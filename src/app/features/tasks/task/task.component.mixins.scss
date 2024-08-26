@@ -56,6 +56,24 @@ $task-c-drag-drop-bg-dark: $dark12;
 $task-c-selected-bg-light: $light-theme-selected-task-bg-color;
 $task-c-selected-bg-dark: $dark4;
 
+//// new colors a bit darker
+//$task-c-bg-dark: $dark2;
+//$sub-task-c-bg-dark-done: $dark3;
+//$sub-task-c-bg-dark: $dark4;
+//$task-c-selected-bg-dark: $dark6;
+//$sub-task-c-bg-dark-in-selected: $dark8;
+//$task-c-current-bg-dark: $dark12;
+
+////// new colors
+$task-c-bg-dark: $dark3;
+$sub-task-c-bg-dark: $dark4_5;
+$task-c-selected-bg-dark: $dark6;
+$sub-task-c-bg-dark-in-selected: $dark10;
+$task-c-current-bg-dark: $dark12;
+
+$task-c-bg-done-dark: $dark1;
+$sub-task-c-bg-dark-done: $dark2;
+
 @mixin isDone($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
     .inner-wrapper.isDone > #{$direct-parent-only-sel} > & {
@@ -89,15 +107,8 @@ $task-c-selected-bg-dark: $dark4;
   flex-grow: 1;
   text-align: start;
   outline: none;
+  border: none;
   margin-left: 2px;
-  padding: 3px 0 3px 5px;
-  line-height: 1.5;
-  min-height: 20px;
-  text-overflow: ellipsis;
-  border: 1px solid transparent;
-  cursor: text;
-  transition: $transition-leave;
-  transition-property: background-color, transform;
   background: inherit;
   position: relative;
   overflow: visible;
@@ -106,37 +117,44 @@ $task-c-selected-bg-dark: $dark4;
   caret-color: #000000;
   z-index: $z-task-title;
 
-  // needs to be block for it not to mess up
-  display: block;
-
   @include darkTheme() {
     caret-color: #ffffff;
   }
 
-  &:first-letter {
-    // we can't do this, as this messes up text input :/
-    // text-transform: uppercase;
+  &.is-focused {
+    z-index: $z-task-title-focus !important;
   }
 
-  &:focus {
-    z-index: $z-task-title-focus;
-    user-select: text;
-    -webkit-user-select: text; /* Safari */
-    // the magic number is 16/14 so we scale to whole pixels
-    transform: scale(1.142857143);
-    transition: $transition-standard;
-    outline: none;
+  ::ng-deep textarea {
+    min-height: 20px;
+    border: 1px solid transparent;
+    transition-property: background-color, transform;
+    line-height: 1.5;
+    padding: 3px 0 3px 5px;
+    cursor: text;
+    transition: $transition-leave;
 
-    // NOTE: needed to overwrite color for current task
-    color: $light-theme-text-color;
-    @include inlineEditElevation();
+    &:focus {
+      user-select: text;
+      -webkit-user-select: text; /* Safari */
 
-    @include mq(xs, max) {
-      transform: scale(1);
-    }
+      // the magic number is 15/14 so we scale to whole pixels
+      //transform: scale(1.071428571);
+      transition: $transition-enter;
+      outline: none;
+      outline: 1px solid $c-accent;
 
-    @include darkTheme() {
-      color: #fff;
+      // NOTE: needed to overwrite color for current task
+      color: $light-theme-text-color;
+      @include inlineEditElevation();
+      //
+      @include mq(xs, max) {
+        transform: scale(1);
+      }
+
+      @include darkTheme() {
+        color: #fff;
+      }
     }
   }
 }

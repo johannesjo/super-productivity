@@ -34,7 +34,10 @@ const BASE = GITHUB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GithubApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  constructor(
+    private _snackService: SnackService,
+    private _http: HttpClient,
+  ) {}
 
   getById$(
     issueId: number,

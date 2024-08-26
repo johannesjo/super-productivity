@@ -2,7 +2,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { getWeeksInMonth } from '../../../util/get-weeks-in-month';
 import { getWeekNumber } from '../../../util/get-week-number';
-import * as moment from 'moment';
+import moment from 'moment';
 import {
   Worklog,
   WorklogDataForDay,

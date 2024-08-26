@@ -96,12 +96,12 @@ export const createWindow = ({
   const url = customUrl
     ? customUrl
     : IS_DEV
-    ? 'http://localhost:4200'
-    : format({
-        pathname: normalize(join(__dirname, '../dist/index.html')),
-        protocol: 'file:',
-        slashes: true,
-      });
+      ? 'http://localhost:4200'
+      : format({
+          pathname: normalize(join(__dirname, '../dist/browser/index.html')),
+          protocol: 'file:',
+          slashes: true,
+        });
 
   mainWin.loadURL(url).then(() => {
     // load custom stylesheet if any

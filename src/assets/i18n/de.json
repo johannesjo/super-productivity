@@ -846,9 +846,9 @@
           "L_IS_COMPRESS_DATA": "Daten komprimieren"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung",
           "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluter Pfad zu der Datei, die für die Synchronisierung verwendet werden soll (wird erstellt).",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluter Pfad zu der Datei, die für die Synchronisierung verwendet werden soll (wird erstellt)."
         },
         "L_ENABLE_COMPRESSION": "Komprimierung aktivieren (schnellere Datenübertragung)",
         "L_ENABLE_ENCRYPTION": "Ende-zu-Ende-Verschlüsselung aktivieren (experimentell) – Machen Sie Ihre Daten für Ihren Synchronisierungsanbieter unzugänglich",
@@ -862,8 +862,8 @@
           "CORS_INFO": "<p><strong>Experimental!!</strong> <strong>Damit dies für Mobil oder den Browser funktioniert, müssen Sie Super Productivity für CORS-Anfragen bei Ihrer Nextcloud-Instanz auf die Whitelist setzen</strong>, dies kann negative Auswirkungen auf die Sicherheit haben! Bitte beziehen Sie sich <a href='https://github.com/nextcloud/server/issues/3131'>auf diesen Thread</a> für weitere Informationen. Ein Ansatz, um dies auch mobil zu ermöglichen, ist das Whitelisting \"https://app.super-productivity.com\" über die Nextcloud-App <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Benutzung auf eigene Gefahr!",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
-          "L_SYNC_FILE_PATH": "Dateipfad synchronisieren",
-          "L_USER_NAME": "Nutzername"
+          "L_USER_NAME": "Nutzername",
+          "L_SYNC_FILE_PATH": "Dateipfad synchronisieren"
         }
       },
       "S": {
@@ -944,7 +944,7 @@
         "DELETE": "Aufgabe löschen",
         "DELETE_REPEAT_INSTANCE": "Instanz der wiederkehrenden Aufgabe löschen",
         "DROP_ATTACHMENT": "Hier ablegen und an \"{{title}}\" anhängen",
-        "EDIT_REMINDER": "Erinnerung bearbeiten",
+        "EDIT_SCHEDULED": "Erinnerung bearbeiten",
         "EDIT_TAGS": "Stichworte bearbeiten",
         "MARK_DONE": "Als erledigt markieren",
         "MARK_UNDONE": "Als offen markieren",
@@ -958,7 +958,7 @@
         "REPEAT_EDIT": "Bearbeite Einstellung der wiederkehrenden Aufgabe",
         "SCHEDULE": "Aufgabe planen",
         "SHOW_UPDATES": "Updates anzeigen",
-        "TOGGLE_ADDITIONAL": "Zusätzliche Informationen ein- / ausblenden",
+        "TOGGLE_DETAIL_PANEL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_ATTACHMENTS": "Anhänge ein- / ausblenden",
         "TOGGLE_DONE": "Als erledigt / unerledigt markieren",
         "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
@@ -974,7 +974,7 @@
         "MSG": "Möchten Sie die neuen Tags {{tagsTxt}} erstellen?",
         "OK": "Tags erstellen "
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Zeitplan",
         "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
         "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
@@ -1131,7 +1131,7 @@
         "WEDNESDAY": "Mittwoch"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "fortgesetzt",
       "D_INITIAL": {
         "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong>, die außerhalb dieser fixen Aufgaben angezeigt werden. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
@@ -1145,7 +1145,7 @@
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "LUNCH_BREAK": "Mittagspause",
       "S": {
-        "CAL_PROVIDER_ERROR": "Fehler beim Timeline-Kal.-Anbieter: {{errTxt}}"
+        "CAL_PROVIDER_ERROR": "Fehler beim Schedule-Kal.-Anbieter: {{errTxt}}"
       }
     },
     "TIME_TRACKING": {
@@ -1170,8 +1170,8 @@
         "SKIP": "Überspringen",
         "SPLIT_TIME": "Zeit aufteilen in mehrere Aufgaben und Pausen",
         "TASK": "Aufgabe",
-        "TASK_BREAK": "Aufgabe+Pause",
-        "TRACK_TO": "Erfassen als:"
+        "TRACK_TO": "Erfassen als:",
+        "TASK_BREAK": "Aufgabe+Pause"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Erstelle</em> und erfasse zu",
@@ -1278,7 +1278,6 @@
   },
   "G": {
     "CANCEL": "Abbrechen",
-    "CLICK_TO_EDIT": "Editieren",
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
@@ -1286,6 +1285,7 @@
     "DO_IT": "Tu es!",
     "EDIT": "Bearbeiten",
     "ENABLED": "Aktiviert",
+    "EXAMPLE_VAL": "z.B. 32m",
     "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Leerlaufzeitbehandlung zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "HIDE": "Verstecken",
     "LOGIN": "Anmeldung",
@@ -1341,9 +1341,9 @@
       "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit erfassen möchten, wenn Sie im Leerlauf waren.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie die Leerlaufbehandlung",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Triggern Sie den Leerlaufdialog nur, wenn eine aktuelle Aufgabe ausgewählt ist",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst",
       "MIN_IDLE_TIME": "Leerlauf nach X auslösen",
-      "TITLE": "Leerlaufbehandlung"
+      "TITLE": "Leerlaufbehandlung",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst"
     },
     "IMEX": {
       "HELP": "<p>Hier können Sie alle Ihre Daten als <strong>JSON</strong> für Backups exportieren, aber auch in einem anderen Kontext verwenden (z. B. möchten Sie Ihre Projekte möglicherweise im Browser exportieren und in die Desktop-Version importieren ). </p> <p>Der Import erwartet, dass gültiges JSON in den Textbereich kopiert wird. <strong>HINWEIS: Sobald Sie auf die Schaltfläche \"Importieren\" klicken, werden alle Ihre aktuellen Einstellungen und Daten überschrieben.</strong></p>",
@@ -1363,7 +1363,7 @@
       "GO_TO_FOCUS_MODE": "Wechseln Sie in den Fokusmodus",
       "GO_TO_SCHEDULED_VIEW": "Gehen Sie zu geplanten Aufgaben",
       "GO_TO_SETTINGS": "Gehen Sie zu den Einstellungen",
-      "GO_TO_TIMELINE": "Gehen Sie zur Zeitleiste",
+      "GO_TO_SCHEDULE": "Gehen Sie zur Zeitleiste",
       "GO_TO_WORK_VIEW": "Gehen Sie zur Arbeitsansicht",
       "HELP": "<p>Hier können Sie alle Tastaturkürzel konfigurieren.</p> <p>Klicken Sie auf die Texteingabe und geben Sie die gewünschte Tastaturkombination ein. Drücken Sie die Eingabetaste, um zu speichern und die Escape-Taste, um den Vorgang abzubrechen.</p> <p>Es gibt drei Arten von Verknüpfungen:</p> <ul> <li> <strong>Globale Verknüpfungen:</strong> Wenn die App ausgeführt wird, wird die Aktion von jeder anderen Anwendung ausgelöst. </li> <li> <strong>Verknüpfungen auf Anwendungsebene:</strong> Wird von jedem Bildschirm der Anwendung ausgelöst, jedoch nicht, wenn Sie gerade ein Textfeld bearbeiten. </li> <li> <strong>Schnellzugriffe auf Aufgabenebene:</strong> Sie werden nur ausgelöst, wenn Sie eine Aufgabe mit der Maus oder der Tastatur ausgewählt haben und normalerweise eine Aktion auslösen, die sich speziell auf diese eine Aufgabe bezieht. </li> </ul>",
       "MOVE_TASK_DOWN": "Aufgabe in Liste nach unten verschieben",
@@ -1378,6 +1378,7 @@
       "SHOW_SEARCH_BAR": "Suchleiste anzeigen",
       "SYSTEM_SHORTCUTS": "Globale Verknüpfungen (systemweit)",
       "TASK_ADD_SUB_TASK": "Unteraufgabe hinzufügen",
+      "TASK_ADD_ATTACHMENT": "Datei oder Link anhängen",
       "TASK_DELETE": "Aufgabe löschen",
       "TASK_EDIT_TAGS": "Stichworte bearbeiten",
       "TASK_EDIT_TITLE": "Titel bearbeiten",
@@ -1387,7 +1388,7 @@
       "TASK_SCHEDULE": "Aufgabe planen",
       "TASK_SHORTCUTS": "Aufgaben",
       "TASK_SHORTCUTS_INFO": "Die folgenden Verknüpfungen gelten für die aktuell ausgewählte Aufgabe (Auswahl über Tab oder Maus).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Zusätzliche Aufgabeninfo ein- oder ausblenden",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Zusätzliche Aufgabeninfo ein- oder ausblenden",
       "TASK_TOGGLE_DONE": "Fertig umschalten",
       "TITLE": "Tastatürkürzel",
       "TOGGLE_BACKLOG": "Task-Backlog anzeigen oder ausblenden",
@@ -1397,31 +1398,6 @@
       "ZOOM_DEFAULT": "Zoom Standard (nur Desktop)",
       "ZOOM_IN": "Vergrößern (nur Desktop)",
       "ZOOM_OUT": "Verkleinern (nur Desktop)"
-    },
-    "LANG": {
-      "AR": "Arabisch",
-      "CZ": "Tschechisch",
-      "DE": "Deutsch",
-      "EN": "Englisch",
-      "ES": "Spanisch",
-      "FA": "Farsi",
-      "FR": "Französisch",
-      "HR": "Kroatisch",
-      "ID": "Indonesisch",
-      "IT": "Italienisch",
-      "JA": "Japanisch",
-      "KO": "Koreanisch",
-      "LABEL": "Bitte wählen Sie eine Sprache",
-      "NB": "Norwegischer Bokmål",
-      "NL": "Niederländisch",
-      "PL": "Polnisch",
-      "PT": "Portugiesisch",
-      "RU": "Russisch",
-      "SK": "Slowakisch",
-      "TITLE": "Sprache",
-      "TR": "Türkisch",
-      "ZH": "Vereinfachtes Chinesisch",
-      "ZH_TW": "Traditionelles Chinesisch"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standardprojekt für Aufgaben, wenn keines angegeben ist",
@@ -1487,8 +1463,8 @@
       "SNOOZE_TIME": "Schlummern, wenn Sie aufgefordert werden, eine Pause einzulegen",
       "TITLE": "Pausenerinnerung"
     },
-    "TIMELINE": {
-      "HELP": "Die Timeline-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/timeline'>'Timeline'</a>.",
+    "SCHEDULE": {
+      "HELP": "Die Schedule-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/schedule'>'Schedule'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
       "L_WORK_END": "Ende des Arbeitstages",
       "L_WORK_START": "Beginn des Arbeitstages",
@@ -1552,7 +1528,7 @@
     "HELP": "Hilfe",
     "METRICS": "Metriken",
     "NOTES": "Anmerkungen",
-    "NOTES_PANEL_INFO": "Notizen können nur von der Timeline und der normalen Aufgabenliste angezeigt werden.",
+    "NOTES_PANEL_INFO": "Notizen können nur von der Schedule und der normalen Aufgabenliste angezeigt werden.",
     "PROCRASTINATE": "Prokrastination",
     "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",

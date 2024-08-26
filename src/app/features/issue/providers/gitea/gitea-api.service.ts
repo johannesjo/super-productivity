@@ -13,16 +13,16 @@ import { Observable, ObservableInput, throwError } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
-import { ISSUE_PROVIDER_HUMANIZED, GITEA_TYPE } from '../../issue.const';
+import { GITEA_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import {
   GiteaIssue,
   GiteaIssueStateOptions,
   GiteaRepositoryReduced,
 } from './gitea-issue/gitea-issue.model';
 import {
-  mapGiteaIssueToSearchResult,
-  mapGiteaIssueIdToIssueNumber,
   isIssueFromProject,
+  mapGiteaIssueIdToIssueNumber,
+  mapGiteaIssueToSearchResult,
 } from './gitea-issue/gitea-issue-map.util';
 import {
   GITEA_API_SUBPATH_REPO,
@@ -38,7 +38,10 @@ import { GiteaUser } from './gitea-api-responses';
   providedIn: 'root',
 })
 export class GiteaApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  constructor(
+    private _snackService: SnackService,
+    private _http: HttpClient,
+  ) {}
 
   searchIssueForRepo$(searchText: string, cfg: GiteaCfg): Observable<SearchResultItem[]> {
     return this.getCurrentRepositoryFor$(cfg).pipe(

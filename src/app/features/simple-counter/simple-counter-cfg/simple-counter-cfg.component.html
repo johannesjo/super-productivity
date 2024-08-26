@@ -3,10 +3,9 @@
   [formGroup]="form"
 >
   <formly-form
-    (modelChange)="onModelChange($event)"
     [fields]="section?.items"
     [form]="form"
-    [model]="editModel"
+    [(model)]="editModel"
     [options]="options"
   >
   </formly-form>

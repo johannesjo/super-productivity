@@ -818,9 +818,9 @@
           "L_SYNC_FILE_NAME": "Dosya adını senkronize et"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir",
           "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu.",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu."
         },
         "L_ENABLE_COMPRESSION": "Sıkıştırmayı Etkinleştir (daha hızlı veri aktarımı)",
         "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
@@ -831,8 +831,8 @@
           "CORS_INFO": "<strong>Tarayıcıda çalışmasını sağlamak:</strong> Bunun tarayıcıda çalışmasını sağlamak için Nextcloud örneğiniz için CORS isteklerine yönelik Süper Üretkenliği beyaz listeye almanız gerekir. Bunun olumsuz güvenlik etkileri olabilir! Lütfen <a href='https://github.com/nextcloud/server/issues/3131'>daha fazla bilgi için bu konuya bakın</a>. Bunun mobil cihazlarda çalışmasını sağlamanın bir yolu, nextcloud uygulaması <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword aracılığıyla \"https://app.super-productivity.com\" adresini beyaz listeye eklemektir. <a>. Kullanım riski size aittir!</p>",
           "L_BASE_URL": "Temel URL",
           "L_PASSWORD": "Parola",
-          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
-          "L_USER_NAME": "Kullanıcı adı"
+          "L_USER_NAME": "Kullanıcı adı",
+          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et"
         }
       },
       "S": {
@@ -909,7 +909,7 @@
         "CONVERT_TO_PARENT_TASK": "Ana Göreve Dönüştür",
         "DELETE": "Görevi Sil",
         "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
-        "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
+        "EDIT_SCHEDULED": "Hatırlatıcıyı düzenle",
         "EDIT_TAGS": "Etiketleri düzenle",
         "MARK_DONE": "Tamamlandı olarak işaretle",
         "MARK_UNDONE": "Tamamlanmadı olarak işaretle",
@@ -923,7 +923,7 @@
         "REPEAT_EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
         "SCHEDULE": "Görevi Planla",
         "SHOW_UPDATES": "Güncellemeleri göster",
-        "TOGGLE_ADDITIONAL": "Ek bilgileri göster/gizle",
+        "TOGGLE_DETAIL_PANEL": "Ek bilgileri göster/gizle",
         "TOGGLE_ATTACHMENTS": "Ekleri Göster/Gizle",
         "TOGGLE_DONE": "Yapıldı/Yapılmadı olarak işaretle",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alt görev görünürlüğünü değiştir",
@@ -931,7 +931,7 @@
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Planla",
         "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
         "DATETIME_FOR": "Hatırlatma için tarih-saat",
@@ -1085,7 +1085,7 @@
         "WEDNESDAY": "Çarşamba"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "Devam eden",
       "D_INITIAL": {
         "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
@@ -1122,8 +1122,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}} TAKİP ETMEMEK için tıklayın",
         "SKIP": "Atla",
         "TASK": "Görev",
-        "TASK_BREAK": "Görev Arası",
-        "TRACK_TO": "Takip et:"
+        "TRACK_TO": "Takip et:",
+        "TASK_BREAK": "Görev Arası"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin",
@@ -1209,7 +1209,6 @@
   },
   "G": {
     "CANCEL": "İptal",
-    "CLICK_TO_EDIT": "Düzenlemek için tıkla",
     "CLOSE": "Kapat",
     "DELETE": "Sil",
     "DISMISS": "Görmezden gel",
@@ -1217,6 +1216,7 @@
     "DO_IT": "Yap!",
     "EDIT": "Düzenle",
     "ENABLED": "Etkin",
+    "EXAMPLE_VAL": "Düzenlemek için tıkla",
     "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
@@ -1257,9 +1257,9 @@
       "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Yalnızca geçerli bir görev seçildiğinde boşta kalma zamanını tetikle",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen boş vakit süresi sıfırlama zamanlayıcısı",
       "MIN_IDLE_TIME": "X'ten sonra boşta tektikle",
-      "TITLE": "Boş vakit takibi"
+      "TITLE": "Boş vakit takibi",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen boş vakit süresi sıfırlama zamanlayıcısı"
     },
     "IMEX": {
       "HELP": "<p>Burada tüm verilerinizi yedeklemeler için <strong>JSON</strong> olarak dışa aktarabilirsiniz, ancak farklı bir bağlamda da kullanabilirsiniz (örneğin, projelerinizi tarayıcıda dışa aktarabilir ve bunları masaüstü sürümüne alabilirsiniz. ). </p> <p>Alma, geçerli JSON'un metin alanına kopyalanmasını bekler. <strong>NOT: İçe aktar düğmesine bastığınızda mevcut ayarların ve verilerin üzerine yazılır!</strong></p>",
@@ -1279,7 +1279,7 @@
       "GO_TO_FOCUS_MODE": "Odak Moduna Git",
       "GO_TO_SCHEDULED_VIEW": "Planlanmış Görevlere git",
       "GO_TO_SETTINGS": "Ayarlara git",
-      "GO_TO_TIMELINE": "Zaman Çizelgesine git",
+      "GO_TO_SCHEDULE": "Zaman Çizelgesine git",
       "GO_TO_WORK_VIEW": "İş Görünümüne Git",
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
       "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
@@ -1294,6 +1294,7 @@
       "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
       "SYSTEM_SHORTCUTS": "Genel Kısayollar (sistem genelinde)",
       "TASK_ADD_SUB_TASK": "Alt Görev ekle",
+      "TASK_ADD_ATTACHMENT": "Dosya veya bağlantı ekle",
       "TASK_DELETE": "Görevi Sil",
       "TASK_EDIT_TAGS": "Etiketleri düzenle",
       "TASK_EDIT_TITLE": "Başlığı Düzenle",
@@ -1303,7 +1304,7 @@
       "TASK_SCHEDULE": "Görev Takvimi",
       "TASK_SHORTCUTS": "Görevler",
       "TASK_SHORTCUTS_INFO": "Seçili görev için aşağıdaki kısayollar geçerlidir (sekme veya fare ile seçilir).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Ek görev bilgilerini göster / gizle",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Ek görev bilgilerini göster / gizle",
       "TASK_TOGGLE_DONE": "Geçiş Yapıldı",
       "TITLE": "Klavye kısayolları",
       "TOGGLE_BACKLOG": "Görev Listesini Göster / Gizle",
@@ -1313,27 +1314,6 @@
       "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
       "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
-    },
-    "LANG": {
-      "AR": "Arapça",
-      "DE": "Almanca",
-      "EN": "ingilizce",
-      "ES": "İspanyol",
-      "FA": "Farsça",
-      "FR": "Fransızca",
-      "IT": "İtalyan",
-      "JA": "Japonca",
-      "KO": "Korece",
-      "LABEL": "Lütfen bir dil seçin",
-      "NB": "Norveççe Bokmål",
-      "NL": "Flemenkçe",
-      "PL": "Lehçe",
-      "PT": "Portekizce",
-      "RU": "Rusça",
-      "TITLE": "dil",
-      "TR": "Türkçe",
-      "ZH": "Çince (Basitleştirilmiş)",
-      "ZH_TW": "Çince (Geleneksel)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Proje belirtilmezse görevler için kullanılacak varsayılan proje",
@@ -1393,8 +1373,8 @@
       "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı ertele",
       "TITLE": "Mola Hatırlatması"
     },
-    "TIMELINE": {
-      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
+    "SCHEDULE": {
+      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/schedule'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
       "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
       "L_WORK_END": "İş Günü Sonu",
       "L_WORK_START": "İş Günü Başlangıcı",

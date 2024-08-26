@@ -2,18 +2,20 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { WorkContext, WorkContextState, WorkContextType } from '../work-context.model';
 import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
 import {
+  mapSubTasksToTask,
   selectTaskEntities,
   selectTaskFeatureState,
 } from '../../tasks/store/task.selectors';
-import { Task, TaskPlanned } from '../../tasks/task.model';
+import { Task, TaskPlanned, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
   projectSelectors,
   selectProjectById,
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
+import { TODAY_TAG } from '../../tag/tag.const';
 
-export const WORK_CONTEXT_FEATURE_NAME = 'context';
+export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
 
 export const selectContextFeatureState = createFeatureSelector<WorkContextState>(
   WORK_CONTEXT_FEATURE_NAME,
@@ -73,11 +75,6 @@ export const selectActiveWorkContext = createSelector(
   },
 );
 
-export const selectActiveContextTheme = createSelector(
-  selectActiveWorkContext,
-  (workContext) => workContext.theme,
-);
-
 export const selectTrackableTasksForActiveContext = createSelector(
   selectActiveWorkContext,
   selectTaskEntities,
@@ -105,8 +102,6 @@ export const selectTrackableTasksForActiveContext = createSelector(
 export const selectStartableTasksForActiveContext = createSelector(
   selectTrackableTasksForActiveContext,
   (trackableTasks): Task[] => {
-    console.log(trackableTasks);
-
     return trackableTasks.filter((task) => !task.isDone);
   },
 );
@@ -168,33 +163,41 @@ export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
   },
 );
 
+export const selectTodayTaskIds = createSelector(
+  selectTagFeatureState,
+  (tagState): string[] => {
+    return tagState.entities[TODAY_TAG.id]?.taskIds || [];
+  },
+);
+
 export const selectTimelineTasks = createSelector(
-  selectStartableTasksForActiveContext,
+  selectTodayTaskIds,
   selectTaskFeatureState,
   (
-    startableTasks,
+    todayIds,
     s,
   ): {
     planned: TaskPlanned[];
-    unPlanned: Task[];
+    unPlanned: TaskWithSubTasks[];
   } => {
     const allPlannedTasks: TaskPlanned[] = [];
     s.ids
       .map((id) => s.entities[id] as Task)
       .forEach((t) => {
         if (!t.isDone) {
-          if (
-            !!t.parentId &&
-            (s.entities[t.parentId] as Task).plannedAt &&
-            (s.entities[t.parentId] as Task).reminderId
-          ) {
-            allPlannedTasks.push({
-              ...t,
-              plannedAt:
-                t.plannedAt ||
-                ((s.entities[t.parentId as string] as Task).plannedAt as number),
-            });
-          } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
+          // if (
+          //   !!t.parentId &&
+          //   (s.entities[t.parentId] as Task).plannedAt &&
+          //   (s.entities[t.parentId] as Task).reminderId
+          // ) {
+          //   allPlannedTasks.push({
+          //     ...t,
+          //     plannedAt:
+          //       t.plannedAt ||
+          //       ((s.entities[t.parentId as string] as Task).plannedAt as number),
+          //   });
+          // } else
+          if (t.plannedAt && t.reminderId) {
             allPlannedTasks.push(t as TaskPlanned);
           }
         }
@@ -203,7 +206,46 @@ export const selectTimelineTasks = createSelector(
 
     return {
       planned: allPlannedTasks,
-      unPlanned: startableTasks.filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+      unPlanned: todayIds
+        .map((id) => {
+          return mapSubTasksToTask(s.entities[id] as Task, s) as TaskWithSubTasks;
+        })
+        .filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+    };
+  },
+);
+
+export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
+  selectTagFeatureState,
+  selectTaskFeatureState,
+  (
+    tagState,
+    taskState,
+  ): {
+    planned: TaskPlanned[];
+    normal: Task[];
+    done: Task[];
+  } => {
+    const taskIds = tagState.entities[TODAY_TAG.id]?.taskIds || [];
+    const normalTasks: Task[] = [];
+    const allPlannedTasks: TaskPlanned[] = [];
+    const doneTasks: Task[] = [];
+    taskIds
+      .map((id) => taskState.entities[id] as Task)
+      .forEach((t) => {
+        if (t.plannedAt && t.reminderId) {
+          allPlannedTasks.push(t as TaskPlanned);
+        } else if (t.isDone) {
+          doneTasks.push(t);
+        } else {
+          normalTasks.push(t);
+        }
+      });
+
+    return {
+      planned: allPlannedTasks,
+      normal: normalTasks,
+      done: doneTasks,
     };
   },
 );

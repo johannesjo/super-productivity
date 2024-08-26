@@ -66,8 +66,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
         ? this._workContextService.trackableTasksForActiveContext$
         : this._workContextService.startableTasksForActiveContext$
       : this.isIncludeDoneTasks
-      ? this._store.select(selectTrackableTasksActiveContextFirst)
-      : this._store.select(selectStartableTasksActiveContextFirst);
+        ? this._store.select(selectTrackableTasksActiveContextFirst)
+        : this._store.select(selectStartableTasksActiveContextFirst);
 
     this.taskSelectCtrl.valueChanges
       .pipe(

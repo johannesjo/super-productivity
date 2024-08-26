@@ -16,7 +16,7 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
     ids: [],
     currentTaskId: null,
     selectedTaskId: null,
-    taskAdditionalInfoTargetPanel: null,
+    taskDetailTargetPanel: null,
     lastCurrentTaskId: null,
     isDataLoaded: false,
   },
@@ -39,4 +39,6 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   metric: createEmptyEntity(),
   improvement: createEmptyEntity() as any,
   obstruction: createEmptyEntity(),
+  planner: { days: {}, addPlannedTasksDialogLastShown: undefined },
+  lastArchiveUpdate: 0,
 });

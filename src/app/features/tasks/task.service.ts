@@ -8,10 +8,9 @@ import {
   DropListModelSource,
   ShowSubTasksMode,
   Task,
-  TaskAdditionalInfoTargetPanel,
   TaskArchive,
   TaskCopy,
-  TaskPlanned,
+  TaskDetailTargetPanel,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -61,14 +60,13 @@ import {
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
-  selectTaskAdditionalInfoTargetPanel,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
+  selectTaskDetailTargetPanel,
   selectTaskFeatureState,
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
-  selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { RoundTimeOption } from '../project/project.model';
@@ -85,11 +83,8 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
-import { SnackService } from '../../core/snack/snack.service';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
-import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import { ProjectService } from '../project/project.service';
 import {
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
@@ -101,7 +96,6 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
-import { T } from 'src/app/t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -139,9 +133,9 @@ export class TaskService {
       map((tasks) => tasks[0]),
     );
 
-  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> =
+  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null> =
     this._store.pipe(
-      select(selectTaskAdditionalInfoTargetPanel),
+      select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
     );
 
@@ -162,22 +156,6 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
-  );
-
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(
-      selectTasksPlannedForRangeNotOnToday,
-      // eslint-disable-next-line no-mixed-operators
-      getDateRangeForDay(Date.now() + 24 * 60 * 60 * 1000),
-    ),
-  );
-
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
@@ -186,6 +164,7 @@ export class TaskService {
     ),
   );
 
+  private _lastFocusedTaskEl: HTMLElement | null = null;
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
   constructor(
@@ -194,12 +173,24 @@ export class TaskService {
     private readonly _tagService: TagService,
     private readonly _workContextService: WorkContextService,
     private readonly _imexMetaService: ImexMetaService,
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: GlobalTrackingIntervalService,
     private readonly _dateService: DateService,
     private readonly _router: Router,
   ) {
+    document.addEventListener(
+      'focus',
+      (ev) => {
+        if (
+          ev.target &&
+          ev.target instanceof HTMLElement &&
+          ev.target.tagName.toLowerCase() === 'task'
+        ) {
+          this._lastFocusedTaskEl = ev.target;
+        }
+      },
+      true,
+    );
+
     this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
 
     // time tracking
@@ -231,9 +222,9 @@ export class TaskService {
 
   setSelectedId(
     id: string | null,
-    taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel = TaskAdditionalInfoTargetPanel.Default,
+    taskDetailTargetPanel: TaskDetailTargetPanel = TaskDetailTargetPanel.Default,
   ): void {
-    this._store.dispatch(setSelectedTask({ id, taskAdditionalInfoTargetPanel }));
+    this._store.dispatch(setSelectedTask({ id, taskDetailTargetPanel }));
   }
 
   async setSelectedIdToParentAndSwitchContextIfNecessary(task: TaskCopy): Promise<void> {
@@ -264,7 +255,7 @@ export class TaskService {
     this._store.dispatch(
       setSelectedTask({
         id: task.parentId,
-        taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+        taskDetailTargetPanel: TaskDetailTargetPanel.Default,
       }),
     );
   }
@@ -341,23 +332,14 @@ export class TaskService {
   }
 
   addTodayTag(t: Task): void {
-    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds], t.tagIds);
+    this.updateTags(t, [TODAY_TAG.id, ...t.tagIds]);
   }
 
-  updateTags(task: Task, newTagIds: string[], oldTagIds: string[]): void {
-    if (!task.parentId && !task.projectId && newTagIds.length === 0) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.TASK.S.LAST_TAG_DELETION_WARNING,
-      });
-      return;
-    }
-
+  updateTags(task: Task, newTagIds: string[]): void {
     this._store.dispatch(
       updateTaskTags({
         task,
         newTagIds: unique(newTagIds),
-        oldTagIds,
       }),
     );
   }
@@ -660,6 +642,12 @@ export class TaskService {
     el.focus();
   }
 
+  focusLastFocusedTask(): void {
+    if (this._lastFocusedTaskEl) {
+      this._lastFocusedTaskEl.focus();
+    }
+  }
+
   focusTaskIfPossible(id: string): void {
     const tEl = document.getElementById('t-' + id);
 
@@ -692,7 +680,6 @@ export class TaskService {
         this.updateTags(
           st,
           st.tagIds.filter((tid) => tid !== tagToRemove),
-          st.tagIds,
         );
       });
     }
@@ -748,6 +735,7 @@ export class TaskService {
     // archive
     await this._persistenceService.taskArchive.execAction(
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
+      true,
     );
   }
 
@@ -893,6 +881,7 @@ export class TaskService {
           changes: changedFields,
         },
       }),
+      true,
     );
   }
 
@@ -900,6 +889,7 @@ export class TaskService {
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
     await this._persistenceService.taskArchive.execActions(
       updates.map((upd) => updateTask({ task: upd })),
+      true,
     );
   }
 
@@ -1016,27 +1006,6 @@ export class TaskService {
       }
       return null;
     }
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async movePlannedTasksToToday(plannedTasks: TaskPlanned[]): Promise<unknown> {
-    return Promise.all(
-      plannedTasks.map(async (t) => {
-        if (t.parentId) {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.parentId, t.projectId);
-          }
-          // NOTE: no unsubscribe on purpose as we always want this to run until done
-          const parentTask = await this.getByIdOnce$(t.parentId).toPromise();
-          this.addTodayTag(parentTask);
-        } else {
-          if (t.projectId) {
-            this._projectService.moveTaskToTodayList(t.id, t.projectId);
-          }
-          this.addTodayTag(t);
-        }
-      }),
-    );
   }
 
   createNewTaskWithDefaults({

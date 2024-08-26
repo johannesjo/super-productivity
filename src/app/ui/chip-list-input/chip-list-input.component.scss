@@ -1,5 +1,13 @@
 @import '../../../variables';
 
+:host {
+  display: block;
+
+  mat-form-field {
+    display: block;
+  }
+}
+
 .additional {
   transition: $transition-fast;
   opacity: 0;
@@ -21,24 +29,5 @@
   mat-icon {
     font-size: 22px;
     max-height: 32px;
-  }
-}
-
-mat-chip {
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-}
-
-//mat-chip {
-.additional {
-  mat-chip:hover &,
-  &.isToggled {
-    opacity: 0.4;
-    transform: scale(1);
-    width: 32px;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 }

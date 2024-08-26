@@ -842,9 +842,9 @@
           "L_SYNC_FILE_NAME": "Ime datoteke sinkronizacije"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama",
           "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se).",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Treba dozvolu za pristup datotekama"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Apsolutna staza do datoteke, koja se treba koristiti za sinkronizaciju (stvorit će se)."
         },
         "L_ENABLE_COMPRESSION": "Aktiviraj komprimiranje (brži prijenos podataka)",
         "L_ENABLE_SYNCING": "Aktiviraj sinkronizaciju",
@@ -855,8 +855,8 @@
           "CORS_INFO": "<strong>Omogućavanje rada na mobilnom uređaju i u pregledniku:</strong> da bi ovo radilo na mobilnom uređaju ili pregledniku, Super Productivity moraš staviti na popis dopuštenih za CORS zahtjeve za tvoju Nextcloud instancu. To može negativno utjecati na sigurnost! <a href='https://github.com/nextcloud/server/issues/3131'>Pogledaj ovu razgovor za daljnje informacija</a>. Jedan od pristupa da bi ovo radilo na mobilnom uređaju je stavljanje adrese „https://app.super-productivity.com” na popis dopuštenih putem Nextcloud programa <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword <a>. Koristi na vlastitu odgovornost!</p>",
           "L_BASE_URL": "Osnovni Url",
           "L_PASSWORD": "Lozinka",
-          "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije",
-          "L_USER_NAME": "Korisničko ime"
+          "L_USER_NAME": "Korisničko ime",
+          "L_SYNC_FILE_PATH": "Staza datoteke sinkronizacije"
         }
       },
       "S": {
@@ -936,7 +936,7 @@
         "DELETE": "Izbriši zadatak",
         "DELETE_REPEAT_INSTANCE": "Izbriši ponavljajuću instancu zadatka",
         "DROP_ATTACHMENT": "Ispusti ovdje za prilaganje naslovu „{{title}}”",
-        "EDIT_REMINDER": "Uredi podsjetnik",
+        "EDIT_SCHEDULED": "Uredi podsjetnik",
         "EDIT_TAGS": "Uredi oznake",
         "MARK_DONE": "Označi kao obavljen",
         "MARK_UNDONE": "Označi kao neobavljen",
@@ -950,7 +950,7 @@
         "REPEAT_EDIT": "Uredi konfiguraciju za ponavljanje zadatka",
         "SCHEDULE": "Terminiraj zadatak",
         "SHOW_UPDATES": "Prikaži aktualiziranja",
-        "TOGGLE_ADDITIONAL": "Prikaži/Sakrij dodatne informacije",
+        "TOGGLE_DETAIL_PANEL": "Prikaži/Sakrij dodatne informacije",
         "TOGGLE_ATTACHMENTS": "Prikaži/Sakrij priloge",
         "TOGGLE_DONE": "Označi kao obavljen/neobavljen",
         "TOGGLE_SUB_TASK_VISIBILITY": "Uključi/Isključi vidljivost podzadataka",
@@ -962,7 +962,7 @@
         "MSG": "Želiš li stvoriti novu oznaku {{tagsTxt}}?",
         "OK": "Stvori oznaku"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Terminiraj",
         "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
         "DATETIME_FOR": "Datum i vrijeme za podsjetnika",
@@ -1119,7 +1119,7 @@
         "WEDNESDAY": "Srijeda"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "nastavljeno",
       "D_INITIAL": {
         "TEXT": "<p>Ideja vremenske trake je pružiti bolju sliku o tome kako se nečiji terminirani zadaci odvijaju tijekom vremena. Automatski se generira iz tvojih zadataka i razlikuje dvije stvari: <strong>terminirane zadatke</strong> koji se prikazuju u planirano vrijeme i <strong>redovne zadatke</strong> koji bi se trebali odvijati oko tih fiksnih događaja. Svi zadaci uzimaju u obzir dodijejene procjene vremena.</p><p>Osim toga moguće je navesti vrijeme početka i kraja rada. Ako su konfigurirani, redovni zadaci se nikada neće pojaviti izvan njih. Imaj na umu da vremenska traka uključuje samo idućih 30 dana.</p>",
@@ -1155,8 +1155,8 @@
         "SKIP": "Preskoči",
         "SPLIT_TIME": "Podijeli vrijeme na više zadataka i pauza",
         "TASK": "Zadatak",
-        "TASK_BREAK": "Zadatak+Pauza",
-        "TRACK_TO": "Prati za"
+        "TRACK_TO": "Prati za",
+        "TASK_BREAK": "Zadatak+Pauza"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stvori</em> i prati do",
@@ -1231,7 +1231,6 @@
   },
   "G": {
     "CANCEL": "Odustani",
-    "CLICK_TO_EDIT": "pritisni i uredi",
     "CLOSE": "Zatvori",
     "DELETE": "Izbriši",
     "DISMISS": "Odbaci",
@@ -1239,6 +1238,7 @@
     "DO_IT": "Obavi!",
     "EDIT": "Uredi",
     "ENABLED": "Aktivirano",
+    "EXAMPLE_VAL": "pritisni i uredi",
     "EXTENSION_INFO": "Preuzmi <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> chrome proširenje</a> za omogućivanje komunikacije s Jira Api-jem i baratanje vremenom neaktivnosti. Napomena: To ne radi s mobilnim uređajima.",
     "HIDE": "Sakrij",
     "LOGIN": "Prijava",
@@ -1294,9 +1294,9 @@
       "HELP": "<div><p>Kad je baratanje neaktivnim vremenom aktivirano, nakon određenog vremena otvorit će se dijaloški okvir za provjeru je li želiš, i pri kojem zadatku želiš pratiti tvoje neaktivno vrijeme.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiviraj baratanje neaktivnim vremenom",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Pokreni dijaloški okvir za neaktivnost samo kad je odabran trenutačni zadatak",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza",
       "MIN_IDLE_TIME": "Pokreni neaktivno vrijeme nakon X",
-      "TITLE": "Baratanje neaktivnim vremenom"
+      "TITLE": "Baratanje neaktivnim vremenom",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nepraćeno neaktivno vrijeme resetira timer pauza"
     },
     "IMEX": {
       "HELP": "<p>Ovdje možeš izvesti sve tvoje podatke kao <strong>JSON</strong> za sigurnosne kopije, ali ih koristiti i u drugom kontekstu (npr. možda želiš izvesti tvoje projekte u pregledniku i uvesti ih u desktop verziju). </p> <p>Uvoz očekuje ispravni JSON za kopiranje u područje teksta. <strong>NAPOMENA: Nakon što pritisneš gumb za uvoz, sve tvoje trenutačne postavke i podaci će se prepisati!</strong></p>",
@@ -1316,7 +1316,7 @@
       "GO_TO_FOCUS_MODE": "Idi na modus fokusa",
       "GO_TO_SCHEDULED_VIEW": "Idi na terminirane zadatke",
       "GO_TO_SETTINGS": "Idi na postavke",
-      "GO_TO_TIMELINE": "Idi na vremensku traku",
+      "GO_TO_SCHEDULE": "Idi na vremensku traku",
       "GO_TO_WORK_VIEW": "Idi na prikaz rada",
       "HELP": "<p>Ovdje možeš konfigurirati sve tipkovne prečace.</p> <p>Pritisni na unos teksta i upiši željenu kombinaciju tipkovnice. Pritisni enter za spremanje i Escape za prekidanje.</p> <p>Postoje tri vrste prečaca:</p> <ul> <li> <strong>Globalni prečaci:</strong> Kad se program pokrene, pokrenut će radnju iz svakog drugog programa. </li> <li> <strong>Prečaci na razini programa:</strong> Pokrenut će se iz svakog ekrana programa, ali ne ako trenutačno uređuješ tekstualno polje. </li> <li> <strong>Prečaci na razini zadatka:</strong> Pokrenut će se samo ako se zadatak odabere putem miša ili tipkovnice i obično pokreću radnju koja je posebno povezana s tim zadatkom. </li> </ul><p><strong>Pritisni Escape za uklanjanje prečaca.</strong>",
       "MOVE_TASK_DOWN": "Premjesti zadatak prema dolje u popisu",
@@ -1331,6 +1331,7 @@
       "SHOW_SEARCH_BAR": "Prikaži traku pretrage",
       "SYSTEM_SHORTCUTS": "Globalni prečaci (sustav)",
       "TASK_ADD_SUB_TASK": "Dodaj podzadatak",
+      "TASK_ADD_ATTACHMENT": "Priloži datoteku ili poveznicu",
       "TASK_DELETE": "Izbriši zadatak",
       "TASK_EDIT_TAGS": "Uredi oznake",
       "TASK_EDIT_TITLE": "Uredi naslov",
@@ -1340,7 +1341,7 @@
       "TASK_SCHEDULE": "Terminiraj zadatak",
       "TASK_SHORTCUTS": "Zadaci",
       "TASK_SHORTCUTS_INFO": "Sljedeći prečaci primijenjuju se na trenutačno odabrani zadatak (odabran pomoću tabulatora ili miša).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Prikaži/Sakrij dodatne podatke zadatka",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Prikaži/Sakrij dodatne podatke zadatka",
       "TASK_TOGGLE_DONE": "Uključi/Isključi obavljeno",
       "TITLE": "Tipkovni prečaci",
       "TOGGLE_BACKLOG": "Prikaži/Sakrij odlagalište",
@@ -1350,31 +1351,6 @@
       "ZOOM_DEFAULT": "Standardno uvećanje prikaza (samo za desktop računala)",
       "ZOOM_IN": "Uvećaj prikaz (samo za desktop računala)",
       "ZOOM_OUT": "Umanji prikaz (samo za desktop računala)"
-    },
-    "LANG": {
-      "AR": "Arapski",
-      "CZ": "Češki",
-      "DE": "Njemački",
-      "EN": "Engleski",
-      "ES": "Španjolski",
-      "FA": "Farsi",
-      "FR": "Francuski",
-      "HR": "Hrvatski",
-      "ID": "Indonezijski",
-      "IT": "Talijanski",
-      "JA": "Japanski",
-      "KO": "Korejski",
-      "LABEL": "Odaberi jezik",
-      "NB": "Norveški Bokmål",
-      "NL": "Nizozemski",
-      "PL": "Poljski",
-      "PT": "Portugalski",
-      "RU": "Ruski",
-      "SK": "Slovački",
-      "TITLE": "Jezik",
-      "TR": "Turski",
-      "ZH": "Pojednostavljeni kineski",
-      "ZH_TW": "Tradicionalni kineski"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standardno korišteni projekt za zadatke ako nijedan nije određen",
@@ -1439,8 +1415,8 @@
       "SNOOZE_TIME": "Odgodi mjerenje vremena kad te program zatraži da pauziraš",
       "TITLE": "Podsjetnik za pauzu"
     },
-    "TIMELINE": {
-      "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/timeline'>„Vremenska traka”</a>. ",
+    "SCHEDULE": {
+      "HELP": "Vremenska traka omogućuje brzi pregled kako se tvoji terminirani zadaci odvijaju tijekom vremena. Nalazi se u lijevom izborniku pod <a href='#/schedule'>„Vremenska traka”</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Ograniči tijek neterminiranog zadatka na određena radna vremena",
       "L_WORK_END": "Kraj radnog dana",
       "L_WORK_START": "Početak radnog dana",

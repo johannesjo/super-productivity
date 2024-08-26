@@ -1,4 +1,4 @@
-import { NightwatchBrowser } from 'nightwatch';
+import { NightwatchAPI } from 'nightwatch';
 
 export interface AddTaskWithReminderParams {
   title: string;
@@ -6,12 +6,14 @@ export interface AddTaskWithReminderParams {
   scheduleTime?: number;
 }
 
-export interface NBrowser extends NightwatchBrowser {
-  addTask: (taskTitle: string) => NBrowser;
+export interface NBrowser extends NightwatchAPI {
+  addTask: (taskTitle: string, isSkipClose?: boolean) => NBrowser;
+  addTaskWithNewTag: (tagName: string) => NBrowser;
   addNote: (noteTitle: string) => NBrowser;
+  draftTask: (taskTitle: string) => NBrowser;
   goToDefaultProject: () => NBrowser;
   loadAppAndClickAwayWelcomeDialog: (url?: string) => NBrowser;
   openPanelForTask: (taskSel: string) => NBrowser;
-  // TODO use object for params
+  sendKeysToActiveEl: (keys: string | string[]) => NBrowser;
   addTaskWithReminder: (params: AddTaskWithReminderParams) => NBrowser;
 }

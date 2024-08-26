@@ -13,6 +13,8 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
+import { MiscConfig } from '../global-config.model';
+import { hideSideNav, toggleSideNav } from '../../../core-ui/layout/store/layout.actions';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -116,7 +118,7 @@ export class GlobalConfigEffects {
         // eslint-disable-next-line
         filter(
           ({ sectionKey, sectionCfg }) =>
-            sectionCfg && (sectionCfg as any).startOfNextDay,
+            sectionCfg && !!(sectionCfg as MiscConfig).startOfNextDay,
         ),
         tap(({ sectionKey, sectionCfg }) => {
           // eslint-disable-next-line
@@ -134,6 +136,25 @@ export class GlobalConfigEffects {
           const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
           const startOfNextDay = cfg && cfg.misc && cfg.misc.startOfNextDay;
           this._dateService.setStartOfNextDayDiff(startOfNextDay);
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  toggleNavOnMinimalNavChange$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'misc'),
+        // eslint-disable-next-line
+        filter(
+          ({ sectionKey, sectionCfg }) =>
+            sectionCfg && 'isUseMinimalNav' in (sectionCfg as MiscConfig),
+        ),
+        tap(({ sectionKey, sectionCfg }) => {
+          this._store.dispatch(hideSideNav());
+          this._store.dispatch(toggleSideNav());
+          window.dispatchEvent(new Event('resize'));
         }),
       ),
     { dispatch: false },

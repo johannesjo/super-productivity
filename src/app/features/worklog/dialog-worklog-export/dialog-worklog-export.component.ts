@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WorklogExportSettingsCopy } from '../worklog.model';
 import { T } from '../../../t.const';
-import * as moment from 'moment';
+import moment from 'moment';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 
 @Component({

@@ -50,6 +50,24 @@
         <mat-icon>{{simpleCounterBtn.icon}}</mat-icon>
       </button>
     </section>
+
+    <div
+      *ngIf="(configService.takeABreak$|async)?.isTakeABreakEnabled"
+      style="
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+        margin-bottom: -8px;
+      "
+    >
+      <mat-checkbox
+        [(ngModel)]="isResetBreakTimer"
+        [ngModelOptions]="
+             {standalone: true}"
+      >
+        {{ T.F.TIME_TRACKING.D_IDLE.RESET_BREAK_REMINDER_TIMER|translate }}
+      </mat-checkbox>
+    </div>
   </div>
 
   <div
@@ -85,21 +103,6 @@
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       {{T.F.TIME_TRACKING.D_IDLE.TASK|translate}}
-    </button>
-
-    <button
-      (click)="track(true)"
-      *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
-      [disabled]="!(selectedTask||newTaskTitle)"
-      color="primary"
-      mat-stroked-button
-      type="button"
-    >
-      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
-      <mat-icon *ngIf="isCreate">add</mat-icon>
-      <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
-      {{T.F.TIME_TRACKING.D_IDLE.TASK_BREAK|translate}}
-      <mat-icon>free_breakfast</mat-icon>
     </button>
   </div>
 </form>

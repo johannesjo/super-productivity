@@ -10,7 +10,6 @@ $splitLineHeight: 2px;
   width: 100%;
   //cursor: row-resize;
 
-
   .handle {
     position: absolute;
     width: 100%;
@@ -60,9 +59,10 @@ $splitLineHeight: 2px;
 
   .counter {
     position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: -25px;
+    left: -27px;
+    width: 30px;
+    text-align: center;
   }
 }
 

@@ -14,8 +14,39 @@ $spacer: $s;
   // mobile viewport bug fix
   min-height: -webkit-fill-available;
 
-  ::ng-deep .mat-menu-item mat-icon {
-    margin-bottom: 2px;
+  &.minimal-nav {
+    max-width: 42px;
+
+    @include mq(xxs) {
+      max-width: 52px;
+    }
+
+    .expand-btn mat-icon {
+      margin-left: 0;
+    }
+
+    .expand-btn .title {
+      display: none;
+    }
+
+    ::ng-deep {
+      @include mq(xxs, max) {
+        .badge {
+          margin-right: -40px !important;
+        }
+      }
+
+      .settings-btn {
+        display: none !important;
+      }
+
+      .mat-mdc-menu-item {
+        padding: 0 8px;
+        @include mq(xxs) {
+          padding: 0 13px;
+        }
+      }
+    }
   }
 }
 
@@ -31,6 +62,7 @@ $spacer: $s;
   button {
     height: 44px !important;
     line-height: 44px !important;
+    min-height: 44px !important;
   }
 
   a {
@@ -72,6 +104,7 @@ section {
   }
 }
 
+.other-task-level-section,
 .main,
 .tags,
 .app {
@@ -95,147 +128,23 @@ section {
 
 // LIST-ITEMS
 // ----------
-.tag,
-.project {
-  display: flex;
-  position: relative;
-  align-items: stretch;
-  justify-content: stretch;
 
-  button .badge {
-    display: none;
-  }
-
-  &.hasTasks {
-    button .badge {
-      display: block;
-      z-index: 10;
-      position: absolute;
-      line-height: 1;
-      left: $s;
-      width: 40px;
-      text-align: center;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 10px;
-      padding: 1px 0 0;
-      border: 1px solid $light-theme-extra-border-color;
-      background: #fff;
-      border-radius: $card-border-radius;
-
-      // avoid affecting drag handle
-      pointer-events: none;
-
-      @include darkTheme() {
-        border-color: $dark-theme-extra-border-color;
-        background: $dark-theme-bg-lighter;
-      }
-    }
-  }
-
-  &.isHidden {
-    display: none !important;
-  }
-
-  button:first-of-type {
-    flex-grow: 1;
-  }
-
-  button:last-of-type {
-    border-radius: 0;
-    align-self: stretch;
-    display: block;
-    height: auto;
-    min-width: 48px;
-
-    @include mq(xs) {
-      opacity: 0;
-      display: none;
-    }
-  }
-
-  &:focus,
-  &:hover {
-    button:last-of-type {
-      opacity: 0.8;
-      display: block;
-    }
-  }
-}
-
-// color bar left styles
-.tag,
-.project,
-.route-link {
-  .tag-color,
-  .project-color,
-  &.isActiveRoute:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: $s * 0.5;
-    background-color: $c-primary;
-  }
-
-  .tag-color,
-  .project-color {
-    opacity: 0;
-  }
-
-  &.isActiveContext,
-  &:focus,
-  &:hover {
-    .tag-color,
-    .project-color {
-      opacity: 1;
-    }
-  }
-}
-
-.tag-settings-btn,
-.tag button:first-of-type,
-.project-settings-btn,
-.project button:first-of-type,
-.route-link {
-  &:focus,
-  &:hover {
-    font-weight: bold;
-
-    @include lightTheme {
-      background: rgba(
-        var(--palette-background-hover),
-        var(--palette-background-hover-alpha, 1)
-      );
-    }
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  }
-}
-
-.route-link.isActiveRoute,
-.tag.isActiveContext,
-.project.isActiveContext {
+.route-link.isActiveRoute {
   background-color: mat-css-color-primary(500, 0.04);
 }
 
-.route-link.isActiveRoute,
-.tag.isActiveContext button,
-.project.isActiveContext button {
+.route-link.isActiveRoute {
   font-weight: bold;
 }
 
 .route-link.isActiveRoute,
-.route-link.isActiveRoute mat-icon,
-.tag.isActiveContext mat-icon,
-.tag.isActiveContext button,
-.project.isActiveContext mat-icon,
-.project.isActiveContext button {
+.route-link.isActiveRoute mat-icon {
   // does not look good for dark theme...
   @include lightTheme {
     color: $c-primary-800;
+  }
+  @include darkTheme {
+    color: $c-primary;
   }
 }
 
@@ -265,36 +174,11 @@ section {
     margin-left: auto;
     margin-right: 0;
     transition: $transition-standard;
+    order: 2;
   }
 
   &.isExpanded ::ng-deep mat-icon:last-of-type {
     transform: rotate(180deg);
-  }
-}
-
-.scroll-down-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  ::ng-deep mat-icon:last-of-type {
-    margin-left: auto;
-    margin-right: 0;
-  }
-}
-
-.drag-handle {
-  /* Firefox 1.5-26 */
-  position: relative;
-  @include grabCursor();
-
-  &:after {
-    content: '';
-    position: absolute;
-    top: -$s;
-    left: -$s;
-    right: -$s;
-    bottom: -$s;
   }
 }
 

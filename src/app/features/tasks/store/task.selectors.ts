@@ -23,7 +23,10 @@ const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
       }
     });
 };
-const mapSubTasksToTask = (task: Task | null, s: TaskState): TaskWithSubTasks | null => {
+export const mapSubTasksToTask = (
+  task: Task | null,
+  s: TaskState,
+): TaskWithSubTasks | null => {
   if (!task) {
     return null;
   }
@@ -126,14 +129,13 @@ export const selectSelectedTaskId = createSelector(
   selectTaskFeatureState,
   (state) => state.selectedTaskId,
 );
-export const selectTaskAdditionalInfoTargetPanel = createSelector(
+export const selectTaskDetailTargetPanel = createSelector(
   selectTaskFeatureState,
-  (state: TaskState) => state.taskAdditionalInfoTargetPanel,
+  (state: TaskState) => state.taskDetailTargetPanel,
 );
 export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
   (s): TaskWithSubTasks => {
-    // @ts-ignore
     // @ts-ignore
     return s.selectedTaskId && mapSubTasksToTask(s.entities[s.selectedTaskId], s);
   },
@@ -185,6 +187,17 @@ export const selectTasksById = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { ids: string[] }): Task[] =>
     props.ids ? (props.ids.map((id) => state.entities[id]) as Task[]) : [],
+);
+
+export const selectPlannedTasksById = createSelector(
+  selectTaskFeatureState,
+  (state: TaskState, props: { ids: string[] }): Task[] =>
+    props.ids
+      ? (props.ids.map((id) => state.entities[id]) as Task[])
+          // there is a short moment when the reminder is already there but the task is not
+          // and there is another when a tasks get deleted
+          .filter((task) => !!task?.plannedAt)
+      : [],
 );
 
 export const selectTasksWithSubTasksByIds = createSelector(

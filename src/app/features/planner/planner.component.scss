@@ -1,0 +1,34 @@
+@import '../../../variables';
+
+.controls {
+  flex-grow: 0 !important;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  //gap: 16px;
+
+  //border-top: 1px solid;
+  //border-bottom: 1px solid;
+
+  @include darkTheme() {
+    //border-color: $dark-theme-extra-border-color;
+    //background: $dark-theme-bg-lighter;
+  }
+  @include lightTheme() {
+    //border-color: $light-theme-extra-border-color;
+    //background: $light-theme-bg-darker;
+  }
+}
+
+.start-date {
+  font-size: 20px;
+}
+
+.day-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 
 export const parseOpenProjectDuration = (
   val: string | number | null | undefined,

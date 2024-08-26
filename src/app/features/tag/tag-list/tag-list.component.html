@@ -9,6 +9,7 @@
       *ngIf=" projectTag"
       [tag]="projectTag"
     ></tag>
+
     <tag
       (click)="editTags()"
       *ngFor="let tag of tags; trackBy: trackByFn"

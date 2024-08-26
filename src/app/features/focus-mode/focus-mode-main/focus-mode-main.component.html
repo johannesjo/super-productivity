@@ -1,12 +1,9 @@
 <ng-container *ngIf="taskService.currentTask$|async as task">
-  <div
-    (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
-    [isResetAfterEdit]="true"
+  <inline-multiline-input
+    (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
     [value]="task.title"
     class="task-title"
-    contentEditableOnClick
-    contenteditable="true"
-  ></div>
+  ></inline-multiline-input>
 
   <div class="progress-wrapper">
     <progress-circle [progress]="sessionProgress$|async"></progress-circle>

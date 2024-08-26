@@ -24,7 +24,7 @@ import {
   timer,
   zip,
 } from 'rxjs';
-import { TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
+import { TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
@@ -35,6 +35,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
+import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -98,6 +99,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     private _activatedRoute: ActivatedRoute,
     private _projectService: ProjectService,
     private _cd: ChangeDetectorRef,
+    private _addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {}
 
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
@@ -178,19 +180,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   startWork(): void {
     this.planningModeService.leavePlanningMode();
-  }
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ): void {
-    this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
-      plannedTasks,
-      repeatableScheduledForTomorrow,
-      this.taskService.currentTaskId,
-      this._tomorrow,
-    );
   }
 
   resetBreakTimer(): void {

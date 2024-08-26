@@ -9,6 +9,7 @@
       dragula="PROJECTS"
     >
       <mat-card
+        appearance="outlined"
         *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
         class="project mat-elevation-z0"
       >
@@ -111,6 +112,7 @@
     </h2>
 
     <mat-card
+      appearance="outlined"
       *ngFor="let project of (projectService.archived$|async); trackBy:trackById;"
       class="project"
     >

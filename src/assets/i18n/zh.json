@@ -697,9 +697,9 @@
           "L_SYNC_FILE_NAME": "同步文件名"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限",
           "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
         },
         "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
         "L_ENABLE_ENCRYPTION": "启用端对端加密（实验性功能）——使你的数据无法被同步提供者访问",
@@ -711,8 +711,8 @@
           "CORS_INFO": "<strong>实验！！</strong> 为了完成这项工作，您需要为Nextcloud实例禁用或限制CORS，这可能会对安全性造成负面影响！请 <a href='https://github.com/nextcloud/server/issues/3131'>参考该线程</a> 以获取更多信息。使用风险自负！",
           "L_BASE_URL": "基本网址",
           "L_PASSWORD": "密码",
-          "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_USER_NAME": "用户名"
+          "L_USER_NAME": "用户名",
+          "L_SYNC_FILE_PATH": "同步文件路径"
         }
       },
       "S": {
@@ -788,7 +788,7 @@
         "DELETE": "删除任务",
         "DELETE_REPEAT_INSTANCE": "删除重复任务",
         "DROP_ATTACHMENT": "放在此处以附加到“{{title}}”",
-        "EDIT_REMINDER": "编辑提醒",
+        "EDIT_SCHEDULED": "编辑提醒",
         "EDIT_TAGS": "编辑标签",
         "MARK_DONE": "标为已完成",
         "MARK_UNDONE": "标记为撤消",
@@ -802,7 +802,7 @@
         "REPEAT_EDIT": "编辑重复任务",
         "SCHEDULE": "安排任务",
         "SHOW_UPDATES": "显示更新",
-        "TOGGLE_ADDITIONAL": "显示/隐藏其他信息",
+        "TOGGLE_DETAIL_PANEL": "显示/隐藏其他信息",
         "TOGGLE_ATTACHMENTS": "显示/隐藏附件",
         "TOGGLE_DONE": "标记为已完成/未完成",
         "TOGGLE_SUB_TASK_VISIBILITY": "切换子任务可见性",
@@ -810,7 +810,7 @@
         "TRACK_TIME_STOP": "暂停记录时间",
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "时间表",
         "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
         "DATETIME_FOR": "提醒的日期时间",
@@ -966,7 +966,7 @@
         "WEDNESDAY": "星期三"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "继续",
       "D_INITIAL": {
         "TEXT": "<p>时间轴的想法是提供一个更好的画面，说明一个人的计划任务如何随着时间的流逝而发展。它是根据您的任务自动生成的，可以区分两个不同的事物： <strong>计划任务</strong>（在计划的时间显示）和 <strong>常规任务</strong> ，这些任务应围绕这些固定事件运行。所有任务都将考虑您分配给他们的时间估计。</p><p>除此之外，您还可以提供工作的开始和结束时间。如果已配置，则常规任务将永远不会显示在这些任务之外。请注意，时间轴仅包括即将到来的30天。</p>",
@@ -1003,8 +1003,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "单击以不跟踪到 {{title}}",
         "SKIP": "跳过",
         "TASK": "任务",
-        "TASK_BREAK": "任务中断",
-        "TRACK_TO": "记录到："
+        "TRACK_TO": "记录到：",
+        "TASK_BREAK": "任务中断"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>创建</em> 并记录到",
@@ -1111,7 +1111,6 @@
   },
   "G": {
     "CANCEL": "取消",
-    "CLICK_TO_EDIT": "点击编辑",
     "CLOSE": "关闭",
     "DELETE": "删除",
     "DISMISS": "取消",
@@ -1119,6 +1118,7 @@
     "DO_IT": "开始吧！",
     "EDIT": "编辑",
     "ENABLED": "启用",
+    "EXAMPLE_VAL": "点击编辑",
     "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> 下载Chrome扩展程序</a> ，以便与Jira Api和空闲时间处理进行通信。请注意，这不适用于移动设备。",
     "HIDE": "隐藏",
     "LOGIN": "登录",
@@ -1165,9 +1165,9 @@
       "HELP": "<div><p>启用空闲时间处理后，将在指定的时间后打开一个对话框，以检查您在空闲时是否以及在哪个任务上记录您的时间。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "启用空闲时间处理",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "仅在选择当前任务时触发空闲时间对话框",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未记录的空闲时间重置需要休息计时器",
       "MIN_IDLE_TIME": "触发空闲的时间阈值",
-      "TITLE": "闲置处理"
+      "TITLE": "闲置处理",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未记录的空闲时间重置需要休息计时器"
     },
     "IMEX": {
       "HELP": "<p>在这里，您可以将所有数据导出为 <strong>JSON</strong> 进行备份，也可以在不同的上下文中使用它（例如，您可能希望在浏览器中导出项目并将其导入桌面版本）。 </p> <p>导入期望将有效的JSON复制到文本区域。 <strong>注意：点击导入按钮后，所有当前设置和数据都将被覆盖！</strong></p>",
@@ -1187,7 +1187,7 @@
       "GO_TO_FOCUS_MODE": "进入专注模式",
       "GO_TO_SCHEDULED_VIEW": "转到计划的任务",
       "GO_TO_SETTINGS": "前往设置",
-      "GO_TO_TIMELINE": "转到时间轴",
+      "GO_TO_SCHEDULE": "转到时间轴",
       "GO_TO_WORK_VIEW": "转到工作视图",
       "HELP": "<p>您可以在此处配置所有键盘快捷键。</p> <p>单击文本输入并输入所需的键盘组合。按Enter键保存，Escape退出。</p> <p>有三种类型的快捷方式：</p> <ul> <li> <strong>全局快捷方式：</strong> 当应用程序运行时，它将触发其他所有应用程序的操作。 </li> <li> <strong>应用程序级快捷方式：</strong> 将从应用程序的每个屏幕触发，但如果您当前正在编辑文本字段则不会。 </li> <li> <strong>任务级快捷方式：</strong> 只有通过鼠标或键盘选择任务并且通常会触发与该任务特定相关的操作时，它们才会触发。 </li> </ul>",
       "MOVE_TASK_DOWN": "在列表中向下移动任务",
@@ -1202,6 +1202,7 @@
       "SHOW_SEARCH_BAR": "显示搜索栏",
       "SYSTEM_SHORTCUTS": "全局快捷方式（全系统）",
       "TASK_ADD_SUB_TASK": "添加子任务",
+      "TASK_ADD_ATTACHMENT": "附加文件或链接",
       "TASK_DELETE": "删除任务",
       "TASK_EDIT_TAGS": "编辑标签",
       "TASK_EDIT_TITLE": "编辑标题",
@@ -1211,7 +1212,7 @@
       "TASK_SCHEDULE": "安排任务",
       "TASK_SHORTCUTS": "任务",
       "TASK_SHORTCUTS_INFO": "以下快捷方式适用于当前选定的任务（通过选项卡或鼠标选择）。",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "显示/隐藏其他任务信息",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "显示/隐藏其他任务信息",
       "TASK_TOGGLE_DONE": "切换完成",
       "TITLE": "键盘快捷键",
       "TOGGLE_BACKLOG": "显示/隐藏待办事项",
@@ -1221,29 +1222,6 @@
       "ZOOM_DEFAULT": "缩放默认值（仅限桌面端）",
       "ZOOM_IN": "放大（仅限桌面端）",
       "ZOOM_OUT": "缩小（仅限桌面端）"
-    },
-    "LANG": {
-      "AR": "阿拉伯语",
-      "DE": "德语",
-      "EN": "英语",
-      "ES": "西班牙语",
-      "FA": "波斯语",
-      "FR": "法语",
-      "HR": "克罗地亚语",
-      "IT": "意大利语",
-      "JA": "日本语",
-      "KO": "朝鲜语",
-      "LABEL": "请选择一种语言",
-      "NB": "挪威语 Bokmål",
-      "NL": "荷兰语",
-      "PL": "拋光",
-      "PT": "葡萄牙语",
-      "RU": "俄语",
-      "SK": "斯洛伐克语",
-      "TITLE": "语言",
-      "TR": "土耳其语",
-      "ZH": "中文(简体)",
-      "ZH_TW": "中文(繁体)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，则用于任务的默认项目",
@@ -1300,8 +1278,8 @@
       "SNOOZE_TIME": "提示休息时暂停时间",
       "TITLE": "休息提醒"
     },
-    "TIMELINE": {
-      "HELP": "时间轴功能应为您提供有关计划任务如何随时间推移进行快速浏览的概述。您可以在 <a href='#/timeline'>'时间轴'</a>下的左侧菜单中找到它。",
+    "SCHEDULE": {
+      "HELP": "时间轴功能应为您提供有关计划任务如何随时间推移进行快速浏览的概述。您可以在 <a href='#/schedule'>'时间轴'</a>下的左侧菜单中找到它。",
       "L_IS_WORK_START_END_ENABLED": "将计划外的任务流限制为特定的工作时间",
       "L_WORK_END": "工作日结束",
       "L_WORK_START": "工作日开始",

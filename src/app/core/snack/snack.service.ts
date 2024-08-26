@@ -16,9 +16,6 @@ import { debounce } from 'helpful-decorators';
 })
 export class SnackService {
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-  );
 
   constructor(
     private _store$: Store<any>,
@@ -27,7 +24,10 @@ export class SnackService {
     private _matSnackBar: MatSnackBar,
     private _ngZone: NgZone,
   ) {
-    this._onWorkContextChange$.subscribe(() => {
+    const _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
+      ofType(setActiveWorkContext),
+    );
+    _onWorkContextChange$.subscribe(() => {
       this.close();
     });
   }
@@ -68,6 +68,7 @@ export class SnackService {
 
     const cfg = {
       ...DEFAULT_SNACK_CFG,
+      duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
       ...config,
       data: {
         ...params,
@@ -91,6 +92,7 @@ export class SnackService {
         // @see https://stackoverflow.com/questions/50101912/snackbar-position-wrong-when-use-errorhandler-in-angular-5-and-material
         this._ngZone.run(() => {
           this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+          this._adjustSnackPos();
         });
         break;
       }
@@ -114,5 +116,34 @@ export class SnackService {
           destroySubs();
         });
     }
+  }
+
+  private _adjustSnackPos(): void {
+    // only relevant on mobile
+    if (window.innerWidth >= 600) {
+      return;
+    }
+
+    const checkExecPosCheck = (): void => {
+      const el: HTMLElement | null = document.querySelector('.mat-mdc-snack-bar-handset');
+
+      if (!el) {
+        return;
+      }
+      if (document.querySelector('add-task-bar.global')) {
+        el.style.marginBottom = '86px';
+      } else if (document.querySelector('.FAB-BTN')) {
+        el.style.marginBottom = '78px';
+      }
+    };
+    setTimeout(() => {
+      checkExecPosCheck();
+    });
+    setTimeout(() => {
+      checkExecPosCheck();
+    }, 60);
+    setTimeout(() => {
+      checkExecPosCheck();
+    }, 180);
   }
 }

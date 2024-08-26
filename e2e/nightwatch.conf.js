@@ -29,9 +29,9 @@ module.exports = {
             '--disable-dev-shm-usage',
             '--disable-browser-side-navigation',
             '--user-agent=NIGHTWATCH',
-            // `--binary=${process.env.CHROME_BIN}`
+            `--binary=${process.env.CHROME_BIN}`,
           ],
-          w3c: false,
+          // w3c: false,
           prefs: {
             'profile.default_content_setting_values.geolocation': 1,
             'profile.default_content_setting_values.notifications': 2,

@@ -6,7 +6,10 @@ import { isToday } from '../../util/is-today.util';
   name: 'shortPlannedAt',
 })
 export class ShortPlannedAtPipe implements PipeTransform {
-  constructor(private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string) {}
+  constructor(
+    private datePipe: DatePipe,
+    @Inject(LOCALE_ID) private locale: string,
+  ) {}
 
   transform(value: number | null, ...args: unknown[]): string | null {
     if (typeof value !== 'number') {
@@ -15,7 +18,7 @@ export class ShortPlannedAtPipe implements PipeTransform {
 
     const locale = this.locale;
 
-    if (isToday(value)) {
+    if (isToday(value) || args[0] === 'timeOnly') {
       const str = `${new Date(value).toLocaleTimeString(locale, {
         hour: 'numeric',
         minute: 'numeric',

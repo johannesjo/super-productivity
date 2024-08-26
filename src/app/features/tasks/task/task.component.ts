@@ -16,8 +16,8 @@ import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   ShowSubTasksMode,
-  TaskAdditionalInfoTargetPanel,
   TaskCopy,
+  TaskDetailTargetPanel,
   TaskWithSubTasks,
 } from '../task.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,13 +40,11 @@ import { TaskAttachmentService } from '../task-attachment/task-attachment.servic
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -57,6 +55,9 @@ import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
+import { KeyboardConfig } from '../../config/keyboard-config.model';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { PlannerService } from '../../planner/planner.service';
 
 @Component({
   selector: 'task',
@@ -84,8 +85,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isShowAddToToday: boolean = false;
   isShowRemoveFromToday: boolean = false;
 
-  @ViewChild('contentEditableOnClickEl', { static: true })
-  contentEditableOnClickEl?: ElementRef;
+  @ViewChild('taskTitleEditEl', { static: true }) taskTitleEditEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
   @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
@@ -100,6 +100,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @see ngOnInit
   @HostBinding('class.isCurrent') isCurrent: boolean = false;
   @HostBinding('class.isSelected') isSelected: boolean = false;
+  @HostBinding('class.hasNoSubTasks') hasNoSubTasks: boolean = true;
+
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
@@ -152,6 +154,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
+    public readonly plannerService: PlannerService,
     public readonly workContextService: WorkContextService,
   ) {}
 
@@ -161,6 +164,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
     this.taskIdWithPrefix = 't-' + this.task.id;
     this.isDone = v.isDone;
+    this.hasNoSubTasks = !v.subTaskIds.length;
     this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
 
     const isTodayTag = v.tagIds.includes(TODAY_TAG.id);
@@ -248,9 +252,24 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     //   });
 
     // hacky but relatively performant
-    if (this.task.parentId && Date.now() - 100 < this.task.created) {
+    if (
+      this.task.parentId &&
+      Date.now() - 200 < this.task.created &&
+      !this.task.title.length
+    ) {
       setTimeout(() => {
-        this.focusTitleForEdit();
+        // when there are multiple instances with the same task we should focus the last one, since it is the one in the
+        // task side panel
+        const otherTaskEl = document.querySelectorAll('#t-' + this.task.id);
+        if (
+          otherTaskEl?.length <= 1 ||
+          Array.from(otherTaskEl).findIndex(
+            (item) => item === this._elementRef.nativeElement,
+          ) ===
+            otherTaskEl.length - 1
+        ) {
+          this.focusTitleForEdit();
+        }
       });
     }
   }
@@ -258,20 +277,25 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
-
-    if (this._currentPanTimeout) {
-      window.clearTimeout(this._currentPanTimeout);
-    }
+    window.clearTimeout(this._currentPanTimeout);
   }
 
-  editReminder(): void {
+  scheduleTask(): void {
     this._matDialog
-      .open(DialogAddTaskReminderComponent, {
-        data: { task: this.task } as AddTaskReminderInterface,
+      .open(DialogScheduleTaskComponent, {
+        // we focus inside dialog instead
+        autoFocus: false,
+        data: { task: this.task },
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
+      // .pipe(takeUntil(this._destroy$))
+      .subscribe((isPlanned) => {
+        if (isPlanned) {
+          this.focusNext(true);
+        } else {
+          this.focusSelf();
+        }
+      });
   }
 
   updateIssueData(): void {
@@ -319,15 +343,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateTaskTitleIfChanged({
-    isChanged,
     newVal,
+    wasChanged,
   }: {
-    isChanged: boolean;
     newVal: string;
-    $taskEl: HTMLElement | null;
-    event: Event;
+    wasChanged: boolean;
   }): void {
-    if (isChanged) {
+    if (wasChanged) {
       this._taskService.update(this.task.id, { title: newVal });
     }
     this.focusSelf();
@@ -378,17 +400,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  showAdditionalInfos(): void {
+  showDetailPanel(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  hideAdditionalInfos(): void {
+  hideDetailPanel(): void {
     this._taskService.setSelectedId(this.task.id);
     this.focusSelf();
   }
 
-  toggleShowAdditionalInfoOpen(ev?: MouseEvent): void {
+  toggleShowDetailPanel(ev?: MouseEvent): void {
     if (this.isSelected) {
       this._taskService.setSelectedId(null);
     } else {
@@ -401,10 +423,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAttachments(): void {
-    this._taskService.setSelectedId(
-      this.task.id,
-      TaskAdditionalInfoTargetPanel.Attachments,
-    );
+    this._taskService.setSelectedId(this.task.id, TaskDetailTargetPanel.Attachments);
     this.focusSelf();
   }
 
@@ -520,20 +539,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit(): void {
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl || !(this.taskTitleEditEl as any).textarea.nativeElement) {
+      console.log(this.taskTitleEditEl);
       throw new Error('No el');
     }
-    this.contentEditableOnClickEl.nativeElement.focus();
+    (this.taskTitleEditEl as any).textarea.nativeElement.focus();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    if (!this.contentEditableOnClickEl || !this.contextMenu) {
+    if (!this.taskTitleEditEl || !this.contextMenu) {
       throw new Error('No el');
     }
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    this.contentEditableOnClickEl.nativeElement.blur();
+    (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     this.contextMenuPosition.x =
       ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
     this.contextMenuPosition.y =
@@ -542,14 +563,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsUpdated(tagIds: string[]): void {
-    this._taskService.updateTags(this.task, tagIds, this.task.tagIds);
+    this._taskService.updateTags(this.task, tagIds);
   }
 
   onPanStart(ev: any): void {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
-    if (!this.contentEditableOnClickEl) {
+    if (!this.taskTitleEditEl) {
       throw new Error('No el');
     }
 
@@ -558,7 +579,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === this.contentEditableOnClickEl.nativeElement ||
+      document.activeElement === (this.taskTitleEditEl as any).textarea.nativeElement ||
       ev.isFinal
     ) {
       return;
@@ -598,7 +619,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.task.repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
-              this.editReminder();
+              this.scheduleTask();
             }
           } else {
             if (this.task.parentId) {
@@ -771,7 +792,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    // this.contentEditableOnClickEl.nativeElement.blur();
+    //  (this.taskTitleEditEl as any).textarea.nativeElement.blur();
     if (targetRef) {
       let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
@@ -796,7 +817,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _resetAfterPan(): void {
     if (
-      !this.contentEditableOnClickEl ||
+      !this.taskTitleEditEl ||
       !this.blockLeftElRef ||
       !this.blockRightElRef ||
       !this.innerWrapperElRef
@@ -816,6 +837,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
+  get kb(): KeyboardConfig {
+    if (IS_TOUCH_PRIMARY) {
+      return {} as any;
+    }
+    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
+  }
+
   private _handleKeyboardShortcuts(ev: KeyboardEvent): void {
     if (ev.target !== this._elementRef.nativeElement) {
       return;
@@ -833,20 +861,23 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       // prevent blur
       ev.preventDefault();
     }
-    if (checkKeyCombo(ev, keys.taskToggleAdditionalInfoOpen)) {
-      this.toggleShowAdditionalInfoOpen();
+    if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) {
+      this.toggleShowDetailPanel();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this.estimateTime();
     }
     if (checkKeyCombo(ev, keys.taskSchedule)) {
-      this.editReminder();
+      this.scheduleTask();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleDoneKeyboard();
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
+    }
+    if (checkKeyCombo(ev, keys.taskAddAttachment)) {
+      this.addAttachment();
     }
     if (!this.task.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
       if (!this.projectMenuTrigger) {
@@ -878,7 +909,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToBacklog) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusPrevious(true);
         this.moveToBacklog();
@@ -888,7 +919,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.moveToTodaysTasks) && this.task.projectId) {
       if (!this.task.parentId) {
         ev.preventDefault();
-        // same default shortcut as timeline so we stop propagation
+        // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
         this.focusNext(true, true);
         this.moveToToday();
@@ -899,7 +930,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
       const hasSubTasks = this.task.subTasks && (this.task.subTasks as any).length > 0;
       if (this.isSelected) {
-        this.hideAdditionalInfos();
+        this.hideDetailPanel();
       } else if (
         hasSubTasks &&
         this.task._showSubTasksMode !== ShowSubTasksMode.HideAll
@@ -919,7 +950,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
       } else if (!this.isSelected) {
-        this.showAdditionalInfos();
+        this.showDetailPanel();
       } else {
         this.focusNext();
       }

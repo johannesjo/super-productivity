@@ -9,10 +9,10 @@ import {
   GlobalSectionConfig,
   IdleConfig,
   MiscConfig,
+  ScheduleConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
-  TimelineConfig,
 } from './global-config.model';
 import {
   selectConfigFeatureState,
@@ -31,11 +31,7 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
   providedIn: 'root',
 })
 export class GlobalConfigService {
-  cfg$: Observable<GlobalConfigState> = this._store.pipe(
-    select(selectConfigFeatureState),
-    distinctUntilChanged(distinctUntilChangedObject),
-    shareReplay(1),
-  );
+  cfg$: Observable<GlobalConfigState>;
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
@@ -66,13 +62,18 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
-  timelineCfg$: Observable<TimelineConfig> = this._store.pipe(
+  timelineCfg$: Observable<ScheduleConfig> = this._store.pipe(
     select(selectTimelineConfig),
   );
 
   cfg?: GlobalConfigState;
 
   constructor(private readonly _store: Store<any>) {
+    this.cfg$ = this._store.pipe(
+      select(selectConfigFeatureState),
+      distinctUntilChanged(distinctUntilChangedObject),
+      shareReplay(1),
+    );
     this.cfg$.subscribe((cfg) => (this.cfg = cfg));
   }
 

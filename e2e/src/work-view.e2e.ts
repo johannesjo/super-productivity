@@ -1,5 +1,6 @@
 import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const ADD_TASK_INITIAL = 'add-task-bar:not(.global) input';
 const ADD_TASK_GLOBAL = 'add-task-bar.global input';
@@ -7,10 +8,10 @@ const TASK = 'task';
 const ADD_TASK_BTN = '.action-nav > button:first-child';
 const WORK_VIEW_URL = `${BASE}/`;
 const READY_TO_WORK_BTN = '.ready-to-work-btn';
+const TASK_TEXTAREA = 'task textarea';
 
 module.exports = {
   '@tags': ['work-view', 'task', 'task-standard'],
-
   'should add task via key combo': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
@@ -18,7 +19,7 @@ module.exports = {
       .addTask('0 test task koko')
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '0 test task koko')
+      .assert.valueContains(TASK_TEXTAREA, '0 test task koko')
       .end(),
 
   'should add a task from initial bar': (browser: NBrowser) =>
@@ -31,7 +32,7 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '1 test task hihi')
+      .assert.valueContains(TASK_TEXTAREA, '1 test task hihi')
       .end(),
 
   'should add 2 tasks from initial bar': (browser: NBrowser) =>
@@ -46,8 +47,8 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK + ':nth-child(1)', '3 some other task')
-      .assert.containsText(TASK + ':nth-child(2)', '2 test task hihi')
+      .assert.valueContains(TASK + ':nth-child(1) textarea', '3 some other task')
+      .assert.valueContains(TASK + ':nth-child(2) textarea', '2 test task hihi')
       .end(),
 
   'should add multiple tasks from header button': (browser: NBrowser) =>
@@ -57,16 +58,18 @@ module.exports = {
       .click(ADD_TASK_BTN)
       .waitForElementVisible(ADD_TASK_GLOBAL)
 
-      .setValue(ADD_TASK_GLOBAL, '4 test task hohoho')
-      .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
-      .setValue(ADD_TASK_GLOBAL, '5 some other task xoxo')
-      .setValue(ADD_TASK_GLOBAL, browser.Keys.ENTER)
+      .sendKeysToActiveEl([
+        '4 test task hohoho',
+        browser.Keys.ENTER,
+        '5 some other task xoxo',
+        browser.Keys.ENTER,
+      ])
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
       // NOTE: global adds to top rather than bottom
-      .assert.containsText(TASK + ':nth-child(1)', '5 some other task xoxo')
-      .assert.containsText(TASK + ':nth-child(2)', '4 test task hohoho')
+      .assert.valueContains(TASK + ':nth-child(1) textarea', '5 some other task xoxo')
+      .assert.valueContains(TASK + ':nth-child(2) textarea', '4 test task hohoho')
       .end(),
 
   'should still show created task after reload': (browser: NBrowser) =>
@@ -79,7 +82,7 @@ module.exports = {
 
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
-      .assert.containsText(TASK, '0 test task lolo')
+      .assert.valueContains(TASK_TEXTAREA, '0 test task lolo')
       .end(),
 
   'should add 3 tasks from initial bar and remove 2 of them via the default keyboard shortcut':
@@ -88,31 +91,22 @@ module.exports = {
         .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
         .waitForElementVisible(ADD_TASK_INITIAL)
 
-        .setValue(ADD_TASK_INITIAL, '1 test task hihi')
-        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
-        .setValue(ADD_TASK_INITIAL, '2 some other task')
-        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
-        .setValue(ADD_TASK_INITIAL, '3 hihi some other task')
-        .setValue(ADD_TASK_INITIAL, browser.Keys.ENTER)
+        .addTask('3 hihi some other task')
+        .addTask('2 some other task')
+        .addTask('1 test task hihi')
 
         .waitForElementVisible(TASK)
-        .assert.visible(TASK)
 
         // focus
-        .pause(200)
-        .keys(browser.Keys.TAB)
-        .keys(browser.Keys.TAB)
-        .pause(200)
+        .sendKeysToActiveEl(browser.Keys.TAB)
+        .sendKeysToActiveEl(browser.Keys.TAB)
 
-        .keys(browser.Keys.BACK_SPACE)
-        .pause(200)
-        .waitForElementNotPresent(TASK + ':nth-child(3)')
+        .sendKeysToActiveEl(browser.Keys.BACK_SPACE)
 
-        .keys(browser.Keys.BACK_SPACE)
-        .pause(200)
+        .sendKeysToActiveEl(browser.Keys.BACK_SPACE)
         .waitForElementNotPresent(TASK + ':nth-child(2)')
 
-        .assert.containsText(TASK + ':nth-child(1)', '1 test task hihi')
+        .assert.valueContains(TASK_TEXTAREA + ':nth-child(1)', '1 test task hihi')
         .end(),
 
   'should focus previous subtask when marking last subtask done': (browser: NBrowser) =>
@@ -120,12 +114,18 @@ module.exports = {
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .addTask('task1')
       .addTask('task2')
-      .setValue('task:last-child', 'a')
-      .keys(['task3', browser.Keys.ENTER])
-      .setValue('[listid="SUB"] task:nth-child(1)', 'a')
-      .keys(['task4', browser.Keys.ENTER])
-      .moveToElement('[listid="SUB"] task:nth-child(2)', 10, 30)
+      .sendKeysToActiveEl('a')
+      .sendKeysToActiveEl(['task3', browser.Keys.ENTER])
+      .setValue('task-list task-list task:nth-child(1)', 'a')
+      .sendKeysToActiveEl(['task4', browser.Keys.ENTER])
+      .waitForElementVisible('.sub-tasks task-list task:nth-child(2)')
+      // .moveToElement('.sub-tasks .task-list-inner task:nth-child(2)', 30, 30)
+      .moveToElement('.sub-tasks task:nth-child(1)', 30, 30)
       .click('.task-done-btn')
-      .assert.containsText(':focus', 'task3')
+      .execute(
+        () => document.activeElement,
+        (result) => browser.assert.textContains(result.value as any, 'task3'),
+      )
+      // .assert.textContains(':focus', 'task3')
       .end(),
 };

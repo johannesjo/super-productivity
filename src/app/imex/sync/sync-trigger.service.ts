@@ -6,6 +6,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   shareReplay,
@@ -75,19 +76,19 @@ export class SyncTriggerService {
             ),
           )
         : // FALLBACK we check if there was any kind of user interaction
-        // (otherwise sync might never be checked if there are no local data changes)
-        IS_TOUCH_PRIMARY
-        ? merge(
-            fromEvent(window, 'touchstart'),
-            fromEvent(window, 'visibilitychange'),
-          ).pipe(
-            mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          )
-        : fromEvent(window, 'focus').pipe(
-            mapTo('I_FOCUS_THROTTLED'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          ),
+          // (otherwise sync might never be checked if there are no local data changes)
+          IS_TOUCH_PRIMARY
+          ? merge(
+              fromEvent(window, 'touchstart'),
+              fromEvent(window, 'visibilitychange'),
+            ).pipe(
+              mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            )
+          : fromEvent(window, 'focus').pipe(
+              mapTo('I_FOCUS_THROTTLED'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            ),
     ),
   );
 
@@ -149,10 +150,11 @@ export class SyncTriggerService {
       concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
     );
 
+  // NOTE: can be called multiple times apparently
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,
-    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)).pipe(shareReplay(1)),
-  );
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
+  ).pipe(first(), shareReplay(1));
 
   constructor(
     private readonly _globalConfigService: GlobalConfigService,

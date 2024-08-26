@@ -1,0 +1,69 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding-top: $s * 0.25;
+  padding-bottom: $s * 0.25;
+  border: 1px solid $dark-theme-separator-color;
+  border-radius: $task-border-radius;
+  opacity: 0.9;
+  min-height: $planner-item-height;
+  cursor: pointer;
+
+  &.isBeingSubmitted {
+    opacity: 0.4;
+    pointer-events: none !important;
+  }
+
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  &:hover {
+    border-color: $c-accent;
+    color: $c-accent;
+    //outline: 1px solid $c-accent;
+
+    mat-icon.add {
+      display: block;
+    }
+
+    mat-icon.default {
+      display: none;
+    }
+  }
+
+  mat-icon {
+    margin-left: $s;
+    margin-right: $s;
+    opacity: 0.8;
+    font-size: $planner-item-ico-size;
+    height: $planner-item-ico-size;
+    width: $planner-item-ico-size;
+    min-width: $planner-item-ico-size;
+    max-width: $planner-item-ico-size;
+
+    &.add {
+      display: none;
+    }
+  }
+}
+
+.title {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: $planner-font-size-mobile;
+
+  @include mq(xs) {
+    font-size: $planner-font-size;
+  }
+}

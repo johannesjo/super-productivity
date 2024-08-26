@@ -13,6 +13,8 @@ import { initialNoteState } from '../../features/note/store/note.reducer';
 import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
 import { MODEL_VERSION } from '../../core/model-version';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { plannerInitialState } from '../../features/planner/store/planner.reducer';
+import { GlobalConfigState } from '../../features/config/global-config.model';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
@@ -28,6 +30,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   archivedProjects: {},
   globalConfig: initialGlobalConfigState,
   reminders: [],
+  planner: plannerInitialState,
 
   task: initialTaskState,
   tag: initialTagState,
@@ -45,11 +48,22 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   obstruction: initialObstructionState,
 };
 
-export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
-  ['misc', 'isDarkMode'],
-  ['sync', 'localFileSync', 'syncFilePath'],
+// NOTE: they should never be changed
+export const PREPEND_STR_ENCRYPTION = 'SP_ENC_';
+export const PREPEND_STR_COMPRESSION = 'SP_CPR_';
+
+type GlobalConfigKey = keyof GlobalConfigState;
+type MiscKey = keyof GlobalConfigState['misc'];
+type SyncKey = keyof GlobalConfigState['sync'];
+type LocalFileSyncKey = keyof GlobalConfigState['sync']['localFileSync'];
+type WebDavKey = keyof GlobalConfigState['sync']['webDav'];
+
+type ConfigPath =
+  | [GlobalConfigKey, MiscKey]
+  | [GlobalConfigKey, SyncKey, LocalFileSyncKey | WebDavKey];
+
+export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: ConfigPath[] = [
+  ['misc', 'darkMode'],
+  ['sync', 'localFileSync', 'syncFolderPath'],
   ['sync', 'webDav', 'password'],
-  ['sync', 'dropboxSync', 'accessToken'],
-  // NOTE: googleDriveSync uses localStorage SUP_GOOGLE_SESSION instead
-  // ['sync', 'googleDriveSync', 'authCode'],
 ];

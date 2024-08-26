@@ -7,14 +7,13 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { first, map, switchMap, takeWhile } from 'rxjs/operators';
 import { T } from '../../../t.const';
-import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { AddTaskReminderInterface } from '../dialog-add-task-reminder/add-task-reminder-interface';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
 import { uniqueByProp } from '../../../util/unique-by-prop';
 import { ProjectService } from '../../project/project.service';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 
 const M = 1000 * 60;
 
@@ -94,14 +93,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         .getByIdOnce$(task.parentId)
         .pipe(first())
         .toPromise();
-      this._taskService.updateTags(
-        parent,
-        [TODAY_TAG.id, ...parent.tagIds],
-        parent.tagIds,
-      );
+      this._taskService.updateTags(parent, [TODAY_TAG.id, ...parent.tagIds]);
       this.dismiss(task);
     } else {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
       this.dismiss(task);
     }
   }
@@ -137,9 +132,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false): void {
     this._subs.add(
       this._matDialog
-        .open(DialogAddTaskReminderComponent, {
+        .open(DialogScheduleTaskComponent, {
           restoreFocus: true,
-          data: { task } as AddTaskReminderInterface,
+          data: { task },
         })
         .afterClosed()
         .subscribe((wasEdited) => {
@@ -210,7 +205,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
 
     updateTagTasks.forEach((task) => {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds], task.tagIds);
+      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
     });
     tasksToDismiss.forEach((task: TaskWithReminderData) => {
       this.dismiss(task);

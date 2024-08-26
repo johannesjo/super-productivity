@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 const arabicNumberMap = {
   '١': '1',
   '٢': '2',

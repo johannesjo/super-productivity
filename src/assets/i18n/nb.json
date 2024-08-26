@@ -393,7 +393,7 @@
         "SNOOZE": "Slumre",
         "TITLE": "Merk"
       },
-      "EDIT_REMINDER": "Rediger påminnelse",
+      "EDIT_SCHEDULED": "Rediger påminnelse",
       "REMOVE_REMINDER": "Fjern påminnelse",
       "S": {
         "ADDED_REMINDER": "Lagt til påminnelse for merknad",
@@ -577,7 +577,7 @@
         "CONVERT_TO_PARENT_TASK": "Konverter til foreldreoppgave",
         "DELETE": "Slett oppgave",
         "DROP_ATTACHMENT": "Slipp her for å legge ved \"{{title}}\"",
-        "EDIT_REMINDER": "Rediger påminnelse",
+        "EDIT_SCHEDULED": "Rediger påminnelse",
         "EDIT_TAGS": "Rediger koder",
         "MARK_DONE": "Marker som ferdig",
         "MARK_UNDONE": "Merk som ugjort",
@@ -591,7 +591,7 @@
         "REPEAT_EDIT": "Rediger konfigurasjon for gjentatt oppgave",
         "SCHEDULE": "Planlegg oppgaven",
         "SHOW_UPDATES": "Vis oppdateringer",
-        "TOGGLE_ADDITIONAL": "Vis / skjul tilleggsinformasjon",
+        "TOGGLE_DETAIL_PANEL": "Vis / skjul tilleggsinformasjon",
         "TOGGLE_ATTACHMENTS": "Vis / skjul vedlegg",
         "TOGGLE_DONE": "Merk som ferdig / angre",
         "TOGGLE_SUB_TASK_VISIBILITY": "Bytt synlighet av underoppgave",
@@ -599,7 +599,7 @@
         "TRACK_TIME_STOP": "Sett sporingstid på pause",
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "DATETIME_FOR": "Datotid for påminnelse",
         "EDIT": "Rediger påminnelse",
         "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
@@ -703,8 +703,8 @@
         "IDLE_FOR": "Du har vært inaktiv for:",
         "SKIP": "Hopp over",
         "TASK": "Oppgave",
-        "TASK_BREAK": "Oppgave + pause",
-        "TRACK_TO": "Spor til"
+        "TRACK_TO": "Spor til",
+        "TASK_BREAK": "Oppgave + pause"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
@@ -836,12 +836,12 @@
   },
   "G": {
     "CANCEL": "Avbryt",
-    "CLICK_TO_EDIT": "klikk for å redigere",
     "CLOSE": "Lukk",
     "DELETE": "Slett",
     "DISMISS": "Avvis",
     "DO_IT": "Gjør det!",
     "EDIT": "Redigere",
+    "EXAMPLE_VAL": "klikk for å redigere",
     "EXTENSION_INFO": "Last <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">ned chrome-utvidelsen</a> for å tillate kommunikasjon med Jira Api og Idle Time Handling. Merk at dette ikke fungerer for mobil.",
     "LOGIN": "Logg Inn",
     "LOGOUT": "Logg ut",
@@ -874,9 +874,9 @@
       "HELP": "<div><p>Når håndtering av inaktiv tid er aktivert, åpnes en dialog etter en spesifisert tid for å sjekke om og på hvilken oppgave du vil spore tiden din, når du har vært inaktiv.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiver håndtering av inaktiv tid",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Bare utløs tomgangsdialog når en aktuell oppgave er valgt",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Usporet inaktiv tid tilbakestiller 'ta en pause'-timer",
       "MIN_IDLE_TIME": "Utløser tomgang etter X",
-      "TITLE": "Tomgangshåndtering"
+      "TITLE": "Tomgangshåndtering",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Usporet inaktiv tid tilbakestiller 'ta en pause'-timer"
     },
     "IMEX": {
       "HELP": "<p>Her kan du eksportere alle dataene dine som en <strong>JSON</strong> for sikkerhetskopiering, men også for å bruke dem i en annen kontekst (f.eks. Vil du kanskje eksportere prosjektene dine i nettleseren og importere dem til desktopversjonen).</p><p> Importen forventer at gyldig JSON kopieres til tekstområdet. <strong>MERKNAD: Når du trykker på importknappen, overskrives alle dine nåværende innstillinger og data!</strong></p>",
@@ -906,6 +906,7 @@
       "SELECT_PREVIOUS_TASK": "Velg forrige oppgave",
       "SYSTEM_SHORTCUTS": "Globale snarveier (hele systemet)",
       "TASK_ADD_SUB_TASK": "Legg til underoppgave",
+      "TASK_ADD_ATTACHMENT": "Legg ved fil eller lenke",
       "TASK_DELETE": "Slett oppgave",
       "TASK_EDIT_TITLE": "Rediger tittel",
       "TASK_MOVE_TO_PROJECT": "Åpne flytt oppgave til prosjektmeny",
@@ -913,7 +914,7 @@
       "TASK_SCHEDULE": "Planlegg oppgave",
       "TASK_SHORTCUTS": "Oppgaver",
       "TASK_SHORTCUTS_INFO": "Følgende snarveier gjelder for den valgte oppgaven (valgt via fane eller mus).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Vis / skjul tilleggsinformasjon",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Vis / skjul tilleggsinformasjon",
       "TASK_TOGGLE_DONE": "Slå på Ferdig",
       "TITLE": "Tastatursnarveier",
       "TOGGLE_BACKLOG": "Vis / skjul oppgavestand",
@@ -922,27 +923,6 @@
       "ZOOM_DEFAULT": "Zoomstandard (bare skrivebord)",
       "ZOOM_IN": "Zoom inn (bare skrivebordet)",
       "ZOOM_OUT": "Zoom ut (bare skrivebordet)"
-    },
-    "LANG": {
-      "AR": "Arabisk",
-      "DE": "Tysk",
-      "EN": "Engelsk",
-      "ES": "Spansk",
-      "FA": "Farsi",
-      "FR": "Fransk",
-      "IT": "Italiensk",
-      "JA": "Japansk",
-      "KO": "Koreansk",
-      "LABEL": "Velg et språk",
-      "NB": "Norsk Bokmål",
-      "NL": "Nederlandsk",
-      "PL": "Pusse",
-      "PT": "Portugisisk",
-      "RU": "Russisk",
-      "TITLE": "Språk",
-      "TR": "Tyrkisk",
-      "ZH": "Kinesisk (forenklet)",
-      "ZH_TW": "Kinesisk (traditionelt)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",

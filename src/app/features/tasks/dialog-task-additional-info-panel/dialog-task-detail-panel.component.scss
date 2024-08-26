@@ -1,0 +1,48 @@
+@import '../../../../variables';
+
+:host {
+  mat-dialog-content {
+    padding: 0;
+    border-radius: 4px;
+    max-width: 450px;
+    max-height: 75vh;
+    min-width: 340px;
+
+    @include darkTheme() {
+      background: rgb(39, 39, 39) !important;
+      border: 4px solid $dark24;
+    }
+
+    @include mq(xxxs) {
+      min-width: 380px;
+    }
+    @include mq(xs) {
+      min-width: 450px;
+      max-height: 85vh;
+    }
+  }
+
+  &::ng-deep {
+    .task-title-wrapper {
+      padding-right: 8px !important;
+    }
+
+    task .hover-controls {
+      display: none !important;
+    }
+
+    .wrapper {
+      //padding: 16px;
+    }
+
+    task-detail-item {
+      margin-left: $s;
+      margin-right: $s;
+
+      @include mq(xxs) {
+        margin-left: $s * 1.5;
+        margin-right: $s * 1.5;
+      }
+    }
+  }
+}

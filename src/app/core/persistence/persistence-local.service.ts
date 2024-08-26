@@ -1,8 +1,22 @@
 import { Injectable } from '@angular/core';
 import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
-import { LocalSyncMetaModel } from '../../imex/sync/sync.model';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
+import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
+import { SyncProvider } from 'src/app/imex/sync/sync-provider.model';
+
+const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
+  [SyncProvider.Dropbox]: {
+    rev: null,
+    lastSync: 0,
+    revTaskArchive: null,
+  },
+  [SyncProvider.WebDAV]: { rev: null, lastSync: 0, revTaskArchive: null },
+  [SyncProvider.LocalFile]: {
+    rev: null,
+    lastSync: 0,
+    revTaskArchive: null,
+  },
+};
 
 @Injectable({
   providedIn: 'root',
@@ -10,44 +24,74 @@ import { SyncProvider } from '../../imex/sync/sync-provider.model';
 export class PersistenceLocalService {
   constructor(private _databaseService: DatabaseService) {}
 
-  async save(data: LocalSyncMetaModel): Promise<any> {
+  async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);
   }
 
   async load(): Promise<LocalSyncMetaModel> {
     const r = (await this._databaseService.load(DB.LOCAL_NON_SYNC)) as LocalSyncMetaModel;
+
     if (
       r &&
       r[SyncProvider.Dropbox] &&
       r[SyncProvider.WebDAV] &&
       r[SyncProvider.LocalFile]
     ) {
+      console.log(r);
       return r;
     }
-    return {
-      [SyncProvider.Dropbox]: {
-        rev: this._getLegacyLocalRev(SyncProvider.Dropbox) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.Dropbox) || 0,
-      },
-      [SyncProvider.WebDAV]: {
-        rev: this._getLegacyLocalRev(SyncProvider.WebDAV) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.WebDAV) || 0,
-      },
-      [SyncProvider.LocalFile]: {
-        rev: this._getLegacyLocalRev(SyncProvider.LocalFile) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.LocalFile) || 0,
-      },
-      // Overwrite with existing if given
-      ...(r as any),
-    };
+    return DEFAULT_LOCAL_SYNC_META;
   }
 
-  private _getLegacyLocalRev(p: SyncProvider): string | null {
-    return localStorage.getItem(LS.SYNC_LAST_LOCAL_REVISION_PREFIX + p);
+  async updateDropboxSyncMeta(
+    dropboxSyncMeta: Partial<LocalSyncMetaForProvider>,
+  ): Promise<unknown> {
+    const localSyncMeta = await this.load();
+    return await this.save({
+      ...localSyncMeta,
+      Dropbox: {
+        ...localSyncMeta.Dropbox,
+        ...dropboxSyncMeta,
+      },
+    });
   }
 
-  private _getLegacyLocalLastSync(p: SyncProvider): number {
-    const it = +(localStorage.getItem(LS.SYNC_LOCAL_LAST_SYNC_PREFIX + p) as any);
-    return isNaN(it) ? 0 : it || 0;
+  async loadLastSyncModelChange(): Promise<number> {
+    const r =
+      ((await this._databaseService.load(
+        DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+        // get legacy value if non here
+      )) as string) || localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+    return this._parseTS(r);
+  }
+
+  async loadLastArchiveChange(): Promise<number> {
+    return this._parseTS(
+      (await this._databaseService.load(DB.LOCAL_LAST_ARCHIVE_CHANGE)) as string,
+    );
+  }
+
+  async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
+    return await this._databaseService.save(
+      DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+      lastSyncModelChange,
+    );
+  }
+
+  async updateLastArchiveChange(lastArchiveChange: number): Promise<unknown> {
+    return await this._databaseService.save(
+      DB.LOCAL_LAST_ARCHIVE_CHANGE,
+      lastArchiveChange,
+    );
+  }
+
+  private _parseTS(ts: number | string | null): number {
+    // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
+    const laParsed = Number.isNaN(Number(ts)) ? ts : +(ts as string);
+    if (!laParsed) {
+      return 0;
+    }
+    // NOTE: to account for legacy string dates
+    return new Date(laParsed).getTime();
   }
 }

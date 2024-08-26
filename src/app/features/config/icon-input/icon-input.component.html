@@ -1,10 +1,11 @@
 <!-- TODO make this work -->
 <!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
 
-<mat-icon *ngIf="formControl.value">{{formControl.value}}</mat-icon>
+<mat-icon>{{ formControl.value }}</mat-icon>
 
 <input
-  [formControl]="formControl"
+  [ngModel]="formControl.value"
+  (ngModelChange)="onInputValueChange($event)"
   [formlyAttributes]="field"
   [matAutocomplete]="auto"
   matInput
@@ -14,10 +15,11 @@
 
 <mat-autocomplete
   #auto="matAutocomplete"
+  (optionSelected)="onIconSelect($event.option.value)"
   [autoActiveFirstOption]="false"
 >
   <mat-option
-    *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
+    *ngFor="let icon of (filteredIcons); trackBy: trackByIndex"
     [value]="icon"
   >
     <mat-icon>{{icon}}</mat-icon>

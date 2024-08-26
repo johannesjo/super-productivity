@@ -42,13 +42,13 @@
       <tr *ngIf="issue?.labels?.length">
         <th>{{T.F.GITHUB.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
-          <mat-chip-list>
-            <mat-chip
+          <mat-chip-listbox>
+            <mat-chip-option
               *ngFor="let label of issue?.labels; trackBy: trackByIndex"
               [title]="label.description"
               >{{label.name}}
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
         </td>
       </tr>
       <tr *ngIf="issue?.body && !isCollapsedIssueSummary()">
@@ -68,6 +68,7 @@
         <div style="text-align: center">
           <button
             mat-stroked-button
+            class="load-comments-and-all-data"
             (click)="isForceShowDescription=true; isForceShowAllComments= true"
           >
             <mat-icon>download</mat-icon>
@@ -100,7 +101,7 @@
             </div>
             <div
               *ngIf="lastComment().body"
-              [innerHTML]="lastComment().body|markdown"
+              [innerHTML]="lastComment().body|markdown|async"
               class="markdown"
             ></div>
           </div>
@@ -124,7 +125,7 @@
             </div>
             <div
               *ngIf="comment.body"
-              [innerHTML]="comment?.body|markdown"
+              [innerHTML]="comment?.body|markdown|async"
               class="markdown"
             ></div>
           </div>

@@ -4,17 +4,17 @@ import { TaskComponent } from './task/task.component';
 import { TaskListComponent } from './task-list/task-list.component';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MentionModule } from 'angular-mentions';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
 import { DialogTimeEstimateComponent } from './dialog-time-estimate/dialog-time-estimate.component';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { TASK_FEATURE_NAME, taskReducer } from './store/task.reducer';
-import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
+import { TaskDetailPanelComponent } from './task-detail-panel/task-detail-panel.component';
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { TaskAttachmentModule } from './task-attachment/task-attachment.module';
 import { IssueModule } from '../issue/issue.module';
 import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
-import { DialogAddTaskReminderComponent } from './dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { TaskSummaryTableComponent } from './task-summary-table/task-summary-table.component';
 import { DialogAddTimeEstimateForOtherDayComponent } from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import { TaskRepeatCfgModule } from '../task-repeat-cfg/task-repeat-cfg.module';
@@ -25,8 +25,7 @@ import { TaskReminderEffects } from './store/task-reminder.effects';
 import { TaskUiEffects } from './store/task-ui.effects';
 import { TaskElectronEffects } from './store/task-electron.effects';
 import { SubTaskTotalTimeSpentPipe } from './pipes/sub-task-total-time-spent.pipe';
-import { SubTaskTotalTimeEstimatePipe } from './pipes/sub-task-total-time-estimate.pipe';
-import { TaskAdditionalInfoItemComponent } from './task-additional-info/task-additional-info-item/task-additional-info-item.component';
+import { TaskDetailItemComponent } from './task-detail-panel/task-additional-info-item/task-detail-item.component';
 import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { TagModule } from '../tag/tag.module';
 import { TagService } from '../tag/tag.service';
@@ -35,11 +34,13 @@ import { TaskSummaryTablesComponent } from './task-summary-tables/task-summary-t
 import { IS_ELECTRON } from '../../app.constants';
 import { TasksByTagComponent } from './tasks-by-tag/tasks-by-tag.component';
 import { ShortSyntaxEffects } from './store/short-syntax.effects';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 
 @NgModule({
   imports: [
     CommonModule,
     IssueModule,
+    MentionModule,
     UiModule,
     FormsModule,
     TaskAttachmentModule,
@@ -57,6 +58,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
     BetterDrawerModule,
+    InlineMultilineInputComponent,
   ],
   declarations: [
     TaskComponent,
@@ -64,15 +66,13 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
     AddTaskBarComponent,
     DialogTimeEstimateComponent,
     DialogViewTaskRemindersComponent,
-    DialogAddTaskReminderComponent,
     DialogAddTimeEstimateForOtherDayComponent,
-    TaskAdditionalInfoComponent,
+    TaskDetailPanelComponent,
     SelectTaskComponent,
     FilterDoneTasksPipe,
     TaskSummaryTableComponent,
     SubTaskTotalTimeSpentPipe,
-    SubTaskTotalTimeEstimatePipe,
-    TaskAdditionalInfoItemComponent,
+    TaskDetailItemComponent,
     TaskSummaryTablesComponent,
     TasksByTagComponent,
   ],
@@ -83,7 +83,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
     SelectTaskComponent,
     TaskSummaryTableComponent,
     TaskSummaryTablesComponent,
-    TaskAdditionalInfoComponent,
+    TaskDetailPanelComponent,
     TasksByTagComponent,
   ],
   providers: [TagService],

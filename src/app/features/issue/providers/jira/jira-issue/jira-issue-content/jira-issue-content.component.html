@@ -96,13 +96,13 @@
     <tr *ngIf="issue?.components?.length">
       <th>{{T.F.JIRA.ISSUE_CONTENT.COMPONENTS|translate}}</th>
       <td>
-        <mat-chip-list>
-          <mat-chip
+        <mat-chip-listbox>
+          <mat-chip-option
             *ngFor="let component of issue?.components; trackBy: trackByIndex"
             [title]="component.description"
             >{{component.name}}
-          </mat-chip>
-        </mat-chip-list>
+          </mat-chip-option>
+        </mat-chip-listbox>
       </td>
     </tr>
     <tr
@@ -150,7 +150,7 @@
             </div>
             <div
               *ngIf="comment.body"
-              [innerHTML]="comment.body|jiraToMarkdown|markdown"
+              [innerHTML]="comment.body|jiraToMarkdown|markdown|async"
               class="markdown"
             ></div>
           </div>

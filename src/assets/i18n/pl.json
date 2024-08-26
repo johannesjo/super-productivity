@@ -407,7 +407,7 @@
         "SNOOZE": "Snooze",
         "TITLE": "Note"
       },
-      "EDIT_REMINDER": "Edit reminder",
+      "EDIT_SCHEDULED": "Edit reminder",
       "REMOVE_REMINDER": "Remove reminder",
       "S": {
         "ADDED_REMINDER": "Added reminder for note",
@@ -591,8 +591,8 @@
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
-          "L_SYNC_FILE_PATH": "Sync File Path",
-          "L_USER_NAME": "Username"
+          "L_USER_NAME": "Username",
+          "L_SYNC_FILE_PATH": "Sync File Path"
         }
       },
       "S": {
@@ -664,7 +664,7 @@
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "Edit reminder",
+        "EDIT_SCHEDULED": "Edit reminder",
         "EDIT_TAGS": "Edit tags",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
@@ -678,7 +678,7 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
@@ -686,7 +686,7 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -783,14 +783,14 @@
         "WEDNESDAY": "Wednesday"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
-        "TITLE": "Timeline"
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Timeline",
+      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
@@ -811,8 +811,8 @@
         "IDLE_FOR": "Nie pracowałeś przez:",
         "SKIP": "Pomiń",
         "TASK": "Zadanie",
-        "TASK_BREAK": "Zadanie+Przerwa",
-        "TRACK_TO": "Przypisz do"
+        "TRACK_TO": "Przypisz do",
+        "TASK_BREAK": "Zadanie+Przerwa"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stwórz</em> i przypisz do",
@@ -906,12 +906,12 @@
   },
   "G": {
     "CANCEL": "Cancel",
-    "CLICK_TO_EDIT": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "EDIT": "Edit",
+    "EXAMPLE_VAL": "click to edit",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
@@ -945,9 +945,9 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -967,7 +967,7 @@
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_TIMELINE": "Go to Timeline",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -980,6 +980,7 @@
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
+      "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
@@ -989,7 +990,7 @@
       "TASK_SCHEDULE": "Zaplanuj Zadanie",
       "TASK_SHORTCUTS": "Zadania",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
       "TITLE": "Skróty klawiszowe",
       "TOGGLE_BACKLOG": "Pokaż/Ukryj Zadanie Backlogu",
@@ -999,26 +1000,6 @@
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
       "ZOOM_OUT": "Zoom out (Desktop only)"
-    },
-    "LANG": {
-      "AR": "Arabski",
-      "DE": "Niemiecki",
-      "EN": "Angielski",
-      "ES": "Hiszpański",
-      "FA": "Farsi",
-      "FR": "Francuski",
-      "IT": "Włoski",
-      "JA": "Japoński",
-      "KO": "Koreański",
-      "LABEL": "Proszę wybrać język",
-      "NB": "Norweski Bokmål",
-      "NL": "Duński",
-      "PT": "Portugalski",
-      "RU": "Rosyjski",
-      "TITLE": "Język",
-      "TR": "Turecki",
-      "ZH": "Chiński (uproszczony)",
-      "ZH_TW": "Chiński (tradycyjny)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Domyślny projekt dla niezdefiniowanych zadań",
@@ -1071,12 +1052,12 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00"
     },
     "TRACKING_REMINDER": {

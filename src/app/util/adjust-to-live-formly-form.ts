@@ -11,19 +11,30 @@ export const adjustToLiveFormlyForm = (
         type: 'toggle',
       };
     }
-    if (item.type === 'input' || item.type === 'textarea' || item.type === 'duration') {
+    if (
+      item.type === 'input' ||
+      item.type === 'textarea' ||
+      item.type === 'duration' ||
+      item.type === 'icon'
+    ) {
       return {
         ...item,
+        templateOptions: {
+          ...item.templateOptions,
+          keydown: (field: FormlyFieldConfig, event: KeyboardEvent) => {
+            if (event.key === 'Enter' && (event.target as any)?.tagName !== 'TEXTAREA') {
+              field.formControl?.setValue((event?.target as any)?.value);
+            }
+          },
+        },
         modelOptions: {
           ...item.modelOptions,
-          debounce: {
-            default: 1500,
-          },
+          updateOn: 'blur',
         },
       };
     }
 
-    if (item.type === 'repeat' && isArray(item?.fieldGroup)) {
+    if (isArray(item?.fieldGroup)) {
       return {
         ...item,
         fieldGroup: adjustToLiveFormlyForm(item?.fieldGroup),
@@ -32,17 +43,18 @@ export const adjustToLiveFormlyForm = (
 
     if (
       item.type === 'repeat' &&
-      item?.fieldArray?.fieldGroup &&
-      isArray(item.fieldArray.fieldGroup)
+      (item?.fieldArray as any)?.fieldGroup &&
+      isArray((item.fieldArray as any).fieldGroup)
     ) {
       return {
         ...item,
         fieldArray: {
           ...item.fieldArray,
-          fieldGroup: adjustToLiveFormlyForm(item?.fieldArray?.fieldGroup),
+          fieldGroup: adjustToLiveFormlyForm((item?.fieldArray as any)?.fieldGroup),
         },
       };
     }
+
     return item;
   });
 };

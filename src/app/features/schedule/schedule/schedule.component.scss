@@ -1,0 +1,412 @@
+@use 'angular-material-css-vars' as mat-css-vars;
+@import '../../../../variables.scss';
+
+$time-width: 3em;
+$row-height: 11px;
+$row-height-mobile: 7px;
+//$grid-color: #dadce0;
+$grid-color: #dadce0;
+$grid-color-dark: rgba(255, 255, 255, 0.1);
+$current-time-color: $c-accent;
+$fr: 12;
+$total-rows: 24 * $fr;
+
+:host {
+  //background: $light-theme-bg;
+  --nr-of-days: 5;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+    background: transparent;
+  }
+}
+
+.main-grid-container,
+.days {
+  grid-auto-flow: column;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  grid-auto-columns: minmax(0, 1fr);
+  //grid-template-columns: $time-width repeat(5, 1fr);
+  grid-template-columns: $time-width repeat(var(--nr-of-days), 1fr);
+}
+
+.main-grid-container {
+  //border: 3px dashed palevioletred;   grid-auto-columns: minmax(0, 1fr);
+  grid-template-rows: repeat($total-rows, $row-height);
+  //grid-auto-rows: $row-height;
+  //grid-auto-rows: max-content;
+
+  @include mq(xs, max) {
+    grid-template-rows: repeat($total-rows, $row-height-mobile);
+    //grid-auto-rows: $row-height-mobile;
+  }
+}
+
+// grid list approach 1
+//:host {
+//  .main-grid-container,
+//  .days {
+//    grid-template-rows: auto !important;
+//    grid-auto-rows: auto !important;
+//  }
+//
+//  schedule-event {
+//    align-self: start; // Align items to the start of the row
+//    grid-row-start: auto !important;
+//    grid-row: auto!important;
+//    grid-row-end: auto !important;
+//  }
+//
+//  .close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first,
+//  .close-to-others.close-to-others.close-to-others.close-to-others.close-to-others {
+//    transform: translate3d(0, 0, 0);
+//  }
+//
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.SplitTaskContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinued,
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.LunchBreak,
+//  .work-end,
+//  .current-time,
+//  .work-start,
+//  .time,
+//  .row {
+//    display: none !important;
+//  }
+//}
+
+header {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid $light-theme-extra-border-color;
+  border-bottom: 1px solid $light-theme-extra-border-color;
+  background: #fff;
+  color: $light-theme-text-color;
+  box-shadow: $whiteframe-shadow-1dp;
+  z-index: 10;
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+    background: $dark-theme-bg-slightly-lighter;
+    color: $dark-theme-text-color;
+    background: $dark-theme-bg-lighter;
+  }
+}
+
+.main-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-bottom: 1px solid $light-theme-extra-border-color;
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
+}
+
+.day {
+  line-height: 32px;
+  font-size: 18px;
+  border-left: 1px solid $light-theme-extra-border-color;
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  @include mq(xs, max) {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+
+.day-num {
+  font-weight: 600;
+  display: inline;
+  padding-right: 6px;
+}
+
+.day-day {
+  display: inline;
+  font-weight: 100;
+}
+
+.time {
+  grid-column: 1;
+  text-align: right;
+  align-self: end;
+  font-size: 80%;
+  position: relative;
+  color: #70757a;
+  padding-right: 6px;
+}
+
+.col {
+  border-left: 1px solid $grid-color;
+  grid-row: 1 / span $total-rows;
+  grid-column: span 1;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
+
+  &.drag-over {
+    //background: $c-primary !important;
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+    @include darkTheme() {
+      background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+    }
+  }
+}
+
+.filler-col {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  border-right: 1px solid $grid-color;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
+}
+
+.row {
+  grid-column: 2 / -1;
+}
+
+.row {
+  border-top: 1px solid $grid-color;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
+}
+
+.current-time {
+  border-top: 2px solid $current-time-color;
+  position: relative;
+  top: calc(50% - 1px);
+}
+
+.circle {
+  width: 12px;
+  height: 12px;
+  border: 1px solid $current-time-color;
+  border-radius: 50%;
+  background: $current-time-color;
+  position: relative;
+  top: -6px;
+  left: -6px;
+}
+
+.current {
+  font-weight: bold;
+}
+
+.cdk-drag-dragging {
+  position: relative;
+  z-index: 99 !important;
+  box-shadow: $whiteframe-shadow-20dp;
+}
+
+.row {
+  pointer-events: none;
+}
+
+.drop-label {
+  display: none;
+  top: 40px;
+  position: sticky;
+  line-height: 1.2;
+  padding: 4px 4px;
+  justify-content: stretch;
+  align-self: start;
+  z-index: 33;
+  box-shadow: $whiteframe-shadow-4dp;
+  width: inherit;
+  flex-direction: column;
+  border: 1px dashed $c-primary;
+  background: $light-theme-bg;
+  background: $c-primary;
+  color: $c-contrast;
+  pointer-events: none;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+    background: $c-primary;
+  }
+
+  .drag-over & {
+    display: flex;
+  }
+
+  .end-of-day & {
+    //top: auto;
+    //bottom: 100px;
+    //outline: 1px dashed red;
+  }
+}
+
+.excess-entries {
+  z-index: 10;
+  position: sticky;
+  bottom: -2px;
+  max-height: 100px;
+  padding-bottom: 30px;
+  border-top: 4px solid $c-warn;
+  background: $light-theme-bg;
+  border: 2px solid $c-warn;
+  box-shadow: $whiteframe-shadow-6dp;
+  border-radius: 4px;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+  }
+
+  @media (min-height: 1000px) {
+    max-height: 200px;
+  }
+
+  schedule-event {
+    margin: 5px;
+  }
+}
+
+.excess-entries-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+
+  @include mq(xs, max) {
+    padding: 4px;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+
+    @include mq(xs, max) {
+      font-size: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.work-end,
+.work-start {
+  scroll-margin-top: 80px;
+  border-top: 2px dashed $light-theme-separator-color;
+  min-width: 100px;
+  grid-column: 2 / -1;
+  position: relative;
+  color: $light-theme-text-color;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+    border-color: $dark-theme-separator-color;
+  }
+
+  &:hover {
+    z-index: 22;
+    border-color: #000;
+    @include darkTheme() {
+      border-color: #fff;
+    }
+  }
+
+  > div {
+    left: 0;
+    font-weight: bold;
+    font-size: 10px;
+    position: absolute;
+    bottom: 100%;
+    line-height: 1;
+    background: $light-theme-bg;
+    padding: 2px 8px;
+    margin-bottom: -6px;
+
+    @include darkTheme() {
+      background: $dark-theme-bg;
+    }
+  }
+
+  .is-dragging & {
+    pointer-events: none;
+  }
+}
+
+.work-end {
+  > div {
+    bottom: auto;
+    top: 100%;
+    margin-bottom: 0;
+    margin-top: -16px;
+  }
+}
+
+// prevent moving out the way
+schedule-event.cdk-drag-dragging + schedule-event {
+  transform: translateY(0);
+
+  &:after {
+    display: none;
+  }
+}
+
+@include mq(sm) {
+  :host ::ng-deep {
+    .close-to-others {
+      //outline: 2px solid blue;
+    }
+
+    .close-to-others-first {
+      //outline: 2px solid red !important;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .close-to-others-first + .close-to-others {
+      transform: translate3d(40px, 0, 0);
+      //outline-color: palegreen !important;
+    }
+
+    .close-to-others-first
+      + .close-to-others
+      + .close-to-others
+      + .close-to-others
+      + .close-to-others,
+    .close-to-others-first + .close-to-others + .close-to-others + .close-to-others,
+    .close-to-others-first + .close-to-others + .close-to-others {
+      transform: translate3d(80px, 0, 0);
+      //outline-color: orchid !important;
+    }
+
+    //.close-to-others-first + .close-to-others + .close-to-others + .close-to-others {
+    //  transform: translate3d(120px, 0, 0);
+    //  //outline-color: palegoldenrod !important;
+    //}
+
+    .close-to-others-first
+      + .close-to-others
+      + .close-to-others
+      + .close-to-others
+      + .close-to-others {
+      transform: translate3d(160px, 0, 0);
+      //outline-color: #5893f1 !important;
+    }
+  }
+}
+
+// no animation feels slicker and is less error prone
+.cdk-drag {
+  transition: none !important;
+}
+
+.cdk-drag-animating {
+  transition: none !important;
+}

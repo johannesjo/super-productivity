@@ -169,26 +169,7 @@ export class AppComponent implements OnDestroy {
       });
     } else {
       // WEB VERSION
-      this._chromeExtensionInterfaceService.init();
-      console.log(
-        'LS.WEB_APP_ACTIVE_INSTANCE',
-        localStorage.getItem(LS.WEB_APP_ACTIVE_INSTANCE),
-      );
-
-      if (localStorage.getItem(LS.WEB_APP_ACTIVE_INSTANCE)) {
-        // NOTE: translations not ready yet
-        const t =
-          'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
-        const t2 = 'Please close all other instances, before you continue!';
-        // show in two dialogs to be sure the user didn't miss it
-        alert(t);
-        alert(t2);
-      }
-      localStorage.setItem(LS.WEB_APP_ACTIVE_INSTANCE, 'true');
-
       window.addEventListener('beforeunload', (e) => {
-        localStorage.removeItem(LS.WEB_APP_ACTIVE_INSTANCE);
-
         const gCfg = this._globalConfigService.cfg;
         if (!gCfg) {
           throw new Error();
@@ -198,6 +179,11 @@ export class AppComponent implements OnDestroy {
           e.returnValue = '';
         }
       });
+
+      if (!IS_ANDROID_WEB_VIEW) {
+        this._chromeExtensionInterfaceService.init();
+        this._initMultiInstanceWarning();
+      }
     }
   }
 
@@ -233,24 +219,27 @@ export class AppComponent implements OnDestroy {
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
 
-    window.setTimeout(() => {
-      this._bannerService.open({
-        id: BannerId.InstallWebApp,
-        msg: T.APP.B_INSTALL.MSG,
-        action: {
-          label: T.APP.B_INSTALL.INSTALL,
-          fn: () => {
-            e.prompt();
+    window.setTimeout(
+      () => {
+        this._bannerService.open({
+          id: BannerId.InstallWebApp,
+          msg: T.APP.B_INSTALL.MSG,
+          action: {
+            label: T.APP.B_INSTALL.INSTALL,
+            fn: () => {
+              e.prompt();
+            },
           },
-        },
-        action2: {
-          label: T.APP.B_INSTALL.IGNORE,
-          fn: () => {
-            localStorage.setItem(LS.WEB_APP_INSTALL, 'true');
+          action2: {
+            label: T.APP.B_INSTALL.IGNORE,
+            fn: () => {
+              localStorage.setItem(LS.WEB_APP_INSTALL, 'true');
+            },
           },
-        },
-      });
-    }, 2 * 60 * 1000);
+        });
+      },
+      2 * 60 * 1000,
+    );
   }
 
   getPage(outlet: RouterOutlet): string {
@@ -260,6 +249,39 @@ export class AppComponent implements OnDestroy {
   ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);
+  }
+
+  private _initMultiInstanceWarning(): void {
+    const channel = new BroadcastChannel('superProductivityTab');
+    let isOriginal = true;
+
+    enum Msg {
+      newTabOpened = 'newTabOpened',
+      alreadyOpenElsewhere = 'alreadyOpenElsewhere',
+    }
+
+    channel.postMessage(Msg.newTabOpened);
+    // note that listener is added after posting the message
+
+    channel.addEventListener('message', (msg) => {
+      if (msg.data === Msg.newTabOpened && isOriginal) {
+        // message received from 2nd tab
+        // reply to all new tabs that the website is already open
+        channel.postMessage(Msg.alreadyOpenElsewhere);
+      }
+      if (msg.data === Msg.alreadyOpenElsewhere) {
+        isOriginal = false;
+        // message received from original tab
+        // replace this with whatever logic you need
+        // NOTE: translations not ready yet
+        const t =
+          'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
+        const t2 = 'Please close all other instances, before you continue!';
+        // show in two dialogs to be sure the user didn't miss it
+        alert(t);
+        alert(t2);
+      }
+    });
   }
 
   private _initElectronErrorHandler(): void {

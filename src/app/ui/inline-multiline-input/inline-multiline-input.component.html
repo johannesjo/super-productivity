@@ -1,0 +1,18 @@
+<!--@if(isEditMode){-->
+<textarea
+  #textAreaElement
+  class="edit-panel"
+  spellcheck="false"
+  rows="1"
+  tabindex="-1"
+  placeholder="{{T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER|translate}}"
+  [ngModel]="tmpValue"
+  (blur)="blurred()"
+  (focus)="focused()"
+  (ngModelChange)="updateTmpValue($event)"
+  (input)="onInput($event)"
+  (textInput)="onTextInput($event)"
+  (keydown)="handleKeyDown($event)"
+></textarea>
+
+<!--} @else { {{tmpValue}} }-->

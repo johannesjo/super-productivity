@@ -14,6 +14,7 @@ const KEY_TO_REPLACE = [
   'host',
   'gitlabBaseUrl',
   'syncFilePath',
+  'syncFolderPath',
   'title',
   'originalImgPath',
   'path',

@@ -1,0 +1,19 @@
+<div
+  style="text-align: center"
+  *ngIf="!isShowAddTask"
+  (click)="isShowAddTask = true"
+>
+  <button mat-button>
+    <mat-icon>add</mat-icon>
+    {{ T.G.ADD|translate }}
+  </button>
+</div>
+
+<add-task-bar
+  *ngIf="isShowAddTask"
+  [isElevated]="true "
+  [isHideTagTitles]="true "
+  (blurred)="isShowAddTask = false"
+  (done)="isShowAddTask = false"
+  [planForDay]="planForDay"
+></add-task-bar>

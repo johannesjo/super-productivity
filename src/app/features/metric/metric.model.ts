@@ -1,6 +1,6 @@
 import { EntityState } from '@ngrx/entity';
-import { Label, SingleDataSet } from 'ng2-charts';
-import { ChartDataSets } from 'chart.js';
+// import { Label, SingleDataSet } from 'ng2-charts';
+import { ChartData } from 'chart.js';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export interface MetricCopy {
@@ -21,15 +21,8 @@ export interface MetricState extends EntityState<Metric> {
   [MODEL_VERSION_KEY]?: number;
 }
 
-export interface PieChartData {
-  labels: Label[];
-  data: SingleDataSet;
-}
-
-export interface LineChartData {
-  labels: Label[];
-  data: ChartDataSets[];
-}
+export type PieChartData = ChartData<'pie', number[], string>;
+export type LineChartData = ChartData<'line', (number | undefined)[], string>;
 
 export interface SimpleMetrics {
   start: string;

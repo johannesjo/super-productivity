@@ -4,15 +4,19 @@
     $f: -1;
   }
 
-  $width: map-get((
-    'xxs' : $layout-xxs,
-    'xs' : $layout-xs,
-    'sm' : $layout-sm,
-    'md' : $layout-md,
-    'lg' : $layout-lg,
-    'xl' : $layout-xl,
-    'component' : $component-max-width,
-  ), $size);
+  $width: map-get(
+    (
+      'xxxs': $layout-xxxs,
+      'xxs': $layout-xxs,
+      'xs': $layout-xs,
+      'sm': $layout-sm,
+      'md': $layout-md,
+      'lg': $layout-lg,
+      'xl': $layout-xl,
+      'component': $component-max-width,
+    ),
+    $size
+  );
 
   @if ($width) {
     @media screen and ($type + -width: $width  + $f) {

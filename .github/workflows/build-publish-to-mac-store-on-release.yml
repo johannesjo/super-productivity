@@ -37,6 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Workaround for nx issue and dmg licence issue
+        run: npm install @nx/nx-darwin-arm64 dmg-license
+
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
@@ -58,7 +61,7 @@ jobs:
       - name: Build Frontend & Electron
         run: npm run build
 
-      - uses: apple-actions/import-codesign-certs@v2
+      - uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.mac_certs }}
           p12-password: ${{ secrets.mac_certs_password }}

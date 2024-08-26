@@ -75,6 +75,8 @@ export interface AndroidInterface {
   makeHttpRequestCallback(rId: string, result: { [key: string]: any }): void;
 
   isGrantedFilePermission(): boolean;
+
+  isGrantFilePermissionInProgress: boolean;
   allowedFolderPath(): string;
   grantFilePermissionWrapped(): Promise<object>;
   grantFilePermission(rId: string): void;
@@ -235,13 +237,17 @@ if (IS_ANDROID_WEB_VIEW) {
     }
   };
 
+  androidInterface.isGrantFilePermissionInProgress = false;
+
   androidInterface.grantFilePermissionWrapped = (): Promise<object> => {
+    androidInterface.isGrantFilePermissionInProgress = true;
     const rId = nanoid();
     androidInterface.grantFilePermission(rId);
     return getRequestMapPromise(rId);
   };
 
   androidInterface.grantFilePermissionCallBack = (rId: string) => {
+    androidInterface.isGrantFilePermissionInProgress = false;
     requestMap[rId].resolve();
     delete requestMap[rId];
   };

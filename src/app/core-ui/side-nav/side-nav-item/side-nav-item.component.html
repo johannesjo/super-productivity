@@ -1,0 +1,40 @@
+<div
+  #contextMenuTriggerEl
+  [matMenuTriggerFor]="contextMenu"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  style="visibility: hidden; position: fixed"
+></div>
+<div
+  [style.background]="workContext().theme.primary"
+  class="color-bar"
+></div>
+<button
+  #routeBtn
+  [routerLink]="[type() ==='TAG' ? 'tag' :'project', workContext().id, 'tasks']"
+  routerLinkActive="isActiveRoute"
+  mat-menu-item
+  (longPressIOS)="openContextMenu($event)"
+  (contextmenu)="openContextMenu($event)"
+>
+  <span class="badge">{{ workContext().taskIds.length }}</span>
+  <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
+  <span class="text">{{ workContext().title }}</span>
+</button>
+
+<button
+  [mat-menu-trigger-for]="contextMenu"
+  class="settings-btn"
+  mat-icon-button
+>
+  <mat-icon>more_vert</mat-icon>
+</button>
+
+<mat-menu #contextMenu="matMenu">
+  <ng-template matMenuContent>
+    <work-context-menu
+      [contextId]="workContext().id"
+      [contextType]="type()"
+    ></work-context-menu>
+  </ng-template>
+</mat-menu>

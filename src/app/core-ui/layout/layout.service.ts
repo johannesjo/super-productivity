@@ -24,6 +24,7 @@ import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { NavigationStart, Router } from '@angular/router';
 import { WorkContextService } from '../../features/work-context/work-context.service';
+import { selectMiscConfig } from '../../features/config/store/global-config.reducer';
 
 const NAV_ALWAYS_VISIBLE = 1200;
 const NAV_OVER_RIGHT_PANEL_NEXT = 800;
@@ -53,7 +54,14 @@ export class LayoutService {
   isRightPanelOver$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${BOTH_OVER}px)`])
     .pipe(map((result) => !result.matches));
-  isNavOver$: Observable<boolean> = this.isRightPanelNextNavOver$.pipe(map((v) => !v));
+  isNavOver$: Observable<boolean> = this._store$.select(selectMiscConfig).pipe(
+    switchMap((miscCfg) => {
+      if (miscCfg.isUseMinimalNav) {
+        return of(false);
+      }
+      return this.isRightPanelNextNavOver$.pipe(map((v) => !v));
+    }),
+  );
   isScrolled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private _isShowSideNav$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSideNav),

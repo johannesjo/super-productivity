@@ -47,4 +47,10 @@ export type GitlabIssue = Readonly<{
 
   // according to the docs: "Users on GitLab Starter, Bronze, or higher will also see the weight parameter"
   weight?: number;
+  links: {
+    self: string;
+    notes: string;
+    award_emoji: string;
+    project: string;
+  };
 }>;

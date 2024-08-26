@@ -5,8 +5,6 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { Actions } from '@ngrx/effects';
 import { GlobalConfigService } from '../config/global-config.service';
-import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { WorkContextService } from '../work-context/work-context.service';
 import Shepherd from 'shepherd.js';
@@ -24,8 +22,6 @@ export class ShepherdService {
     private taskService: TaskService,
     private actions$: Actions,
     private globalConfigService: GlobalConfigService,
-    private _matDialog: MatDialog,
-    private _store: Store,
     private _router: Router,
     private workContextService: WorkContextService,
   ) {}
@@ -46,14 +42,18 @@ export class ShepherdService {
       ) as any,
     );
     this.start();
-    this.show('XXX' as TourId);
+    // this.show('XXX' as TourId);
   }
 
   async show(id: TourId): Promise<void> {
     if (!this.isActive) {
       await this.init();
     }
-    if (id !== TourId.Calendars && id !== TourId.ProductivityHelper) {
+    if (
+      id !== TourId.Calendars &&
+      id !== TourId.ProductivityHelper &&
+      id !== TourId.StartTourAgain
+    ) {
       await this._router.navigateByUrl('/');
     }
 

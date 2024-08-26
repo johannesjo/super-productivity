@@ -28,6 +28,15 @@
   margin: $s;
   margin-top: $s * 3;
   margin-bottom: $s * 3;
+  border-radius: 8px;
+
+  ::ng-deep textarea {
+    text-align: center;
+  }
+
+  &.is-focused {
+    outline: 2px solid $c-accent;
+  }
 
   :host.isShowNotes & {
     margin-top: $s * 7;
@@ -127,13 +136,13 @@ progress-circle {
 
   a,
   button {
-    width: 56px;
-    height: 56px;
+    width: 56px !important;
+    height: 56px !important;
 
     mat-icon {
       font-size: 32px !important; //make it bigger, the default being 24px.
-      width: 32px;
-      height: 32px;
+      width: 32px !important;
+      height: 32px !important;
     }
   }
 }

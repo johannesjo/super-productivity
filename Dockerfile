@@ -3,7 +3,7 @@
 ### build ###
 
 # base image
-FROM node:16 as build
+FROM node:20 as build
 
 # add app
 COPY . /app
@@ -32,7 +32,7 @@ FROM nginx:1-alpine
 ENV PORT=80
 
 # copy artifact build from the 'build environment'
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist/browser /usr/share/nginx/html
 
 # expose port: defaults to 80
 EXPOSE $PORT

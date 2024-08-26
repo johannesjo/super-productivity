@@ -83,7 +83,7 @@ export class TaskRepeatCfgEffects {
       filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
       withLatestFrom(this._taskService.currentTaskId$),
 
-      // existing tasks with sub tasks are loaded, because need to move them to the archive
+      // existing tasks with sub-tasks are loaded, because need to move them to the archive
       mergeMap(([taskRepeatCfgs, currentTaskId]) => {
         // NOTE sorting here is important
         const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
@@ -91,7 +91,6 @@ export class TaskRepeatCfgEffects {
           mergeMap((taskRepeatCfg: TaskRepeatCfg) =>
             this._taskRepeatCfgService.getActionsForTaskRepeatCfg(
               taskRepeatCfg,
-              currentTaskId,
               Date.now() - this._dateService.startOfNextDayDiff,
             ),
           ),
@@ -207,7 +206,7 @@ export class TaskRepeatCfgEffects {
                       }
                     }
                     if (changes.tagIds) {
-                      this._taskService.updateTags(task, changes.tagIds, task.tagIds);
+                      this._taskService.updateTags(task, changes.tagIds);
                     }
                     if (changes.title || changes.notes) {
                       this._taskService.update(task.id, {

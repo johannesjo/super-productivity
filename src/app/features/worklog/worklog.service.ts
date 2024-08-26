@@ -30,7 +30,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
-import * as moment from 'moment';
+import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
 
 @Injectable({ providedIn: 'root' })

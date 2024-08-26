@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
-import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
+import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { SyncProvider } from '../../../imex/sync/sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
@@ -75,17 +75,26 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&
             (androidInterface as any).grantFilePermission &&
-            androidInterface.isGrantedFilePermission)
+            (androidInterface as any).isGrantedFilePermission)
             ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
             : []),
         ],
-        change: (field) => {
+        change: (field, ev) => {
           if (
             IS_ANDROID_WEB_VIEW &&
             field.model.syncProvider === SyncProvider.LocalFile
           ) {
+            // disable / enable is a workaround for the hide expression for the info file path info tpl
+            field.formControl?.disable();
+
             androidInterface.grantFilePermissionWrapped().then(() => {
+              field.formControl?.enable();
+              console.log('Granted file access permission for android');
+              console.log(androidInterface?.allowedFolderPath());
               field.formControl?.updateValueAndValidity();
+              field.formControl?.parent?.updateValueAndValidity();
+              field.formControl?.parent?.markAllAsTouched();
+              field.formControl?.markAllAsTouched();
             });
           }
         },
@@ -94,6 +103,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         validFileAccessPermission: {
           expression: (c: any) => {
             if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
+              console.log(
+                'Checking file access permission for android',
+                androidInterface.isGrantedFilePermission(),
+              );
               return androidInterface.isGrantedFilePermission();
             }
             return true;
@@ -105,30 +118,35 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         show: true,
       },
     },
-    {
-      // TODO animation maybe
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
-      key: 'dropboxSync',
-      templateOptions: { label: 'Address' },
-      fieldGroup: [
-        {
-          key: 'accessToken',
-          type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
-          templateOptions: {
-            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
-          },
-        },
-      ],
-    },
+    // TODO remove completely
+    // {
+    //   // TODO animation maybe
+    //   hideExpression: (m, v, field) =>
+    //     field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
+    //   key: 'dropboxSync',
+    //   fieldGroup: [
+    //     {
+    //       key: 'accessToken',
+    //       type: 'input',
+    //       hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
+    //       templateOptions: {
+    //         label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
+    //       },
+    //     },
+    //   ],
+    // },
     IS_ANDROID_WEB_VIEW
       ? {
-          hideExpression: (m, v, field) =>
-            !IS_ANDROID_WEB_VIEW ||
-            field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
-            !androidInterface?.isGrantedFilePermission() ||
-            !androidInterface?.allowedFolderPath,
+          hideExpression: (m, v, field) => {
+            console.log(androidInterface?.allowedFolderPath());
+
+            return (
+              !IS_ANDROID_WEB_VIEW ||
+              field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+              !androidInterface?.isGrantedFilePermission() ||
+              !androidInterface?.allowedFolderPath()
+            );
+          },
           type: 'tpl',
           className: `tpl`,
           expressionProperties: {
@@ -142,25 +160,17 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       : {},
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.LocalFile,
+        field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+        // hide for android
+        IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
         {
-          key: 'syncFilePath',
+          key: 'syncFolderPath',
           type: 'input',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH,
-            description: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_DESCRIPTION,
-            change: (field) => {
-              const lastChar = field?.model.syncFilePath?.trim().slice(-1);
-              if (lastChar === '/' || lastChar === '\\') {
-                field.formControl?.setValue(
-                  (field.model.syncFilePath += 'SP_SYNC_FILE.json'),
-                );
-                field.formControl?.updateValueAndValidity();
-              }
-            },
+            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
           },
         },
       ],
@@ -170,14 +180,18 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            // text: `<p>Please open the following link and copy the auth code provided there</p>`,
-            text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-          },
-        },
+        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+          ? [
+              {
+                type: 'tpl',
+                templateOptions: {
+                  tag: 'p',
+                  // text: `<p>Please open the following link and copy the auth code provided there</p>`,
+                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+                },
+              },
+            ]
+          : []),
         {
           key: 'baseUrl',
           type: 'input',
@@ -206,12 +220,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          key: 'syncFilePath',
+          key: 'syncFolderPath',
           type: 'input',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FILE_PATH,
-            description: '* my-sync-file.json',
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
           },
         },
       ],

@@ -3,27 +3,28 @@ import { DROPBOX_APP_KEY } from './dropbox.const';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import axios, { AxiosResponse, Method } from 'axios';
 import { stringify } from 'query-string';
 import { DropboxFileMetadata } from './dropbox.model';
-import { toDropboxIsoString } from './iso-date-without-ms.util.';
 import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';
-import { Store } from '@ngrx/store';
-import { updateGlobalConfigSection } from '../../../features/config/store/global-config.actions';
-import { SyncConfig } from '../../../features/config/global-config.model';
+import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
+import { SyncProvider } from '../sync-provider.model';
+
+/* eslint-disable @typescript-eslint/naming-convention */
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
-  private _accessToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
-    map((cfg) => cfg?.sync.dropboxSync.accessToken),
+  // keep as fallback
+  private _accessToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
+    1,
   );
-  private _refreshToken$: Observable<string | null> = this._globalConfigService.cfg$.pipe(
-    map((cfg) => cfg?.sync.dropboxSync.refreshToken),
+  private _refreshToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
+    1,
   );
 
   isTokenAvailable$: Observable<boolean> = this._accessToken$.pipe(
@@ -42,8 +43,10 @@ export class DropboxApiService {
     private _dataInitService: DataInitService,
     private _matDialog: MatDialog,
     private _snackService: SnackService,
-    private _store: Store,
-  ) {}
+    private _persistenceLocalService: PersistenceLocalService,
+  ) {
+    this._initTokens();
+  }
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
     await this._isReady$.toPromise();
@@ -89,11 +92,9 @@ export class DropboxApiService {
     path,
     localRev,
     data,
-    clientModified,
     isForceOverwrite = false,
   }: {
     path: string;
-    clientModified?: number;
     localRev?: string | null;
     data: any;
     isForceOverwrite?: boolean;
@@ -104,10 +105,10 @@ export class DropboxApiService {
       mode: { '.tag': 'overwrite' },
       path,
       mute: true,
-      ...(typeof clientModified === 'number'
-        ? // we need to use ISO 8601 "combined date and time representation" format:
-          { client_modified: toDropboxIsoString(clientModified) }
-        : {}),
+      // ...(typeof clientModified === 'number'
+      //   ? // we need to use ISO 8601 "combined date and time representation" format:
+      //     { client_modified: toDropboxIsoString(clientModified) }
+      //   : {}),
     };
 
     if (localRev && !isForceOverwrite) {
@@ -226,28 +227,73 @@ export class DropboxApiService {
         }),
       })
       .then(async (res) => {
-        const sync = await this._globalConfigService.sync$.pipe(first()).toPromise();
-        this._store.dispatch(
-          updateGlobalConfigSection({
-            isSkipLastActiveUpdate: true,
-            sectionKey: 'sync',
-            sectionCfg: {
-              ...sync,
-              dropboxSync: {
-                ...sync.dropboxSync,
-                accessToken: res.data.access_token,
-                // eslint-disable-next-line no-mixed-operators
-                _tokenExpiresAt: +res.data.expires_at * 1000 + Date.now(),
-              },
-            } as SyncConfig,
-          }),
-        );
+        await this.updateTokens({
+          accessToken: res.data.access_token,
+          // eslint-disable-next-line no-mixed-operators
+          expiresAt: +res.data.expires_at * 1000 + Date.now(),
+        });
+
         return 'SUCCESS' as any;
       })
       .catch((e) => {
         console.error(e);
         return 'ERROR';
       });
+  }
+
+  private async _initTokens(): Promise<void> {
+    const d = await this._persistenceLocalService.load();
+    if (d[SyncProvider.Dropbox].accessToken && d[SyncProvider.Dropbox].refreshToken) {
+      this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
+      this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
+    } else {
+      console.log('LEGACY TOKENS');
+      // TODO remove legacy stuff
+      this._dataInitService.isAllDataLoadedInitially$
+        .pipe(
+          switchMap(() => this._globalConfigService.cfg$),
+          map((cfg) => cfg?.sync.dropboxSync),
+          first(),
+        )
+        .subscribe((v) => {
+          console.log('SETTING LEGACY TOKENS', v as any);
+          this.updateTokens({
+            accessToken: (v as any)?.accessToken,
+            refreshToken: (v as any)?.refreshToken,
+            expiresAt: 0,
+          });
+        });
+    }
+  }
+
+  async updateTokens({
+    accessToken,
+    refreshToken,
+    expiresAt,
+  }: {
+    accessToken: string;
+    expiresAt: number;
+    refreshToken?: string;
+  }): Promise<void> {
+    this._accessToken$.next(accessToken);
+    if (refreshToken) {
+      this._refreshToken$.next(refreshToken);
+    }
+    await this._persistenceLocalService.updateDropboxSyncMeta({
+      accessToken,
+      _tokenExpiresAt: expiresAt,
+      ...(refreshToken ? { refreshToken } : {}),
+    });
+  }
+
+  async deleteTokens(): Promise<void> {
+    await this._persistenceLocalService.updateDropboxSyncMeta({
+      accessToken: undefined,
+      _tokenExpiresAt: 0,
+      refreshToken: undefined,
+    });
+    this._accessToken$.next(null);
+    this._refreshToken$.next(null);
   }
 
   private async _getTokensFromAuthCode(

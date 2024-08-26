@@ -4,6 +4,8 @@ import {
   IdleConfig,
   SyncConfig,
   TakeABreakConfig,
+  TimeTrackingConfig,
+  TrackingReminderConfigOld,
 } from './global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
@@ -26,9 +28,13 @@ export const migrateGlobalConfigState = (
 
   globalConfigState = _migrateSyncCfg(globalConfigState);
 
+  globalConfigState = _migrateToNewTimeTrackingConfig(globalConfigState);
+
   globalConfigState = _migrateTimelineCalendarsToCalendarIntegration(globalConfigState);
 
   globalConfigState = _migrateMotivationalImg(globalConfigState);
+
+  globalConfigState = _migrateTimelineToSchedule(globalConfigState);
 
   globalConfigState = _fixDefaultProjectId(globalConfigState);
 
@@ -54,9 +60,6 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
         isEnableIdleTimeTracking: (config.misc as any)['isEnableIdleTimeTracking'],
         // eslint-disable-next-line
         minIdleTime: (config.misc as any)['minIdleTime'],
-        // eslint-disable-next-line
-        isUnTrackedIdleResetsBreakTimer: (config.misc as any)
-          .isUnTrackedIdleResetsBreakTimer,
       };
 
   const takeABreak: TakeABreakConfig = !!config.takeABreak
@@ -79,7 +82,6 @@ const _migrateMiscToSeparateKeys = (config: GlobalConfigState): GlobalConfigStat
     'isOnlyOpenIdleWhenCurrentTask',
     'isEnableIdleTimeTracking',
     'minIdleTime',
-    'isUnTrackedIdleResetsBreakTimer',
   ];
 
   obsoleteMiscKeys.forEach((key) => {
@@ -143,6 +145,40 @@ const _migrateUndefinedShortcutsToNull = (
   };
 };
 
+const _migrateTimelineToSchedule = (config: GlobalConfigState): GlobalConfigState => {
+  return {
+    ...config,
+    schedule:
+      config.schedule || (config as any).timeline || DEFAULT_GLOBAL_CONFIG.schedule,
+  };
+};
+
+const _migrateToNewTimeTrackingConfig = (
+  config: GlobalConfigState,
+): GlobalConfigState => {
+  if (config.timeTracking) {
+    return config;
+  }
+  const trackingOld = (config as any).trackingReminder as TrackingReminderConfigOld;
+  const miscOld = config.misc as any as Partial<TimeTrackingConfig>;
+
+  return {
+    ...config,
+    timeTracking: {
+      ...DEFAULT_GLOBAL_CONFIG.timeTracking,
+      trackingReminderMinTime: trackingOld.minTime,
+      isTrackingReminderEnabled: trackingOld.isEnabled,
+      isTrackingReminderShowOnMobile: trackingOld.isShowOnMobile,
+      isAutoStartNextTask:
+        miscOld.isAutoStartNextTask ||
+        DEFAULT_GLOBAL_CONFIG.timeTracking.isAutoStartNextTask,
+      isNotifyWhenTimeEstimateExceeded:
+        miscOld.isNotifyWhenTimeEstimateExceeded ||
+        DEFAULT_GLOBAL_CONFIG.timeTracking.isNotifyWhenTimeEstimateExceeded,
+    },
+  };
+};
+
 const _migrateMotivationalImg = (config: GlobalConfigState): GlobalConfigState => {
   const takeABreakCopy: TakeABreakConfig = {
     // also add new keys
@@ -169,6 +205,12 @@ const _migrateMotivationalImg = (config: GlobalConfigState): GlobalConfigState =
 };
 
 const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
+  const getDir = (file: string): string | null => {
+    const normalizedFilePath = file.replace(/\\/g, '/');
+    const m = normalizedFilePath.match(/(.*)\//);
+    return (m && m[1]) || null;
+  };
+
   if (config.sync) {
     let syncProvider: SyncProvider | null = config.sync.syncProvider;
     if ((syncProvider as any) === 'GoogleDrive') {
@@ -176,6 +218,27 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     }
     if ((config.sync as any).googleDriveSync) {
       delete (config.sync as any).googleDriveSync;
+    }
+
+    if (
+      !config.sync.localFileSync.syncFolderPath &&
+      config.sync.localFileSync.syncFilePath?.length
+    ) {
+      config.sync.localFileSync.syncFolderPath = getDir(
+        config.sync.localFileSync.syncFilePath,
+      );
+      console.log(
+        'migrating new folder path localFileSync',
+        JSON.stringify(config.sync.localFileSync),
+      );
+      // TODO add delete with next version
+      // delete config.sync.localFileSync.syncFilePath;
+    }
+    if (!config.sync.webDav.syncFolderPath && config.sync.webDav.syncFilePath?.length) {
+      config.sync.webDav.syncFolderPath = getDir(config.sync.webDav.syncFilePath);
+      console.log('migrating new folder path webDav', JSON.stringify(config.sync.webDav));
+      // TODO add delete with next version
+      // delete config.sync.webDav.syncFilePath;
     }
 
     return { ...config, sync: { ...config.sync, syncProvider } };
@@ -220,9 +283,9 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
 const _migrateTimelineCalendarsToCalendarIntegration = (
   config: GlobalConfigState,
 ): GlobalConfigState => {
-  if ((config.timeline as any)?.calendarProviders?.length) {
+  if ((config.schedule as any)?.calendarProviders?.length) {
     const convertedCalendars: CalendarProvider[] = (
-      config.timeline as any
+      config.schedule as any
     ).calendarProviders.map((oldCalProvider) => ({
       isEnabled: oldCalProvider.isEnabled,
       icalUrl: oldCalProvider.icalUrl,
@@ -232,11 +295,11 @@ const _migrateTimelineCalendarsToCalendarIntegration = (
       showBannerBeforeThreshold: 15 * 60 * 1000,
     }));
 
-    delete (config.timeline as any).calendarProviders;
+    delete (config.schedule as any).calendarProviders;
     return {
       ...config,
-      timeline: {
-        ...config.timeline,
+      schedule: {
+        ...config.schedule,
         ...({ calendarProviders: undefined } as any),
       },
       calendarIntegration: {

@@ -27,7 +27,7 @@ import {
 } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
-import { ArchiveTask, Task, TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
+import { ArchiveTask, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
 import {
   flattenTasks,
@@ -56,7 +56,6 @@ import {
   selectDoneBacklogTaskIdsForActiveContext,
   selectDoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
-  selectTimelineTasks,
   selectTrackableTasksForActiveContext,
 } from './store/work-context.selectors';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
@@ -137,14 +136,7 @@ export class WorkContextService {
   );
 
   activeWorkContextTitle$: Observable<string> = this.activeWorkContext$.pipe(
-    switchMap((activeContext) =>
-      activeContext.id === TODAY_TAG.id && activeContext.title === TODAY_TAG.title
-        ? this._translateService.onLangChange.pipe(
-            startWith(this._translateService.currentLang),
-            map(() => this._translateService.instant(T.G.TODAY_TAG_TITLE)),
-          )
-        : of(activeContext.title),
-    ),
+    map((activeContext) => activeContext.title),
   );
 
   mainWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
@@ -157,7 +149,7 @@ export class WorkContextService {
           routerLink: `tag/${mainWorkContext.id}`,
           // TODO get pinned noteIds
           noteIds: [],
-        } as WorkContext),
+        }) as WorkContext,
     ),
     switchMap((mainWorkContext) =>
       mainWorkContext.id === TODAY_TAG.id && mainWorkContext.title === TODAY_TAG.title
@@ -258,11 +250,6 @@ export class WorkContextService {
     switchMap(() => this._store$),
     select(selectTrackableTasksForActiveContext),
   );
-
-  timelineTasks$: Observable<{
-    planned: TaskPlanned[];
-    unPlanned: Task[];
-  }> = this._store$.pipe(select(selectTimelineTasks));
 
   workingToday$: Observable<any> = this._globalTrackingIntervalService.todayDateStr$.pipe(
     switchMap((worklogStrDate) => this.getTimeWorkedForDay$(worklogStrDate)),

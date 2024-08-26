@@ -18,6 +18,8 @@ export class TagComponent {
   // @HostBinding('style.background')
   color?: string;
 
+  @Input() isHideTitle: boolean = false;
+
   constructor() {}
 
   @Input('tag') set tagIn(v: TagComponentTag) {

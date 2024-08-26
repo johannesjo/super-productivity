@@ -64,8 +64,8 @@ export class TakeABreakService {
 
   private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
-      const isConfigured =
-        idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer;
+      const isConfigured = idleCfg.isEnableIdleTimeTracking;
+      // return [true];
       if (IS_ELECTRON) {
         return [isConfigured];
       } else if (isConfigured) {
@@ -236,7 +236,10 @@ export class TakeABreakService {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       this._notifyService.notifyDesktop({
         tag: 'TAKE_A_BREAK',
-        renotify: true,
+        // Todo: check if applicable
+        ...({
+          renotify: true,
+        } as any),
         title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });

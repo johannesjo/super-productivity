@@ -1,0 +1,189 @@
+<!--  <div class="title">February 2019 Week 6</div>-->
+
+<header>
+  <!--  <div class="main-controls">-->
+  <!--    <button-->
+  <!--      mat-icon-button-->
+  <!--      [disabled]="true"-->
+  <!--    >-->
+  <!--      <mat-icon>chevron_left</mat-icon>-->
+  <!--    </button>-->
+  <!--    <div-->
+  <!--      *ngIf="currentTimeSpan$|async as currentTimeSpan"-->
+  <!--      style="margin-right: 16px"-->
+  <!--    >-->
+  <!--      {{currentTimeSpan.from}} - {{currentTimeSpan.to}}-->
+  <!--    </div>-->
+  <!--    <button mat-icon-button>-->
+  <!--      <mat-icon>chevron_right</mat-icon>-->
+  <!--    </button>-->
+
+  <!--    <div><strong>~</strong>Flow source:</div>-->
+  <!--    <div><strong>~</strong></div>-->
+  <!--    <div><mat-icon>airwave</mat-icon> Flow from:</div>-->
+  <!--    <button-->
+  <!--      mat-button-->
+  <!--      [matMenuTriggerFor]="menu"-->
+  <!--    >-->
+  <!--      <mat-icon>wb_sunny</mat-icon>-->
+  <!--      Today-->
+  <!--    </button>-->
+  <!--    <mat-menu #menu="matMenu">-->
+  <!--      <button mat-menu-item>Only show appointments</button>-->
+  <!--      <button mat-menu-item>Show tasks from X</button>-->
+  <!--    </mat-menu>-->
+  <!--  </div>-->
+
+  <div class="days">
+    <div class="filler"><!--for time --></div>
+
+    @for (day of daysToShow; track $index) {
+    <div class="day">
+      @if ($index === 0) {
+      <mat-icon>wb_sunny</mat-icon>
+      }
+      <div class="day-num">{{ day|date:'d' }}</div>
+      <div class="day-day">{{ day|date:'EEE' }}</div>
+    </div>
+    }
+  </div>
+</header>
+
+<!--<div class="outer-container">-->
+<div
+  #gridContainer
+  class="main-grid-container {{containerExtraClass}}"
+  (click)="onGridClick($event)"
+  (mousemove)="onMoveOverGrid($event)"
+>
+  <!-- Time -->
+  @for (time of times; track $index) {
+  <div
+    class="time"
+    style="grid-row: {{ $index *FH + 1 }}"
+  >
+    {{ time }}
+  </div>
+  }
+  <!-- Grid Rows -->
+  @for (row of rowsByNr; track $index) {
+  <div
+    class="row"
+    style="grid-row: {{ row + 1 }}"
+  ></div>
+  }
+
+  <!-- Grid Cols -->
+  @for (day of daysToShow; track $index) {
+  <div
+    class="col"
+    [attr.data-day]="day"
+    style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{($index === 0 ? currentTimeRow :endOfDayColRowStart) -1}}"
+  >
+    <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY|translate }}</div>
+  </div>
+  <div
+    class="col end-of-day"
+    [attr.data-day]="day"
+    style="grid-column: {{ $index + 2 }}; grid-row: {{($index === 0 ? currentTimeRow :endOfDayColRowStart)}} / span {{totalRows - ($index === 0 ? currentTimeRow :endOfDayColRowStart)}}"
+  >
+    <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY|translate }}</div>
+  </div>
+  }
+
+  <!-- Work Start and End -->
+  @if (workStartEnd) {
+  <div
+    class="work-start"
+    style="grid-row: {{workStartEnd.workStartRow}}"
+  >
+    <div>{{ T.F.SCHEDULE.START|translate }}</div>
+  </div>
+  <div
+    class="work-end"
+    style="grid-row: {{workStartEnd.workEndRow}}"
+  >
+    <div>{{ T.F.SCHEDULE.END|translate }}</div>
+  </div>
+  }
+
+  <!-- Events -->
+  @for (ev of (events$|async); track ev.id) {
+  <!-- -->
+  @if (ev.type === SVEType.Task || ev.type === SVEType.SplitTask || ev.type ===
+  SVEType.TaskPlannedForDay || ev.type === SVEType.SplitTaskPlannedForDay) {
+  <schedule-event
+    class="draggable"
+    cdkDrag
+    [cdkDragData]="ev"
+    (cdkDragMoved)="dragMoved($event)"
+    (cdkDragStarted)="dragStarted($event)"
+    (cdkDragReleased)="dragReleased($event)"
+    [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+    [event]="ev"
+  ></schedule-event>
+  } @else {
+  <schedule-event [event]="ev"></schedule-event>
+  } }
+
+  <!-- Excess tasks planned for day -->
+  @for (beyondBudgetDay of (beyondBudget$|async); track i; let i = $index) {
+  <!-- -->
+  @if (beyondBudgetDay.length > 0) {
+  <div
+    class="excess-entries"
+    style="grid-column: {{i + 2}}"
+  >
+    <div
+      class="excess-entries-header"
+      [matTooltipPosition]="'above'"
+      [matTooltip]="'Tasks planned for day, but that are beyond the available time budget'"
+    >
+      <mat-icon>hourglass_disabled</mat-icon>
+      {{ beyondBudgetDay.length }}
+    </div>
+    @for (ev of beyondBudgetDay; track ev.id) {
+    <schedule-event
+      [event]="ev"
+      class="draggable"
+      cdkDrag
+      [cdkDragData]="ev"
+      (cdkDragMoved)="dragMoved($event)"
+      (cdkDragStarted)="dragStarted($event)"
+      (cdkDragReleased)="dragReleased($event)"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+    ></schedule-event>
+    }
+  </div>
+  }
+  <!-- -->
+  }
+
+  <div
+    class="current-time"
+    style="grid-column: 2;  grid-row: {{currentTimeRow}} / span 1"
+  >
+    <div class="circle"></div>
+  </div>
+
+  <create-task-placeholder
+    *ngIf="newTaskPlaceholder$|async as newTaskPlaceholder"
+    [isEditMode]="isCreateTaskActive"
+    [time]="newTaskPlaceholder.time"
+    [date]="newTaskPlaceholder.date"
+    (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
+    [style]="newTaskPlaceholder.style"
+  >
+  </create-task-placeholder>
+</div>
+<!--</div>-->
+
+<div class="fab-wrapper show-xs-only FAB-BTN">
+  <button
+    mat-fab
+    color="primary"
+    (click)="layoutService.showAddTaskBar()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

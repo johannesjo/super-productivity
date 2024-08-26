@@ -1,6 +1,9 @@
 import { T } from '../../t.const';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 export const PROGRESS_BAR_LABEL_MAP: { [key: string]: string } = {
+  SYNC: T.GPB.SYNC,
+
   'asset/': T.GPB.ASSETS,
 
   'https://api.dropboxapi.com/2/files/get_metadata': T.GPB.DBX_META,

@@ -46,13 +46,13 @@
       <tr *ngIf="issue?.labels?.length">
         <th>{{T.F.GITEA.ISSUE_CONTENT.LABELS|translate}}</th>
         <td>
-          <mat-chip-list>
-            <mat-chip
+          <mat-chip-listbox>
+            <mat-chip-option
               *ngFor="let label of issue?.labels"
               [title]="label.name"
               >{{label.name}}
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
         </td>
       </tr>
       <tr *ngIf="issue?.body">

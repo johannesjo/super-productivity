@@ -149,8 +149,8 @@ export class BetterDrawerContainerComponent
         ? 'transform: translateX(0);'
         : 'transform: translateX(100%);'
       : this.isOpenGet
-      ? `${margin}: 0; ${widthStyle}`
-      : `${margin}: ${-1 * this.sideWidth}%; ${widthStyle}`;
+        ? `${margin}: 0; ${widthStyle}`
+        : `${margin}: ${-1 * this.sideWidth}%; ${widthStyle}`;
   }
 
   private _updateStyle(): void {

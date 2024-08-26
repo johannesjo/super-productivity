@@ -3,10 +3,39 @@
 $summary-point-inner-margin: $s;
 
 :host {
-  ::ng-deep .mat-tab-labels {
-    justify-content: center !important;
+  evaluation-sheet {
+    display: block;
+  }
+
+  ::ng-deep {
+    .mat-mdc-tab .mdc-tab__text-label {
+      @include darkTheme() {
+        //color: $dark-theme-text-color;
+        //font-weight: 300;
+      }
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab-list {
+    border-bottom: 1px solid $light-theme-separator-color;
+
+    @include darkTheme {
+      border-color: $dark-theme-separator-color;
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    justify-content: center;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    flex-grow: 0 !important;
     user-select: none;
-    -webkit-user-select: none; /* Safari */
+
+    @include mq(xs) {
+      min-width: 200px;
+    }
   }
 
   // in case we every want to go sticky
@@ -26,13 +55,9 @@ $summary-point-inner-margin: $s;
 }
 
 .tab-inner {
-  padding: 0;
   margin: auto;
   max-width: $component-max-width;
-
-  @include mq(xs) {
-    padding: $s;
-  }
+  padding: $s;
 
   &.full-width {
     max-width: none;
@@ -49,7 +74,7 @@ $summary-point-inner-margin: $s;
 }
 
 .daily-summary-summary {
-  margin-bottom: $s * 2;
+  margin-bottom: $s * 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -66,7 +91,7 @@ $summary-point-inner-margin: $s;
   text-align: center;
   margin: $summary-point-inner-margin;
   //flex-grow: 1;
-  flex-basis: 150px;
+  flex-basis: 160px;
   position: relative;
 }
 
@@ -77,18 +102,7 @@ $summary-point-inner-margin: $s;
   font-weight: bold;
 }
 
-.finish-day-opts {
-  margin-top: 10px;
-
-  mat-checkbox {
-    display: block;
-  }
-}
-
 .tabs {
-  margin-left: -2 * $s;
-  margin-right: -2 * $s;
-
   @include mq(xs) {
     margin: 0;
   }

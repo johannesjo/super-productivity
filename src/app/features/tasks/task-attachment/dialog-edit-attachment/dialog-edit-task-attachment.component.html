@@ -39,9 +39,8 @@
         >
           <mat-option
             *ngFor="let type of types; trackBy:trackByIndex"
-            [innerHtml]="(type.title|translate)"
             [value]="type.type"
-          >
+            >{{ (type.title|translate) }}
           </mat-option>
         </mat-select>
       </mat-form-field>

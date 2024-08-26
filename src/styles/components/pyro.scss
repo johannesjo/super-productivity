@@ -7,17 +7,30 @@ $height: 500;
 // Create the explosion...
 $box-shadow: ();
 $box-shadow2: ();
+
+/*
+if not working check migration
+Deprecation math.random() will no longer ignore $limit units (360%) in a future release.
+Recommendation: math.random(math.div($limit, 1%)) * 1%
+To preserve current behavior: math.random(math.div($limit, 1%))
+More info: https://sass-lang.com/d/function-units
+ */
+
 @for $i from 0 through $particles {
-  $box-shadow: $box-shadow,
-    random($width)-$width *
+  $box-shadow:
+    $box-shadow,
+    math.floor(math.random() * $width) -
+      $width *
       0.5 +
       px
-      random($height) -
+      math.floor(math.random() * $height) -
       $height *
       0.8333 +
       px
-      hsl(random(360%), 100%, 50%);
-  $box-shadow2: $box-shadow2, 0 0 #fff;
+      hsl(math.floor(math.random() * 360), 100%, 50%);
+  $box-shadow2:
+    $box-shadow2,
+    0 0 #fff;
 }
 
 .pyro {
@@ -40,7 +53,9 @@ $box-shadow2: ();
     height: 5px;
     //border-radius: 50%;
     box-shadow: $box-shadow2;
-    animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards,
+    animation:
+      1s bang ease-out infinite backwards,
+      1s gravity ease-in infinite backwards,
       5s position linear infinite backwards;
     opacity: 0;
   }

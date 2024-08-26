@@ -18,6 +18,7 @@ import { IssueModule } from '../issue/issue.module';
 import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
 import { ProcrastinationModule } from '../procrastination/procrastination.module';
 import { FocusModePreparationComponent } from './focus-mode-preparation/focus-mode-preparation.component';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { FocusModePreparationComponent } from './focus-mode-preparation/focus-mo
     StoreModule.forFeature(FOCUS_MODE_FEATURE_KEY, focusModeReducer),
     EffectsModule.forFeature([FocusModeEffects]),
     ProcrastinationModule,
+    InlineMultilineInputComponent,
   ],
   exports: [FocusModeOverlayComponent],
 })

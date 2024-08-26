@@ -17,7 +17,10 @@ import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
   providedIn: 'root',
 })
 export class TaskAttachmentService {
-  constructor(private _store$: Store<TaskState>, private _matDialog: MatDialog) {}
+  constructor(
+    private _store$: Store<TaskState>,
+    private _matDialog: MatDialog,
+  ) {}
 
   addAttachment(taskId: string, taskAttachment: TaskAttachment): void {
     if (!taskAttachment) {
@@ -64,7 +67,11 @@ export class TaskAttachmentService {
 
     // don't intervene with text inputs
     const targetEl = ev.target as HTMLElement;
-    if (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA') {
+    if (
+      targetEl.tagName === 'INPUT' ||
+      (targetEl.tagName === 'TEXTAREA' &&
+        targetEl.parentElement?.tagName.toLowerCase() !== 'inline-multiline-input')
+    ) {
       return;
     }
 

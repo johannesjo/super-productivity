@@ -23,6 +23,7 @@ export class DatabaseService {
     private _indexedDbAdapterService: IndexedDBAdapterService,
     private _androidDbAdapterService: AndroidDbAdapterService,
   ) {
+    this._adapter = this._indexedDbAdapterService;
     this._init().then();
   }
 
@@ -38,6 +39,8 @@ export class DatabaseService {
 
   async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = { a: 'save', key, data };
+    // disable saving during testing
+    // return Promise.resolve();
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
@@ -74,7 +77,6 @@ export class DatabaseService {
       console.error('_lastParams', this._lastParams);
       console.error(e);
       alert('DB INIT Error');
-      // TODO fix typing issue
       throw new Error(e as any);
     }
   }

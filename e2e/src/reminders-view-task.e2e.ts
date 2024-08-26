@@ -1,5 +1,6 @@
 import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const WORK_VIEW_URL = `${BASE}/`;
 
@@ -31,7 +32,7 @@ module.exports = {
       .assert.elementPresent(DIALOG)
       .waitForElementVisible(DIALOG_TASK1)
       .assert.elementPresent(DIALOG_TASK1)
-      .assert.containsText(DIALOG_TASK1, '0 A task')
+      .assert.textContains(DIALOG_TASK1, '0 A task')
       .end(),
 
   'should display a modal with 2 scheduled task if due': (browser: NBrowser) => {
@@ -45,8 +46,8 @@ module.exports = {
         .assert.elementPresent(DIALOG)
         .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)
         .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME)
-        .assert.containsText(DIALOG_TASKS_WRAPPER, '0 B task')
-        .assert.containsText(DIALOG_TASKS_WRAPPER, '1 B task')
+        .assert.textContains(DIALOG_TASKS_WRAPPER, '0 B task')
+        .assert.textContains(DIALOG_TASKS_WRAPPER, '1 B task')
         .end()
     );
   },
@@ -59,7 +60,7 @@ module.exports = {
       .waitForElementVisible(DIALOG_TASK1)
       .click(D_PLAY)
       .pause(100)
-      .assert.cssClassPresent(TODAY_TASK_1, 'isCurrent')
+      .assert.hasClass(TODAY_TASK_1, 'isCurrent')
       .end(),
 
   'should manually empty list via add to today': (browser: NBrowser) => {
@@ -77,13 +78,13 @@ module.exports = {
         .waitForElementVisible(DIALOG_TASK2, SCHEDULE_MAX_WAIT_TIME + 120000)
         .waitForElementVisible(DIALOG_TASK3, SCHEDULE_MAX_WAIT_TIME + 120000)
         .pause(100)
-        .assert.containsText(DIALOG_TASKS_WRAPPER, '0 D task xyz')
-        .assert.containsText(DIALOG_TASKS_WRAPPER, '1 D task xyz')
-        .assert.containsText(DIALOG_TASKS_WRAPPER, '2 D task xyz')
+        .assert.textContains(DIALOG_TASKS_WRAPPER, '0 D task xyz')
+        .assert.textContains(DIALOG_TASKS_WRAPPER, '1 D task xyz')
+        .assert.textContains(DIALOG_TASKS_WRAPPER, '2 D task xyz')
         .click(DIALOG_TASK1 + TO_TODAY_SUF)
         .click(DIALOG_TASK2 + TO_TODAY_SUF)
         .pause(50)
-        .assert.containsText(DIALOG_TASK1, 'D task xyz')
+        .assert.textContains(DIALOG_TASK1, 'D task xyz')
         .end()
     );
   },

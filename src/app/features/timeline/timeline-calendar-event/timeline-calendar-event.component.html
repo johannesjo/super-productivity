@@ -1,9 +1,0 @@
-<ng-container *ngIf="calendarEvent">
-  <mat-icon class="default">{{calendarEvent.icon}}</mat-icon>
-  <mat-icon class="add">add</mat-icon>
-  <div class="title">
-    {{calendarEvent.title}}
-    <!--   {{event.start|date:'HH:mm'}} – {{(event.start + event.duration)|date:'HH:mm'}}-->
-  </div>
-  <div class="duration">{{calendarEvent.duration|msToString}}</div>
-</ng-container>

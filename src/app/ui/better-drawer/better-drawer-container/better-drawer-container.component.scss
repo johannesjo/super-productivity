@@ -1,6 +1,6 @@
 @import '../../../../variables';
 
-$z-this-content: $z-task-side-bar + 1;
+$z-this-content: $z-side-panel-task-and-notes + 1;
 $z-this-backdrop: -1 + $z-task-side-bar-over;
 
 :host {
@@ -23,7 +23,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   // because then there would be none
 
   position: relative;
-  z-index: $z-task-side-bar;
+  z-index: $z-side-panel-task-and-notes;
   transition: $transition-leave;
   transition-property: opacity, margin-right, right, transform;
   // NOTE: if this value is to big it might mess, with the push out logic, as
@@ -53,6 +53,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
   @include darkTheme() {
     background: $dark-theme-bg-slightly-lighter;
+    background: $dark6;
     //border-color: $dark-theme-extra-border-color;
   }
 
@@ -69,8 +70,8 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     }
   }
 
-  :host.isOpen & {
-    box-shadow: $whiteframe-shadow-2dp !important;
+  :host.isOpen.isOpen.isOpen & {
+    box-shadow: $whiteframe-shadow-2dp;
     opacity: 1;
     transition: $transition-enter;
   }

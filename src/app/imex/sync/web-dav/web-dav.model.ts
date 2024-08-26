@@ -1,5 +1,7 @@
 // TODO throws compile error :(
 // import { FileStat } from 'webdav/web/types';
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { IncomingHttpHeaders } from 'http';
 
 export interface FileStat {
@@ -15,4 +17,5 @@ export interface FileStat {
 
 export interface WebDavHeadResponse extends IncomingHttpHeaders {
   'oc-etag'?: string;
+  // [key: string]: any;
 }

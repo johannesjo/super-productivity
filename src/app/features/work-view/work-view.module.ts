@@ -10,6 +10,7 @@ import { MetricModule } from '../../features/metric/metric.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { WorkViewComponent } from './work-view.component';
 import { RightPanelModule } from '../right-panel/right-panel.module';
+import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
 
 @NgModule({
   imports: [
@@ -23,6 +24,7 @@ import { RightPanelModule } from '../right-panel/right-panel.module';
     MetricModule,
     MatSidenavModule,
     RightPanelModule,
+    AddScheduledTodayOrTomorrowBtnComponent,
   ],
   declarations: [WorkViewComponent, BacklogComponent],
   exports: [WorkViewComponent],

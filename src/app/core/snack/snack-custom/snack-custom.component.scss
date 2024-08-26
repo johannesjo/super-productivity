@@ -13,7 +13,7 @@
 }
 
 .snack-icon {
-  margin-right: $s;
+  margin-right: $s * 2;
   position: relative;
   z-index: 2;
   //background: inherit;
@@ -29,23 +29,15 @@
 
 .message {
   flex: 1;
-  // icons all have there inner padding so we also move th message a little bit
-  padding-left: $s;
-  padding-top: $s;
-  padding-bottom: $s;
 }
 
 button {
   margin: 0;
-  margin-left: 1.5* $s;
+  margin-left: 1.5 * $s;
 }
 
 .button-wrapper {
   margin-left: auto;
-
-  button {
-    text-transform: uppercase;
-  }
 }
 
 .close-btn {

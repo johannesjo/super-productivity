@@ -4,7 +4,6 @@ import { TagService } from '../tag/tag.service';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { map, switchMap } from 'rxjs/operators';
-import { androidInterface } from './android-interface';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { ProjectService } from '../project/project.service';
 import { Project } from '../project/project.model';
@@ -84,9 +83,9 @@ export class AndroidService {
   }
 
   init(): void {
-    this._todayTagTasksFlat$.subscribe((tasks) => {
-      androidInterface.updateTaskData(JSON.stringify(tasks));
-    });
+    // this._todayTagTasksFlat$.subscribe((tasks) => {
+    //   androidInterface.updateTaskData(JSON.stringify(tasks));
+    // });
   }
 
   private _getCategoryHtml(projectOrTag: Project | Tag): string {

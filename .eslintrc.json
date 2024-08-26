@@ -1,12 +1,17 @@
 {
   "root": true,
-  "ignorePatterns": ["app-builds/**/*", "dist/**", "node_modules/**/*"],
+  "ignorePatterns": [
+    "app-builds/**/*",
+    "dist/**",
+    "node_modules/**/*",
+    "src/app/t.const.ts"
+  ],
   "overrides": [
     {
       "files": ["*.ts"],
       "parser": "@typescript-eslint/parser",
+      "excludedFiles": [],
       "parserOptions": {
-        "project": ["tsconfig.json", "e2e/tsconfig.e2e.json"],
         "ecmaVersion": 2020,
         "sourceType": "module",
         "createDefaultProgram": true
@@ -16,7 +21,7 @@
         "plugin:@angular-eslint/recommended",
         "plugin:prettier/recommended"
       ],
-      "plugins": ["@typescript-eslint", "prettier", "unused-imports", "prefer-arrow"],
+      "plugins": ["@typescript-eslint", "prettier", "prefer-arrow"],
       "rules": {
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/ban-ts-comment": 0,
@@ -30,7 +35,6 @@
             "args": "none"
           }
         ],
-        "unused-imports/no-unused-imports": "error",
         "@typescript-eslint/explicit-function-return-type": [
           "error",
           {
@@ -60,7 +64,11 @@
             "selector": "default",
             "format": ["camelCase", "snake_case", "UPPER_CASE", "PascalCase"],
             "leadingUnderscore": "allowSingleOrDouble",
-            "trailingUnderscore": "allow"
+            "trailingUnderscore": "allow",
+            "filter": {
+              "regex": "(should)|@tags",
+              "match": false
+            }
           },
           {
             "selector": "variable",

@@ -638,10 +638,6 @@
           "L_SYNC_FILE_NAME": "Nome file di sincronizzazione",
           "L_IS_COMPRESS_DATA": "Comprimi i dati"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Sincronizza percorso file",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Percorso assoluto del file da utilizzare per la sincronizzazione (verrà creato)."
-        },
         "L_ENABLE_SYNCING": "Abilita sincronizzazione",
         "L_SYNC_INTERVAL": "Intervallo di sincronizzazione",
         "L_SYNC_PROVIDER": "Provider di sincronizzazione",
@@ -650,8 +646,12 @@
           "CORS_INFO": "<strong>Sperimentale !!</strong> Per fare in modo che funzioni, devi disabilitare o limitare CORS per la tua istanza Nextcloud, che può avere implicazioni negative per la sicurezza! Per ulteriori informazioni, <a href='https://github.com/nextcloud/server/issues/3131'>fai riferimento a questo thread</a> . Utilizzare a proprio rischio!",
           "L_BASE_URL": "URL di base",
           "L_PASSWORD": "Password",
+          "L_USER_NAME": "Nome utente",
+          "L_SYNC_FILE_PATH": "Sincronizza percorso file"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Sincronizza percorso file",
-          "L_USER_NAME": "Nome utente"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Percorso assoluto del file da utilizzare per la sincronizzazione (verrà creato)."
         }
       },
       "S": {
@@ -726,7 +726,7 @@
         "CONVERT_TO_PARENT_TASK": "Converti a task padre",
         "DELETE": "Cancella task",
         "DROP_ATTACHMENT": "Trascina qui per allegare a \"{{title}}\"",
-        "EDIT_REMINDER": "Modifica promemoria",
+        "EDIT_SCHEDULED": "Modifica promemoria",
         "EDIT_TAGS": "Modifica etichette",
         "MARK_DONE": "Segna come completato",
         "MARK_UNDONE": "Segna come non completato",
@@ -740,7 +740,7 @@
         "REPEAT_EDIT": "Modifica ripetizione configurazione task",
         "SCHEDULE": "Pianifica task",
         "SHOW_UPDATES": "Mostra aggiornamenti",
-        "TOGGLE_ADDITIONAL": "Mostra/nascondi informazioni aggiuntive",
+        "TOGGLE_DETAIL_PANEL": "Mostra/nascondi informazioni aggiuntive",
         "TOGGLE_ATTACHMENTS": "Mostra/nascondi allegati",
         "TOGGLE_DONE": "Segna come completato/non completato",
         "TOGGLE_SUB_TASK_VISIBILITY": "Cambia visibilità sotto-task",
@@ -748,7 +748,7 @@
         "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "programma",
         "CONFIRM_REPEAT_TXT": "Stai cercando di programmare questa attività ripetuta per un altro giorno. Le attività ripetute in genere devono essere ricreate in giorni specificati e pianificate solo in quel giorno. Vuoi procedere comunque?",
         "DATETIME_FOR": "Data e ora per promemoria",
@@ -855,7 +855,7 @@
         "WEDNESDAY": "Mercoledì"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "ha continuato",
       "D_INITIAL": {
         "TEXT": "<p>L'idea della sequenza temporale è fornire un quadro migliore di come si svolgono le proprie attività pianificate nel tempo. Viene generato automaticamente dalle tue attività e distingue due cose diverse: <strong>attività pianificate</strong>, che vengono mostrate all'orario pianificato e <strong>attività regolari</strong> che dovrebbero fluire attorno a quegli eventi fissi. Tutte le attività considerano le stime di tempo che hai assegnato loro.</p><p>Oltre a ciò, puoi anche fornire un'ora di inizio e di fine del lavoro. Se configurate, le attività regolari non verranno mai visualizzate al di fuori di queste. Tieni presente che la sequenza temporale include solo i prossimi 30 giorni.</p>",
@@ -892,8 +892,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Fare clic per NON tracciare su {{title}}",
         "SKIP": "Salta",
         "TASK": "Task",
-        "TASK_BREAK": "Task+Pausa",
-        "TRACK_TO": "Traccia su:"
+        "TRACK_TO": "Traccia su:",
+        "TASK_BREAK": "Task+Pausa"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Crea</em> e monitora in",
@@ -987,13 +987,13 @@
   },
   "G": {
     "CANCEL": "Annulla",
-    "CLICK_TO_EDIT": "clicca per modificare",
     "CLOSE": "Chiudi",
     "DELETE": "Cancella",
     "DISMISS": "Rimuovi",
     "DO_IT": "Fallo!",
     "EDIT": "Modifica",
     "ENABLED": "Abilitato",
+    "EXAMPLE_VAL": "clicca per modificare",
     "EXTENSION_INFO": "Per favore <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> scarica l'estensione di chrome</a> per permettere la comunicazione con le api di Jira e la gestione del tempo inattivo. Nota che non funziona su dispositivi mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
@@ -1027,9 +1027,9 @@
       "HELP": "<div><p>Quando la gestione del tempo di inattività è abilitata, un finestra si aprirà dopo un periodo specifico di tempo per controllare se e su quale task vuoi tracciare il tuo tempo, nel periodo che sei stato inattivo.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Abilita la gestione del tempo di inattività",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Innesca una finestra per il tempo di inattività soltanto quando è selezionato un task corrente",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Il tempo di inattività non tracciato si ripristina durante un momento di pausa",
       "MIN_IDLE_TIME": "Innesca inattività dopo X",
-      "TITLE": "Gestione inattività"
+      "TITLE": "Gestione inattività",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Il tempo di inattività non tracciato si ripristina durante un momento di pausa"
     },
     "IMEX": {
       "HELP": "<p>Qui puoi esportare tutti i tuoi dati in formato <strong>JSON</strong> per backup, ma anche per usarli in un contesto diverso (es. potresti voler esportare i tuoi progetti dal browser ed importarli nella versione desktop). </p> <p>Per l'importazione deve essere copiato JSON valido nella text area<strong>NB: Una volta premuto il pulsante di import, tutte le tue impostazioni ed i dati correnti saranno sovrascritti!</strong></p>",
@@ -1049,7 +1049,7 @@
       "GO_TO_FOCUS_MODE": "Vai alla modalità evidenza",
       "GO_TO_SCHEDULED_VIEW": "Vai alle attività pianificate",
       "GO_TO_SETTINGS": "Vai alle impostazioni",
-      "GO_TO_TIMELINE": "Vai a Timeline",
+      "GO_TO_SCHEDULE": "Vai a Schedule",
       "GO_TO_WORK_VIEW": "Vai alla vista lavoro",
       "HELP": "<p>Qui puoi configurare tutte le scorciatoie per la tastiera.</p> <p>Clicca sull'area di testo ed inserisci la combinazione di tasti desiderata. Premi invio per salvare e Esc per annullare.</p> <p>Ci sono 3 tipi di scorciatoie:</p> <ul> <li> <strong>Scorciatoie globali:</strong>Mentre l'applicazione è attiva, innescheranno l'azione da qualsiasi altra applicazione. </li> <li> <strong>Scorciatoie a livello di applicazione:</strong>Si innescherà da ogni pagina dell'applicazione, ma non se stai editando un campo di testo. </li> <li> <strong>Scorciatoie a livello di task:</strong>Si innescheranno solo se hai selezionato un task tramite mouse o tastiera, e solitamente innescheranno un'azione specificatamente relativa a quel task. </li> </ul>",
       "MOVE_TASK_DOWN": "Sposta task in basso nella lista",
@@ -1062,6 +1062,7 @@
       "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
       "SYSTEM_SHORTCUTS": "Scorciatoie globali (a livello di sistema)",
       "TASK_ADD_SUB_TASK": "Aggiungi sotto-task",
+      "TASK_ADD_ATTACHMENT": "Allega file o link",
       "TASK_DELETE": "Cancella task",
       "TASK_EDIT_TAGS": "Modificare i tag",
       "TASK_EDIT_TITLE": "Modifica titolo",
@@ -1071,7 +1072,7 @@
       "TASK_SCHEDULE": "Pianifica task",
       "TASK_SHORTCUTS": "Task",
       "TASK_SHORTCUTS_INFO": "Le scorciatoie seguenti si applicato al task correntemente selezionato (tramite mouse o tastiera).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Mostra/nascondi informazioni aggiuntive sul task",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Mostra/nascondi informazioni aggiuntive sul task",
       "TASK_TOGGLE_DONE": "Segna come completato/non completato",
       "TITLE": "Scorciatoie da tastiera",
       "TOGGLE_BACKLOG": "Mostra/nascondi backlog dei task",
@@ -1081,27 +1082,6 @@
       "ZOOM_DEFAULT": "Zoom default (solo Desktop)",
       "ZOOM_IN": "Zoom in (solo Desktop)",
       "ZOOM_OUT": "Zoom out (solo Desktop)"
-    },
-    "LANG": {
-      "AR": "Arabo",
-      "DE": "Tedesco",
-      "EN": "Inglese",
-      "ES": "Spagnolo",
-      "FA": "Persiano",
-      "FR": "Francese",
-      "IT": "Italiano",
-      "JA": "Giapponese",
-      "KO": "Coreano",
-      "LABEL": "Seleziona la lingua",
-      "NB": "Norvegese Bokmål",
-      "NL": "Olandese",
-      "PL": "Polacco",
-      "PT": "Portoguese",
-      "RU": "Russo",
-      "TITLE": "Lingua",
-      "TR": "Turco",
-      "ZH": "Cinese semplificato",
-      "ZH_TW": "Cinese tradizionale"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Progetto predefinito da utilizzare per le attività se non ne viene specificato nessuno",
@@ -1154,8 +1134,8 @@
       "SNOOZE_TIME": "Posticipa quando ti viene chiesto di fare una pausa",
       "TITLE": "Promemoria pausa"
     },
-    "TIMELINE": {
-      "HELP": "La funzione cronologia dovrebbe fornirti una rapida panoramica su come le attività pianificate si svolgono nel tempo. Puoi trovarlo nel menu a sinistra sotto <a href='#/timeline'>\"Cronologia\"</a>.",
+    "SCHEDULE": {
+      "HELP": "La funzione cronologia dovrebbe fornirti una rapida panoramica su come le attività pianificate si svolgono nel tempo. Puoi trovarlo nel menu a sinistra sotto <a href='#/schedule'>\"Cronologia\"</a>.",
       "L_IS_WORK_START_END_ENABLED": "Limita il flusso di attività non pianificate a orari di lavoro specifici",
       "L_WORK_END": "Fine giornata lavorativa",
       "L_WORK_START": "Inizio giornata lavorativa",

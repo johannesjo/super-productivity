@@ -10,7 +10,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { Tag } from '../tag.model';
 import { TagService } from '../tag.service';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
 import { DialogEditTagsForTaskComponent } from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
@@ -19,6 +19,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TagComponentTag } from '../tag/tag.component';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
+import { NO_LIST_TAG } from '../tag.const';
 
 @Component({
   selector: 'tag-list',
@@ -33,6 +34,7 @@ export class TagListComponent implements OnDestroy {
   @Output() removedTagsFromTask: EventEmitter<string[]> = new EventEmitter();
   @Output() replacedTagForTask: EventEmitter<string[]> = new EventEmitter();
   projectTag?: TagComponentTag | null;
+
   tags: Tag[] = [];
   private _isShowProjectTagAlways$: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
@@ -50,12 +52,20 @@ export class TagListComponent implements OnDestroy {
       !isShowProjectTagNever &&
       (isShowProjectTagAlways || activeType === WorkContextType.TAG)
         ? this._projectId$.pipe(
-            switchMap((id) => (id ? this._projectService.getByIdOnce$(id) : of(null))),
+            switchMap((id) =>
+              id
+                ? this._projectService.getByIdOnceCatchError$(id).pipe(
+                    catchError(() => {
+                      return of(null);
+                    }),
+                  )
+                : of(null),
+            ),
             map(
               (project) =>
                 project && {
                   ...project,
-                  icon: 'list',
+                  icon: project.icon || 'folder_special',
                 },
             ),
           )
@@ -70,7 +80,7 @@ export class TagListComponent implements OnDestroy {
     // TODO there should be a better way...
     switchMap(([ids, activeId]) =>
       this._tagService.getTagsByIds$(
-        ids.filter((id) => id !== activeId),
+        ids.filter((id) => id !== activeId && id !== NO_LIST_TAG.id),
         true,
       ),
     ),

@@ -8,6 +8,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { Note } from '../../features/note/note.model';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
 //   'task',
@@ -28,6 +29,8 @@ describe('isValidAppData()', () => {
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     spyOn(window, 'alert').and.stub();
+    // for mocking away dev error confirm
+    spyOn(window, 'confirm').and.returnValue(true);
   });
 
   it('should work for valid data', () => {

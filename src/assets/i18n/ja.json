@@ -638,10 +638,6 @@
           "L_SYNC_FILE_NAME": "同期ファイル名",
           "L_IS_COMPRESS_DATA": "データを圧縮する"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "同期ファイルパス",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "同期に使用する必要があるファイルへの絶対パス（作成されます）。"
-        },
         "L_ENABLE_SYNCING": "同期を有効にする",
         "L_SYNC_INTERVAL": "同期間隔",
         "L_SYNC_PROVIDER": "同期プロバイダー",
@@ -650,8 +646,12 @@
           "CORS_INFO": "<strong>実験的!!</strong> これを機能させるには、NextcloudインスタンスのCORSを無効にするか制限する必要があります。これは、セキュリティに悪影響を与える可能性があります。詳細については、 <a href='https://github.com/nextcloud/server/issues/3131'>このスレッド</a> を参照してください。自己責任！",
           "L_BASE_URL": "ベースURL",
           "L_PASSWORD": "パスワード",
+          "L_USER_NAME": "ユーザー名",
+          "L_SYNC_FILE_PATH": "同期ファイルパス"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "同期ファイルパス",
-          "L_USER_NAME": "ユーザー名"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "同期に使用する必要があるファイルへの絶対パス（作成されます）。"
         }
       },
       "S": {
@@ -726,7 +726,7 @@
         "CONVERT_TO_PARENT_TASK": "親タスクに変換",
         "DELETE": "タスクを削除",
         "DROP_ATTACHMENT": "ここにドロップして\"{{title}}\"に添付",
-        "EDIT_REMINDER": "リマインダーを編集",
+        "EDIT_SCHEDULED": "リマインダーを編集",
         "EDIT_TAGS": "タグを編集",
         "MARK_DONE": "完了としてマーク",
         "MARK_UNDONE": "未完了としてマーク",
@@ -740,7 +740,7 @@
         "REPEAT_EDIT": "繰り返しタスク設定の編集",
         "SCHEDULE": "タスクのスケジュール",
         "SHOW_UPDATES": "更新を表示",
-        "TOGGLE_ADDITIONAL": "追加情報を表示/非表示",
+        "TOGGLE_DETAIL_PANEL": "追加情報を表示/非表示",
         "TOGGLE_ATTACHMENTS": "添付ファイルの表示/非表示",
         "TOGGLE_DONE": "完了/未完了としてマーク",
         "TOGGLE_SUB_TASK_VISIBILITY": "サブタスクの表示/非表示",
@@ -748,7 +748,7 @@
         "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "スケジュール",
         "CONFIRM_REPEAT_TXT": "この繰り返されるタスクを別の日にスケジュールしようとしています。繰り返されるタスクは通常、指定された日に再作成され、その日にのみスケジュールされることを意味します。とにかく続行しますか？",
         "DATETIME_FOR": "リマインダーの日時",
@@ -855,7 +855,7 @@
         "WEDNESDAY": "水曜日"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "続く",
       "D_INITIAL": {
         "TEXT": "<p>タイムラインのアイデアは、計画されたタスクが時間の経過とともにどのように実行されるかをより正確に把握することです。これはタスクから自動的に生成され、2つの異なるものを区別します。計画された時間に表示される <strong>スケジュールされたタスク</strong>と、それらの固定イベントの周りを流れる <strong>通常のタスク</strong> です。すべてのタスクは、割り当てられた時間の見積もりを考慮します。</p><p>これに加えて、作業の開始時間と終了時間を指定することもできます。構成されている場合、通常のタスクはこれらの外に表示されることはありません。タイムラインには、今後30日間のみが含まれることに注意してください。</p>",
@@ -892,8 +892,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "クリックして {{title}}を追跡しない",
         "SKIP": "スキップ",
         "TASK": "タスク",
-        "TASK_BREAK": "タスク+休憩",
-        "TRACK_TO": "以下に追加する："
+        "TRACK_TO": "以下に追加する：",
+        "TASK_BREAK": "タスク+休憩"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
@@ -987,13 +987,13 @@
   },
   "G": {
     "CANCEL": "キャンセル",
-    "CLICK_TO_EDIT": "クリックして編集する",
     "CLOSE": "閉じる",
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
     "EDIT": "編集",
     "ENABLED": "有効",
+    "EXAMPLE_VAL": "クリックして編集する",
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">Chrome拡張機能をダウンロード</a>してください。これはモバイルでは機能しないことに注意してください。",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
@@ -1027,9 +1027,9 @@
       "HELP": "<div><p>アイドル時間処理が有効になっていると、アイドル時間が経過したときに、どのタスクで時間を追跡するかを確認するために、指定した時間が経過した後にダイアログが開きます。</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "アイドル時間処理を有効にする",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "現在のタスクが選択されている場合にのみアイドル時間ダイアログを起動する",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る",
       "MIN_IDLE_TIME": "アイドル状態になるまでの時間",
-      "TITLE": "アイドル処理"
+      "TITLE": "アイドル処理",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る"
     },
     "IMEX": {
       "HELP": "<p>ここでは、すべてのデータをバックアップ用の <strong>JSON</strong> としてエクスポートできますが、それを別のコンテキストで使用することもできます（たとえば、プロジェクトをブラウザにエクスポートしてデスクトップバージョンにインポートできます） </p> <p>インポートは、有効なJSONがテキスト領域にコピーされることを期待しています。 <strong>注：インポートボタンを押すと、現在の設定とデータがすべて上書きされます。</strong></p>",
@@ -1049,7 +1049,7 @@
       "GO_TO_FOCUS_MODE": "フォーカスモードに移動",
       "GO_TO_SCHEDULED_VIEW": "スケジュールされたタスクに移動",
       "GO_TO_SETTINGS": "設定に移動",
-      "GO_TO_TIMELINE": "タイムラインに移動",
+      "GO_TO_SCHEDULE": "タイムラインに移動",
       "GO_TO_WORK_VIEW": "作業ビューに移動",
       "HELP": "<p>ここですべてのキーボードショートカットを設定できます。</p> <p>テキスト入力をクリックして、希望のキーボードの組み合わせを入力してください。保存するにはEnterキーを押し、中止するにはEscapeキーを押してください。</p> <p>3種類のショートカットがあります。</p> <ul> <li> <strong>グローバルショートカット：</strong> アプリが実行されているとき、他のすべてのアプリケーションからアクションが起動されます。 </li> <li> <strong>アプリケーションレベルのショートカット：</strong> アプリケーションのすべての画面から起動しますが、現在テキストフィールドを編集している場合はそうではありません。 </li> <li> <strong>タスクレベルのショートカット：</strong> マウスまたはキーボードでタスクを選択した場合にのみ起動され、通常そのタスクに関連したアクションを起動します。 </li> </ul>",
       "MOVE_TASK_DOWN": "リスト内のタスクを下に移動",
@@ -1062,6 +1062,7 @@
       "SHOW_SEARCH_BAR": "検索バーを表示する",
       "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
       "TASK_ADD_SUB_TASK": "サブタスクを追加",
+      "TASK_ADD_ATTACHMENT": "ファイルまたはリンクを添付",
       "TASK_DELETE": "タスクを削除",
       "TASK_EDIT_TAGS": "タグを編集",
       "TASK_EDIT_TITLE": "タイトルを編集",
@@ -1071,7 +1072,7 @@
       "TASK_SCHEDULE": "スケジュールタスク",
       "TASK_SHORTCUTS": "タスク",
       "TASK_SHORTCUTS_INFO": "次のショートカットは、現在選択されているタスク（タブまたはマウスで選択）に適用されます。",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "追加の仕事情報を表示/隠す",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "追加の仕事情報を表示/隠す",
       "TASK_TOGGLE_DONE": "完了を切り替える",
       "TITLE": "キーボードショートカット",
       "TOGGLE_BACKLOG": "タスクバックログの表示/非表示",
@@ -1081,27 +1082,6 @@
       "ZOOM_DEFAULT": "ズームのデフォルト（デスクトップのみ）",
       "ZOOM_IN": "ズームイン（デスクトップのみ）",
       "ZOOM_OUT": "ズームアウト（デスクトップのみ）"
-    },
-    "LANG": {
-      "AR": "アラビア語",
-      "DE": "ドイツ語",
-      "EN": "英語",
-      "ES": "スペイン語",
-      "FA": "ペルシア語",
-      "FR": "フランス語",
-      "IT": "イタリア語",
-      "JA": "日本語",
-      "KO": "韓国語",
-      "LABEL": "言語を選択してください",
-      "NB": "ノルウェー語（ブークモール）",
-      "NL": "オランダ語",
-      "PL": "研磨",
-      "PT": "ポルトガル語",
-      "RU": "ロシア語",
-      "TITLE": "言語",
-      "TR": "トルコ語",
-      "ZH": "中国語（簡体）",
-      "ZH_TW": "中国語 (繁体字)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "何も指定されていない場合にタスクに使用するデフォルトのプロジェクト",
@@ -1154,8 +1134,8 @@
       "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
       "TITLE": "休憩リマインダー"
     },
-    "TIMELINE": {
-      "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/timeline'>'タイムライン'</a>の下にあります。",
+    "SCHEDULE": {
+      "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/schedule'>'タイムライン'</a>の下にあります。",
       "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
       "L_WORK_END": "就業日の終わり",
       "L_WORK_START": "就業日開始",

@@ -9,12 +9,17 @@
   }
 
   &.keyboard {
-    ::ng-deep formly-field {
+    ::ng-deep formly-field > formly-group {
       box-sizing: border-box;
       padding: 0 $s;
-      width: 50%;
-      display: block;
-      float: left;
+      display: grid;
+      grid: auto-flow / 1fr;
+      gap: 0;
+
+      @include mq(xs) {
+        gap: 0 $s * 2;
+        grid: auto-flow / 1fr 1fr;
+      }
     }
   }
 }

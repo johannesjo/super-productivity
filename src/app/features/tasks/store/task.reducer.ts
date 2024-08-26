@@ -28,12 +28,7 @@ import {
   updateTaskTags,
   updateTaskUi,
 } from './task.actions';
-import {
-  ShowSubTasksMode,
-  Task,
-  TaskAdditionalInfoTargetPanel,
-  TaskState,
-} from '../task.model';
+import { ShowSubTasksMode, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -68,6 +63,9 @@ import { migrateTaskState } from '../migrate-task-state.util';
 import { createReducer, on } from '@ngrx/store';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -80,7 +78,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   // TODO maybe at least move those properties to an ui property
   currentTaskId: null,
   selectedTaskId: null,
-  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+  taskDetailTargetPanel: TaskDetailTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
   [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
@@ -137,11 +135,18 @@ export const taskReducer = createReducer<TaskState>(
     return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
   }),
 
-  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel }) => {
+  on(setSelectedTask, (state, { id, taskDetailTargetPanel, isSkipToggle }) => {
+    if (isSkipToggle) {
+      return {
+        ...state,
+        taskDetailTargetPanel: taskDetailTargetPanel || null,
+        selectedTaskId: id,
+      };
+    }
     return {
       ...state,
-      taskAdditionalInfoTargetPanel:
-        !id || id === state.selectedTaskId ? null : taskAdditionalInfoTargetPanel || null,
+      taskDetailTargetPanel:
+        !id || id === state.selectedTaskId ? null : taskDetailTargetPanel || null,
       selectedTaskId: id === state.selectedTaskId ? null : id,
     };
   }),
@@ -163,7 +168,7 @@ export const taskReducer = createReducer<TaskState>(
     stateCopy = timeSpentOnDay
       ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
       : stateCopy;
-    stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+    stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
     stateCopy = updateDoneOnForTask(task, stateCopy);
     return taskAdapter.updateOne(task, stateCopy);
   }),
@@ -596,6 +601,104 @@ export const taskReducer = createReducer<TaskState>(
       },
       state,
     );
+  }),
+
+  // PLANNER STUFF
+  // --------------
+  on(
+    PlannerActions.transferTask,
+    (state, { task, today, targetIndex, newDay, prevDay }) => {
+      if (prevDay === today && newDay !== today) {
+        const taskToUpdate = state.entities[task.id] as Task;
+        return taskAdapter.updateOne(
+          {
+            id: task.id,
+            changes: {
+              tagIds: taskToUpdate.tagIds.filter((id) => id !== TODAY_TAG.id),
+            },
+          },
+          state,
+        );
+      }
+      if (prevDay !== today && newDay === today) {
+        const taskToUpdate = state.entities[task.id] as Task;
+        const tagIds = [...taskToUpdate.tagIds];
+        tagIds.unshift(TODAY_TAG.id);
+        return taskAdapter.updateOne(
+          {
+            id: task.id,
+            changes: {
+              tagIds,
+            },
+          },
+          state,
+        );
+      }
+
+      return state;
+    },
+  ),
+  on(PlannerActions.moveBeforeTask, (state, { toTaskId, fromTask }) => {
+    const targetTask = state.entities[toTaskId] as Task;
+    if (!targetTask) {
+      return state;
+    }
+
+    if (
+      targetTask.tagIds.includes(TODAY_TAG.id) &&
+      !fromTask.tagIds.includes(TODAY_TAG.id)
+    ) {
+      return taskAdapter.updateOne(
+        {
+          id: fromTask.id,
+          changes: {
+            tagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
+          },
+        },
+        state,
+      );
+    } else if (
+      !targetTask.tagIds.includes(TODAY_TAG.id) &&
+      fromTask.tagIds.includes(TODAY_TAG.id)
+    ) {
+      return taskAdapter.updateOne(
+        {
+          id: fromTask.id,
+          changes: {
+            tagIds: unique(fromTask.tagIds.filter((id) => id !== TODAY_TAG.id)),
+          },
+        },
+        state,
+      );
+    }
+    return state;
+  }),
+
+  on(PlannerActions.planTaskForDay, (state, { task, day }) => {
+    const todayStr = getWorklogStr();
+    if (day === todayStr && !task.tagIds.includes(TODAY_TAG.id)) {
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            tagIds: unique([TODAY_TAG.id, ...task.tagIds]),
+          },
+        },
+        state,
+      );
+    } else if (day !== todayStr && task.tagIds.includes(TODAY_TAG.id)) {
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
   }),
 
   // REMINDER STUFF

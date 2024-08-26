@@ -643,10 +643,6 @@
           "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید",
           "L_IS_COMPRESS_DATA": "فشرده سازی داده ها"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
-        },
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
         "L_SYNC_PROVIDER": "ارائه دهنده همگام سازی",
@@ -655,8 +651,12 @@
           "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
           "L_BASE_URL": "آدرس پایگاه",
           "L_PASSWORD": "کلمه عبور",
+          "L_USER_NAME": "نام کاربری",
+          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
-          "L_USER_NAME": "نام کاربری"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
         }
       },
       "S": {
@@ -731,7 +731,7 @@
         "CONVERT_TO_PARENT_TASK": "تبدیل به کار اصلی",
         "DELETE": "Delete Task",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "ویرایش یادآوری",
+        "EDIT_SCHEDULED": "ویرایش یادآوری",
         "EDIT_TAGS": "برچسب ها را ویرایش کنید",
         "MARK_DONE": "علامت زدن به عنوان انجام شده",
         "MARK_UNDONE": "علامت زدن به عنوان انجام نشده",
@@ -745,7 +745,7 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
@@ -753,7 +753,7 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "برنامه",
         "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
         "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
@@ -860,7 +860,7 @@
         "WEDNESDAY": "چهارشنبه"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "ادامه داد",
       "D_INITIAL": {
         "TEXT": "<p>ایده جدول زمانی ارائه تصویر بهتری از نحوه انجام کارهای برنامه ریزی شده فرد در طول زمان است. این به طور خودکار از وظایف شما تولید می شود و دو چیز مختلف را از هم متمایز می کند: <strong>کارهای برنامه ریزی شده</strong>، که در زمان برنامه ریزی شده آنها نشان داده می شود و <strong>کارهای منظم</strong> که باید حول آن وقایع ثابت باشند. همه کارها تخمین زمانی را که به آنها اختصاص داده اید در نظر می گیرند.</p><p>علاوه بر این می توانید زمان شروع و پایان کار را نیز ارائه دهید. اگر کارهای منظم پیکربندی شده هرگز خارج از اینها نشان داده نشود. لطفاً توجه داشته باشید که این جدول زمانی فقط شامل 30 روز آینده است.</p>",
@@ -897,8 +897,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
         "SKIP": "رد شدن",
         "TASK": "کار",
-        "TASK_BREAK": "کار+استراحت",
-        "TRACK_TO": "تایین کنید:"
+        "TRACK_TO": "تایین کنید:",
+        "TASK_BREAK": "کار+استراحت"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>ایجاد کنید</em> و پیگیری کنید",
@@ -992,13 +992,13 @@
   },
   "G": {
     "CANCEL": "لغو",
-    "CLICK_TO_EDIT": "برای ویرایش کلیک کنید",
     "CLOSE": "بستن",
     "DELETE": "حذف",
     "DISMISS": "رد کردن",
     "DO_IT": "انجام بدهید!",
     "EDIT": "ویرایش",
     "ENABLED": "فعال شده است",
+    "EXAMPLE_VAL": "برای ویرایش کلیک کنید",
     "EXTENSION_INFO": "لطفا برای ارتباط با جیرا و مدیریت زمان <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> افزونه گوگل کروم</a> را دانلود کنید. توجه این افزونه برای نسخه موبایل کروم کار نمی کند.",
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
@@ -1032,9 +1032,9 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -1054,7 +1054,7 @@
       "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
       "GO_TO_SCHEDULED_VIEW": "رفتن به وظایف برنامه ریزی شده",
       "GO_TO_SETTINGS": "رفتن به تنظیمات",
-      "GO_TO_TIMELINE": "به جدول زمانی بروید",
+      "GO_TO_SCHEDULE": "به جدول زمانی بروید",
       "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1067,6 +1067,7 @@
       "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
+      "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_DELETE": "حذف کار",
       "TASK_EDIT_TAGS": "برچسب ها را ویرایش کنید",
       "TASK_EDIT_TITLE": "ویرایش عنوان",
@@ -1076,7 +1077,7 @@
       "TASK_SCHEDULE": "کار برنامه ریزی شده",
       "TASK_SHORTCUTS": "کارها",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "نمایش دادن/پنهان کردن اطلاعات بیشتر در مورد کار",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "نمایش دادن/پنهان کردن اطلاعات بیشتر در مورد کار",
       "TASK_TOGGLE_DONE": "Toggle Done",
       "TITLE": "میانبرهای صفحه کلید",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
@@ -1086,27 +1087,6 @@
       "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
       "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
       "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
-    },
-    "LANG": {
-      "AR": "عربی",
-      "DE": "آلمانی",
-      "EN": "انگلیسی",
-      "ES": "اسپانیایی",
-      "FA": "فارسی",
-      "FR": "فرانسوی",
-      "IT": "ایتالیایی",
-      "JA": "ژاپنی",
-      "KO": "کره ای",
-      "LABEL": "لطفا یک زبان انتخاب کنید",
-      "NB": "نروژی",
-      "NL": "هلندی",
-      "PL": "لهستانی",
-      "PT": "پرتغالی",
-      "RU": "روسی",
-      "TITLE": "زبان",
-      "TR": "ترکی",
-      "ZH": "چینی ساده‌شده",
-      "ZH_TW": "چینی سنتی"
     },
     "MISC": {
       "DEFAULT_PROJECT": "پروژه پیش فرض برای استفاده در کارها در صورت مشخص نبودن هیچ کدام",
@@ -1159,8 +1139,8 @@
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
     },
-    "TIMELINE": {
-      "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/timeline'>'Timeline'</a>پیدا کنید.",
+    "SCHEDULE": {
+      "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/schedule'>'Schedule'</a>پیدا کنید.",
       "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
       "L_WORK_END": "پایان روز کار",
       "L_WORK_START": "شروع روز کار",

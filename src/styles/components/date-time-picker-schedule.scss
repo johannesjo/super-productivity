@@ -652,10 +652,6 @@ $owl-missing: $owl-light-selected-bg !default;
 
 .owl-dt-inline {
   display: block;
-
-  @include mq(xxs, max) {
-    width: 100vw;
-  }
 }
 
 .owl-dt-control {
@@ -738,8 +734,7 @@ $owl-missing: $owl-light-selected-bg !default;
     color: $owl-dark-text-color-strong;
   }
 
-  &.isActive {
-    border-color: $c-primary;
+  &:hover {
     outline: none;
     background: $owl-light-selected-bg;
     opacity: 1;
@@ -749,13 +744,24 @@ $owl-missing: $owl-light-selected-bg !default;
     }
   }
 
-  &:hover {
+  &:focus {
+    border-color: $c-primary !important;
     outline: none;
     background: $owl-light-selected-bg;
     opacity: 1;
 
     @include darkTheme(true) {
       background: $owl-dark-light-selected-bg;
+    }
+  }
+
+  &.isActive {
+    background: $c-primary !important;
+    color: $c-contrast;
+    outline: none;
+    border-color: $owl-light-selected-bg;
+    @include darkTheme(true) {
+      border-color: $owl-dark-light-selected-bg;
     }
   }
 }

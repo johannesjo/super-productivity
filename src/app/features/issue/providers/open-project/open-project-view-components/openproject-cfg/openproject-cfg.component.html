@@ -108,18 +108,19 @@
           >
             {{T.F.OPEN_PROJECT.CFG_CMP.PROGRESS_ON_SAVE|translate}}
           </mat-checkbox>
+          <!-- TODO: The 'tickInterval' property no longer exists -->
           <mat-slider
             *ngIf="this.cfg.isSetProgressOnTaskDone"
             thumbLabel
             [displayWith]="displayThumbWith"
-            tickInterval="5"
             min="0"
             max="100"
             step="5"
             aria-label="units"
             [(ngModel)]="this.cfg.progressOnDone"
             [ngModelOptions]="{standalone: true}"
-          ></mat-slider>
+            ><input matSliderThumb
+          /></mat-slider>
         </div>
       </div>
     </section>

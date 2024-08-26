@@ -1,0 +1,60 @@
+@import '../../../../variables';
+@import '../../tasks/task/task.component.mixins';
+
+:host {
+  display: block;
+}
+
+:host > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding-top: $s * 0.25;
+  padding-bottom: $s * 0.25;
+  border: 1px solid $dark-theme-separator-color;
+  border-radius: $task-border-radius;
+  opacity: 0.9;
+  cursor: pointer;
+  min-height: $planner-item-height;
+
+  @include lightTheme {
+    border-color: $light-theme-extra-border-color;
+  }
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
+
+  &:hover {
+    border-color: $c-primary;
+  }
+
+  mat-icon {
+    margin-left: $s;
+    margin-right: $s;
+    opacity: 0.8;
+    font-size: $planner-item-ico-size;
+    height: $planner-item-ico-size;
+    width: $planner-item-ico-size;
+    min-width: $planner-item-ico-size;
+    max-width: $planner-item-ico-size;
+  }
+}
+
+.title {
+  font-size: $planner-font-size-mobile;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @include mq(xs) {
+    font-size: $planner-font-size;
+  }
+}
+
+.original-time-remaining {
+  white-space: nowrap;
+  font-size: 10px;
+  margin-left: -6px;
+}

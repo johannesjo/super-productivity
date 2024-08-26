@@ -775,10 +775,6 @@
           "L_SYNC_FILE_NAME": "Synchroniseer bestandsnaam",
           "L_IS_COMPRESS_DATA": "Comprimeer gegevens"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluut pad naar het bestand dat moet worden gebruikt voor synchronisatie (wordt gemaakt)."
-        },
         "L_ENABLE_COMPRESSION": "Compressie inschakelen (snellere data overdracht)",
         "L_ENABLE_ENCRYPTION": "End-to-end encryptie inschakelen (experiment) - Maak je data ontoegankelijk voor je sync provider",
         "L_ENABLE_SYNCING": "Schakel synchronisatie in",
@@ -790,8 +786,12 @@
           "CORS_INFO": "<strong>Experimenteel !!</strong> Om dit te laten werken, moet u CORS uitschakelen of beperken voor uw Nextcloud-instantie, wat negatieve gevolgen voor de veiligheid kan hebben! Raadpleeg <a href='https://github.com/nextcloud/server/issues/3131'>deze thread</a> voor meer informatie. Gebruik op eigen risico!",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Wachtwoord",
+          "L_USER_NAME": "Gebruikersnaam",
+          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad"
+        },
+        "LOCAL_FILE": {
           "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
-          "L_USER_NAME": "Gebruikersnaam"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluut pad naar het bestand dat moet worden gebruikt voor synchronisatie (wordt gemaakt)."
         }
       },
       "S": {
@@ -868,7 +868,7 @@
         "CONVERT_TO_PARENT_TASK": "Converteren naar bovenliggende taak",
         "DELETE": "Taak verwijderen",
         "DROP_ATTACHMENT": "Zet hier neer om te koppelen aan \"{{title}}\"",
-        "EDIT_REMINDER": "Herinnering bewerken",
+        "EDIT_SCHEDULED": "Herinnering bewerken",
         "EDIT_TAGS": "Bewerk-tags",
         "MARK_DONE": "Markeer als voltooid",
         "MARK_UNDONE": "Markeren als ongedaan gemaakt",
@@ -882,7 +882,7 @@
         "REPEAT_EDIT": "Herhaal taakconfiguratie bewerken",
         "SCHEDULE": "Taak plannen",
         "SHOW_UPDATES": "Updates weergeven",
-        "TOGGLE_ADDITIONAL": "Extra informatie tonen / verbergen",
+        "TOGGLE_DETAIL_PANEL": "Extra informatie tonen / verbergen",
         "TOGGLE_ATTACHMENTS": "Bijlagen tonen / verbergen",
         "TOGGLE_DONE": "Markeren als gereed / ongedaan gemaakt",
         "TOGGLE_SUB_TASK_VISIBILITY": "Zichtbaarheid van subtaken in- / uitschakelen",
@@ -890,7 +890,7 @@
         "TRACK_TIME_STOP": "Pauzeer de volgtijd",
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Planning",
         "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
         "DATETIME_FOR": "Datetime voor herinnering",
@@ -1030,7 +1030,7 @@
         "WEDNESDAY": "woensdag"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "vervolgd",
       "D_INITIAL": {
         "TEXT": "<p>Het idee van de tijdlijn is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de tijdlijn alleen de komende 30 dagen omvat.</p>",
@@ -1067,8 +1067,8 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Klik om NIET te volgen naar {{title}}",
         "SKIP": "Overslaan",
         "TASK": "Taak",
-        "TASK_BREAK": "Taak + pauze",
-        "TRACK_TO": "Track naar:"
+        "TRACK_TO": "Track naar:",
+        "TASK_BREAK": "Taak + pauze"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Maken</em> en volgen naar",
@@ -1162,13 +1162,13 @@
   },
   "G": {
     "CANCEL": "annuleren",
-    "CLICK_TO_EDIT": "Klik om te bewerken",
     "CLOSE": "Sluiten",
     "DELETE": "Verwijderen",
     "DISMISS": "Afwijzen",
     "DO_IT": "Doe het!",
     "EDIT": "Bewerk",
     "ENABLED": "Ingeschakeld",
+    "EXAMPLE_VAL": "Klik om te bewerken",
     "EXTENSION_INFO": "<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> Download de Chrome-extensie</a> om communicatie met de Jira Api en Idle Time Handling mogelijk te maken. Merk op dat dit niet werkt voor mobiel.",
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
@@ -1202,9 +1202,9 @@
       "HELP": "<div><p>Wanneer de verwerking van inactieve tijd is ingeschakeld, wordt na een bepaalde tijd een dialoogvenster geopend om te controleren of en voor welke taak u uw tijd wilt bijhouden, wanneer u inactief bent geweest.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Inactieve tijdafhandeling inschakelen",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Activeer alleen een inactieve tijdsvenster wanneer een huidige taak is geselecteerd",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Niet-gevolgde inactieve tijd resets nemen een pauzetimer",
       "MIN_IDLE_TIME": "Activeer inactief na X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Niet-gevolgde inactieve tijd resets nemen een pauzetimer"
     },
     "IMEX": {
       "HELP": "<p>Hier kunt u al uw gegevens exporteren als een <strong>JSON</strong> voor back-ups, maar ook om deze in een andere context te gebruiken (u wilt bijvoorbeeld uw projecten in de browser exporteren en in de desktopversie importeren).</p> <p>De import verwacht dat geldige JSON wordt gekopieerd naar het tekstgebied. <strong>OPMERKING: zodra u op de importknop drukt, worden al uw huidige instellingen en gegevens overschreven!</strong></p>",
@@ -1224,7 +1224,7 @@
       "GO_TO_FOCUS_MODE": "Ga naar Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Ga naar geplande taken",
       "GO_TO_SETTINGS": "Ga naar Instellingen",
-      "GO_TO_TIMELINE": "Ga naar de tijdlijn",
+      "GO_TO_SCHEDULE": "Ga naar de tijdlijn",
       "GO_TO_WORK_VIEW": "Ga naar Work View",
       "HELP": "<p>Hier kunt u alle sneltoetsen configureren.</p> <p>Klik op de tekstinvoer en voer de gewenste toetsenbordcombinatie in. Druk op enter om op te slaan en op Escape om af te breken.</p> <p>Er zijn drie soorten sneltoetsen:</p> <ul> <li><strong>Wereldwijde snelkoppelingen:</strong> wanneer de app wordt uitgevoerd, wordt de actie vanuit elke andere app geactiveerd.</li> <li><strong>Sneltoetsen op applicatieniveau:</strong> wordt geactiveerd vanuit elk scherm van de applicatie, maar niet als u momenteel een tekstveld bewerkt.</li> <li><strong>Sneltoetsen op taakniveau:</strong> Ze worden alleen geactiveerd als u een taak via muis of toetsenbord hebt geselecteerd en activeren meestal een actie die specifiek betrekking heeft op die ene taak.</li> </ul>",
       "MOVE_TASK_DOWN": "Verplaats taak naar beneden in lijst",
@@ -1237,6 +1237,7 @@
       "SHOW_SEARCH_BAR": "Toon zoekbalk",
       "SYSTEM_SHORTCUTS": "Globale snelkoppelingen (systeembreed)",
       "TASK_ADD_SUB_TASK": "Subtaak toevoegen",
+      "TASK_ADD_ATTACHMENT": "Voeg bestand of link toe",
       "TASK_DELETE": "Taak verwijderen",
       "TASK_EDIT_TAGS": "Bewerk-tags",
       "TASK_EDIT_TITLE": "Titel bewerken",
@@ -1246,7 +1247,7 @@
       "TASK_SCHEDULE": "Taak plannen",
       "TASK_SHORTCUTS": "Taken",
       "TASK_SHORTCUTS_INFO": "De volgende sneltoetsen zijn van toepassing op de momenteel geselecteerde taak (geselecteerd via tab of muis).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Extra taakinformatie tonen / verbergen",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Extra taakinformatie tonen / verbergen",
       "TASK_TOGGLE_DONE": "Toggle Gereed",
       "TITLE": "Toetsenbord sneltoetsen",
       "TOGGLE_BACKLOG": "Backlog weergeven / verbergen",
@@ -1256,27 +1257,6 @@
       "ZOOM_DEFAULT": "Zoomstandaard (alleen desktop)",
       "ZOOM_IN": "Inzoomen (alleen desktop)",
       "ZOOM_OUT": "Uitzoomen (alleen desktop)"
-    },
-    "LANG": {
-      "AR": "Arabisch",
-      "DE": "Duitse",
-      "EN": "Engels",
-      "ES": "Spaans",
-      "FA": "Perzisch",
-      "FR": "Frans",
-      "IT": "Italiaans",
-      "JA": "Japans",
-      "KO": "Koreaans",
-      "LABEL": "Selecteer een taal",
-      "NB": "Noors Bokmål",
-      "NL": "Nederlands",
-      "PL": "Polere",
-      "PT": "Portugees",
-      "RU": "Russisch",
-      "TITLE": "Taal",
-      "TR": "Turks",
-      "ZH": "Chinees (vereenvoudigd)",
-      "ZH_TW": "Chinees (traditioneel)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Standaardproject om te gebruiken voor taken als er geen is opgegeven",
@@ -1329,8 +1309,8 @@
       "SNOOZE_TIME": "Snoozetijd wanneer u wordt gevraagd om een pauze te nemen",
       "TITLE": "Pauzeherinnering"
     },
-    "TIMELINE": {
-      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/timeline'>'Tijdlijn'</a>.",
+    "SCHEDULE": {
+      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Tijdlijn'</a>.",
       "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
       "L_WORK_END": "Einde van de werkdag",
       "L_WORK_START": "Start van de werkdag",

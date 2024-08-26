@@ -1,19 +1,20 @@
 //$shadow-edit-on-click-light: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-14dp;
 //$shadow-edit-on-click-dark: 0 0 4px 0 $dark-theme-bg-lightest, $whiteframe-shadow-14dp;
 $shadow-edit-on-click-dark: $whiteframe-shadow-15dp;
-$shadow-edit-on-click-light: $whiteframe-shadow-15dp;
+$shadow-edit-on-click-light: $whiteframe-shadow-7dp;
 
 @mixin inlineEditElevation {
   border-radius: $card-border-radius;
   background: #fff;
   box-shadow: $shadow-edit-on-click-light;
   color: $light-theme-text-color-most-intense;
-  border: 1px solid $light-theme-extra-border-color;
+  border: 1px solid $c-accent;
+  //border: 1px solid $light-theme-extra-border-color;
 
   @include darkTheme() {
     background: $dark-theme-bg-lightest;
     box-shadow: $shadow-edit-on-click-dark;
     color: $dark-theme-text-color-most-intense;
-    border-color: $dark-theme-extra-border-color;
+    //border-color: $dark-theme-extra-border-color;
   }
 }

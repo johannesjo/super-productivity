@@ -5,6 +5,11 @@ import { HANDLED_ERROR_PROP_STR } from '../../app.constants';
 export const getSyncErrorStr = (err: unknown): string => {
   let errorAsString: string =
     err && (err as any)?.toString ? (err as any).toString() : '???';
+
+  if (err && typeof (err as any)?.response?.data === 'string') {
+    errorAsString = (err as any)?.response?.data as string;
+  }
+
   if (
     errorAsString === '[object Object]' &&
     err &&
@@ -12,5 +17,6 @@ export const getSyncErrorStr = (err: unknown): string => {
   ) {
     errorAsString = (err as any)[HANDLED_ERROR_PROP_STR] as string;
   }
-  return truncate(errorAsString.toString(), 100);
+
+  return truncate(errorAsString.toString(), 150);
 };

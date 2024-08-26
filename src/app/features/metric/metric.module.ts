@@ -11,20 +11,21 @@ import { EffectsModule } from '@ngrx/effects';
 import { MetricEffects } from './store/metric.effects';
 import { ObstructionModule } from './obstruction/obstruction.module';
 import { ImprovementModule } from './improvement/improvement.module';
-import { ChartsModule } from 'ng2-charts';
 import { RouterModule } from '@angular/router';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 @NgModule({
+  providers: [provideCharts(withDefaultRegisterables())],
   imports: [
     CommonModule,
     FormsModule,
     UiModule,
     ObstructionModule,
     ImprovementModule,
-    ChartsModule,
     StoreModule.forFeature(METRIC_FEATURE_NAME, metricReducer),
     EffectsModule.forFeature([MetricEffects]),
     RouterModule,
+    BaseChartDirective,
   ],
   declarations: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],
   exports: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],

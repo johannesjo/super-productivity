@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
-import * as fromNote from './store/note.reducer';
-import { NOTE_FEATURE_NAME } from './store/note.reducer';
+import { NOTE_FEATURE_NAME, noteReducer } from './store/note.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { NoteEffects } from './store/note.effects';
 import { NotesComponent } from './notes/notes.component';
@@ -18,7 +17,7 @@ import { TagModule } from '../tag/tag.module';
     FormsModule,
     UiModule,
     TagModule,
-    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.noteReducer),
+    StoreModule.forFeature(NOTE_FEATURE_NAME, noteReducer),
     EffectsModule.forFeature([NoteEffects]),
   ],
   declarations: [NotesComponent, NoteComponent, DialogAddNoteComponent],

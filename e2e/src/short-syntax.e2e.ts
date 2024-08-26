@@ -1,5 +1,6 @@
 import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const TASK = 'task';
 const TASK_TAGS = 'task tag';

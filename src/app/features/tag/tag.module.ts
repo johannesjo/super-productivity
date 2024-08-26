@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { TagListComponent } from './tag-list/tag-list.component';
 import { DialogEditTagsForTaskComponent } from './dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { TagComponent } from './tag/tag.component';
+import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { TagComponent } from './tag/tag.component';
     FormsModule,
     StoreModule.forFeature(TAG_FEATURE_NAME, tagReducer),
     EffectsModule.forFeature([TagEffects]),
+    IssueModule,
   ],
   declarations: [
     TagListComponent,

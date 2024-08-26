@@ -39,26 +39,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
           },
         ]) as LimitedFormlyFieldConfig<MiscConfig>[]),
     {
-      key: 'isNotifyWhenTimeEstimateExceeded',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED,
-      },
-    },
-    {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {
         label: T.GCF.MISC.IS_AUTO_MARK_PARENT_AS_DONE,
       },
     },
-    {
-      key: 'isAutoStartNextTask',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_AUTO_START_NEXT_TASK,
-      },
-    },
+
     {
       key: 'isTurnOffMarkdown',
       type: 'checkbox',
@@ -129,6 +116,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       templateOptions: {
         rows: 5,
         label: T.GCF.MISC.TASK_NOTES_TPL,
+      },
+    },
+    {
+      key: 'isUseMinimalNav',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_USE_MINIMAL_SIDE_NAV,
       },
     },
     {

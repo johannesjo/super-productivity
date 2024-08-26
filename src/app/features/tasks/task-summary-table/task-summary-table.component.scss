@@ -1,4 +1,4 @@
-@import "../../../../variables";
+@import '../../../../variables';
 
 :host {
   display: block;
@@ -16,6 +16,8 @@
   }
 
   td {
+    text-align: center;
+
     @include lightTheme() {
       color: $light-theme-text-color-muted;
     }
@@ -36,7 +38,6 @@
   th {
     text-align: center;
   }
-
 
   th,
   td {
@@ -101,7 +102,6 @@
   }
 }
 
-
 .repeat-task-icon {
   vertical-align: middle;
   margin-right: 4px;
@@ -123,11 +123,10 @@
     font-style: italic;
   }
 
-
   > span {
     text-decoration: none !important;
     display: block;
-    padding-left: $s*1;
+    padding-left: $s * 1;
   }
 
   inline-input {

@@ -1,8 +1,8 @@
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
 import { environment } from '../../../environments/environment';
-import * as StackTrace from 'stacktrace-js';
-import * as pThrottle from 'p-throttle';
-import * as newGithubIssueUrl from 'new-github-issue-url';
+import StackTrace from 'stacktrace-js';
+import pThrottle from 'p-throttle';
+import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
 import { AppDataComplete } from '../../imex/sync/sync.model';

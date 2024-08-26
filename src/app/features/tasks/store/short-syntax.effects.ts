@@ -162,7 +162,6 @@ export class ShortSyntaxEffects {
               updateTaskTags({
                 task,
                 newTagIds: unique(tagIds),
-                oldTagIds: task.tagIds,
               }),
             );
           }
@@ -214,7 +213,6 @@ export class ShortSyntaxEffects {
                   updateTaskTags({
                     task,
                     newTagIds: unique(newTagIds),
-                    oldTagIds: task.tagIds,
                   }),
                 );
               }

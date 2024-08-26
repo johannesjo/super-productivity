@@ -3,6 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 import { T } from '../../t.const';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export class TranslateExtension {
   constructor(private translate: TranslateService) {}
 
@@ -48,14 +50,14 @@ export const registerTranslateExtension = (
   validationMessages: [
     { name: 'required', message: () => translate.stream(T.V.E_REQUIRED) },
     {
-      name: 'minlength',
+      name: 'minLength',
       message: (err, field: FormlyFieldConfig) =>
         translate.stream(T.V.E_MIN_LENGTH, {
           val: field.templateOptions ? field.templateOptions.minLength : null,
         }),
     },
     {
-      name: 'maxlength',
+      name: 'maxLength',
       message: (err, field: FormlyFieldConfig) =>
         translate.stream(T.V.E_MAX_LENGTH, {
           val: field.templateOptions ? field.templateOptions.maxLength : null,

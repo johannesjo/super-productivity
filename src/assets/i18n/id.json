@@ -767,9 +767,9 @@
           "L_SYNC_FILE_NAME": "Sinkronisasi Nama File"
         },
         "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Memerlukan izin akses file",
           "L_SYNC_FILE_PATH": "Sinkronisasi jalur file",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Jalur absolut ke file yang harus digunakan untuk sinkronisasi (akan dibuat).",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Memerlukan izin akses file"
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Jalur absolut ke file yang harus digunakan untuk sinkronisasi (akan dibuat)."
         },
         "L_ENABLE_COMPRESSION": "Aktifkan Kompresi (transfer data lebih cepat)",
         "L_ENABLE_SYNCING": "Aktifkan Sinkronasi",
@@ -780,8 +780,8 @@
           "CORS_INFO": "<strong>Membuatnya berfungsi di browser:</strong> Agar ini berfungsi di browser, Anda perlu memasukkan Super Productivity untuk permintaan CORS ke whitelist untuk instans Nextcloud Anda. Ini dapat memiliki implikasi keamanan negatif! Silahkan <a href='https://github.com/nextcloud/server/issues/3131'>lihat utas ini untuk informasi lebih lanjut</a>. Salah satu pendekatan untuk membuat ini berfungsi di seluler adalah memasukkannya ke whitelist \"https://app.super-productivity.com\" lewat nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Gunakan dengan risiko Anda sendiri!</p>",
           "L_BASE_URL": "Url Dasar",
           "L_PASSWORD": "Kata Sandi",
-          "L_SYNC_FILE_PATH": "Sinkronisasi jalur file",
-          "L_USER_NAME": "Nama Pengguna"
+          "L_USER_NAME": "Nama Pengguna",
+          "L_SYNC_FILE_PATH": "Sinkronisasi jalur file"
         }
       },
       "S": {
@@ -857,7 +857,7 @@
         "DELETE": "Hapus Tugas",
         "DELETE_REPEAT_INSTANCE": "Hapus Instance Tugas berulang",
         "DROP_ATTACHMENT": "Drop di sini untuk melampirkan ke \"{{title}}\"",
-        "EDIT_REMINDER": "Ubah pengingat",
+        "EDIT_SCHEDULED": "Ubah pengingat",
         "EDIT_TAGS": "Ubah tag",
         "MARK_DONE": "Tandai selesai",
         "MARK_UNDONE": "Tandai belum selesai",
@@ -871,7 +871,7 @@
         "REPEAT_EDIT": "Edit konfigurasi tugas berulang",
         "SCHEDULE": "Jadwalkan tugas",
         "SHOW_UPDATES": "Tampilkan pembaruan",
-        "TOGGLE_ADDITIONAL": "Tampilkan/Sembunyikan info tambahan",
+        "TOGGLE_DETAIL_PANEL": "Tampilkan/Sembunyikan info tambahan",
         "TOGGLE_ATTACHMENTS": "Tampilkan/Sembunyikan lampiran",
         "TOGGLE_DONE": "Tandai sebagai selesai/diurungkan",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alihkan visibilitas sub tugas",
@@ -879,7 +879,7 @@
         "TRACK_TIME_STOP": "Jeda waktu pelacakan",
         "UPDATE_ISSUE_DATA": "Perbarui data masalah"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Jadwalkan",
         "CONFIRM_REPEAT_TXT": "Anda mencoba menjadwalkan tugas berulang ini ke hari lain. Tugas yang berulang biasanya dimaksudkan untuk dibuat ulang pada hari tertentu dan hanya dijadwalkan pada hari itu. Tetap ingin melanjutkan?",
         "DATETIME_FOR": "Tanggal untuk pengingat",
@@ -1035,10 +1035,10 @@
         "WEDNESDAY": "Rabu"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "lanjutan",
       "D_INITIAL": {
-        "TEXT": "<p>Ide Timeline adalah untuk memberikan gambaran yang lebih baik tentang bagaimana tugas yang direncanakan seseorang bermain dari waktu ke waktu. Ini dibuat secara otomatis dari Tugas Anda dan membedakan dua hal yang berbeda: <strong>Tugas Terjadwal</strong>, yang ditampilkan pada waktu yang direncanakan dan <strong>Tugas Biasa</strong> yang harus mengalir di sekitar peristiwa tetap tersebut. Semua tugas mempertimbangkan perkiraan waktu yang telah Anda tetapkan untuk mereka.</p><p>Selain itu, Anda juga dapat memberikan waktu mulai dan selesai pekerjaan. Jika dikonfigurasi, tugas rutin tidak akan pernah muncul di luar ini. Harap dicatat bahwa timeline hanya mencakup 30 hari mendatang.</p>",
+        "TEXT": "<p>Ide Schedule adalah untuk memberikan gambaran yang lebih baik tentang bagaimana tugas yang direncanakan seseorang bermain dari waktu ke waktu. Ini dibuat secara otomatis dari Tugas Anda dan membedakan dua hal yang berbeda: <strong>Tugas Terjadwal</strong>, yang ditampilkan pada waktu yang direncanakan dan <strong>Tugas Biasa</strong> yang harus mengalir di sekitar peristiwa tetap tersebut. Semua tugas mempertimbangkan perkiraan waktu yang telah Anda tetapkan untuk mereka.</p><p>Selain itu, Anda juga dapat memberikan waktu mulai dan selesai pekerjaan. Jika dikonfigurasi, tugas rutin tidak akan pernah muncul di luar ini. Harap dicatat bahwa schedule hanya mencakup 30 hari mendatang.</p>",
         "TITLE": "Linimasa"
       },
       "END": "Pekerjaan selesai",
@@ -1074,8 +1074,8 @@
         "SKIP": "Lewatkan",
         "SPLIT_TIME": "Bagi waktu menjadi beberapa tugas dan istirahat",
         "TASK": "Tugas",
-        "TASK_BREAK": "Tugas+Istirahat",
-        "TRACK_TO": "Lacak ke"
+        "TRACK_TO": "Lacak ke",
+        "TASK_BREAK": "Tugas+Istirahat"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Buat</em> dan lacak untuk",
@@ -1182,7 +1182,6 @@
   },
   "G": {
     "CANCEL": "Batal",
-    "CLICK_TO_EDIT": "Klik untuk ubah",
     "CLOSE": "Tutup",
     "DELETE": "Hapus",
     "DISMISS": "Abaikan",
@@ -1190,6 +1189,7 @@
     "DO_IT": "Lakukan!",
     "EDIT": "Ubah",
     "ENABLED": "Aktifkan",
+    "EXAMPLE_VAL": "Klik untuk ubah",
     "EXTENSION_INFO": "Silahkan <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> unduh ekstensi Chrome</a> untuk memungkinkan komunikasi dengan Jira Api dan Penanganan Waktu Idle. Perhatikan bahwa ini tidak berfungsi untuk seluler.",
     "LOGIN": "Login",
     "LOGOUT": "Keluar",
@@ -1224,9 +1224,9 @@
       "HELP": "<div><p>Ketika penanganan waktu idle diaktifkan, sebuah dialog akan terbuka setelah jangka waktu tertentu untuk memeriksa apakah dan pada tugas mana Anda ingin melacak waktu Anda, saat Anda menganggur.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktifkan penanganan waktu idle",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Hanya picu dialog waktu idle saat tugas saat ini dipilih",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Reset waktu idle yang tidak terlacak mengambil waktu istirahat",
       "MIN_IDLE_TIME": "Memicu idle setelah X",
-      "TITLE": "Penanganan Menganggur"
+      "TITLE": "Penanganan Menganggur",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Reset waktu idle yang tidak terlacak mengambil waktu istirahat"
     },
     "IMEX": {
       "HELP": "<p>Di sini Anda dapat mengekspor semua data Anda sebagai <strong>JSON</strong> untuk cadangan, tetapi juga menggunakannya dalam konteks yang berbeda (contoh. Anda mungkin ingin mengekspor proyek Anda di browser dan mengimpornya ke versi desktop). </p> <p>Impor mengharapkan JSON yang valid untuk disalin ke area teks. <strong>CATATAN: Setelah Anda menekan tombol impor, semua setelan dan data Anda saat ini akan ditimpa!</strong></p>",
@@ -1246,7 +1246,7 @@
       "GO_TO_FOCUS_MODE": "Pergi ke Mode Fokus",
       "GO_TO_SCHEDULED_VIEW": "Buka Tugas terjadwal",
       "GO_TO_SETTINGS": "Pergi ke pengaturan",
-      "GO_TO_TIMELINE": "Pergi ke Linimasa",
+      "GO_TO_SCHEDULE": "Pergi ke Linimasa",
       "GO_TO_WORK_VIEW": "Pergi ke Tampilan Kerja",
       "HELP": "<p>Di sini Anda dapat mengonfigurasi semua pintasan keyboard.</p> <p>Klik input teks dan masukkan kombinasi keyboard yang diinginkan. Tekan enter untuk menyimpan dan Escape untuk membatalkan.</p> <p>Ada tiga jenis pintasan:</p> <ul> <li> <strong>Pintasan global:</strong> Saat aplikasi dijalankan, aplikasi akan memicu tindakan dari setiap aplikasi lain. </li> <li> <strong>Pintasan tingkat aplikasi:</strong> Akan dipicu dari setiap layar aplikasi, tetapi tidak jika Anda sedang mengedit bidang teks. </li> <li> <strong>Pintasan tingkat tugas:</strong> Pintasan ini hanya akan dipicu jika Anda telah memilih tugas melalui mouse atau keyboard dan biasanya memicu tindakan yang secara khusus terkait dengan satu tugas tersebut. </li> </ul><p>Anda dapat <strong>menekan Escape untuk menghapus pintasan.</strong>",
       "MOVE_TASK_DOWN": "Pindahkan Tugas ke bawah dalam Daftar",
@@ -1259,6 +1259,7 @@
       "SHOW_SEARCH_BAR": "Tampilkan bilah pencarian",
       "SYSTEM_SHORTCUTS": "Pintasan Global (seluruh sistem)",
       "TASK_ADD_SUB_TASK": "Tambahkan sub Tugas",
+      "TASK_ADD_ATTACHMENT": "Lampirkan file atau tautan",
       "TASK_DELETE": "Hapus Tugas",
       "TASK_EDIT_TAGS": "Ubah Tag",
       "TASK_EDIT_TITLE": "Ubah Judul",
@@ -1268,7 +1269,7 @@
       "TASK_SCHEDULE": "Jadwal Tugas",
       "TASK_SHORTCUTS": "Tugas-tugas",
       "TASK_SHORTCUTS_INFO": "Pintasan berikut berlaku untuk tugas yang saat ini dipilih (dipilih melalui tab atau mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Tampilkan/Sembunyikan info tugas tambahan",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Tampilkan/Sembunyikan info tugas tambahan",
       "TASK_TOGGLE_DONE": "Beralih Selesai",
       "TITLE": "Pintasan Keyboard",
       "TOGGLE_BACKLOG": "Tampilkan/Sembunyikan Backlog",
@@ -1278,30 +1279,6 @@
       "ZOOM_DEFAULT": "Zoom default (khusus Desktop)",
       "ZOOM_IN": "Perbesar (khusus Desktop)",
       "ZOOM_OUT": "Perkecil (khusus Desktop)"
-    },
-    "LANG": {
-      "AR": "Arab",
-      "DE": "Jerman",
-      "EN": "Inggris",
-      "ES": "Spanyol",
-      "FA": "Persia",
-      "FR": "Perancis",
-      "HR": "Kroasia",
-      "ID": "Indonesia",
-      "IT": "Italia",
-      "JA": "Jepang",
-      "KO": "Korea",
-      "LABEL": "Pilih bahasa",
-      "NB": "Bokmål Norwegia",
-      "NL": "Belanda",
-      "PL": "Polandia",
-      "PT": "Portugis",
-      "RU": "Rusia",
-      "SK": "Slovakia",
-      "TITLE": "Bahasa",
-      "TR": "Turki",
-      "ZH": "Cina disederhanakan",
-      "ZH_TW": "Cina tradisional"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Proyek default untuk digunakan untuk tugas jika tidak ada yang ditentukan",
@@ -1358,8 +1335,8 @@
       "TITLE": "Pengingat istirahat",
       "MOTIVATIONAL_IMG": "Gambar motivasi (url web)"
     },
-    "TIMELINE": {
-      "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Batasi alur tugas yang tidak terjadwal ke waktu kerja tertentu",
       "L_WORK_END": "Hari Kerja Berakhir",
       "L_WORK_START": "Mulai Hari Kerja",
@@ -1367,7 +1344,7 @@
       "WORK_START_END_DESCRIPTION": "contoh. 17:00",
       "CAL_PROVIDERS": "Penyedia kalender (eksperimental dan opsional)",
       "CAL_PROVIDERS_ADD": "Tambahkan sumber iCal",
-      "CAL_PROVIDERS_INFO": "Anda juga dapat mengonfigurasi timeline untuk memuat dan menampilkan data dari iCal (contoh. Google Kalender).",
+      "CAL_PROVIDERS_INFO": "Anda juga dapat mengonfigurasi schedule untuk memuat dan menampilkan data dari iCal (contoh. Google Kalender).",
       "L_CAL_PATH": "Jalur Url/File untuk kalender ICAL (opsional)"
     },
     "TRACKING_REMINDER": {

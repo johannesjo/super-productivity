@@ -12,9 +12,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     darkMode: 'system',
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
-    isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
-    isAutoStartNextTask: false,
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
@@ -22,6 +20,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultProjectId: DEFAULT_PROJECT_ID,
     firstDayOfWeek: 1,
     startOfNextDay: 0,
+    isUseMinimalNav: false,
     isDisableAnimations: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
@@ -37,7 +36,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
-    isUnTrackedIdleResetsBreakTimer: true,
   },
   takeABreak: {
     isTakeABreakEnabled: true,
@@ -100,12 +98,15 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     zoomIn: 'Ctrl++',
     zoomOut: 'Ctrl+-',
     zoomDefault: 'Ctrl+0',
+    saveNote: 'Ctrl+s',
+    triggerSync: 'Ctrl+s',
     taskEditTitle: null,
-    taskToggleAdditionalInfoOpen: 'i',
+    taskToggleDetailPanelOpen: 'i',
     taskOpenEstimationDialog: 't',
     taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
+    taskAddAttachment: 'l',
     taskDelete: 'Backspace',
     taskMoveToProject: 'e',
     taskOpenContextMenu: 'q',
@@ -131,10 +132,14 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     doneSound: 'done2.mp3',
     breakReminderSound: null,
   },
-  trackingReminder: {
-    isEnabled: true,
-    isShowOnMobile: false,
-    minTime: minute * 2,
+  timeTracking: {
+    defaultEstimate: 0,
+    defaultEstimateSubTasks: 0,
+    isNotifyWhenTimeEstimateExceeded: true,
+    isAutoStartNextTask: false,
+    isTrackingReminderEnabled: false,
+    isTrackingReminderShowOnMobile: false,
+    trackingReminderMinTime: 5 * minute,
   },
   calendarIntegration: {
     calendarProviders: [],
@@ -143,7 +148,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,
   },
-  timeline: {
+  schedule: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',
@@ -171,11 +176,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       baseUrl: null,
       userName: null,
       password: null,
-      syncFilePath: 'super-productivity-backup.json',
+      syncFolderPath: 'super-productivity',
     },
 
     localFileSync: {
-      syncFilePath: 'super-productivity-sync.json',
+      syncFolderPath: 'super-productivity',
     },
   },
 };

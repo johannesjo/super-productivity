@@ -646,6 +646,27 @@
         "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "No tasks",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Add to Today",
+          "TITLE": "Add planned tasks to Today"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "This will remove the reminder from the task! Press Escape to cancel.",
+          "REMOVE_PLAN_DATE": "Remove plan date",
+          "TITLE": "Plan Task for Day"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "No scheduled items"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
+        "TASK_PLANNED_FOR": "Task planned for {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
       "BREAK_IS_DONE": "Your break is done!",
@@ -803,6 +824,10 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "Your data was only partially uploaded. Please try again later! Otherwise you will not be able to sync your data to other devices.",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog."
+      },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_IMPORT": "Import remote data anyway?",
@@ -830,6 +855,17 @@
         "USE_LOCAL": "Keep local",
         "USE_REMOTE": "Keep remote"
       },
+      "D_INCOMPLETE_SYNC": {
+        "T1": "Last sync was incomplete!",
+        "T2": "Your archive data was not properly uploaded during last sync:",
+        "T3": "You have 2 Options:",
+        "T4": "1. Go to your other device and complete the sync there.",
+        "T5": "2. Or you can overwrite the remote data with your local one. All remote changes will\n    be lost!",
+        "T6": "Creating a backup of the data you overwrite is recommended!!!",
+        "BTN_CLOSE_APP": "Close App",
+        "BTN_DOWNLOAD_BACKUP": "Download Local Backup",
+        "BTN_FORCE_UPLOAD": "Force Upload Local"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
         "PERM_FILE": "Give permission",
@@ -844,8 +880,7 @@
           "L_SYNC_FILE_NAME": "Sync File Name"
         },
         "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Sync file path",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created).",
+          "L_SYNC_FOLDER_PATH": "Sync folder path",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Needs file access permission"
         },
         "L_ENABLE_COMPRESSION": "Enable Compression (faster data transfer)",
@@ -860,7 +895,7 @@
           "CORS_INFO": "<strong>Making it work in the browser:</strong> To make this work in the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
-          "L_SYNC_FILE_PATH": "Sync File Path",
+          "L_SYNC_FOLDER_PATH": "Sync Folder Path",
           "L_USER_NAME": "Username"
         }
       },
@@ -869,6 +904,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "No local changes – Already in sync",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
+        "ERROR_NO_REV": "No valid rev for remote file",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data. Maybe you enabled encryption and your local password does not match the one used to encrypt the remote data?",
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
@@ -911,11 +947,13 @@
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
         "PARENT": "Parent",
+        "SCHEDULED_AT": "Scheduled at",
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
-        "TIME": "Time"
+        "TIME": "Time",
+        "TITLE_PLACEHOLDER": "Enter a title"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
@@ -942,8 +980,9 @@
         "DELETE": "Delete Task",
         "DELETE_REPEAT_INSTANCE": "Delete repeated Task Instance",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
-        "EDIT_REMINDER": "Edit reminder",
+        "EDIT_SCHEDULED": "Reschedule",
         "EDIT_TAGS": "Edit tags",
+        "EDIT_TASK_TITLE": "Edit title",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -956,7 +995,7 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
@@ -972,13 +1011,13 @@
         "MSG": "Do you want to create the new tags {{tagsTxt}}?",
         "OK": "Create tags"
       },
-      "D_REMINDER_ADD": {
-        "CONFIRM_REPEAT_OK": "Schedule",
-        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder",
+      "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "REMIND_AT": "Remind at",
+        "QA_NEXT_MONTH": "Schedule next Month",
+        "QA_NEXT_WEEK": "Schedule next Week",
+        "QA_TODAY": "Schedule Today",
+        "QA_TOMORROW": "Schedule Tomorrow",
         "RO_10M": "10 minutes before it starts",
         "RO_15M": "15 minutes before it starts",
         "RO_1H": "1 hour before it starts",
@@ -987,7 +1026,7 @@
         "RO_START": "when it starts",
         "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "UNSCHEDULE": "Remove"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
@@ -1129,16 +1168,18 @@
         "WEDNESDAY": "Wednesday"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
-        "TITLE": "Timeline"
+        "TEXT": "<p>The Schedule should provide you with a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and requires only <strong>time estimates on them to work</strong>.</p><p>Two things are distinguished: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong>, which should flow around those fixed events.</p><p>If you provide a work start and end time (recommended) regular tasks will never show up outside of these boundaries.</p>",
+        "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Timeline",
+      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "PLAN_END_DAY": "Plan at end of day",
+      "PLAN_START_DAY": "Plan at start of day",
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
       "LUNCH_BREAK": "Lunch Break"
@@ -1157,6 +1198,7 @@
         "BREAK": "Break",
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
+        "RESET_BREAK_REMINDER_TIMER": "Reset break reminder timer",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Skip",
         "SIMPLE_CONFIRM_COUNTER_OK": "Track",
         "SIMPLE_COUNTER_CONFIRM_TXT": "You selected skip, but activated {{nr}} simple counter button(s). Do you want to track the idle time to them?",
@@ -1165,7 +1207,6 @@
         "SKIP": "Skip",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Task",
-        "TASK_BREAK": "Task+Break",
         "TRACK_TO": "Track to"
       },
       "D_TRACKING_REMINDER": {
@@ -1240,8 +1281,8 @@
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "G": {
+    "ADD": "Add",
     "CANCEL": "Cancel",
-    "CLICK_TO_EDIT": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
@@ -1249,6 +1290,7 @@
     "DO_IT": "Do it!",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
+    "EXAMPLE_VAL": "e.g. 32m",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "HIDE": "Hide",
     "LOGIN": "Login",
@@ -1282,11 +1324,11 @@
       "CAL_PATH": "Url of the iCal source",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add Calendar iCal source",
-      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the timeline and you will be prompted to create tasks for calendar events, if they are due.",
+      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the schedule and you will be prompted to create tasks for calendar events, if they are due.",
       "CHECK_UPDATES": "Check for remote updates every X",
       "DEFAULT_PROJECT": "Default Project for added calendar tasks",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
-      "ICON": "Icon for Timeline",
+      "ICON": "Icon for Schedule",
       "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
       "TITLE": "Calendars"
     },
@@ -1304,7 +1346,6 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
       "TITLE": "Idle Handling"
     },
@@ -1326,7 +1367,7 @@
       "GO_TO_FOCUS_MODE": "Enter Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_TIMELINE": "Go to Timeline",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1336,55 +1377,59 @@
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Notes",
+      "SAVE_NOTE": "Save note",
       "SELECT_NEXT_TASK": "Select next Task",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
+      "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_PLAN_FORDAY": "Plan for day",
       "TASK_SCHEDULE": "Schedule Task",
       "TASK_SHORTCUTS": "Tasks",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
       "TITLE": "Keyboard Shortcuts",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "Start/Stop Task",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
+      "TRIGGER_SYNC": "Trigger sync (if configured)",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
       "ZOOM_OUT": "Zoom out (Desktop only)"
     },
     "LANG": {
-      "AR": "Arabic",
+      "AR": "عربى",
       "CZ": "Czech",
-      "DE": "German",
+      "DE": "Deutsch",
       "EN": "English",
-      "ES": "Spanish",
-      "FA": "Farsi",
-      "FR": "French",
-      "HR": "Croatian",
+      "ES": "Español",
+      "FA": "فارسی",
+      "FR": "français",
+      "HR": "Hrvatski",
       "ID": "Indonesian",
-      "IT": "Italian",
-      "JA": "Japanese",
-      "KO": "Korean",
+      "IT": "Italiano",
+      "JA": "日本語",
+      "KO": "한국어",
       "LABEL": "Please select a language",
-      "NB": "Norwegian Bokmål",
-      "NL": "Dutch",
+      "NB": "Norsk Bokmål",
+      "NL": "Nederlands",
       "PL": "Polish",
-      "PT": "Portuguese",
-      "RU": "Russian",
+      "PT": "Português",
+      "RU": "Русский",
       "SK": "Slovak",
       "TITLE": "Language",
-      "TR": "Turkish",
-      "ZH": "Simplified Chinese",
-      "ZH_TW": "Traditional Chinese"
+      "TR": "Türkçe",
+      "ZH": "中文(简体)",
+      "ZH_TW": "中文(繁體)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
@@ -1394,16 +1439,15 @@
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Disable all animations",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
+      "IS_USE_MINIMAL_SIDE_NAV": "Use minimal navigation bar (show only icons)",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
     },
@@ -1449,24 +1493,28 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
       "L_LUNCH_BREAK_END": "Lunch break end",
       "L_LUNCH_BREAK_START": "Lunch break start",
       "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00"
     },
-    "TRACKING_REMINDER": {
-      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
-      "L_IS_ENABLED": "Enabled",
-      "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
-      "L_MIN_TIME": "Time to wait before showing Banner",
-      "TITLE": "Time Tracking Reminder"
+    "TIME_TRACKING": {
+      "HELP": "The time tracking reminder is a banner to show up in case you forgot to start time tracking.",
+      "L_DEFAULT_ESTIMATE": "Default time estimate for new tasks",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "Default time estimate for new sub tasks",
+      "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
+      "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Reminder Enabled",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
+      "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
+      "TITLE": "Time Tracking"
     }
   },
   "GLOBAL_SNACK": {
@@ -1488,6 +1536,7 @@
     "DBX_UPLOAD": "Dropbox: Upload file...",
     "GITHUB_LOAD_ISSUE": "GitHub: Load issue data...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
+    "SYNC": "Syncing data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
     "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
@@ -1505,20 +1554,22 @@
       "KEYBOARD": "Howto: Advanced Keyboard",
       "REPORT_A_PROBLEM": "Report a problem",
       "START_WELCOME": "Start Welcome Tour",
-      "SYNC": "Howto: Configure Sync"
+      "SYNC": "Howto: Configure Sync",
+      "REDDIT_COMMUNITY": "Reddit Community"
     },
     "MANAGE_PROJECTS": "Manage Projects",
     "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
     "HELP": "Help",
     "METRICS": "Metrics",
     "NOTES": "Notes",
-    "NOTES_PANEL_INFO": "Notes can only be shown from the timeline and the regular task list views.",
+    "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",
+    "PLANNER": "Planner",
     "PROCRASTINATE": "Procrastinate",
     "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Project Settings",
     "QUICK_HISTORY": "Quick History",
-    "SCHEDULED": "Scheduled",
+    "SCHEDULED": "Scheduled Tasks",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",
@@ -1541,10 +1592,11 @@
       "OK": "Aye aye! Shutdown!"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
-    "EVALUATION": "Evaluation",
+    "EVALUATE_DAY": "Evaluate",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
-    "PLAN": "Plan",
+    "PLAN_TOMORROW": "Plan",
+    "REVIEW_TASKS": "Review",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
     "ROUND_5M": "Round all tasks to 5 minutes",
@@ -1559,11 +1611,9 @@
     "START_END": "Start – End",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
     "TASKS_COMPLETED": "Tasks Completed",
-    "TASK_LIST": "Task List",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
     "TIME_SPENT_TODAY_BY_TAG": "Time Spent today by Tag",
-    "TODAY": "Today",
     "WEEK": "Week"
   },
   "PM": {

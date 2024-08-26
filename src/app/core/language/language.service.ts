@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateTimeAdapter } from 'ngx-date-time-picker-schedule';
 import { DateAdapter } from '@angular/material/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import {
   AUTO_SWITCH_LNGS,
   LanguageCode,
@@ -25,7 +24,6 @@ export class LanguageService {
 
   constructor(
     private _translateService: TranslateService,
-    private _dateTimeAdapter: DateTimeAdapter<unknown>,
     private _dateAdapter: DateAdapter<unknown>,
     private _globalConfigService: GlobalConfigService,
   ) {
@@ -76,7 +74,6 @@ export class LanguageService {
     moment.locale(momLng);
 
     this._dateAdapter.setLocale(momLng);
-    this._dateTimeAdapter.setLocale(momLng);
   }
 
   private _isRTL(lng: LanguageCode): boolean {

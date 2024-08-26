@@ -1,0 +1,34 @@
+<div
+  class="wrap-add-planned"
+  *ngIf="workContextService.isToday
+  &&(isAlwaysShowIfAny || (workContextService.activeWorkContext$|async)?.taskIds.length ===0)
+  && (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
+>
+  <button
+    *ngIf="plannedForToday?.length"
+    (click)="addTasksForTomorrowService.movePlannedTasksToToday(plannedForToday)"
+    class="add-scheduled"
+    color=""
+    mat-stroked-button
+    tabindex="1"
+  >
+    <mat-icon>playlist_add</mat-icon>
+    {{ T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{ nr: plannedForToday.length } }}
+  </button>
+
+  <ng-container
+    *ngIf="plannedForToday.length === 0 && (addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$|async) as nrOfPlannerItemsForTomorrow"
+  >
+    <button
+      *ngIf="nrOfPlannerItemsForTomorrow"
+      class="add-scheduled"
+      (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
+      color=""
+      mat-stroked-button
+      tabindex="1"
+    >
+      <mat-icon>playlist_add</mat-icon>
+      {{ T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr: nrOfPlannerItemsForTomorrow } }}
+    </button>
+  </ng-container>
+</div>

@@ -2,7 +2,7 @@
 
 <div
   *ngIf="(worklogService.quickHistoryWeeks$|async) as weeks else spinner"
-  [@fade]
+  [@fadeInSlow]
 >
   <div
     class="no-data"

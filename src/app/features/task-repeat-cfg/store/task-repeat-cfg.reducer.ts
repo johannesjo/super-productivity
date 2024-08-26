@@ -46,6 +46,27 @@ export const selectTaskRepeatCfgsWithStartTime = createSelector(
   },
 );
 
+export const selectTaskRepeatCfgsWithAndWithoutStartTime = createSelector(
+  selectAllTaskRepeatCfgs,
+  (
+    taskRepeatCfgs: TaskRepeatCfg[],
+  ): {
+    withStartTime: TaskRepeatCfg[];
+    withoutStartTime: TaskRepeatCfg[];
+  } => {
+    const withStartTime: TaskRepeatCfg[] = [];
+    const withoutStartTime: TaskRepeatCfg[] = [];
+    taskRepeatCfgs.forEach((cfg) => {
+      if (cfg.startTime) {
+        withStartTime.push(cfg);
+      } else {
+        withoutStartTime.push(cfg);
+      }
+    });
+    return { withStartTime, withoutStartTime };
+  },
+);
+
 export const selectTaskRepeatCfgsSortedByTitleAndProject = createSelector(
   selectAllTaskRepeatCfgs,
   (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {

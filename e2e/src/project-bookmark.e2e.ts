@@ -1,8 +1,8 @@
 import { NBrowser } from '../n-browser-interface';
 
-const TOGGLE_BOOKMARK_BAR_BTN = '.action-nav button:nth-child(3)';
+const TOGGLE_BOOKMARK_BAR_BTN = '.e2e-bookmark-btn';
 const BOOKMARK_BAR_OPTS_BTN = 'bookmark-bar .list-controls button:first-of-type';
-const ADD_BOOKMARK_BTN = '.mat-menu-panel .mat-menu-item:first-of-type';
+const ADD_BOOKMARK_BTN = '.mat-mdc-menu-panel .mat-mdc-menu-item:first-of-type';
 
 const ADD_BOOKMARK_DIALOG = 'dialog-edit-bookmark';
 const BOOKMARK_TITLE_INP = `${ADD_BOOKMARK_DIALOG} input[name=title]`;
@@ -11,10 +11,10 @@ const BOOKMARK_SUBMIT_BTN = `${ADD_BOOKMARK_DIALOG} button[type=submit]:enabled`
 
 const BOOKMARK = '.global-bookmark-list-inner .global-bookmark';
 const FIRST_BOOKMARK = `${BOOKMARK}:first-of-type`;
+/* eslint-disable @typescript-eslint/naming-convention */
 
 module.exports = {
   '@tags': ['bookmark'],
-
   'create a bookmark': (browser: NBrowser) =>
     browser
       .goToDefaultProject()
@@ -36,6 +36,6 @@ module.exports = {
 
       .waitForElementVisible(FIRST_BOOKMARK)
       .assert.elementPresent(FIRST_BOOKMARK)
-      .assert.containsText(FIRST_BOOKMARK, 'Some bookmark title')
+      .assert.textContains(FIRST_BOOKMARK, 'Some bookmark title')
       .end(),
 };

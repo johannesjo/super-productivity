@@ -61,6 +61,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
       // !! is used to get the associated boolean value of a non boolean value
       // It's not a fancy trick using model.project alone gets the required case right but won't remove it
       // if the project field is empty so this is needed for the wanted behavior
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'templateOptions.required': '!!model.project',
     },
   },

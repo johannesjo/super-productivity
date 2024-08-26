@@ -28,6 +28,7 @@ $project-color-width: $s * 3;
   align-items: center;
   justify-content: space-between;
   padding: $s * 0.5 2 * $s;
+  flex-direction: row;
   padding-left: 2 * $s + $project-color-width;
   margin-bottom: $s;
   position: relative;

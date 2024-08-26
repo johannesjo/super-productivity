@@ -628,10 +628,6 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Názov synchronizačného súboru"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
-        },
         "L_ENABLE_COMPRESSION": "Povoliť kompresie (rýchlejší prenos údajov)",
         "L_ENABLE_SYNCING": "Povoliť synchronizáciu",
         "L_SYNC_INTERVAL": "Interval synchronizácie",
@@ -641,8 +637,12 @@
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Základná URL adresa",
           "L_PASSWORD": "Heslo",
-          "L_SYNC_FILE_PATH": "Cesta k synchronizačnému súboru",
-          "L_USER_NAME": "Používateľské meno"
+          "L_USER_NAME": "Používateľské meno",
+          "L_SYNC_FILE_PATH": "Cesta k synchronizačnému súboru"
+        },
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
         }
       },
       "S": {
@@ -718,7 +718,7 @@
         "DELETE": "Odstrániť úlohu",
         "DELETE_REPEAT_INSTANCE": "Odstránenie opakovanej inštancie úlohy",
         "DROP_ATTACHMENT": "Vložte prílohu k \"{{title}}\"",
-        "EDIT_REMINDER": "Upraviť pripomienku",
+        "EDIT_SCHEDULED": "Upraviť pripomienku",
         "EDIT_TAGS": "Upraviť štítky",
         "MARK_DONE": "Označiť ako hotové",
         "MARK_UNDONE": "Označiť ako nedokončené",
@@ -732,7 +732,7 @@
         "REPEAT_EDIT": "Upravte konfiguráciu opakovanej úlohy",
         "SCHEDULE": "Naplánovať úlohu",
         "SHOW_UPDATES": "Zobraziť aktualizácie",
-        "TOGGLE_ADDITIONAL": "Zobraziť/skryť ďalšie informácie",
+        "TOGGLE_DETAIL_PANEL": "Zobraziť/skryť ďalšie informácie",
         "TOGGLE_ATTACHMENTS": "Zobraziť/skryť prílohy",
         "TOGGLE_DONE": "Označiť ako hotové/nedokončené",
         "TOGGLE_SUB_TASK_VISIBILITY": "Prepnúť viditeľnosť podúloh",
@@ -740,7 +740,7 @@
         "TRACK_TIME_STOP": "Pozastaviť sledovanie času",
         "UPDATE_ISSUE_DATA": "Aktualizujte údaje o probléme"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Naplánovať",
         "CONFIRM_REPEAT_TXT": "Snažíte sa naplánovať túto opakovanú úlohu na iný deň. Opakované úlohy sú zvyčajne určené na opakované vytváranie v určených dňoch a plánujú sa len na tento deň. Chcete v tom aj tak pokračovať?",
         "DATETIME_FOR": "Dátum pre pripomienku",
@@ -895,10 +895,10 @@
         "WEDNESDAY": "Streda"
       }
     },
-    "TIMELINE": {
+    "SCHEDULE": {
       "CONTINUED": "continued",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
         "TITLE": "Časová os"
       },
       "END": "Ukončenie práce",
@@ -909,7 +909,7 @@
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
       "LUNCH_BREAK": "Obedová prestávka",
       "S": {
-        "CAL_PROVIDER_ERROR": "Timeline Cal Provider Error: {{errTxt}}"
+        "CAL_PROVIDER_ERROR": "Schedule Cal Provider Error: {{errTxt}}"
       }
     },
     "TIME_TRACKING": {
@@ -934,8 +934,8 @@
         "SKIP": "Preskočiť",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Úloha",
-        "TASK_BREAK": "Task+Break",
-        "TRACK_TO": "Track to"
+        "TRACK_TO": "Track to",
+        "TASK_BREAK": "Task+Break"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Vytvoriť</em> a sledovať na",
@@ -1042,14 +1042,14 @@
   },
   "G": {
     "CANCEL": "Cancel",
-    "CLICK_TO_EDIT": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
-    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
+    "DURATION_DESCRIPTION": "e.g. \"5h 6m\" which results in 5 hours in 6 minutes",
     "DO_IT": "Do it!",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
+    "EXAMPLE_VAL": "click to edit",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
@@ -1084,9 +1084,9 @@
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling"
+      "TITLE": "Idle Handling",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -1106,7 +1106,7 @@
       "GO_TO_FOCUS_MODE": "Prejdite do režimu zaostrenia",
       "GO_TO_SCHEDULED_VIEW": "Prejsť na naplánované úlohy",
       "GO_TO_SETTINGS": "Prejsť na Nastavenia",
-      "GO_TO_TIMELINE": "Prejsť na časovú os",
+      "GO_TO_SCHEDULE": "Prejsť na časovú os",
       "GO_TO_WORK_VIEW": "Prejsť na pracovné zobrazenie",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Presunúť úlohu v zozname nadol",
@@ -1119,6 +1119,7 @@
       "SHOW_SEARCH_BAR": "Zobraziť panel vyhľadávania",
       "SYSTEM_SHORTCUTS": "Globálne skratky (pre celý systém)",
       "TASK_ADD_SUB_TASK": "Pridať podúlohu",
+      "TASK_ADD_ATTACHMENT": "Priložiť súbor alebo odkaz",
       "TASK_DELETE": "Odstrániť úlohu",
       "TASK_EDIT_TAGS": "Upraviť štítky",
       "TASK_EDIT_TITLE": "Upraviť názov",
@@ -1128,7 +1129,7 @@
       "TASK_SCHEDULE": "Naplánovať úlohu",
       "TASK_SHORTCUTS": "Úlohy",
       "TASK_SHORTCUTS_INFO": "Nasledujúce skratky sa vzťahujú na aktuálne vybranú úlohu (vybranú pomocou karty alebo myši).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Zobraziť/skryť ďalšie informácie o úlohe",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Zobraziť/skryť ďalšie informácie o úlohe",
       "TASK_TOGGLE_DONE": "Prepnúť Hotové",
       "TITLE": "Klávesové skratky",
       "TOGGLE_BACKLOG": "Zobraziť/skryť zoznam nevybavených úloh",
@@ -1138,29 +1139,6 @@
       "ZOOM_DEFAULT": "Predvolené zväčšenie (Desktop only)",
       "ZOOM_IN": "Priblížiť (Desktop only)",
       "ZOOM_OUT": "Oddialiť (Desktop only)"
-    },
-    "LANG": {
-      "AR": "Arabic",
-      "DE": "German",
-      "EN": "English",
-      "ES": "Spanish",
-      "FA": "Farsi",
-      "FR": "French",
-      "HR": "Croatian",
-      "IT": "Italian",
-      "JA": "Japanese",
-      "KO": "Korean",
-      "LABEL": "Please select a language",
-      "NB": "Norwegian Bokmål",
-      "NL": "Dutch",
-      "PL": "Polish",
-      "PT": "Portuguese",
-      "RU": "Russian",
-      "SK": "Slovak",
-      "TITLE": "Language",
-      "TR": "Turkish",
-      "ZH": "Simplified Chinese",
-      "ZH_TW": "Traditional Chinese"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Predvolený projekt, ktorý sa použije pre úlohy, ak nie je zadaný žiadny",
@@ -1214,16 +1192,16 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "TIMELINE": {
-      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
-      "TITLE": "Timeline",
+      "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the timeline to also load and display data from iCal (e.g. Google Calendar).",
+      "CAL_PROVIDERS_INFO": "You can optionally configure the schedule to also load and display data from iCal (e.g. Google Calendar).",
       "L_CAL_PATH": "Url/File path for calendar ICAL (optional)"
     },
     "TRACKING_REMINDER": {

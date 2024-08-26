@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { fadeAnimation, fadeInSlowAnimation } from '../../ui/animations/fade.ani';
 import { WorklogService } from '../worklog/worklog.service';
 import { SimpleCounterService } from '../simple-counter/simple-counter.service';
 import { TaskService } from '../tasks/task.service';
@@ -14,7 +14,7 @@ import { KeyValue } from '@angular/common';
   templateUrl: './quick-history.component.html',
   styleUrls: ['./quick-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, expandFadeAnimation, fadeAnimation],
+  animations: [expandAnimation, expandFadeAnimation, fadeAnimation, fadeInSlowAnimation],
 })
 export class QuickHistoryComponent {
   visibility: boolean[] = [];

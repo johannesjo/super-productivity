@@ -120,6 +120,7 @@ describe('createRows', () => {
           id: 'T1',
           timeSpentOnDay: {
             [dateKey1]: oneHour,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             '2021-02-20': oneHour,
             [dateKey2]: oneHour,
           },

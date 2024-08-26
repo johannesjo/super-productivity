@@ -5,9 +5,9 @@
 }
 
 :host::ng-deep .tpl {
-  clear: both !important;
-  width: auto !important;
-  float: none !important;
+  @include mq(xs) {
+    grid-column: 1/3;
+  }
 }
 
 :host::ng-deep .sub-section-heading {

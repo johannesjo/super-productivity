@@ -8,6 +8,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   title: T.GCF.KEYBOARD.TITLE,
   key: 'keyboard',
   help: T.GCF.KEYBOARD.HELP,
+  isHideForAndroidApp: true,
   items: [
     // SYSTEM WIDE
     ...((IS_ELECTRON
@@ -135,7 +136,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'goToTimeline',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_TIMELINE,
+        label: T.GCF.KEYBOARD.GO_TO_SCHEDULE,
       },
     },
     {
@@ -187,6 +188,22 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.ZOOM_DEFAULT,
       },
     },
+    // TODO implement somehow
+    // {
+    //   key: 'saveNote',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.SAVE_NOTE,
+    //   },
+    // },
+    {
+      key: 'triggerSync',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TRIGGER_SYNC,
+      },
+    },
+
     // TASKS
     {
       type: 'tpl',
@@ -213,10 +230,10 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'taskToggleAdditionalInfoOpen',
+      key: 'taskToggleDetailPanelOpen',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN,
+        label: T.GCF.KEYBOARD.TASK_TOGGLE_DETAIL_PANEL_OPEN,
       },
     },
     {
@@ -245,6 +262,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.TASK_ADD_SUB_TASK,
+      },
+    },
+    {
+      key: 'taskAddAttachment',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_ADD_ATTACHMENT,
       },
     },
     {

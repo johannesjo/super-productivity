@@ -24,7 +24,7 @@ import {
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
-import * as moment from 'moment';
+import moment from 'moment';
 import { T } from '../../t.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';

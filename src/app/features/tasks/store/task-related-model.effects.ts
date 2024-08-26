@@ -75,7 +75,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-            oldTagIds: task.tagIds,
           }),
         ),
       ),
@@ -93,7 +92,6 @@ export class TaskRelatedModelEffects {
           updateTaskTags({
             task,
             newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
-            oldTagIds: task.tagIds,
           }),
         ),
       ),
@@ -145,7 +143,7 @@ export class TaskRelatedModelEffects {
     this._actions$.pipe(
       ofType(updateTaskTags),
       filter(({ isSkipExcludeCheck }) => !isSkipExcludeCheck),
-      switchMap(({ task, newTagIds, oldTagIds }) => {
+      switchMap(({ task, newTagIds }) => {
         if (task.parentId) {
           return this._taskService.getByIdOnce$(task.parentId).pipe(
             switchMap((parentTask) => {
@@ -163,7 +161,6 @@ export class TaskRelatedModelEffects {
                   return of(
                     updateTaskTags({
                       task: parentTask,
-                      oldTagIds: parentTask.tagIds,
                       newTagIds: freeTags,
                       isSkipExcludeCheck: true,
                     }),
@@ -179,8 +176,10 @@ export class TaskRelatedModelEffects {
                   // reverse previous updateTaskTags action since not possible
                   return of(
                     updateTaskTags({
-                      task: task,
-                      oldTagIds: newTagIds,
+                      task: {
+                        ...task,
+                        tagIds: newTagIds,
+                      },
                       newTagIds: freeTagsForSub,
                       isSkipExcludeCheck: true,
                     }),
@@ -200,7 +199,6 @@ export class TaskRelatedModelEffects {
                 .map((subTask) => {
                   return updateTaskTags({
                     task: subTask,
-                    oldTagIds: subTask.tagIds,
                     newTagIds: subTask.tagIds.filter((id) => !newTagIds.includes(id)),
                     isSkipExcludeCheck: true,
                   });
@@ -266,8 +264,8 @@ export class TaskRelatedModelEffects {
           task.isDone && task.doneOn
             ? task.doneOn
             : task.parentId
-            ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
-            : now,
+              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
+              : now,
       })),
       currentArchive,
     );
