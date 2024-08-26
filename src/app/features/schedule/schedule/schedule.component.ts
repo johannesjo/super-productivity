@@ -252,6 +252,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   isDragging = false;
+  isDraggingDelayed = false;
   isCreateTaskActive = false;
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
@@ -322,7 +323,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
-    if (this.isDragging) {
+    if (this.isDragging || this.isDraggingDelayed) {
       return;
     }
     if (this.isCreateTaskActive) {
@@ -416,7 +417,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     console.log('dragStart', ev);
-    this.isDragging = true;
+    this.isDragging = this.isDraggingDelayed = true;
     this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
 
     const cur = ev.source.element.nativeElement;
@@ -460,6 +461,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         // NOTE: doing this again fixes the issue that the element remains in the wrong state sometimes
         ev.source.element.nativeElement.style.pointerEvents = '';
       }
+      this.isDraggingDelayed = false;
     }, 100);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
