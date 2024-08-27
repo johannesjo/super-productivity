@@ -14,6 +14,10 @@
   }
 }
 
+:host planner-task ::ng-deep .drag-handle-ico {
+  visibility: hidden;
+}
+
 .due-date {
   border-radius: $card-border-radius;
   display: flex;

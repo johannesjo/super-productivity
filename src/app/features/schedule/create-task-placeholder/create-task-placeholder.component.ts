@@ -77,6 +77,8 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._editEndTimeout);
+    // otherwise the element  might not reappear always
+    this.editEnd.emit();
   }
 
   onBlur(): void {
