@@ -20,6 +20,7 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { TagComponentTag } from '../tag/tag.component';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { NO_LIST_TAG } from '../tag.const';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 @Component({
   selector: 'tag-list',
@@ -108,9 +109,9 @@ export class TagListComponent implements OnDestroy {
 
   // NOTE: should normally be enough
 
-  private _task?: Task;
+  private _task?: Task | TaskRepeatCfg;
 
-  @Input() set task(task: Task) {
+  @Input() set task(task: Task | TaskRepeatCfg) {
     this._task = task;
     if (this._tagIds$.getValue() !== task.tagIds) {
       this._tagIds$.next(task.tagIds);
