@@ -13,7 +13,7 @@
   <ng-template matMenuContent>
     <button
       (click)="startTask()"
-      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTasks?.length"
+      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -28,7 +28,7 @@
 
     <button
       (click)="pauseTask()"
-      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTasks?.length"
+      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -64,7 +64,7 @@
 
     <button
       (click)="estimateTime()"
-      *ngIf="!task.subTasks?.length"
+      *ngIf="!task.subTaskIds.length"
       class="hide-xs"
       mat-menu-item
     >

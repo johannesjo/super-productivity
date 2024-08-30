@@ -3,7 +3,6 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { Tag } from '../tag.model';
 import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
-import { DialogEditTagsForTaskComponent } from '../dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
@@ -69,13 +68,4 @@ export class TagListComponent {
     private readonly _workContextService: WorkContextService,
     private readonly _matDialog: MatDialog,
   ) {}
-
-  editTags(): void {
-    this._matDialog.open(DialogEditTagsForTaskComponent, {
-      restoreFocus: true,
-      data: {
-        task: this.task(),
-      },
-    });
-  }
 }
