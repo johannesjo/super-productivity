@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  input,
   Input,
   ViewChild,
 } from '@angular/core';
@@ -15,10 +16,11 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { TaskCopy, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskCopy, TaskWithSubTasks } from '../../task.model';
 import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
+  delay,
   distinctUntilChanged,
   first,
   map,
@@ -49,6 +51,8 @@ import { Update } from '@ngrx/entity';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
+import { Store } from '@ngrx/store';
+import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -73,6 +77,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
 
+  isAdvancedControls = input<boolean>(false);
+
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
   @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
@@ -80,13 +86,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   @ViewChild('contextMenu', { static: true, read: MatMenu }) contextMenu?: MatMenu;
 
-  task!: TaskWithSubTasks;
+  task!: TaskWithSubTasks | Task;
 
   isTodayTag: boolean = false;
   isCurrent: boolean = false;
   isBacklog: boolean = false;
 
-  private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
+  private _task$: ReplaySubject<TaskWithSubTasks | Task> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
       return v.issueType && v.issueId && v.projectId
@@ -112,7 +118,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _isTaskDeleteTriggered: boolean = false;
 
-  @Input('task') set taskSet(v: TaskWithSubTasks) {
+  @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
     this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
     this.isCurrent = this._taskService.currentTaskId === v.id;
@@ -130,6 +136,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     private readonly _globalConfigService: GlobalConfigService,
+    private readonly _store: Store,
   ) {}
 
   ngAfterViewInit(): void {
@@ -192,7 +199,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //     .subscribe(() => this.focusSelf());
   // }
 
-  deleteTask(isClick: boolean = false): void {
+  async deleteTask(isClick: boolean = false): Promise<void> {
     // NOTE: prevents attempts to delete the same task multiple times
     if (this._isTaskDeleteTriggered) {
       return;
@@ -203,8 +210,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       this.focusNext(true);
     }
 
+    const taskWithSubTasks = await this._getTaskWithSubtasks();
+    this._taskService.remove(taskWithSubTasks);
     this._isTaskDeleteTriggered = true;
-    this._taskService.remove(this.task);
   }
 
   startTask(): void {
@@ -372,7 +380,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   // TODO move to service
-  moveTaskToProject(projectId: string): void {
+  async moveTaskToProject(projectId: string): Promise<void> {
     if (projectId === this.task.projectId) {
       return;
     } else if (this.task.issueId && this.task.issueType !== 'CALENDAR') {
@@ -383,8 +391,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       });
       return;
     } else if (!this.task.repeatCfgId) {
-      this._taskService.moveToProject(this.task, projectId);
+      const taskWithSubTasks = await this._getTaskWithSubtasks();
+      this._taskService.moveToProject(taskWithSubTasks, projectId);
     } else {
+      const taskWithSubTasks = await this._getTaskWithSubtasks();
+
       forkJoin([
         this._taskRepeatCfgService
           .getTaskRepeatCfgById$(this.task.repeatCfgId)
@@ -417,7 +428,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
                 this._taskRepeatCfgService.updateTaskRepeatCfg(reminderCfg.id, {
                   projectId,
                 });
-                this._taskService.moveToProject(this.task, projectId);
+                this._taskService.moveToProject(taskWithSubTasks, projectId);
                 return EMPTY;
               }
 
@@ -488,5 +499,16 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   trackByProjectId(i: number, project: Project): string {
     return project.id;
+  }
+
+  private async _getTaskWithSubtasks(): Promise<TaskWithSubTasks> {
+    return await this._store
+      .select(selectTaskByIdWithSubTaskData, { id: this.task.id })
+      .pipe(
+        first(),
+        // NOTE without the delay selectTaskByIdWithSubTaskData triggers twice for unknown reasons
+        delay(50),
+      )
+      .toPromise();
   }
 }
