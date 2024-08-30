@@ -60,7 +60,7 @@ import { unique } from '../../../util/unique';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { projectSelectors } from './project.selectors';
+import { selectProjectFeatureState } from './project.selectors';
 import {
   addNote,
   deleteNote,
@@ -543,7 +543,7 @@ export class ProjectEffects {
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
     return this._store$.pipe(
       // tap(() => console.log('SAVE')),
-      select(projectSelectors),
+      select(selectProjectFeatureState),
       take(1),
       switchMap((projectState) =>
         this._persistenceService.project.saveState(projectState, { isSyncModelChange }),

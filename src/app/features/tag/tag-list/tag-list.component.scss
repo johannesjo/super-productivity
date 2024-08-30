@@ -2,19 +2,17 @@
 
 :host {
   display: block;
+  pointer-events: none;
 }
 
 .tags-container {
+  display: inline-block;
   position: relative;
   //margin-left: 50px;
   // Magic number to align icon with task text
   user-select: none;
   -webkit-user-select: none; /* Safari */
   margin: 0 0 ($s * 0.5) 4px;
-
-  &.isDisableEdit {
-    pointer-events: none;
-  }
 }
 
 .tags {
@@ -25,11 +23,4 @@
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
-}
-
-.tags > mat-icon {
-  margin-right: 4px;
-  font-size: 16px;
-  margin-right: 4px;
-  opacity: 0.6;
 }

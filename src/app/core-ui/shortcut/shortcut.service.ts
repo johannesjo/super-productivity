@@ -52,8 +52,6 @@ export class ShortcutService {
     private _ngZone: NgZone,
     private _store: Store,
   ) {
-    this.isCtrlPressed$.subscribe((v) => console.log(`isCtrlPressed$`, v));
-
     this._activatedRoute.queryParams.subscribe((params) => {
       if (params && params.backlogPos) {
         this.backlogPos = +params.backlogPos;

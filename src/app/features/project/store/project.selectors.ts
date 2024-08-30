@@ -20,9 +20,10 @@ import { GiteaCfg } from '../../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../../issue/providers/redmine/redmine.model';
 
 // TODO rename to selectProjectFeatureState
-export const projectSelectors = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
+export const selectProjectFeatureState =
+  createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
-export const selectAllProjects = createSelector(projectSelectors, selectAll);
+export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => !p.isArchived),
 );
@@ -48,7 +49,7 @@ export const selectAllProjectColorsAndTitles = createSelector(
 // DYNAMIC SELECTORS
 // -----------------
 export const selectProjectById = createSelector(
-  projectSelectors,
+  selectProjectFeatureState,
   (state: ProjectState, props: { id: string }): Project => {
     const p = state.entities[props.id];
     if (!props.id) {
@@ -98,7 +99,7 @@ export const selectGiteaCfgByProjectId = createSelector(
 );
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(
-  projectSelectors,
+  selectProjectFeatureState,
   (s: ProjectState, props: { currentId: string | null }) => {
     const ids = s.ids as string[];
     return ids
