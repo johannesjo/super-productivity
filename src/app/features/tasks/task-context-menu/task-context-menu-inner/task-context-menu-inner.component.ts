@@ -140,7 +140,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     ev.preventDefault();
     ev.stopPropagation();
     ev.stopImmediatePropagation();
-    console.log(this._elementRef.nativeElement.closest('.backlog'));
 
     if (ev instanceof MouseEvent || ev instanceof TouchEvent) {
       this.contextMenuPosition.x =
@@ -365,7 +364,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   focusTaskElement(): void {
-    this._elementRef.nativeElement.closest('task').focus();
+    this._elementRef.nativeElement.closest('task')?.focus();
   }
 
   onTagsUpdated(tagIds: string[]): void {

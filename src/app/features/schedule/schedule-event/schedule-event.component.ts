@@ -46,6 +46,7 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
+import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 
 @Component({
   selector: 'schedule-event',
@@ -60,6 +61,7 @@ import { CalendarIntegrationService } from '../../calendar-integration/calendar-
     MatMenuItem,
     TranslateModule,
     MatMenuTrigger,
+    TaskContextMenuComponent,
   ],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
@@ -88,8 +90,10 @@ export class ScheduleEventComponent implements OnInit {
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-  @ViewChild('contextMenuTriggerEl', { static: false, read: MatMenuTrigger })
-  contextMenu!: MatMenuTrigger;
+
+  @ViewChild('taskContextMenu', { static: false, read: TaskContextMenuComponent })
+  taskContextMenu?: TaskContextMenuComponent;
+
   protected readonly SVEType = SVEType;
   destroyRef = inject(DestroyRef);
   private _isBeingSubmitted: boolean = false;
@@ -254,18 +258,7 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    // for some reason that fixes the menu position for very short events
-    if (!this.se.isCloseToOthers && !this.se.isCloseToOthersFirst) {
-      this.contextMenuPosition.x =
-        ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-      this.contextMenuPosition.y =
-        ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
-    }
-    this.contextMenu.openMenu();
+    this.taskContextMenu?.open(event);
   }
 
   deleteTask(): void {

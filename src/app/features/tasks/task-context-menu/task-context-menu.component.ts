@@ -9,7 +9,7 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
-import { TaskWithSubTasks } from '../task.model';
+import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-context-menu-inner.component';
 
 @Component({
@@ -33,7 +33,7 @@ import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-co
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskContextMenuComponent {
-  task = input.required<TaskWithSubTasks>();
+  task = input.required<TaskWithSubTasks | Task>();
   isShowInner: boolean = true;
 
   @ViewChild('taskContextMenuInner', {
