@@ -21,6 +21,14 @@ $total-rows: 24 * $fr;
   }
 }
 
+.main-grid-container.isCtrlKeyPressed {
+  schedule-event,
+  .work-start,
+  .work-end {
+    pointer-events: none !important;
+  }
+}
+
 .main-grid-container,
 .days {
   grid-auto-flow: column;

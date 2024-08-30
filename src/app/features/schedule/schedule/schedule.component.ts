@@ -59,6 +59,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
+import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -266,6 +267,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   constructor(
     public taskService: TaskService,
     public layoutService: LayoutService,
+    public shortcutService: ShortcutService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _store: Store,

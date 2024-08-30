@@ -53,6 +53,7 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
+  [class.isCtrlKeyPressed]="shortcutService.isCtrlPressed$|async"
   (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
