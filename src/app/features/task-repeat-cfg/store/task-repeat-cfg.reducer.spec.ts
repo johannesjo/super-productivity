@@ -3,6 +3,7 @@ import {
   selectTaskRepeatCfgsDueOnDayOnly,
 } from './task-repeat-cfg.reducer';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
+import { TaskReminderOptionId } from '../../tasks/task.model';
 
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   ...DEFAULT_TASK_REPEAT_CFG,
@@ -141,6 +142,34 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
         );
         const resultIds = result.map((item) => item.id);
         expect(resultIds).toEqual([]);
+      });
+    });
+
+    [
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 2,
+      // eslint-disable-next-line no-mixed-operators
+      FAKE_MONDAY_THE_10TH + DAY * 4,
+    ].forEach((dayDateStr) => {
+      it('should return cfg for a for repeatEvery if correct', () => {
+        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+          [
+            dummyRepeatable('R1', {
+              repeatCycle: 'DAILY',
+              repeatEvery: 2,
+              startDate: '2022-01-10',
+              startTime: '10:00',
+              remindAt: TaskReminderOptionId.AtStart,
+            }),
+          ],
+          {
+            dayDate: new Date(dayDateStr).getTime(),
+          },
+        );
+        const resultIds = result.map((item) => item.id);
+        expect(resultIds).toEqual(['R1']);
       });
     });
   });
@@ -432,7 +461,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
   describe('for DAILY', () => {
     it('should return cfg for a far future task', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'DAILY',
@@ -459,7 +488,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       FAKE_MONDAY_THE_10TH + DAY * 150,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -488,7 +517,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly for non exact day dates', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -507,21 +536,21 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
     [
       // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY,
+      FAKE_MONDAY_THE_10TH,
       // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 11,
+      FAKE_MONDAY_THE_10TH + DAY * 2,
       // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 21,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 34,
+      FAKE_MONDAY_THE_10TH + DAY * 4,
     ].forEach((dayDateStr) => {
-      it('should NOT return cfg for a for repeatEvery if not correct', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      it('should return cfg for a for repeatEvery if correct', () => {
+        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
-              repeatEvery: 4,
+              repeatEvery: 2,
               startDate: '2022-01-10',
+              startTime: '10:00',
+              remindAt: TaskReminderOptionId.AtStart,
             }),
           ],
           {
@@ -529,7 +558,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           },
         );
         const resultIds = result.map((item) => item.id);
-        expect(resultIds).toEqual([]);
+        expect(resultIds).toEqual(['R1']);
       });
     });
   });

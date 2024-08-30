@@ -113,6 +113,10 @@ export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
         }
 
         const rd = getNewestPossibleDueDate(taskRepeatCfg, dateToCheckDate);
+        console.log(rd);
+        console.log(dateToCheckDate);
+        console.log(isSameDay(rd as Date, dateToCheckDate));
+
         return !!rd && isSameDay(rd, dateToCheckDate);
       })
     );
