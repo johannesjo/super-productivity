@@ -31,13 +31,11 @@ import {
   first,
   map,
   switchMap,
-  take,
   takeUntil,
   tap,
 } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
-import { IssueService } from '../../issue/issue.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
@@ -58,6 +56,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { PlannerService } from '../../planner/planner.service';
+import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 
 @Component({
   selector: 'task',
@@ -79,7 +78,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isPreventPointerEventsWhilePanning: boolean = false;
   isActionTriggered: boolean = false;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
-  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
   progress: number = 0;
   isTodayTag: boolean = false;
   isShowAddToToday: boolean = false;
@@ -90,10 +88,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
   @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
   // only works because item comes first in dom
-  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
-  contextMenu?: MatMenuTrigger;
+
   @ViewChild('projectMenuTriggerEl', { static: false, read: MatMenuTrigger })
   projectMenuTrigger?: MatMenuTrigger;
+
+  @ViewChild('taskContextMenu', { static: true, read: TaskContextMenuComponent })
+  taskContextMenu?: TaskContextMenuComponent;
+
   @HostBinding('tabindex') tabIndex: number = 1;
   @HostBinding('class.isDone') isDone: boolean = false;
   @HostBinding('id') taskIdWithPrefix: string = 'NO';
@@ -103,14 +104,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class.hasNoSubTasks') hasNoSubTasks: boolean = true;
 
   private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
-  issueUrl$: Observable<string | null> = this._task$.pipe(
-    switchMap((v) => {
-      return v.issueType && v.issueId && v.projectId
-        ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
-        : of(null);
-    }),
-    take(1),
-  );
+
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
@@ -126,14 +120,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     map((task) => task && task.title),
   );
 
-  isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
-    take(1),
-    switchMap((task) =>
-      task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
-    ),
-    map((project) => project.isEnableBacklog),
-  );
-
   isFirstLineHover: boolean = false;
   isRepeatTaskCreatedToday: boolean = false;
 
@@ -147,7 +133,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _taskRepeatCfgService: TaskRepeatCfgService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: GlobalConfigService,
-    private readonly _issueService: IssueService,
     private readonly _attachmentService: TaskAttachmentService,
     private readonly _elementRef: ElementRef,
     private readonly _snackService: SnackService,
@@ -298,10 +283,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  updateIssueData(): void {
-    this._issueService.refreshIssueTask(this.task, true, true);
-  }
-
   editTaskRepeatCfg(): void {
     this._matDialog
       .open(DialogEditTaskRepeatCfgComponent, {
@@ -312,10 +293,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusSelf());
-  }
-
-  handleUpdateBtnClick(): void {
-    this._taskService.setSelectedId(this.task.id);
   }
 
   deleteTask(isClick: boolean = false): void {
@@ -548,18 +525,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    if (!this.taskTitleEditEl || !this.contextMenu) {
-      throw new Error('No el');
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    (this.taskTitleEditEl as any).textarea.nativeElement.blur();
-    this.contextMenuPosition.x =
-      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-    this.contextMenuPosition.y =
-      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
-    this.contextMenu.openMenu();
+    (this.taskTitleEditEl as any).textarea.nativeElement?.blur();
+    this.taskContextMenu?.open(event);
   }
 
   onTagsUpdated(tagIds: string[]): void {
@@ -658,6 +625,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._handlePan(ev);
   }
 
+  // TODO extract so service
   moveTaskToProject(projectId: string): void {
     if (projectId === this.task.projectId) {
       return;
@@ -886,10 +854,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.projectMenuTrigger.openMenu();
     }
     if (checkKeyCombo(ev, keys.taskOpenContextMenu)) {
-      if (!this.contextMenu) {
+      if (!this.taskContextMenu) {
         throw new Error('No el');
       }
-      this.contextMenu.openMenu();
+      this.taskContextMenu.open(ev);
     }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
