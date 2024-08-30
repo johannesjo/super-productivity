@@ -89,7 +89,7 @@
 
     <button
       (click)="toggleTaskDone()"
-      *ngIf="IS_TOUCH_PRIMARY"
+      *ngIf="IS_TOUCH_PRIMARY || !isAdvancedControls()"
       mat-menu-item
     >
       <span class="menuItemLeft">
