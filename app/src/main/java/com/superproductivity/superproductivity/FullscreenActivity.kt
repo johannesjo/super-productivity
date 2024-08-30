@@ -2,10 +2,12 @@ package com.superproductivity.superproductivity
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.webkit.JsResult
 import android.webkit.ServiceWorkerClient
 import android.webkit.ServiceWorkerController
@@ -18,6 +20,8 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -36,8 +40,8 @@ class FullscreenActivity : AppCompatActivity() {
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
-        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
-//        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
+//        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
+        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +67,26 @@ class FullscreenActivity : AppCompatActivity() {
             webView.restoreState(savedInstanceState)
         } else {
             webView.loadUrl(appUrl)
+        }
+
+
+        val rootView = findViewById<View>(android.R.id.content)
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = rootView.rootView.height
+
+            // rect.bottom is the position above soft keypad or device button.
+            // if keypad is shown, the rect.bottom is smaller than the screen height.
+            val keypadHeight = screenHeight - rect.bottom
+            // 0.15 ratio is perhaps enough to determine keypad height.
+            if (keypadHeight > screenHeight * 0.15) {
+                // keyboard is opened
+                callJSInterfaceFunctionIfExists("next", "isKeyboardShown$", "true")
+            } else {
+                // keyboard is closed
+                callJSInterfaceFunctionIfExists("next", "isKeyboardShown$", "false")
+            }
         }
     }
 
@@ -203,10 +227,10 @@ class FullscreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String) {
+    private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String, fnParam: String = "") {
         val fnFullName = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath.$fnName"
         val fullObjectPath = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath"
-        callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName()")
+        callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
 
     fun callJavaScriptFunction(script: String) {
