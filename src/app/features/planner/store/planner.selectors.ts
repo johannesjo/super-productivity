@@ -31,10 +31,15 @@ export const selectAllTasksWithPlannedDay = createSelector(
       .reduce<TaskWithPlannedDay[]>(
         (acc, dateStr) => [
           ...acc,
-          ...plannerState.days[dateStr].map((id) => ({
-            ...(taskState.entities[id] as TaskWithPlannedDay),
-            plannedDay: dateStr,
-          })),
+          ...plannerState.days[dateStr]
+            .filter((id) => taskState.entities[id])
+            .map((id) => {
+              const task = taskState.entities[id] as TaskWithPlannedDay;
+              return {
+                ...task,
+                plannedDay: dateStr,
+              };
+            }),
         ],
         [],
       );
