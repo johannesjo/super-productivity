@@ -1,3 +1,5 @@
+@import '../../../../../variables.scss';
+
 .key-i {
   opacity: 0.4;
   font-size: 13px;
@@ -23,4 +25,34 @@
   text-align: left;
   display: flex;
   align-items: center;
+}
+
+.quick-access {
+  display: flex;
+  justify-content: space-evenly;
+  border-bottom: 1px solid var(--extra-border-color);
+  height: 48px;
+
+  //@include darkTheme() {
+  //  border-color: $dark-theme-extra-border-color;
+  //}
+
+  > button {
+    height: 48px;
+    flex-grow: 1;
+    border-radius: 4px !important;
+
+    ::ng-deep .mat-mdc-button-persistent-ripple {
+      border-radius: 4px !important;
+    }
+  }
+
+  button + button {
+    border-left: 1px solid var(--extra-border-color);
+  }
+}
+
+.label {
+  display: block;
+  text-align: center;
 }

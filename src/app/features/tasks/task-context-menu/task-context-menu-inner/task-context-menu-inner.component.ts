@@ -7,8 +7,9 @@ import {
   input,
   Input,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 import { IssueModule } from '../../../issue/issue.module';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -17,7 +18,7 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { Task, TaskCopy, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../../task.model';
 import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
@@ -54,6 +55,12 @@ import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { updateTaskTags } from '../../store/task.actions';
+import { PlannerActions } from '../../../planner/store/planner.actions';
+import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -69,10 +76,13 @@ import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
     TranslateModule,
     MatMenuTrigger,
     NgIf,
+    MatIconButton,
+    MatTooltip,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
@@ -127,6 +137,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   constructor(
+    private _datePipe: DatePipe,
     private readonly _taskService: TaskService,
     private readonly _taskRepeatCfgService: TaskRepeatCfgService,
     private readonly _matDialog: MatDialog,
@@ -512,5 +523,84 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         delay(50),
       )
       .toPromise();
+  }
+
+  quickAccessBtnClick(item: number): void {
+    const tDate = new Date();
+    tDate.setMinutes(0, 0, 0);
+    switch (item) {
+      case 0:
+        this._schedule(tDate.toISOString());
+        break;
+      case 1:
+        const tomorrow = tDate;
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        this._schedule(tomorrow.toISOString());
+        break;
+      case 2:
+        const nextMonday = tDate;
+        nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
+        this._schedule(nextMonday.toISOString());
+        break;
+      case 3:
+        const nextMonth = tDate;
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        this._schedule(nextMonth.toISOString());
+        break;
+    }
+    // this.submit();
+  }
+
+  private _schedule(selectedDate: string): void {
+    if (!selectedDate) {
+      console.warn('no selected date');
+      return;
+    }
+
+    const newDayDate = new Date(selectedDate);
+    const newDay = getWorklogStr(newDayDate);
+    const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
+
+    if (this.task.plannedAt) {
+      const task = this.task;
+      const newDate = combineDateAndTime(new Date(this.task.plannedAt), newDayDate);
+
+      const isTodayI = new Date().toDateString() === newDate.toDateString();
+      this._taskService.scheduleTask(
+        task,
+        newDate.getTime(),
+        TaskReminderOptionId.AtStart,
+        false,
+      );
+      if (isTodayI) {
+        this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+      } else {
+        this._taskService.updateTags(
+          task,
+          task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
+        );
+      }
+    } else if (newDay === getWorklogStr()) {
+      this._store.dispatch(
+        updateTaskTags({
+          task: this.task,
+          newTagIds: [...this.task.tagIds, TODAY_TAG.id],
+        }),
+      );
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+        translateParams: { date: formattedDate },
+      });
+    } else {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({ task: this.task, day: newDay }),
+      );
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+        translateParams: { date: formattedDate },
+      });
+    }
   }
 }

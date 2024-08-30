@@ -35,3 +35,12 @@ body.isDisableAnimations {
     animation: none !important;
   }
 }
+
+// css variables
+body {
+  --extra-border-color: #{$light-theme-extra-border-color};
+}
+
+body.isDarkTheme {
+  --extra-border-color: #{$dark-theme-extra-border-color};
+}

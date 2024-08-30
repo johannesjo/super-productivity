@@ -226,6 +226,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // this.openContextMenu(new Event('click') as any);
     // this._taskService.focusTaskId$
     //   .pipe(
     //     takeUntil(this._destroy$),

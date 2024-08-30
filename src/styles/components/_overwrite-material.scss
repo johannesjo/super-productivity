@@ -5,6 +5,11 @@
   --mat-menu-item-label-text-size: 14px;
 }
 
+.mat-mdc-menu-content {
+  padding-top: 0 !important;
+  padding: 0 !important;
+}
+
 .mat-drawer.mat-drawer-side {
   // should be below notes panel
   z-index: 1 !important;

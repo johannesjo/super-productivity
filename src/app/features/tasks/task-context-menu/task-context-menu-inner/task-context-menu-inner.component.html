@@ -11,6 +11,55 @@
   (close)="focusSelf()"
 >
   <ng-template matMenuContent>
+    <div class="quick-access">
+      <!--  <button-->
+      <!--    mat-icon-button-->
+      <!--    (click)="quickAccessBtnClick(0)"-->
+      <!--    [matTooltip]="'Schedule Today'"-->
+      <!--  >-->
+      <!--    <mat-icon>history</mat-icon>-->
+      <!--  </button>-->
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="quickAccessBtnClick(0)"
+        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
+      >
+        <mat-icon>wb_sunny</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="quickAccessBtnClick(1)"
+        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW|translate)"
+      >
+        <mat-icon svgIcon="tomorrow"></mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="quickAccessBtnClick(2)"
+        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK|translate)"
+      >
+        <mat-icon svgIcon="next_week"></mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="quickAccessBtnClick(3)"
+        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"
+      >
+        <mat-icon>bedtime</mat-icon>
+      </button>
+      <!--      <button-->
+      <!--        mat-icon-button-->
+      <!--        tabindex="0"-->
+      <!--        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"-->
+      <!--      >-->
+      <!--        <mat-icon>alarm_add</mat-icon>-->
+      <!--      </button>-->
+    </div>
+
     <button
       (click)="startTask()"
       *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
