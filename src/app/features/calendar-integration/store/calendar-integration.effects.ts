@@ -82,11 +82,7 @@ export class CalendarIntegrationEffects {
     { id: string; calEv: CalendarIntegrationEvent; calProvider: CalendarProvider }[]
   >([]);
   showBanner = createEffect(
-    () =>
-      this._currentlyShownBanners$.pipe(
-        tap((v) => console.log('this._currentlyShownBanners$', v)),
-        tap((v) => this._showBanner(v)),
-      ),
+    () => this._currentlyShownBanners$.pipe(tap((v) => this._showBanner(v))),
     {
       dispatch: false,
     },
@@ -133,7 +129,6 @@ export class CalendarIntegrationEffects {
     }[],
   ): Promise<void> {
     console.log('SHOW BANNER');
-
     const firstEntry = allEvsToShow[0];
     if (!firstEntry) {
       this._bannerService.dismiss(BannerId.CalendarEvent);
