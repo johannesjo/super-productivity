@@ -1,6 +1,6 @@
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { nanoid } from 'nanoid';
-import { merge, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 
 export interface AndroidInterface {
@@ -93,6 +93,7 @@ export interface AndroidInterface {
   onPauseCurrentTask$: Subject<void>;
   onMarkCurrentTaskAsDone$: Subject<void>;
   onAddNewTask$: Subject<void>;
+  isKeyboardShown$: Subject<boolean>;
 }
 
 // setInterval(() => {
@@ -115,6 +116,7 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPauseCurrentTask$ = new Subject();
   androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
   androidInterface.onAddNewTask$ = new Subject();
+  androidInterface.isKeyboardShown$ = new BehaviorSubject(false);
 
   androidInterface.isInBackground$ = merge(
     androidInterface.onResume$.pipe(mapTo(false)),
