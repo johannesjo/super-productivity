@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -68,7 +69,7 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './task-context-menu-inner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskContextMenuInnerComponent {
+export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
 
@@ -81,7 +82,6 @@ export class TaskContextMenuInnerComponent {
 
   task!: TaskWithSubTasks;
 
-  // TODO make all these work
   isTodayTag: boolean = false;
   isCurrent: boolean = false;
   isBacklog: boolean = false;
@@ -114,6 +114,8 @@ export class TaskContextMenuInnerComponent {
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {
     this.task = v;
+    this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
+    this.isCurrent = this._taskService.currentTaskId === v.id;
     this._task$.next(v);
   }
 
@@ -130,10 +132,15 @@ export class TaskContextMenuInnerComponent {
     private readonly _globalConfigService: GlobalConfigService,
   ) {}
 
+  ngAfterViewInit(): void {
+    this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
+  }
+
   open(ev: MouseEvent | KeyboardEvent | TouchEvent): void {
     ev.preventDefault();
     ev.stopPropagation();
     ev.stopImmediatePropagation();
+    console.log(this._elementRef.nativeElement.closest('.backlog'));
 
     if (ev instanceof MouseEvent || ev instanceof TouchEvent) {
       this.contextMenuPosition.x =
@@ -353,12 +360,12 @@ export class TaskContextMenuInnerComponent {
       return;
     }
 
-    this.focusSelfElement();
+    this.focusTaskElement();
     // this._taskService.focusTask(this.task.id);
   }
 
-  focusSelfElement(): void {
-    this._elementRef.nativeElement.focus();
+  focusTaskElement(): void {
+    this._elementRef.nativeElement.closest('task').focus();
   }
 
   onTagsUpdated(tagIds: string[]): void {
