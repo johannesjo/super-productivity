@@ -10,8 +10,8 @@ const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_SCHEDULE_BTN = '.ico-btn.schedule-btn';
 const TASK_SCHEDULE_BTN_2 = TASK_2 + ' ' + TASK_SCHEDULE_BTN;
 
-const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled"]';
-const SCHEDULE_PAGE_CMP = 'schedule-page';
+const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled-list"]';
+const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
 const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
 // Note: not sure why this is the second child, but it is
