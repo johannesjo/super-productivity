@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   input,
@@ -136,6 +137,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     private readonly _globalConfigService: GlobalConfigService,
+    private readonly _cd: ChangeDetectorRef,
     private readonly _store: Store,
   ) {}
 
@@ -159,7 +161,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   get kb(): KeyboardConfig {
-    if (IS_TOUCH_PRIMARY) {
+    if (IS_TOUCH_PRIMARY || !this.isAdvancedControls()) {
       return {} as any;
     }
     return (this._globalConfigService.cfg?.keyboard as KeyboardConfig) || {};

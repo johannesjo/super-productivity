@@ -34,6 +34,7 @@ import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-co
 })
 export class TaskContextMenuComponent {
   task = input.required<TaskWithSubTasks | Task>();
+  isAdvancedControls = input<boolean>(false);
   isShowInner: boolean = true;
 
   @ViewChild('taskContextMenuInner', {

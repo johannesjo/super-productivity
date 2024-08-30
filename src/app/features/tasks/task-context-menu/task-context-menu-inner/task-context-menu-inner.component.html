@@ -13,7 +13,7 @@
   <ng-template matMenuContent>
     <button
       (click)="startTask()"
-      *ngIf="IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTasks?.length"
+      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTasks?.length"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -25,9 +25,10 @@
       </span>
       <span class="key-i">{{ kb.togglePlay }}</span>
     </button>
+
     <button
       (click)="pauseTask()"
-      *ngIf="IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTasks?.length"
+      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTasks?.length"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -54,7 +55,7 @@
 
     <button
       (click)="removeFromMyDay()"
-      *ngIf="IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
       mat-menu-item
     >
       <mat-icon svgIcon="remove_today"></mat-icon>
@@ -96,7 +97,7 @@
 
     <button
       (click)="addSubTask();"
-      *ngIf="!task.parentId&&!task.isDone"
+      *ngIf="isAdvancedControls() && !task.parentId&&!task.isDone"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -141,7 +142,7 @@
 
     <button
       (click)="moveToBacklog();"
-      *ngIf="!task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
+      *ngIf="isAdvancedControls() && !task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
       mat-menu-item
     >
       <span class="menuItemLeft">
@@ -153,7 +154,7 @@
 
     <button
       (click)="moveToToday();"
-      *ngIf="!task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
+      *ngIf="isAdvancedControls() && !task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
       mat-menu-item
     >
       <span class="menuItemLeft">
