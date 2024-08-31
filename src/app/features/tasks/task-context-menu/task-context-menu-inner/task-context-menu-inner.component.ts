@@ -91,7 +91,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   isAdvancedControls = input<boolean>(false);
   close = output();
 
-  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
+  contextMenuPosition: { x: string; y: string } = { x: '100px', y: '100px' };
 
   @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
   contextMenuTrigger?: MatMenuTrigger;
@@ -172,9 +172,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     if (ev instanceof MouseEvent || ev instanceof TouchEvent) {
       this.contextMenuPosition.x =
-        ('touches' in ev ? ev.touches[0].clientX : ev.clientX) + 'px';
+        ('touches' in ev ? ev.touches[0].clientX : ev.clientX) + 10 + 'px';
       this.contextMenuPosition.y =
-        ('touches' in ev ? ev.touches[0].clientY : ev.clientY) + 'px';
+        ('touches' in ev ? ev.touches[0].clientY : ev.clientY) - 48 + 'px';
     }
 
     this.contextMenuTrigger?.openMenu();
