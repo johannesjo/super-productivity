@@ -199,11 +199,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             // needs to be set otherwise the activatedIssueTask won't reflect the task that is added
             this.activatedIssueTask$.next(null);
           } else if (ev.key === '1' && ev.ctrlKey) {
-            this.isAddToBacklog = !this.isAddToBacklog;
+            this.isAddToBottom = !this.isAddToBottom;
             this._cd.detectChanges();
             ev.preventDefault();
           } else if (ev.key === '2' && ev.ctrlKey) {
-            this.isAddToBottom = !this.isAddToBottom;
+            this.isAddToBacklog = !this.isAddToBacklog;
             this._cd.detectChanges();
             ev.preventDefault();
           }
