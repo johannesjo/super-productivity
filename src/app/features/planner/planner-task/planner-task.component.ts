@@ -20,7 +20,7 @@ import { Project } from '../../project/project.model';
 import { ProjectService } from '../../project/project.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '../../../core/base-component/base.component';
-import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
+import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 
 @Component({
