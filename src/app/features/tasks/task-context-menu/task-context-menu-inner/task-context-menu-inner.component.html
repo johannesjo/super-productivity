@@ -43,21 +43,21 @@
       >
         <mat-icon svgIcon="next_week"></mat-icon>
       </button>
-      <button
-        mat-icon-button
-        tabindex="0"
-        (click)="quickAccessBtnClick(3)"
-        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"
-      >
-        <mat-icon>bedtime</mat-icon>
-      </button>
       <!--      <button-->
       <!--        mat-icon-button-->
       <!--        tabindex="0"-->
+      <!--        (click)="quickAccessBtnClick(3)"-->
       <!--        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"-->
       <!--      >-->
-      <!--        <mat-icon>alarm_add</mat-icon>-->
+      <!--        <mat-icon>bedtime</mat-icon>-->
       <!--      </button>-->
+      <button
+        mat-icon-button
+        tabindex="0"
+        [matTooltip]="(task.reminderId ? T.F.TASK.CMP.EDIT_SCHEDULED : T.F.TASK.CMP.SCHEDULE|translate) + ' ['+kb.taskSchedule+ ']'"
+      >
+        <mat-icon>today</mat-icon>
+      </button>
     </div>
 
     <button
@@ -124,25 +124,25 @@
       <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
     </button>
 
-    <button
-      (click)="scheduleTask()"
-      mat-menu-item
-    >
-      <ng-container *ngIf="!task.reminderId">
-        <span>
-          <mat-icon>alarm_add</mat-icon>
-          {{ T.F.TASK.CMP.SCHEDULE|translate }}
-        </span>
-        <span class="key-i">{{ kb.taskSchedule }}</span>
-      </ng-container>
-      <ng-container *ngIf="task.reminderId">
-        <span>
-          <mat-icon>alarm</mat-icon>
-          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}
-        </span>
-        <span class="key-i">{{ kb.taskSchedule }}</span>
-      </ng-container>
-    </button>
+    <!--    <button-->
+    <!--      (click)="scheduleTask()"-->
+    <!--      mat-menu-item-->
+    <!--    >-->
+    <!--      <ng-container *ngIf="!task.reminderId">-->
+    <!--        <span>-->
+    <!--          <mat-icon>alarm_add</mat-icon>-->
+    <!--          {{ T.F.TASK.CMP.SCHEDULE|translate }}-->
+    <!--        </span>-->
+    <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+    <!--      </ng-container>-->
+    <!--      <ng-container *ngIf="task.reminderId">-->
+    <!--        <span>-->
+    <!--          <mat-icon>alarm</mat-icon>-->
+    <!--          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}-->
+    <!--        </span>-->
+    <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+    <!--      </ng-container>-->
+    <!--    </button>-->
 
     <button
       (click)="addSubTask();"
