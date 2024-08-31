@@ -104,7 +104,7 @@
 
     <button
       (click)="removeFromMyDay()"
-      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
       mat-menu-item
     >
       <mat-icon svgIcon="remove_today"></mat-icon>

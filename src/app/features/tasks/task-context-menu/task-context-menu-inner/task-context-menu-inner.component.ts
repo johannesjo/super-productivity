@@ -118,13 +118,18 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
 
-  isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
-    take(1),
-    switchMap((task) =>
-      task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
-    ),
-    map((project) => project.isEnableBacklog),
-  );
+  // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
+  //   take(1),
+  //   switchMap((task) =>
+  //     task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
+  //   ),
+  //   map((project) => project.isEnableBacklog),
+  // );
+  isShowMoveFromAndToBacklogBtns$: Observable<boolean> =
+    this.workContextService.activeWorkContext$.pipe(
+      take(1),
+      map((ctx) => !!ctx.isEnableBacklog),
+    );
 
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _isTaskDeleteTriggered: boolean = false;
