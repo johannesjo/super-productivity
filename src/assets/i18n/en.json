@@ -974,7 +974,7 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Add sub task",
-        "ADD_TO_MY_DAY": "Add to My Day",
+        "ADD_TO_MY_DAY": "Add to Today",
         "ADD_TO_PROJECT": "Add to a Project",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
         "DELETE": "Delete Task",
@@ -991,7 +991,7 @@
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TIME": "Time Tracking",
-        "REMOVE_FROM_MY_DAY": "Remove from My Day",
+        "REMOVE_FROM_MY_DAY": "Remove from Today",
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
