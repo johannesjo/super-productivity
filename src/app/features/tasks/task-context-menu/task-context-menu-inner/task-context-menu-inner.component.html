@@ -8,272 +8,270 @@
 
 <mat-menu
   #contextMenu="matMenu"
-  (close)="focusSelf()"
+  (close)="onClose()"
 >
-  <ng-template matMenuContent>
-    <div
-      mat-menu-item
-      style="height: 0; padding: 0; margin: 0; border: none; min-height: 0"
-      (focus)="focusFirstBtn($event)"
-    ></div>
-    <div
-      class="quick-access"
-      (keydown)="quickAccessKeydown($event)"
-    >
-      <!--  <button-->
-      <!--    mat-icon-button-->
-      <!--    (click)="quickAccessBtnClick(01)"-->
-      <!--    [matTooltip]="'Schedule Today'"-->
-      <!--  >-->
-      <!--    <mat-icon>history</mat-icon>-->
-      <!--  </button>-->
-      <button
-        mat-icon-button
-        tabindex="0"
-        (click)="quickAccessBtnClick(0)"
-        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
-      >
-        <mat-icon>wb_sunny</mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        tabindex="0"
-        (click)="quickAccessBtnClick(1)"
-        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW|translate)"
-      >
-        <mat-icon svgIcon="tomorrow"></mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        tabindex="0"
-        (click)="quickAccessBtnClick(2)"
-        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK|translate)"
-      >
-        <mat-icon svgIcon="next_week"></mat-icon>
-      </button>
-      <!--      <button-->
-      <!--        mat-icon-button-->
-      <!--        tabindex="0"-->
-      <!--        (click)="quickAccessBtnClick(3)"-->
-      <!--        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"-->
-      <!--      >-->
-      <!--        <mat-icon>bedtime</mat-icon>-->
-      <!--      </button>-->
-      <button
-        mat-icon-button
-        tabindex="0"
-        [matTooltip]="(task.reminderId ? T.F.TASK.CMP.EDIT_SCHEDULED : T.F.TASK.CMP.SCHEDULE|translate) + ' ['+kb.taskSchedule+ ']'"
-        (click)="scheduleTask()"
-      >
-        <mat-icon>today</mat-icon>
-      </button>
-    </div>
-
+  <div
+    mat-menu-item
+    style="height: 0; padding: 0; margin: 0; border: none; min-height: 0"
+    (focus)="focusFirstBtn($event)"
+  ></div>
+  <div
+    class="quick-access"
+    (keydown)="quickAccessKeydown($event)"
+  >
+    <!--  <button-->
+    <!--    mat-icon-button-->
+    <!--    (click)="quickAccessBtnClick(01)"-->
+    <!--    [matTooltip]="'Schedule Today'"-->
+    <!--  >-->
+    <!--    <mat-icon>history</mat-icon>-->
+    <!--  </button>-->
     <button
-      (click)="startTask()"
-      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
-      mat-menu-item
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(0)"
+      [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
     >
-      <span class="menuItemLeft">
-        <mat-icon
-          class="play-icon"
-          svgIcon="play"
-        ></mat-icon>
-        {{ T.F.TASK.CMP.TRACK_TIME|translate }}
-      </span>
-      <span class="key-i">{{ kb.togglePlay }}</span>
+      <mat-icon>wb_sunny</mat-icon>
     </button>
-
     <button
-      (click)="pauseTask()"
-      *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
-      mat-menu-item
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(1)"
+      [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW|translate)"
     >
-      <span class="menuItemLeft">
-        <mat-icon>pause</mat-icon>
-        {{ T.F.TASK.CMP.TRACK_TIME_STOP|translate }}
-      </span>
-      <span class="key-i">{{ kb.togglePlay }}</span>
+      <mat-icon svgIcon="tomorrow"></mat-icon>
     </button>
-
     <button
-      (click)="toggleTaskDone()"
-      *ngIf="IS_TOUCH_PRIMARY || !isAdvancedControls()"
-      mat-menu-item
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(2)"
+      [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK|translate)"
     >
-      <span class="menuItemLeft">
-        @if (task.isDone) {
-        <mat-icon>undo</mat-icon>
-        } @else {
-        <mat-icon>check</mat-icon>
-        } {{ (task.isDone ? T.F.TASK.CMP.MARK_DONE : T.F.TASK.CMP.MARK_DONE)|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskToggleDone }}</span>
+      <mat-icon svgIcon="next_week"></mat-icon>
     </button>
-
+    <!--      <button-->
+    <!--        mat-icon-button-->
+    <!--        tabindex="0"-->
+    <!--        (click)="quickAccessBtnClick(3)"-->
+    <!--        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"-->
+    <!--      >-->
+    <!--        <mat-icon>bedtime</mat-icon>-->
+    <!--      </button>-->
     <button
-      (click)="removeFromMyDay()"
-      *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
-      mat-menu-item
+      mat-icon-button
+      tabindex="0"
+      [matTooltip]="(task.reminderId ? T.F.TASK.CMP.EDIT_SCHEDULED : T.F.TASK.CMP.SCHEDULE|translate) + ' ['+kb.taskSchedule+ ']'"
+      (click)="scheduleTask()"
     >
-      <mat-icon svgIcon="remove_today"></mat-icon>
-      {{ T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate }}
+      <mat-icon>today</mat-icon>
     </button>
+  </div>
 
-    <button
-      (click)="estimateTime()"
-      *ngIf="!task.subTaskIds.length"
-      class="hide-xs"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>timer</mat-icon>
-        {{ T.F.TASK.CMP.OPEN_TIME|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
-    </button>
+  <button
+    (click)="startTask()"
+    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon
+        class="play-icon"
+        svgIcon="play"
+      ></mat-icon>
+      {{ T.F.TASK.CMP.TRACK_TIME|translate }}
+    </span>
+    <span class="key-i">{{ kb.togglePlay }}</span>
+  </button>
 
-    <!--    <button-->
-    <!--      (click)="scheduleTask()"-->
-    <!--      mat-menu-item-->
-    <!--    >-->
-    <!--      <ng-container *ngIf="!task.reminderId">-->
-    <!--        <span>-->
-    <!--          <mat-icon>alarm_add</mat-icon>-->
-    <!--          {{ T.F.TASK.CMP.SCHEDULE|translate }}-->
-    <!--        </span>-->
-    <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
-    <!--      </ng-container>-->
-    <!--      <ng-container *ngIf="task.reminderId">-->
-    <!--        <span>-->
-    <!--          <mat-icon>alarm</mat-icon>-->
-    <!--          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}-->
-    <!--        </span>-->
-    <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
-    <!--      </ng-container>-->
-    <!--    </button>-->
+  <button
+    (click)="pauseTask()"
+    *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>pause</mat-icon>
+      {{ T.F.TASK.CMP.TRACK_TIME_STOP|translate }}
+    </span>
+    <span class="key-i">{{ kb.togglePlay }}</span>
+  </button>
 
-    <button
-      (click)="addSubTask();"
-      *ngIf="isAdvancedControls() && !task.parentId&&!task.isDone"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>playlist_add</mat-icon>
-        {{ T.F.TASK.CMP.ADD_SUB_TASK|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskAddSubTask }}</span>
-    </button>
+  <button
+    (click)="toggleTaskDone()"
+    *ngIf="IS_TOUCH_PRIMARY || !isAdvancedControls()"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      @if (task.isDone) {
+      <mat-icon>undo</mat-icon>
+      } @else {
+      <mat-icon>check</mat-icon>
+      } {{ (task.isDone ? T.F.TASK.CMP.MARK_DONE : T.F.TASK.CMP.MARK_DONE)|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskToggleDone }}</span>
+  </button>
 
-    <button
-      (click)="addAttachment();"
-      class="hide-xs"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>attachment</mat-icon>
-        {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskAddAttachment }}</span>
-    </button>
+  <button
+    (click)="removeFromMyDay()"
+    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+    mat-menu-item
+  >
+    <mat-icon svgIcon="remove_today"></mat-icon>
+    {{ T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate }}
+  </button>
 
-    <!--TODO maybe handle dynamically -->
-    <a
-      *ngIf="task.issueId && task.issueType !=='CALENDAR'"
-      [href]="issueUrl$|async"
-      mat-menu-item
-      style="color: inherit"
-      target="_blank"
-    >
-      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-      {{ T.F.TASK.CMP.OPEN_ISSUE|translate }}
-    </a>
+  <button
+    (click)="estimateTime()"
+    *ngIf="!task.subTaskIds.length"
+    class="hide-xs"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>timer</mat-icon>
+      {{ T.F.TASK.CMP.OPEN_TIME|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
+  </button>
 
-    <button
-      (click)="updateIssueData()"
-      *ngIf="task.issueId && task.issueType !=='CALENDAR'"
-      mat-menu-item
-    >
-      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-      {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate }}
-    </button>
+  <!--    <button-->
+  <!--      (click)="scheduleTask()"-->
+  <!--      mat-menu-item-->
+  <!--    >-->
+  <!--      <ng-container *ngIf="!task.reminderId">-->
+  <!--        <span>-->
+  <!--          <mat-icon>alarm_add</mat-icon>-->
+  <!--          {{ T.F.TASK.CMP.SCHEDULE|translate }}-->
+  <!--        </span>-->
+  <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+  <!--      </ng-container>-->
+  <!--      <ng-container *ngIf="task.reminderId">-->
+  <!--        <span>-->
+  <!--          <mat-icon>alarm</mat-icon>-->
+  <!--          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}-->
+  <!--        </span>-->
+  <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+  <!--      </ng-container>-->
+  <!--    </button>-->
 
-    <button
-      (click)="moveToBacklog();"
-      *ngIf="isAdvancedControls() && !task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>arrow_downward</mat-icon>
-        {{ T.F.TASK.CMP.MOVE_TO_BACKLOG|translate }}
-      </span>
-      <span class="key-i">{{ kb.moveToBacklog }}</span>
-    </button>
+  <button
+    (click)="addSubTask();"
+    *ngIf="isAdvancedControls() && !task.parentId&&!task.isDone"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>playlist_add</mat-icon>
+      {{ T.F.TASK.CMP.ADD_SUB_TASK|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskAddSubTask }}</span>
+  </button>
 
-    <button
-      (click)="moveToToday();"
-      *ngIf="isAdvancedControls() && !task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>arrow_upward</mat-icon>
-        {{ T.F.TASK.CMP.MOVE_TO_TODAY|translate }}
-      </span>
-      <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
-    </button>
+  <button
+    (click)="addAttachment();"
+    class="hide-xs"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>attachment</mat-icon>
+      {{ T.F.TASK.CMP.OPEN_ATTACH|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskAddAttachment }}</span>
+  </button>
 
-    <button
-      (click)="editTags();"
-      *ngIf="!task.parentId"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>style</mat-icon>
-        {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskEditTags }}</span>
-    </button>
+  <!--TODO maybe handle dynamically -->
+  <a
+    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+    [href]="issueUrl$|async"
+    mat-menu-item
+    style="color: inherit"
+    target="_blank"
+  >
+    <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+    {{ T.F.TASK.CMP.OPEN_ISSUE|translate }}
+  </a>
 
-    <button
-      *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"
-      [matMenuTriggerFor]="projectMenu"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>forward</mat-icon>
-        {{ (task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
-        T.F.TASK.CMP.ADD_TO_PROJECT)|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskMoveToProject }}</span>
-    </button>
+  <button
+    (click)="updateIssueData()"
+    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+    mat-menu-item
+  >
+    <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+    {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate }}
+  </button>
 
-    <button
-      *ngIf="task.parentId"
-      (click)="convertToMainTask()"
-      mat-menu-item
-    >
-      <mat-icon>subdirectory_arrow_left</mat-icon>
-      {{ (T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate }}
-    </button>
+  <button
+    (click)="moveToBacklog();"
+    *ngIf="isAdvancedControls() && !task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>arrow_downward</mat-icon>
+      {{ T.F.TASK.CMP.MOVE_TO_BACKLOG|translate }}
+    </span>
+    <span class="key-i">{{ kb.moveToBacklog }}</span>
+  </button>
 
-    <button
-      (click)="deleteTask(true)"
-      class="color-warn"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon class="color-warn-i">delete_forever</mat-icon>
-        {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
-        T.F.TASK.CMP.DELETE)|translate }}
-      </span>
-      <span class="key-i">{{ kb.taskDelete }}</span>
-    </button>
-  </ng-template>
+  <button
+    (click)="moveToToday();"
+    *ngIf="isAdvancedControls() && !task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>arrow_upward</mat-icon>
+      {{ T.F.TASK.CMP.MOVE_TO_TODAY|translate }}
+    </span>
+    <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
+  </button>
+
+  <button
+    (click)="editTags();"
+    *ngIf="!task.parentId"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>style</mat-icon>
+      {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskEditTags }}</span>
+  </button>
+
+  <button
+    *ngIf="!task.parentId && (!task.issueId || task.issueType ==='CALENDAR') && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"
+    [matMenuTriggerFor]="projectMenu"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>forward</mat-icon>
+      {{ (task.projectId ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT :
+      T.F.TASK.CMP.ADD_TO_PROJECT)|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskMoveToProject }}</span>
+  </button>
+
+  <button
+    *ngIf="task.parentId"
+    (click)="convertToMainTask()"
+    mat-menu-item
+  >
+    <mat-icon>subdirectory_arrow_left</mat-icon>
+    {{ (T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate }}
+  </button>
+
+  <button
+    (click)="deleteTask(true)"
+    class="color-warn"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon class="color-warn-i">delete_forever</mat-icon>
+      {{ (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE :
+      T.F.TASK.CMP.DELETE)|translate }}
+    </span>
+    <span class="key-i">{{ kb.taskDelete }}</span>
+  </button>
 </mat-menu>
 
 <mat-menu
   #projectMenu="matMenu"
-  (closed)="focusSelf()"
+  (closed)="focusRelatedTask()"
 >
   <ng-template matMenuContent>
     <button

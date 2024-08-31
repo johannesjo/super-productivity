@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  input,
+  ViewChild,
+} from '@angular/core';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { IssueModule } from '../../issue/issue.module';
 import { MatIcon } from '@angular/material/icon';
@@ -35,7 +41,7 @@ import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-co
 export class TaskContextMenuComponent {
   task = input.required<TaskWithSubTasks | Task>();
   isAdvancedControls = input<boolean>(false);
-  isShowInner: boolean = true;
+  isShowInner: boolean = false;
 
   @ViewChild('taskContextMenuInner', {
     static: false,
@@ -43,8 +49,11 @@ export class TaskContextMenuComponent {
   })
   taskContextMenuInner?: TaskContextMenuInnerComponent;
 
+  constructor(private _cd: ChangeDetectorRef) {}
+
   open(ev: MouseEvent | KeyboardEvent | TouchEvent): void {
     this.isShowInner = true;
+    this._cd.detectChanges();
     this.taskContextMenuInner?.open(ev);
   }
 }

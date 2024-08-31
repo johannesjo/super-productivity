@@ -5,6 +5,7 @@ import {
   ElementRef,
   input,
   Input,
+  output,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
@@ -88,6 +89,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly T = T;
 
   isAdvancedControls = input<boolean>(false);
+  close = output();
+  focusTaskAfter = output();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
@@ -174,6 +177,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this.contextMenuTrigger?.openMenu();
   }
 
+  onClose(): void {
+    this.focusRelatedTask();
+    this.close.emit();
+  }
+
   get kb(): KeyboardConfig {
     if (IS_TOUCH_PRIMARY || !this.isAdvancedControls()) {
       return {} as any;
@@ -233,7 +241,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         if (isPlanned) {
           this.focusNext(true);
         } else {
-          this.focusSelf();
+          this.focusRelatedTask();
         }
       });
   }
@@ -272,7 +280,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   startTask(): void {
     this._taskService.setCurrentId(this.task.id);
-    this.focusSelf();
+    this.focusRelatedTask();
   }
 
   pauseTask(): void {
@@ -287,7 +295,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
+      .subscribe(() => this.focusRelatedTask());
   }
 
   addAttachment(): void {
@@ -301,7 +309,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         if (result) {
           this._attachmentService.addAttachment(this.task.id, result);
         }
-        this.focusSelf();
+        this.focusRelatedTask();
       });
   }
 
@@ -336,7 +344,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusSelf());
+      .subscribe(() => this.focusRelatedTask());
   }
 
   addToMyDay(): void {
@@ -417,7 +425,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
   }
 
-  focusSelf(): void {
+  // TODO fix
+  focusRelatedTask(): void {
     if (IS_TOUCH_PRIMARY) {
       return;
     }
@@ -532,7 +541,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             },
           ),
         )
-        .subscribe(() => this.focusSelf());
+        .subscribe(() => this.focusRelatedTask());
     }
   }
 
@@ -595,7 +604,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   private _schedule(selectedDate: string): void {
     // this.focusNext(true, true);
-    this.focusSelf();
+    this.focusRelatedTask();
 
     if (!selectedDate) {
       console.warn('no selected date');
