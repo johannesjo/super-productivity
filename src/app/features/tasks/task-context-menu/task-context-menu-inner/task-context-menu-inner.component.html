@@ -55,6 +55,7 @@
         mat-icon-button
         tabindex="0"
         [matTooltip]="(task.reminderId ? T.F.TASK.CMP.EDIT_SCHEDULED : T.F.TASK.CMP.SCHEDULE|translate) + ' ['+kb.taskSchedule+ ']'"
+        (click)="scheduleTask()"
       >
         <mat-icon>today</mat-icon>
       </button>
