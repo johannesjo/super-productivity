@@ -137,23 +137,26 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
   tagSuggestions: Tag[] = [];
 
-  isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(
-    switchMap((shortSyntaxTags) => {
-      const shortSyntaxProjectId =
-        shortSyntaxTags.length &&
-        shortSyntaxTags.find((tag: ShortSyntaxTag) => tag.projectId)?.projectId;
+  isAddToBacklogAvailable$: Observable<boolean> =
+    this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
 
-      if (typeof shortSyntaxProjectId === 'string') {
-        return this._projectService
-          .getByIdOnce$(shortSyntaxProjectId)
-          .pipe(map((project) => project.isEnableBacklog));
-      }
-
-      return this._workContextService.activeWorkContext$.pipe(
-        map((ctx) => !!ctx.isEnableBacklog),
-      );
-    }),
-  );
+  // isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(
+  //   switchMap((shortSyntaxTags) => {
+  //     const shortSyntaxProjectId =
+  //       shortSyntaxTags.length &&
+  //       shortSyntaxTags.find((tag: ShortSyntaxTag) => tag.projectId)?.projectId;
+  //
+  //     if (typeof shortSyntaxProjectId === 'string') {
+  //       return this._projectService
+  //         .getByIdOnce$(shortSyntaxProjectId)
+  //         .pipe(map((project) => project.isEnableBacklog));
+  //     }
+  //
+  //     return this._workContextService.activeWorkContext$.pipe(
+  //       map((ctx) => !!ctx.isEnableBacklog),
+  //     );
+  //   }),
+  // );
 
   private _isAddInProgress?: boolean;
   private _delayBlurTimeout?: number;
