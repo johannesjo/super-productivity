@@ -159,6 +159,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
+
+    setTimeout(() => {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    });
   }
 
   open(ev: MouseEvent | KeyboardEvent | TouchEvent): void {
@@ -174,6 +178,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
 
     this.contextMenuTrigger?.openMenu();
+    setTimeout(() => {
+      (document.querySelectorAll('.mat-mdc-menu-panel button')[4] as any)?.focus();
+    });
   }
 
   focusRelatedTaskOrNext(): void {
