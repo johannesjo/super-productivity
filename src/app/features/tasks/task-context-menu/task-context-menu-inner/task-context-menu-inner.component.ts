@@ -90,7 +90,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   isAdvancedControls = input<boolean>(false);
   close = output();
-  focusTaskAfter = output();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
@@ -177,8 +176,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this.contextMenuTrigger?.openMenu();
   }
 
+  focusRelatedTaskOrNext(): void {
+    // NOTE: not active for now
+    // this.focusTaskOrNextAfter.emit();
+  }
+
   onClose(): void {
-    this.focusRelatedTask();
+    this.focusRelatedTaskOrNext();
     this.close.emit();
   }
 
@@ -205,24 +209,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
   }
 
-  // quickAccessKeydown(ev: KeyboardEvent): void {
-  //   const activeElement = document.activeElement as HTMLElement;
-  //   const t = ev.target as HTMLElement;
-  //   console.log(t);
-  //
-  //   const btns = Array.from(t?.querySelectorAll('button') || []);
-  //   const currentIndex = btns.indexOf(activeElement as HTMLButtonElement);
-  //   console.log(currentIndex, btns, activeElement);
-  //
-  //   if (currentIndex > -1) {
-  //     if (ev.key === 'ArrowRight' && currentIndex < btns.length - 1) {
-  //       (btns[currentIndex + 1] as HTMLElement).focus();
-  //     } else if (ev.key === 'ArrowLeft' && currentIndex > 0) {
-  //       (btns[currentIndex - 1] as HTMLElement).focus();
-  //     }
-  //   }
-  // }
-
   focusFirstBtn(ev: FocusEvent): void {
     const t = ev.target as HTMLElement;
     t?.parentElement?.querySelector('button')?.focus();
@@ -238,11 +224,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       .afterClosed()
       // .pipe(takeUntil(this._destroy$))
       .subscribe((isPlanned) => {
-        if (isPlanned) {
-          this.focusNext(true);
-        } else {
-          this.focusRelatedTask();
-        }
+        this.focusRelatedTaskOrNext();
       });
   }
 
@@ -262,17 +244,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //     .subscribe(() => this.focusSelf());
   // }
 
-  async deleteTask(isClick: boolean = false): Promise<void> {
+  async deleteTask(): Promise<void> {
     // NOTE: prevents attempts to delete the same task multiple times
     if (this._isTaskDeleteTriggered) {
       return;
     }
-    // NOTE: in case we want the focus behaviour on click we could use:
-    // this.focusSelf();
-    if (!isClick) {
-      this.focusNext(true);
-    }
-
     const taskWithSubTasks = await this._getTaskWithSubtasks();
     this._taskService.remove(taskWithSubTasks);
     this._isTaskDeleteTriggered = true;
@@ -280,7 +256,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   startTask(): void {
     this._taskService.setCurrentId(this.task.id);
-    this.focusRelatedTask();
   }
 
   pauseTask(): void {
@@ -295,7 +270,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusRelatedTask());
+      .subscribe(() => this.focusRelatedTaskOrNext());
   }
 
   addAttachment(): void {
@@ -309,7 +284,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         if (result) {
           this._attachmentService.addAttachment(this.task.id, result);
         }
-        this.focusRelatedTask();
+        this.focusRelatedTaskOrNext();
       });
   }
 
@@ -323,8 +298,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   toggleTaskDone(): void {
-    this.focusNext(true, true);
-
     if (this.task.isDone) {
       this._taskService.setUnDone(this.task.id);
     } else {
@@ -344,7 +317,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       })
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusRelatedTask());
+      .subscribe(() => this.focusRelatedTaskOrNext());
   }
 
   addToMyDay(): void {
@@ -357,86 +330,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   convertToMainTask(): void {
     this._taskService.convertToMainTask(this.task);
-  }
-
-  focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
-    if (IS_TOUCH_PRIMARY) {
-      return;
-    }
-
-    const taskEls = Array.from(document.querySelectorAll('task'));
-    const activeEl =
-      document.activeElement?.tagName.toLowerCase() === 'task'
-        ? document.activeElement
-        : document.activeElement?.closest('task');
-    const currentIndex = taskEls.findIndex((el) => el === activeEl);
-    const prevEl = taskEls[currentIndex - 1] as HTMLElement;
-
-    if (prevEl) {
-      prevEl.focus();
-      // hacky but works
-      setTimeout(() => {
-        if (document.activeElement !== prevEl) {
-          prevEl.focus();
-        }
-      });
-    } else if (isFocusReverseIfNotPossible) {
-      this.focusNext();
-    }
-  }
-
-  focusNext(
-    isFocusReverseIfNotPossible: boolean = false,
-    isTaskMovedInList = false,
-  ): void {
-    if (IS_TOUCH_PRIMARY) {
-      return;
-    }
-
-    const taskEls = Array.from(document.querySelectorAll('task'));
-    const activeEl =
-      document.activeElement?.tagName.toLowerCase() === 'task'
-        ? document.activeElement
-        : document.activeElement?.closest('task');
-    const currentIndex = taskEls.findIndex((el) => el === activeEl);
-    const nextEl = isTaskMovedInList
-      ? (() => {
-          // if a parent task is moved in list, as it is for when toggling done,
-          // we don't want to focus the next sub-task, but the next main task instead
-          if (this.task.subTaskIds.length) {
-            return taskEls.find((el, i) => {
-              return i > currentIndex && el.parentElement?.closest('task');
-            }) as HTMLElement | undefined;
-          }
-          return taskEls[currentIndex + 1] as HTMLElement;
-        })()
-      : (taskEls[currentIndex + 1] as HTMLElement);
-
-    if (nextEl) {
-      nextEl.focus();
-      // hacky but works
-      setTimeout(() => {
-        if (document.activeElement !== nextEl) {
-          nextEl.focus();
-        }
-      });
-    } else if (isFocusReverseIfNotPossible) {
-      this.focusPrevious();
-    }
-  }
-
-  // TODO fix
-  focusRelatedTask(): void {
-    if (IS_TOUCH_PRIMARY) {
-      return;
-    }
-
-    this.focusTaskElement();
-    // this._taskService.focusTask(this.task.id);
-  }
-
-  focusTaskElement(): void {
-    this._elementRef.nativeElement.closest('task')?.focus();
   }
 
   onTagsUpdated(tagIds: string[]): void {
@@ -541,7 +434,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             },
           ),
         )
-        .subscribe(() => this.focusRelatedTask());
+        .subscribe(() => this.focusRelatedTaskOrNext());
     }
   }
 
@@ -603,9 +496,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   private _schedule(selectedDate: string): void {
-    // this.focusNext(true, true);
-    this.focusRelatedTask();
-
     if (!selectedDate) {
       console.warn('no selected date');
       return;
