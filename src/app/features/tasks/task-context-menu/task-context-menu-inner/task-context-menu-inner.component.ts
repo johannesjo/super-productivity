@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   input,
@@ -153,7 +152,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
     private readonly _globalConfigService: GlobalConfigService,
-    private readonly _cd: ChangeDetectorRef,
     private readonly _store: Store,
   ) {}
 
@@ -181,6 +179,45 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       return {} as any;
     }
     return (this._globalConfigService.cfg?.keyboard as KeyboardConfig) || {};
+  }
+
+  quickAccessKeydown(ev: KeyboardEvent): void {
+    const t = ev.target as HTMLElement;
+    const btns = Array.from(
+      t?.closest('.quick-access')?.querySelectorAll('button') || [],
+    );
+    //   const btns = Array.from(t?.querySelectorAll('button') || []);
+
+    const currentIndex = btns.indexOf(t as HTMLButtonElement);
+
+    if (ev.key === 'ArrowRight' && currentIndex < btns.length - 1) {
+      (btns[currentIndex + 1] as HTMLElement).focus();
+    } else if (ev.key === 'ArrowLeft' && currentIndex > 0) {
+      (btns[currentIndex - 1] as HTMLElement).focus();
+    }
+  }
+
+  // quickAccessKeydown(ev: KeyboardEvent): void {
+  //   const activeElement = document.activeElement as HTMLElement;
+  //   const t = ev.target as HTMLElement;
+  //   console.log(t);
+  //
+  //   const btns = Array.from(t?.querySelectorAll('button') || []);
+  //   const currentIndex = btns.indexOf(activeElement as HTMLButtonElement);
+  //   console.log(currentIndex, btns, activeElement);
+  //
+  //   if (currentIndex > -1) {
+  //     if (ev.key === 'ArrowRight' && currentIndex < btns.length - 1) {
+  //       (btns[currentIndex + 1] as HTMLElement).focus();
+  //     } else if (ev.key === 'ArrowLeft' && currentIndex > 0) {
+  //       (btns[currentIndex - 1] as HTMLElement).focus();
+  //     }
+  //   }
+  // }
+
+  focusFirstBtn(ev: FocusEvent): void {
+    const t = ev.target as HTMLElement;
+    t?.parentElement?.querySelector('button')?.focus();
   }
 
   scheduleTask(): void {
@@ -557,6 +594,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   private _schedule(selectedDate: string): void {
+    // this.focusNext(true, true);
+    this.focusSelf();
+
     if (!selectedDate) {
       console.warn('no selected date');
       return;

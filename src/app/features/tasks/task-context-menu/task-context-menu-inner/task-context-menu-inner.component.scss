@@ -49,7 +49,7 @@
   }
 
   button + button {
-    border-left: 1px solid var(--extra-border-color);
+    border-left: 1px solid var(--extra-border-color) !important;
   }
 }
 
