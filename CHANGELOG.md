@@ -1,3 +1,9 @@
+## [10.0.1](https://github.com/johannesjo/super-productivity/compare/v10.0.0...v10.0.1) (2024-09-01)
+
+### Bug Fixes
+
+- header showing "main" ([c19d9cf](https://github.com/johannesjo/super-productivity/commit/c19d9cf9e72aab3cc92b276bb23d9b66e4c45feb))
+
 # [10.0.0](https://github.com/johannesjo/super-productivity/compare/v10.0.0-rc.0...v10.0.0) (2024-09-01)
 
 ### Bug Fixes
