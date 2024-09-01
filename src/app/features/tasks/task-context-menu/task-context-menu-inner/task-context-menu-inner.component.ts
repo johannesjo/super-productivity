@@ -61,6 +61,7 @@ import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { updateTaskTags } from '../../store/task.actions';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -155,6 +156,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     public readonly workContextService: WorkContextService,
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _store: Store,
+    private readonly _focusModeService: FocusModeService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -219,6 +221,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   focusFirstBtn(ev: FocusEvent): void {
     const t = ev.target as HTMLElement;
     t?.parentElement?.querySelector('button')?.focus();
+  }
+
+  goToFocusMode(): void {
+    this._taskService.setSelectedId(this.task.id);
+    this._focusModeService.showFocusOverlay();
   }
 
   scheduleTask(): void {

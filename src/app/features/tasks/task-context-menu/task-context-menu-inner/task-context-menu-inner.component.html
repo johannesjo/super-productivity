@@ -86,8 +86,20 @@
   </button>
 
   <button
+    (click)="goToFocusMode()"
+    *ngIf="isAdvancedControls() && !IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>center_focus_strong</mat-icon>
+      {{ T.F.TASK.CMP.FOCUS_SESSION|translate }}
+    </span>
+    <!--    <span class="key-i">{{ kb.goToFocusMode }}</span>-->
+  </button>
+
+  <button
     (click)="pauseTask()"
-    *ngIf="isAdvancedControls() &&IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
+    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
     mat-menu-item
   >
     <span class="menuItemLeft">
