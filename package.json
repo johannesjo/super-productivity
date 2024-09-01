@@ -114,7 +114,7 @@
     "@angular/animations": "^18.1.4",
     "@angular/cdk": "^18.1.4",
     "@angular/cli": "^18.1.4",
-    "@angular/common": "^18.1.4",
+    "@angular/common": "^18.2.2",
     "@angular/compiler": "^18.1.4",
     "@angular/compiler-cli": "^18.1.4",
     "@angular/core": "^18.1.4",
