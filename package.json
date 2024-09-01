@@ -109,7 +109,7 @@
     "@angular-eslint/builder": "^18.0.1",
     "@angular-eslint/eslint-plugin": "^18.0.1",
     "@angular-eslint/eslint-plugin-template": "^18.0.1",
-    "@angular-eslint/schematics": "^18.0.1",
+    "@angular-eslint/schematics": "^18.3.0",
     "@angular-eslint/template-parser": "^18.0.1",
     "@angular/animations": "^18.1.4",
     "@angular/cdk": "^18.1.4",
