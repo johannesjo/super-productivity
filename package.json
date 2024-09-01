@@ -129,7 +129,7 @@
     "@angular/service-worker": "^18.1.4",
     "@electron/notarize": "^2.3.2",
     "@fontsource/roboto": "^4.5.8",
-    "@nextcloud/cdav-library": "^1.1.0",
+    "@nextcloud/cdav-library": "^1.5.1",
     "@ngrx/data": "^18.0.2",
     "@ngrx/effects": "^18.0.2",
     "@ngrx/entity": "^18.0.2",
