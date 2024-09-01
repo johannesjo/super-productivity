@@ -52,9 +52,9 @@ export class TaskContextMenuComponent {
 
   constructor(private _cd: ChangeDetectorRef) {}
 
-  open(ev: MouseEvent | KeyboardEvent | TouchEvent): void {
+  open(ev: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
     this.isShowInner = true;
     this._cd.detectChanges();
-    this.taskContextMenuInner?.open(ev);
+    this.taskContextMenuInner?.open(ev, isOpenedFromKeyBoard);
   }
 }

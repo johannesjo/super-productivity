@@ -135,6 +135,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _isTaskDeleteTriggered: boolean = false;
+  private _isOpenedFromKeyboard = false;
 
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
@@ -163,11 +164,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
 
     setTimeout(() => {
-      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      if (!this._isOpenedFromKeyboard) {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      }
     });
   }
 
-  open(ev: MouseEvent | KeyboardEvent | TouchEvent): void {
+  open(ev: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
     ev.preventDefault();
     ev.stopPropagation();
     ev.stopImmediatePropagation();
@@ -179,10 +182,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         ('touches' in ev ? ev.touches[0].clientY : ev.clientY) - 48 + 'px';
     }
 
+    this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger?.openMenu();
-    setTimeout(() => {
-      (document.querySelectorAll('.mat-mdc-menu-panel button')[4] as any)?.focus();
-    });
   }
 
   focusRelatedTaskOrNext(): void {
