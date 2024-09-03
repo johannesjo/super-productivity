@@ -214,6 +214,15 @@
         "SUCCESS_LOGIN": "GoogleApi：登入成功"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "在記錄任務時間時，每隔 X 時間重複配置的短語。",
+        "L_INTERVAL": "重複短語的間隔時間",
+        "L_TEXT": "短語內容",
+        "L_TEXT_DESCRIPTION": "例如：\"處理 ${currentTaskTitle}！\"",
+        "TITLE": "Domina 模式"
+      }
+    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "issues",
@@ -482,6 +491,27 @@
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "沒有任務",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "添加到今天",
+          "TITLE": "將計劃任務添加到今天"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "這將移除任務中的提醒！按下 Esc 鍵取消。",
+          "REMOVE_PLAN_DATE": "移除計劃日期",
+          "TITLE": "為一天計劃任務"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "沒有計劃項目"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "已移除任務 '{{taskTitle}}' 的計劃日期",
+        "TASK_PLANNED_FOR": "任務計劃於 {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "繼續加油！",
       "BREAK_IS_DONE": "休息已完成！",
@@ -581,7 +611,13 @@
       "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "提醒介面發生錯誤"
+      "S_REMINDER_ERR": "提醒介面發生錯誤",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "立即開始",
+        "HIDE": "隱藏",
+        "TXT": "<strong>{{title}}</strong> 將於 <strong>{{start}}</strong> 開始！",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> 將於 <strong>{{start}}</strong> 開始！<br> （以及另外 {{nrOfOtherBanners}} 個任務到期）"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Click on the list icon to search for archived tasks",
@@ -616,13 +652,18 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "您的數據僅部分上傳。請稍後再試！否則，您將無法將數據同步到其他設備。",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity 現在使用兩個獨立的文件而不是單個文件來改進同步，這樣可以減少數據傳輸量。建議更新所有 Super Productivity 實例，並首先從數據最新的應用實例同步數據。如果這是您本地設備中的數據，則請忽略此警告，並通過確認下一個對話框來繼續上傳。"
+      },
       "C": {
         "EMPTY_SYNC": "您正在嘗試同步一個空的資料對象。這是您（幾乎）原始應用程式的第一次同步嗎？",
         "FORCE_IMPORT": "仍要匯入遠端資料？",
         "FORCE_UPLOAD": "仍要上傳本地資料嗎？",
         "FORCE_UPLOAD_AFTER_ERROR": "上傳本地資料時發生錯誤。嘗試強制更新？",
         "NO_REMOTE_DATA": "找不到遠端資料。本地上傳到遠端嗎？",
-        "TRY_LOAD_REMOTE_AGAIN": "嘗試再次從遠端重新載入資料？"
+        "TRY_LOAD_REMOTE_AGAIN": "嘗試再次從遠端重新載入資料？",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "無法從遠端加載數據。您想嘗試用本地數據覆蓋遠端數據嗎？此過程將導致所有遠端數據丟失。"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
@@ -709,11 +750,13 @@
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "筆記",
         "PARENT": "親",
+        "SCHEDULED_AT": "计划时间",
         "REMINDER": "提醒",
         "REPEAT": "重複",
         "SCHEDULE_TASK": "安排任務",
         "SUB_TASKS": "子任務（{{nr}}）",
-        "TIME": "時間"
+        "TIME": "時間",
+        "TITLE_PLACEHOLDER": "輸入標題"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "添加現有任務\"{{taskTitle}}\"",
@@ -724,7 +767,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "Add task to top of list",
         "CREATE_TASK": "建立新任務",
         "EXAMPLE": "示例：\"某些任務標題+ projectName #一些標籤 #一些其他標籤10m/3h\"",
-        "START": "再次按回車鍵開始"
+        "START": "再次按回車鍵開始",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "切換將任務添加到待辦/今天列表",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "切換將任務添加到列表的頂部或底部"
       },
       "B": {
         "ADD_HALF_HOUR": "增加半小時",
@@ -1101,6 +1146,11 @@
       "LONGER_BREAK_DURATION": "長休息時長",
       "TITLE": "番茄鐘"
     },
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前顯示倒計時橫幅",
+      "COUNTDOWN_DURATION": "在實際提醒前 X 時間顯示橫幅",
+      "TITLE": "提醒"
+    },
     "SOUND": {
       "DONE_SOUND": "任務完成聲音",
       "IS_INCREASE_DONE_PITCH": "為完成的每項任務增加音調",
@@ -1109,10 +1159,13 @@
       "VOLUME": "音量"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "添加勵志圖片",
       "HELP": "<div> <p>允許您在工作了指定的時間而不休息時配置重複提醒。 </p> <p>您可以修改顯示的消息。 ${duration}將被替換為連續工作時長。</p> </div>",
       "IS_ENABLED": "啟用休息提醒",
       "IS_FOCUS_WINDOW": "有提醒時激活本應用視窗（僅限桌面）",
       "IS_LOCK_SCREEN": "休息時間到時鎖定螢幕（僅限桌面）",
+      "IS_FULL_SCREEN_BLOCKER": "在全螢幕窗口中顯示消息（僅限桌面）",
+      "FULL_SCREEN_BLOCKER_DURATION": "全螢幕窗口顯示時長（僅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "觸發休息提醒的工作時長",
       "MOTIVATIONAL_IMGS": "勵志圖片（網址）",
@@ -1127,11 +1180,15 @@
       "TITLE": "時間軸",
       "WORK_START_END_DESCRIPTION": "例如 17:00"
     },
-    "TRACKING_REMINDER": {
-      "HELP": "配置橫幅以在您忘記開始時間追蹤的情況下顯示。",
-      "L_IS_ENABLED": "啟用",
-      "L_IS_SHOW_ON_MOBILE": "在移動應用上顯示",
-      "L_MIN_TIME": "等待顯示橫幅廣告的時間",
+    "TIME_TRACKING": {
+      "HELP": "配置橫幅以在您忘記開始時間記錄的情況下顯示。",
+      "L_DEFAULT_ESTIMATE": "新任務的默認時間估算",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "新子任務的默認時間估算",
+      "L_IS_AUTO_START_NEXT_TASK": "將當前任務標記為完成時自動開始記錄下一個任務",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "時間估算超出時通知",
+      "L_IS_TRACKING_REMINDER_ENABLED": "啟用",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "在移動應用上顯示",
+      "L_TRACKING_REMINDER_MIN_TIME": "等待顯示橫幅的時間",
       "TITLE": "時間追蹤提醒"
     }
   },
@@ -1169,6 +1226,7 @@
     "MANAGE_PROJECTS": "管理項目",
     "METRICS": "評估",
     "NOTES": "筆記",
+    "PLANNER": "計劃",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "項目",
     "PROJECT_MENU": "項目清單",
