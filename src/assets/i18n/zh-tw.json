@@ -1,0 +1,60 @@
+{
+  "F": {
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "在記錄任務時間時，每隔 X 時間重複配置的短語。",
+        "L_INTERVAL": "重複短語的間隔時間",
+        "L_TEXT": "短語內容",
+        "L_TEXT_DESCRIPTION": "例如：\"處理 ${currentTaskTitle}！\"",
+        "TITLE": "Domina 模式"
+      }
+    },
+    "PLANNER": {
+      "NO_TASKS": "沒有任務",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "添加到今天",
+          "TITLE": "將計劃任務添加到今天"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "這將移除任務中的提醒！按下 Esc 鍵取消。",
+          "REMOVE_PLAN_DATE": "移除計劃日期",
+          "TITLE": "為一天計劃任務"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "沒有計劃項目"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "已移除任務 '{{taskTitle}}' 的計劃日期",
+        "TASK_PLANNED_FOR": "任務計劃於 {{date}}"
+      }
+    }
+  },
+  "GCF": {
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前顯示倒計時橫幅",
+      "COUNTDOWN_DURATION": "在實際提醒前 X 時間顯示橫幅",
+      "TITLE": "提醒"
+    },
+    "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "添加勵志圖片",
+      "IS_FULL_SCREEN_BLOCKER": "在全螢幕窗口中顯示消息（僅限桌面）",
+      "FULL_SCREEN_BLOCKER_DURATION": "全螢幕窗口顯示時長（僅限桌面）"
+    },
+    "TIME_TRACKING": {
+      "HELP": "配置橫幅以在您忘記開始時間記錄的情況下顯示。",
+      "L_DEFAULT_ESTIMATE": "新任務的默認時間估算",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "新子任務的默認時間估算",
+      "L_IS_AUTO_START_NEXT_TASK": "將當前任務標記為完成時自動開始記錄下一個任務",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "時間估算超出時通知",
+      "L_IS_TRACKING_REMINDER_ENABLED": "啟用",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "在移動應用上顯示",
+      "L_TRACKING_REMINDER_MIN_TIME": "等待顯示橫幅的時間",
+      "TITLE": "時間追蹤提醒"
+    }
+  },
+  "MH": {
+    "PLANNER": "計劃"
+  }
+}
