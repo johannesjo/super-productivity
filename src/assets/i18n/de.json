@@ -1094,7 +1094,7 @@
         "HELP1": "Wiederkehrende Aufgaben sind für regelmäßige Arbeiten gedacht, z. B. : \"Organisation\", \"Tägliche Besprechung\", \"Codeüberprüfung\", \"Überprüfen von E-Mails\" oder ähnliche Aufgaben, die wahrscheinlich immer wieder auftreten.",
         "HELP2": "Einmal konfiguriert, wird eine sich wiederkehrende Aufgabe an jedem unten ausgewählten Tag neu erstellt, sobald Sie Ihr Projekt öffnen, und wird am Ende des Tages automatisch als erledigt markiert. Sie werden als unterschiedliche Instanzen behandelt. So können Sie Unteraufgaben usw. frei hinzufügen.",
         "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht.",
-        "HELP4": "Ein Hinweis zum Auftragsfeld: Bezieht sich auf den Erstellungsauftrag wiederkehrende Aufgaben. Nur wirksam für wiederkehrende Aufgaben, die gleichzeitig erstellt werden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste steht, eine niedrigere Nummer, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
+        "HELP4": "Ein Hinweis zum Auftragsfeld: Bezieht sich auf den Erstellungsauftrag wiederkehrende Aufgaben. Nur wirksam für wiederkehrende Aufgaben, die gleichzeitig erstellt werden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste steht, ein höherer Wert, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
         "TAG_LABEL": "Stichwörter zum Hinzufügen"
       },
       "F": {
@@ -1108,7 +1108,7 @@
         "MONDAY": "Montag",
         "NOTES": "Standardnotizen",
         "ORDER": "Reihenfolge",
-        "ORDER_DESCRIPTION": "Erstellungsreihenfolge wiederkehrender Aufgaben. Betrifft nur wiederkehrende Aufgaben, die gleichzeitig erstellt wurden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste erstellt wird, eine niedrigere Nummer, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
+        "ORDER_DESCRIPTION": "Erstellungsreihenfolge wiederkehrender Aufgaben. Betrifft nur wiederkehrende Aufgaben, die gleichzeitig erstellt wurden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste erstellt wird, ein höherer Wert, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
         "Q_CUSTOM": "Benutzerdefinierte Wiederholungkonfiguration",
         "Q_DAILY": "Jeden Tag",
         "Q_MONTHLY_CURRENT_DATE": "Jeden Monat am {{dateDayStr}}.",
