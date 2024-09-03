@@ -242,6 +242,15 @@
         "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "在记录任务时间时，每隔 X 时间重复配置的短语。",
+        "L_INTERVAL": "重复短语的间隔时间",
+        "L_TEXT": "短语内容",
+        "L_TEXT_DESCRIPTION": "例如：\"处理 ${currentTaskTitle}！\"",
+        "TITLE": "Domina 模式"
+      }
+    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "问题",
@@ -515,6 +524,27 @@
         "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "没有任务",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "添加到今天",
+          "TITLE": "将计划任务添加到今天"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "这将移除任务中的提醒！按下 Esc 键取消。",
+          "REMOVE_PLAN_DATE": "移除计划日期",
+          "TITLE": "为一天计划任务"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "没有计划项目"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "已移除任务 '{{taskTitle}}' 的计划日期",
+        "TASK_PLANNED_FOR": "任务计划于 {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "继续加油！",
       "BREAK_IS_DONE": "休息已完成！",
@@ -663,6 +693,10 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "您的数据仅部分上传。请稍后再试！否则，您将无法将数据同步到其他设备。",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity 现在使用两个独立的文件而不是单个文件来改进同步，这样可以减少数据传输量。建议更新所有 Super Productivity 实例，并首先从数据最新的应用实例同步数据。如果这是您本地设备中的数据，则请忽略此警告，并通过确认下一个对话框来继续上传。"
+      },
       "C": {
         "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
         "FORCE_IMPORT": "无论如何,导入远程数据？",
@@ -670,7 +704,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
         "MIGRATE_LEGACY": "导入时检测到旧数据，是否要尝试迁移它？",
         "NO_REMOTE_DATA": "找不到远程数据。本地上传到远程吗？",
-        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
+        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "无法从远程加载数据。您想尝试用本地数据覆盖远程数据吗？此过程将导致所有远程数据丢失。"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "请打开以下链接，并将此处提供的身份验证代码复制到下面的输入字段中。",
@@ -811,10 +846,6 @@
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "时间表",
-        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
-        "DATETIME_FOR": "提醒的日期时间",
-        "EDIT": "编辑提醒",
         "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
         "REMIND_AT": "提醒在",
         "RO_10M": "开始前10分钟",
@@ -825,7 +856,11 @@
         "RO_START": "当它开始的时候",
         "RO_NEVER": "Never",
         "SCHEDULE": "计划时间",
-        "UNSCHEDULE": "取消计划"
+        "UNSCHEDULE": "取消计划",
+        "CONFIRM_REPEAT_OK": "时间表",
+        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
+        "DATETIME_FOR": "提醒的日期时间",
+        "EDIT": "编辑提醒"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
@@ -1231,18 +1266,18 @@
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
-      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "在没有先完成一天的情况下退出应用程序之前确认",
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TASK_NOTES_TPL": "任务描述模板",
-      "TITLE": "其他设置"
+      "TITLE": "其他设置",
+      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知"
     },
     "POMODORO": {
       "BREAK_DURATION": "短休息时长",
@@ -1259,6 +1294,11 @@
       "LONGER_BREAK_DURATION": "长休息时长",
       "TITLE": "番茄钟"
     },
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前显示倒计时横幅",
+      "COUNTDOWN_DURATION": "在实际提醒前 X 时间显示横幅",
+      "TITLE": "提醒"
+    },
     "SOUND": {
       "DONE_SOUND": "任务完成声音",
       "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
@@ -1267,10 +1307,13 @@
       "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "添加励志图片",
       "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
       "IS_ENABLED": "启用休息提醒",
       "IS_FOCUS_WINDOW": "有提醒时激活本应用窗口（仅限桌面）",
       "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
+      "IS_FULL_SCREEN_BLOCKER": "在全屏窗口中显示消息（仅限桌面）",
+      "FULL_SCREEN_BLOCKER_DURATION": "全屏窗口显示时长（仅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMGS": "励志图片（网址）",
@@ -1289,6 +1332,17 @@
       "CAL_PROVIDERS_ADD": "添加 ical 源",
       "CAL_PROVIDERS_INFO": "您可以选择将时间线配置为还从 iCal（例如 Google 日历）加载和显示数据。",
       "L_CAL_PATH": "日历 ICAL 的 URL/文件路径（可选）"
+    },
+    "TIME_TRACKING": {
+      "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
+      "L_DEFAULT_ESTIMATE": "新任务的默认时间估算",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "新子任务的默认时间估算",
+      "L_IS_AUTO_START_NEXT_TASK": "将当前任务标记为完成时自动开始记录下一个任务",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "时间估算超出时通知",
+      "L_IS_TRACKING_REMINDER_ENABLED": "启用",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "在移动应用上显示",
+      "L_TRACKING_REMINDER_MIN_TIME": "等待显示横幅的时间",
+      "TITLE": "时间记录提醒"
     },
     "TRACKING_REMINDER": {
       "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
@@ -1341,6 +1395,7 @@
     "METRICS": "评估",
     "NOTES": "笔记",
     "NOTES_PANEL_INFO": "笔记仅在时间线和一般任务列表中展示。",
+    "PLANNER": "计划",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
@@ -1369,10 +1424,8 @@
       "OK": "好的！结束程序！"
     },
     "ESTIMATE_TOTAL": "总估计数：",
-    "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
-    "PLAN": "计划",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
     "ROUND_5M": "将所有任务舍入到5分钟",
@@ -1387,11 +1440,13 @@
     "START_END": "开始 - 结束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任务已完成",
-    "TASK_LIST": "任务列表",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "花费时间/估计",
     "TIME_SPENT_ESTIMATE_TITLE": "花费的时间：今天花费的总时间。存档的任务不包括在内。 - 估计时间：今天工作的任务估计时间减去其他日子已经花费的时间。",
-    "TODAY": "今天",
-    "WEEK": "周"
+    "WEEK": "周",
+    "EVALUATION": "评估",
+    "PLAN": "计划",
+    "TASK_LIST": "任务列表",
+    "TODAY": "今天"
   },
   "PM": {
     "TITLE": "项目指标"

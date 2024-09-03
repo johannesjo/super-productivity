@@ -749,10 +749,6 @@
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "スケジュール",
-        "CONFIRM_REPEAT_TXT": "この繰り返されるタスクを別の日にスケジュールしようとしています。繰り返されるタスクは通常、指定された日に再作成され、その日にのみスケジュールされることを意味します。とにかく続行しますか？",
-        "DATETIME_FOR": "リマインダーの日時",
-        "EDIT": "リマインダーを編集",
         "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
         "REMIND_AT": "で思い出させる",
         "RO_10M": "開始の10分前",
@@ -763,7 +759,11 @@
         "RO_START": "それが始まるとき",
         "RO_NEVER": "Never",
         "SCHEDULE": "スケジュール",
-        "UNSCHEDULE": "予定外"
+        "UNSCHEDULE": "予定外",
+        "CONFIRM_REPEAT_OK": "スケジュール",
+        "CONFIRM_REPEAT_TXT": "この繰り返されるタスクを別の日にスケジュールしようとしています。繰り返されるタスクは通常、指定された日に再作成され、その日にのみスケジュールされることを意味します。とにかく続行しますか？",
+        "DATETIME_FOR": "リマインダーの日時",
+        "EDIT": "リマインダーを編集"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "今日にすべて追加",
@@ -1089,17 +1089,17 @@
       "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "タスクに取り組むために今日タグを自動的に追加する",
       "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
-      "IS_AUTO_START_NEXT_TASK": "現在のタスクを完了したら、次のタスクの追跡を開始する",
       "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認する",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "最初に1日を終えずにアプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
       "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
       "TASK_NOTES_TPL": "タスク記述テンプレート",
-      "TITLE": "その他の設定"
+      "TITLE": "その他の設定",
+      "IS_AUTO_START_NEXT_TASK": "現在のタスクを完了したら、次のタスクの追跡を開始する",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する"
     },
     "POMODORO": {
       "BREAK_DURATION": "短い休憩時間",
@@ -1215,10 +1215,8 @@
       "OK": "アイアイ！シャットダウンします！"
     },
     "ESTIMATE_TOTAL": "合計見積もり：",
-    "EVALUATION": "評価",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
     "NO_TASKS": "この日は何もしていません",
-    "PLAN": "計画",
     "ROUND_15M": "すべてのタスクを15分に丸める",
     "ROUND_30M": "すべてのタスクを30分に丸める",
     "ROUND_5M": "すべてのタスクを5分に丸める",
@@ -1232,11 +1230,13 @@
     "START_END": "開始 - 終了",
     "SUMMARY_FOR": " {{dayStr}}の日別サマリー",
     "TASKS_COMPLETED": "完了したタスク",
-    "TASK_LIST": "タスクリスト",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "消費時間/推定時間",
     "TIME_SPENT_ESTIMATE_TITLE": "消費時間：今日消費した合計時間。アーカイブされたタスクは含まれていません。 - 推定時間：今日作業したタスクの見積もり時間から、他の日にすでに消費した時間を差し引いたもの。",
-    "TODAY": "今日",
-    "WEEK": "週間"
+    "WEEK": "週間",
+    "EVALUATION": "評価",
+    "PLAN": "計画",
+    "TASK_LIST": "タスクリスト",
+    "TODAY": "今日"
   },
   "PM": {
     "TITLE": "プロジェクトメトリクス"
