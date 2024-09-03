@@ -242,6 +242,15 @@
         "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "在记录任务时间时，每隔 X 时间重复配置的短语。",
+        "L_INTERVAL": "重复短语的间隔时间",
+        "L_TEXT": "短语内容",
+        "L_TEXT_DESCRIPTION": "例如：\"处理 ${currentTaskTitle}！\"",
+        "TITLE": "Domina 模式"
+      }
+    },
     "ISSUE": {
       "DEFAULT": {
         "ISSUES_STR": "问题",
@@ -515,6 +524,27 @@
         "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "没有任务",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "添加到今天",
+          "TITLE": "将计划任务添加到今天"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "这将移除任务中的提醒！按下 Esc 键取消。",
+          "REMOVE_PLAN_DATE": "移除计划日期",
+          "TITLE": "为一天计划任务"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "没有计划项目"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "已移除任务 '{{taskTitle}}' 的计划日期",
+        "TASK_PLANNED_FOR": "任务计划于 {{date}}"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "继续加油！",
       "BREAK_IS_DONE": "休息已完成！",
@@ -589,6 +619,7 @@
         "SETUP_REDMINE_PROJECT": "关联 Redmine"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "启用项目待办",
         "L_IS_HIDDEN_FROM_MENU": "从菜单中隐藏项目",
         "L_TITLE": "项目名",
         "TITLE": "基本设置"
@@ -628,7 +659,13 @@
       "WEEK_TITLE": "第 {{nr}} 周 ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "提醒界面出错"
+      "S_REMINDER_ERR": "提醒界面出错",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "立即开始",
+        "HIDE": "隐藏",
+        "TXT": "<strong>{{title}}</strong> 将于 <strong>{{start}}</strong> 开始！",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> 将于 <strong>{{start}}</strong> 开始！<br> （以及另外 {{nrOfOtherBanners}} 个任务到期）"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "单击列表图标以搜索存档任务",
@@ -663,6 +700,10 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "您的数据仅部分上传。请稍后再试！否则，您将无法将数据同步到其他设备。",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity 现在使用两个独立的文件而不是单个文件来改进同步，这样可以减少数据传输量。建议更新所有 Super Productivity 实例，并首先从数据最新的应用实例同步数据。如果这是您本地设备中的数据，则请忽略此警告，并通过确认下一个对话框来继续上传。"
+      },
       "C": {
         "EMPTY_SYNC": "您正在尝试同步一个空的数据对象。这是您（几乎）原始应用程序的第一次同步吗？",
         "FORCE_IMPORT": "无论如何,导入远程数据？",
@@ -670,7 +711,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "上载本地数据时发生错误。尝试强制更新？",
         "MIGRATE_LEGACY": "导入时检测到旧数据，是否要尝试迁移它？",
         "NO_REMOTE_DATA": "找不到远程数据。本地上传到远程吗？",
-        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？"
+        "TRY_LOAD_REMOTE_AGAIN": "尝试再次从远程重新加载数据？",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "无法从远程加载数据。您想尝试用本地数据覆盖远程数据吗？此过程将导致所有远程数据丢失。"
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "请打开以下链接，并将此处提供的身份验证代码复制到下面的输入字段中。",
@@ -759,11 +801,13 @@
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "笔记",
         "PARENT": "父任务",
+        "SCHEDULED_AT": "计划时间",
         "REMINDER": "提醒",
         "REPEAT": "重复",
         "SCHEDULE_TASK": "安排任务",
         "SUB_TASKS": "子任务（{{nr}}）",
-        "TIME": "时间"
+        "TIME": "时间",
+        "TITLE_PLACEHOLDER": "输入标题"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "添加现有任务“{{taskTitle}}”",
@@ -774,7 +818,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "将任务添加到列表顶部",
         "CREATE_TASK": "创建新任务",
         "EXAMPLE": "示例：“某些任务标题+ projectName＃一些标签＃一些其他标签10m / 3h”",
-        "START": "再次按回车键开始"
+        "START": "再次按回车键开始",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "切换将任务添加到待办/今天列表",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "切换将任务添加到列表的顶部或底部"
       },
       "B": {
         "ADD_HALF_HOUR": "增加半小时",
@@ -1259,6 +1305,11 @@
       "LONGER_BREAK_DURATION": "长休息时长",
       "TITLE": "番茄钟"
     },
+    "REMINDER": {
+      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前显示倒计时横幅",
+      "COUNTDOWN_DURATION": "在实际提醒前 X 时间显示横幅",
+      "TITLE": "提醒"
+    },
     "SOUND": {
       "DONE_SOUND": "任务完成声音",
       "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
@@ -1267,10 +1318,13 @@
       "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "添加励志图片",
       "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
       "IS_ENABLED": "启用休息提醒",
       "IS_FOCUS_WINDOW": "有提醒时激活本应用窗口（仅限桌面）",
       "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
+      "IS_FULL_SCREEN_BLOCKER": "在全屏窗口中显示消息（仅限桌面）",
+      "FULL_SCREEN_BLOCKER_DURATION": "全屏窗口显示时长（仅限桌面）",
       "MESSAGE": "休息一下",
       "MIN_WORKING_TIME": "触发休息提醒的工作时长",
       "MOTIVATIONAL_IMGS": "励志图片（网址）",
@@ -1290,11 +1344,15 @@
       "CAL_PROVIDERS_INFO": "您可以选择将时间线配置为还从 iCal（例如 Google 日历）加载和显示数据。",
       "L_CAL_PATH": "日历 ICAL 的 URL/文件路径（可选）"
     },
-    "TRACKING_REMINDER": {
+    "TIME_TRACKING": {
       "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
-      "L_IS_ENABLED": "启用",
-      "L_IS_SHOW_ON_MOBILE": "在移动应用上显示",
-      "L_MIN_TIME": "等待显示横幅的时间",
+      "L_DEFAULT_ESTIMATE": "新任务的默认时间估算",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "新子任务的默认时间估算",
+      "L_IS_AUTO_START_NEXT_TASK": "将当前任务标记为完成时自动开始记录下一个任务",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "时间估算超出时通知",
+      "L_IS_TRACKING_REMINDER_ENABLED": "启用",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "在移动应用上显示",
+      "L_TRACKING_REMINDER_MIN_TIME": "等待显示横幅的时间",
       "TITLE": "时间记录提醒"
     }
   },
@@ -1341,6 +1399,7 @@
     "METRICS": "评估",
     "NOTES": "笔记",
     "NOTES_PANEL_INFO": "笔记仅在时间线和一般任务列表中展示。",
+    "PLANNER": "计划",
     "PROCRASTINATE": "拖延",
     "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
