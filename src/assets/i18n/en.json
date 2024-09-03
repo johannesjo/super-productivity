@@ -1688,9 +1688,9 @@
   "V": {
     "E_1TO10": "Please enter a value between 1 and 10",
     "E_DATETIME": "The entered value is not a datetime!",
-    "E_MAX": "Should not be bigger than {{val}}",
+    "E_MAX": "Should not be  than {{val}}",
     "E_MAX_LENGTH": "Should be max {{val}} characters long",
-    "E_MIN": "Should be smaller than {{val}}",
+    "E_MIN": "Should not be bigger than {{val}}",
     "E_MIN_LENGTH": "Should be at least {{val}} characters long",
     "E_PATTERN": "Invalid input",
     "E_REQUIRED": "This field is required"
