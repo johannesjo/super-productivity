@@ -3,6 +3,7 @@ export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/
 export const TRACKING_INTERVAL = 1000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
+export const DRAG_DELAY_FOR_TOUCH = 75;
 
 import '@angular/common/locales/global/en';
 import '@angular/common/locales/global/es';

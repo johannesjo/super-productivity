@@ -14,7 +14,7 @@ import { T } from '../../t.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { Project } from '../../features/project/project.model';
 import { MatDialog } from '@angular/material/dialog';
-import { THEME_COLOR_MAP } from '../../app.constants';
+import { DRAG_DELAY_FOR_TOUCH } from '../../app.constants';
 import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
@@ -30,12 +30,13 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { DialogTimelineSetupComponent } from '../../features/schedule/dialog-timeline-setup/dialog-timeline-setup.component';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
-import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
+import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { GlobalConfigService } from '../../features/config/global-config.service';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { moveItemBeforeItem } from '../../util/move-item-before-item';
 
 @Component({
   selector: 'side-nav',
@@ -47,6 +48,9 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 export class SideNavComponent implements OnDestroy {
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
+  IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
+  DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
+
   keyboardFocusTimeout?: number;
   @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
   isProjectsExpanded: boolean = this.fetchProjectListState();
@@ -79,7 +83,6 @@ export class SideNavComponent implements OnDestroy {
     ),
   );
   T: typeof T = T;
-  readonly PROJECTS_SIDE_NAV: string = 'PROJECTS_SIDE_NAV';
   readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
@@ -103,17 +106,6 @@ export class SideNavComponent implements OnDestroy {
     private readonly _shepherdService: ShepherdService,
     private readonly _globalConfigService: GlobalConfigService,
   ) {
-    this._dragulaService.createGroup(this.PROJECTS_SIDE_NAV, {
-      direction: 'vertical',
-      moves: (el, container, handle) => {
-        return (
-          this.isProjectsExpanded &&
-          !!handle &&
-          handle.className.indexOf &&
-          handle.className.indexOf('drag-handle') > -1
-        );
-      },
-    });
     this._dragulaService.createGroup(this.TAG_SIDE_NAV, {
       direction: 'vertical',
       moves: (el, container, handle) => {
@@ -130,16 +122,6 @@ export class SideNavComponent implements OnDestroy {
       this.workContextService.activeWorkContextId$.subscribe(
         (id) => (this.activeWorkContextId = id),
       ),
-    );
-
-    this._subs.add(
-      this._dragulaService
-        .dropModel(this.PROJECTS_SIDE_NAV)
-        .subscribe(({ targetModel }) => {
-          // const {target, source, targetModel, item} = params;
-          const targetNewIds = targetModel.map((project: Project) => project.id);
-          this.projectService.updateOrder(targetNewIds);
-        }),
     );
 
     this._subs.add(
@@ -176,7 +158,6 @@ export class SideNavComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
-    this._dragulaService.destroy(this.PROJECTS_SIDE_NAV);
     this._dragulaService.destroy(this.TAG_SIDE_NAV);
     window.clearTimeout(this.keyboardFocusTimeout);
   }
@@ -189,12 +170,6 @@ export class SideNavComponent implements OnDestroy {
 
   trackById(i: number, project: Project | Tag): string {
     return project.id;
-  }
-
-  getThemeColor(color: THEME_COLOR_MAP | string): { [key: string]: string } {
-    const standardColor = (THEME_COLOR_MAP as any)[color];
-    const colorToUse = standardColor ? standardColor : color;
-    return { background: colorToUse };
   }
 
   fetchProjectListState(): boolean {
@@ -269,10 +244,6 @@ export class SideNavComponent implements OnDestroy {
     }
   }
 
-  openTimelineSettings(): void {
-    this._matDialog.open(DialogTimelineSetupComponent);
-  }
-
   startTour(id: TourId): void {
     this._shepherdService.show(id);
   }
@@ -282,5 +253,27 @@ export class SideNavComponent implements OnDestroy {
       this._cachedIssueUrl = getGithubErrorUrl('', undefined, true);
     }
     return this._cachedIssueUrl;
+  }
+
+  dropOnProjectList(allItems: Project[], ev: CdkDragDrop<string, string, Project>): void {
+    if (ev.previousContainer === ev.container) {
+      const idsWithoutHidden = allItems
+        .filter((p) => !p.isHiddenFromMenu)
+        .map((p) => p.id);
+      const hiddenIds = allItems.filter((p) => p.isHiddenFromMenu).map((p) => p.id);
+      const hiddenLength = hiddenIds.length;
+      const project = ev.item.data;
+      // const targetProjectId = allIdsWithoutHidden[ev.currentIndex] as string;
+      const targetProjectId = idsWithoutHidden[ev.currentIndex - hiddenLength] as string;
+      console.log(targetProjectId);
+
+      if (targetProjectId) {
+        const newIds = [
+          ...moveItemBeforeItem(idsWithoutHidden, project.id, targetProjectId),
+          ...hiddenIds,
+        ];
+        this.projectService.updateOrder(newIds);
+      }
+    }
   }
 }

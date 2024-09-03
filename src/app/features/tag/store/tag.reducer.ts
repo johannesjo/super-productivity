@@ -46,9 +46,9 @@ import {
   upsertTag,
 } from './tag.actions';
 import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
-import { moveItemInArray } from '../../../util/move-item-in-array';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -551,13 +551,11 @@ export const tagReducer = createReducer<TagState>(
 
   on(moveTaskInTagList, (state, { tagId, toTaskId, fromTaskId }) => {
     const tagToUpdate = state.entities[tagId] as Tag;
-    const toIndex = tagToUpdate.taskIds.indexOf(toTaskId);
-    const fromIndex = tagToUpdate.taskIds.indexOf(fromTaskId);
     return tagAdapter.updateOne(
       {
         id: tagId,
         changes: {
-          taskIds: moveItemInArray(tagToUpdate.taskIds, fromIndex, toIndex),
+          taskIds: moveItemBeforeItem(tagToUpdate.taskIds, fromTaskId, toTaskId),
         },
       },
       state,

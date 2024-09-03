@@ -60,6 +60,7 @@ import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-inpu
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
+import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -92,6 +93,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
+  DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (v, index) => index % FH === 0,
   );

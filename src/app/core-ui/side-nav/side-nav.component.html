@@ -51,18 +51,25 @@
 
   <div
     [@standardList]="projectList?.length"
-    [dragulaModel]="projectList"
-    [dragula]="PROJECTS_SIDE_NAV"
+    cdkDropList
+    (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
   >
+    @for (project of projectList; track project.id) {
+    <!---->@if (!project.isHiddenFromMenu) {
     <side-nav-item
       #menuEntry
+      cdkDrag
+      [cdkDragData]="project"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
       (keydown)="checkFocusProject($event)"
-      *ngFor="let project of projectList; trackBy: trackById;"
       [workContext]="project"
       [type]="WorkContextType.PROJECT"
       [defaultIcon]="'folder_special'"
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
+    }
+    <!---->
+    }
   </div>
 
   <button
