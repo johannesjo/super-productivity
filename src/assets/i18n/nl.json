@@ -891,10 +891,6 @@
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Planning",
-        "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
-        "DATETIME_FOR": "Datetime voor herinnering",
-        "EDIT": "Herinnering bewerken",
         "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
         "REMIND_AT": "Herinner bij",
         "RO_10M": "10 minuten voordat het begint",
@@ -905,7 +901,11 @@
         "RO_START": "wanneer het begint",
         "RO_NEVER": "Nooit",
         "SCHEDULE": "Schema",
-        "UNSCHEDULE": "Ongepland"
+        "UNSCHEDULE": "Ongepland",
+        "CONFIRM_REPEAT_OK": "Planning",
+        "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
+        "DATETIME_FOR": "Datetime voor herinnering",
+        "EDIT": "Herinnering bewerken"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
@@ -1264,17 +1264,17 @@
       "HELP": "<p><strong>Ziet u geen bureaubladmeldingen?</strong> Voor vensters wilt u misschien Systeem> Meldingen en acties controleren en controleren of de vereiste meldingen zijn ingeschakeld.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Voeg automatisch de tag voor vandaag toe aan taken",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Markeer de bovenliggende taak als voltooid wanneer alle subtaken zijn voltooid",
-      "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
       "IS_CONFIRM_BEFORE_EXIT": "Bevestig voordat u de app afsluit",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bevestig voordat u de app verlaat zonder eerst de dag af te sluiten",
       "IS_DARK_MODE": "Donkere modus",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TASK_NOTES_TPL": "Taak omschrijving template",
-      "TITLE": "Diverse instellingen"
+      "TITLE": "Diverse instellingen",
+      "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duur van korte pauzes",
@@ -1390,10 +1390,8 @@
       "OK": "Aye aye! Afsluiten!"
     },
     "ESTIMATE_TOTAL": "Totale schatting:",
-    "EVALUATION": "Evaluatie",
     "EXPORT_TASK_LIST": "Takenlijst exporteren",
     "NO_TASKS": "Er zijn geen taken voor deze dag",
-    "PLAN": "Plan",
     "ROUND_15M": "Rond alle taken af op 15 minuten",
     "ROUND_30M": "Rond alle taken af op 30 minuten",
     "ROUND_5M": "Rond alle taken af op 5 minuten",
@@ -1407,11 +1405,13 @@
     "START_END": "Begin het einde",
     "SUMMARY_FOR": "Dagelijks overzicht voor {{dayStr}}",
     "TASKS_COMPLETED": "Taken voltooid",
-    "TASK_LIST": "Takenlijst",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Bestede tijd / geschat",
     "TIME_SPENT_ESTIMATE_TITLE": "Bestede tijd: totale tijd die vandaag is besteed. Gearchiveerde taken niet inbegrepen. - Geschatte tijd: geschatte tijd voor taken waaraan vandaag is gewerkt minus de tijd die al op andere dagen met hen is doorgebracht.",
-    "TODAY": "Vandaag",
-    "WEEK": "Week"
+    "WEEK": "Week",
+    "EVALUATION": "Evaluatie",
+    "PLAN": "Plan",
+    "TASK_LIST": "Takenlijst",
+    "TODAY": "Vandaag"
   },
   "PM": {
     "TITLE": "Projectstatistieken"

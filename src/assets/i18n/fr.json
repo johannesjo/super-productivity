@@ -879,10 +879,6 @@
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Programme",
-        "CONFIRM_REPEAT_TXT": "Vous essayez de programmer cette tâche répétée à un autre jour. Les tâches répétées sont généralement destinées à être recréées à des jours spécifiés et planifiées uniquement ce jour-là. Voulez-vous continuer malgré tout ?",
-        "DATETIME_FOR": "Date et heure du rappel",
-        "EDIT": "Modifier le rappel",
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
         "REMIND_AT": "Rappeler à",
         "RO_10M": "10 minutes avant le début",
@@ -893,7 +889,11 @@
         "RO_START": "quand ça commence",
         "RO_NEVER": "Jamais",
         "SCHEDULE": "Planifier",
-        "UNSCHEDULE": "Dé-planifier"
+        "UNSCHEDULE": "Dé-planifier",
+        "CONFIRM_REPEAT_OK": "Programme",
+        "CONFIRM_REPEAT_TXT": "Vous essayez de programmer cette tâche répétée à un autre jour. Les tâches répétées sont généralement destinées à être recréées à des jours spécifiés et planifiées uniquement ce jour-là. Voulez-vous continuer malgré tout ?",
+        "DATETIME_FOR": "Date et heure du rappel",
+        "EDIT": "Modifier le rappel"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Ajouter tout à aujourd'hui",
@@ -1220,18 +1220,18 @@
       "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau ?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Ajouter automatiquement la balise d'aujourd'hui aux tâches travaillées",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
-      "IS_AUTO_START_NEXT_TASK": "Commencer le suivi de la tâche suivante lors du marquage du courant comme terminé",
       "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirmez avant de quitter l'application sans terminer le jour en premier",
       "IS_DARK_MODE": "Mode sombre",
       "IS_DISABLE_ANIMATIONS": "Désactiver toutes les animations",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
       "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
       "TASK_NOTES_TPL": "Modèle de description de tâche",
-      "TITLE": "Réglages divers"
+      "TITLE": "Réglages divers",
+      "IS_AUTO_START_NEXT_TASK": "Commencer le suivi de la tâche suivante lors du marquage du courant comme terminé",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durée des pauses courtes",
@@ -1349,10 +1349,8 @@
       "OK": "Aye Aye ! Fermer !"
     },
     "ESTIMATE_TOTAL": "Estimation totale :",
-    "EVALUATION": "évaluation",
     "EXPORT_TASK_LIST": "Exporter la liste des tâches",
     "NO_TASKS": "Il n'y a pas de tâches pour aujourd'hui",
-    "PLAN": "Plan",
     "ROUND_15M": "Arrondir au plus près 15 minutes",
     "ROUND_30M": "Arrondir au plus près 30 minutes",
     "ROUND_5M": "Arrondir au plus près 5 minutes",
@@ -1367,11 +1365,13 @@
     "START_END": "Début – Fin",
     "SUMMARY_FOR": "Récapitulatif quotidien pour {{dayStr}}",
     "TASKS_COMPLETED": "Tâches terminées",
-    "TASK_LIST": "Liste de tâches",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Temps passé / estimé",
     "TIME_SPENT_ESTIMATE_TITLE": "Temps passé: Temps total passé aujourd'hui. Tâches archivées non incluses. - Temps estimé: temps estimé pour les tâches effectuées aujourd'hui moins le temps déjà passé dessus les autres jours.",
-    "TODAY": "Aujourd'hui",
-    "WEEK": "La semaine"
+    "WEEK": "La semaine",
+    "EVALUATION": "évaluation",
+    "PLAN": "Plan",
+    "TASK_LIST": "Liste de tâches",
+    "TODAY": "Aujourd'hui"
   },
   "PM": {
     "TITLE": "Données du projet"

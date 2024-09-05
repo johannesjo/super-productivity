@@ -1612,8 +1612,8 @@
     "TASKS_COMPLETED": "Attività completate",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Attività archiviate non incluse. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
-    "TODAY": "Oggi",
-    "WEEK": "Settimana"
+    "WEEK": "Settimana",
+    "TODAY": "Oggi"
   },
   "PM": {
     "TITLE": "Metriche di progetto"

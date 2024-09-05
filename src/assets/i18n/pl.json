@@ -687,8 +687,6 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_SCHEDULE_TASK": {
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "REMIND_AT": "Remind at",
         "RO_10M": "10 minutes before it starts",
@@ -699,7 +697,9 @@
         "RO_START": "when it starts",
         "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "UNSCHEDULE": "Unschedule",
+        "DATETIME_FOR": "Datetime for reminder",
+        "EDIT": "Edit Reminder"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
@@ -1007,16 +1007,16 @@
       "HELP": "<p><strong>Nie widzisz powidomień na pulpicie?</strong> Dla windowsa sprawdź czy w Ustawienia > System > Powiadomienia i akcje zaznaczone zostały odpowiednie opcje.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Dodaj automatycznie tag dzisiejszy do zadania",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Zaznacz zadanie główne jako ukończone, jeżeli wszystkie podrzędne zostały ukończone",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_DARK_MODE": "Dark Mode",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Ustawienia różne",
+      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_DISABLE_INITIAL_DIALOG": "Disable initial info dialog (you might miss important updates!)"
     },
     "POMODORO": {
@@ -1124,10 +1124,8 @@
       "MSG": "Twoja praca skończona, czas wracać do domu!",
       "OK": "Tak, tak! Spadamy!"
     },
-    "EVALUATION": "Ocena",
     "EXPORT_TASK_LIST": "Eksportuj listę Zadań",
     "NO_TASKS": "Nie ma żadnych zadań na dziś",
-    "PLAN": "Plan",
     "ROUND_15M": "Zaokrągl czas zadań do 15 minut",
     "ROUND_30M": "Zaokrągl czas zadań do 30 minut",
     "ROUND_5M": "Zaokrągl czas zadań do 5 minut",
@@ -1141,11 +1139,13 @@
     "START_END": "Start – Koniec",
     "SUMMARY_FOR": "Dzienne Podsumiwanie {{dayStr}}",
     "TASKS_COMPLETED": "Zadania ukończone",
-    "TASK_LIST": "Lista zadań",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Czas spędzony / Estymacja",
     "TIME_SPENT_ESTIMATE_TITLE": "Czas spędzony: Całkowity czas spędzony. Nie liczymy zadań zarchiwowanych. – Estymacja: Czas zaplanowany na wykonane zadania bez czasu pracy wykonanym w innych dniach.",
-    "TODAY": "Dziś",
-    "WEEK": "Tydzień"
+    "WEEK": "Tydzień",
+    "EVALUATION": "Ocena",
+    "PLAN": "Plan",
+    "TASK_LIST": "Lista zadań",
+    "TODAY": "Dziś"
   },
   "PM": {
     "TITLE": "Metryki Projektu"
