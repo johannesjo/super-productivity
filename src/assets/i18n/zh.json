@@ -811,10 +811,6 @@
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "时间表",
-        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
-        "DATETIME_FOR": "提醒的日期时间",
-        "EDIT": "编辑提醒",
         "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
         "REMIND_AT": "提醒在",
         "RO_10M": "开始前10分钟",
@@ -825,7 +821,11 @@
         "RO_START": "当它开始的时候",
         "RO_NEVER": "Never",
         "SCHEDULE": "计划时间",
-        "UNSCHEDULE": "取消计划"
+        "UNSCHEDULE": "取消计划",
+        "CONFIRM_REPEAT_OK": "时间表",
+        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
+        "DATETIME_FOR": "提醒的日期时间",
+        "EDIT": "编辑提醒"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
@@ -1231,18 +1231,18 @@
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
-      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
       "IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "在没有先完成一天的情况下退出应用程序之前确认",
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
       "TASK_NOTES_TPL": "任务描述模板",
-      "TITLE": "其他设置"
+      "TITLE": "其他设置",
+      "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出时间估算时发送通知"
     },
     "POMODORO": {
       "BREAK_DURATION": "短休息时长",
@@ -1369,10 +1369,8 @@
       "OK": "好的！结束程序！"
     },
     "ESTIMATE_TOTAL": "总估计数：",
-    "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
-    "PLAN": "计划",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
     "ROUND_5M": "将所有任务舍入到5分钟",
@@ -1387,11 +1385,13 @@
     "START_END": "开始 - 结束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任务已完成",
-    "TASK_LIST": "任务列表",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "花费时间/估计",
     "TIME_SPENT_ESTIMATE_TITLE": "花费的时间：今天花费的总时间。存档的任务不包括在内。 - 估计时间：今天工作的任务估计时间减去其他日子已经花费的时间。",
-    "TODAY": "今天",
-    "WEEK": "周"
+    "WEEK": "周",
+    "EVALUATION": "评估",
+    "PLAN": "计划",
+    "TASK_LIST": "任务列表",
+    "TODAY": "今天"
   },
   "PM": {
     "TITLE": "项目指标"

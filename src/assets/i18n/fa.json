@@ -754,10 +754,6 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "برنامه",
-        "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
-        "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
-        "EDIT": "ویرایش یادآوری",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "REMIND_AT": "یادآوری در",
         "RO_10M": "10 دقیقه قبل از شروع آن",
@@ -768,7 +764,11 @@
         "RO_START": "وقتی شروع می شود",
         "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
+        "UNSCHEDULE": "Unschedule",
+        "CONFIRM_REPEAT_OK": "برنامه",
+        "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
+        "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
+        "EDIT": "ویرایش یادآوری"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "همه را به امروز اضافه کنید",
@@ -1094,17 +1094,17 @@
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "برچسب امروز به صورت خودکار به کار بر روی وظایف اضافه کنید",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-      "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "قبل از خروج از برنامه بدون اتمام روز اول آن را تأیید کنید",
       "IS_DARK_MODE": "Dark Mode",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "الگوی شرح کار",
-      "TITLE": "Misc Settings"
+      "TITLE": "Misc Settings",
+      "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1220,10 +1220,8 @@
       "OK": "Aye aye! Shutdown!"
     },
     "ESTIMATE_TOTAL": "برآورد کل:",
-    "EVALUATION": "Evaluation",
     "EXPORT_TASK_LIST": "خروجی‌گرفتن از لیست کارها",
     "NO_TASKS": "There are no tasks for this day",
-    "PLAN": "Plan",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
     "ROUND_5M": "Round all tasks to 5 minutes",
@@ -1237,11 +1235,13 @@
     "START_END": "شروع - پایان",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
     "TASKS_COMPLETED": "کارهای تکمیل شده",
-    "TASK_LIST": "Task List",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "زمان سپری‌شده/تخمین",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-    "TODAY": "امروز",
-    "WEEK": "Week"
+    "WEEK": "Week",
+    "EVALUATION": "Evaluation",
+    "PLAN": "Plan",
+    "TASK_LIST": "Task List",
+    "TODAY": "امروز"
   },
   "PM": {
     "TITLE": "معیارهای پروژه"

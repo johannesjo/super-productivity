@@ -938,10 +938,6 @@
         "UPDATE_ISSUE_DATA": "Aktualizovat údaje o problému"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Naplánovat",
-        "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
-        "DATETIME_FOR": "Datum a čas pro připomenutí",
-        "EDIT": "Upravit připomenutí",
         "MOVE_TO_BACKLOG": "Přesunout úkol do zásobníku do doby naplánování",
         "REMIND_AT": "Připomenout v",
         "RO_10M": "10 minut před začátkem",
@@ -952,7 +948,11 @@
         "RO_START": "kdy začíná",
         "RO_NEVER": "Nikdy",
         "SCHEDULE": "Naplánovat",
-        "UNSCHEDULE": "Zrušit naplánování"
+        "UNSCHEDULE": "Zrušit naplánování",
+        "CONFIRM_REPEAT_OK": "Naplánovat",
+        "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
+        "DATETIME_FOR": "Datum a čas pro připomenutí",
+        "EDIT": "Upravit připomenutí"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Přidat vše do dneška",
@@ -1336,18 +1336,18 @@
       "HELP": "<p><strong>Desktopová upozornění se nezobrazují?</strong> Pro systém Windows byste mohli zkontrolovat Systém > Upozornění a akce a zkontrolovat, zda jsou vyžadovaná upozornění povolena.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automaticky přidat značku 'Dnes' k úkolům, na kterých jste pracovali",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označit nadřazený úkol jako hotový, když jsou hotovy všechny podúkoly",
-      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdit před ukončením aplikace",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdit před ukončením aplikace bez dokončení dne",
       "IS_DARK_MODE": "Temný režim",
       "IS_DISABLE_ANIMATIONS": "Vypnout všechny animace",
       "IS_HIDE_NAV": "Skrýt navigaci, dokud není nadpis záhlaví aktivován (pouze pro desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalizovat do oznamovací oblasti (pouze pro desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času",
       "IS_TRAY_SHOW_CURRENT_TASK": "Zobrazit aktuální úkol v oznamovací oblasti/menu stavu (pouze pro desktop Mac/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Vypnout zpracování markdown pro poznámky k úkolům",
       "TASK_NOTES_TPL": "Šablona popisu úkolu",
-      "TITLE": "Různá nastavení"
+      "TITLE": "Různá nastavení",
+      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času"
     },
     "POMODORO": {
       "BREAK_DURATION": "Délka krátkých přestávek",
@@ -1467,10 +1467,8 @@
       "OK": "Ano, vypnout!"
     },
     "ESTIMATE_TOTAL": "Celkový odhad:",
-    "EVALUATION": "Hodnocení",
     "EXPORT_TASK_LIST": "Exportovat seznam úkolů",
     "NO_TASKS": "Pro tento den nejsou žádné úkoly",
-    "PLAN": "Plán",
     "ROUND_15M": "Zaokrouhlit všechny úkoly na 15 minut",
     "ROUND_30M": "Zaokrouhlit všechny úkoly na 30 minut",
     "ROUND_5M": "Zaokrouhlit všechny úkoly na 5 minut",
@@ -1485,12 +1483,14 @@
     "START_END": "Začátek – Konec",
     "SUMMARY_FOR": "Denní shrnutí pro {{dayStr}}",
     "TASKS_COMPLETED": "Hotové úkoly",
-    "TASK_LIST": "Seznam úkolů",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Strávený čas / Odhadovaný",
     "TIME_SPENT_ESTIMATE_TITLE": "Strávený čas: Celkový čas strávený dnes. Archivované úkoly nejsou zahrnuty. – Čas odhadovaný: Čas odhadovaný pro úkoly pracované dnes minus čas již strávený s nimi v jiné dny.",
     "TIME_SPENT_TODAY_BY_TAG": "Strávený čas dnes podle štítku",
-    "TODAY": "Dnes",
-    "WEEK": "Týden"
+    "WEEK": "Týden",
+    "EVALUATION": "Hodnocení",
+    "PLAN": "Plán",
+    "TASK_LIST": "Seznam úkolů",
+    "TODAY": "Dnes"
   },
   "PM": {
     "TITLE": "Projektová metrika"

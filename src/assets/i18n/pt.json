@@ -647,6 +647,27 @@
         "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "Nenhuma tarefa",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Adicionar a Hoje",
+          "TITLE": "Adicionar tarefas planejadas para Hoje"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "Isso removerá o lembrete da tarefa! Pressione Escape para cancelar.",
+          "REMOVE_PLAN_DATE": "Remover data do plano",
+          "TITLE": "Planejar tarefa para o dia"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "Nenhum item agendado"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Data do plano removida para a tarefa ' {{taskTitle} }'",
+        "TASK_PLANNED_FOR": "Tarefa planejada para {{date} }"
+      }
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Voltar ao trabalho!",
       "BREAK_IS_DONE": "Seu intervalo acabou!",
@@ -719,6 +740,7 @@
         "SETUP_GITLAB": "Configurar integração com GitLab ",
         "SETUP_JIRA": "Configurar integração com Jira ",
         "SETUP_OPEN_PROJECT": "Configurar integração com OpenProject",
+        "SETUP_GITEA_PROJECT": "Configurar integração com o Gitea",
         "SETUP_REDMINE_PROJECT": "Configurar Integração com Redmine"
       },
       "FORM_BASIC": {
@@ -765,7 +787,9 @@
       "S_REMINDER_ERR": "Erro na interface do lembrete",
       "COUNTDOWN_BANNER": {
         "START_NOW": "Iniciar agora",
-        "HIDE": "Esconder"
+        "HIDE": "Esconder",
+        "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
       }
     },
     "SEARCH_BAR": {
@@ -801,6 +825,10 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "Seus dados foram carregados apenas parcialmente. Tente novamente mais tarde! Caso contrário, você não poderá sincronizar seus dados com outros dispositivos.",
+        "POSSIBLE_LEGACY_DATA": "O Super Productivity melhorou a sincronização usando agora dois arquivos separados em vez de um único, permitindo muito menos transferência de dados. É recomendado atualizar todas as instâncias do Super Productivity e primeiro sincronizar os dados da instância do aplicativo onde os dados são mais recentes. Se esses forem os dados do seu dispositivo local, ignore este aviso e prossiga para carregá-los confirmando o próximo diálogo."
+      },
       "C": {
         "EMPTY_SYNC": "Você está tentando sincronizar um objeto de dados vazio. Esta é a sua primeira sincronização de um aplicativo (quase) virgem?",
         "FORCE_IMPORT": "Importar dados remotos mesmo assim?",
@@ -808,7 +836,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "Ocorreu um erro ao enviar seus dados locais. Tentar forçar a atualização?",
         "MIGRATE_LEGACY": "Dados legados detectados durante a importação, deseja tentar migrá-los?",
         "NO_REMOTE_DATA": "Nenhum dado remoto encontrado. Carregar local para remoto?",
-        "TRY_LOAD_REMOTE_AGAIN": "Tentar recarregar os dados remotamente mais uma vez?"
+        "TRY_LOAD_REMOTE_AGAIN": "Tentar recarregar os dados remotamente mais uma vez?",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "Não é possível carregar dados do remoto. Você quer tentar sobrescrever os dados remotos com seus dados locais? Todos os dados remotos serão perdidos no processo."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Abra o link a seguir e copie o código de autenticação fornecido no campo de entrada abaixo.",
@@ -829,13 +858,20 @@
       },
       "D_INCOMPLETE_SYNC": {
         "T1": "A última atualização foi incompleta!",
+        "T2": "Seus dados de arquivo não foram carregados corretamente durante a última sincronização:",
         "T3": "Você tem 2 opções:",
+        "T4": "1. Vá para o outro dispositivo e conclua a sincronização lá.",
+        "T5": "2. Ou você pode sobrescrever os dados remotos com os locais. Todas as alterações remotas serão\nesteja perdido!",
+        "T6": "É recomendável criar um backup dos dados que você sobrescreveu!!!",
         "BTN_CLOSE_APP": "Fechar Aplicativo",
-        "BTN_DOWNLOAD_BACKUP": "Baixar Cópia local"
+        "BTN_DOWNLOAD_BACKUP": "Baixar Cópia local",
+        "BTN_FORCE_UPLOAD": "Forçar upload local"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Desabilitar sincronização",
-        "PERM_FILE": "Dar Permissão"
+        "PERM_FILE": "Dar Permissão",
+        "TEXT": "<p>Sua permissão de arquivo para sincronização local foi revogada.</p>",
+        "TITLE": "Sincronização: Permissão de arquivo local negada"
       },
       "FORM": {
         "DROPBOX": {
@@ -854,6 +890,8 @@
         "L_ENABLE_COMPRESSION": "Habilitar compressão de dados (envio mais rápido)",
         "L_ENABLE_ENCRYPTION": "Habilitar criptografia ponta-a-ponta (experimental) - Torna seus dados inelegíveis ao provedor sincronizado",
         "L_ENABLE_SYNCING": "Habilitar Sincronização",
+        "L_ENCRYPTION_NOTES": "OBSERVAÇÕES IMPORTANTES: Você precisará definir a mesma senha em seus outros dispositivos <strong>ANTES</strong> da próxima sincronização para que tudo funcione. Selecione uma senha segura. Observe também que <strong>você NÃO poderá acessar seus dados se esquecer essa senha. NÃO há recuperação possível</strong> , pois somente você tem a chave. A criptografia provavelmente será boa o suficiente para frustrar a maioria dos invasores, mas <strong>não há garantia.</strong>",
+        "L_ENCRYPTION_PASSWORD": "Senha de criptografia (NÃO ESQUEÇA)",
         "L_SYNC_INTERVAL": "Intervalo de sincronização",
         "L_SYNC_PROVIDER": "Provedor de sincronização",
         "TITLE": "Sincronizar",
@@ -861,14 +899,18 @@
           "CORS_INFO": "<strong>Experimental !!</strong> Para fazer isso funcionar, você precisa desabilitar ou limitar o CORS para sua instância Nextcloud, o que pode ter implicações de segurança negativas! Por favor, <a href='https://github.com/nextcloud/server/issues/3131'>consulte esta discussão</a> para obter mais informações. Use por sua conta e risco!",
           "L_BASE_URL": "Url Base",
           "L_PASSWORD": "Senha",
+          "L_SYNC_FOLDER_PATH": "Caminho da pasta de sincronização",
           "L_USER_NAME": "Nome de usuário",
           "L_SYNC_FILE_PATH": "Caminho do arquivo de sincronização"
         }
       },
       "S": {
         "ALREADY_IN_SYNC": "Já sincronizado",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Nenhuma alteração local – Já em sincronia",
         "ERROR_FALLBACK_TO_BACKUP": "Algo deu errado ao importar os dados. Retornando ao backup local.",
         "ERROR_INVALID_DATA": "Erro ao sincronizar. Dados inválidos",
+        "ERROR_NO_REV": "Nenhuma revisão válida para arquivo remoto",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Erro ao sincronizar. Não é possível ler dados remotos. Talvez você tenha habilitado a criptografia e sua senha local não corresponde à usada para criptografar os dados remotos?",
         "IMPORTING": "Importando dados",
         "INCOMPLETE_CFG": "A autenticação para sincronização falhou. Por favor, verifique o seu Config!",
         "INITIAL_SYNC_ERROR": "A sincronização inicial falhou",
@@ -910,6 +952,7 @@
         "LOCAL_ATTACHMENTS": "Anexos locais",
         "NOTES": "Notas",
         "PARENT": "Pai",
+        "SCHEDULED_AT": "Programado para",
         "REMINDER": "Lembrete",
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Agendar Tarefa",
@@ -926,7 +969,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "Adicionar tarefa ao topo da lista",
         "CREATE_TASK": "Criar nova tarefa",
         "EXAMPLE": "Exemplo: \"Algum título da tarefa + nome do projeto # alguma tag # alguma outra tag 10m / 3h\"",
-        "START": "Pressione enter mais uma vez para iniciar"
+        "START": "Pressione enter mais uma vez para iniciar",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Alternar adição de tarefa à lista de pendências/lista de hoje'",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Alternar adição de tarefa ao topo e ao final da lista"
       },
       "B": {
         "ADD_HALF_HOUR": "Adicione meia hora",
@@ -938,9 +983,12 @@
         "ADD_TO_PROJECT": "Adicionar a um projeto",
         "CONVERT_TO_PARENT_TASK": "Converter em tarefa pai",
         "DELETE": "Excluir tarefa",
+        "DELETE_REPEAT_INSTANCE": "Excluir instância de tarefa repetida",
         "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
         "EDIT_SCHEDULED": "Editar lembrete",
         "EDIT_TAGS": "Editar etiquetas",
+        "EDIT_TASK_TITLE": "Editar título",
+        "FOCUS_SESSION": "Iniciar sessão de foco",
         "MARK_DONE": "Marcar como concluído",
         "MARK_UNDONE": "Marcar como desfeita",
         "MOVE_TO_BACKLOG": "Mover para backlog",
@@ -962,18 +1010,18 @@
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Você deseja criar a nova tag {{tagsTxt} }?",
         "OK": "Criar Tag"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "Você deseja criar as novas tags {{tagsTxt} }?",
         "OK": "Criar Tags"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Cronograma",
-        "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
-        "DATETIME_FOR": "Data e hora para lembrete",
-        "EDIT": "Editar lembrete",
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
         "REMIND_AT": "Lembre-se em",
+        "QA_NEXT_MONTH": "Agenda do próximo mês",
+        "QA_NEXT_WEEK": "Agenda da próxima semana",
         "RO_10M": "10 minutos antes de começar",
         "RO_15M": "15 minutos antes de começar",
         "RO_1H": "1 hora antes de começar",
@@ -982,7 +1030,11 @@
         "RO_START": "quando começa",
         "RO_NEVER": "Nunca",
         "SCHEDULE": "Agendar",
-        "UNSCHEDULE": "Cancelar agendamento"
+        "UNSCHEDULE": "Cancelar agendamento",
+        "CONFIRM_REPEAT_OK": "Cronograma",
+        "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
+        "DATETIME_FOR": "Data e hora para lembrete",
+        "EDIT": "Editar lembrete"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Adicionar tudo hoje",
@@ -996,6 +1048,7 @@
         "FOR_OTHER": "A tarefa está vencida. Deseja começar a trabalhar nela?",
         "FROM_PROJECT": "Do projeto",
         "FROM_TAG": "Da tag: \"{{title}}\"",
+        "RESCHEDULE_EDIT": "Editar (reagendar)",
         "RESCHEDULE_UNTIL_TOMORROW": "Até amanhã",
         "SNOOZE": "Soneca",
         "SNOOZE_ALL": "Suspender tudo",
@@ -1022,6 +1075,7 @@
         "ESTIMATE_EXCEEDED_BODY": "Você excedeu o tempo estimado para \"{{title}}\"."
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Não é possível atribuir projeto via sintaxe curta para tarefas repetíveis!",
         "DELETED": "Tarefa excluída \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Tarefa <strong>{{title}}</strong> movida do backlog para a lista de tarefas de hoje",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tarefa adicionada <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> para a lista atual",
@@ -1060,6 +1114,8 @@
         "MONDAY_TO_FRIDAY": "Seg. a Sex",
         "MONDAY_TO_FRIDAY_AND_TIME": "Seg. a Sex, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Semanalmente {{weekdayStr}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Semanalmente em {{weekdayStr} }, {{timeStr} }",
+        "YEARLY_CURRENT_DATE": "Anualmente em {{dayAndMonthStr} }",
         "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_REMOVE": {
@@ -1067,11 +1123,13 @@
         "OK": "Remover completamente"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
+        "MSG": "Há {{tasksNr} } instâncias criadas para esta tarefa repetível. Você quer atualizar todas elas com os novos padrões ou apenas tarefas futuras?",
         "CANCEL": "Somente tarefas futuras",
         "OK": "Atualizar todas as instancias"
       },
       "D_EDIT": {
         "ADD": "Adicionar configuração de repetição de tarefas",
+        "ADVANCED_CFG": "Configuração avançada",
         "EDIT": "Editr configuração de repetição de tarefas",
         "HELP1": "Tarefas repetidas são destinadas a tarefas diárias, por exemplo: \"Organização\", \"Reunião Diária\", \"Revisão de Código\", \"Verificando e-mails\" ou tarefas semelhantes que provavelmente ocorrerão novamente e de novo.",
         "HELP2": "Uma vez configurada, uma tarefa repetida será recriada todos os dias selecionados abaixo assim que você abrir o seu projeto e será automaticamente marcada como concluída no final do dia. Elas serão tratadas como instâncias diferentes. Assim, você pode adicione livremente subtarefas etc.",
@@ -1091,8 +1149,12 @@
         "NOTES": "Notas padrão",
         "ORDER": "Ordem",
         "ORDER_DESCRIPTION": "Ordem de criação de tarefas repetíveis. Afeta apenas tarefas repetíveis criadas ao mesmo tempo. Um valor mais baixo significa que uma tarefa será criada mais acima na lista, um número menor que estará mais abaixo. Um valor maior que 0 significa que os itens são criados na parte inferior das tarefas normais.",
+        "Q_CUSTOM": "Configuração de repetição personalizada",
         "Q_DAILY": "Todos os dias",
         "Q_MONDAY_TO_FRIDAY": "De segunda a sexta",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Toda semana em {{weekdayStr} }",
+        "Q_YEARLY_CURRENT_DATE": "Todos os anos em {{dayAndMonthStr} }",
+        "QUICK_SETTING": "Repita a configuração",
         "REMIND_AT": "Lembre-se em",
         "REMIND_AT_PLACEHOLDER": "Selecione quando lembrar",
         "REPEAT_CYCLE": "Repetir ciclo",
@@ -1118,6 +1180,8 @@
       "MENU_TITLE": "Schedule",
       "NOW": "agora",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
+      "PLAN_END_DAY": "Planeje no final do dia",
+      "PLAN_START_DAY": "Planeje o início do dia",
       "START": "Início do Trabalho",
       "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada",
       "LUNCH_BREAK": "Intervalo para o almoço",
@@ -1135,15 +1199,18 @@
         "MSG": "Você não está monitorando o tempo de {{time}}"
       },
       "D_IDLE": {
+        "ADD_ENTRY": "Adicionar entrada para rastreamento",
         "BREAK": "Pausa",
         "CREATE_AND_TRACK": "<em>Criar</em> e acompanhar:",
         "IDLE_FOR": "Você esteve ocioso por:",
+        "RESET_BREAK_REMINDER_TIMER": "Reiniciar o temporizador de lembrete de intervalo",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Pular",
         "SIMPLE_CONFIRM_COUNTER_OK": "Track",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Você selecionou ignorar, mas ativou {{nr}} botão (s) de contador simples. Você deseja rastrear o tempo ocioso deles?",
         "SIMPLE_COUNTER_TOOLTIP": "Clique para rastrear até {{title}}",
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Clique para NÃO rastrear para {{title}}",
         "SKIP": "Pular",
+        "SPLIT_TIME": "Divida o tempo em múltiplas tarefas e intervalos",
         "TASK": "Tarefa",
         "TRACK_TO": "Seguir para:",
         "TASK_BREAK": "Tarefa+Pausa"
@@ -1236,13 +1303,16 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "Exportar dados",
     "IMPORT_FROM_FILE": "Importar do arquivo",
+    "PRIVACY_EXPORT": "Exportar dados anonimizados (para enviar para contact@super-productivity.com para depuração)",
     "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido"
   },
   "G": {
+    "ADD": "Adicionar",
     "CANCEL": "Cancelar",
     "CLOSE": "Fechar",
     "DELETE": "Excluir",
     "DISMISS": "Dispensar",
+    "DURATION_DESCRIPTION": "por exemplo \"5h 23m\" que resulta em 5 horas em 23 minutos",
     "DO_IT": "Fazer isto!",
     "EDIT": "Editar",
     "ENABLED": "Ativado",
@@ -1276,6 +1346,16 @@
       "TITLE": "Backups automáticos"
     },
     "CALENDARS": {
+      "BROWSER_WARNING": "<b>Provavelmente isso NÃO funcionará com a versão para navegador do Super Productivity.<br /> <a href=\"https://super-productivity.com/download/\">Baixe a versão para desktop</a> para usar este recurso!</b>",
+      "CAL_PATH": "URL da fonte iCal",
+      "CAL_PROVIDERS": "Provedores de calendário (experimental e opcional)",
+      "CAL_PROVIDERS_ADD": "Adicionar fonte iCal do calendário",
+      "CAL_PROVIDERS_INFO": "Você pode carregar dados de calendário como iCal (por exemplo, <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Os dados serão integrados na agenda e você será solicitado a criar tarefas para eventos de calendário, se eles forem devidos.",
+      "CHECK_UPDATES": "Verifique se há atualizações remotas a cada X",
+      "DEFAULT_PROJECT": "Projeto padrão para tarefas de calendário adicionadas",
+      "HELP": "Você pode integrar calendários para ser lembrado e adicioná-los como tarefas dentro do Super Productivity. A integração funciona usando o formato iCal. Para que isso funcione, seus calendários precisam estar acessíveis pela internet ou pelo sistema de arquivos.",
+      "ICON": "Ícone para agendamento",
+      "SHOW_BANNER_THRESHOLD": "Mostrar uma notificação X antes do evento (em branco para desabilitado)",
       "TITLE": "Calendários"
     },
     "EVALUATION": {
@@ -1283,6 +1363,9 @@
       "TITLE": "Avaliação e Métricas"
     },
     "FOCUS_MODE": {
+      "HELP": "O Modo Foco abre uma tela sem distrações para ajudar você a se concentrar na sua tarefa atual.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "Sempre abra o modo de foco ao rastrear",
+      "L_SKIP_PREPARATION_SCREEN": "Pular tela de preparação (alongamento etc.)",
       "TITLE": "Modo de Foco"
     },
     "IDLE": {
@@ -1316,6 +1399,8 @@
       "HELP": "<p>Aqui você pode configurar todos os atalhos do teclado.</p> <p>Clique na entrada de texto e insira a combinação de teclado desejada. Pressione Enter para salvar e Esc para abortar.</p> <p>Existem três tipos de atalhos:</p> <ul> <li> <strong>Atalhos globais:</strong> Quando o aplicativo está sendo executado, ele acionará a ação de todos os outros aplicativos. </li> <li> <strong>Atalhos no nível do aplicativo:</strong> Será acionado em todas as telas do aplicativo, mas não se você estiver editando um campo de texto. </li> <li> <strong>Atalhos no nível da tarefa:</strong> Eles serão acionados apenas se você tiver selecionado uma tarefa via mouse ou teclado e, normalmente, acionarão uma ação especificamente relacionada a essa tarefa. </li> </ul>",
       "MOVE_TASK_DOWN": "Mover tarefa para baixo na lista",
       "MOVE_TASK_UP": "Mover tarefa para cima na lista",
+      "MOVE_TASK_TO_BOTTOM": "Mover tarefa para o final da lista",
+      "MOVE_TASK_TO_TOP": "Mover tarefa para o topo da lista",
       "MOVE_TO_BACKLOG": "Mover tarefa para o backlog de tarefas",
       "MOVE_TO_TODAYS_TASKS": "Mover tarefa para a lista de tarefas de hoje",
       "OPEN_PROJECT_NOTES": "Mostrar / ocultar notas do projeto",
@@ -1332,6 +1417,7 @@
       "TASK_MOVE_TO_PROJECT": "Abrir tarefa de mover para o menu do projeto",
       "TASK_OPEN_CONTEXT_MENU": "Abra o menu de contexto de tarefas",
       "TASK_OPEN_ESTIMATION_DIALOG": "Editar estimativa / tempo gasto",
+      "TASK_PLAN_FORDAY": "Plano para o dia",
       "TASK_SCHEDULE": "Agendar tarefa",
       "TASK_SHORTCUTS": "Tarefas",
       "TASK_SHORTCUTS_INFO": "Os seguintes atalhos se aplicam à tarefa atualmente selecionada (selecionada via guia ou mouse).",
@@ -1342,9 +1428,13 @@
       "TOGGLE_BOOKMARKS": "Mostrar/ocultar barra de favoritos",
       "TOGGLE_PLAY": "Começar/Parar Tarefa",
       "TOGGLE_SIDE_NAV": "Mostrar e focar / ocultar o Sidenav",
+      "TRIGGER_SYNC": "Botão de sincronização (se configurado)",
       "ZOOM_DEFAULT": "Zoom padrão (somente para computador)",
       "ZOOM_IN": "Mais zoom (somente para computador)",
       "ZOOM_OUT": "Diminuir o zoom (somente para computador)"
+    },
+    "LANG": {
+      "LABEL": "Selecione um idioma"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
@@ -1354,18 +1444,19 @@
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Adicionar automaticamente a tag hoje às tarefas trabalhadas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Marque a tarefa pai como concluída, quando todas as subtarefas estiverem concluídas",
-      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
       "IS_CONFIRM_BEFORE_EXIT": "Confirme antes de sair do aplicativo",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra a tarefa atual na bandeja / menu de status (somente desktop)",
       "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
+      "IS_USE_MINIMAL_SIDE_NAV": "Use a barra de navegação mínima (mostrar apenas ícones)",
       "TASK_NOTES_TPL": "Modelo de descrição de tarefa",
-      "TITLE": "Configurações diversas"
+      "TITLE": "Configurações diversas",
+      "IS_AUTO_START_NEXT_TASK": "Comece a rastrear a próxima tarefa ao marcar atual como concluído",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando a estimativa de tempo foi excedida"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duração de pausas curtas",
@@ -1386,6 +1477,7 @@
       "TITLE": "Lembretes"
     },
     "SOUND": {
+      "BREAK_REMINDER_SOUND": "Faça um lembrete sonoro de pausa",
       "DONE_SOUND": "Som de tarefa concluída",
       "IS_INCREASE_DONE_PITCH": "Aumente o tom para cada tarefa realizada",
       "TITLE": "Som",
@@ -1500,10 +1592,8 @@
       "OK": "Sim, sim! Desligar!"
     },
     "ESTIMATE_TOTAL": "Estimativa total:",
-    "EVALUATION": "Avaliação",
     "EXPORT_TASK_LIST": "Exportar lista de tarefas",
     "NO_TASKS": "Não há tarefas para este dia",
-    "PLAN": "Plano",
     "ROUND_15M": "Arredonde todas as tarefas para 15 minutos",
     "ROUND_30M": "Arredonde todas as tarefas para 30 minutos",
     "ROUND_5M": "Arredonde todas as tarefas para 5 minutos",
@@ -1517,11 +1607,13 @@
     "START_END": "Começar – Fim",
     "SUMMARY_FOR": "Resumo diário para {{dayStr}}",
     "TASKS_COMPLETED": "Tarefas concluídas",
-    "TASK_LIST": "Lista de tarefas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo gasto / Estimado",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo gasto: Tempo total gasto hoje. Tarefas arquivadas não incluídas. – Tempo estimado: Tempo estimado para tarefas trabalhadas hoje menos o tempo já gasto com elas em outros dias.",
-    "TODAY": "Hoje",
-    "WEEK": "Semana"
+    "WEEK": "Semana",
+    "EVALUATION": "Avaliação",
+    "PLAN": "Plano",
+    "TASK_LIST": "Lista de tarefas",
+    "TODAY": "Hoje"
   },
   "PM": {
     "TITLE": "Métricas do projeto"
