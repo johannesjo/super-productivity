@@ -15,7 +15,6 @@ import { DialogCreateProjectComponent } from '../../features/project/dialogs/cre
 import { Project } from '../../features/project/project.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DRAG_DELAY_FOR_TOUCH } from '../../app.constants';
-import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -89,7 +88,6 @@ export class SideNavComponent implements OnDestroy {
     ),
   );
   T: typeof T = T;
-  readonly TAG_SIDE_NAV: string = 'TAG_SIDE_NAV';
   activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
   TourId: typeof TourId = TourId;
@@ -108,36 +106,14 @@ export class SideNavComponent implements OnDestroy {
     private readonly _matDialog: MatDialog,
     private readonly _layoutService: LayoutService,
     private readonly _taskService: TaskService,
-    private readonly _dragulaService: DragulaService,
     private readonly _shepherdService: ShepherdService,
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _store: Store,
   ) {
-    this._dragulaService.createGroup(this.TAG_SIDE_NAV, {
-      direction: 'vertical',
-      moves: (el, container, handle) => {
-        return (
-          this.isTagsExpanded &&
-          !!handle &&
-          handle.className.indexOf &&
-          handle.className.indexOf('drag-handle') > -1
-        );
-      },
-    });
-
     this._subs.add(
       this.workContextService.activeWorkContextId$.subscribe(
         (id) => (this.activeWorkContextId = id),
       ),
-    );
-
-    this._subs.add(
-      this._dragulaService.dropModel(this.TAG_SIDE_NAV).subscribe(({ targetModel }) => {
-        // const {target, source, targetModel, item} = params;
-        const targetNewIds = targetModel.map((project: Project) => project.id);
-        // NOTE: the today tag is filtered out, that's why we re-add here
-        this.tagService.updateOrder([TODAY_TAG.id, ...targetNewIds]);
-      }),
     );
 
     this._subs.add(
@@ -165,7 +141,6 @@ export class SideNavComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
-    this._dragulaService.destroy(this.TAG_SIDE_NAV);
     window.clearTimeout(this.keyboardFocusTimeout);
   }
 
@@ -173,10 +148,6 @@ export class SideNavComponent implements OnDestroy {
     this._matDialog.open(DialogCreateProjectComponent, {
       restoreFocus: true,
     });
-  }
-
-  trackById(i: number, project: Project | Tag): string {
-    return project.id;
   }
 
   fetchProjectListState(): boolean {
