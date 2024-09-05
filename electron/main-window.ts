@@ -242,6 +242,7 @@ const appCloseHandler = (app: App): void => {
       getSettings(mainWin, (appCfg: GlobalConfigState) => {
         if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
           mainWin.hide();
+          app.dock.hide();
           return;
         }
 
@@ -273,6 +274,9 @@ const appMinimizeHandler = (app: App): void => {
         if (appCfg.misc.isMinimizeToTray) {
           event.preventDefault();
           mainWin.hide();
+          app.dock.hide();
+        } else {
+          app.dock.show();
         }
       });
     });

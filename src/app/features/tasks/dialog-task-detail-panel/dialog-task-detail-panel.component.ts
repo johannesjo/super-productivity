@@ -43,7 +43,7 @@ export class DialogTaskDetailPanelComponent implements OnDestroy {
     this._store.dispatch(
       setSelectedTask({
         id: data.taskId,
-        taskDetailTargetPanel: TaskDetailTargetPanel.Default,
+        taskDetailTargetPanel: TaskDetailTargetPanel.DONT_OPEN_PANEL,
         isSkipToggle: true,
       }),
     );

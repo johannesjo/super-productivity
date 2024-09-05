@@ -25,6 +25,7 @@ $margin-right: 10px;
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
+  min-width: 0;
 
   &.no-project {
   }
@@ -104,6 +105,9 @@ $margin-right: 10px;
   .title {
     flex-grow: 0;
     column-width: auto;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ico-wrapper {
@@ -464,10 +468,4 @@ $offsetShortEvent: 15px;
     cursor: grabbing;
     transition: none;
   }
-}
-
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
 }

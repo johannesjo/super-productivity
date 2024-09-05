@@ -128,7 +128,9 @@ export const plannerReducer = createReducer(
               ...targetDays.slice(0, action.targetIndex),
               action.task.id,
               ...targetDays.slice(action.targetIndex),
-            ]),
+            ])
+              // when moving a parent to the day, remove all sub-tasks
+              .filter((id) => !action.task.subTaskIds.includes(id)),
           };
 
     return {
@@ -201,7 +203,9 @@ export const plannerReducer = createReducer(
                 isAddToTop
                   ? [task.id, ...(daysCopy[day] || [])]
                   : [...(daysCopy[day] || []), task.id],
-              ),
+              )
+                // when moving a parent to the day, remove all sub-tasks
+                .filter((id) => !task.subTaskIds.includes(id)),
             }),
       },
     };

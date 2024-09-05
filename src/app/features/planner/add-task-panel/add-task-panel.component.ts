@@ -9,7 +9,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, startWith, withLatestFrom } from 'rxjs/operators';
 import { UntypedFormControl } from '@angular/forms';
 import { selectTagFeatureState } from '../../tag/store/tag.reducer';
-import { projectSelectors } from '../../project/store/project.selectors';
+import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { selectPlannerState } from '../store/planner.selectors';
@@ -43,7 +43,7 @@ export class AddTaskPanelComponent {
     withLatestFrom(
       this.allTasks$,
       this._store.select(selectTagFeatureState),
-      this._store.select(projectSelectors),
+      this._store.select(selectProjectFeatureState),
     ),
     map(([[value, plannerState], tasks, tagFeatureState, projectFeatureState]) => {
       const lcv = value.toLowerCase();

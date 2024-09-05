@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
-import { delay, first } from 'rxjs/operators';
+import { delay, first, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { MatMiniFabButton } from '@angular/material/button';
@@ -44,8 +44,10 @@ import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/di
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-additional-info-panel/dialog-task-detail-panel.component';
+import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
+import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
+import { BehaviorSubject, of } from 'rxjs';
 
 @Component({
   selector: 'schedule-event',
@@ -60,6 +62,7 @@ import { CalendarIntegrationService } from '../../calendar-integration/calendar-
     MatMenuItem,
     TranslateModule,
     MatMenuTrigger,
+    TaskContextMenuComponent,
   ],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
@@ -88,11 +91,14 @@ export class ScheduleEventComponent implements OnInit {
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-  @ViewChild('contextMenuTriggerEl', { static: false, read: MatMenuTrigger })
-  contextMenu!: MatMenuTrigger;
+
+  @ViewChild('taskContextMenu', { static: false, read: TaskContextMenuComponent })
+  taskContextMenu?: TaskContextMenuComponent;
+
   protected readonly SVEType = SVEType;
   destroyRef = inject(DestroyRef);
   private _isBeingSubmitted: boolean = false;
+  private _projectId$ = new BehaviorSubject<string | null>(null);
 
   @Input({ required: true })
   set event(event: ScheduleEvent) {
@@ -123,6 +129,7 @@ export class ScheduleEventComponent implements OnInit {
       this.se.type === SVEType.ScheduledTask
     ) {
       this.task = this.se.data as TaskCopy;
+      this._projectId$.next(this.task.projectId);
 
       if (
         (this.se.type === SVEType.Task || this.se.type === SVEType.TaskPlannedForDay) &&
@@ -242,30 +249,27 @@ export class ScheduleEventComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const pid = (this.se?.data as any)?.projectId;
-    if (pid) {
-      this._store
-        .select(selectProjectById, { id: pid })
-        .pipe(takeUntilDestroyed(this.destroyRef))
+    if (this.task) {
+      this._projectId$
+        .pipe(
+          switchMap((projectId) =>
+            projectId
+              ? this._store.select(selectProjectById, { id: projectId })
+              : of(null),
+          ),
+          takeUntilDestroyed(this.destroyRef),
+        )
         .subscribe((p) => {
-          this._elRef.nativeElement.style.setProperty('--project-color', p.theme.primary);
+          this._elRef.nativeElement.style.setProperty(
+            '--project-color',
+            p ? p.theme.primary : '',
+          );
         });
     }
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    // for some reason that fixes the menu position for very short events
-    if (!this.se.isCloseToOthers && !this.se.isCloseToOthersFirst) {
-      this.contextMenuPosition.x =
-        ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-      this.contextMenuPosition.y =
-        ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
-    }
-    this.contextMenu.openMenu();
+    this.taskContextMenu?.open(event);
   }
 
   deleteTask(): void {

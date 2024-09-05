@@ -9,8 +9,8 @@ import {
 import { Task, TaskPlanned, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
-  projectSelectors,
   selectProjectById,
+  selectProjectFeatureState,
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -44,7 +44,7 @@ export const selectActiveContextTypeAndId = createSelector(
 
 export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
-  projectSelectors,
+  selectProjectFeatureState,
   selectTagFeatureState,
   selectNoteTodayOrder,
   ({ activeId, activeType }, projectState, tagState, todayOrder): WorkContext => {

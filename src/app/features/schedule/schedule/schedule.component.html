@@ -53,6 +53,7 @@
 <div
   #gridContainer
   class="main-grid-container {{containerExtraClass}}"
+  [class.isCtrlKeyPressed]="shortcutService.isCtrlPressed$|async"
   (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
@@ -151,7 +152,7 @@
       (cdkDragMoved)="dragMoved($event)"
       (cdkDragStarted)="dragStarted($event)"
       (cdkDragReleased)="dragReleased($event)"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
     ></schedule-event>
     }
   </div>

@@ -195,6 +195,10 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.DEFAULT_ESTIMATE,
       description: T.G.DURATION_DESCRIPTION,
     },
+    // otherwise the input duration field messes up :(
+    modelOptions: {
+      updateOn: 'blur',
+    },
   },
   {
     key: 'order',

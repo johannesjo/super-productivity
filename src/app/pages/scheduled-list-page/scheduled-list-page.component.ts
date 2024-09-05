@@ -17,13 +17,13 @@ import { DialogScheduleTaskComponent } from '../../features/planner/dialog-sched
 import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
 
 @Component({
-  selector: 'schedule-page',
-  templateUrl: './schedule-page.component.html',
-  styleUrls: ['./schedule-page.component.scss'],
+  selector: 'scheduled-list-page',
+  templateUrl: './scheduled-list-page.component.html',
+  styleUrls: ['./scheduled-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
 })
-export class SchedulePageComponent {
+export class ScheduledListPageComponent {
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);

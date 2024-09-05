@@ -318,33 +318,6 @@
   }
 }
 
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
-}
-
-.key-i {
-  opacity: 0.4;
-  font-size: 13px;
-  text-align: center;
-  border-radius: 20px;
-  max-width: 66px;
-  letter-spacing: -1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: none;
-
-  &:not(:empty) {
-    display: block;
-    min-width: 24px;
-    border: 1px solid;
-    padding: 0 4px;
-    margin-left: 4px;
-  }
-}
-
 .hover-controls {
   transform-origin: right center;
   position: absolute;

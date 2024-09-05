@@ -13,6 +13,7 @@ export enum ShowSubTasksMode {
 export enum TaskDetailTargetPanel {
   Default = 'Default',
   Attachments = 'Attachments',
+  DONT_OPEN_PANEL = 'DONT_OPEN_PANEL',
 }
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';

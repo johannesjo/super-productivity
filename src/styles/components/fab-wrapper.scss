@@ -13,4 +13,9 @@
   > button:nth-child(1n + 1) {
     margin-left: 8px;
   }
+
+  // hide the fab when the keyboard is visible
+  .isAndroidKeyboardVisible & {
+    display: none;
+  }
 }

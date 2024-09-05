@@ -136,6 +136,18 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(setSelectedTask, (state, { id, taskDetailTargetPanel, isSkipToggle }) => {
+    if (
+      state.taskDetailTargetPanel === TaskDetailTargetPanel.DONT_OPEN_PANEL &&
+      taskDetailTargetPanel !== null &&
+      id
+    ) {
+      return {
+        ...state,
+        taskDetailTargetPanel: TaskDetailTargetPanel.DONT_OPEN_PANEL,
+        selectedTaskId: id,
+      };
+    }
+
     if (isSkipToggle) {
       return {
         ...state,

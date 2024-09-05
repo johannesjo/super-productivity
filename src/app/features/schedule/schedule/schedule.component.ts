@@ -59,6 +59,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
+import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
+import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -91,6 +93,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
+  DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (v, index) => index % FH === 0,
   );
@@ -252,6 +255,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   now: number = Date.now();
   tomorrow: number = getTomorrow(0).getTime();
   isDragging = false;
+  isDraggingDelayed = false;
   isCreateTaskActive = false;
   containerExtraClass = IS_NOT_DRAGGING_CLASS;
   prevDragOverEl: HTMLElement | null = null;
@@ -265,6 +269,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   constructor(
     public taskService: TaskService,
     public layoutService: LayoutService,
+    public shortcutService: ShortcutService,
     private _matDialog: MatDialog,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _store: Store,
@@ -322,7 +327,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
-    if (this.isDragging) {
+    if (this.isDragging || this.isDraggingDelayed) {
       return;
     }
     if (this.isCreateTaskActive) {
@@ -416,7 +421,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     console.log('dragStart', ev);
-    this.isDragging = true;
+    this.isDragging = this.isDraggingDelayed = true;
     this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
 
     const cur = ev.source.element.nativeElement;
@@ -460,6 +465,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
         // NOTE: doing this again fixes the issue that the element remains in the wrong state sometimes
         ev.source.element.nativeElement.style.pointerEvents = '';
       }
+      this.isDraggingDelayed = false;
     }, 100);
 
     this.containerExtraClass = IS_NOT_DRAGGING_CLASS;

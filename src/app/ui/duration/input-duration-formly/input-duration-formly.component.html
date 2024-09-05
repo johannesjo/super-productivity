@@ -1,20 +1,20 @@
 <input
   [id]="id"
-  [isAllowSeconds]="field.templateOptions?.isAllowSeconds"
-  [isShowZeroVal]="field.templateOptions?.isShowZeroVal"
-  [type]="'text'"
   [isValidate]="field.templateOptions?.required"
   [name]="field.name"
   [readonly]="props.readonly"
   [required]="required"
   [errorStateMatcher]="errorStateMatcher"
   [value]="formControl.value"
-  [formControl]="formControl"
   (change)="onInputValueChange($event)"
   (keydown)="onKeyDown($event)"
   [formlyAttributes]="field"
+  [formControl]="formControl"
   [tabIndex]="props.tabindex"
   [placeholder]="props.placeholder"
   inputDuration
+  [isAllowSeconds]="field.templateOptions?.isAllowSeconds"
+  [isShowZeroVal]="field.templateOptions?.isShowZeroVal"
+  #inputEl
   matInput
 />

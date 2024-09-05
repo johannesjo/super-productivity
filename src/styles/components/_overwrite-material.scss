@@ -159,3 +159,13 @@ mat-icon.mat-icon[svgicon] {
   border-radius: 6px;
   cursor: grabbing;
 }
+
+// MAT MENU
+.mat-mdc-menu-content {
+  padding-top: 0 !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-menu-item.quick-access {
+  border: 1px solid red;
+}

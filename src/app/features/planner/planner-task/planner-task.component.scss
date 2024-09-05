@@ -238,12 +238,6 @@ $min-badge-size: 14px;
   margin-left: -6px;
 }
 
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
-}
-
 :host ::ng-deep .due-date + .planner-time-remaining-shared {
   display: none;
 }
