@@ -266,7 +266,7 @@ export class SideNavComponent implements OnDestroy {
     allItems: Project[],
     ev: CdkDragDrop<string, string, Project>,
   ): Promise<void> {
-    if (ev.previousContainer === ev.container) {
+    if (ev.previousContainer === ev.container && ev.currentIndex !== ev.previousIndex) {
       const tag = ev.item.data;
       const allIds = allItems.map((p) => p.id);
       const targetTagId = allIds[ev.currentIndex] as string;
@@ -282,7 +282,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   dropOnTagList(allItems: Tag[], ev: CdkDragDrop<string, string, Tag>): void {
-    if (ev.previousContainer === ev.container) {
+    if (ev.previousContainer === ev.container && ev.currentIndex !== ev.previousIndex) {
       const tag = ev.item.data;
       const allIds = allItems.map((p) => p.id);
       const targetTagId = allIds[ev.currentIndex] as string;
