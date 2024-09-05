@@ -13,14 +13,19 @@ import {
   WorkContextCommon,
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
-import { MatMenuTrigger } from '@angular/material/menu';
 import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 
 @Component({
   selector: 'side-nav-item',
   standalone: true,
-  imports: [RouterLink, UiModule, RouterModule, WorkContextMenuComponent],
+  imports: [
+    RouterLink,
+    UiModule,
+    RouterModule,
+    WorkContextMenuComponent,
+    // ContextMenuDirective,
+  ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,9 +37,6 @@ export class SideNavItemComponent {
   activeWorkContextId = input.required<string>();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-
-  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
-  contextMenu!: MatMenuTrigger;
 
   @ViewChild('routeBtn', { static: true, read: ElementRef })
   routeBtn!: ElementRef;
@@ -52,17 +54,6 @@ export class SideNavItemComponent {
   @HostBinding('class.isHidden')
   get isHidden(): boolean {
     return (this.workContext() as Project)?.isHiddenFromMenu;
-  }
-
-  openContextMenu(event: TouchEvent | MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    this.contextMenuPosition.x =
-      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-    this.contextMenuPosition.y =
-      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
-    this.contextMenu.openMenu();
   }
 
   focus(): void {

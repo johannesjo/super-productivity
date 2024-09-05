@@ -88,6 +88,7 @@ import { markedOptionsFactory } from './marked-options-factory';
 
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 import { LocalDateStrPipe } from './pipes/local-date-str.pipe';
+import { ContextMenuDirective } from './context-menu/context-menu.directive';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -97,6 +98,7 @@ const DIALOG_COMPONENTS = [
 
 const COMPONENT_AND_PIPES = [
   ...DIALOG_COMPONENTS,
+  ContextMenuDirective,
   ChipListInputComponent,
   CollapsibleComponent,
   DurationFromStringPipe,
