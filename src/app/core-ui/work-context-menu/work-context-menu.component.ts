@@ -9,14 +9,18 @@ import { TagService } from '../../features/tag/tag.service';
 import { filter, first, switchMap, take, tap } from 'rxjs/operators';
 import { Tag } from '../../features/tag/tag.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { Project } from '../../features/project/project.model';
+import { UiModule } from '../../ui/ui.module';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'work-context-menu',
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [RouterLink, UiModule, RouterModule, NgIf],
 })
 export class WorkContextMenuComponent {
   @Input() project!: Project;

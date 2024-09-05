@@ -8,18 +8,19 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { UiModule } from '../../../ui/ui.module';
-import { WorkContextMenuModule } from '../../work-context-menu/work-context-menu.module';
+
 import {
   WorkContextCommon,
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Project } from '../../../features/project/project.model';
+import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 
 @Component({
   selector: 'side-nav-item',
   standalone: true,
-  imports: [RouterLink, UiModule, WorkContextMenuModule, RouterModule],
+  imports: [RouterLink, UiModule, RouterModule, WorkContextMenuComponent],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
