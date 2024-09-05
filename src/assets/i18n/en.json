@@ -742,6 +742,9 @@
         "SETUP_GITEA_PROJECT": "Setup Gitea Integration",
         "SETUP_REDMINE_PROJECT": "Setup Redmine Integration"
       },
+      "D_DELETE": {
+        "MSG": "Are you sure you want to delete the project \"{{title}}\"?"
+      },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Enable Project Backlog",
         "L_IS_HIDDEN_FROM_MENU": "Hide project from menu",
@@ -1546,6 +1549,7 @@
     "ADD_NEW_TASK": "Add new Task",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
+    "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
     "GO_TO_TASK_LIST": "Go to task list",
     "HM": {
