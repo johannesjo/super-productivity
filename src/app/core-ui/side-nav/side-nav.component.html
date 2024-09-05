@@ -116,18 +116,22 @@
   <div
     *ngIf="tagList.length"
     [@standardList]="tagList?.length"
-    [dragulaModel]="tagList"
-    [dragula]="TAG_SIDE_NAV"
+    cdkDropList
+    (cdkDropListDropped)="dropOnTagList(tagList, $event)"
   >
+    @for (tag of tagList; track tag.id) {
     <side-nav-item
       #menuEntry
+      cdkDrag
+      [cdkDragData]="tag"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
       (keydown)="checkFocusTag($event)"
-      *ngFor="let tag of tagList; trackBy: trackById;"
       [workContext]="tag"
       [type]="WorkContextType.TAG"
       [defaultIcon]="'style'"
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
+    }
   </div>
 
   <div
