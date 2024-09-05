@@ -33,7 +33,7 @@
 </section>
 
 <section
-  *ngIf="projectList$|async as projectList"
+  *ngIf="nonHiddenProjects$|async as projectList"
   class="projects tour-projects"
 >
   <button
@@ -55,7 +55,6 @@
     (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
   >
     @for (project of projectList; track project.id) {
-    <!---->@if (!project.isHiddenFromMenu) {
     <side-nav-item
       #menuEntry
       cdkDrag
@@ -67,8 +66,6 @@
       [defaultIcon]="'folder_special'"
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
-    }
-    <!---->
     }
   </div>
 

@@ -19,7 +19,7 @@ import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-import { map, switchMap } from 'rxjs/operators';
+import { first, map, switchMap } from 'rxjs/operators';
 import { TagService } from '../../features/tag/tag.service';
 import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
@@ -37,6 +37,11 @@ import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary'
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
+import { Store } from '@ngrx/store';
+import {
+  selectUnarchivedHiddenProjectIds,
+  selectUnarchivedVisibleProjects,
+} from '../../features/project/store/project.selectors';
 
 @Component({
   selector: 'side-nav',
@@ -57,16 +62,17 @@ export class SideNavComponent implements OnDestroy {
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isProjectsExpanded,
   );
-  projectList$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
+  nonHiddenProjects$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded
-        ? this.projectService.list$
+        ? this._store.select(selectUnarchivedVisibleProjects)
         : combineLatest([
-            this.projectService.list$,
+            this._store.select(selectUnarchivedVisibleProjects),
             this.workContextService.activeWorkContextId$,
           ]).pipe(map(([projects, id]) => projects.filter((p) => p.id === id))),
     ),
   );
+
   @ViewChild('tagExpandBtn', { read: ElementRef }) tagExpandBtn?: ElementRef;
   isTagsExpanded: boolean = this.fetchTagListState();
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
@@ -105,6 +111,7 @@ export class SideNavComponent implements OnDestroy {
     private readonly _dragulaService: DragulaService,
     private readonly _shepherdService: ShepherdService,
     private readonly _globalConfigService: GlobalConfigService,
+    private readonly _store: Store,
   ) {
     this._dragulaService.createGroup(this.TAG_SIDE_NAV, {
       direction: 'vertical',
@@ -255,23 +262,20 @@ export class SideNavComponent implements OnDestroy {
     return this._cachedIssueUrl;
   }
 
-  dropOnProjectList(allItems: Project[], ev: CdkDragDrop<string, string, Project>): void {
+  async dropOnProjectList(
+    allItems: Project[],
+    ev: CdkDragDrop<string, string, Project>,
+  ): Promise<void> {
     if (ev.previousContainer === ev.container) {
-      const idsWithoutHidden = allItems
-        .filter((p) => !p.isHiddenFromMenu)
-        .map((p) => p.id);
-      const hiddenIds = allItems.filter((p) => p.isHiddenFromMenu).map((p) => p.id);
-      const hiddenLength = hiddenIds.length;
-      const project = ev.item.data;
-      // const targetProjectId = allIdsWithoutHidden[ev.currentIndex] as string;
-      const targetProjectId = idsWithoutHidden[ev.currentIndex - hiddenLength] as string;
-      console.log(targetProjectId);
-
-      if (targetProjectId) {
-        const newIds = [
-          ...moveItemBeforeItem(idsWithoutHidden, project.id, targetProjectId),
-          ...hiddenIds,
-        ];
+      const tag = ev.item.data;
+      const allIds = allItems.map((p) => p.id);
+      const targetTagId = allIds[ev.currentIndex] as string;
+      if (targetTagId) {
+        const hiddenIds = await this._store
+          .select(selectUnarchivedHiddenProjectIds)
+          .pipe(first())
+          .toPromise();
+        const newIds = [...moveItemBeforeItem(allIds, tag.id, targetTagId), ...hiddenIds];
         this.projectService.updateOrder(newIds);
       }
     }
