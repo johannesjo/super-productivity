@@ -1,44 +1,11 @@
 <section class="main">
-  <div
+  <side-nav-item
     *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
-    [class.hasTasks]="mainContext.taskIds.length"
-    [class.isActiveContext]="mainContext.id===activeWorkContextId"
-    routerLinkActive="isActiveRoute"
-    class="tag today-tag"
-  >
-    <div
-      [style.background]="mainContext.theme.primary"
-      class="tag-color"
-    ></div>
-    <button
-      #menuEntry
-      [routerLink]="['tag', mainContext.id, 'tasks']"
-      mat-menu-item
-      routerLinkActive="isActiveRoute"
-    >
-      <span class="badge">{{ mainContext.taskIds.length }}</span>
-      <mat-icon>{{ mainContext.icon }}</mat-icon>
-      <span class="text">{{ mainContext.title }}</span>
-    </button>
-
-    <button
-      [mat-menu-trigger-for]="tagMenu"
-      class="tag-settings-btn"
-      mat-icon-button
-      routerLinkActive="isActiveRoute"
-    >
-      <mat-icon>more_vert</mat-icon>
-    </button>
-
-    <mat-menu #tagMenu="matMenu">
-      <ng-template matMenuContent>
-        <work-context-menu
-          [contextId]="mainContext.id"
-          [contextType]="mainContext.type"
-        ></work-context-menu>
-      </ng-template>
-    </mat-menu>
-  </div>
+    [type]="WorkContextType.TAG"
+    [defaultIcon]="mainContext.icon"
+    [workContext]="mainContext"
+    [activeWorkContextId]="activeWorkContextId"
+  ></side-nav-item>
 
   <button
     #menuEntry
@@ -84,56 +51,25 @@
 
   <div
     [@standardList]="projectList?.length"
-    [dragulaModel]="projectList"
-    [dragula]="PROJECTS_SIDE_NAV"
+    cdkDropList
+    (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
   >
-    <div
+    @for (project of projectList; track project.id) {
+    <!---->@if (!project.isHiddenFromMenu) {
+    <side-nav-item
+      #menuEntry
+      cdkDrag
+      [cdkDragData]="project"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
       (keydown)="checkFocusProject($event)"
-      *ngFor="let project of projectList; trackBy: trackById;"
-      [class.hasTasks]="project.taskIds.length"
-      [class.isActiveContext]="project.id===activeWorkContextId"
-      [class.isHidden]="project.isHiddenFromMenu"
-      class="project"
-    >
-      <div
-        [ngStyle]="getThemeColor(project.theme?.primary || project.themeColor)"
-        class="project-color"
-      ></div>
-      <button
-        #menuEntry
-        [routerLink]="['project', project.id, 'tasks']"
-        mat-menu-item
-      >
-        <span class="badge"
-          >{{ project.taskIds.length }}{{ project.isEnableBacklog ? '/' +
-          project.backlogTaskIds.length : '' }}
-        </span>
-        <mat-icon
-          class="drag-handle"
-          drag-handle
-          >folder_special
-        </mat-icon>
-        <span class="text">{{ project.title }}</span>
-      </button>
-
-      <button
-        [matMenuTriggerFor]="projectMenu"
-        class="project-settings-btn"
-        mat-icon-button
-        routerLinkActive="isActiveRoute"
-      >
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #projectMenu="matMenu">
-        <ng-template matMenuContent>
-          <work-context-menu
-            [contextId]="project.id"
-            [project]="project"
-            [contextType]="WorkContextType.PROJECT"
-          ></work-context-menu>
-        </ng-template>
-      </mat-menu>
-    </div>
+      [workContext]="project"
+      [type]="WorkContextType.PROJECT"
+      [defaultIcon]="'folder_special'"
+      [activeWorkContextId]="activeWorkContextId"
+    ></side-nav-item>
+    }
+    <!---->
+    }
   </div>
 
   <button
@@ -183,50 +119,17 @@
     [dragulaModel]="tagList"
     [dragula]="TAG_SIDE_NAV"
   >
-    <div
+    <side-nav-item
+      #menuEntry
       (keydown)="checkFocusTag($event)"
       *ngFor="let tag of tagList; trackBy: trackById;"
-      [class.hasTasks]="tag.taskIds.length"
-      [class.isActiveContext]="tag.id===activeWorkContextId"
-      class="tag"
-    >
-      <div
-        [style.background]="tag?.theme.primary"
-        class="tag-color"
-      ></div>
-      <button
-        #menuEntry
-        [routerLink]="['tag', tag.id, 'tasks']"
-        mat-menu-item
-      >
-        <span class="badge">{{ tag.taskIds.length }}</span>
-        <mat-icon
-          class="drag-handle"
-          drag-handle
-          >style
-        </mat-icon>
-        <span class="text">{{ tag.title }}</span>
-      </button>
-
-      <button
-        [mat-menu-trigger-for]="tagMenu"
-        class="tag-settings-btn"
-        mat-icon-button
-        routerLinkActive="isActiveRoute"
-      >
-        <mat-icon>more_vert</mat-icon>
-      </button>
-
-      <mat-menu #tagMenu="matMenu">
-        <ng-template matMenuContent>
-          <work-context-menu
-            [contextId]="tag.id"
-            [contextType]="WorkContextType.TAG"
-          ></work-context-menu>
-        </ng-template>
-      </mat-menu>
-    </div>
+      [workContext]="tag"
+      [type]="WorkContextType.TAG"
+      [defaultIcon]="'style'"
+      [activeWorkContextId]="activeWorkContextId"
+    ></side-nav-item>
   </div>
+
   <div
     *ngIf="!tagList.length && isTagsExpanded"
     class="no-tags-info"
@@ -250,7 +153,7 @@
     #menuEntry
     class="route-link"
     mat-menu-item
-    routerLink="scheduled"
+    routerLink="scheduled-list"
     routerLinkActive="isActiveRoute"
   >
     <mat-icon svgIcon="repeat"></mat-icon>

@@ -2,7 +2,7 @@
 @import '../../../../variables.scss';
 
 $time-width: 3em;
-$row-height: 10px;
+$row-height: 11px;
 $row-height-mobile: 7px;
 //$grid-color: #dadce0;
 $grid-color: #dadce0;
@@ -12,11 +12,20 @@ $fr: 12;
 $total-rows: 24 * $fr;
 
 :host {
-  background: $light-theme-bg;
+  //background: $light-theme-bg;
   --nr-of-days: 5;
 
   @include darkTheme() {
     background: $dark-theme-bg;
+    background: transparent;
+  }
+}
+
+.main-grid-container.isCtrlKeyPressed {
+  schedule-event,
+  .work-start,
+  .work-end {
+    pointer-events: none !important;
   }
 }
 
@@ -26,7 +35,8 @@ $total-rows: 24 * $fr;
   display: grid;
   place-content: center;
   text-align: center;
-  grid-auto-columns: minmax(0, 1fr);
+  //grid-auto-columns: minmax(0, 1fr);
+  grid-auto-columns: 1fr;
   //grid-template-columns: $time-width repeat(5, 1fr);
   grid-template-columns: $time-width repeat(var(--nr-of-days), 1fr);
 }
@@ -43,6 +53,41 @@ $total-rows: 24 * $fr;
   }
 }
 
+// grid list approach 1
+//:host {
+//  .main-grid-container,
+//  .days {
+//    grid-template-rows: auto !important;
+//    grid-auto-rows: auto !important;
+//  }
+//
+//  schedule-event {
+//    align-self: start; // Align items to the start of the row
+//    grid-row-start: auto !important;
+//    grid-row: auto!important;
+//    grid-row-end: auto !important;
+//  }
+//
+//  .close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first.close-to-others-first,
+//  .close-to-others.close-to-others.close-to-others.close-to-others.close-to-others {
+//    transform: translate3d(0, 0, 0);
+//  }
+//
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.SplitTaskContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinuedLast,
+//  schedule-event.RepeatProjectionSplitContinued,
+//  schedule-event.SplitTaskContinued,
+//  schedule-event.LunchBreak,
+//  .work-end,
+//  .current-time,
+//  .work-start,
+//  .time,
+//  .row {
+//    display: none !important;
+//  }
+//}
+
 header {
   display: flex;
   flex-direction: column;
@@ -54,7 +99,7 @@ header {
   border-bottom: 1px solid $light-theme-extra-border-color;
   background: #fff;
   color: $light-theme-text-color;
-  box-shadow: $whiteframe-shadow-3dp;
+  box-shadow: $whiteframe-shadow-1dp;
   z-index: 10;
 
   @include darkTheme() {

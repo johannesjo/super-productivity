@@ -11,14 +11,25 @@ export const adjustToLiveFormlyForm = (
         type: 'toggle',
       };
     }
-    if (item.type === 'input' || item.type === 'textarea' || item.type === 'duration') {
+    if (
+      item.type === 'input' ||
+      item.type === 'textarea' ||
+      item.type === 'duration' ||
+      item.type === 'icon'
+    ) {
       return {
         ...item,
+        templateOptions: {
+          ...item.templateOptions,
+          keydown: (field: FormlyFieldConfig, event: KeyboardEvent) => {
+            if (event.key === 'Enter' && (event.target as any)?.tagName !== 'TEXTAREA') {
+              field.formControl?.setValue((event?.target as any)?.value);
+            }
+          },
+        },
         modelOptions: {
           ...item.modelOptions,
-          debounce: {
-            default: 1500,
-          },
+          updateOn: 'blur',
         },
       };
     }

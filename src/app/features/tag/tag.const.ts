@@ -8,34 +8,28 @@ import {
 import { WorkContextThemeCfg } from '../work-context/work-context.model';
 
 export const TODAY_TAG: Tag = {
-  id: 'TODAY',
-  icon: 'wb_sunny',
-  title: 'Today',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'wb_sunny',
+  title: 'Today',
+  id: 'TODAY',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
-    backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
-
-    ...((window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? {
-          isDisableBackgroundGradient: false,
-        }
-      : {}) as Partial<WorkContextThemeCfg>),
+    // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: true,
   },
 };
 
 export const DEFAULT_TAG: Tag = {
-  id: '',
-  icon: null,
-  title: '',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: null,
+  title: '',
+  id: '',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TAG_COLOR,
@@ -43,17 +37,16 @@ export const DEFAULT_TAG: Tag = {
 };
 
 export const NO_LIST_TAG: Tag = {
-  id: 'NO_LIST',
-  icon: 'question_mark',
-  title: 'no list scheduled',
   color: null,
   created: Date.now(),
-  taskIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'question_mark',
+  title: 'no list scheduled',
+  id: 'NO_LIST',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
-    backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
+    backgroundImageDark: '',
 
     ...((window.matchMedia('(prefers-color-scheme: dark)').matches
       ? {

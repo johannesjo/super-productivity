@@ -125,6 +125,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
     }
     const rev = meta.etag || meta['oc-etag'] || meta['last-modified'];
     if (!rev) {
+      console.log(meta);
       throw new Error('Not able to get rev for WebDAV');
     }
     return rev;

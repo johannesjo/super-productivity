@@ -121,6 +121,10 @@ $h: $planner-item-height;
       background: $light-theme-bg-darker;
     }
   }
+
+  mat-icon {
+    display: inline-flex;
+  }
 }
 
 .drag-handle {
@@ -234,8 +238,6 @@ $min-badge-size: 14px;
   margin-left: -6px;
 }
 
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
+:host ::ng-deep .due-date + .planner-time-remaining-shared {
+  display: none;
 }

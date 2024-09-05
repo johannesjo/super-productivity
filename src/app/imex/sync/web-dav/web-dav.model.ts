@@ -17,4 +17,5 @@ export interface FileStat {
 
 export interface WebDavHeadResponse extends IncomingHttpHeaders {
   'oc-etag'?: string;
+  // [key: string]: any;
 }

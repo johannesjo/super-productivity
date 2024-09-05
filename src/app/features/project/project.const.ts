@@ -7,13 +7,10 @@ import {
 } from '../work-context/work-context.const';
 
 export const DEFAULT_PROJECT: Project = {
-  id: '',
-  title: '',
   isHiddenFromMenu: false,
   isArchived: false,
   isEnableBacklog: false,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
-  taskIds: [],
   backlogTaskIds: [],
   noteIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,
@@ -29,6 +26,7 @@ export const FIRST_PROJECT: Project = {
   ...DEFAULT_PROJECT,
   id: DEFAULT_PROJECT_ID,
   title: 'Inbox',
+  icon: 'inbox',
   workStart: {},
   workEnd: {},
 };

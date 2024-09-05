@@ -29,6 +29,7 @@ import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.compon
 import { PlannerDayComponent } from './planner-day/planner-day.component';
 import { BetterSimpleDrawerComponent } from '../../ui/better-simple-drawer/better-simple-drawer.component';
 import { PlannerInitialDialogEffects } from './store/planner-initial-dialog.effects';
+import { TaskContextMenuComponent } from '../tasks/task-context-menu/task-context-menu.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { PlannerInitialDialogEffects } from './store/planner-initial-dialog.effe
     IssueModule,
     AddTaskInlineComponent,
     BetterSimpleDrawerComponent,
+    TaskContextMenuComponent,
   ],
   exports: [
     PlannerTaskComponent,

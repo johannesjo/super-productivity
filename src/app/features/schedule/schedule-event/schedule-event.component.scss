@@ -25,6 +25,7 @@ $margin-right: 10px;
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
+  min-width: 0;
 
   &.no-project {
   }
@@ -104,6 +105,9 @@ $margin-right: 10px;
   .title {
     flex-grow: 0;
     column-width: auto;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ico-wrapper {
@@ -116,11 +120,12 @@ $margin-right: 10px;
   content: '';
   position: absolute;
   top: 0;
-  bottom: -1 * ($margin-bottom + 10);
+  bottom: -1 * ($margin-bottom + 1);
   left: 0;
   right: -1 * ($margin-right + 4);
   z-index: 3;
   //background: rgba(255, 0, 0, 0.1);
+  display: block;
 }
 
 // non draggable
@@ -425,21 +430,34 @@ $margin-right: 10px;
   }
 }
 
+$offset: 40px;
 :host.drag-over {
-  transform: translateY(40px);
+  transform: translateY($offset);
   z-index: 3;
 
   &:after {
     // NOTE: there are some styles in the parent component since host:active + :host  is not working
     content: '';
     position: absolute;
-    transform: translateY(-40px);
+    transform: translateY(-$offset);
     top: -1 * $margin-bottom;
-    height: 40px + $margin-bottom;
+    height: $offset + $margin-bottom;
     left: 0;
     right: -1 * ($margin-right + 4);
     z-index: 3;
     //border: 1px solid red;
+    //background: rgba(255, 0, 0, 0.2);
+  }
+}
+
+$offsetShortEvent: 15px;
+:host.very-short-event.drag-over {
+  transform: translateY($offsetShortEvent);
+  z-index: 3;
+
+  &:after {
+    transform: translateY(-$offsetShortEvent);
+    height: $offsetShortEvent + $margin-bottom;
   }
 }
 
@@ -450,10 +468,4 @@ $margin-right: 10px;
     cursor: grabbing;
     transition: none;
   }
-}
-
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
 }

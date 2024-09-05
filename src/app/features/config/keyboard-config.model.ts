@@ -25,15 +25,15 @@ export type KeyboardConfig = Readonly<{
   triggerSync: string | null;
 
   taskEditTitle: string | null;
-  taskToggleAdditionalInfoOpen: string | null;
+  taskToggleDetailPanelOpen: string | null;
   taskOpenEstimationDialog: string | null;
   taskToggleDone: string | null;
   taskAddSubTask: string | null;
+  taskAddAttachment: string | null;
   taskMoveToProject: string | null;
   taskOpenContextMenu: string | null;
   taskDelete: string | null;
   taskSchedule: string | null;
-  taskPlanForDay: string | null;
   selectPreviousTask: string | null;
   selectNextTask: string | null;
   moveTaskUp: string | null;

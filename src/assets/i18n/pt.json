@@ -939,7 +939,7 @@
         "CONVERT_TO_PARENT_TASK": "Converter em tarefa pai",
         "DELETE": "Excluir tarefa",
         "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
-        "EDIT_REMINDER": "Editar lembrete",
+        "EDIT_SCHEDULED": "Editar lembrete",
         "EDIT_TAGS": "Editar etiquetas",
         "MARK_DONE": "Marcar como concluído",
         "MARK_UNDONE": "Marcar como desfeita",
@@ -953,7 +953,7 @@
         "REPEAT_EDIT": "Editar configuração da tarefa de repetição",
         "SCHEDULE": "Agendar tarefa",
         "SHOW_UPDATES": "Mostrar atualizações",
-        "TOGGLE_ADDITIONAL": "Mostrar/ocultar informações adicionais",
+        "TOGGLE_DETAIL_PANEL": "Mostrar/ocultar informações adicionais",
         "TOGGLE_ATTACHMENTS": "Mostrar/ocultar anexos",
         "TOGGLE_DONE": "Marcar como concluído/desfeito",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alternar visibilidade da subtarefa",
@@ -967,7 +967,7 @@
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
         "OK": "Criar Tags"
       },
-      "D_REMINDER_ADD": {
+      "D_SCHEDULE_TASK": {
         "CONFIRM_REPEAT_OK": "Cronograma",
         "CONFIRM_REPEAT_TXT": "Você está tentando agendar essa tarefa repetida para outro dia. Normalmente, as tarefas repetidas devem ser recriadas em dias específicos e agendadas apenas nesse dia. Você deseja continuar mesmo assim?",
         "DATETIME_FOR": "Data e hora para lembrete",
@@ -1325,6 +1325,7 @@
       "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
       "SYSTEM_SHORTCUTS": "Atalhos globais (todo o sistema)",
       "TASK_ADD_SUB_TASK": "Adicionar subtarefa",
+      "TASK_ADD_ATTACHMENT": "Anexar arquivo ou link",
       "TASK_DELETE": "Excluir tarefa",
       "TASK_EDIT_TAGS": "Editar etiquetas",
       "TASK_EDIT_TITLE": "Editar título",
@@ -1334,7 +1335,7 @@
       "TASK_SCHEDULE": "Agendar tarefa",
       "TASK_SHORTCUTS": "Tarefas",
       "TASK_SHORTCUTS_INFO": "Os seguintes atalhos se aplicam à tarefa atualmente selecionada (selecionada via guia ou mouse).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Mostrar/ocultar informações adicionais da tarefa",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Mostrar/ocultar informações adicionais da tarefa",
       "TASK_TOGGLE_DONE": "Alternar Concluído",
       "TITLE": "Atalhos do teclado",
       "TOGGLE_BACKLOG": "Mostrar/ocultar tarefas do backlog",
@@ -1344,27 +1345,6 @@
       "ZOOM_DEFAULT": "Zoom padrão (somente para computador)",
       "ZOOM_IN": "Mais zoom (somente para computador)",
       "ZOOM_OUT": "Diminuir o zoom (somente para computador)"
-    },
-    "LANG": {
-      "AR": "Árabe",
-      "DE": "Alemão",
-      "EN": "Inglês",
-      "ES": "Espanhol",
-      "FA": "Persa",
-      "FR": "Francês",
-      "IT": "Italiano",
-      "JA": "Japonês",
-      "KO": "Coreano",
-      "LABEL": "Por favor escolha um idioma",
-      "NB": "Bokmål norueguês",
-      "NL": "Holandês",
-      "PL": "Polonês",
-      "PT": "Português",
-      "RU": "Russo",
-      "TITLE": "Idioma",
-      "TR": "Turco",
-      "ZH": "Chinês Simplificado",
-      "ZH_TW": "Chinês Tradicional"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",

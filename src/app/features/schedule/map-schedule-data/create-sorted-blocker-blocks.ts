@@ -48,7 +48,7 @@ export const createSortedBlockerBlocks = (
   //     e: new Date(end),
   //   })),
   // );
-  console.log(blockedBlocks);
+  // console.log(blockedBlocks);
 
   return blockedBlocks;
 };

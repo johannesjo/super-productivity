@@ -49,7 +49,7 @@ export class CalendarIntegrationEffects {
                 // timer(0, 10000).pipe(
                 tap(() => console.log('REQUEST CALENDAR', calProvider)),
                 switchMap(() =>
-                  this._calendarIntegrationService.requestEvents(calProvider),
+                  this._calendarIntegrationService.requestEvents$(calProvider),
                 ),
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
@@ -58,7 +58,7 @@ export class CalendarIntegrationEffects {
                         isCalenderEventDue(
                           calEv,
                           calProvider,
-                          this._calendarIntegrationService.skippedEventIds,
+                          this._calendarIntegrationService.skippedEventIds$.getValue(),
                           now,
                         ),
                       );
@@ -82,11 +82,7 @@ export class CalendarIntegrationEffects {
     { id: string; calEv: CalendarIntegrationEvent; calProvider: CalendarProvider }[]
   >([]);
   showBanner = createEffect(
-    () =>
-      this._currentlyShownBanners$.pipe(
-        tap((v) => console.log('this._currentlyShownBanners$', v)),
-        tap((v) => this._showBanner(v)),
-      ),
+    () => this._currentlyShownBanners$.pipe(tap((v) => this._showBanner(v))),
     {
       dispatch: false,
     },
@@ -133,7 +129,6 @@ export class CalendarIntegrationEffects {
     }[],
   ): Promise<void> {
     console.log('SHOW BANNER');
-
     const firstEntry = allEvsToShow[0];
     if (!firstEntry) {
       this._bannerService.dismiss(BannerId.CalendarEvent);

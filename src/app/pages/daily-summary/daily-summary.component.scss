@@ -7,6 +7,15 @@ $summary-point-inner-margin: $s;
     display: block;
   }
 
+  ::ng-deep {
+    .mat-mdc-tab .mdc-tab__text-label {
+      @include darkTheme() {
+        //color: $dark-theme-text-color;
+        //font-weight: 300;
+      }
+    }
+  }
+
   ::ng-deep .mat-mdc-tab-list {
     border-bottom: 1px solid $light-theme-separator-color;
 

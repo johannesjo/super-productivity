@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { delay, exhaustMap, first, map, switchMap, withLatestFrom } from 'rxjs/operators';
-import { EMPTY, merge } from 'rxjs';
+import { delay, exhaustMap, first, map, switchMap } from 'rxjs/operators';
+import { combineLatest, EMPTY, merge, of } from 'rxjs';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { select, Store } from '@ngrx/store';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
@@ -39,17 +39,19 @@ export class PlannerInitialDialogEffects {
           );
         }),
 
-        withLatestFrom(
-          this._plannerService.days$,
-          this._store.pipe(select(selectTodayTaskIds)),
-          this._store.pipe(select(selectPlannerState)),
+        switchMap((todayStr) =>
+          combineLatest([
+            of(todayStr),
+            this._plannerService.plannerDayForAllDueToday$,
+            this._store.pipe(select(selectTodayTaskIds)),
+            this._store.pipe(select(selectPlannerState)),
+          ]).pipe(first()),
         ),
-        exhaustMap(([todayStr, plannerDays, todayTaskIds, plannerState]) => {
-          const plannerDay = plannerDays.find((day) => day.dayDate === todayStr);
-
+        exhaustMap(([todayStr, plannerDay, todayTaskIds, plannerState]) => {
           if (todayStr === plannerState.addPlannedTasksDialogLastShown) {
             return EMPTY;
           }
+          console.log(plannerDay);
 
           if (!plannerDay) {
             devError('showDialogAfterAppLoad$(): No planner day found for today');

@@ -180,14 +180,18 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            // text: `<p>Please open the following link and copy the auth code provided there</p>`,
-            text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-          },
-        },
+        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+          ? [
+              {
+                type: 'tpl',
+                templateOptions: {
+                  tag: 'p',
+                  // text: `<p>Please open the following link and copy the auth code provided there</p>`,
+                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+                },
+              },
+            ]
+          : []),
         {
           key: 'baseUrl',
           type: 'input',

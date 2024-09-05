@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, map, switchMap } from 'rxjs/operators';
+import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
+import { delay, map, switchMap, tap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
-import { taskAdditionalInfoTaskChangeAnimation } from '../tasks/task-additional-info/task-additional-info.ani';
+import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
 
 @Component({
   selector: 'right-panel',
@@ -14,7 +14,7 @@ import { taskAdditionalInfoTaskChangeAnimation } from '../tasks/task-additional-
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
-    taskAdditionalInfoTaskChangeAnimation,
+    taskDetailPanelTaskChangeAnimation,
     slideInFromTopAni,
     slideInFromRightAni,
   ],
@@ -31,8 +31,16 @@ export class RightPanelComponent implements OnDestroy {
 
   isOpen$: Observable<boolean> = combineLatest([
     this.taskService.selectedTask$,
+    this.taskService.taskDetailPanelTargetPanel$,
     this.layoutService.isShowNotes$,
-  ]).pipe(map(([selectedTask, isShowNotes]) => !!(selectedTask || isShowNotes)));
+  ]).pipe(
+    tap((v) => console.log(`isOpen$`, v)),
+    map(
+      ([selectedTask, targetPanel, isShowNotes]) =>
+        !!(selectedTask || isShowNotes) &&
+        targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
+    ),
+  );
 
   // NOTE: prevents the inner animation from happening file panel is expanding
   isDisableTaskPanelAni = true;
@@ -43,6 +51,8 @@ export class RightPanelComponent implements OnDestroy {
     public taskService: TaskService,
     public layoutService: LayoutService,
   ) {
+    this.isOpen$.subscribe((v) => console.log(`isOpen$`, v));
+
     this._subs.add(
       this.isOpen$.subscribe((isOpen) => {
         if (!isOpen) {

@@ -452,7 +452,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Sync,
       title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy very serious. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required.</p><p>It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
+      text: "<p>Super Productivity takes your data privacy very seriously. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required.</p><p>It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
       buttons: [{ ...NEXT_BTN, text: 'That is cool, I guess' }],
     },
     {
@@ -792,6 +792,7 @@ export const SHEPHERD_STEPS = (
           <li>${KEY_COMBO('taskDelete')}: Delete Task</li>
           <li>${KEY_COMBO('taskToggleDone')}: Toggle done</li>
           <li>${KEY_COMBO('taskAddSubTask')}: Add new sub task</li>
+          <li>${KEY_COMBO('taskAddAttachment')}: Attach a file or link to the task</li>
           <li>${KEY_COMBO('togglePlay')}: Toggle tracking</li>
           </ul>
 

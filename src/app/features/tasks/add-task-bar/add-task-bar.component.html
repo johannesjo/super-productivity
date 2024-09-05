@@ -55,6 +55,18 @@
       </div>
 
       <button
+        (click)="isAddToBottom=!isAddToBottom"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TOP_OR_BOTTOM|translate"
+        matTooltipPosition="above"
+        class="switch-add-to-bot-btn"
+        mat-icon-button
+        type="button"
+      >
+        <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
+        <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
+      </button>
+
+      <button
         *ngIf="isAddToBacklogAvailable$|async"
         (click)="isAddToBacklog=!isAddToBacklog"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"
@@ -65,17 +77,6 @@
       >
         <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
         <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
-      </button>
-      <button
-        (click)="isAddToBottom=!isAddToBottom"
-        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TOP_OR_BOTTOM|translate"
-        matTooltipPosition="above"
-        class="switch-add-to-bot-btn"
-        mat-icon-button
-        type="button"
-      >
-        <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
-        <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
       </button>
     </div>
   </div>

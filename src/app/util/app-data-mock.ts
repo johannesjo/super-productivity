@@ -16,7 +16,7 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
     ids: [],
     currentTaskId: null,
     selectedTaskId: null,
-    taskAdditionalInfoTargetPanel: null,
+    taskDetailTargetPanel: null,
     lastCurrentTaskId: null,
     isDataLoaded: false,
   },

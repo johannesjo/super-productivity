@@ -31,15 +31,17 @@ $card-border-radius: 4px;
 //$dark16: #343434;
 //$dark24: #383838;
 $dark0: rgb(18, 18, 18);
-$dark05: rgb(24, 24, 24);
 $dark1: rgb(30, 30, 30);
 $dark2: rgb(34, 34, 34);
 $dark3: rgb(36, 36, 36);
 $dark4: rgb(39, 39, 39);
+$dark4_5: rgb(40, 40, 40);
+$dark5: rgb(42, 42, 42);
 $dark6: rgb(44, 44, 44);
 $dark8: rgb(46, 46, 46);
+$dark10: rgb(48, 48, 48);
 $dark12: rgb(51, 51, 51);
-$dark16: rgb(52, 52, 52);
+$dark16: rgb(53, 53, 53);
 $dark24: rgb(56, 56, 56);
 
 $dark-theme-bg: $dark0;
@@ -52,7 +54,8 @@ $dark-theme-bg-super-light: #616161;
 $dark-theme-card-bg: $dark2;
 $dark-theme-sidebar-bg: $dark8;
 
-$light-theme-bg: rgb(250, 250, 250);
+//$light-theme-bg: rgb(250, 250, 250);
+$light-theme-bg: #f8f8f7;
 $light-theme-bg-darker: rgb(235, 235, 235);
 $light-theme-bg-drag-col: rgb(242, 242, 242);
 
@@ -142,7 +145,7 @@ $z-tour: 10001;
 // ----------
 $standard-note-bg-light: #ffffff;
 $standard-note-fg-light: $light-theme-text-color;
-$standard-note-bg-dark: $dark-theme-bg-lighter;
+$standard-note-bg-dark: $dark16;
 $standard-note-bg-dark-hovered: $dark-theme-bg-lightest;
 $standard-note-fg-dark: #eeeeee;
 

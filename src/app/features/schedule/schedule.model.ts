@@ -112,6 +112,7 @@ interface SVELunchBreak extends SVEBase {
 export type SVEEntryForNextDay =
   | SVETask
   | SVESplitTaskStart
+  | SVERepeatProjection
   | SVESplitTaskContinued
   | SVERepeatProjectionSplitContinued;
 

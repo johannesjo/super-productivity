@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskAdditionalInfoTargetPanel, TaskWithSubTasks } from '../task.model';
+import { Task, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueDataReduced } from '../../issue/issue.model';
 import { RoundTimeOption } from '../../project/project.model';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -45,7 +45,7 @@ enum TaskActionTypes {
   'MoveToOtherProject' = '[Task] Move tasks to other project',
   'ToggleStart' = '[Task] Toggle start',
   'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
-  'AddNewTagsFromShortSyntax' = '[Task] Add new tags form short syntax',
+  'AddNewTagsFromShortSyntax' = '[Task] Add new tags from short syntax',
 }
 
 export const setCurrentTask = createAction(
@@ -59,7 +59,7 @@ export const setSelectedTask = createAction(
   TaskActionTypes.SetSelectedTask,
   props<{
     id: string | null;
-    taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
+    taskDetailTargetPanel?: TaskDetailTargetPanel;
     isSkipToggle?: boolean;
   }>(),
 );

@@ -2,6 +2,12 @@
   //--mdc-fab-small-container-elevation-shadow: $whiteframe-shadow-4dp;
   --mat-dialog-container-small-max-width: 94vw;
   --mat-dialog-container-max-width: 85vw;
+  --mat-menu-item-label-text-size: 14px;
+}
+
+.mat-drawer.mat-drawer-side {
+  // should be below notes panel
+  z-index: 1 !important;
 }
 
 // DIALOGS
@@ -108,6 +114,11 @@ mat-icon,
   vertical-align: middle;
 }
 
+mat-icon.mat-icon[svgicon] {
+  display: flex;
+  justify-content: center;
+}
+
 // AUTOCOMPLETE
 // -----------------
 .mdc-list-item__primary-text {
@@ -147,4 +158,14 @@ mat-icon,
   outline: 1px dashed $c-primary;
   border-radius: 6px;
   cursor: grabbing;
+}
+
+// MAT MENU
+.mat-mdc-menu-content {
+  padding-top: 0 !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-menu-item.quick-access {
+  border: 1px solid red;
 }

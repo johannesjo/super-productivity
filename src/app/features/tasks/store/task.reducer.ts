@@ -28,12 +28,7 @@ import {
   updateTaskTags,
   updateTaskUi,
 } from './task.actions';
-import {
-  ShowSubTasksMode,
-  Task,
-  TaskAdditionalInfoTargetPanel,
-  TaskState,
-} from '../task.model';
+import { ShowSubTasksMode, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -83,7 +78,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   // TODO maybe at least move those properties to an ui property
   currentTaskId: null,
   selectedTaskId: null,
-  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel.Default,
+  taskDetailTargetPanel: TaskDetailTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
   [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
@@ -140,18 +135,30 @@ export const taskReducer = createReducer<TaskState>(
     return { ...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId };
   }),
 
-  on(setSelectedTask, (state, { id, taskAdditionalInfoTargetPanel, isSkipToggle }) => {
+  on(setSelectedTask, (state, { id, taskDetailTargetPanel, isSkipToggle }) => {
+    if (
+      state.taskDetailTargetPanel === TaskDetailTargetPanel.DONT_OPEN_PANEL &&
+      taskDetailTargetPanel !== null &&
+      id
+    ) {
+      return {
+        ...state,
+        taskDetailTargetPanel: TaskDetailTargetPanel.DONT_OPEN_PANEL,
+        selectedTaskId: id,
+      };
+    }
+
     if (isSkipToggle) {
       return {
         ...state,
-        taskAdditionalInfoTargetPanel: taskAdditionalInfoTargetPanel || null,
+        taskDetailTargetPanel: taskDetailTargetPanel || null,
         selectedTaskId: id,
       };
     }
     return {
       ...state,
-      taskAdditionalInfoTargetPanel:
-        !id || id === state.selectedTaskId ? null : taskAdditionalInfoTargetPanel || null,
+      taskDetailTargetPanel:
+        !id || id === state.selectedTaskId ? null : taskDetailTargetPanel || null,
       selectedTaskId: id === state.selectedTaskId ? null : id,
     };
   }),

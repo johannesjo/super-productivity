@@ -10,9 +10,10 @@ export enum ShowSubTasksMode {
   Show = 2,
 }
 
-export enum TaskAdditionalInfoTargetPanel {
+export enum TaskDetailTargetPanel {
   Default = 'Default',
   Attachments = 'Attachments',
+  DONT_OPEN_PANEL = 'DONT_OPEN_PANEL',
 }
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
@@ -118,6 +119,10 @@ export interface TaskPlanned extends Task {
   plannedAt: number;
 }
 
+export interface TaskWithPlannedDay extends Task {
+  plannedDay: string;
+}
+
 export interface TaskWithoutReminder extends Task {
   reminderId: null;
   plannedAt: null;
@@ -170,7 +175,7 @@ export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
   selectedTaskId: string | null;
-  taskAdditionalInfoTargetPanel: TaskAdditionalInfoTargetPanel | null;
+  taskDetailTargetPanel: TaskDetailTargetPanel | null;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
 

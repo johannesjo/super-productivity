@@ -1,3 +1,4 @@
+@use 'angular-material-css-vars' as mat-css-vars;
 @import '../_variables.scss';
 
 html,
@@ -13,6 +14,10 @@ app-root,
   //font-family: 'Open Sans', sans-serif;
   //font-family: 'Roboto', sans-serif;
   font-family: 'Roboto', 'Comic Sans MS';
+}
+
+html {
+  overflow: hidden !important;
 }
 
 html {
@@ -48,55 +53,50 @@ body {
   &.isEnabledBackgroundGradient {
     &:before {
       display: block;
+      opacity: 1;
     }
   }
 
   &.isLightTheme {
     color: $light-theme-text-color;
+    background: $light-theme-bg;
 
     &.isDisableBackgroundGradient {
       background: $light-theme-bg;
+      //&:before {
+      //  display: block;
+      //  opacity: .3;
+      //  background: mat-css-vars.mat-css-color(50, 1);
+      //}
     }
 
     &:before {
-      opacity: 1;
       filter: saturate(0.8);
       background: linear-gradient(
         180deg,
-        $c-primary-50 0,
-        $c-primary-100 85%,
-        $c-primary-200 100%
+        mat-css-vars.mat-css-color(100, 1) 0%,
+        mat-css-vars.mat-css-color(50, 1) 140px,
+        $light-theme-bg 100%
       );
     }
   }
 
   &.isDarkTheme {
     color: $dark-theme-text-color;
+    background: #000;
 
     &.isDisableBackgroundGradient {
       background: $dark-theme-bg;
     }
 
     &:before {
-      content: '';
-      opacity: 1;
-      filter: brightness(0.7) saturate(0.6);
-      //background: linear-gradient(
-      //  180deg,
-      //  $dark-theme-bg 0,
-      //  $c-primary-900 20%,
-      //  $c-primary-800 50%,
-      //  $c-primary-700 100%
-      //);
+      filter: saturate(0.8);
       background: linear-gradient(
         180deg,
-        $dark-theme-bg 0,
-        $c-primary-900 20%,
-        $c-primary-800 100%
+        mat-css-vars.mat-css-color(800, 0.35) 0%,
+        mat-css-vars.mat-css-color(900, 0.1) 140px,
+        mat-css-vars.mat-css-color(900, 0.02) 100%
       );
-
-      //background: linear-gradient(180deg, $c-primary-700 0, $c-primary-800 20%, $c-primary-900 30%, $dark-theme-bg 100%);
-      //background: linear-gradient(180deg, $c-primary-900 0, $c-primary-800 80%, $c-primary-700 90%, $c-primary-600 100%);
     }
   }
 

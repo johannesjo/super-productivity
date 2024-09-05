@@ -10,15 +10,15 @@ const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_SCHEDULE_BTN = '.ico-btn.schedule-btn';
 const TASK_SCHEDULE_BTN_2 = TASK_2 + ' ' + TASK_SCHEDULE_BTN;
 
-const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled"]';
-const SCHEDULE_PAGE_CMP = 'schedule-page';
-const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks mat-card`;
+const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled-list"]';
+const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
+const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
 // Note: not sure why this is the second child, but it is
 const SCHEDULE_PAGE_TASK_2 = `${SCHEDULE_PAGE_TASKS}:nth-of-type(2)`;
-const SCHEDULE_PAGE_TASK_1_TEXT_AREA = `${SCHEDULE_PAGE_TASK_1} textarea`;
+const SCHEDULE_PAGE_TASK_1_TITLE_EL = `${SCHEDULE_PAGE_TASK_1} .title`;
 // Note: not sure why this is the second child, but it is
-const SCHEDULE_PAGE_TASK_2_TEXTAREA = `${SCHEDULE_PAGE_TASK_2} textarea`;
+const SCHEDULE_PAGE_TASK_2_TITLE_EL = `${SCHEDULE_PAGE_TASK_2} .title`;
 
 module.exports = {
   '@tags': ['task', 'reminder'],
@@ -36,7 +36,8 @@ module.exports = {
       .click(SCHEDULE_ROUTE_BTN)
       .waitForElementVisible(SCHEDULE_PAGE_CMP)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
-      .assert.valueContains(SCHEDULE_PAGE_TASK_1_TEXT_AREA, '0 test task koko')
+      .waitForElementVisible(SCHEDULE_PAGE_TASK_1_TITLE_EL)
+      .assert.textContains(SCHEDULE_PAGE_TASK_1_TITLE_EL, '0 test task koko')
       .end(),
 
   'should add multiple scheduled tasks': (browser: NBrowser) =>
@@ -54,7 +55,8 @@ module.exports = {
       .click(SCHEDULE_ROUTE_BTN)
       .waitForElementVisible(SCHEDULE_PAGE_CMP)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
-      .assert.valueContains(SCHEDULE_PAGE_TASK_1_TEXT_AREA, '0 test task koko')
-      .assert.valueContains(SCHEDULE_PAGE_TASK_2_TEXTAREA, '2 hihihi')
+      .waitForElementVisible(SCHEDULE_PAGE_TASK_1_TITLE_EL)
+      .assert.textContains(SCHEDULE_PAGE_TASK_1_TITLE_EL, '0 test task koko')
+      .assert.textContains(SCHEDULE_PAGE_TASK_2_TITLE_EL, '2 hihihi')
       .end(),
 };

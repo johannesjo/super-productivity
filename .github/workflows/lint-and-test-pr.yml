@@ -39,3 +39,9 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run e2e
+      - name: 'Upload E2E screenshots on failure'
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: WinStoreRelease
+          path: e2e/screenshots/**/*.*

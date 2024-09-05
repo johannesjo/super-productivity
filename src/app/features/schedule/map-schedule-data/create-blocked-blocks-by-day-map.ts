@@ -33,7 +33,7 @@ export const createBlockedBlocksByDayMap = (
     now,
     nrOfDays,
   );
-  console.log(allBlockedBlocks);
+  // console.log(allBlockedBlocks);
 
   const blockedBlocksByDay: BlockedBlockByDayMap = {};
 

@@ -17,6 +17,8 @@ import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { ChartConfiguration } from 'chart.js';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -118,6 +120,8 @@ export class GlobalThemeService {
       ['redmine', 'assets/icons/redmine.svg'],
       ['calendar', 'assets/icons/calendar.svg'],
       ['early_on', 'assets/icons/early-on.svg'],
+      ['tomorrow', 'assets/icons/tomorrow.svg'],
+      ['next_week', 'assets/icons/next-week.svg'],
     ];
 
     icons.forEach(([name, path]) => {
@@ -159,6 +163,18 @@ export class GlobalThemeService {
         this.document.body.classList.add(BodyClass.isExtension);
         this.document.body.classList.add(BodyClass.isAdvancedFeatures);
         this.document.body.classList.remove(BodyClass.isNoAdvancedFeatures);
+      });
+    }
+
+    if (IS_ANDROID_WEB_VIEW) {
+      androidInterface.isKeyboardShown$.subscribe((isShown) => {
+        console.log('isShown', isShown);
+
+        this.document.body.classList.remove(BodyClass.isAndroidKeyboardHidden);
+        this.document.body.classList.remove(BodyClass.isAndroidKeyboardShown);
+        this.document.body.classList.add(
+          isShown ? BodyClass.isAndroidKeyboardShown : BodyClass.isAndroidKeyboardHidden,
+        );
       });
     }
 

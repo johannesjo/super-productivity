@@ -1,7 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { TASK_REMINDER_OPTIONS } from '../../tasks/dialog-add-task-reminder/task-reminder-options.const';
+import { TASK_REMINDER_OPTIONS } from '../../planner/dialog-schedule-task/task-reminder-options.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { RepeatQuickSetting, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
@@ -89,14 +89,14 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
   },
   {
     key: 'startDate',
-    type: 'datepicker',
+    type: 'input',
     hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     defaultValue: getWorklogStr(),
     templateOptions: {
       label: T.F.TASK_REPEAT.F.START_DATE,
       required: true,
       // min: getWorklogStr() as any,
-      // type: IS_ANDROID_WEB_VIEW ? 'text' : 'date',
+      type: 'date',
     },
   },
   {
@@ -194,6 +194,10 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     templateOptions: {
       label: T.F.TASK_REPEAT.F.DEFAULT_ESTIMATE,
       description: T.G.DURATION_DESCRIPTION,
+    },
+    // otherwise the input duration field messes up :(
+    modelOptions: {
+      updateOn: 'blur',
     },
   },
   {

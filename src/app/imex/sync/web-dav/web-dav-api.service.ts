@@ -171,6 +171,8 @@ export class WebDavApiService {
         password: cfg.password,
       });
       const r = await client.customRequest(path, { method: 'HEAD' });
+      console.log({ r });
+
       return r.headers;
     }
   }

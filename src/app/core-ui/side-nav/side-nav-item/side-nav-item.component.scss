@@ -1,0 +1,163 @@
+@import '../../../../variables';
+
+:host {
+  a,
+  button {
+    height: 44px !important;
+    line-height: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+:host {
+  display: flex;
+  position: relative;
+  align-items: stretch;
+  justify-content: stretch;
+
+  button .badge {
+    display: none;
+  }
+
+  &.hasTasks {
+    button .badge {
+      display: block;
+      z-index: 10;
+      position: absolute;
+      line-height: 1;
+      right: 100%;
+      text-align: center;
+      bottom: 6px;
+      font-size: 10px;
+      min-width: 18px;
+      padding: 1px 4px 0;
+      pointer-events: none;
+      border: 1px solid $light-theme-extra-border-color;
+      background: #fff;
+      border-radius: 12px;
+      margin-right: -49px;
+
+      // avoid affecting drag handle
+      pointer-events: none;
+
+      @include darkTheme() {
+        border-color: $dark-theme-extra-border-color;
+        background: $dark-theme-bg-lighter;
+      }
+    }
+  }
+
+  &.isHidden {
+    display: none !important;
+  }
+
+  button:first-of-type {
+    flex-grow: 1;
+  }
+
+  button:last-of-type {
+    border-radius: 0;
+    align-self: stretch;
+    display: inline-flex;
+    min-width: 48px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+
+    .mat-mdc-button-touch-target {
+      width: 40px;
+      height: 40px;
+    }
+
+    @include mousePrimaryDevice {
+      opacity: 0;
+      display: none;
+    }
+  }
+
+  &:focus,
+  &:hover {
+    button:last-of-type {
+      @include mousePrimaryDevice {
+        opacity: 0.8;
+        display: inline-flex;
+      }
+    }
+  }
+}
+
+// color bar left styles
+:host {
+  .color-bar,
+  &.isActiveRoute:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: $s * 0.5;
+    background-color: $c-primary;
+  }
+
+  .color-bar {
+    opacity: 0;
+  }
+
+  &.isActiveContext,
+  &:focus,
+  &:hover {
+    .color-bar {
+      opacity: 1;
+    }
+  }
+}
+
+.settings-btn {
+  border-radius: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-button-persistent-ripple {
+      border-radius: 0 !important;
+    }
+  }
+
+  .settings-btn {
+    border-radius: 0;
+  }
+}
+
+:host.isActiveContext button {
+  font-weight: normal;
+
+  &.isActiveRoute {
+    font-weight: bold;
+    color: $c-primary-800;
+    @include darkTheme() {
+      color: $c-primary;
+    }
+
+    mat-icon {
+      color: $c-primary-800;
+      @include darkTheme() {
+        color: $c-primary;
+      }
+    }
+  }
+}
+
+.drag-handle {
+  /* Firefox 1.5-26 */
+  position: relative;
+  @include grabCursor();
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: -$s;
+    left: -$s;
+    right: -$s;
+    bottom: -$s;
+  }
+}

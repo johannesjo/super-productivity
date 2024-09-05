@@ -94,11 +94,7 @@
       class="tabs"
       dynamicHeight
     >
-      <mat-tab
-        [label]="(isForToday)
-      ? (T.PDS.TODAY|translate)
-      : (T.PDS.TASK_LIST|translate)"
-      >
+      <mat-tab [label]="'1. ' + (T.PDS.REVIEW_TASKS|translate)">
         <section class="tab-inner">
           <ng-container
             *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading"
@@ -132,7 +128,7 @@
 
       <mat-tab
         *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
-        [label]="T.PDS.EVALUATION|translate"
+        [label]="'2. '+ (T.PDS.EVALUATE_DAY|translate)"
       >
         <section
           class="tab-inner"
@@ -147,7 +143,7 @@
 
       <mat-tab
         *ngIf="isForToday"
-        [label]="T.PDS.PLAN|translate"
+        [label]="((configService.evaluation$|async)?.isHideEvaluationSheet ? '2. ' : '3. ')+(T.PDS.PLAN_TOMORROW|translate)"
       >
         <section class="tab-inner">
           <plan-tasks-tomorrow></plan-tasks-tomorrow>

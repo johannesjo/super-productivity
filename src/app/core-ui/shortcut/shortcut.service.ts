@@ -18,12 +18,22 @@ import { T } from '../../t.const';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
-import { first } from 'rxjs/operators';
+import { first, mapTo, switchMap } from 'rxjs/operators';
+import { fromEvent, merge, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShortcutService {
+  isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
+    switchMap((ev: Event) => {
+      const e = ev as KeyboardEvent;
+      if (e.ctrlKey) {
+        return merge(of(true), fromEvent(document, 'keyup').pipe(mapTo(false)));
+      }
+      return of(false);
+    }),
+  );
   backlogPos?: number;
 
   constructor(

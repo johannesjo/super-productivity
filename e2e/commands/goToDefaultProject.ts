@@ -6,7 +6,7 @@ const BASE_URL = `${BASE}`;
 const SIDENAV = `side-nav`;
 const EXPAND_PROJECT_BTN = `${SIDENAV} .projects .expand-btn`;
 
-const PROJECT = `${SIDENAV} section.projects .project`;
+const PROJECT = `${SIDENAV} section.projects side-nav-item`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;
 const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-mdc-menu-item`;
 

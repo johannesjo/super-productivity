@@ -1,0 +1,96 @@
+@import '../../../../variables.scss';
+
+:host {
+  border: 2px dashed $c-accent;
+  border-radius: 8px;
+  position: relative;
+  grid-row: 149 / span 2;
+  grid-column: 4 / span 2;
+  //box-shadow: $whiteframe-shadow-3dp;
+  background: #fff;
+  pointer-events: none;
+  z-index: 33;
+  opacity: 0.2;
+  color: $light-theme-text-color;
+  // NOTE: to be consistent with scheduled event
+  margin-bottom: 6px;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color;
+    background: $dark-theme-bg-lightest;
+  }
+
+  &.isEditMode {
+    pointer-events: auto;
+    opacity: 1;
+    box-shadow: $whiteframe-shadow-4dp;
+  }
+
+  .time {
+    cursor: pointer;
+    position: absolute;
+    bottom: 100%;
+    //margin-bottom: -6px;
+    border: 2px dashed $c-accent;
+    background: inherit;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 0;
+    padding: 1px 12px;
+    color: inherit;
+    z-index: 1;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+      padding: 0 4px;
+    }
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      vertical-align: middle;
+
+      @include mq(xs, max) {
+        font-size: 12px;
+        width: 12px;
+        height: 12px;
+        line-height: 12px;
+      }
+    }
+  }
+
+  textarea {
+    padding: 8px;
+    resize: none;
+    border: 0;
+    outline: none;
+    position: absolute;
+    background: transparent;
+    inset: 0;
+    color: inherit;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+    }
+  }
+}
+
+.msg {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+}
