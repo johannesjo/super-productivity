@@ -1,0 +1,37 @@
+// config.gradle
+
+// Load properties from the app_config.properties file
+ext.loadAppConfig = {
+    // Create a Properties object to hold the app configuration
+    def appConfig = new Properties()
+
+    // Locate the app_config.properties file in the project root
+    def appConfigFile = file("app_config.properties")
+
+    // If the properties file exists, load its contents
+    if (appConfigFile.exists()) {
+        appConfig.load(new FileInputStream(appConfigFile))
+    }
+
+    // Return the loaded properties
+    return appConfig
+}
+
+// Determine the build configuration fields based on the build type (Debug or Release)
+ext.getBuildConfigFields = { appConfig, isDebugBuild ->
+    // SERVICE_IS_LOCAL remains as a string for comparison
+    def serviceIsLocal = appConfig.getProperty("SERVICE_IS_LOCAL", "true")
+
+    // Set the service host based on the build type and whether it's running locally
+    def serviceHost = (serviceIsLocal == "true" && isDebugBuild) ? "10.0.2.2:4200" : appConfig.getProperty("SERVICE_HOST", "app.super-productivity.com")
+
+    // Set the protocol based on the build type and whether it's running locally
+    def serviceProtocol = (serviceIsLocal == "true" && isDebugBuild) ? "http" : appConfig.getProperty("SERVICE_PROTOCOL", "https")
+
+    // Return the configuration fields as a map
+    return [
+            SERVICE_IS_LOCAL: "\"${serviceIsLocal}\"",  // Keeping SERVICE_IS_LOCAL as a string
+            SERVICE_HOST: "\"${serviceHost}\"",
+            SERVICE_PROTOCOL: "\"${serviceProtocol}\""
+    ]
+}
