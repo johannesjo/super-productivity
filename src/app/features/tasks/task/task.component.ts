@@ -1,19 +1,17 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
-  HostBinding,
   HostListener,
-  Input,
+  input,
   OnDestroy,
-  OnInit,
   Renderer2,
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { EMPTY, forkJoin, of } from 'rxjs';
 import {
   ShowSubTasksMode,
   TaskCopy,
@@ -31,7 +29,6 @@ import {
   first,
   map,
   switchMap,
-  takeUntil,
   tap,
 } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -57,6 +54,7 @@ import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { PlannerService } from '../../planner/planner.service';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'task',
@@ -64,12 +62,55 @@ import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu
   styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation, swirlAnimation],
-})
-export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() isBacklog: boolean = false;
-  @Input() isInSubTaskList: boolean = false;
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  host: {
+    '[id]': 'taskIdWithPrefix()',
+    '[tabindex]': '1',
+    '[class.isDone]': 'task().isDone',
+    '[class.isCurrent]': 'isCurrent()',
+    '[class.isSelected]': 'isSelected()',
+    '[class.hasNoSubTasks]': 'task().subTaskIds.length === 0',
+  },
 
-  task!: TaskWithSubTasks;
+  /* eslint-enable @typescript-eslint/naming-convention*/
+})
+export class TaskComponent implements OnDestroy, AfterViewInit {
+  task = input.required<TaskWithSubTasks>();
+  isBacklog = input<boolean>(false);
+  isInSubTaskList = input<boolean>(false);
+
+  // computed
+  currentId = toSignal(this._taskService.currentTaskId$);
+  isCurrent = computed(() => this.currentId() === this.task().id);
+  selectedId = toSignal(this._taskService.selectedTaskId$);
+  isSelected = computed(() => this.selectedId() === this.task().id);
+
+  isTodayListActive = computed(() => this.workContextService.isToday);
+  isTodayTag = computed(() => this.task().tagIds.includes(TODAY_TAG.id));
+  taskIdWithPrefix = computed(() => 't-' + this.task().id);
+  isRepeatTaskCreatedToday = computed(
+    () => !!(this.task().repeatCfgId && isToday(this.task().created)),
+  );
+  isShowRemoveFromToday = computed(() => {
+    const t = this.task();
+    return !!(
+      !t.isDone &&
+      this.isTodayTag() &&
+      (t.projectId || t.tagIds?.length > 1 || t.parentId)
+    );
+  });
+  isShowAddToToday = computed(() => {
+    return (
+      !this.isShowRemoveFromToday() &&
+      !(this.task().parentId && this.workContextService.isToday) &&
+      !this.isTodayTag()
+    );
+  });
+  progress = computed<number>(() => {
+    const t = this.task();
+    return (t.timeEstimate && (t.timeSpent / t.timeEstimate) * 100) || 0;
+  });
+
   T: typeof T = T;
   IS_TOUCH_PRIMARY: boolean = IS_TOUCH_PRIMARY;
   isDragOver: boolean = false;
@@ -78,55 +119,39 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isPreventPointerEventsWhilePanning: boolean = false;
   isActionTriggered: boolean = false;
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
-  progress: number = 0;
-  isTodayTag: boolean = false;
-  isShowAddToToday: boolean = false;
-  isShowRemoveFromToday: boolean = false;
+  isFirstLineHover: boolean = false;
 
   @ViewChild('taskTitleEditEl', { static: true }) taskTitleEditEl?: ElementRef;
   @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
   @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
   @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
-  // only works because item comes first in dom
-
   @ViewChild('projectMenuTriggerEl', { static: false, read: MatMenuTrigger })
   projectMenuTrigger?: MatMenuTrigger;
-
   @ViewChild('taskContextMenu', { static: true, read: TaskContextMenuComponent })
   taskContextMenu?: TaskContextMenuComponent;
 
-  @HostBinding('tabindex') tabIndex: number = 1;
-  @HostBinding('class.isDone') isDone: boolean = false;
-  @HostBinding('id') taskIdWithPrefix: string = 'NO';
-  // @see ngOnInit
-  @HostBinding('class.isCurrent') isCurrent: boolean = false;
-  @HostBinding('class.isSelected') isSelected: boolean = false;
-  @HostBinding('class.hasNoSubTasks') hasNoSubTasks: boolean = true;
+  private _task$ = toObservable(this.task);
 
-  private _task$: ReplaySubject<TaskWithSubTasks> = new ReplaySubject(1);
-
-  moveToProjectList$: Observable<Project[]> = this._task$.pipe(
-    map((t) => t.projectId),
-    distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
-  );
-
-  parentTask$: Observable<TaskCopy | null> = this._task$.pipe(
-    switchMap((task) =>
-      task.parentId ? this._taskService.getByIdLive$(task.parentId) : of(null),
+  moveToProjectList = toSignal(
+    this._task$.pipe(
+      map((t) => t.projectId),
+      distinctUntilChanged(),
+      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
     ),
   );
-  parentTitle$: Observable<string | null> = this.parentTask$.pipe(
-    map((task) => task && task.title),
-  );
 
-  isFirstLineHover: boolean = false;
-  isRepeatTaskCreatedToday: boolean = false;
+  parentTask = toSignal(
+    this._task$.pipe(
+      switchMap((task) =>
+        task.parentId ? this._taskService.getByIdLive$(task.parentId) : of(null),
+      ),
+    ),
+  );
+  parentTitle = computed(() => this.parentTask()?.title ?? null);
 
   private _dragEnterTarget?: HTMLElement;
-  private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
-  private _isTaskDeleteTriggered: boolean = false;
+  private _isTaskDeleteTriggered = false;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -137,60 +162,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _elementRef: ElementRef,
     private readonly _snackService: SnackService,
     private readonly _renderer: Renderer2,
-    private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly plannerService: PlannerService,
     public readonly workContextService: WorkContextService,
   ) {}
 
-  @Input('task') set taskSet(v: TaskWithSubTasks) {
-    this.task = v;
-
-    this.progress = v && v.timeEstimate && (v.timeSpent / v.timeEstimate) * 100;
-    this.taskIdWithPrefix = 't-' + this.task.id;
-    this.isDone = v.isDone;
-    this.hasNoSubTasks = !v.subTaskIds.length;
-    this.isRepeatTaskCreatedToday = !!(this.task.repeatCfgId && isToday(v.created));
-
-    const isTodayTag = v.tagIds.includes(TODAY_TAG.id);
-
-    this.isShowRemoveFromToday = !!(
-      !v.isDone &&
-      isTodayTag &&
-      (v.projectId || v.tagIds?.length > 1 || v.parentId)
-    );
-
-    this.isShowAddToToday =
-      !this.isShowRemoveFromToday &&
-      !(v.parentId && this.workContextService.isToday) &&
-      !isTodayTag;
-
-    this._task$.next(v);
-  }
-
   // methods come last
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     this._handleKeyboardShortcuts(ev);
   }
-
-  // @HostListener('focus', ['$event']) onFocus(ev: Event): void {
-  //   if (this._currentFocusId !== this.task.id && ev.target === this._elementRef.nativeElement) {
-  //     this._taskService.focusTask(this.task.id);
-  //     this._currentFocusId = this.task.id;
-  //   }
-  // }
-  //
-  // @HostListener('blur', ['$event']) onBlur(ev: Event): void {
-  //   // console.log('BLUR', this._currentFocusId, this.task.id);
-  //
-  //   //  @TODO replace: hacky way to wait for last update
-  //   setTimeout(() => {
-  //     if (this._currentFocusId === this.task.id) {
-  //       this._taskService.focusTask(null);
-  //       this._currentFocusId = null;
-  //     }
-  //   });
-  // }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
     this._dragEnterTarget = ev.target as HTMLElement;
@@ -209,44 +189,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
     this.focusSelf();
-    this._attachmentService.createFromDrop(ev, this.task.id);
+    this._attachmentService.createFromDrop(ev, this.task().id);
     ev.stopPropagation();
     this.isDragOver = false;
   }
 
-  ngOnInit(): void {
-    this._taskService.currentTaskId$.pipe(takeUntil(this._destroy$)).subscribe((id) => {
-      this.isCurrent = this.task && id === this.task.id;
-      this._cd.markForCheck();
-    });
-    this._taskService.selectedTaskId$.pipe(takeUntil(this._destroy$)).subscribe((id) => {
-      this.isSelected = this.task && id === this.task.id;
-      this._cd.markForCheck();
-    });
-  }
-
   ngAfterViewInit(): void {
-    // this.openContextMenu(new Event('click') as any);
-    // this._taskService.focusTaskId$
-    //   .pipe(
-    //     takeUntil(this._destroy$),
-    //   )
-    //   .subscribe((id) => {
-    //     if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
-    //       this.focusSelfElement();
-    //     }
-    //   });
-
     // hacky but relatively performant
-    if (
-      this.task.parentId &&
-      Date.now() - 200 < this.task.created &&
-      !this.task.title.length
-    ) {
+    const t = this.task();
+    if (t.parentId && !t.title.length && Date.now() - 200 < t.created) {
       setTimeout(() => {
         // when there are multiple instances with the same task we should focus the last one, since it is the one in the
         // task side panel
-        const otherTaskEl = document.querySelectorAll('#t-' + this.task.id);
+        const otherTaskEl = document.querySelectorAll('#t-' + t.id);
         if (
           otherTaskEl?.length <= 1 ||
           Array.from(otherTaskEl).findIndex(
@@ -261,8 +216,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this._destroy$.next(true);
-    this._destroy$.unsubscribe();
     window.clearTimeout(this._currentPanTimeout);
   }
 
@@ -271,7 +224,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
         autoFocus: false,
-        data: { task: this.task },
+        data: { task: this.task() },
       })
       .afterClosed()
       // .pipe(takeUntil(this._destroy$))
@@ -288,11 +241,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._matDialog
       .open(DialogEditTaskRepeatCfgComponent, {
         data: {
-          task: this.task,
+          task: this.task(),
         },
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusSelf());
   }
 
@@ -308,11 +260,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this._isTaskDeleteTriggered = true;
-    this._taskService.remove(this.task);
+    this._taskService.remove(this.task());
   }
 
   startTask(): void {
-    this._taskService.setCurrentId(this.task.id);
+    this._taskService.setCurrentId(this.task().id);
     this.focusSelf();
   }
 
@@ -328,7 +280,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     wasChanged: boolean;
   }): void {
     if (wasChanged) {
-      this._taskService.update(this.task.id, { title: newVal });
+      this._taskService.update(this.task().id, { title: newVal });
     }
     this.focusSelf();
   }
@@ -336,11 +288,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   estimateTime(): void {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
-        data: { task: this.task },
+        data: { task: this.task() },
         autoFocus: !IS_TOUCH_PRIMARY,
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusSelf());
   }
 
@@ -350,17 +301,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         data: {},
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe((result) => {
         if (result) {
-          this._attachmentService.addAttachment(this.task.id, result);
+          this._attachmentService.addAttachment(this.task().id, result);
         }
         this.focusSelf();
       });
   }
 
   addSubTask(): void {
-    this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
+    this._taskService.addSubTaskTo(this.task().parentId || this.task().id);
   }
 
   @throttle(200, { leading: true, trailing: false })
@@ -371,28 +321,28 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleTaskDone(): void {
     this.focusNext(true, true);
 
-    if (this.task.isDone) {
-      this._taskService.setUnDone(this.task.id);
+    if (this.task().isDone) {
+      this._taskService.setUnDone(this.task().id);
     } else {
-      this._taskService.setDone(this.task.id);
+      this._taskService.setDone(this.task().id);
     }
   }
 
   showDetailPanel(): void {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId(this.task().id);
     this.focusSelf();
   }
 
   hideDetailPanel(): void {
-    this._taskService.setSelectedId(this.task.id);
+    this._taskService.setSelectedId(this.task().id);
     this.focusSelf();
   }
 
   toggleShowDetailPanel(ev?: MouseEvent): void {
-    if (this.isSelected) {
+    if (this.isSelected()) {
       this._taskService.setSelectedId(null);
     } else {
-      this._taskService.setSelectedId(this.task.id);
+      this._taskService.setSelectedId(this.task().id);
     }
     if (ev) {
       ev.preventDefault();
@@ -401,19 +351,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAttachments(): void {
-    this._taskService.setSelectedId(this.task.id, TaskDetailTargetPanel.Attachments);
+    this._taskService.setSelectedId(this.task().id, TaskDetailTargetPanel.Attachments);
     this.focusSelf();
   }
 
   toggleSubTaskMode(): void {
-    this._taskService.toggleSubTaskMode(this.task.id, true, true);
+    this._taskService.toggleSubTaskMode(this.task().id, true, true);
     this.focusSelf();
   }
 
   async editTags(): Promise<void> {
-    const taskToEdit = this.task.parentId
-      ? await this._taskService.getByIdOnce$(this.task.parentId).toPromise()
-      : this.task;
+    const pId = this.task().parentId;
+    const taskToEdit = pId
+      ? await this._taskService.getByIdOnce$(pId).toPromise()
+      : this.task();
     this._matDialog
       .open(DialogEditTagsForTaskComponent, {
         data: {
@@ -421,20 +372,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         },
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusSelf());
   }
 
   addToMyDay(): void {
-    this._taskService.addTodayTag(this.task);
+    this._taskService.addTodayTag(this.task());
   }
 
   removeFromMyDay(): void {
-    this.onTagsUpdated(this.task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
+    this.onTagsUpdated(this.task().tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
   }
 
   convertToMainTask(): void {
-    this._taskService.convertToMainTask(this.task);
+    this._taskService.convertToMainTask(this.task());
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
@@ -481,7 +431,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       ? (() => {
           // if a parent task is moved in list, as it is for when toggling done,
           // we don't want to focus the next sub-task, but the next main task instead
-          if (this.task.subTaskIds.length) {
+          if (this.task().subTaskIds.length) {
             return taskEls.find((el, i) => {
               return i > currentIndex && el.parentElement?.closest('task');
             }) as HTMLElement | undefined;
@@ -509,7 +459,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.focusSelfElement();
-    // this._taskService.focusTask(this.task.id);
+    // this._taskService.focusTask(this.task().id);
   }
 
   focusSelfElement(): void {
@@ -531,7 +481,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTagsUpdated(tagIds: string[]): void {
-    this._taskService.updateTags(this.task, tagIds);
+    this._taskService.updateTags(this.task(), tagIds);
   }
 
   onPanStart(ev: any): void {
@@ -584,16 +534,16 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         );
         this._currentPanTimeout = window.setTimeout(() => {
           if (this.workContextService.isToday) {
-            if (this.task.repeatCfgId) {
+            if (this.task().repeatCfgId) {
               this.editTaskRepeatCfg();
             } else {
               this.scheduleTask();
             }
           } else {
-            if (this.task.parentId) {
+            if (this.task().parentId) {
               // NOTHING
             } else {
-              if (this.task.tagIds.includes(TODAY_TAG.id)) {
+              if (this.task().tagIds.includes(TODAY_TAG.id)) {
                 this.removeFromMyDay();
               } else {
                 this.addToMyDay();
@@ -628,26 +578,23 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // TODO extract so service
   moveTaskToProject(projectId: string): void {
-    if (projectId === this.task.projectId) {
+    const t = this.task();
+    if (projectId === t.projectId) {
       return;
-    } else if (this.task.issueId && this.task.issueType !== 'CALENDAR') {
+    } else if (t.issueId && t.issueType !== 'CALENDAR') {
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'block',
         msg: T.F.TASK.S.MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK,
       });
       return;
-    } else if (!this.task.repeatCfgId) {
-      this._taskService.moveToProject(this.task, projectId);
+    } else if (!t.repeatCfgId) {
+      this._taskService.moveToProject(t, projectId);
     } else {
       forkJoin([
-        this._taskRepeatCfgService
-          .getTaskRepeatCfgById$(this.task.repeatCfgId)
-          .pipe(first()),
-        this._taskService
-          .getTasksWithSubTasksByRepeatCfgId$(this.task.repeatCfgId)
-          .pipe(first()),
-        this._taskService.getArchiveTasksForRepeatCfgId(this.task.repeatCfgId),
+        this._taskRepeatCfgService.getTaskRepeatCfgById$(t.repeatCfgId).pipe(first()),
+        this._taskService.getTasksWithSubTasksByRepeatCfgId$(t.repeatCfgId).pipe(first()),
+        this._taskService.getArchiveTasksForRepeatCfgId(t.repeatCfgId),
         this._projectService.getByIdOnce$(projectId),
       ])
         .pipe(
@@ -672,7 +619,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
                 this._taskRepeatCfgService.updateTaskRepeatCfg(reminderCfg.id, {
                   projectId,
                 });
-                this._taskService.moveToProject(this.task, projectId);
+                this._taskService.moveToProject(this.task(), projectId);
                 return EMPTY;
               }
 
@@ -726,17 +673,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveToBacklog(): void {
-    if (this.task.projectId && !this.task.parentId) {
-      this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
-      if (this.task.tagIds.includes(TODAY_TAG.id)) {
+    const t = this.task();
+    if (t.projectId && !t.parentId) {
+      this._projectService.moveTaskToBacklog(t.id, t.projectId);
+      if (t.tagIds.includes(TODAY_TAG.id)) {
         this.removeFromMyDay();
       }
     }
   }
 
   moveToToday(): void {
-    if (this.task.projectId && !this.task.parentId) {
-      this._projectService.moveTaskToTodayList(this.task.id, this.task.projectId);
+    const t = this.task();
+    if (t.projectId && !t.parentId) {
+      this._projectService.moveTaskToTodayList(t.id, t.projectId);
       this.addToMyDay();
     }
   }
@@ -761,7 +710,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    //  (this.taskTitleEditEl as any).textarea.nativeElement.blur();
+    //  (this.task()TitleEditEl as any).textarea.nativeElement.blur();
     if (targetRef) {
       let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
@@ -818,6 +767,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    const t = this.task();
     const cfg = this._configService.cfg;
     if (!cfg) {
       throw new Error();
@@ -848,7 +798,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (checkKeyCombo(ev, keys.taskAddAttachment)) {
       this.addAttachment();
     }
-    if (!this.task.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
+    if (!t.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
       if (!this.projectMenuTrigger) {
         throw new Error('No el');
       }
@@ -862,7 +812,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
-      if (this.isCurrent) {
+      if (this.isCurrent()) {
         this.pauseTask();
       } else {
         this.startTask();
@@ -875,8 +825,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.deleteTask();
     }
 
-    if (checkKeyCombo(ev, keys.moveToBacklog) && this.task.projectId) {
-      if (!this.task.parentId) {
+    if (checkKeyCombo(ev, keys.moveToBacklog) && t.projectId) {
+      if (!t.parentId) {
         ev.preventDefault();
         // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
@@ -885,8 +835,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    if (checkKeyCombo(ev, keys.moveToTodaysTasks) && this.task.projectId) {
-      if (!this.task.parentId) {
+    if (checkKeyCombo(ev, keys.moveToTodaysTasks) && t.projectId) {
+      if (!t.parentId) {
         ev.preventDefault();
         // same default shortcut as schedule so we stop propagation
         ev.stopPropagation();
@@ -897,14 +847,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // collapse sub tasks
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      const hasSubTasks = this.task.subTasks && (this.task.subTasks as any).length > 0;
-      if (this.isSelected) {
+      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      if (this.isSelected()) {
         this.hideDetailPanel();
-      } else if (
-        hasSubTasks &&
-        this.task._showSubTasksMode !== ShowSubTasksMode.HideAll
-      ) {
-        this._taskService.toggleSubTaskMode(this.task.id, true, false);
+      } else if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+        this._taskService.toggleSubTaskMode(t.id, true, false);
         // TODO find a solution
         // } else if (this.task.parentId) {
         // this._taskService.focusTask(this.task.parentId);
@@ -915,9 +862,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
-      const hasSubTasks = this.task.subTasks && (this.task.subTasks as any).length > 0;
-      if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
-        this._taskService.toggleSubTaskMode(this.task.id, false, false);
+      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.Show) {
+        this._taskService.toggleSubTaskMode(t.id, false, false);
       } else if (!this.isSelected) {
         this.showDetailPanel();
       } else {
@@ -928,7 +875,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // moving items
     // move task up
     if (checkKeyCombo(ev, keys.moveTaskUp)) {
-      this._taskService.moveUp(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveUp(t.id, t.parentId, this.isBacklog());
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
@@ -938,7 +885,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
-      this._taskService.moveDown(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveDown(t.id, t.parentId, this.isBacklog());
       // timeout required to let changes take place @TODO hacky
       setTimeout(this.focusSelf.bind(this));
       setTimeout(this.focusSelf.bind(this), 10);
@@ -948,7 +895,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.moveTaskToTop)) {
-      this._taskService.moveToTop(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveToTop(t.id, t.parentId, this.isBacklog());
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
@@ -958,7 +905,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.moveTaskToBottom)) {
-      this._taskService.moveToBottom(this.task.id, this.task.parentId, this.isBacklog);
+      this._taskService.moveToBottom(t.id, t.parentId, this.isBacklog());
       ev.stopPropagation();
       ev.preventDefault();
       // timeout required to let changes take place @TODO hacky
