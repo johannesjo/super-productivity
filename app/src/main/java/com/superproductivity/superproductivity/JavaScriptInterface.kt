@@ -156,12 +156,19 @@ class JavaScriptInterface(
             0
         }
         val pendingIntent = PendingIntent.getActivity(activity, 0, ii, pendingIntentFlags)
+
+        // Title
+        mBuilder.setContentTitle(title)
         val bigText: NotificationCompat.BigTextStyle = NotificationCompat.BigTextStyle()
         bigText.setBigContentTitle(title)
+
+        // Body
         if (body.isNotEmpty() && body.trim() != "undefined") {
+            mBuilder.setContentText(body)
             bigText.bigText(body)
         }
 
+        mBuilder.setStyle(bigText)
         mBuilder.setContentIntent(pendingIntent)
         mBuilder.setSmallIcon(R.mipmap.ic_launcher)
         mBuilder.setLargeIcon(
@@ -171,7 +178,6 @@ class JavaScriptInterface(
         )
         mBuilder.setSmallIcon(R.drawable.ic_stat_sp)
         mBuilder.priority = Notification.PRIORITY_MAX
-        mBuilder.setStyle(bigText)
         mBuilder.setAutoCancel(true)
 
         val mNotificationManager =
