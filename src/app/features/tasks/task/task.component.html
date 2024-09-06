@@ -41,7 +41,6 @@
 
   <div class="box"></div>
 
-  <!-- TODO only bind pan, longPress etc when touch is available-->
   <div
     (longPressIOS)="openContextMenu($event)"
     (contextmenu)="openContextMenu($event)"
@@ -190,86 +189,14 @@
       </div>
 
       <div class="controls">
-        <div
+        <task-hover-controls
           *ngIf="isFirstLineHover && !IS_TOUCH_PRIMARY"
+          [isShowAddToToday]="isShowAddToToday()"
+          [task]="task()"
+          [isCurrent]="isCurrent()"
+          [isSelected]="isSelected()"
           class="hover-controls"
-        >
-          <button
-            (click)="startTask()"
-            *ngIf="!task().isDone && !isCurrent() && !task().subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
-            class="ico-btn start-task-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon
-              class="play-icon"
-              svgIcon="play"
-            ></mat-icon>
-          </button>
-
-          <button
-            (click)="pauseTask()"
-            *ngIf="!task().isDone && isCurrent() && !task().subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME_STOP|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
-            class="ico-btn"
-            color="accent"
-            mat-icon-button
-          >
-            <mat-icon>pause</mat-icon>
-          </button>
-
-          <button
-            (click)="addToMyDay()"
-            *ngIf="isShowAddToToday()"
-            title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{kb.moveToTodaysTasks?'['+kb.moveToTodaysTasks+']':''}}"
-            class="ico-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon>wb_sunny</mat-icon>
-          </button>
-
-          <button
-            (click)="removeFromMyDay()"
-            *ngIf="isShowRemoveFromToday()"
-            [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
-            class="ico-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon svgIcon="remove_today"></mat-icon>
-          </button>
-
-          <button
-            *ngIf="!task().isDone"
-            (click)="toggleTaskDone()"
-            title="{{T.F.TASK.CMP.TOGGLE_DONE|translate}} {{kb.taskToggleDone?'['+kb.taskToggleDone+']':''}}"
-            class="ico-btn task-done-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon>check</mat-icon>
-          </button>
-
-          <button
-            (click)="toggleShowDetailPanel()"
-            *ngIf="!task().notes && (!task().issueId||task().issueType==='CALENDAR') && !isSelected()"
-            title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
-            class="ico-btn show-additional-info-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon *ngIf="!task().issueWasUpdated">&#xe949;</mat-icon>
-            <!--            <mat-icon *ngIf="!task().issueWasUpdated">toc</mat-icon>-->
-            <!--            <mat-icon *ngIf="!task().issueWasUpdated">chevron_right</mat-icon>-->
-            <mat-icon
-              *ngIf="task().issueWasUpdated"
-              color="accent"
-              >update
-            </mat-icon>
-          </button>
-        </div>
+        ></task-hover-controls>
 
         <button
           (click)="toggleShowAttachments()"
@@ -375,7 +302,7 @@
     class="bgc-accent drag-over-msg"
   >
     <mat-icon>add</mat-icon>
-    {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{ title: task().title } }}
+    {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task().title} }}
   </div>
 </div>
 
