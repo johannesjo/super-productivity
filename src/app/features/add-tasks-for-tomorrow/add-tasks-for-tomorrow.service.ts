@@ -61,17 +61,7 @@ export class AddTasksForTomorrowService {
     private _plannerService: PlannerService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _store: Store,
-  ) {
-    this.allPlannedForTodayNotOnToday$.subscribe((v) =>
-      console.log(`allPlannedForTodayNotOnToday$`, v),
-    );
-    this.nrOfPlannerItemsForTomorrow$.subscribe((v) =>
-      console.log(`nrOfPlannerItemsForTomorrow$`, v),
-    );
-    this.repeatableScheduledForTomorrow$.subscribe((v) =>
-      console.log(`repeatableScheduledForTomorrow$`, v),
-    );
-  }
+  ) {}
 
   async addAllPlannedToDayAndCreateRepeatable(): Promise<void> {
     const dayData = await this._plannerService.plannerDayForAllDueTomorrow$

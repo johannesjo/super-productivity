@@ -2,32 +2,37 @@
   [style.background]="workContext().theme.primary"
   class="color-bar"
 ></div>
+
 <button
   #routeBtn
   [routerLink]="[type() ==='TAG' ? 'tag' :'project', workContext().id, 'tasks']"
   routerLinkActive="isActiveRoute"
   mat-menu-item
-  contextMenu
-  [matMenuTriggerFor]="contextMenuEl"
 >
   <span class="badge">{{ workContext().taskIds.length }}</span>
   <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
   <span class="text">{{ workContext().title }}</span>
 </button>
 
+<!--[matMenuTriggerFor]="contextMenuEl"-->
+
 <button
-  [matMenuTriggerFor]="contextMenuEl"
+  #settingsBtn
   class="settings-btn"
   mat-icon-button
 >
   <mat-icon>more_vert</mat-icon>
 </button>
 
-<mat-menu #contextMenuEl="matMenu">
-  <ng-template matMenuContent>
-    <work-context-menu
-      [contextId]="workContext().id"
-      [contextType]="type()"
-    ></work-context-menu>
-  </ng-template>
-</mat-menu>
+<context-menu
+  [contextMenu]="contextMenu"
+  [rightClickTriggerEl]="routeBtn"
+  [leftClickTriggerEl]="settingsBtn"
+></context-menu>
+
+<ng-template #contextMenu>
+  <work-context-menu
+    [contextId]="workContext().id"
+    [contextType]="type()"
+  ></work-context-menu
+></ng-template>

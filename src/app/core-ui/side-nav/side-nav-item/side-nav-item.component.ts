@@ -15,6 +15,7 @@ import {
 } from '../../../features/work-context/work-context.model';
 import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
+import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 
 @Component({
   selector: 'side-nav-item',
@@ -24,7 +25,7 @@ import { WorkContextMenuComponent } from '../../work-context-menu/work-context-m
     UiModule,
     RouterModule,
     WorkContextMenuComponent,
-    // ContextMenuDirective,
+    ContextMenuComponent,
   ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',
