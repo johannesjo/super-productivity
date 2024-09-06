@@ -1,5 +1,5 @@
 <div
-  *ngIf="isHideDoneIN || isHideAllIN"
+  *ngIf="isHideDone() || isHideAll()"
   @expandFadeFast
   class="done-task-box"
 >
@@ -9,31 +9,33 @@
     mat-button
   >
     <!--TODO translate -->
-    <em>+ {{isHideDoneIN ? doneTasksLength + ' done ' : allTasksLength}} sub tasks</em>
+    <em
+      >+ {{ isHideDone() ? doneTasksLength() + ' done ' : allTasksLength() }} sub
+      tasks</em
+    >
     <mat-icon>expand_more</mat-icon>
   </button>
 </div>
 
 <div
-  #listEl
-  [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks?.length"
-  [attr.data-id]="listModelId"
-  [dragulaModel]="filteredTasks"
-  [dragula]="listId"
+  [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks()?.length"
+  [attr.data-id]="listModelId()"
+  [dragulaModel]="filteredTasks()"
+  [dragula]="listId()"
   class="task-list-inner"
 >
   <task
-    *ngFor="let task of filteredTasks; trackBy: trackByFn; let i = index;"
-    [isInSubTaskList]="isSubTaskList"
-    [isBacklog]="isBacklog"
+    *ngFor="let task of filteredTasks(); trackBy: trackByFn; let i = index;"
+    [isInSubTaskList]="isSubTaskList()"
+    [isBacklog]="isBacklog()"
     [task]="task"
   >
   </task>
 </div>
 
 <div
-  *ngIf="noTasksMsg && !allTasksLength"
+  *ngIf="noTasksMsg() && !allTasksLength()"
   class="no-tasks"
 >
-  {{noTasksMsg}}
+  {{ noTasksMsg() }}
 </div>
