@@ -48,7 +48,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
   T: typeof T = T;
-  minDate = new Date().toISOString();
+  minDate = new Date();
   @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
@@ -110,7 +110,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
       this.selectedDate =
         this.plannedDayForTask ||
-        (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+        (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date() : null);
     }
 
     console.log(this.selectedDate);
@@ -247,7 +247,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       } else {
         // get current time +1h
         this.selectedTime = getClockStringFromHours(new Date().getHours() + 1);
-        this.selectedDate = new Date().toISOString();
+        this.selectedDate = new Date();
       }
     }
   }
@@ -268,7 +268,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         getDateTimeFromClockString(this.selectedTime, this.selectedDate as Date),
       );
 
-      const isTodayI = new Date().toDateString() === newDate.toDateString();
+      const isTodayI = isToday(newDate);
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
@@ -314,41 +314,25 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     switch (item) {
       case 0:
-        this.selectedDate = tDate.toISOString();
+        this.selectedDate = tDate;
         break;
       case 1:
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
-        this.selectedDate = tomorrow.toISOString();
+        this.selectedDate = tomorrow;
         break;
       case 2:
         const nextMonday = tDate;
         nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this.selectedDate = nextMonday.toISOString();
+        this.selectedDate = nextMonday;
         break;
       case 3:
         const nextMonth = tDate;
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        this.selectedDate = nextMonth.toISOString();
+        this.selectedDate = nextMonth;
         break;
     }
-    // console.log(
-    //   this._prevSelectedQuickAccessDate &&
-    //     this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate,
-    //   this._prevSelectedQuickAccessDate &&
-    //     this._prevSelectedQuickAccessDate.toISOString(),
-    //   this.selectedDate,
-    // );
 
-    // if (
-    //   this._prevSelectedQuickAccessDate &&
-    //   this._prevQuickAccessAction === item &&
-    //   this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate
-    // ) {
     this.submit();
-    // }
-
-    // this._prevSelectedQuickAccessDate = new Date(this.selectedDate as string);
-    // this._prevQuickAccessAction = item;
   }
 }

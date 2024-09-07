@@ -62,6 +62,7 @@ import { updateTaskTags } from '../../store/task.actions';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { FocusModeService } from '../../../focus-mode/focus-mode.service';
+import { isToday } from '../../../../util/is-today.util';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -489,28 +490,28 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     tDate.setMinutes(0, 0, 0);
     switch (item) {
       case 0:
-        this._schedule(tDate.toISOString());
+        this._schedule(tDate);
         break;
       case 1:
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
-        this._schedule(tomorrow.toISOString());
+        this._schedule(tomorrow);
         break;
       case 2:
         const nextMonday = tDate;
         nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this._schedule(nextMonday.toISOString());
+        this._schedule(nextMonday);
         break;
       case 3:
         const nextMonth = tDate;
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        this._schedule(nextMonth.toISOString());
+        this._schedule(nextMonth);
         break;
     }
     // this.submit();
   }
 
-  private _schedule(selectedDate: string): void {
+  private _schedule(selectedDate: Date): void {
     if (!selectedDate) {
       console.warn('no selected date');
       return;
@@ -524,7 +525,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       const task = this.task;
       const newDate = combineDateAndTime(new Date(this.task.plannedAt), newDayDate);
 
-      const isTodayI = new Date().toDateString() === newDate.toDateString();
+      const isTodayI = isToday(newDate);
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
