@@ -28,6 +28,20 @@
               ></mat-icon>
             </span>
           </div>
+          <div *ngIf="(workContextService.isActiveWorkContextProject$|async)">
+            <div class="item">
+              <span class="label">{{T.WW.TODAY_REMAINING|translate}}</span>
+              <span class="no-wrap">
+                ~<strong class="time-val"
+                  >{{workContextService.todayRemainingInProject$|async|msToString}}</strong
+                >
+                <mat-icon
+                  style="margin-left: 2px"
+                  svgIcon="estimate_remaining"
+                ></mat-icon>
+              </span>
+            </div>
+          </div>
 
           <div class="item">
             <span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
