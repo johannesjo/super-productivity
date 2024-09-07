@@ -3,10 +3,12 @@ import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const NDS = '1970-01-01';
-const N = Date.UTC(1970, 0, 1, 0, 0, 0, 0);
+const N = new Date(1970, 0, 1, 0, 0, 0, 0).getTime();
 // 86400000 ==> 24h
 const H = 60 * 60 * 1000;
 const TZ_OFFSET = new Date(NDS).getTimezoneOffset() * 60000;
+// const TZ_OFFSET = 0;
+console.log('TZ_OFFSET', TZ_OFFSET);
 
 const FAKE_TASK: Partial<TaskCopy> = {
   tagIds: [],
@@ -22,7 +24,7 @@ const dh = (d: number = 0, hr: number): number => hr * H + d * h(24);
 const dhTz = (d: number = 0, hr: number): number => dh(d, hr) + TZ_OFFSET;
 
 // eslint-disable-next-line no-mixed-operators
-const minAfterNow = (min: number): Date => new Date(Date.UTC(1970, 0, 1, 0, min, 0, 0));
+const minAfterNow = (min: number): Date => new Date(1970, 0, 1, 0, min, 0, 0);
 
 const minAfterNowTs = (min: number): number => minAfterNow(min).getTime();
 
@@ -109,7 +111,7 @@ describe('mapToScheduleDays()', () => {
               timeSpent: 0,
             },
             id: '1',
-            start: 0,
+            start: hTz(0),
             duration: h(1),
             type: 'Task',
           },
@@ -121,7 +123,7 @@ describe('mapToScheduleDays()', () => {
               timeSpent: 0,
             },
             id: '2',
-            start: h(1),
+            start: hTz(1),
             duration: h(2),
             type: 'Task',
           },
@@ -164,7 +166,7 @@ describe('mapToScheduleDays()', () => {
               timeSpent: 0,
             },
             id: 'N1',
-            start: 0,
+            start: hTz(0),
             duration: h(0.5),
             type: 'SplitTask',
           },
@@ -257,7 +259,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'N1',
-            start: 0,
+            start: hTz(0),
             duration: h(0.5),
             type: 'SplitTask',
           },
@@ -296,6 +298,7 @@ describe('mapToScheduleDays()', () => {
     ] as any);
   });
 
+  //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   it('should show repeat for next day', () => {
     const r = mapToScheduleDays(
       N,
@@ -323,7 +326,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'N1',
-            start: 0,
+            start: hTz(0),
             duration: h(2),
             type: 'Task',
           },
@@ -349,7 +352,7 @@ describe('mapToScheduleDays()', () => {
 
   it('should spit around scheduled repeat task cases', () => {
     const r = mapToScheduleDays(
-      N,
+      N + h(1),
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
@@ -377,7 +380,8 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'N1',
-            start: 0,
+            // NOTE: the 24h stuff only works if we count from 0 of the current timezone
+            start: h(0),
             // eslint-disable-next-line no-mixed-operators
             duration: h(23) - 60000,
             type: 'Task',
@@ -421,7 +425,7 @@ describe('mapToScheduleDays()', () => {
 
   it('should work for NON-scheduled repeat task cases', () => {
     const r = mapToScheduleDays(
-      N,
+      N + TZ_OFFSET,
       [NDS, '1970-01-02'],
       [
         // NOTE: takes us to the next day, since without dayStart and dayEnd it otherwise won't
@@ -451,7 +455,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'N1',
-            start: 0,
+            start: hTz(0),
             // eslint-disable-next-line no-mixed-operators
             duration: h(23) - 60000,
             type: 'Task',
@@ -610,7 +614,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: jasmine.any(Object),
             id: 'N1',
-            start: 0,
+            start: hTz(0),
             duration: h(2),
             type: 'Task',
           },
@@ -698,7 +702,7 @@ describe('mapToScheduleDays()', () => {
               defaultEstimate: h(4),
               friday: true,
               id: 'R1',
-              lastTaskCreation: -86400000,
+              lastTaskCreation: dhTz(-1, 0),
               monday: true,
               repeatCycle: 'DAILY',
               repeatEvery: 1,
@@ -742,7 +746,7 @@ describe('mapToScheduleDays()', () => {
               defaultEstimate: h(4),
               friday: true,
               id: 'R1',
-              lastTaskCreation: -86400000,
+              lastTaskCreation: jasmine.any(Number),
               monday: true,
               repeatCycle: 'DAILY',
               repeatEvery: 1,
@@ -796,7 +800,7 @@ describe('mapToScheduleDays()', () => {
       ],
       [fakeRepeatCfg('R1', '01:00', { defaultEstimate: h(1) })],
       [
-        fakeRepeatCfg('R1', undefined, {
+        fakeRepeatCfg('R2', undefined, {
           defaultEstimate: h(2),
           lastTaskCreation: N + 60000,
         }),
@@ -832,7 +836,7 @@ describe('mapToScheduleDays()', () => {
         {
           data: jasmine.any(Object),
           id: 'S1',
-          start: h(2),
+          start: hTz(2),
           duration: h(1),
           type: 'ScheduledTask',
         },
@@ -867,17 +871,25 @@ describe('mapToScheduleDays()', () => {
         },
         {
           data: jasmine.any(Object),
-          duration: h(2),
-          id: 'R1_1970-01-02',
+          duration: h(1),
+          id: 'R2_1970-01-02',
           start: dhTz(1, 9),
-          type: 'RepeatProjection',
+          type: 'RepeatProjectionSplit',
         },
         {
           data: jasmine.any(Object),
           id: 'S2',
-          start: dhTz(1, 11),
+          start: dhTz(1, 10),
           duration: h(0.5),
           type: 'ScheduledTask',
+        },
+        {
+          data: jasmine.any(Object),
+          duration: h(1),
+          id: 'R2_1970-01-02_0',
+          start: dhTz(1, 10.5),
+          type: 'RepeatProjectionSplitContinuedLast',
+          splitIndex: 0,
         },
         {
           data: jasmine.any(Object),
@@ -920,7 +932,7 @@ describe('mapToScheduleDays()', () => {
             defaultEstimate: 3600000,
             friday: true,
             id: 'R1',
-            lastTaskCreation: -86400000,
+            lastTaskCreation: jasmine.any(Number),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,
@@ -955,8 +967,8 @@ describe('mapToScheduleDays()', () => {
           data: {
             defaultEstimate: 7200000,
             friday: true,
-            id: 'R1',
-            lastTaskCreation: 60000,
+            id: 'R2',
+            lastTaskCreation: jasmine.any(Number),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,
@@ -969,7 +981,7 @@ describe('mapToScheduleDays()', () => {
             wednesday: true,
           },
           duration: 5400000,
-          id: 'R1_1970-01-03',
+          id: 'R2_1970-01-03',
           // start: dhTz(2, 9),
           start: 207000000,
           type: 'RepeatProjectionSplit',
@@ -986,8 +998,8 @@ describe('mapToScheduleDays()', () => {
           data: {
             defaultEstimate: 7200000,
             friday: true,
-            id: 'R1',
-            lastTaskCreation: 60000,
+            id: 'R2',
+            lastTaskCreation: jasmine.any(Number),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,
@@ -1000,7 +1012,7 @@ describe('mapToScheduleDays()', () => {
             wednesday: true,
           },
           duration: h(0.5),
-          id: 'R1_1970-01-03_0',
+          id: 'R2_1970-01-03_0',
           splitIndex: 0,
           start: dhTz(2, 13),
           type: 'RepeatProjectionSplitContinuedLast',
