@@ -140,13 +140,13 @@ mat-icon.mat-icon[svgicon] {
 
 .cdk-drag-preview {
   background: #fff !important;
-  box-shadow: $whiteframe-shadow-10dp;
+  box-shadow: $whiteframe-shadow-12dp;
   //cursor: grab;
   cursor: grabbing;
   //min-width: 200px;
 
   @include darkTheme(true) {
-    background: $dark3 !important;
+    background: $dark24 !important;
   }
 }
 

@@ -64,6 +64,12 @@
   }
 }
 
+:host-context(.cdk-drop-list-dragging) {
+  .color-bar {
+    opacity: 0 !important;
+  }
+}
+
 :host.isActiveContext button {
   font-weight: normal;
 

@@ -16,6 +16,7 @@ import {
 import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
+import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'side-nav-item',
@@ -26,6 +27,7 @@ import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.comp
     RouterModule,
     WorkContextMenuComponent,
     ContextMenuComponent,
+    CdkDragPlaceholder,
   ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',

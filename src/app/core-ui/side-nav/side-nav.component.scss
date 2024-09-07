@@ -155,6 +155,8 @@ section {
   display: flex;
   align-items: center;
   font-weight: bold;
+  font-size: 12px;
+  opacity: 0.7;
 
   &:focus,
   &:hover {
