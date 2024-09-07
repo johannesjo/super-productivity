@@ -90,18 +90,6 @@
 
   <button
     #menuEntry
-    *ngIf="isProjectsExpanded"
-    mat-menu-item
-    class="route-link"
-    routerLink="project-overview"
-    routerLinkActive="isActiveRoute"
-  >
-    <mat-icon>format_list_numbered_rtl</mat-icon>
-    <span class="text">{{ T.MH.MANAGE_PROJECTS|translate }}</span>
-  </button>
-
-  <button
-    #menuEntry
     (click)="addProject()"
     *ngIf="isProjectsExpanded"
     class="route-link"

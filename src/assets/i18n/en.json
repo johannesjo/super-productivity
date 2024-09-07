@@ -1562,7 +1562,6 @@
       "SYNC": "Howto: Configure Sync",
       "REDDIT_COMMUNITY": "Reddit Community"
     },
-    "MANAGE_PROJECTS": "Manage Projects",
     "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
     "HELP": "Help",
     "METRICS": "Metrics",
@@ -1623,35 +1622,6 @@
   },
   "PM": {
     "TITLE": "Project Metrics"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CLICK_TO_HIDE": "Click to hide project from menu",
-    "CLICK_TO_SHOW": "Click to show project in menu",
-    "DELETE_PROJECT": "Delete Project",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Delete"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
-    },
-    "EDIT_PROJECT": "Edit Project",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
