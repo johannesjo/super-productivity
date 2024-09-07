@@ -1,10 +1,11 @@
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 /* eslint-disable no-mixed-operators */
 
-const FAKE_MONDAY_THE_10TH = new Date('2022-01-10').getTime();
+const FAKE_MONDAY_THE_10TH = dateStrToUtcDate('2022-01-10').getTime();
 
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   ...DEFAULT_TASK_REPEAT_CFG,
@@ -68,41 +69,41 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
         }),
-        today: new Date('2022-02-11'),
-        startDate: new Date('2022-01-10'),
-        expectedDate: new Date('2022-02-11'),
+        today: dateStrToUtcDate('2022-02-11'),
+        startDate: dateStrToUtcDate('2022-01-10'),
+        expectedDate: dateStrToUtcDate('2022-02-11'),
       },
       {
         description: 'should return date if today is after due',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date('2022-01-14').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-14').getTime(),
         }),
-        startDate: new Date('2022-01-14'),
-        today: new Date('2022-03-14'),
-        expectedDate: new Date('2022-03-14'),
+        startDate: dateStrToUtcDate('2022-01-14'),
+        today: dateStrToUtcDate('2022-03-14'),
+        expectedDate: dateStrToUtcDate('2022-03-14'),
       },
       {
         description: 'should work for repeat every 1',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 3,
-          lastTaskCreation: new Date('2022-01-14').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-14').getTime(),
         }),
-        startDate: new Date('2022-01-14'),
-        today: new Date('2022-03-14'),
-        expectedDate: new Date('2022-03-12'),
+        startDate: dateStrToUtcDate('2022-01-14'),
+        today: dateStrToUtcDate('2022-03-14'),
+        expectedDate: dateStrToUtcDate('2022-03-12'),
       },
       {
         description: 'should return null if today and already created',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date('2022-01-14').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-14').getTime(),
         }),
-        today: new Date('2022-01-14'),
-        startDate: new Date('2022-01-14'),
+        today: dateStrToUtcDate('2022-01-14'),
+        startDate: dateStrToUtcDate('2022-01-14'),
         expectedDate: null,
       },
       {
@@ -110,10 +111,10 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 5,
-          lastTaskCreation: new Date('2022-01-15').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-15').getTime(),
         }),
-        today: new Date('2022-01-17'),
-        startDate: new Date('2022-01-10'),
+        today: dateStrToUtcDate('2022-01-17'),
+        startDate: dateStrToUtcDate('2022-01-10'),
         expectedDate: null,
       },
     ];
@@ -134,84 +135,84 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
           monday: true,
         }),
-        today: new Date('2022-01-17'),
-        startDate: new Date('2022-01-10'),
-        expectedDate: new Date('2022-01-17'),
+        today: dateStrToUtcDate('2022-01-17'),
+        startDate: dateStrToUtcDate('2022-01-10'),
+        expectedDate: dateStrToUtcDate('2022-01-17'),
       },
       {
         // 1-10-22 is a monday
         description: 'should return null if no weekday is set',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
         }),
-        today: new Date('2022-01-17'),
-        startDate: new Date('2022-01-10'),
+        today: dateStrToUtcDate('2022-01-17'),
+        startDate: dateStrToUtcDate('2022-01-10'),
         expectedDate: null,
       },
       {
         description: 'should work also if there is a weird lastTaskCreation date',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date('2022-01-16').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-16').getTime(),
           monday: true,
         }),
-        today: new Date('2022-01-17'),
-        startDate: new Date('2022-01-10'),
-        expectedDate: new Date('2022-01-17'),
+        today: dateStrToUtcDate('2022-01-17'),
+        startDate: dateStrToUtcDate('2022-01-10'),
+        expectedDate: dateStrToUtcDate('2022-01-17'),
       },
       {
         description: 'should return date for the proper weekday',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date('2022-01-07').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-07').getTime(),
           friday: true,
         }),
         // is a friday
-        startDate: new Date('2022-01-07'),
-        today: new Date('2022-03-24'),
+        startDate: dateStrToUtcDate('2022-01-07'),
+        today: dateStrToUtcDate('2022-03-24'),
         // is a friday
-        expectedDate: new Date('2022-03-18'),
+        expectedDate: dateStrToUtcDate('2022-03-18'),
       },
       {
         description: 'should work for repeat every 1',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date('2022-01-03').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-03').getTime(),
           monday: true,
         }),
         // monday
-        startDate: new Date('2022-01-03'),
-        today: new Date('2022-01-24'),
-        expectedDate: new Date('2022-01-17'),
+        startDate: dateStrToUtcDate('2022-01-03'),
+        today: dateStrToUtcDate('2022-01-24'),
+        expectedDate: dateStrToUtcDate('2022-01-17'),
       },
       {
         description: 'should work for repeat every 2',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date('2022-01-03').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-03').getTime(),
           monday: true,
           tuesday: true,
         }),
         // monday
-        startDate: new Date('2022-01-03'),
-        today: new Date('2022-01-24'),
-        expectedDate: new Date('2022-01-18'),
+        startDate: dateStrToUtcDate('2022-01-03'),
+        today: dateStrToUtcDate('2022-01-24'),
+        expectedDate: dateStrToUtcDate('2022-01-18'),
       },
       {
         description: 'should return null if today and already created',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
           monday: true,
         }),
-        today: new Date('2022-01-10'),
-        startDate: new Date('2022-01-10'),
+        today: dateStrToUtcDate('2022-01-10'),
+        startDate: dateStrToUtcDate('2022-01-10'),
         expectedDate: null,
       },
       {
@@ -220,10 +221,10 @@ describe('getNewestPossibleDueDate()', () => {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
           monday: true,
-          lastTaskCreation: new Date('2022-01-17').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-17').getTime(),
         }),
-        today: new Date('2022-01-27'),
-        startDate: new Date('2022-01-03'),
+        today: dateStrToUtcDate('2022-01-27'),
+        startDate: dateStrToUtcDate('2022-01-03'),
         expectedDate: null,
       },
       {
@@ -289,32 +290,32 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
         }),
-        today: new Date('2022-02-10'),
-        startDate: new Date('2022-01-10'),
-        expectedDate: new Date('2022-02-10'),
+        today: dateStrToUtcDate('2022-02-10'),
+        startDate: dateStrToUtcDate('2022-01-10'),
+        expectedDate: dateStrToUtcDate('2022-02-10'),
       },
       {
         description: 'should return date if today is after due',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 3,
-          lastTaskCreation: new Date('2022-01-14').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-14').getTime(),
         }),
-        today: new Date('2022-08-14'),
-        startDate: new Date('2022-01-14'),
-        expectedDate: new Date('2022-07-14'),
+        today: dateStrToUtcDate('2022-08-14'),
+        startDate: dateStrToUtcDate('2022-01-14'),
+        expectedDate: dateStrToUtcDate('2022-07-14'),
       },
       {
         description: 'should return null if last applicable is already created',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 3,
-          lastTaskCreation: new Date('2022-07-14').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-07-14').getTime(),
         }),
-        today: new Date('2022-08-14'),
-        startDate: new Date('2022-01-14'),
+        today: dateStrToUtcDate('2022-08-14'),
+        startDate: dateStrToUtcDate('2022-01-14'),
         expectedDate: null,
       },
       {
@@ -322,10 +323,10 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date('2024-06-26').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2024-06-26').getTime(),
         }),
-        today: new Date('2024-07-16'),
-        startDate: new Date('2024-01-26'),
+        today: dateStrToUtcDate('2024-07-16'),
+        startDate: dateStrToUtcDate('2024-01-26'),
         expectedDate: null,
       },
     ];
@@ -381,21 +382,21 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 3,
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
         }),
-        today: new Date('2026-01-10'),
+        today: dateStrToUtcDate('2026-01-10'),
         startDate: FAKE_MONDAY_THE_10TH,
-        expectedDate: new Date('2025-01-10'),
+        expectedDate: dateStrToUtcDate('2025-01-10'),
       },
       {
         description: 'should return null if NOT applicable',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date('2022-01-10').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
         }),
-        today: new Date('2023-01-10'),
-        startDate: new Date('2022-01-10').getTime(),
+        today: dateStrToUtcDate('2023-01-10'),
+        startDate: dateStrToUtcDate('2022-01-10').getTime(),
         expectedDate: null,
       },
       {
@@ -403,10 +404,10 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date('2024-01-26').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2024-01-26').getTime(),
         }),
-        today: new Date('2024-07-16'),
-        startDate: new Date('2023-01-26'),
+        today: dateStrToUtcDate('2024-07-16'),
+        startDate: dateStrToUtcDate('2023-01-26'),
         expectedDate: null,
       },
       {
@@ -414,10 +415,10 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date('2024-01-26').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2024-01-26').getTime(),
         }),
-        today: new Date('2024-05-27'),
-        startDate: new Date('2023-01-26'),
+        today: dateStrToUtcDate('2024-05-27'),
+        startDate: dateStrToUtcDate('2023-01-26'),
         expectedDate: null,
       },
     ];
