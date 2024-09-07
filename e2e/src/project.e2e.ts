@@ -4,7 +4,7 @@ import { NBrowser } from '../n-browser-interface';
 
 const SIDENAV = `side-nav`;
 const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
-const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .mat-mdc-menu-item:last-of-type`;
+const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .g-multi-btn-wrapper > button:last-of-type`;
 
 const PROJECT_NAME_INPUT = `dialog-create-project input:first-of-type`;
 const SUBMIT_BTN = `dialog-create-project button[type=submit]:enabled`;
@@ -12,12 +12,12 @@ const SUBMIT_BTN = `dialog-create-project button[type=submit]:enabled`;
 const PROJECT = `${SIDENAV} section.projects side-nav-item`;
 const DEFAULT_PROJECT = `${PROJECT}:nth-of-type(1)`;
 const DEFAULT_PROJECT_BTN = `${DEFAULT_PROJECT} .mat-mdc-menu-item`;
-const DEFAULT_PROJECT_ADV_BTN = `${DEFAULT_PROJECT} .settings-btn`;
+const DEFAULT_PROJECT_ADV_BTN = `${DEFAULT_PROJECT} .additional-btn`;
 
 const WORK_CTX_MENU = `work-context-menu`;
 const WORK_CTX_TITLE = `.current-work-context-title`;
 
-const PROJECT_SETTINGS_BTN = `${WORK_CTX_MENU} button:last-of-type`;
+const PROJECT_SETTINGS_BTN = `${WORK_CTX_MENU} button:nth-of-type(4)`;
 const SECOND_PROJECT = `${PROJECT}:nth-of-type(2)`;
 const SECOND_PROJECT_BTN = `${SECOND_PROJECT} button:first-of-type`;
 
