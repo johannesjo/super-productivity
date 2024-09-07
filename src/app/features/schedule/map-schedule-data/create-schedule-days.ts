@@ -18,6 +18,7 @@ import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
 import { createViewEntriesForDay } from './create-view-entries-for-day';
 import { msLeftToday } from '../../../util/ms-left-today';
 import { getTasksWithinAndBeyondBudget } from './get-tasks-within-and-beyond-budget';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 export const createScheduleDays = (
   nonScheduledTasks: TaskWithoutReminder[],
@@ -41,17 +42,17 @@ export const createScheduleDays = (
   let beyondBudgetTasks: TaskWithoutReminder[];
 
   const v: ScheduleDay[] = dayDates.map((dayDate, i) => {
-    const nextDayStartDate = new Date(dayDate);
+    const nextDayStartDate = dateStrToUtcDate(dayDate);
     nextDayStartDate.setHours(24, 0, 0, 0);
     const nextDayStart = nextDayStartDate.getTime();
-    const todayStart = new Date(dayDate);
+    const todayStart = dateStrToUtcDate(dayDate);
     todayStart.setHours(0, 0, 0, 0);
 
     let startTime = i == 0 ? now : todayStart.getTime();
     if (workStartEndCfg) {
       const startTimeToday = getDateTimeFromClockString(
         workStartEndCfg.startTime,
-        new Date(dayDate),
+        dateStrToUtcDate(dayDate),
       );
       if (startTimeToday > now) {
         startTime = startTimeToday;
@@ -150,7 +151,7 @@ export const createScheduleDays = (
 
     // console.log({
     //   dayDate,
-    //   startTime: new Date(startTime),
+    //   startTime: dateStrToUtcDate(startTime),
     //   viewEntriesPushedToNextDay,
     //   flowTasksLeftAfterDay,
     //   blockerBlocksForDay,
