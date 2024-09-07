@@ -50,7 +50,7 @@ jobs:
       - name: Test E2E
         run: npm run e2e
       - name: 'Upload E2E screenshots on failure'
-        if: ${{ failure() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: e2eScreenshots
