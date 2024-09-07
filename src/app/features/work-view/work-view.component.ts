@@ -12,7 +12,6 @@ import {
 import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -37,9 +36,6 @@ import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-
-const SUB = 'SUB';
-const PARENT = 'PARENT';
 
 @Component({
   selector: 'work-view',
@@ -102,7 +98,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     public layoutService: LayoutService,
     public workContextService: WorkContextService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
     private _projectService: ProjectService,
     private _cd: ChangeDetectorRef,
@@ -118,33 +113,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   ngOnInit(): void {
     // eslint-disable-next-line no-mixed-operators
     this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-    const sub = this._dragulaService.find(SUB);
-    const par = this._dragulaService.find(PARENT);
 
-    if (!sub) {
-      this._dragulaService.createGroup(SUB, {
-        direction: 'vertical',
-        moves: (el, container, handle) => {
-          return (
-            !!handle &&
-            handle.className.indexOf &&
-            handle.className.indexOf('handle-sub') > -1
-          );
-        },
-      });
-    }
-    if (!par) {
-      this._dragulaService.createGroup(PARENT, {
-        direction: 'vertical',
-        moves: (el, container, handle) => {
-          return (
-            !!handle &&
-            handle.className.indexOf &&
-            handle.className.indexOf('handle-par') > -1
-          );
-        },
-      });
-    }
     // preload
     // TODO check
     // this._subs.add(this.workContextService.backlogTasks$.subscribe());

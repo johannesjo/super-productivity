@@ -160,6 +160,17 @@ mat-icon.mat-icon[svgicon] {
   cursor: grabbing;
 }
 
+.cdk-drop-list-disabled {
+  border: 3px solid red;
+}
+
+.cdk-drop-list-receiving {
+  outline: 1px dashed $c-primary;
+  border-radius: 6px;
+  cursor: grabbing;
+  //border: 2px solid green;
+}
+
 // MAT MENU
 .mat-mdc-menu-content {
   padding-top: 0 !important;

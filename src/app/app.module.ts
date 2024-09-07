@@ -55,6 +55,7 @@ import { DominaModeModule } from './features/domina-mode/domina-mode.module';
 import { FocusModeModule } from './features/focus-mode/focus-mode.module';
 import { CalendarIntegrationModule } from './features/calendar-integration/calendar-integration.module';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -142,6 +143,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
       },
     }),
     EntityDataModule,
+    CdkDropListGroup,
   ],
   providers: [
     { provide: ErrorHandler, useClass: GlobalErrorHandler },

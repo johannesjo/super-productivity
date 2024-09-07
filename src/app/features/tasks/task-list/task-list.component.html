@@ -19,10 +19,11 @@
 
 <div
   #listEl
+  cdkDropList
+  [cdkDropListData]="dropModelDataForList()"
+  (cdkDropListDropped)="drop(filteredTasks(), $event)"
   [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks()?.length"
   [attr.data-id]="listModelId()"
-  [dragulaModel]="filteredTasks()"
-  [dragula]="listId()"
   class="task-list-inner"
 >
   <task
@@ -30,6 +31,8 @@
     [isInSubTaskList]="isSubTaskList()"
     [isBacklog]="isBacklog()"
     [task]="task"
+    cdkDrag
+    [cdkDragData]="task"
   >
   </task>
 </div>

@@ -11,6 +11,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { WorkViewComponent } from './work-view.component';
 import { RightPanelModule } from '../right-panel/right-panel.module';
 import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -25,6 +26,7 @@ import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorr
     MatSidenavModule,
     RightPanelModule,
     AddScheduledTodayOrTomorrowBtnComponent,
+    CdkDropListGroup,
   ],
   declarations: [WorkViewComponent, BacklogComponent],
   exports: [WorkViewComponent],
