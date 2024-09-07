@@ -53,7 +53,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
-          name: WinStoreRelease
+          name: e2eScreenshots
           path: e2e/screenshots/**/*.*
 
       - name: Build Frontend & Electron
