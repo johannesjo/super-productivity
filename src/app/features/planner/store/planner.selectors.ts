@@ -17,6 +17,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { isSameDay } from '../../../util/is-same-day';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -186,7 +187,7 @@ const getPlannerDay = (
   unplannedTaskIdsToday: string[] | false,
 ): PlannerDay => {
   const isToday = dayDate === todayStr;
-  const currentDayDate = new Date(dayDate);
+  const currentDayDate = dateStrToUtcDate(dayDate);
   const currentDayTimestamp = currentDayDate.getTime();
   const tIds =
     isToday && unplannedTaskIdsToday
