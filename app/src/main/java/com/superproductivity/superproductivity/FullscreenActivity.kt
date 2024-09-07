@@ -41,7 +41,7 @@ class FullscreenActivity : AppCompatActivity() {
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
 //        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
-        if (BuildConfig.DEBUG) "http://10.0.2.2:4200" else "https://app.super-productivity.com"
+        "${BuildConfig.SERVICE_PROTOCOL}://${BuildConfig.SERVICE_HOST}"
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,7 +162,7 @@ class FullscreenActivity : AppCompatActivity() {
                 Log.v("TW", url)
                 return if (url.startsWith("http://") || url.startsWith("https://")) {
                     if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains(
-                            "10.0.2.2:4200"
+                            BuildConfig.SERVICE_HOST
                         )
                     ) {
                         false
@@ -283,10 +283,7 @@ class FullscreenActivity : AppCompatActivity() {
             }
         }
 
-        if (request.url.toString()
-                .contains("app.super-productivity.com") || request.url.toString()
-                .contains("10.0.2.2:4200")
-        ) {
+        if (request.url.toString().contains(BuildConfig.SERVICE_HOST)) {
             return null
         }
 

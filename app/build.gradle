@@ -4,6 +4,16 @@ plugins {
     id "org.jetbrains.kotlin.android"
 }
 
+// Apply the external configuration script
+apply from: "config.gradle"
+
+// Load the application configuration properties
+def appConfig = loadAppConfig()
+
+// Retrieve the build configuration fields for Debug and Release builds
+def debugConfigFields = getBuildConfigFields(appConfig, true)
+def releaseConfigFields = getBuildConfigFields(appConfig, false)
+
 android {
     defaultConfig {
         applicationId "com.superproductivity.superproductivity"
@@ -21,8 +31,21 @@ android {
                         '"target": {"namespace": "web", "site": "https://app.super-productivity.com"}}]'
         ]
     }
+
+    // Configure the build types (Debug and Release)
     buildTypes {
+        debug {
+            // Define each field in BuildConfig for the Debug build
+            debugConfigFields.each { key, value ->
+                buildConfigField "String", key, value.toString()
+            }
+        }
         release {
+            // Define each field in BuildConfig for the Release build
+            releaseConfigFields.each { key, value ->
+                buildConfigField "String", key, value.toString()
+            }
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
