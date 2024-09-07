@@ -9,6 +9,7 @@ import { PlannerModule } from '../../features/planner/planner.module';
 import { ScheduleEventComponent } from '../../features/schedule/schedule-event/schedule-event.component';
 import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
 import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
+import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 
 @NgModule({
   imports: [
@@ -22,6 +23,7 @@ import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
     PlannerModule,
     ScheduleEventComponent,
     SideNavItemComponent,
+    ContextMenuComponent,
   ],
   declarations: [SideNavComponent],
   exports: [SideNavComponent],

@@ -38,9 +38,11 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
 import { Store } from '@ngrx/store';
 import {
+  selectAllProjects,
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
+import { updateProject } from '../../features/project/store/project.actions';
 
 @Component({
   selector: 'side-nav',
@@ -61,6 +63,8 @@ export class SideNavComponent implements OnDestroy {
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isProjectsExpanded,
   );
+
+  allProjects$: Observable<Project[]> = this._store.select(selectAllProjects);
   nonHiddenProjects$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded
@@ -231,6 +235,17 @@ export class SideNavComponent implements OnDestroy {
       this._cachedIssueUrl = getGithubErrorUrl('', undefined, true);
     }
     return this._cachedIssueUrl;
+  }
+
+  toggleProjectVisibility(project: Project): void {
+    this._store.dispatch(
+      updateProject({
+        project: {
+          id: project.id,
+          changes: { isHiddenFromMenu: !project.isHiddenFromMenu },
+        },
+      }),
+    );
   }
 
   async dropOnProjectList(

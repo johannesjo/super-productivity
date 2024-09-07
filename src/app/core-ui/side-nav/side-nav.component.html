@@ -49,6 +49,25 @@
     <mat-icon>expand_more</mat-icon>
   </button>
 
+  <context-menu
+    [contextMenu]="contextMenu"
+    [rightClickTriggerEl]="projectExpandBtn"
+  ></context-menu>
+
+  <ng-template #contextMenu>
+    @for (project of (allProjects$|async); track project.id) {
+    <button
+      mat-menu-item
+      (click)="toggleProjectVisibility(project)"
+    >
+      <mat-icon *ngIf="!project.isHiddenFromMenu">visibility</mat-icon>
+      <mat-icon *ngIf="project.isHiddenFromMenu">visibility_off</mat-icon>
+
+      {{ project.title }}
+    </button>
+    }
+  </ng-template>
+
   <div
     [@standardList]="projectList?.length"
     cdkDropList
