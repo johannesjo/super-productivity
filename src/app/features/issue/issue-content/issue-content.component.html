@@ -12,6 +12,13 @@
   ></github-issue-content>
 </ng-container>
 
+<ng-container *ngIf="task?.issueType===AZUREDEVOPS_TYPE">
+  <azuredevops-issue-content
+    [issue]="issueData"
+    [task]="task"
+  ></azuredevops-issue-content>
+</ng-container>
+
 <ng-container *ngIf="task?.issueType===REDMINE_TYPE">
   <redmine-issue-content
     [issue]="issueData"
