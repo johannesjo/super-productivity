@@ -107,12 +107,12 @@ export const toggleHideFromMenu = createAction(
 // MOVE TASK ACTIONS
 // -----------------
 export const moveProjectTaskToBacklogListAuto = createAction(
-  '[Project] Auto Move Task from today to backlog',
+  '[Project] Auto Move Task from regular to backlog',
   props<{ taskId: string; projectId: string }>(),
 );
 
-export const moveProjectTaskToTodayListAuto = createAction(
-  '[Project] Auto Move Task from backlog to today',
+export const moveProjectTaskToRegularListAuto = createAction(
+  '[Project] Auto Move Task from backlog to regular',
   props<{ taskId: string; projectId: string; isMoveToTop: boolean }>(),
 );
 
@@ -142,12 +142,12 @@ export const moveProjectTaskInBacklogList = createAction(
 );
 
 export const moveProjectTaskToBacklogList = createAction(
-  '[Project] Move Task from today to backlog',
+  '[Project] Move Task from regular to backlog',
   props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
 );
 
-export const moveProjectTaskToTodayList = createAction(
-  '[Project] Move Task from backlog to today',
+export const moveProjectTaskToRegularList = createAction(
+  '[Project] Move Task from backlog to regular',
   props<{
     taskId: string;
     newOrderedIds: string[];
@@ -157,7 +157,7 @@ export const moveProjectTaskToTodayList = createAction(
   }>(),
 );
 
-export const moveAllProjectBacklogTasksToTodayList = createAction(
-  '[Project] Move all backlog tasks to today',
+export const moveAllProjectBacklogTasksToRegularList = createAction(
+  '[Project] Move all backlog tasks to regular',
   props<{ projectId: string }>(),
 );

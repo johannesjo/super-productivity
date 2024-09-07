@@ -90,7 +90,7 @@ import {
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToTodayList,
+  moveProjectTaskToRegularList,
   moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
@@ -411,7 +411,13 @@ export class TaskService {
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
       this._store.dispatch(
-        moveProjectTaskToTodayList({ taskId, newOrderedIds, src, target, workContextId }),
+        moveProjectTaskToRegularList({
+          taskId,
+          newOrderedIds,
+          src,
+          target,
+          workContextId,
+        }),
       );
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog

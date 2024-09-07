@@ -25,7 +25,7 @@ import {
   loadProjectRelatedDataSuccess,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToRegularListAuto,
   toggleHideFromMenu,
   unarchiveProject,
   updateProject,
@@ -237,7 +237,7 @@ export class ProjectService {
 
   moveTaskToTodayList(id: string, projectId: string, isMoveToTop: boolean = false): void {
     this._store$.dispatch(
-      moveProjectTaskToTodayListAuto({
+      moveProjectTaskToRegularListAuto({
         taskId: id,
         isMoveToTop,
         projectId,

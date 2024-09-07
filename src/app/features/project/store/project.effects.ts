@@ -9,14 +9,14 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
-  moveAllProjectBacklogTasksToTodayList,
+  moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToTodayList,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToRegularList,
+  moveProjectTaskToRegularListAuto,
   moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
   unarchiveProject,
@@ -95,13 +95,13 @@ export class ProjectEffects {
 
           moveProjectTaskInBacklogList.type,
           moveProjectTaskToBacklogList.type,
-          moveProjectTaskToTodayList.type,
+          moveProjectTaskToRegularList.type,
           moveProjectTaskUpInBacklogList.type,
           moveProjectTaskDownInBacklogList.type,
           moveProjectTaskToTopInBacklogList.type,
           moveProjectTaskToBottomInBacklogList.type,
           moveProjectTaskToBacklogListAuto.type,
-          moveProjectTaskToTodayListAuto.type,
+          moveProjectTaskToRegularListAuto.type,
         ),
         switchMap((a) => {
           // exclude ui only actions
@@ -282,7 +282,7 @@ export class ProjectEffects {
         ofType(updateProject),
         filter((a) => a.project.changes.isEnableBacklog === false),
         map((a) => {
-          return moveAllProjectBacklogTasksToTodayList({
+          return moveAllProjectBacklogTasksToRegularList({
             projectId: a.project.id as string,
           });
         }),

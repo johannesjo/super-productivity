@@ -20,7 +20,7 @@ import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { createEmptyEntity } from '../../../util/create-empty-entity';
-import { moveProjectTaskToTodayList } from '../../project/store/project.actions';
+import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 
@@ -103,7 +103,7 @@ export class TaskRelatedModelEffects {
 
   moveTaskToUnDone$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
+      ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(
         ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
       ),
@@ -122,7 +122,7 @@ export class TaskRelatedModelEffects {
 
   moveTaskToDone$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(moveTaskInTodayList, moveProjectTaskToTodayList),
+      ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(
         ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
       ),

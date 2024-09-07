@@ -47,14 +47,14 @@ import {
   deleteProject,
   deleteProjects,
   loadProjects,
-  moveAllProjectBacklogTasksToTodayList,
+  moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToTodayList,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToRegularList,
+  moveProjectTaskToRegularListAuto,
   moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
   toggleHideFromMenu,
@@ -352,7 +352,7 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(moveProjectTaskToTodayList, (state, { taskId, newOrderedIds, workContextId }) => {
+  on(moveProjectTaskToRegularList, (state, { taskId, newOrderedIds, workContextId }) => {
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
 
@@ -540,7 +540,7 @@ export const projectReducer = createReducer<ProjectState>(
         );
   }),
 
-  on(moveProjectTaskToTodayListAuto, (state, { taskId, projectId, isMoveToTop }) => {
+  on(moveProjectTaskToRegularListAuto, (state, { taskId, projectId, isMoveToTop }) => {
     const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
     return todaysTaskIdsBefore.includes(taskId)
@@ -766,7 +766,7 @@ export const projectReducer = createReducer<ProjectState>(
 
     return projectAdapter.updateMany(updates, state);
   }),
-  on(moveAllProjectBacklogTasksToTodayList, (state, { projectId }) => {
+  on(moveAllProjectBacklogTasksToRegularList, (state, { projectId }) => {
     const project = state.entities[projectId] as Project;
     return projectAdapter.updateOne(
       {
