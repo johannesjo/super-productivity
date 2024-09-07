@@ -30,6 +30,7 @@ import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.comp
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'g-multi-btn-wrapper' },
 })
 export class SideNavItemComponent {
   workContext = input.required<WorkContextCommon>();

@@ -1,6 +1,7 @@
 <section class="main">
   <side-nav-item
     *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
+    #menuEntry
     [type]="WorkContextType.TAG"
     [defaultIcon]="mainContext.icon"
     [workContext]="mainContext"
@@ -36,19 +37,39 @@
   *ngIf="nonHiddenProjects$|async as projectList"
   class="projects tour-projects"
 >
-  <button
-    #menuEntry
-    #projectExpandBtn
-    (click)="toggleExpandProjects()"
-    (keydown)="toggleExpandProjectsLeftRight($event)"
-    [class.isExpanded]="isProjectsExpanded"
-    class="expand-btn"
-    mat-menu-item
-  >
-    <span class="title">{{ T.MH.PROJECTS|translate }}</span>
-    <mat-icon>expand_more</mat-icon>
-  </button>
+  <div class="g-multi-btn-wrapper">
+    <button
+      #menuEntry
+      #projectExpandBtn
+      (click)="toggleExpandProjects()"
+      (keydown)="toggleExpandProjectsLeftRight($event)"
+      [class.isExpanded]="isProjectsExpanded"
+      class="expand-btn"
+      mat-menu-item
+    >
+      <mat-icon>expand_more</mat-icon>
+      <span class="title">{{ T.MH.PROJECTS|translate }}</span>
+    </button>
 
+    <!--    <button-->
+    <!--      #projectVisibilityBtn-->
+    <!--      mat-icon-button-->
+    <!--      class="additional-btn"-->
+    <!--    >-->
+    <!--      <mat-icon>visibility</mat-icon>-->
+    <!--    </button>-->
+
+    <button
+      (click)="addProject()"
+      class="additional-btn"
+      mat-icon-button
+      [matTooltip]="T.MH.CREATE_PROJECT|translate"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <!--  [leftClickTriggerEl]="projectVisibilityBtn"-->
   <context-menu
     [contextMenu]="contextMenu"
     [rightClickTriggerEl]="projectExpandBtn"
@@ -87,17 +108,6 @@
     ></side-nav-item>
     }
   </div>
-
-  <button
-    #menuEntry
-    (click)="addProject()"
-    *ngIf="isProjectsExpanded"
-    class="route-link"
-    mat-menu-item
-  >
-    <mat-icon>add</mat-icon>
-    <span class="text">{{ T.MH.CREATE_PROJECT|translate }}</span>
-  </button>
 </section>
 
 <section

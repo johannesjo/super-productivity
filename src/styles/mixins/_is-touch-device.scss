@@ -17,8 +17,14 @@
   }
 }
 
-@mixin mousePrimaryDevice {
-  :host-context(.isMousePrimary) & {
-    @content;
+@mixin mousePrimaryDevice($isGlobal: false) {
+  @if $isGlobal {
+    .isMousePrimary & {
+      @content;
+    }
+  } @else {
+    :host-context(.isMousePrimary) & {
+      @content;
+    }
   }
 }

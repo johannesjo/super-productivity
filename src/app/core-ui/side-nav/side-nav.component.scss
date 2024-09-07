@@ -36,7 +36,7 @@ $spacer: $s;
         }
       }
 
-      .settings-btn {
+      .additional-btn {
         display: none !important;
       }
 
@@ -153,28 +153,21 @@ section {
 
 .expand-btn {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   font-weight: bold;
 
   &:focus,
   &:hover {
-    @include darkTheme {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    @include lightTheme {
-      background: rgba(
-        var(--palette-background-hover),
-        var(--palette-background-hover-alpha, 1)
-      );
+    > mat-icon:last-of-type {
+      opacity: 1;
     }
   }
 
-  ::ng-deep mat-icon:last-of-type {
-    margin-left: auto;
+  > mat-icon:last-of-type {
     margin-right: 0;
+    //margin-left: -10px;
+    opacity: 0.4;
     transition: $transition-standard;
-    order: 2;
   }
 
   &.isExpanded ::ng-deep mat-icon:last-of-type {
