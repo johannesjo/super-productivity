@@ -25,6 +25,7 @@ import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
@@ -93,7 +94,7 @@ export class DialogAddPlannedTasksComponent {
 
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
     if (newDay) {
-      const newDate = new Date(newDay);
+      const newDate = dateStrToUtcDate(newDay);
       if (task.plannedAt && task.reminderId) {
         this._rescheduleTask(task, newDate);
         return;
