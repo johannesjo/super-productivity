@@ -3,6 +3,7 @@ import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
 import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 export const getNewestPossibleDueDate = (
   taskRepeatCfg: TaskRepeatCfg,
@@ -16,7 +17,7 @@ export const getNewestPossibleDueDate = (
   }
 
   const checkDate = new Date(today);
-  const startDateDate = new Date(taskRepeatCfg.startDate);
+  const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
   const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
   // set to 2 to be safer(?) for summer/winter time affected comparisons
   checkDate.setHours(2, 0, 0, 0);
