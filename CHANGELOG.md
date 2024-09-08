@@ -1,3 +1,40 @@
+## [10.0.2](https://github.com/johannesjo/super-productivity/compare/v10.0.1...v10.0.2) (2024-09-08)
+
+### Bug Fixes
+
+- don't open side panel when dialog-task-detail-panel is used ([47b124c](https://github.com/johannesjo/super-productivity/commit/47b124c8d814e4f711fa9a4ddcc942e0749838e2))
+- adjust getWeekNr to work with other time zones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([462dad6](https://github.com/johannesjo/super-productivity/commit/462dad6998199cd200b27a46867c567edd74d5a1))
+- also make repeat info text work in other time zones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([928691a](https://github.com/johannesjo/super-productivity/commit/928691afccb68bea31cf52a9eaefa95f1c6d716a))
+- error case ([315d409](https://github.com/johannesjo/super-productivity/commit/315d409be2eda2516045634f93bded0727857488))
+- get rid of date iso strings since they seem to mess up the datepicker timezone [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([fac3a6a](https://github.com/johannesjo/super-productivity/commit/fac3a6a5d2435f65bdc024d5f4095b959aea42be))
+- make repeat tasks work better for other timezones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([c5bd24a](https://github.com/johannesjo/super-productivity/commit/c5bd24a5fe777aec7420b5467854e62ed556bc0f))
+- project re-order not always working ([0c8ef6b](https://github.com/johannesjo/super-productivity/commit/0c8ef6ba4a3f1d751b2479a92004dfefe537a8ad))
+- task not expanding any more on right key ([eee870d](https://github.com/johannesjo/super-productivity/commit/eee870dfc1c9d8e125fa6da5cba04bf62c02dc1e))
+- use utc date for day string parsing to avoid tasks being at the wrong day in timezones with negative offset [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([0b451b2](https://github.com/johannesjo/super-productivity/commit/0b451b277338153f40c3537b948831dbf751a486))
+- wrong day of month shown in schedule-event for negative timezones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([64f2d8f](https://github.com/johannesjo/super-productivity/commit/64f2d8ffa0f84e85579e7b293a418f214efc3315))
+- wrong days for negative timezones for planner [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([268eeb0](https://github.com/johannesjo/super-productivity/commit/268eeb0db62e0b0e6c9af06d5591c0eca03f5f49))
+
+### Features
+
+- add angular cdk for project list ([3139a1f](https://github.com/johannesjo/super-productivity/commit/3139a1f8665d20e55902602e8baaca729b3bef0d))
+- add context menu to toggle project visibility ([08a6e9e](https://github.com/johannesjo/super-productivity/commit/08a6e9e1b474be6ebb10facb4b40c62e62a23fe1))
+- add directive for context menu ([4034854](https://github.com/johannesjo/super-productivity/commit/4034854238bb52841467b0204b5b76d9d26f217b))
+- add more focus to currently running simple counter ([b510f4f](https://github.com/johannesjo/super-productivity/commit/b510f4f85576677ca44ab564a53342bd1c7e2e43))
+- add project delete for context menu ([c85c8bd](https://github.com/johannesjo/super-productivity/commit/c85c8bd3bddab308563887154995ef664746330b))
+- allow focus session also for current task ([fa7ed4a](https://github.com/johannesjo/super-productivity/commit/fa7ed4aca7b4774ae5fa55f9c99d518227120863))
+- convert tag component to signals ([ec5045f](https://github.com/johannesjo/super-productivity/commit/ec5045fe9824bf2c93571e764c7014d90f63b9ed))
+- extract hover controls for task to improve performance ([ef03e96](https://github.com/johannesjo/super-productivity/commit/ef03e96f4cbc613e2e24bab1db6d072732244c3f))
+- **i18n:** translate JSON content into Simplified Chinese ([7fcb4bf](https://github.com/johannesjo/super-productivity/commit/7fcb4bf2a0be064a09efa6879d33c2d9f3358070))
+- **i18n:** translate JSON content into Traditional Chinese ([5156e67](https://github.com/johannesjo/super-productivity/commit/5156e677762ba84c1b51b7088f81fcb686958cff))
+- move sidenav project stuff to sub menus ([6c55db0](https://github.com/johannesjo/super-productivity/commit/6c55db0528e62a0b8c9cfa53e325eae4253ca6bb))
+- polish new side nav ([43bacad](https://github.com/johannesjo/super-productivity/commit/43bacaddc62497132fd52c32017cc0d323cf2662))
+- refactor task list component to signals ([f952f4a](https://github.com/johannesjo/super-productivity/commit/f952f4ad8d3fb70cf5ec742bb4187ec6b6aeeebb))
+- remove dragula from side-nav ([6c2e15f](https://github.com/johannesjo/super-productivity/commit/6c2e15ffefa55f3121ed46951043a9660ccff1b4))
+- remove manage project page ([d8cd7d2](https://github.com/johannesjo/super-productivity/commit/d8cd7d2b9ea1a49081f0d03e070689407e6e4b14))
+- use cdk drop for tags as well ([e553b5a](https://github.com/johannesjo/super-productivity/commit/e553b5aaeb698464f19c71b5c93c31bcb4293160))
+- use context menu component instead of directive ([20d2fc9](https://github.com/johannesjo/super-productivity/commit/20d2fc985163a41d26a49c560ca62574a6c2de22))
+- use signals in task component for better performance ([8eecd79](https://github.com/johannesjo/super-productivity/commit/8eecd79496049447afeea10a417821b3bffd5eb6))
+
 ## [10.0.1](https://github.com/johannesjo/super-productivity/compare/v10.0.0...v10.0.1) (2024-09-01)
 
 ### Bug Fixes
