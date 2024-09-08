@@ -6,7 +6,7 @@ I am not an Android developer, so help would be very welcome!!
 
 ## Building locally
 
-*This feature was added on September 7, 2024. See [Pull Request #51](https://github.com/johannesjo/super-productivity-android/pull/51).*
+*This feature was added on September 7, 2024. See [Pull Request #52](https://github.com/johannesjo/super-productivity-android/pull/52).*
 
 To build this app locally, you can configure the URL that the web view loads by modifying the `app_config.properties` file. This allows you to easily switch between a local development server, the production server, or a self-hosted server without changing the source code directly.
 
