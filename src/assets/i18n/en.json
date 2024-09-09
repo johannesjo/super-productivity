@@ -1179,7 +1179,6 @@
         "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "PLAN_END_DAY": "Plan at end of day",
@@ -1573,7 +1572,8 @@
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Project Settings",
     "QUICK_HISTORY": "Quick History",
-    "SCHEDULED": "Scheduled Tasks",
+    "REPEAT_SCHEDULED": "Repeat/Scheduled",
+    "SCHEDULE": "Schedule",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",
