@@ -17,6 +17,7 @@ import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log/main';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
+import { IS_MAC } from './common.const';
 
 let mainWin: BrowserWindow;
 
@@ -42,14 +43,12 @@ export const getIsAppReady = (): boolean => {
 export const createWindow = ({
   IS_DEV,
   ICONS_FOLDER,
-  IS_MAC,
   quitApp,
   app,
   customUrl,
 }: {
   IS_DEV: boolean;
   ICONS_FOLDER: string;
-  IS_MAC: boolean;
   quitApp: () => void;
   app: App;
   customUrl?: string;
@@ -242,7 +241,10 @@ const appCloseHandler = (app: App): void => {
       getSettings(mainWin, (appCfg: GlobalConfigState) => {
         if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
           mainWin.hide();
-          app.dock.hide();
+
+          if (IS_MAC) {
+            app.dock.hide();
+          }
           return;
         }
 
@@ -274,8 +276,10 @@ const appMinimizeHandler = (app: App): void => {
         if (appCfg.misc.isMinimizeToTray) {
           event.preventDefault();
           mainWin.hide();
-          app.dock.hide();
-        } else {
+          if (IS_MAC) {
+            app.dock.hide();
+          }
+        } else if (IS_MAC) {
           app.dock.show();
         }
       });

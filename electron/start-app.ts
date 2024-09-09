@@ -255,7 +255,6 @@ export const startApp = (): void => {
       app,
       IS_DEV,
       ICONS_FOLDER,
-      IS_MAC,
       quitApp,
       customUrl,
     });
