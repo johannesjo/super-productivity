@@ -36,6 +36,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -68,7 +69,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _timeCheckVal: string | null = null;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task },
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task; targetDay?: string },
     private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
     private _cd: ChangeDetectorRef,
     private _store: Store,
@@ -111,6 +112,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedDate =
         this.plannedDayForTask ||
         (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date() : null);
+    }
+
+    if (this.data.targetDay) {
+      this.selectedDate = dateStrToUtcDate(this.data.targetDay);
     }
 
     console.log(this.selectedDate);

@@ -102,6 +102,7 @@ export class PlannerDayComponent {
     this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
         task,
+        targetDay: newDay,
       },
     });
   }
