@@ -1177,7 +1177,6 @@
         "TITLE": "Schedule"
       },
       "END": "Fim do trabalho",
-      "MENU_TITLE": "Schedule",
       "NOW": "agora",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
       "PLAN_END_DAY": "Planeje no final do dia",
@@ -1185,6 +1184,7 @@
       "START": "Início do Trabalho",
       "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada",
       "LUNCH_BREAK": "Intervalo para o almoço",
+      "MENU_TITLE": "Schedule",
       "S": {
         "CAL_PROVIDER_ERROR": "Erro do provedor de calibração da linha do tempo: {{errTxt}}"
       }
@@ -1560,7 +1560,6 @@
       "REPORT_A_PROBLEM": "Reportar um problema",
       "REDDIT_COMMUNITY": "Comunidade no Reddit"
     },
-    "MANAGE_PROJECTS": "Gerenciar projetos",
     "HELP": "Ajuda",
     "METRICS": "Métricas",
     "NOTES": "Notas",
@@ -1569,7 +1568,6 @@
     "PROJECT_MENU": "Menu Projeto",
     "PROJECT_SETTINGS": "Configurações do projeto",
     "QUICK_HISTORY": "História Rápida",
-    "SCHEDULED": "Programado",
     "SETTINGS": "Configurações",
     "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
     "TAGS": "Tag",
@@ -1579,7 +1577,9 @@
     "TOGGLE_SHOW_NOTES": "Mostrar/ocultar notas do projeto",
     "TOGGLE_TRACK_TIME": "Iniciar/parar rastreamento de tempo ",
     "TRIGGER_SYNC": "Acionar a sincronização manualmente",
-    "WORKLOG": "Log de trabalho"
+    "WORKLOG": "Log de trabalho",
+    "MANAGE_PROJECTS": "Gerenciar projetos",
+    "SCHEDULED": "Programado"
   },
   "PDS": {
     "BACK": "Espere, eu esqueci uma coisa!",
@@ -1617,35 +1617,6 @@
   },
   "PM": {
     "TITLE": "Métricas do projeto"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Projetos Arquivados",
-    "ARCHIVE_PROJECT": "Arquivar Projeto",
-    "CLICK_TO_HIDE": "Clique para ocultar o projeto do menu",
-    "CLICK_TO_SHOW": "Clique para mostrar o projeto no menu",
-    "DELETE_PROJECT": "Excluir projeto",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Tem certeza de que deseja arquivar este projeto? Projetos arquivados não serão mais exibidos no menu e você não poderá acessar nenhum dos dados deles sem restaurá-los. É recomendável que você faça backup dos seus dados antes de fazer isso.",
-      "OK": "Arquivo"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Tem certeza de que deseja excluir este projeto? É recomendável fazer backup de seus dados antes de fazer isso.",
-      "OK": "Delete"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Tem certeza de que deseja desarquivar este projeto?",
-      "OK": "Desarquivar"
-    },
-    "EDIT_PROJECT": "Editar Projeto",
-    "EXPORT_PROJECT": "Projeto de Exportação",
-    "GITHUB_CONFIGURED": "Integração do GitHub configurada",
-    "GITLAB_CONFIGURED": "Integração do GitLab configurada",
-    "IMPORT_FROM_FILE": "Importar do arquivo",
-    "JIRA_CONFIGURED": "Integração Jira configurada",
-    "OPEN_PROJECT_CONFIGURED": "Integração OpenProject configurada",
-    "S_INVALID_JSON": "Json inválido para o arquivo de projeto",
-    "TITLE": "Visão Geral do Projeto",
-    "UN_ARCHIVE_PROJECT": "Desarquivar projeto"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Configurações globais",
@@ -1709,5 +1680,34 @@
     "TIME_ESTIMATED": "Tempo estimado:",
     "WITHOUT_BREAK": "Sem pausa:",
     "WORKING_TODAY": "Trabalhando hoje:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Projetos Arquivados",
+    "ARCHIVE_PROJECT": "Arquivar Projeto",
+    "CLICK_TO_HIDE": "Clique para ocultar o projeto do menu",
+    "CLICK_TO_SHOW": "Clique para mostrar o projeto no menu",
+    "DELETE_PROJECT": "Excluir projeto",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Tem certeza de que deseja arquivar este projeto? Projetos arquivados não serão mais exibidos no menu e você não poderá acessar nenhum dos dados deles sem restaurá-los. É recomendável que você faça backup dos seus dados antes de fazer isso.",
+      "OK": "Arquivo"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Tem certeza de que deseja excluir este projeto? É recomendável fazer backup de seus dados antes de fazer isso.",
+      "OK": "Delete"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Tem certeza de que deseja desarquivar este projeto?",
+      "OK": "Desarquivar"
+    },
+    "EDIT_PROJECT": "Editar Projeto",
+    "EXPORT_PROJECT": "Projeto de Exportação",
+    "GITHUB_CONFIGURED": "Integração do GitHub configurada",
+    "GITLAB_CONFIGURED": "Integração do GitLab configurada",
+    "IMPORT_FROM_FILE": "Importar do arquivo",
+    "JIRA_CONFIGURED": "Integração Jira configurada",
+    "OPEN_PROJECT_CONFIGURED": "Integração OpenProject configurada",
+    "S_INVALID_JSON": "Json inválido para o arquivo de projeto",
+    "TITLE": "Visão Geral do Projeto",
+    "UN_ARCHIVE_PROJECT": "Desarquivar projeto"
   }
 }
