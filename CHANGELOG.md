@@ -1,3 +1,14 @@
+## [10.0.4](https://github.com/johannesjo/super-productivity/compare/v10.0.3...v10.0.4) (2024-09-09)
+
+### Bug Fixes
+
+- add proper day date when dropping and dragging in planner [#3413](https://github.com/johannesjo/super-productivity/issues/3413) ([0561ee0](https://github.com/johannesjo/super-productivity/commit/0561ee027820ecc0ee96c6d76a5b029d396a6d08))
+- main list task re-order not being saved [#3422](https://github.com/johannesjo/super-productivity/issues/3422) ([5957eb8](https://github.com/johannesjo/super-productivity/commit/5957eb8db4f9518e0e908f53f8421dfd8f1cc418))
+
+### Features
+
+- improve styling ([c1f7165](https://github.com/johannesjo/super-productivity/commit/c1f716579c8b32b6e8b96ffc1fc34ccce7d7aadd))
+
 ## [10.0.3](https://github.com/johannesjo/super-productivity/compare/v10.0.2...v10.0.3) (2024-09-09)
 
 ### Bug Fixes
