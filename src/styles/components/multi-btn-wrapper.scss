@@ -39,6 +39,7 @@
 
     @include mousePrimaryDevice(true) {
       opacity: 0;
+      display: none;
     }
   }
 
