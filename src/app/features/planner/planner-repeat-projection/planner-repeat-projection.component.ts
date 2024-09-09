@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import { T } from 'src/app/t.const';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'planner-repeat-projection',
@@ -11,16 +13,21 @@ import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-e
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerRepeatProjectionComponent {
-  @Input({ required: true }) repeatCfg!: TaskRepeatCfg;
-  @Input() overWriteTimeEstimate: number = 0;
+  repeatCfg = input.required<TaskRepeatCfg>();
+  overWriteTimeEstimate = input(0);
 
-  constructor(private _matDialog: MatDialog) {}
+  T = T;
+
+  constructor(
+    private _matDialog: MatDialog,
+    private _translateService: TranslateService,
+  ) {}
 
   editTaskRepeatCfg(): void {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
       restoreFocus: false,
       data: {
-        repeatCfg: this.repeatCfg,
+        repeatCfg: this.repeatCfg(),
       },
     });
   }
