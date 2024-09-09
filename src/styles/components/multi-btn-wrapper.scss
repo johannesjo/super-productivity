@@ -53,10 +53,10 @@
     }
   }
 
-  button:first-of-type:focus + button {
-    @include mousePrimaryDevice(true) {
-      opacity: 0.8;
-      display: inline-flex;
-    }
-  }
+  //button:first-of-type:focus + button {
+  //  @include mousePrimaryDevice(true) {
+  //    opacity: 0.8;
+  //    display: inline-flex;
+  //  }
+  //}
 }
