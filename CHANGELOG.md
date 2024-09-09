@@ -1,3 +1,14 @@
+## [10.0.3](https://github.com/johannesjo/super-productivity/compare/v10.0.2...v10.0.3) (2024-09-09)
+
+### Bug Fixes
+
+- styling for multi btn wrapper ([98ceff6](https://github.com/johannesjo/super-productivity/commit/98ceff6b724625549c66b4ccf20e8eedffc929ef))
+- windows crashing issue on minimize [#3423](https://github.com/johannesjo/super-productivity/issues/3423) ([6a5f21e](https://github.com/johannesjo/super-productivity/commit/6a5f21e5f28bca0cd0ee6710eca4814a7eccc418))
+
+### Features
+
+- update translations ([7c65adb](https://github.com/johannesjo/super-productivity/commit/7c65adb4a571debdb4cfc7e107ebd59d8ddb9d4c))
+
 ## [10.0.2](https://github.com/johannesjo/super-productivity/compare/v10.0.1...v10.0.2) (2024-09-08)
 
 ### Bug Fixes
