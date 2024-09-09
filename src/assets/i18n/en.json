@@ -842,7 +842,7 @@
         "UNABLE_TO_LOAD_REMOTE_DATA": "Unable to load data from remote. Do you want to try to overwrite the remote data with your local data? All remote data will be lost in the process."
       },
       "D_AUTH_CODE": {
-        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
+        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the input field below.",
         "GET_AUTH_CODE": "Get Authorization Code",
         "L_AUTH_CODE": "Enter Auth Code",
         "TITLE": "Login: {{provider}}"
