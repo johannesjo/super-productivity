@@ -3,8 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
+  ElementRef,
   input,
   OnDestroy,
+  OnInit,
+  ViewChild,
 } from '@angular/core';
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
@@ -13,6 +16,8 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { DragulaService } from 'ng2-dragula';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'task-list',
@@ -21,7 +26,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [taskListAnimation, expandFadeFastAnimation],
 })
-export class TaskListComponent implements OnDestroy {
+export class TaskListComponent implements OnDestroy, OnInit {
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
@@ -52,23 +57,37 @@ export class TaskListComponent implements OnDestroy {
   });
   allTasksLength = computed(() => this.tasks()?.length ?? 0);
 
+  @ViewChild('listEl', { static: true }) listEl?: ElementRef;
+
   T: typeof T = T;
 
   isBlockAni: boolean = false;
+  private _subs: Subscription = new Subscription();
 
   private _blockAnimationTimeout?: number;
 
   constructor(
     private _taskService: TaskService,
+    private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
   ) {}
 
-  // const sourceModelId = source.dataset.id;
-  // const targetModelId = target.dataset.id;
-  // const targetNewIds = targetModel.map((task: Task) => task.id);
-  // const movedTaskId = item.id;
-  // this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
+  ngOnInit(): void {
+    this._subs.add(
+      this._dragulaService.dropModel(this.listId()).subscribe((params: any) => {
+        const { target, source, targetModel, item } = params;
+        if (this.listEl && this.listEl.nativeElement === target) {
+          this._blockAnimation();
 
+          const sourceModelId = source.dataset.id;
+          const targetModelId = target.dataset.id;
+          const targetNewIds = targetModel.map((task: Task) => task.id);
+          const movedTaskId = item.id;
+          this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
+        }
+      }),
+    );
+  }
   ngOnDestroy(): void {
     if (this._blockAnimationTimeout) {
       clearTimeout(this._blockAnimationTimeout);

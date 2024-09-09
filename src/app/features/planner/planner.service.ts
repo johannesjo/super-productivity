@@ -135,5 +135,7 @@ export class PlannerService {
     private _calendarIntegrationService: CalendarIntegrationService,
     private _dateService: DateService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {}
+  ) {
+    this.days$.subscribe((v) => console.log(`days$`, v));
+  }
 }
