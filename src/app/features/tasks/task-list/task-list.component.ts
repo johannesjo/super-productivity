@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -15,7 +16,7 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -27,6 +28,7 @@ import { moveSubTask } from '../store/task.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
+import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -44,7 +46,7 @@ export interface DropModelDataForList {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [taskListAnimation, expandFadeFastAnimation],
 })
-export class TaskListComponent implements OnDestroy {
+export class TaskListComponent implements OnDestroy, AfterViewInit {
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
@@ -82,10 +84,9 @@ export class TaskListComponent implements OnDestroy {
   });
   allTasksLength = computed(() => this.tasks()?.length ?? 0);
 
-  @ViewChild('listEl', { static: true }) listEl?: ElementRef;
+  @ViewChild(CdkDropList) dropList?: CdkDropList;
 
   T: typeof T = T;
-
   isBlockAni: boolean = false;
 
   private _blockAnimationTimeout?: number;
@@ -95,16 +96,40 @@ export class TaskListComponent implements OnDestroy {
     private _cd: ChangeDetectorRef,
     private _workContextService: WorkContextService,
     private _store: Store,
+    public dropListService: DropListService,
   ) {}
+
+  // const sourceModelId = source.dataset.id;
+  // const targetModelId = target.dataset.id;
+  // const targetNewIds = targetModel.map((task: Task) => task.id);
+  // const movedTaskId = item.id;
+  // this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
+
+  ngAfterViewInit(): void {
+    this.dropListService.registerDropList(this.dropList!);
+  }
 
   ngOnDestroy(): void {
     if (this._blockAnimationTimeout) {
       clearTimeout(this._blockAnimationTimeout);
     }
+    this.dropListService.unregisterDropList(this.dropList!);
   }
 
   trackByFn(i: number, task: Task): string {
     return task.id;
+  }
+
+  enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
+    console.log({ drag, drop });
+    // if (ev.previousContainer === ev.container && ev.currentIndex !== ev.previousIndex) {
+    // }
+    // const
+    //     if (drag.dropContainer) {
+    //
+    //     }
+
+    return false;
   }
 
   async drop(
