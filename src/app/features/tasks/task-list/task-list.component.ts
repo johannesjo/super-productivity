@@ -76,7 +76,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this._subs.add(
       this._dragulaService.dropModel(this.listId()).subscribe((params: any) => {
         const { target, source, targetModel, item } = params;
-        if (this.listEl && this.listEl.nativeElement === target) {
+        // NOTE: due to some quirks of dragula item can be undefined
+        if (this.listEl && this.listEl.nativeElement === target && item) {
           this._blockAnimation();
 
           const sourceModelId = source.dataset.id;
