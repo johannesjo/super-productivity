@@ -99,7 +99,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        cfg.baseUrl + '/' + path,
+        new URL(path, cfg.baseUrl).toString(),
         'PUT',
         data,
         // JSON.stringify(data),
@@ -128,7 +128,7 @@ export class WebDavApiService {
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       // TODO check on real android
       const result = (await androidInterface.makeHttpRequestWrapped(
-        cfg.baseUrl + '/' + folderPath,
+        new URL(folderPath, cfg.baseUrl).toString(),
         'MKCOL',
         '',
         cfg.userName,
@@ -154,7 +154,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        cfg.baseUrl + '/' + path,
+        new URL(path, cfg.baseUrl).toString(),
         'HEAD',
         '',
         cfg.userName,
@@ -188,7 +188,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        cfg.baseUrl + '/' + path,
+        new URL(path, cfg.baseUrl).toString(),
         'GET',
         '',
         cfg.userName,
