@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">super-productivity</string>
-    <string name="title_activity_main">super-productivity</string>
-    <string name="package_name">com.superproductivity.superproductivity</string>
-    <string name="custom_url_scheme">com.superproductivity.superproductivity</string>
-</resources>
