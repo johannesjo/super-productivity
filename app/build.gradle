@@ -81,9 +81,13 @@ dependencies {
 
     playImplementation "com.google.android.gms:play-services-auth:20.4.0"
 
+    implementation project(':capacitor-android')
+
     testImplementation "junit:junit:4.13.2"
 
     androidTestImplementation "androidx.test:rules:1.5.0"
     androidTestImplementation "com.android.support.test:runner:1.0.2"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
 }
+
+apply from: 'capacitor.build.gradle'
