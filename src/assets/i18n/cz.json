@@ -1101,12 +1101,12 @@
         "TITLE": "Časová osa"
       },
       "END": "Konec práce",
-      "MENU_TITLE": "Časová osa",
       "NOW": "Nyní",
       "NO_TASKS": "Momentálně zde nejsou žádné úkoly. Přidejte nějaké úkoly pomocí tlačítka + v horní liště.",
       "START": "Začátek práce",
       "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu",
       "LUNCH_BREAK": "Obední přestávka",
+      "MENU_TITLE": "Časová osa",
       "S": {
         "CAL_PROVIDER_ERROR": "Chyba poskytovatele kalendáře Časové osy: {{errTxt}}"
       }
@@ -1434,7 +1434,6 @@
     "CREATE_TAG": "Vytvořit štítek",
     "DELETE_TAG": "Smazat štítek",
     "GO_TO_TASK_LIST": "Přejít na seznam úkolů",
-    "MANAGE_PROJECTS": "Spravovat projekty",
     "HELP": "Nápověda",
     "METRICS": "Metryky",
     "NOTES": "Poznámky",
@@ -1444,7 +1443,6 @@
     "PROJECT_MENU": "Menu projektu",
     "PROJECT_SETTINGS": "Nastavení projektu",
     "QUICK_HISTORY": "Rychlá historie",
-    "SCHEDULED": "Naplánováno",
     "SETTINGS": "Nastavení",
     "SHOW_SEARCH_BAR": "Zobrazit vyhledávací lištu",
     "TAGS": "Štítky",
@@ -1454,7 +1452,9 @@
     "TOGGLE_SHOW_NOTES": "Zobrazit/Skrýt poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Spustit/Zastavit sledování času",
     "TRIGGER_SYNC": "Spustit synchronizaci ručně",
-    "WORKLOG": "Pracovní záznam"
+    "WORKLOG": "Pracovní záznam",
+    "MANAGE_PROJECTS": "Spravovat projekty",
+    "SCHEDULED": "Naplánováno"
   },
   "PDS": {
     "BACK": "Počkej, zapomněl jsem na něco!",
@@ -1494,35 +1494,6 @@
   },
   "PM": {
     "TITLE": "Projektová metrika"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archivované projekty",
-    "ARCHIVE_PROJECT": "Archivovat projekt",
-    "CLICK_TO_HIDE": "Klikněte pro skrytí projektu z menu",
-    "CLICK_TO_SHOW": "Klikněte pro zobrazení projektu v menu",
-    "DELETE_PROJECT": "Smazat projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt archivovat? Archivované projekty se v menu již nezobrazují, a nemůžete přistupovat k žádným jejich datům bez obnovení. Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Archivovat"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Opravdu chcete tento projekt smazat? Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Smazat"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt znovu zarchivovat?",
-      "OK": "Odzarchivovat"
-    },
-    "EDIT_PROJECT": "Upravit projekt",
-    "EXPORT_PROJECT": "Exportovat projekt",
-    "GITHUB_CONFIGURED": "Nastavena integrace GitHubu",
-    "GITLAB_CONFIGURED": "Nastavena integrace GitLabu",
-    "IMPORT_FROM_FILE": "Importovat z souboru",
-    "JIRA_CONFIGURED": "Nastavena integrace Jiry",
-    "OPEN_PROJECT_CONFIGURED": "Nastavena integrace OpenProjectu",
-    "S_INVALID_JSON": "Neplatný JSON pro soubor s projektem",
-    "TITLE": "Přehled projektu",
-    "UN_ARCHIVE_PROJECT": "Odzarchivovat projekt"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Celková nastavení",
@@ -1589,5 +1560,34 @@
     "TIME_ESTIMATED": "Odhadovaný čas:",
     "WITHOUT_BREAK": "Bez přestávky:",
     "WORKING_TODAY": "Pracujete dnes:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archivované projekty",
+    "ARCHIVE_PROJECT": "Archivovat projekt",
+    "CLICK_TO_HIDE": "Klikněte pro skrytí projektu z menu",
+    "CLICK_TO_SHOW": "Klikněte pro zobrazení projektu v menu",
+    "DELETE_PROJECT": "Smazat projekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Opravdu chcete tento projekt archivovat? Archivované projekty se v menu již nezobrazují, a nemůžete přistupovat k žádným jejich datům bez obnovení. Doporučuje se zálohovat data před provedením této akce.",
+      "OK": "Archivovat"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Opravdu chcete tento projekt smazat? Doporučuje se zálohovat data před provedením této akce.",
+      "OK": "Smazat"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Opravdu chcete tento projekt znovu zarchivovat?",
+      "OK": "Odzarchivovat"
+    },
+    "EDIT_PROJECT": "Upravit projekt",
+    "EXPORT_PROJECT": "Exportovat projekt",
+    "GITHUB_CONFIGURED": "Nastavena integrace GitHubu",
+    "GITLAB_CONFIGURED": "Nastavena integrace GitLabu",
+    "IMPORT_FROM_FILE": "Importovat z souboru",
+    "JIRA_CONFIGURED": "Nastavena integrace Jiry",
+    "OPEN_PROJECT_CONFIGURED": "Nastavena integrace OpenProjectu",
+    "S_INVALID_JSON": "Neplatný JSON pro soubor s projektem",
+    "TITLE": "Přehled projektu",
+    "UN_ARCHIVE_PROJECT": "Odzarchivovat projekt"
   }
 }

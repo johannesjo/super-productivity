@@ -1092,12 +1092,12 @@
         "TITLE": "Zaman çizelgesi"
       },
       "END": "İş Bitişi",
-      "MENU_TITLE": "Zaman çizelgesi",
       "NOW": "Şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
       "START": "İş Başlangıcı",
       "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
       "LUNCH_BREAK": "Öğle Arası",
+      "MENU_TITLE": "Zaman çizelgesi",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
       }
@@ -1421,7 +1421,6 @@
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
-    "MANAGE_PROJECTS": "Projeleri Yönet",
     "HELP": "Yardım",
     "METRICS": "İstatistikler",
     "NOTES": "Notlar",
@@ -1431,7 +1430,6 @@
     "PROJECT_MENU": "Proje Menüsü",
     "PROJECT_SETTINGS": "Proje Ayarları",
     "QUICK_HISTORY": "Hızlı Geçmiş",
-    "SCHEDULED": "Planlanmış",
     "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
@@ -1441,7 +1439,9 @@
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
     "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
-    "WORKLOG": "Görev günlüğü"
+    "WORKLOG": "Görev günlüğü",
+    "MANAGE_PROJECTS": "Projeleri Yönet",
+    "SCHEDULED": "Planlanmış"
   },
   "PDS": {
     "BACK": "Bekle bir şey unuttum!",
@@ -1481,35 +1481,6 @@
   },
   "PM": {
     "TITLE": "Proje İstatistikleri"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
-    "ARCHIVE_PROJECT": "Arşiv Projesi",
-    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
-    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
-    "DELETE_PROJECT": "Projeyi Sil",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "Arşivle"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "Sil"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
-      "OK": "Arşivden Çıkar"
-    },
-    "EDIT_PROJECT": "Projeyi Düzenle",
-    "EXPORT_PROJECT": "Projeyi Dışa Aktar",
-    "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
-    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
-    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
-    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
-    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
-    "TITLE": "Projeye Genel Bakış",
-    "UN_ARCHIVE_PROJECT": "Arşivlenmemiş Proje"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
@@ -1576,5 +1547,34 @@
     "TIME_ESTIMATED": "Tahmini Süre:",
     "WITHOUT_BREAK": "Mola vermeden:",
     "WORKING_TODAY": "Bugün çalışıyorum:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
+    "ARCHIVE_PROJECT": "Arşiv Projesi",
+    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
+    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
+    "DELETE_PROJECT": "Projeyi Sil",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
+      "OK": "Arşivle"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
+      "OK": "Sil"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
+      "OK": "Arşivden Çıkar"
+    },
+    "EDIT_PROJECT": "Projeyi Düzenle",
+    "EXPORT_PROJECT": "Projeyi Dışa Aktar",
+    "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
+    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
+    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
+    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
+    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
+    "TITLE": "Projeye Genel Bakış",
+    "UN_ARCHIVE_PROJECT": "Arşivlenmemiş Proje"
   }
 }
