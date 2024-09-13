@@ -892,12 +892,12 @@
         "TITLE": "타임 라인"
       },
       "END": "작업 종료",
-      "MENU_TITLE": "타임 라인",
       "NOW": "지금",
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
       "START": "작업 시작",
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
       "LUNCH_BREAK": "점심 휴식",
+      "MENU_TITLE": "타임 라인",
       "S": {
         "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
       }
@@ -1216,7 +1216,6 @@
     "CREATE_TAG": "태그 생성",
     "DELETE_TAG": "태그 삭제",
     "GO_TO_TASK_LIST": "작업 목록으로 이동",
-    "MANAGE_PROJECTS": "프로젝트 관리",
     "METRICS": "측정 항목",
     "NOTES": "노트",
     "PROCRASTINATE": "미루다",
@@ -1224,7 +1223,6 @@
     "PROJECT_MENU": "프로젝트 메뉴",
     "PROJECT_SETTINGS": "프로젝트 설정",
     "QUICK_HISTORY": "빠른 기록",
-    "SCHEDULED": "예정",
     "SETTINGS": "설정",
     "SHOW_SEARCH_BAR": "검색창 표시",
     "TAGS": "태그",
@@ -1234,7 +1232,9 @@
     "TOGGLE_SHOW_NOTES": "프로젝트 노트 표시 / 숨기기",
     "TOGGLE_TRACK_TIME": "추적 시작 / 중지 시간",
     "TRIGGER_SYNC": "수동으로 동기화 트리거",
-    "WORKLOG": "작업 로그"
+    "WORKLOG": "작업 로그",
+    "MANAGE_PROJECTS": "프로젝트 관리",
+    "SCHEDULED": "예정"
   },
   "PDS": {
     "BACK": "잠깐 내가 뭔가를 잊었 어!",
@@ -1272,35 +1272,6 @@
   },
   "PM": {
     "TITLE": "프로젝트 측정 항목"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
-    "ARCHIVE_PROJECT": "프로젝트 아카이브",
-    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
-    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
-    "DELETE_PROJECT": "프로젝트 삭제",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "아카이브"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "삭제"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
-      "OK": "보관 취소"
-    },
-    "EDIT_PROJECT": "프로젝트 수정",
-    "EXPORT_PROJECT": "프로젝트 내보내기",
-    "GITHUB_CONFIGURED": "GitHub 통합 구성",
-    "GITLAB_CONFIGURED": "GitLab 통합 구성",
-    "IMPORT_FROM_FILE": "파일에서 가져 오기",
-    "JIRA_CONFIGURED": "Jira 통합 구성",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
-    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
-    "TITLE": "프로젝트 개요",
-    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
   },
   "PS": {
     "GLOBAL_SETTINGS": "전체 설정",
@@ -1361,5 +1332,34 @@
     "TIME_ESTIMATED": "예상 시간 :",
     "WITHOUT_BREAK": "휴식없이 :",
     "WORKING_TODAY": "오늘은 일한다:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
+    "ARCHIVE_PROJECT": "프로젝트 아카이브",
+    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
+    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
+    "DELETE_PROJECT": "프로젝트 삭제",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "아카이브"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "삭제"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
+      "OK": "보관 취소"
+    },
+    "EDIT_PROJECT": "프로젝트 수정",
+    "EXPORT_PROJECT": "프로젝트 내보내기",
+    "GITHUB_CONFIGURED": "GitHub 통합 구성",
+    "GITLAB_CONFIGURED": "GitLab 통합 구성",
+    "IMPORT_FROM_FILE": "파일에서 가져 오기",
+    "JIRA_CONFIGURED": "Jira 통합 구성",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
+    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
+    "TITLE": "프로젝트 개요",
+    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
   }
 }

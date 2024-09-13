@@ -902,12 +902,12 @@
         "TITLE": "Časová os"
       },
       "END": "Ukončenie práce",
-      "MENU_TITLE": "Časová os",
       "NOW": "Teraz",
       "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
       "START": "Začiatok práce",
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
       "LUNCH_BREAK": "Obedová prestávka",
+      "MENU_TITLE": "Časová os",
       "S": {
         "CAL_PROVIDER_ERROR": "Schedule Cal Provider Error: {{errTxt}}"
       }
@@ -1242,7 +1242,6 @@
     "CREATE_TAG": "Vytvoriť štítok",
     "DELETE_TAG": "Odstrániť štítok",
     "GO_TO_TASK_LIST": "Prejsť do zoznamu úloh",
-    "MANAGE_PROJECTS": "Spravovať projekty",
     "METRICS": "Metrika",
     "NOTES": "Poznámky",
     "NOTES_PANEL_INFO": "Poznámky je možné zobraziť len z časovej osi a bežného zobrazenia zoznamu úloh.",
@@ -1251,7 +1250,6 @@
     "PROJECT_MENU": "Ponuka projektu",
     "PROJECT_SETTINGS": "Nastavenia projektu",
     "QUICK_HISTORY": "Rýchla história",
-    "SCHEDULED": "Naplánované",
     "SETTINGS": "Nastavenia",
     "SHOW_SEARCH_BAR": "Zobrazenie panela vyhľadávania",
     "TAGS": "Štítky",
@@ -1261,7 +1259,9 @@
     "TOGGLE_SHOW_NOTES": "Zobraziť/skryť Poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Začať/pozastaviť sledovanie času",
     "TRIGGER_SYNC": "Ručné spustenie synchronizácie",
-    "WORKLOG": "Pracovný denník"
+    "WORKLOG": "Pracovný denník",
+    "MANAGE_PROJECTS": "Spravovať projekty",
+    "SCHEDULED": "Naplánované"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
@@ -1300,35 +1300,6 @@
   },
   "PM": {
     "TITLE": "Project Metrics"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CLICK_TO_HIDE": "Click to hide project from menu",
-    "CLICK_TO_SHOW": "Click to show project in menu",
-    "DELETE_PROJECT": "Delete Project",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Odstrániť"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
-    },
-    "EDIT_PROJECT": "Upraviť projekt",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
@@ -1395,5 +1366,34 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archived Projects",
+    "ARCHIVE_PROJECT": "Archive Project",
+    "CLICK_TO_HIDE": "Click to hide project from menu",
+    "CLICK_TO_SHOW": "Click to show project in menu",
+    "DELETE_PROJECT": "Delete Project",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
+      "OK": "Archive"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
+      "OK": "Odstrániť"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Are you sure you want to unarchive this project?",
+      "OK": "Unarchive"
+    },
+    "EDIT_PROJECT": "Upraviť projekt",
+    "EXPORT_PROJECT": "Export Project",
+    "GITHUB_CONFIGURED": "GitHub Integration Configured",
+    "GITLAB_CONFIGURED": "GitLab Integration Configured",
+    "IMPORT_FROM_FILE": "Import from file",
+    "JIRA_CONFIGURED": "Jira Integration Configured",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
+    "S_INVALID_JSON": "Invalid json for project file",
+    "TITLE": "Project Overview",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   }
 }

@@ -862,12 +862,12 @@
         "TITLE": "タイムライン"
       },
       "END": "作業終了",
-      "MENU_TITLE": "タイムライン",
       "NOW": "今",
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
       "START": "作業開始",
       "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
       "LUNCH_BREAK": "昼休憩",
+      "MENU_TITLE": "タイムライン",
       "S": {
         "CAL_PROVIDER_ERROR": "タイムライン校正プロバイダーエラー： {{errTxt}}"
       }
@@ -1184,7 +1184,6 @@
     "CREATE_TAG": "タグを作成",
     "DELETE_TAG": "タグを削除",
     "GO_TO_TASK_LIST": "タスクリストへ",
-    "MANAGE_PROJECTS": "プロジェクトを管理する",
     "METRICS": "メトリック",
     "NOTES": "ノート",
     "PROCRASTINATE": "先延ばし",
@@ -1192,7 +1191,6 @@
     "PROJECT_MENU": "プロジェクトメニュー",
     "PROJECT_SETTINGS": "プロジェクト設定",
     "QUICK_HISTORY": "クイックヒストリー",
-    "SCHEDULED": "予定",
     "SETTINGS": "設定",
     "SHOW_SEARCH_BAR": "検索バーを表示する",
     "TAGS": "タグ",
@@ -1202,7 +1200,9 @@
     "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
     "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
     "TRIGGER_SYNC": "手動で同期をトリガーする",
-    "WORKLOG": "作業記録"
+    "WORKLOG": "作業記録",
+    "MANAGE_PROJECTS": "プロジェクトを管理する",
+    "SCHEDULED": "予定"
   },
   "PDS": {
     "BACK": "待って！何か忘れてる！",
@@ -1240,35 +1240,6 @@
   },
   "PM": {
     "TITLE": "プロジェクトメトリクス"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "アーカイブプロジェクト",
-    "ARCHIVE_PROJECT": "アーカイブプロジェクト",
-    "CLICK_TO_HIDE": "メニューからプロジェクトを非表示にするにはクリックします",
-    "CLICK_TO_SHOW": "クリックしてプロジェクトをメニューに表示",
-    "DELETE_PROJECT": "プロジェクトを削除",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "このプロジェクトをアーカイブしますか？アーカイブされたプロジェクトはメニューに表示されなくなり、復元しないとデータにアクセスできなくなります。これを行う前にデータをバックアップすることをお勧めします。",
-      "OK": "アーカイブ"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "このプロジェクトを削除してもよろしいですか？これを行う前にデータをバックアップすることをお勧めします。",
-      "OK": "削除"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "このプロジェクトをアーカイブ解除してよろしいですか？",
-      "OK": "アーカイブ解除"
-    },
-    "EDIT_PROJECT": "プロジェクトを編集",
-    "EXPORT_PROJECT": "プロジェクトをエクスポート",
-    "GITHUB_CONFIGURED": "GitHub連携を設定済み",
-    "GITLAB_CONFIGURED": "GitLab連携を設定済み",
-    "IMPORT_FROM_FILE": "ファイルからインポート",
-    "JIRA_CONFIGURED": "Jira連携が設定されました",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject統合の構成",
-    "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
-    "TITLE": "プロジェクト概要",
-    "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
   },
   "PS": {
     "GLOBAL_SETTINGS": "全体設定",
@@ -1329,5 +1300,34 @@
     "TIME_ESTIMATED": "推定所要時間：",
     "WITHOUT_BREAK": "連続：",
     "WORKING_TODAY": "今日："
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "アーカイブプロジェクト",
+    "ARCHIVE_PROJECT": "アーカイブプロジェクト",
+    "CLICK_TO_HIDE": "メニューからプロジェクトを非表示にするにはクリックします",
+    "CLICK_TO_SHOW": "クリックしてプロジェクトをメニューに表示",
+    "DELETE_PROJECT": "プロジェクトを削除",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "このプロジェクトをアーカイブしますか？アーカイブされたプロジェクトはメニューに表示されなくなり、復元しないとデータにアクセスできなくなります。これを行う前にデータをバックアップすることをお勧めします。",
+      "OK": "アーカイブ"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "このプロジェクトを削除してもよろしいですか？これを行う前にデータをバックアップすることをお勧めします。",
+      "OK": "削除"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "このプロジェクトをアーカイブ解除してよろしいですか？",
+      "OK": "アーカイブ解除"
+    },
+    "EDIT_PROJECT": "プロジェクトを編集",
+    "EXPORT_PROJECT": "プロジェクトをエクスポート",
+    "GITHUB_CONFIGURED": "GitHub連携を設定済み",
+    "GITLAB_CONFIGURED": "GitLab連携を設定済み",
+    "IMPORT_FROM_FILE": "ファイルからインポート",
+    "JIRA_CONFIGURED": "Jira連携が設定されました",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject統合の構成",
+    "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
+    "TITLE": "プロジェクト概要",
+    "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
   }
 }

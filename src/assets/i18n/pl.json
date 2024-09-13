@@ -790,11 +790,11 @@
         "TITLE": "Schedule"
       },
       "END": "Work End",
-      "MENU_TITLE": "Schedule",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
-      "LUNCH_BREAK": "Przerwa na lunch"
+      "LUNCH_BREAK": "Przerwa na lunch",
+      "MENU_TITLE": "Schedule"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1096,14 +1096,12 @@
     "CREATE_TAG": "Stwórz Tag",
     "DELETE_TAG": "Usuń Tag",
     "GO_TO_TASK_LIST": "Idź do listy zadań",
-    "MANAGE_PROJECTS": "Zarządzaj projektami",
     "METRICS": "Metryki",
     "NOTES": "Notatki",
     "PROCRASTINATE": "Odwlekanie",
     "PROJECTS": "Projekty",
     "PROJECT_MENU": "Menu projektu",
     "PROJECT_SETTINGS": "Ustawienia projektów",
-    "SCHEDULED": "Zaplanowane",
     "SETTINGS": "Ustawienia",
     "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania",
     "TAGS": "Tagi",
@@ -1112,7 +1110,9 @@
     "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
     "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
     "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
-    "WORKLOG": "Czas pracy"
+    "WORKLOG": "Czas pracy",
+    "MANAGE_PROJECTS": "Zarządzaj projektami",
+    "SCHEDULED": "Zaplanowane"
   },
   "PDS": {
     "BACK": "Poczekaj! Zapomniałem czegoś...",
@@ -1149,33 +1149,6 @@
   },
   "PM": {
     "TITLE": "Metryki Projektu"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Zarchiwizowane projekty",
-    "ARCHIVE_PROJECT": "Archiwizuj Projekt",
-    "DELETE_PROJECT": "Usuń Projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Jesteś pewien że chcesz zarchiwizować projekt? Nie bedzie się pojawiał na liście projektów dopóki nie zostanie przywrócony. Polecamy zrobić kopię zapasową przed wykonaniem akcji.",
-      "OK": "Zarchiwizuj"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Jesteś pewien że chcesz go usunąć? Polecamy najpierw zrobić kopię zapasową.",
-      "OK": "Usuń"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Jesteś pewien że chcesz przywrócić projekt?",
-      "OK": "Przywróć"
-    },
-    "EDIT_PROJECT": "Edytuj Projekt",
-    "EXPORT_PROJECT": "Wyeksportuj projekt",
-    "GITHUB_CONFIGURED": "Integracja z GitHub Skonfigutowana",
-    "GITLAB_CONFIGURED": "Integracja z GitLab Skonfigutowana",
-    "IMPORT_FROM_FILE": "Importuj z pliku",
-    "JIRA_CONFIGURED": "Integracja z Jira Skonfigutowana",
-    "S_INVALID_JSON": "Niepoprawny plik JSON projektu",
-    "TITLE": "Podgląd Projektu",
-    "UN_ARCHIVE_PROJECT": "Przywróć Projekt",
-    "CREATE_NEW": "Stwórz Nowy"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Ustawienia Globalne",
@@ -1236,5 +1209,32 @@
     "TIME_ESTIMATED": "Zaplanowany Czas:",
     "WITHOUT_BREAK": "Bez Przerwy:",
     "WORKING_TODAY": "Czas pracy:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Zarchiwizowane projekty",
+    "ARCHIVE_PROJECT": "Archiwizuj Projekt",
+    "DELETE_PROJECT": "Usuń Projekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Jesteś pewien że chcesz zarchiwizować projekt? Nie bedzie się pojawiał na liście projektów dopóki nie zostanie przywrócony. Polecamy zrobić kopię zapasową przed wykonaniem akcji.",
+      "OK": "Zarchiwizuj"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Jesteś pewien że chcesz go usunąć? Polecamy najpierw zrobić kopię zapasową.",
+      "OK": "Usuń"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Jesteś pewien że chcesz przywrócić projekt?",
+      "OK": "Przywróć"
+    },
+    "EDIT_PROJECT": "Edytuj Projekt",
+    "EXPORT_PROJECT": "Wyeksportuj projekt",
+    "GITHUB_CONFIGURED": "Integracja z GitHub Skonfigutowana",
+    "GITLAB_CONFIGURED": "Integracja z GitLab Skonfigutowana",
+    "IMPORT_FROM_FILE": "Importuj z pliku",
+    "JIRA_CONFIGURED": "Integracja z Jira Skonfigutowana",
+    "S_INVALID_JSON": "Niepoprawny plik JSON projektu",
+    "TITLE": "Podgląd Projektu",
+    "UN_ARCHIVE_PROJECT": "Przywróć Projekt",
+    "CREATE_NEW": "Stwórz Nowy"
   }
 }

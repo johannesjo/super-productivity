@@ -1006,12 +1006,12 @@
         "TITLE": "Línea de tiempo"
       },
       "END": "Fin del trabajo",
-      "MENU_TITLE": "Línea de tiempo",
       "NOW": "ahora",
       "NO_TASKS": "Actualmente no hay tareas. Agregue algunas tareas a través del botón + en la barra superior.",
       "START": "Inicio del trabajo",
       "TASK_PROJECTION_INFO": "Proyección futura de una tarea repetible programada",
       "LUNCH_BREAK": "Pausa comida",
+      "MENU_TITLE": "Línea de tiempo",
       "S": {
         "CAL_PROVIDER_ERROR": "Error del proveedor de la escala de tiempo: {{errTxt}}"
       }
@@ -1332,7 +1332,6 @@
     "CREATE_TAG": "Crear etiqueta",
     "DELETE_TAG": "Eliminar etiqueta",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
-    "MANAGE_PROJECTS": "Administrar proyectos",
     "HELP": "Ayuda",
     "METRICS": "Métrica",
     "NOTES": "Notas",
@@ -1342,7 +1341,6 @@
     "PROJECT_MENU": "Menú de proyecto",
     "PROJECT_SETTINGS": "Ajustes del proyecto",
     "QUICK_HISTORY": "Historia rápida",
-    "SCHEDULED": "Programado",
     "SETTINGS": "Ajustes",
     "SHOW_SEARCH_BAR": "Mostrar barra de búsqueda",
     "TAGS": "Etiquetas",
@@ -1352,7 +1350,9 @@
     "TOGGLE_SHOW_NOTES": "Mostrar/Ocultar Notas del Proyecto",
     "TOGGLE_TRACK_TIME": "Iniciar / Detener el tiempo de seguimiento",
     "TRIGGER_SYNC": "Activar la sincronización manualmente",
-    "WORKLOG": "Registro de trabajo"
+    "WORKLOG": "Registro de trabajo",
+    "MANAGE_PROJECTS": "Administrar proyectos",
+    "SCHEDULED": "Programado"
   },
   "PDS": {
     "BACK": "!Espera me olvidé de algo!",
@@ -1392,35 +1392,6 @@
   },
   "PM": {
     "TITLE": "Métricas del proyecto"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Proyectos archivados",
-    "ARCHIVE_PROJECT": "Archivar proyecto",
-    "CLICK_TO_HIDE": "Haga clic para ocultar el proyecto del menú",
-    "CLICK_TO_SHOW": "Haga clic para mostrar el proyecto en el menú",
-    "DELETE_PROJECT": "Eliminar proyecto",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "¿Seguro que quieres archivar este proyecto? Los proyectos archivados ya no se mostrarán en el menú y no podrá acceder a ninguno de sus datos sin restaurarlos. Se recomienda que haga una copia de seguridad de sus datos antes de hacer esto.",
-      "OK": "Archivar"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "¿Seguro que quieres eliminar este proyecto? Es recomendable hacer una copia de seguridad de tus datos antes de hacer esto.",
-      "OK": "Borrar"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "¿Seguro que quieres desarchivar este proyecto?",
-      "OK": "Desarchivar"
-    },
-    "EDIT_PROJECT": "Editar proyecto",
-    "EXPORT_PROJECT": "Exportar proyecto",
-    "GITHUB_CONFIGURED": "Integración de GitHub configurada",
-    "GITLAB_CONFIGURED": "Integración de GitLab configurada",
-    "IMPORT_FROM_FILE": "Importar desde archivo",
-    "JIRA_CONFIGURED": "Integración de Jira Configurada",
-    "OPEN_PROJECT_CONFIGURED": "Integración de OpenProject configurada",
-    "S_INVALID_JSON": "Json no válido para el archivo de proyecto",
-    "TITLE": "Descripción del proyecto",
-    "UN_ARCHIVE_PROJECT": "Desarchivar Proyecto"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Ajustes globales",
@@ -1488,5 +1459,34 @@
     "WITHOUT_BREAK": "Sin descanso:",
     "WORKING_TODAY": "Trabajado hoy:",
     "WORKING_TODAY_ARCHIVED": "Tiempo trabajado hoy en tareas archivadas"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Proyectos archivados",
+    "ARCHIVE_PROJECT": "Archivar proyecto",
+    "CLICK_TO_HIDE": "Haga clic para ocultar el proyecto del menú",
+    "CLICK_TO_SHOW": "Haga clic para mostrar el proyecto en el menú",
+    "DELETE_PROJECT": "Eliminar proyecto",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "¿Seguro que quieres archivar este proyecto? Los proyectos archivados ya no se mostrarán en el menú y no podrá acceder a ninguno de sus datos sin restaurarlos. Se recomienda que haga una copia de seguridad de sus datos antes de hacer esto.",
+      "OK": "Archivar"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "¿Seguro que quieres eliminar este proyecto? Es recomendable hacer una copia de seguridad de tus datos antes de hacer esto.",
+      "OK": "Borrar"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "¿Seguro que quieres desarchivar este proyecto?",
+      "OK": "Desarchivar"
+    },
+    "EDIT_PROJECT": "Editar proyecto",
+    "EXPORT_PROJECT": "Exportar proyecto",
+    "GITHUB_CONFIGURED": "Integración de GitHub configurada",
+    "GITLAB_CONFIGURED": "Integración de GitLab configurada",
+    "IMPORT_FROM_FILE": "Importar desde archivo",
+    "JIRA_CONFIGURED": "Integración de Jira Configurada",
+    "OPEN_PROJECT_CONFIGURED": "Integración de OpenProject configurada",
+    "S_INVALID_JSON": "Json no válido para el archivo de proyecto",
+    "TITLE": "Descripción del proyecto",
+    "UN_ARCHIVE_PROJECT": "Desarchivar Proyecto"
   }
 }
