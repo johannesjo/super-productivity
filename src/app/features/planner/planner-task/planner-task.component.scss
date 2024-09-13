@@ -99,31 +99,29 @@ $h: $planner-item-height;
 }
 
 .planner-time-remaining-shared {
-  cursor: pointer;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  // we overwrite since we need to move down styles to inline-input
+  padding: 0;
   border: 1px solid transparent;
 
   &.hasNoTimeSpentOrEstimate {
     text-align: center;
   }
 
-  &:hover {
-    border: 1px solid transparent;
-    border-radius: 6px;
-
-    @include darkTheme() {
-      border-color: $dark-theme-extra-border-color;
-      background: $dark-theme-bg-lighter;
-    }
-    @include lightTheme() {
-      border-color: $dark-theme-extra-border-color;
-      background: $light-theme-bg-darker;
-    }
-  }
-
   mat-icon {
     display: inline-flex;
+  }
+
+  inline-input {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-width: 44px;
+    text-align: right;
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+
+  inline-input ::ng-deep input {
+    line-height: 1.5;
   }
 }
 

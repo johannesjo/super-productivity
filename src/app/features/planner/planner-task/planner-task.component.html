@@ -68,7 +68,7 @@
   <ng-content></ng-content>
 
   <div
-    (click)="estimateTime($event)"
+    (click)="estimateTimeClick($event)"
     [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
     [style.pointer-events]="task.subTaskIds?.length && 'none'"
     class="planner-time-remaining-shared"
@@ -78,10 +78,14 @@
       svgIcon="estimate_remaining"
       inline="true"
     ></mat-icon>
-    @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
-    <span class="original-time-remaining">({{ timeEstimate|msToString }})</span>
-    <!--- -->
-    } @else { {{ timeEstimate|msToString }} }
+
+    <inline-input
+      (changed)="updateTimeEstimate( $event)"
+      [displayValue]="timeEstimate|msToString"
+      [type]="'duration'"
+      [value]="timeEstimate"
+    >
+    </inline-input>
   </div>
 </div>
 
