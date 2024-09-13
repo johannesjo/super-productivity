@@ -12,21 +12,19 @@
     >
       <header class="work-view-header">
         <div
-          *ngIf="!(planningModeService.isPlanningMode$|async)"
+          *ngIf="!(isPlanningMode()) &&  estimateRemainingToday() || workingToday()"
           @fade
           class="status-bar"
         >
           <div
             class="item"
-            matTooltip="{{T.WW.TODAY_REMAINING|translate}} ~{{workContextService.todayRemainingInProject$|async|msToString}}"
+            matTooltip="{{T.WW.TODAY_REMAINING|translate}} ~{{todayRemainingInProject()|msToString}}"
             [matTooltipDisabled]="!(workContextService.isActiveWorkContextProject$|async)"
             matTooltipPosition="above"
           >
-            <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
+            <span class="label">{{ T.WW.ESTIMATE_REMAINING|translate }}</span>
             <span class="no-wrap">
-              ~<strong class="time-val"
-                >{{workContextService.estimateRemainingToday$|async|msToString}}</strong
-              >
+              ~<strong class="time-val">{{ estimateRemainingToday()|msToString }}</strong>
               <mat-icon
                 style="margin-left: 2px"
                 svgIcon="estimate_remaining"
@@ -34,14 +32,13 @@
             </span>
           </div>
           <div class="item">
-            <span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
+            <span class="label">{{ T.WW.WORKING_TODAY|translate }}</span>
             <span class="no-wrap">
-              <strong class="time-val"
-                >{{workContextService.workingToday$|async|msToString}}</strong
+              <strong class="time-val">{{ workingToday()|msToString }}</strong
               ><span
                 *ngIf="(workContextService.workingTodayArchived$|async) as workingTodayArchived"
                 [matTooltip]="T.WW.WORKING_TODAY_ARCHIVED|translate"
-                >(+{{workingTodayArchived|msToString}})</span
+                >(+{{ workingTodayArchived|msToString }})</span
               >
               <mat-icon svgIcon="working_today"></mat-icon>
             </span>
@@ -51,10 +48,11 @@
             *ngIf="isShowTimeWorkedWithoutBreak"
             class="item hide-xs"
           >
-            <span class="label">{{T.WW.WITHOUT_BREAK|translate}} </span>
+            <span class="label">{{ T.WW.WITHOUT_BREAK|translate }} </span>
             <span class="no-wrap">
               <strong class="time-val"
-                >{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong
+                >{{ takeABreakService.timeWorkingWithoutABreak$|async|msToString
+                }}</strong
               ><mat-icon>timer</mat-icon>
             </span>
             <div
@@ -73,24 +71,25 @@
         </div>
 
         <div
-          *ngIf="(planningModeService.isPlanningMode$|async)"
+          *ngIf="(isPlanningMode())"
           class="planning-mode-header"
         >
           <h3
-            *ngIf="!(undoneTasks?.length)"
+            *ngIf="!(undoneTasks()?.length)"
             class="planning-mode-header mat-h3"
           >
-            {{T.WW.ADD_SOME_TASKS|translate}}
+            {{ T.WW.ADD_SOME_TASKS|translate }}
           </h3>
           <div
-            *ngIf="undoneTasks?.length"
+            *ngIf="undoneTasks()?.length"
             class="status-bar"
           >
             <div class="item">
-              <span class="label">{{T.WW.TIME_ESTIMATED|translate}}</span>
+              <span class="label">{{ T.WW.TIME_ESTIMATED|translate }}</span>
               <span class="no-wrap">
                 <strong class="time-val"
-                  >~{{workContextService.estimateRemainingToday$|async|msToString}}</strong
+                  >~{{ workContextService.estimateRemainingToday$|async|msToString
+                  }}</strong
                 >
                 <mat-icon>timer</mat-icon>
               </span>
@@ -106,11 +105,11 @@
 
       <div class="task-list-wrapper">
         <div
-          *ngIf="!(planningModeService.isPlanningMode$|async) && !(workContextService.isHasTasksToWorkOn$|async)"
+          *ngIf="!(isPlanningMode()) && !(workContextService.isHasTasksToWorkOn$|async)"
           @expandFade
           class="add-more-or-finish"
         >
-          <h2>{{T.WW.NO_PLANNED_TASKS|translate}}</h2>
+          <h2>{{ T.WW.NO_PLANNED_TASKS|translate }}</h2>
 
           <div class="btn-wrapper">
             <button
@@ -120,7 +119,7 @@
               tabindex="1"
             >
               <mat-icon>playlist_add</mat-icon>
-              {{T.WW.ADD_MORE|translate}}
+              {{ T.WW.ADD_MORE|translate }}
             </button>
 
             <button
@@ -132,7 +131,7 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY|translate}}
+              {{ T.WW.FINISH_DAY|translate }}
             </button>
 
             <button
@@ -144,7 +143,7 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
+              {{ T.WW.FINISH_DAY_FOR_PROJECT|translate }}
             </button>
 
             <button
@@ -156,13 +155,13 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
+              {{ T.WW.FINISH_DAY_FOR_TAG|translate }}
             </button>
           </div>
         </div>
 
         <div
-          *ngIf="(planningModeService.isPlanningMode$|async)"
+          *ngIf="(isPlanningMode())"
           @expandFade
           class="planning-mode-content"
         >
@@ -184,27 +183,27 @@
             tabindex="1"
           >
             <mat-icon>check</mat-icon>
-            {{T.WW.READY_TO_WORK|translate}}
+            {{ T.WW.READY_TO_WORK|translate }}
           </button>
         </div>
         <task-list
           class="tour-undoneList"
-          [tasks]="undoneTasks"
+          [tasks]="undoneTasks()"
           listId="PARENT"
           listModelId="UNDONE"
         ></task-list>
 
         <div
-          *ngIf="!(planningModeService.isPlanningMode$|async) || (doneTasks)?.length"
+          *ngIf="!(isPlanningMode()) || (doneTasks())?.length"
           @expand
         >
           <h2 class="mat-h2 completed-tasks-heading">
-            {{T.WW.COMPLETED_TASKS|translate}}
+            {{ T.WW.COMPLETED_TASKS|translate }}
           </h2>
           <task-list
             class="tour-doneList"
             [noTasksMsg]="T.WW.NO_COMPLETED_TASKS|translate"
-            [tasks]="doneTasks"
+            [tasks]="doneTasks()"
             listId="PARENT"
             listModelId="DONE"
           ></task-list>
@@ -219,7 +218,7 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY|translate}}
+              {{ T.WW.FINISH_DAY|translate }}
             </button>
 
             <button
@@ -231,7 +230,7 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
+              {{ T.WW.FINISH_DAY_FOR_PROJECT|translate }}
             </button>
 
             <button
@@ -243,7 +242,7 @@
               tabindex="1"
             >
               <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
+              {{ T.WW.FINISH_DAY_FOR_TAG|translate }}
             </button>
           </div>
         </div>
@@ -259,7 +258,7 @@
       <split
         (posChanged)="splitInputPos=$event"
         [containerEl]="containerEl"
-        [counter]="backlogTasks?.length"
+        [counter]="backlogTasks()?.length"
         [isAnimateBtn]="isTriggerBacklogIconAni$|async"
         [splitBottomEl]="splitBottomEl"
         [splitPos]="splitInputPos"
@@ -272,7 +271,7 @@
       >
         <backlog
           (closeBacklog)="splitInputPos=100"
-          [backlogTasks]="backlogTasks"
+          [backlogTasks]="backlogTasks()"
         ></backlog>
       </div>
     </div>
