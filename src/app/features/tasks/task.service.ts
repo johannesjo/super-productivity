@@ -628,8 +628,9 @@ export class TaskService {
     task: Task,
     duration: number,
     date: string = this._dateService.todayStr(),
+    isFromTrackingReminder = false,
   ): void {
-    this._store.dispatch(addTimeSpent({ task, date, duration }));
+    this._store.dispatch(addTimeSpent({ task, date, duration, isFromTrackingReminder }));
   }
 
   removeTimeSpent(

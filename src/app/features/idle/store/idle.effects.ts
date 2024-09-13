@@ -178,7 +178,13 @@ export class IdleEffects {
         }
       }),
       isNotNullOrUndefined(),
-      map((dialogRes) => idleDialogResult(dialogRes)),
+      withLatestFrom(this._store.select(selectIdleTime)),
+      map(([dialogRes, idleTime]) =>
+        idleDialogResult({
+          ...dialogRes,
+          idleTime,
+        }),
+      ),
       tap(() => (this._isDialogOpen = false)),
     ),
   );
@@ -186,8 +192,7 @@ export class IdleEffects {
   handleIdleDialogResult$ = createEffect(() =>
     this.actions$.pipe(
       ofType(idleDialogResult),
-      withLatestFrom(this._store.select(selectIdleTime)),
-      tap(([{ trackItems, simpleCounterToggleBtnsWhenNoTrackItems }, idleTime]) => {
+      tap(({ trackItems, simpleCounterToggleBtnsWhenNoTrackItems, idleTime }) => {
         this._cancelIdlePoll();
         // handle dialog result weirdness :(
         if (!trackItems) {
