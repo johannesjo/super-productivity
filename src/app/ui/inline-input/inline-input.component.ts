@@ -47,10 +47,9 @@ export class InlineInputComponent implements AfterViewInit {
 
     this.isFocused = true;
     (this.activeInputEl as HTMLElement).focus();
-
-    // if (this.type === 'text' || this.type === 'duration') {
-    // this.activeInputEl.setSelectionRange(0, this.activeInputEl.value.length);
-    // }
+    if (this.type === 'text' || this.type === 'duration') {
+      this.activeInputEl?.select();
+    }
   }
 
   blur(): void {
