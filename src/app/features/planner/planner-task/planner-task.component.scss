@@ -56,6 +56,12 @@ $h: $planner-item-height;
 
 .play-icon-indicator {
   color: $c-accent;
+  // NOTE: we do this since change detection does not immediately pick up on _taskService.currentTaskId
+  display: none;
+
+  :host.isCurrent & {
+    display: block;
+  }
 }
 
 .wrap {
