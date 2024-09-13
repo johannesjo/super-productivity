@@ -16,7 +16,12 @@
           @fade
           class="status-bar"
         >
-          <div class="item">
+          <div
+            class="item"
+            matTooltip="{{T.WW.TODAY_REMAINING|translate}} ~{{workContextService.todayRemainingInProject$|async|msToString}}"
+            [matTooltipDisabled]="!(workContextService.isActiveWorkContextProject$|async)"
+            matTooltipPosition="above"
+          >
             <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
             <span class="no-wrap">
               ~<strong class="time-val"
@@ -28,21 +33,6 @@
               ></mat-icon>
             </span>
           </div>
-          <div *ngIf="(workContextService.isActiveWorkContextProject$|async)">
-            <div class="item">
-              <span class="label">{{T.WW.TODAY_REMAINING|translate}}</span>
-              <span class="no-wrap">
-                ~<strong class="time-val"
-                  >{{workContextService.todayRemainingInProject$|async|msToString}}</strong
-                >
-                <mat-icon
-                  style="margin-left: 2px"
-                  svgIcon="estimate_remaining"
-                ></mat-icon>
-              </span>
-            </div>
-          </div>
-
           <div class="item">
             <span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
             <span class="no-wrap">
