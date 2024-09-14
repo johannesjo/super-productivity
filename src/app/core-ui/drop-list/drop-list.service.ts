@@ -8,8 +8,12 @@ import { BehaviorSubject } from 'rxjs';
 export class DropListService {
   dropLists = new BehaviorSubject<CdkDropList[]>([]);
 
-  registerDropList(dropList: CdkDropList): void {
-    this.dropLists.next([...this.dropLists.getValue(), dropList]);
+  registerDropList(dropList: CdkDropList, isSubTaskList = false): void {
+    if (isSubTaskList) {
+      this.dropLists.next([dropList, ...this.dropLists.getValue()]);
+    } else {
+      this.dropLists.next([...this.dropLists.getValue(), dropList]);
+    }
     console.log(this.dropLists.getValue());
   }
 

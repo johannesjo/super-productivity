@@ -32,6 +32,7 @@ import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
+const PARENT_ALLOWED_LISTS = ['DONE', 'UNDONE', 'BACKLOG'];
 
 export interface DropModelDataForList {
   listModelId: ListModelId;
@@ -106,7 +107,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   // this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
 
   ngAfterViewInit(): void {
-    this.dropListService.registerDropList(this.dropList!);
+    this.dropListService.registerDropList(this.dropList!, this.listId() === 'SUB');
   }
 
   ngOnDestroy(): void {
@@ -122,13 +123,24 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
     console.log({ drag, drop });
-    // if (ev.previousContainer === ev.container && ev.currentIndex !== ev.previousIndex) {
-    // }
-    // const
-    //     if (drag.dropContainer) {
-    //
-    //     }
 
+    const task = drag.data;
+    // const targetModelId = drag.dropContainer.data.listModelId;
+    const targetModelId = drop.data.listModelId;
+    const isSubtask = !!task.parentId;
+    console.log({ isSubtask, targetModelId });
+    // return true;
+    if (isSubtask) {
+      if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
+        console.log('TRUEEEE');
+
+        return true;
+      }
+    } else {
+      if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
+        return true;
+      }
+    }
     return false;
   }
 
@@ -136,20 +148,50 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     srcFilteredTasks: TaskWithSubTasks[],
     ev: CdkDragDrop<DropModelDataForList, DropModelDataForList, TaskWithSubTasks>,
   ): Promise<void> {
-    console.log(ev);
-    console.log(srcFilteredTasks);
-    console.log(this.filteredTasks());
-    console.log(this.listId());
-    console.log(this.listModelId());
-
     const srcListData = ev.previousContainer.data;
     const targetListData = ev.container.data;
     const draggedTask = ev.item.data;
+    console.log({
+      ev,
+      srcListData,
+      targetListData,
+      draggedTask,
+      listId: this.listId(),
+      listModelId: this.listModelId(),
+      filteredTasks: this.filteredTasks(),
+    });
 
-    if (draggedTask.parentId) {
-    }
+    if (
+      draggedTask.parentId &&
+      !PARENT_ALLOWED_LISTS.includes(targetListData.listModelId)
+    ) {
+      // TODO handle case when ev.currentIndex is 1 and there is only one task (means task should be inserted after)
+      // const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
+      const targetTask =
+        (targetListData.allTasks[ev.currentIndex] as TaskCopy) ||
+        targetListData.allTasks[0];
 
-    if (ev.previousContainer === ev.container && ev.currentIndex !== ev.previousIndex) {
+      if (targetTask) {
+        const newIds = [
+          ...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask),
+        ];
+        console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
+          targetTask,
+          draggedTask,
+          newIds,
+        });
+
+        this._move(
+          draggedTask.id,
+          srcListData.listModelId,
+          targetListData.listModelId,
+          newIds.map((p) => p.id),
+        );
+      }
+    } else if (
+      ev.previousContainer === ev.container &&
+      ev.currentIndex !== ev.previousIndex
+    ) {
       const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
       if (targetTask) {
         const newIds = [
