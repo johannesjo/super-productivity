@@ -1,5 +1,6 @@
 import { GlobalConfigState } from './global-config.model';
 import { DEFAULT_PROJECT_ID } from '../project/project.const';
+import { TRACKING_INTERVAL } from 'src/app/app.constants';
 
 const minute = 60 * 1000;
 
@@ -133,6 +134,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     breakReminderSound: null,
   },
   timeTracking: {
+    trackingInterval: TRACKING_INTERVAL,
     defaultEstimate: 0,
     defaultEstimateSubTasks: 0,
     isNotifyWhenTimeEstimateExceeded: true,
