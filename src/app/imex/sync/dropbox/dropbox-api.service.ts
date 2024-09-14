@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { DROPBOX_APP_KEY } from './dropbox.const';
-import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { Observable, ReplaySubject } from 'rxjs';
@@ -39,7 +38,6 @@ export class DropboxApiService {
     );
 
   constructor(
-    private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
     private _matDialog: MatDialog,
     private _snackService: SnackService,
@@ -227,10 +225,12 @@ export class DropboxApiService {
         }),
       })
       .then(async (res) => {
+        console.log('Dropbox: Refresh access token Response', res);
+
         await this.updateTokens({
           accessToken: res.data.access_token,
           // eslint-disable-next-line no-mixed-operators
-          expiresAt: +res.data.expires_at * 1000 + Date.now(),
+          expiresAt: +res.data.expires_in * 1000 + Date.now(),
         });
 
         return 'SUCCESS' as any;
@@ -247,22 +247,7 @@ export class DropboxApiService {
       this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
       this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
     } else {
-      console.log('LEGACY TOKENS');
-      // TODO remove legacy stuff
-      this._dataInitService.isAllDataLoadedInitially$
-        .pipe(
-          switchMap(() => this._globalConfigService.cfg$),
-          map((cfg) => cfg?.sync.dropboxSync),
-          first(),
-        )
-        .subscribe((v) => {
-          console.log('SETTING LEGACY TOKENS', v as any);
-          this.updateTokens({
-            accessToken: (v as any)?.accessToken,
-            refreshToken: (v as any)?.refreshToken,
-            expiresAt: 0,
-          });
-        });
+      console.log('No Dropbox tokens found', d);
     }
   }
 
@@ -279,6 +264,8 @@ export class DropboxApiService {
     if (refreshToken) {
       this._refreshToken$.next(refreshToken);
     }
+    console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+
     await this._persistenceLocalService.updateDropboxSyncMeta({
       accessToken,
       _tokenExpiresAt: expiresAt,
