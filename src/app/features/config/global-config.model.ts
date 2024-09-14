@@ -25,6 +25,7 @@ export type MiscConfig = Readonly<{
 }>;
 
 export type TimeTrackingConfig = Readonly<{
+  trackingInterval: number;
   defaultEstimate: number;
   defaultEstimateSubTasks: number;
   isAutoStartNextTask: boolean;
