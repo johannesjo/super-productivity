@@ -613,10 +613,12 @@ progress-bar {
 
   // fixes drag and drop on mobile
   touch-action: none;
+  pointer-events: all;
 
   @include grabCursor();
 
   > * {
+    pointer-events: none;
     position: absolute;
     left: 50%;
     top: 50%;

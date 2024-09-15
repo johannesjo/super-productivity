@@ -194,6 +194,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.isDragOver = false;
   }
 
+  // NOTE: this prevents dragging on mobile for no touch area
+  onTouchStart(ev: TouchEvent): void {
+    if (!ev.target || !(ev.target as HTMLElement).classList?.contains('drag-handle')) {
+      ev.stopPropagation();
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+    }
+  }
+
   ngAfterViewInit(): void {
     // hacky but relatively performant
     const t = this.task();
