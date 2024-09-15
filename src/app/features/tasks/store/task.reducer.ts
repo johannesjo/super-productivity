@@ -101,8 +101,14 @@ export const taskReducer = createReducer<TaskState>(
       : state,
   ),
 
-  on(deleteProject, (state, { project }) => {
-    return taskAdapter.removeMany([...project.taskIds, ...project.backlogTaskIds], state);
+  on(deleteProject, (state, { project, allTaskIds }) => {
+    return taskAdapter.removeMany(allTaskIds, {
+      ...state,
+      currentTaskId:
+        state.currentTaskId && allTaskIds.includes(state.currentTaskId)
+          ? null
+          : state.currentTaskId,
+    });
   }),
 
   // TODO check if working
