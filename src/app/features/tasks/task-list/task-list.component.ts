@@ -108,6 +108,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
+    // TODO this gets called very often for nested lists. Maybe there are possibilities to optimize
     const task = drag.data;
     // const targetModelId = drag.dropContainer.data.listModelId;
     const targetModelId = drop.data.listModelId;

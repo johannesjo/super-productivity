@@ -141,9 +141,13 @@ mat-icon.mat-icon[svgicon] {
 .cdk-drag-preview {
   background: #fff !important;
   box-shadow: $whiteframe-shadow-12dp;
-  //cursor: grab;
-  cursor: grabbing;
+  cursor: grabbing !important;
   overflow: hidden;
+
+  &:hover,
+  &:active {
+    cursor: grabbing !important;
+  }
 
   @include darkTheme(true) {
     background: $dark24 !important;
@@ -183,6 +187,12 @@ mat-icon.mat-icon[svgicon] {
 
 .cdk-drag-placeholder {
   opacity: 0.1;
+}
+
+task.cdk-drag-preview .box {
+  @include darkTheme(true) {
+    background: $dark24 !important;
+  }
 }
 
 // MAT TOOLTIP
