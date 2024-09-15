@@ -11,6 +11,13 @@ export const moveItemBeforeItem = <T = string>(arr: T[], fromVal: T, toVal: T): 
     }
     return insertItemIntoArray(arr, fromVal, toIndex);
   }
+  if (toIndex === -1) {
+    if (arr.length === 0) {
+      return [fromVal];
+    }
+    return insertItemIntoArray(arr, fromVal, 0);
+  }
+
   return moveItemInArray(arr, fromIndex, toIndex);
 };
 

@@ -108,13 +108,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
-    console.log({ drag, drop }, drag.data.id);
-
     const task = drag.data;
     // const targetModelId = drag.dropContainer.data.listModelId;
     const targetModelId = drop.data.listModelId;
     const isSubtask = !!task.parentId;
-    console.log({ isSubtask, targetModelId });
+    // console.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
     // return true;
     if (isSubtask) {
       if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
@@ -145,14 +143,15 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       filteredTasks: this.filteredTasks(),
     });
 
-    const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
+    const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
-    const newIds = targetTask
-      ? [...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask)]
-      : [
-          ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
-          draggedTask,
-        ];
+    const newIds =
+      targetTask && targetTask.id !== draggedTask.id
+        ? [...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask)]
+        : [
+            ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
+            draggedTask,
+          ];
     console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
       targetTask,
       draggedTask,
