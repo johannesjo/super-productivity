@@ -122,7 +122,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
-    console.log({ drag, drop });
+    console.log({ drag, drop }, drag.data.id);
 
     const task = drag.data;
     // const targetModelId = drag.dropContainer.data.listModelId;
@@ -161,27 +161,26 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       filteredTasks: this.filteredTasks(),
     });
 
-    const targetTask =
-      (targetListData.allTasks[ev.currentIndex] as TaskCopy) ||
-      targetListData.allTasks[0];
+    const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
 
-    if (targetTask) {
-      const newIds = [
-        ...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask),
-      ];
-      console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
-        targetTask,
-        draggedTask,
-        newIds,
-      });
+    const newIds = targetTask
+      ? [...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask)]
+      : [
+          ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
+          draggedTask,
+        ];
+    console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
+      targetTask,
+      draggedTask,
+      newIds,
+    });
 
-      this._move(
-        draggedTask.id,
-        srcListData.listModelId,
-        targetListData.listModelId,
-        newIds.map((p) => p.id),
-      );
-    }
+    this._move(
+      draggedTask.id,
+      srcListData.listModelId,
+      targetListData.listModelId,
+      newIds.map((p) => p.id),
+    );
   }
 
   private _move(

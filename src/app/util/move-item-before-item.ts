@@ -15,8 +15,6 @@ export const moveItemBeforeItem = <T = string>(arr: T[], fromVal: T, toVal: T): 
 };
 
 const insertItemIntoArray = <T = string>(arr: T[], fromVal: T, toIndex: number): T[] => {
-  console.log('I am here!');
-
   const array = [...arr];
   array.splice(toIndex, 0, fromVal);
   return array;
