@@ -55,7 +55,7 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { Project } from '../project.model';
 import { TaskService } from '../../tasks/task.service';
-import { Task, TaskArchive, TaskState } from '../../tasks/task.model';
+import { Task, TaskArchive } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { EMPTY, Observable, of } from 'rxjs';
@@ -68,8 +68,6 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { DateService } from 'src/app/core/date/date.service';
-import { selectAllNotes } from '../../note/store/note.reducer';
-import { Note } from '../../note/note.model';
 
 @Injectable()
 export class ProjectEffects {
@@ -246,13 +244,14 @@ export class ProjectEffects {
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteProject.type),
-        tap(async ({ id }) => {
+        ofType(deleteProject),
+        tap(async ({ project }) => {
+          const id = project.id as string;
           await this._persistenceService.removeCompleteRelatedDataForProject(id);
-          this._removeAllNonArchiveTasksForProject(id);
+          // this._removeAllNonArchiveTasksForProject(id);
           this._removeAllArchiveTasksForProject(id);
           this._removeAllRepeatingTasksForProject(id);
-          this._removeAlNotesForProject(id);
+          // this._removeAlNotesForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
           const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
@@ -450,31 +449,31 @@ export class ProjectEffects {
     private _dateService: DateService,
   ) {}
 
-  private async _removeAllNonArchiveTasksForProject(
-    projectIdToDelete: string,
-  ): Promise<any> {
-    const taskState: TaskState = await this._taskService.taskFeatureState$
-      .pipe(
-        filter((s) => s.isDataLoaded),
-        first(),
-      )
-      .toPromise();
-    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
-      const t = taskState.entities[id] as Task;
-      if (!t) {
-        throw new Error('No task');
-      }
-      // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete;
-    });
-
-    console.log(
-      'TaskIds to remove/unique',
-      nonArchiveTaskIdsToDelete,
-      unique(nonArchiveTaskIdsToDelete),
-    );
-    this._taskService.removeMultipleTasks(nonArchiveTaskIdsToDelete);
-  }
+  // private async _removeAllNonArchiveTasksForProject(
+  //   projectIdToDelete: string,
+  // ): Promise<any> {
+  //   const taskState: TaskState = await this._taskService.taskFeatureState$
+  //     .pipe(
+  //       filter((s) => s.isDataLoaded),
+  //       first(),
+  //     )
+  //     .toPromise();
+  //   const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
+  //     const t = taskState.entities[id] as Task;
+  //     if (!t) {
+  //       throw new Error('No task');
+  //     }
+  //     // NOTE sub tasks are accounted for in DeleteMainTasks action
+  //     return t.projectId === projectIdToDelete;
+  //   });
+  //
+  //   console.log(
+  //     'TaskIds to remove/unique',
+  //     nonArchiveTaskIdsToDelete,
+  //     unique(nonArchiveTaskIdsToDelete),
+  //   );
+  //   this._taskService.removeMultipleTasks(nonArchiveTaskIdsToDelete);
+  // }
 
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,
@@ -527,18 +526,18 @@ export class ProjectEffects {
     }
   }
 
-  private async _removeAlNotesForProject(projectIdToDelete: string): Promise<any> {
-    const notes: Note[] = await this._store$
-      .select(selectAllNotes)
-      .pipe(first())
-      .toPromise();
-    const allNoteIdsForProject = notes.filter(
-      (cfg) => cfg.projectId === projectIdToDelete,
-    );
-    allNoteIdsForProject.forEach((note) => {
-      this._noteService.remove(note);
-    });
-  }
+  // private async _removeAlNotesForProject(projectIdToDelete: string): Promise<any> {
+  //   const notes: Note[] = await this._store$
+  //     .select(selectAllNotes)
+  //     .pipe(first())
+  //     .toPromise();
+  //   const allNoteIdsForProject = notes.filter(
+  //     (cfg) => cfg.projectId === projectIdToDelete,
+  //   );
+  //   allNoteIdsForProject.forEach((note) => {
+  //     this._noteService.remove(note);
+  //   });
+  // }
 
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
     return this._store$.pipe(

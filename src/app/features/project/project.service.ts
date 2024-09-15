@@ -216,8 +216,8 @@ export class ProjectService {
     );
   }
 
-  remove(projectId: string): void {
-    this._store$.dispatch(deleteProject({ id: projectId }));
+  remove(project: Project): void {
+    this._store$.dispatch(deleteProject({ project }));
   }
 
   toggleHideFromMenu(projectId: string): void {

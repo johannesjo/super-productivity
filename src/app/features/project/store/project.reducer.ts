@@ -155,7 +155,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(updateProject, (state, { project }) => projectAdapter.updateOne(project, state)),
 
-  on(deleteProject, (state, { id }) => projectAdapter.removeOne(id, state)),
+  on(deleteProject, (state, { project }) => projectAdapter.removeOne(project.id, state)),
   on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
   on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
 

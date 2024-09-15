@@ -66,6 +66,7 @@ import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -99,6 +100,10 @@ export const taskReducer = createReducer<TaskState>(
         })
       : state,
   ),
+
+  on(deleteProject, (state, { project }) => {
+    return taskAdapter.removeMany([...project.taskIds, ...project.backlogTaskIds], state);
+  }),
 
   // TODO check if working
   on(setCurrentTask, (state, { id }) => {

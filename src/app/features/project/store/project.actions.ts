@@ -76,7 +76,7 @@ export const updateProjectIssueProviderCfg = createAction(
 
 export const deleteProject = createAction(
   '[Project] Delete Project',
-  props<{ id: string }>(),
+  props<{ project: Project }>(),
 );
 
 export const deleteProjects = createAction(
