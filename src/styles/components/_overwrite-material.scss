@@ -161,7 +161,7 @@ mat-icon.mat-icon[svgicon] {
 }
 
 .cdk-drop-list-disabled {
-  border: 3px solid red;
+  border: 4px solid red;
 }
 
 .cdk-drop-list-receiving {
@@ -179,6 +179,10 @@ mat-icon.mat-icon[svgicon] {
 
 .mat-mdc-menu-item.quick-access {
   border: 1px solid red;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.1;
 }
 
 // MAT TOOLTIP

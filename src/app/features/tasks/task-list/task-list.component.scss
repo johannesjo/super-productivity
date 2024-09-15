@@ -47,3 +47,19 @@
     opacity: 1;
   }
 }
+
+.cdk-drag-placeholder,
+.cdk-drag-preview {
+  border-radius: 6px;
+  overflow: hidden;
+
+  ::ng-deep .controls {
+    display: none;
+  }
+}
+
+.cdk-drag-animating {
+  //transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  transition: none !important;
+  animation: none !important;
+}
