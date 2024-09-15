@@ -161,49 +161,26 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       filteredTasks: this.filteredTasks(),
     });
 
-    if (
-      draggedTask.parentId &&
-      !PARENT_ALLOWED_LISTS.includes(targetListData.listModelId)
-    ) {
-      // TODO handle case when ev.currentIndex is 1 and there is only one task (means task should be inserted after)
-      // const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
-      const targetTask =
-        (targetListData.allTasks[ev.currentIndex] as TaskCopy) ||
-        targetListData.allTasks[0];
+    const targetTask =
+      (targetListData.allTasks[ev.currentIndex] as TaskCopy) ||
+      targetListData.allTasks[0];
 
-      if (targetTask) {
-        const newIds = [
-          ...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask),
-        ];
-        console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
-          targetTask,
-          draggedTask,
-          newIds,
-        });
+    if (targetTask) {
+      const newIds = [
+        ...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask),
+      ];
+      console.log(srcListData.listModelId, '=>', targetListData.listModelId, {
+        targetTask,
+        draggedTask,
+        newIds,
+      });
 
-        this._move(
-          draggedTask.id,
-          srcListData.listModelId,
-          targetListData.listModelId,
-          newIds.map((p) => p.id),
-        );
-      }
-    } else if (
-      ev.previousContainer === ev.container &&
-      ev.currentIndex !== ev.previousIndex
-    ) {
-      const targetTask = targetListData.allTasks[ev.currentIndex] as TaskCopy;
-      if (targetTask) {
-        const newIds = [
-          ...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask),
-        ];
-        this._move(
-          draggedTask.id,
-          srcListData.listModelId,
-          targetListData.listModelId,
-          newIds.map((p) => p.id),
-        );
-      }
+      this._move(
+        draggedTask.id,
+        srcListData.listModelId,
+        targetListData.listModelId,
+        newIds.map((p) => p.id),
+      );
     }
   }
 
