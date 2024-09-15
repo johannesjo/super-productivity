@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   ElementRef,
@@ -88,32 +87,19 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   @ViewChild(CdkDropList) dropList?: CdkDropList;
 
   T: typeof T = T;
-  isBlockAni: boolean = false;
-
-  private _blockAnimationTimeout?: number;
 
   constructor(
     private _taskService: TaskService,
-    private _cd: ChangeDetectorRef,
     private _workContextService: WorkContextService,
     private _store: Store,
     public dropListService: DropListService,
   ) {}
-
-  // const sourceModelId = source.dataset.id;
-  // const targetModelId = target.dataset.id;
-  // const targetNewIds = targetModel.map((task: Task) => task.id);
-  // const movedTaskId = item.id;
-  // this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList!, this.listId() === 'SUB');
   }
 
   ngOnDestroy(): void {
-    if (this._blockAnimationTimeout) {
-      clearTimeout(this._blockAnimationTimeout);
-    }
     this.dropListService.unregisterDropList(this.dropList!);
   }
 
@@ -132,8 +118,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     // return true;
     if (isSubtask) {
       if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        console.log('TRUEEEE');
-
         return true;
       }
     } else {
@@ -175,6 +159,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       newIds,
     });
 
+    this.dropListService.blockAniTrigger$.next();
     this._move(
       draggedTask.id,
       srcListData.listModelId,
@@ -192,7 +177,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const isSrcRegularList = src === 'DONE' || src === 'UNDONE';
     const isTargetRegularList = target === 'DONE' || target === 'UNDONE';
     const workContextId = this._workContextService.activeWorkContextId as string;
-    this._blockAnimation();
 
     if (isSrcRegularList && isTargetRegularList) {
       // move inside today
@@ -239,15 +223,5 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     this._taskService.showSubTasks(pid);
     this._taskService.focusTask(pid);
-  }
-
-  // TODO after drop
-  private _blockAnimation(): void {
-    this.isBlockAni = true;
-    this._cd.detectChanges();
-    this._blockAnimationTimeout = window.setTimeout(() => {
-      this.isBlockAni = false;
-      this._cd.detectChanges();
-    }, 200);
   }
 }

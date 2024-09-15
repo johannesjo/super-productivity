@@ -25,7 +25,7 @@
   [cdkDropListEnterPredicate]="enterPredicate"
   [cdkDropListData]="dropModelDataForList()"
   (cdkDropListDropped)="drop(filteredTasks(), $event)"
-  [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks()?.length"
+  [@taskList]="(dropListService.isBlockAniAfterDrop$|async) ? 'BLOCK' : filteredTasks()?.length"
   [attr.data-id]="listModelId()"
   class="task-list-inner"
 >
