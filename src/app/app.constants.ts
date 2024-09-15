@@ -4,6 +4,7 @@ export const TRACKING_INTERVAL = 1000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
 export const DRAG_DELAY_FOR_TOUCH = 75;
+export const DRAG_DELAY_FOR_TOUCH_LONGER = 150;
 
 import '@angular/common/locales/global/en';
 import '@angular/common/locales/global/es';

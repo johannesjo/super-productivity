@@ -99,7 +99,7 @@
       #menuEntry
       cdkDrag
       [cdkDragData]="project"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
       (keydown)="checkFocusProject($event)"
       [workContext]="project"
       [type]="WorkContextType.PROJECT"
@@ -138,7 +138,7 @@
       #menuEntry
       cdkDrag
       [cdkDragData]="tag"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
       (keydown)="checkFocusTag($event)"
       [workContext]="tag"
       [type]="WorkContextType.TAG"
