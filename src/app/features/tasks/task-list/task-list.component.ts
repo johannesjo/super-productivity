@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ElementRef,
   input,
   OnDestroy,
   ViewChild,
@@ -21,7 +20,7 @@ import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.
 import {
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
-  moveProjectTaskToTodayList,
+  moveProjectTaskToRegularList,
 } from '../../project/store/project.actions';
 import { moveSubTask } from '../store/task.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -200,7 +199,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     } else if (src === 'BACKLOG' && isTargetRegularList) {
       // move from backlog to today
       this._store.dispatch(
-        moveProjectTaskToTodayList({ taskId, newOrderedIds, src, target, workContextId }),
+        moveProjectTaskToRegularList({
+          taskId,
+          newOrderedIds,
+          src,
+          target,
+          workContextId,
+        }),
       );
     } else if (isSrcRegularList && target === 'BACKLOG') {
       // move from today to backlog
