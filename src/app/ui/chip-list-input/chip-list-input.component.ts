@@ -128,10 +128,6 @@ export class ChipListInputComponent implements OnDestroy {
     this.inputCtrl.setValue(null);
   }
 
-  trackById(i: number, item: Suggestion): string {
-    return item.id;
-  }
-
   isToggled(id: string): boolean {
     return !!this.toggledItems && this.toggledItems.includes(id);
   }
@@ -144,9 +140,9 @@ export class ChipListInputComponent implements OnDestroy {
 
   private _updateModelItems(modelIds: string[]): void {
     this.modelItems = this.suggestionsIn.length
-      ? (modelIds.map((id) =>
-          this.suggestionsIn.find((suggestion) => suggestion.id === id),
-        ) as Suggestion[])
+      ? (modelIds
+          .map((id) => this.suggestionsIn.find((suggestion) => suggestion.id === id))
+          .filter((v) => v) as Suggestion[])
       : [];
   }
 
