@@ -52,11 +52,16 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    await window.ea.fileSyncSave({
+    const r = await window.ea.fileSyncSave({
       localRev,
       filePath: await this._getFilePath(syncTarget),
       dataStr,
     });
+    if (r instanceof Error) {
+      throw r;
+    }
+
+    console.log('uploadFileData AAAAAAFTER', syncTarget, localRev);
     return this._getLocalRev(dataStr);
   }
 
