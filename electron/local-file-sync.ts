@@ -1,6 +1,6 @@
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
-import { readFileSync, statSync, writeFileSync } from 'fs';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { error, log } from 'electron-log/main';
 import { ipcMain } from 'electron';
 
@@ -85,6 +85,28 @@ export const initLocalFileSyncAdapter = (): void => {
         };
       } catch (e) {
         log('ERR: Sync error while loading file from ' + filePath);
+        error(e);
+        return new Error(e as string);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC.CHECK_DIR_EXISTS,
+    (
+      ev,
+      {
+        dirPath,
+      }: {
+        dirPath: string;
+      },
+    ): true | Error => {
+      try {
+        const r = readdirSync(dirPath);
+        console.log(r);
+        return true;
+      } catch (e) {
+        log('ERR: error while checking dir ' + dirPath);
         error(e);
         return new Error(e as string);
       }

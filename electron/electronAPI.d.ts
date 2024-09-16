@@ -36,7 +36,11 @@ export interface ElectronAPI {
   fileSyncLoad(args: {
     filePath: string;
     localRev: string | null;
-  }): Promise<{ rev: string; dataStr: string | undefined }>;
+  }): Promise<{ rev: string; dataStr: string | undefined } | Error>;
+
+  checkDirExists(args: { dirPath: string }): Promise<true | Error>;
+
+  // checkDirExists(dirPath: string): Promise<true | Error>;
 
   // STANDARD
   // --------

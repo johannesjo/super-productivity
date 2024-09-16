@@ -39,6 +39,12 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
         rev: r.rev,
       };
     } catch (e) {
+      const folderPath = await this._folderPathOnce$.toPromise();
+      const isDirExists = await this._checkDirExists(folderPath as string);
+      if (!isDirExists) {
+        alert(`Directory ${folderPath} does not exist`);
+      }
+
       if (e?.toString?.().includes('ENOENT')) {
         return 'NO_REMOTE_DATA';
       }
@@ -98,5 +104,15 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
 
   private _getLocalRev(dataStr: string): Promise<string> {
     return createSha1Hash(dataStr);
+  }
+
+  private async _checkDirExists(dirPath: string): Promise<boolean> {
+    const r = await window.ea.checkDirExists({
+      dirPath,
+    });
+    if (r instanceof Error) {
+      throw r;
+    }
+    return r;
   }
 }

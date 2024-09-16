@@ -13,7 +13,7 @@ const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
 
 const ea: ElectronAPI = {
   on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => {
-    // NOTE: there is no proper way to unsubscribe apart from unsusbscribing all
+    // NOTE: there is no proper way to unsubscribe apart from unsubscribing all
     ipcRenderer.on(channel, listener);
   },
   // INVOKE
@@ -35,6 +35,8 @@ const ea: ElectronAPI = {
       rev: string;
       dataStr: string | undefined;
     }>,
+  checkDirExists: (dirPath) =>
+    _invoke('CHECK_DIR_EXISTS', dirPath) as Promise<true | Error>,
 
   // STANDARD
   // --------
