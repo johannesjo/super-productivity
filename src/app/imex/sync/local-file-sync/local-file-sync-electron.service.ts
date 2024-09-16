@@ -103,6 +103,21 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     };
   }
 
+  async checkDirAndOpenPickerIfNotExists(): Promise<void> {
+    const folderPath = await this._folderPathOnce$.toPromise();
+    try {
+      const isDirExists = await this._checkDirExists(folderPath as string);
+      if (!isDirExists) {
+        alert(' Please select a local directory for file sync.');
+        this._pickDirectory();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(' Please select a local directory for file sync.');
+      this._pickDirectory();
+    }
+  }
+
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
     const folderPath = await this._folderPathOnce$.toPromise();
     if (!folderPath) {
