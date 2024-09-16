@@ -1,3 +1,9 @@
+## [10.0.6](https://github.com/johannesjo/super-productivity/compare/v10.0.5...v10.0.6) (2024-09-16)
+
+### Bug Fixes
+
+- prevent double sub tasks after drag and drop ([4feb135](https://github.com/johannesjo/super-productivity/commit/4feb135f0407f2c5799572048345699036891e18))
+
 ## [10.0.5](https://github.com/johannesjo/super-productivity/compare/v10.0.4...v10.0.5) (2024-09-16)
 
 ### Bug Fixes
