@@ -248,6 +248,8 @@ export class DropboxApiService {
       this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
     } else {
       console.log('No Dropbox tokens found', d);
+      this._accessToken$.next(null);
+      this._refreshToken$.next(null);
     }
   }
 
