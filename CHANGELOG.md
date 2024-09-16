@@ -1,3 +1,34 @@
+## [10.0.5](https://github.com/johannesjo/super-productivity/compare/v10.0.4...v10.0.5) (2024-09-16)
+
+### Bug Fixes
+
+- play icon doesn't disappear in planner page [#3451](https://github.com/johannesjo/super-productivity/issues/3451) ([d509762](https://github.com/johannesjo/super-productivity/commit/d5097625e79ba9c873842f31893ae9527e2afbed))
+- display value of date in negative timezones [#3446](https://github.com/johannesjo/super-productivity/issues/3446) ([a37d58c](https://github.com/johannesjo/super-productivity/commit/a37d58c4cf967c4ad164af4ea4d2fa4a7259e891))
+- dropbox 400 error [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([4908eb5](https://github.com/johannesjo/super-productivity/commit/4908eb50ca9bb3736c7b3abae01220103c433827))
+- error when deleting project [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([6231982](https://github.com/johannesjo/super-productivity/commit/6231982eb9feb0003f139f1874fc6cf6c44c03a9))
+- error when deleting project 2 [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([e88b0ae](https://github.com/johannesjo/super-productivity/commit/e88b0aea5cc055c30cfbd916133a86d3c3b3e344))
+- not persisting state after project delete [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([00dc4b9](https://github.com/johannesjo/super-productivity/commit/00dc4b9a3cf3a4ee90632514bf845df7771847b6))
+- prevent app crash [#3430](https://github.com/johannesjo/super-productivity/issues/3430) ([371ef42](https://github.com/johannesjo/super-productivity/commit/371ef42d955b9a3cc06ef91035d9c9243ab22b76))
+- several other instances when timezone adjusted value is wrong [#3446](https://github.com/johannesjo/super-productivity/issues/3446) ([cdf4f93](https://github.com/johannesjo/super-productivity/commit/cdf4f930f2be97e4070ca3c7f96ab18ccb01d8b0))
+- start date not being respected [#3366](https://github.com/johannesjo/super-productivity/issues/3366) ([6eb7d96](https://github.com/johannesjo/super-productivity/commit/6eb7d966eb173e8396007599cb5e0568d76ffb02))
+- typo ([2fe6208](https://github.com/johannesjo/super-productivity/commit/2fe6208c0ec6430127c2da2e1aa4d3360fc688ef))
+- weekNr being wrong [#3435](https://github.com/johannesjo/super-productivity/issues/3435) ([d519c86](https://github.com/johannesjo/super-productivity/commit/d519c863aa435292631d8ba02b69b46bc0b83ab3))
+
+### Features
+
+- add inline edit to planner tasks [#3450](https://github.com/johannesjo/super-productivity/issues/3450) ([c6c7b08](https://github.com/johannesjo/super-productivity/commit/c6c7b0871af88251d9e5ee80b30a642d9cd35c29))
+- Add Today Remaining in the projects view ([16902bf](https://github.com/johannesjo/super-productivity/commit/16902bfa95872cd1c6ee2f19ea3366431e0e90d1))
+- add ui for editing sub task tags [#3454](https://github.com/johannesjo/super-productivity/issues/3454) ([82befe1](https://github.com/johannesjo/super-productivity/commit/82befe16037dec8a7e677408eaefd632643a6998))
+- don't show today and no_list tags for dialog edit tags ([596fa08](https://github.com/johannesjo/super-productivity/commit/596fa08b256fb5fd65bfd78cabeb334cefeb703a))
+- hide hidden projects also for short syntax [#3165](https://github.com/johannesjo/super-productivity/issues/3165) ([db0021c](https://github.com/johannesjo/super-productivity/commit/db0021cb05f7d5966754feca83cf0ff2fd8f002f))
+- increase touch delay project drag and drop [#3466](https://github.com/johannesjo/super-productivity/issues/3466) ([a3ebf89](https://github.com/johannesjo/super-productivity/commit/a3ebf897d9cb61c2b4a2a551134e1289f3910367))
+- make data repair script a bit more lenient [#3395](https://github.com/johannesjo/super-productivity/issues/3395) ([df7b8e1](https://github.com/johannesjo/super-productivity/commit/df7b8e18e01231735acb489898f0eab4ba0fe300))
+- make tag list component more error resistant ([4318a7e](https://github.com/johannesjo/super-productivity/commit/4318a7e2ed33632d8f4e1771216e62c49114f256))
+- only count without break for when time was worked [#3337](https://github.com/johannesjo/super-productivity/issues/3337) ([8417427](https://github.com/johannesjo/super-productivity/commit/84174279c7cd443980ab825372f78f92dade350c))
+- remove legacy migration [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([1fc1902](https://github.com/johannesjo/super-productivity/commit/1fc1902eb661c6cbd22b0f5c6ba961643c9317d7))
+- select all for inline input on focus [#3450](https://github.com/johannesjo/super-productivity/issues/3450) ([d6ae779](https://github.com/johannesjo/super-productivity/commit/d6ae7790f52c4b5277a6317819aeccf4703c1b6a))
+- show work view status bar only when there is data for it [#3455](https://github.com/johannesjo/super-productivity/issues/3455) ([f21e05b](https://github.com/johannesjo/super-productivity/commit/f21e05bdb83ad552a80397c871ecfd10aebdab9c))
+
 ## [10.0.4](https://github.com/johannesjo/super-productivity/compare/v10.0.3...v10.0.4) (2024-09-09)
 
 ### Bug Fixes
