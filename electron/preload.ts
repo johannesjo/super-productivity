@@ -38,6 +38,8 @@ const ea: ElectronAPI = {
   checkDirExists: (dirPath) =>
     _invoke('CHECK_DIR_EXISTS', dirPath) as Promise<true | Error>,
 
+  pickDirectory: () => _invoke('PICK_DIRECTORY') as Promise<string | undefined>,
+
   // STANDARD
   // --------
   setZoomFactor: (zoomFactor: number) => {

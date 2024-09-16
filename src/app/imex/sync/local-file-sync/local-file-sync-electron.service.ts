@@ -40,9 +40,18 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       };
     } catch (e) {
       const folderPath = await this._folderPathOnce$.toPromise();
-      const isDirExists = await this._checkDirExists(folderPath as string);
-      if (!isDirExists) {
-        alert(`Directory ${folderPath} does not exist`);
+      try {
+        const isDirExists = await this._checkDirExists(folderPath as string);
+        if (!isDirExists) {
+          alert('No valid folder selected for local file sync. Please select one.');
+          this._pickDirectory();
+          throw new Error('No valid folder selected');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('No valid folder selected for local file sync. Please select one.');
+        this._pickDirectory();
+        throw new Error('No valid folder selected');
       }
 
       if (e?.toString?.().includes('ENOENT')) {
@@ -114,5 +123,16 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
       throw r;
     }
     return r;
+  }
+
+  private async _pickDirectory(): Promise<void> {
+    const dir = await window.ea.pickDirectory();
+    if (dir) {
+      this._globalConfigService.updateSection('sync', {
+        localFileSync: {
+          syncFolderPath: dir,
+        },
+      });
+    }
   }
 }

@@ -40,6 +40,8 @@ export interface ElectronAPI {
 
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
+  pickDirectory(): Promise<string | undefined>;
+
   // checkDirExists(dirPath: string): Promise<true | Error>;
 
   // STANDARD
