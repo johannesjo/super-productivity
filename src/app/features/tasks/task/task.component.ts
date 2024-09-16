@@ -198,8 +198,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   onTouchStart(ev: TouchEvent): void {
     if (!ev.target || !(ev.target as HTMLElement).classList?.contains('drag-handle')) {
       ev.stopPropagation();
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
     }
   }
 
