@@ -315,7 +315,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id: newPar.id,
         changes: {
-          subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+          subTaskIds: unique(moveItemInList(taskId, newPar.subTaskIds, newOrderedIds)),
         },
       },
       newState,
