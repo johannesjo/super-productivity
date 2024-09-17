@@ -1,3 +1,22 @@
+## [10.0.7](https://github.com/johannesjo/super-productivity/compare/v10.0.6...v10.0.7) (2024-09-17)
+
+### Bug Fixes
+
+- build issues ([64a3e34](https://github.com/johannesjo/super-productivity/commit/64a3e344329d63933da1b3318d44ee57ec2669c2))
+- dropbox asking for token when sync is disabled ([94461da](https://github.com/johannesjo/super-productivity/commit/94461da7fb55f870f34dbf714837364eb3df44a8))
+- dropbox not asking for token [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([0480241](https://github.com/johannesjo/super-productivity/commit/04802414504d2c286e2c8bbd1deae1d0416cd391))
+- error not properly thrown for electron local file sync [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([3166adb](https://github.com/johannesjo/super-productivity/commit/3166adbc30828ad47a840c21915c88c470f783f0))
+- filter out model ids without suggestion value for chip-list-input [#3475](https://github.com/johannesjo/super-productivity/issues/3475) ([c29ea87](https://github.com/johannesjo/super-productivity/commit/c29ea879297a12a94cba860f435cb188c22ceafe))
+- **sync:** prevent localOnlyModel from being deleted when importing data [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([dd547fa](https://github.com/johannesjo/super-productivity/commit/dd547fa3b1e88522c4b8d21ab53b0355c1f93bb7))
+
+### Features
+
+- add folder picker when there is no valid selected [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([866df0c](https://github.com/johannesjo/super-productivity/commit/866df0c49392c31f3dff563c4fa0a06694987489))
+- add setting to change tracking interval [#2355](https://github.com/johannesjo/super-productivity/issues/2355) ([d34ef38](https://github.com/johannesjo/super-productivity/commit/d34ef38e0f78ba913b78c1174e38ea03b968ecad))
+- check if directory exists [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([552b250](https://github.com/johannesjo/super-productivity/commit/552b25074dd8579543c513280674bd2eed7aa98a))
+- **dropbox:** re-add legacy tokens [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([845ef2c](https://github.com/johannesjo/super-productivity/commit/845ef2c808b3b074a85ea314ddde893c515b694b))
+- use directory picker if no valid directory was given for local file sync [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([a553681](https://github.com/johannesjo/super-productivity/commit/a553681f8f00660f3ef76c4f920506d0dc13ba72))
+
 ## [10.0.6](https://github.com/johannesjo/super-productivity/compare/v10.0.5...v10.0.6) (2024-09-16)
 
 ### Bug Fixes

@@ -380,9 +380,11 @@ export class PersistenceService {
       });
   }
 
-  async clearDatabaseExceptBackup(): Promise<void> {
+  async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
     const backup: AppDataComplete = await this.loadBackup();
+    const localOnlyModel = await this._persistenceLocalService.load();
     await this._databaseService.clearDatabase();
+    await this._persistenceLocalService.save(localOnlyModel);
     if (backup) {
       await this.saveBackup(backup);
     }

@@ -96,7 +96,7 @@ export class DataImportService {
           : migratedData;
 
         // clear database to have a clean one and delete legacy stuff
-        await this._persistenceService.clearDatabaseExceptBackup();
+        await this._persistenceService.clearDatabaseExceptBackupAndLocalOnlyModel();
 
         // save data to database first then load to store from there
         await this._persistenceService.importComplete(mergedData);

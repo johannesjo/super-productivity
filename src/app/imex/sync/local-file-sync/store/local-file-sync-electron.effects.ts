@@ -6,23 +6,28 @@ import { filter, tap } from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
 import { SyncProvider } from '../../sync-provider.model';
 import { LocalFileSyncElectronService } from '../local-file-sync-electron.service';
+import { IS_ELECTRON } from '../../../../app.constants';
 
 @Injectable()
 export class LocalFileSyncElectronEffects {
-  triggerTokenDialog$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(updateGlobalConfigSection),
-        filter(
-          ({ sectionKey, sectionCfg }): boolean =>
-            sectionKey === 'sync' &&
-            (sectionCfg as SyncConfig).syncProvider === SyncProvider.LocalFile &&
-            (sectionCfg as SyncConfig).isEnabled,
+  triggerTokenDialog$: Observable<unknown> | false =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(updateGlobalConfigSection),
+          filter(
+            ({ sectionKey, sectionCfg }): boolean =>
+              sectionKey === 'sync' &&
+              (sectionCfg as SyncConfig).syncProvider === SyncProvider.LocalFile &&
+              (sectionCfg as SyncConfig).isEnabled,
+          ),
+          tap(() =>
+            this._localFileSyncElectronService.checkDirAndOpenPickerIfNotExists(),
+          ),
         ),
-        tap(() => this._localFileSyncElectronService.checkDirAndOpenPickerIfNotExists()),
-      ),
-    { dispatch: false },
-  );
+      { dispatch: false },
+    );
 
   constructor(
     private _actions$: Actions,
