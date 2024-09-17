@@ -215,7 +215,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issuePoints: issue.weight,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
-      issueId: issue.id as string,
+      issueId: issue.number.toString(),
     };
   }
 
