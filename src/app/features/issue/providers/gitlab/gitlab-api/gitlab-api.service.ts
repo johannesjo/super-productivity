@@ -212,13 +212,13 @@ export class GitlabApiService {
     time_estimate: null | number;
     total_time_spent: null | number;
   }*/
-
+    const iid = this._getIidFromIssue(issueId);
     return this._sendRawRequest$(
       {
         url: `${this._apiLink(
           cfg,
           cfg.project || undefined,
-        )}/issues/${issueId}/add_spent_time`,
+        )}/issues/${iid}/add_spent_time`,
         method: 'POST',
         data: {
           duration,
