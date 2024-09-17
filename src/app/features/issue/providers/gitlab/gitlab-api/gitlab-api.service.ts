@@ -223,7 +223,7 @@ export class GitlabApiService {
         url: `${this._apiLink(
           cfg,
           cfg.project || undefined,
-        )}/issues/${this._getIidFromIssue(issueId)}/add_spent_time`, // <--- this does not work!!!!
+        )}/issues/${this._getIidFromIssue(issueId)}/add_spent_time`,
         method: 'POST',
         data: {
           duration: duration,
