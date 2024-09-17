@@ -13,6 +13,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
 import { SyncProvider } from '../sync-provider.model';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -38,6 +39,7 @@ export class DropboxApiService {
     );
 
   constructor(
+    private _globalConfigService: GlobalConfigService,
     private _dataInitService: DataInitService,
     private _matDialog: MatDialog,
     private _snackService: SnackService,
@@ -247,9 +249,22 @@ export class DropboxApiService {
       this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
       this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
     } else {
-      console.log('No Dropbox tokens found', d);
-      this._accessToken$.next(null);
-      this._refreshToken$.next(null);
+      console.log('LEGACY TOKENS');
+      // TODO remove legacy stuff
+      this._dataInitService.isAllDataLoadedInitially$
+        .pipe(
+          switchMap(() => this._globalConfigService.cfg$),
+          map((cfg) => cfg?.sync.dropboxSync),
+          first(),
+        )
+        .subscribe((v) => {
+          console.log('SETTING LEGACY TOKENS', v as any);
+          this.updateTokens({
+            accessToken: (v as any)?.accessToken,
+            refreshToken: (v as any)?.refreshToken,
+            expiresAt: 0,
+          });
+        });
     }
   }
 
