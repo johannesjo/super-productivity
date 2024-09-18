@@ -43,13 +43,16 @@ module.exports = {
 };
 
 const getTimeVal = (d: Date): string => {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const v = new Date(d).toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: isBrowserLocaleClockType24h(),
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone: tz,
   });
-  console.log('Enter time input value ' + v);
+  console.log(
+    `Enter time input value ${v}  – ${tz}; 12h: ${isBrowserLocaleClockType24h()}`,
+  );
   return v;
 };
 
