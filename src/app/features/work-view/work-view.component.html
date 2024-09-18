@@ -251,7 +251,7 @@
 
     <div
       #splitBottomEl
-      *ngIf="isShowBacklog"
+      *ngIf="isShowBacklog()"
       [style.user-focus]="(splitInputPos===100)? 'none':''"
       class="backlog"
     >
@@ -280,7 +280,7 @@
 
 <button
   (click)="layoutService.showAddTaskBar()"
-  [class.isRight]="isShowBacklog"
+  [class.isRight]="isShowBacklog()"
   [matTooltip]="T.MH.ADD_NEW_TASK|translate"
   class="show-xs-only add-task-btn FAB-BTN"
   color="primary"
