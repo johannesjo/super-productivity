@@ -2,7 +2,6 @@ import {
   CalendarProvider,
   GlobalConfigState,
   IdleConfig,
-  SyncConfig,
   TakeABreakConfig,
   TimeTrackingConfig,
   TrackingReminderConfigOld,
@@ -243,41 +242,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
 
     return { ...config, sync: { ...config.sync, syncProvider } };
   }
-
-  let prevProvider: SyncProvider | null = null;
-  let syncInterval: number = 0;
-  if ((config as any).dropboxSync?.isEnabled) {
-    prevProvider = SyncProvider.Dropbox;
-    syncInterval = (config as any).dropboxSync.syncInterval;
-  }
-
-  return {
-    ...config,
-    sync: !!prevProvider
-      ? ({
-          isEnabled: true,
-          syncInterval,
-          syncProvider: prevProvider,
-          dropboxSync: {
-            ...DEFAULT_GLOBAL_CONFIG.sync.dropboxSync,
-            accessToken: (config as any).dropboxSync?.accessToken,
-            authCode: (config as any).dropboxSync?.authCode,
-            // copy existing values if any
-            ...(config.sync as any)?.dropboxSync,
-          },
-          webDav: {
-            ...DEFAULT_GLOBAL_CONFIG.sync.webDav,
-            // copy existing values if any
-            ...(config.sync as any)?.webDav,
-          },
-          localFileSync: {
-            ...DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
-            // copy existing values if any
-            ...(config.sync as any)?.localFileSync,
-          },
-        } as SyncConfig)
-      : DEFAULT_GLOBAL_CONFIG.sync,
-  };
+  return config;
 };
 
 const _migrateTimelineCalendarsToCalendarIntegration = (

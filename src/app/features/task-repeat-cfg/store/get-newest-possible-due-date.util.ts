@@ -23,6 +23,10 @@ export const getNewestPossibleDueDate = (
   checkDate.setHours(2, 0, 0, 0);
   lastTaskCreation.setHours(2, 0, 0, 0);
 
+  if (startDateDate > checkDate) {
+    return null;
+  }
+
   switch (taskRepeatCfg.repeatCycle) {
     case 'DAILY': {
       const nrOfDaysToCheck = taskRepeatCfg.repeatEvery + 1;

@@ -322,13 +322,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   async editTags(): Promise<void> {
-    const taskToEdit = this.task.parentId
-      ? await this._taskService.getByIdOnce$(this.task.parentId).toPromise()
-      : this.task;
     this._matDialog
       .open(DialogEditTagsForTaskComponent, {
         data: {
-          task: taskToEdit,
+          task: this.task,
         },
       })
       .afterClosed()

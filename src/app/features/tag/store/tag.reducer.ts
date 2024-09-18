@@ -49,6 +49,7 @@ import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -125,6 +126,19 @@ export const tagReducer = createReducer<TagState>(
       appDataComplete.tag ? migrateTagState({ ...appDataComplete.tag }) : oldState,
     ),
   ),
+
+  // delete all project tasks from tags on project delete
+  on(deleteProject, (state, { project, allTaskIds }) => {
+    const updates: Update<Tag>[] = (state.ids as string[]).map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state.entities[tagId] as Tag).taskIds.filter(
+          (taskId) => !allTaskIds.includes(taskId),
+        ),
+      },
+    }));
+    return tagAdapter.updateMany(updates, state);
+  }),
 
   on(
     PlannerActions.transferTask,

@@ -38,8 +38,8 @@ export class TagListComponent {
     );
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
     const projectId = this.projectId();
-    if (projectId) {
-      const project = this.projectState()?.entities[projectId] as Project;
+    const project = projectId && (this.projectState()?.entities[projectId] as Project);
+    if (project) {
       const projectTag: Tag = {
         ...project,
         color: project.theme.primary,

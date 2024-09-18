@@ -34,7 +34,7 @@ module.exports = {
       .pause(30)
       .waitForElementVisible(TIME_INP)
       .pause(50)
-      .setValue(TIME_INP, getClockString(d))
+      .setValue(TIME_INP, getTimeVal(d))
       .pause(50)
       .waitForElementVisible(DIALOG_SUBMIT)
       .click(DIALOG_SUBMIT)
@@ -42,10 +42,24 @@ module.exports = {
   },
 };
 
-/*given a value of 8..5 returns '8:30'*/
-const getClockString = (d: Date): string => {
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const parsed = Math.floor(h) + ':' + ('00' + m).slice(-2);
-  return parsed.trim();
+const getTimeVal = (d: Date): string => {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const v = new Date(d).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: isBrowserLocaleClockType12h(),
+    timeZone: tz,
+  });
+  console.log(
+    `Enter time input value ${v}  – ${tz}; 12h: ${isBrowserLocaleClockType12h()}`,
+  );
+  return v;
+};
+
+const isBrowserLocaleClockType12h = (): boolean => {
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const parts = new Intl.DateTimeFormat(locale, { hour: 'numeric' }).formatToParts(
+    new Date(),
+  );
+  return parts.some((part) => part.type === 'dayPeriod');
 };

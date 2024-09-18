@@ -55,7 +55,7 @@ export const shortSyntax = (
   };
   const changesForProject = parseProjectChanges(
     { ...task, title: taskChanges.title || task.title },
-    allProjects,
+    allProjects?.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
   );
   if (changesForProject.projectId) {
     taskChanges = {

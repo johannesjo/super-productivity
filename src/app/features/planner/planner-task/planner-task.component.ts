@@ -12,7 +12,6 @@ import {
 import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
-import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
@@ -32,7 +31,6 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;
   @Input() day?: string;
-  @Input() overWriteTimeEstimate: number = 0;
 
   isRepeatTaskCreatedToday = false;
 
@@ -118,15 +116,19 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
     this.taskContextMenu?.open(event);
   }
 
-  estimateTime(ev: MouseEvent): void {
+  estimateTimeClick(ev: MouseEvent): void {
     ev.preventDefault();
     ev.stopPropagation();
-    this._matDialog.open(DialogTimeEstimateComponent, {
-      data: { task: this.task, isFocusEstimateOnMousePrimaryDevice: true },
-      autoFocus: !IS_TOUCH_PRIMARY,
-    });
+    // this._matDialog.open(DialogTimeEstimateComponent, {
+    //   data: { task: this.task, isFocusEstimateOnMousePrimaryDevice: true },
+    //   autoFocus: !IS_TOUCH_PRIMARY,
+    // });
   }
 
-  // TODO implement with keyboard support
-  focusSelf(): void {}
+  updateTimeEstimate(val: number): void {
+    console.log(val);
+    this._taskService.update(this.task.id, {
+      timeEstimate: val,
+    });
+  }
 }

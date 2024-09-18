@@ -4,7 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -36,6 +36,7 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -53,10 +54,16 @@ const PARENT = 'PARENT';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
-  @Input() undoneTasks: TaskWithSubTasks[] = [];
-  @Input() doneTasks: TaskWithSubTasks[] = [];
-  @Input() backlogTasks: TaskWithSubTasks[] = [];
-  @Input() isShowBacklog: boolean = false;
+  // TODO refactor all to signals
+  undoneTasks = input<TaskWithSubTasks[]>([]);
+  doneTasks = input<TaskWithSubTasks[]>([]);
+  backlogTasks = input<TaskWithSubTasks[]>([]);
+  isShowBacklog = input<boolean>(false);
+
+  isPlanningMode = toSignal(this.planningModeService.isPlanningMode$);
+  todayRemainingInProject = toSignal(this.workContextService.todayRemainingInProject$);
+  estimateRemainingToday = toSignal(this.workContextService.estimateRemainingToday$);
+  workingToday = toSignal(this.workContextService.workingToday$);
 
   isShowTimeWorkedWithoutBreak: boolean = true;
   splitInputPos: number = 100;

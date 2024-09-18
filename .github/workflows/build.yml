@@ -55,6 +55,7 @@ jobs:
         with:
           name: e2eScreenshots
           path: e2e/screenshots/**/*.*
+          retention-days: 5
 
       - name: Build Frontend & Electron
         run: npm run build

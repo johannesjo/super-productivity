@@ -38,6 +38,7 @@ import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isToday } from '../../../util/is-today.util';
 import { DateService } from 'src/app/core/date/date.service';
+import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -51,6 +52,9 @@ export class TaskRepeatCfgEffects {
           upsertTaskRepeatCfg,
           deleteTaskRepeatCfg,
           deleteTaskRepeatCfgs,
+
+          // PROJECT
+          deleteProject,
         ),
         withLatestFrom(this._store$.pipe(select(selectTaskRepeatCfgFeatureState))),
         tap(this._saveToLs.bind(this)),
