@@ -47,16 +47,19 @@ const getTimeVal = (d: Date): string => {
   const v = new Date(d).toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
-    hour12: isBrowserLocaleClockType24h(),
+    hour12: isBrowserLocaleClockType12h(),
     timeZone: tz,
   });
   console.log(
-    `Enter time input value ${v}  – ${tz}; 12h: ${isBrowserLocaleClockType24h()}`,
+    `Enter time input value ${v}  – ${tz}; 12h: ${isBrowserLocaleClockType12h()}`,
   );
   return v;
 };
 
-const isBrowserLocaleClockType24h = (): boolean => {
-  const hr = new Intl.DateTimeFormat([], { hour: 'numeric' }).format();
-  return Number.isInteger(Number(hr));
+const isBrowserLocaleClockType12h = (): boolean => {
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const parts = new Intl.DateTimeFormat(locale, { hour: 'numeric' }).formatToParts(
+    new Date(),
+  );
+  return parts.some((part) => part.type === 'dayPeriod');
 };
