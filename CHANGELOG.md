@@ -1,3 +1,9 @@
+## [10.0.8](https://github.com/johannesjo/super-productivity/compare/v10.0.7...v10.0.8) (2024-09-18)
+
+### Bug Fixes
+
+- backlog button shown when it shouldn't [#3488](https://github.com/johannesjo/super-productivity/issues/3488) ([f360d9a](https://github.com/johannesjo/super-productivity/commit/f360d9ac299269bd0e0ff5316039b4574ba0199b))
+
 ## [10.0.7](https://github.com/johannesjo/super-productivity/compare/v10.0.6...v10.0.7) (2024-09-17)
 
 ### Bug Fixes
