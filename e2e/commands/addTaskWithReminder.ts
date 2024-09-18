@@ -34,7 +34,7 @@ module.exports = {
       .pause(30)
       .waitForElementVisible(TIME_INP)
       .pause(50)
-      .setValue(TIME_INP, getClockString(d))
+      .setValue(TIME_INP, getTimeVal(d))
       .pause(50)
       .waitForElementVisible(DIALOG_SUBMIT)
       .click(DIALOG_SUBMIT)
@@ -42,10 +42,18 @@ module.exports = {
   },
 };
 
-/*given a value of 8..5 returns '8:30'*/
-const getClockString = (d: Date): string => {
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const parsed = Math.floor(h) + ':' + ('00' + m).slice(-2);
-  return parsed.trim();
+const getTimeVal = (d: Date): string => {
+  const v = new Date(d).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: isBrowserLocaleClockType24h(),
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+  console.log('Enter time input value ' + v);
+  return v;
+};
+
+const isBrowserLocaleClockType24h = (): boolean => {
+  const hr = new Intl.DateTimeFormat([], { hour: 'numeric' }).format();
+  return Number.isInteger(Number(hr));
 };
