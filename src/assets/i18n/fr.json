@@ -977,7 +977,7 @@
         "REMIND_AT_PLACEHOLDER": "Sélectionnez quand rappeler",
         "SATURDAY": "samedi",
         "START_TIME": "Heure de début programmée",
-        "START_TIME_DESCRIPTION": "Par exemple. 15h00. Laisser vide pour une tâche toute la journée",
+        "START_TIME_DESCRIPTION": "Par exemple. 15:00. Laisser vide pour une tâche toute la journée",
         "SUNDAY": "dimanche",
         "THURSDAY": "jeudi",
         "TITLE": "Titre de la tâche",
