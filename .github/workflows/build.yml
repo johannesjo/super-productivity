@@ -54,7 +54,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: e2eScreenshots
-          path: e2e/screenshots/**/*.*
+          path: e2e/screenshots/**/*."
+          retention-days: 5
 
       - name: Build Frontend & Electron
         run: npm run build

@@ -45,3 +45,4 @@ jobs:
         with:
           name: e2eScreenshots
           path: e2e/screenshots/**/*.*
+          retention-days: 5
