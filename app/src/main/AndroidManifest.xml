@@ -23,8 +23,9 @@
         tools:ignore="UnusedAttribute">
 
         <!-- App in WebFrame -->
+        <!-- TODO: Need .FullscreenActivity -->
         <activity
-            android:name=".FullscreenActivity"
+            android:name=".CapacitorFullscreenActivity"
             android:allowTaskReparenting="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
