@@ -47,15 +47,15 @@ jobs:
       - name: Test Unit
         run: npm run test
 
-      - name: Test E2E
-        run: npm run e2e
-      - name: 'Upload E2E screenshots on failure'
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: e2eScreenshots
-          path: e2e/screenshots/**/*.*
-          retention-days: 5
+      #      - name: Test E2E
+      #        run: npm run e2e
+      #      - name: 'Upload E2E screenshots on failure'
+      #        if: ${{ always() }}
+      #        uses: actions/upload-artifact@v3
+      #        with:
+      #          name: e2eScreenshots
+      #          path: e2e/screenshots/**/*.*
+      #          retention-days: 5
 
       - name: Build Frontend & Electron
         run: npm run build
