@@ -293,7 +293,7 @@
         "TITLE": "Senden Sie die für Issues aufgewendete Zeit an GitLab",
         "T_ALREADY_TRACKED": "Bereits erfasst",
         "T_TITLE": "Titel",
-        "T_TO_BE_SUBMITTED": "Einzureichend",
+        "T_TO_BE_SUBMITTED": "Noch einzureichen",
         "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
