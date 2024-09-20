@@ -12,7 +12,7 @@
     >
       <header class="work-view-header">
         <div
-          *ngIf="!(isPlanningMode()) &&  estimateRemainingToday() || workingToday()"
+          *ngIf="!(isPlanningMode()) &&  (estimateRemainingToday() || workingToday())"
           @fade
           class="status-bar"
         >
