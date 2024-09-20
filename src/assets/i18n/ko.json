@@ -779,10 +779,6 @@
         "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "시간표",
-        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
-        "DATETIME_FOR": "알림 시간",
-        "EDIT": "알림 수정",
         "MOVE_TO_BACKLOG": "예약 될 때까지 작업을 백 로그로 이동하십시오.",
         "REMIND_AT": "에 알림",
         "RO_10M": "시작하기 10 분 전",
@@ -793,7 +789,11 @@
         "RO_START": "시작될 때",
         "RO_NEVER": "Never",
         "SCHEDULE": "시간표",
-        "UNSCHEDULE": "일정 잡기"
+        "UNSCHEDULE": "일정 잡기",
+        "CONFIRM_REPEAT_OK": "시간표",
+        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
+        "DATETIME_FOR": "알림 시간",
+        "EDIT": "알림 수정"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "오늘 모두 추가",
@@ -892,12 +892,12 @@
         "TITLE": "타임 라인"
       },
       "END": "작업 종료",
-      "MENU_TITLE": "타임 라인",
       "NOW": "지금",
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
       "START": "작업 시작",
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
       "LUNCH_BREAK": "점심 휴식",
+      "MENU_TITLE": "타임 라인",
       "S": {
         "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
       }
@@ -1121,17 +1121,17 @@
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "작업에 사용할 오늘 태그를 자동으로 추가",
       "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
-      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
       "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TASK_NOTES_TPL": "작업 설명 템플릿",
-      "TITLE": "기타 설정"
+      "TITLE": "기타 설정",
+      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림"
     },
     "POMODORO": {
       "BREAK_DURATION": "짧은 휴식 시간",
@@ -1216,7 +1216,6 @@
     "CREATE_TAG": "태그 생성",
     "DELETE_TAG": "태그 삭제",
     "GO_TO_TASK_LIST": "작업 목록으로 이동",
-    "MANAGE_PROJECTS": "프로젝트 관리",
     "METRICS": "측정 항목",
     "NOTES": "노트",
     "PROCRASTINATE": "미루다",
@@ -1224,7 +1223,6 @@
     "PROJECT_MENU": "프로젝트 메뉴",
     "PROJECT_SETTINGS": "프로젝트 설정",
     "QUICK_HISTORY": "빠른 기록",
-    "SCHEDULED": "예정",
     "SETTINGS": "설정",
     "SHOW_SEARCH_BAR": "검색창 표시",
     "TAGS": "태그",
@@ -1234,7 +1232,9 @@
     "TOGGLE_SHOW_NOTES": "프로젝트 노트 표시 / 숨기기",
     "TOGGLE_TRACK_TIME": "추적 시작 / 중지 시간",
     "TRIGGER_SYNC": "수동으로 동기화 트리거",
-    "WORKLOG": "작업 로그"
+    "WORKLOG": "작업 로그",
+    "MANAGE_PROJECTS": "프로젝트 관리",
+    "SCHEDULED": "예정"
   },
   "PDS": {
     "BACK": "잠깐 내가 뭔가를 잊었 어!",
@@ -1247,10 +1247,8 @@
       "OK": "네 네! 일시 휴업!"
     },
     "ESTIMATE_TOTAL": "총 견적:",
-    "EVALUATION": "평가",
     "EXPORT_TASK_LIST": "작업 목록 내보내기",
     "NO_TASKS": "오늘은 아무 작업도 없습니다.",
-    "PLAN": "계획",
     "ROUND_15M": "모든 작업을 15 분으로 반올림",
     "ROUND_30M": "모든 작업을 30 분으로 반올림",
     "ROUND_5M": "모든 작업을 5 분으로 반올림",
@@ -1264,43 +1262,16 @@
     "START_END": "시작 - 끝",
     "SUMMARY_FOR": " {{dayStr}}의 일일 요약",
     "TASKS_COMPLETED": "완료된 작업",
-    "TASK_LIST": "작업 목록",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "소요 시간 / 예상",
     "TIME_SPENT_ESTIMATE_TITLE": "소요 시간 : 오늘 보낸 총 시간. 아카이브 된 태스크는 포함되지 않습니다. - 예상 시간 : 오늘 작업 한 작업에 대한 예상 시간에서 다른 날에 이미 소비 한 시간을 뺀 시간입니다.",
-    "TODAY": "오늘",
-    "WEEK": "주"
+    "WEEK": "주",
+    "EVALUATION": "평가",
+    "PLAN": "계획",
+    "TASK_LIST": "작업 목록",
+    "TODAY": "오늘"
   },
   "PM": {
     "TITLE": "프로젝트 측정 항목"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
-    "ARCHIVE_PROJECT": "프로젝트 아카이브",
-    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
-    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
-    "DELETE_PROJECT": "프로젝트 삭제",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "아카이브"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "삭제"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
-      "OK": "보관 취소"
-    },
-    "EDIT_PROJECT": "프로젝트 수정",
-    "EXPORT_PROJECT": "프로젝트 내보내기",
-    "GITHUB_CONFIGURED": "GitHub 통합 구성",
-    "GITLAB_CONFIGURED": "GitLab 통합 구성",
-    "IMPORT_FROM_FILE": "파일에서 가져 오기",
-    "JIRA_CONFIGURED": "Jira 통합 구성",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
-    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
-    "TITLE": "프로젝트 개요",
-    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
   },
   "PS": {
     "GLOBAL_SETTINGS": "전체 설정",
@@ -1361,5 +1332,34 @@
     "TIME_ESTIMATED": "예상 시간 :",
     "WITHOUT_BREAK": "휴식없이 :",
     "WORKING_TODAY": "오늘은 일한다:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
+    "ARCHIVE_PROJECT": "프로젝트 아카이브",
+    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
+    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
+    "DELETE_PROJECT": "프로젝트 삭제",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "아카이브"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "삭제"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
+      "OK": "보관 취소"
+    },
+    "EDIT_PROJECT": "프로젝트 수정",
+    "EXPORT_PROJECT": "프로젝트 내보내기",
+    "GITHUB_CONFIGURED": "GitHub 통합 구성",
+    "GITLAB_CONFIGURED": "GitLab 통합 구성",
+    "IMPORT_FROM_FILE": "파일에서 가져 오기",
+    "JIRA_CONFIGURED": "Jira 통합 구성",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
+    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
+    "TITLE": "프로젝트 개요",
+    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
   }
 }

@@ -12,6 +12,7 @@ export const mapGitlabIssue = (
     html_url: issue.web_url,
     // eslint-disable-next-line id-blacklist
     number: issue.iid,
+    iid: issue.iid,
     state: issue.state,
     title: issue.title,
     body: issue.description,

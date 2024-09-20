@@ -27,6 +27,15 @@ export const selectAllProjects = createSelector(selectProjectFeatureState, selec
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => !p.isArchived),
 );
+export const selectUnarchivedVisibleProjects = createSelector(
+  selectAllProjects,
+  (projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
+);
+export const selectUnarchivedHiddenProjectIds = createSelector(
+  selectAllProjects,
+  (projects) =>
+    projects.filter((p) => !p.isArchived && p.isHiddenFromMenu).map((p) => p.id),
+);
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => p.isArchived),

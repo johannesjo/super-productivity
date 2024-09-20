@@ -600,11 +600,11 @@
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
       },
       "D_SCHEDULE_TASK": {
-        "DATETIME_FOR": "Datotid for påminnelse",
-        "EDIT": "Rediger påminnelse",
         "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
         "SCHEDULE": "Legg til planlagt",
-        "UNSCHEDULE": "Fjern fra planlagt"
+        "UNSCHEDULE": "Fjern fra planlagt",
+        "DATETIME_FOR": "Datotid for påminnelse",
+        "EDIT": "Rediger påminnelse"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
@@ -930,13 +930,13 @@
       "HELP": "<p><strong>Ser du ikke skrivebordsvarsler?</strong> For Windows vil du kanskje sjekke System&gt; Varsler og handlinger og sjekke om de nødvendige varslene er aktivert.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Legg til dagens tag automatisk for å jobbe med oppgaver",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Merk foreldreoppgaven som ferdig når alle underoppgaver er utført",
-      "IS_AUTO_START_NEXT_TASK": "Begynn å spore neste oppgave når du merker nåværende som ferdig",
       "IS_CONFIRM_BEFORE_EXIT": "Bekreft før du avslutter appen",
       "IS_DARK_MODE": "Mørk modus",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Gi beskjed når tidsestimatet ble overskredet",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
       "TITLE": "Diverse innstillinger",
+      "IS_AUTO_START_NEXT_TASK": "Begynn å spore neste oppgave når du merker nåværende som ferdig",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Gi beskjed når tidsestimatet ble overskredet",
       "IS_DISABLE_INITIAL_DIALOG": "Deaktiver innledende infodialog (du kan gå glipp av viktige oppdateringer!)"
     },
     "POMODORO": {
@@ -1007,14 +1007,12 @@
     "CREATE_TAG": "Opprett tag",
     "DELETE_TAG": "Slett tag",
     "GO_TO_TASK_LIST": "Gå til oppgavelisten",
-    "MANAGE_PROJECTS": "Administrer prosjekter",
     "METRICS": "Beregninger",
     "NOTES": "Merknader",
     "PROCRASTINATE": "Utsette",
     "PROJECTS": "Prosjekter",
     "PROJECT_MENU": "Prosjektmeny",
     "PROJECT_SETTINGS": "Prosjektinnstillinger",
-    "SCHEDULED": "Planlagt",
     "SETTINGS": "Innstillinger",
     "TAGS": "Merker",
     "TASKS": "Oppgaver",
@@ -1022,7 +1020,9 @@
     "TOGGLE_SHOW_BOOKMARKS": "Vis / skjul bokmerker",
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
-    "WORKLOG": "Arbeidslogg"
+    "WORKLOG": "Arbeidslogg",
+    "MANAGE_PROJECTS": "Administrer prosjekter",
+    "SCHEDULED": "Planlagt"
   },
   "PDS": {
     "BACK": "Vent, jeg glemte noe!",
@@ -1034,10 +1034,8 @@
       "MSG": "Arbeidet ditt er gjort. På tide å gå hjem!",
       "OK": "Jepp! Skru av!"
     },
-    "EVALUATION": "Evaluering",
     "EXPORT_TASK_LIST": "Eksporter oppgaveliste",
     "NO_TASKS": "Det er ingen oppgaver for denne dagen",
-    "PLAN": "Plan",
     "ROUND_15M": "Avrund alle oppgavene til 15 minutter",
     "ROUND_30M": "Avrund alle oppgavene til 30 minutter",
     "ROUND_5M": "Avrund alle oppgavene til 5 minutter",
@@ -1051,41 +1049,16 @@
     "START_END": "Start - Slutt",
     "SUMMARY_FOR": "Daglig sammendrag for {{dayStr}}",
     "TASKS_COMPLETED": "Oppgaver fullført",
-    "TASK_LIST": "Oppgaveliste",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tid brukt / estimert",
     "TIME_SPENT_ESTIMATE_TITLE": "Tidsbruk: Total tid brukt i dag. Arkiverte oppgaver er ikke inkludert. - Beregnet tid: Anslått tid for oppgaver som jobbes med i dag minus tiden som allerede er brukt sammen med dem andre dager.",
-    "TODAY": "I dag",
-    "WEEK": "Uke"
+    "WEEK": "Uke",
+    "EVALUATION": "Evaluering",
+    "PLAN": "Plan",
+    "TASK_LIST": "Oppgaveliste",
+    "TODAY": "I dag"
   },
   "PM": {
     "TITLE": "Prosjektstatistikk"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arkiverte prosjekter",
-    "ARCHIVE_PROJECT": "Arkivprosjekt",
-    "DELETE_PROJECT": "Slett prosjekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Er du sikker på at du vil arkivere dette prosjektet? Arkiverte prosjekter vises ikke lenger i menyen, og du kan ikke få tilgang til dataene deres uten å gjenopprette dem. Det anbefales at du sikkerhetskopierer dataene dine før du gjør dette.",
-      "OK": "Arkiv"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Er du sikker på at du vil slette dette prosjektet? Det anbefales å sikkerhetskopiere dataene dine før du gjør dette.",
-      "OK": "Slett"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Er du sikker på at du vil fjerne arkivet for dette prosjektet?",
-      "OK": "Unarkiv"
-    },
-    "EDIT_PROJECT": "Rediger prosjekt",
-    "EXPORT_PROJECT": "Eksporter prosjekt",
-    "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
-    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
-    "IMPORT_FROM_FILE": "Importer fra fil",
-    "JIRA_CONFIGURED": "Jira Integration konfigurert",
-    "S_INVALID_JSON": "Ugyldig json for prosjektfilen",
-    "TITLE": "Prosjektoversikt",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project",
-    "CREATE_NEW": "Lag ny"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale innstillinger",
@@ -1143,6 +1116,33 @@
     "TIME_ESTIMATED": "Anslått tid:",
     "WITHOUT_BREAK": "Uten pause:",
     "WORKING_TODAY": "Jobber i dag:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arkiverte prosjekter",
+    "ARCHIVE_PROJECT": "Arkivprosjekt",
+    "DELETE_PROJECT": "Slett prosjekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Er du sikker på at du vil arkivere dette prosjektet? Arkiverte prosjekter vises ikke lenger i menyen, og du kan ikke få tilgang til dataene deres uten å gjenopprette dem. Det anbefales at du sikkerhetskopierer dataene dine før du gjør dette.",
+      "OK": "Arkiv"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Er du sikker på at du vil slette dette prosjektet? Det anbefales å sikkerhetskopiere dataene dine før du gjør dette.",
+      "OK": "Slett"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Er du sikker på at du vil fjerne arkivet for dette prosjektet?",
+      "OK": "Unarkiv"
+    },
+    "EDIT_PROJECT": "Rediger prosjekt",
+    "EXPORT_PROJECT": "Eksporter prosjekt",
+    "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
+    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
+    "IMPORT_FROM_FILE": "Importer fra fil",
+    "JIRA_CONFIGURED": "Jira Integration konfigurert",
+    "S_INVALID_JSON": "Ugyldig json for prosjektfilen",
+    "TITLE": "Prosjektoversikt",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project",
+    "CREATE_NEW": "Lag ny"
   },
   "S": {
     "SYNC": {

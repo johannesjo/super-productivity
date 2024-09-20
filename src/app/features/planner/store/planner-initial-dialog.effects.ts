@@ -48,14 +48,19 @@ export class PlannerInitialDialogEffects {
           ]).pipe(first()),
         ),
         exhaustMap(([todayStr, plannerDay, todayTaskIds, plannerState]) => {
+          // console.log({
+          //   todayStr,
+          //   a: plannerState.addPlannedTasksDialogLastShown,
+          //   b: new Date(plannerState.addPlannedTasksDialogLastShown as any),
+          // });
+
           if (todayStr === plannerState.addPlannedTasksDialogLastShown) {
             return EMPTY;
           }
           console.log(plannerDay);
-
           if (!plannerDay) {
             devError('showDialogAfterAppLoad$(): No planner day found for today');
-            // might possibly happen if feature was never used?
+            // might happen if feature was never used?
             return EMPTY;
           }
 

@@ -15,6 +15,7 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTagList } from '../../tag/store/tag.actions';
 import { DateService } from '../../../core/date/date.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 @Component({
   selector: 'planner-day',
@@ -89,7 +90,7 @@ export class PlannerDayComponent {
 
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
     if (newDay) {
-      const newDate = new Date(newDay);
+      const newDate = dateStrToUtcDate(newDay);
       if (task.plannedAt && task.reminderId) {
         this._rescheduleTask(task, newDate);
         return;
@@ -101,6 +102,7 @@ export class PlannerDayComponent {
     this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
         task,
+        targetDay: newDay,
       },
     });
   }

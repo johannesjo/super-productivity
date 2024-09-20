@@ -1,3 +1,150 @@
+## [10.0.10](https://github.com/johannesjo/super-productivity/compare/v10.0.9...v10.0.10) (2024-9-20)
+
+### Bug Fixes
+
+- mousewheel scroll & drag and drop case for planner ([235ccf9](https://github.com/johannesjo/super-productivity/commit/235ccf9b36e66e7ac2808cfc7c0bac39355bcd92))
+- prevent scrollbars when dragging ([c267b32](https://github.com/johannesjo/super-productivity/commit/c267b32903cc7536f78774ae4ff5b59d0c7c3a72))
+- wrong condition ([fec84c3](https://github.com/johannesjo/super-productivity/commit/fec84c38c5e7634a4003c4f54d19e46605ecc142))
+
+### Features
+
+- add a bit of drag area for mac os [#3501](https://github.com/johannesjo/super-productivity/issues/3501) ([42a81d4](https://github.com/johannesjo/super-productivity/commit/42a81d44a378cfc59d5a14d7382bab46999ed77b))
+- don't disable gradient for default today tag ([4c68dc8](https://github.com/johannesjo/super-productivity/commit/4c68dc8d59383b63215a4ce0bc08347d2a32ea3a))
+- don't disable gradient for default today tag ([d71b0fd](https://github.com/johannesjo/super-productivity/commit/d71b0fd51a5e76fcc3cbe2b3b35f2a1b15b5ab9a))
+- replace weak etag string that causes sync problems when applied inconsistent [#3361](https://github.com/johannesjo/super-productivity/issues/3361) ([a11d0b4](https://github.com/johannesjo/super-productivity/commit/a11d0b42e182de01a86a0df110388140f57015dd))
+- simplify url handling [#3361](https://github.com/johannesjo/super-productivity/issues/3361) ([05f8cf7](https://github.com/johannesjo/super-productivity/commit/05f8cf764b18393d25de2899bb69d23e26cb166e))
+
+### Reverts
+
+- Revert "build: disable e2e for now" ([537e7f9](https://github.com/johannesjo/super-productivity/commit/537e7f97b50358388bbbd1eb8838533f379e3e4a))
+
+## [10.0.9](https://github.com/johannesjo/super-productivity/compare/v10.0.8...v10.0.9) (2024-09-18)
+
+### Bug Fixes
+
+- backlog button shown when it shouldn't [#3488](https://github.com/johannesjo/super-productivity/issues/3488) ([4076a85](https://github.com/johannesjo/super-productivity/commit/4076a853fbdf333268ed3a63da63a0ab79594b3a))
+
+## [10.0.8](https://github.com/johannesjo/super-productivity/compare/v10.0.7...v10.0.8) (2024-09-18)
+
+### Bug Fixes
+
+- backlog button shown when it shouldn't [#3488](https://github.com/johannesjo/super-productivity/issues/3488) ([f360d9a](https://github.com/johannesjo/super-productivity/commit/f360d9ac299269bd0e0ff5316039b4574ba0199b))
+
+## [10.0.7](https://github.com/johannesjo/super-productivity/compare/v10.0.6...v10.0.7) (2024-09-17)
+
+### Bug Fixes
+
+- build issues ([64a3e34](https://github.com/johannesjo/super-productivity/commit/64a3e344329d63933da1b3318d44ee57ec2669c2))
+- dropbox asking for token when sync is disabled ([94461da](https://github.com/johannesjo/super-productivity/commit/94461da7fb55f870f34dbf714837364eb3df44a8))
+- dropbox not asking for token [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([0480241](https://github.com/johannesjo/super-productivity/commit/04802414504d2c286e2c8bbd1deae1d0416cd391))
+- error not properly thrown for electron local file sync [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([3166adb](https://github.com/johannesjo/super-productivity/commit/3166adbc30828ad47a840c21915c88c470f783f0))
+- filter out model ids without suggestion value for chip-list-input [#3475](https://github.com/johannesjo/super-productivity/issues/3475) ([c29ea87](https://github.com/johannesjo/super-productivity/commit/c29ea879297a12a94cba860f435cb188c22ceafe))
+- **sync:** prevent localOnlyModel from being deleted when importing data [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([dd547fa](https://github.com/johannesjo/super-productivity/commit/dd547fa3b1e88522c4b8d21ab53b0355c1f93bb7))
+
+### Features
+
+- add folder picker when there is no valid selected [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([866df0c](https://github.com/johannesjo/super-productivity/commit/866df0c49392c31f3dff563c4fa0a06694987489))
+- add setting to change tracking interval [#2355](https://github.com/johannesjo/super-productivity/issues/2355) ([d34ef38](https://github.com/johannesjo/super-productivity/commit/d34ef38e0f78ba913b78c1174e38ea03b968ecad))
+- check if directory exists [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([552b250](https://github.com/johannesjo/super-productivity/commit/552b25074dd8579543c513280674bd2eed7aa98a))
+- **dropbox:** re-add legacy tokens [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([845ef2c](https://github.com/johannesjo/super-productivity/commit/845ef2c808b3b074a85ea314ddde893c515b694b))
+- use directory picker if no valid directory was given for local file sync [#3473](https://github.com/johannesjo/super-productivity/issues/3473) ([a553681](https://github.com/johannesjo/super-productivity/commit/a553681f8f00660f3ef76c4f920506d0dc13ba72))
+
+## [10.0.6](https://github.com/johannesjo/super-productivity/compare/v10.0.5...v10.0.6) (2024-09-16)
+
+### Bug Fixes
+
+- prevent double sub tasks after drag and drop ([4feb135](https://github.com/johannesjo/super-productivity/commit/4feb135f0407f2c5799572048345699036891e18))
+
+## [10.0.5](https://github.com/johannesjo/super-productivity/compare/v10.0.4...v10.0.5) (2024-09-16)
+
+### Bug Fixes
+
+- play icon doesn't disappear in planner page [#3451](https://github.com/johannesjo/super-productivity/issues/3451) ([d509762](https://github.com/johannesjo/super-productivity/commit/d5097625e79ba9c873842f31893ae9527e2afbed))
+- display value of date in negative timezones [#3446](https://github.com/johannesjo/super-productivity/issues/3446) ([a37d58c](https://github.com/johannesjo/super-productivity/commit/a37d58c4cf967c4ad164af4ea4d2fa4a7259e891))
+- dropbox 400 error [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([4908eb5](https://github.com/johannesjo/super-productivity/commit/4908eb50ca9bb3736c7b3abae01220103c433827))
+- error when deleting project [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([6231982](https://github.com/johannesjo/super-productivity/commit/6231982eb9feb0003f139f1874fc6cf6c44c03a9))
+- error when deleting project 2 [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([e88b0ae](https://github.com/johannesjo/super-productivity/commit/e88b0aea5cc055c30cfbd916133a86d3c3b3e344))
+- not persisting state after project delete [#3464](https://github.com/johannesjo/super-productivity/issues/3464) ([00dc4b9](https://github.com/johannesjo/super-productivity/commit/00dc4b9a3cf3a4ee90632514bf845df7771847b6))
+- prevent app crash [#3430](https://github.com/johannesjo/super-productivity/issues/3430) ([371ef42](https://github.com/johannesjo/super-productivity/commit/371ef42d955b9a3cc06ef91035d9c9243ab22b76))
+- several other instances when timezone adjusted value is wrong [#3446](https://github.com/johannesjo/super-productivity/issues/3446) ([cdf4f93](https://github.com/johannesjo/super-productivity/commit/cdf4f930f2be97e4070ca3c7f96ab18ccb01d8b0))
+- start date not being respected [#3366](https://github.com/johannesjo/super-productivity/issues/3366) ([6eb7d96](https://github.com/johannesjo/super-productivity/commit/6eb7d966eb173e8396007599cb5e0568d76ffb02))
+- typo ([2fe6208](https://github.com/johannesjo/super-productivity/commit/2fe6208c0ec6430127c2da2e1aa4d3360fc688ef))
+- weekNr being wrong [#3435](https://github.com/johannesjo/super-productivity/issues/3435) ([d519c86](https://github.com/johannesjo/super-productivity/commit/d519c863aa435292631d8ba02b69b46bc0b83ab3))
+
+### Features
+
+- add inline edit to planner tasks [#3450](https://github.com/johannesjo/super-productivity/issues/3450) ([c6c7b08](https://github.com/johannesjo/super-productivity/commit/c6c7b0871af88251d9e5ee80b30a642d9cd35c29))
+- Add Today Remaining in the projects view ([16902bf](https://github.com/johannesjo/super-productivity/commit/16902bfa95872cd1c6ee2f19ea3366431e0e90d1))
+- add ui for editing sub task tags [#3454](https://github.com/johannesjo/super-productivity/issues/3454) ([82befe1](https://github.com/johannesjo/super-productivity/commit/82befe16037dec8a7e677408eaefd632643a6998))
+- don't show today and no_list tags for dialog edit tags ([596fa08](https://github.com/johannesjo/super-productivity/commit/596fa08b256fb5fd65bfd78cabeb334cefeb703a))
+- hide hidden projects also for short syntax [#3165](https://github.com/johannesjo/super-productivity/issues/3165) ([db0021c](https://github.com/johannesjo/super-productivity/commit/db0021cb05f7d5966754feca83cf0ff2fd8f002f))
+- increase touch delay project drag and drop [#3466](https://github.com/johannesjo/super-productivity/issues/3466) ([a3ebf89](https://github.com/johannesjo/super-productivity/commit/a3ebf897d9cb61c2b4a2a551134e1289f3910367))
+- make data repair script a bit more lenient [#3395](https://github.com/johannesjo/super-productivity/issues/3395) ([df7b8e1](https://github.com/johannesjo/super-productivity/commit/df7b8e18e01231735acb489898f0eab4ba0fe300))
+- make tag list component more error resistant ([4318a7e](https://github.com/johannesjo/super-productivity/commit/4318a7e2ed33632d8f4e1771216e62c49114f256))
+- only count without break for when time was worked [#3337](https://github.com/johannesjo/super-productivity/issues/3337) ([8417427](https://github.com/johannesjo/super-productivity/commit/84174279c7cd443980ab825372f78f92dade350c))
+- remove legacy migration [#3436](https://github.com/johannesjo/super-productivity/issues/3436) ([1fc1902](https://github.com/johannesjo/super-productivity/commit/1fc1902eb661c6cbd22b0f5c6ba961643c9317d7))
+- select all for inline input on focus [#3450](https://github.com/johannesjo/super-productivity/issues/3450) ([d6ae779](https://github.com/johannesjo/super-productivity/commit/d6ae7790f52c4b5277a6317819aeccf4703c1b6a))
+- show work view status bar only when there is data for it [#3455](https://github.com/johannesjo/super-productivity/issues/3455) ([f21e05b](https://github.com/johannesjo/super-productivity/commit/f21e05bdb83ad552a80397c871ecfd10aebdab9c))
+
+## [10.0.4](https://github.com/johannesjo/super-productivity/compare/v10.0.3...v10.0.4) (2024-09-09)
+
+### Bug Fixes
+
+- add proper day date when dropping and dragging in planner [#3413](https://github.com/johannesjo/super-productivity/issues/3413) ([0561ee0](https://github.com/johannesjo/super-productivity/commit/0561ee027820ecc0ee96c6d76a5b029d396a6d08))
+- main list task re-order not being saved [#3422](https://github.com/johannesjo/super-productivity/issues/3422) ([5957eb8](https://github.com/johannesjo/super-productivity/commit/5957eb8db4f9518e0e908f53f8421dfd8f1cc418))
+
+### Features
+
+- improve styling ([c1f7165](https://github.com/johannesjo/super-productivity/commit/c1f716579c8b32b6e8b96ffc1fc34ccce7d7aadd))
+
+## [10.0.3](https://github.com/johannesjo/super-productivity/compare/v10.0.2...v10.0.3) (2024-09-09)
+
+### Bug Fixes
+
+- styling for multi btn wrapper ([98ceff6](https://github.com/johannesjo/super-productivity/commit/98ceff6b724625549c66b4ccf20e8eedffc929ef))
+- windows crashing issue on minimize [#3423](https://github.com/johannesjo/super-productivity/issues/3423) ([6a5f21e](https://github.com/johannesjo/super-productivity/commit/6a5f21e5f28bca0cd0ee6710eca4814a7eccc418))
+
+### Features
+
+- update translations ([7c65adb](https://github.com/johannesjo/super-productivity/commit/7c65adb4a571debdb4cfc7e107ebd59d8ddb9d4c))
+
+## [10.0.2](https://github.com/johannesjo/super-productivity/compare/v10.0.1...v10.0.2) (2024-09-08)
+
+### Bug Fixes
+
+- don't open side panel when dialog-task-detail-panel is used ([47b124c](https://github.com/johannesjo/super-productivity/commit/47b124c8d814e4f711fa9a4ddcc942e0749838e2))
+- adjust getWeekNr to work with other time zones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([462dad6](https://github.com/johannesjo/super-productivity/commit/462dad6998199cd200b27a46867c567edd74d5a1))
+- also make repeat info text work in other time zones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([928691a](https://github.com/johannesjo/super-productivity/commit/928691afccb68bea31cf52a9eaefa95f1c6d716a))
+- error case ([315d409](https://github.com/johannesjo/super-productivity/commit/315d409be2eda2516045634f93bded0727857488))
+- get rid of date iso strings since they seem to mess up the datepicker timezone [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([fac3a6a](https://github.com/johannesjo/super-productivity/commit/fac3a6a5d2435f65bdc024d5f4095b959aea42be))
+- make repeat tasks work better for other timezones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([c5bd24a](https://github.com/johannesjo/super-productivity/commit/c5bd24a5fe777aec7420b5467854e62ed556bc0f))
+- project re-order not always working ([0c8ef6b](https://github.com/johannesjo/super-productivity/commit/0c8ef6ba4a3f1d751b2479a92004dfefe537a8ad))
+- task not expanding any more on right key ([eee870d](https://github.com/johannesjo/super-productivity/commit/eee870dfc1c9d8e125fa6da5cba04bf62c02dc1e))
+- use utc date for day string parsing to avoid tasks being at the wrong day in timezones with negative offset [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([0b451b2](https://github.com/johannesjo/super-productivity/commit/0b451b277338153f40c3537b948831dbf751a486))
+- wrong day of month shown in schedule-event for negative timezones [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([64f2d8f](https://github.com/johannesjo/super-productivity/commit/64f2d8ffa0f84e85579e7b293a418f214efc3315))
+- wrong days for negative timezones for planner [#3402](https://github.com/johannesjo/super-productivity/issues/3402) ([268eeb0](https://github.com/johannesjo/super-productivity/commit/268eeb0db62e0b0e6c9af06d5591c0eca03f5f49))
+
+### Features
+
+- add angular cdk for project list ([3139a1f](https://github.com/johannesjo/super-productivity/commit/3139a1f8665d20e55902602e8baaca729b3bef0d))
+- add context menu to toggle project visibility ([08a6e9e](https://github.com/johannesjo/super-productivity/commit/08a6e9e1b474be6ebb10facb4b40c62e62a23fe1))
+- add directive for context menu ([4034854](https://github.com/johannesjo/super-productivity/commit/4034854238bb52841467b0204b5b76d9d26f217b))
+- add more focus to currently running simple counter ([b510f4f](https://github.com/johannesjo/super-productivity/commit/b510f4f85576677ca44ab564a53342bd1c7e2e43))
+- add project delete for context menu ([c85c8bd](https://github.com/johannesjo/super-productivity/commit/c85c8bd3bddab308563887154995ef664746330b))
+- allow focus session also for current task ([fa7ed4a](https://github.com/johannesjo/super-productivity/commit/fa7ed4aca7b4774ae5fa55f9c99d518227120863))
+- convert tag component to signals ([ec5045f](https://github.com/johannesjo/super-productivity/commit/ec5045fe9824bf2c93571e764c7014d90f63b9ed))
+- extract hover controls for task to improve performance ([ef03e96](https://github.com/johannesjo/super-productivity/commit/ef03e96f4cbc613e2e24bab1db6d072732244c3f))
+- **i18n:** translate JSON content into Simplified Chinese ([7fcb4bf](https://github.com/johannesjo/super-productivity/commit/7fcb4bf2a0be064a09efa6879d33c2d9f3358070))
+- **i18n:** translate JSON content into Traditional Chinese ([5156e67](https://github.com/johannesjo/super-productivity/commit/5156e677762ba84c1b51b7088f81fcb686958cff))
+- move sidenav project stuff to sub menus ([6c55db0](https://github.com/johannesjo/super-productivity/commit/6c55db0528e62a0b8c9cfa53e325eae4253ca6bb))
+- polish new side nav ([43bacad](https://github.com/johannesjo/super-productivity/commit/43bacaddc62497132fd52c32017cc0d323cf2662))
+- refactor task list component to signals ([f952f4a](https://github.com/johannesjo/super-productivity/commit/f952f4ad8d3fb70cf5ec742bb4187ec6b6aeeebb))
+- remove dragula from side-nav ([6c2e15f](https://github.com/johannesjo/super-productivity/commit/6c2e15ffefa55f3121ed46951043a9660ccff1b4))
+- remove manage project page ([d8cd7d2](https://github.com/johannesjo/super-productivity/commit/d8cd7d2b9ea1a49081f0d03e070689407e6e4b14))
+- use cdk drop for tags as well ([e553b5a](https://github.com/johannesjo/super-productivity/commit/e553b5aaeb698464f19c71b5c93c31bcb4293160))
+- use context menu component instead of directive ([20d2fc9](https://github.com/johannesjo/super-productivity/commit/20d2fc985163a41d26a49c560ca62574a6c2de22))
+- use signals in task component for better performance ([8eecd79](https://github.com/johannesjo/super-productivity/commit/8eecd79496049447afeea10a417821b3bffd5eb6))
+
 ## [10.0.1](https://github.com/johannesjo/super-productivity/compare/v10.0.0...v10.0.1) (2024-09-01)
 
 ### Bug Fixes

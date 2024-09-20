@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { ProjectTaskPageComponent } from './pages/project-task-page/project-task-page.component';
 import { ConfigPageComponent } from './pages/config-page/config-page.component';
-import { ProjectOverviewPageComponent } from './pages/project-overview-page/project-overview-page.component';
 import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
 import { WorklogComponent } from './features/worklog/worklog.component';
 import { MetricPageComponent } from './pages/metric-page/metric-page.component';
@@ -131,12 +130,6 @@ export const APP_ROUTES: Routes = [
     data: { page: 'daily-summary' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
-  {
-    path: 'project-overview',
-    component: ProjectOverviewPageComponent,
-    data: { page: 'project-overview' },
-  },
-
   {
     path: 'active/:subPageType',
     canActivate: [ActiveWorkContextGuard, FocusOverlayOpenGuard],

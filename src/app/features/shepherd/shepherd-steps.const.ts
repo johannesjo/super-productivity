@@ -260,7 +260,7 @@ export const SHEPHERD_STEPS = (
       : [
           {
             title: 'Task Details',
-            text: 'There is more you you can do with task. Tap on the task.',
+            text: 'There is more you can do with tasks. Tap on the task.',
             attachTo: {
               element: 'task',
               on: 'bottom' as any,

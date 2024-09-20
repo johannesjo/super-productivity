@@ -1,20 +1,6 @@
 @import '../../../../variables';
 
 :host {
-  a,
-  button {
-    height: 44px !important;
-    line-height: 44px !important;
-    min-height: 44px !important;
-  }
-}
-
-:host {
-  display: flex;
-  position: relative;
-  align-items: stretch;
-  justify-content: stretch;
-
   button .badge {
     display: none;
   }
@@ -50,42 +36,6 @@
   &.isHidden {
     display: none !important;
   }
-
-  button:first-of-type {
-    flex-grow: 1;
-  }
-
-  button:last-of-type {
-    border-radius: 0;
-    align-self: stretch;
-    display: inline-flex;
-    min-width: 48px;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-
-    .mat-mdc-button-touch-target {
-      width: 40px;
-      height: 40px;
-    }
-
-    @include mousePrimaryDevice {
-      opacity: 0;
-      display: none;
-    }
-  }
-
-  &:focus,
-  &:hover {
-    button:last-of-type {
-      @include mousePrimaryDevice {
-        opacity: 0.8;
-        display: inline-flex;
-      }
-    }
-  }
 }
 
 // color bar left styles
@@ -114,17 +64,9 @@
   }
 }
 
-.settings-btn {
-  border-radius: 0 !important;
-
-  ::ng-deep {
-    .mat-mdc-button-persistent-ripple {
-      border-radius: 0 !important;
-    }
-  }
-
-  .settings-btn {
-    border-radius: 0;
+:host-context(.cdk-drop-list-dragging) {
+  .color-bar {
+    opacity: 0 !important;
   }
 }
 

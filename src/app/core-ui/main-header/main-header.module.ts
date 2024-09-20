@@ -6,9 +6,9 @@ import { ProjectModule } from '../../features/project/project.module';
 import { RouterModule } from '@angular/router';
 import { BookmarkModule } from '../../features/bookmark/bookmark.module';
 import { PomodoroModule } from '../../features/pomodoro/pomodoro.module';
-import { WorkContextMenuModule } from '../work-context-menu/work-context-menu.module';
 import { TagModule } from '../../features/tag/tag.module';
 import { SimpleCounterModule } from '../../features/simple-counter/simple-counter.module';
+import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
 
 @NgModule({
   imports: [
@@ -18,9 +18,9 @@ import { SimpleCounterModule } from '../../features/simple-counter/simple-counte
     RouterModule,
     BookmarkModule,
     PomodoroModule,
-    WorkContextMenuModule,
     TagModule,
     SimpleCounterModule,
+    WorkContextMenuComponent,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],

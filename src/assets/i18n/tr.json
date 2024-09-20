@@ -932,10 +932,6 @@
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Planla",
-        "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
-        "DATETIME_FOR": "Hatırlatma için tarih-saat",
-        "EDIT": "Hatırlatıcıyı düzenle",
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi biriktirme günlüğüne kaydet",
         "REMIND_AT": "Şu saatte hatırlat:",
         "RO_10M": "Başlamadan 10 dakika önce",
@@ -946,7 +942,11 @@
         "RO_START": "başladığında",
         "RO_NEVER": "Never",
         "SCHEDULE": "Planla",
-        "UNSCHEDULE": "Planlamayı iptal et"
+        "UNSCHEDULE": "Planlamayı iptal et",
+        "CONFIRM_REPEAT_OK": "Planla",
+        "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
+        "DATETIME_FOR": "Hatırlatma için tarih-saat",
+        "EDIT": "Hatırlatıcıyı düzenle"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
@@ -1092,12 +1092,12 @@
         "TITLE": "Zaman çizelgesi"
       },
       "END": "İş Bitişi",
-      "MENU_TITLE": "Zaman çizelgesi",
       "NOW": "Şimdi",
       "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
       "START": "İş Başlangıcı",
       "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
       "LUNCH_BREAK": "Öğle Arası",
+      "MENU_TITLE": "Zaman çizelgesi",
       "S": {
         "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
       }
@@ -1323,18 +1323,18 @@
       "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Çalışılan görevlere bugün etiketini otomatik olarak ekle",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
-      "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Uygulamadan çıkmadan önce günü bitirmeden çıkış yaptığınızı onaylayın",
       "IS_DARK_MODE": "Karanlık modu",
       "IS_DISABLE_ANIMATIONS": "Tüm animasyonları devre dışı bırak",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
       "TASK_NOTES_TPL": "Görev açıklama şablonu",
-      "TITLE": "Diğer ayarlar"
+      "TITLE": "Diğer ayarlar",
+      "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir"
     },
     "POMODORO": {
       "BREAK_DURATION": "Kısa molaların süresi",
@@ -1421,7 +1421,6 @@
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
-    "MANAGE_PROJECTS": "Projeleri Yönet",
     "HELP": "Yardım",
     "METRICS": "İstatistikler",
     "NOTES": "Notlar",
@@ -1431,7 +1430,6 @@
     "PROJECT_MENU": "Proje Menüsü",
     "PROJECT_SETTINGS": "Proje Ayarları",
     "QUICK_HISTORY": "Hızlı Geçmiş",
-    "SCHEDULED": "Planlanmış",
     "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
@@ -1441,7 +1439,9 @@
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
     "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
-    "WORKLOG": "Görev günlüğü"
+    "WORKLOG": "Görev günlüğü",
+    "MANAGE_PROJECTS": "Projeleri Yönet",
+    "SCHEDULED": "Planlanmış"
   },
   "PDS": {
     "BACK": "Bekle bir şey unuttum!",
@@ -1454,10 +1454,8 @@
       "OK": "Hay hay! Kapat!"
     },
     "ESTIMATE_TOTAL": "Toplam tahmin:",
-    "EVALUATION": "Değerlendirme",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
     "NO_TASKS": "Bugün için görev yok",
-    "PLAN": "Plan",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
     "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
@@ -1472,44 +1470,17 @@
     "START_END": "Başlangıç - Bitiş",
     "SUMMARY_FOR": " {{dayStr}} Günlük Özeti",
     "TASKS_COMPLETED": "Tamamlanan Görevler",
-    "TASK_LIST": "Görev listesi",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
     "TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
     "TIME_SPENT_TODAY_BY_TAG": "Etikete Göre Bugün Harcanan Zaman",
-    "TODAY": "Bugün",
-    "WEEK": "Hafta"
+    "WEEK": "Hafta",
+    "EVALUATION": "Değerlendirme",
+    "PLAN": "Plan",
+    "TASK_LIST": "Görev listesi",
+    "TODAY": "Bugün"
   },
   "PM": {
     "TITLE": "Proje İstatistikleri"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
-    "ARCHIVE_PROJECT": "Arşiv Projesi",
-    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
-    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
-    "DELETE_PROJECT": "Projeyi Sil",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "Arşivle"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "Sil"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
-      "OK": "Arşivden Çıkar"
-    },
-    "EDIT_PROJECT": "Projeyi Düzenle",
-    "EXPORT_PROJECT": "Projeyi Dışa Aktar",
-    "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
-    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
-    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
-    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
-    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
-    "TITLE": "Projeye Genel Bakış",
-    "UN_ARCHIVE_PROJECT": "Arşivlenmemiş Proje"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
@@ -1576,5 +1547,34 @@
     "TIME_ESTIMATED": "Tahmini Süre:",
     "WITHOUT_BREAK": "Mola vermeden:",
     "WORKING_TODAY": "Bugün çalışıyorum:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
+    "ARCHIVE_PROJECT": "Arşiv Projesi",
+    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
+    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
+    "DELETE_PROJECT": "Projeyi Sil",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
+      "OK": "Arşivle"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
+      "OK": "Sil"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
+      "OK": "Arşivden Çıkar"
+    },
+    "EDIT_PROJECT": "Projeyi Düzenle",
+    "EXPORT_PROJECT": "Projeyi Dışa Aktar",
+    "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
+    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
+    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
+    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
+    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
+    "TITLE": "Projeye Genel Bakış",
+    "UN_ARCHIVE_PROJECT": "Arşivlenmemiş Proje"
   }
 }

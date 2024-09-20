@@ -128,7 +128,12 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
       console.log(meta);
       throw new Error('Not able to get rev for WebDAV');
     }
-    return rev;
+    console.log('cleaned rev', this._cleanRev(rev));
+    return this._cleanRev(rev);
+  }
+
+  private _cleanRev(rev: string): string {
+    return rev.replace(/"/g, '').replace(/^W\//, '');
   }
 
   private _getFilePath(syncTarget: SyncTarget, cfg: WebDavConfig): string {

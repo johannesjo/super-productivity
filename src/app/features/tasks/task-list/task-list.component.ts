@@ -1,29 +1,23 @@
 import {
-  Attribute,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
-import { DragulaService } from 'ng2-dragula';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  ReplaySubject,
-  Subscription,
-} from 'rxjs';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
-import { map } from 'rxjs/operators';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DragulaService } from 'ng2-dragula';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'task-list',
@@ -33,89 +27,57 @@ import { taskListAnimation } from './task-list-ani';
   animations: [taskListAnimation, expandFadeFastAnimation],
 })
 export class TaskListComponent implements OnDestroy, OnInit {
-  T: typeof T = T;
-  tasksIN: TaskWithSubTasks[] = [];
-  tasks$: ReplaySubject<TaskWithSubTasks[]> = new ReplaySubject(1);
-  isHideDoneIN: boolean = false;
-  isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isHideAllIN: boolean = false;
-  isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  filteredTasks: TaskWithSubTasks[] = [];
+  tasks = input<TaskWithSubTasks[]>([]);
+  isHideDone = input(false);
+  isHideAll = input(false);
 
-  @Input() parentId?: string;
-  @Input() listModelId?: string;
-  @Input() noTasksMsg?: string;
-  @Input() isBacklog: boolean = false;
-  @Input() isSubTaskList: boolean = false;
-  listId?: string;
+  listId = input<'PARENT' | 'SUB' | undefined>(undefined);
+  listModelId = input<string | undefined>(undefined);
+  parentId = input<string | undefined>(undefined);
+
+  noTasksMsg = input<string | undefined>(undefined);
+  isBacklog = input(false);
+  isSubTaskList = input(false);
+
+  currentTaskId = toSignal(this._taskService.currentTaskId$);
+
+  filteredTasks = computed<Task[]>(() => {
+    const tasks = this.tasks();
+    if (this.listId() === 'PARENT') {
+      return tasks;
+    }
+    const isHideDone = this.isHideDone();
+    const isHideAll = this.isHideAll();
+    const currentId = this.currentTaskId() || null;
+    return filterDoneTasks(tasks, currentId, isHideDone, isHideAll);
+  });
+
+  doneTasksLength = computed(() => {
+    return this.tasks()?.filter((task) => task.isDone).length ?? 0;
+  });
+  allTasksLength = computed(() => this.tasks()?.length ?? 0);
+
   @ViewChild('listEl', { static: true }) listEl?: ElementRef;
+
+  T: typeof T = T;
+
   isBlockAni: boolean = false;
-  doneTasksLength: number = 0;
-  undoneTasksLength: number = 0;
-  allTasksLength: number = 0;
-  currentTaskId: string | null = null;
   private _subs: Subscription = new Subscription();
+
   private _blockAnimationTimeout?: number;
-  private _filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
-    this.tasks$,
-    this.isHideDone$,
-    this.isHideAll$,
-    this._taskService.currentTaskId$,
-  ]).pipe(
-    map(([tasks, isHideDone, isHideAll, currentId]) =>
-      filterDoneTasks(tasks, currentId, isHideDone, isHideAll),
-    ),
-  );
 
   constructor(
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
-    @Attribute('subTaskList') private subTaskList: string,
   ) {}
-
-  @Input('listId') set listIdIn(v: string) {
-    this.listId = v;
-
-    // Disable filtering for non sub task tasks
-    if (v !== 'SUB') {
-      this._filteredTasks$ = this.tasks$;
-    }
-  }
-
-  @Input() set tasks(tasks: TaskWithSubTasks[]) {
-    this.tasksIN = tasks;
-    this.tasks$.next(tasks);
-
-    if (!tasks) {
-      return;
-    }
-    this.doneTasksLength = this.tasksIN.filter((task) => task.isDone).length;
-    this.allTasksLength = this.tasksIN.length;
-    this.undoneTasksLength = this.tasksIN.length - this.doneTasksLength;
-  }
-
-  @Input() set isHideDone(val: boolean) {
-    this.isHideDoneIN = val;
-    this.isHideDone$.next(val);
-  }
-
-  @Input() set isHideAll(val: boolean) {
-    this.isHideAllIN = val;
-    this.isHideAll$.next(val);
-  }
 
   ngOnInit(): void {
     this._subs.add(
-      this._filteredTasks$.subscribe((tasks) => {
-        this.filteredTasks = tasks;
-      }),
-    );
-
-    this._subs.add(
-      this._dragulaService.dropModel(this.listId).subscribe((params: any) => {
+      this._dragulaService.dropModel(this.listId()).subscribe((params: any) => {
         const { target, source, targetModel, item } = params;
-        if (this.listEl && this.listEl.nativeElement === target) {
+        // NOTE: due to some quirks of dragula item can be undefined
+        if (this.listEl && this.listEl.nativeElement === target && item) {
           this._blockAnimation();
 
           const sourceModelId = source.dataset.id;
@@ -126,14 +88,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
         }
       }),
     );
-
-    this._subs.add(
-      this._taskService.currentTaskId$.subscribe((val) => (this.currentTaskId = val)),
-    );
   }
-
   ngOnDestroy(): void {
-    this._subs.unsubscribe();
     if (this._blockAnimationTimeout) {
       clearTimeout(this._blockAnimationTimeout);
     }
@@ -144,14 +100,16 @@ export class TaskListComponent implements OnDestroy, OnInit {
   }
 
   expandDoneTasks(): void {
-    if (!this.parentId) {
-      throw new Error();
+    const pid = this.parentId();
+    if (!pid) {
+      throw new Error('Parent ID is undefined');
     }
 
-    this._taskService.showSubTasks(this.parentId);
-    this._taskService.focusTask(this.parentId);
+    this._taskService.showSubTasks(pid);
+    this._taskService.focusTask(pid);
   }
 
+  // TODO after drop
   private _blockAnimation(): void {
     this.isBlockAni = true;
     this._cd.detectChanges();

@@ -9,14 +9,14 @@ import {
   archiveProject,
   deleteProject,
   loadProjectRelatedDataSuccess,
-  moveAllProjectBacklogTasksToTodayList,
+  moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToTodayList,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToRegularList,
+  moveProjectTaskToRegularListAuto,
   moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
   unarchiveProject,
@@ -30,7 +30,6 @@ import {
 } from './project.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
-import { NoteService } from '../../note/note.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTask,
@@ -42,7 +41,6 @@ import {
   moveToOtherProject,
   restoreTask,
 } from '../../tasks/store/task.actions';
-import { ReminderService } from '../../reminder/reminder.service';
 import { ProjectService } from '../project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
@@ -54,12 +52,9 @@ import {
 import { WorkContextType } from '../../work-context/work-context.model';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { Project } from '../project.model';
-import { TaskService } from '../../tasks/task.service';
-import { Task, TaskArchive, TaskState } from '../../tasks/task.model';
+import { Task, TaskArchive } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { EMPTY, Observable, of } from 'rxjs';
-import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectProjectFeatureState } from './project.selectors';
 import {
   addNote,
@@ -68,8 +63,7 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { DateService } from 'src/app/core/date/date.service';
-import { selectAllNotes } from '../../note/store/note.reducer';
-import { Note } from '../../note/note.model';
+import { ReminderService } from '../../reminder/reminder.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -95,13 +89,13 @@ export class ProjectEffects {
 
           moveProjectTaskInBacklogList.type,
           moveProjectTaskToBacklogList.type,
-          moveProjectTaskToTodayList.type,
+          moveProjectTaskToRegularList.type,
           moveProjectTaskUpInBacklogList.type,
           moveProjectTaskDownInBacklogList.type,
           moveProjectTaskToTopInBacklogList.type,
           moveProjectTaskToBottomInBacklogList.type,
           moveProjectTaskToBacklogListAuto.type,
-          moveProjectTaskToTodayListAuto.type,
+          moveProjectTaskToRegularListAuto.type,
         ),
         switchMap((a) => {
           // exclude ui only actions
@@ -246,13 +240,12 @@ export class ProjectEffects {
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteProject.type),
-        tap(async ({ id }) => {
+        ofType(deleteProject),
+        tap(async ({ project, allTaskIds }) => {
+          const id = project.id as string;
           await this._persistenceService.removeCompleteRelatedDataForProject(id);
-          this._removeAllNonArchiveTasksForProject(id);
           this._removeAllArchiveTasksForProject(id);
-          this._removeAllRepeatingTasksForProject(id);
-          this._removeAlNotesForProject(id);
+          this._reminderService.removeRemindersByRelatedIds(allTaskIds);
 
           // we also might need to account for this unlikely but very nasty scenario
           const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
@@ -282,7 +275,7 @@ export class ProjectEffects {
         ofType(updateProject),
         filter((a) => a.project.changes.isEnableBacklog === false),
         map((a) => {
-          return moveAllProjectBacklogTasksToTodayList({
+          return moveAllProjectBacklogTasksToRegularList({
             projectId: a.project.id as string,
           });
         }),
@@ -385,55 +378,6 @@ export class ProjectEffects {
     { dispatch: false },
   );
 
-  // NOTE: does not seem to be necessary any more
-  // moveToTodayListOnAddTodayTag: Observable<unknown> = createEffect(() =>
-  //   this._actions$.pipe(
-  //     ofType(updateTaskTags),
-  //     filter(
-  //       ({ task, newTagIds }) => !!task.projectId && newTagIds.includes(TODAY_TAG.id),
-  //     ),
-  //     concatMap(({ task, newTagIds }) =>
-  //       this._projectService.getByIdOnce$(task.projectId as string).pipe(
-  //         map((project) => ({
-  //           project,
-  //           task,
-  //           newTagIds,
-  //         })),
-  //       ),
-  //     ),
-  //     filter(({ project }) => !project.taskIds.includes(TODAY_TAG.id)),
-  //     map(({ task, newTagIds, project }) =>
-  //       moveProjectTaskToTodayListAuto({
-  //         projectId: project.id,
-  //         taskId: task.id,
-  //         isMoveToTop: false,
-  //       }),
-  //     ),
-  //   ),
-  // );
-
-  // @Effect()
-  // moveToBacklogOnRemoveTodayTag: Observable<unknown> = this._actions$.pipe(
-  //   ofType(updateTaskTags),
-  //   filter((action: UpdateTaskTags) =>
-  //     task.projectId &&
-  //   ),
-  //   concatMap((action) => this._projectService.getByIdOnce$(task.projectId).pipe(
-  //     map((project) => ({
-  //       project,
-  //       p: action.payload,
-  //     }))
-  //   )),
-  //   filter(({project}) => !project.taskIds.includes(TODAY_TAG.id)),
-  //   map(({p, project}) => moveTaskToTodayList({
-  //     workContextId: project.id,
-  //     taskId: p.task.id,
-  //     newOrderedIds: [p.task.id, ...project.backlogTaskIds],
-  //     src: 'DONE',
-  //     target: 'BACKLOG'
-  //   })),
-  // );
-
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
@@ -441,40 +385,10 @@ export class ProjectEffects {
     private _projectService: ProjectService,
     private _persistenceService: PersistenceService,
     private _bookmarkService: BookmarkService,
-    private _noteService: NoteService,
     private _globalConfigService: GlobalConfigService,
-    private _reminderService: ReminderService,
-    // private _workContextService: WorkContextService,
-    private _taskService: TaskService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _dateService: DateService,
+    private _reminderService: ReminderService,
   ) {}
-
-  private async _removeAllNonArchiveTasksForProject(
-    projectIdToDelete: string,
-  ): Promise<any> {
-    const taskState: TaskState = await this._taskService.taskFeatureState$
-      .pipe(
-        filter((s) => s.isDataLoaded),
-        first(),
-      )
-      .toPromise();
-    const nonArchiveTaskIdsToDelete = taskState.ids.filter((id) => {
-      const t = taskState.entities[id] as Task;
-      if (!t) {
-        throw new Error('No task');
-      }
-      // NOTE sub tasks are accounted for in DeleteMainTasks action
-      return t.projectId === projectIdToDelete;
-    });
-
-    console.log(
-      'TaskIds to remove/unique',
-      nonArchiveTaskIdsToDelete,
-      unique(nonArchiveTaskIdsToDelete),
-    );
-    this._taskService.removeMultipleTasks(nonArchiveTaskIdsToDelete);
-  }
 
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,
@@ -501,43 +415,6 @@ export class ProjectEffects {
       deleteTasks({ taskIds: archiveTaskIdsToDelete }),
       true,
     );
-  }
-
-  private async _removeAllRepeatingTasksForProject(
-    projectIdToDelete: string,
-  ): Promise<any> {
-    const taskRepeatCfgs: TaskRepeatCfg[] =
-      await this._taskRepeatCfgService.taskRepeatCfgs$.pipe(first()).toPromise();
-    const allCfgIdsForProject = taskRepeatCfgs.filter(
-      (cfg) => cfg.projectId === projectIdToDelete,
-    );
-
-    const cfgsIdsToRemove: string[] = allCfgIdsForProject
-      .filter((cfg) => !cfg.tagIds || cfg.tagIds.length === 0)
-      .map((cfg) => cfg.id as string);
-    if (cfgsIdsToRemove.length > 0) {
-      this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgsIdsToRemove);
-    }
-
-    const cfgsToUpdate: string[] = allCfgIdsForProject
-      .filter((cfg) => cfg.tagIds && cfg.tagIds.length > 0)
-      .map((taskRepeatCfg) => taskRepeatCfg.id as string);
-    if (cfgsToUpdate.length > 0) {
-      this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, { projectId: null });
-    }
-  }
-
-  private async _removeAlNotesForProject(projectIdToDelete: string): Promise<any> {
-    const notes: Note[] = await this._store$
-      .select(selectAllNotes)
-      .pipe(first())
-      .toPromise();
-    const allNoteIdsForProject = notes.filter(
-      (cfg) => cfg.projectId === projectIdToDelete,
-    );
-    allNoteIdsForProject.forEach((note) => {
-      this._noteService.remove(note);
-    });
   }
 
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {

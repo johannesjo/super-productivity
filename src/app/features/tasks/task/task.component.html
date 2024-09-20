@@ -3,8 +3,8 @@
     #blockLeftEl
     class="block-left bg-400"
   >
-    <mat-icon *ngIf="!task.isDone">check</mat-icon>
-    <mat-icon *ngIf="task.isDone">undo</mat-icon>
+    <mat-icon *ngIf="!task().isDone">check</mat-icon>
+    <mat-icon *ngIf="task().isDone">undo</mat-icon>
   </div>
 
   <div
@@ -12,17 +12,17 @@
     class="block-right bg-400"
   >
     <!--NOTE: non observable should be enough as we only need the initial value-->
-    <ng-container *ngIf="workContextService.isToday">
-      <mat-icon *ngIf="!(task.repeatCfgId)">alarm</mat-icon>
+    <ng-container *ngIf="isTodayListActive()">
+      <mat-icon *ngIf="!(task().repeatCfgId)">alarm</mat-icon>
       <mat-icon
-        *ngIf="(task.repeatCfgId)"
+        *ngIf="(task().repeatCfgId)"
         svgIcon="repeat"
       ></mat-icon>
     </ng-container>
-    <ng-container *ngIf="!workContextService.isToday">
-      <mat-icon *ngIf="!isTodayTag">wb_sunny</mat-icon>
+    <ng-container *ngIf="!isTodayListActive()">
+      <mat-icon *ngIf="!isTodayTag()">wb_sunny</mat-icon>
       <mat-icon
-        *ngIf="isTodayTag && (task.projectId || task.tagIds?.length > 1)"
+        *ngIf="isTodayTag() && (task().projectId || task().tagIds?.length > 1)"
         svgIcon="remove_today"
       ></mat-icon>
     </ng-container>
@@ -41,7 +41,6 @@
 
   <div class="box"></div>
 
-  <!-- TODO only bind pan, longPress etc when touch is available-->
   <div
     (longPressIOS)="openContextMenu($event)"
     (contextmenu)="openContextMenu($event)"
@@ -56,7 +55,7 @@
   >
     <button
       (click)="toggleTaskDone()"
-      *ngIf="task.isDone"
+      *ngIf="task().isDone"
       [title]="T.F.TASK.CMP.TOGGLE_DONE|translate"
       class="check-done"
       mat-icon-button
@@ -76,8 +75,8 @@
     <div class="title-and-left-btns-wrapper">
       <div
         (click)="focusSelf()"
-        [class.handle-par]="!isInSubTaskList"
-        [class.handle-sub]="isInSubTaskList"
+        [class.handle-par]="!isInSubTaskList()"
+        [class.handle-sub]="isInSubTaskList()"
         class="drag-handle"
       >
         <mat-icon
@@ -85,62 +84,62 @@
           svgIcon="drag_handle"
         ></mat-icon>
         <mat-icon
-          *ngIf="isCurrent"
+          *ngIf="isCurrent()"
           class="play-icon-indicator"
           >play_arrow
         </mat-icon>
 
         <div class="type-ico-wrapper">
-          <div *ngIf="task.repeatCfgId">
+          <div *ngIf="task().repeatCfgId">
             <div
               class="repeat-date-badge"
-              *ngIf="!isRepeatTaskCreatedToday"
+              *ngIf="!isRepeatTaskCreatedToday()"
             >
-              {{ task.created|date:'d.M' }}
+              {{ task().created|date:'d.M' }}
             </div>
             <mat-icon
-              *ngIf="task.repeatCfgId"
-              [style.transform]="isCurrent ? 'scale(1.4)': ''"
+              *ngIf="task().repeatCfgId"
+              [style.transform]="isCurrent() ? 'scale(1.4)': ''"
               svgIcon="repeat"
             >
             </mat-icon>
           </div>
 
-          <div *ngIf="task.issueId">
+          <div *ngIf="task().issueId">
             <div
-              *ngIf="task.issuePoints"
+              *ngIf="task().issuePoints"
               class="mini-badge bgc-primary"
             >
-              {{ task.issuePoints }}
+              {{ task().issuePoints }}
             </div>
-            <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+            <mat-icon [svgIcon]="task().issueType|issueIcon"></mat-icon>
           </div>
         </div>
       </div>
 
       <div
-        (click)="IS_TOUCH_PRIMARY && (task.title.length ? toggleShowDetailPanel($event) : focusTitleForEdit())"
+        (click)="IS_TOUCH_PRIMARY && (task().title.length ? toggleShowDetailPanel($event) : focusTitleForEdit())"
         class="title-and-tags-wrapper"
       >
         <div
           class="parent-title"
-          *ngIf="!isInSubTaskList && task.parentId"
+          *ngIf="!isInSubTaskList() && task().parentId"
         >
-          <div class="title">{{ parentTitle$|async }}</div>
+          <div class="title">{{ parentTitle() }}</div>
         </div>
 
         <inline-multiline-input
-          [resetToLastExternalValueTrigger]="task"
-          [style.pointer-events]="IS_TOUCH_PRIMARY && (task.title.length) ? 'none' : 'auto'"
+          [resetToLastExternalValueTrigger]="task()"
+          [style.pointer-events]="IS_TOUCH_PRIMARY && (task().title.length) ? 'none' : 'auto'"
           #taskTitleEditEl
           (valueEdited)="updateTaskTitleIfChanged($event)"
-          [value]="task.title"
+          [value]="task().title"
           class="task-title"
         ></inline-multiline-input>
 
         <tag-list
-          [task]="task"
-          [isShowProjectTagNever]="isInSubTaskList"
+          [task]="task()"
+          [isShowProjectTagNever]="isInSubTaskList()"
         ></tag-list>
       </div>
     </div>
@@ -148,26 +147,26 @@
     <div class="all-controls-wrapper">
       <div
         (click)="estimateTime()"
-        [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
-        [class.isEditable]="!task.subTasks?.length"
+        [class.hasNoTimeSpentOrEstimate]="!task().timeSpent && !task().timeEstimate"
+        [class.isEditable]="!task().subTasks?.length"
         class="time-wrapper"
       >
         <div
-          *ngIf="!task.subTasks?.length"
+          *ngIf="!task().subTasks?.length"
           class="time"
         >
           <div class="time-val">
-            <span [innerHTML]="task.timeSpent|msToString"></span>
+            <span [innerHTML]="task().timeSpent|msToString"></span>
           </div>
           <div class="separator">/</div>
           <div
-            [innerHTML]="task.timeEstimate|msToString"
+            [innerHTML]="task().timeEstimate|msToString"
             class="time-val"
           ></div>
         </div>
 
         <div
-          *ngIf="task.subTasks?.length"
+          *ngIf="task().subTasks?.length"
           class="time"
         >
           <div class="time-val">
@@ -176,7 +175,7 @@
               style="margin-top: -6px"
               >functions
             </mat-icon>
-            <span [innerHTML]="task.subTasks|subTaskTotalTimeSpent|msToString"></span>
+            <span [innerHTML]="task().subTasks|subTaskTotalTimeSpent|msToString"></span>
           </div>
           <div class="separator">/</div>
           <div class="time-val">
@@ -184,96 +183,24 @@
               svgIcon="estimate_remaining"
               inline="true"
             ></mat-icon>
-            {{ task.timeEstimate|msToString }}
+            {{ task().timeEstimate|msToString }}
           </div>
         </div>
       </div>
 
       <div class="controls">
-        <div
+        <task-hover-controls
           *ngIf="isFirstLineHover && !IS_TOUCH_PRIMARY"
+          [isShowAddToToday]="isShowAddToToday()"
+          [task]="task()"
+          [isCurrent]="isCurrent()"
+          [isSelected]="isSelected()"
           class="hover-controls"
-        >
-          <button
-            (click)="startTask()"
-            *ngIf="!task.isDone && !isCurrent && !task.subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
-            class="ico-btn start-task-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon
-              class="play-icon"
-              svgIcon="play"
-            ></mat-icon>
-          </button>
-
-          <button
-            (click)="pauseTask()"
-            *ngIf="!task.isDone && isCurrent && !task.subTasks?.length"
-            title="{{T.F.TASK.CMP.TRACK_TIME_STOP|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
-            class="ico-btn"
-            color="accent"
-            mat-icon-button
-          >
-            <mat-icon>pause</mat-icon>
-          </button>
-
-          <button
-            (click)="addToMyDay()"
-            *ngIf="isShowAddToToday"
-            title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{kb.moveToTodaysTasks?'['+kb.moveToTodaysTasks+']':''}}"
-            class="ico-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon>wb_sunny</mat-icon>
-          </button>
-
-          <button
-            (click)="removeFromMyDay()"
-            *ngIf="isShowRemoveFromToday"
-            [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
-            class="ico-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon svgIcon="remove_today"></mat-icon>
-          </button>
-
-          <button
-            *ngIf="!task.isDone"
-            (click)="toggleTaskDone()"
-            title="{{T.F.TASK.CMP.TOGGLE_DONE|translate}} {{kb.taskToggleDone?'['+kb.taskToggleDone+']':''}}"
-            class="ico-btn task-done-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon>check</mat-icon>
-          </button>
-
-          <button
-            (click)="toggleShowDetailPanel()"
-            *ngIf="!task.notes && (!task.issueId||task.issueType==='CALENDAR') && !isSelected"
-            title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
-            class="ico-btn show-additional-info-btn"
-            color=""
-            mat-icon-button
-          >
-            <mat-icon *ngIf="!task.issueWasUpdated">&#xe949;</mat-icon>
-            <!--            <mat-icon *ngIf="!task.issueWasUpdated">toc</mat-icon>-->
-            <!--            <mat-icon *ngIf="!task.issueWasUpdated">chevron_right</mat-icon>-->
-            <mat-icon
-              *ngIf="task.issueWasUpdated"
-              color="accent"
-              >update
-            </mat-icon>
-          </button>
-        </div>
+        ></task-hover-controls>
 
         <button
           (click)="toggleShowAttachments()"
-          *ngIf="task.attachments?.length || task.issueAttachmentNr"
+          *ngIf="task().attachments?.length || task().issueAttachmentNr"
           [title]="T.F.TASK.CMP.TOGGLE_ATTACHMENTS|translate"
           class="ico-btn attachment-btn"
           color=""
@@ -284,19 +211,19 @@
 
         <button
           (click)="scheduleTask()"
-          *ngIf="task.reminderId"
+          *ngIf="task().reminderId"
           [title]="T.F.TASK.CMP.EDIT_SCHEDULED|translate"
           class="ico-btn schedule-btn"
           color=""
           mat-icon-button
         >
           <mat-icon>alarm</mat-icon>
-          <div class="time-badge">{{ task.plannedAt|shortPlannedAt }}</div>
+          <div class="time-badge">{{ task().plannedAt|shortPlannedAt }}</div>
         </button>
 
         <button
           (click)="scheduleTask()"
-          *ngIf="((plannerService.plannedTaskDayMap$|async)||{})[task.id] as plannedAtDay"
+          *ngIf="((plannerService.plannedTaskDayMap$|async)||{})[task().id] as plannedAtDay"
           [title]="T.F.TASK.CMP.SCHEDULE|translate"
           class="ico-btn schedule-btn"
           color=""
@@ -309,17 +236,17 @@
         <div>
           <button
             (click)="toggleShowDetailPanel()"
-            *ngIf="task.notes|| (task.issueId&&task.issueType!=='CALENDAR') || isSelected"
+            *ngIf="task().notes|| (task().issueId&&task().issueType!=='CALENDAR') || isSelected()"
             title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}}  {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
-            [class.closeBtn]="!task.issueWasUpdated && isSelected"
+            [class.closeBtn]="!task().issueWasUpdated && isSelected()"
             class="ico-btn show-additional-info-btn"
             color=""
             mat-icon-button
           >
-            <mat-icon *ngIf="!task.issueWasUpdated && !isSelected">chat</mat-icon>
-            <mat-icon *ngIf="!task.issueWasUpdated && isSelected">close</mat-icon>
+            <mat-icon *ngIf="!task().issueWasUpdated && !isSelected()">chat</mat-icon>
+            <mat-icon *ngIf="!task().issueWasUpdated && isSelected()">close</mat-icon>
             <mat-icon
-              *ngIf="task.issueWasUpdated"
+              *ngIf="task().issueWasUpdated"
               class="updated-icon"
               color="accent"
               >update
@@ -331,41 +258,41 @@
   </div>
 
   <progress-bar
-    *ngIf="isCurrent"
+    *ngIf="isCurrent()"
     [cssClass]="'bg-accent'"
-    [progress]="progress"
+    [progress]="progress()"
   ></progress-bar>
 
   <div
-    *ngIf="task.subTasks?.length"
+    *ngIf="task().subTasks?.length"
     class="sub-tasks"
   >
     <button
       (click)="toggleSubTaskMode()"
-      *ngIf="task.subTasks?.length"
+      *ngIf="task().subTasks?.length"
       [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY|translate"
       class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
       color=""
       mat-mini-fab
     >
-      <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)"
+      <mat-icon *ngIf="(task()._showSubTasksMode===ShowSubTasksMode.HideAll)"
         >add
       </mat-icon>
       <mat-icon
-        *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"
-        [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
+        *ngIf="(task()._showSubTasksMode!==ShowSubTasksMode.HideAll)"
+        [class.isHideDoneTasks]="(task()._showSubTasksMode===ShowSubTasksMode.HideDone)"
         >remove
       </mat-icon>
     </button>
     <task-list
-      *ngIf="task.subTasks?.length"
+      *ngIf="task().subTasks?.length"
       [@expand]
-      [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
-      [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
+      [isHideAll]="(task()._showSubTasksMode!==ShowSubTasksMode.Show)"
+      [isHideDone]="(task()._showSubTasksMode===ShowSubTasksMode.HideDone)"
       [isSubTaskList]="true"
-      [listModelId]="task.id"
-      [parentId]="task.id"
-      [tasks]="task.subTasks"
+      [listModelId]="task().id"
+      [parentId]="task().id"
+      [tasks]="task().subTasks"
       listId="SUB"
     ></task-list>
   </div>
@@ -375,7 +302,7 @@
     class="bgc-accent drag-over-msg"
   >
     <mat-icon>add</mat-icon>
-    {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{ title: task.title } }}
+    {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task().title} }}
   </div>
 </div>
 
@@ -384,7 +311,7 @@
 <task-context-menu
   #taskContextMenu
   [isAdvancedControls]="true"
-  [task]="task"
+  [task]="task()"
 ></task-context-menu>
 
 <mat-menu
@@ -394,7 +321,7 @@
   <ng-template matMenuContent>
     <button
       (click)="moveTaskToProject(project.id)"
-      *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
+      *ngFor="let project of (moveToProjectList()); trackBy:trackByProjectId;"
       mat-menu-item
     >
       {{ project.title }}

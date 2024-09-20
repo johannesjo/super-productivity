@@ -52,7 +52,12 @@ export class GitlabApiService {
     ).pipe(
       mergeAll(),
       mergeMap((issue: GitlabIssue) => {
-        return this.getIssueWithComments$(issue, cfg);
+        return this.getIssueWithComments$(issue, cfg).pipe(
+          map((issueWithComments) => ({
+            ...issueWithComments,
+            iid: issue.iid,
+          })),
+        );
       }),
     );
   }
@@ -212,15 +217,16 @@ export class GitlabApiService {
     time_estimate: null | number;
     total_time_spent: null | number;
   }*/
+
     return this._sendRawRequest$(
       {
         url: `${this._apiLink(
           cfg,
           cfg.project || undefined,
-        )}/issues/${issueId}/add_spent_time`,
+        )}/issues/${this._getIidFromIssue(issueId)}/add_spent_time`,
         method: 'POST',
         data: {
-          duration,
+          duration: duration,
           summary: 'Submitted via Super Productivity on ' + new Date(),
         },
       },
@@ -242,7 +248,7 @@ export class GitlabApiService {
         url: `${this._apiLink(
           cfg,
           cfg.project || undefined,
-        )}/issues/${issueId}/time_stats`,
+        )}/issues/${this._getIidFromIssue(issueId)}/time_stats`,
       },
       cfg,
     ).pipe(map((res) => (res as any).body));
@@ -255,6 +261,10 @@ export class GitlabApiService {
     } else {
       return parts[0];
     }
+  }
+
+  private _getIssueNumberFromTitle(title: string): string {
+    return title.split(' ')[0].replace('#', '');
   }
 
   public static getPartsFromIssue(issue: string | number): string[] {

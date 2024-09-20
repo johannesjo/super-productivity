@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { DROPBOX_APP_KEY } from './dropbox.const';
-import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { Observable, ReplaySubject } from 'rxjs';
@@ -14,6 +13,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
 import { SyncProvider } from '../sync-provider.model';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -227,10 +227,12 @@ export class DropboxApiService {
         }),
       })
       .then(async (res) => {
+        console.log('Dropbox: Refresh access token Response', res);
+
         await this.updateTokens({
           accessToken: res.data.access_token,
           // eslint-disable-next-line no-mixed-operators
-          expiresAt: +res.data.expires_at * 1000 + Date.now(),
+          expiresAt: +res.data.expires_in * 1000 + Date.now(),
         });
 
         return 'SUCCESS' as any;
@@ -279,6 +281,8 @@ export class DropboxApiService {
     if (refreshToken) {
       this._refreshToken$.next(refreshToken);
     }
+    console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+
     await this._persistenceLocalService.updateDropboxSyncMeta({
       accessToken,
       _tokenExpiresAt: expiresAt,

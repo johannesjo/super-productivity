@@ -1,0 +1,104 @@
+@import '../../../../../variables';
+@import '../task.component.mixins';
+
+:host {
+  transform-origin: right center;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  z-index: $z-hover-controls;
+  display: none;
+  border-radius: $card-border-radius;
+
+  @include lightTheme() {
+    &:before {
+      content: '';
+      border-left: 1px solid;
+      width: 1px;
+      height: 90%;
+      position: absolute;
+      left: 0;
+      top: 5%;
+      opacity: 0.5;
+
+      :host-context([dir='rtl']) & {
+        right: 0;
+      }
+    }
+  }
+
+  :host-context([dir='rtl']) & {
+    position: absolute;
+    transform-origin: left center;
+    left: 100%;
+    right: unset;
+  }
+
+  @include mq(xs, max) {
+    :host-context(.isTouchOnly) & {
+      display: none !important;
+    }
+  }
+
+  button {
+    height: 100% !important;
+    border-radius: $card-border-radius !important;
+    margin-top: auto;
+    margin-bottom: auto;
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple {
+        border-radius: $card-border-radius;
+      }
+    }
+  }
+
+  :host-context(.first-line:hover) & {
+    display: flex;
+    background: $task-c-bg-light;
+
+    @include darkTheme() {
+      background: $task-c-bg-dark;
+    }
+
+    :host-context(.isLightTheme .isSelected) & {
+      background: $task-c-selected-bg-light;
+    }
+
+    :host-context(.isDarkTheme .isSelected) & {
+      background: $task-c-selected-bg-dark;
+    }
+
+    :host-context(.isDarkTheme .isCurrent) & {
+      background: $task-c-current-bg-dark;
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks) ::ng-deep & {
+      background: $sub-task-c-bg-dark;
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks .isSelected) ::ng-deep & {
+      background: $task-c-selected-bg-dark;
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks .isCurrent) ::ng-deep & {
+      background: $task-c-current-bg-dark;
+    }
+  }
+
+  // extra hitarea
+  &:after {
+    position: absolute;
+    top: -$s * 1.5;
+    right: 0;
+    left: -$s * 1.5;
+    bottom: -$s * 1.5;
+    content: '';
+
+    :host-context([dir='rtl']) & {
+      right: -$s * 1.5;
+      left: 0;
+    }
+  }
+}

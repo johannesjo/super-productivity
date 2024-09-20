@@ -2,6 +2,7 @@ import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { SVEType } from '../schedule.const';
 import { TaskWithPlannedForDayIndication } from '../../tasks/task.model';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 export const mapScheduleDaysToScheduleEvents = (
   days: ScheduleDay[],
@@ -64,7 +65,7 @@ export const mapScheduleDaysToScheduleEvents = (
         eventsFlat.push({
           dayOfMonth:
             ((entry.data as TaskWithPlannedForDayIndication)?.plannedForDay &&
-              new Date(
+              dateStrToUtcDate(
                 (entry.data as TaskWithPlannedForDayIndication)?.plannedForDay,
               ).getDate()) ||
             undefined,

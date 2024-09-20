@@ -90,7 +90,7 @@ import {
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToTodayList,
+  moveProjectTaskToRegularList,
   moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
@@ -411,7 +411,13 @@ export class TaskService {
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
       this._store.dispatch(
-        moveProjectTaskToTodayList({ taskId, newOrderedIds, src, target, workContextId }),
+        moveProjectTaskToRegularList({
+          taskId,
+          newOrderedIds,
+          src,
+          target,
+          workContextId,
+        }),
       );
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
@@ -622,8 +628,9 @@ export class TaskService {
     task: Task,
     duration: number,
     date: string = this._dateService.todayStr(),
+    isFromTrackingReminder = false,
   ): void {
-    this._store.dispatch(addTimeSpent({ task, date, duration }));
+    this._store.dispatch(addTimeSpent({ task, date, duration, isFromTrackingReminder }));
   }
 
   removeTimeSpent(

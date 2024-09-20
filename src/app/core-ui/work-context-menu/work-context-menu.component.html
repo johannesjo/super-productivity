@@ -39,3 +39,12 @@
   <mat-icon class="color-warn-i">delete_forever</mat-icon>
   <span class="text">{{T.MH.DELETE_TAG|translate}}</span>
 </button>
+
+<button
+  (click)="deleteProject()"
+  *ngIf="isForProject"
+  mat-menu-item
+>
+  <mat-icon class="color-warn-i">delete_forever</mat-icon>
+  <span class="text">{{ T.MH.DELETE_PROJECT|translate }}</span>
+</button>

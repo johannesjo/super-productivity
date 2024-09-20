@@ -60,6 +60,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { DateService } from 'src/app/core/date/date.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class TagEffects {
@@ -96,6 +97,9 @@ export class TagEffects {
           PlannerActions.transferTask,
           PlannerActions.moveBeforeTask,
           PlannerActions.planTaskForDay,
+
+          // PROJECT
+          deleteProject,
         ),
         switchMap(() => this.saveToLs$),
       ),

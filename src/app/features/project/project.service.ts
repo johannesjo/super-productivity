@@ -25,7 +25,7 @@ import {
   loadProjectRelatedDataSuccess,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToRegularListAuto,
   toggleHideFromMenu,
   unarchiveProject,
   updateProject,
@@ -53,6 +53,8 @@ import { OpenProjectCfg } from '../issue/providers/open-project/open-project.mod
 import { GiteaCfg } from '../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../issue/providers/redmine/redmine.model';
 import { devError } from '../../util/dev-error';
+import { selectTaskFeatureState } from '../tasks/store/task.selectors';
+import { getTaskById } from '../tasks/store/task.reducer.util';
 
 @Injectable({
   providedIn: 'root',
@@ -216,8 +218,24 @@ export class ProjectService {
     );
   }
 
-  remove(projectId: string): void {
-    this._store$.dispatch(deleteProject({ id: projectId }));
+  async remove(project: Project): Promise<void> {
+    const taskState = await this._store$
+      .select(selectTaskFeatureState)
+      .pipe(take(1))
+      .toPromise();
+    const subTaskIdsForProject: string[] = [];
+    project.taskIds.forEach((id) => {
+      const task = getTaskById(id, taskState);
+      if (task.projectId && task.subTaskIds.length > 0) {
+        subTaskIdsForProject.push(...task.subTaskIds);
+      }
+    });
+    const allTaskIds = [
+      ...project.taskIds,
+      ...project.backlogTaskIds,
+      ...subTaskIdsForProject,
+    ];
+    this._store$.dispatch(deleteProject({ project, allTaskIds }));
   }
 
   toggleHideFromMenu(projectId: string): void {
@@ -237,7 +255,7 @@ export class ProjectService {
 
   moveTaskToTodayList(id: string, projectId: string, isMoveToTop: boolean = false): void {
     this._store$.dispatch(
-      moveProjectTaskToTodayListAuto({
+      moveProjectTaskToRegularListAuto({
         taskId: id,
         isMoveToTop,
         projectId,

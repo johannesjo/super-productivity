@@ -40,8 +40,9 @@ jobs:
       - run: npm run test
       - run: npm run e2e
       - name: 'Upload E2E screenshots on failure'
-        if: ${{ failure() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: WinStoreRelease
+          name: e2eScreenshots
           path: e2e/screenshots/**/*.*
+          retention-days: 5

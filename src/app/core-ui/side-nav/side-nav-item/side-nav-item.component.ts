@@ -8,21 +8,31 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { UiModule } from '../../../ui/ui.module';
-import { WorkContextMenuModule } from '../../work-context-menu/work-context-menu.module';
+
 import {
   WorkContextCommon,
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
-import { MatMenuTrigger } from '@angular/material/menu';
 import { Project } from '../../../features/project/project.model';
+import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
+import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
+import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'side-nav-item',
   standalone: true,
-  imports: [RouterLink, UiModule, WorkContextMenuModule, RouterModule],
+  imports: [
+    RouterLink,
+    UiModule,
+    RouterModule,
+    WorkContextMenuComponent,
+    ContextMenuComponent,
+    CdkDragPlaceholder,
+  ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'g-multi-btn-wrapper' },
 })
 export class SideNavItemComponent {
   workContext = input.required<WorkContextCommon>();
@@ -31,9 +41,6 @@ export class SideNavItemComponent {
   activeWorkContextId = input.required<string>();
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-
-  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
-  contextMenu!: MatMenuTrigger;
 
   @ViewChild('routeBtn', { static: true, read: ElementRef })
   routeBtn!: ElementRef;
@@ -51,17 +58,6 @@ export class SideNavItemComponent {
   @HostBinding('class.isHidden')
   get isHidden(): boolean {
     return (this.workContext() as Project)?.isHiddenFromMenu;
-  }
-
-  openContextMenu(event: TouchEvent | MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    this.contextMenuPosition.x =
-      ('touches' in event ? event.touches[0].clientX : event.clientX) + 'px';
-    this.contextMenuPosition.y =
-      ('touches' in event ? event.touches[0].clientY : event.clientY) + 'px';
-    this.contextMenu.openMenu();
   }
 
   focus(): void {

@@ -1,0 +1,11 @@
+<div
+  #contextMenuTriggerEl
+  [matMenuTriggerFor]="contextMenuEl"
+  style="visibility: hidden; height: 0; width: 0; position: fixed; left: {{contextMenuPosition.x}}; top: {{contextMenuPosition.y}}"
+></div>
+
+<mat-menu #contextMenuEl="matMenu">
+  <ng-template matMenuContent>
+    <ng-container [ngTemplateOutlet]="contextMenu()"></ng-container>
+  </ng-template>
+</mat-menu>

@@ -19,6 +19,7 @@ import { fastArrayCompare } from '../../util/fast-array-compare';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 
 @Injectable({
   providedIn: 'root',
@@ -76,7 +77,7 @@ export class PlannerService {
     this._globalTrackingIntervalService.todayDateStr$,
   ]).pipe(
     switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr]) => {
-      const tomorrow = new Date(todayStr);
+      const tomorrow = dateStrToUtcDate(todayStr);
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = getWorklogStr(tomorrow);
       return this._store.select(
@@ -118,7 +119,7 @@ export class PlannerService {
     ),
     // for better performance
     // TODO better solution, gets called very often
-    tap((val) => console.log('days$', val)),
+    // tap((val) => console.log('days$', val)),
     // tap((val) => console.log('days$ SIs', val[0]?.scheduledIItems)),
     shareReplay(1),
   );

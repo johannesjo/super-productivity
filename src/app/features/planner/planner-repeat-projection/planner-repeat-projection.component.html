@@ -1,15 +1,15 @@
 <div (click)="editTaskRepeatCfg()">
   <mat-icon svgIcon="repeat"></mat-icon>
   <div class="title">
-    {{ repeatCfg.title }}
+    {{ repeatCfg().title }}
     <!--   {{event.start|date:'HH:mm'}} – {{(event.start + event.duration)|date:'HH:mm'}}-->
   </div>
   <div class="planner-time-remaining-shared">
-    @if (overWriteTimeEstimate > 0) { {{ overWriteTimeEstimate|msToString }} <br />
+    @if (overWriteTimeEstimate() > 0) { {{ overWriteTimeEstimate()|msToString }} <br />
     <span class="original-time-remaining"
-      >({{ repeatCfg.defaultEstimate|msToString }})</span
+      >({{ repeatCfg().defaultEstimate|msToString }})</span
     >
     <!--- -->
-    } @else { {{ repeatCfg.defaultEstimate|msToString }} }
+    } @else { {{ repeatCfg().defaultEstimate|msToString }} }
   </div>
 </div>

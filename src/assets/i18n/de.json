@@ -293,7 +293,7 @@
         "TITLE": "Senden Sie die für Issues aufgewendete Zeit an GitLab",
         "T_ALREADY_TRACKED": "Bereits erfasst",
         "T_TITLE": "Titel",
-        "T_TO_BE_SUBMITTED": "Einzureichend",
+        "T_TO_BE_SUBMITTED": "Noch einzureichen",
         "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
@@ -975,10 +975,6 @@
         "OK": "Tags erstellen "
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Zeitplan",
-        "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
-        "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
-        "EDIT": "Erinnerung bearbeiten",
         "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
         "REMIND_AT": "Erinnern an",
         "RO_10M": "10 Minuten bevor es losgeht",
@@ -989,7 +985,11 @@
         "RO_START": "wenn es beginnt",
         "RO_NEVER": "Nie",
         "SCHEDULE": "Planen",
-        "UNSCHEDULE": "Planung entfernen"
+        "UNSCHEDULE": "Planung entfernen",
+        "CONFIRM_REPEAT_OK": "Zeitplan",
+        "CONFIRM_REPEAT_TXT": "Sie versuchen, diese wiederkehrende Aufgabe auf einen anderen Tag zu verschieben. Wiederkehrende Aufgaben sollen normalerweise an bestimmten Tagen neu erstellt und nur an diesem Tag geplant werden. Möchten Sie trotzdem fortfahren?",
+        "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
+        "EDIT": "Erinnerung bearbeiten"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
@@ -1138,12 +1138,12 @@
         "TITLE": "Zeitleiste"
       },
       "END": "Arbeitsende",
-      "MENU_TITLE": "Zeitleiste",
       "NOW": "Jetzt",
       "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
       "START": "Arbeitsbeginn",
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "LUNCH_BREAK": "Mittagspause",
+      "MENU_TITLE": "Zeitleiste",
       "S": {
         "CAL_PROVIDER_ERROR": "Fehler beim Schedule-Kal.-Anbieter: {{errTxt}}"
       }
@@ -1407,18 +1407,18 @@
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System -> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
-      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
       "IS_CONFIRM_BEFORE_EXIT": "Bestätigen, bevor die App beendet wird",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bestätigen, bevor die App beendet wird, ohne den Tag zuerst zu beenden",
       "IS_DARK_MODE": "Dunkler Modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviere alle Animationen",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
-      "TITLE": "Verschiedene Einstellungen"
+      "TITLE": "Verschiedene Einstellungen",
+      "IS_AUTO_START_NEXT_TASK": "Beginnen Sie mit der nächsten Aufgabe, wenn Sie die aktuelle Aufgabe als erledigt markieren",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",
@@ -1523,18 +1523,19 @@
       "START_WELCOME": "Willkommenstour starten",
       "SYNC": "Howto: Synchronisierung konfigurieren"
     },
-    "MANAGE_PROJECTS": "Projekte verwalten",
     "NO_TAG_INFO": "Derzeit sind keine Tags vorhanden. Sie können Tags hinzufügen, indem Sie beim Hinzufügen oder Bearbeiten von Aufgaben „#IhrNeuesTag“ eingeben.",
     "HELP": "Hilfe",
     "METRICS": "Metriken",
     "NOTES": "Anmerkungen",
     "NOTES_PANEL_INFO": "Notizen können nur von der Schedule und der normalen Aufgabenliste angezeigt werden.",
+    "PLANNER": "Planer",
     "PROCRASTINATE": "Prokrastination",
     "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",
     "PROJECT_SETTINGS": "Projekt Einstellungen",
     "QUICK_HISTORY": "Schnellverlauf",
-    "SCHEDULED": "Geplant",
+    "REPEAT_SCHEDULED": "Wiederkehrend",
+    "SCHEDULE": "Stundenplan",
     "SETTINGS": "Einstellungen",
     "SHOW_SEARCH_BAR": "Suchleiste anzeigen",
     "TAGS": "Stichworte",
@@ -1544,7 +1545,9 @@
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
     "TRIGGER_SYNC": "Synchronisierung manuell auslösen",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "Worklog",
+    "MANAGE_PROJECTS": "Projekte verwalten",
+    "SCHEDULED": "Geplant"
   },
   "PDS": {
     "BACK": "Ich habe etwas vergessen!",
@@ -1557,10 +1560,8 @@
       "OK": "Aye Aye! Ausschalten!"
     },
     "ESTIMATE_TOTAL": "Gesamtschätzung:",
-    "EVALUATION": "Auswertung",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
-    "PLAN": "Planen",
     "ROUND_15M": "Runden auf 15 Minuten",
     "ROUND_30M": "Runden auf 30 Minuten",
     "ROUND_5M": "Runden auf 5 Minuten",
@@ -1575,44 +1576,17 @@
     "START_END": "Start - Ende",
     "SUMMARY_FOR": "Zusammenfassung für {{dayStr}}",
     "TASKS_COMPLETED": "Aufgaben erledigt",
-    "TASK_LIST": "Aufgabenliste",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Zeitaufwand / Geschätzt",
     "TIME_SPENT_ESTIMATE_TITLE": "Aufgewandte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
     "TIME_SPENT_TODAY_BY_TAG": "Heute verbrachte Zeit nach #Tag",
-    "TODAY": "Heute",
-    "WEEK": "Woche"
+    "WEEK": "Woche",
+    "EVALUATION": "Auswertung",
+    "PLAN": "Planen",
+    "TASK_LIST": "Aufgabenliste",
+    "TODAY": "Heute"
   },
   "PM": {
     "TITLE": "Projektmetriken"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archivierte Projekte",
-    "ARCHIVE_PROJECT": "Projekt archivieren",
-    "CLICK_TO_HIDE": "Klicken Sie hier, um das Projekt aus dem Menü auszublenden",
-    "CLICK_TO_SHOW": "Klicken Sie hier, um das Projekt im Menü anzuzeigen",
-    "DELETE_PROJECT": "Projekt löschen",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
-      "OK": "Archivieren"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
-      "OK": "Löschen"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich wiederherstellen?",
-      "OK": "Wiederherstellen"
-    },
-    "EDIT_PROJECT": "Projekt bearbeiten",
-    "EXPORT_PROJECT": "Projekt exportieren",
-    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
-    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
-    "IMPORT_FROM_FILE": "Aus Datei importieren",
-    "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject-Integration konfiguriert",
-    "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
-    "TITLE": "Projektübersicht",
-    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv wiederherstellen"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
@@ -1680,5 +1654,34 @@
     "WITHOUT_BREAK": "Ohne Pause:",
     "WORKING_TODAY": "Arbeit heute:",
     "WORKING_TODAY_ARCHIVED": "Heute an archivierten Aufgaben gearbeitete Zeit"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archivierte Projekte",
+    "ARCHIVE_PROJECT": "Projekt archivieren",
+    "CLICK_TO_HIDE": "Klicken Sie hier, um das Projekt aus dem Menü auszublenden",
+    "CLICK_TO_SHOW": "Klicken Sie hier, um das Projekt im Menü anzuzeigen",
+    "DELETE_PROJECT": "Projekt löschen",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
+      "OK": "Archivieren"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
+      "OK": "Löschen"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich wiederherstellen?",
+      "OK": "Wiederherstellen"
+    },
+    "EDIT_PROJECT": "Projekt bearbeiten",
+    "EXPORT_PROJECT": "Projekt exportieren",
+    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
+    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
+    "IMPORT_FROM_FILE": "Aus Datei importieren",
+    "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject-Integration konfiguriert",
+    "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
+    "TITLE": "Projektübersicht",
+    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv wiederherstellen"
   }
 }

@@ -4,6 +4,7 @@ import {
 } from './task-repeat-cfg.reducer';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { TaskReminderOptionId } from '../../tasks/task.model';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   ...DEFAULT_TASK_REPEAT_CFG,
@@ -33,7 +34,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
-const FAKE_MONDAY_THE_10TH = new Date('2022-01-10').getTime();
+const FAKE_MONDAY_THE_10TH = dateStrToUtcDate('2022-01-10').getTime();
 
 const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeatCfg => ({
   ...DUMMY_REPEATABLE_TASK,
@@ -52,7 +53,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2025-11-11').getTime(),
+          dayDate: dateStrToUtcDate('2025-11-11').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -203,7 +204,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-02-07').getTime(),
+          dayDate: dateStrToUtcDate('2022-02-07').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -270,7 +271,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     //       }),
     //     ],
     //     {
-    //       dayDate: new Date('2022-03-10').getTime(),
+    //       dayDate: dateStrToUtcDate('2022-03-10').getTime(),
     //     },
     //   );
     //   const resultIds = result.map((item) => item.id);
@@ -286,7 +287,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     //       }),
     //     ],
     //     {
-    //       dayDate: new Date('2022-03-10').getTime(),
+    //       dayDate: dateStrToUtcDate('2022-03-10').getTime(),
     //     },
     //   );
     //   const resultIds = result.map((item) => item.id);
@@ -310,7 +311,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
-          dayDate: new Date('2022-02-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-02-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -338,7 +339,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-03-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-03-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -355,7 +356,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-03-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-03-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -379,7 +380,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2021-01-10' })],
         {
-          dayDate: new Date('2022-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -407,7 +408,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           }),
         ],
         {
-          dayDate: new Date('2024-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2024-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -420,12 +421,12 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: new Date('2022-01-10').getTime(),
+            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
             repeatEvery: 2,
           }),
         ],
         {
-          dayDate: new Date('2023-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2023-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -446,11 +447,11 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
           startDate: '2024-01-26',
-          lastTaskCreation: new Date('2024-06-26').getTime(),
+          lastTaskCreation: dateStrToUtcDate('2024-06-26').getTime(),
         }),
       ],
       {
-        dayDate: new Date('2024-07-16').getTime(),
+        dayDate: dateStrToUtcDate('2024-07-16').getTime(),
       },
     );
     const resultIds = result.map((item) => item.id);
@@ -469,7 +470,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           }),
         ],
         {
-          dayDate: new Date('2025-11-11').getTime(),
+          dayDate: dateStrToUtcDate('2025-11-11').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -592,7 +593,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-02-07').getTime(),
+          dayDate: dateStrToUtcDate('2022-02-07').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -633,7 +634,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
-          dayDate: new Date('2022-02-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-02-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -661,7 +662,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           }),
         ],
         {
-          dayDate: new Date('2022-03-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-03-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -675,11 +676,11 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
             repeatCycle: 'MONTHLY',
             startDate: '2022-01-10',
             repeatEvery: 3,
-            lastTaskCreation: new Date('2022-01-10').getTime(),
+            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
           }),
         ],
         {
-          dayDate: new Date('2022-03-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-03-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -703,7 +704,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2021-01-10' })],
         {
-          dayDate: new Date('2022-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2022-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -731,7 +732,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           }),
         ],
         {
-          dayDate: new Date('2024-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2024-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);
@@ -744,12 +745,12 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: new Date('2022-01-10').getTime(),
+            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
             repeatEvery: 2,
           }),
         ],
         {
-          dayDate: new Date('2023-01-10').getTime(),
+          dayDate: dateStrToUtcDate('2023-01-10').getTime(),
         },
       );
       const resultIds = result.map((item) => item.id);

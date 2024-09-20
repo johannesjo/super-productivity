@@ -5,6 +5,7 @@ import {
 import moment from 'moment';
 import { T } from '../../../t.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 export const getTaskRepeatInfoText = (
   repeatCfg: TaskRepeatCfg,
@@ -121,12 +122,11 @@ export const getTaskRepeatInfoText = (
       ];
 
     case 'MONTHLY':
-      const dateDayStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
-        locale,
-        {
-          day: 'numeric',
-        },
-      );
+      const dateDayStr = dateStrToUtcDate(
+        repeatCfg.startDate as string,
+      ).toLocaleDateString(locale, {
+        day: 'numeric',
+      });
 
       return [
         timeStr
@@ -139,13 +139,12 @@ export const getTaskRepeatInfoText = (
       ];
 
     case 'YEARLY':
-      const dayAndMonthStr = new Date(repeatCfg.startDate as string).toLocaleDateString(
-        locale,
-        {
-          day: 'numeric',
-          month: 'numeric',
-        },
-      );
+      const dayAndMonthStr = dateStrToUtcDate(
+        repeatCfg.startDate as string,
+      ).toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'numeric',
+      });
 
       return [
         timeStr

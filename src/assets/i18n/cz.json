@@ -938,10 +938,6 @@
         "UPDATE_ISSUE_DATA": "Aktualizovat údaje o problému"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Naplánovat",
-        "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
-        "DATETIME_FOR": "Datum a čas pro připomenutí",
-        "EDIT": "Upravit připomenutí",
         "MOVE_TO_BACKLOG": "Přesunout úkol do zásobníku do doby naplánování",
         "REMIND_AT": "Připomenout v",
         "RO_10M": "10 minut před začátkem",
@@ -952,7 +948,11 @@
         "RO_START": "kdy začíná",
         "RO_NEVER": "Nikdy",
         "SCHEDULE": "Naplánovat",
-        "UNSCHEDULE": "Zrušit naplánování"
+        "UNSCHEDULE": "Zrušit naplánování",
+        "CONFIRM_REPEAT_OK": "Naplánovat",
+        "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
+        "DATETIME_FOR": "Datum a čas pro připomenutí",
+        "EDIT": "Upravit připomenutí"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Přidat vše do dneška",
@@ -1101,12 +1101,12 @@
         "TITLE": "Časová osa"
       },
       "END": "Konec práce",
-      "MENU_TITLE": "Časová osa",
       "NOW": "Nyní",
       "NO_TASKS": "Momentálně zde nejsou žádné úkoly. Přidejte nějaké úkoly pomocí tlačítka + v horní liště.",
       "START": "Začátek práce",
       "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu",
       "LUNCH_BREAK": "Obední přestávka",
+      "MENU_TITLE": "Časová osa",
       "S": {
         "CAL_PROVIDER_ERROR": "Chyba poskytovatele kalendáře Časové osy: {{errTxt}}"
       }
@@ -1336,18 +1336,18 @@
       "HELP": "<p><strong>Desktopová upozornění se nezobrazují?</strong> Pro systém Windows byste mohli zkontrolovat Systém > Upozornění a akce a zkontrolovat, zda jsou vyžadovaná upozornění povolena.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automaticky přidat značku 'Dnes' k úkolům, na kterých jste pracovali",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označit nadřazený úkol jako hotový, když jsou hotovy všechny podúkoly",
-      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdit před ukončením aplikace",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdit před ukončením aplikace bez dokončení dne",
       "IS_DARK_MODE": "Temný režim",
       "IS_DISABLE_ANIMATIONS": "Vypnout všechny animace",
       "IS_HIDE_NAV": "Skrýt navigaci, dokud není nadpis záhlaví aktivován (pouze pro desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalizovat do oznamovací oblasti (pouze pro desktop)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času",
       "IS_TRAY_SHOW_CURRENT_TASK": "Zobrazit aktuální úkol v oznamovací oblasti/menu stavu (pouze pro desktop Mac/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Vypnout zpracování markdown pro poznámky k úkolům",
       "TASK_NOTES_TPL": "Šablona popisu úkolu",
-      "TITLE": "Různá nastavení"
+      "TITLE": "Různá nastavení",
+      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času"
     },
     "POMODORO": {
       "BREAK_DURATION": "Délka krátkých přestávek",
@@ -1434,7 +1434,6 @@
     "CREATE_TAG": "Vytvořit štítek",
     "DELETE_TAG": "Smazat štítek",
     "GO_TO_TASK_LIST": "Přejít na seznam úkolů",
-    "MANAGE_PROJECTS": "Spravovat projekty",
     "HELP": "Nápověda",
     "METRICS": "Metryky",
     "NOTES": "Poznámky",
@@ -1444,7 +1443,6 @@
     "PROJECT_MENU": "Menu projektu",
     "PROJECT_SETTINGS": "Nastavení projektu",
     "QUICK_HISTORY": "Rychlá historie",
-    "SCHEDULED": "Naplánováno",
     "SETTINGS": "Nastavení",
     "SHOW_SEARCH_BAR": "Zobrazit vyhledávací lištu",
     "TAGS": "Štítky",
@@ -1454,7 +1452,9 @@
     "TOGGLE_SHOW_NOTES": "Zobrazit/Skrýt poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Spustit/Zastavit sledování času",
     "TRIGGER_SYNC": "Spustit synchronizaci ručně",
-    "WORKLOG": "Pracovní záznam"
+    "WORKLOG": "Pracovní záznam",
+    "MANAGE_PROJECTS": "Spravovat projekty",
+    "SCHEDULED": "Naplánováno"
   },
   "PDS": {
     "BACK": "Počkej, zapomněl jsem na něco!",
@@ -1467,10 +1467,8 @@
       "OK": "Ano, vypnout!"
     },
     "ESTIMATE_TOTAL": "Celkový odhad:",
-    "EVALUATION": "Hodnocení",
     "EXPORT_TASK_LIST": "Exportovat seznam úkolů",
     "NO_TASKS": "Pro tento den nejsou žádné úkoly",
-    "PLAN": "Plán",
     "ROUND_15M": "Zaokrouhlit všechny úkoly na 15 minut",
     "ROUND_30M": "Zaokrouhlit všechny úkoly na 30 minut",
     "ROUND_5M": "Zaokrouhlit všechny úkoly na 5 minut",
@@ -1485,44 +1483,17 @@
     "START_END": "Začátek – Konec",
     "SUMMARY_FOR": "Denní shrnutí pro {{dayStr}}",
     "TASKS_COMPLETED": "Hotové úkoly",
-    "TASK_LIST": "Seznam úkolů",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Strávený čas / Odhadovaný",
     "TIME_SPENT_ESTIMATE_TITLE": "Strávený čas: Celkový čas strávený dnes. Archivované úkoly nejsou zahrnuty. – Čas odhadovaný: Čas odhadovaný pro úkoly pracované dnes minus čas již strávený s nimi v jiné dny.",
     "TIME_SPENT_TODAY_BY_TAG": "Strávený čas dnes podle štítku",
-    "TODAY": "Dnes",
-    "WEEK": "Týden"
+    "WEEK": "Týden",
+    "EVALUATION": "Hodnocení",
+    "PLAN": "Plán",
+    "TASK_LIST": "Seznam úkolů",
+    "TODAY": "Dnes"
   },
   "PM": {
     "TITLE": "Projektová metrika"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archivované projekty",
-    "ARCHIVE_PROJECT": "Archivovat projekt",
-    "CLICK_TO_HIDE": "Klikněte pro skrytí projektu z menu",
-    "CLICK_TO_SHOW": "Klikněte pro zobrazení projektu v menu",
-    "DELETE_PROJECT": "Smazat projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt archivovat? Archivované projekty se v menu již nezobrazují, a nemůžete přistupovat k žádným jejich datům bez obnovení. Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Archivovat"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Opravdu chcete tento projekt smazat? Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Smazat"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt znovu zarchivovat?",
-      "OK": "Odzarchivovat"
-    },
-    "EDIT_PROJECT": "Upravit projekt",
-    "EXPORT_PROJECT": "Exportovat projekt",
-    "GITHUB_CONFIGURED": "Nastavena integrace GitHubu",
-    "GITLAB_CONFIGURED": "Nastavena integrace GitLabu",
-    "IMPORT_FROM_FILE": "Importovat z souboru",
-    "JIRA_CONFIGURED": "Nastavena integrace Jiry",
-    "OPEN_PROJECT_CONFIGURED": "Nastavena integrace OpenProjectu",
-    "S_INVALID_JSON": "Neplatný JSON pro soubor s projektem",
-    "TITLE": "Přehled projektu",
-    "UN_ARCHIVE_PROJECT": "Odzarchivovat projekt"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Celková nastavení",
@@ -1589,5 +1560,34 @@
     "TIME_ESTIMATED": "Odhadovaný čas:",
     "WITHOUT_BREAK": "Bez přestávky:",
     "WORKING_TODAY": "Pracujete dnes:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archivované projekty",
+    "ARCHIVE_PROJECT": "Archivovat projekt",
+    "CLICK_TO_HIDE": "Klikněte pro skrytí projektu z menu",
+    "CLICK_TO_SHOW": "Klikněte pro zobrazení projektu v menu",
+    "DELETE_PROJECT": "Smazat projekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Opravdu chcete tento projekt archivovat? Archivované projekty se v menu již nezobrazují, a nemůžete přistupovat k žádným jejich datům bez obnovení. Doporučuje se zálohovat data před provedením této akce.",
+      "OK": "Archivovat"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Opravdu chcete tento projekt smazat? Doporučuje se zálohovat data před provedením této akce.",
+      "OK": "Smazat"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Opravdu chcete tento projekt znovu zarchivovat?",
+      "OK": "Odzarchivovat"
+    },
+    "EDIT_PROJECT": "Upravit projekt",
+    "EXPORT_PROJECT": "Exportovat projekt",
+    "GITHUB_CONFIGURED": "Nastavena integrace GitHubu",
+    "GITLAB_CONFIGURED": "Nastavena integrace GitLabu",
+    "IMPORT_FROM_FILE": "Importovat z souboru",
+    "JIRA_CONFIGURED": "Nastavena integrace Jiry",
+    "OPEN_PROJECT_CONFIGURED": "Nastavena integrace OpenProjectu",
+    "S_INVALID_JSON": "Neplatný JSON pro soubor s projektem",
+    "TITLE": "Přehled projektu",
+    "UN_ARCHIVE_PROJECT": "Odzarchivovat projekt"
   }
 }

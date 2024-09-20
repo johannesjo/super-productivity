@@ -36,6 +36,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -48,7 +49,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
   T: typeof T = T;
-  minDate = new Date().toISOString();
+  minDate = new Date();
   @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
@@ -68,7 +69,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _timeCheckVal: string | null = null;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task },
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task; targetDay?: string },
     private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
     private _cd: ChangeDetectorRef,
     private _store: Store,
@@ -95,9 +96,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
 
     if (this.data.task.plannedAt) {
-      this.selectedDate = new Date(this.data.task.plannedAt);
-
-      this.selectedTime = new Date(this.selectedDate).toLocaleTimeString('en-GB', {
+      const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
+      this.selectedDate = new Date(this.data.task.plannedAt + tzOffset);
+      this.selectedTime = new Date(this.data.task.plannedAt).toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -108,12 +109,16 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         .toPromise();
       this.plannedDayForTask = plannerTaskMap[this.data.task.id];
 
-      this.selectedDate =
-        this.plannedDayForTask ||
-        (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date().toISOString() : null);
+      this.selectedDate = this.plannedDayForTask
+        ? dateStrToUtcDate(this.plannedDayForTask)
+        : this.data.task.tagIds.includes(TODAY_TAG.id)
+          ? new Date()
+          : null;
     }
 
-    console.log(this.selectedDate);
+    if (this.data.targetDay) {
+      this.selectedDate = dateStrToUtcDate(this.data.targetDay);
+    }
 
     this.calendar.activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();
@@ -247,7 +252,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       } else {
         // get current time +1h
         this.selectedTime = getClockStringFromHours(new Date().getHours() + 1);
-        this.selectedDate = new Date().toISOString();
+        this.selectedDate = new Date();
       }
     }
   }
@@ -268,7 +273,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         getDateTimeFromClockString(this.selectedTime, this.selectedDate as Date),
       );
 
-      const isTodayI = new Date().toDateString() === newDate.toDateString();
+      const isTodayI = isToday(newDate);
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
@@ -314,41 +319,25 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     switch (item) {
       case 0:
-        this.selectedDate = tDate.toISOString();
+        this.selectedDate = tDate;
         break;
       case 1:
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
-        this.selectedDate = tomorrow.toISOString();
+        this.selectedDate = tomorrow;
         break;
       case 2:
         const nextMonday = tDate;
         nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this.selectedDate = nextMonday.toISOString();
+        this.selectedDate = nextMonday;
         break;
       case 3:
         const nextMonth = tDate;
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        this.selectedDate = nextMonth.toISOString();
+        this.selectedDate = nextMonth;
         break;
     }
-    // console.log(
-    //   this._prevSelectedQuickAccessDate &&
-    //     this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate,
-    //   this._prevSelectedQuickAccessDate &&
-    //     this._prevSelectedQuickAccessDate.toISOString(),
-    //   this.selectedDate,
-    // );
 
-    // if (
-    //   this._prevSelectedQuickAccessDate &&
-    //   this._prevQuickAccessAction === item &&
-    //   this._prevSelectedQuickAccessDate.toISOString() === this.selectedDate
-    // ) {
     this.submit();
-    // }
-
-    // this._prevSelectedQuickAccessDate = new Date(this.selectedDate as string);
-    // this._prevQuickAccessAction = item;
   }
 }

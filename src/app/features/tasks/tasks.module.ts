@@ -36,6 +36,7 @@ import { TasksByTagComponent } from './tasks-by-tag/tasks-by-tag.component';
 import { ShortSyntaxEffects } from './store/short-syntax.effects';
 import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.component';
+import { TaskHoverControlsComponent } from './task/task-hover-controls/task-hover-controls.component';
 
 @NgModule({
   imports: [
@@ -61,6 +62,7 @@ import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.
     BetterDrawerModule,
     InlineMultilineInputComponent,
     TaskContextMenuComponent,
+    TaskHoverControlsComponent,
   ],
   declarations: [
     TaskComponent,

@@ -963,10 +963,6 @@
         "OK": "Stvori oznaku"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Terminiraj",
-        "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
-        "DATETIME_FOR": "Datum i vrijeme za podsjetnika",
-        "EDIT": "Uredi podsjetnika",
         "MOVE_TO_BACKLOG": "Premjesti zadatak u odlagalište dok se ne terminira",
         "REMIND_AT": "Podsjeti",
         "RO_10M": "10 minuta prije početka",
@@ -977,7 +973,11 @@
         "RO_START": "u vrijeme početka",
         "RO_NEVER": "Nikdy",
         "SCHEDULE": "Terminiraj",
-        "UNSCHEDULE": "Ukloni termin"
+        "UNSCHEDULE": "Ukloni termin",
+        "CONFIRM_REPEAT_OK": "Terminiraj",
+        "CONFIRM_REPEAT_TXT": "Pokušavaš terminirati ovaj ponavljajući zadatak na jedan drugi dan. Uobičajeno je da se ponavljajući zadaci ponovo stvore na određene dane i da se terminiraju samo na taj dan. Želiš li svejedno nastaviti?",
+        "DATETIME_FOR": "Datum i vrijeme za podsjetnika",
+        "EDIT": "Uredi podsjetnika"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj sve u Danas",
@@ -1126,12 +1126,12 @@
         "TITLE": "Vremenska traka"
       },
       "END": "Kraj rada",
-      "MENU_TITLE": "Vremenska traka",
       "NOW": "Sada",
       "NO_TASKS": "Trenutačno nema zadataka. Dodaj zadatke putem gumba + u gornjoj traci.",
       "START": "Početak rada",
       "TASK_PROJECTION_INFO": "Projekcija u budućnosti terminiranog ponavljajućeg zadatka",
-      "LUNCH_BREAK": "Pauza za ručak"
+      "LUNCH_BREAK": "Pauza za ručak",
+      "MENU_TITLE": "Vremenska traka"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1360,18 +1360,18 @@
       "HELP": "<p><strong>Ne vidiš obavijesti na radnoj površini?</strong> Za Windows provjeri Sustav > Obavijesti i radnje te provjeri jesu li potrebne obavijesti aktivirane.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatski dodaj oznaku danas zadacima koje si obrađivao/la",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Označi nadređeni zadatak kao obavljen kad se obave svi podzadaci",
-      "IS_AUTO_START_NEXT_TASK": "Počni pratiti sljedeći zadatak kad trenutačni zadatak označiš kao obavljen",
       "IS_CONFIRM_BEFORE_EXIT": "Potvrdi prije zatvaranja programa",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdi prije zatvaranja programa bez prethodnog završavanja dana",
       "IS_DARK_MODE": "Tamni modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviraj sve animacije",
       "IS_HIDE_NAV": "Sakrij navigaciju sve dok ne prijeđeš mišem preko naslova (samo za desktop računala)",
       "IS_MINIMIZE_TO_TRAY": "Sklopi u programsku traku (samo za desktop računala)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Obavijesti kad se premaši procijenjeno vrijeme",
       "IS_TRAY_SHOW_CURRENT_TASK": "Prikaži trenutačni zadatak u donjoj traci sustava / u izborniku stanja (samo mac/windows desktop računala)",
       "IS_TURN_OFF_MARKDOWN": "Isključi markdown obradu za bilješke",
       "TASK_NOTES_TPL": "Predložak za opis zadatka",
-      "TITLE": "Razne postavke"
+      "TITLE": "Razne postavke",
+      "IS_AUTO_START_NEXT_TASK": "Počni pratiti sljedeći zadatak kad trenutačni zadatak označiš kao obavljen",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Obavijesti kad se premaši procijenjeno vrijeme"
     },
     "POMODORO": {
       "BREAK_DURATION": "Trajanje kratkih pauza",
@@ -1469,7 +1469,6 @@
       "START_WELCOME": "Pokreni uvod",
       "SYNC": "Kako: Konfiguriraj sinkronizaciju"
     },
-    "MANAGE_PROJECTS": "Upravljaj projektima",
     "NO_TAG_INFO": "Trenutačno nema oznaka. Oznake možeš dodati unosom `#yourTagName` prilikom dodavanja ili uređivanja zadataka.",
     "HELP": "Pomoć",
     "METRICS": "Mjerni podaci",
@@ -1480,7 +1479,6 @@
     "PROJECT_MENU": "Izbornik projekta",
     "PROJECT_SETTINGS": "Postavke projekta",
     "QUICK_HISTORY": "Brza povijest",
-    "SCHEDULED": "Terminirano",
     "SETTINGS": "Postavke",
     "SHOW_SEARCH_BAR": "Prikaži traku pretrage",
     "TAGS": "Oznake",
@@ -1490,7 +1488,9 @@
     "TOGGLE_SHOW_NOTES": "Prikaži/Sakrij bilješke projekta",
     "TOGGLE_TRACK_TIME": "Počni/Prekini praćenje vremena",
     "TRIGGER_SYNC": "Pokreni sinkronizaciju ručno",
-    "WORKLOG": "Dnevnik rada"
+    "WORKLOG": "Dnevnik rada",
+    "MANAGE_PROJECTS": "Upravljaj projektima",
+    "SCHEDULED": "Terminirano"
   },
   "PDS": {
     "BACK": "Čekaj, nešto sam zaboravio/la!",
@@ -1503,10 +1503,8 @@
       "OK": "Konačno! Isključi računalo!"
     },
     "ESTIMATE_TOTAL": "Ukupna procjena:",
-    "EVALUATION": "Evaluacija",
     "EXPORT_TASK_LIST": "Izvezi popis zadataka",
     "NO_TASKS": "Nema zadataka za ovaj dan",
-    "PLAN": "Terminiraj",
     "ROUND_15M": "Zaokruži sve zadatke na 15 minuta",
     "ROUND_30M": "Zaokruži sve zadatke na 30 minuta",
     "ROUND_5M": "Zaokruži sve zadatke na 5 minuta",
@@ -1521,44 +1519,17 @@
     "START_END": "Početak – Kraj",
     "SUMMARY_FOR": "Dnevni sažetak za {{dayStr}}",
     "TASKS_COMPLETED": "Završeni zadaci",
-    "TASK_LIST": "Popis zadataka",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Utrošeno / Procijenjeno vrijeme",
     "TIME_SPENT_ESTIMATE_TITLE": "Utrošeno vrijeme: Danas ukupno utrošeno vrijeme. Arhivirani zadaci su iključeni iz računice. – Procijenjeno vrijeme: Procijenjeno vrijeme za danas obrađene zadatke minus već utrošeno vrijeme prethodnih dana.",
     "TIME_SPENT_TODAY_BY_TAG": "Danas utrošeno vrijeme na osnovi oznake",
-    "TODAY": "Danas",
-    "WEEK": "Tjedan"
+    "WEEK": "Tjedan",
+    "EVALUATION": "Evaluacija",
+    "PLAN": "Terminiraj",
+    "TASK_LIST": "Popis zadataka",
+    "TODAY": "Danas"
   },
   "PM": {
     "TITLE": "Mjerni podaci projekata"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arhivirani projekti",
-    "ARCHIVE_PROJECT": "Arhiviraj projekt",
-    "CLICK_TO_HIDE": "Pritisni za skrivanje projekta iz izbornika",
-    "CLICK_TO_SHOW": "Pritisni za prikazivanje projekta u izborniku",
-    "DELETE_PROJECT": "Izbriši projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Stvarno želiš arhivirati ovaj projekt? Arhivirani projekti se više neće prikazivati u izborniku i ne možeš pristupiti njihovim podacima bez obnavljanja podataka. Preporučujemo izradu sigurnosne kopije podataka prije arhiviranja.",
-      "OK": "Arhiviraj"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Stvarno želiš izbrisati ovaj projekt? Prije brisanja svakako spremi sigurnosnu kopiju podataka.",
-      "OK": "Izbriši"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Stvarno želiš ukloniti projekt iz arhive?",
-      "OK": "Ukloni iz arhive"
-    },
-    "EDIT_PROJECT": "Uredi projekt",
-    "EXPORT_PROJECT": "Izvezi projekt",
-    "GITHUB_CONFIGURED": "GitHub integracija je konfigurirana",
-    "GITLAB_CONFIGURED": "GitLab integracija je konfigurirana",
-    "IMPORT_FROM_FILE": "Uvezi iz datoteke",
-    "JIRA_CONFIGURED": "Jira integracija je konfigurirana",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject integracija je konfigurirana",
-    "S_INVALID_JSON": "Neispravan json za datoteku projekta",
-    "TITLE": "Pregled projekta",
-    "UN_ARCHIVE_PROJECT": "Ukloni projekt iz arhive"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globalne postavke",
@@ -1625,5 +1596,34 @@
     "TIME_ESTIMATED": "Procijenjeno vrijeme:",
     "WITHOUT_BREAK": "Bez pauze:",
     "WORKING_TODAY": "Današnje vrijeme rada:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arhivirani projekti",
+    "ARCHIVE_PROJECT": "Arhiviraj projekt",
+    "CLICK_TO_HIDE": "Pritisni za skrivanje projekta iz izbornika",
+    "CLICK_TO_SHOW": "Pritisni za prikazivanje projekta u izborniku",
+    "DELETE_PROJECT": "Izbriši projekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Stvarno želiš arhivirati ovaj projekt? Arhivirani projekti se više neće prikazivati u izborniku i ne možeš pristupiti njihovim podacima bez obnavljanja podataka. Preporučujemo izradu sigurnosne kopije podataka prije arhiviranja.",
+      "OK": "Arhiviraj"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Stvarno želiš izbrisati ovaj projekt? Prije brisanja svakako spremi sigurnosnu kopiju podataka.",
+      "OK": "Izbriši"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Stvarno želiš ukloniti projekt iz arhive?",
+      "OK": "Ukloni iz arhive"
+    },
+    "EDIT_PROJECT": "Uredi projekt",
+    "EXPORT_PROJECT": "Izvezi projekt",
+    "GITHUB_CONFIGURED": "GitHub integracija je konfigurirana",
+    "GITLAB_CONFIGURED": "GitLab integracija je konfigurirana",
+    "IMPORT_FROM_FILE": "Uvezi iz datoteke",
+    "JIRA_CONFIGURED": "Jira integracija je konfigurirana",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject integracija je konfigurirana",
+    "S_INVALID_JSON": "Neispravan json za datoteku projekta",
+    "TITLE": "Pregled projekta",
+    "UN_ARCHIVE_PROJECT": "Ukloni projekt iz arhive"
   }
 }

@@ -1175,14 +1175,14 @@
         "TITLE": "Sequenza temporale"
       },
       "END": "fine del lavoro",
-      "MENU_TITLE": "Calendario",
       "NOW": "Adesso",
       "NO_TASKS": "Attualmente non ci sono attività. Aggiungi alcune attività tramite il pulsante + nella barra in alto.",
       "PLAN_END_DAY": "Pianifica alla fine del giorno",
       "PLAN_START_DAY": "Pianifica all'inizio del giorno",
       "START": "Inizio del lavoro",
       "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata",
-      "LUNCH_BREAK": "Pausa pranzo"
+      "LUNCH_BREAK": "Pausa pranzo",
+      "MENU_TITLE": "Calendario"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1448,7 +1448,9 @@
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "IS_USE_MINIMAL_SIDE_NAV": "Usa barra di navigazione minima (mostra solo icone)",
       "TASK_NOTES_TPL": "Modello di descrizione dell'attività",
-      "TITLE": "Impostazioni varie"
+      "TITLE": "Impostazioni varie",
+      "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durata delle pause brevi",
@@ -1556,7 +1558,6 @@
       "SYNC": "Howto: Configura Sincronizzazione",
       "REDDIT_COMMUNITY": "Comunità di Reddit"
     },
-    "MANAGE_PROJECTS": "Gestisci progetti",
     "NO_TAG_INFO": "Non ci sono tag. Puoi aggiungere tag inserendo `#nomeTag` mentre aggiungi o modifichi le attività.",
     "HELP": "Aiuto",
     "METRICS": "Metriche",
@@ -1568,7 +1569,6 @@
     "PROJECT_MENU": "Menu di progetto",
     "PROJECT_SETTINGS": "Impostazioni di progetto",
     "QUICK_HISTORY": "Cronologia rapida",
-    "SCHEDULED": "Pianificati",
     "SETTINGS": "Impostazioni",
     "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
     "TAGS": "Etichette",
@@ -1578,7 +1578,9 @@
     "TOGGLE_SHOW_NOTES": "Mostra/nascondi note di progetto",
     "TOGGLE_TRACK_TIME": "Inizia/smetti di tracciare il tempo",
     "TRIGGER_SYNC": "Attiva la sincronizzazione manualmente",
-    "WORKLOG": "Registro di lavoro"
+    "WORKLOG": "Registro di lavoro",
+    "MANAGE_PROJECTS": "Gestisci progetti",
+    "SCHEDULED": "Pianificati"
   },
   "PDS": {
     "BACK": "Apetta ho dimenticato qualcosa!",
@@ -1612,40 +1614,11 @@
     "TASKS_COMPLETED": "Attività completate",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Attività archiviate non incluse. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
-    "TODAY": "Oggi",
-    "WEEK": "Settimana"
+    "WEEK": "Settimana",
+    "TODAY": "Oggi"
   },
   "PM": {
     "TITLE": "Metriche di progetto"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Progetti archiviati",
-    "ARCHIVE_PROJECT": "Archivia progetto",
-    "CLICK_TO_HIDE": "Fare clic per nascondere il progetto dal menu",
-    "CLICK_TO_SHOW": "Fare clic per mostrare il progetto nel menu",
-    "DELETE_PROJECT": "Elimina progetto",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Sei sicuro di voler archiviare questo progetto? I progetti archiviati non saranno più mostrati nel menu e non potrai accederne ai dati senza prima riabilitarli. E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
-      "OK": "Archivia"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Sei sicuro di voler eliminare questo progetto? E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
-      "OK": "Elimina"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Sei sicuro che vuoi estrarre il progetto?",
-      "OK": "Estrai"
-    },
-    "EDIT_PROJECT": "Modifica progetto",
-    "EXPORT_PROJECT": "Esporta progetto",
-    "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
-    "GITLAB_CONFIGURED": "Integrazione GitLab configurata",
-    "IMPORT_FROM_FILE": "Importa da file",
-    "JIRA_CONFIGURED": "Integrazione Jira configurata",
-    "OPEN_PROJECT_CONFIGURED": "Integrazione OpenProject configurata",
-    "S_INVALID_JSON": "JSON non valido per file di progetto",
-    "TITLE": "Panoramica progetto",
-    "UN_ARCHIVE_PROJECT": "Estrai progetto"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Impostazioni globali",
@@ -1713,5 +1686,34 @@
     "WITHOUT_BREAK": "Senza pausa:",
     "WORKING_TODAY": "Lavorate oggi:",
     "WORKING_TODAY_ARCHIVED": "Tempo lavorato oggi su attività archiviate"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Progetti archiviati",
+    "ARCHIVE_PROJECT": "Archivia progetto",
+    "CLICK_TO_HIDE": "Fare clic per nascondere il progetto dal menu",
+    "CLICK_TO_SHOW": "Fare clic per mostrare il progetto nel menu",
+    "DELETE_PROJECT": "Elimina progetto",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Sei sicuro di voler archiviare questo progetto? I progetti archiviati non saranno più mostrati nel menu e non potrai accederne ai dati senza prima riabilitarli. E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
+      "OK": "Archivia"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Sei sicuro di voler eliminare questo progetto? E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
+      "OK": "Elimina"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Sei sicuro che vuoi estrarre il progetto?",
+      "OK": "Estrai"
+    },
+    "EDIT_PROJECT": "Modifica progetto",
+    "EXPORT_PROJECT": "Esporta progetto",
+    "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
+    "GITLAB_CONFIGURED": "Integrazione GitLab configurata",
+    "IMPORT_FROM_FILE": "Importa da file",
+    "JIRA_CONFIGURED": "Integrazione Jira configurata",
+    "OPEN_PROJECT_CONFIGURED": "Integrazione OpenProject configurata",
+    "S_INVALID_JSON": "JSON non valido per file di progetto",
+    "TITLE": "Panoramica progetto",
+    "UN_ARCHIVE_PROJECT": "Estrai progetto"
   }
 }

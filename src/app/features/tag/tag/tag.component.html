@@ -1,10 +1,10 @@
 <mat-icon
-  [style.background]="color"
+  [style.background]="color()"
   class="tag-ico"
-  >{{tag?.icon}}</mat-icon
+  >{{tag().icon}}</mat-icon
 >
 <span
   class="tag-title"
-  *ngIf="!isHideTitle"
-  >{{ tag?.title }}</span
+  *ngIf="!isHideTitle()"
+  >{{ tag().title }}</span
 >
