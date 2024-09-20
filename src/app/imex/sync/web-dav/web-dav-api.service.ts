@@ -162,6 +162,7 @@ export class WebDavApiService {
         false,
       )) as AndroidHttpResponse;
       this.checkErrorAndroid(result);
+      console.log({ result });
       return result.headers as WebDavHeadResponse;
     } else {
       const webDavClientCreator = await this.getWebDavClientCreator();
