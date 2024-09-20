@@ -99,7 +99,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        new URL(path, cfg.baseUrl).toString(),
+        this._getUrl(path, cfg),
         'PUT',
         data,
         // JSON.stringify(data),
@@ -154,7 +154,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        new URL(path, cfg.baseUrl).toString(),
+        this._getUrl(path, cfg),
         'HEAD',
         '',
         cfg.userName,
@@ -188,7 +188,7 @@ export class WebDavApiService {
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
       const result = (await androidInterface.makeHttpRequestWrapped(
-        new URL(path, cfg.baseUrl).toString(),
+        this._getUrl(path, cfg),
         'GET',
         '',
         cfg.userName,
@@ -207,5 +207,17 @@ export class WebDavApiService {
       const r = await client.getFileContents(path, { format: 'text' });
       return r as any;
     }
+  }
+
+  private _getUrl(
+    path: string,
+    cfg: {
+      baseUrl: string;
+      userName: string;
+      password: string;
+      syncFolderPath: string;
+    },
+  ): string {
+    return new URL(path, cfg.baseUrl).toString();
   }
 }
