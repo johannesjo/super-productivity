@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_TITLE": "同期の競合が発生しました",
+      "SYNC_CONFLICT_MSG": "確認して何をするか決めてください。"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "同期を有効にするためにバックグラウンドで実行されているアプリ",
+      "NO_ACTIVE_TASKS": "アクティブなタスクなし",
+      "SYNCING": "同期中"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "無視する",
@@ -108,6 +119,19 @@
         "ISSUE_NOT_FOUND": "CalDav：Todo \"{{issueId}}\"がサーバー上で削除されているようです。"
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "TXT": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
+        "TXT_PAST": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start} }</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
+        "ADD_AS_TASK": "タスクとして追加",
+        "FOCUS_TASK": "フォーカスタスク"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "カレンダー プロバイダー エラー: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "<strong>{{sectionKey}}</strong>の設定を更新しました"
@@ -120,12 +144,81 @@
         "AUTH_ERROR": "Dropbox：提供された無効なアクセストークン",
         "AUTH_ERROR_ACTION": "トークンの変更",
         "OFFLINE": "Dropbox：オフラインのため、同期できません",
-        "SYNC_ERROR": "Dropbox：同期中のエラー"
+        "SYNC_ERROR": "Dropbox：同期中のエラー",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: PKCE チャレンジを生成できません。"
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "今日のリストには、まだアーカイブに移動されていない {{nr}} の完了したタスクがあります。あなたは本当にあなたの一日を終えることなくやめたいですか？"
+      }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "計画に戻る",
+      "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル",
+      "CONGRATS": "セッションの完了おめでとうございます!",
+      "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
+      "FINISH_TASK_AND_SELECT_NEXT": "タスクを終了して次を選択",
+      "GET_READY": "集中セッションの準備をしましょう!",
+      "GO_TO_PROCRASTINATION": "先延ばしにするときは助けを求める",
+      "NEXT": "次",
+      "ON": "オン",
+      "POMODORO_DISABLE": "ポモドーロを無効にする",
+      "POMODORO_INFO": "ポモドーロ タイマーが有効になっている場合、フォーカス セッションを併用することはできません。",
+      "PREP_STRETCH": "軽いストレッチをする",
+      "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
+      "PREP_GET_MENTALLY_READY": "集中して生産的になるために精神的に準備する",
+      "SELECT_ANOTHER_TASK": "別のタスクを選択",
+      "SELECT_TASK": "集中するタスクを選択",
+      "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
+      "START_FOCUS_SESSION": "フォーカスセッションを開始",
+      "START_NEXT_FOCUS_SESSION": "次のフォーカスセッションを開始",
+      "WORKED_FOR": "あなたが働いていたのは"
+    },
+    "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "プロジェクト用にGiteaをセットアップする"
+      },
+      "FORM": {
+        "FILTER_USER": "ユーザー名 (例:自分で変更をフィルタリングする場合)",
+        "IS_AUTO_IMPORT_ISSUES": "Gitea から未解決の問題をバックログに自動的に追加する",
+        "IS_AUTO_POLL": "インポートされた Git のイシューの変更を自動的にポーリングします",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "新しいタスクを追加するときに、git からのイシューを提案として表示する",
+        "HOST": "ホスト (例:https://try.gitea.io)",
+        "TOKEN": "アクセストークン",
+        "REPO_FULL_NAME": "ユーザー名または組織名/プロジェクト名",
+        "REPO_FULL_NAME_DESCRIPTION": "ブラウザでプロジェクトを表示するときに、URL の一部として見つかります。",
+        "SCOPE": "範囲",
+        "SCOPE_ALL": "全て",
+        "SCOPE_ASSIGNED": "私に割り当てられた",
+        "SCOPE_CREATED": "私が作った"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク"
+      }
+    },
+    "REDMINE": {
+      "FORM": {
+        "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示するときに、URL の一部として見つかります。",
+        "HOST": "ホスト (例: https://redmine.org)",
+        "API_KEY": "APIアクセスキー",
+        "SCOPE": "範囲",
+        "SCOPE_ALL": "全て",
+        "SCOPE_ASSIGNED": "私に割り当てられた",
+        "SCOPE_CREATED": "私が作った",
+        "IS_AUTO_POLL": "インポートされたRedmineのイシューの変更を自動的にポーリングします",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "新しいタスクを追加するときに、Redmine からのイシューを提案として表示する",
+        "IS_AUTO_IMPORT_ISSUES": "Redmineから未解決のイシューを自動的に追加する"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク"
       }
     },
     "GITHUB": {
@@ -328,6 +421,7 @@
         "ON": "に",
         "STATUS": "状態",
         "STORY_POINTS": "ストーリーポイント",
+        "SUB_TASKS": "サブタスク",
         "SUMMARY": "概要",
         "WORKLOG": "作業記録",
         "WRITE_A_COMMENT": "コメントを書く"
@@ -417,6 +511,12 @@
       "EDIT_FULLSCREEN": "全画面で編集する"
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "常にダイアログを開く",
+        "DONE": "タスク完了のステータス",
+        "DO_NOT": "移行しない",
+        "ENABLE": "Openproject統合を有効にする"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "プロジェクト用にOpenProjectをセットアップする"
       },
