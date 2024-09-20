@@ -137,7 +137,7 @@ class FullscreenActivity : AppCompatActivity() {
 
         webView.loadUrl(appUrl)
         supportActionBar?.hide()
-        javaScriptInterface = JavaScriptInterface(this)
+        javaScriptInterface = JavaScriptInterface(this, webView, storageHelper)
         webView.addJavascriptInterface(javaScriptInterface, WINDOW_INTERFACE_PROPERTY)
         if (BuildConfig.FLAVOR.equals("fdroid")) {
             webView.addJavascriptInterface(javaScriptInterface, WINDOW_PROPERTY_F_DROID)
@@ -227,11 +227,7 @@ class FullscreenActivity : AppCompatActivity() {
     private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String, fnParam: String = "") {
         val fnFullName = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath.$fnName"
         val fullObjectPath = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath"
-        callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
-    }
-
-    fun callJavaScriptFunction(script: String) {
-        webView.post { webView.evaluateJavascript(script) { } }
+        javaScriptInterface.callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
 
     @Deprecated("Deprecated in Java")
