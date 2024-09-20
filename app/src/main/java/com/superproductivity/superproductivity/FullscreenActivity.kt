@@ -36,7 +36,6 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
-    var isInForeground: Boolean = false
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
@@ -106,14 +105,12 @@ class FullscreenActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        isInForeground = false
         Log.v("TW", "FullScreenActivity: onPause")
         callJSInterfaceFunctionIfExists("next", "onPause$")
     }
 
     override fun onResume() {
         super.onResume()
-        isInForeground = true
         Log.v("TW", "FullScreenActivity: onResume")
         callJSInterfaceFunctionIfExists("next", "onResume$")
     }

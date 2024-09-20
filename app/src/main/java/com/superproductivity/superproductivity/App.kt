@@ -13,4 +13,11 @@ class App : Application() {
     val keyValStore: KeyValStore by lazy {
         KeyValStore(this)
     }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize AppLifecycleObserver at app startup
+        AppLifecycleObserver.getInstance()
+    }
 }

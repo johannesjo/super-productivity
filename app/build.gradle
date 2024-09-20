@@ -77,6 +77,7 @@ dependencies {
     implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.4.0"
     implementation "com.google.code.gson:gson:2.10"
     implementation "androidx.core:core-ktx:1.9.0"
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.6'
     implementation "com.anggrayudi:storage:1.5.4"
 
     playImplementation "com.google.android.gms:play-services-auth:20.4.0"

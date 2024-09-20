@@ -133,7 +133,7 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun showNotificationIfAppIsNotOpen(title: String, body: String) {
-        if (!activity.isInForeground) {
+        if (!AppLifecycleObserver.getInstance().isInForeground) {
             showNotification(title, body)
         }
     }
