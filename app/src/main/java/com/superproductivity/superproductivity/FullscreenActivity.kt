@@ -292,9 +292,9 @@ class FullscreenActivity : AppCompatActivity() {
             "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
         )
 
-        // since we currently don't have a way to also post the body, we only handle GET and OPTIONS requests
+        // since we currently don't have a way to also post the body, we only handle GET, HEAD and OPTIONS requests
         // see https://github.com/KonstantinSchubert/request_data_webviewclient for a possible solution
-        if (request.method.uppercase() != "GET" && request.method.uppercase() != "OPTIONS") {
+        if (request.method.uppercase() != "GET" && request.method.uppercase() != "OPTIONS" && request.method.uppercase() !="HEAD") {
             return null
         }
 
@@ -328,6 +328,38 @@ class FullscreenActivity : AppCompatActivity() {
                     Log.v("TW", "OPTIONS overwrite")
                     return OptionsAllowResponse.build()
                 }
+            }
+        }
+
+
+        // Handle HEAD requests
+        if (request.method.uppercase() == "HEAD") {
+            Log.v("TW", "HEAD request triggered")
+            client.newCall(newRequest).execute().use { response ->
+                Log.v("TW", "HEAD response ${response.code} ${response.message}")
+                val responseHeaders = response.headers.names()
+                    .associateWith { response.headers(it)?.joinToString() }
+                    .toMutableMap()
+
+                val keysToRemoveI = responseHeaders.keys.filter {
+                    it.equals("Access-Control-Allow-Origin", ignoreCase = true)
+                }
+                for (key in keysToRemoveI) {
+                    responseHeaders.remove(key)
+                }
+                responseHeaders["Access-Control-Allow-Origin"] = "*"
+
+                val contentType = response.header("Content-Type", "text/plain")
+                val contentEncoding = response.header("Content-Encoding", "utf-8")
+                val reasonPhrase = response.message.ifEmpty { "OK" }
+                return WebResourceResponse(
+                    contentType,
+                    contentEncoding,
+                    response.code,
+                    reasonPhrase,
+                    responseHeaders,
+                    null
+                )
             }
         }
 
