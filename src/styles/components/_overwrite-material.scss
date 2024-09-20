@@ -169,3 +169,8 @@ mat-icon.mat-icon[svgicon] {
 .mat-mdc-menu-item.quick-access {
   border: 1px solid red;
 }
+
+// MAT TOOLTIP
+mat-tooltip-component {
+  pointer-events: none;
+}
