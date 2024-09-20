@@ -13,6 +13,21 @@
   -webkit-app-region: no-drag !important;
 }
 
+.mac-os-drag-bar {
+  -webkit-app-region: drag;
+  height: 50px;
+  width: 160px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  display: none;
+
+  :host-context(.isMac) & {
+    display: block;
+  }
+}
+
 header {
 }
 
