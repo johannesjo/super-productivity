@@ -70,13 +70,13 @@ jobs:
         run: npm run dist:mac:mas:buildOnly
 
       - name: Validate App
-        run: ls app-builds; ls app-builds/mas; xcrun altool --type macos --validate-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
+        run: ls app-builds; ls app-builds/mas; xcrun altool --type macos --validate-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
         env:
-          APPLEID: ${{secrets.APPLEID}}
-          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
+          APPLE_ID: ${{secrets.APPLE_ID}}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
 
       - name: Push to Store
-        run: xcrun altool --type macos --upload-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
+        run: xcrun altool --type macos --upload-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
         env:
-          APPLEID: ${{secrets.APPLEID}}
-          APPLEIDPASS: ${{secrets.APPLEIDPASS}}
+          APPLE_ID: ${{secrets.APPLE_ID}}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}

@@ -5,6 +5,8 @@ files:
   - '!electron/**/*.js.map'
   - dist/**/*
   - 'embedded.provisionprofile'
+#afterSign: ./tools/notarizeMacApp.js
+
 directories:
   output: './app-builds'
 
@@ -74,16 +76,15 @@ mac:
   publish:
     - github
   target:
-    - zip
+    #    - zip
     - target: dmg
       arch:
         - arm64
-        - x64
-        - universal
+#        - x64
+#        - universal
 
 dmg:
   sign: true
-  notarize: true
   publish:
     - github
 
