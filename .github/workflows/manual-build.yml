@@ -142,6 +142,9 @@ jobs:
         env:
           API_KEY_ID: ${{ secrets.mac_api_key_id }}
           API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       # - name: notary log
       #  if: always()
