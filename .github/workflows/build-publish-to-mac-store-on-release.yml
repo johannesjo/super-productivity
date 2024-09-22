@@ -70,7 +70,7 @@ jobs:
         run: npm run dist:mac:mas:buildOnly
 
       - name: Validate App
-        run: ls app-builds; ls app-builds/mas-arm64; xcrun altool --type macos --validate-app -f app-builds/mas-arm64/Super*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
+        run: ls app-builds; ls app-builds/mas; xcrun altool --type macos --validate-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLEID}} -p ${{secrets.APPLEIDPASS}}
         env:
           APPLEID: ${{secrets.APPLEID}}
           APPLEIDPASS: ${{secrets.APPLEIDPASS}}

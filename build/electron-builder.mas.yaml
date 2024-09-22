@@ -17,7 +17,9 @@ mas:
   gatekeeperAssess: false
   darkModeSupport: true
   target:
-    - mas
+    - target: mas
+      arch:
+        - universal
 
   hardenedRuntime: false
   entitlements: build/entitlements.mas.plist

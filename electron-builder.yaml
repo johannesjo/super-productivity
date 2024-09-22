@@ -58,7 +58,6 @@ snap:
   confinement: strict
 
 mac:
-  notarize: true
   appId: com.super-productivity.app
   type: distribution
   category: public.app-category.productivity
@@ -69,6 +68,7 @@ mac:
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
+  notarize: true
   extendInfo:
     ITSAppUsesNonExemptEncryption: false
   publish:
