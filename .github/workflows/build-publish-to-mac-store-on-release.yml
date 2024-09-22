@@ -69,6 +69,9 @@ jobs:
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
 
+      - run: ls app-builds
+        shell: bash
+
       - name: Validate App
         run: ls app-builds; ls app-builds/mas; xcrun altool --type macos --validate-app -f app-builds/mas/Super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
         env:
