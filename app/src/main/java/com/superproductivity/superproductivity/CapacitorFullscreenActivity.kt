@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 
@@ -39,6 +40,17 @@ class CapacitorFullscreenActivity : BridgeActivity() {
             // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
 
+        // Register OnBackPressedCallback to handle back button press
+        onBackPressedDispatcher.addCallback(this) {
+            Log.v("TW", "onBackPressed ${bridge.webView.canGoBack()}")
+            if (bridge.webView.canGoBack()) {
+                bridge.webView.goBack()
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+
         // Handle keyboard visibility changes
         val rootView = findViewById<View>(android.R.id.content)
         rootView.viewTreeObserver.addOnGlobalLayoutListener {
@@ -68,12 +80,6 @@ class CapacitorFullscreenActivity : BridgeActivity() {
         Log.v("TW", "CapacitorFullscreenActivity: onResume")
         callJavaScriptFunction("window.SUPAndroid.next.onResume$()")
     }
-
-//    override fun onBackPressed() {
-//      if (!bridge.handleBackPressed()) {
-//        super.onBackPressed()
-//      }
-//    }
 
     private fun callJavaScriptFunction(script: String) {
         bridge?.webView?.post {
