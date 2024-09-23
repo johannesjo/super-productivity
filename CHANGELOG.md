@@ -1,3 +1,23 @@
+## [10.0.11](https://github.com/johannesjo/super-productivity/compare/v10.0.9...v10.0.11) (2024-09-23)
+
+### Bug Fixes
+
+- mousewheel scroll & drag and drop case for planner ([235ccf9](https://github.com/johannesjo/super-productivity/commit/235ccf9b36e66e7ac2808cfc7c0bac39355bcd92))
+- prevent scrollbars when dragging ([c267b32](https://github.com/johannesjo/super-productivity/commit/c267b32903cc7536f78774ae4ff5b59d0c7c3a72))
+- wrong condition ([fec84c3](https://github.com/johannesjo/super-productivity/commit/fec84c38c5e7634a4003c4f54d19e46605ecc142))
+
+### Features
+
+- add a bit of drag area for mac os [#3501](https://github.com/johannesjo/super-productivity/issues/3501) ([42a81d4](https://github.com/johannesjo/super-productivity/commit/42a81d44a378cfc59d5a14d7382bab46999ed77b))
+- don't disable gradient for default today tag ([4c68dc8](https://github.com/johannesjo/super-productivity/commit/4c68dc8d59383b63215a4ce0bc08347d2a32ea3a))
+- don't disable gradient for default today tag ([d71b0fd](https://github.com/johannesjo/super-productivity/commit/d71b0fd51a5e76fcc3cbe2b3b35f2a1b15b5ab9a))
+- replace weak etag string that causes sync problems when applied inconsistent [#3361](https://github.com/johannesjo/super-productivity/issues/3361) ([a11d0b4](https://github.com/johannesjo/super-productivity/commit/a11d0b42e182de01a86a0df110388140f57015dd))
+- simplify url handling [#3361](https://github.com/johannesjo/super-productivity/issues/3361) ([05f8cf7](https://github.com/johannesjo/super-productivity/commit/05f8cf764b18393d25de2899bb69d23e26cb166e))
+
+### Reverts
+
+- Revert "build: disable e2e for now" ([537e7f9](https://github.com/johannesjo/super-productivity/commit/537e7f97b50358388bbbd1eb8838533f379e3e4a))
+
 ## [10.0.10](https://github.com/johannesjo/super-productivity/compare/v10.0.9...v10.0.10) (2024-9-20)
 
 ### Bug Fixes
