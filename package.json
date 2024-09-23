@@ -76,7 +76,7 @@
     "dist:win:store": "git pull && npm run && copy electron-builder.win-store.yaml electron-builder.yaml && npm run dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
     "dist:mac:dl": "cp tools/mac-profiles/dl.provisionprofile embedded.provisionprofile && electron-builder --mac",
     "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
-    "dist:mac:mas:buildOnly": "electron-builder --mac mas --config=build/electron-builder.mas.yaml",
+    "dist:mac:mas:buildOnly": "electron-builder --config=build/electron-builder.mas.yaml",
     "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
     "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
     "release": "npm run release.changelog && npm run dist",
