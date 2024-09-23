@@ -145,6 +145,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
+    if (targetTask && targetTask.id === draggedTask.id) {
+      return;
+    }
+
     const newIds =
       targetTask && targetTask.id !== draggedTask.id
         ? [...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask)]
