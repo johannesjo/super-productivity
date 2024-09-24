@@ -11,7 +11,7 @@ import com.getcapacitor.BridgeActivity
 class CapacitorFullscreenActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
 
-    val storageHelper =
+    private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +67,20 @@ class CapacitorFullscreenActivity : BridgeActivity() {
                 callJavaScriptFunction("window.SUPAndroid.next.isKeyboardShown$('false')")
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save scoped storage permission on Android 10+
+        storageHelper.onSaveInstanceState(outState)
+        bridge.webView.saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        // Restore scoped storage permission on Android 10+
+        storageHelper.onRestoreInstanceState(savedInstanceState)
+        bridge.webView.restoreState(savedInstanceState)
     }
 
     override fun onPause() {
