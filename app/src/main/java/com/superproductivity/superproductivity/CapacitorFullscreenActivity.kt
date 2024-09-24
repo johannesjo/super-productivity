@@ -1,5 +1,6 @@
 package com.superproductivity.superproductivity
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
@@ -98,6 +99,14 @@ class CapacitorFullscreenActivity : BridgeActivity() {
     private fun callJavaScriptFunction(script: String) {
         bridge?.webView?.post {
             bridge?.webView?.evaluateJavascript(script, null)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (data != null) {
+            javaScriptInterface.onActivityResult(requestCode, resultCode, data)
         }
     }
 
