@@ -1,5 +1,8 @@
 package com.superproductivity.superproductivity
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -13,7 +16,25 @@ import java.io.ByteArrayInputStream
 /**
  * Strip the original WebViewClient logic to ensure that both types share the same logic
  */
-class SpWebViewClient(bridge: Bridge) : BridgeWebViewClient(bridge) {
+class SpWebViewClient(private val activity: Activity, bridge: Bridge) : BridgeWebViewClient(bridge) {
+
+    @Deprecated("Deprecated in Java")
+    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+        Log.v("TW", url)
+        return if (url.startsWith("http://") || url.startsWith("https://")) {
+            if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains(
+                    BuildConfig.SERVICE_HOST
+                )
+            ) {
+                false
+            } else {
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                true
+            }
+        } else {
+            false
+        }
+    }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
         if (request == null || request.isForMainFrame) {
