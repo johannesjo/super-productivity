@@ -42,6 +42,9 @@ class CapacitorFullscreenActivity : BridgeActivity() {
             // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
 
+        // Set custom SP WebViewClient
+        bridge.webViewClient = SpWebViewClient(bridge)
+
         // Register OnBackPressedCallback to handle back button press
         onBackPressedDispatcher.addCallback(this) {
             Log.v("TW", "onBackPressed ${bridge.webView.canGoBack()}")
