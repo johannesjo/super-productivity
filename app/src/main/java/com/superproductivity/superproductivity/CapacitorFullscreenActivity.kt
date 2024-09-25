@@ -19,7 +19,8 @@ class CapacitorFullscreenActivity : BridgeActivity() {
         super.onCreate(savedInstanceState)
 
         // Register Plugin
-        // TODO:
+        // TODO: The changes to the compatible logic are too complex, so they will not be added for now
+        //  (separate branch, there will be opportunities to add it later)
 
         // Hide the action bar
         supportActionBar?.hide()
@@ -61,11 +62,11 @@ class CapacitorFullscreenActivity : BridgeActivity() {
 
             val keypadHeight = screenHeight - rect.bottom
             if (keypadHeight > screenHeight * 0.15) {
-                // Keyboard is opened
-                callJavaScriptFunction("window.SUPAndroid.next.isKeyboardShown$('true')")
+                // keyboard is opened
+                callJSInterfaceFunctionIfExists("next", "isKeyboardShown$", "true")
             } else {
-                // Keyboard is closed
-                callJavaScriptFunction("window.SUPAndroid.next.isKeyboardShown$('false')")
+                // keyboard is closed
+                callJSInterfaceFunctionIfExists("next", "isKeyboardShown$", "false")
             }
         }
     }
@@ -87,20 +88,21 @@ class CapacitorFullscreenActivity : BridgeActivity() {
     override fun onPause() {
         super.onPause()
         Log.v("TW", "CapacitorFullscreenActivity: onPause")
-        callJavaScriptFunction("window.SUPAndroid.next.onPause$()")
+        callJSInterfaceFunctionIfExists("next", "onPause$")
     }
 
     override fun onResume() {
         super.onResume()
         Log.v("TW", "CapacitorFullscreenActivity: onResume")
-        callJavaScriptFunction("window.SUPAndroid.next.onResume$()")
+        callJSInterfaceFunctionIfExists("next", "onResume$")
     }
 
-    private fun callJavaScriptFunction(script: String) {
-        bridge?.webView?.post {
-            bridge?.webView?.evaluateJavascript(script, null)
-        }
+    private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String, fnParam: String = "") {
+        val fnFullName = "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath.$fnName"
+        val fullObjectPath = "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath"
+        javaScriptInterface.callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
+
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
