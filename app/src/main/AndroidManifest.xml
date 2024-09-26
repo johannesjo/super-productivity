@@ -22,10 +22,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
 
-        <!-- App in WebFrame -->
-        <!-- TODO: Need .FullscreenActivity -->
+        <!-- Set FullscreenActivity as the default launcher -->
         <activity
-            android:name=".CapacitorFullscreenActivity"
+            android:name=".FullscreenActivity"
             android:allowTaskReparenting="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
@@ -46,5 +45,19 @@
                 <action android:name="com.superproductivity.superproductivity.PAUSE" />
             </intent-filter>
         </activity>
+
+      <!-- All new Super-Productivity main activity, based on Capacitor to support offline use -->
+      <activity
+        android:name=".CapacitorMainActivity"
+        android:allowTaskReparenting="true"
+        android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+        android:exported="true"
+        android:hardwareAccelerated="true"
+        android:label="@string/title_activity_fullscreen"
+        android:launchMode="singleTask"
+        android:lockTaskMode="never"
+        android:persistableMode="persistNever"
+        android:theme="@style/FullscreenTheme"
+        android:windowSoftInputMode="adjustResize"/>
     </application>
 </manifest>

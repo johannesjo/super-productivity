@@ -17,7 +17,10 @@ import com.getcapacitor.BridgeWebViewClient
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
-class CapacitorFullscreenActivity : BridgeActivity() {
+/**
+ * All new Super-Productivity main activity, based on Capacitor to support offline use of the entire application
+ */
+class CapacitorMainActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
 
     private var webViewRequestHandler = WebViewRequestHandler(this, "localhost")
