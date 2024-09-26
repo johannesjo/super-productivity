@@ -1,4 +1,4 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.webview
 
 import android.Manifest
 import android.app.Activity
@@ -20,7 +20,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.*
+import com.superproductivity.superproductivity.App
+import com.superproductivity.superproductivity.app.AppLifecycleObserver
+import com.superproductivity.superproductivity.FullscreenActivity
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
+import com.superproductivity.superproductivity.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedOutputStream

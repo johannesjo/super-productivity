@@ -1,6 +1,5 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.webview
 
-import android.annotation.TargetApi
 import android.util.Log
 import android.webkit.WebResourceResponse
 import java.text.SimpleDateFormat

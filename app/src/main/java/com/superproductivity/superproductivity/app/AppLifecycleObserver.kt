@@ -1,4 +1,4 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.app
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner

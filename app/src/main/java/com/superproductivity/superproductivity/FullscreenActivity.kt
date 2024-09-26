@@ -20,6 +20,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
+import com.superproductivity.superproductivity.webview.JavaScriptInterface
+import com.superproductivity.superproductivity.webview.WebHelper
+import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 
 /**

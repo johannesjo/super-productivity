@@ -14,6 +14,8 @@ import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
+import com.superproductivity.superproductivity.webview.JavaScriptInterface
+import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 class CapacitorFullscreenActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface

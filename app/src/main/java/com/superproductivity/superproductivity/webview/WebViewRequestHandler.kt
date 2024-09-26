@@ -1,4 +1,4 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.webview
 
 import android.app.Activity
 import android.content.Intent

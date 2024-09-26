@@ -1,7 +1,8 @@
 package com.superproductivity.superproductivity
 
 import android.app.Application
-import android.webkit.WebView
+import com.superproductivity.superproductivity.app.AppLifecycleObserver
+import com.superproductivity.superproductivity.app.KeyValStore
 
 class App : Application() {
 
