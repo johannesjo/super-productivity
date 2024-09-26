@@ -7,8 +7,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.util.Log
-import com.getcapacitor.Bridge
-import com.getcapacitor.BridgeWebViewClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.ByteArrayInputStream
@@ -16,14 +14,14 @@ import java.io.ByteArrayInputStream
 /**
  * Strip the original WebViewClient logic to ensure that both types share the same logic
  */
-class SpWebViewClient(private val activity: Activity, bridge: Bridge) : BridgeWebViewClient(bridge) {
+class WebViewRequestHandler(private val activity: Activity, private val serviceHost: String){
 
     @Deprecated("Deprecated in Java")
-    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+    fun handleUrlLoading(view: WebView, url: String): Boolean {
         Log.v("TW", url)
         return if (url.startsWith("http://") || url.startsWith("https://")) {
             if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains(
-                    BuildConfig.SERVICE_HOST
+                    serviceHost
                 )
             ) {
                 false
@@ -36,7 +34,7 @@ class SpWebViewClient(private val activity: Activity, bridge: Bridge) : BridgeWe
         }
     }
 
-    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+    fun interceptWebRequest(request: WebResourceRequest?): WebResourceResponse? {
         if (request == null || request.isForMainFrame) {
             return null
         }
@@ -49,7 +47,7 @@ class SpWebViewClient(private val activity: Activity, bridge: Bridge) : BridgeWe
             }
         }
 
-        if (request.url.toString().contains(BuildConfig.SERVICE_HOST)) {
+        if (request.url.toString().contains(serviceHost)) {
             return null
         }
 

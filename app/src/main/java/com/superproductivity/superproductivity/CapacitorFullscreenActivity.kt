@@ -5,13 +5,18 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
 import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
+import com.getcapacitor.BridgeWebViewClient
 
 class CapacitorFullscreenActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
 
+    private var webViewRequestHandler = WebViewRequestHandler(this, "localhost")
     private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
 
@@ -43,7 +48,21 @@ class CapacitorFullscreenActivity : BridgeActivity() {
         }
 
         // Set custom SP WebViewClient
-        bridge.webViewClient = SpWebViewClient(this, bridge)
+        // No need to set up WebChromeClient, as most of the processes have been implemented in Bridge
+        bridge.webViewClient = object : BridgeWebViewClient(bridge) {
+            @Deprecated("Deprecated in Java")
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                return webViewRequestHandler.handleUrlLoading(view, url)
+            }
+
+            override fun shouldInterceptRequest(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): WebResourceResponse? {
+                val interceptedResponse = webViewRequestHandler.interceptWebRequest(request)
+                return interceptedResponse ?: super.shouldInterceptRequest(view, request)
+            }
+        }
 
         // Register OnBackPressedCallback to handle back button press
         onBackPressedDispatcher.addCallback(this) {
