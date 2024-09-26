@@ -5,6 +5,8 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.webkit.ServiceWorkerClient
+import android.webkit.ServiceWorkerController
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -47,7 +49,7 @@ class CapacitorFullscreenActivity : BridgeActivity() {
             // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
 
-        // Set custom SP WebViewClient
+        // Set custom SP WebViewClient & ServiceWorkerController
         // No need to set up WebChromeClient, as most of the processes have been implemented in Bridge
         bridge.webViewClient = object : BridgeWebViewClient(bridge) {
             @Deprecated("Deprecated in Java")
@@ -63,6 +65,13 @@ class CapacitorFullscreenActivity : BridgeActivity() {
                 return interceptedResponse ?: super.shouldInterceptRequest(view, request)
             }
         }
+        val swController = ServiceWorkerController.getInstance()
+        swController.setServiceWorkerClient(
+            object : ServiceWorkerClient() {
+                override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
+                    return webViewRequestHandler.interceptWebRequest(request)
+                }
+            })
 
         // Register OnBackPressedCallback to handle back button press
         onBackPressedDispatcher.addCallback(this) {
