@@ -10,6 +10,7 @@ import android.webkit.ServiceWorkerController
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
@@ -33,6 +34,12 @@ class CapacitorMainActivity : BridgeActivity() {
         // Register Plugin
         // TODO: The changes to the compatible logic are too complex, so they will not be added for now
         //  (separate branch, there will be opportunities to add it later)
+
+        // DEBUG ONLY
+        if (BuildConfig.DEBUG) {
+            Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
 
         // Hide the action bar
         supportActionBar?.hide()
