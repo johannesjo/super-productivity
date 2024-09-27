@@ -1,6 +1,7 @@
 package com.superproductivity.superproductivity
 
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
+import com.superproductivity.superproductivity.app.LaunchDecider
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
@@ -44,6 +46,16 @@ class FullscreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.v("TW", "FullScreenActivity: onCreate")
         super.onCreate(savedInstanceState)
+
+        // Determines which launch mode to use. (Online-old or Offline-new)
+        val launchDecider = LaunchDecider(this)
+        if (launchDecider.shouldSwitchToNewActivity()) {
+            // Switch to CapacitorMainActivity
+            val intent = intent.setComponent(ComponentName(this, CapacitorMainActivity::class.java))
+            startActivity(intent)
+            finish()
+            return
+        }
 
         initWebView()
 
@@ -226,7 +238,10 @@ class FullscreenActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        wvContainer.removeView(webView)
+        // Ensure wvContainer is initialized before removing the view
+        if (::wvContainer.isInitialized) {
+            wvContainer.removeView(webView)
+        }
         super.onDestroy()
     }
 
