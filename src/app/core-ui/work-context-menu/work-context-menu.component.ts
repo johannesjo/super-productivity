@@ -68,13 +68,13 @@ export class WorkContextMenuComponent {
   }
 
   async deleteProject(): Promise<void> {
-    const tag = await this._projectService.getByIdOnce$(this.contextId).toPromise();
+    const project = await this._projectService.getByIdOnce$(this.contextId).toPromise();
     const isConfirmed = await this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
           message: T.F.PROJECT.D_DELETE.MSG,
-          translateParams: { title: tag.title },
+          translateParams: { title: project.title },
         },
       })
       .afterClosed()
@@ -85,7 +85,7 @@ export class WorkContextMenuComponent {
       if (activeId === this.contextId) {
         await this._router.navigateByUrl('/');
       }
-      this._projectService.remove(this.contextId);
+      this._projectService.remove(project);
     }
   }
 }

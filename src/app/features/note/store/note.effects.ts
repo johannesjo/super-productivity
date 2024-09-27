@@ -14,13 +14,22 @@ import { selectNoteFeatureState } from './note.reducer';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Observable } from 'rxjs';
 import { NoteState } from '../note.model';
+import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class NoteEffects {
   updateNote$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addNote, deleteNote, updateNote, updateNoteOrder, moveNoteToOtherProject),
+        ofType(
+          addNote,
+          deleteNote,
+          updateNote,
+          updateNoteOrder,
+          moveNoteToOtherProject,
+          // PROJECT
+          deleteProject,
+        ),
         switchMap(() => this._store$.pipe(select(selectNoteFeatureState)).pipe(first())),
         tap((state) => this._saveToLs(state)),
       ),

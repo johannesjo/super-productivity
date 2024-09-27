@@ -4,18 +4,20 @@
 .planner-time-remaining-shared {
   min-width: 44px;
   text-align: right;
-  //white-space: nowrap;
   padding-left: 4px;
   padding-right: 8px;
   font-style: italic;
   font-weight: 300;
   line-height: 1;
-  opacity: 0.6;
   margin-left: auto;
   font-size: $planner-font-size-mobile;
+  color: $light-theme-text-color-muted;
 
   @include mq(xs) {
     font-size: $planner-font-size;
+  }
+  @include darkTheme(true) {
+    color: $dark-theme-text-color-muted;
   }
 
   mat-icon {

@@ -293,7 +293,7 @@
         "TITLE": "Senden Sie die für Issues aufgewendete Zeit an GitLab",
         "T_ALREADY_TRACKED": "Bereits erfasst",
         "T_TITLE": "Titel",
-        "T_TO_BE_SUBMITTED": "Einzureichend",
+        "T_TO_BE_SUBMITTED": "Noch einzureichen",
         "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
@@ -1138,12 +1138,12 @@
         "TITLE": "Zeitleiste"
       },
       "END": "Arbeitsende",
-      "MENU_TITLE": "Zeitleiste",
       "NOW": "Jetzt",
       "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
       "START": "Arbeitsbeginn",
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "LUNCH_BREAK": "Mittagspause",
+      "MENU_TITLE": "Zeitleiste",
       "S": {
         "CAL_PROVIDER_ERROR": "Fehler beim Schedule-Kal.-Anbieter: {{errTxt}}"
       }
@@ -1523,7 +1523,6 @@
       "START_WELCOME": "Willkommenstour starten",
       "SYNC": "Howto: Synchronisierung konfigurieren"
     },
-    "MANAGE_PROJECTS": "Projekte verwalten",
     "NO_TAG_INFO": "Derzeit sind keine Tags vorhanden. Sie können Tags hinzufügen, indem Sie beim Hinzufügen oder Bearbeiten von Aufgaben „#IhrNeuesTag“ eingeben.",
     "HELP": "Hilfe",
     "METRICS": "Metriken",
@@ -1537,7 +1536,6 @@
     "QUICK_HISTORY": "Schnellverlauf",
     "REPEAT_SCHEDULED": "Wiederkehrend",
     "SCHEDULE": "Stundenplan",
-    "SCHEDULED": "Geplant",
     "SETTINGS": "Einstellungen",
     "SHOW_SEARCH_BAR": "Suchleiste anzeigen",
     "TAGS": "Stichworte",
@@ -1547,7 +1545,9 @@
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
     "TRIGGER_SYNC": "Synchronisierung manuell auslösen",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "Worklog",
+    "MANAGE_PROJECTS": "Projekte verwalten",
+    "SCHEDULED": "Geplant"
   },
   "PDS": {
     "BACK": "Ich habe etwas vergessen!",
@@ -1587,35 +1587,6 @@
   },
   "PM": {
     "TITLE": "Projektmetriken"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archivierte Projekte",
-    "ARCHIVE_PROJECT": "Projekt archivieren",
-    "CLICK_TO_HIDE": "Klicken Sie hier, um das Projekt aus dem Menü auszublenden",
-    "CLICK_TO_SHOW": "Klicken Sie hier, um das Projekt im Menü anzuzeigen",
-    "DELETE_PROJECT": "Projekt löschen",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
-      "OK": "Archivieren"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
-      "OK": "Löschen"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich wiederherstellen?",
-      "OK": "Wiederherstellen"
-    },
-    "EDIT_PROJECT": "Projekt bearbeiten",
-    "EXPORT_PROJECT": "Projekt exportieren",
-    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
-    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
-    "IMPORT_FROM_FILE": "Aus Datei importieren",
-    "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject-Integration konfiguriert",
-    "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
-    "TITLE": "Projektübersicht",
-    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv wiederherstellen"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
@@ -1683,5 +1654,34 @@
     "WITHOUT_BREAK": "Ohne Pause:",
     "WORKING_TODAY": "Arbeit heute:",
     "WORKING_TODAY_ARCHIVED": "Heute an archivierten Aufgaben gearbeitete Zeit"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archivierte Projekte",
+    "ARCHIVE_PROJECT": "Projekt archivieren",
+    "CLICK_TO_HIDE": "Klicken Sie hier, um das Projekt aus dem Menü auszublenden",
+    "CLICK_TO_SHOW": "Klicken Sie hier, um das Projekt im Menü anzuzeigen",
+    "DELETE_PROJECT": "Projekt löschen",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
+      "OK": "Archivieren"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
+      "OK": "Löschen"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich wiederherstellen?",
+      "OK": "Wiederherstellen"
+    },
+    "EDIT_PROJECT": "Projekt bearbeiten",
+    "EXPORT_PROJECT": "Projekt exportieren",
+    "GITHUB_CONFIGURED": "GitHub-Integration konfiguriert",
+    "GITLAB_CONFIGURED": "GitLab-Integration konfiguriert",
+    "IMPORT_FROM_FILE": "Aus Datei importieren",
+    "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject-Integration konfiguriert",
+    "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
+    "TITLE": "Projektübersicht",
+    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv wiederherstellen"
   }
 }

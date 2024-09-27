@@ -48,7 +48,8 @@ export class DropboxEffects {
       filter(
         ({ sectionKey, sectionCfg }): boolean =>
           sectionKey === 'sync' &&
-          (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox,
+          (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
+          (sectionCfg as SyncConfig).isEnabled !== false,
       ),
       withLatestFrom(this._dropboxApiService.isTokenAvailable$),
       filter(([, isTokenAvailable]) => !isTokenAvailable),
@@ -64,7 +65,7 @@ export class DropboxEffects {
           ({ sectionKey, sectionCfg }): boolean =>
             sectionKey === 'sync' &&
             (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
-            !(sectionCfg as SyncConfig).isEnabled,
+            (sectionCfg as SyncConfig).isEnabled,
         ),
         withLatestFrom(this._dropboxApiService.isTokenAvailable$),
         filter(([, isTokenAvailable]) => isTokenAvailable),

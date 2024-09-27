@@ -1007,14 +1007,12 @@
     "CREATE_TAG": "Opprett tag",
     "DELETE_TAG": "Slett tag",
     "GO_TO_TASK_LIST": "Gå til oppgavelisten",
-    "MANAGE_PROJECTS": "Administrer prosjekter",
     "METRICS": "Beregninger",
     "NOTES": "Merknader",
     "PROCRASTINATE": "Utsette",
     "PROJECTS": "Prosjekter",
     "PROJECT_MENU": "Prosjektmeny",
     "PROJECT_SETTINGS": "Prosjektinnstillinger",
-    "SCHEDULED": "Planlagt",
     "SETTINGS": "Innstillinger",
     "TAGS": "Merker",
     "TASKS": "Oppgaver",
@@ -1022,7 +1020,9 @@
     "TOGGLE_SHOW_BOOKMARKS": "Vis / skjul bokmerker",
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
-    "WORKLOG": "Arbeidslogg"
+    "WORKLOG": "Arbeidslogg",
+    "MANAGE_PROJECTS": "Administrer prosjekter",
+    "SCHEDULED": "Planlagt"
   },
   "PDS": {
     "BACK": "Vent, jeg glemte noe!",
@@ -1059,33 +1059,6 @@
   },
   "PM": {
     "TITLE": "Prosjektstatistikk"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arkiverte prosjekter",
-    "ARCHIVE_PROJECT": "Arkivprosjekt",
-    "DELETE_PROJECT": "Slett prosjekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Er du sikker på at du vil arkivere dette prosjektet? Arkiverte prosjekter vises ikke lenger i menyen, og du kan ikke få tilgang til dataene deres uten å gjenopprette dem. Det anbefales at du sikkerhetskopierer dataene dine før du gjør dette.",
-      "OK": "Arkiv"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Er du sikker på at du vil slette dette prosjektet? Det anbefales å sikkerhetskopiere dataene dine før du gjør dette.",
-      "OK": "Slett"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Er du sikker på at du vil fjerne arkivet for dette prosjektet?",
-      "OK": "Unarkiv"
-    },
-    "EDIT_PROJECT": "Rediger prosjekt",
-    "EXPORT_PROJECT": "Eksporter prosjekt",
-    "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
-    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
-    "IMPORT_FROM_FILE": "Importer fra fil",
-    "JIRA_CONFIGURED": "Jira Integration konfigurert",
-    "S_INVALID_JSON": "Ugyldig json for prosjektfilen",
-    "TITLE": "Prosjektoversikt",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project",
-    "CREATE_NEW": "Lag ny"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale innstillinger",
@@ -1143,6 +1116,33 @@
     "TIME_ESTIMATED": "Anslått tid:",
     "WITHOUT_BREAK": "Uten pause:",
     "WORKING_TODAY": "Jobber i dag:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arkiverte prosjekter",
+    "ARCHIVE_PROJECT": "Arkivprosjekt",
+    "DELETE_PROJECT": "Slett prosjekt",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Er du sikker på at du vil arkivere dette prosjektet? Arkiverte prosjekter vises ikke lenger i menyen, og du kan ikke få tilgang til dataene deres uten å gjenopprette dem. Det anbefales at du sikkerhetskopierer dataene dine før du gjør dette.",
+      "OK": "Arkiv"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Er du sikker på at du vil slette dette prosjektet? Det anbefales å sikkerhetskopiere dataene dine før du gjør dette.",
+      "OK": "Slett"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Er du sikker på at du vil fjerne arkivet for dette prosjektet?",
+      "OK": "Unarkiv"
+    },
+    "EDIT_PROJECT": "Rediger prosjekt",
+    "EXPORT_PROJECT": "Eksporter prosjekt",
+    "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
+    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
+    "IMPORT_FROM_FILE": "Importer fra fil",
+    "JIRA_CONFIGURED": "Jira Integration konfigurert",
+    "S_INVALID_JSON": "Ugyldig json for prosjektfilen",
+    "TITLE": "Prosjektoversikt",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project",
+    "CREATE_NEW": "Lag ny"
   },
   "S": {
     "SYNC": {

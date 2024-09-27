@@ -119,7 +119,7 @@ export class PlannerService {
     ),
     // for better performance
     // TODO better solution, gets called very often
-    tap((val) => console.log('days$', val)),
+    // tap((val) => console.log('days$', val)),
     // tap((val) => console.log('days$ SIs', val[0]?.scheduledIItems)),
     shareReplay(1),
   );
@@ -135,7 +135,5 @@ export class PlannerService {
     private _calendarIntegrationService: CalendarIntegrationService,
     private _dateService: DateService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {
-    this.days$.subscribe((v) => console.log(`days$`, v));
-  }
+  ) {}
 }

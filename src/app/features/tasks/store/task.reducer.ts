@@ -66,6 +66,7 @@ import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -99,6 +100,16 @@ export const taskReducer = createReducer<TaskState>(
         })
       : state,
   ),
+
+  on(deleteProject, (state, { project, allTaskIds }) => {
+    return taskAdapter.removeMany(allTaskIds, {
+      ...state,
+      currentTaskId:
+        state.currentTaskId && allTaskIds.includes(state.currentTaskId)
+          ? null
+          : state.currentTaskId,
+    });
+  }),
 
   // TODO check if working
   on(setCurrentTask, (state, { id }) => {
@@ -304,7 +315,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id: newPar.id,
         changes: {
-          subTaskIds: moveItemInList(taskId, newPar.subTaskIds, newOrderedIds),
+          subTaskIds: unique(moveItemInList(taskId, newPar.subTaskIds, newOrderedIds)),
         },
       },
       newState,

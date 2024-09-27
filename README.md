@@ -2,9 +2,8 @@
   <img align="center" alt="Banner" src="screens/banner-bw.png" />
 </a>
 
-
 <p align="center">
-<strong>An advanced todo list app with timeboxing & time tracking capabilities that supports importing tasks from your calendar, jira, github and others</strong>
+<strong>An advanced todo list app with timeboxing & time tracking capabilities that supports importing tasks from your calendar, Jira, GitHub and others</strong>
 <p>
   
 <p align="center">:globe_with_meridians: <a href="https://app.super-productivity.com">Open Web App</a> or :computer: <a href="https://github.com/johannesjo/super-productivity/releases">Download</a></p>
@@ -20,7 +19,6 @@
 <br>
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 
 <p align="center" style="text-align: center;">
 <a href="https://lbesson.mit-license.org">
@@ -96,8 +94,6 @@
 
 <br>
 
-
-
 ## :heavy_check_mark: Features
 
 - **Keep organized and focused!** Plan and categorize your tasks using sub-tasks, projects and tags and color code them as needed.
@@ -115,7 +111,6 @@
 And much more!
 
 <a href="https://youtu.be/_mvMXWLsL-8"><img alt="Work View with global links" src="screens/screen_standard.png" width="100%"></a>
-
 
 ## :question: How to use it
 

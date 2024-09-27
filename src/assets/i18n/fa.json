@@ -867,12 +867,12 @@
         "TITLE": "جدول زمانی"
       },
       "END": "پایان کار",
-      "MENU_TITLE": "جدول زمانی",
       "NOW": "اکنون",
       "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
       "START": "شروع کار",
       "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده",
       "LUNCH_BREAK": "استراحت ناهار",
+      "MENU_TITLE": "جدول زمانی",
       "S": {
         "CAL_PROVIDER_ERROR": "خط زمان خطای ارائه دهنده Cal: {{errTxt}}"
       }
@@ -1189,7 +1189,6 @@
     "CREATE_TAG": "ایجاد برچسب",
     "DELETE_TAG": "برچسب را حذف کنید",
     "GO_TO_TASK_LIST": "به لیست کارها برو",
-    "MANAGE_PROJECTS": "مدیریت پروژه ها",
     "METRICS": "معیارها",
     "NOTES": "یادداشت ها",
     "PROCRASTINATE": "به تعویق انداختن",
@@ -1197,7 +1196,6 @@
     "PROJECT_MENU": "منوی پروژه",
     "PROJECT_SETTINGS": "تنظیمات پروژه",
     "QUICK_HISTORY": "تاریخچه سریع",
-    "SCHEDULED": "برنامه ریزی شده",
     "SETTINGS": "تنظیمات",
     "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
     "TAGS": "برچسب ها",
@@ -1207,7 +1205,9 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "همگام سازی را به صورت دستی فعال کنید",
-    "WORKLOG": "گزارش کار"
+    "WORKLOG": "گزارش کار",
+    "MANAGE_PROJECTS": "مدیریت پروژه ها",
+    "SCHEDULED": "برنامه ریزی شده"
   },
   "PDS": {
     "BACK": "صبر کنید من چیزی را فراموش کردم!",
@@ -1245,35 +1245,6 @@
   },
   "PM": {
     "TITLE": "معیارهای پروژه"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CLICK_TO_HIDE": "برای مخفی کردن پروژه از منو کلیک کنید",
-    "CLICK_TO_SHOW": "برای نمایش پروژه در منو کلیک کنید",
-    "DELETE_PROJECT": "Delete Project",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Delete"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
-    },
-    "EDIT_PROJECT": "ویرایش پروژه",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration پیکربندی شده است",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   },
   "PS": {
     "GLOBAL_SETTINGS": "تنظیمات عمومی",
@@ -1334,5 +1305,34 @@
     "TIME_ESTIMATED": "تخمین زمان:",
     "WITHOUT_BREAK": "بدون استراحت:",
     "WORKING_TODAY": "کار امروز:"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archived Projects",
+    "ARCHIVE_PROJECT": "Archive Project",
+    "CLICK_TO_HIDE": "برای مخفی کردن پروژه از منو کلیک کنید",
+    "CLICK_TO_SHOW": "برای نمایش پروژه در منو کلیک کنید",
+    "DELETE_PROJECT": "Delete Project",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
+      "OK": "Archive"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
+      "OK": "Delete"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Are you sure you want to unarchive this project?",
+      "OK": "Unarchive"
+    },
+    "EDIT_PROJECT": "ویرایش پروژه",
+    "EXPORT_PROJECT": "Export Project",
+    "GITHUB_CONFIGURED": "GitHub Integration Configured",
+    "GITLAB_CONFIGURED": "GitLab Integration Configured",
+    "IMPORT_FROM_FILE": "Import from file",
+    "JIRA_CONFIGURED": "Jira Integration Configured",
+    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration پیکربندی شده است",
+    "S_INVALID_JSON": "Invalid json for project file",
+    "TITLE": "Project Overview",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   }
 }

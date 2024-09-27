@@ -25,7 +25,7 @@ export class SplitComponent implements AfterViewInit {
   @Input() splitTopEl?: ElementRef;
   @Input() splitBottomEl?: ElementRef;
   @Input() containerEl?: HTMLElement;
-  @Input() counter?: ElementRef;
+  @Input() counter?: number;
   @Input() isAnimateBtn?: boolean;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 

@@ -1290,6 +1290,7 @@
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
+    "TRACKING_INTERVAL_DESCRIPTION": "Track time using this interval in milliseconds. You might want to change this to reduce disk writes. See issue #2355.",
     "DO_IT": "Do it!",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
@@ -1510,6 +1511,7 @@
     },
     "TIME_TRACKING": {
       "HELP": "The time tracking reminder is a banner to show up in case you forgot to start time tracking.",
+      "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_DEFAULT_ESTIMATE": "Default time estimate for new tasks",
       "L_DEFAULT_ESTIMATE_SUB_TASKS": "Default time estimate for new sub tasks",
       "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
@@ -1688,6 +1690,7 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:",
-    "WORKING_TODAY_ARCHIVED": "Time worked today on archived tasks"
+    "WORKING_TODAY_ARCHIVED": "Time worked today on archived tasks",
+    "TODAY_REMAINING": "Today remaining:"
   }
 }

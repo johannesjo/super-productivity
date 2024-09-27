@@ -15,6 +15,7 @@ import { isSameDay } from '../../../util/is-same-day';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -166,6 +167,34 @@ export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
       : oldState,
   ),
 
+  // delete all project tasks from tags on project delete
+  on(deleteProject, (state, { project, allTaskIds }) => {
+    const taskRepeatCfgs = state.ids.map((id) => state.entities[id] as TaskRepeatCfg);
+    const allCfgIdsForProject = taskRepeatCfgs.filter(
+      (cfg) => cfg.projectId === project.id,
+    );
+    return adapter.removeMany(
+      allCfgIdsForProject.map((repeatCfg) => repeatCfg.id),
+      state,
+    );
+
+    // const cfgsIdsToRemove: string[] = allCfgIdsForProject
+    //   .filter((cfg) => !cfg.tagIds || cfg.tagIds.length === 0)
+    //   .map((cfg) => cfg.id as string);
+    // if (cfgsIdsToRemove.length > 0) {
+    //   // this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgsIdsToRemove);
+    //   return adapter.removeMany(cfgsIdsToRemove, state);
+    // }
+
+    // const cfgsToUpdate: string[] = allCfgIdsForProject
+    //   .filter((cfg) => cfg.tagIds && cfg.tagIds.length > 0)
+    //   .map((taskRepeatCfg) => taskRepeatCfg.id as string);
+    // if (cfgsToUpdate.length > 0) {
+    //   // this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, { projectId: null });
+    // }
+  }),
+
+  // INTERNAL
   on(addTaskRepeatCfgToTask, (state, { taskRepeatCfg }) =>
     adapter.addOne(taskRepeatCfg, state),
   ),

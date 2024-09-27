@@ -96,9 +96,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
 
     if (this.data.task.plannedAt) {
-      this.selectedDate = new Date(this.data.task.plannedAt);
-
-      this.selectedTime = new Date(this.selectedDate).toLocaleTimeString('en-GB', {
+      const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
+      this.selectedDate = new Date(this.data.task.plannedAt + tzOffset);
+      this.selectedTime = new Date(this.data.task.plannedAt).toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -109,16 +109,16 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         .toPromise();
       this.plannedDayForTask = plannerTaskMap[this.data.task.id];
 
-      this.selectedDate =
-        this.plannedDayForTask ||
-        (this.data.task.tagIds.includes(TODAY_TAG.id) ? new Date() : null);
+      this.selectedDate = this.plannedDayForTask
+        ? dateStrToUtcDate(this.plannedDayForTask)
+        : this.data.task.tagIds.includes(TODAY_TAG.id)
+          ? new Date()
+          : null;
     }
 
     if (this.data.targetDay) {
       this.selectedDate = dateStrToUtcDate(this.data.targetDay);
     }
-
-    console.log(this.selectedDate);
 
     this.calendar.activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();

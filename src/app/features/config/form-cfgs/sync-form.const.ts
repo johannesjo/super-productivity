@@ -138,8 +138,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     IS_ANDROID_WEB_VIEW
       ? {
           hideExpression: (m, v, field) => {
-            console.log(androidInterface?.allowedFolderPath());
-
             return (
               !IS_ANDROID_WEB_VIEW ||
               field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
@@ -199,7 +197,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
             description:
-              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName',
+              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
           },
         },
         {

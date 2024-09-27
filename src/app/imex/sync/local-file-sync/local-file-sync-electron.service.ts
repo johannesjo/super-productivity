@@ -39,6 +39,21 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
         rev: r.rev,
       };
     } catch (e) {
+      const folderPath = await this._folderPathOnce$.toPromise();
+      try {
+        const isDirExists = await this._checkDirExists(folderPath as string);
+        if (!isDirExists) {
+          alert('No valid folder selected for local file sync. Please select one.');
+          this._pickDirectory();
+          throw new Error('No valid folder selected');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('No valid folder selected for local file sync. Please select one.');
+        this._pickDirectory();
+        throw new Error('No valid folder selected');
+      }
+
       if (e?.toString?.().includes('ENOENT')) {
         return 'NO_REMOTE_DATA';
       }
@@ -52,11 +67,16 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     localRev: string | null,
     isForceOverwrite?: boolean,
   ): Promise<string | Error> {
-    await window.ea.fileSyncSave({
+    const r = await window.ea.fileSyncSave({
       localRev,
       filePath: await this._getFilePath(syncTarget),
       dataStr,
     });
+    if (r instanceof Error) {
+      throw r;
+    }
+
+    console.log('uploadFileData AAAAAAFTER', syncTarget, localRev);
     return this._getLocalRev(dataStr);
   }
 
@@ -83,6 +103,21 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     };
   }
 
+  async checkDirAndOpenPickerIfNotExists(): Promise<void> {
+    const folderPath = await this._folderPathOnce$.toPromise();
+    try {
+      const isDirExists = await this._checkDirExists(folderPath as string);
+      if (!isDirExists) {
+        alert(' Please select a local directory for file sync.');
+        this._pickDirectory();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(' Please select a local directory for file sync.');
+      this._pickDirectory();
+    }
+  }
+
   private async _getFilePath(syncTarget: SyncTarget): Promise<string> {
     const folderPath = await this._folderPathOnce$.toPromise();
     if (!folderPath) {
@@ -93,5 +128,26 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
 
   private _getLocalRev(dataStr: string): Promise<string> {
     return createSha1Hash(dataStr);
+  }
+
+  private async _checkDirExists(dirPath: string): Promise<boolean> {
+    const r = await window.ea.checkDirExists({
+      dirPath,
+    });
+    if (r instanceof Error) {
+      throw r;
+    }
+    return r;
+  }
+
+  private async _pickDirectory(): Promise<void> {
+    const dir = await window.ea.pickDirectory();
+    if (dir) {
+      this._globalConfigService.updateSection('sync', {
+        localFileSync: {
+          syncFolderPath: dir,
+        },
+      });
+    }
   }
 }

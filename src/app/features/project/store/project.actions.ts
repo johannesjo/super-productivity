@@ -76,13 +76,13 @@ export const updateProjectIssueProviderCfg = createAction(
 
 export const deleteProject = createAction(
   '[Project] Delete Project',
-  props<{ id: string }>(),
+  props<{ project: Project; allTaskIds: string[] }>(),
 );
 
-export const deleteProjects = createAction(
-  '[Project] Delete Projects',
-  props<{ ids: string[] }>(),
-);
+// export const deleteProjects = createAction(
+//   '[Project] Delete Projects',
+//   props<{ ids: string[] }>(),
+// );
 
 export const updateProjectOrder = createAction(
   '[Project] Update Project Order',

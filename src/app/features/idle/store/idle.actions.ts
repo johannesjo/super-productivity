@@ -24,6 +24,7 @@ export const setIdleTime = createAction(
 export const idleDialogResult = createAction(
   '[Idle] Dialog result',
   props<{
+    idleTime: number;
     trackItems: IdleTrackItem[];
     simpleCounterToggleBtnsWhenNoTrackItems?: SimpleCounterIdleBtn[];
   }>(),

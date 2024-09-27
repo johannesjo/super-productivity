@@ -14,7 +14,7 @@ import { T } from '../../t.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { Project } from '../../features/project/project.model';
 import { MatDialog } from '@angular/material/dialog';
-import { DRAG_DELAY_FOR_TOUCH } from '../../app.constants';
+import { DRAG_DELAY_FOR_TOUCH_LONGER } from '../../app.constants';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -55,7 +55,7 @@ export class SideNavComponent implements OnDestroy {
   @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
-  DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
+  DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
   keyboardFocusTimeout?: number;
   @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
