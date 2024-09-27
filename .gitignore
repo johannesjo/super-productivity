@@ -48,6 +48,7 @@ captures/
 .idea/libraries
 .idea/deploymentTargetSelector.xml
 .idea/deploymentTargetDropDown.xml
+.idea/caches/deviceStreaming.xml
 # Android Studio 3 in .gitignore file.
 .idea/caches
 .idea/modules.xml
