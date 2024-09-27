@@ -9,6 +9,12 @@ files:
 directories:
   output: './app-builds'
 
+mac:
+  target:
+    - target: mas
+      arch:
+        - universal
+
 mas:
   notarize: true
   appId: com.super-productivity.app
@@ -16,9 +22,6 @@ mas:
   icon: build/icon-mac.icns
   gatekeeperAssess: false
   darkModeSupport: true
-  target:
-    - mas
-
   hardenedRuntime: false
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
