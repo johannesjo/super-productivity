@@ -14,3 +14,9 @@ trim_trailing_whitespace = false
 
 [*.kt]
 indent_size = 4
+
+[*.java]
+indent_size = 4
+
+[*.gradle]
+indent_size = 4
