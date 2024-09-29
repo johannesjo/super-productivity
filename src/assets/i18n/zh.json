@@ -765,8 +765,8 @@
         "INITIAL_SYNC_ERROR": "初始同步失败",
         "SUCCESS_IMPORT": "数据已导入",
         "SUCCESS_VIA_BUTTON": "数据同步成功",
-        "UNKNOWN_ERROR": "同步时发生未知错误。请检查控制台。",
-        "UPLOAD_ERROR": "未知的上载错误（设置正确吗？）： {{err}}"
+        "UNKNOWN_ERROR": "同步时发生未知错误： {{err}}",
+        "UPLOAD_ERROR": "未知的上传错误（设置正确吗？）： {{err}}"
       }
     },
     "TAG": {
