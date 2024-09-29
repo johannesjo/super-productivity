@@ -3,7 +3,7 @@ package com.superproductivity.superproductivity.app
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import java.io.File
 
 /**
@@ -27,7 +27,7 @@ class LaunchDecider(private val context: Context) {
      * If the mode is MODE_DEFAULT, it will perform checks to decide between MODE_ONLINE and MODE_OFFLINE.
      * The result is saved in SharedPreferences for future launches.
      */
-    fun getLaunchMode(): Int {
+    private fun getLaunchMode(): Int {
         val currentMode = sharedPrefs.getInt(LAUNCH_MODE_KEY, MODE_DEFAULT)
         if (currentMode != MODE_DEFAULT) {
             // If mode is already determined, return it
@@ -82,7 +82,7 @@ class LaunchDecider(private val context: Context) {
      * Returns true if databases/SupKeyValStore file exists.
      */
     private fun hasLegacyData(): Boolean {
-        val dataDir = context.filesDir.parentFile // This should be /data/data/package_name/
+        val dataDir = context.filesDir.parentFile
         val dbFile = File(dataDir, "databases/SupKeyValStore")
         return dbFile.exists()
     }
