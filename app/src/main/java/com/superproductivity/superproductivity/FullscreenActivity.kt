@@ -35,12 +35,12 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
-    private var webViewRequestHandler = WebViewRequestHandler(this, BuildConfig.SERVICE_HOST)
+    private var webViewRequestHandler = WebViewRequestHandler(this, BuildConfig.ONLINE_SERVICE_HOST)
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
 //        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
-        "${BuildConfig.SERVICE_PROTOCOL}://${BuildConfig.SERVICE_HOST}"
+        "${BuildConfig.ONLINE_SERVICE_PROTOCOL}://${BuildConfig.ONLINE_SERVICE_HOST}"
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {

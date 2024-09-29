@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.preference.PreferenceManager
+import com.superproductivity.superproductivity.BuildConfig
 import java.io.File
 
 /**
@@ -25,20 +26,28 @@ class LaunchDecider(private val context: Context) {
     /**
      * Determines which launch mode to use.
      * If the mode is MODE_DEFAULT, it will perform checks to decide between MODE_ONLINE and MODE_OFFLINE.
+     * If LAUNCH_MODE is set to 1 or 2, it will force the corresponding mode.
      * The result is saved in SharedPreferences for future launches.
      */
     private fun getLaunchMode(): Int {
-        val currentMode = sharedPrefs.getInt(LAUNCH_MODE_KEY, MODE_DEFAULT)
-        if (currentMode != MODE_DEFAULT) {
-            // If mode is already determined, return it
-            return currentMode
+        val launchMode = BuildConfig.LAUNCH_MODE.toIntOrNull() ?: 0
+        return when (launchMode) {
+            1 -> MODE_ONLINE
+            2 -> MODE_OFFLINE
+            else -> {
+                val currentMode = sharedPrefs.getInt(LAUNCH_MODE_KEY, MODE_DEFAULT)
+                if (currentMode != MODE_DEFAULT) {
+                    // If mode is already determined, return it
+                    currentMode
+                } else {
+                    // Mode is MODE_DEFAULT, need to determine
+                    val newMode = determineLaunchMode()
+                    // Save the new mode for future launches
+                    sharedPrefs.edit().putInt(LAUNCH_MODE_KEY, newMode).apply()
+                    newMode
+                }
+            }
         }
-
-        // Mode is MODE_DEFAULT, need to determine
-        val newMode = determineLaunchMode()
-        // Save the new mode for future launches
-        sharedPrefs.edit().putInt(LAUNCH_MODE_KEY, newMode).apply()
-        return newMode
     }
 
     /**
