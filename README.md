@@ -328,6 +328,40 @@ Ensure you follow the setup steps properly to configure the environment for buil
 docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
 
+Now you can access the web app from your browser at `http://localhost`.
+
+This container only serves the web app, and the user data is stored in the browser. Therefore, it does not have any persistent storage.
+
+### Integrate with WebDAV backend server
+
+You can integrate the container with a WebDAV server container to provides WebDAV service with base url `http://localhost/webdav`.
+
+**Download pre-configured files**
+
+Download the pre-configured `docker-compose.yaml` and `webdav.yaml` from this repository to a local directory, say `sp/`.
+
+```bash
+# Alternatively, you can get them by cloning this repository
+git clone https://github.com/johannesjo/super-productivity.git
+mkdir -p sp
+cp super-productivity/docker-compose.yaml sp/
+cp super-productivity/webdav.yaml sp/
+cd sp
+```
+
+**Setup user accounts**
+
+Edit `webdav.yaml` to configure username and password. Remember to allocate separate directories to different user (within `/data`) to avoid mixing up user data.
+
+**Start the services**
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Additionally to accessing the web app from your browser at `http://localhost`, you can set up WebDAV synchronization with base url `http://localhost/webdav/`.
+
 ## Custom themes (desktop only)
 
 In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
