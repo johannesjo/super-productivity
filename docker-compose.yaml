@@ -1,0 +1,17 @@
+services:
+  sp:
+    image: johannesjo/super-productivity:latest
+    ports:
+      - 80:80
+    environment:
+      - WEBDAV_BACKEND=http://webdav # Optional
+
+  # Optional: WebDAV backend server
+  # (used with the WEBDAV_BACKEND environment variable)
+  webdav:
+    image: hacdias/webdav:latest
+    ports:
+      - 81:80
+    volumes:
+      - ./webdav.yaml:/config.yml:ro
+      - ./data:/data
