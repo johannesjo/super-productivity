@@ -23,6 +23,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { TimeTrackingConfig } from '../config/global-config.model';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { DateService } from 'src/app/core/date/date.service';
+import { TakeABreakService } from '../take-a-break/take-a-break.service';
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +72,7 @@ export class TrackingReminderService {
     private _matDialog: MatDialog,
     private _translateService: TranslateService,
     private _dateService: DateService,
+    private _takeABreakService: TakeABreakService,
   ) {}
 
   init(): void {
@@ -130,6 +132,7 @@ export class TrackingReminderService {
           const timeSpent = remindCounter;
 
           if (task) {
+            this._takeABreakService.otherNoBreakTIme$.next(timeSpent);
             if (typeof task === 'string') {
               const currId = this._taskService.add(task, false, {
                 timeSpent,
@@ -139,7 +142,7 @@ export class TrackingReminderService {
               });
               this._taskService.setCurrentId(currId);
             } else {
-              this._taskService.addTimeSpent(task, timeSpent);
+              this._taskService.addTimeSpent(task, timeSpent, undefined, true);
               this._taskService.setCurrentId(task.id);
             }
           }

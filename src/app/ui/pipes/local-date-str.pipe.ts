@@ -1,5 +1,6 @@
 import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 
 @Pipe({
   name: 'localDateStr',
@@ -14,7 +15,7 @@ export class LocalDateStrPipe implements PipeTransform {
     if (typeof value !== 'string') {
       return null;
     }
-    const d = new Date(value);
+    const d = dateStrToUtcDate(value);
     return `${d.toLocaleDateString(this.locale, {
       month: 'numeric',
       day: 'numeric',

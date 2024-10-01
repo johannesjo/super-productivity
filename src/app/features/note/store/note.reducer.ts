@@ -19,6 +19,7 @@ import { devError } from '../../../util/dev-error';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
@@ -70,6 +71,13 @@ const _reducer = createReducer<NoteState>(
   on(loadAllData, (state, { appDataComplete }) =>
     appDataComplete.note ? appDataComplete.note : state,
   ),
+
+  on(deleteProject, (state, { project }) => {
+    return adapter.removeMany(project.noteIds, {
+      ...state,
+      todayOrder: state.todayOrder.filter((idI) => !project.noteIds.includes(idI)),
+    });
+  }),
 
   on(updateNoteOrder, (state, { ids, activeContextType }) =>
     activeContextType !== WorkContextType.PROJECT

@@ -361,14 +361,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   async editTags(): Promise<void> {
-    const pId = this.task().parentId;
-    const taskToEdit = pId
-      ? await this._taskService.getByIdOnce$(pId).toPromise()
-      : this.task();
     this._matDialog
       .open(DialogEditTagsForTaskComponent, {
         data: {
-          task: taskToEdit,
+          task: this.task(),
         },
       })
       .afterClosed()

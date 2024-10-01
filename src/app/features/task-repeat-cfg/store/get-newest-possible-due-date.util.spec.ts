@@ -263,7 +263,7 @@ describe('getNewestPossibleDueDate()', () => {
         expectedDate: null,
       },
       {
-        description: 'should return NULL if start data is in the future',
+        description: 'should return NULL if start date is in the future',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           lastTaskCreation: FAKE_MONDAY_THE_10TH - DAY * 7,
@@ -271,6 +271,19 @@ describe('getNewestPossibleDueDate()', () => {
         }),
         startDate: new Date(FAKE_MONDAY_THE_10TH),
         today: new Date(FAKE_MONDAY_THE_10TH - 1 * DAY),
+        expectedDate: null,
+      },
+      {
+        description: 'should respect start date is in the future',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          lastTaskCreation: FAKE_MONDAY_THE_10TH - DAY * 7,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+        }),
+        startDate: new Date(FAKE_MONDAY_THE_10TH + 4 * DAY),
+        today: new Date(FAKE_MONDAY_THE_10TH + 1 * DAY),
         expectedDate: null,
       },
     ];

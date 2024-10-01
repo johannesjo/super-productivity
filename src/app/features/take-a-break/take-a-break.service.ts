@@ -30,7 +30,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
 import { Actions, ofType } from '@ngrx/effects';
-import { triggerResetBreakTimer } from '../idle/store/idle.actions';
+import { idleDialogResult, triggerResetBreakTimer } from '../idle/store/idle.actions';
 import { playSound } from '../../util/play-sound';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
@@ -52,6 +52,8 @@ const BANNER_ID: BannerId = BannerId.TakeABreak;
   providedIn: 'root',
 })
 export class TakeABreakService {
+  otherNoBreakTIme$ = new Subject<number>();
+
   private _timeWithNoCurrentTask$: Observable<number> =
     this._taskService.currentTaskId$.pipe(
       switchMap((currentId) => {
@@ -81,8 +83,23 @@ export class TakeABreakService {
     filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
   );
 
-  private _tick$: Observable<number> = this._timeTrackingService.tick$.pipe(
-    map((tick) => tick.duration),
+  private _tick$: Observable<number> = merge(
+    this._timeTrackingService.tick$.pipe(
+      map((tick) => tick.duration),
+      filter(() => !!this._taskService.currentTaskId),
+    ),
+    this._actions$.pipe(ofType(idleDialogResult)).pipe(
+      map(({ trackItems, idleTime }) => {
+        if (trackItems.find((t) => t.type === 'BREAK')) {
+          return 0;
+        }
+        return trackItems.reduce(
+          (acc, t) => acc + (typeof t.time === 'number' ? t.time : idleTime),
+          0,
+        );
+      }),
+    ),
+    this.otherNoBreakTIme$,
   );
 
   private _triggerSnooze$: Subject<number> = new Subject();
@@ -203,6 +220,8 @@ export class TakeABreakService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
     private _uiHelperService: UiHelperService,
   ) {
+    this._tick$.subscribe((v) => console.log(`_tick$`, v));
+
     this._triggerReset$
       .pipe(
         withLatestFrom(this._configService.takeABreak$),

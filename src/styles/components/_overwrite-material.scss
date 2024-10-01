@@ -143,7 +143,7 @@ mat-icon.mat-icon[svgicon] {
   box-shadow: $whiteframe-shadow-12dp;
   //cursor: grab;
   cursor: grabbing;
-  //min-width: 200px;
+  overflow: hidden;
 
   @include darkTheme(true) {
     background: $dark24 !important;
@@ -168,4 +168,9 @@ mat-icon.mat-icon[svgicon] {
 
 .mat-mdc-menu-item.quick-access {
   border: 1px solid red;
+}
+
+// MAT TOOLTIP
+mat-tooltip-component {
+  pointer-events: none;
 }

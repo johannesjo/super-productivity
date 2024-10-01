@@ -217,6 +217,23 @@ export class WorkContextService {
     shareReplay(1),
   );
 
+  todaysTasksInProject$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
+    map((tasks) =>
+      tasks
+        .filter(
+          (task) =>
+            task.tagIds.includes(TODAY_TAG.id) ||
+            task.subTasks.some((subTask) => subTask.tagIds.includes(TODAY_TAG.id)),
+        )
+        .map((task) => ({
+          ...task,
+          subTasks: task.subTasks.filter((subTask) =>
+            subTask.tagIds.includes(TODAY_TAG.id),
+          ),
+        })),
+    ),
+  );
+
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map((tasks) => tasks.filter((task) => task && !task.isDone)),
   );
@@ -268,6 +285,11 @@ export class WorkContextService {
   );
 
   estimateRemainingToday$: Observable<number> = this.todaysTasks$.pipe(
+    map(mapEstimateRemainingFromTasks),
+    distinctUntilChanged(),
+  );
+
+  todayRemainingInProject$: Observable<number> = this.todaysTasksInProject$.pipe(
     map(mapEstimateRemainingFromTasks),
     distinctUntilChanged(),
   );

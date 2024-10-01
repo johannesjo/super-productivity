@@ -23,7 +23,7 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
   task: Task = this.data.task;
   tagIds: string[] = [...this.data.task.tagIds];
   isEdit: boolean = this.data.task.tagIds && this.data.task.tagIds.length > 0;
-  tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
+  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
 
   private _subs: Subscription = new Subscription();
 

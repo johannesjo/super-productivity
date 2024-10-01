@@ -1,12 +1,12 @@
 <mat-form-field>
-  <mat-label>{{label}}</mat-label>
+  <mat-label>{{ label }}</mat-label>
   <mat-chip-grid #chipListElRef>
+    @for (modelItem of modelItems; track modelItem.id) {
     <mat-chip-row
       (removed)="remove(modelItem.id)"
-      *ngFor="let modelItem of modelItems; trackBy:trackById"
       [removable]="true"
     >
-      {{ modelItem.title}}
+      {{ modelItem.title }}
 
       <mat-icon
         [matTooltip]="T.G.REMOVE|translate"
@@ -22,10 +22,10 @@
         class="additional"
         mat-icon-button
       >
-        <mat-icon style="transform: rotate(45deg)">{{additionalActionIcon}} </mat-icon>
+        <mat-icon style="transform: rotate(45deg)">{{ additionalActionIcon }}</mat-icon>
       </button>
     </mat-chip-row>
-
+    }
     <input
       #inputElRef
       (matChipInputTokenEnd)="add($event)"
@@ -42,11 +42,8 @@
     #autoElRef="matAutocomplete"
     (optionSelected)="selected($event)"
   >
-    <mat-option
-      *ngFor="let suggestion of (filteredSuggestions | async); trackBy:trackById"
-      [value]="suggestion.id"
-    >
-      {{suggestion.title}}
-    </mat-option>
+    @for (suggestion of filteredSuggestions | async; track suggestion.id) {
+    <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
+    }
   </mat-autocomplete>
 </mat-form-field>
