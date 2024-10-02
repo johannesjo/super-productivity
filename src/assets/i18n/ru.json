@@ -1074,7 +1074,7 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Невозможно назначить проект с помощью краткого синтаксиса для повторяющихся задач!",
-        "DELETED": "Удаленное задание \"{{title}}\"",
+        "DELETED": "Удалена задача \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Существующее задание <strong>{{title}}</strong> перемещено в текущий список заданий",
         "FOUND_MOVE_FROM_OTHER_LIST": "Задача <strong>{{title}}</strong> из <strong>{{contextTitle}}</strong> добавлена в текущий список",
         "FOUND_RESTORE_FROM_ARCHIVE": "Задача <strong>{{title}}</strong> связана с задачей из архива восстановлена",
