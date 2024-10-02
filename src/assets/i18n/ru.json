@@ -1080,9 +1080,9 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Задача <strong>{{title}}</strong> связана с задачей из архива восстановлена",
         "LAST_TAG_DELETION_WARNING": "Вы пытаетесь удалить последний тег непроектной задачи. Это не разрешено!",
         "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Перенос проблемных задач в другой проект не допускается",
-        "REMINDER_ADDED": "Запланированное задание \"{{title}}\"",
+        "REMINDER_ADDED": "Запланирована задача \"{{title}}\"",
         "REMINDER_DELETED": "Удалено напоминание для задания",
-        "REMINDER_UPDATED": "Обновленное напоминание для задачи \"{{title}}\"",
+        "REMINDER_UPDATED": "Обновлено напоминание для задачи \"{{title}}\"",
         "TASK_CREATED": "Создано задание \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Выберите или создайте задачу",
