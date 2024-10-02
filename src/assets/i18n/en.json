@@ -666,7 +666,8 @@
         "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
         "TASK_PLANNED_FOR": "Task planned for {{date}}"
       },
-      "TASK_DRAWER": "Task Drawer"
+      "TASK_DRAWER": "Task Drawer",
+      "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
