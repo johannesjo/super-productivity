@@ -16,6 +16,7 @@ import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
+import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 /**
@@ -46,6 +47,9 @@ class CapacitorMainActivity : BridgeActivity() {
 
         // Initialize JavaScriptInterface
         javaScriptInterface = JavaScriptInterface(this, bridge.webView, storageHelper)
+
+        // Initialize WebView
+        WebHelper().setupView(bridge.webView)
 
         // Inject JavaScriptInterface into Capacitor's WebView
         bridge.webView.addJavascriptInterface(

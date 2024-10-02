@@ -15,6 +15,11 @@ class WebHelper {
         val wv = WebView(context)
         wv.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT)
+
+        return setupView(wv)
+    }
+
+    fun setupView(wv: WebView) : WebView {
         wv.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         wv.isFocusableInTouchMode = true
 
