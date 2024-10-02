@@ -85,7 +85,7 @@ class CapacitorMainActivity : BridgeActivity() {
         swController.setServiceWorkerClient(
             object : ServiceWorkerClient() {
                 override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
-                    return webViewRequestHandler.interceptWebRequest(request)
+                    return bridge.webViewClient.shouldInterceptRequest(bridge.webView, request)
                 }
             })
 
