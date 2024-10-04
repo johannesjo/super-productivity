@@ -14,7 +14,11 @@ server {
         return 302 /webdav/;
     }
     location /webdav/ {
-        proxy_pass $WEBDAV_BACKEND/;
+        set $upstream $WEBDAV_BACKEND;
+        # note: put the upstream host in a variable first so that nginx can
+        # starts successfully even if the upstream hsot is not found.
+
+        proxy_pass $upstream/;
         # note: the trailing slash here matters!
     }
 
