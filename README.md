@@ -334,7 +334,7 @@ cd sp
 
 **Setup user accounts**
 
-Edit `webdav.yaml` to configure username and password. Remember to allocate separate directories to different user (within `/data`) to avoid mixing up user data.
+Edit `webdav.yaml` to configure username and password. Remember to create and assign different directories to different users (within `/data`) to avoid mixing up user data.
 
 **Start the services**
 
