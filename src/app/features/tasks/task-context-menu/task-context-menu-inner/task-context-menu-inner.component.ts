@@ -63,6 +63,7 @@ import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { isToday } from '../../../../util/is-today.util';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -159,6 +160,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _store: Store,
     private readonly _focusModeService: FocusModeService,
+    private readonly _dateAdapter: DateAdapter<unknown>,
   ) {}
 
   ngAfterViewInit(): void {
@@ -495,9 +497,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         this._schedule(tomorrow);
         break;
       case 2:
-        const nextMonday = tDate;
-        nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this._schedule(nextMonday);
+        const nextFirstDayOfWeek = tDate;
+        const dayOffset =
+          (this._dateAdapter.getFirstDayOfWeek() -
+            this._dateAdapter.getDayOfWeek(nextFirstDayOfWeek) +
+            7) %
+            7 || 7;
+        nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
+        this._schedule(nextFirstDayOfWeek);
         break;
       case 3:
         const nextMonth = tDate;

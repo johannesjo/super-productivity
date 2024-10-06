@@ -37,6 +37,7 @@ import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -78,6 +79,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     private _taskService: TaskService,
     private _reminderService: ReminderService,
     private _plannerService: PlannerService,
+    private readonly _dateAdapter: DateAdapter<unknown>,
   ) {}
 
   async ngAfterViewInit(): Promise<void> {
@@ -327,9 +329,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         this.selectedDate = tomorrow;
         break;
       case 2:
-        const nextMonday = tDate;
-        nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this.selectedDate = nextMonday;
+        const nextFirstDayOfWeek = tDate;
+        const dayOffset =
+          (this._dateAdapter.getFirstDayOfWeek() -
+            this._dateAdapter.getDayOfWeek(nextFirstDayOfWeek) +
+            7) %
+            7 || 7;
+        nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
+        this.selectedDate = nextFirstDayOfWeek;
         break;
       case 3:
         const nextMonth = tDate;
