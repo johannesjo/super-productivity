@@ -49,7 +49,7 @@ class CapacitorMainActivity : BridgeActivity() {
         javaScriptInterface = JavaScriptInterface(this, bridge.webView, storageHelper)
 
         // Initialize WebView
-        WebHelper().setupView(bridge.webView)
+        WebHelper().setupView(bridge.webView, false)
 
         // Inject JavaScriptInterface into Capacitor's WebView
         bridge.webView.addJavascriptInterface(
