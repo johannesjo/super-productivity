@@ -305,6 +305,14 @@ npm start
 
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `npm run dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
 
+### Building for Android
+
+*This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57).*
+
+To build the Android version of Super Productivity, please refer to the [Android Offline Mode Documentation](./android/offline.md).
+
+Ensure you have followed the steps outlined in the offline documentation to set up and configure the Android build environment properly.
+
 ## Run as Docker Container
 
 ```bash
