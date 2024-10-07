@@ -85,6 +85,8 @@
     "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
     "dist:android": "npm run buildFrontend:stageWeb:unminified && npm run sync:android && npm run assemble:android:stage && echo 'Staging Android APK generated at android/app/build/outputs/apk/debug/'",
     "dist:android:prod": "npm run buildFrontend:prodWeb && npm run sync:android && npm run assemble:android:prod && echo 'Production Android APK generated at android/app/build/outputs/apk/release/'",
+    "install:android": "adb install -r android/app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk && echo 'Staging APK installed successfully.'",
+    "install:android:prod": "adb install -r android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk && echo 'Production APK installed successfully.'",
     "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "version": "npm run prebuild && npm run release.changelog && git add -A",
