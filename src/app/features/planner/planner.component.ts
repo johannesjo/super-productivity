@@ -6,6 +6,7 @@ import { PlannerActions } from './store/planner.actions';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { T } from '../../t.const';
+
 @Component({
   selector: 'planner',
   templateUrl: './planner.component.html',
@@ -13,7 +14,7 @@ import { T } from '../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerComponent {
-  readonly T = T
+  readonly T = T;
   isPanelOpen = false;
 
   constructor(
