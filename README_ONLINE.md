@@ -1,18 +1,18 @@
-# Online Mode Configuration
+# Online-Only Mode (Compatibility Mode) Configuration
 
-**Online Mode** allows the Super Productivity Android app to connect to the production server, a local development server, or a self-hosted server. This mode requires an internet connection and is compatible with various server setups.
+**Online-Only Mode (Compatibility Mode)** allows the Super Productivity Android app to connect to the production server, a local development server, or a self-hosted server. This mode requires an internet connection and is compatible with various server setups.
 
-**Note**: While Online Mode offers connectivity to production, local development, or self-hosted servers, it is highly recommended to use the latest **Offline Mode** for a more stable and reliable experience. Offline Mode allows you to use the app without an internet connection, ensuring uninterrupted productivity, enhanced privacy, and reduced latency.
+**Note**: While Online-Only Mode offers connectivity to production, local development, or self-hosted servers, it is highly recommended to use the latest **Connectivity-Free Mode** for a more stable and reliable experience. Connectivity-Free Mode allows you to use the app without an internet connection, ensuring uninterrupted productivity, enhanced privacy, and reduced latency.
 
-For more information, refer to the **[Offline Mode Documentation (Recommended)](./README_OFFLINE.md)**
+For more information, refer to the **[Connectivity-Free Mode Documentation (Recommended)](./README_OFFLINE.md)**.
 
-If you require online features or need to connect to specific servers, proceed with the Online Mode configuration below.
+If you require online features or need to connect to specific servers, proceed with the Online-Only Mode configuration below.
 
 ## Setting Launch Mode to Online
 
-To enable Online Mode, set the `LAUNCH_MODE` to `1` or `0` in the `app_config.properties` file.
+To enable Online-Only Mode, set the `LAUNCH_MODE` to `1` or `0` in the `app_config.properties` file.
 
-- **1**: Force online mode (compatible mode)
+- **1**: Force Online-Only Mode (Compatibility Mode)
 - **0**: Default behavior (read from SharedPreferences)
 
 **Recommendation**: Set `LAUNCH_MODE` to `0` for default behavior. The app will use the default behavior, which may attempt to read from SharedPreferences and connect to online services if available.
@@ -26,8 +26,8 @@ To enable Online Mode, set the `LAUNCH_MODE` to `1` or `0` in the `app_config.pr
     ```
 
     - **0**: Default behavior (read from SharedPreferences)
-    - **1**: Force online mode
-    - **2**: Force offline mode (for offline configuration)
+    - **1**: Force Online-Only Mode (compatible mode)
+    - **2**: Force Connectivity-Free Mode (for offline configuration)
 
 2. **Use Production URL**
 
@@ -74,18 +74,18 @@ You can edit the URL that the web view loads by modifying the `app_config.proper
 ### Relevant Settings
 
 - **`LAUNCH_MODE`**:
-  - `0`: Default behavior (read from SharedPreferences)
-  - `1`: Force online mode
-  - `2`: Force offline mode
+    - `0`: Default behavior (read from SharedPreferences)
+    - `1`: Force Online-Only Mode
+    - `2`: Force Connectivity-Free Mode
 
 - **When `LAUNCH_MODE` is `1` or `0` (with upgrade)**:
-  - **`ONLINE_SERVICE_IS_LOCAL`**:
-    - `true`: Load from local development server (`http://10.0.2.2:4200`).
-    - `false`: Load from production or self-hosted server.
-  - **`ONLINE_SERVICE_HOST`**:
-    - Defines the server's address.
-  - **`ONLINE_SERVICE_PROTOCOL`**:
-    - `http` or `https`.
+    - **`ONLINE_SERVICE_IS_LOCAL`**:
+        - `true`: Load from local development server (`http://10.0.2.2:4200`).
+        - `false`: Load from production or self-hosted server.
+    - **`ONLINE_SERVICE_HOST`**:
+        - Defines the server's address.
+    - **`ONLINE_SERVICE_PROTOCOL`**:
+        - `http` or `https`.
 
 ## Important Notes
 

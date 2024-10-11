@@ -1,12 +1,12 @@
-# Offline Mode Configuration
+# Connectivity-Free Mode Configuration
 
-**Offline Mode** allows you to use the Super Productivity Android app without an internet connection. This mode is recommended for users who prefer local usage.
+**Connectivity-Free Mode** allows you to use the Super Productivity Android app without an internet connection. This mode is recommended for users who prefer local usage.
 
-## Setting Launch Mode to Offline
+## Setting Launch Mode to Connectivity-Free
 
-To enable Offline Mode, set the `LAUNCH_MODE` to `0` (Default for new installation) or `2` in the `app_config.properties` file.
+To enable Connectivity-Free Mode, set the `LAUNCH_MODE` to `0` (Default for new installation) or `2` in the `app_config.properties` file.
 
-For users performing a **new installation**, setting `LAUNCH_MODE` to `2` ensures that the app starts in Offline Mode by default. This avoids any attempts to connect to online services, providing a seamless offline experience from the outset.
+For users performing a **new installation**, setting `LAUNCH_MODE` to `2` ensures that the app starts in Connectivity-Free Mode by default. This avoids any attempts to connect to online services, providing a seamless offline experience from the outset.
 
 **Important**: If you set `LAUNCH_MODE` to `0`, the app will use the default behavior, which may attempt to read from SharedPreferences and connect to online services if available. To maintain a purely offline experience, always set `LAUNCH_MODE` to `2` for new installations.
 
@@ -75,6 +75,6 @@ You can install the compiled Android application using either Android Studio or 
 ## Additional Notes
 
 - **Local Modifications**: The `app_config.properties` file is intended for local modifications only. **DO NOT COMMIT** this file unless you are absolutely sure of the changes.
-- **No Additional Configuration**: Offline Mode does not require further configuration beyond setting the `LAUNCH_MODE` to `0` or `2`.
+- **No Additional Configuration**: Connectivity-Free Mode does not require further configuration beyond setting the `LAUNCH_MODE` to `0` or `2`.
 
 For more information, refer to the [main README](./README.md).
