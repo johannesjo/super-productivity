@@ -20,8 +20,8 @@ android {
         minSdkVersion 24
         targetSdkVersion 34
         compileSdk 34
-        versionCode 23
-        versionName "23.0"
+        versionCode 30
+        versionName "30.10.0.11"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 hostName       : "app.super-productivity.com",
