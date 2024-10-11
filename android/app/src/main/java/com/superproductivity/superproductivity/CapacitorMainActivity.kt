@@ -15,6 +15,7 @@ import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
+import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
@@ -31,11 +32,11 @@ class CapacitorMainActivity : BridgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        printWebViewVersion(bridge.webView)
 
         // Register Plugin
         // TODO: The changes to the compatible logic are too complex, so they will not be added for now
         //  (separate branch, there will be opportunities to add it later)
-
         // DEBUG ONLY
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
