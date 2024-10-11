@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
@@ -144,6 +145,7 @@ class FullscreenActivity : AppCompatActivity() {
 //            webView.clearHistory()
             WebView.setWebContentsDebuggingEnabled(true); // necessary to enable chrome://inspect of webviews on physical remote Android devices, but not for AVD emulator, as the latter automatically enables debug build features
         }
+        printWebViewVersion(webView)
 
         webView.loadUrl(appUrl)
         supportActionBar?.hide()
