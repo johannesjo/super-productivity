@@ -12,6 +12,7 @@
 
 # IDEs and editors
 /.idea
+android/.idea
 .project
 .classpath
 .c9/
