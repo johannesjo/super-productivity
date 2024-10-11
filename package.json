@@ -106,9 +106,6 @@
     }
   ],
   "dependencies": {
-    "@capacitor/android": "^6.1.2",
-    "@capacitor/cli": "^6.1.2",
-    "@capacitor/core": "^6.1.2",
     "electron-dl": "^3.5.2",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.1.2",
@@ -139,6 +136,9 @@
     "@angular/platform-server": "^18.1.4",
     "@angular/router": "^18.1.4",
     "@angular/service-worker": "^18.1.4",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
     "@electron/notarize": "^2.5.0",
     "@fontsource/roboto": "^4.5.8",
     "@nextcloud/cdav-library": "^1.1.0",
