@@ -222,7 +222,13 @@ brew install --cask superproductivity
 
 ### Android
 
-There is a [very early(!) Android version available](https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity&hl=gsw). The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
+A new version of the Android app is now available with **Connectivity-Free Mode**, allowing you to use the app without an internet connection.
+
+This update offers more flexibility, supporting both fully offline usage and integration with services like WebDAV and Dropbox for syncing. Enjoy a smoother, more reliable experience whether you're online or offline.
+
+Stay tuned for even more exciting updates!
+
+You can find the Android app here:
 
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
   <img src='./screens/google-play-badge.png'
@@ -236,6 +242,8 @@ There is a [very early(!) Android version available](https://play.google.com/sto
        alt='F-Droid Badge'
        height="50" />
 </a>
+
+The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
 
 ## :hearts: Contributing
 
@@ -309,9 +317,10 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 
 *This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57).*
 
-To build the Android version of Super Productivity, please refer to the [Android Offline Mode Documentation](./android/offline.md).
+To build the Android version of Super Productivity, please refer to the [Android Build Documentation](./android/offline.md), which includes instructions on configuring **Connectivity-Free Mode** and **Online-Only Mode (Compatibility Mode)**.
 
-Ensure you have followed the steps outlined in the offline documentation to set up and configure the Android build environment properly.
+Ensure you follow the setup steps properly to configure the environment for building the app.
+
 
 ## Run as Docker Container
 
