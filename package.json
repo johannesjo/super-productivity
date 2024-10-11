@@ -50,6 +50,7 @@
     "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
     "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
     "build": "npm run buildAllElectron:noTests:prod",
+    "droid": "npm run buildFrontend:stageWeb:unminified && npx cap sync",
     "sync:android": "npx cap sync android",
     "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
     "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
