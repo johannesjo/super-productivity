@@ -1,0 +1,10 @@
+New Connectivity-Free Mode is Here!
+
+You can now use the core features of the app without an internet connection, offering a smoother and more reliable experience. We've made several key updates to enhance usability:
+
+· Connectivity-Free Mode Support: Enjoy uninterrupted access to the app's main features without needing a network connection. You can still sync with WebDAV, Dropbox, or choose to work entirely offline without any network access.
+· Seamless Transition: Existing users will continue using the app in Online-Only Mode (Compatibility Mode) with no disruptions, while new users can immediately benefit from the Connectivity-Free Mode. Future updates will include a smooth migration plan for everyone.
+· CORS Issues Resolved: Fixed cross-origin resource sharing (CORS) problems, especially for WebDAV sync, ensuring secure and smooth synchronization with local or hosted resources.
+· Enhanced Security: Strengthened data protection to keep your information secure, even when offline.
+
+Update now to enjoy these exciting new features and improvements!

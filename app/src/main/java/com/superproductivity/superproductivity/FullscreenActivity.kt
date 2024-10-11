@@ -1,9 +1,9 @@
 package com.superproductivity.superproductivity
 
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,12 +20,11 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.anggrayudi.storage.SimpleStorageHelper
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.ByteArrayInputStream
+import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.webview.JavaScriptInterface
+import com.superproductivity.superproductivity.webview.WebHelper
+import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 
 /**
@@ -36,17 +35,27 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
     private lateinit var webView: WebView
     private lateinit var wvContainer: FrameLayout
-    var isInForeground: Boolean = false
+    private var webViewRequestHandler = WebViewRequestHandler(this, BuildConfig.ONLINE_SERVICE_HOST)
     val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
     val appUrl =
 //        if (BuildConfig.DEBUG) "https://test-app.super-productivity.com" else "https://app.super-productivity.com"
-        "${BuildConfig.SERVICE_PROTOCOL}://${BuildConfig.SERVICE_HOST}"
+        "${BuildConfig.ONLINE_SERVICE_PROTOCOL}://${BuildConfig.ONLINE_SERVICE_HOST}"
 
     @Suppress("ReplaceCallWithBinaryOperator")
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.v("TW", "FullScreenActivity: onCreate")
         super.onCreate(savedInstanceState)
+
+        // Determines which launch mode to use. (Online-old or Offline-new)
+        val launchDecider = LaunchDecider(this)
+        if (launchDecider.shouldSwitchToNewActivity()) {
+            // Switch to CapacitorMainActivity
+            val intent = intent.setComponent(ComponentName(this, CapacitorMainActivity::class.java))
+            startActivity(intent)
+            finish()
+            return
+        }
 
         initWebView()
 
@@ -106,14 +115,12 @@ class FullscreenActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        isInForeground = false
         Log.v("TW", "FullScreenActivity: onPause")
         callJSInterfaceFunctionIfExists("next", "onPause$")
     }
 
     override fun onResume() {
         super.onResume()
-        isInForeground = true
         Log.v("TW", "FullScreenActivity: onResume")
         callJSInterfaceFunctionIfExists("next", "onResume$")
     }
@@ -140,7 +147,7 @@ class FullscreenActivity : AppCompatActivity() {
 
         webView.loadUrl(appUrl)
         supportActionBar?.hide()
-        javaScriptInterface = JavaScriptInterface(this)
+        javaScriptInterface = JavaScriptInterface(this, webView, storageHelper)
         webView.addJavascriptInterface(javaScriptInterface, WINDOW_INTERFACE_PROPERTY)
         if (BuildConfig.FLAVOR.equals("fdroid")) {
             webView.addJavascriptInterface(javaScriptInterface, WINDOW_PROPERTY_F_DROID)
@@ -152,34 +159,21 @@ class FullscreenActivity : AppCompatActivity() {
         swController.setServiceWorkerClient(@RequiresApi(Build.VERSION_CODES.N)
         object : ServiceWorkerClient() {
             override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
-                return interceptRequest(request)
+                return webViewRequestHandler.interceptWebRequest(request)
             }
         })
 
         webView.webViewClient = object : WebViewClient() {
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                Log.v("TW", url)
-                return if (url.startsWith("http://") || url.startsWith("https://")) {
-                    if (url.contains("super-productivity.com") || url.contains("localhost") || url.contains(
-                            BuildConfig.SERVICE_HOST
-                        )
-                    ) {
-                        false
-                    } else {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                        true
-                    }
-                } else {
-                    false
-                }
+                return webViewRequestHandler.handleUrlLoading(view, url)
             }
 
             override fun shouldInterceptRequest(
                 view: WebView?,
                 request: WebResourceRequest?
             ): WebResourceResponse? {
-                return interceptRequest(request)
+                return webViewRequestHandler.interceptWebRequest(request)
             }
         }
 
@@ -230,11 +224,7 @@ class FullscreenActivity : AppCompatActivity() {
     private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String, fnParam: String = "") {
         val fnFullName = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath.$fnName"
         val fullObjectPath = "window.$WINDOW_INTERFACE_PROPERTY.$objectPath"
-        callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
-    }
-
-    fun callJavaScriptFunction(script: String) {
-        webView.post { webView.evaluateJavascript(script) { } }
+        javaScriptInterface.callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
 
     @Deprecated("Deprecated in Java")
@@ -248,7 +238,10 @@ class FullscreenActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        wvContainer.removeView(webView)
+        // Ensure wvContainer is initialized before removing the view
+        if (::wvContainer.isInitialized) {
+            wvContainer.removeView(webView)
+        }
         super.onDestroy()
     }
 
@@ -267,135 +260,5 @@ class FullscreenActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Mandatory for Activity, but not for Fragment & ComponentActivity
         //storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-
-    private fun interceptRequest(request: WebResourceRequest?): WebResourceResponse? {
-        if (request == null || request.isForMainFrame) {
-            return null
-        }
-
-        if (request.url?.path?.contains("assets/icons/favicon") == true) {
-            try {
-                return WebResourceResponse("image/png", null, null)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        if (request.url.toString().contains(BuildConfig.SERVICE_HOST)) {
-            return null
-        }
-
-        Log.v(
-            "TW",
-            "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
-        )
-
-        // since we currently don't have a way to also post the body, we only handle GET, HEAD and OPTIONS requests
-        // see https://github.com/KonstantinSchubert/request_data_webviewclient for a possible solution
-        if (request.method.uppercase() != "GET" && request.method.uppercase() != "OPTIONS" && request.method.uppercase() !="HEAD") {
-            return null
-        }
-
-        // remove user agent header in the hopes that we're treated better by the remotes :D
-        val keysToRemove =
-            request.requestHeaders.keys.filter { it.equals("User-Agent", ignoreCase = true) }
-        for (key in keysToRemove) {
-            request.requestHeaders.remove(key)
-        }
-
-        val client = OkHttpClient()
-        val newRequestBuilder = Request.Builder()
-            .url(request.url.toString())
-            .method(request.method, null)
-
-        // Add each header from the original request to the new request
-        for ((key, value) in request.requestHeaders) {
-            newRequestBuilder.addHeader(key, value)
-        }
-        val newRequest = newRequestBuilder.build()
-
-        // currently we can't handle POST requests since everything
-        if (request.method.uppercase() == "OPTIONS") {
-            Log.v("TW", "OPTIONS request triggered")
-            client.newCall(newRequest).execute().use { response ->
-                Log.v(
-                    "TW",
-                    "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}"
-                )
-                if (response.code != 200) {
-                    Log.v("TW", "OPTIONS overwrite")
-                    return OptionsAllowResponse.build()
-                }
-            }
-        }
-
-
-        // Handle HEAD requests
-        if (request.method.uppercase() == "HEAD") {
-            Log.v("TW", "HEAD request triggered")
-            client.newCall(newRequest).execute().use { response ->
-                Log.v("TW", "HEAD response ${response.code} ${response.message}")
-                val responseHeaders = response.headers.names()
-                    .associateWith { response.headers(it)?.joinToString() }
-                    .toMutableMap()
-
-                val keysToRemoveI = responseHeaders.keys.filter {
-                    it.equals("Access-Control-Allow-Origin", ignoreCase = true)
-                }
-                for (key in keysToRemoveI) {
-                    responseHeaders.remove(key)
-                }
-                responseHeaders["Access-Control-Allow-Origin"] = "*"
-
-                val contentType = response.header("Content-Type", "text/plain")
-                val contentEncoding = response.header("Content-Encoding", "utf-8")
-                val reasonPhrase = response.message.ifEmpty { "OK" }
-                return WebResourceResponse(
-                    contentType,
-                    contentEncoding,
-                    response.code,
-                    reasonPhrase,
-                    responseHeaders,
-                    null
-                )
-            }
-        }
-
-
-        Log.v("TW", "exec request ${request.url}")
-        client.newCall(newRequest).execute().use { response ->
-            Log.v("TW", "response ${response.code} ${response.message}")
-            val responseHeaders = response.headers.names()
-                .associateWith { response.headers(it)?.joinToString() }
-                .toMutableMap()
-
-            val keysToRemoveI =
-                responseHeaders.keys.filter {
-                    it.equals(
-                        "Access-Control-Allow-Origin",
-                        ignoreCase = true
-                    )
-                }
-            for (key in keysToRemoveI) {
-                responseHeaders.remove(key)
-            }
-            responseHeaders["Access-Control-Allow-Origin"] = "*"
-
-            val contentType = response.header("Content-Type", "text/plain")
-            val contentEncoding = response.header("Content-Encoding", "utf-8")
-            val inputStream = ByteArrayInputStream(response.body?.bytes())
-            val reasonPhrase =
-                response.message.ifEmpty { "OK" } // provide a default value if the message is null or empty
-            return WebResourceResponse(
-                contentType,
-                contentEncoding,
-                response.code,
-                reasonPhrase,
-                responseHeaders,
-                inputStream
-            )
-        }
     }
 }

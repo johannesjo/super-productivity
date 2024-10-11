@@ -1,4 +1,4 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.app
 
 data class SpTask(
     val id: String,

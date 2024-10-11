@@ -1,6 +1,7 @@
-package com.superproductivity.superproductivity
+package com.superproductivity.superproductivity.webview
 
 import android.Manifest
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,11 +14,17 @@ import android.os.Build
 import android.util.Base64
 import android.util.Log
 import android.webkit.JavascriptInterface
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.*
+import com.superproductivity.superproductivity.App
+import com.superproductivity.superproductivity.app.AppLifecycleObserver
+import com.superproductivity.superproductivity.FullscreenActivity
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
+import com.superproductivity.superproductivity.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedOutputStream
@@ -37,7 +44,9 @@ import java.util.Locale
 import javax.net.ssl.SSLHandshakeException
 
 class JavaScriptInterface(
-    private val activity: FullscreenActivity,
+    private val activity: Activity,
+    private val webView: WebView,
+    private val storageHelper: SimpleStorageHelper
 ) {
 
     /**
@@ -47,7 +56,7 @@ class JavaScriptInterface(
         // Additional callback for scoped storage permission management on Android 10+
         // Mandatory for Activity, but not for Fragment & ComponentActivity
         Log.d("SuperProductivity", "onActivityResult")
-        activity.storageHelper.storage.onActivityResult(requestCode, resultCode, data)
+        storageHelper.storage.onActivityResult(requestCode, resultCode, data)
     }
 
     @Suppress("unused")
@@ -133,7 +142,7 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun showNotificationIfAppIsNotOpen(title: String, body: String) {
-        if (!activity.isInForeground) {
+        if (!AppLifecycleObserver.getInstance().isInForeground) {
             showNotification(title, body)
         }
     }
@@ -512,7 +521,7 @@ class JavaScriptInterface(
         // Note that SimpleStorage takes care of all the gritty technical details, including whether the user must pick a root path BEFORE selecting the folder they want to store in, everything is explained to the user
         Log.d("SuperProductivity", "Before SimpleStorageHelper callback func def")
         // Register a callback with SimpleStorage when a folder is picked
-        activity.storageHelper.onFolderSelected =
+        storageHelper.onFolderSelected =
             { requestCode, root -> // could also use simpleStorageHelper.onStorageAccessGranted()
                 Log.d("SuperProductivity", "Success Folder Pick! Now saving...")
                 // Get absolute path to folder
@@ -528,7 +537,7 @@ class JavaScriptInterface(
         // Open folder picker via SimpleStorage, this will request the necessary scoped storage permission
         // Note that even though we get permissions, we need to only write DocumentFile files, not MediaStore files, because the latter are not meant to be reopened in the future so we can lose permission at anytime once they are written once, see: https://github.com/anggrayudi/SimpleStorage/issues/103
         Log.d("SuperProductivity", "Get Storage Access permission")
-        activity.storageHelper.openFolderPicker(
+        storageHelper.openFolderPicker(
             // We could also use simpleStorageHelper.requestStorageAccess()
             initialPath = FileFullPath(
                 activity,
@@ -541,9 +550,9 @@ class JavaScriptInterface(
         )
     }
 
-    protected fun callJavaScriptFunction(script: String) {
-        activity.callJavaScriptFunction(script)
-    }
+  fun callJavaScriptFunction(script: String) {
+    webView.post { webView.evaluateJavascript(script) { } }
+  }
 
     companion object {
         // TODO rename to WINDOW_PROPERTY
