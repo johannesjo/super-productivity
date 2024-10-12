@@ -10,17 +10,6 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
-  "browserslist": {
-    "development": [
-      "defaults and fully supports es6-module"
-    ],
-    "production": [
-      "defaults and fully supports es6-module"
-    ],
-    "modern": [
-      "defaults and fully supports es6-module"
-    ]
-  },
   "keywords": [
     "ToDo",
     "Task Management",
