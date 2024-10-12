@@ -19,7 +19,7 @@ type DueChanges = {
   plannedAt?: number;
 };
 
-const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/;
+const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+)/;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
 const CH_PRO = '+';
