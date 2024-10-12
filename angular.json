@@ -36,7 +36,7 @@
               "src/manifest.json",
               "src/static"
             ],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss", "node_modules/@ctrl/ngx-emoji-mart/picker.css"],
             "scripts": [],
             "webWorkerTsConfig": "src/tsconfig.worker.json",
             "browser": "src/main.ts",
@@ -205,7 +205,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "preserveSymlinks": true,
             "karmaConfig": "src/karma.conf.js",
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss", "node_modules/@ctrl/ngx-emoji-mart/picker.css"],
             "scripts": [],
             "assets": ["src/favicon.ico", "src/assets", "src/manifest.json"]
           }

@@ -1,7 +1,16 @@
 <!-- TODO make this work -->
 <!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
 
-<mat-icon>{{ formControl.value }}</mat-icon>
+<ngx-emoji
+  *ngIf="isEmoji(); else icon_preview"
+  [emoji]="{id: formControl.value.split(':')[1]}"
+  [skin]="chosenSkin"
+  set="apple"
+  size="16"
+></ngx-emoji>
+<ng-template #icon_preview>
+  <mat-icon>{{ formControl.value }}</mat-icon>
+</ng-template>
 
 <input
   [ngModel]="formControl.value"
@@ -10,6 +19,12 @@
   [matAutocomplete]="auto"
   matInput
   type="text"
+/>
+<emoji-skins
+  *ngIf="isEmoji()"
+  [skin]="chosenSkin"
+  [i18n]="i18n"
+  (changeSkin)="changeSkin($event)"
 />
 <!--<span matPrefix>+1 &nbsp;</span>-->
 
@@ -24,5 +39,19 @@
   >
     <mat-icon>{{icon}}</mat-icon>
     <span>{{icon}}</span>
+  </mat-option>
+  <mat-option
+    *ngFor="let emojiId of (filteredEmojis); trackBy: trackByIndex"
+    [value]="emojiId"
+  >
+    <mat-icon>
+      <ngx-emoji
+        [emoji]="{id: emojiId.split(':')[1]}"
+        [skin]="chosenSkin"
+        set="apple"
+        size="20"
+      ></ngx-emoji>
+    </mat-icon>
+    <span>{{emojiId}}</span>
   </mat-option>
 </mat-autocomplete>

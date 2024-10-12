@@ -10,6 +10,7 @@ import { TagListComponent } from './tag-list/tag-list.component';
 import { DialogEditTagsForTaskComponent } from './dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { TagComponent } from './tag/tag.component';
 import { IssueModule } from '../issue/issue.module';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { IssueModule } from '../issue/issue.module';
     StoreModule.forFeature(TAG_FEATURE_NAME, tagReducer),
     EffectsModule.forFeature([TagEffects]),
     IssueModule,
+    EmojiComponent,
   ],
   declarations: [
     TagListComponent,

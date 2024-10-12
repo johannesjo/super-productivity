@@ -1,8 +1,18 @@
-<mat-icon
-  [style.background]="color()"
+<ngx-emoji
+  *ngIf="tag().icon?.startsWith('emoji:'); else icon_preview"
   class="tag-ico"
-  >{{tag().icon}}</mat-icon
->
+  [emoji]="{id: tag().icon.split(':')[1]}"
+  [skin]="tag().icon.split(':')[2]"
+  set="apple"
+  size="15"
+></ngx-emoji>
+<ng-template #icon_preview>
+  <mat-icon
+    [style.background]="color()"
+    class="tag-ico"
+    >{{tag().icon}}</mat-icon
+  >
+</ng-template>
 <span
   class="tag-title"
   *ngIf="!isHideTitle()"

@@ -125,6 +125,8 @@ mat-icon.mat-icon[svgicon] {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  display: flex;
+  align-items: center;
 }
 
 // CDK DRAG

@@ -17,6 +17,8 @@ import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'side-nav-item',
@@ -28,6 +30,8 @@ import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
     WorkContextMenuComponent,
     ContextMenuComponent,
     CdkDragPlaceholder,
+    EmojiComponent,
+    CommonModule,
   ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',

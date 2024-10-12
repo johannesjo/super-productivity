@@ -15,7 +15,17 @@
   mat-menu-item
 >
   <span class="badge">{{ workContext().taskIds.length }}</span>
-  <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
+  <ngx-emoji
+    *ngIf="workContext().icon?.startsWith('emoji:'); else icon_preview"
+    class="drag-handle side-nav-project-emoji"
+    [emoji]="{id: workContext().icon.split(':')[1]}"
+    [skin]="workContext().icon.split(':')[2]"
+    set="apple"
+    size="22"
+  ></ngx-emoji>
+  <ng-template #icon_preview>
+    <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
+  </ng-template>
   <span class="text">{{ workContext().title }}</span>
 </button>
 
