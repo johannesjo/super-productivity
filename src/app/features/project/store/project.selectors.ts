@@ -19,7 +19,6 @@ import { OpenProjectCfg } from '../../issue/providers/open-project/open-project.
 import { GiteaCfg } from '../../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../../issue/providers/redmine/redmine.model';
 
-// TODO rename to selectProjectFeatureState
 export const selectProjectFeatureState =
   createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();

@@ -30,6 +30,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 **Why do I want it?**
 `,
   },
+  shortSyntax: {
+    isEnableProject: true,
+    isEnableDue: true,
+    isEnableTag: true,
+  },
   evaluation: {
     isHideEvaluationSheet: false,
   },

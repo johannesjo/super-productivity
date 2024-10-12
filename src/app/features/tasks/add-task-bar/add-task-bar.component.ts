@@ -47,6 +47,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { ShortSyntaxConfig } from '../../config/global-config.model';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -126,6 +129,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           tags,
           projects,
           defaultColor: activeWorkContext.theme.primary,
+          shortSyntaxConfig: this._shortSyntaxConfig,
         }),
       ),
       startWith([]),
@@ -165,6 +169,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _saveTmpTodoTimeout?: number;
   private _lastAddedTaskId?: string;
   private _subs: Subscription = new Subscription();
+  private _shortSyntaxConfig: ShortSyntaxConfig = DEFAULT_GLOBAL_CONFIG.shortSyntax;
 
   constructor(
     private _taskService: TaskService,
@@ -175,6 +180,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _tagService: TagService,
     private _cd: ChangeDetectorRef,
     private _store: Store,
+    private _globalConfigService: GlobalConfigService,
   ) {
     this._subs.add(
       this.activatedIssueTask$.subscribe((v) => (this.activatedIssueTask = v)),
@@ -182,6 +188,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._subs.add(this.shortSyntaxTags$.subscribe((v) => (this.shortSyntaxTags = v)));
     this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
     this._subs.add(this.tagSuggestions$.subscribe((v) => (this.tagSuggestions = v)));
+    this._subs.add(
+      this._globalConfigService.shortSyntax$.subscribe(
+        (shortSyntaxConfig) => (this._shortSyntaxConfig = shortSyntaxConfig),
+      ),
+    );
   }
 
   ngAfterViewInit(): void {

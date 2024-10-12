@@ -4,8 +4,22 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
+import { ShortSyntaxConfig } from '../config/global-config.model';
 
-const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/;
+type ProjectChanges = {
+  title?: string;
+  projectId?: string;
+};
+type TagChanges = {
+  taskChanges?: Partial<TaskCopy>;
+  newTagTitlesToCreate?: string[];
+};
+type DueChanges = {
+  title?: string;
+  plannedAt?: number;
+};
+
+const SHORT_SYNTAX_TIME_REG_EX = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+)/;
 // NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
 
 const CH_PRO = '+';
@@ -25,6 +39,7 @@ const SHORT_SYNTAX_DUE_REG_EX = new RegExp(`\\${CH_DUE}[^${ALL_SPECIAL}]+`, 'gi'
 
 export const shortSyntax = (
   task: Task | Partial<Task>,
+  config: ShortSyntaxConfig,
   allTags?: Tag[],
   allProjects?: Project[],
   now = new Date(),
@@ -44,40 +59,51 @@ export const shortSyntax = (
   }
 
   // TODO clean up this mess
-  let taskChanges: Partial<TaskCopy>;
+  let taskChanges: Partial<TaskCopy> = {};
+  let changesForProject: ProjectChanges = {};
+  let changesForTag: TagChanges = {};
 
-  // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
-  taskChanges = parseTimeSpentChanges(task);
-  const changesForScheduledDate = parseScheduledDate(task, now);
-  taskChanges = {
-    ...taskChanges,
-    ...changesForScheduledDate,
-  };
-  const changesForProject = parseProjectChanges(
-    { ...task, title: taskChanges.title || task.title },
-    allProjects?.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
-  );
-  if (changesForProject.projectId) {
+  if (config.isEnableDue) {
+    // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
+    taskChanges = parseTimeSpentChanges(task);
     taskChanges = {
       ...taskChanges,
-      title: changesForProject.title,
+      ...parseScheduledDate(task, now),
     };
   }
 
-  const changesForTag = parseTagChanges(
-    { ...task, title: taskChanges.title || task.title },
-    allTags,
-  );
-  taskChanges = {
-    ...taskChanges,
-    ...changesForTag.taskChanges,
-  };
-  taskChanges = {
-    ...taskChanges,
-    // NOTE: because we pass the new taskChanges here we need to assignments...
-    ...parseTimeSpentChanges(taskChanges),
-    // title: taskChanges.title?.trim(),
-  };
+  if (config.isEnableProject) {
+    changesForProject = parseProjectChanges(
+      { ...task, title: taskChanges.title || task.title },
+      allProjects?.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
+    );
+    if (changesForProject.projectId) {
+      taskChanges = {
+        ...taskChanges,
+        title: changesForProject.title,
+      };
+    }
+  }
+
+  if (config.isEnableTag) {
+    changesForTag = parseTagChanges(
+      { ...task, title: taskChanges.title || task.title },
+      allTags,
+    );
+    taskChanges = {
+      ...taskChanges,
+      ...(changesForTag.taskChanges || {}),
+    };
+  }
+
+  if (config.isEnableDue) {
+    taskChanges = {
+      ...taskChanges,
+      // NOTE: because we pass the new taskChanges here we need to assignments...
+      ...parseTimeSpentChanges(taskChanges),
+      // title: taskChanges.title?.trim(),
+    };
+  }
 
   // const changesForDue = parseDueChanges({...task, title: taskChanges.title || task.title});
   // if (changesForDue.remindAt) {
@@ -93,7 +119,7 @@ export const shortSyntax = (
 
   return {
     taskChanges,
-    newTagTitles: changesForTag.newTagTitlesToCreate,
+    newTagTitles: changesForTag.newTagTitlesToCreate || [],
     remindAt: null,
     projectId: changesForProject.projectId,
     // remindAt: changesForDue.remindAt
@@ -103,18 +129,14 @@ export const shortSyntax = (
 const parseProjectChanges = (
   task: Partial<TaskCopy>,
   allProjects?: Project[],
-): {
-  title?: string;
-  projectId?: string;
-} => {
-  // don't allow for issue tasks
-  if (task.issueId) {
-    return {};
-  }
-  if (!Array.isArray(allProjects) || !allProjects || allProjects.length === 0) {
-    return {};
-  }
-  if (!task.title) {
+): ProjectChanges => {
+  if (
+    task.issueId || // don't allow for issue tasks
+    !task.title ||
+    !Array.isArray(allProjects) ||
+    !allProjects ||
+    allProjects.length === 0
+  ) {
     return {};
   }
 
@@ -167,10 +189,7 @@ const parseProjectChanges = (
   return {};
 };
 
-const parseTagChanges = (
-  task: Partial<TaskCopy>,
-  allTags?: Tag[],
-): { taskChanges: Partial<TaskCopy>; newTagTitlesToCreate: string[] } => {
+const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges => {
   const taskChanges: Partial<TaskCopy> = {};
 
   const newTagTitlesToCreate: string[] = [];
@@ -240,7 +259,7 @@ const parseTagChanges = (
   };
 };
 
-const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): Partial<Task> => {
+const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
   if (!task.title) {
     return {};
   }

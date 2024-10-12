@@ -141,12 +141,14 @@ There is another older – the app looks and feels much better now ;) – [artic
 
 ### Short-Syntax
 
-Can be used when adding a task.
+Can be used when adding a task. <strong>(Each of these can be disabled in settings->short syntax)</strong>
 
 - `# <tag-name>`: add a tag to the task  
   (`"task-description #tag1"`)
 - `<number>m` or `<number>h`: set time-estimate for the task  
   (`"task-description 10m"` or `"task-description 5h"`)
+- `@<time>`: add due time to the task
+  (`"task-description @fri 10pm"`)
 - `+ <project-name>`: add the task to an existing project  
   (`"task-description +Important Project"`)
 - `Ctr + 2`: toggle between moving the new task to the bottom and top of the list
@@ -315,12 +317,11 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 
 ### Building for Android
 
-*This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57).*
+_This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57)._
 
 To build the Android version of Super Productivity, please refer to the [Android Build Documentation](./android/offline.md), which includes instructions on configuring **Connectivity-Free Mode** and **Online-Only Mode (Compatibility Mode)**.
 
 Ensure you follow the setup steps properly to configure the environment for building the app.
-
 
 ## Run as Docker Container
 

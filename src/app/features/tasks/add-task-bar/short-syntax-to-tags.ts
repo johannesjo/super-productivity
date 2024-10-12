@@ -4,6 +4,7 @@ import { DEFAULT_TODAY_TAG_COLOR } from '../../work-context/work-context.const';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { ShortSyntaxConfig } from '../../config/global-config.model';
 
 export interface ShortSyntaxTag {
   title: string;
@@ -18,11 +19,13 @@ export const shortSyntaxToTags = ({
   tags,
   projects,
   defaultColor,
+  shortSyntaxConfig,
 }: {
   val: string;
   tags: Tag[];
   projects: Project[];
   defaultColor: string;
+  shortSyntaxConfig: ShortSyntaxConfig;
 }): ShortSyntaxTag[] => {
   const r = shortSyntax(
     {
@@ -30,6 +33,7 @@ export const shortSyntaxToTags = ({
       tagIds: [],
       projectId: undefined,
     },
+    shortSyntaxConfig,
     tags,
     projects,
   );
