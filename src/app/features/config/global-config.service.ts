@@ -10,6 +10,7 @@ import {
   IdleConfig,
   MiscConfig,
   ScheduleConfig,
+  ShortSyntaxConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
@@ -19,6 +20,7 @@ import {
   selectEvaluationConfig,
   selectIdleConfig,
   selectMiscConfig,
+  selectShortSyntaxConfig,
   selectSoundConfig,
   selectSyncConfig,
   selectTakeABreakConfig,
@@ -36,6 +38,10 @@ export class GlobalConfigService {
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
     shareReplay(1),
+  );
+
+  shortSyntax$: Observable<ShortSyntaxConfig> = this._store.pipe(
+    select(selectShortSyntaxConfig),
   );
 
   sound$: Observable<SoundConfig> = this._store.pipe(

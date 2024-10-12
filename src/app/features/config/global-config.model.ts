@@ -24,6 +24,12 @@ export type MiscConfig = Readonly<{
   isDisableAnimations: boolean;
 }>;
 
+export type ShortSyntaxConfig = Readonly<{
+  isEnableProject: boolean;
+  isEnableDue: boolean;
+  isEnableTag: boolean;
+}>;
+
 export type TimeTrackingConfig = Readonly<{
   trackingInterval: number;
   defaultEstimate: number;
@@ -170,6 +176,7 @@ export type FocusModeConfig = Readonly<{
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
   misc: MiscConfig;
+  shortSyntax: ShortSyntaxConfig;
   evaluation: EvaluationConfig;
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;

@@ -11,6 +11,7 @@ import {
   PomodoroConfig,
   ReminderConfig,
   ScheduleConfig,
+  ShortSyntaxConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
@@ -28,6 +29,10 @@ export const selectConfigFeatureState =
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,
+);
+export const selectShortSyntaxConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): ShortSyntaxConfig => cfg.shortSyntax,
 );
 export const selectSoundConfig = createSelector(
   selectConfigFeatureState,
