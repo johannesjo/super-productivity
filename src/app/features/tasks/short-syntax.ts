@@ -59,13 +59,13 @@ export const shortSyntax = (
   }
 
   // TODO clean up this mess
-  let taskChanges: Partial<TaskCopy>;
+  let taskChanges: Partial<TaskCopy> = {};
   let changesForProject: ProjectChanges = {};
   let changesForTag: TagChanges = {};
 
-  // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
-  taskChanges = parseTimeSpentChanges(task);
   if (config.isEnableDue) {
+    // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
+    taskChanges = parseTimeSpentChanges(task);
     taskChanges = {
       ...taskChanges,
       ...parseScheduledDate(task, now),
