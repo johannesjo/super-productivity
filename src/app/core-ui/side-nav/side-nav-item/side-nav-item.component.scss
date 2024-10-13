@@ -36,6 +36,15 @@
   &.isHidden {
     display: none !important;
   }
+
+  button.mat-mdc-menu-item {
+    ngx-emoji {
+      display: block;
+      width: 40px;
+      height: 40px;
+      top: 5px;
+    }
+  }
 }
 
 // color bar left styles
