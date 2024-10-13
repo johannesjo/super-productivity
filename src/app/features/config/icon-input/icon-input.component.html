@@ -34,13 +34,6 @@
   [autoActiveFirstOption]="false"
 >
   <mat-option
-    *ngFor="let icon of (filteredIcons); trackBy: trackByIndex"
-    [value]="icon"
-  >
-    <mat-icon>{{icon}}</mat-icon>
-    <span>{{icon}}</span>
-  </mat-option>
-  <mat-option
     *ngFor="let emojiId of (filteredEmojis); trackBy: trackByIndex"
     [value]="emojiId"
   >
@@ -53,5 +46,12 @@
       ></ngx-emoji>
     </mat-icon>
     <span>{{emojiId}}</span>
+  </mat-option>
+  <mat-option
+    *ngFor="let icon of (filteredIcons); trackBy: trackByIndex"
+    [value]="icon"
+  >
+    <mat-icon>{{icon}}</mat-icon>
+    <span>{{icon}}</span>
   </mat-option>
 </mat-autocomplete>
