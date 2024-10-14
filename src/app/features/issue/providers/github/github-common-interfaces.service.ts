@@ -7,11 +7,16 @@ import { GithubApiService } from './github-api.service';
 import { ProjectService } from '../../../project/project.service';
 import { SearchResultItem } from '../../issue.model';
 import { GithubCfg } from './github.model';
-import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
+import {
+  GithubIssue,
+  GithubIssueReduced,
+  GithubLabel,
+} from './github-issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from './github.const';
+import { TagService } from '../../../tag/tag.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +25,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _githubApiService: GithubApiService,
     private readonly _projectService: ProjectService,
+    private _tagService: TagService,
   ) {}
 
   pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
@@ -156,6 +162,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       // NOTE: we use Date.now() instead to because updated does not account for comments
       issueLastUpdated: new Date(issue.updated_at).getTime(),
       isDone: this._isIssueDone(issue),
+      tagIds: this._getGithubLabelsAsTags(issue.labels),
     };
   }
 
@@ -173,5 +180,13 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   private _isIssueDone(issue: GithubIssueReduced): boolean {
     return issue.state === 'closed';
+  }
+
+  private _getGithubLabelsAsTags(labels: GithubLabel[]): string[] {
+    const getTagIds: string[] = [];
+    labels.forEach((label: GithubLabel) => {
+      getTagIds.push(this._tagService.addTag({ title: label.name, color: label.color }));
+    }, this);
+    return getTagIds;
   }
 }
