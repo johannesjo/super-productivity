@@ -1104,6 +1104,7 @@
         "QUICK_SETTING": "Yapılandırmayı Tekrarla",
         "REMIND_AT": "Şu saatte hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
+        "REPEAT_EVERY": "Yinelenme sıklığı",
         "SATURDAY": "Cumartesi",
         "START_DATE": "Başlangıç ​​tarihi",
         "START_TIME": "Planlanan başlangıç zamanı",
@@ -1238,6 +1239,7 @@
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
   },
   "G": {
+    "ADD": "Ekle",
     "CANCEL": "İptal",
     "CLOSE": "Kapat",
     "DELETE": "Sil",
@@ -1248,6 +1250,7 @@
     "ENABLED": "Etkin",
     "EXAMPLE_VAL": "Düzenlemek için tıkla",
     "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+    "HIDE": "Gizle",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
@@ -1259,6 +1262,7 @@
     "REMOVE": "Kaldır",
     "RESET": "Sıfırla",
     "SAVE": "Kaydet",
+    "SUBMIT": "Gönder",
     "TITLE": "Başlık",
     "TODAY_TAG_TITLE": "Bugün",
     "UNDO": "Geri Al",
@@ -1319,6 +1323,7 @@
       "MOVE_TO_BACKLOG": "Görevi biriktirme listesine taşı",
       "MOVE_TO_TODAYS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
       "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
+      "SAVE_NOTE": "Notu kaydet",
       "SELECT_NEXT_TASK": "Sonraki görevi seç",
       "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
       "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
@@ -1381,6 +1386,9 @@
       "LONGER_BREAK_DURATION": "Uzun molaların süresi",
       "TITLE": "Pomodoro Zamanlayıcı"
     },
+    "REMINDER": {
+      "TITLE": "Hatırlatıcılar"
+    },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
       "DONE_SOUND": "Görev tamamlandı sesi",
@@ -1410,6 +1418,7 @@
       "L_WORK_START": "İş Günü Başlangıcı",
       "TITLE": "Zaman çizelgesi",
       "WORK_START_END_DESCRIPTION": "örn. 17:00",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "örn. 13:00",
       "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
       "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
       "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
@@ -1449,12 +1458,17 @@
     "ADD_NEW_TASK": "Yeni Görev ekle",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
+    "DELETE_PROJECT": "Projeyi Sil",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
+    "HM": {
+      "CONTRIBUTE": "Katkıda bulun"
+    },
     "HELP": "Yardım",
     "METRICS": "İstatistikler",
     "NOTES": "Notlar",
     "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",
+    "PLANNER": "Planlayıcı",
     "PROCRASTINATE": "Ertelemek",
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",
