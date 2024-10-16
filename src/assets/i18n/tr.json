@@ -119,6 +119,14 @@
         "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucudan silinmiş görünüyor."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "ADD_AS_TASK": "Görev olarak ekle"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Takvim Sağlayıcı Hatası: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
@@ -259,6 +267,8 @@
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
+        "LAST_COMMENT": "Son yorum",
+        "LOAD_ALL_COMMENTS": "{{nr}} yorumun tümünü yükle",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
@@ -629,6 +639,9 @@
         "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "Hiçbir görev yok"
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Çalışmaya geri dön!",
       "BREAK_IS_DONE": "Molan bitti!",
@@ -702,6 +715,9 @@
         "SETUP_GITEA_PROJECT": "Gitea Entegrasyonunu Kur",
         "SETUP_REDMINE_PROJECT": "Redmine Entegrasyonunu Kur"
       },
+      "D_DELETE": {
+        "MSG": "\"{{title}\" projesini silmek istediğinizden emin misiniz?"
+      },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Proje İş Biriktirme Listesini Etkinleştir",
         "L_IS_HIDDEN_FROM_MENU": "Menüden projeyi gizle",
@@ -743,7 +759,11 @@
       "WEEK_TITLE": " {{nr}}. Hafta ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+      "S_REMINDER_ERR": "Hatırlatma arayüzü hatası",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Şimdi başla",
+        "HIDE": "Gizle"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Arşivlenmiş görevleri aramak için liste simgesine tıklayın",
@@ -883,7 +903,8 @@
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
         "SUB_TASKS": "Alt Görevler ({{nr}})",
-        "TIME": "Zaman"
+        "TIME": "Zaman",
+        "TITLE_PLACEHOLDER": "Bir başlık girin"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Mevcut \"{{taskTitle}}\" görevini ekle",
@@ -911,6 +932,7 @@
         "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
         "EDIT_SCHEDULED": "Hatırlatıcıyı düzenle",
         "EDIT_TAGS": "Etiketleri düzenle",
+        "EDIT_TASK_TITLE": "Başlığı düzenle",
         "MARK_DONE": "Tamamlandı olarak işaretle",
         "MARK_UNDONE": "Tamamlanmadı olarak işaretle",
         "MOVE_TO_BACKLOG": "Görev biriktirme listesine taşı",
@@ -930,6 +952,13 @@
         "TRACK_TIME": "İzlemeye başla",
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "OK": "Etiket oluştur"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "{{tagsTxt}} etiketlerini oluşturmak istiyor musunuz?",
+        "OK": "Etiketleri oluştur"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi biriktirme günlüğüne kaydet",
@@ -960,6 +989,7 @@
         "FOR_OTHER": "Görevin zamanı geldi. Üzerinde çalışmaya başlamak ister misin?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
+        "RESCHEDULE_EDIT": "Düzenle (Yeniden planla)",
         "RESCHEDULE_UNTIL_TOMORROW": "Yarın için yeniden planla",
         "SNOOZE": "Ertele",
         "SNOOZE_ALL": "Tümünü ertele",
