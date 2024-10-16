@@ -141,6 +141,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
   tagSuggestions: Tag[] = [];
 
+  projectSuggestions$: Observable<Project[]> = this._projectService.list$;
+  projectSuggestions: Project[] = [];
+
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
 
@@ -188,6 +191,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._subs.add(this.shortSyntaxTags$.subscribe((v) => (this.shortSyntaxTags = v)));
     this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
     this._subs.add(this.tagSuggestions$.subscribe((v) => (this.tagSuggestions = v)));
+    this._subs.add(
+      this.projectSuggestions$.subscribe((v) => (this.projectSuggestions = v)),
+    );
     this._subs.add(
       this._globalConfigService.shortSyntax$.subscribe(
         (shortSyntaxConfig) => (this._shortSyntaxConfig = shortSyntaxConfig),
