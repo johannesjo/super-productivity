@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.util.Base64
 import android.util.Log
@@ -18,6 +19,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.*
 import com.superproductivity.superproductivity.App
@@ -343,7 +345,8 @@ class JavaScriptInterface(
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Scoped storage permission management for Android 10+
             // Load file
-            val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
+            // val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
+            val file = DocumentFile.fromSingleUri(activity, Uri.parse(fullFilePath))
             // Get last modified date
             val lastModif = file?.lastModified().toString()
             Log.d("SuperProductivity", "getFileRev lastModified: $lastModif")
@@ -377,12 +380,17 @@ class JavaScriptInterface(
         val reader =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // Scoped storage permission management for Android 10+
-                val file = DocumentFileCompat.fromFullPath(
+                val folder = DocumentFile.fromTreeUri(
                     activity,
-                    fullFilePath,
-                    requiresWriteAccess = false
+                    Uri.parse(fullFilePath),
                 )
-                file?.openInputStream(activity)?.reader()
+                val file: DocumentFile? = folder?.findFile(filePath)
+                if (file != null) {
+                    activity.contentResolver.openInputStream(file.uri)?.reader()
+                }
+                else {
+                    null
+                }
             } else {
                 // Older versions of Android <= 9 don't need scoped storage management
                 try {
@@ -426,15 +434,30 @@ class JavaScriptInterface(
             Log.d("SuperProductivity", "writeFile: trying to save to fullFilePath: " + fullFilePath)
             // Scoped storage permission management for Android 10+, but also works for Android < 10
             // Open file with write access, using SimpleStorage helper wrapper DocumentFileCompat
-            var file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=true, considerRawFile=true)
-            if ((file == null) || (!file.exists())) {  // if file does not exist, we create it
-                Log.d("SuperProductivity", "writeFile: file does not exist, try to create it")
-                val folder = DocumentFileCompat.fromFullPath(activity, folderPath, requiresWriteAccess=true)
-                Log.d("SuperProductivity", "writeFile: do we have access to parentFolder? " + folder.toString())
-                file = folder!!.makeFile(activity, filePath, mode=CreateMode.REPLACE) // do NOT specify a mimeType, otherwise Android will force a file extension
+            val folder = DocumentFile.fromTreeUri(activity, Uri.parse(folderPath))
+            var file = folder?.findFile(filePath)
+
+            if (file != null && file.exists()) {
+                // File exists, attempt to delete it
+                val deleted = file.delete()
+
+                if (!deleted) {
+                    Log.e("SuperProductivity", "Failed to delete the existing file: $filePath")
+                    return
+                } else {
+                    Log.d("SuperProductivity", "File deleted: $filePath")
+                }
             }
-            Log.d("SuperProductivity", "writeFile: erase file content by recreating it")
-            file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
+
+            // File doesn't exist or was deleted successfully, so create it
+            file = folder?.createFile("text/plain", filePath)
+
+            if (file != null) {
+                Log.d("SuperProductivity", "File created successfully: ${file.uri}")
+            } else {
+                Log.e("SuperProductivity", "Failed to create the file: $filePath")
+            }
+            // file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
             // Open a writer to an OutputStream to the file without append mode (so we write from the start of the file)
             Log.d("SuperProductivity", "writeFile: try to openOutputStream")
             val writer: Writer =file?.openOutputStream(activity, append=false)!!.writer()
@@ -536,7 +559,9 @@ class JavaScriptInterface(
             { requestCode, root -> // could also use simpleStorageHelper.onStorageAccessGranted()
                 Log.d("SuperProductivity", "Success Folder Pick! Now saving...")
                 // Get absolute path to folder
-                val fpath = root.getAbsolutePath(activity)
+                val fpath = root.uri.toString()
+                Log.d("SuperProductivity", "THEA: FileSyncFolder: " + fpath)
+                Log.d("SuperProductivity", "THEA: root: " + root)
                 // Open preferences to save folder to path
                 val sp = activity.getPreferences(Context.MODE_PRIVATE)
                 sp.edit().putString("filesyncFolder", fpath).apply()
