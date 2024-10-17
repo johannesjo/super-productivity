@@ -279,8 +279,6 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
 
       if (!start.isCertain('hour')) {
         plannedAt = start.date().setHours(9, 0, 0, 0);
-      } else if (start.date().getTime() < now.getTime()) {
-        plannedAt = start.date().setDate(start.date().getDate() + 1);
       }
       const inputDate = parsedDateResult.text;
       return {
