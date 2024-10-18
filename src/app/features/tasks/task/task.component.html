@@ -192,7 +192,9 @@
       <div class="controls">
         <task-hover-controls
           *ngIf="isFirstLineHover && !IS_TOUCH_PRIMARY"
+          [isTodayTag]="isTodayTag()"
           [isShowAddToToday]="isShowAddToToday()"
+          [isShowRemoveFromToday]="isShowRemoveFromToday()"
           [task]="task()"
           [isCurrent]="isCurrent()"
           [isSelected]="isSelected()"
