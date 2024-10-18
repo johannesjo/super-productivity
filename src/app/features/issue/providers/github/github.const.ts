@@ -15,6 +15,7 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isAutoAddToBacklog: false,
   filterUsername: null,
   filterIssuesAssignedToMe: false,
+  isImportLabelsAsTags: false,
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -95,6 +96,14 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
     hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
+    },
+  },
+  {
+    key: 'isImportLabelsAsTags',
+    type: 'checkbox',
+    hideExpression: (model: any) => !model.isEnabled,
+    templateOptions: {
+      label: T.F.GITHUB.FORM.IS_IMPORT_LABELS_AS_TAGS,
     },
   },
 ];
