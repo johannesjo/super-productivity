@@ -19,10 +19,14 @@
 
 <div
   #listEl
-  [@taskList]="isBlockAni ? 'BLOCK' : filteredTasks()?.length"
+  cdkDropList
+  #dropList="cdkDropList"
+  [cdkDropListConnectedTo]="dropListService.dropLists|async"
+  [cdkDropListEnterPredicate]="enterPredicate"
+  [cdkDropListData]="dropModelDataForList()"
+  (cdkDropListDropped)="drop(filteredTasks(), $event)"
+  [@taskList]="(dropListService.isBlockAniAfterDrop$|async) ? 'BLOCK' : filteredTasks()?.length"
   [attr.data-id]="listModelId()"
-  [dragulaModel]="filteredTasks()"
-  [dragula]="listId()"
   class="task-list-inner"
 >
   <task
@@ -30,6 +34,8 @@
     [isInSubTaskList]="isSubTaskList()"
     [isBacklog]="isBacklog()"
     [task]="task"
+    cdkDrag
+    [cdkDragData]="task"
   >
   </task>
 </div>

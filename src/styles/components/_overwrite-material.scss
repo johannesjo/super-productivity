@@ -141,9 +141,13 @@ mat-icon.mat-icon[svgicon] {
 .cdk-drag-preview {
   background: #fff !important;
   box-shadow: $whiteframe-shadow-12dp;
-  //cursor: grab;
-  cursor: grabbing;
+  cursor: grabbing !important;
   overflow: hidden;
+
+  &:hover,
+  &:active {
+    cursor: grabbing !important;
+  }
 
   @include darkTheme(true) {
     background: $dark24 !important;
@@ -160,6 +164,17 @@ mat-icon.mat-icon[svgicon] {
   cursor: grabbing;
 }
 
+.cdk-drop-list-disabled {
+  border: 4px solid red;
+}
+
+.cdk-drop-list-receiving {
+  outline: 1px dashed $c-primary;
+  border-radius: 6px;
+  cursor: grabbing;
+  //border: 2px solid green;
+}
+
 // MAT MENU
 .mat-mdc-menu-content {
   padding-top: 0 !important;
@@ -168,6 +183,16 @@ mat-icon.mat-icon[svgicon] {
 
 .mat-mdc-menu-item.quick-access {
   border: 1px solid red;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.1;
+}
+
+task.cdk-drag-preview .box {
+  @include darkTheme(true) {
+    background: $dark24 !important;
+  }
 }
 
 // MAT TOOLTIP
