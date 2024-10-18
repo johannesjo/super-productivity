@@ -23,7 +23,7 @@
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
       [matAutocompleteConnectedTo]="origin"
-      [mentionConfig]="{mentions: [{items:tagSuggestions, labelKey: 'title', triggerChar: '#'}, {items: projectSuggestions, labelKey: 'title', triggerChar: '+'}]}"
+      [mentionConfig]="mentionConfig$|async"
       spellcheck="false"
       [placeholder]="(doubleEnterCount > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)

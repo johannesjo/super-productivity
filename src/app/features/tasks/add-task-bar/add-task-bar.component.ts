@@ -24,7 +24,16 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import { BehaviorSubject, forkJoin, from, Observable, of, Subscription, zip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  from,
+  Observable,
+  of,
+  Subscription,
+  zip,
+} from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
@@ -50,6 +59,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
 
 @Component({
   selector: 'add-task-bar',
@@ -139,10 +149,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
   tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
-  tagSuggestions: Tag[] = [];
 
   projectSuggestions$: Observable<Project[]> = this._projectService.list$;
-  projectSuggestions: Project[] = [];
 
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
@@ -164,6 +172,25 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   //     );
   //   }),
   // );
+
+  mentionConfig$: Observable<MentionConfig> = combineLatest([
+    this._globalConfigService.shortSyntax$,
+    this.tagSuggestions$,
+    this.projectSuggestions$,
+  ]).pipe(
+    map(([cfg, tagSuggestions, projectSuggestions]) => {
+      const mentions: Mentions[] = [];
+      if (cfg.isEnableTag) {
+        mentions.push({ items: tagSuggestions, labelKey: 'title', triggerChar: '#' });
+      }
+      if (cfg.isEnableProject) {
+        mentions.push({ items: projectSuggestions, labelKey: 'title', triggerChar: '+' });
+      }
+      return {
+        mentions,
+      };
+    }),
+  );
 
   private _isAddInProgress?: boolean;
   private _delayBlurTimeout?: number;
@@ -190,10 +217,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     );
     this._subs.add(this.shortSyntaxTags$.subscribe((v) => (this.shortSyntaxTags = v)));
     this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
-    this._subs.add(this.tagSuggestions$.subscribe((v) => (this.tagSuggestions = v)));
-    this._subs.add(
-      this.projectSuggestions$.subscribe((v) => (this.projectSuggestions = v)),
-    );
+
     this._subs.add(
       this._globalConfigService.shortSyntax$.subscribe(
         (shortSyntaxConfig) => (this._shortSyntaxConfig = shortSyntaxConfig),
