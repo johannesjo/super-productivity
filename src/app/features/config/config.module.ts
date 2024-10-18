@@ -20,6 +20,8 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatInputModule } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
+import { SkinComponent } from '@ctrl/ngx-emoji-mart';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @NgModule({
   imports: [
@@ -62,6 +64,8 @@ import { TranslateModule } from '@ngx-translate/core';
     MatSlideToggleModule,
     MatInputModule,
     TranslateModule,
+    EmojiComponent,
+    SkinComponent,
   ],
   declarations: [
     ConfigSectionComponent,
