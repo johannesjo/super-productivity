@@ -21,9 +21,8 @@ export class TaskHoverControlsComponent {
   task = input.required<TaskWithSubTasks>();
   isCurrent = input.required<boolean>();
   isSelected = input.required<boolean>();
-  isTodayTag = input.required<boolean>();
-  isShowAddToToday = input.required<boolean>();
-  isShowRemoveFromToday = input.required<boolean>();
+  isTaskPlannedForToday = input.required<boolean>();
+  isTaskNotPlannedForToday = input.required<boolean>();
   isBacklog = input<boolean>(false);
   isInSubTaskList = input<boolean>(false);
 

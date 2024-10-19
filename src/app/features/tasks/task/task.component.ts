@@ -49,11 +49,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
-import {
-  isShowRemoveFromToday,
-  isShowAddToToday,
-  isTodayTag,
-} from '../util/is-task-today';
+import { isTaskNotPlannedForToday, isTaskPlannedForToday } from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -209,15 +205,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     window.clearTimeout(this._currentPanTimeout);
   }
 
-  isTodayTag(): boolean {
-    return isTodayTag(this.task());
+  isTaskNotPlannedForToday(): boolean {
+    return isTaskNotPlannedForToday(this.task());
   }
 
-  isShowRemoveFromToday(): boolean {
-    return isShowRemoveFromToday(this.task());
-  }
-  isShowAddToToday(): boolean {
-    return isShowAddToToday(this.task(), this.workContextService.isToday);
+  isTaskPlannedForToday(): boolean {
+    return isTaskPlannedForToday(this.task(), this.workContextService.isToday);
   }
 
   scheduleTask(): void {
