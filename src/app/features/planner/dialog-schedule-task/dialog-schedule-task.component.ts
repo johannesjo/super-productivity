@@ -38,6 +38,11 @@ import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { DateAdapter } from '@angular/material/core';
+import {
+  isTaskNotPlannedForToday,
+  isTaskPlannedForToday,
+} from '../../tasks/util/is-task-today';
+import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -77,6 +82,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     private _snackService: SnackService,
     private _datePipe: DatePipe,
     private _taskService: TaskService,
+    private workContextService: WorkContextService,
     private _reminderService: ReminderService,
     private _plannerService: PlannerService,
     private readonly _dateAdapter: DateAdapter<unknown>,
@@ -173,6 +179,17 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     } else {
       this.isShowEnterMsg = false;
     }
+  }
+
+  addToMyDay(): void {
+    this._taskService.addTodayTag(this.data.task);
+  }
+
+  removeFromMyDay(): void {
+    this._taskService.updateTags(
+      this.data.task,
+      this.data.task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
+    );
   }
 
   onTimeKeyDown(ev: KeyboardEvent): void {
@@ -283,25 +300,22 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         false,
       );
       if (isTodayI) {
-        this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+        this.addToMyDay();
       } else {
-        this._taskService.updateTags(
-          task,
-          task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
-        );
+        this.removeFromMyDay();
       }
     } else if (newDay === getWorklogStr()) {
-      this._store.dispatch(
-        updateTaskTags({
-          task: this.data.task,
-          newTagIds: [...this.data.task.tagIds, TODAY_TAG.id],
-        }),
-      );
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: formattedDate },
-      });
+      if (this.isTaskPlannedForToday()) {
+        this.addToMyDay();
+
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+          translateParams: { date: formattedDate },
+        });
+      } else {
+        this.removeFromMyDay();
+      }
     } else {
       this._store.dispatch(
         PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
@@ -346,5 +360,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
 
     this.submit();
+  }
+
+  isTaskNotPlannedForToday(): boolean {
+    return isTaskNotPlannedForToday(this.task);
+  }
+
+  isTaskPlannedForToday(): boolean {
+    return isTaskPlannedForToday(this.task, this.workContextService.isToday);
   }
 }
