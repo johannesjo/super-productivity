@@ -63,8 +63,7 @@
     class="component-wrapper"
     style="margin-top: 24px"
   >
-    <!--    <h2>{{ T.SCHEDULE.SCHEDULED_TASKS|translate }}</h2>-->
-    <h2>Scheduled Tasks with Reminder</h2>
+    <h2>{{ T.SCHEDULE.SCHEDULED_TASKS_WITH_REMINDER|translate }}</h2>
 
     <p
       *ngIf="!allScheduledTasks?.length"
@@ -107,7 +106,7 @@
     class="component-wrapper"
     style="margin-top: 24px"
   >
-    <h2>Scheduled Tasks for Day</h2>
+    <h2>{{ T.SCHEDULE.NO_SCHEDULED_TITLE|translate }}</h2>
 
     <p
       *ngIf="!allScheduledTasks?.length"
