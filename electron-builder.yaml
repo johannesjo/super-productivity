@@ -1,6 +1,6 @@
 appId: superProductivity
 productName: Super Productivity
-artifactName: ${productName}-${arch}.${ext}
+artifactName: ${name}-${arch}.${ext}
 
 files:
   - electron/**/*
@@ -28,7 +28,7 @@ win:
 nsis:
   artifactName: ${productName} Setup-${arch}.${ext}
 portable:
-  artifactName: ${productName}-${arch}.${ext}
+  artifactName: ${name}-${arch}.${ext}
 appx:
   applicationId: SuperProductivity
   displayName: Super Productivity

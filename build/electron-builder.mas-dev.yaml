@@ -1,6 +1,6 @@
 appId: com.super-productivity.app
 productName: Super Productivity
-artifactName: ${productName}-${arch}.${ext}
+artifactName: ${name}-${arch}.${ext}
 files:
   - electron/**/*
   - '!electron/**/*.ts'
