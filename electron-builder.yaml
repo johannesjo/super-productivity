@@ -1,6 +1,6 @@
 appId: superProductivity
 productName: Super Productivity
-artifactName: ${appId}-${arch}.${ext}
+artifactName: ${productName}-${arch}.${ext}
 
 files:
   - electron/**/*
