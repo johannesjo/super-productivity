@@ -49,7 +49,11 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
-import { isTaskNotPlannedForToday, isTaskPlannedForToday } from '../util/is-task-today';
+import {
+  isTaskNotPlannedForToday,
+  isTaskPlannedForToday,
+  isTodayTag,
+} from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -86,6 +90,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   selectedId = toSignal(this._taskService.selectedTaskId$);
   isSelected = computed(() => this.selectedId() === this.task().id);
 
+  isTodayTag = computed(() => isTodayTag(this.task()));
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
