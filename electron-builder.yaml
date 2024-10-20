@@ -1,4 +1,7 @@
 appId: superProductivity
+productName: Super Productivity
+artifactName: ${appId}-${arch}.${ext}
+
 files:
   - electron/**/*
   - '!electron/**/*.ts'
@@ -23,9 +26,9 @@ win:
   publish:
     - github
 nsis:
-  artifactName: ${productName} Setup ${version}-${arch}.${ext}
+  artifactName: ${productName} Setup-${arch}.${ext}
 portable:
-  artifactName: ${productName}-${version}-${arch}.${ext}
+  artifactName: ${productName}-${arch}.${ext}
 appx:
   applicationId: SuperProductivity
   displayName: Super Productivity
