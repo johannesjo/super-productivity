@@ -47,7 +47,7 @@
       {{ T.G.CANCEL|translate }}
     </button>
     <button
-      *ngIf="IS_ELECTRON"
+      *ngIf="!IS_ANDROID_WEB_VIEW"
       (click)="closeApp()"
       color="primary"
       mat-stroked-button
