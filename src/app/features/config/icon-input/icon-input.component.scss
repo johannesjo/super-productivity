@@ -2,14 +2,21 @@
 
 :host {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   box-sizing: border-box;
   width: 100%;
+  justify-content: space-between;
 
-  mat-icon {
+  mat-icon,
+  ngx-emoji {
     margin-right: $s;
     font-size: 16px;
     height: 16px;
     width: 16px;
   }
+}
+
+emoji-skins {
+  position: absolute;
+  right: 0;
 }
