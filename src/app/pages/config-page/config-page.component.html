@@ -33,7 +33,7 @@
 
       <section
         *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
-        class="config-section"
+        class="config-section section-{{section.key}}"
       >
         <config-section
           (save)="saveGlobalCfg($event)"
