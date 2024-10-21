@@ -79,13 +79,13 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'checkUpdatesEvery',
             hooks: {
               onInit: (field) => {
+                console.log(field?.formControl?.value);
                 if (!field?.formControl?.value) {
                   field?.formControl?.setValue(2 * 60 * 60000);
                 }
               },
             },
             templateOptions: {
-              required: false,
               label: T.GCF.CALENDARS.CHECK_UPDATES,
               description: T.G.DURATION_DESCRIPTION,
             },
@@ -95,12 +95,14 @@ export const CALENDAR_FORM_CFG: ConfigFormSection<CalendarIntegrationConfig> = {
             key: 'showBannerBeforeThreshold',
             hooks: {
               onInit: (field) => {
-                if (!field?.formControl?.value) {
+                console.log(field?.formControl?.value);
+                if (!field?.formControl?.value && field?.formControl?.value !== null) {
                   field?.formControl?.setValue(2 * 60 * 60000);
                 }
               },
             },
             templateOptions: {
+              required: false,
               isAllowSeconds: true,
               label: T.GCF.CALENDARS.SHOW_BANNER_THRESHOLD,
               description: T.G.DURATION_DESCRIPTION,
