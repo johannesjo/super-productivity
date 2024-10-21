@@ -49,6 +49,7 @@ export const mapGithubReducedIssueFromGraphQL = ({ node }: any): GithubIssueRedu
     title: node.title,
     state: node.state,
     updated_at: node.updatedAt,
+    labels: node.labels,
   };
 };
 
