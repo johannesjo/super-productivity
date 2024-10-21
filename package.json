@@ -228,5 +228,15 @@
     "angular-mentions": {
       "@angular/common": "$@angular/common"
     }
+  },
+  "build": {
+    "mac": {
+      "productName": "SuperProductivity",
+      "description": "Efficient task and time tracking app"
+    },
+    "win": {
+      "productName": "SuperProductivity",
+      "description": "Efficient task and time tracking app"
+    }
   }
 }
