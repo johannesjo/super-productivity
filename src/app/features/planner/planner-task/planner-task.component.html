@@ -11,10 +11,7 @@
     >play_arrow
   </mat-icon>
   <div class="type-ico-wrapper">
-    <div
-      *ngIf="task.repeatCfgId"
-      matTooltip="{{ T.F.PLANNER.EDIT_REPEATED_TASK|translate: {taskName: task.title} }}"
-    >
+    <div *ngIf="task.repeatCfgId">
       <div
         class="repeat-date-badge"
         *ngIf="!isRepeatTaskCreatedToday"
