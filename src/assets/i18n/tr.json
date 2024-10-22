@@ -1381,7 +1381,7 @@
       "IS_MANUAL_CONTINUE_BREAK": "Sonraki molanın başlamasını elle onaylayın",
       "IS_PLAY_SOUND": "Oturum bittiğinde ses çal",
       "IS_PLAY_SOUND_AFTER_BREAK": "Mola bittiğinde ses çal",
-      "IS_PLAY_TICK": "Her saniye kene sesini çal",
+      "IS_PLAY_TICK": "Her saniye saat sesini çal",
       "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
       "LONGER_BREAK_DURATION": "Uzun molaların süresi",
       "TITLE": "Pomodoro Zamanlayıcı"
