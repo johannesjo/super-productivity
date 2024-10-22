@@ -82,13 +82,13 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   @Input() set isFocus(val: boolean) {
     if (!this.isShowEdit && val) {
-      this.toggleShowEdit();
+      this._toggleShowEdit();
     }
   }
 
   ngOnInit(): void {
     if (this.isLock) {
-      this.toggleShowEdit();
+      this._toggleShowEdit();
     } else {
       this.resizeParsedToFit();
     }
@@ -112,23 +112,19 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleShowEdit($event?: MouseEvent): void {
-    if (
-      !$event ||
-      // check if anchor link was clicked
-      ($event.target as HTMLElement).tagName !== 'A'
+  clickPreview($event: MouseEvent): void {
+    if (($event.target as HTMLElement).tagName === 'A') {
+    } else if (($event.target as HTMLElement).classList.contains('checkbox-wrapper')) {
+      this._handleCheckboxClick($event.target as HTMLElement);
+    } else if (
+      $event?.target &&
+      ($event.target as HTMLElement).classList.contains('checkbox')
     ) {
-      this.isShowEdit = true;
-      this.modelCopy = this.model || '';
-
-      setTimeout(() => {
-        if (!this.textareaEl) {
-          throw new Error('Textarea not visible');
-        }
-        this.textareaEl.nativeElement.value = this.modelCopy;
-        this.textareaEl.nativeElement.focus();
-        this.resizeTextareaToFit();
-      });
+      this._handleCheckboxClick(
+        ($event.target as HTMLElement).parentElement as HTMLElement,
+      );
+    } else {
+      this._toggleShowEdit();
     }
   }
 
@@ -211,6 +207,19 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this.blurred.emit(ev);
   }
 
+  private _toggleShowEdit(): void {
+    this.isShowEdit = true;
+    this.modelCopy = this.model || '';
+    setTimeout(() => {
+      if (!this.textareaEl) {
+        throw new Error('Textarea not visible');
+      }
+      this.textareaEl.nativeElement.value = this.modelCopy;
+      this.textareaEl.nativeElement.focus();
+      this.resizeTextareaToFit();
+    });
+  }
+
   private _hideOverflow(): void {
     this.isHideOverflow = true;
     if (this._hideOverFlowTimeout) {
@@ -237,5 +246,30 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  private _handleCheckboxClick(targetEl: HTMLElement): void {
+    const allCheckboxes =
+      this.previewEl?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
+
+    const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
+    if (checkIndex !== -1 && this._model) {
+      // Find all to-do items in the markdown string
+      const todoItems = this._model.match(/- \[[ x]\] .*/g);
+
+      if (todoItems && todoItems[checkIndex]) {
+        // Replace the value at checkIndex with the opposite value
+        const updatedItem = todoItems[checkIndex].includes('[ ]')
+          ? todoItems[checkIndex].replace('[ ]', '[x]').replace('[]', '[x]')
+          : todoItems[checkIndex].replace('[x]', '[ ]');
+
+        // Update the markdown string
+        this.modelCopy = this._model.replace(todoItems[checkIndex], updatedItem);
+        if (this.modelCopy !== this.model) {
+          this.model = this.modelCopy;
+          this.changed.emit(this.modelCopy);
+        }
+      }
+    }
   }
 }

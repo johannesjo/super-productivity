@@ -79,10 +79,10 @@
     }
   }
 
-  input[type='checkbox'] {
-    margin-left: -20px;
-    pointer-events: none;
-  }
+  //input[type='checkbox'] {
+  //  margin-left: -20px;
+  //  pointer-events: none;
+  //}
 
   .checkbox {
     display: inline-block;
@@ -92,11 +92,18 @@
     text-align: center;
     margin-left: -28px;
     vertical-align: middle;
-    margin-right: $s;
+    padding-right: $s;
   }
 
   .checkbox-wrapper {
+    cursor: pointer;
+    display: block;
     list-style: none;
-    margin-bottom: $s;
+    padding-bottom: $s;
+
+    &.done {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
   }
 }

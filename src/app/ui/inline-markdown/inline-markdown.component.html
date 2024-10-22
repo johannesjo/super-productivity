@@ -17,10 +17,10 @@
     rows="1"
   ></textarea>
 
+  <!--  (focus)="clickOrFocusPreview($event, true)"-->
   <div
     #previewEl
-    (click)="toggleShowEdit($event)"
-    (focus)="toggleShowEdit($event)"
+    (click)="clickPreview($event)"
     *ngIf="!(isTurnOffMarkdownParsing$|async)"
     [data]="model"
     [hidden]="isShowEdit"
