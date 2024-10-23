@@ -774,7 +774,6 @@ $this-play-size: 22px;
 .show-additional-info-btn {
   mat-icon {
     transition: transform $transition-standard;
-    backface-visibility: hidden;
   }
 }
 
