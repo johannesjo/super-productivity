@@ -114,6 +114,11 @@ mat-icon,
   vertical-align: middle;
 }
 
+.mat-icon {
+  // for some reason material puts that to transform and it is bad for performance
+  will-change: auto !important;
+}
+
 mat-icon.mat-icon[svgicon] {
   display: flex;
   justify-content: center;
