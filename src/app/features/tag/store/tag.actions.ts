@@ -9,6 +9,7 @@ export const updateTag = createAction(
   '[Tag] Update Tag',
   props<{ tag: Update<Tag>; isSkipSnack?: boolean }>(),
 );
+console.log('AAAAAAAAAAAAa');
 
 export const upsertTag = createAction('[Tag] Upsert Tag', props<{ tag: Tag }>());
 
