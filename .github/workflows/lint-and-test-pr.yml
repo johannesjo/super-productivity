@@ -48,16 +48,17 @@ jobs:
       - name: Read performance metrics to env
         # if: github.event_name == 'pull_request'
         run: |
-          echo "e2ePerfResult<<$EOF" >> "$GITHUB_ENV"
-          node tools/get-perf-metrics.js >> "$GITHUB_ENV"
-          echo "$EOF" >> "$GITHUB_ENV"
+          perfResult=$(node tools/gen-perf-metrics.js)
+          echo "e2ePerfResult<<EOF" >> $GITHUB_OUTPUT
+          echo "$perfResult" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Attach performance metrics to PR as comment
         # if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           #          header: test
           message: |
-            ${{ env.e2ePerfResult }}
+            ${{ steps.perfResult.outputs.e2ePerfResult }}
 
       - name: 'Upload E2E screenshots on failure'
         if: ${{ always() }}
