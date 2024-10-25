@@ -6,6 +6,7 @@ const TEXTAREA = 'dialog-fullscreen-markdown textarea';
 const ADD_NOTE_SUBMIT_BTN = '#T-save-note';
 const NOTES_WRAPPER = 'notes';
 const ROUTER_WRAPPER = '.route-wrapper';
+console.log('I am here!');
 
 module.exports = {
   async command(this: NightwatchBrowser, noteName: string) {
