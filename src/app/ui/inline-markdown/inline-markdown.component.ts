@@ -254,17 +254,23 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
     const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
     if (checkIndex !== -1 && this._model) {
-      // Find all to-do items in the markdown string
-      const todoItems = this._model.match(/- \[[ x]\] .*/g);
+      const allLines = this._model.split('\n');
+      const todoAllLinesIndexes = allLines
+        .map((line, index) => (line.includes('- [') ? index : null))
+        .filter((i) => i !== null);
 
-      if (todoItems && todoItems[checkIndex]) {
-        // Replace the value at checkIndex with the opposite value
-        const updatedItem = todoItems[checkIndex].includes('[ ]')
-          ? todoItems[checkIndex].replace('[ ]', '[x]').replace('[]', '[x]')
-          : todoItems[checkIndex].replace('[x]', '[ ]');
+      // Find all to-do items in the markdown string
+      // console.log(checkIndex, todoAllLinesIndexes, allLines);
+
+      const itemIndex = todoAllLinesIndexes[checkIndex];
+      if (typeof itemIndex === 'number' && itemIndex > -1) {
+        const item = allLines[itemIndex];
+        allLines[itemIndex] = item.includes('[ ]')
+          ? item.replace('[ ]', '[x]').replace('[]', '[x]')
+          : item.replace('[x]', '[ ]');
+        this.modelCopy = allLines.join('\n');
 
         // Update the markdown string
-        this.modelCopy = this._model.replace(todoItems[checkIndex], updatedItem);
         if (this.modelCopy !== this.model) {
           this.model = this.modelCopy;
           this.changed.emit(this.modelCopy);
