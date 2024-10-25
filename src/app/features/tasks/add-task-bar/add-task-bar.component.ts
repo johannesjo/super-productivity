@@ -60,7 +60,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
-
+console.log('CHANGE');
 @Component({
   selector: 'add-task-bar',
   templateUrl: './add-task-bar.component.html',
