@@ -58,6 +58,15 @@ class JavaScriptInterface(
         // Additional callback for scoped storage permission management on Android 10+
         // Mandatory for Activity, but not for Fragment & ComponentActivity
         Log.d("SuperProductivity", "onActivityResult")
+
+        if (resultCode == -1 && requestCode == -1) {
+            val takeFlags: Int = (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            data.data?.let { uri ->
+                activity.contentResolver.takePersistableUriPermission(uri, takeFlags)
+            }
+        }
+
         storageHelper.storage.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -334,7 +343,6 @@ class JavaScriptInterface(
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Scoped storage permission management for Android 10+
             // Load file
-            // val file = DocumentFileCompat.fromFullPath(activity, fullFilePath, requiresWriteAccess=false)
             val file = DocumentFile.fromSingleUri(activity, Uri.parse(fullFilePath))
             // Get last modified date
             val lastModif = file?.lastModified().toString()
@@ -418,13 +426,12 @@ class JavaScriptInterface(
             // Get folder path
             val sp = activity.getPreferences(Context.MODE_PRIVATE)
             val folderPath = sp.getString("filesyncFolder", "") ?: ""
-            // Build fullFilePath from folder path and filepath
-            val fullFilePath = "$folderPath/$filePath"
-            Log.d("SuperProductivity", "writeFile: trying to save to fullFilePath: " + fullFilePath)
+
             // Scoped storage permission management for Android 10+, but also works for Android < 10
-            // Open file with write access, using SimpleStorage helper wrapper DocumentFileCompat
+            // Open file with write access, using DocumentFile URI
             val folder = DocumentFile.fromTreeUri(activity, Uri.parse(folderPath))
             var file = folder?.findFile(filePath)
+            Log.d("SuperProductivity", "writeFile: trying to save to: " + file)
 
             if (file != null && file.exists()) {
                 // File exists, attempt to delete it
@@ -464,8 +471,8 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun allowedFolderPath(): String {
-        val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
-        Log.d("SuperProductivity", "allowedFolderPath grantedPaths: " + grantedPaths.toString())
+        val grantedUris = activity.contentResolver.persistedUriPermissions.map { it.uri }
+        Log.d("SuperProductivity", "allowedFolderPath grantedUris: " + grantedUris.toString())
         val sp = activity.getPreferences(Context.MODE_PRIVATE)
         val folderPath = sp.getString("filesyncFolder", "") ?: ""
         Log.d("SuperProductivity", "allowedFolderPath filesyncFolder: $folderPath")
@@ -473,12 +480,12 @@ class JavaScriptInterface(
         val pathGranted: Boolean =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // If scoped storage, check if stored path is in the list of granted path, if true, then return it, else return an empty string
-                if (grantedPaths.isNullOrEmpty() || folderPath.isEmpty()) {
+                if (grantedUris.isEmpty() or folderPath.isEmpty()) {
                     // list of granted paths is empty, then we have no permission
                     false
                 } else {
                     // otherwise we loop through each path in the granted paths list, and check if the currently selected folderPath is a subfolder of a granted path
-                    val vpaths: List<String> = grantedPaths.values.toList().flatten()
+                    val vpaths: List<String> = grantedUris.map { it.toString() }
                     Log.d("SuperProductivity", "allowedFolderPath flattened values: $vpaths")
                     var innerCond: Boolean = false
                     for (p in vpaths) {
@@ -507,7 +514,7 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val grantedPaths = DocumentFileCompat.getAccessibleAbsolutePaths(activity)
+        val grantedPaths = activity.contentResolver.persistedUriPermissions.map { it.uri }
         Log.d("SuperProductivity", "isGrantedFilePermission grantedPaths: " + grantedPaths.toString())
         /*
         val sp = activity.getPreferences(Context.MODE_PRIVATE)
@@ -549,8 +556,7 @@ class JavaScriptInterface(
                 Log.d("SuperProductivity", "Success Folder Pick! Now saving...")
                 // Get absolute path to folder
                 val fpath = root.uri.toString()
-                Log.d("SuperProductivity", "THEA: FileSyncFolder: " + fpath)
-                Log.d("SuperProductivity", "THEA: root: " + root)
+
                 // Open preferences to save folder to path
                 val sp = activity.getPreferences(Context.MODE_PRIVATE)
                 sp.edit().putString("filesyncFolder", fpath).apply()
