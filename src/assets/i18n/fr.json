@@ -339,7 +339,11 @@
     },
     "DOMINA_MODE": {
       "FORM": {
-        "L_TEXT": "Texte"
+        "HELP": "Répète la phrase configurée tous les X lors du suivi du temps d'une tâche.",
+        "L_INTERVAL": "Intervalle de répétition de la phrase",
+        "L_TEXT": "Texte",
+        "L_TEXT_DESCRIPTION": "Ex : « Travailler sur $ {currentTaskTitle} ! »",
+        "TITLE": "Mode Domina"
       }
     },
     "ISSUE": {
@@ -381,7 +385,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Malheureusement, certaines données de Jira sont enregistrées dans des champs personnalisés, qui sont différents pour chaque installation. Si vous souhaitez inclure ces données, vous devez sélectionner le champ personnalisé approprié.",
         "OPEN": "Statut pour les tâche en pause",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez le ticket pour charger les transistions disponibles",
-        "STORY_POINTS": "Story points"
+        "STORY_POINTS": "Story points",
+        "TRANSITION": "Gestion des transitions"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> est actuellement affecté à <strong>{{assignee}}</strong>. Voulez-vous vous l'attribuer ?",
@@ -551,6 +556,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Entrez le texte à enregistrer en tant que note ..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Afficher comme texte non parsé",
+        "VIEW_SPLIT": "Afficher les fichiers Markdown parsés et non parsés dans la vue fractionnée",
+        "VIEW_PARSED": "Afficher comme Markdown parsé (non modifiable)"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Ajouter une nouvelle note",
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note",
@@ -565,7 +575,15 @@
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Toujours ouvrir la boîte de dialogue",
-        "PROGRESS_ON_SAVE": "Progression par défaut lors de la sauvegarde"
+        "DONE": "Statut d'achèvement de la tâche",
+        "DO_NOT": "Ne pas transitionner",
+        "ENABLE": "Activer l'intégration Openproject",
+        "ENABLE_TRANSITIONS": "Activer la gestion de transition",
+        "IN_PROGRESS": "Statut pour le démarrage de la tâche",
+        "OPEN": "Statut pour la mise en pause de la tâche",
+        "PROGRESS_ON_SAVE": "Progression par défaut lors de la sauvegarde",
+        "TRANSITION": "Gestion de transition",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez un ticket pour charger les transitions disponibles"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Configurer OpenProject pour le projet"
@@ -579,6 +597,15 @@
         "SUBMIT_TIME_FOR": "Soumettre du temps à OpenProject pour",
         "TIME_SPENT": "Temps passé",
         "TITLE": "OpenProject : Soumettre le journal de travail"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Choisissez le statut à attribuer",
+        "CURRENT_ASSIGNEE": "Responsable actuel :",
+        "CURRENT_STATUS": "Statut actuel :",
+        "PERCENTAGE_DONE": "Avancement :",
+        "TASK_NAME": "Nom de la tâche",
+        "TITLE": "OpenProject : Mise à jour du statut",
+        "UPDATE_STATUS": "Mettre à jour le statut"
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
@@ -615,8 +642,34 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject : erreur inconnue {{statusCode}} {{errorMsg}}. CORS est-il correctement configuré pour le serveur ?",
-        "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}",
+        "TRANSITION": "OpenProject : définir le ticket \"{{issueKey} }\" sur \"{{name} }\"",
+        "TRANSITION_SUCCESS": "OpenProject : définir le ticket {{issueKey} } sur <strong>{{chosenTransition} }</strong>",
+        "TRANSITIONS_LOADED": "Transitions chargées. Utilisez les sélections ci-dessous pour les attribuer"
       }
+    },
+    "PLANNER": {
+      "NO_TASKS": "Pas de tâche",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Ajouter à Aujourd'hui",
+          "TITLE": "Ajouter les tâches planifiées à Aujourd'hui"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "Cela supprimera le rappel de la tâche ! Appuyez sur Échap pour annuler.",
+          "REMOVE_PLAN_DATE": "Supprimer la date de planification",
+          "TITLE": "Planifier la tâche pour la journée"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "Aucun élément programmé"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle} }\"",
+        "TASK_PLANNED_FOR": "Tâche planifiée pour {date}"
+      },
+      "TASK_DRAWER": "Tiroir des tâches",
+      "EDIT_REPEATED_TASK": "Modifier la tâche répétée '{{taskName}}'"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Au travail !",
