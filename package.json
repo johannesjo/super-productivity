@@ -174,7 +174,7 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "^5.1.3",
     "file-saver": "^2.0.2",
-    "glob": "^9.3.5",
+    "glob": "^11.0.0",
     "hammerjs": "^2.0.8",
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
