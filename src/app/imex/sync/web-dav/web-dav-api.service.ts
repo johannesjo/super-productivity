@@ -126,16 +126,18 @@ export class WebDavApiService {
     await this._isReady$.toPromise();
     const cfg = await this._cfg$.pipe(first()).toPromise();
     if (IS_ANDROID_WEB_VIEW && androidInterface.makeHttpRequest) {
-      // TODO check on real android
-      const result = (await androidInterface.makeHttpRequestWrapped(
-        new URL(folderPath, cfg.baseUrl).toString(),
-        'MKCOL',
-        '',
-        cfg.userName,
-        cfg.password,
-        false,
-      )) as AndroidHttpResponse;
-      this.checkErrorAndroid(result);
+      // // TODO check on real android
+      // const result = (await androidInterface.makeHttpRequestWrapped(
+      //   new URL(folderPath, cfg.baseUrl).toString(),
+      //   'MKCOL',
+      //   '',
+      //   cfg.userName,
+      //   cfg.password,
+      //   false,
+      // )) as AndroidHttpResponse;
+      // this.checkErrorAndroid(result);
+      console.warn('MCOL not working on Android');
+      return Promise.resolve();
     } else {
       const webDavClientCreator = await this.getWebDavClientCreator();
 
