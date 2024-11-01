@@ -221,6 +221,9 @@ export class WebDavApiService {
       syncFolderPath: string;
     },
   ): string {
-    return new URL(path, cfg.baseUrl).toString();
+    return new URL(
+      path,
+      cfg.baseUrl.endsWith('/') ? cfg.baseUrl : `${cfg.baseUrl}/`,
+    ).toString();
   }
 }
