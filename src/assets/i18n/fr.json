@@ -273,7 +273,7 @@
         "DESCRIPTION": "Description",
         "LABELS": "Étiquettes",
         "LAST_COMMENT": "Dernier commentaire",
-        "LOAD_ALL_COMMENTS": "Charger les {nr} commentaire",
+        "LOAD_ALL_COMMENTS": "Charger les {nr} commentaires",
         "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Charger la description et tous les commentaires",
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
         "STATUS": "Statut",
