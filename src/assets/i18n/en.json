@@ -272,7 +272,7 @@
         "DESCRIPTION": "Description",
         "LABELS": "Labels",
         "LAST_COMMENT": "Last comment",
-        "LOAD_ALL_COMMENTS": "Load all {{nr}} comments",
+        "LOAD_ALL_COMMENTS": "{{nr}Load all {{nr}} comments{{nr}",
         "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Load description & all comments",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
