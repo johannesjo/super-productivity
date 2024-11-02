@@ -928,7 +928,7 @@
     },
     "TAG": {
       "D_CREATE": {
-        "CREATE": "Créer un tag",
+        "CREATE": "Créer une balise",
         "EDIT": "Modifier la balise"
       },
       "D_DELETE": {
@@ -942,7 +942,7 @@
       "FORM_BASIC": {
         "L_COLOR": "Couleur (si une couleur de thème principale non définie est utilisée)",
         "L_ICON": "Icône",
-        "L_TITLE": "Nom du tag",
+        "L_TITLE": "Nom de la balise",
         "TITLE": "Paramètres de base"
       },
       "S": {
@@ -992,10 +992,8 @@
         "DELETE_REPEAT_INSTANCE": "Supprimer l'instance de Tâche Répétée",
         "DROP_ATTACHMENT": "Déposer ici pour attacher à \"{{title}}\"",
         "EDIT_SCHEDULED": "Modifier le rappel",
-        "EDIT_TAGS": "Étiquettes d'édition",
-        "EDIT_TASK_TITLE": "Éditer le titre",
-        "FOCUS_SESSION": "Commencer une Session Concentration",
-        "MARK_DONE": "marquer comme terminée",
+        "EDIT_TAGS": "Modifier les balises",
+        "MARK_DONE": "Marquer comme terminée",
         "MARK_UNDONE": "Marquer comme annulée",
         "MOVE_TO_BACKLOG": "Déplacer dans le backlog",
         "MOVE_TO_OTHER_PROJECT": "Déplacer vers un autre projet",
@@ -1055,8 +1053,8 @@
         "FOR_CURRENT": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
-        "FROM_TAG": "De la balise: \"{{title}}\"",
-        "RESCHEDULE_EDIT": "Éditer (re-planifier)",
+        "FROM_TAG": "Depuis la balise: \"{{title}}\"",
+
         "RESCHEDULE_UNTIL_TOMORROW": "Jusqu'à demain",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Répéter tout",
@@ -1148,7 +1146,7 @@
         "HELP2": "Une fois configurée, une tâche répétitive sera recréée chaque jour sélectionné ci-dessous dès que vous ouvrez votre projet et sera automatiquement marquée comme terminée à la fin de la journée. Ils seront traités comme des instances différentes. Vous pouvez donc ajouter librement des sous-tâches, etc.",
         "HELP3": "Les tâches importées de Jira ou d'issues Git ne peuvent pas être répétées. Tous les rappels seront également supprimés sur une tâche répétée.",
         "HELP4": "Une note sur le champ de commande : Se référant aux tâches répétables de l'ordre de création. Uniquement en vigueur pour les tâches répétables qui sont créées en même temps. Une valeur inférieure signifie qu'une tâche sera plus haut dans la liste, un nombre inférieur qu'elle sera plus bas. Une valeur supérieure à 0 signifie que les éléments sont créés au bas des tâches normales.",
-        "TAG_LABEL": "Tags à ajouter"
+        "TAG_LABEL": "Balises à ajouter"
       },
       "F": {
         "C_DAY": "Jour",
@@ -1271,7 +1269,7 @@
           "PARENT_TASK_TITLES_ONLY": "Titres de tâches parentes uniquement",
           "PROJECTS": "Noms de projet",
           "STARTED_WORKING": "Commencé à travailler",
-          "TAGS": "Mots clés",
+          "TAGS": "Balises",
           "TASK_SUBTASK": "Tâche / Sous-tâche",
           "TIME_AS_CLOCK": "Heure format horaire (par exemple 5:23)",
           "TIME_AS_MILLISECONDS": "Temps en millisecondes",
@@ -1427,7 +1425,7 @@
       "TASK_ADD_SUB_TASK": "Ajouter une sous-tâche",
       "TASK_ADD_ATTACHMENT": "Joindre un fichier ou un lien",
       "TASK_DELETE": "Supprimer la tâche",
-      "TASK_EDIT_TAGS": "Étiquettes d'édition",
+      "TASK_EDIT_TAGS": "Modifier les balises",
       "TASK_EDIT_TITLE": "Modifier le titre",
       "TASK_MOVE_TO_PROJECT": "Ouvrir la tâche de déplacement vers le menu du projet",
       "TASK_OPEN_CONTEXT_MENU": "Ouvrir le menu contextuel de la tâche",
@@ -1589,8 +1587,7 @@
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
     "CREATE_PROJECT": "Créer un projet",
-    "CREATE_TAG": "Créer un tag",
-    "DELETE_PROJECT": "Supprimer le Projet",
+    "CREATE_TAG": "Créer une balise",
     "DELETE_TAG": "Supprimer la balise",
     "GO_TO_TASK_LIST": "Aller à la liste des tâches",
     "HM": {
@@ -1618,7 +1615,7 @@
     "SCHEDULE": "Programmer",
     "SETTINGS": "Réglages",
     "SHOW_SEARCH_BAR": "Afficher la barre de recherche",
-    "TAGS": "Mots clés",
+    "TAGS": "Balises",
     "TASKS": "Tâches",
     "TASK_LIST": "Liste de tâches",
     "TOGGLE_SHOW_BOOKMARKS": "Afficher / masquer les favoris",
