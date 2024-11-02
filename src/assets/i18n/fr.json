@@ -708,9 +708,17 @@
         "L3": "Qu'est-ce qu'ils vous rappellent?",
         "L4": "Qu'advient-il de l'envie de procrastiner quand vous l'observez? Ça l'intensifie? La dissipe? Ça cause d'autres émotions?",
         "L5": "Comment les sensations dans votre corps changent-elles pendant que vous continuez à concentrer votre conscience sur elles?",
-        "TITLE": "Curiosité"
+        "TITLE": "Curiosité",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Notez vos déclencheurs de procrastination",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Une autre méthode très efficace consiste à noter ce qui a déclenché votre envie de procrastiner. Par exemple, j'ai souvent envie d'aller rapidement sur Reddit ou sur mon site d'actualités préféré dès que la fenêtre de mon navigateur apparaît. Depuis que j'ai commencé à noter mes déclencheurs dans un simple document texte vide, j'ai pris conscience de l'enracinement de ce pattern et cela m'a aidé à expérimenter différentes contre-mesures."
       },
       "H1": "Prenez du temps!",
+      "INTRO": {
+        "AVOIDING": "Éviter la tâche",
+        "FEAR": "Peur de l'échec",
+        "STRESSED": "Stressé de ne pas terminer le travail",
+        "TITLE": "Introduction"
+      },
       "P1": "Tout d'abord détendez-vous! Tout le monde le fait de temps en temps. Et si vous ne faites pas ce que vous devriez, vous devriez au moins en profiter! Ensuite, consultez les sections ci-dessous pour quelque chose d'utile.",
       "P2": "Rappelez-vous: la procrastination est un problème de régulation des émotions, pas un problème de gestion du temps.",
       "REFRAME": {
@@ -734,9 +742,15 @@
         "SETUP_GIT": "Configurer l'intégration de GitHub",
         "SETUP_GITLAB": "Configurer l'intégration de GitLab",
         "SETUP_JIRA": "Configurer l'intégration de Jira",
-        "SETUP_OPEN_PROJECT": "Configurer l'intégration OpenProject"
+        "SETUP_OPEN_PROJECT": "Configurer l'intégration OpenProject",
+        "SETUP_GITEA_PROJECT": "Mettre en place l'intégration Gitea",
+        "SETUP_REDMINE_PROJECT": "Mettre en place l'intégration Redmine"
+      },
+      "D_DELETE": {
+        "MSG": "Êtes-vous sûr de vouloir supprimer le projet \"{title}\" ?"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Activer la Backlog de Projet",
         "L_IS_HIDDEN_FROM_MENU": "Masquer le projet dans le menu",
         "L_TITLE": "Nom du projet",
         "TITLE": "Paramètres de base"
@@ -776,7 +790,13 @@
       "WEEK_TITLE": "Semaine {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
+      "S_REMINDER_ERR": "Erreur pour l'interface de rappel",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Commencer maintenant",
+        "HIDE": "Réduire",
+        "TXT": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres tâches sont dues)"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Cliquez sur l'icône de la liste pour rechercher les tâches archivées",
@@ -811,6 +831,10 @@
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "Vos données ont été partiellement importées. Merci de réessayer plus tard ! Autrement, vous ne serez pas en capacité de synchroniser vos données avec d'autres appareils.",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity a amélioré la synchronisation en utilisant désormais deux fichiers distincts plutôt qu'un seul, ce qui permet un transfert de données beaucoup moins important. Il est recommandé de mettre à jour toutes les instances de Super Productivity et de synchroniser d'abord les données de l'instance d'application où les données sont les plus récentes. S'il s'agit des données de votre appareil local, ignorez cet avertissement et procédez simplement au téléchargement en confirmant la boîte de dialogue suivante."
+      },
       "C": {
         "EMPTY_SYNC": "Vous essayez de synchroniser un objet de données vide. Est-ce votre toute première synchronisation d'une application (presque) vierge?",
         "FORCE_IMPORT": "Importer quand même des données distantes?",
@@ -818,7 +842,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "Une erreur s'est produite lors du téléchargement de vos données locales. Essayez de forcer la mise à jour?",
         "MIGRATE_LEGACY": "Données héritées détectées lors de l'importation, voulez-vous essayer de les migrer ?",
         "NO_REMOTE_DATA": "Aucune donnée sur le serveur distant trouvée. Télécharger local vers le serveur distant?",
-        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis le serveur distant?"
+        "TRY_LOAD_REMOTE_AGAIN": "Essayez à nouveau de recharger les données depuis le serveur distant?",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "Impossible de charger les données de la base distante. Voulez-vous essayer d'écraser les données distantes avec vos données locales ? Toutes les données distantes seront perdues dans le processus."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Veuillez ouvrir le lien suivant et copier le code d'authentification qui y est fourni dans le champ de saisie ci-dessous.",
@@ -837,6 +862,23 @@
         "USE_LOCAL": "Conserver la version local",
         "USE_REMOTE": "Utiliser le serveur distant"
       },
+      "D_INCOMPLETE_SYNC": {
+        "T1": "La dernière synchronisation est incomplète !",
+        "T2": "Vos données d'archive n'ont pas été correctement importées au cours de la dernière synchronisation :",
+        "T3": "Vous avez 2 Options :",
+        "T4": "1. Vous rendre sur votre autre appareil et y effectuer la synchronisation.",
+        "T5": "2. Sinon, vous pouvez écraser les données distantes avec vos données locales. Tous les changements distants seront perdus !",
+        "T6": "La création d'une sauvegarde des données que vous écrasez est recommandée !!!",
+        "BTN_CLOSE_APP": "Femer l'application",
+        "BTN_DOWNLOAD_BACKUP": "Télécharger une sauvegarde locale",
+        "BTN_FORCE_UPLOAD": "Forcer un envoi des données locales"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Désactiver la synchronisation",
+        "PERM_FILE": "Donner l'autorisation",
+        "TEXT": "<p>Votre autorisation de fichier pour la synchronisation locale a été révoquée.</p>",
+        "TITLE": "Synchronisation : autorisation de fichier locale refusée"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)"
@@ -845,7 +887,17 @@
           "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation",
           "L_IS_COMPRESS_DATA": "Compresser les données"
         },
+        "LOCAL_FILE": {
+          "L_SYNC_FOLDER_PATH": "Synchroniser le chemin du dossier",
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Nécessite une autorisation d'accès au fichier",
+          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "Chemin absolu vers le fichier qui doit être utilisé pour la synchronisation (sera créé)."
+        },
+        "L_ENABLE_COMPRESSION": "Activer la compression (transfert de données plus rapide)",
+        "L_ENABLE_ENCRYPTION": "Activer le chiffrement de bout en bout (expérimental) - Rend vos données inacessibles à votre fournisseur de synchronisation",
         "L_ENABLE_SYNCING": "Activer la synchronisation",
+        "L_ENCRYPTION_NOTES": "REMARQUES IMPORTANTES : Vous devrez définir le même mot de passe sur vos autres appareils <strong>AVANT</strong> la prochaine synchronisation pour permettre un bon fonctionnement. Veuillez sélectionner un mot de passe sécurisé. Veuillez également noter que <strong>vous ne pourrez PAS accéder à vos données si vous oubliez ce mot de passe. Il n'y a AUCUNE récupération possible</strong>, car vous seul possédez la clé. Le chiffrement sera probablement suffisamment bon pour contrecarrer la plupart des attaquants, mais <strong>il n'y a aucune garantie.</strong>",
+        "L_ENCRYPTION_PASSWORD": "Mot de passe de chiffrement (NE PAS OUBLIER)",
         "L_SYNC_INTERVAL": "Intervalle de synchronisation",
         "L_SYNC_PROVIDER": "Fournisseur de synchronisation",
         "TITLE": "Sync",
@@ -853,17 +905,18 @@
           "CORS_INFO": "<strong>Expérimental !!</strong> Pour que cela fonctionne, vous devez désactiver ou limiter CORS pour votre instance Nextcloud, ce qui peut avoir des implications négatives sur la sécurité! Veuillez <a href='https://github.com/nextcloud/server/issues/3131'>consulter ce fil de discussion</a> pour plus d'informations. À utiliser à vos risques et périls!",
           "L_BASE_URL": "URL de base",
           "L_PASSWORD": "Mot de passe",
+          "L_SYNC_FOLDER_PATH": "Synchroniser le chemin du dossier",
           "L_USER_NAME": "Nom d'utilisateur",
           "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Chemin absolu vers le fichier qui doit être utilisé pour la synchronisation (sera créé)."
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "Déjà synchronisé",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Pas de changement local - Déjà synchronisé",
         "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
         "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
+        "ERROR_NO_REV": "Pas de révision valide pour le fichier distant",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Erreur lors de la synchronisation. Impossible de lire les données distantes. Peut-être avez-vous activé le chiffrement et votre mot de passe local ne correspond pas à celui utilisé pour chiffrer les données distantes ?",
         "IMPORTING": "Importer des données",
         "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
         "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
@@ -905,11 +958,13 @@
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
         "NOTES": "Notes",
         "PARENT": "Parent",
+        "SCHEDULED_AT": "Planifié à",
         "REMINDER": "Rappel",
         "REPEAT": "Répéter",
         "SCHEDULE_TASK": "Planifier une tâche",
         "SUB_TASKS": "Sous-tâches ({{nr}})",
-        "TIME": "Temps"
+        "TIME": "Temps",
+        "TITLE_PLACEHOLDER": "Entrez un titre"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Ajouter la tâche existante \"{{taskTitle}}\"",
@@ -920,7 +975,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "Ajouter une tâche en haut de la liste",
         "CREATE_TASK": "Créer une nouvelle tâche",
         "EXAMPLE": "Exemple: \"Un titre de tâche + projectName # une balise # une autre balise 10m / 3h\"",
-        "START": "Appuyez sur Entrée une fois de plus pour démarrer"
+        "START": "Appuyez sur Entrée une fois de plus pour démarrer",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Activer / Désactiver l'ajout de tâche à la backlog / liste d'aujourd'hui",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Activer / Désactiver l'ajout de tâche tout en haut & bas de la liste"
       },
       "B": {
         "ADD_HALF_HOUR": "Ajouter 1/2 heure",
@@ -932,9 +989,12 @@
         "ADD_TO_PROJECT": "Ajouter à un projet",
         "CONVERT_TO_PARENT_TASK": "Convertir en tâche parent",
         "DELETE": "Supprimer la tâche",
+        "DELETE_REPEAT_INSTANCE": "Supprimer l'instance de Tâche Répétée",
         "DROP_ATTACHMENT": "Déposer ici pour attacher à \"{{title}}\"",
         "EDIT_SCHEDULED": "Modifier le rappel",
         "EDIT_TAGS": "Étiquettes d'édition",
+        "EDIT_TASK_TITLE": "Éditer le titre",
+        "FOCUS_SESSION": "Commencer une Session Concentration",
         "MARK_DONE": "marquer comme terminée",
         "MARK_UNDONE": "Marquer comme annulée",
         "MOVE_TO_BACKLOG": "Déplacer dans le backlog",
@@ -955,9 +1015,21 @@
         "TRACK_TIME_STOP": "Mettre en pause le suivi du temps",
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Voulez-vous créer la nouvelle balise {tagsTxt} ?",
+        "OK": "Créer la balise"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "Voulez-vous créer les nouvelles balises {tagsTxt} ?",
+        "OK": "Créer les balises"
+      },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
         "REMIND_AT": "Rappeler à",
+        "QA_NEXT_MONTH": "Planifier pour le mois prochain",
+        "QA_NEXT_WEEK": "Planifier pour la semaine prochaine",
+        "QA_TODAY": "Planifier pour aujourd'hui",
+        "QA_TOMORROW": "Planifier pour demain",
         "RO_10M": "10 minutes avant le début",
         "RO_15M": "15 minutes avant le début",
         "RO_1H": "1 heure avant le début",
@@ -984,6 +1056,7 @@
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "FROM_TAG": "De la balise: \"{{title}}\"",
+        "RESCHEDULE_EDIT": "Éditer (re-planifier)",
         "RESCHEDULE_UNTIL_TOMORROW": "Jusqu'à demain",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Répéter tout",
@@ -1010,11 +1083,13 @@
         "ESTIMATE_EXCEEDED_BODY": "Vous avez dépassé votre temps estimé pour \"{{title}}\"."
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossible d'attribuer le projet via une courte syntaxe pour les tâches répétables !",
         "DELETED": "Tâche supprimée \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Déplacement de la tâche existante <strong>{{title}}</strong> vers la liste des tâches du jour",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tâche <strong>{{title}}</strong> ajoutée de <strong>{{contextTitle}}</strong> à la liste actuelle",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche <strong>{{title}}</strong> restaurée en lien avec le ticket de l'archive",
         "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis!",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Le déplacement des tâches de résolution vers un autre projet n'est pas autorisé",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
@@ -1030,9 +1105,36 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "Configuration de répétition customisée",
+        "CUSTOM_AND_TIME": "Customisé, {timeStr}",
+        "CUSTOM_WEEKLY": "{daysStr}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr} }, {{timeStr} }",
+        "DAILY": "Chaque jour",
+        "DAILY_AND_TIME": "Chaque jour, {{timeStr} }",
+        "EVERY_X_DAILY": "Tous les {{x} } jours",
+        "EVERY_X_DAILY_AND_TIME": "Tous les {{x} } jours, {{timeStr} }",
+        "EVERY_X_MONTHLY": "Tous les {{x} } mois",
+        "EVERY_X_MONTHLY_AND_TIME": "Tous les {{x} } mois, {{timeStr} }",
+        "EVERY_X_YEARLY": "Tous les {{x} } ans",
+        "EVERY_X_YEARLY_AND_TIME": "Tous les {{x} } ans, {{timeStr} }",
+        "MONTHLY_CURRENT_DATE": "Le {{dateDayStr}} de chaque mois",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Le {dateDayStr} de chaque mois, {timeStr}",
+        "MONDAY_TO_FRIDAY": "Lun-Ven",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Lun-Ven, {timeStr}",
+        "WEEKLY_CURRENT_WEEKDAY": "Chaque semaine le {weekdayStr}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Chaque semaine le {weekdayStr}, {timeStr}",
+        "YEARLY_CURRENT_DATE": "Chaque année le {dayAndMonthStr}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Chaque année le {dayAndMonthStr}, {timeStr}"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "En supprimant la configuration de répétition, toutes les instances précédentes de cette tâche seront converties en tâches ordinaires. Êtes-vous sur de vouloir continuer",
         "OK": "Supprimer complètement"
+      },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "MSG": "Il y a {tasksNr} instances crées pour cette tâche répétable. Voulez-vous les mettre toutes à jour avec les nouveaux paramètres par défaut, ou juste appliquer le changement aux tâches futures ?",
+        "CANCEL": "Seulement aux tâches futures",
+        "OK": "Mettre à jour toutes les instances"
       },
       "D_EDIT": {
         "ADD": "Ajouter une configuration de tâche répétitive",
