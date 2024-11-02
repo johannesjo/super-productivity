@@ -1684,6 +1684,9 @@
   },
   "SCHEDULE": {
     "NO_SCHEDULED": "Il n'y a actuellement aucune tâche planifiée. Vous pouvez planifier une tâche en choisissant \"Planifier une tâche\" dans le menu contextuel de la tâche. Pour l'ouvrir, cliquez sur les 3 petits points à droite d'une tâche.",
+    "NO_REPEATABLE_TASKS": "Il n'y a actuellement aucune tâche répétée. Vous pouvez planifier une tâche en choisissant « Répéter la tâche » dans le panneau latéral des tâches. Pour l'ouvrir, cliquez sur l'icône la plus à droite qui apparaît lorsque vous survolez une tâche (ou appuyez simplement sur la tâche sur mobile).",
+    "REPEATED_TASKS": "Tâches répétées",
+    "SCHEDULED_TASKS": "Tâches programmées",
     "START_TASK": "Démarrer la tâche maintenant et supprimer le rappel"
   },
   "THEMES": {
@@ -1722,6 +1725,9 @@
     "COMPLETED_TASKS": "Tâches terminées",
     "ESTIMATE_REMAINING": "Tps. restant:",
     "FINISH_DAY": "Fin de journée",
+    "FINISH_DAY_TOOLTIP": "Évaluer votre journée, archiver toutes les tâches finies (optionnel) et/ou planifier la prochaine journée.",
+    "FINISH_DAY_FOR_PROJECT": "Finir la journée pour ce Projet",
+    "FINISH_DAY_FOR_TAG": "Finir la journée pour cette Balise",
     "HELP_PROCRASTINATION": "A l'aide je procrastine !",
     "NO_COMPLETED_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_PLANNED_TASKS": "Aucune tâche planifiée",
@@ -1729,7 +1735,9 @@
     "RESET_BREAK_TIMER": "Réinitialiser le timer 'sans prendre de pause'",
     "TIME_ESTIMATED": "Temps estimé :",
     "WITHOUT_BREAK": "Sans pause :",
-    "WORKING_TODAY": "Travaillé aujourd'hui :"
+    "WORKING_TODAY": "Travaillé aujourd'hui :",
+    "WORKING_TODAY_ARCHIVED": "Temps travaillé aujourd'hui sur les tâches archivées",
+    "TODAY_REMAINING": "Restant pour aujourd'hui :"
   },
   "PP": {
     "ARCHIVED_PROJECTS": "Projets archivés",
