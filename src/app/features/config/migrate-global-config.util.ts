@@ -219,6 +219,19 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
       delete (config.sync as any).googleDriveSync;
     }
 
+    if (!config.sync.localFileSync || !config.sync.dropboxSync || !config.sync.webDav) {
+      console.warn(
+        'sync config was missing some keys, reverting to default',
+        config.sync,
+      );
+      return {
+        ...config,
+        sync: {
+          ...DEFAULT_GLOBAL_CONFIG.sync,
+        },
+      };
+    }
+
     if (
       !config.sync.localFileSync.syncFolderPath &&
       config.sync.localFileSync.syncFilePath?.length
