@@ -1,3 +1,15 @@
+## [10.1.1](https://github.com/johannesjo/super-productivity/compare/v10.1.0...v10.1.1) (2024-11-06)
+
+### Bug Fixes
+
+- **sync:** rev check code [#3661](https://github.com/johannesjo/super-productivity/issues/3661) [#3660](https://github.com/johannesjo/super-productivity/issues/3660) ([b0aef07](https://github.com/johannesjo/super-productivity/commit/b0aef0732542633ddaf46eae2b337a7f16fe84cf))
+
+### Features
+
+- **android:** improve error handling in request interceptor 3657 ([e8c0b7f](https://github.com/johannesjo/super-productivity/commit/e8c0b7f1a5dfe526ec22619838aaaef7f5520339))
+- **android:** prepare auto builds ([9008c22](https://github.com/johannesjo/super-productivity/commit/9008c22fa63265d274eba09127ac32f7d24449cc))
+- changes the separators when the user is typing ([a6c813b](https://github.com/johannesjo/super-productivity/commit/a6c813b3463f55292c91cb34dabb88c4eb6fcc44))
+
 # [10.1.0](https://github.com/johannesjo/super-productivity/compare/v10.0.11...v10.1.0) (2024-11-05)
 
 ### Bug Fixes

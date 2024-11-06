@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "10.1.0",
+  "version": "10.1.1",
   "description": "ToDo list and Time Tracking",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
