@@ -988,7 +988,8 @@ export class SyncProviderService {
 
   private _isSameRev(a: string | null, b: string | null): boolean {
     if (!a || !b) {
-      throw new Error('Invalid rev given');
+      console.warn(`Invalid revs a:${a} and b:${b} given`);
+      return false;
     }
     if (a === b) {
       return true;
