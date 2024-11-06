@@ -135,7 +135,12 @@ export class ChipListInputComponent implements OnDestroy {
   }
 
   triggerCtrlEnterSubmit(ev: KeyboardEvent): void {
-    this._detectKeyboardLayout(ev);
+    const isCyrillic = /^[А-яёЁ]$/.test(ev.key);
+    if (isCyrillic) {
+      this.separatorKeysCodes = [ENTER];
+    } else {
+      this.separatorKeysCodes = DEFAULT_SEPARATOR_KEY_CODES;
+    }
 
     if (ev.code === 'Enter' && ev.ctrlKey) {
       this.ctrlEnterSubmit.next();
@@ -181,15 +186,5 @@ export class ChipListInputComponent implements OnDestroy {
         suggestion.title.toLowerCase().indexOf(filterValue) === 0 &&
         !this._modelIds.includes(suggestion.id),
     );
-  }
-
-  private _detectKeyboardLayout(event: KeyboardEvent): void {
-    const isCyrillic = /^[А-яёЁ]$/.test(event.key);
-
-    if (isCyrillic) {
-      this.separatorKeysCodes = [ENTER];
-    } else {
-      this.separatorKeysCodes = DEFAULT_SEPARATOR_KEY_CODES;
-    }
   }
 }
