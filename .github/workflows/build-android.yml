@@ -47,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: sup-android-release
-          path: android/app/play/release/*
+          path: android/app/build/outputs/*/*
