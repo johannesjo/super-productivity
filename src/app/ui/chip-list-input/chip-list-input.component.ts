@@ -20,6 +20,8 @@ import { map, startWith } from 'rxjs/operators';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../t.const';
 
+const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
+
 interface Suggestion {
   id: string;
   title: string;
@@ -51,7 +53,7 @@ export class ChipListInputComponent implements OnDestroy {
   suggestionsIn: Suggestion[] = [];
   modelItems: Suggestion[] = [];
   inputCtrl: UntypedFormControl = new UntypedFormControl();
-  separatorKeysCodes: number[] = [ENTER, COMMA];
+  separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
   isAutoFocus = false;
   @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
@@ -133,6 +135,8 @@ export class ChipListInputComponent implements OnDestroy {
   }
 
   triggerCtrlEnterSubmit(ev: KeyboardEvent): void {
+    this._detectKeyboardLayout(ev);
+
     if (ev.code === 'Enter' && ev.ctrlKey) {
       this.ctrlEnterSubmit.next();
     }
@@ -177,5 +181,15 @@ export class ChipListInputComponent implements OnDestroy {
         suggestion.title.toLowerCase().indexOf(filterValue) === 0 &&
         !this._modelIds.includes(suggestion.id),
     );
+  }
+
+  private _detectKeyboardLayout(event: KeyboardEvent): void {
+    const isCyrillic = /^[А-яёЁ]$/.test(event.key);
+
+    if (isCyrillic) {
+      this.separatorKeysCodes = [ENTER];
+    } else {
+      this.separatorKeysCodes = DEFAULT_SEPARATOR_KEY_CODES;
+    }
   }
 }
