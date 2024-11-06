@@ -20,7 +20,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 34
         compileSdk 34
-        versionCode 100101
+        versionCode 101001
         versionName "10.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
@@ -46,7 +46,7 @@ android {
                 buildConfigField "String", key, value.toString()
             }
 
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
