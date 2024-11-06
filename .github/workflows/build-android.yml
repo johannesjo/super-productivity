@@ -1,0 +1,34 @@
+name: Create android Play Store APK
+on:
+  push:
+    branches: [test/git-actions]
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs: null
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      #      - name: Build with Gradle
+      #        run: ./gradlew build
+      - name: Build
+        run: npm run dist:android:prod
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: sup-android-release
+          path: android/app/play/release/
