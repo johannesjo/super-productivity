@@ -25,8 +25,26 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       #      - name: Build with Gradle
       #        run: ./gradlew build
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v4
+        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Workaround for nx issue
+        run: npm install @nx/nx-win32-x64-msvc
+      - name: Install npm Packages
+        #  if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm i
       - name: Build
         run: npm run dist:android:prod
+
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
         with:
