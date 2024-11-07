@@ -158,7 +158,7 @@
     "axios": "^1.6.0",
     "chai": "^5.1.1",
     "chart.js": "^4.4.3",
-    "chromedriver": "^130.0.1",
+    "chromedriver": "^130.0.4",
     "chrono-node": "^2.7.6",
     "clipboard": "^2.0.8",
     "conventional-changelog-cli": "^4.1.0",
