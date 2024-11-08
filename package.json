@@ -79,7 +79,7 @@
     "install:android:prod": "adb install -r android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk && echo 'Production APK installed successfully.'",
     "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "npm run prebuild && npm run release.changelog && git add -A",
+    "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
     "buildSchema": "cd tools/schematics && npm run build && cd ../../ && npm i file:./tools/schematics --legacy-peer-deps",
     "int": "node ./tools/extract-i18n-single.js",
     "int:watch": "node ./tools/extract-i18n-watch.js",
