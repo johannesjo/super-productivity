@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Input,
+  input,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -12,8 +12,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { Subscription } from 'rxjs';
+import { EMPTY, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'simple-counter-button',
@@ -26,7 +28,13 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = this._dateService.todayStr();
 
-  @Input() simpleCounter?: SimpleCounter;
+  simpleCounter = input<SimpleCounter>();
+
+  repeatedStopWatchTime$ = toObservable(this.simpleCounter).pipe(
+    switchMap((sc) => {
+      return sc?.isOn ? this._globalTrackingIntervalService.tick$ : EMPTY;
+    }),
+  );
 
   private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
   private _subs = new Subscription();
@@ -53,35 +61,42 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   }
 
   toggleStopwatch(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.toggleCounter(this.simpleCounter.id);
+    this._simpleCounterService.toggleCounter(c.id);
   }
 
   toggleCounter(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.increaseCounterToday(this.simpleCounter.id, 1);
+    this._simpleCounterService.increaseCounterToday(c.id, 1);
   }
 
   reset(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
+    this._simpleCounterService.setCounterToday(c.id, 0);
   }
 
   edit(ev?: Event): void {
     if (ev) {
       ev.preventDefault();
     }
+    const c = this.simpleCounter();
+    if (!c) {
+      throw new Error('No simple counter model');
+    }
 
     this._matDialog.open(DialogSimpleCounterEditComponent, {
       restoreFocus: true,
       data: {
-        simpleCounter: this.simpleCounter,
+        simpleCounter: c,
       },
     });
   }
