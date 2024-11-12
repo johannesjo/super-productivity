@@ -818,6 +818,7 @@
         "L_AUTO_COUNT_UP": "Auto trigger count up for",
         "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
         "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "L_COUNTDOWN_DURATION": "Countdown duration",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
@@ -825,6 +826,7 @@
         "L_TYPE": "Type",
         "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
+        "TYPE_REPEATED_COUNTDOWN": "Repeated Countdown",
         "TYPE_STOPWATCH": "Stopwatch"
       }
     },
