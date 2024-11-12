@@ -12,7 +12,7 @@ import {
 } from '../../config/global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { SimpleCounterConfig } from '../simple-counter.model';
-import { FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { SimpleCounterService } from '../simple-counter.service';
@@ -20,6 +20,7 @@ import { map } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
 
 @Component({
   selector: 'simple-counter-cfg',
@@ -28,8 +29,14 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
-  @Input() section?: ConfigFormSection<SimpleCounterConfig>;
   @Input() cfg?: SimpleCounterConfig;
+
+  @Input() set section(section: ConfigFormSection<SimpleCounterConfig>) {
+    if (section.items) {
+      this.items = adjustToLiveFormlyForm(section.items);
+    }
+  }
+
   @Output() save: EventEmitter<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
@@ -46,6 +53,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
       })),
     );
 
+  items: FormlyFieldConfig[] = [];
   editModel?: SimpleCounterConfig;
 
   private _inModelCopy?: SimpleCounterConfig;
