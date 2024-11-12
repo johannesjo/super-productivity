@@ -40,10 +40,18 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
   },
   {
     ...EMPTY_SIMPLE_COUNTER,
-    id: 'COFFEE COUNTER',
+    id: 'COFFEE_COUNTER',
     title: 'Coffee Counter',
     type: SimpleCounterType.ClickCounter,
     icon: 'free_breakfast',
+  },
+  {
+    ...EMPTY_SIMPLE_COUNTER,
+    id: 'STRETCHING_COUNTER',
+    title: 'Stretching Counter',
+    type: SimpleCounterType.RepeatedCountdownReminder,
+    icon: 'fitness_center',
+    countdownDuration: 30 * 60 * 1000,
   },
 ];
 
