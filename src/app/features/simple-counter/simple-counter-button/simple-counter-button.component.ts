@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Input,
+  input,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -12,8 +12,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { Subscription } from 'rxjs';
+import { merge, of, Subject, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'simple-counter-button',
@@ -26,10 +28,35 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = this._dateService.todayStr();
 
-  @Input() simpleCounter?: SimpleCounter;
+  simpleCounter = input<SimpleCounter>();
 
   private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
   private _subs = new Subscription();
+  private _resetCountdown$ = new Subject();
+  private _countdownDuration$ = toObservable(this.simpleCounter).pipe(
+    map((c) => c?.countdownDuration),
+    filter((v): v is number => typeof v === 'number' && v > 0),
+    distinctUntilChanged(),
+  );
+
+  countdownTime$ = this._countdownDuration$.pipe(
+    switchMap((countdownDuration) =>
+      merge(of(true), this._resetCountdown$).pipe(
+        switchMap(() =>
+          this._globalTrackingIntervalService.tick$.pipe(
+            scan((acc, tick) => {
+              if (!this.simpleCounter()?.isOn) {
+                return acc;
+              }
+
+              const newVal = acc - tick.duration;
+              return newVal < 0 ? 0 : newVal;
+            }, countdownDuration),
+          ),
+        ),
+      ),
+    ),
+  );
 
   constructor(
     private _simpleCounterService: SimpleCounterService,
@@ -46,6 +73,21 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
         this._cd.detectChanges();
       }),
     );
+
+    if (this.simpleCounter()?.type === SimpleCounterType.RepeatedCountdownReminder) {
+      this._subs.add(
+        this.countdownTime$.subscribe((countdownTime) => {
+          // console.log(countdownTime);
+          if (countdownTime === 0) {
+            alert(
+              `${this.simpleCounter()?.title || 'Simple Counter Countdown'} is finished!`,
+            );
+            this.toggleCounter();
+            this._resetCountdown$.next();
+          }
+        }),
+      );
+    }
   }
 
   ngOnDestroy(): void {
@@ -53,35 +95,42 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   }
 
   toggleStopwatch(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.toggleCounter(this.simpleCounter.id);
+    this._simpleCounterService.toggleCounter(c.id);
   }
 
   toggleCounter(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.increaseCounterToday(this.simpleCounter.id, 1);
+    this._simpleCounterService.increaseCounterToday(c.id, 1);
   }
 
   reset(): void {
-    if (!this.simpleCounter) {
+    const c = this.simpleCounter();
+    if (!c) {
       throw new Error('No simple counter model');
     }
-    this._simpleCounterService.setCounterToday(this.simpleCounter.id, 0);
+    this._simpleCounterService.setCounterToday(c.id, 0);
   }
 
   edit(ev?: Event): void {
     if (ev) {
       ev.preventDefault();
     }
+    const c = this.simpleCounter();
+    if (!c) {
+      throw new Error('No simple counter model');
+    }
 
     this._matDialog.open(DialogSimpleCounterEditComponent, {
       restoreFocus: true,
       data: {
-        simpleCounter: this.simpleCounter,
+        simpleCounter: c,
       },
     });
   }

@@ -25,6 +25,7 @@
   }
 }
 
+.extra-label,
 .label {
   margin-left: 0;
   position: absolute;
@@ -50,6 +51,11 @@
   .wrapper:hover .stopwatch & {
     opacity: 0;
   }
+}
+
+.extra-label {
+  bottom: auto;
+  top: -4px;
 }
 
 .controls {

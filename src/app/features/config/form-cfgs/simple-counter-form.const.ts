@@ -59,6 +59,10 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
                   label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER,
                   value: SimpleCounterType.ClickCounter,
                 },
+                {
+                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_REPEATED_COUNTDOWN,
+                  value: SimpleCounterType.RepeatedCountdownReminder,
+                },
               ],
             },
           },
@@ -77,6 +81,27 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
+            },
+          },
+          {
+            key: 'countdownDuration',
+            type: 'duration',
+            hideExpression: (model: any) => {
+              return model.type !== SimpleCounterType.RepeatedCountdownReminder;
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log(field?.formControl?.value);
+                if (!field?.formControl?.value && field?.formControl?.value !== null) {
+                  field?.formControl?.setValue(30 * 60000);
+                }
+              },
+            },
+            templateOptions: {
+              required: false,
+              isAllowSeconds: false,
+              label: T.F.SIMPLE_COUNTER.FORM.L_COUNTDOWN_DURATION,
+              description: T.G.DURATION_DESCRIPTION,
             },
           },
           {
