@@ -60,7 +60,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
                   value: SimpleCounterType.ClickCounter,
                 },
                 {
-                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER,
+                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_REPEATED_COUNTDOWN,
                   value: SimpleCounterType.RepeatedCountdownReminder,
                 },
               ],
@@ -100,7 +100,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             templateOptions: {
               required: false,
               isAllowSeconds: false,
-              label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+              label: T.F.SIMPLE_COUNTER.FORM.L_COUNTDOWN_DURATION,
               description: T.G.DURATION_DESCRIPTION,
             },
           },
