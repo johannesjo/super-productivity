@@ -66,11 +66,12 @@ export class SimpleCounterEffects {
 
   checkTimedCounters$: Observable<unknown> = createEffect(() =>
     this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
-      switchMap((items) =>
-        items && items.length
+      switchMap((itemsI) => {
+        const items = itemsI.filter((item) => item.type === SimpleCounterType.StopWatch);
+        return items && items.length
           ? this._timeTrackingService.tick$.pipe(map((tick) => ({ tick, items })))
-          : EMPTY,
-      ),
+          : EMPTY;
+      }),
       mergeMap(({ items, tick }) => {
         const today = this._dateService.todayStr();
         return items.map((item) =>

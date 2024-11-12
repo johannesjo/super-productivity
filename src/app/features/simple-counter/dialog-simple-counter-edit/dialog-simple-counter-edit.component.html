@@ -3,7 +3,9 @@
 
   <mat-dialog-content>
     <div class="form-wrapper">
-      <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter">
+      <mat-form-field
+        *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter || data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder"
+      >
         <input
           (ngModelChange)="onModelChange($event)"
           [ngModel]="val"
@@ -37,7 +39,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL|translate }}
       </button>
       <button
         class="btn btn-primary submit-button"
@@ -46,7 +48,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{T.G.SAVE|translate}}
+        {{ T.G.SAVE|translate }}
       </button>
     </div>
   </mat-dialog-actions>

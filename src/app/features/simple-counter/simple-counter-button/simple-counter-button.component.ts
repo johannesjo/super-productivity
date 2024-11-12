@@ -12,10 +12,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { EMPTY, Subscription } from 'rxjs';
+import { merge, of, Subject, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'simple-counter-button',
@@ -30,14 +30,33 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
 
   simpleCounter = input<SimpleCounter>();
 
-  repeatedStopWatchTime$ = toObservable(this.simpleCounter).pipe(
-    switchMap((sc) => {
-      return sc?.isOn ? this._globalTrackingIntervalService.tick$ : EMPTY;
-    }),
-  );
-
   private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
   private _subs = new Subscription();
+  private _resetCountdown$ = new Subject();
+  private _countdownDuration$ = toObservable(this.simpleCounter).pipe(
+    map((c) => c?.countdownDuration),
+    filter((v): v is number => typeof v === 'number' && v > 0),
+    distinctUntilChanged(),
+  );
+
+  countdownTime$ = this._countdownDuration$.pipe(
+    switchMap((countdownDuration) =>
+      merge(of(true), this._resetCountdown$).pipe(
+        switchMap(() =>
+          this._globalTrackingIntervalService.tick$.pipe(
+            scan((acc, tick) => {
+              if (!this.simpleCounter()?.isOn) {
+                return acc;
+              }
+
+              const newVal = acc - tick.duration;
+              return newVal < 0 ? 0 : newVal;
+            }, countdownDuration),
+          ),
+        ),
+      ),
+    ),
+  );
 
   constructor(
     private _simpleCounterService: SimpleCounterService,
@@ -54,6 +73,21 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
         this._cd.detectChanges();
       }),
     );
+
+    if (this.simpleCounter()?.type === SimpleCounterType.RepeatedCountdownReminder) {
+      this._subs.add(
+        this.countdownTime$.subscribe((countdownTime) => {
+          // console.log(countdownTime);
+          if (countdownTime === 0) {
+            alert(
+              `${this.simpleCounter()?.title || 'Simple Counter Countdown'} is finished!`,
+            );
+            this.toggleCounter();
+            this._resetCountdown$.next();
+          }
+        }),
+      );
+    }
   }
 
   ngOnDestroy(): void {
