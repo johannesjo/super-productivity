@@ -93,7 +93,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               onInit: (field) => {
                 console.log(field?.formControl?.value);
                 if (!field?.formControl?.value && field?.formControl?.value !== null) {
-                  field?.formControl?.setValue(2 * 60 * 60000);
+                  field?.formControl?.setValue(30 * 60000);
                 }
               },
             },

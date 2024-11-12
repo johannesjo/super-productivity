@@ -43,6 +43,7 @@
 
   <ng-container *ngIf="sc.type===SimpleCounterType.RepeatedCountdownReminder">
     <button
+      (click)="toggleStopwatch()"
       (contextmenu)="edit($event)"
       (longPress)="edit()"
       [color]="sc.isOn? 'accent': ''"
@@ -52,12 +53,7 @@
       <mat-icon *ngIf="!sc.isOn">{{sc.icon}}</mat-icon>
       <mat-icon *ngIf="sc.isOn">{{sc.iconOn||sc.icon}}</mat-icon>
     </button>
-    <div
-      *ngIf="sc.countOnDay[todayStr]"
-      class="extra-label"
-    >
-      {{sc.countOnDay[todayStr]|msToMinuteClockString}}
-    </div>
+    <div class="extra-label">{{countdownTime$|async|msToMinuteClockString}}</div>
 
     <div
       *ngIf="sc.countOnDay[todayStr]"
