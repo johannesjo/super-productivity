@@ -16,6 +16,8 @@ import { merge, of, Subject, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
 
 @Component({
   selector: 'simple-counter-button',
@@ -52,8 +54,10 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
               const newVal = acc - tick.duration;
               return newVal < 0 ? 0 : newVal;
             }, countdownDuration),
+            // }, 10000),
           ),
         ),
+        distinctUntilChanged(),
       ),
     ),
   );
@@ -63,6 +67,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     private _matDialog: MatDialog,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _dateService: DateService,
+    private _bannerService: BannerService,
     private _cd: ChangeDetectorRef,
   ) {}
 
@@ -77,13 +82,20 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     if (this.simpleCounter()?.type === SimpleCounterType.RepeatedCountdownReminder) {
       this._subs.add(
         this.countdownTime$.subscribe((countdownTime) => {
-          // console.log(countdownTime);
+          console.log(countdownTime);
           if (countdownTime === 0) {
-            alert(
-              `${this.simpleCounter()?.title || 'Simple Counter Countdown'} is finished!`,
-            );
-            this.toggleCounter();
-            this._resetCountdown$.next();
+            this._bannerService.open({
+              id: BannerId.SimpleCounterCountdownComplete,
+              isHideDismissBtn: true,
+              msg: `<i>${this.simpleCounter()?.title || 'Simple Counter Countdown'}</i> is finished!`,
+              action: {
+                label: 'Count up and restart!',
+                fn: () => {
+                  this.toggleCounter();
+                  this._resetCountdown$.next();
+                },
+              },
+            });
           }
         }),
       );
