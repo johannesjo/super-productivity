@@ -9,6 +9,7 @@ export enum BannerId {
   TimeEstimateExceeded = 'TimeEstimateExceeded',
   CalendarEvent = 'CalendarEvent',
   ReminderCountdown = 'ReminderCountdown',
+  SimpleCounterCountdownComplete = 'SimpleCounterCountdownComplete',
 }
 
 export type BannerType = 'ERROR';
@@ -28,6 +29,7 @@ export interface Banner {
   action?: BannerAction;
   action2?: BannerAction;
   action3?: BannerAction;
+  isHideDismissBtn?: boolean;
   progress$?: Observable<number>;
   img?: string;
 }

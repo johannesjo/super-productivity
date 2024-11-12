@@ -36,7 +36,7 @@
     <div class="buttons">
       <button
         (click)="dismiss(banner.id)"
-        *ngIf="!banner.action2"
+        *ngIf="!banner.action2 && !banner.isHideDismissBtn"
         color="primary"
         mat-button
         tabindex="1"
