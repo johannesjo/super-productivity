@@ -7,7 +7,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { Task } from '../../tasks/task.model';
+import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
@@ -32,6 +32,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
+import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -71,9 +72,14 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       this._setRepeatCfgInitiallyForEditOnly(this._data.repeatCfg);
       this.isEdit = true;
     } else if (this._data.task) {
+      const startTime = this._data.task.plannedAt
+        ? clockStringFromDate(this._data.task.plannedAt)
+        : undefined;
       this.repeatCfg = {
         ...DEFAULT_TASK_REPEAT_CFG,
-        startDate: getWorklogStr(),
+        startDate: getWorklogStr(this._data.task.plannedAt || undefined),
+        startTime,
+        remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
         title: this._data.task.title,
         notes: this._data.task.notes || undefined,
         // NOTE: always add today tag, as that's likely what we want
