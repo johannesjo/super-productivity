@@ -150,7 +150,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
 
-  projectSuggestions$: Observable<Project[]> = this._projectService.list$;
+  projectSuggestions$: Observable<Project[]> = this._projectService.list$.pipe(
+    map((ps) => ps.filter((p) => !p.isHiddenFromMenu)),
+  );
 
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
