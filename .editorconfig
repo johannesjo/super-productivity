@@ -11,3 +11,12 @@ trim_trailing_whitespace = true
 [*.md]
 max_line_length = off
 trim_trailing_whitespace = false
+
+[*.kt]
+indent_size = 4
+
+[*.java]
+indent_size = 4
+
+[*.gradle]
+indent_size = 4

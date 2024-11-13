@@ -1,0 +1,6 @@
+{
+  "webDir": "dist/browser",
+  "android": {
+    "path": "android"
+  }
+}

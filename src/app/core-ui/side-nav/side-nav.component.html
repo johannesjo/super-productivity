@@ -60,6 +60,14 @@
     <!--    </button>-->
 
     <button
+      class="additional-btn"
+      #projectExpandBtn2
+      mat-icon-button
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <button
       (click)="addProject()"
       class="additional-btn"
       mat-icon-button
@@ -72,6 +80,7 @@
   <!--  [leftClickTriggerEl]="projectVisibilityBtn"-->
   <context-menu
     [contextMenu]="contextMenu"
+    [leftClickTriggerEl]="projectExpandBtn2"
     [rightClickTriggerEl]="projectExpandBtn"
   ></context-menu>
 

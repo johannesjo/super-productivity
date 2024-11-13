@@ -73,13 +73,13 @@ jobs:
         shell: bash
 
       - name: Validate App
-        run: ls app-builds; ls app-builds/mas-universal; xcrun altool --type macos --validate-app -f app-builds/mas-universal/Super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
+        run: ls app-builds; ls app-builds/mas-universal; xcrun altool --type macos --validate-app -f app-builds/mas-universal/super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
         env:
           APPLE_ID: ${{secrets.APPLE_ID}}
           APPLE_APP_SPECIFIC_PASSWORD: ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
 
       - name: Push to Store
-        run: xcrun altool --type macos --upload-app -f app-builds/mas-universal/Super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
+        run: xcrun altool --type macos --upload-app -f app-builds/mas-universal/super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
         env:
           APPLE_ID: ${{secrets.APPLE_ID}}
           APPLE_APP_SPECIFIC_PASSWORD: ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}

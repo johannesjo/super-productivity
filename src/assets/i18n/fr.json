@@ -121,6 +121,11 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "TXT": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)",
+        "TXT_PAST": "<strong>{{title} }</strong> a commencé à <strong>{{start} }</strong> !",
+        "TXT_PAST_MULTIPLE": "<strong>{{title} }</strong> a commencé à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)",
+        "ADD_AS_TASK": "Ajouter une Tâche",
         "FOCUS_TASK": "Tâche de concentration"
       },
       "S": {
@@ -218,14 +223,20 @@
       },
       "FORM": {
         "PROJECT_ID": "Identifiant du projet",
+        "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans une partie de l'URL, lors de la visualisation du projet dans le navigateur.",
         "HOST": "Hôte (ex : https://redmine.org)",
         "API_KEY": "clé d'accès à l'API",
         "SCOPE": "Portée",
+        "SCOPE_ALL": "Tout",
+        "SCOPE_ASSIGNED": "Assigné à moi-même",
         "SCOPE_CREATED": "Créé par moi",
+        "IS_AUTO_POLL": "Surveiller automatiquement les modifications des tickets importés depuis Redmine",
+        "IS_SEARCH_ISSUES_FROM_REDMINE": "Montrer les tickets Redmine comme suggestions à l'ajout de nouvelles tâches",
         "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les problèmes ouverts depuis Redmine"
       },
       "FORM_SECTION": {
-        "TITLE": "Redmine"
+        "TITLE": "Redmine",
+        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tickets Redmine ouverts (soit la version en ligne, soit une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet.</p><p>Vous pouvez aussi importer automatiquement tous les problèmes ouverts.</p>"
       },
       "ISSUE_CONTENT": {
         "AUTHOR": "Auteur",
@@ -233,6 +244,9 @@
         "PRIORITY": "Priorité",
         "DESCRIPTION": "Description",
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine : erreur inconnue {{statusCode} } {{errorMsg} }."
       }
     },
     "GITHUB": {
@@ -259,13 +273,16 @@
         "DESCRIPTION": "Description",
         "LABELS": "Étiquettes",
         "LAST_COMMENT": "Dernier commentaire",
+        "LOAD_ALL_COMMENTS": "Charger les {nr} commentaires",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Charger la description et tous les commentaires",
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
         "STATUS": "Statut",
         "SUMMARY": "Résumé",
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}. Limite de taux de l'API dépassée ?"
+        "ERR_UNKNOWN": "GitHub: erreur inconnue {{statusCode}} {{errorMsg}}. Limite de taux de l'API dépassée ?",
+        "CONFIG_ERROR": "GitHub : erreur lors du mapping des données. Le nom de votre dépôt est-il correct ?"
       }
     },
     "GITLAB": {
@@ -273,8 +290,12 @@
         "TITLE": "Configurer GitLab pour le projet"
       },
       "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "La durée préremplie contient des données non suivies des jours passés.",
+        "TITLE": "Soumettre sur GitLab le temps passé sur les tickets",
         "T_ALREADY_TRACKED": "Déjà suivi",
-        "T_TITLE": "Titre"
+        "T_TITLE": "Titre",
+        "T_TO_BE_SUBMITTED": "A soumettre",
+        "TOTAL_MSG": "Vous allez soumettre <em>{{totalTimeToSubmit} }</em> comme temps de travail total d'aujourd'hui, passé sur <em>{{nrOfTasksToSubmit} }</em> tickets différents."
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
@@ -291,8 +312,11 @@
         "SOURCE_GLOBAL": "Tout",
         "SOURCE_GROUP": "Groupe",
         "SOURCE_PROJECT": "Projet",
+        "SUBMIT_TIMELOGS": "Soumettre le suivi de temps sur Gitlab",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Afficher la boîte de dialogue de suivi du temps après avoir cliqué sur \"terminer la journée\"",
         "TOKEN": "Jeton d'accès",
-        "FILTER": "Filtre personnalisé"
+        "FILTER": "Filtre personnalisé",
+        "FILTER_DESCRIPTION": "Voir https://docs.gitlab.com/ee/api/issues.html#list-issues. Plusieurs peuvent être combinés avec le caractère &"
       },
       "FORM_SECTION": {
         "HELP": "<p> Ici, vous pouvez configurer SuperProductivity pour répertorier les problèmes ouverts de GitLab (que ce soit la version en ligne ou une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet. </p> <p> En outre, vous pouvez automatiquement ajouter et synchroniser tous les problèmes ouverts à votre carnet de tâches. </p>",
@@ -315,7 +339,11 @@
     },
     "DOMINA_MODE": {
       "FORM": {
-        "L_TEXT": "Texte"
+        "HELP": "Répète la phrase configurée tous les X lors du suivi du temps d'une tâche.",
+        "L_INTERVAL": "Intervalle de répétition de la phrase",
+        "L_TEXT": "Texte",
+        "L_TEXT_DESCRIPTION": "Ex : « Travailler sur $ {currentTaskTitle} ! »",
+        "TITLE": "Mode Domina"
       }
     },
     "ISSUE": {
@@ -357,7 +385,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Malheureusement, certaines données de Jira sont enregistrées dans des champs personnalisés, qui sont différents pour chaque installation. Si vous souhaitez inclure ces données, vous devez sélectionner le champ personnalisé approprié.",
         "OPEN": "Statut pour les tâche en pause",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez le ticket pour charger les transistions disponibles",
-        "STORY_POINTS": "Story points"
+        "STORY_POINTS": "Story points",
+        "TRANSITION": "Gestion des transitions"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> est actuellement affecté à <strong>{{assignee}}</strong>. Voulez-vous vous l'attribuer ?",
@@ -527,6 +556,11 @@
       "D_ADD": {
         "NOTE_LABEL": "Entrez le texte à enregistrer en tant que note ..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_TEXT_ONLY": "Afficher comme texte non parsé",
+        "VIEW_SPLIT": "Afficher les fichiers Markdown parsés et non parsés dans la vue fractionnée",
+        "VIEW_PARSED": "Afficher comme Markdown parsé (non modifiable)"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Ajouter une nouvelle note",
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note",
@@ -541,7 +575,15 @@
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Toujours ouvrir la boîte de dialogue",
-        "PROGRESS_ON_SAVE": "Progression par défaut lors de la sauvegarde"
+        "DONE": "Statut d'achèvement de la tâche",
+        "DO_NOT": "Ne pas transitionner",
+        "ENABLE": "Activer l'intégration Openproject",
+        "ENABLE_TRANSITIONS": "Activer la gestion de transition",
+        "IN_PROGRESS": "Statut pour le démarrage de la tâche",
+        "OPEN": "Statut pour la mise en pause de la tâche",
+        "PROGRESS_ON_SAVE": "Progression par défaut lors de la sauvegarde",
+        "TRANSITION": "Gestion de transition",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Sélectionnez un ticket pour charger les transitions disponibles"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Configurer OpenProject pour le projet"
@@ -555,6 +597,15 @@
         "SUBMIT_TIME_FOR": "Soumettre du temps à OpenProject pour",
         "TIME_SPENT": "Temps passé",
         "TITLE": "OpenProject : Soumettre le journal de travail"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Choisissez le statut à attribuer",
+        "CURRENT_ASSIGNEE": "Responsable actuel :",
+        "CURRENT_STATUS": "Statut actuel :",
+        "PERCENTAGE_DONE": "Avancement :",
+        "TASK_NAME": "Nom de la tâche",
+        "TITLE": "OpenProject : Mise à jour du statut",
+        "UPDATE_STATUS": "Mettre à jour le statut"
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
@@ -591,8 +642,34 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject : erreur inconnue {{statusCode}} {{errorMsg}}. CORS est-il correctement configuré pour le serveur ?",
-        "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}",
+        "TRANSITION": "OpenProject : définir le ticket \"{{issueKey} }\" sur \"{{name} }\"",
+        "TRANSITION_SUCCESS": "OpenProject : définir le ticket {{issueKey} } sur <strong>{{chosenTransition} }</strong>",
+        "TRANSITIONS_LOADED": "Transitions chargées. Utilisez les sélections ci-dessous pour les attribuer"
       }
+    },
+    "PLANNER": {
+      "NO_TASKS": "Pas de tâche",
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Ajouter à Aujourd'hui",
+          "TITLE": "Ajouter les tâches planifiées à Aujourd'hui"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "Cela supprimera le rappel de la tâche ! Appuyez sur Échap pour annuler.",
+          "REMOVE_PLAN_DATE": "Supprimer la date de planification",
+          "TITLE": "Planifier la tâche pour la journée"
+        }
+      },
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "Aucun élément programmé"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle} }\"",
+        "TASK_PLANNED_FOR": "Tâche planifiée pour {date}"
+      },
+      "TASK_DRAWER": "Tiroir des tâches",
+      "EDIT_REPEATED_TASK": "Modifier la tâche répétée '{{taskName}}'"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Au travail !",

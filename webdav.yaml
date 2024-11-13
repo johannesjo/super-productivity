@@ -1,0 +1,13 @@
+address: 0.0.0.0
+port: 80
+
+prefix: /
+permissions: CRUD
+
+users:
+  - username: alice
+    password: alicepassword
+    directory: /data/alice
+  - username: bob
+    password: bobpassword
+    directory: /data/bob

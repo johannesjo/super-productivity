@@ -141,12 +141,14 @@ There is another older – the app looks and feels much better now ;) – [artic
 
 ### Short-Syntax
 
-Can be used when adding a task.
+Can be used when adding a task. <strong>(Each of these can be disabled in settings->short syntax)</strong>
 
 - `# <tag-name>`: add a tag to the task  
   (`"task-description #tag1"`)
 - `<number>m` or `<number>h`: set time-estimate for the task  
   (`"task-description 10m"` or `"task-description 5h"`)
+- `@<time>`: add due time to the task
+  (`"task-description @fri 10pm"`)
 - `+ <project-name>`: add the task to an existing project  
   (`"task-description +Important Project"`)
 - `Ctr + 2`: toggle between moving the new task to the bottom and top of the list
@@ -222,7 +224,13 @@ brew install --cask superproductivity
 
 ### Android
 
-There is a [very early(!) Android version available](https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity&hl=gsw). The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
+A new version of the Android app is now available with **Connectivity-Free Mode**, allowing you to use the app without an internet connection.
+
+This update offers more flexibility, supporting both fully offline usage and integration with services like WebDAV and Dropbox for syncing. Enjoy a smoother, more reliable experience whether you're online or offline.
+
+Stay tuned for even more exciting updates!
+
+You can find the Android app here:
 
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
   <img src='./screens/google-play-badge.png'
@@ -236,6 +244,8 @@ There is a [very early(!) Android version available](https://play.google.com/sto
        alt='F-Droid Badge'
        height="50" />
 </a>
+
+The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
 
 ## :hearts: Contributing
 
@@ -305,11 +315,53 @@ npm start
 
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `npm run dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
 
+### Building for Android
+
+_This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57)._
+
+To build the Android version of Super Productivity, please refer to the [Android Build Documentation](./android/offline.md), which includes instructions on configuring **Connectivity-Free Mode** and **Online-Only Mode (Compatibility Mode)**.
+
+Ensure you follow the setup steps properly to configure the environment for building the app.
+
 ## Run as Docker Container
 
 ```bash
 docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
+
+Now you can access the web app from your browser at `http://localhost`.
+
+This container only serves the web app, and the user data is stored in the browser. Therefore, it does not have any persistent storage.
+
+### Integrate with WebDAV backend server
+
+You can integrate the container with a WebDAV server container to provides WebDAV service with base url `http://localhost/webdav`.
+
+**Download pre-configured files**
+
+Download the pre-configured `docker-compose.yaml` and `webdav.yaml` from this repository to a local directory, say `sp/`.
+
+```bash
+# Alternatively, you can get them by cloning this repository
+git clone https://github.com/johannesjo/super-productivity.git
+mkdir -p sp
+cp super-productivity/docker-compose.yaml sp/
+cp super-productivity/webdav.yaml sp/
+cd sp
+```
+
+**Setup user accounts**
+
+Edit `webdav.yaml` to configure username and password. Remember to create and assign different directories to different users (within `/data`) to avoid mixing up user data.
+
+**Start the services**
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Additionally to accessing the web app from your browser at `http://localhost`, you can set up WebDAV synchronization with base url `http://localhost/webdav/`.
 
 ## Custom themes (desktop only)
 

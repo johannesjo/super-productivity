@@ -49,6 +49,11 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
+import {
+  isTaskNotPlannedForToday,
+  isTaskPlannedForToday,
+  isTodayTag,
+} from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -85,27 +90,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   selectedId = toSignal(this._taskService.selectedTaskId$);
   isSelected = computed(() => this.selectedId() === this.task().id);
 
+  isTodayTag = computed(() => isTodayTag(this.task()));
   isTodayListActive = computed(() => this.workContextService.isToday);
-  isTodayTag = computed(() => this.task().tagIds.includes(TODAY_TAG.id));
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
     () => !!(this.task().repeatCfgId && isToday(this.task().created)),
   );
-  isShowRemoveFromToday = computed(() => {
-    const t = this.task();
-    return !!(
-      !t.isDone &&
-      this.isTodayTag() &&
-      (t.projectId || t.tagIds?.length > 1 || t.parentId)
-    );
-  });
-  isShowAddToToday = computed(() => {
-    return (
-      !this.isShowRemoveFromToday() &&
-      !(this.task().parentId && this.workContextService.isToday) &&
-      !this.isTodayTag()
-    );
-  });
+
   progress = computed<number>(() => {
     const t = this.task();
     return (t.timeEstimate && (t.timeSpent / t.timeEstimate) * 100) || 0;
@@ -194,6 +185,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.isDragOver = false;
   }
 
+  // NOTE: this prevents dragging on mobile for no touch area
+  onTouchStart(ev: TouchEvent): void {
+    if (!ev.target || !(ev.target as HTMLElement).classList?.contains('drag-handle')) {
+      ev.stopPropagation();
+    }
+  }
+
   ngAfterViewInit(): void {
     // hacky but relatively performant
     const t = this.task();
@@ -217,6 +215,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
+  }
+
+  isTaskNotPlannedForToday(): boolean {
+    return isTaskNotPlannedForToday(this.task());
+  }
+
+  isTaskPlannedForToday(): boolean {
+    return isTaskPlannedForToday(this.task(), this.workContextService.isToday);
   }
 
   scheduleTask(): void {

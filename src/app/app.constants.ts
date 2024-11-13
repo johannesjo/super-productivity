@@ -26,6 +26,7 @@ import '@angular/common/locales/global/pt';
 import '@angular/common/locales/global/nl';
 import '@angular/common/locales/global/nb';
 import '@angular/common/locales/global/hr';
+import '@angular/common/locales/global/uk';
 
 export const DAY_STARTS_AT_DEFAULT_H = 9;
 export const DAY_STARTS_AT: string = '9:00';
@@ -68,6 +69,7 @@ export enum LanguageCode {
   ru = 'ru',
   sk = 'sk',
   tr = 'tr',
+  uk = 'uk',
   zh = 'zh',
   zh_tw = 'zh_tw',
 }
@@ -92,6 +94,7 @@ export enum LanguageCodeMomentMap {
   ru = 'ru',
   sk = 'sk',
   tr = 'tr',
+  uk = 'uk',
   zh = 'zh-cn',
   zh_tw = 'zh-tw',
 }

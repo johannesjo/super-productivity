@@ -245,7 +245,7 @@ export class SyncProviderService {
 
     console.log({ rev, localRev });
 
-    if (rev && rev === localRev) {
+    if (rev && this._isSameRev(rev, localRev)) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same mainFileRev, doesn't mean. that we can't have local changes
       local = await this._persistenceService.getValidCompleteData();
@@ -671,7 +671,7 @@ export class SyncProviderService {
       remoteArchiveRev !== 'NO_UPDATE' &&
       // NOTE: main file archiveRev might be undefined when archive was never synced before with current data, but the file was created earlier
       remoteMainFileData.archiveRev &&
-      remoteArchiveRev !== remoteMainFileData.archiveRev
+      !this._isSameRev(remoteArchiveRev, remoteMainFileData.archiveRev)
     ) {
       console.log({
         remoteArchiveRev,
@@ -984,5 +984,24 @@ export class SyncProviderService {
 
   private _log(cp: SyncProviderServiceInterface, ...args: any | any[]): void {
     console.log(cp.id, ...args);
+  }
+
+  private _isSameRev(a: string | null, b: string | null): boolean {
+    if (!a || !b) {
+      console.warn(`Invalid revs a:${a} and b:${b} given`);
+      return false;
+    }
+    if (a === b) {
+      return true;
+    }
+    return this._cleanRev(a) === this._cleanRev(b);
+  }
+
+  private _cleanRev(rev: string): string {
+    const suffix = '-gzip';
+    if (rev.endsWith(suffix)) {
+      return rev.slice(0, -suffix.length);
+    }
+    return rev;
   }
 }

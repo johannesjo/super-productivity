@@ -34,6 +34,9 @@ ENV PORT=80
 # copy artifact build from the 'build environment'
 COPY --from=build /app/dist/browser /usr/share/nginx/html
 
+# copy nginx config
+COPY ./nginx/default.conf.template /etc/nginx/templates/default.conf.template
+
 # expose port: defaults to 80
 EXPOSE $PORT
 

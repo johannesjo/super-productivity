@@ -2,6 +2,9 @@
   "ANDROID": {
     "NOTIFICATIONS": {
       "SYNC_CONFLICT_TITLE": "یک تضاد همگام سازی رخ داد"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "SYNCING": "در حال همگام سازی"
     }
   },
   "APP": {
@@ -133,6 +136,44 @@
         "FINISH_DAY_BEFORE_EXIT": " {{nr}} کار انجام شده در لیست امروز شما هنوز به بایگانی منتقل نشده است. آیا واقعاً می خواهید بدون اینکه روز خود را تمام کنید ترک کنید؟"
       }
     },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
+      "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
+      "GET_READY": "برای نشست تمرکز خود آماده شوید!",
+      "GOGOGO": "برو، برو، برو!!!",
+      "GO_TO_PROCRASTINATION": "هنگام اهمال‌کاری، کمک بگیرید",
+      "NEXT": "بعدی",
+      "POMODORO_BACK": "بازگشت",
+      "POMODORO_DISABLE": "غیرفعال کردن پومودورو",
+      "WORKED_FOR": "شما کار کردید به مدت"
+    },
+    "GITEA": {
+      "FORM": {
+        "TOKEN": "توکن دسترسی",
+        "SCOPE_ALL": "همه",
+        "SCOPE_CREATED": "ایجاد شده توسط من"
+      },
+      "ISSUE_CONTENT": {
+        "AT": "در",
+        "DESCRIPTION": "توضیحات",
+        "LABELS": "برچسب‌ها",
+        "PROJECT": "پروژه",
+        "STATUS": "وضعیت",
+        "SUMMARY": "خلاصه",
+        "WRITE_A_COMMENT": "یک کامنت بنویسید"
+      }
+    },
+    "REDMINE": {
+      "FORM": {
+        "PROJECT_ID": "شناساگر پروژه",
+        "HOST": "(مثال: https://redmine.org) هاست",
+        "SCOPE_CREATED": "ایجاد شده توسط من"
+      },
+      "ISSUE_CONTENT": {
+        "STATUS": "وضعیت",
+        "DESCRIPTION": "توضیحات"
+      }
+    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی گیت هاب برای پروژه"
@@ -155,6 +196,7 @@
         "AT": "در",
         "DESCRIPTION": "توضیحات",
         "LABELS": "برچسب ها",
+        "LAST_COMMENT": "آخرین نظر",
         "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
@@ -167,6 +209,9 @@
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی گیت لاب برای پروژه"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "عنوان"
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
@@ -202,6 +247,11 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: خطای ناشناخته {{statusCode}} {{errorMsg}}"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "L_TEXT": "متن"
       }
     },
     "ISSUE": {
@@ -331,6 +381,7 @@
         "LIST_OF_CHANGES": "لیست تغییرات",
         "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
         "ON": "روشن",
+        "RELATED": "مرتبط",
         "STATUS": "وضعیت",
         "STORY_POINTS": "Story Points",
         "SUMMARY": "خلاصه",
@@ -395,11 +446,11 @@
         "HELP_P2": "This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.",
         "IMPROVEMENTS": "What improved your productivity?",
         "IMPROVEMENTS_TOMORROW": "What could you do to improve tomorrow?",
-        "MOOD": "How do you feel?",
+        "MOOD": "حالت چطوره؟",
         "MOOD_HINT": "1: Awful – 10: Splendid",
-        "NOTES": "Notes for tomorrow",
+        "NOTES": "یادداشت‌هایی برای فردا",
         "OBSTRUCTIONS": "What hindered your productivity?",
-        "PRODUCTIVITY": "How efficient did you work?",
+        "PRODUCTIVITY": "بازدهی کار کردن امروزت چطور بود؟",
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
       "S": {
@@ -434,6 +485,9 @@
         "SUBMIT_TIME_FOR": "ارسال زمان به OpenProject برای",
         "TIME_SPENT": "زمان صرف شده",
         "TITLE": "OpenProject: ارسال کارنامه"
+      },
+      "DIALOG_TRANSITION": {
+        "CURRENT_STATUS": "وضعیت فعلی:"
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
@@ -545,7 +599,7 @@
         "L_BACKGROUND_IMAGE_DARK": "URL تصویر پس زمینه (تم تاریک)",
         "L_BACKGROUND_IMAGE_LIGHT": "آدرس تصویر پس زمینه (تم سبک)",
         "L_COLOR_ACCENT": "Accent Color",
-        "L_COLOR_PRIMARY": "Primary Color",
+        "L_COLOR_PRIMARY": "رنگ اصلی",
         "L_COLOR_WARN": "Warn/Error Color",
         "L_HUE_ACCENT": "Threshold for dark text on accent color background",
         "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
@@ -574,7 +628,10 @@
       "WEEK_TITLE": "هفته {{nr}} ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "خطا در رابط یادآوری"
+      "S_REMINDER_ERR": "خطا در رابط یادآوری",
+      "COUNTDOWN_BANNER": {
+        "HIDE": "مخفی کردن"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "برای جستجوی کارهای بایگانی شده روی نماد لیست کلیک کنید",
@@ -634,6 +691,13 @@
         "TITLE": "Dropbox: داده های متضاد",
         "USE_LOCAL": "از محلی استفاده کنید",
         "USE_REMOTE": "از راه دور استفاده کنید"
+      },
+      "D_INCOMPLETE_SYNC": {
+        "T3": "شما دو گزینه دارید:",
+        "BTN_CLOSE_APP": "بستن برنامه"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی"
       },
       "FORM": {
         "DROPBOX": {
@@ -733,6 +797,8 @@
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_SCHEDULED": "ویرایش یادآوری",
         "EDIT_TAGS": "برچسب ها را ویرایش کنید",
+        "EDIT_TASK_TITLE": "ویرایش عنوان",
+        "FOCUS_SESSION": "آغاز نشست تمرکز",
         "MARK_DONE": "علامت زدن به عنوان انجام شده",
         "MARK_UNDONE": "علامت زدن به عنوان انجام نشده",
         "MOVE_TO_BACKLOG": "انتقال به بک لاگ",
@@ -753,6 +819,9 @@
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "OK": "ایجاد برچسب"
+      },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
         "REMIND_AT": "یادآوری در",
@@ -762,7 +831,7 @@
         "RO_30M": "30 دقیقه قبل از شروع آن",
         "RO_5M": "5 دقیقه قبل از شروع آن",
         "RO_START": "وقتی شروع می شود",
-        "RO_NEVER": "Never",
+        "RO_NEVER": "هرگز",
         "SCHEDULE": "Schedule",
         "UNSCHEDULE": "Unschedule",
         "CONFIRM_REPEAT_OK": "برنامه",
@@ -792,15 +861,15 @@
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
         "DELETE_FOR": "Delete entry for day",
         "ESTIMATE": "Estimate",
-        "TIME_SPENT": "Time Spent",
-        "TIME_SPENT_ON": "Time Spent {{date}}",
+        "TIME_SPENT": "زمان صرف شده",
+        "TIME_SPENT_ON": "زمان صرف شده {{date}}",
         "TITLE": "Time spent / Estimates"
       },
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
         "DATE": "Date for new entry",
         "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
-        "TINE_SPENT": "Time Spent",
+        "TINE_SPENT": "زمان صرف شده",
         "TITLE": "Add for Day"
       },
       "N": {
@@ -828,6 +897,13 @@
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "DAILY": "هر روز",
+        "EVERY_X_DAILY": "روز {{x}} هر",
+        "EVERY_X_MONTHLY": "ماه {{x}} هر",
+        "EVERY_X_YEARLY": "سال {{x}} هر",
+        "MONDAY_TO_FRIDAY": "دوشنبه - جمعه"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
         "OK": "Remove completely"
@@ -842,15 +918,24 @@
         "TAG_LABEL": "برچسب ها برای اضافه کردن"
       },
       "F": {
+        "C_DAY": "روز",
+        "C_MONTH": "ماه",
+        "C_WEEK": "هفته",
+        "C_YEAR": "سال",
         "DEFAULT_ESTIMATE": "تخمین پیش فرض",
         "FRIDAY": "جمعه",
         "IS_ADD_TO_BOTTOM": "کار را به پایین لیست منتقل کنید",
         "MONDAY": "دوشنبه",
+        "NOTES": "یادداشت‌های پیش‌فرض",
         "ORDER": "سفارش",
         "ORDER_DESCRIPTION": "ترتیب ایجاد وظایف تکرار شونده فقط بر کارهای تکراری ایجاد شده در همان زمان تأثیر می گذارد. مقدار کمتر به این معنی است که یک کار بالاتر از لیست ایجاد می شود، یک عدد پایین تر که پایین تر خواهد بود. مقدار بزرگتر از 0 به این معنی است که موارد در انتهای کارهای عادی ایجاد می شوند.",
+        "Q_DAILY": "هر روز",
+        "Q_MONDAY_TO_FRIDAY": "هر دوشنبه تا جمعه",
         "REMIND_AT": "یادآوری در",
         "REMIND_AT_PLACEHOLDER": "زمان یادآوری را انتخاب کنید",
+        "REPEAT_CYCLE": "چرخه‌ی تکرار",
         "SATURDAY": "شنبه",
+        "START_DATE": "تاریخ شروع",
         "START_TIME": "زمان شروع برنامه ریزی شده",
         "START_TIME_DESCRIPTION": "به عنوان مثال. ساعت 15:00 برای یک کار تمام روز خالی بگذارید",
         "SUNDAY": "یک شنبه",
@@ -991,6 +1076,7 @@
     "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر"
   },
   "G": {
+    "ADD": "اضافه کردن",
     "CANCEL": "لغو",
     "CLOSE": "بستن",
     "DELETE": "حذف",
@@ -1011,7 +1097,9 @@
     "REMOVE": "حذف",
     "RESET": "تنظیم مجدد",
     "SAVE": "ذخیره",
+    "SUBMIT": "ثبت",
     "TITLE": "عنوان",
+    "TODAY_TAG_TITLE": "امروز",
     "UNDO": "Undo",
     "UPDATE": "بروز رسانی",
     "WITHOUT_PROJECT": "بدون پروژه",
@@ -1024,9 +1112,15 @@
       "LOCATION_INFO": "نسخه پشتیبان تهیه شده در:",
       "TITLE": "پشتیبان گیری خودکار"
     },
+    "CALENDARS": {
+      "TITLE": "تقویم‌ها"
+    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "ارزیابی ها و معیارها"
+    },
+    "FOCUS_MODE": {
+      "TITLE": "حالت تمرکز"
     },
     "IDLE": {
       "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
@@ -1088,6 +1182,10 @@
       "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
       "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
     },
+    "LANG": {
+      "LABEL": "لطفاََ یک زبان را انتخاب کنید",
+      "TITLE": "زبان"
+    },
     "MISC": {
       "DEFAULT_PROJECT": "پروژه پیش فرض برای استفاده در کارها در صورت مشخص نبودن هیچ کدام",
       "FIRST_DAY_OF_WEEK": "روز اول هفته",
@@ -1096,7 +1194,8 @@
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
       "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "قبل از خروج از برنامه بدون اتمام روز اول آن را تأیید کنید",
-      "IS_DARK_MODE": "Dark Mode",
+      "IS_DARK_MODE": "حالت تاریک",
+      "IS_DISABLE_ANIMATIONS": "غیرفعال کردن تمام پویانمایی‌ها",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
@@ -1109,7 +1208,7 @@
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
       "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
-      "DURATION": "Duration of work sessions",
+      "DURATION": "طول نشست‌های کاری",
       "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
       "IS_ENABLED": "Enable pomodoro timer",
       "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
@@ -1119,6 +1218,9 @@
       "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
       "TITLE": "Pomodoro Timer"
+    },
+    "REMINDER": {
+      "TITLE": "یادآوری‌ها"
     },
     "SOUND": {
       "DONE_SOUND": "وظیفه تمام شد صدا",
@@ -1146,6 +1248,7 @@
       "L_WORK_START": "شروع روز کار",
       "TITLE": "جدول زمانی",
       "WORK_START_END_DESCRIPTION": "به عنوان مثال، ساعت 17:00",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰",
       "CAL_PROVIDERS": "ارائه دهندگان تقویم (تجربی و اختیاری)",
       "CAL_PROVIDERS_ADD": "منبع ical اضافه کنید",
       "CAL_PROVIDERS_INFO": "می‌توانید به‌صورت اختیاری جدول زمانی را برای بارگیری و نمایش داده‌ها از iCal (مانند Google Calendar) پیکربندی کنید.",
@@ -1187,8 +1290,15 @@
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
     "CREATE_PROJECT": "ایجاد پروژه",
     "CREATE_TAG": "ایجاد برچسب",
+    "DELETE_PROJECT": "حذف پروژه",
     "DELETE_TAG": "برچسب را حذف کنید",
     "GO_TO_TASK_LIST": "به لیست کارها برو",
+    "HM": {
+      "CONTRIBUTE": "مشارکت",
+      "REPORT_A_PROBLEM": "گزارش یک مشکل",
+      "START_WELCOME": "آغاز تور خوش‌آمدگویی"
+    },
+    "HELP": "کمک",
     "METRICS": "معیارها",
     "NOTES": "یادداشت ها",
     "PROCRASTINATE": "به تعویق انداختن",

@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { download } from '../../../util/download';
 import { DataImportService } from '../data-import.service';
 import { NgIf } from '@angular/common';
+import { IS_ELECTRON } from '../../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
 export interface DialogIncompleteSyncData {
   archiveRevInMainFile?: string;
@@ -27,8 +29,7 @@ export interface DialogIncompleteSyncData {
 })
 export class DialogIncompleteSyncComponent {
   T: typeof T = T;
-  // IS_ELECTRON = IS_ELECTRON;
-  IS_ELECTRON = true;
+  IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogIncompleteSyncComponent>,
@@ -50,6 +51,10 @@ export class DialogIncompleteSyncComponent {
   }
 
   closeApp(): void {
-    window.ea.shutdownNow();
+    if (IS_ELECTRON) {
+      window.ea.shutdownNow();
+    } else {
+      window.close();
+    }
   }
 }

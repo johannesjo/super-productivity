@@ -37,6 +37,7 @@ import { ShortSyntaxEffects } from './store/short-syntax.effects';
 import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
 import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.component';
 import { TaskHoverControlsComponent } from './task/task-hover-controls/task-hover-controls.component';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -63,6 +64,8 @@ import { TaskHoverControlsComponent } from './task/task-hover-controls/task-hove
     InlineMultilineInputComponent,
     TaskContextMenuComponent,
     TaskHoverControlsComponent,
+    CdkDropList,
+    CdkDrag,
   ],
   declarations: [
     TaskComponent,

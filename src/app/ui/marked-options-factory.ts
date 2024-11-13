@@ -10,7 +10,7 @@ export const markedOptionsFactory = (): MarkedOptions => {
   };
   renderer.listitem = (text: string) => {
     return text.includes('checkbox')
-      ? '<li class="checkbox-wrapper">' + text + '</li>'
+      ? `<li class="checkbox-wrapper ${text.includes('check_box_outline_blank') ? 'undone' : 'done'}">${text}</li>`
       : '<li>' + text + '</li>';
   };
 

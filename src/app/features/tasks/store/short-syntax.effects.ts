@@ -32,6 +32,7 @@ import { T } from '../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -79,7 +80,13 @@ export class ShortSyntaxEffects {
         ),
       ),
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
-        const r = shortSyntax(task, tags, projects);
+        const r = shortSyntax(
+          task,
+          this._globalConfigService?.cfg?.shortSyntax ||
+            DEFAULT_GLOBAL_CONFIG.shortSyntax,
+          tags,
+          projects,
+        );
         if (environment.production) {
           console.log('shortSyntax', r);
         }

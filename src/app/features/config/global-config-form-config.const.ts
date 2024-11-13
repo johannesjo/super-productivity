@@ -18,6 +18,7 @@ import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { CALENDAR_FORM_CFG } from './form-cfgs/calendar-form.const';
 import { REMINDER_FORM_CFG } from './form-cfgs/reminder-form.const';
+import { SHORT_SYNTAX_FORM_CFG } from './form-cfgs/short-syntax-form.const';
 
 const filterGlobalConfigForm = (cfg: ConfigFormSection<any>): boolean => {
   return (
@@ -29,6 +30,7 @@ const filterGlobalConfigForm = (cfg: ConfigFormSection<any>): boolean => {
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM,
   MISC_SETTINGS_FORM_CFG,
+  SHORT_SYNTAX_FORM_CFG,
   IDLE_FORM_CFG,
   KEYBOARD_SETTINGS_FORM_CFG,
   TIME_TRACKING_FORM_CFG,

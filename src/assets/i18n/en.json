@@ -665,7 +665,9 @@
       "S": {
         "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
         "TASK_PLANNED_FOR": "Task planned for {{date}}"
-      }
+      },
+      "TASK_DRAWER": "Task Drawer",
+      "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
@@ -816,6 +818,7 @@
         "L_AUTO_COUNT_UP": "Auto trigger count up for",
         "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
         "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "L_COUNTDOWN_DURATION": "Countdown duration",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
@@ -823,6 +826,7 @@
         "L_TYPE": "Type",
         "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
+        "TYPE_REPEATED_COUNTDOWN": "Repeated Countdown",
         "TYPE_STOPWATCH": "Stopwatch"
       }
     },
@@ -1428,10 +1432,11 @@
       "NL": "Nederlands",
       "PL": "Polish",
       "PT": "Português",
-      "RU": "Русский",
+      "RU": "Russian",
       "SK": "Slovak",
       "TITLE": "Language",
       "TR": "Türkçe",
+      "UK": "Українська",
       "ZH": "中文(简体)",
       "ZH_TW": "中文(繁體)"
     },
@@ -1454,6 +1459,13 @@
       "IS_USE_MINIMAL_SIDE_NAV": "Use minimal navigation bar (show only icons)",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
+    },
+    "SHORT_SYNTAX": {
+      "TITLE": "Short Syntax",
+      "HELP": "<p>Here you can control short syntax options when creating a task</p>",
+      "IS_ENABLE_PROJECT": "Enable project short syntax (+<Project name>)",
+      "IS_ENABLE_TAG": "Enable tag short syntax (#<Tag>)",
+      "IS_ENABLE_DUE": "Enable due short syntax (@<Due time>)"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",

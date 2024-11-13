@@ -12,6 +12,7 @@
 
 # IDEs and editors
 /.idea
+android/.idea
 .project
 .classpath
 .c9/
@@ -46,6 +47,7 @@ testem.log
 chromedriver.log
 e2e-test-results
 e2e/screenshots
+perf-metrics-*.json
 .eslintcache
 
 # System Files

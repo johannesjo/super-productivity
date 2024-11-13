@@ -613,10 +613,12 @@ progress-bar {
 
   // fixes drag and drop on mobile
   touch-action: none;
+  pointer-events: all;
 
   @include grabCursor();
 
   > * {
+    pointer-events: none;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -772,7 +774,6 @@ $this-play-size: 22px;
 .show-additional-info-btn {
   mat-icon {
     transition: transform $transition-standard;
-    backface-visibility: hidden;
   }
 }
 

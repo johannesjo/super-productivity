@@ -82,7 +82,11 @@ export class PlannerDayComponent {
           }),
         );
         if (task.reminderId) {
-          this._taskService.unScheduleTask(task.id, task.reminderId);
+          // NOTE: we need to wait a bit to make sure the task is already moved into the proper position
+          // as otherwise unschedule will mess up the order
+          setTimeout(() => {
+            this._taskService.unScheduleTask(task.id, task.reminderId as string);
+          });
         }
       }
     }

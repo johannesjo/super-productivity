@@ -58,11 +58,15 @@ import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
-import { updateTaskTags } from '../../store/task.actions';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { isToday } from '../../../../util/is-today.util';
+import { DateAdapter } from '@angular/material/core';
+import {
+  isTaskPlannedForToday,
+  isTaskNotPlannedForToday,
+} from '../../util/is-task-today';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -159,6 +163,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _globalConfigService: GlobalConfigService,
     private readonly _store: Store,
     private readonly _focusModeService: FocusModeService,
+    private readonly _dateAdapter: DateAdapter<unknown>,
   ) {}
 
   ngAfterViewInit(): void {
@@ -495,9 +500,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         this._schedule(tomorrow);
         break;
       case 2:
-        const nextMonday = tDate;
-        nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
-        this._schedule(nextMonday);
+        const nextFirstDayOfWeek = tDate;
+        const dayOffset =
+          (this._dateAdapter.getFirstDayOfWeek() -
+            this._dateAdapter.getDayOfWeek(nextFirstDayOfWeek) +
+            7) %
+            7 || 7;
+        nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
+        this._schedule(nextFirstDayOfWeek);
         break;
       case 3:
         const nextMonth = tDate;
@@ -538,17 +548,17 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         );
       }
     } else if (newDay === getWorklogStr()) {
-      this._store.dispatch(
-        updateTaskTags({
-          task: this.task,
-          newTagIds: [...this.task.tagIds, TODAY_TAG.id],
-        }),
-      );
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: formattedDate },
-      });
+      if (this.isTaskPlannedForToday()) {
+        this.addToMyDay();
+
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+          translateParams: { date: formattedDate },
+        });
+      } else {
+        this.removeFromMyDay();
+      }
     } else {
       this._store.dispatch(
         PlannerActions.planTaskForDay({ task: this.task, day: newDay }),
@@ -559,5 +569,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         translateParams: { date: formattedDate },
       });
     }
+  }
+
+  isTaskNotPlannedForToday(): boolean {
+    return isTaskNotPlannedForToday(this.task);
+  }
+
+  isTaskPlannedForToday(): boolean {
+    return isTaskPlannedForToday(this.task, this.workContextService.isToday);
   }
 }

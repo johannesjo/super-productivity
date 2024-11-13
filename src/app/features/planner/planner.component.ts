@@ -5,6 +5,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { PlannerActions } from './store/planner.actions';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { T } from '../../t.const';
 
 @Component({
   selector: 'planner',
@@ -13,6 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerComponent {
+  readonly T = T;
   isPanelOpen = false;
 
   constructor(

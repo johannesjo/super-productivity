@@ -119,6 +119,14 @@
         "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucudan silinmiş görünüyor."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "ADD_AS_TASK": "Görev olarak ekle"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Takvim Sağlayıcı Hatası: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
@@ -259,6 +267,8 @@
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
+        "LAST_COMMENT": "Son yorum",
+        "LOAD_ALL_COMMENTS": "{{nr}} yorumun tümünü yükle",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
@@ -629,6 +639,9 @@
         "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
       }
     },
+    "PLANNER": {
+      "NO_TASKS": "Hiçbir görev yok"
+    },
     "POMODORO": {
       "BACK_TO_WORK": "Çalışmaya geri dön!",
       "BREAK_IS_DONE": "Molan bitti!",
@@ -702,6 +715,9 @@
         "SETUP_GITEA_PROJECT": "Gitea Entegrasyonunu Kur",
         "SETUP_REDMINE_PROJECT": "Redmine Entegrasyonunu Kur"
       },
+      "D_DELETE": {
+        "MSG": "\"{{title}\" projesini silmek istediğinizden emin misiniz?"
+      },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Proje İş Biriktirme Listesini Etkinleştir",
         "L_IS_HIDDEN_FROM_MENU": "Menüden projeyi gizle",
@@ -743,7 +759,11 @@
       "WEEK_TITLE": " {{nr}}. Hafta ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+      "S_REMINDER_ERR": "Hatırlatma arayüzü hatası",
+      "COUNTDOWN_BANNER": {
+        "START_NOW": "Şimdi başla",
+        "HIDE": "Gizle"
+      }
     },
     "SEARCH_BAR": {
       "INFO": "Arşivlenmiş görevleri aramak için liste simgesine tıklayın",
@@ -883,7 +903,8 @@
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
         "SUB_TASKS": "Alt Görevler ({{nr}})",
-        "TIME": "Zaman"
+        "TIME": "Zaman",
+        "TITLE_PLACEHOLDER": "Bir başlık girin"
       },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Mevcut \"{{taskTitle}}\" görevini ekle",
@@ -911,6 +932,7 @@
         "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
         "EDIT_SCHEDULED": "Hatırlatıcıyı düzenle",
         "EDIT_TAGS": "Etiketleri düzenle",
+        "EDIT_TASK_TITLE": "Başlığı düzenle",
         "MARK_DONE": "Tamamlandı olarak işaretle",
         "MARK_UNDONE": "Tamamlanmadı olarak işaretle",
         "MOVE_TO_BACKLOG": "Görev biriktirme listesine taşı",
@@ -930,6 +952,13 @@
         "TRACK_TIME": "İzlemeye başla",
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "OK": "Etiket oluştur"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "{{tagsTxt}} etiketlerini oluşturmak istiyor musunuz?",
+        "OK": "Etiketleri oluştur"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi biriktirme günlüğüne kaydet",
@@ -960,6 +989,7 @@
         "FOR_OTHER": "Görevin zamanı geldi. Üzerinde çalışmaya başlamak ister misin?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
+        "RESCHEDULE_EDIT": "Düzenle (Yeniden planla)",
         "RESCHEDULE_UNTIL_TOMORROW": "Yarın için yeniden planla",
         "SNOOZE": "Ertele",
         "SNOOZE_ALL": "Tümünü ertele",
@@ -1074,6 +1104,7 @@
         "QUICK_SETTING": "Yapılandırmayı Tekrarla",
         "REMIND_AT": "Şu saatte hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
+        "REPEAT_EVERY": "Yinelenme sıklığı",
         "SATURDAY": "Cumartesi",
         "START_DATE": "Başlangıç ​​tarihi",
         "START_TIME": "Planlanan başlangıç zamanı",
@@ -1208,6 +1239,7 @@
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
   },
   "G": {
+    "ADD": "Ekle",
     "CANCEL": "İptal",
     "CLOSE": "Kapat",
     "DELETE": "Sil",
@@ -1218,6 +1250,7 @@
     "ENABLED": "Etkin",
     "EXAMPLE_VAL": "Düzenlemek için tıkla",
     "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+    "HIDE": "Gizle",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
@@ -1229,6 +1262,7 @@
     "REMOVE": "Kaldır",
     "RESET": "Sıfırla",
     "SAVE": "Kaydet",
+    "SUBMIT": "Gönder",
     "TITLE": "Başlık",
     "TODAY_TAG_TITLE": "Bugün",
     "UNDO": "Geri Al",
@@ -1289,6 +1323,7 @@
       "MOVE_TO_BACKLOG": "Görevi biriktirme listesine taşı",
       "MOVE_TO_TODAYS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
       "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
+      "SAVE_NOTE": "Notu kaydet",
       "SELECT_NEXT_TASK": "Sonraki görevi seç",
       "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
       "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
@@ -1346,10 +1381,13 @@
       "IS_MANUAL_CONTINUE_BREAK": "Sonraki molanın başlamasını elle onaylayın",
       "IS_PLAY_SOUND": "Oturum bittiğinde ses çal",
       "IS_PLAY_SOUND_AFTER_BREAK": "Mola bittiğinde ses çal",
-      "IS_PLAY_TICK": "Her saniye kene sesini çal",
+      "IS_PLAY_TICK": "Her saniye saat sesini çal",
       "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
       "LONGER_BREAK_DURATION": "Uzun molaların süresi",
       "TITLE": "Pomodoro Zamanlayıcı"
+    },
+    "REMINDER": {
+      "TITLE": "Hatırlatıcılar"
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
@@ -1380,6 +1418,7 @@
       "L_WORK_START": "İş Günü Başlangıcı",
       "TITLE": "Zaman çizelgesi",
       "WORK_START_END_DESCRIPTION": "örn. 17:00",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "örn. 13:00",
       "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
       "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
       "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
@@ -1419,12 +1458,17 @@
     "ADD_NEW_TASK": "Yeni Görev ekle",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
+    "DELETE_PROJECT": "Projeyi Sil",
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
+    "HM": {
+      "CONTRIBUTE": "Katkıda bulun"
+    },
     "HELP": "Yardım",
     "METRICS": "İstatistikler",
     "NOTES": "Notlar",
     "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",
+    "PLANNER": "Planlayıcı",
     "PROCRASTINATE": "Ertelemek",
     "PROJECTS": "Projeler",
     "PROJECT_MENU": "Proje Menüsü",

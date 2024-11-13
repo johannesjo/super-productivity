@@ -1,7 +1,11 @@
 name: Win Store File on Release
 on:
-  release:
-    types: [published]
+  #  release:
+  #    types: [published]
+  push:
+    branches: [test/git-actions]
+    tags:
+      - v*
   workflow_dispatch:
     inputs: null
 

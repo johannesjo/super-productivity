@@ -1,0 +1,8 @@
+### Bug Fixes
+
+- **sync:** rev check code #3661 #3660
+### Features
+
+- **android:** improve error handling in request interceptor 3657
+- **android:** prepare auto builds
+- changes the separators when the user is typing

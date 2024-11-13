@@ -362,13 +362,21 @@ export const tagReducer = createReducer<TagState>(
   on(deleteTags, (state: TagState, { ids }) => tagAdapter.removeMany(ids, state)),
 
   on(updateTagOrder, (state: TagState, { ids }) => {
-    if (ids.length !== state.ids.length) {
+    if (
+      ids.filter((id) => id !== NO_LIST_TAG.id).length !==
+      state.ids.filter((id) => id !== NO_LIST_TAG.id).length
+    ) {
       console.log({ state, ids });
       throw new Error('Tag length should not change on re-order');
     }
+    const idsToUse =
+      state.entities[NO_LIST_TAG.id] && !ids.includes(NO_LIST_TAG.id)
+        ? [...ids, NO_LIST_TAG.id]
+        : ids;
+
     return {
       ...state,
-      ids,
+      ids: idsToUse,
     };
   }),
 

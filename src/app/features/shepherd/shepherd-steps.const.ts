@@ -543,7 +543,7 @@ export const SHEPHERD_STEPS = (
       text: `On the settings page, you can also find the <strong>Calendars</strong> section. ${CLICK_B} on it!`,
       beforeShowPromise: () => promiseTimeout(500),
       attachTo: {
-        element: '.config-section:nth-of-type(6)',
+        element: '.section-calendarIntegration',
         on: 'top',
       },
       when: (() => {
