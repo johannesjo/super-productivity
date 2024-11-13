@@ -20,13 +20,13 @@ import {
 } from '../../features/config/global-config.model';
 import { Subscription } from 'rxjs';
 import { ProjectCfgFormKey } from '../../features/project/project.model';
-import { environment } from '../../../environments/environment';
 import { T } from '../../t.const';
 import { versions } from '../../../environments/versions';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { getAppVersionStr } from '../../util/get-app-version-str';
 
 @Component({
   selector: 'config-page',
@@ -42,7 +42,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   globalCfg?: GlobalConfigState;
 
-  appVersion: string = environment.version;
+  appVersion: string = getAppVersionStr();
   versions?: any = versions;
 
   private _subs: Subscription = new Subscription();

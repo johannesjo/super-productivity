@@ -29,7 +29,7 @@ class LaunchDecider(private val context: Context) {
      * If LAUNCH_MODE is set to 1 or 2, it will force the corresponding mode.
      * The result is saved in SharedPreferences for future launches.
      */
-    private fun getLaunchMode(): Int {
+    fun getLaunchMode(): Int {
         val launchMode = BuildConfig.LAUNCH_MODE.toIntOrNull() ?: 0
         return when (launchMode) {
             1 -> MODE_ONLINE
