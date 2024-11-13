@@ -4,6 +4,8 @@ import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 
 export interface AndroidInterface {
+  getVersion?(): string;
+
   showToast(s: string): void;
 
   showNotification(title: string, body: string): void;
