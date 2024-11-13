@@ -1,5 +1,4 @@
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
-import { environment } from '../../../environments/environment';
 import StackTrace from 'stacktrace-js';
 import pThrottle from 'p-throttle';
 import newGithubIssueUrl from 'new-github-issue-url';
@@ -7,6 +6,7 @@ import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
+import { getAppVersionStr } from '../../util/get-app-version-str';
 
 let isWasErrorAlertCreated = false;
 
@@ -159,7 +159,7 @@ export const createErrorAlert = (
 
 export const getSimpleMeta = (): string => {
   const n = window.navigator;
-  return `META: SP${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
+  return `META: SP${getAppVersionStr()} __ ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
     n.language
   } – ${n.platform} – ${n.userAgent}`;
 };

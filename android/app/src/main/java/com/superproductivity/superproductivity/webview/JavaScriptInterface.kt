@@ -21,10 +21,12 @@ import androidx.core.content.ContextCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.*
 import com.superproductivity.superproductivity.App
+import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.app.AppLifecycleObserver
 import com.superproductivity.superproductivity.FullscreenActivity
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.R
+import com.superproductivity.superproductivity.app.LaunchDecider
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedOutputStream
@@ -57,6 +59,15 @@ class JavaScriptInterface(
         // Mandatory for Activity, but not for Fragment & ComponentActivity
         Log.d("SuperProductivity", "onActivityResult")
         storageHelper.storage.onActivityResult(requestCode, resultCode, data)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun getVersion(): String {
+        val versionName = BuildConfig.VERSION_NAME
+        val launchDecider = LaunchDecider(activity)
+        val launchMode = launchDecider.getLaunchMode()
+        return "${versionName}_L$launchMode"
     }
 
     @Suppress("unused")
