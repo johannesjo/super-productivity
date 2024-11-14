@@ -126,7 +126,7 @@
         "TXT_PAST": "<strong>{{title}}</strong> avviato alle <strong>{{start}}</strong>!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> avviato alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altri eventi sono scaduti)",
         "ADD_AS_TASK": "Aggiungi come attività",
-        "FOCUS_TASK": "Attività Focus"
+        "FOCUS_TASK": "Attività Concentrazione"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Errore provider del Calendario: {{errTxt}}"
@@ -155,9 +155,9 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Torna alla pianificazione",
-      "CANCEL_FOCUS_SESSION": "Annulla Sessione Focus",
+      "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
       "CONGRATS": "Congratulazione per avere completato questa sessione!",
-      "CONTINUE_FOCUS_SESSION": "Continua Sessione Focus",
+      "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
       "FINISH_TASK_AND_SELECT_NEXT": "Termina attività e seleziona la prossima",
       "GET_READY": "Preparati per la tua prossima sessione!",
       "GOGOGO": "Vai, vai, vai!",
@@ -167,16 +167,16 @@
       "OPEN_ISSUE_IN_BROWSER": "Apri issue nel Browser",
       "POMODORO_BACK": "Indietro",
       "POMODORO_DISABLE": "Disabilita Pomodoro",
-      "POMODORO_INFO": "Le sessioni Focus non possono essere usate insieme con il temporizzatore del pomodoro attivo.",
+      "POMODORO_INFO": "Le sessioni Concentrazione non possono essere usate insieme con il temporizzatore del pomodoro attivo.",
       "PREP_STRETCH": "Fai un po' di stretching",
       "PREP_SIT_UPRIGHT": "Siediti o alzati in posizione eretta",
       "PREP_GET_MENTALLY_READY": "Preparati mentalmente per essere concentrato e produttivo",
       "SELECT_ANOTHER_TASK": "Seleziona un'altra attività",
       "SELECT_TASK": "Seleziona l'attività su cui concentrarti",
-      "SET_FOCUS_SESSION_DURATION": "Imposta la durata della Sessione Focus",
+      "SET_FOCUS_SESSION_DURATION": "Imposta la durata della Sessione Concentrazione",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostra/nascondi note e allegati dell'attività",
-      "START_FOCUS_SESSION": "Avvia Sessione Focus",
-      "START_NEXT_FOCUS_SESSION": "Avvia la prossima Sessione Focus",
+      "START_FOCUS_SESSION": "Avvia Sessione Concentrazione",
+      "START_NEXT_FOCUS_SESSION": "Avvia la prossima Sessione Concentrazione",
       "WORKED_FOR": "Hai lavorato per"
     },
     "GITEA": {
@@ -742,6 +742,9 @@
         "SETUP_GITEA_PROJECT": "Configura integrazione Gitea",
         "SETUP_REDMINE_PROJECT": "Configura integrazione Redmine"
       },
+      "D_DELETE": {
+        "MSG": "Sei sicuro di voler eliminare il progetto \"{{title}}\"?"
+      },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Abilita gestione arretrati del progetto",
         "L_IS_HIDDEN_FROM_MENU": "Nascondi progetto dal menu",
@@ -983,6 +986,7 @@
         "EDIT_SCHEDULED": "Modifica promemoria",
         "EDIT_TAGS": "Modifica etichette",
         "EDIT_TASK_TITLE": "Modifica titolo",
+        "FOCUS_SESSION": "Avvia sessione Concentrazione",
         "MARK_DONE": "Segna come completato",
         "MARK_UNDONE": "Segna come non completato",
         "MOVE_TO_BACKLOG": "Sposta negli arretrati",
@@ -1181,8 +1185,7 @@
       "PLAN_START_DAY": "Pianifica all'inizio del giorno",
       "START": "Inizio del lavoro",
       "TASK_PROJECTION_INFO": "Proiezione futura di un'attività ripetibile pianificata",
-      "LUNCH_BREAK": "Pausa pranzo",
-      "MENU_TITLE": "Calendario"
+      "LUNCH_BREAK": "Pausa pranzo"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1287,6 +1290,7 @@
     "DELETE": "Cancella",
     "DISMISS": "Rimuovi",
     "DURATION_DESCRIPTION": "es. \"5h 23m\" diventerà 5 ore e 23 minuti",
+    "TRACKING_INTERVAL_DESCRIPTION": "Traccia il tempo usando questo intervallo in millisecondi. Potresti volerlo cambiare per ridurre la scrittura su disco. Vedi segnalazione #2355.",
     "DO_IT": "Fallo!",
     "EDIT": "Modifica",
     "ENABLED": "Abilitato",
@@ -1337,10 +1341,10 @@
       "TITLE": "Valutazione & Metriche"
     },
     "FOCUS_MODE": {
-      "HELP": "La Modalità Focus are una schermata senza distrazioni per aiutarti a concentrarti sul'attività corrente.",
-      "L_ALWAYS_OPEN_FOCUS_MODE": "Apri sempre la modalità focus mentre tracci",
+      "HELP": "La Modalità Concentrazione are una schermata senza distrazioni per aiutarti a concentrarti sul'attività corrente.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "Apri sempre la modalità concentrazione mentre tracci",
       "L_SKIP_PREPARATION_SCREEN": "Salta la schermata di preparazione (stretching ecc.)",
-      "TITLE": "Modalità Focus"
+      "TITLE": "Modalità Concentrazione"
     },
     "IDLE": {
       "HELP": "<div><p>Quando la gestione del tempo di inattività è abilitata, un finestra si aprirà dopo un periodo specifico di tempo per controllare se e su quale attività vuoi tracciare il tuo tempo, nel periodo che sei stato inattivo.</p></div>",
@@ -1364,7 +1368,7 @@
       "GLOBAL_SHOW_HIDE": "Mostra/nascondi Super Productivity",
       "GLOBAL_TOGGLE_TASK_START": "Abilita/disabilita il tracciamento del tempo per l'ultima attività attiva",
       "GO_TO_DAILY_AGENDA": "Vai all'agenda",
-      "GO_TO_FOCUS_MODE": "Vai alla modalità focus",
+      "GO_TO_FOCUS_MODE": "Vai alla modalità concentrazione",
       "GO_TO_SCHEDULED_VIEW": "Vai alle attività pianificate",
       "GO_TO_SETTINGS": "Vai alle impostazioni",
       "GO_TO_SCHEDULE": "Vai a Schedule",
@@ -1383,6 +1387,7 @@
       "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
       "SYSTEM_SHORTCUTS": "Scorciatoie globali (a livello di sistema)",
       "TASK_ADD_SUB_TASK": "Aggiungi sotto-task",
+      "TASK_ADD_ATTACHMENT": "Allega file o link",
       "TASK_DELETE": "Cancella task",
       "TASK_EDIT_TAGS": "Modificare i tag",
       "TASK_EDIT_TITLE": "Modifica titolo",
@@ -1418,14 +1423,14 @@
       "IT": "Italiano",
       "JA": "日本語",
       "KO": "한국어",
-      "LABEL": "Please select a language",
+      "LABEL": "Seleziona una lingua",
       "NB": "Norsk Bokmål",
       "NL": "Nederlands",
       "PL": "Polish",
       "PT": "Português",
       "RU": "Русский",
       "SK": "Slovak",
-      "TITLE": "Language",
+      "TITLE": "Lingua",
       "TR": "Türkçe",
       "ZH": "中文(简体)",
       "ZH_TW": "中文(繁體)"
@@ -1448,9 +1453,7 @@
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "IS_USE_MINIMAL_SIDE_NAV": "Usa barra di navigazione minima (mostra solo icone)",
       "TASK_NOTES_TPL": "Modello di descrizione dell'attività",
-      "TITLE": "Impostazioni varie",
-      "IS_AUTO_START_NEXT_TASK": "Inizia a tracciare l'attività successiva quando si contrassegna corrente come fatto",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificami quando il tempo stimato viene superato"
+      "TITLE": "Impostazioni varie"
     },
     "POMODORO": {
       "BREAK_DURATION": "Durata delle pause brevi",
@@ -1508,6 +1511,7 @@
     },
     "TIME_TRACKING": {
       "HELP": "Il promemoria per il monitoraggio del tempo è un banner da visualizzare nel caso in cui si sia dimenticati di avviare il monitoraggio del tempo.",
+      "L_TRACKING_INTERVAL": "Intervallo di monitoraggio del tempo (SPERIMENTALE)",
       "L_DEFAULT_ESTIMATE": "Tempo stimato predefinito per le nuove attività",
       "L_DEFAULT_ESTIMATE_SUB_TASKS": "Tempo stimato predefinito per le nuove sotto-attività",
       "L_IS_AUTO_START_NEXT_TASK": "Iniziare a tracciare l'attività successiva quando si contrassegna l'attività corrente come completata",
@@ -1515,7 +1519,7 @@
       "L_IS_TRACKING_REMINDER_ENABLED": "Promemoria tracciamento abilitato",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostra promemoria tracciamento su app mobile",
       "L_TRACKING_REMINDER_MIN_TIME": "Tempo di attesa prima di mostrare il banner di promemoria tracciamento",
-      "TITLE": "Tracciamento Tempo"
+      "TITLE": "Monitoraggio del tempo"
     }
   },
   "GLOBAL_SNACK": {
@@ -1526,7 +1530,7 @@
     "NAVIGATE_TO_TASK_ERR": "Impossibile concentrarsi sull'attività. L'hai cancellata?",
     "PERSISTENCE_DISALLOWED": "I dati non saranno salvati permanentemente. Fai attenzione che questo può portare a perdita dei dati!!",
     "PERSISTENCE_ERROR": "Errore durante la richiesta di dati persistenti: {{err}}",
-    "RUNNING_X": "Eseguendo \"{{str}}\".",
+    "RUNNING_X": "Esecuzione di \"{{str}} in corso\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} premuto, ma la scorciatoia Apri segnalibri è disponibile solo nel contesto del progetto."
   },
   "GPB": {
@@ -1546,7 +1550,8 @@
     "ADD_NEW_TASK": "Aggiungi nuova attività",
     "CREATE_PROJECT": "Crea progetto",
     "CREATE_TAG": "Crea etichetta",
-    "DELETE_TAG": "Cancella etichetta",
+    "DELETE_PROJECT": "Elimina progetto",
+    "DELETE_TAG": "Elimina etichetta",
     "GO_TO_TASK_LIST": "Vai alla lista delle attività",
     "HM": {
       "CALENDARS": "Come fare: Connetti Calendari",
@@ -1569,6 +1574,8 @@
     "PROJECT_MENU": "Menu di progetto",
     "PROJECT_SETTINGS": "Impostazioni di progetto",
     "QUICK_HISTORY": "Cronologia rapida",
+    "REPEAT_SCHEDULED": "Ripetute/Pianificate",
+    "SCHEDULE": "Pianifica",
     "SETTINGS": "Impostazioni",
     "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
     "TAGS": "Etichette",
@@ -1578,9 +1585,7 @@
     "TOGGLE_SHOW_NOTES": "Mostra/nascondi note di progetto",
     "TOGGLE_TRACK_TIME": "Inizia/smetti di tracciare il tempo",
     "TRIGGER_SYNC": "Attiva la sincronizzazione manualmente",
-    "WORKLOG": "Registro di lavoro",
-    "MANAGE_PROJECTS": "Gestisci progetti",
-    "SCHEDULED": "Pianificati"
+    "WORKLOG": "Registro di lavoro"
   },
   "PDS": {
     "BACK": "Apetta ho dimenticato qualcosa!",
@@ -1614,8 +1619,8 @@
     "TASKS_COMPLETED": "Attività completate",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Attività archiviate non incluse. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
-    "WEEK": "Settimana",
-    "TODAY": "Oggi"
+    "TIME_SPENT_TODAY_BY_TAG": "Tempo speso oggi per Etichetta",
+    "WEEK": "Settimana"
   },
   "PM": {
     "TITLE": "Metriche di progetto"
@@ -1623,19 +1628,21 @@
   "PS": {
     "GLOBAL_SETTINGS": "Impostazioni globali",
     "ISSUE_INTEGRATION": "Integrazione Issue",
-    "PRIVACY_POLICY": "Privacy Policy",
+    "PRIVACY_POLICY": "Politica sulla Privacy",
     "PRODUCTIVITY_HELPER": "Aiuto produttività",
     "PROJECT_SETTINGS": "Impostazioni specifiche del progetto",
-    "PROVIDE_FEEDBACK": "Fornire un feedback",
+    "PROVIDE_FEEDBACK": "La tua opinione",
     "SYNC_EXPORT": "Sincronizza ed esporta",
     "TAG_SETTINGS": "Impostazioni specifiche dell'etichetta",
     "TOGGLE_DARK_MODE": "Abilita/disabilita tema scuro"
   },
   "SCHEDULE": {
+    "NO_SCHEDULED_TITLE": "Attività pianificate per Giorno",
     "NO_SCHEDULED": "Non ci sono attività pianificate al momento. Puoi pianificare un'attività scegliendo \"Pianifica attività\" nel menu contestuale. Per aprirlo clicca i tre puntini sulla destra delle attività.",
     "NO_REPEATABLE_TASKS": "Non ci sono attività ripetute. Puoi pianificare un'attività scegliendo \"Ripeti Attività\" nel pannello laterale. Per aprirlo clicca sull'icona più a destra che appare passandoci sopra con il mouse (o solo toccando l'ìattività da mobile).",
     "REPEATED_TASKS": "Attività ripetute",
     "SCHEDULED_TASKS": "Attività pianificate",
+    "SCHEDULED_TASKS_WITH_REMINDER": "Attività pianificate con promemoria",
     "START_TASK": "Inizia l'attività ora e rimuovi promemoria"
   },
   "THEMES": {
@@ -1685,35 +1692,7 @@
     "TIME_ESTIMATED": "Tempo stimato:",
     "WITHOUT_BREAK": "Senza pausa:",
     "WORKING_TODAY": "Lavorate oggi:",
-    "WORKING_TODAY_ARCHIVED": "Tempo lavorato oggi su attività archiviate"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Progetti archiviati",
-    "ARCHIVE_PROJECT": "Archivia progetto",
-    "CLICK_TO_HIDE": "Fare clic per nascondere il progetto dal menu",
-    "CLICK_TO_SHOW": "Fare clic per mostrare il progetto nel menu",
-    "DELETE_PROJECT": "Elimina progetto",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Sei sicuro di voler archiviare questo progetto? I progetti archiviati non saranno più mostrati nel menu e non potrai accederne ai dati senza prima riabilitarli. E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
-      "OK": "Archivia"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Sei sicuro di voler eliminare questo progetto? E' consigliato fare un backup dei dati prima di eseguire questa operazione.",
-      "OK": "Elimina"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Sei sicuro che vuoi estrarre il progetto?",
-      "OK": "Estrai"
-    },
-    "EDIT_PROJECT": "Modifica progetto",
-    "EXPORT_PROJECT": "Esporta progetto",
-    "GITHUB_CONFIGURED": "Integrazione GitHub configurata",
-    "GITLAB_CONFIGURED": "Integrazione GitLab configurata",
-    "IMPORT_FROM_FILE": "Importa da file",
-    "JIRA_CONFIGURED": "Integrazione Jira configurata",
-    "OPEN_PROJECT_CONFIGURED": "Integrazione OpenProject configurata",
-    "S_INVALID_JSON": "JSON non valido per file di progetto",
-    "TITLE": "Panoramica progetto",
-    "UN_ARCHIVE_PROJECT": "Estrai progetto"
+    "WORKING_TODAY_ARCHIVED": "Tempo lavorato oggi su attività archiviate",
+    "TODAY_REMAINING": "Rimanente oggi:"
   }
 }
