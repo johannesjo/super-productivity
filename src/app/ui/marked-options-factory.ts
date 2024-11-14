@@ -16,6 +16,8 @@ export const markedOptionsFactory = (): MarkedOptions => {
 
   const linkRendererOld = renderer.link;
   renderer.link = (href, title, text) => {
+    console.log(href);
+
     const html = linkRendererOld(href, title, text);
     return html.replace(/^<a /, '<a target="_blank" ');
   };
@@ -35,6 +37,20 @@ export const markedOptionsFactory = (): MarkedOptions => {
       return acc ? (split.length - 1 === i ? acc + p + `</p>` : acc + p) : `<p>` + p;
     }, '');
   };
+
+  // Add a custom rule to detect plain URLs
+  const urlPattern =
+    /\b((([A-Za-z][A-Za-z0-9+.-]*):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)\b|(\b(https?|ftp|file|obsidian):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+
+  const rendererTxtOld = renderer.text;
+  renderer.text = (text) => {
+    return rendererTxtOld(
+      text.replace(urlPattern, (url) => {
+        return `<a href="${url}" target="_blank">${url}</a>`;
+      }),
+    );
+  };
+
   return {
     renderer: renderer,
     gfm: true,
