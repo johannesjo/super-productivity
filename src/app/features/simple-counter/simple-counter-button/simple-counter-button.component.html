@@ -11,14 +11,14 @@
       class="main-btn stopwatch"
       mat-mini-fab
     >
-      <mat-icon *ngIf="!sc.isOn">{{sc.icon}}</mat-icon>
-      <mat-icon *ngIf="sc.isOn">{{sc.iconOn||sc.icon}}</mat-icon>
+      <mat-icon *ngIf="!sc.isOn">{{ sc.icon }}</mat-icon>
+      <mat-icon *ngIf="sc.isOn">{{ sc.iconOn || sc.icon }}</mat-icon>
     </button>
     <div
       *ngIf="sc.countOnDay[todayStr]"
       class="label"
     >
-      {{sc.countOnDay[todayStr]|msToMinuteClockString}}
+      {{ sc.countOnDay[todayStr]|msToMinuteClockString }}
     </div>
   </ng-container>
 
@@ -31,35 +31,40 @@
       color=""
       mat-mini-fab
     >
-      <mat-icon>{{sc.icon}}</mat-icon>
+      <mat-icon>{{ sc.icon }}</mat-icon>
     </button>
     <div
       *ngIf="sc.countOnDay[todayStr]"
       class="label"
     >
-      {{sc.countOnDay[todayStr]}}
+      {{ sc.countOnDay[todayStr] }}
     </div>
   </ng-container>
 
   <ng-container *ngIf="sc.type===SimpleCounterType.RepeatedCountdownReminder">
     <button
-      (click)="toggleStopwatch()"
+      (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
       (contextmenu)="edit($event)"
       (longPress)="edit()"
-      [color]="sc.isOn? 'accent': ''"
+      [color]="(sc.isOn && !isTimeUp())? 'accent': ''"
       class="main-btn repeated-countdown"
       mat-mini-fab
     >
-      <mat-icon *ngIf="!sc.isOn">{{sc.icon}}</mat-icon>
-      <mat-icon *ngIf="sc.isOn">{{sc.iconOn||sc.icon}}</mat-icon>
+      <mat-icon *ngIf="!sc.isOn">{{ sc.icon }}</mat-icon>
+      <mat-icon *ngIf="sc.isOn">{{ sc.iconOn || sc.icon }}</mat-icon>
     </button>
-    <div class="extra-label">{{countdownTime$|async|msToMinuteClockString}}</div>
+    <div
+      class="extra-label"
+      *ngIf="countdownTime$|async as countdownTime"
+    >
+      {{ countdownTime|msToMinuteClockString }}
+    </div>
 
     <div
-      *ngIf="sc.countOnDay[todayStr]"
+      *ngIf="sc.countOnDay[todayStr] || isTimeUp()"
       class="label"
     >
-      {{sc.countOnDay[todayStr]}}
+      {{ isTimeUp() ? "+" : sc.countOnDay[todayStr] }}
     </div>
   </ng-container>
 

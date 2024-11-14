@@ -5,6 +5,7 @@ import {
   input,
   OnDestroy,
   OnInit,
+  signal,
 } from '@angular/core';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
@@ -31,6 +32,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   todayStr: string = this._dateService.todayStr();
 
   simpleCounter = input<SimpleCounter>();
+  isTimeUp = signal<boolean>(false);
 
   private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
   private _subs = new Subscription();
@@ -53,8 +55,8 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
 
               const newVal = acc - tick.duration;
               return newVal < 0 ? 0 : newVal;
-            }, countdownDuration),
-            // }, 10000),
+              // }, countdownDuration),
+            }, 10000),
           ),
         ),
         distinctUntilChanged(),
@@ -82,8 +84,8 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     if (this.simpleCounter()?.type === SimpleCounterType.RepeatedCountdownReminder) {
       this._subs.add(
         this.countdownTime$.subscribe((countdownTime) => {
-          console.log(countdownTime);
           if (countdownTime === 0) {
+            this.isTimeUp.set(true);
             this._bannerService.open({
               id: BannerId.SimpleCounterCountdownComplete,
               isHideDismissBtn: true,
@@ -91,8 +93,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
               action: {
                 label: 'Count up and restart!',
                 fn: () => {
-                  this.toggleCounter();
-                  this._resetCountdown$.next();
+                  this.countUpAndNextRepeatCountdownSession();
                 },
               },
             });
@@ -104,6 +105,13 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  countUpAndNextRepeatCountdownSession(): void {
+    this._bannerService.dismiss(BannerId.SimpleCounterCountdownComplete);
+    this.toggleCounter();
+    this._resetCountdown$.next();
+    this.isTimeUp.set(false);
   }
 
   toggleStopwatch(): void {
