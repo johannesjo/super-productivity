@@ -6,6 +6,9 @@ jobs:
   test-on-linux:
     runs-on: ubuntu-latest
 
+    permissions:
+      pull-requests: write
+
     steps:
       - uses: actions/setup-node@v3
         with:
