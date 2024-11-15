@@ -18,6 +18,10 @@
   // needs to be above the rest
   z-index: 2;
 
+  &.isTimeUp {
+    border: 2px solid $c-accent;
+  }
+
   .mat-icon {
     position: relative;
     z-index: 2;
