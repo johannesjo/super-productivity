@@ -13,7 +13,6 @@ import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { TaskService } from '../task.service';
 import { Store } from '@ngrx/store';
 import {
   selectStartableTasksActiveContextFirst,
@@ -41,7 +40,6 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
 
   constructor(
     private _workContextService: WorkContextService,
-    private _taskService: TaskService,
     private _store: Store,
   ) {}
 

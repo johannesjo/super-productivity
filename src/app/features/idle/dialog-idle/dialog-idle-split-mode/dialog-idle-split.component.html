@@ -26,6 +26,7 @@
         </mat-button-toggle-group>
 
         <select-task
+          [isIncludeDoneTasks]="true"
           [initialTask]="item.task"
           (taskChange)="onTaskChange(item, $event)"
           [class.isDisabled]="item.type==='BREAK'"
