@@ -126,6 +126,7 @@
     "@angular/router": "^18.1.4",
     "@angular/service-worker": "^18.1.4",
     "@capacitor/android": "^6.1.2",
+    "@capacitor/app": "^6.0.1",
     "@capacitor/cli": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@electron/notarize": "^2.5.0",

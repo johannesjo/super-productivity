@@ -7,6 +7,7 @@ import { IS_ELECTRON } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { ElectronAPI } from '../electron/electronAPI.d';
+import { App as CapacitorApp } from '@capacitor/app';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -57,4 +58,16 @@ if (!(environment.production || environment.stage) && IS_ANDROID_WEB_VIEW) {
     androidInterface.showToast('Android DEV works');
     console.log(androidInterface);
   }, 1000);
+}
+
+// CAPICATOR STUFF
+// ---------------
+if (IS_ANDROID_WEB_VIEW) {
+  CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+    if (!canGoBack) {
+      CapacitorApp.minimizeApp();
+    } else {
+      window.history.back();
+    }
+  });
 }
