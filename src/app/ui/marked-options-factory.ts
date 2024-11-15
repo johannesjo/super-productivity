@@ -36,9 +36,9 @@ export const markedOptionsFactory = (): MarkedOptions => {
     }, '');
   };
 
-  // Add a custom rule to detect plain URLs
+  // parse all RFC3986 URIs
   const urlPattern =
-    /\b((([A-Za-z][A-Za-z0-9+.-]*):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)\b|(\b(https?|ftp|file|obsidian):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+    /\b((([A-Za-z][A-Za-z0-9+.-]*):\/\/([^\/?#]*))([^?#]*)(\?([^#]*))?(#(.*))?)\b/gi;
 
   const rendererTxtOld = renderer.text;
   renderer.text = (text) => {
