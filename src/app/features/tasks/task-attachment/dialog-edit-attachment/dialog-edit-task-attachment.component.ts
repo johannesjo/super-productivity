@@ -55,7 +55,10 @@ export class DialogEditTaskAttachmentComponent {
     if (
       this.attachmentCopy.type === 'LINK' &&
       this.attachmentCopy.path &&
-      !this.attachmentCopy.path.match(/(https?|ftp|file):\/\//)
+      // don't prepend for all valid RFC3986 URIs
+      !this.attachmentCopy.path.match(
+        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/,
+      )
     ) {
       this.attachmentCopy.path = 'http://' + this.attachmentCopy.path;
     }
