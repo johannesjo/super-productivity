@@ -16,8 +16,6 @@ export const markedOptionsFactory = (): MarkedOptions => {
 
   const linkRendererOld = renderer.link;
   renderer.link = (href, title, text) => {
-    console.log(href);
-
     const html = linkRendererOld(href, title, text);
     return html.replace(/^<a /, '<a target="_blank" ');
   };
