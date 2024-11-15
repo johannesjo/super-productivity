@@ -3,22 +3,17 @@ import { MarkedOptions, MarkedRenderer } from 'ngx-markdown';
 export const markedOptionsFactory = (): MarkedOptions => {
   const renderer = new MarkedRenderer();
 
-  renderer.checkbox = (isChecked: boolean) => {
-    return `<span class="checkbox material-icons">${
-      isChecked ? 'check_box ' : 'check_box_outline_blank '
-    }</span>`;
-  };
-  renderer.listitem = (text: string) => {
-    return text.includes('checkbox')
-      ? `<li class="checkbox-wrapper ${text.includes('check_box_outline_blank') ? 'undone' : 'done'}">${text}</li>`
-      : '<li>' + text + '</li>';
-  };
+  renderer.checkbox = (isChecked: boolean) =>
+    `<span class="checkbox material-icons">${isChecked ? 'check_box' : 'check_box_outline_blank'}</span>`;
 
-  const linkRendererOld = renderer.link;
-  renderer.link = (href, title, text) => {
-    const html = linkRendererOld(href, title, text);
-    return html.replace(/^<a /, '<a target="_blank" ');
-  };
+  renderer.listitem = (text: string) =>
+    text.includes('checkbox')
+      ? `<li class="checkbox-wrapper ${text.includes('check_box_outline_blank') ? 'undone' : 'done'}">${text}</li>`
+      : `<li>${text}</li>`;
+
+  renderer.link = (href, title, text) =>
+    `<a target="_blank" href="${href}" title="${title}">${text}</a>`;
+
   renderer.paragraph = (text) => {
     const split = text.split('\n');
     return split.reduce((acc, p, i) => {
@@ -50,11 +45,9 @@ export const markedOptionsFactory = (): MarkedOptions => {
   };
 
   return {
-    renderer: renderer,
+    renderer,
     gfm: true,
     breaks: false,
     pedantic: false,
-    // smartLists: true,
-    // smartypants: false,
   };
 };
