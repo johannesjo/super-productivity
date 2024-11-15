@@ -55,8 +55,8 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
 
               const newVal = acc - tick.duration;
               return newVal < 0 ? 0 : newVal;
-              // }, countdownDuration),
-            }, 10000),
+            }, countdownDuration),
+            // }, 10000),
           ),
         ),
         distinctUntilChanged(),
