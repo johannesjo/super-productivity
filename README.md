@@ -319,7 +319,7 @@ Packaging the app is done via [electron-builder](https://github.com/electron-use
 
 _This feature was added on October 7, 2024. See [Pull Request #57](https://github.com/johannesjo/super-productivity-android/pull/57)._
 
-To build the Android version of Super Productivity, please refer to the [Android Build Documentation](./android/offline.md), which includes instructions on configuring **Connectivity-Free Mode** and **Online-Only Mode (Compatibility Mode)**.
+To build the Android version of Super Productivity, please refer to the [Android Build Documentation](./android/README.md), which includes instructions on configuring **Connectivity-Free Mode** and **Online-Only Mode (Compatibility Mode)**.
 
 Ensure you follow the setup steps properly to configure the environment for building the app.
 
