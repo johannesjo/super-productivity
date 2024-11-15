@@ -2,14 +2,6 @@
   "name": "superProductivity",
   "version": "10.1.1",
   "description": "ToDo list and Time Tracking",
-  "main": "./electron/main.js",
-  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
-  "license": "MIT",
-  "homepage": "http://super-productivity.com",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/johannesjo/super-productivity.git"
-  },
   "keywords": [
     "ToDo",
     "Task Management",
@@ -17,37 +9,50 @@
     "GitHub",
     "Time Tracking"
   ],
+  "homepage": "http://super-productivity.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/johannesjo/super-productivity.git"
+  },
+  "license": "MIT",
+  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged && npm run lint",
       "pre-push": "npm run lint && npm run test"
     }
   },
+  "main": "./electron/main.js",
   "scripts": {
-    "ng": "ng",
-    "start": "npm run electron:build && cross-env NODE_ENV=DEV electron .",
-    "startFrontend": "ng serve",
-    "serveProd": "ng serve --configuration production",
-    "removeWOFF1": "node ./tools/remove-woff.js",
+    "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
+    "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
+    "prebuild": "node ./tools/git-version.js",
+    "build": "npm run buildAllElectron:noTests:prod",
+    "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
+    "buildAllElectron:prod": "npm run preCheck && npm run buildFrontend:prod:es6 && npm run electron:build",
+    "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
     "buildFrontend:prod:es6": "npm run prebuild && cross-env BROWSERSLIST_ENV='modern' node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration production && npm run removeWOFF1",
+    "buildFrontend:prod:watch": "npm run prebuild && ng build --configuration production --watch",
     "buildFrontend:prodWeb": "npm run prebuild && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build  --configuration productionWeb",
     "buildFrontend:stage:es6": "npm run prebuild && cross-env BROWSERSLIST_ENV='modern' ng build --configuration stage && npm run removeWOFF1",
     "buildFrontend:stageWeb": "npm run prebuild && ng build --configuration stageWeb",
     "buildFrontend:stageWeb:unminified": "npm run prebuild && ng build --configuration stageWeb --optimization=false --aot=false",
-    "buildFrontend:prod:watch": "npm run prebuild && ng build --configuration production --watch",
-    "buildAllElectron:prod": "npm run preCheck && npm run buildFrontend:prod:es6 && npm run electron:build",
-    "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
-    "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
-    "build": "npm run buildAllElectron:noTests:prod",
+    "buildSchema": "cd tools/schematics && npm run build && cd ../../ && npm i file:./tools/schematics --legacy-peer-deps",
+    "dist": "npm run buildAllElectron:prod && electron-builder",
+    "dist:android": "npm run buildFrontend:stageWeb:unminified && npm run sync:android && npm run assemble:android:stage && echo 'Staging Android APK generated at android/app/build/outputs/apk/debug/'",
+    "dist:android:prod": "npm run buildFrontend:prodWeb && npm run sync:android && npm run assemble:android:prod && echo 'Production Android APK generated at android/app/build/outputs/apk/release/'",
+    "dist:linuxAndWin": "npm run buildAllElectron:prod && electron-builder --linux --win",
+    "dist:mac:dl": "cp tools/mac-profiles/dl.provisionprofile embedded.provisionprofile && electron-builder --mac",
+    "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
+    "dist:mac:mas:buildOnly": "electron-builder --config=build/electron-builder.mas.yaml",
+    "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
+    "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
+    "dist:only": "electron-builder",
+    "dist:win": "npm run buildAllElectron:noTests:prod && electron-builder --win",
+    "dist:win:appx": "npm run buildAllElectron:prod && electron-builder --win --config=build/electron-builder.appx.yaml",
+    "dist:win:only": "electron-builder --win",
+    "dist:win:store": "git pull && npm run && copy electron-builder.win-store.yaml electron-builder.yaml && npm run dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
     "droid": "npm run buildFrontend:stageWeb:unminified && npx cap sync",
-    "sync:android": "npx cap sync android",
-    "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
-    "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
-    "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
-    "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
-    "lint": "ng lint",
-    "prebuild": "node ./tools/git-version.js",
-    "preCheck": "npm run lint && npm run test & npm run int:test && npm run e2e",
     "e2e": "cross-env TZ='' DETECT_CHROMEDRIVER_VERSION=true SKIP_POST_INSTALL=true npm i -D chromedriver --legacy-peer-deps && tsc --project e2e/tsconfig.e2e.json && start-server-and-test 'ng serve --no-live-reload' 4200 'nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 1 --retries 1'",
     "e2e:tag": "killall chromedriver; rm -R ./out-tsc; tsc --project e2e/tsconfig.e2e.json && nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 0 --retries 0 --tag ",
     "electron": "NODE_ENV=PROD electron .",
@@ -55,45 +60,36 @@
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch",
     "electronBuilderOnly": "electron-builder",
     "empty": "echo 'EMPTY YEAH'",
-    "pack": "electron-builder --dir",
+    "install:android": "adb install -r android/app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk && echo 'Staging APK installed successfully.'",
+    "install:android:prod": "adb install -r android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk && echo 'Production APK installed successfully.'",
+    "int": "node ./tools/extract-i18n-single.js",
+    "int:clean": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json --marker _",
+    "int:find": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json  --sort --format namespaced-json --marker _",
+    "int:test": "node ./tools/test-lng-files.js",
+    "int:watch": "node ./tools/extract-i18n-watch.js",
+    "lint": "ng lint",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildAllElectron:stage && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
+    "localInstall:mac": "sudo echo 'Starting local install MAC. Don`t forget APPLEID & APPLEIDPASS !!' && npm run buildAllElectron:noTests:prod && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
     "localInstall:prod": "sudo echo 'Starting local install PROD' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildAllElectron:prod && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:quick": "sudo echo 'Starting local install QUICK' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildFrontend:stage:es6 && npm run electron:build && electron-builder --linux deb && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:test:snap": "sudo echo 'Starting local install SNAP QUICK' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildFrontend:stage:es6 && npm run electron:build && electron-builder --linux snap && sudo snap install --dangerous app-builds/superProductivity*.snap",
-    "localInstall:mac": "sudo echo 'Starting local install MAC. Don`t forget APPLEID & APPLEIDPASS !!' && npm run buildAllElectron:noTests:prod && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
-    "dist": "npm run buildAllElectron:prod && electron-builder",
-    "dist:only": "electron-builder",
-    "dist:linuxAndWin": "npm run buildAllElectron:prod && electron-builder --linux --win",
-    "dist:win": "npm run buildAllElectron:noTests:prod && electron-builder --win",
-    "dist:win:only": "electron-builder --win",
-    "dist:win:appx": "npm run buildAllElectron:prod && electron-builder --win --config=build/electron-builder.appx.yaml",
-    "dist:win:store": "git pull && npm run && copy electron-builder.win-store.yaml electron-builder.yaml && npm run dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
-    "dist:mac:dl": "cp tools/mac-profiles/dl.provisionprofile embedded.provisionprofile && electron-builder --mac",
-    "dist:mac:mas": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml",
-    "dist:mac:mas:buildOnly": "electron-builder --config=build/electron-builder.mas.yaml",
-    "dist:mac:mas:dev": "cp tools/mac-profiles/mas-dev.provisionprofile embedded.provisionprofile; electron-builder --mac mas-dev --config=build/electron-builder.mas-dev.yaml",
-    "dist:mac:mas:x64": "cp tools/mac-profiles/mas.provisionprofile embedded.provisionprofile; electron-builder --mac mas --config=build/electron-builder.mas.yaml --x64",
-    "dist:android": "npm run buildFrontend:stageWeb:unminified && npm run sync:android && npm run assemble:android:stage && echo 'Staging Android APK generated at android/app/build/outputs/apk/debug/'",
-    "dist:android:prod": "npm run buildFrontend:prodWeb && npm run sync:android && npm run assemble:android:prod && echo 'Production Android APK generated at android/app/build/outputs/apk/release/'",
-    "install:android": "adb install -r android/app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk && echo 'Staging APK installed successfully.'",
-    "install:android:prod": "adb install -r android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk && echo 'Production APK installed successfully.'",
+    "ng": "ng",
+    "pack": "electron-builder --dir",
+    "preCheck": "npm run lint && npm run test & npm run int:test && npm run e2e",
     "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
-    "buildSchema": "cd tools/schematics && npm run build && cd ../../ && npm i file:./tools/schematics --legacy-peer-deps",
-    "int": "node ./tools/extract-i18n-single.js",
-    "int:watch": "node ./tools/extract-i18n-watch.js",
-    "int:find": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json  --sort --format namespaced-json --marker _",
-    "int:clean": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json --marker _",
-    "int:test": "node ./tools/test-lng-files.js"
+    "removeWOFF1": "node ./tools/remove-woff.js",
+    "serveProd": "ng serve --configuration production",
+    "start": "npm run electron:build && cross-env NODE_ENV=DEV electron .",
+    "startFrontend": "ng serve",
+    "sync:android": "npx cap sync android",
+    "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
+    "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
+    "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A"
   },
-  "publish": [
-    {
-      "provider": "github",
-      "repo": "super-productivity",
-      "owner": "johannesjo"
-    }
-  ],
+  "resolutions": {
+    "sass": "1.32.6"
+  },
   "dependencies": {
     "electron-dl": "^3.5.2",
     "electron-localshortcut": "^3.2.1",
@@ -217,9 +213,6 @@
     "webdav": "~4.11.3",
     "zone.js": "~0.14.7"
   },
-  "resolutions": {
-    "sass": "1.32.6"
-  },
   "overrides": {
     "ng2-dragula": {
       "@angular/common": "$@angular/common",
@@ -229,5 +222,12 @@
     "angular-mentions": {
       "@angular/common": "$@angular/common"
     }
-  }
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "repo": "super-productivity",
+      "owner": "johannesjo"
+    }
+  ]
 }
