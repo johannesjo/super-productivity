@@ -5,7 +5,7 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    inputs: null
+    inputs: {}
 
 jobs:
   push_to_registry:

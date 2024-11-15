@@ -7,7 +7,7 @@ on:
     tags:
       - v*
   workflow_dispatch:
-    inputs: null
+    inputs: {}
 
 jobs:
   windows-store-artifact:
