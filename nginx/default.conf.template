@@ -1,3 +1,8 @@
+# Load environment variables
+map "" $webdav_backend {
+    default "$WEBDAV_BACKEND";
+}
+
 server {
     listen       80;
     server_name  localhost;
@@ -14,12 +19,13 @@ server {
         return 302 /webdav/;
     }
     location /webdav/ {
-        set $upstream $WEBDAV_BACKEND;
-        # note: put the upstream host in a variable first so that nginx can
-        # starts successfully even if the upstream hsot is not found.
+        if ($webdav_backend = "") {
+            return 404;
+        }
 
-        proxy_pass $upstream/;
-        # note: the trailing slash here matters!
+        resolver 127.0.0.11;  # resolve webdav_backend by docker internal DNS
+        rewrite ^/webdav/(.*)$ /$1 break;   # remove the `/webdav/` prefix
+        proxy_pass $webdav_backend;
     }
 
     # redirect server error pages to the static page /50x.html

@@ -10,8 +10,6 @@ services:
   # (used with the WEBDAV_BACKEND environment variable)
   webdav:
     image: hacdias/webdav:latest
-    ports:
-      - 81:80
     volumes:
       - ./webdav.yaml:/config.yml:ro
       - ./data:/data
