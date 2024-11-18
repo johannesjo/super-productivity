@@ -76,6 +76,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     map((event) => !!event.url.match(/(tasks|timeline)$/)),
     startWith(!!this._router.url.match(/(tasks|timeline)$/)),
   );
+  isInboxRoute$: Observable<boolean> = this._router.events.pipe(
+    filter((event: any) => event instanceof NavigationEnd),
+    map((event) => !!event.url.match(/(inbox)$/)),
+    startWith(!!this._router.url.match(/(inbox)$/)),
+  );
 
   private _subs: Subscription = new Subscription();
 

@@ -40,12 +40,12 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
       key: 'volume',
       type: 'slider',
       hideExpression: '!model.isEnabled',
-      templateOptions: {
+      props: {
         type: 'number',
         min: 0,
         max: 100,
-        label: T.GCF.SOUND.VOLUME,
         required: true,
+        label: T.GCF.SOUND.VOLUME,
         change: ({ model }) => {
           let txt = model.text.replace('${currentTaskTitle}', 'current task title');
           if (txt.length <= 1) {

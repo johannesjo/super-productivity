@@ -12,11 +12,22 @@
     #menuEntry
     class="route-link"
     mat-menu-item
+    routerLink="inbox"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>inbox</mat-icon>
+    <span class="text">Inbox</span>
+    <!--    <span class="text">{{ T.MH.INBOX|translate }}</span>-->
+  </button>
+
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
     routerLink="schedule"
     routerLinkActive="isActiveRoute"
   >
     <mat-icon svgIcon="early_on"></mat-icon>
-    <!--    <span class="text">{{ T.MH.PLANNER|translate }}</span>-->
     <span class="text">{{ T.MH.SCHEDULE|translate }}</span>
   </button>
 
@@ -27,7 +38,6 @@
     routerLink="planner"
     routerLinkActive="isActiveRoute"
   >
-    <!--    <mat-icon>calendar_view_week</mat-icon>-->
     <mat-icon>edit_calendar</mat-icon>
     <span class="text">{{ T.MH.PLANNER|translate }}</span>
   </button>

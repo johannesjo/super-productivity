@@ -9,6 +9,12 @@
     <mat-icon>menu</mat-icon>
   </button>
 
+  @if (isInboxRoute$|async) {
+  <div class="current-work-context-title">
+    <!--      {{ T.MH.INBOX|translate }}-->
+    Inbox
+  </div>
+  } @else {
   <ng-container
     *ngIf="workContextService.activeWorkContextTypeAndId$|async as activeWorkContextTypeAndId"
   >
@@ -18,7 +24,7 @@
       mat-ripple
       routerLink="/active/tasks"
     >
-      {{workContextService.activeWorkContextTitle$|async}}
+      {{ workContextService.activeWorkContextTitle$|async }}
     </div>
 
     <button
@@ -40,6 +46,7 @@
       </ng-template>
     </mat-menu>
   </ng-container>
+  }
 
   <nav class="action-nav">
     <button
@@ -104,7 +111,7 @@
         @fade
         class="current-task-title"
       >
-        <div class="title">{{currentTask.title}}</div>
+        <div class="title">{{ currentTask.title }}</div>
         <tag
           *ngIf="(currentTaskContext$|async) as currentTaskContext"
           @expandFadeHorizontal
@@ -160,7 +167,7 @@
 
       <ng-container *ngIf="(pomodoroService.cfg$|async)?.isEnabled">
         <div class="pomodoro-label">
-          {{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
+          {{ (pomodoroService.currentSessionTime$|async|msToMinuteClockString) }}
         </div>
         <div class="pomodoro-controls">
           <button

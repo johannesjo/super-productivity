@@ -1,0 +1,47 @@
+<div class="page-wrapper">
+  @if (isShowIntro()) {
+  <inbox-intro></inbox-intro>
+  }
+
+  <mat-tab-group
+    mat-align-tabs="start"
+    mat-stretch-tabs="false"
+  >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>inbox</mat-icon>
+      </ng-template>
+      Inbox
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon
+          matTooltip="Jira"
+          matTooltipPosition="above"
+          [svgIcon]="'JIRA'|issueIcon"
+        ></mat-icon>
+      </ng-template>
+      Jira 1
+      <button mat-flat-button>Configure</button>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>
+      </ng-template>
+      Github 1
+    </mat-tab>
+
+    <mat-tab disabled>
+      <ng-template mat-tab-label>
+        <button
+          mat-icon-button
+          (click)="addProvider()"
+        >
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>
