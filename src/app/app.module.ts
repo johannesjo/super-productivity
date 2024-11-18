@@ -56,7 +56,7 @@ import { FocusModeModule } from './features/focus-mode/focus-mode.module';
 import { CalendarIntegrationModule } from './features/calendar-integration/calendar-integration.module';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { InboxModule } from './features/inbox/inbox.module';
+import { InboxModule } from './features/add-task-panel/inbox.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>

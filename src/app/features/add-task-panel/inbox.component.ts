@@ -5,6 +5,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { IssueModule } from '../issue/issue.module';
 import { MatTooltip } from '@angular/material/tooltip';
+import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.component';
 
 @Component({
   selector: 'inbox',
@@ -19,6 +20,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     IssueModule,
     MatTooltip,
     MatButton,
+    AddIssuesPanelComponent,
   ],
   templateUrl: './inbox.component.html',
   styleUrl: './inbox.component.scss',

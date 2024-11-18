@@ -9,12 +9,6 @@
     <mat-icon>menu</mat-icon>
   </button>
 
-  @if (isInboxRoute$|async) {
-  <div class="current-work-context-title">
-    <!--      {{ T.MH.INBOX|translate }}-->
-    Inbox
-  </div>
-  } @else {
   <ng-container
     *ngIf="workContextService.activeWorkContextTypeAndId$|async as activeWorkContextTypeAndId"
   >
@@ -46,7 +40,6 @@
       </ng-template>
     </mat-menu>
   </ng-container>
-  }
 
   <nav class="action-nav">
     <button
@@ -223,6 +216,18 @@
         </div>
       </div>
     </ng-container>
+
+    <button
+      class="toggle-notes-btn"
+      [disabled]="!(isRouteWithSidePanel$|async)"
+      [class.isActive]="(layoutService.isShowAddTaskPanel$|async)"
+      [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"
+      (click)="layoutService.toggleAddTaskPanel()"
+      mat-icon-button
+      matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{kb.openProjectNotes?'['+kb.openProjectNotes+']':''}}"
+    >
+      <mat-icon class="note-ico">playlist_add</mat-icon>
+    </button>
 
     <button
       class="toggle-notes-btn"

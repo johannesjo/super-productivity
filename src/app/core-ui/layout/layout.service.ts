@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
+  hideAddTaskPanel,
   hideNotes,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
   showSearchBar,
   toggleAddTaskBar,
+  toggleAddTaskPanel,
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
@@ -16,6 +18,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
+  selectIsShowAddTaskPanel,
   selectIsShowNotes,
   selectIsShowSearchBar,
   selectIsShowSideNav,
@@ -76,6 +79,11 @@ export class LayoutService {
     select(selectIsShowNotes),
   );
   isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe();
+
+  private _isShowAddTaskPanel$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowAddTaskPanel),
+  );
+  isShowAddTaskPanel$: Observable<boolean> = this._isShowAddTaskPanel$.pipe();
 
   constructor(
     private _store$: Store<LayoutState>,
@@ -140,5 +148,13 @@ export class LayoutService {
 
   hideNotes(): void {
     this._store$.dispatch(hideNotes());
+  }
+
+  toggleAddTaskPanel(): void {
+    this._store$.dispatch(toggleAddTaskPanel());
+  }
+
+  hideAddTaskPanel(): void {
+    this._store$.dispatch(hideAddTaskPanel());
   }
 }

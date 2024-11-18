@@ -1,0 +1,37 @@
+<!--- create 10 random list items -->
+<div class="filter-bar">
+  <div class="filter-input">
+    <mat-icon class="filter-ico">filter_alt</mat-icon>
+    <input
+      type="text"
+      placeholder="Enter text to filter"
+    />
+  </div>
+</div>
+
+<!-- TODO
+* schedule tasks need to be indicated
+-->
+
+<!--<div-->
+<!--  class="tasks"-->
+<!--  *ngIf="filteredTasks$|async as allTasks"-->
+<!--  cdkDropList-->
+<!--  cdkDropListSortingDisabled-->
+<!--  [cdkDropListData]="ADD_TASK_PANEL "-->
+<!--  (cdkDropListDropped)="drop($event)"-->
+<!--&gt;-->
+<!--  @for (task of allTasks; track task.id) {-->
+<!--    <planner-task-->
+<!--      cdkDrag-->
+<!--      [cdkDragData]="task"-->
+<!--      [task]="task"-->
+<!--    ></planner-task>-->
+<!--  } @if (allTasks.length === 0) {-->
+<!--  <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>-->
+<!--}-->
+<!--</div>-->
+
+@for (val of Array(10).keys(); track $index){
+<issue-panel-item></issue-panel-item>
+}
