@@ -113,6 +113,11 @@ export class CaldavClientService {
     const comp = new ICAL.Component(jCal);
     const todo = comp.getFirstSubcomponent('vtodo');
 
+    if (!todo) {
+      console.log(task);
+      throw new Error('No todo found for task');
+    }
+
     let categories: string[] = [];
     for (const cats of todo.getAllProperties('categories')) {
       if (cats) {
@@ -123,14 +128,14 @@ export class CaldavClientService {
     const completed = todo.getFirstPropertyValue('completed');
 
     return {
-      id: todo.getFirstPropertyValue('uid'),
+      id: todo.getFirstPropertyValue('uid') as string,
       completed: !!completed,
       item_url: task.url,
-      summary: todo.getFirstPropertyValue('summary') || '',
-      due: todo.getFirstPropertyValue('due') || '',
-      start: todo.getFirstPropertyValue('dtstart') || '',
+      summary: (todo.getFirstPropertyValue('summary') as string) || '',
+      due: (todo.getFirstPropertyValue('due') as string) || '',
+      start: (todo.getFirstPropertyValue('dtstart') as string) || '',
       labels: categories,
-      note: todo.getFirstPropertyValue('description') || '',
+      note: (todo.getFirstPropertyValue('description') as string) || '',
       etag_hash: this._hashEtag(task.etag),
     };
   }
@@ -388,6 +393,11 @@ export class CaldavClientService {
     const comp = new ICAL.Component(jCal);
     const todo = comp.getFirstSubcomponent('vtodo');
 
+    if (!todo) {
+      console.warn('No todo found for task', task);
+      return;
+    }
+
     const oldCompleted = !!todo.getFirstPropertyValue('completed');
 
     if (completed === oldCompleted) {
@@ -408,7 +418,7 @@ export class CaldavClientService {
     // As 'sequence' starts at 0 and completing probably counts as a major change, then it should be at least 1 in the end,
     // if no other changes have been written.
     const sequence = todo.getFirstPropertyValue('sequence');
-    const sequenceInt = sequence ? parseInt(sequence) + 1 : 1;
+    const sequenceInt = sequence ? parseInt(sequence as string) + 1 : 1;
     todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);

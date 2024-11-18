@@ -101,7 +101,7 @@ const getAllPossibleEventsAfterStartFromIcal = (icalData: string, start: Date): 
       });
 
       if (!ICAL.TimezoneService.has(tz.tzid)) {
-        ICAL.TimezoneService.register(tz.tzid, tz);
+        ICAL.TimezoneService.register(tz);
         tzAdded.push(tz.tzid);
       }
     }
