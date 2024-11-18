@@ -2,13 +2,12 @@ name: 'Lint & Test PRs'
 
 on: [pull_request]
 
+permissions:
+  pull-requests: write
+
 jobs:
   test-on-linux:
     runs-on: ubuntu-latest
-
-    permissions:
-      pull-requests: write
-
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -60,6 +59,7 @@ jobs:
       - name: Attach performance metrics to PR as comment
         # if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
+        continue-on-error: true
         with:
           #          header: test
           message: |
