@@ -6,6 +6,7 @@
   <mat-tab-group
     mat-align-tabs="start"
     mat-stretch-tabs="false"
+    dynamicHeight="true"
   >
     <mat-tab>
       <ng-template mat-tab-label>
@@ -20,6 +21,13 @@
 
     <mat-tab>
       <ng-template mat-tab-label>
+        <mat-icon [svgIcon]="'CALENDAR'|issueIcon"></mat-icon>
+      </ng-template>
+      Github 1
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
         <mat-icon
           matTooltip="Jira"
           matTooltipPosition="above"
@@ -29,12 +37,6 @@
       <button mat-flat-button>Configure</button>
     </mat-tab>
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>
-      </ng-template>
-      Github 1
-    </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>

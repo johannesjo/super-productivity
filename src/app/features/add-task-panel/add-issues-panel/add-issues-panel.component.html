@@ -1,13 +1,37 @@
 <!--- create 10 random list items -->
-<div class="filter-bar">
-  <div class="filter-input">
-    <mat-icon class="filter-ico">filter_alt</mat-icon>
-    <input
-      type="text"
-      placeholder="Enter text to filter"
-    />
-  </div>
+
+<div style="display: flex; align-items: center">
+  <form
+    class="example-form"
+    style="width: 100%; margin-top: 8px; margin-bottom: 8px"
+  >
+    <mat-form-field style="width: 100%">
+      <mat-label>Filter</mat-label>
+      <input
+        matInput
+        placeholder="Filter"
+      />
+    </mat-form-field>
+  </form>
+
+  <button
+    mat-icon-button
+    style="margin-left: 8px"
+    color=""
+  >
+    <mat-icon>settings</mat-icon>
+  </button>
 </div>
+
+<!--<div class="filter-bar">-->
+<!--  <div class="filter-input">-->
+<!--    <mat-icon class="filter-ico">filter_alt</mat-icon>-->
+<!--    <input-->
+<!--      type="text"-->
+<!--      placeholder="Enter text to filter"-->
+<!--    />-->
+<!--  </div>-->
+<!--</div>-->
 
 <!-- TODO
 * schedule tasks need to be indicated
@@ -32,6 +56,11 @@
 <!--}-->
 <!--</div>-->
 
-@for (val of Array(10).keys(); track $index){
-<issue-panel-item></issue-panel-item>
-}
+<div
+  class="item-list"
+  cdk-scrollable
+>
+  @for (val of Array(20).keys(); track $index) {
+  <issue-panel-item></issue-panel-item>
+  }
+</div>

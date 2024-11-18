@@ -89,3 +89,9 @@
   line-height: $planner-item-height;
   height: 0;
 }
+
+.item-list {
+  gap: 8px;
+  display: flex;
+  flex-direction: column;
+}

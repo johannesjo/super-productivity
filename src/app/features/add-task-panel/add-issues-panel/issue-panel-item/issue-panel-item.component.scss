@@ -1,0 +1,27 @@
+@import '../../../../../variables';
+@import '../../../tasks/task/task.component.mixins';
+
+$h: $planner-item-height;
+
+:host {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  min-height: $h;
+  background: $task-c-bg-light;
+  @include grabCursor();
+
+  @include darkTheme() {
+    color: $task-text-c-dark;
+    background: $task-c-bg-dark;
+  }
+
+  &.isDone {
+    opacity: $task-is-done-dim-opacity;
+
+    .title {
+      text-decoration: line-through;
+    }
+  }
+}
