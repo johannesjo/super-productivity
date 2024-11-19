@@ -11,6 +11,7 @@
     @for (issueProvider of issueProviders(); track issueProvider.id) {
     <mat-tab>
       <ng-template mat-tab-label>
+        <div class="initials">{{getIssueProviderInitials(issueProvider)}}</div>
         <mat-icon
           [svgIcon]="issueProvider.issueProviderKey|issueIcon"
           [matTooltip]="getToolTipText(issueProvider)"

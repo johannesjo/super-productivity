@@ -1,3 +1,4 @@
+@import '../../../variables.scss';
 :host {
   ::ng-deep .mat-mdc-tab {
     padding-left: 8px !important;
@@ -9,5 +10,21 @@
     opacity: 1;
     min-width: 20px;
     padding: 0;
+  }
+}
+
+.initials {
+  font-size: 12px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 4px;
+  border-radius: 50%;
+  background: #fff;
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lightest;
+    color: #ffffff;
   }
 }

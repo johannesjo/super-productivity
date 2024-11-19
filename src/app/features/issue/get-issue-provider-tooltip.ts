@@ -1,11 +1,67 @@
 import { IssueProvider } from './issue.model';
 
 export const getIssueProviderTooltip = (issueProvider: IssueProvider): string => {
+  const v = (() => {
+    switch (issueProvider.issueProviderKey) {
+      case 'JIRA':
+        return issueProvider.host;
+      case 'GITHUB':
+        return issueProvider.repo;
+      case 'GITLAB':
+        return issueProvider.project;
+      case 'GITEA':
+        return issueProvider.repoFullname;
+      case 'CALDAV':
+        return issueProvider.caldavUrl;
+      case 'REDMINE':
+        return issueProvider.projectId;
+      case 'OPEN_PROJECT':
+        return issueProvider.projectId;
+    }
+  })();
+  return v || issueProvider.issueProviderKey;
+};
+
+const getRepoInitials = (repo: string | null): string | undefined => {
+  if (!repo) {
+    return undefined;
+  }
+
+  const repoName = repo.split('/')[1];
+  const repoNameParts = repoName.split('-');
+  if (repoNameParts.length === 1) {
+    return repoNameParts[0].substring(0, 2).toUpperCase();
+  }
+  return repoNameParts
+    .map((part) => part[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+};
+
+export const getIssueProviderInitials = (
+  issueProvider: IssueProvider,
+): string | undefined | null => {
   switch (issueProvider.issueProviderKey) {
     case 'JIRA':
-      return issueProvider.host as string;
+      return issueProvider.host
+        ?.replace('https://', '')
+        ?.replace('http://', '')
+        ?.substring(0, 2)
+        ?.toUpperCase();
+    // case 'CALDAV':
+    //   return issueProvider.resourceName?.substring(0, 2).toUpperCase();
+    case 'REDMINE':
+      return issueProvider.projectId?.substring(0, 2).toUpperCase();
+    case 'OPEN_PROJECT':
+      return issueProvider.projectId?.substring(0, 2).toUpperCase();
+
     case 'GITHUB':
-      return issueProvider.repo as string;
+      return getRepoInitials(issueProvider.repo);
+    case 'GITLAB':
+      return getRepoInitials(issueProvider.project);
+    case 'GITEA':
+      return getRepoInitials(issueProvider.repoFullname);
   }
-  return issueProvider.issueProviderKey;
+  return undefined;
 };

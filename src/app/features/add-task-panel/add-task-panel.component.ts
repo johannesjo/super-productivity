@@ -10,7 +10,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProvider } from '../issue/issue.model';
-import { getIssueProviderTooltip } from '../issue/get-issue-provider-tooltip';
+import {
+  getIssueProviderInitials,
+  getIssueProviderTooltip,
+} from '../issue/get-issue-provider-tooltip';
 
 @Component({
   selector: 'add-task-panel',
@@ -44,5 +47,9 @@ export class AddTaskPanelComponent {
 
   getToolTipText(issueProvider: IssueProvider): string {
     return getIssueProviderTooltip(issueProvider);
+  }
+
+  getIssueProviderInitials(issueProvider: IssueProvider): string | null | undefined {
+    return getIssueProviderInitials(issueProvider);
   }
 }
