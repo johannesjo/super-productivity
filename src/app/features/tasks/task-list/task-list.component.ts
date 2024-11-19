@@ -27,10 +27,12 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
+import { IssueService } from '../../issue/issue.service';
+import { AddTaskPanel } from '../../add-task-panel/add-task-panel.model';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
-const PARENT_ALLOWED_LISTS = ['DONE', 'UNDONE', 'BACKLOG'];
+const PARENT_ALLOWED_LISTS = ['DONE', 'UNDONE', 'BACKLOG', 'ADD_TASK_PANEL'];
 
 export interface DropModelDataForList {
   listModelId: ListModelId;
@@ -91,6 +93,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
     private _store: Store,
+    private _issueService: IssueService,
     public dropListService: DropListService,
   ) {}
 
@@ -128,7 +131,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   async drop(
     srcFilteredTasks: TaskWithSubTasks[],
-    ev: CdkDragDrop<DropModelDataForList, DropModelDataForList, TaskWithSubTasks>,
+    ev: CdkDragDrop<
+      DropModelDataForList,
+      DropModelDataForList | 'ADD_TASK_PANEL',
+      TaskWithSubTasks | AddTaskPanel.IssueItem
+    >,
   ): Promise<void> {
     const srcListData = ev.previousContainer.data;
     const targetListData = ev.container.data;
@@ -149,9 +156,22 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
+    if (typeof srcListData === 'string') {
+      if (srcListData === 'ADD_TASK_PANEL') {
+        return this._addFromIssuePanel(draggedTask as AddTaskPanel.IssueItem);
+      }
+      throw new Error('Should not happen');
+    }
+
     const newIds =
       targetTask && targetTask.id !== draggedTask.id
-        ? [...moveItemBeforeItem(targetListData.filteredTasks, draggedTask, targetTask)]
+        ? [
+            ...moveItemBeforeItem(
+              targetListData.filteredTasks,
+              draggedTask,
+              targetTask as TaskWithSubTasks,
+            ),
+          ]
         : [
             ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
             draggedTask,
@@ -168,6 +188,21 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       srcListData.listModelId,
       targetListData.listModelId,
       newIds.map((p) => p.id),
+    );
+  }
+
+  async _addFromIssuePanel(item: AddTaskPanel.IssueItem): Promise<void> {
+    if (!item.data.issueType || !item.data.issueData) {
+      throw new Error('No issueData');
+    }
+    console.log(item);
+
+    await this._issueService.addTaskWithIssue(
+      item.data.issueType,
+      item.data.issueData.id,
+      this._workContextService.activeWorkContextId as string,
+      // this.isAddToBacklog,
+      false,
     );
   }
 

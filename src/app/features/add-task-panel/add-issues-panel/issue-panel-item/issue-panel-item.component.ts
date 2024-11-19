@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
+import { AddTaskPanel } from '../../add-task-panel.model';
 
 @Component({
   selector: 'issue-panel-item',
@@ -11,4 +12,6 @@ import { MatTooltip } from '@angular/material/tooltip';
   styleUrl: './issue-panel-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IssuePanelItemComponent {}
+export class IssuePanelItemComponent {
+  itemData = input.required<AddTaskPanel.IssueItem>();
+}

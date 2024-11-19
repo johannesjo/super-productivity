@@ -6,13 +6,8 @@ $h: $planner-item-height;
 :host {
   display: flex;
   align-items: center;
-}
-
-.wrapper {
-  display: flex;
-  align-items: center;
   flex: 1;
-  padding: 8px;
+  //padding: 8px;
   border-radius: 6px;
   min-height: $h;
   background: $task-c-bg-light;

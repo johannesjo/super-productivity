@@ -49,10 +49,29 @@
 <!--</div>-->
 
 <div
+  #dropList
   class="item-list"
   cdk-scrollable
+  cdkDropList
+  cdkDropListSortingDisabled
+  [cdkDropListConnectedTo]="dropListService.dropLists|async"
+  [cdkDropListData]="'ADD_TASK_PANEL'"
 >
-  @for (val of Array(20).keys(); track $index) {
-  <issue-panel-item></issue-panel-item>
+  <!--  (cdkDropListDropped)="drop($event)"-->
+
+  @for (item of items; track $index) {
+  <!--    <div style="display: flex; align-items: center">-->
+  <!--      <button-->
+  <!--        mat-icon-button-->
+  <!--        color=""-->
+  <!--      >-->
+  <!--        <mat-icon>add</mat-icon>-->
+  <!--      </button>-->
+  <issue-panel-item
+    [itemData]="item"
+    cdkDrag
+    [cdkDragData]="item"
+  ></issue-panel-item>
+  <!--    </div>-->
   }
 </div>

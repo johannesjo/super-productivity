@@ -384,40 +384,40 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         translateParams: { title: item.title },
       });
     } else {
-      if (!item.issueType || !item.issueData) {
-        throw new Error('No issueData');
-      }
-      const res = await this._taskService.checkForTaskWithIssueInProject(
-        item.issueData.id,
-        item.issueType,
-        this._workContextService.activeWorkContextId as string,
-      );
-      if (!res) {
-        this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
-          item.issueType,
-          item.issueData.id,
-          this._workContextService.activeWorkContextId as string,
-          this.isAddToBacklog,
-        );
-      } else if (res.isFromArchive) {
-        this._lastAddedTaskId = res.task.id;
-        this._taskService.restoreTask(res.task, res.subTasks || []);
-        this._snackService.open({
-          ico: 'info',
-          msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
-          translateParams: { title: res.task.title },
-        });
-      } else if (res.task.projectId) {
-        this._lastAddedTaskId = res.task.id;
-        this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
-        this._snackService.open({
-          ico: 'arrow_upward',
-          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
-          translateParams: { title: res.task.title },
-        });
-      } else {
-        throw new Error('Weird add task case2');
-      }
+      // if (!item.issueType || !item.issueData) {
+      //   throw new Error('No issueData');
+      // }
+      // const res = await this._taskService.checkForTaskWithIssueInProject(
+      //   item.issueData.id,
+      //   item.issueType,
+      //   this._workContextService.activeWorkContextId as string,
+      // );
+      // if (!res) {
+      //   this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
+      //     item.issueType,
+      //     item.issueData.id,
+      //     this._workContextService.activeWorkContextId as string,
+      //     this.isAddToBacklog,
+      //   );
+      // } else if (res.isFromArchive) {
+      //   this._lastAddedTaskId = res.task.id;
+      //   this._taskService.restoreTask(res.task, res.subTasks || []);
+      //   this._snackService.open({
+      //     ico: 'info',
+      //     msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+      //     translateParams: { title: res.task.title },
+      //   });
+      // } else if (res.task.projectId) {
+      //   this._lastAddedTaskId = res.task.id;
+      //   this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
+      //   this._snackService.open({
+      //     ico: 'arrow_upward',
+      //     msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+      //     translateParams: { title: res.task.title },
+      //   });
+      // } else {
+      //   throw new Error('Weird add task case2');
+      // }
     }
 
     if (this._lastAddedTaskId) {
