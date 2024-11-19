@@ -28,7 +28,7 @@ import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { IssueService } from '../../issue/issue.service';
-import { AddTaskPanel } from '../../add-task-panel/add-task-panel.model';
+import { SearchResultItem } from '../../issue/issue.model';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -134,7 +134,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     ev: CdkDragDrop<
       DropModelDataForList,
       DropModelDataForList | 'ADD_TASK_PANEL',
-      TaskWithSubTasks | AddTaskPanel.IssueItem
+      TaskWithSubTasks | SearchResultItem
     >,
   ): Promise<void> {
     const srcListData = ev.previousContainer.data;
@@ -152,15 +152,18 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
-    if (targetTask && targetTask.id === draggedTask.id) {
-      return;
-    }
-
-    if (typeof srcListData === 'string') {
+    if (!!draggedTask.issueType) {
       if (srcListData === 'ADD_TASK_PANEL') {
-        return this._addFromIssuePanel(draggedTask as AddTaskPanel.IssueItem);
+        return this._addFromIssuePanel(draggedTask as SearchResultItem);
       }
       throw new Error('Should not happen');
+    }
+    if (typeof srcListData === 'string') {
+      throw new Error('Should not happen');
+    }
+
+    if (targetTask && targetTask.id === draggedTask.id) {
+      return;
     }
 
     const newIds =
@@ -191,19 +194,24 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     );
   }
 
-  async _addFromIssuePanel(item: AddTaskPanel.IssueItem): Promise<void> {
-    if (!item.data.issueType || !item.data.issueData) {
+  async _addFromIssuePanel(item: SearchResultItem): Promise<void> {
+    if (!item.issueType || !item.issueData) {
       throw new Error('No issueData');
     }
     console.log(item);
 
-    await this._issueService.addTaskWithIssue(
-      item.data.issueType,
-      item.data.issueData.id,
-      this._workContextService.activeWorkContextId as string,
-      // this.isAddToBacklog,
-      false,
-    );
+    if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
+      await this._issueService.addTaskWithIssue(
+        item.issueType,
+        item.issueData.id,
+        this._workContextService.activeWorkContextId as string,
+        // this.isAddToBacklog,
+        false,
+      );
+    } else {
+      // TODO make it work
+      throw new Error('Not implemented YET');
+    }
   }
 
   private _move(
