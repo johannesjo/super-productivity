@@ -64,6 +64,7 @@ import {
 } from './persistence.const';
 import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
+import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -90,6 +91,11 @@ export class PersistenceService {
     ProjectState,
     Project
   >(ENTITY_MODEL_CFGS.project);
+
+  issueProvider: PersistenceBaseEntityModel<IssueProviderState, IssueProvider> =
+    this._cmBaseEntity<IssueProviderState, IssueProvider>(
+      ENTITY_MODEL_CFGS.issueProvider,
+    );
 
   tag: PersistenceBaseEntityModel<TagState, Tag> = this._cmBaseEntity<TagState, Tag>(
     ENTITY_MODEL_CFGS.tag,

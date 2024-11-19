@@ -24,6 +24,8 @@ import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue/redmine-issue.model';
+import { EntityState } from '@ngrx/entity';
+import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -89,3 +91,55 @@ export interface SearchResultItem {
   issueData: IssueDataReduced;
   titleHighlighted?: string;
 }
+
+// ISSUE PROVIDER MODEL
+// --------------------
+
+export interface IssueProviderState extends EntityState<IssueProvider> {
+  ids: string[];
+  // additional entities state properties
+  [MODEL_VERSION_KEY]: number;
+}
+
+// export type IssueProviderState = EntityState<IssueProvider>;
+
+interface IssueProviderBase {
+  id: string;
+  issueProviderKey: IssueProviderKey;
+}
+
+interface IssueProviderJira extends IssueProviderBase, JiraCfg {
+  issueProviderKey: 'JIRA';
+}
+
+interface IssueProviderGithub extends IssueProviderBase, GithubCfg {
+  issueProviderKey: 'GITHUB';
+}
+
+interface IssueProviderGitlab extends IssueProviderBase, GitlabCfg {
+  issueProviderKey: 'GITLAB';
+}
+
+interface IssueProviderCaldav extends IssueProviderBase, CaldavCfg {
+  issueProviderKey: 'CALDAV';
+}
+
+interface IssueProviderOpenProject extends IssueProviderBase, OpenProjectCfg {
+  issueProviderKey: 'OPEN_PROJECT';
+}
+
+interface IssueProviderGitea extends IssueProviderBase, GiteaCfg {
+  issueProviderKey: 'GITEA';
+}
+
+interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
+  issueProviderKey: 'REDMINE';
+}
+
+export type IssueProvider = IssueProviderJira &
+  IssueProviderGithub &
+  IssueProviderGitlab &
+  IssueProviderCaldav &
+  IssueProviderOpenProject &
+  IssueProviderGitea &
+  IssueProviderRedmine;

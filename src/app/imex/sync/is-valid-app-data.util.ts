@@ -28,6 +28,9 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
     dAny.globalConfig !== null &&
     typeof dAny.taskArchive === 'object' &&
     dAny.taskArchive !== null &&
+    // TODO add check later
+    // typeof dAny.issueProvider === 'object' &&
+    // dAny.issueProvider !== null &&
     typeof dAny.project === 'object' &&
     dAny.project !== null &&
     Array.isArray(d.reminders) &&

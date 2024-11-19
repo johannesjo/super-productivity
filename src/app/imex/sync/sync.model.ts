@@ -13,6 +13,7 @@ import { ProjectState } from '../../features/project/project.model';
 import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
+import { IssueProviderState } from '../../features/issue/issue.model';
 
 export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
@@ -20,6 +21,7 @@ export interface AppBaseWithoutLastSyncModelChange {
   reminders: Reminder[];
   planner: PlannerState;
   note: NoteState;
+  issueProvider: IssueProviderState;
 
   // Metric models
   metric: MetricState;

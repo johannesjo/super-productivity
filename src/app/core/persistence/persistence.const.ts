@@ -59,6 +59,9 @@ import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
 import { migrateNoteState } from '../../features/note/migrate-note-state.util';
 import { AppBaseData } from '../../imex/sync/sync.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
+import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
+import { issueProviderReducer } from '../../features/issue/store/issue-provider.reducer';
+import { migrateIssueProviderState } from '../../features/issue/migrate-issue-providers';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
@@ -69,6 +72,7 @@ interface PersistenceBaseModelCfgs {
 
 interface PersistenceEntityModelCfgs {
   project: PersistenceEntityModelCfg<ProjectState, Project>;
+  issueProvider: PersistenceEntityModelCfg<IssueProviderState, IssueProvider>;
   tag: PersistenceEntityModelCfg<TagState, Tag>;
   simpleCounter: PersistenceEntityModelCfg<SimpleCounterState, SimpleCounter>;
   note: PersistenceEntityModelCfg<NoteState, Note>;
@@ -115,7 +119,12 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     reducerFn: projectReducer as any,
     migrateFn: migrateProjectState,
   },
-
+  issueProvider: {
+    appDataKey: 'issueProvider',
+    modelVersion: MODEL_VERSION.ISSUE_PROVIDER,
+    reducerFn: issueProviderReducer,
+    migrateFn: migrateIssueProviderState,
+  },
   tag: {
     appDataKey: 'tag',
     modelVersion: MODEL_VERSION.TAG,
