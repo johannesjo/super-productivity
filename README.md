@@ -329,6 +329,11 @@ Ensure you follow the setup steps properly to configure the environment for buil
 docker run -d -p 80:80 johannesjo/super-productivity:latest
 ```
 
+> [!NOTE]
+> The command will automatically pull the container that matches the host's platform. Use `--platform` to specify a different one.
+>
+> Currently supported architectures: `linux/amd64`, `linux/arm64`, `linux/arm/v7`.
+
 Now you can access the web app from your browser at `http://localhost`.
 
 This container only serves the web app, and the user data is stored in the browser. Therefore, it does not have any persistent storage.
