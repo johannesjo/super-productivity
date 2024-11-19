@@ -11,10 +11,10 @@
   <ng-container better-drawer-side>
     @let panelContent = panelContent$ |async;
     <div class="right-panel">
-      <inbox
+      <add-task-panel
         *ngIf="panelContent === 'ADD_TASK_PANEL'"
         [@slideInFromRight]
-      ></inbox>
+      ></add-task-panel>
       <notes
         *ngIf="panelContent === 'NOTES'"
         [@slideInFromRight]

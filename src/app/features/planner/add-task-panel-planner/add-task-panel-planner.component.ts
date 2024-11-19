@@ -20,12 +20,12 @@ import { DateService } from '../../../core/date/date.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
-  selector: 'add-task-panel',
-  templateUrl: './add-task-panel.component.html',
-  styleUrl: './add-task-panel.component.scss',
+  selector: 'add-task-panel-planner',
+  templateUrl: './add-task-panel-planner.component.html',
+  styleUrl: './add-task-panel-planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddTaskPanelComponent {
+export class AddTaskPanelPlannerComponent {
   T: typeof T = T;
   @Output() closePanel = new EventEmitter<void>();
 

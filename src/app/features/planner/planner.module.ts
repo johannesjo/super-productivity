@@ -13,7 +13,7 @@ import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module'
 import { NoteModule } from '../note/note.module';
 import { TasksModule } from '../tasks/tasks.module';
 import { WorkViewModule } from '../work-view/work-view.module';
-import { AddTaskPanelComponent } from './add-task-panel/add-task-panel.component';
+import { AddTaskPanelPlannerComponent } from './add-task-panel-planner/add-task-panel-planner.component';
 import { TagModule } from '../tag/tag.module';
 import { PlannerTaskComponent } from './planner-task/planner-task.component';
 import { PlannerRepeatProjectionComponent } from './planner-repeat-projection/planner-repeat-projection.component';
@@ -35,7 +35,7 @@ import { TaskContextMenuComponent } from '../tasks/task-context-menu/task-contex
   declarations: [
     PlannerComponent,
     PlannerPlanViewComponent,
-    AddTaskPanelComponent,
+    AddTaskPanelPlannerComponent,
     PlannerTaskComponent,
     PlannerDayComponent,
     PlannerRepeatProjectionComponent,

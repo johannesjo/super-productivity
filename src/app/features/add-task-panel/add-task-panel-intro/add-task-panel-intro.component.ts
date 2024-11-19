@@ -10,7 +10,7 @@ import { UiModule } from '../../../ui/ui.module';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'inbox-intro',
+  selector: 'add-task-panel-intro',
   standalone: true,
   imports: [
     CommonModule,
@@ -21,8 +21,8 @@ import { CommonModule } from '@angular/common';
     MatCardActions,
     MatButton,
   ],
-  templateUrl: './inbox-intro.component.html',
-  styleUrl: './inbox-intro.component.scss',
+  templateUrl: './add-task-panel-intro.component.html',
+  styleUrl: './add-task-panel-intro.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InboxIntroComponent {}
+export class AddTaskPanelIntroComponent {}

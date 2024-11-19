@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { InboxIntroComponent } from './inbox-intro/inbox-intro.component';
+import { AddTaskPanelIntroComponent } from './add-task-panel-intro/add-task-panel-intro.component';
 import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -8,10 +8,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.component';
 
 @Component({
-  selector: 'inbox',
+  selector: 'add-task-panel',
   standalone: true,
   imports: [
-    InboxIntroComponent,
+    AddTaskPanelIntroComponent,
     MatTabGroup,
     MatTab,
     MatTabLabel,
@@ -22,11 +22,11 @@ import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.com
     MatButton,
     AddIssuesPanelComponent,
   ],
-  templateUrl: './inbox.component.html',
-  styleUrl: './inbox.component.scss',
+  templateUrl: './add-task-panel.component.html',
+  styleUrl: './add-task-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InboxComponent {
+export class AddTaskPanelComponent {
   isShowIntro = signal(false);
 
   addProvider(ev: MouseEvent): void {
