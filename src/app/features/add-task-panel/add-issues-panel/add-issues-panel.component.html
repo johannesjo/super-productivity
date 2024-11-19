@@ -22,30 +22,15 @@
     <mat-label>Search</mat-label>
     <mat-icon matPrefix>search</mat-icon>
     <input
+      [ngModel]="searchText()"
+      (ngModelChange)="searchText.set($event)"
+      autocomplete="off"
       matInput
+      name="search"
       placeholder="Search"
     />
   </mat-form-field>
 </form>
-
-<!--<div-->
-<!--  class="tasks"-->
-<!--  *ngIf="filteredTasks$|async as allTasks"-->
-<!--  cdkDropList-->
-<!--  cdkDropListSortingDisabled-->
-<!--  [cdkDropListData]="ADD_TASK_PANEL "-->
-<!--  (cdkDropListDropped)="drop($event)"-->
-<!--&gt;-->
-<!--  @for (task of allTasks; track task.id) {-->
-<!--    <planner-task-->
-<!--      cdkDrag-->
-<!--      [cdkDragData]="task"-->
-<!--      [task]="task"-->
-<!--    ></planner-task>-->
-<!--  } @if (allTasks.length === 0) {-->
-<!--  <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>-->
-<!--}-->
-<!--</div>-->
 
 <div
   #dropList
@@ -58,7 +43,7 @@
 >
   <!--  (cdkDropListDropped)="drop($event)"-->
 
-  @for (item of items; track $index) {
+  @for (item of issueItems(); track $index) {
   <!--    <div style="display: flex; align-items: center">-->
   <!--      <button-->
   <!--        mat-icon-button-->
