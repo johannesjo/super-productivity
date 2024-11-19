@@ -106,6 +106,8 @@ export interface IssueProviderState extends EntityState<IssueProvider> {
 interface IssueProviderBase {
   id: string;
   issueProviderKey: IssueProviderKey;
+  // delete at some point in the future
+  migratedFromProjectId?: string;
 }
 
 interface IssueProviderJira extends IssueProviderBase, JiraCfg {
