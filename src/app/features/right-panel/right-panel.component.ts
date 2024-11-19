@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import { delay, map, switchMap, tap } from 'rxjs/operators';
+import { delay, map, switchMap } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -53,8 +53,6 @@ export class RightPanelComponent implements OnDestroy {
     this.layoutService.isShowNotes$,
     this.layoutService.isShowAddTaskPanel$,
   ]).pipe(
-    tap((v) => console.log('aa', v)),
-
     map(
       ([selectedTask, targetPanel, isShowNotes, isShowAddTaskPanel]) =>
         !!(selectedTask || isShowNotes || isShowAddTaskPanel) &&

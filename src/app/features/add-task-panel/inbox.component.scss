@@ -4,4 +4,10 @@
     padding-right: 8px !important;
     min-width: 50px !important;
   }
+
+  ::ng-deep .mat-tab-label:last-child {
+    opacity: 1;
+    min-width: 20px;
+    padding: 0;
+  }
 }

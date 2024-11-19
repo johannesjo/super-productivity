@@ -8,22 +8,22 @@
     mat-stretch-tabs="false"
     dynamicHeight="true"
   >
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon
-          matTooltip="Tasks"
-          matTooltipPosition="above"
-          >check_circle
-        </mat-icon>
-      </ng-template>
-      <add-issues-panel></add-issues-panel>
-    </mat-tab>
+    <!--    <mat-tab>-->
+    <!--      <ng-template mat-tab-label>-->
+    <!--        <mat-icon-->
+    <!--          matTooltip="Tasks"-->
+    <!--          matTooltipPosition="above"-->
+    <!--          >check_circle-->
+    <!--        </mat-icon>-->
+    <!--      </ng-template>-->
+    <!--      <add-issues-panel></add-issues-panel>-->
+    <!--    </mat-tab>-->
 
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon [svgIcon]="'CALENDAR'|issueIcon"></mat-icon>
       </ng-template>
-      Github 1
+      <add-issues-panel></add-issues-panel>
     </mat-tab>
 
     <mat-tab>
@@ -56,11 +56,11 @@
       Github 1
     </mat-tab>
 
-    <mat-tab disabled>
+    <mat-tab>
       <ng-template mat-tab-label>
         <button
           mat-icon-button
-          (click)="addProvider()"
+          (click)="addProvider($event)"
         >
           <mat-icon>add_circle</mat-icon>
         </button>

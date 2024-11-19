@@ -29,7 +29,8 @@ import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.com
 export class InboxComponent {
   isShowIntro = signal(false);
 
-  addProvider(): void {
-    console.log('I am here!');
+  addProvider(ev: MouseEvent): void {
+    ev.stopPropagation();
+    ev.preventDefault();
   }
 }

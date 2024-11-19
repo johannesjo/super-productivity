@@ -6,15 +6,24 @@ $h: $planner-item-height;
 :host {
   display: flex;
   align-items: center;
-  gap: 8px;
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 8px;
   border-radius: 6px;
   min-height: $h;
   background: $task-c-bg-light;
+  border: 1px solid $light-theme-extra-border-color;
+
   @include grabCursor();
 
   @include darkTheme() {
     color: $task-text-c-dark;
     background: $task-c-bg-dark;
+    border-color: $dark-theme-extra-border-color;
   }
 
   &.isDone {

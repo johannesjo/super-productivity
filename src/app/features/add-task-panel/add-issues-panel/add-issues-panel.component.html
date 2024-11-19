@@ -3,13 +3,19 @@
 <div style="display: flex; align-items: center">
   <form
     class="example-form"
-    style="width: 100%; margin-top: 8px; margin-bottom: 8px"
+    style="width: 100%; margin: 16px 0"
   >
-    <mat-form-field style="width: 100%">
-      <mat-label>Filter</mat-label>
+    <mat-form-field
+      style="width: 100%; margin: 0"
+      appearance="outline"
+    >
+      <!--      <mat-icon matPrefix>filter_alt</mat-icon>-->
+      <!--      <mat-label>Filter</mat-label>-->
+      <mat-label>Search</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
       <input
         matInput
-        placeholder="Filter"
+        placeholder="Search"
       />
     </mat-form-field>
   </form>
@@ -22,20 +28,6 @@
     <mat-icon>settings</mat-icon>
   </button>
 </div>
-
-<!--<div class="filter-bar">-->
-<!--  <div class="filter-input">-->
-<!--    <mat-icon class="filter-ico">filter_alt</mat-icon>-->
-<!--    <input-->
-<!--      type="text"-->
-<!--      placeholder="Enter text to filter"-->
-<!--    />-->
-<!--  </div>-->
-<!--</div>-->
-
-<!-- TODO
-* schedule tasks need to be indicated
--->
 
 <!--<div-->
 <!--  class="tasks"-->
