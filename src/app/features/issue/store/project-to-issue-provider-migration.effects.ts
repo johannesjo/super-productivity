@@ -41,6 +41,7 @@ export class ProjectToIssueProviderMigrationEffects {
           issueProviderKey: key,
           migratedFromProjectId: project.id,
           id: nanoid(),
+          isEnabled: value.isEnabled && !project.isHiddenFromMenu,
           ...value,
         } as IssueProvider;
         console.log('Migrating issue provider from project', key, issueProvider);

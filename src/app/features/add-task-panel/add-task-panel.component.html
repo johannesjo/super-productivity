@@ -8,6 +8,21 @@
     mat-stretch-tabs="false"
     dynamicHeight="true"
   >
+    @for (issueProvider of issueProviders(); track issueProvider.id) {
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon
+          [svgIcon]="issueProvider.issueProviderKey|issueIcon"
+          [matTooltip]="getToolTipText(issueProvider)"
+          matTooltipPosition="above"
+        ></mat-icon>
+      </ng-template>
+      <ng-template matTabContent>
+        <add-issues-panel [issueProvider]="issueProvider"></add-issues-panel>
+      </ng-template>
+    </mat-tab>
+    }
+
     <!--    <mat-tab>-->
     <!--      <ng-template mat-tab-label>-->
     <!--        <mat-icon-->
@@ -19,42 +34,12 @@
     <!--      <add-issues-panel></add-issues-panel>-->
     <!--    </mat-tab>-->
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon [svgIcon]="'CALENDAR'|issueIcon"></mat-icon>
-      </ng-template>
-      <add-issues-panel></add-issues-panel>
-    </mat-tab>
-
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon
-          matTooltip="Jira"
-          matTooltipPosition="above"
-          [svgIcon]="'JIRA'|issueIcon"
-        ></mat-icon>
-      </ng-template>
-      <button mat-flat-button>Configure</button>
-    </mat-tab>
-
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>
-      </ng-template>
-      Github 1
-    </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>
-      </ng-template>
-      Github 1
-    </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon [svgIcon]="'GITHUB'|issueIcon"></mat-icon>
-      </ng-template>
-      Github 1
-    </mat-tab>
+    <!--    <mat-tab>-->
+    <!--      <ng-template mat-tab-label>-->
+    <!--        <mat-icon [svgIcon]="'CALENDAR'|issueIcon"></mat-icon>-->
+    <!--      </ng-template>-->
+    <!--      <add-issues-panel></add-issues-panel>-->
+    <!--    </mat-tab>-->
 
     <mat-tab>
       <ng-template mat-tab-label>

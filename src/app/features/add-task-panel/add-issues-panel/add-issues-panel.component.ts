@@ -2,6 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  input,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
@@ -14,6 +16,8 @@ import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
 import { AsyncPipe } from '@angular/common';
 import { AddTaskPanel } from '../add-task-panel.model';
+import { IssueProvider } from '../../issue/issue.model';
+import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
 
 @Component({
   selector: 'add-issues-panel',
@@ -33,6 +37,9 @@ import { AddTaskPanel } from '../add-task-panel.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
+  issueProvider = input.required<IssueProvider>();
+  issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
+
   items: AddTaskPanel.IssueItem[] = [
     {
       id: 'A',
@@ -54,9 +61,8 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   constructor(public dropListService: DropListService) {}
 
   ngAfterViewInit(): void {
-    console.log(this.dropList);
-
     this.dropListService.registerDropList(this.dropList!);
+    console.log(this.dropList);
   }
 
   ngOnDestroy(): void {

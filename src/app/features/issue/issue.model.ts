@@ -105,6 +105,7 @@ export interface IssueProviderState extends EntityState<IssueProvider> {
 
 interface IssueProviderBase {
   id: string;
+  isEnabled: boolean;
   issueProviderKey: IssueProviderKey;
   // delete at some point in the future
   migratedFromProjectId?: string;
@@ -138,10 +139,11 @@ interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
   issueProviderKey: 'REDMINE';
 }
 
-export type IssueProvider = IssueProviderJira &
-  IssueProviderGithub &
-  IssueProviderGitlab &
-  IssueProviderCaldav &
-  IssueProviderOpenProject &
-  IssueProviderGitea &
-  IssueProviderRedmine;
+export type IssueProvider =
+  | IssueProviderJira
+  | IssueProviderGithub
+  | IssueProviderGitlab
+  | IssueProviderCaldav
+  | IssueProviderOpenProject
+  | IssueProviderGitea
+  | IssueProviderRedmine;

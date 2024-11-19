@@ -64,6 +64,3 @@ export const issueProvidersFeature = createFeature({
     ...adapter.getSelectors(selectIssueProviderState),
   }),
 });
-
-export const { selectIds, selectEntities, selectAll, selectTotal } =
-  issueProvidersFeature;

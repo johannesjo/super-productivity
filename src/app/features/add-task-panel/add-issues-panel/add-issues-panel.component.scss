@@ -11,6 +11,12 @@
   min-width: 260px;
 }
 
+.title {
+  opacity: 0.5;
+  margin-top: 16px;
+  font-style: italic;
+}
+
 .filter-bar {
   display: flex;
   flex-grow: 0;
