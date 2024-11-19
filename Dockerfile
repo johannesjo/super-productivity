@@ -3,7 +3,7 @@
 ### build ###
 
 # base image
-FROM node:20 as build
+FROM --platform=$BUILDPLATFORM node:20 as build
 
 # add app
 COPY . /app
@@ -26,7 +26,10 @@ RUN npm run buildFrontend:prodWeb
 ### serve ###
 
 # base image
-FROM nginx:1-alpine
+# --platform=$TARGETPLATFORM is redundant and docker will raise a warning,
+# but it makes it clearer that the target platform might be different from the
+# build platform
+FROM --platform=$TARGETPLATFORM nginx:1-alpine
 
 # environmental variables
 ENV PORT=80
