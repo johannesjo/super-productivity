@@ -17,13 +17,13 @@ import { UiModule } from '../../../ui/ui.module';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
 import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
-import { debounceTime, filter, map, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
@@ -45,6 +45,7 @@ import { MatDialog } from '@angular/material/dialog';
     CdkDrag,
     AsyncPipe,
     FormsModule,
+    NgIf,
   ],
   templateUrl: './add-issues-panel.component.html',
   styleUrl: './add-issues-panel.component.scss',
@@ -60,6 +61,7 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   issueProvider = input.required<IssueProvider>();
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
   searchText = signal('');
+  isLoading = signal(false);
 
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
@@ -73,6 +75,7 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
     ]).pipe(
       filter(([searchText]) => searchText.length >= 1),
       debounceTime(300),
+      tap(() => this.isLoading.set(true)),
       switchMap(([searchText, allIssueIdsForProvider]) =>
         this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
           map((items) => {
@@ -90,6 +93,7 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
           }),
         ),
       ),
+      tap(() => this.isLoading.set(false)),
     );
 
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));

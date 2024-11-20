@@ -7,10 +7,10 @@
   >
     <mat-icon>settings</mat-icon>
   </button>
-  <div class="title">{{issueProviderTooltip()}}</div>
+  <div class="title">{{ issueProviderTooltip() }}</div>
 </div>
 
-@if(issueProvider().isEnabled) {
+@if (issueProvider().isEnabled) {
 <form
   class="example-form"
   style="width: 100%; margin: 8px 0 16px"
@@ -35,6 +35,11 @@
   </mat-form-field>
 </form>
 
+@if (isLoading()) {
+<div class="spinner">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>
+} @else {
 <div
   #dropList
   class="item-list"
@@ -63,4 +68,4 @@
   <!--    </div>-->
   }
 </div>
-}
+} }
