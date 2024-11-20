@@ -1,5 +1,16 @@
 @import '../../../variables.scss';
+
 :host {
+  padding: $s;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   ::ng-deep .mat-mdc-tab {
     padding-left: 8px !important;
     padding-right: 8px !important;
@@ -10,6 +21,30 @@
     opacity: 1;
     min-width: 20px;
     padding: 0;
+  }
+
+  ::ng-deep {
+    .mat-mdc-tab-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      //border: 1px solid yellow;
+    }
   }
 }
 
