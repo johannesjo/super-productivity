@@ -13,19 +13,22 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean>;
+  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean>;
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean>;
+  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean>;
 
   pollTimer$: Observable<number>;
 
-  issueLink$(issueId: string | number, projectId: string): Observable<string>;
+  issueLink$(issueId: string | number, issueProviderId: string): Observable<string>;
 
-  getById$(id: string | number, projectId: string): Observable<IssueData>;
+  getById$(id: string | number, issueProviderId: string): Observable<IssueData>;
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
+  searchIssues$(
+    searchTerm: string,
+    issueProviderId: string,
+  ): Observable<SearchResultItem[]>;
 
   // also used to determine if task is done
   getFreshDataForIssueTask(task: Task): Promise<{
@@ -47,7 +50,7 @@ export interface IssueServiceInterface {
   getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 
   getNewIssuesToAddToBacklog?(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]>;
 }

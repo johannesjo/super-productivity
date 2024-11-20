@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { EMPTY, Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
-import { ProjectService } from '../../../project/project.service';
-import { IssueData, SearchResultItem } from '../../issue.model';
+import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
@@ -15,6 +14,8 @@ import {
   GITLAB_POLL_INTERVAL,
 } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
+import { Store } from '@ngrx/store';
+import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -22,19 +23,19 @@ import { isGitlabEnabled } from './is-gitlab-enabled';
 export class GitlabCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _gitlabApiService: GitlabApiService,
-    private readonly _projectService: ProjectService,
+    private readonly _store: Store,
   ) {}
 
   pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
     );
   }
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );
   }
@@ -43,8 +44,8 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return isGitlabEnabled(cfg);
   }
 
-  issueLink$(issueId: string, projectId: string): Observable<string> {
-    return this._getCfgOnce$(projectId).pipe(
+  issueLink$(issueId: string, issueProviderId: string): Observable<string> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => {
         const project: string = this._gitlabApiService.getProject(cfg, issueId);
         if (cfg.gitlabBaseUrl) {
@@ -59,14 +60,17 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  getById$(issueId: string, projectId: string): Observable<GitlabIssue> {
-    return this._getCfgOnce$(projectId).pipe(
+  getById$(issueId: string, issueProviderId: string): Observable<GitlabIssue> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
     );
   }
 
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(projectId).pipe(
+  searchIssues$(
+    searchTerm: string,
+    issueProviderId: string,
+  ): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((gitlabCfg) =>
         this.isEnabled(gitlabCfg) && gitlabCfg.isSearchIssuesFromGitlab
           ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(
@@ -85,14 +89,14 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     issue: GitlabIssue;
     issueTitle: string;
   } | null> {
-    if (!task.projectId) {
-      throw new Error('No projectId');
+    if (!task.issueProviderId) {
+      throw new Error('No issueProviderId');
     }
     if (!task.issueId) {
       throw new Error('No issueId');
     }
 
-    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const cfg = await this._getCfgOnce$(task.issueProviderId).toPromise();
     const fullIssueRef = this._gitlabApiService.getFullIssueRef(task.issueId, cfg);
     const idFormatChanged = task.issueId !== fullIssueRef;
     const issue = await this._gitlabApiService.getById$(fullIssueRef, cfg).toPromise();
@@ -130,12 +134,13 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   async getFreshDataForIssueTasks(
     tasks: Task[],
   ): Promise<{ task: Task; taskChanges: Partial<Task>; issue: GitlabIssue }[]> {
-    const projectId = tasks && tasks[0].projectId ? tasks[0].projectId : 0;
-    if (!projectId) {
-      throw new Error('No projectId');
+    const issueProviderId =
+      tasks && tasks[0].issueProviderId ? tasks[0].issueProviderId : 0;
+    if (!issueProviderId) {
+      throw new Error('No issueProviderId');
     }
 
-    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
     const issues = new Map<string, GitlabIssue>();
     const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
     const iidsByProject = new Map<string, string[]>();
@@ -220,10 +225,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   }
 
   async getNewIssuesToAddToBacklog(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueData[]> {
-    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
     return await this._gitlabApiService.getProjectIssues$(cfg).toPromise();
   }
 
@@ -235,7 +240,10 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return `${truncate(this._formatIssueTitle(issue))}`;
   }
 
-  private _getCfgOnce$(projectId: string): Observable<GitlabCfg> {
-    return this._projectService.getGitlabCfgForProject$(projectId).pipe(first());
+  private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGitlab> {
+    return EMPTY;
+    return this._store
+      .select(selectIssueProviderById<IssueProviderGitlab>(issueProviderId, 'GITLAB'))
+      .pipe(first());
   }
 }

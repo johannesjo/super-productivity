@@ -55,11 +55,7 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
     filter((searchText) => searchText.length >= 1),
     debounceTime(300),
     switchMap((searchText) =>
-      this.issueService.searchIssues$(
-        searchText,
-        // TODO remove migratedFromProjectId
-        this.issueProvider().migratedFromProjectId || this.issueProvider().id,
-      ),
+      this.issueService.searchIssues$(searchText, this.issueProvider().id),
     ),
   );
   issueItems = toSignal(this.issueItems$);

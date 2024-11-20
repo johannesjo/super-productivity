@@ -103,7 +103,7 @@ export interface IssueProviderState extends EntityState<IssueProvider> {
 
 // export type IssueProviderState = EntityState<IssueProvider>;
 
-interface IssueProviderBase {
+export interface IssueProviderBase {
   id: string;
   isEnabled: boolean;
   issueProviderKey: IssueProviderKey;
@@ -111,31 +111,31 @@ interface IssueProviderBase {
   migratedFromProjectId?: string;
 }
 
-interface IssueProviderJira extends IssueProviderBase, JiraCfg {
+export interface IssueProviderJira extends IssueProviderBase, JiraCfg {
   issueProviderKey: 'JIRA';
 }
 
-interface IssueProviderGithub extends IssueProviderBase, GithubCfg {
+export interface IssueProviderGithub extends IssueProviderBase, GithubCfg {
   issueProviderKey: 'GITHUB';
 }
 
-interface IssueProviderGitlab extends IssueProviderBase, GitlabCfg {
+export interface IssueProviderGitlab extends IssueProviderBase, GitlabCfg {
   issueProviderKey: 'GITLAB';
 }
 
-interface IssueProviderCaldav extends IssueProviderBase, CaldavCfg {
+export interface IssueProviderCaldav extends IssueProviderBase, CaldavCfg {
   issueProviderKey: 'CALDAV';
 }
 
-interface IssueProviderOpenProject extends IssueProviderBase, OpenProjectCfg {
+export interface IssueProviderOpenProject extends IssueProviderBase, OpenProjectCfg {
   issueProviderKey: 'OPEN_PROJECT';
 }
 
-interface IssueProviderGitea extends IssueProviderBase, GiteaCfg {
+export interface IssueProviderGitea extends IssueProviderBase, GiteaCfg {
   issueProviderKey: 'GITEA';
 }
 
-interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
+export interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
   issueProviderKey: 'REDMINE';
 }
 

@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
-import { ProjectService } from 'src/app/features/project/project.service';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
-import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
+import {
+  IssueData,
+  IssueDataReduced,
+  IssueProviderRedmine,
+  SearchResultItem,
+} from '../../issue.model';
 import { REDMINE_INITIAL_POLL_DELAY, REDMINE_POLL_INTERVAL } from './redmine.const';
 import {
   formatRedmineIssueSubject,
@@ -14,6 +18,8 @@ import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
 import { RedmineApiService } from '../redmine/redmine-api.service';
 import { RedmineIssue } from './redmine-issue/redmine-issue.model';
+import { Store } from '@ngrx/store';
+import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -21,21 +27,21 @@ import { RedmineIssue } from './redmine-issue/redmine-issue.model';
 export class RedmineCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _redmineApiService: RedmineApiService,
-    private readonly _projectService: ProjectService,
+    private readonly _store: Store,
   ) {}
 
   isEnabled(cfg: RedmineCfg): boolean {
     return isRedmineEnabled(cfg);
   }
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
     );
   }
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );
   }
@@ -45,14 +51,14 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     REDMINE_POLL_INTERVAL,
   );
 
-  issueLink$(issueId: number, projectId: string): Observable<string> {
-    return this._getCfgOnce$(projectId).pipe(
+  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => `${cfg.host}/issues/${issueId}`),
     );
   }
 
-  getById$(id: number, projectId: string): Observable<IssueData> {
-    return this._getCfgOnce$(projectId).pipe(
+  getById$(id: number, issueProviderId: string): Observable<IssueData> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((cfg: RedmineCfg) => this._redmineApiService.getById$(id as number, cfg)),
     );
   }
@@ -65,8 +71,8 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(query: string, projectId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(projectId).pipe(
+  searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((cfg) =>
         this.isEnabled(cfg) && cfg.isSearchIssuesFromRedmine
           ? this._redmineApiService
@@ -82,10 +88,10 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     issue: RedmineIssue;
     issueTitle: string;
   } | null> {
-    if (!task.projectId) throw new Error('No projectId');
+    if (!task.issueProviderId) throw new Error('No issueProviderId');
     if (!task.issueId) throw new Error('No issueId');
 
-    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const cfg = await this._getCfgOnce$(task.issueProviderId).toPromise();
     const issue = await this._redmineApiService.getById$(+task.issueId, cfg).toPromise();
     const lastUpdateOn = new Date(issue.updated_on).getTime();
     const wasUpdated = lastUpdateOn > (task.issueLastUpdated || 0);
@@ -134,17 +140,19 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
   }
 
   async getNewIssuesToAddToBacklog(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[],
   ): Promise<IssueDataReduced[]> {
-    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
 
     return await this._redmineApiService
       .getLast100IssuesForCurrentRedmineProject$(cfg)
       .toPromise();
   }
 
-  private _getCfgOnce$(projectId: string): Observable<RedmineCfg> {
-    return this._projectService.getRedmineCfgForProject$(projectId).pipe(first());
+  private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderRedmine> {
+    return this._store
+      .select(selectIssueProviderById<IssueProviderRedmine>(issueProviderId, 'REDMINE'))
+      .pipe(first());
   }
 }

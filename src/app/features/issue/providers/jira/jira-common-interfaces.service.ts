@@ -4,14 +4,15 @@ import { Task } from 'src/app/features/tasks/task.model';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
-import { ProjectService } from '../../../project/project.service';
-import { SearchResultItem } from '../../issue.model';
+import { IssueProviderJira, SearchResultItem } from '../../issue.model';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
 import { JiraCfg } from './jira.model';
 import { isJiraEnabled } from './is-jira-enabled.util';
 import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
+import { Store } from '@ngrx/store';
+import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -19,19 +20,19 @@ import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
 export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _jiraApiService: JiraApiService,
-    private readonly _projectService: ProjectService,
+    private readonly _store: Store,
   ) {}
 
   pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
     );
   }
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
+  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPollTickets),
     );
   }
@@ -41,8 +42,8 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   // NOTE: we're using the issueKey instead of the real issueId
-  getById$(issueId: string | number, projectId: string): Observable<JiraIssue> {
-    return this._getCfgOnce$(projectId).pipe(
+  getById$(issueId: string | number, issueProviderId: string): Observable<JiraIssue> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((jiraCfg) =>
         this._jiraApiService.getIssueById$(issueId as string, jiraCfg),
       ),
@@ -50,8 +51,11 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   // NOTE: this gives back issueKey instead of issueId
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(projectId).pipe(
+  searchIssues$(
+    searchTerm: string,
+    issueProviderId: string,
+  ): Observable<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((jiraCfg) =>
         this.isEnabled(jiraCfg) && jiraCfg.isEnabled
           ? this._jiraApiService
@@ -67,14 +71,14 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     issue: JiraIssue;
     issueTitle: string;
   } | null> {
-    if (!task.projectId) {
-      throw new Error('No projectId');
+    if (!task.issueProviderId) {
+      throw new Error('No issueProviderId');
     }
     if (!task.issueId) {
       throw new Error('No issueId');
     }
 
-    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const cfg = await this._getCfgOnce$(task.issueProviderId).toPromise();
     const issue = (await this._jiraApiService
       .getIssueById$(task.issueId, cfg)
       .toPromise()) as JiraIssue;
@@ -133,22 +137,22 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  issueLink$(issueId: string | number, projectId: string): Observable<string> {
-    if (!issueId || !projectId) {
-      throw new Error('No issueId or no projectId');
+  issueLink$(issueId: string | number, issueProviderId: string): Observable<string> {
+    if (!issueId || !issueProviderId) {
+      throw new Error('No issueId or no issueProviderId');
     }
     // const isIssueKey = isNaN(Number(issueId));
-    return this._projectService.getJiraCfgForProject$(projectId).pipe(
+    return this._getCfgOnce$(issueProviderId).pipe(
       first(),
       map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
     );
   }
 
   async getNewIssuesToAddToBacklog(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<JiraIssueReduced[]> {
-    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
     return await this._jiraApiService.findAutoImportIssues$(cfg).toPromise();
   }
 
@@ -158,7 +162,9 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
       : [];
   }
 
-  private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
-    return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
+  private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderJira> {
+    return this._store
+      .select(selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'))
+      .pipe(first());
   }
 }

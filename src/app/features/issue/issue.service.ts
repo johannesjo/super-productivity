@@ -81,14 +81,14 @@ export class IssueService {
   getById$(
     issueType: IssueProviderKey,
     id: string | number,
-    projectId: string,
+    issueProviderId: string,
   ): Observable<IssueData> {
     // account for issue refreshment
     if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
       this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
     }
     return this.ISSUE_SERVICE_MAP[issueType]
-      .getById$(id, projectId)
+      .getById$(id, issueProviderId)
       .pipe(
         switchMap((issue) =>
           merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
@@ -96,11 +96,14 @@ export class IssueService {
       );
   }
 
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
+  searchIssues$(
+    searchTerm: string,
+    issueProviderId: string,
+  ): Observable<SearchResultItem[]> {
     const obs = Object.keys(this.ISSUE_SERVICE_MAP)
       .map((key) => this.ISSUE_SERVICE_MAP[key])
       .filter((provider) => typeof provider.searchIssues$ === 'function')
-      .map((provider) => (provider.searchIssues$ as any)(searchTerm, projectId));
+      .map((provider) => (provider.searchIssues$ as any)(searchTerm, issueProviderId));
     obs.unshift(from([[]]));
 
     return zip(...obs, (...allResults: any[]) => [].concat(...allResults)) as Observable<
@@ -111,26 +114,26 @@ export class IssueService {
   issueLink$(
     issueType: IssueProviderKey,
     issueId: string | number,
-    projectId: string,
+    issueProviderId: string,
   ): Observable<string> {
-    return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
+    return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, issueProviderId);
   }
 
   isBacklogPollEnabledForProjectOnce$(
     providerKey: IssueProviderKey,
-    projectId: string,
+    issueProviderId: string,
   ): Observable<boolean> {
     return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
-      projectId,
+      issueProviderId,
     );
   }
 
   isPollIssueChangesEnabledForProjectOnce$(
     providerKey: IssueProviderKey,
-    projectId: string,
+    issueProviderId: string,
   ): Observable<boolean> {
     return this.ISSUE_SERVICE_MAP[providerKey].isIssueRefreshEnabledForProjectOnce$(
-      projectId,
+      issueProviderId,
     );
   }
 
@@ -150,7 +153,7 @@ export class IssueService {
 
   async checkAndImportNewIssuesToBacklogForProject(
     providerKey: IssueProviderKey,
-    projectId: string,
+    issueProviderId: string,
   ): Promise<void> {
     if (!this.ISSUE_SERVICE_MAP[providerKey].getNewIssuesToAddToBacklog) {
       return;
@@ -166,11 +169,11 @@ export class IssueService {
     });
 
     const allExistingIssueIds: string[] | number[] =
-      await this._taskService.getAllIssueIdsForProject(projectId, providerKey);
+      await this._taskService.getAllIssueIdsForProject(issueProviderId, providerKey);
 
     const potentialIssuesToAdd = await (
       this.ISSUE_SERVICE_MAP[providerKey] as any
-    ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
+    ).getNewIssuesToAddToBacklog(issueProviderId, allExistingIssueIds);
 
     const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
       (issue: IssueData): boolean =>
@@ -178,7 +181,7 @@ export class IssueService {
     );
 
     issuesToAdd.forEach((issue: IssueDataReduced) => {
-      this.addTaskWithIssue(providerKey, issue, projectId, true);
+      this.addTaskWithIssue(providerKey, issue, issueProviderId, true);
     });
 
     if (issuesToAdd.length === 1) {
@@ -216,9 +219,9 @@ export class IssueService {
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
   ): Promise<void> {
-    const { issueId, issueType, projectId } = task;
+    const { issueId, issueType, issueProviderId } = task;
 
-    if (!issueId || !issueType || !projectId) {
+    if (!issueId || !issueType || !issueProviderId) {
       throw new Error('No issue task');
     }
     if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
@@ -346,7 +349,7 @@ export class IssueService {
   async addTaskWithIssue(
     issueType: IssueProviderKey,
     issueIdOrData: string | number | IssueDataReduced,
-    projectId: string,
+    issueProviderId: string,
     isAddToBacklog: boolean = false,
   ): Promise<string> {
     if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
@@ -357,7 +360,7 @@ export class IssueService {
         ? {
             issueId: issueIdOrData,
             issueData: await this.ISSUE_SERVICE_MAP[issueType]
-              .getById$(issueIdOrData, projectId)
+              .getById$(issueIdOrData, issueProviderId)
               .toPromise(),
           }
         : {
@@ -370,12 +373,11 @@ export class IssueService {
 
     return this._taskService.add(title, isAddToBacklog, {
       issueType,
+      issueProviderId,
       issueId: issueId as string,
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
       ...additionalFields,
-      // this is very important as chances are we are in another context already when adding!
-      projectId,
     });
   }
 }
