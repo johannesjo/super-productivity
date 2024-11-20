@@ -133,11 +133,11 @@ export class IssueService {
     );
   }
 
-  isPollIssueChangesEnabledForProjectOnce$(
+  isAutoUpdateIssuesEnabledOnce$(
     providerKey: IssueProviderKey,
     issueProviderId: string,
   ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isIssueRefreshEnabledForProjectOnce$(
+    return this.ISSUE_SERVICE_MAP[providerKey].isAutoUpdateIssuesEnabledOnce$(
       issueProviderId,
     );
   }

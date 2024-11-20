@@ -40,6 +40,7 @@ export class ProjectToIssueProviderMigrationEffects {
         const issueProvider = {
           issueProviderKey: key,
           migratedFromProjectId: project.id,
+          defaultProjectId: project.id,
           id: nanoid(),
           isEnabled: value.isEnabled && !project.isHiddenFromMenu,
           ...value,

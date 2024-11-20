@@ -10,7 +10,6 @@ import { TaskCopy } from '../../tasks/task.model';
 import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { Router } from '@angular/router';
 import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { T } from 'src/app/t.const';
@@ -52,8 +51,8 @@ export class FocusModeMainComponent implements OnDestroy {
       if (!v) {
         return of(null);
       }
-      return v.issueType && v.issueId && v.projectId
-        ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
+      return v.issueType && v.issueId && v.issueProviderId
+        ? this._issueService.issueLink$(v.issueType, v.issueId, v.issueProviderId)
         : of(null);
     }),
     take(1),
@@ -66,7 +65,6 @@ export class FocusModeMainComponent implements OnDestroy {
     public readonly simpleCounterService: SimpleCounterService,
     private readonly _globalConfigService: GlobalConfigService,
     public readonly taskService: TaskService,
-    private readonly _router: Router,
     private readonly _taskAttachmentService: TaskAttachmentService,
     private readonly _issueService: IssueService,
     private readonly _store: Store,

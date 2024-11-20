@@ -110,8 +110,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private _task$: ReplaySubject<TaskWithSubTasks | Task> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
-      return v.issueType && v.issueId && v.projectId
-        ? this._issueService.issueLink$(v.issueType, v.issueId, v.projectId)
+      return v.issueType && v.issueId && v.issueProviderId
+        ? this._issueService.issueLink$(v.issueType, v.issueId, v.issueProviderId)
         : of(null);
     }),
     take(1),

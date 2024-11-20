@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, merge, Observable } from 'rxjs';
+import { Actions, ofType } from '@ngrx/effects';
+import { Observable } from 'rxjs';
 
-import { concatMap, filter, first, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { ISSUE_PROVIDER_TYPES } from '../issue.const';
+import { concatMap, filter, first, switchMap } from 'rxjs/operators';
 import { IssueService } from '../issue.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { updateProjectIssueProviderCfg } from '../../project/store/project.actions';
@@ -31,37 +30,38 @@ export class PollToBacklogEffects {
       filter((projectId) => !!projectId),
     );
 
-  pollNewIssuesToBacklog$: Observable<any> = createEffect(
-    () =>
-      this.pollToBacklogTriggerToProjectId$.pipe(
-        switchMap((pId) =>
-          merge(
-            ...ISSUE_PROVIDER_TYPES.map((providerKey) =>
-              this._issueService
-                .isBacklogPollEnabledForProjectOnce$(providerKey, pId)
-                .pipe(
-                  switchMap((isEnabled) => {
-                    return isEnabled
-                      ? this._issueService.getPollTimer$(providerKey).pipe(
-                          // NOTE: required otherwise timer stays alive for filtered actions
-                          takeUntil(this.pollToBacklogActions$),
-                          tap(() => console.log('POLL ' + providerKey)),
-                          switchMap(() =>
-                            this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                              providerKey,
-                              pId,
-                            ),
-                          ),
-                        )
-                      : EMPTY;
-                  }),
-                ),
-            ),
-          ),
-        ),
-      ),
-    { dispatch: false },
-  );
+  // TODO fix
+  // pollNewIssuesToBacklog$: Observable<any> = createEffect(
+  //   () =>
+  //     this.pollToBacklogTriggerToProjectId$.pipe(
+  //       switchMap((pId) =>
+  //         merge(
+  //           ...ISSUE_PROVIDER_TYPES.map((providerKey) =>
+  //             this._issueService
+  //               .isBacklogPollEnabledForProjectOnce$(providerKey, pId)
+  //               .pipe(
+  //                 switchMap((isEnabled) => {
+  //                   return isEnabled
+  //                     ? this._issueService.getPollTimer$(providerKey).pipe(
+  //                         // NOTE: required otherwise timer stays alive for filtered actions
+  //                         takeUntil(this.pollToBacklogActions$),
+  //                         tap(() => console.log('POLL ' + providerKey)),
+  //                         switchMap(() =>
+  //                           this._issueService.checkAndImportNewIssuesToBacklogForProject(
+  //                             providerKey,
+  //                             pId,
+  //                           ),
+  //                         ),
+  //                       )
+  //                     : EMPTY;
+  //                 }),
+  //               ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   { dispatch: false },
+  // );
 
   constructor(
     private readonly _issueService: IssueService,

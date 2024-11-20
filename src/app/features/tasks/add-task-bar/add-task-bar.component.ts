@@ -32,7 +32,6 @@ import {
   Observable,
   of,
   Subscription,
-  zip,
 } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -493,13 +492,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  // TODO improve typing
   private _searchForProject$(
     searchTerm: string,
     projectId: string,
   ): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
     if (searchTerm && searchTerm.length > 0) {
-      const backlog$ = this._workContextService.backlogTasks$.pipe(
+      return this._workContextService.backlogTasks$.pipe(
         map((tasks) =>
           tasks
             .filter((task) => this._filterBacklog(searchTerm, task))
@@ -513,13 +511,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
               }),
             ),
         ),
-      );
-      const issues$ = this._issueService.searchIssues$(
-        searchTerm,
-        this._workContextService.activeWorkContextId as string,
-      );
-      return zip(backlog$, issues$).pipe(
-        map(([backlog, issues]) => [...backlog, ...issues]),
       );
     } else {
       return of([]);

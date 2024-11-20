@@ -107,6 +107,7 @@ export interface IssueProviderBase {
   id: string;
   isEnabled: boolean;
   issueProviderKey: IssueProviderKey;
+  defaultProjectId: string | null;
   // delete at some point in the future
   migratedFromProjectId?: string;
 }

@@ -19,7 +19,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return of(false);
   }
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+  isAutoUpdateIssuesEnabledOnce$(projectId: string): Observable<boolean> {
     return of(false);
   }
 

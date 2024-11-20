@@ -31,13 +31,13 @@ export class PollIssueUpdatesEffects {
                       );
                       return forkJoin(
                         issueTasksForProvider.map((task) => {
-                          if (!task.projectId) {
-                            throw new Error('No project for task');
+                          if (!task.issueProviderId) {
+                            throw new Error('No issueProviderId for task');
                           }
                           return this._issueService
-                            .isPollIssueChangesEnabledForProjectOnce$(
+                            .isAutoUpdateIssuesEnabledOnce$(
                               providerKey,
-                              task.projectId,
+                              task.issueProviderId,
                             )
                             .pipe(
                               filter((isEnabled) => isEnabled),

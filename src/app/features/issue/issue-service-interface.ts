@@ -15,7 +15,7 @@ export interface IssueServiceInterface {
 
   isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean>;
 
-  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean>;
+  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean>;
 
   pollTimer$: Observable<number>;
 

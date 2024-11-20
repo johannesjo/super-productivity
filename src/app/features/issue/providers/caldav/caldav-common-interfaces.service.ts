@@ -34,7 +34,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  isIssueRefreshEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );

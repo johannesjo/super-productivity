@@ -156,11 +156,11 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
           if (this._taskData?.issueType === 'CALENDAR') {
             return of(null);
           }
-          if (!this._taskData || !this._taskData.projectId) {
+          if (!this._taskData || !this._taskData.issueProviderId) {
             throw new Error('task data not ready');
           }
           return this._issueService
-            .getById$(args.type, args.id, this._taskData.projectId)
+            .getById$(args.type, args.id, this._taskData.issueProviderId)
             .pipe(
               // NOTE we need this, otherwise the error is going to weird up the observable
               catchError(() => {
