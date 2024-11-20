@@ -7,10 +7,11 @@
   mat-stretch-tabs="false"
 >
   @for (issueProvider of issueProviders(); track issueProvider.id) {
-  <mat-tab [disabled]="!issueProvider.isEnabled">
+  <mat-tab>
     <ng-template mat-tab-label>
       <div
         class="tab-header-item"
+        [class.disabled]="!issueProvider.isEnabled"
         (longPressIOS)="openEditIssueProvider(issueProvider)"
         (longPress)="openEditIssueProvider(issueProvider)"
       >

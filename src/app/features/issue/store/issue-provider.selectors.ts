@@ -22,6 +22,14 @@ export const selectEnabledIssueProviders = createSelector(
     ),
 );
 
+export const selectIssueProvidersWithDisabledLast = createSelector(
+  selectAll,
+  (issueProviders: IssueProvider[]): IssueProvider[] =>
+    issueProviders.sort((a: IssueProvider, b: IssueProvider) =>
+      a.isEnabled === b.isEnabled ? 0 : a.isEnabled ? -1 : 1,
+    ),
+);
+
 export const selectIssueProviderById = <T extends IssueProvider>(
   id: string,
   issueProviderKey: IssueProviderKey | null,

@@ -10,6 +10,7 @@
   <div class="title">{{issueProviderTooltip()}}</div>
 </div>
 
+@if(issueProvider().isEnabled) {
 <form
   class="example-form"
   style="width: 100%; margin: 8px 0 16px"
@@ -61,3 +62,4 @@
   <!--    </div>-->
   }
 </div>
+}

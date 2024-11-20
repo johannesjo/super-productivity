@@ -65,6 +65,10 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+
+  &.disabled {
+    opacity: 0.5;
+  }
 }
 
 .initials {
