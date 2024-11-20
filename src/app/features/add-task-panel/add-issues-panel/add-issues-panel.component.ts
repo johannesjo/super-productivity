@@ -22,9 +22,12 @@ import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip'
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
-import { debounceTime, filter, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, filter, map, switchMap } from 'rxjs/operators';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
 
 @Component({
   selector: 'add-issues-panel',
@@ -48,21 +51,44 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
   private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
 
   issueProvider = input.required<IssueProvider>();
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
   searchText = signal('s');
 
   // TODO add caching in sessionStorage
-  issueItems$ = toObservable(this.searchText).pipe(
-    filter((searchText) => searchText.length >= 1),
-    debounceTime(300),
-    tap((v) => console.log('', v, this.issueProvider())),
-    switchMap((searchText) =>
-      this._issueService.searchIssues$(searchText, this.issueProvider().id),
-    ),
-  );
-  issueItems = toSignal(this.issueItems$);
+  issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
+    combineLatest(
+      toObservable(this.searchText),
+      toObservable(this.issueProvider).pipe(
+        switchMap((issueProvider) =>
+          this._store.select(selectAllTaskIssueIdsForIssueProvider(issueProvider)),
+        ),
+      ),
+    ).pipe(
+      filter(([searchText]) => searchText.length >= 1),
+      debounceTime(300),
+      switchMap(([searchText, allIssueIdsForProvider]) =>
+        this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
+          map((items) => {
+            const added: SearchResultItem[] = [];
+            const notAdded: SearchResultItem[] = [];
+
+            items.forEach((item) => {
+              if (allIssueIdsForProvider.includes(item.issueData.id as string)) {
+                added.push(item);
+              } else {
+                notAdded.push(item);
+              }
+            });
+            return { added, notAdded };
+          }),
+        ),
+      ),
+    );
+
+  issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
   @ViewChild(CdkDropList) dropList?: CdkDropList;
 

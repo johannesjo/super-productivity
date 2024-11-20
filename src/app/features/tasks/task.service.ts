@@ -962,6 +962,58 @@ export class TaskService {
       .map((task) => task.issueId) as string[] | number[];
   }
 
+  async checkForTaskWithIssueEverywhere(
+    issueId: string | number,
+    issueProviderKey: IssueProviderKey,
+    issueProviderId: string,
+  ): Promise<{
+    task: Task;
+    subTasks: Task[] | null;
+    isFromArchive: boolean;
+  } | null> {
+    if (!issueProviderId) {
+      throw new Error('No project id');
+    }
+
+    const findTaskFn = (task: Task | ArchiveTask | undefined): boolean =>
+      !!task &&
+      task.issueId === issueId &&
+      task.issueType === issueProviderKey &&
+      task.issueProviderId === issueProviderId;
+    const allTasks = (await this._allTasks$.pipe(first()).toPromise()) as Task[];
+    const taskWithSameIssue: Task = allTasks.find(findTaskFn) as Task;
+
+    if (taskWithSameIssue) {
+      return {
+        task: taskWithSameIssue,
+        isFromArchive: false,
+        subTasks: null,
+      };
+    } else {
+      const archiveTaskState: TaskArchive =
+        await this._persistenceService.taskArchive.loadState();
+      const ids = archiveTaskState && (archiveTaskState.ids as string[]);
+      if (ids) {
+        const archiveTaskWithSameIssue = ids
+          .map((id) => archiveTaskState.entities[id])
+          .find(findTaskFn);
+
+        return archiveTaskWithSameIssue
+          ? {
+              task: archiveTaskWithSameIssue as Task,
+              subTasks: archiveTaskWithSameIssue.subTaskIds
+                ? (archiveTaskWithSameIssue.subTaskIds.map(
+                    (id) => archiveTaskState.entities[id],
+                  ) as Task[])
+                : null,
+              isFromArchive: true,
+            }
+          : null;
+      }
+      return null;
+    }
+  }
+
   // TODO check with new archive
   async checkForTaskWithIssueInProject(
     issueId: string | number,
