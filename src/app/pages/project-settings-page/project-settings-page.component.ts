@@ -75,9 +75,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
               return (
                 a.title === b.title &&
                 JSON.stringify(a.advancedCfg) === JSON.stringify(b.advancedCfg) &&
-                JSON.stringify(a.theme) === JSON.stringify(b.theme) &&
-                JSON.stringify(a.issueIntegrationCfgs) ===
-                  JSON.stringify(b.issueIntegrationCfgs)
+                JSON.stringify(a.theme) === JSON.stringify(b.theme)
               );
             } else {
               return a === b;
@@ -94,7 +92,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
           this.currentProjectTheme = project.theme;
 
           // in case there are new ones...
-          this.issueIntegrationCfgs = { ...project.issueIntegrationCfgs };
 
           this._cd.detectChanges();
         }),
@@ -141,25 +138,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
         icon: $event.config.icon,
       });
     }
-  }
-
-  saveIssueProviderCfg($event: {
-    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
-    config: IssueIntegrationCfg;
-  }): void {
-    if (!$event.config || !this.currentProject) {
-      throw new Error('Not enough data');
-    }
-    const { sectionKey, config } = $event;
-    const sectionKeyIN = sectionKey as IssueProviderKey;
-    this.projectService.updateIssueProviderConfig(
-      this.currentProject.id,
-      sectionKeyIN,
-      {
-        ...config,
-      },
-      true,
-    );
   }
 
   getIssueIntegrationCfg(key: IssueProviderKey): IssueIntegrationCfg {

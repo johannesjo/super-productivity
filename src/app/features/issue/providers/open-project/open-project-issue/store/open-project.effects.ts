@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { setCurrentTask, updateTask } from '../../../../../tasks/store/task.actions';
-import { concatMap, filter, first, map, take, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
 import { ProjectService } from '../../../../../project/project.service';
@@ -170,7 +170,9 @@ export class OpenProjectEffects {
   }
 
   private _getCfgOnce$(projectId: string): Observable<OpenProjectCfg> {
-    return this._projectService.getOpenProjectCfgForProject$(projectId).pipe(first());
+    return EMPTY;
+    // TODO fixme
+    // return this._projectService.getOpenProjectCfgForProject$(projectId).pipe(first());
   }
 
   private _handleTransitionForIssue(

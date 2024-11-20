@@ -4,7 +4,6 @@ import { select, Store } from '@ngrx/store';
 import {
   concatMap,
   filter,
-  first,
   map,
   switchMap,
   take,
@@ -373,6 +372,8 @@ export class JiraIssueEffects {
   }
 
   private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
-    return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
+    // TODO fixme
+    return EMPTY;
+    // return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
   }
 }

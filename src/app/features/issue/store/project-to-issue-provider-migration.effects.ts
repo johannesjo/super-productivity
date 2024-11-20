@@ -44,6 +44,10 @@ export class ProjectToIssueProviderMigrationEffects {
 
   private _addIssueProvidersForProject(project: Project): void {
     let count = 0;
+    if (!project.issueIntegrationCfgs) {
+      return;
+    }
+
     Object.entries(project.issueIntegrationCfgs).forEach(([key, value]) => {
       if (this._isMigrateIssueProvider(value, key as IssueProviderKey)) {
         count++;

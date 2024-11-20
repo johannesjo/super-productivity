@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IssueLocalState } from '../../../../issue.model';
 import { JiraIssueReduced } from '../../jira-issue/jira-issue.model';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraOriginalTransition } from '../../jira-api-responses';
 import { SnackService } from '../../../../../../core/snack/snack.service';
@@ -11,7 +11,6 @@ import { T } from '../../../../../../t.const';
 import { Task } from '../../../../../tasks/task.model';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { ProjectService } from '../../../../../project/project.service';
-import { JiraCfg } from '../../jira.model';
 import { IssueService } from '../../../../issue.service';
 
 @Component({
@@ -23,9 +22,11 @@ import { IssueService } from '../../../../issue.service';
 export class DialogJiraTransitionComponent {
   T: typeof T = T;
 
-  _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(
-    this.data.task.projectId as string,
-  );
+  // TODO fix
+  _jiraCfg$ = EMPTY;
+  // _jiraCfg$: Observable<JiraCfg> = this._projectService.getJiraCfgForProject$(
+  //   this.data.task.projectId as string,
+  // );
 
   availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraCfg$.pipe(
     first(),

@@ -6,12 +6,10 @@ import { IssueTaskTimeTracked, Task, TimeSpentOnDay } from '../../../../tasks/ta
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { ProjectService } from '../../../../project/project.service';
-import { first, map, tap } from 'rxjs/operators';
-import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
+import { map } from 'rxjs/operators';
 import { throttle } from 'helpful-decorators';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
-import { updateTask } from '../../../../tasks/store/task.actions';
 
 interface TmpTask {
   id: string;
@@ -97,75 +95,76 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   // quick way to prevent multiple submits
   @throttle(2000, { leading: true, trailing: false })
   async submit(): Promise<void> {
-    this.isLoading = true;
-    try {
-      const tasksToTrack = await this.tmpTasksToTrack$.pipe(first()).toPromise();
-      const project = await this.project$.pipe(first()).toPromise();
-      if (tasksToTrack.length === 0) {
-        this._snackService.open({
-          type: 'SUCCESS',
-          // TODO translate
-          msg: 'Gitlab: No time tracking data submitted for project ' + project.title,
-        });
-        this.close();
-        return;
-      }
-
-      const gitlabCfg = await this._projectService
-        .getGitlabCfgForProject$(this.data.projectId)
-        .pipe(first())
-        .toPromise();
-      if (!gitlabCfg) {
-        throw new Error('No gitlab cfg');
-      }
-
-      await Promise.all(
-        tasksToTrack.map((t) =>
-          this._gitlabApiService
-            .addTimeSpentToIssue$(
-              t.issueId as string,
-              msToString(t.timeToSubmit).replace(' ', ''),
-              gitlabCfg,
-            )
-            .pipe(
-              first(),
-              tap(() =>
-                this._store.dispatch(
-                  updateTask({
-                    task: {
-                      id: t.id,
-                      changes: {
-                        // null all diffs as clean afterwards (regardless of amount of time submitted)
-                        issueTimeTracked: { ...t.timeSpentOnDay },
-                      },
-                    },
-                  }),
-                ),
-              ),
-            )
-            .toPromise(),
-        ),
-      );
-
-      this._snackService.open({
-        type: 'SUCCESS',
-        ico: 'file_upload',
-        // TODO translate
-        msg: 'Gitlab: Successfully posted time tracking data for project' + project.title,
-      });
-      this.close();
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({
-        type: 'ERROR',
-        // TODO translate
-        translateParams: {
-          errorMsg: 'Error while submitting data to GitLab',
-        },
-        msg: T.F.GITLAB.S.ERR_UNKNOWN,
-      });
-    }
-    this.isLoading = false;
+    // TODO fixme
+    // this.isLoading = true;
+    // try {
+    //   const tasksToTrack = await this.tmpTasksToTrack$.pipe(first()).toPromise();
+    //   const project = await this.project$.pipe(first()).toPromise();
+    //   if (tasksToTrack.length === 0) {
+    //     this._snackService.open({
+    //       type: 'SUCCESS',
+    //       // TODO translate
+    //       msg: 'Gitlab: No time tracking data submitted for project ' + project.title,
+    //     });
+    //     this.close();
+    //     return;
+    //   }
+    //
+    //   const gitlabCfg = await this._projectService
+    //     .getGitlabCfgForProject$(this.data.projectId)
+    //     .pipe(first())
+    //     .toPromise();
+    //   if (!gitlabCfg) {
+    //     throw new Error('No gitlab cfg');
+    //   }
+    //
+    //   await Promise.all(
+    //     tasksToTrack.map((t) =>
+    //       this._gitlabApiService
+    //         .addTimeSpentToIssue$(
+    //           t.issueId as string,
+    //           msToString(t.timeToSubmit).replace(' ', ''),
+    //           gitlabCfg,
+    //         )
+    //         .pipe(
+    //           first(),
+    //           tap(() =>
+    //             this._store.dispatch(
+    //               updateTask({
+    //                 task: {
+    //                   id: t.id,
+    //                   changes: {
+    //                     // null all diffs as clean afterwards (regardless of amount of time submitted)
+    //                     issueTimeTracked: { ...t.timeSpentOnDay },
+    //                   },
+    //                 },
+    //               }),
+    //             ),
+    //           ),
+    //         )
+    //         .toPromise(),
+    //     ),
+    //   );
+    //
+    //   this._snackService.open({
+    //     type: 'SUCCESS',
+    //     ico: 'file_upload',
+    //     // TODO translate
+    //     msg: 'Gitlab: Successfully posted time tracking data for project' + project.title,
+    //   });
+    //   this.close();
+    // } catch (e) {
+    //   console.error(e);
+    //   this._snackService.open({
+    //     type: 'ERROR',
+    //     // TODO translate
+    //     translateParams: {
+    //       errorMsg: 'Error while submitting data to GitLab',
+    //     },
+    //     msg: T.F.GITLAB.S.ERR_UNKNOWN,
+    //   });
+    // }
+    // this.isLoading = false;
   }
 
   close(): void {
@@ -183,27 +182,28 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   }
 
   private async _loadAlreadyTrackedData(): Promise<void> {
-    const tmpTasks = this.tmpTasks$.getValue();
-    const gitlabCfg = await this._projectService
-      .getGitlabCfgForProject$(this.data.projectId)
-      .pipe(first())
-      .toPromise();
-    const dataForAll = await Promise.all(
-      tmpTasks.map((t) =>
-        this._gitlabApiService
-          .getTimeTrackingStats$(t.issueId, gitlabCfg)
-          .pipe(first())
-          .toPromise(),
-      ),
-    );
-    this.tmpTasks$.next(
-      tmpTasks.map((t, i) => ({
-        ...t,
-        timeTrackedAlreadyRemote:
-          typeof dataForAll[i].total_time_spent === 'number'
-            ? (dataForAll[i].total_time_spent as number) * 1000
-            : 0 || 0,
-      })),
-    );
+    // TODO fixme
+    // const tmpTasks = this.tmpTasks$.getValue();
+    // const gitlabCfg = await this._projectService
+    //   .getGitlabCfgForProject$(this.data.projectId)
+    //   .pipe(first())
+    //   .toPromise();
+    // const dataForAll = await Promise.all(
+    //   tmpTasks.map((t) =>
+    //     this._gitlabApiService
+    //       .getTimeTrackingStats$(t.issueId, gitlabCfg)
+    //       .pipe(first())
+    //       .toPromise(),
+    //   ),
+    // );
+    // this.tmpTasks$.next(
+    //   tmpTasks.map((t, i) => ({
+    //     ...t,
+    //     timeTrackedAlreadyRemote:
+    //       typeof dataForAll[i].total_time_spent === 'number'
+    //         ? (dataForAll[i].total_time_spent as number) * 1000
+    //         : 0 || 0,
+    //   })),
+    // );
   }
 }

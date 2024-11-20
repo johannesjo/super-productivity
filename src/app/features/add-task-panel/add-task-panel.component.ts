@@ -16,13 +16,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { MatMenuItem } from '@angular/material/menu';
-import { DialogJiraInitialSetupComponent } from '../issue/providers/jira/jira-view-components/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
-import { DialogGithubInitialSetupComponent } from '../issue/providers/github/github-view-components/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import { DialogGitlabInitialSetupComponent } from '../issue/providers/gitlab/dialog-gitlab-initial-setup/dialog-gitlab-initial-setup.component';
-import { DialogCaldavInitialSetupComponent } from '../issue/providers/caldav/dialog-caldav-initial-setup/dialog-caldav-initial-setup.component';
-import { DialogGiteaInitialSetupComponent } from '../issue/providers/gitea/gitea-view-components/dialog-gitea-initial-setup/dialog-gitea-initial-setup.component';
-import { DialogRedmineInitialSetupComponent } from '../issue/providers/redmine/redmine-view-components/redmine-initial-setup/dialog-redmine-initial-setup.component';
-import { DialogOpenProjectInitialSetupComponent } from '../issue/providers/open-project/open-project-view-components/dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
+
 import { UiModule } from '../../ui/ui.module';
 import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
@@ -55,16 +49,6 @@ export class AddTaskPanelComponent {
 
   isShowIntro = signal(false);
   issueProviders = toSignal(this._store.select(selectIssueProvidersWithDisabledLast));
-
-  private _components = {
-    JIRA: DialogJiraInitialSetupComponent,
-    GITHUB: DialogGithubInitialSetupComponent,
-    GITLAB: DialogGitlabInitialSetupComponent,
-    CALDAV: DialogCaldavInitialSetupComponent,
-    GITEA: DialogGiteaInitialSetupComponent,
-    REDMINE: DialogRedmineInitialSetupComponent,
-    OPEN_PROJECT: DialogOpenProjectInitialSetupComponent,
-  };
 
   addProvider(ev: MouseEvent): void {
     ev.stopPropagation();

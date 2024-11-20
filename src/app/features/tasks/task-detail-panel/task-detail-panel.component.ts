@@ -55,9 +55,8 @@ import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-e
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { TaskDetailItemComponent } from './task-additional-info-item/task-detail-item.component';
-import { IssueData, IssueProviderKey } from '../../issue/issue.model';
+import { IssueData, IssueProviderJira, IssueProviderKey } from '../../issue/issue.model';
 import { JIRA_TYPE } from '../../issue/issue.const';
-import { ProjectService } from '../../project/project.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
@@ -70,6 +69,8 @@ import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { Store } from '@ngrx/store';
+import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 
 interface IssueAndType {
   id: string | number | null;
@@ -226,7 +227,7 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     private _reminderService: ReminderService,
     private _taskRepeatCfgService: TaskRepeatCfgService,
     private _matDialog: MatDialog,
-    private _projectService: ProjectService,
+    private _store: Store,
     public readonly plannerService: PlannerService,
     private readonly _attachmentService: TaskAttachmentService,
     private _translateService: TranslateService,
@@ -256,10 +257,15 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
           filter(({ id, type }) => type === JIRA_TYPE),
           // not strictly reactive reactive but should work a 100% as issueIdAndType are triggered after task data
           switchMap(() => {
-            if (!this._taskData || !this._taskData.projectId) {
+            if (!this._taskData || !this._taskData.issueProviderId) {
               throw new Error('task data not ready');
             }
-            return this._projectService.getJiraCfgForProject$(this._taskData.projectId);
+            return this._store.select(
+              selectIssueProviderById<IssueProviderJira>(
+                this._taskData.issueProviderId,
+                'JIRA',
+              ),
+            );
           }),
           takeUntil(this._onDestroy$),
         )

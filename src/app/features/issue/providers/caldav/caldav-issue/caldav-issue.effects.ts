@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import { concatMap, filter, first, map } from 'rxjs/operators';
+import { concatMap, filter, map } from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { CALDAV_TYPE } from '../../../issue.const';
 import { isCaldavEnabled } from '../is-caldav-enabled.util';
@@ -56,6 +56,8 @@ export class CaldavIssueEffects {
   }
 
   private _getCfgOnce$(projectId: string): Observable<CaldavCfg> {
-    return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
+    // TODO fixme
+    return EMPTY;
+    // return this._projectService.getCaldavCfgForProject$(projectId).pipe(first());
   }
 }

@@ -5,18 +5,15 @@ import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
-import { concatMap, first } from 'rxjs/operators';
 import moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
-import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-project-work-package-subject.util';
 import { JiraWorklogExportDefaultTime } from '../../../jira/jira.model';
 import {
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../../jira/jira.const';
-import { Subscription } from 'rxjs';
-import { OPEN_PROJECT_TYPE } from '../../../../issue.const';
+import { EMPTY, Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import { DateService } from 'src/app/core/date/date.service';
 
@@ -45,16 +42,18 @@ export class DialogOpenProjectTrackTimeComponent {
   timeSpentLoggedDelta: number;
 
   activityId: number = 1;
-  activities$ = this._projectService
-    .getOpenProjectCfgForProject$(this.data.task.projectId as string)
-    .pipe(
-      concatMap((cfg) => {
-        return this._openProjectApiService.getActivitiesForTrackTime$(
-          this.workPackage.id,
-          cfg,
-        );
-      }),
-    );
+  // TODO fix
+  activities$ = EMPTY;
+  // activities$ = this._projectService
+  //   .getOpenProjectCfgForProject$(this.data.task.projectId as string)
+  //   .pipe(
+  //     concatMap((cfg) => {
+  //       return this._openProjectApiService.getActivitiesForTrackTime$(
+  //         this.workPackage.id,
+  //         cfg,
+  //       );
+  //     }),
+  //   );
   private _subs = new Subscription();
 
   constructor(
@@ -82,17 +81,18 @@ export class DialogOpenProjectTrackTimeComponent {
       this.data.task.timeSpent - this.timeLoggedForWorkPackage,
     );
 
-    this._subs.add(
-      this._projectService
-        .getOpenProjectCfgForProject$(this.data.task.projectId as string)
-        .pipe(first())
-        .subscribe((cfg) => {
-          if (cfg.timeTrackingDialogDefaultTime) {
-            this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
-            this.started = this._fillInStarted(cfg.timeTrackingDialogDefaultTime);
-          }
-        }),
-    );
+    // TODO fix
+    // this._subs.add(
+    //   this._projectService
+    //     .getOpenProjectCfgForProject$(this.data.task.projectId as string)
+    //     .pipe(first())
+    //     .subscribe((cfg) => {
+    //       if (cfg.timeTrackingDialogDefaultTime) {
+    //         this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
+    //         this.started = this._fillInStarted(cfg.timeTrackingDialogDefaultTime);
+    //       }
+    //     }),
+    // );
   }
 
   close(): void {
@@ -106,40 +106,40 @@ export class DialogOpenProjectTrackTimeComponent {
       this.timeSpent &&
       this.data.task.projectId
     ) {
-      const cfg = await this._projectService
-        .getOpenProjectCfgForProject$(this.data.task.projectId)
-        .pipe(first())
-        .toPromise();
-
-      if (this.defaultTimeCheckboxContent?.isChecked === true) {
-        this._projectService.updateIssueProviderConfig(
-          this.data.task.projectId,
-          OPEN_PROJECT_TYPE,
-          {
-            timeTrackingDialogDefaultTime: this.defaultTimeCheckboxContent.value,
-          },
-        );
-      }
-
-      this._openProjectApiService
-        .trackTime$({
-          workPackage: this.workPackage,
-          spentOn: moment(this.started).format('YYYY-MM-DD'),
-          hours: moment.duration({ milliseconds: this.timeSpent }).toISOString(),
-          comment: this.comment,
-          activityId: this.activityId,
-          cfg,
-        })
-        .subscribe((res) => {
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: T.F.OPEN_PROJECT.S.POST_TIME_SUCCESS,
-            translateParams: {
-              issueTitle: formatOpenProjectWorkPackageSubjectForSnack(this.workPackage),
-            },
-          });
-          this.close();
-        });
+      // TODO fix
+      // const cfg = await this._projectService
+      //   .getOpenProjectCfgForProject$(this.data.task.projectId)
+      //   .pipe(first())
+      //   .toPromise();
+      //
+      // if (this.defaultTimeCheckboxContent?.isChecked === true) {
+      //   this._projectService.updateIssueProviderConfig(
+      //     this.data.task.projectId,
+      //     OPEN_PROJECT_TYPE,
+      //     {
+      //       timeTrackingDialogDefaultTime: this.defaultTimeCheckboxContent.value,
+      //     },
+      //   );
+      // }
+      // this._openProjectApiService
+      //   .trackTime$({
+      //     workPackage: this.workPackage,
+      //     spentOn: moment(this.started).format('YYYY-MM-DD'),
+      //     hours: moment.duration({ milliseconds: this.timeSpent }).toISOString(),
+      //     comment: this.comment,
+      //     activityId: this.activityId,
+      //     cfg,
+      //   })
+      //   .subscribe((res) => {
+      //     this._snackService.open({
+      //       type: 'SUCCESS',
+      //       msg: T.F.OPEN_PROJECT.S.POST_TIME_SUCCESS,
+      //       translateParams: {
+      //         issueTitle: formatOpenProjectWorkPackageSubjectForSnack(this.workPackage),
+      //       },
+      //     });
+      //     this.close();
+      //   });
     }
   }
 

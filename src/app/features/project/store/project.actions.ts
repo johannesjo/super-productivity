@@ -1,7 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
-import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 import { DropListModelSource } from '../../tasks/task.model';
 
@@ -61,16 +60,6 @@ export const updateProjectAdvancedCfg = createAction(
     projectId: string;
     sectionKey: WorkContextAdvancedCfgKey;
     data: any;
-  }>(),
-);
-
-export const updateProjectIssueProviderCfg = createAction(
-  '[Project] Update Project Issue Provider Cfg',
-  props<{
-    projectId: string;
-    issueProviderKey: IssueProviderKey;
-    providerCfg: Partial<IssueIntegrationCfg>;
-    isOverwrite: boolean;
   }>(),
 );
 

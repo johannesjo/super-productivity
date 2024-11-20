@@ -1,23 +1,22 @@
 import {
-  Component,
-  OnInit,
   ChangeDetectionStrategy,
-  Input,
-  Output,
+  Component,
   EventEmitter,
+  inject,
+  Input,
   OnDestroy,
+  OnInit,
+  Output,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { catchError, debounceTime, first, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, EMPTY, Subscription } from 'rxjs';
 import { HelperClasses } from 'src/app/app.constants';
 import { SnackService } from 'src/app/core/snack/snack.service';
 import {
   ConfigFormSection,
   GlobalConfigSectionKey,
 } from 'src/app/features/config/global-config.model';
-import { OPEN_PROJECT_TYPE } from 'src/app/features/issue/issue.const';
 import { SearchResultItem } from 'src/app/features/issue/issue.model';
 import { ProjectCfgFormKey } from 'src/app/features/project/project.model';
 import { ProjectService } from 'src/app/features/project/project.service';
@@ -36,6 +35,7 @@ import {
   OpenProjectTransitionConfig,
   OpenProjectTransitionOption,
 } from '../../open-project.model';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'openproject-cfg',
@@ -45,6 +45,8 @@ import {
   animations: [expandAnimation],
 })
 export class OpenprojectCfgComponent implements OnInit, OnDestroy {
+  private _store = inject(Store);
+
   @Input() section?: ConfigFormSection<OpenProjectCfg>;
   @Output() save: EventEmitter<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
@@ -57,33 +59,36 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   fields?: FormlyFieldConfig[];
   options: FormlyFormOptions = {};
-  filteredIssueSuggestions$: Observable<SearchResultItem[]> =
-    this.issueSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(300),
-      tap(() => this.isLoading$.next(true)),
-      switchMap((searchTerm: string) => {
-        return searchTerm && searchTerm.length > 1
-          ? this._projectService
-              .getOpenProjectCfgForProject$(
-                this._workContextService.activeWorkContextId as string,
-              )
-              .pipe(
-                first(),
-                switchMap((cfg) =>
-                  this._openProjectApiService.searchIssueForRepo$(searchTerm, cfg),
-                ),
-                catchError(() => {
-                  return [];
-                }),
-              )
-          : // Note: the outer array signifies the observable stream the other is the value
-            [[]];
-        // TODO fix type
-      }),
-      tap((suggestions) => {
-        this.isLoading$.next(false);
-      }),
-    );
+  filteredIssueSuggestions$ = EMPTY;
+
+  // TODO make it work
+  // filteredIssueSuggestions$: Observable<SearchResultItem[]> =
+  //   this.issueSuggestionsCtrl.valueChanges.pipe(
+  //     debounceTime(300),
+  //     tap(() => this.isLoading$.next(true)),
+  //     switchMap((searchTerm: string) => {
+  //       return searchTerm && searchTerm.length > 1
+  //         ? this._projectService
+  //             .getOpenProjectCfgForProject$(
+  //               this._workContextService.activeWorkContextId as string,
+  //             )
+  //             .pipe(
+  //               first(),
+  //               switchMap((cfg) =>
+  //                 this._openProjectApiService.searchIssueForRepo$(searchTerm, cfg),
+  //               ),
+  //               catchError(() => {
+  //                 return [];
+  //               }),
+  //             )
+  //         : // Note: the outer array signifies the observable stream the other is the value
+  //           [[]];
+  //       // TODO fix type
+  //     }),
+  //     tap((suggestions) => {
+  //       this.isLoading$.next(false);
+  //     }),
+  //   );
   transitionConfigOpts: {
     key: keyof OpenProjectTransitionConfig;
     val: OpenProjectTransitionOption;
@@ -201,10 +206,14 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');
     }
-    const projectId = this._workContextService.activeWorkContextId as string;
-    this._projectService.updateIssueProviderConfig(projectId, OPEN_PROJECT_TYPE, {
-      isEnabled,
-    });
+    // TODO make it work
+    // const projectId = this._workContextService.activeWorkContextId as string;
+    // this._store.dispatch(
+    //
+    // )
+    // this._projectService.updateIssueProviderConfig(projectId, OPEN_PROJECT_TYPE, {
+    //   isEnabled,
+    // });
   }
 
   displayIssueWith(issue?: OpenProjectWorkPackage): string | undefined {

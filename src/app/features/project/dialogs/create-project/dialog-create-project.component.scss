@@ -1,15 +1,5 @@
 @import '../../../../../variables';
 
-.issue-provider-cfg {
-  margin: $s * 3 0 $s * 1;
-
-  .item {
-    margin-bottom: $s;
-    display: flex;
-    flex-direction: column;
-  }
-}
-
 h1,
 mat-dialog-actions {
   :host-context([dir='rtl']) & {

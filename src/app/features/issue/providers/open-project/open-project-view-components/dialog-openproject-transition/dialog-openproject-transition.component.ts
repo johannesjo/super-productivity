@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { concatMap, first, switchMap } from 'rxjs/operators';
 import { SnackService } from 'src/app/core/snack/snack.service';
 import { IssueLocalState } from 'src/app/features/issue/issue.model';
@@ -22,8 +22,10 @@ import { OpenProjectCfg } from '../../open-project.model';
 export class DialogOpenprojectTransitionComponent {
   T: typeof T = T;
 
-  _openProjectCfg$: Observable<OpenProjectCfg> =
-    this._projectService.getOpenProjectCfgForProject$(this.data.task.projectId as string);
+  // TODO fix
+  // _openProjectCfg$: Observable<OpenProjectCfg> =
+  //   this._projectService.getOpenProjectCfgForProject$(this.data.task.projectId as string);
+  _openProjectCfg$: Observable<OpenProjectCfg> = EMPTY;
 
   availableTransitions$: Observable<OpenProjectOriginalStatus[]> =
     this._openProjectCfg$.pipe(

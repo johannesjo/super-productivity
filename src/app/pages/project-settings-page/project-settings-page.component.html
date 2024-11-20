@@ -22,21 +22,5 @@
         [section]="projectThemeSettingsFormCfg"
       ></config-section>
     </section>
-
-    <h2
-      class="mat-h2"
-      style="margin-top: 24px"
-    >
-      <span>{{T.PS.ISSUE_INTEGRATION|translate}}</span>
-    </h2>
-    <div *ngFor="let section of issueIntegrationFormCfg; trackBy:trackBySectionKey;">
-      <section class="config-section">
-        <config-section
-          (save)="saveIssueProviderCfg($event)"
-          [cfg]="getIssueIntegrationCfg(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
-    </div>
   </div>
 </div>

@@ -6,11 +6,9 @@ import { JiraIssue } from '../../jira-issue/jira-issue.model';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import { ProjectService } from '../../../../../project/project.service';
-import { first } from 'rxjs/operators';
 import moment from 'moment';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import {
-  JIRA_ISSUE_TYPE,
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../jira.const';
@@ -64,17 +62,18 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
     this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
 
-    this._subs.add(
-      this._projectService
-        .getJiraCfgForProject$(this.data.task.projectId as string)
-        .pipe(first())
-        .subscribe((cfg) => {
-          if (cfg.worklogDialogDefaultTime) {
-            this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
-            this.started = this._fillInStarted(cfg.worklogDialogDefaultTime);
-          }
-        }),
-    );
+    // TODO fixme
+    // this._subs.add(
+    //   this._projectService
+    //     .getJiraCfgForProject$(this.data.task.projectId as string)
+    //     .pipe(first())
+    //     .subscribe((cfg) => {
+    //       if (cfg.worklogDialogDefaultTime) {
+    //         this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
+    //         this.started = this._fillInStarted(cfg.worklogDialogDefaultTime);
+    //       }
+    //     }),
+    // );
   }
 
   ngOnDestroy(): void {
@@ -86,39 +85,40 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   }
 
   async submitWorklog(): Promise<void> {
-    if (this.issue.id && this.started && this.timeSpent && this.data.task.projectId) {
-      const cfg = await this._projectService
-        .getJiraCfgForProject$(this.data.task.projectId)
-        .pipe(first())
-        .toPromise();
-
-      if (this.defaultTimeCheckboxContent?.isChecked === true) {
-        this._projectService.updateIssueProviderConfig(
-          this.data.task.projectId,
-          JIRA_ISSUE_TYPE,
-          {
-            worklogDialogDefaultTime: this.defaultTimeCheckboxContent.value,
-          },
-        );
-      }
-
-      this._jiraApiService
-        .addWorklog$({
-          issueId: this.issue.id,
-          started: this.started,
-          timeSpent: this.timeSpent,
-          comment: this.comment,
-          cfg,
-        })
-        .subscribe((res) => {
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
-            translateParams: { issueKey: this.issue.key },
-          });
-          this.close();
-        });
-    }
+    // TODO fixme
+    // if (this.issue.id && this.started && this.timeSpent && this.data.task.projectId) {
+    //   const cfg = await this._projectService
+    //     .getJiraCfgForProject$(this.data.task.projectId)
+    //     .pipe(first())
+    //     .toPromise();
+    //
+    //   if (this.defaultTimeCheckboxContent?.isChecked === true) {
+    //     this._projectService.updateIssueProviderConfig(
+    //       this.data.task.projectId,
+    //       JIRA_ISSUE_TYPE,
+    //       {
+    //         worklogDialogDefaultTime: this.defaultTimeCheckboxContent.value,
+    //       },
+    //     );
+    //   }
+    //
+    //   this._jiraApiService
+    //     .addWorklog$({
+    //       issueId: this.issue.id,
+    //       started: this.started,
+    //       timeSpent: this.timeSpent,
+    //       comment: this.comment,
+    //       cfg,
+    //     })
+    //     .subscribe((res) => {
+    //       this._snackService.open({
+    //         type: 'SUCCESS',
+    //         msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
+    //         translateParams: { issueKey: this.issue.key },
+    //       });
+    //       this.close();
+    //     });
+    // }
   }
 
   fill(mode: JiraWorklogExportDefaultTime): void {

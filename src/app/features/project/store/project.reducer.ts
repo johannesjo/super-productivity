@@ -60,7 +60,6 @@ import {
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
-  updateProjectIssueProviderCfg,
   updateProjectOrder,
   updateProjectWorkEnd,
   updateProjectWorkStart,
@@ -271,29 +270,6 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(
-    updateProjectIssueProviderCfg,
-    (state, { projectId, providerCfg, issueProviderKey, isOverwrite }) => {
-      const currentProject = state.entities[projectId] as Project;
-      return projectAdapter.updateOne(
-        {
-          id: projectId,
-          changes: {
-            issueIntegrationCfgs: {
-              ...currentProject.issueIntegrationCfgs,
-              [issueProviderKey]: {
-                ...(isOverwrite
-                  ? {}
-                  : currentProject.issueIntegrationCfgs[issueProviderKey]),
-                ...providerCfg,
-              },
-            },
-          },
-        },
-        state,
-      );
-    },
-  ),
   on(updateProjectOrder, (state, { ids }) => {
     const currentIds = state.ids as string[];
     let newIds: string[] = ids;

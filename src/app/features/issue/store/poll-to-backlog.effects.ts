@@ -5,14 +5,13 @@ import { Observable } from 'rxjs';
 import { concatMap, filter, first, switchMap } from 'rxjs/operators';
 import { IssueService } from '../issue.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
-import { updateProjectIssueProviderCfg } from '../../project/store/project.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 
 @Injectable()
 export class PollToBacklogEffects {
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext, updateProjectIssueProviderCfg.type),
+    ofType(setActiveWorkContext),
   );
 
   pollToBacklogTriggerToProjectId$: Observable<string> =

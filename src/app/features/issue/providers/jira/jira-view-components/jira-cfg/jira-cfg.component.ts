@@ -16,17 +16,9 @@ import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { JiraCfg, JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subscription } from 'rxjs';
 import { SearchResultItem } from '../../../../issue.model';
-import {
-  catchError,
-  concatMap,
-  debounceTime,
-  first,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { JiraApiService } from '../../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../../jira.const';
 import { JiraIssue } from '../../jira-issue/jira-issue.model';
@@ -36,7 +28,6 @@ import { HelperClasses } from '../../../../../../app.constants';
 import { ProjectService } from '../../../../../project/project.service';
 import { WorkContextService } from '../../../../../work-context/work-context.service';
 import { WorkContextType } from '../../../../../work-context/work-context.model';
-import { JIRA_TYPE } from '../../../../issue.const';
 
 @Component({
   selector: 'jira-cfg',
@@ -61,31 +52,33 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   fields?: FormlyFieldConfig[];
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
-  filteredIssueSuggestions$: Observable<SearchResultItem[]> =
-    this.issueSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(300),
-      tap(() => this.isLoading$.next(true)),
-      switchMap((searchTerm: string) => {
-        return searchTerm && searchTerm.length > 1
-          ? this._projectService
-              .getJiraCfgForProject$(
-                this._workContextService.activeWorkContextId as string,
-              )
-              .pipe(
-                first(),
-                switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
-                catchError(() => {
-                  return [];
-                }),
-              )
-          : // Note: the outer array signifies the observable stream the other is the value
-            [[]];
-        // TODO fix type
-      }),
-      tap((suggestions) => {
-        this.isLoading$.next(false);
-      }),
-    );
+  // TODO fixme
+  filteredIssueSuggestions$ = EMPTY;
+  // filteredIssueSuggestions$: Observable<SearchResultItem[]> =
+  //   this.issueSuggestionsCtrl.valueChanges.pipe(
+  //     debounceTime(300),
+  //     tap(() => this.isLoading$.next(true)),
+  //     switchMap((searchTerm: string) => {
+  //       return searchTerm && searchTerm.length > 1
+  //         ? this._projectService
+  //             .getJiraCfgForProject$(
+  //               this._workContextService.activeWorkContextId as string,
+  //             )
+  //             .pipe(
+  //               first(),
+  //               switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
+  //               catchError(() => {
+  //                 return [];
+  //               }),
+  //             )
+  //         : // Note: the outer array signifies the observable stream the other is the value
+  //           [[]];
+  //       // TODO fix type
+  //     }),
+  //     tap((suggestions) => {
+  //       this.isLoading$.next(false);
+  //     }),
+  //   );
   filteredCustomFieldSuggestions$: Observable<any[]> =
     this.customFieldSuggestionsCtrl.valueChanges.pipe(
       map((value) => this._filterCustomFieldSuggestions(value)),
@@ -163,10 +156,11 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
       throw new Error('Should only be called when in project context');
     }
-    const projectId = this._workContextService.activeWorkContextId as string;
-    this._projectService.updateIssueProviderConfig(projectId, JIRA_TYPE, {
-      isEnabled,
-    });
+    // TODO fixme
+    // const projectId = this._workContextService.activeWorkContextId as string;
+    // this._projectService.updateIssueProviderConfig(projectId, JIRA_TYPE, {
+    //   isEnabled,
+    // });
   }
 
   submit(): void {
@@ -196,18 +190,19 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   loadCustomFields(): void {
-    this.customFieldsPromise = this._projectService
-      .getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
-      .pipe(
-        first(),
-        concatMap((jiraCfg) => this._jiraApiService.listFields$(jiraCfg)),
-      )
-      .toPromise();
-    this.customFieldsPromise.then((v: any) => {
-      if (v && Array.isArray(v.response)) {
-        this.customFields = v.response;
-      }
-    });
+    // TODO fixme
+    // this.customFieldsPromise = this._projectService
+    //   .getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
+    //   .pipe(
+    //     first(),
+    //     concatMap((jiraCfg) => this._jiraApiService.listFields$(jiraCfg)),
+    //   )
+    //   .toPromise();
+    // this.customFieldsPromise.then((v: any) => {
+    //   if (v && Array.isArray(v.response)) {
+    //     this.customFields = v.response;
+    //   }
+    // });
   }
 
   updateTransitionOptions(): void {

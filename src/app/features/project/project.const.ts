@@ -1,5 +1,4 @@
 import { Project } from './project.model';
-import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import {
   DEFAULT_PROJECT_COLOR,
   WORK_CONTEXT_DEFAULT_COMMON,
@@ -10,7 +9,6 @@ export const DEFAULT_PROJECT: Project = {
   isHiddenFromMenu: false,
   isArchived: false,
   isEnableBacklog: false,
-  issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   backlogTaskIds: [],
   noteIds: [],
   ...WORK_CONTEXT_DEFAULT_COMMON,

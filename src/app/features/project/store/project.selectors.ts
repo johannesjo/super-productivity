@@ -1,23 +1,7 @@
 import { Project, ProjectState } from '../project.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { JiraCfg } from '../../issue/providers/jira/jira.model';
-import { GithubCfg } from '../../issue/providers/github/github.model';
-import {
-  CALDAV_TYPE,
-  GITEA_TYPE,
-  GITHUB_TYPE,
-  GITLAB_TYPE,
-  JIRA_TYPE,
-  OPEN_PROJECT_TYPE,
-  REDMINE_TYPE,
-} from '../../issue/issue.const';
-import { GitlabCfg } from '../../issue/providers/gitlab/gitlab';
 import { exists } from '../../../util/exists';
-import { CaldavCfg } from '../../issue/providers/caldav/caldav.model';
 import { PROJECT_FEATURE_NAME, projectAdapter } from './project.reducer';
-import { OpenProjectCfg } from '../../issue/providers/open-project/open-project.model';
-import { GiteaCfg } from '../../issue/providers/gitea/gitea.model';
-import { RedmineCfg } from '../../issue/providers/redmine/redmine.model';
 
 export const selectProjectFeatureState =
   createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
@@ -68,42 +52,6 @@ export const selectProjectById = createSelector(
     }
     return p;
   },
-);
-
-export const selectJiraCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): JiraCfg => p.issueIntegrationCfgs[JIRA_TYPE] as JiraCfg,
-);
-
-export const selectGithubCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): GithubCfg => p.issueIntegrationCfgs[GITHUB_TYPE] as GithubCfg,
-);
-
-export const selectRedmineCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): RedmineCfg => p.issueIntegrationCfgs[REDMINE_TYPE] as RedmineCfg,
-);
-
-export const selectGitlabCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): GitlabCfg => p.issueIntegrationCfgs[GITLAB_TYPE] as GitlabCfg,
-);
-
-export const selectCaldavCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): CaldavCfg => p.issueIntegrationCfgs[CALDAV_TYPE] as CaldavCfg,
-);
-
-export const selectOpenProjectCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): OpenProjectCfg =>
-    p.issueIntegrationCfgs[OPEN_PROJECT_TYPE] as OpenProjectCfg,
-);
-
-export const selectGiteaCfgByProjectId = createSelector(
-  selectProjectById,
-  (p: Project): GiteaCfg => p.issueIntegrationCfgs[GITEA_TYPE] as GiteaCfg,
 );
 
 export const selectUnarchivedProjectsWithoutCurrent = createSelector(
