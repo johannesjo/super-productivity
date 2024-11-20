@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SearchResultItem } from '../../../issue/issue.model';
@@ -13,4 +13,5 @@ import { SearchResultItem } from '../../../issue/issue.model';
 })
 export class IssuePanelItemComponent {
   itemData = input.required<SearchResultItem>();
+  addIssue = output<SearchResultItem>();
 }

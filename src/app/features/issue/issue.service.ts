@@ -356,6 +356,7 @@ export class IssueService {
     issueIdOrData: string | number | IssueDataReduced,
     issueProviderId: string,
     isAddToBacklog: boolean = false,
+    additional: Partial<Task> = {},
   ): Promise<string> {
     if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
       throw new Error('Issue method not available');
@@ -383,6 +384,7 @@ export class IssueService {
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
       ...additionalFields,
+      ...additional,
     });
   }
 }

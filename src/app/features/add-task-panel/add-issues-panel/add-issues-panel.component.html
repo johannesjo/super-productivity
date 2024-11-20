@@ -39,7 +39,7 @@
   cdkDropList
   cdkDropListSortingDisabled
   [cdkDropListConnectedTo]="dropListService.dropLists|async"
-  [cdkDropListData]="'ADD_TASK_PANEL'"
+  [cdkDropListData]="issueProvider().id"
 >
   <!--  (cdkDropListDropped)="drop($event)"-->
 
@@ -53,8 +53,9 @@
   <!--      </button>-->
   <issue-panel-item
     [itemData]="item"
-    cdkDrag
     [cdkDragData]="item"
+    cdkDrag
+    (addIssue)="addIssue($event)"
   ></issue-panel-item>
   <!--    </div>-->
   }

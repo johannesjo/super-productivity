@@ -133,7 +133,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     srcFilteredTasks: TaskWithSubTasks[],
     ev: CdkDragDrop<
       DropModelDataForList,
-      DropModelDataForList | 'ADD_TASK_PANEL',
+      DropModelDataForList | string,
       TaskWithSubTasks | SearchResultItem
     >,
   ): Promise<void> {
@@ -152,14 +152,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
-    if (!!draggedTask.issueType) {
-      if (srcListData === 'ADD_TASK_PANEL') {
-        return this._addFromIssuePanel(draggedTask as SearchResultItem);
-      }
-      throw new Error('Should not happen');
-    }
-    if (typeof srcListData === 'string') {
-      throw new Error('Should not happen');
+    if ('issueData' in draggedTask) {
+      return this._addFromIssuePanel(draggedTask, srcListData as string);
+    } else if (typeof srcListData === 'string') {
+      throw new Error('Should not happen 2');
     }
 
     if (targetTask && targetTask.id === draggedTask.id) {
@@ -194,24 +190,28 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     );
   }
 
-  async _addFromIssuePanel(item: SearchResultItem): Promise<void> {
-    if (!item.issueType || !item.issueData) {
+  async _addFromIssuePanel(
+    item: SearchResultItem,
+    issueProviderId: string,
+  ): Promise<void> {
+    if (!item.issueType || !item.issueData || !issueProviderId) {
       throw new Error('No issueData');
     }
-    console.log(item);
 
-    if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
-      await this._issueService.addTaskWithIssue(
-        item.issueType,
-        item.issueData.id,
-        this._workContextService.activeWorkContextId as string,
-        // this.isAddToBacklog,
-        false,
-      );
-    } else {
-      // TODO make it work
-      throw new Error('Not implemented YET');
-    }
+    await this._issueService.addTaskWithIssue(
+      item.issueType,
+      item.issueData.id,
+      issueProviderId,
+      // this.isAddToBacklog,
+      false,
+      this._workContextService.activeWorkContextType === WorkContextType.PROJECT
+        ? {
+            projectId: this._workContextService.activeWorkContextId as string,
+          }
+        : {
+            tagIds: [this._workContextService.activeWorkContextId as string],
+          },
+    );
   }
 
   private _move(
