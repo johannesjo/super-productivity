@@ -9,6 +9,8 @@
     class="dialog-header-icon"
     [svgIcon]="(issueProviderKey)|issueIcon"
   ></mat-icon>
+  <!-- TODO improve title -->
+
   {{ isEdit ? 'Edit' : 'Setup'}} {{title}} Config
   <!--  <span>{{T.F.JIRA.DIALOG_INITIAL.TITLE|translate}}</span>-->
 </h1>
@@ -18,8 +20,41 @@
   (ngSubmit)="submit()"
 >
   <mat-dialog-content>
+    <help-section *ngIf="formCfg?.help||formCfg?.helpArr">
+      <div
+        *ngIf="formCfg?.help"
+        [innerHtml]="formCfg?.help|translate"
+      ></div>
+      <ng-container *ngIf="formCfg?.helpArr">
+        <ng-container *ngFor="let helpSection of formCfg?.helpArr; ">
+          <div
+            *ngIf="helpSection.h"
+            class="mat-caption"
+          >
+            {{helpSection.h|translate}}
+          </div>
+          <p
+            *ngIf="helpSection.p"
+            [innerHTML]="helpSection.p|translate"
+          ></p>
+          <p
+            *ngIf="helpSection.p2"
+            [innerHTML]="helpSection.p2|translate"
+          ></p>
+          <p
+            *ngIf="helpSection.p3"
+            [innerHTML]="helpSection.p3|translate"
+          ></p>
+          <p
+            *ngIf="helpSection.p4"
+            [innerHTML]="helpSection.p4|translate"
+          ></p>
+        </ng-container>
+      </ng-container>
+    </help-section>
+
     <formly-form
-      [model]="model"
+      [(model)]="model"
       [fields]="fields"
       [form]="form"
     ></formly-form>
@@ -36,6 +71,7 @@
     </button>
 
     <!-- TODO implement -->
+    @if(isEdit) {
     <button
       (click)="remove()"
       color="warn"
@@ -44,7 +80,7 @@
     >
       {{ T.G.DELETE|translate }}
     </button>
-
+    }
     <button
       color="primary"
       mat-stroked-button

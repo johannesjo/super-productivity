@@ -7,7 +7,7 @@
   mat-stretch-tabs="false"
 >
   @for (issueProvider of issueProviders(); track issueProvider.id) {
-  <mat-tab>
+  <mat-tab [disabled]="!issueProvider.isEnabled">
     <ng-template mat-tab-label>
       <div
         class="tab-header-item"

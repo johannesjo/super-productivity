@@ -7,7 +7,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { selectEnabledIssueProviders } from '../issue/store/issue-provider.selectors';
+import { selectAll } from '../issue/store/issue-provider.selectors';
 import { IssueProvider, IssueProviderKey } from '../issue/issue.model';
 import {
   getIssueProviderInitials,
@@ -54,7 +54,7 @@ export class AddTaskPanelComponent {
   private _matDialog = inject(MatDialog);
 
   isShowIntro = signal(false);
-  issueProviders = toSignal(this._store.select(selectEnabledIssueProviders));
+  issueProviders = toSignal(this._store.select(selectAll));
 
   private _components = {
     JIRA: DialogJiraInitialSetupComponent,

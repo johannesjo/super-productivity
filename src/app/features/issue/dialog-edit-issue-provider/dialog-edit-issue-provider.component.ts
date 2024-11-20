@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { UiModule } from '../../../ui/ui.module';
@@ -14,16 +14,17 @@ import { FormGroup } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
+import { NgForOf, NgIf } from '@angular/common';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
   standalone: true,
-  imports: [UiModule, IssueModule],
+  imports: [UiModule, IssueModule, NgIf, NgForOf],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogEditIssueProviderComponent implements OnInit {
+export class DialogEditIssueProviderComponent {
   T: typeof T = T;
   readonly d = inject<{
     issueProvider?: IssueProvider;
@@ -38,10 +39,24 @@ export class DialogEditIssueProviderComponent implements OnInit {
 
   model: Partial<IssueProvider> = this.isEdit
     ? this.issueProvider
-    : DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey];
+    : {
+        ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
+        isEnabled: true,
+      };
   formCfg: ConfigFormSection<IssueIntegrationCfg> =
     ISSUE_PROVIDER_FORM_CFGS_MAP[this.issueProviderKey];
-  fields = this.formCfg?.items;
+  fields = this.isEdit
+    ? [
+        {
+          key: 'isEnabled',
+          type: 'toggle',
+          templateOptions: {
+            label: T.G.ENABLED,
+          },
+        },
+        ...this.formCfg.items!,
+      ]
+    : this.formCfg.items!;
 
   title: string = ISSUE_PROVIDER_HUMANIZED[this.issueProviderKey];
 
@@ -52,17 +67,27 @@ export class DialogEditIssueProviderComponent implements OnInit {
   private _store = inject(Store);
 
   submit(): void {
+    console.log(this.model);
+
     if (this.form.valid) {
+      if (this.isEdit) {
+        this._store.dispatch(
+          IssueProviderActions.updateIssueProvider({
+            issueProvider: {
+              id: this.issueProvider!.id,
+              changes: this.model as IssueProvider,
+            },
+          }),
+        );
+      } else {
+        this._store.dispatch(
+          IssueProviderActions.addIssueProvider({
+            issueProvider: this.model as IssueProvider,
+          }),
+        );
+      }
       this._matDialogRef.close(this.model);
     }
-  }
-
-  constructor() {
-    console.log(this);
-  }
-
-  ngOnInit(): void {
-    console.log(this);
   }
 
   cancel(): void {

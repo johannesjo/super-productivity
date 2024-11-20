@@ -98,6 +98,7 @@ export const ISSUE_PROVIDER_FORM_CFGS_MAP = {
 
 export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];
 
+// TODO remove
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   GITLAB_CONFIG_FORM_SECTION as GenericConfigFormSection,
   GITHUB_CONFIG_FORM_SECTION as GenericConfigFormSection,

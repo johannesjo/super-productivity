@@ -1,4 +1,12 @@
+@import '../../../../variables';
+
 :host {
-  min-width: 400px;
-  display: block;
+  @include mq(xxs) {
+    display: block;
+    min-width: 400px;
+  }
+
+  help-section {
+    max-width: 400px;
+  }
 }
