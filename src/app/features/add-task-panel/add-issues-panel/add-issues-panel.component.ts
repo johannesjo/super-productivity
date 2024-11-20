@@ -28,6 +28,8 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
+import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'add-issues-panel',
@@ -51,22 +53,23 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
   private _workContextService = inject(WorkContextService);
+  private _matDialog = inject(MatDialog);
   private _store = inject(Store);
 
   issueProvider = input.required<IssueProvider>();
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
-  searchText = signal('s');
+  searchText = signal('');
 
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
-    combineLatest(
+    combineLatest([
       toObservable(this.searchText),
       toObservable(this.issueProvider).pipe(
         switchMap((issueProvider) =>
           this._store.select(selectAllTaskIssueIdsForIssueProvider(issueProvider)),
         ),
       ),
-    ).pipe(
+    ]).pipe(
       filter(([searchText]) => searchText.length >= 1),
       debounceTime(300),
       switchMap(([searchText, allIssueIdsForProvider]) =>
@@ -125,5 +128,14 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
             tagIds: [this._workContextService.activeWorkContextId as string],
           },
     );
+  }
+
+  openSettings(): void {
+    this._matDialog.open(DialogEditIssueProviderComponent, {
+      restoreFocus: true,
+      data: {
+        issueProvider: this.issueProvider(),
+      },
+    });
   }
 }

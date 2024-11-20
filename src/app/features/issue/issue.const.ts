@@ -52,7 +52,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   GITEA_TYPE,
   REDMINE_TYPE,
   CALENDAR_TYPE,
-];
+] as const;
 
 export const ISSUE_PROVIDER_ICON_MAP = {
   [JIRA_TYPE]: 'jira',
@@ -63,7 +63,7 @@ export const ISSUE_PROVIDER_ICON_MAP = {
   [GITEA_TYPE]: 'gitea',
   [REDMINE_TYPE]: 'redmine',
   [CALENDAR_TYPE]: 'calendar',
-};
+} as const;
 
 export const ISSUE_PROVIDER_HUMANIZED = {
   [JIRA_TYPE]: 'Jira',
@@ -74,7 +74,7 @@ export const ISSUE_PROVIDER_HUMANIZED = {
   [GITEA_TYPE]: 'Gitea',
   [REDMINE_TYPE]: 'Redmine',
   [CALENDAR_TYPE]: 'Calendar',
-};
+} as const;
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [JIRA_TYPE]: DEFAULT_JIRA_CFG,
@@ -84,7 +84,17 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [OPEN_PROJECT_TYPE]: DEFAULT_OPEN_PROJECT_CFG,
   [GITEA_TYPE]: DEFAULT_GITEA_CFG,
   [REDMINE_TYPE]: DEFAULT_REDMINE_CFG,
-};
+} as const;
+
+export const ISSUE_PROVIDER_FORM_CFGS_MAP = {
+  [JIRA_TYPE]: JIRA_CONFIG_FORM_SECTION,
+  [GITHUB_TYPE]: GITHUB_CONFIG_FORM_SECTION,
+  [GITLAB_TYPE]: GITLAB_CONFIG_FORM_SECTION,
+  [CALDAV_TYPE]: CALDAV_CONFIG_FORM_SECTION,
+  [OPEN_PROJECT_TYPE]: OPEN_PROJECT_CONFIG_FORM_SECTION,
+  [GITEA_TYPE]: GITEA_CONFIG_FORM_SECTION,
+  [REDMINE_TYPE]: REDMINE_CONFIG_FORM_SECTION,
+} as const;
 
 export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];
 
@@ -118,7 +128,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
 const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
   ISSUE_STR: T.F.ISSUE.DEFAULT.ISSUE_STR,
   ISSUES_STR: T.F.ISSUE.DEFAULT.ISSUES_STR,
-};
+} as const;
 
 export const ISSUE_STR_MAP: { [key: string]: { ISSUE_STR: string; ISSUES_STR: string } } =
   {
@@ -132,4 +142,4 @@ export const ISSUE_STR_MAP: { [key: string]: { ISSUE_STR: string; ISSUES_STR: st
     },
     [GITEA_TYPE]: DEFAULT_ISSUE_STRS,
     [REDMINE_TYPE]: DEFAULT_ISSUE_STRS,
-  };
+  } as const;

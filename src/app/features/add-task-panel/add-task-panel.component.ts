@@ -2,18 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { AddTaskPanelIntroComponent } from './add-task-panel-intro/add-task-panel-intro.component';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
 import { IssueModule } from '../issue/issue.module';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from '../issue/store/issue-provider.selectors';
-import {
-  IssueIntegrationCfg,
-  IssueProvider,
-  IssueProviderKey,
-} from '../issue/issue.model';
+import { IssueProvider, IssueProviderKey } from '../issue/issue.model';
 import {
   getIssueProviderInitials,
   getIssueProviderTooltip,
@@ -30,6 +25,7 @@ import { DialogRedmineInitialSetupComponent } from '../issue/providers/redmine/r
 import { DialogOpenProjectInitialSetupComponent } from '../issue/providers/open-project/open-project-view-components/dialog-open-project-initial-setup/dialog-open-project-initial-setup.component';
 import { UiModule } from '../../ui/ui.module';
 import { T } from '../../t.const';
+import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 
 @Component({
   selector: 'add-task-panel',
@@ -41,7 +37,6 @@ import { T } from '../../t.const';
     MatTab,
     MatTabLabel,
     MatIcon,
-    MatIconButton,
     IssueModule,
     MatTooltip,
     AddIssuesPanelComponent,
@@ -86,38 +81,20 @@ export class AddTaskPanelComponent {
   }
 
   openSetupDialog(issueProviderKey: IssueProviderKey): void {
-    this._matDialog
-      .open(this._components[issueProviderKey], {
-        restoreFocus: true,
-        data: {
-          cfg: {
-            isEnabled: true,
-          },
-        },
-      })
-      .afterClosed()
-      .subscribe((cfg: IssueIntegrationCfg) => {
-        if (cfg) {
-          // this._addIssueProviderCfg(issueProviderKey, cfg);
-        }
-      });
+    this._matDialog.open(DialogEditIssueProviderComponent, {
+      restoreFocus: true,
+      data: {
+        issueProviderKey,
+      },
+    });
   }
 
   openEditIssueProvider(issueProvider: IssueProvider): void {
-    this._matDialog
-      .open(this._components[issueProvider.issueProviderKey] as any, {
-        restoreFocus: true,
-        data: {
-          cfg: {
-            isEnabled: true,
-          },
-        },
-      })
-      .afterClosed()
-      .subscribe((cfg: IssueIntegrationCfg) => {
-        if (cfg) {
-          // this._addIssueProviderCfg(issueProviderKey, cfg);
-        }
-      });
+    this._matDialog.open(DialogEditIssueProviderComponent, {
+      restoreFocus: true,
+      data: {
+        issueProvider,
+      },
+    });
   }
 }

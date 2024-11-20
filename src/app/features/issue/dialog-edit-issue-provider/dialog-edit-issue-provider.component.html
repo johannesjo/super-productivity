@@ -1,0 +1,57 @@
+<!--@let issueProviderKey = d.issueProvider?.issueProviderKey || d.issueProviderKey;-->
+<!--&lt;!&ndash;&ndash;&gt;-->
+<!--@let isEdit = !!d.issueProvider?.issueProviderKey;-->
+<!--&lt;!&ndash;&ndash;&gt;-->
+<!--@let model = isEdit ? d.issueProvider : DEFAULT_ISSUE_PROVIDER_CFGS[issueProviderKey];-->
+
+<h1 mat-dialog-title>
+  <mat-icon
+    class="dialog-header-icon"
+    [svgIcon]="(issueProviderKey)|issueIcon"
+  ></mat-icon>
+  {{ isEdit ? 'Edit' : 'Setup'}} {{title}} Config
+  <!--  <span>{{T.F.JIRA.DIALOG_INITIAL.TITLE|translate}}</span>-->
+</h1>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+>
+  <mat-dialog-content>
+    <formly-form
+      [model]="model"
+      [fields]="fields"
+      [form]="form"
+    ></formly-form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      (click)="cancel()"
+      color="primary"
+      mat-button
+      type="button"
+    >
+      {{ T.G.CANCEL|translate }}
+    </button>
+
+    <!-- TODO implement -->
+    <button
+      (click)="remove()"
+      color="warn"
+      mat-button
+      type="button"
+    >
+      {{ T.G.DELETE|translate }}
+    </button>
+
+    <button
+      color="primary"
+      mat-stroked-button
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{ T.G.SAVE|translate }}
+    </button>
+  </mat-dialog-actions>
+</form>
