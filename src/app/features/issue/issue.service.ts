@@ -128,9 +128,9 @@ export class IssueService {
     providerKey: IssueProviderKey,
     issueProviderId: string,
   ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
-      issueProviderId,
-    );
+    return this.ISSUE_SERVICE_MAP[
+      providerKey
+    ].isBacklogPollingEnabledForDefaultProjectOnce$(issueProviderId);
   }
 
   isAutoUpdateIssuesEnabledOnce$(

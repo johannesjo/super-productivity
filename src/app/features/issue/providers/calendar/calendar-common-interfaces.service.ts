@@ -15,7 +15,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return true;
   }
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(projectId: string): Observable<boolean> {
     return of(false);
   }
 

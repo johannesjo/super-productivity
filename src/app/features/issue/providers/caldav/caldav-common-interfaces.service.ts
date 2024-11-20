@@ -28,9 +28,13 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(
+    issueProviderId: string,
+  ): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+      map(
+        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
+      ),
     );
   }
 

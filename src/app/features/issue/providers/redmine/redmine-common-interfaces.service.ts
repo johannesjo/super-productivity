@@ -34,9 +34,13 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     return isRedmineEnabled(cfg);
   }
 
-  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(
+    issueProviderId: string,
+  ): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+      map(
+        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
+      ),
     );
   }
 

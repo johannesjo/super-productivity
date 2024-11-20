@@ -29,7 +29,6 @@ export class PollToBacklogEffects {
       filter((projectId) => !!projectId),
     );
 
-  // TODO fix
   // pollNewIssuesToBacklog$: Observable<any> = createEffect(
   //   () =>
   //     this.pollToBacklogTriggerToProjectId$.pipe(

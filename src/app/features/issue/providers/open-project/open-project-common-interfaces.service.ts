@@ -37,9 +37,13 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     OPEN_PROJECT_POLL_INTERVAL,
   );
 
-  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(
+    issueProviderId: string,
+  ): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+      map(
+        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
+      ),
     );
   }
 

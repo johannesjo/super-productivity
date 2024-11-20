@@ -25,9 +25,13 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForProjectOnce$(issueProviderId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(
+    issueProviderId: string,
+  ): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
+      map(
+        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
+      ),
     );
   }
 
