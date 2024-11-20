@@ -22,7 +22,7 @@ export class DialogGiteaInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRef: MatDialogRef<DialogGiteaInitialSetupComponent>,
   ) {
-    this.giteaCfg = this.data.giteaCfg || DEFAULT_GITEA_CFG;
+    this.giteaCfg = this.data.cfg || DEFAULT_GITEA_CFG;
   }
 
   saveGiteaCfg(giteaCfg: GiteaCfg): void {

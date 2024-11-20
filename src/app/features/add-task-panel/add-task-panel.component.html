@@ -9,12 +9,18 @@
   @for (issueProvider of issueProviders(); track issueProvider.id) {
   <mat-tab>
     <ng-template mat-tab-label>
-      <div class="initials">{{getIssueProviderInitials(issueProvider)}}</div>
-      <mat-icon
-        [svgIcon]="issueProvider.issueProviderKey|issueIcon"
-        [matTooltip]="getToolTipText(issueProvider)"
-        matTooltipPosition="above"
-      ></mat-icon>
+      <div
+        class="tab-header-item"
+        (longPressIOS)="openEditIssueProvider(issueProvider)"
+        (longPress)="openEditIssueProvider(issueProvider)"
+      >
+        <mat-icon
+          [svgIcon]="issueProvider.issueProviderKey|issueIcon"
+          [matTooltip]="getToolTipText(issueProvider)"
+          matTooltipPosition="above"
+        ></mat-icon>
+        <div class="initials">{{getIssueProviderInitials(issueProvider)}}</div>
+      </div>
     </ng-template>
     <ng-template matTabContent>
       <add-issues-panel [issueProvider]="issueProvider"></add-issues-panel>
@@ -42,12 +48,70 @@
 
   <mat-tab>
     <ng-template mat-tab-label>
-      <button
-        mat-icon-button
+      <div
         (click)="addProvider($event)"
+        #addProviderBtn
+        class="tab-header-item"
       >
         <mat-icon>add_circle</mat-icon>
-      </button>
+      </div>
+      <context-menu
+        [contextMenu]="contextMenu"
+        [leftClickTriggerEl]="addProviderBtn"
+        [rightClickTriggerEl]="addProviderBtn"
+      ></context-menu>
+
+      <ng-template #contextMenu>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('JIRA')"
+        >
+          <mat-icon svgIcon="jira"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_JIRA | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('GITHUB')"
+        >
+          <mat-icon svgIcon="github"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_GIT | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('REDMINE')"
+        >
+          <mat-icon svgIcon="redmine"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_REDMINE_PROJECT | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('GITLAB')"
+        >
+          <mat-icon svgIcon="gitlab"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_GITLAB | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('CALDAV')"
+        >
+          <mat-icon svgIcon="caldav"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_CALDAV | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('OPEN_PROJECT')"
+        >
+          <mat-icon svgIcon="open_project"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_OPEN_PROJECT | translate }}</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openSetupDialog('GITEA')"
+        >
+          <mat-icon svgIcon="gitea"></mat-icon>
+          <span>{{ T.F.PROJECT.D_CREATE.SETUP_GITEA_PROJECT | translate }}</span>
+        </button>
+      </ng-template>
     </ng-template>
   </mat-tab>
 </mat-tab-group>

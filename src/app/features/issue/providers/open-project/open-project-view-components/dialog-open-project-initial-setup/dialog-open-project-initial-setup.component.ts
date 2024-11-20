@@ -25,7 +25,7 @@ export class DialogOpenProjectInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRef: MatDialogRef<DialogOpenProjectInitialSetupComponent>,
   ) {
-    this.openProjectCfg = this.data.openProjectCfg || DEFAULT_OPEN_PROJECT_CFG;
+    this.openProjectCfg = this.data.cfg || DEFAULT_OPEN_PROJECT_CFG;
   }
 
   saveOpenProjectCfg(gitCfg: OpenProjectCfg): void {

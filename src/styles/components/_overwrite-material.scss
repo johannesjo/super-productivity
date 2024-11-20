@@ -16,6 +16,8 @@
 .mdc-dialog__title.mdc-dialog__title {
   margin-bottom: 0;
   margin-top: 0;
+  display: flex;
+  align-items: center;
 }
 
 .cdk-overlay-pane.mat-mdc-dialog-panel {

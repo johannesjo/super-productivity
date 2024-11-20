@@ -22,7 +22,7 @@ export class DialogGitlabInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRef: MatDialogRef<DialogGitlabInitialSetupComponent>,
   ) {
-    this.gitlabCfg = this.data.gitlabCfg || DEFAULT_GITLAB_CFG;
+    this.gitlabCfg = this.data.cfg || DEFAULT_GITLAB_CFG;
   }
 
   saveGitlabCfg(gitlabCfg: GitlabCfg): void {

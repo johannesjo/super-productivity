@@ -22,7 +22,7 @@ export class DialogGithubInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRef: MatDialogRef<DialogGithubInitialSetupComponent>,
   ) {
-    this.githubCfg = this.data.githubCfg || DEFAULT_GITHUB_CFG;
+    this.githubCfg = this.data.cfg || DEFAULT_GITHUB_CFG;
   }
 
   saveGithubCfg(gitCfg: GithubCfg): void {

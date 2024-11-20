@@ -22,7 +22,7 @@ export class DialogCaldavInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRef: MatDialogRef<DialogCaldavInitialSetupComponent>,
   ) {
-    this.caldavCfg = this.data.caldavCfg || DEFAULT_CALDAV_CFG;
+    this.caldavCfg = this.data.cfg || DEFAULT_CALDAV_CFG;
   }
 
   saveCaldavCfg(caldavCfg: CaldavCfg): void {

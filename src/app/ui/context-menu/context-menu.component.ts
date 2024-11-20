@@ -33,7 +33,7 @@ import { NgTemplateOutlet } from '@angular/common';
 })
 export class ContextMenuComponent implements OnInit {
   leftClickTriggerEl = input<HTMLElement | MatMenuItem | MatIconButton>();
-  rightClickTriggerEl = input.required<HTMLElement | MatMenuItem>();
+  rightClickTriggerEl = input.required<HTMLElement | MatMenuItem | MatIconButton>();
   contextMenu = input.required<TemplateRef<any>>();
 
   @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })

@@ -11,10 +11,18 @@
   flex-direction: column;
   height: 100%;
 
+  ::ng-deep {
+    .mat-mdc-tab-header {
+      @include mq(xs, max) {
+        margin-right: 50px;
+      }
+    }
+  }
+
   ::ng-deep .mat-mdc-tab {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-    min-width: 50px !important;
+    min-width: 40px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   ::ng-deep .mat-tab-label:last-child {
@@ -48,13 +56,20 @@
   }
 }
 
+.tab-header-item {
+  min-width: 52px;
+  min-height: 48px;
+  padding-left: 8px;
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
 .initials {
+  margin-top: 1px;
   font-size: 12px;
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 2px 4px;
   border-radius: 50%;
   background: #fff;
 

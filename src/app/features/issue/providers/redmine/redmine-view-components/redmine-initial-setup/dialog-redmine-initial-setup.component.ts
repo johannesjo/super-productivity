@@ -22,7 +22,7 @@ export class DialogRedmineInitialSetupComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _matDialogRed: MatDialogRef<DialogRedmineInitialSetupComponent>,
   ) {
-    this.redmineCfg = this.data.redmineCfg || DEFAULT_REDMINE_CFG;
+    this.redmineCfg = this.data.cfg || DEFAULT_REDMINE_CFG;
   }
 
   saveRedmineCfg(redmineCfg: RedmineCfg): void {
