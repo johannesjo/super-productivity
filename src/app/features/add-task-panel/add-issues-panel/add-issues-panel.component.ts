@@ -22,7 +22,7 @@ import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip'
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
-import { debounceTime, filter, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'add-issues-panel',
@@ -54,9 +54,12 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   issueItems$ = toObservable(this.searchText).pipe(
     filter((searchText) => searchText.length >= 1),
     debounceTime(300),
+    tap((v) => console.log('', v, this.issueProvider())),
     switchMap((searchText) =>
       this.issueService.searchIssues$(searchText, this.issueProvider().id),
     ),
+    // TODO remove
+    shareReplay({ bufferSize: 1, refCount: true }),
   );
   issueItems = toSignal(this.issueItems$);
 

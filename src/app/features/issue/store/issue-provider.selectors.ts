@@ -24,7 +24,7 @@ export const selectEnabledIssueProviders = createSelector(
 
 export const selectIssueProviderById = <T extends IssueProvider>(
   id: string,
-  issueProviderKey: IssueProviderKey,
+  issueProviderKey: IssueProviderKey | null,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) =>
   createSelector(selectIssueProviderState, ({ entities }) => {
@@ -32,7 +32,7 @@ export const selectIssueProviderById = <T extends IssueProvider>(
     if (!issueProvider) {
       throw new Error(`No issueProvider found for id ${id}`);
     }
-    if (issueProvider.issueProviderKey !== issueProviderKey) {
+    if (issueProviderKey && issueProvider.issueProviderKey !== issueProviderKey) {
       console.log(issueProviderKey, issueProvider);
       throw new Error(
         `IssueProvider found for id ${id} is not of type ${issueProviderKey} but ${issueProvider.issueProviderKey}`,

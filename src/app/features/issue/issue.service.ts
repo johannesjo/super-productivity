@@ -6,7 +6,7 @@ import {
   SearchResultItem,
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
-import { from, merge, Observable, of, Subject, zip } from 'rxjs';
+import { merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
   CALENDAR_TYPE,
@@ -35,6 +35,8 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
+import { Store } from '@ngrx/store';
+import { selectIssueProviderById } from './store/issue-provider.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -76,6 +78,7 @@ export class IssueService {
     private _calendarCommonInterfaceService: CalendarCommonInterfacesService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
+    private _store: Store,
   ) {}
 
   getById$(
@@ -100,15 +103,17 @@ export class IssueService {
     searchTerm: string,
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
-    const obs = Object.keys(this.ISSUE_SERVICE_MAP)
-      .map((key) => this.ISSUE_SERVICE_MAP[key])
-      .filter((provider) => typeof provider.searchIssues$ === 'function')
-      .map((provider) => (provider.searchIssues$ as any)(searchTerm, issueProviderId));
-    obs.unshift(from([[]]));
-
-    return zip(...obs, (...allResults: any[]) => [].concat(...allResults)) as Observable<
-      SearchResultItem[]
-    >;
+    return this._store.select(selectIssueProviderById(issueProviderId, null)).pipe(
+      switchMap((issueProvider) => {
+        if (!issueProvider) {
+          return of([]);
+        }
+        return this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
+          searchTerm,
+          issueProvider.id,
+        );
+      }),
+    );
   }
 
   issueLink$(
