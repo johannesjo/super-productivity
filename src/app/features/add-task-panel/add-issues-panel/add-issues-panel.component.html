@@ -24,6 +24,7 @@
     <mat-label>Search</mat-label>
     <mat-icon matPrefix>search</mat-icon>
     <input
+      #searchTextEl
       [ngModel]="searchText()"
       (ngModelChange)="searchText.set($event)"
       autocomplete="off"

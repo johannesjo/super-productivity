@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   input,
   OnDestroy,
@@ -94,16 +95,25 @@ export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
   @ViewChild(CdkDropList) dropList?: CdkDropList;
+  @ViewChild('searchTextEl') searchTextEl!: ElementRef;
 
   T: typeof T = T;
 
+  private _focusTimeout?: number;
+
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList!);
-    console.log(this.dropList);
+
+    if (this.searchText().length <= 1) {
+      this._focusTimeout = window.setTimeout(() => {
+        this.searchTextEl?.nativeElement.focus();
+      }, 500);
+    }
   }
 
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList!);
+    window.clearTimeout(this._focusTimeout);
   }
 
   // TODO move to service
