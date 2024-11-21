@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GithubApiService } from './github-api.service';
 import { IssueProviderGithub, SearchResultItem } from '../../issue.model';
@@ -11,8 +11,7 @@ import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from './github.const';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
-import { Store } from '@ngrx/store';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +19,7 @@ import { Store } from '@ngrx/store';
 export class GithubCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _githubApiService: GithubApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
@@ -176,9 +175,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGithub> {
-    return this._store
-      .select(selectIssueProviderById<IssueProviderGithub>(issueProviderId, 'GITHUB'))
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'GITHUB');
   }
 
   private _isIssueDone(issue: GithubIssueReduced): boolean {

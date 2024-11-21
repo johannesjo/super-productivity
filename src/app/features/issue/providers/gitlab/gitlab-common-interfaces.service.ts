@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, of, timer } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.model';
@@ -14,8 +14,7 @@ import {
   GITLAB_POLL_INTERVAL,
 } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +22,7 @@ import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 export class GitlabCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _gitlabApiService: GitlabApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
@@ -75,6 +74,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
+      tap((v) => console.log('gitlabcommon CFG', v)),
       switchMap((gitlabCfg) =>
         this.isEnabled(gitlabCfg) && gitlabCfg.isSearchIssuesFromGitlab
           ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(
@@ -245,9 +245,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGitlab> {
-    return EMPTY;
-    return this._store
-      .select(selectIssueProviderById<IssueProviderGitlab>(issueProviderId, 'GITLAB'))
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'GITLAB');
   }
 }

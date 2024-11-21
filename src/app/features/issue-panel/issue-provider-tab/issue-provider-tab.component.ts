@@ -24,7 +24,6 @@ import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
@@ -52,7 +51,6 @@ import { MatDialog } from '@angular/material/dialog';
 export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
-  private _workContextService = inject(WorkContextService);
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
 

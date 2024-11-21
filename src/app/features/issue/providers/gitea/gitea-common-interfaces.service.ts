@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -18,8 +18,7 @@ import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
 import { GiteaApiService } from '../gitea/gitea-api.service';
 import { GiteaIssue } from './gitea-issue/gitea-issue.model';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
-import { Store } from '@ngrx/store';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +26,7 @@ import { Store } from '@ngrx/store';
 export class GiteaCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _giteaApiService: GiteaApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   isEnabled(cfg: GiteaCfg): boolean {
@@ -158,8 +157,6 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGitea> {
-    return this._store
-      .select(selectIssueProviderById<IssueProviderGitea>(issueProviderId, 'GITEA'))
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'GITEA');
   }
 }

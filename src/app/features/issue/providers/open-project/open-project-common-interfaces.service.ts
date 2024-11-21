@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { OpenProjectApiService } from './open-project-api.service';
 import { IssueProviderOpenProject, SearchResultItem } from '../../issue.model';
@@ -20,8 +20,7 @@ import {
   formatOpenProjectWorkPackageSubject,
   formatOpenProjectWorkPackageSubjectForSnack,
 } from './format-open-project-work-package-subject.util';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +28,7 @@ import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 export class OpenProjectCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _openProjectApiService: OpenProjectApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   pollTimer$: Observable<number> = timer(
@@ -180,13 +179,6 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderOpenProject> {
-    return this._store
-      .select(
-        selectIssueProviderById<IssueProviderOpenProject>(
-          issueProviderId,
-          'OPEN_PROJECT',
-        ),
-      )
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'OPEN_PROJECT');
   }
 }

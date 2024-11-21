@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -18,8 +18,7 @@ import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
 import { RedmineApiService } from '../redmine/redmine-api.service';
 import { RedmineIssue } from './redmine-issue/redmine-issue.model';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +26,7 @@ import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 export class RedmineCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _redmineApiService: RedmineApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   isEnabled(cfg: RedmineCfg): boolean {
@@ -155,8 +154,6 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderRedmine> {
-    return this._store
-      .select(selectIssueProviderById<IssueProviderRedmine>(issueProviderId, 'REDMINE'))
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'REDMINE');
   }
 }

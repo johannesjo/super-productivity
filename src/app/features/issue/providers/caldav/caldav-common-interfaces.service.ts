@@ -6,19 +6,18 @@ import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { catchError, concatMap, first, map, switchMap } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CaldavCommonInterfacesService implements IssueServiceInterface {
   constructor(
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
     private readonly _caldavClientService: CaldavClientService,
   ) {}
 
@@ -161,8 +160,6 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderCaldav> {
-    return this._store
-      .select(selectIssueProviderById<IssueProviderCaldav>(issueProviderId, 'CALDAV'))
-      .pipe(first());
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'CALDAV');
   }
 }

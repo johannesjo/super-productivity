@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
 import { IssueProviderJira, SearchResultItem } from '../../issue.model';
@@ -11,8 +11,7 @@ import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util'
 import { JiraCfg } from './jira.model';
 import { isJiraEnabled } from './is-jira-enabled.util';
 import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from '../../store/issue-provider.selectors';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +19,7 @@ import { selectIssueProviderById } from '../../store/issue-provider.selectors';
 export class JiraCommonInterfacesService implements IssueServiceInterface {
   constructor(
     private readonly _jiraApiService: JiraApiService,
-    private readonly _store: Store,
+    private readonly _issueProviderService: IssueProviderService,
   ) {}
 
   pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
@@ -60,6 +59,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
+      tap((v) => console.log('settings', v)),
       switchMap((jiraCfg) =>
         this.isEnabled(jiraCfg) && jiraCfg.isEnabled
           ? this._jiraApiService
@@ -167,8 +167,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderJira> {
-    return this._store
-      .select(selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'))
-      .pipe(first());
+    console.log('getCfgOnce$', issueProviderId);
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'JIRA');
   }
 }
