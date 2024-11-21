@@ -231,7 +231,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _formatIssueTitle(issue: GitlabIssue): string {
-    return `#${issue.number} ${issue.title} #${issue.project}`;
+    return `#${issue.number} ${issue.title}`;
   }
 
   private _formatIssueTitleForSnack(issue: GitlabIssue): string {

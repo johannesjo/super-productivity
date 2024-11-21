@@ -44,6 +44,8 @@
   [errorTxt]="error()"
   [actionAdvice]="'Check your config!'"
 ></error-card>
+} @else if (!issueItems()?.length) {
+<div class="empty">No items found</div>
 } @else {
 <div
   #dropList
