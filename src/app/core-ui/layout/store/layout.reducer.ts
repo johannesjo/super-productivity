@@ -1,6 +1,6 @@
 import {
   hideAddTaskBar,
-  hideNotes,
+  hideNotesAndAddTaskPanel,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
@@ -98,15 +98,17 @@ const _reducer = createReducer<LayoutState>(
     isShowAddTaskPanel: false,
   })),
 
-  on(hideNotes, (state) => ({ ...state, isShowNotes: false, isShowAddTaskPanel: false })),
+  on(hideNotesAndAddTaskPanel, (state) => ({
+    ...state,
+    isShowNotes: false,
+    isShowAddTaskPanel: false,
+  })),
 
   on(toggleAddTaskPanel, (state) => ({
     ...state,
     isShowAddTaskPanel: !state.isShowAddTaskPanel,
     isShowNotes: false,
   })),
-
-  on(hideNotes, (state) => ({ ...state, isShowAddTaskPanel: false, isShowNotes: false })),
 );
 
 export const layoutReducer = (

@@ -18,7 +18,7 @@ export const toggleSideNav = createAction('[Layout] Toggle SideBar');
 
 export const toggleShowNotes = createAction('[Layout] ToggleShow Notes');
 
-export const hideNotes = createAction('[Layout] Hide Notes');
+export const hideNotesAndAddTaskPanel = createAction('[Layout] Hide Notes');
 
 export const toggleAddTaskPanel = createAction('[Layout] Toggle AddTaskPanel');
 

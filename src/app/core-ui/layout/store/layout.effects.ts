@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { hideNotes, toggleShowNotes } from './layout.actions';
+import {
+  hideNotesAndAddTaskPanel,
+  toggleAddTaskPanel,
+  toggleShowNotes,
+} from './layout.actions';
 import { filter, mapTo, withLatestFrom } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
 import { LayoutService } from '../layout.service';
@@ -20,7 +24,7 @@ export class LayoutEffects {
     this.actions$.pipe(
       ofType(setSelectedTask),
       filter(({ id }) => id !== null),
-      mapTo(hideNotes()),
+      mapTo(hideNotesAndAddTaskPanel()),
     ),
   );
 
@@ -28,7 +32,7 @@ export class LayoutEffects {
     this.router.events.pipe(
       filter((event: any) => event instanceof NavigationEnd),
       filter((event) => !!event.url.match(/(daily-summary)$/)),
-      mapTo(hideNotes()),
+      mapTo(hideNotesAndAddTaskPanel()),
     ),
   );
 
@@ -37,6 +41,15 @@ export class LayoutEffects {
       ofType(toggleShowNotes),
       withLatestFrom(this.layoutService.isShowNotes$),
       filter(([, isShowNotes]) => isShowNotes),
+      mapTo(setSelectedTask({ id: null })),
+    ),
+  );
+
+  hideSelectedTaskWhenAddTaskPanelShowIsToggled$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(toggleAddTaskPanel),
+      withLatestFrom(this.layoutService.isShowAddTaskPanel$),
+      filter(([, isShowAddTaskPanel]) => isShowAddTaskPanel),
       mapTo(setSelectedTask({ id: null })),
     ),
   );
