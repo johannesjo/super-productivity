@@ -141,24 +141,4 @@ export class DialogEditIssueProviderComponent {
       ...config,
     } as any;
   }
-
-  //
-  // saveIssueProviderCfg($event: {
-  //   sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
-  //   config: IssueIntegrationCfg;
-  // }): void {
-  //   if (!$event.config || !this.currentProject) {
-  //     throw new Error('Not enough data');
-  //   }
-  //   const { sectionKey, config } = $event;
-  //   const sectionKeyIN = sectionKey as IssueProviderKey;
-  //   this.projectService.updateIssueProviderConfig(
-  //     this.currentProject.id,
-  //     sectionKeyIN,
-  //     {
-  //       ...config,
-  //     },
-  //     true,
-  //   );
-  // }
 }
