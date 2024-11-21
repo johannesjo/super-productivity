@@ -31,12 +31,14 @@ import { TaskCopy } from '../../features/tasks/task.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 
 export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => {
-  console.log('[M] Starting cross model migrations...');
+  console.log('[M] Starting cross model migrations...', data);
   let newData = migrateTaskReminders(data);
 
   if (
-    !data.issueProvider ||
-    (!data.issueProvider[MODEL_VERSION_KEY] && !data.issueProvider.ids.length)
+    (!data.issueProvider ||
+      (!data.issueProvider[MODEL_VERSION_KEY] && !data.issueProvider.ids.length)) &&
+    data.project.ids.length &&
+    data.project.ids.find((id) => data.project.entities[id]?.issueIntegrationCfgs)
   ) {
     newData = migrateIssueProvidersFromProjects(newData);
   }
@@ -63,18 +65,78 @@ const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComple
     copy.issueProvider = issueProviderInitialState;
   }
 
-  let str = '';
+  let migrations: string[] = [];
   if (data.project.ids.length > 0) {
     Object.values(data.project.entities).forEach((project): void => {
       if (project) {
-        str += _addIssueProvidersForProject(copy, project);
+        migrations = migrations.concat(_addIssueProvidersForProject(copy, project));
       }
     });
   }
-  console.log('Issue providers migrated from projects to standalone:\n' + str);
-  alert('Issue providers migrated from projects:\n' + str);
-  return copy;
+  migrations = migrations.concat(_cleanupIssueDataFromOrphanedIssueTasks(copy));
+
+  if (migrations.length > 0) {
+    console.log('Issue providers migrated from projects to standalone:', migrations);
+    if (
+      confirm(
+        'Do the following migrations?\n\nCreate issue providers from projects:\n' +
+          migrations.join('\n'),
+      )
+    ) {
+      return copy;
+    } else {
+      throw new Error('Migration aborted');
+    }
+  }
+
+  return data;
 };
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function _cleanupIssueDataFromOrphanedIssueTasks(data: AppDataComplete): string[] {
+  let count = 0;
+
+  const updateTaskIfNecessary = (task: TaskCopy): void => {
+    if (task.issueId && !task.issueProviderId) {
+      count++;
+
+      console.log('Cleaning up issue data for orphaned issue task', task);
+      console.log(JSON.stringify(task));
+
+      task.issueId = null;
+      task.issueProviderId = null;
+      task.issueType = null;
+      task.issueWasUpdated = null;
+      task.issueLastUpdated = null;
+      task.issueAttachmentNr = null;
+      task.issueTimeTracked = null;
+      task.issuePoints = null;
+    }
+  };
+
+  // Update tasks
+  Object.keys(data.task.entities).forEach((taskId) => {
+    const task = data.task.entities[taskId];
+    if (task) {
+      updateTaskIfNecessary(task);
+    }
+  });
+
+  // Update archived tasks
+  Object.keys(data.taskArchive.entities).forEach((taskId) => {
+    const task = data.taskArchive.entities[taskId];
+    if (task) {
+      updateTaskIfNecessary(task);
+    }
+  });
+
+  if (count === 0) {
+    return [];
+  }
+  return [
+    `Unlink issue data from ${count} orphaned issue tasks (check console via Ctrl+Shift+I for more details).`,
+  ];
+}
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _addIssueProvider(data: AppDataComplete, newEntity: IssueProvider): void {
@@ -95,10 +157,10 @@ function _addIssueProvider(data: AppDataComplete, newEntity: IssueProvider): voi
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _addIssueProvidersForProject(data: AppDataComplete, project: Project): string {
+function _addIssueProvidersForProject(data: AppDataComplete, project: Project): string[] {
   let count = 0;
   if (!project.issueIntegrationCfgs) {
-    return '';
+    return [];
   }
 
   Object.entries(project.issueIntegrationCfgs).forEach(([key, value]) => {
@@ -123,9 +185,9 @@ function _addIssueProvidersForProject(data: AppDataComplete, project: Project): 
 
   if (count) {
     // alert(`Migrated ${count} issue providers for project ${project.title}`);
-    return `${count} for ${project.title}\n`;
+    return [`${count} for ${project.title}`];
   }
-  return '';
+  return [];
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
