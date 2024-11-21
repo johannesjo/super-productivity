@@ -19,13 +19,11 @@ import { TaskService } from '../../../../tasks/task.service';
 import { BehaviorSubject, EMPTY, Observable, of, throwError, timer } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
-import { IssueLocalState } from '../../../issue.model';
-import { ProjectService } from '../../../../project/project.service';
+import { IssueLocalState, IssueProviderJira } from '../../../issue.model';
 import { IssueService } from '../../../issue.service';
 import { JIRA_TYPE } from '../../../issue.const';
 import { T } from '../../../../../t.const';
-import { WorkContextService } from '../../../../work-context/work-context.service';
-import { JiraCfg, JiraTransitionOption } from '../jira.model';
+import { JiraTransitionOption } from '../jira.model';
 import { setCurrentTask, updateTask } from '../../../../tasks/store/task.actions';
 import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import { selectCurrentTaskParentOrCurrent } from '../../../../tasks/store/task.selectors';
@@ -34,6 +32,7 @@ import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-
 import { setActiveWorkContext } from '../../../../work-context/store/work-context.actions';
 import { WorkContextType } from '../../../../work-context/work-context.model';
 import { isJiraEnabled } from '../is-jira-enabled.util';
+import { IssueProviderService } from '../../../issue-provider.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -53,28 +52,24 @@ export class JiraIssueEffects {
             : of({ mainTask: task, subTask: undefined }),
         ),
         concatMap(({ mainTask, subTask }) =>
-          mainTask.issueType === JIRA_TYPE && mainTask.issueId && mainTask.projectId
-            ? this._getCfgOnce$(mainTask.projectId).pipe(
-                tap((jiraProjectCfg) => {
+          mainTask.issueType === JIRA_TYPE && mainTask.issueId && mainTask.issueProviderId
+            ? this._getCfgOnce$(mainTask.issueProviderId).pipe(
+                tap((jiraCfg) => {
                   if (
                     subTask &&
-                    jiraProjectCfg.isWorklogEnabled &&
-                    jiraProjectCfg.isAddWorklogOnSubTaskDone
+                    jiraCfg.isWorklogEnabled &&
+                    jiraCfg.isAddWorklogOnSubTaskDone
                   ) {
-                    this._openWorklogDialog(
-                      subTask,
-                      mainTask.issueId as string,
-                      jiraProjectCfg,
-                    );
+                    this._openWorklogDialog(subTask, mainTask.issueId as string, jiraCfg);
                   } else if (
-                    jiraProjectCfg.isAddWorklogOnSubTaskDone &&
+                    jiraCfg.isAddWorklogOnSubTaskDone &&
                     !subTask &&
-                    (!jiraProjectCfg.isWorklogEnabled || !mainTask.subTaskIds.length)
+                    (!jiraCfg.isWorklogEnabled || !mainTask.subTaskIds.length)
                   ) {
                     this._openWorklogDialog(
                       mainTask,
                       mainTask.issueId as string,
-                      jiraProjectCfg,
+                      jiraCfg,
                     );
                   }
                 }),
@@ -110,10 +105,10 @@ export class JiraIssueEffects {
             !!currentTaskOrParent.issueId,
         ),
         concatMap(([, currentTaskOrParent]) => {
-          if (!currentTaskOrParent.projectId) {
-            throw new Error('No projectId for task');
+          if (!currentTaskOrParent.issueProviderId) {
+            throw new Error('No issueProviderId for task');
           }
-          return this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
+          return this._getCfgOnce$(currentTaskOrParent.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, currentTaskOrParent })),
           );
         }),
@@ -193,10 +188,10 @@ export class JiraIssueEffects {
             currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE,
         ),
         concatMap(([, currentTaskOrParent]) => {
-          if (!currentTaskOrParent.projectId) {
-            throw new Error('No projectId for task');
+          if (!currentTaskOrParent.issueProviderId) {
+            throw new Error('No issueProviderId for task');
           }
-          return this._getCfgOnce$(currentTaskOrParent.projectId).pipe(
+          return this._getCfgOnce$(currentTaskOrParent.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, currentTaskOrParent })),
           );
         }),
@@ -224,10 +219,10 @@ export class JiraIssueEffects {
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => task && task.issueType === JIRA_TYPE),
         concatMap((task: Task) => {
-          if (!task.projectId) {
-            throw new Error('No projectId for task');
+          if (!task.issueProviderId) {
+            throw new Error('No issueProviderId for task');
           }
-          return this._getCfgOnce$(task.projectId).pipe(
+          return this._getCfgOnce$(task.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, task })),
           );
         }),
@@ -266,9 +261,8 @@ export class JiraIssueEffects {
     private readonly _actions$: Actions,
     private readonly _store$: Store<any>,
     private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
-    private readonly _workContextService: WorkContextService,
+    private readonly _issueProviderService: IssueProviderService,
     private readonly _jiraApiService: JiraApiService,
     private readonly _issueService: IssueService,
     private readonly _matDialog: MatDialog,
@@ -276,7 +270,7 @@ export class JiraIssueEffects {
 
   private _handleTransitionForIssue(
     localState: IssueLocalState,
-    jiraCfg: JiraCfg,
+    jiraCfg: IssueProviderJira,
     task: Task,
   ): Observable<any> {
     const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
@@ -339,7 +333,11 @@ export class JiraIssueEffects {
     }
   }
 
-  private _openWorklogDialog(task: Task, issueId: string, jiraCfg: JiraCfg): void {
+  private _openWorklogDialog(
+    task: Task,
+    issueId: string,
+    jiraCfg: IssueProviderJira,
+  ): void {
     this._jiraApiService
       .getReducedIssueById$(issueId, jiraCfg)
       .pipe(take(1))
@@ -371,9 +369,7 @@ export class JiraIssueEffects {
       .afterClosed();
   }
 
-  private _getCfgOnce$(projectId: string): Observable<JiraCfg> {
-    // TODO fixme
-    return EMPTY;
-    // return this._projectService.getJiraCfgForProject$(projectId).pipe(first());
+  private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderJira> {
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'JIRA');
   }
 }

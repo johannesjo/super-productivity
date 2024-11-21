@@ -3,33 +3,32 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
-import { ProjectService } from '../../../project/project.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CalendarCommonInterfacesService implements IssueServiceInterface {
-  constructor(private readonly _projectService: ProjectService) {}
-
   isEnabled(cfg: any): boolean {
     return true;
   }
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(projectId: string): Observable<boolean> {
+  isBacklogPollingEnabledForDefaultProjectOnce$(
+    issueProviderId: string,
+  ): Observable<boolean> {
     return of(false);
   }
 
-  isAutoUpdateIssuesEnabledOnce$(projectId: string): Observable<boolean> {
+  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
     return of(false);
   }
 
   pollTimer$: Observable<number> = EMPTY;
 
-  issueLink$(issueId: number, projectId: string): Observable<string> {
+  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
     return of('NONE');
   }
 
-  getById$(id: number, projectId: string): Observable<IssueData> {
+  getById$(id: number, issueProviderId: string): Observable<IssueData> {
     return of({} as any);
   }
 
@@ -41,7 +40,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(query: string, projectId: string): Observable<SearchResultItem[]> {
+  searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
     return of([]);
   }
 
@@ -64,7 +63,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   }
 
   async getNewIssuesToAddToBacklog(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[],
   ): Promise<IssueDataReduced[]> {
     return [];
