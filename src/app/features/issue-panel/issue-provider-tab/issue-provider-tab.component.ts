@@ -26,7 +26,7 @@ import { IssueService } from '../../issue/issue.service';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
 import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -63,33 +63,30 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
 
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
-    combineLatest([
-      toObservable(this.searchText),
-      toObservable(this.issueProvider).pipe(
-        switchMap((issueProvider) =>
-          this._store.select(selectAllTaskIssueIdsForIssueProvider(issueProvider)),
-        ),
-      ),
-    ]).pipe(
-      filter(([searchText]) => searchText.length >= 1),
+    toObservable(this.searchText).pipe(
+      filter((searchText) => searchText.length >= 1),
       debounceTime(300),
       tap(() => this.isLoading.set(true)),
-      switchMap(([searchText, allIssueIdsForProvider]) =>
-        this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
-          map((items) => {
-            const added: SearchResultItem[] = [];
-            const notAdded: SearchResultItem[] = [];
-
-            items.forEach((item) => {
-              if (allIssueIdsForProvider.includes(item.issueData.id as string)) {
-                added.push(item);
-              } else {
-                notAdded.push(item);
-              }
-            });
-            return { added, notAdded };
-          }),
-        ),
+      switchMap((searchText) =>
+        this._issueService.searchIssues$(searchText, this.issueProvider().id),
+      ),
+      switchMap((items) =>
+        this._store
+          .select(selectAllTaskIssueIdsForIssueProvider(this.issueProvider()))
+          .pipe(
+            map((allIssueIdsForProvider) => {
+              const added: SearchResultItem[] = [];
+              const notAdded: SearchResultItem[] = [];
+              items.forEach((item) => {
+                if (allIssueIdsForProvider.includes(item.issueData.id.toString())) {
+                  added.push(item);
+                } else {
+                  notAdded.push(item);
+                }
+              });
+              return { added, notAdded };
+            }),
+          ),
       ),
       tap(() => this.isLoading.set(false)),
     );
