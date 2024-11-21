@@ -11,15 +11,29 @@ import {
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
 import { FormGroup } from '@angular/forms';
-import { ConfigFormSection } from '../../config/global-config.model';
+import {
+  ConfigFormSection,
+  GlobalConfigSectionKey,
+} from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgForOf, NgIf } from '@angular/common';
+import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
+import { ProjectCfgFormKey } from '../../project/project.model';
+import { OpenprojectCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/openproject-cfg.component';
+import { nanoid } from 'nanoid';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
   standalone: true,
-  imports: [UiModule, IssueModule, NgIf, NgForOf],
+  imports: [
+    UiModule,
+    IssueModule,
+    NgIf,
+    NgForOf,
+    JiraViewComponentsModule,
+    OpenprojectCfgComponent,
+  ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +44,7 @@ export class DialogEditIssueProviderComponent {
     issueProvider?: IssueProvider;
     issueProviderKey?: IssueProviderKey;
   }>(MAT_DIALOG_DATA);
+
   form = new FormGroup({});
 
   issueProviderKey: IssueProviderKey = (this.d.issueProvider?.issueProviderKey ||
@@ -41,9 +56,11 @@ export class DialogEditIssueProviderComponent {
     ? this.issueProvider
     : {
         ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
+        id: nanoid(),
+        issueProviderKey: this.issueProviderKey,
         isEnabled: true,
       };
-  formCfg: ConfigFormSection<IssueIntegrationCfg> =
+  configFormSection: ConfigFormSection<IssueIntegrationCfg> =
     ISSUE_PROVIDER_FORM_CFGS_MAP[this.issueProviderKey];
   fields = this.isEdit
     ? [
@@ -54,9 +71,9 @@ export class DialogEditIssueProviderComponent {
             label: T.G.ENABLED,
           },
         },
-        ...this.formCfg.items!,
+        ...this.configFormSection.items!,
       ]
-    : this.formCfg.items!;
+    : this.configFormSection.items!;
 
   title: string = ISSUE_PROVIDER_HUMANIZED[this.issueProviderKey];
 
@@ -67,8 +84,6 @@ export class DialogEditIssueProviderComponent {
   private _store = inject(Store);
 
   submit(): void {
-    console.log(this.model);
-
     if (this.form.valid) {
       if (this.isEdit) {
         this._store.dispatch(
@@ -122,4 +137,37 @@ export class DialogEditIssueProviderComponent {
         }
       });
   }
+
+  customCfgCmpSave({
+    sectionKey,
+    config,
+  }: {
+    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
+    config: IssueIntegrationCfg;
+  }): void {
+    console.log(sectionKey, config);
+    this.model = {
+      ...this.model,
+      ...config,
+    } as any;
+  }
+  //
+  // saveIssueProviderCfg($event: {
+  //   sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
+  //   config: IssueIntegrationCfg;
+  // }): void {
+  //   if (!$event.config || !this.currentProject) {
+  //     throw new Error('Not enough data');
+  //   }
+  //   const { sectionKey, config } = $event;
+  //   const sectionKeyIN = sectionKey as IssueProviderKey;
+  //   this.projectService.updateIssueProviderConfig(
+  //     this.currentProject.id,
+  //     sectionKeyIN,
+  //     {
+  //       ...config,
+  //     },
+  //     true,
+  //   );
+  // }
 }

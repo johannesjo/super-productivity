@@ -8,7 +8,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { BehaviorSubject, EMPTY, Subscription } from 'rxjs';
 import { HelperClasses } from 'src/app/app.constants';
@@ -36,12 +36,17 @@ import {
   OpenProjectTransitionOption,
 } from '../../open-project.model';
 import { Store } from '@ngrx/store';
+import { UiModule } from '../../../../../../ui/ui.module';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { MatSlider } from '@angular/material/slider';
 
 @Component({
   selector: 'openproject-cfg',
   templateUrl: './openproject-cfg.component.html',
   styleUrls: ['./openproject-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider],
   animations: [expandAnimation],
 })
 export class OpenprojectCfgComponent implements OnInit, OnDestroy {

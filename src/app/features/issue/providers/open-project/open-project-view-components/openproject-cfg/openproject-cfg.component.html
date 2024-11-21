@@ -4,7 +4,7 @@
   name="isEnabled"
   style="margin-bottom: 8px"
 >
-  {{T.G.ENABLED|translate}}
+  {{ T.G.ENABLED|translate }}
 </mat-slide-toggle>
 
 <form
@@ -21,14 +21,16 @@
     >
     </formly-form>
 
-    <h3 class="sub-section-heading">{{T.F.OPEN_PROJECT.CFG_CMP.TRANSITION|translate}}</h3>
+    <h3 class="sub-section-heading">
+      {{ T.F.OPEN_PROJECT.CFG_CMP.TRANSITION|translate }}
+    </h3>
     <mat-slide-toggle
       [(ngModel)]="cfg.isTransitionIssuesEnabled"
       [ngModelOptions]="{standalone: true}"
       name="isTransitionIssuesEnabled"
       style="margin-bottom: 8px"
     >
-      {{T.F.OPEN_PROJECT.CFG_CMP.ENABLE_TRANSITIONS|translate}}
+      {{ T.F.OPEN_PROJECT.CFG_CMP.ENABLE_TRANSITIONS|translate }}
     </mat-slide-toggle>
 
     <section
@@ -37,7 +39,7 @@
     >
       <mat-form-field>
         <mat-label>
-          {{T.F.OPEN_PROJECT.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate}}
+          {{ T.F.OPEN_PROJECT.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate }}
         </mat-label>
         <input
           [formControl]="issueSuggestionsCtrl"
@@ -62,7 +64,7 @@
           <mat-option
             *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByIssueId;"
             [value]="issue"
-            ><span>{{issue?.title}}</span>
+            ><span>{{ issue?.title }}</span>
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
@@ -70,13 +72,13 @@
       <div *ngFor="let opt of transitionConfigOpts">
         <mat-form-field>
           <label *ngIf="opt.key==='OPEN'">
-            {{T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate}}
+            {{ T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate }}
           </label>
           <label *ngIf="opt.key==='IN_PROGRESS'">
-            {{T.F.OPEN_PROJECT.CFG_CMP.IN_PROGRESS|translate}}
+            {{ T.F.OPEN_PROJECT.CFG_CMP.IN_PROGRESS|translate }}
           </label>
           <label *ngIf="opt.key==='DONE'">
-            {{T.F.OPEN_PROJECT.CFG_CMP.DONE|translate}}
+            {{ T.F.OPEN_PROJECT.CFG_CMP.DONE|translate }}
           </label>
 
           <!-- TODO check for a better way to do this -->
@@ -87,16 +89,16 @@
             [ngModel]="getTransition(opt.key)"
           >
             <mat-option value="DO_NOT">
-              {{T.F.OPEN_PROJECT.CFG_CMP.DO_NOT|translate}}
+              {{ T.F.OPEN_PROJECT.CFG_CMP.DO_NOT|translate }}
             </mat-option>
             <mat-option value="ALWAYS_ASK">
-              {{T.F.OPEN_PROJECT.CFG_CMP.ALWAYS_ASK|translate}}
+              {{ T.F.OPEN_PROJECT.CFG_CMP.ALWAYS_ASK|translate }}
             </mat-option>
             <mat-option
               *ngFor="let transition of cfg.availableTransitions"
               [value]="transition"
             >
-              {{transition.name}}
+              {{ transition.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -106,7 +108,7 @@
             [(ngModel)]="this.cfg.isSetProgressOnTaskDone"
             [ngModelOptions]="{standalone: true}"
           >
-            {{T.F.OPEN_PROJECT.CFG_CMP.PROGRESS_ON_SAVE|translate}}
+            {{ T.F.OPEN_PROJECT.CFG_CMP.PROGRESS_ON_SAVE|translate }}
           </mat-checkbox>
           <!-- TODO: The 'tickInterval' property no longer exists -->
           <mat-slider
@@ -135,7 +137,7 @@
       type="submit"
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+      {{ T.G.SAVE|translate }}
     </button>
   </div>
 </form>

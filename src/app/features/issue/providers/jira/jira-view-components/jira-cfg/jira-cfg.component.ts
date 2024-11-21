@@ -14,10 +14,10 @@ import {
 import { ProjectCfgFormKey } from '../../../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { JiraCfg, JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
+import { JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { SearchResultItem } from '../../../../issue.model';
+import { IssueProviderJira, SearchResultItem } from '../../../../issue.model';
 import { catchError, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../../jira.const';
@@ -25,8 +25,6 @@ import { JiraIssue } from '../../jira-issue/jira-issue.model';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
-import { WorkContextService } from '../../../../../work-context/work-context.service';
-import { WorkContextType } from '../../../../../work-context/work-context.model';
 import { IssueProviderService } from '../../../../issue-provider.service';
 
 @Component({
@@ -37,14 +35,12 @@ import { IssueProviderService } from '../../../../issue-provider.service';
   animations: [expandAnimation],
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
-  @Input() section?: ConfigFormSection<JiraCfg>;
-  // TODO fixme
-  @Output() save: EventEmitter<{
+  @Input() section?: ConfigFormSection<IssueProviderJira>;
+
+  @Output() modelChange: EventEmitter<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
   }> = new EventEmitter();
-  // TODO fixme
-  ISSUE_PROVIDER_ID = 'XXXX';
 
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
@@ -63,7 +59,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
       tap(() => this.isLoading$.next(true)),
       switchMap((searchTerm: string) => {
         return searchTerm && searchTerm.length > 1
-          ? this._issueProviderService.getCfgOnce$(this.ISSUE_PROVIDER_ID, 'JIRA').pipe(
+          ? this._issueProviderService.getCfgOnce$(this.cfg.id, 'JIRA').pipe(
               first(),
               switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
               catchError(() => {
@@ -93,18 +89,17 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
     private _issueProviderService: IssueProviderService,
-    private _workContextService: WorkContextService,
   ) {}
 
-  private _cfg?: JiraCfg;
+  private _cfg?: IssueProviderJira;
 
-  get cfg(): JiraCfg {
-    return this._cfg as JiraCfg;
+  get cfg(): IssueProviderJira {
+    return this._cfg as IssueProviderJira;
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
-  @Input() set cfg(cfg: JiraCfg) {
-    const newCfg: JiraCfg = cfg ? { ...cfg } : DEFAULT_JIRA_CFG;
+  @Input() set cfg(cfg: IssueProviderJira) {
+    const newCfg: IssueProviderJira = { ...cfg };
 
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
@@ -133,11 +128,16 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<JiraCfg>).items;
+    this.fields = (this.section as ConfigFormSection<IssueProviderJira>).items;
   }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  onModelChange(cfg: IssueProviderJira): void {
+    this.cfg = cfg;
+    this.notifyModelChange();
   }
 
   getTransition(key: keyof JiraTransitionConfig): JiraTransitionOption {
@@ -152,24 +152,21 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   toggleEnabled(isEnabled: boolean): void {
-    if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
-      throw new Error('Should only be called when in project context');
-    }
-    // TODO fixme
-    // const projectId = this._workContextService.activeWorkContextId as string;
-    // this._projectService.updateIssueProviderConfig(projectId, JIRA_TYPE, {
-    //   isEnabled,
-    // });
+    this.cfg = {
+      ...this.cfg,
+      isEnabled,
+    };
+    this.notifyModelChange();
   }
 
-  submit(): void {
+  notifyModelChange(): void {
     if (!this.cfg) {
       throw new Error(
-        'No config for ' + (this.section as ConfigFormSection<JiraCfg>).key,
+        'No config for ' + (this.section as ConfigFormSection<IssueProviderJira>).key,
       );
     } else {
-      this.save.emit({
-        sectionKey: (this.section as ConfigFormSection<JiraCfg>).key,
+      this.modelChange.emit({
+        sectionKey: (this.section as ConfigFormSection<IssueProviderJira>).key,
         config: this.cfg,
       });
     }
@@ -189,19 +186,14 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   loadCustomFields(): void {
-    // TODO fixme
-    // this.customFieldsPromise = this._projectService
-    //   .getJiraCfgForProject$(this._workContextService.activeWorkContextId as string)
-    //   .pipe(
-    //     first(),
-    //     concatMap((jiraCfg) => this._jiraApiService.listFields$(jiraCfg)),
-    //   )
-    //   .toPromise();
-    // this.customFieldsPromise.then((v: any) => {
-    //   if (v && Array.isArray(v.response)) {
-    //     this.customFields = v.response;
-    //   }
-    // });
+    this.customFieldsPromise = this._jiraApiService
+      .listFields$(this.cfg as IssueProviderJira)
+      .toPromise();
+    this.customFieldsPromise.then((v: any) => {
+      if (v && Array.isArray(v.response)) {
+        this.customFields = v.response;
+      }
+    });
   }
 
   updateTransitionOptions(): void {

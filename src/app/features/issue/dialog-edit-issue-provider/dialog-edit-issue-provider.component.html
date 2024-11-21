@@ -11,7 +11,7 @@
   ></mat-icon>
   <!-- TODO improve title -->
 
-  {{ isEdit ? 'Edit' : 'Setup'}} {{title}} Config
+  {{ isEdit ? 'Edit' : 'Setup' }} {{ title }} Config
   <!--  <span>{{T.F.JIRA.DIALOG_INITIAL.TITLE|translate}}</span>-->
 </h1>
 
@@ -20,18 +20,18 @@
   (ngSubmit)="submit()"
 >
   <mat-dialog-content>
-    <help-section *ngIf="formCfg?.help||formCfg?.helpArr">
+    <help-section *ngIf="configFormSection?.help||configFormSection?.helpArr">
       <div
-        *ngIf="formCfg?.help"
-        [innerHtml]="formCfg?.help|translate"
+        *ngIf="configFormSection?.help"
+        [innerHtml]="configFormSection?.help|translate"
       ></div>
-      <ng-container *ngIf="formCfg?.helpArr">
-        <ng-container *ngFor="let helpSection of formCfg?.helpArr; ">
+      <ng-container *ngIf="configFormSection?.helpArr">
+        <ng-container *ngFor="let helpSection of configFormSection?.helpArr; ">
           <div
             *ngIf="helpSection.h"
             class="mat-caption"
           >
-            {{helpSection.h|translate}}
+            {{ helpSection.h|translate }}
           </div>
           <p
             *ngIf="helpSection.p"
@@ -53,11 +53,29 @@
       </ng-container>
     </help-section>
 
+    @switch (issueProviderKey) {
+    <!-- -->
+    @case ("JIRA") {
+    <jira-cfg
+      [section]="configFormSection"
+      [cfg]="model"
+      (modelChange)="customCfgCmpSave($event)"
+    ></jira-cfg>
+    <!-- -->
+    } @case ("OPEN_PROJECT") {
+    <openproject-cfg
+      [section]="configFormSection"
+      [cfg]="model"
+      (save)="customCfgCmpSave($event)"
+    ></openproject-cfg>
+    <!-- -->
+    } @default {
     <formly-form
       [(model)]="model"
       [fields]="fields"
       [form]="form"
     ></formly-form>
+    } }
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
@@ -71,7 +89,7 @@
     </button>
 
     <!-- TODO implement -->
-    @if(isEdit) {
+    @if (isEdit) {
     <button
       (click)="remove()"
       color="warn"
@@ -85,6 +103,7 @@
       color="primary"
       mat-stroked-button
       type="submit"
+      [disabled]="form.invalid"
     >
       <mat-icon>save</mat-icon>
       {{ T.G.SAVE|translate }}

@@ -13,13 +13,12 @@
 </mat-slide-toggle>
 
 <form
-  (ngSubmit)="submit()"
   [formGroup]="form"
   [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
 >
   <div *ngIf="cfg.isEnabled">
     <formly-form
-      (modelChange)="cfg=$event"
+      (modelChange)="onModelChange($event)"
       [fields]="section?.items"
       [form]="form"
       [model]="cfg"
@@ -141,18 +140,5 @@
         </mat-autocomplete>
       </mat-form-field>
     </section>
-  </div>
-
-  <div class="controls">
-    <button
-      [disabled]="!form.valid && cfg.isEnabled"
-      class="btn btn-primary submit-button"
-      color="primary"
-      mat-raised-button
-      type="submit"
-    >
-      <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
-    </button>
   </div>
 </form>

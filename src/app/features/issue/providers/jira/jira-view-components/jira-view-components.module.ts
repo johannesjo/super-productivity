@@ -15,6 +15,6 @@ import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-
     JiraCfgStepperComponent,
     JiraCfgComponent,
   ],
-  exports: [JiraCfgStepperComponent],
+  exports: [JiraCfgStepperComponent, JiraCfgComponent],
 })
 export class JiraViewComponentsModule {}
