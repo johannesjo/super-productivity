@@ -31,6 +31,7 @@ describe('isLegacyAppData()', () => {
         task: { [MODEL_VERSION_KEY]: MODEL_VERSION.TASK },
         taskArchive: { [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_ARCHIVE },
         taskRepeatCfg: { [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_REPEAT },
+        issueProvider: { [MODEL_VERSION_KEY]: MODEL_VERSION.ISSUE_PROVIDER },
       } as any),
     ).toBe(false);
   });
