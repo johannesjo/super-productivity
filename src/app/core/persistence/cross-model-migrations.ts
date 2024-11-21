@@ -29,6 +29,7 @@ import { GiteaCfg } from '../../features/issue/providers/gitea/gitea.model';
 import { GitlabCfg } from '../../features/issue/providers/gitlab/gitlab';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
+import { MODEL_VERSION } from '../model-version';
 
 export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => {
   console.log('[M] Starting cross model migrations...', data);
@@ -83,6 +84,7 @@ const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComple
           migrations.join('\n'),
       )
     ) {
+      copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
       return copy;
     } else {
       throw new Error('Migration aborted');

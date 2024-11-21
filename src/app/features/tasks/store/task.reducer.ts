@@ -1,4 +1,5 @@
 import {
+  __updateMultipleTaskSimple,
   addSubTask,
   addTask,
   addTimeSpent,
@@ -194,6 +195,10 @@ export const taskReducer = createReducer<TaskState>(
     stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
     stateCopy = updateDoneOnForTask(task, stateCopy);
     return taskAdapter.updateOne(task, stateCopy);
+  }),
+
+  on(__updateMultipleTaskSimple, (state, { taskUpdates }) => {
+    return taskAdapter.updateMany(taskUpdates, state);
   }),
 
   on(updateTaskUi, (state, { task }) => {

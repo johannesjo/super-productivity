@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  __updateMultipleTaskSimple,
   addSubTask,
   addTask,
   addTimeSpent,
@@ -59,6 +60,7 @@ export class TaskDbEffects {
           // setCurrentTask,
           // unsetCurrentTask,
           updateTask,
+          __updateMultipleTaskSimple,
           updateTaskTags,
           removeTagsForAllTasks,
           moveSubTask,

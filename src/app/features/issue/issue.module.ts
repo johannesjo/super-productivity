@@ -16,6 +16,7 @@ import { PollIssueUpdatesEffects } from './store/poll-issue-updates.effects';
 import { StoreModule } from '@ngrx/store';
 import { IssueProviderDbEffects } from './store/issue-provider-db.effects';
 import { issueProvidersFeature } from './store/issue-provider.reducer';
+import { UnlinkAllTasksOnProviderDeletionEffects } from './store/unlink-all-tasks-on-provider-deletion.effects';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import { issueProvidersFeature } from './store/issue-provider.reducer';
       PollToBacklogEffects,
       PollIssueUpdatesEffects,
       IssueProviderDbEffects,
+      UnlinkAllTasksOnProviderDeletionEffects,
     ]),
   ],
   declarations: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],

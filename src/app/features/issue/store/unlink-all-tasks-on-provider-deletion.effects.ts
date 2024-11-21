@@ -1,0 +1,85 @@
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { TaskService } from '../../tasks/task.service';
+import { TaskCopy } from '../../tasks/task.model';
+import { IssueProviderActions } from './issue-provider.actions';
+import { first, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { Update } from '@ngrx/entity/src/models';
+import { Store } from '@ngrx/store';
+import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+
+@Injectable()
+export class UnlinkAllTasksOnProviderDeletionEffects {
+  readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
+    issueId: null,
+    issueProviderId: null,
+    issueType: null,
+    issueWasUpdated: null,
+    issueLastUpdated: null,
+    issueAttachmentNr: null,
+    issueTimeTracked: null,
+    issuePoints: null,
+  } as const;
+
+  unlinkAllTasksOnProviderDeletion$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(IssueProviderActions.deleteIssueProvider),
+        tap((v) => this._unlinkProvider(v.id)),
+      ),
+    { dispatch: false },
+  );
+
+  unlinkAllTasksOnProviderDeletions$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(IssueProviderActions.deleteIssueProviders),
+        tap((v) => v.ids.forEach((id) => this._unlinkProvider(id))),
+      ),
+    { dispatch: false },
+  );
+
+  constructor(
+    private _actions$: Actions,
+    private _taskService: TaskService,
+    private _store: Store,
+    private _persistenceService: PersistenceService,
+  ) {}
+
+  private async _unlinkProvider(issueProviderId: string): Promise<void> {
+    const regularTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+    const archiveTasks = await this._taskService.getArchivedTasks();
+
+    const taskUpdates: Update<TaskCopy>[] = regularTasks
+      .filter((task) => task.issueProviderId === issueProviderId)
+      .map((task) => {
+        return {
+          id: task.id,
+          changes: this.UNLINKED_PARTIAL_TASK,
+        };
+      });
+    this._store.dispatch(__updateMultipleTaskSimple({ taskUpdates }));
+
+    const archiveTaskUpdates: Update<TaskCopy>[] = archiveTasks
+      .filter((task) => task.issueProviderId === issueProviderId)
+      .map((task) => {
+        return {
+          id: task.id,
+          changes: this.UNLINKED_PARTIAL_TASK,
+        };
+      });
+    await this._persistenceService.taskArchive.execAction(
+      __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
+      true,
+    );
+
+    console.log('unlinkAllTasksOnProviderDeletion$', {
+      regularTasks,
+      archiveTasks,
+      taskUpdates,
+      archiveTaskUpdates,
+    });
+  }
+}
