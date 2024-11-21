@@ -163,6 +163,9 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       this._layoutService.toggleNotes();
+    } else if (checkKeyCombo(ev, keys.toggleIssuePanel)) {
+      ev.preventDefault();
+      this._layoutService.toggleAddTaskPanel();
     } else if (checkKeyCombo(ev, keys.triggerSync)) {
       ev.preventDefault();
       if (await this._syncProviderService.isEnabled$.pipe(first()).toPromise()) {

@@ -90,6 +90,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES,
       },
     },
+    {
+      key: 'toggleIssuePanel',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TOGGLE_ISSUE_PANEL,
+      },
+    },
     // {
     //   key: 'showHelp',
     //   type: 'keyboard',

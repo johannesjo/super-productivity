@@ -18,6 +18,7 @@ export type KeyboardConfig = Readonly<{
   toggleSideNav: string | null;
   openProjectNotes: string | null;
   toggleBookmarks: string | null;
+  toggleIssuePanel: string | null;
   zoomIn: string | null;
   zoomOut: string | null;
   zoomDefault: string | null;
