@@ -1,35 +1,37 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { concatMap, first, switchMap } from 'rxjs/operators';
 import { SnackService } from 'src/app/core/snack/snack.service';
-import { IssueLocalState } from 'src/app/features/issue/issue.model';
+import {
+  IssueLocalState,
+  IssueProviderOpenProject,
+} from 'src/app/features/issue/issue.model';
 import { IssueService } from 'src/app/features/issue/issue.service';
-import { ProjectService } from 'src/app/features/project/project.service';
 import { T } from 'src/app/t.const';
 import { Task } from '../../../../../tasks/task.model';
 import { OpenProjectOriginalStatus } from '../../open-project-api-responses';
 import { OpenProjectApiService } from '../../open-project-api.service';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
-import { OpenProjectCfg } from '../../open-project.model';
+import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
 
 @Component({
-  selector: 'dialog-openproject-transition',
-  templateUrl: './dialog-openproject-transition.component.html',
-  styleUrls: ['./dialog-openproject-transition.component.scss'],
+  selector: 'dialog-open-project-transition',
+  templateUrl: './dialog-open-project-transition.component.html',
+  styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogOpenprojectTransitionComponent {
+export class DialogOpenProjectTransitionComponent {
   T: typeof T = T;
 
-  // TODO fix
-  // _openProjectCfg$: Observable<OpenProjectCfg> =
-  //   this._projectService.getOpenProjectCfgForProject$(this.data.task.projectId as string);
-  _openProjectCfg$: Observable<OpenProjectCfg> = EMPTY;
+  _openProjectCfg$: Observable<IssueProviderOpenProject> =
+    this._issueProviderService.getCfgOnce$(
+      this.data.task.issueProviderId as string,
+      'OPEN_PROJECT',
+    );
 
   availableTransitions$: Observable<OpenProjectOriginalStatus[]> =
     this._openProjectCfg$.pipe(
-      first(),
       switchMap((cfg) =>
         this._openProjectApiService.getTransitionsForIssue$(
           this.data.issue.id,
@@ -45,8 +47,8 @@ export class DialogOpenprojectTransitionComponent {
   constructor(
     private _openProjectApiService: OpenProjectApiService,
     private _issueService: IssueService,
-    private _projectService: ProjectService,
-    private _matDialogRef: MatDialogRef<DialogOpenprojectTransitionComponent>,
+    private _issueProviderService: IssueProviderService,
+    private _matDialogRef: MatDialogRef<DialogOpenProjectTransitionComponent>,
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
@@ -55,8 +57,8 @@ export class DialogOpenprojectTransitionComponent {
       task: Task;
     },
   ) {
-    if (!this.data.task.projectId) {
-      throw new Error('No projectId for task');
+    if (!this.data.task.issueProviderId) {
+      throw new Error('No issueProviderId for task');
     }
     this.percentageDone = data.issue.percentageDone;
   }

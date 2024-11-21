@@ -11,15 +11,11 @@ import {
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
 import { FormGroup } from '@angular/forms';
-import {
-  ConfigFormSection,
-  GlobalConfigSectionKey,
-} from '../../config/global-config.model';
+import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgForOf, NgIf } from '@angular/common';
 import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
-import { ProjectCfgFormKey } from '../../project/project.model';
 import { OpenprojectCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/openproject-cfg.component';
 import { nanoid } from 'nanoid';
 
@@ -138,19 +134,14 @@ export class DialogEditIssueProviderComponent {
       });
   }
 
-  customCfgCmpSave({
-    sectionKey,
-    config,
-  }: {
-    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
-    config: IssueIntegrationCfg;
-  }): void {
-    console.log(sectionKey, config);
+  customCfgCmpSave(config: IssueIntegrationCfg): void {
+    console.log('customCfgCmpSave()', config);
     this.model = {
       ...this.model,
       ...config,
     } as any;
   }
+
   //
   // saveIssueProviderCfg($event: {
   //   sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;

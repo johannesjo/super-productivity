@@ -19,7 +19,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 import { OpenProjectWorkPackage } from '../open-project-issue.model';
 import { IssueService } from 'src/app/features/issue/issue.service';
 import { T } from 'src/app/t.const';
-import { DialogOpenprojectTransitionComponent } from '../../open-project-view-components/dialog-openproject-transition/dialog-openproject-transition.component';
+import { DialogOpenProjectTransitionComponent } from '../../open-project-view-components/dialog-openproject-transition/dialog-open-project-transition.component';
 
 @Injectable()
 export class OpenProjectEffects {
@@ -259,7 +259,7 @@ export class OpenProjectEffects {
     task: Task,
   ): Observable<any> {
     return this._matDialog
-      .open(DialogOpenprojectTransitionComponent, {
+      .open(DialogOpenProjectTransitionComponent, {
         restoreFocus: true,
         data: {
           issue,

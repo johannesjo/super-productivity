@@ -7,11 +7,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import {
-  ConfigFormSection,
-  GlobalConfigSectionKey,
-} from '../../../../../config/global-config.model';
-import { ProjectCfgFormKey } from '../../../../../project/project.model';
+import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
@@ -37,10 +33,7 @@ import { IssueProviderService } from '../../../../issue-provider.service';
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<IssueProviderJira>;
 
-  @Output() modelChange: EventEmitter<{
-    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
-    config: any;
-  }> = new EventEmitter();
+  @Output() modelChange: EventEmitter<IssueProviderJira> = new EventEmitter();
 
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
@@ -135,8 +128,11 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  onModelChange(cfg: IssueProviderJira): void {
-    this.cfg = cfg;
+  partialModelChange(cfg: Partial<IssueProviderJira>): void {
+    this.cfg = {
+      ...this.cfg,
+      ...cfg,
+    };
     this.notifyModelChange();
   }
 
@@ -144,19 +140,13 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return this.cfg.transitionConfig[key];
   }
 
-  setTransition(
-    key: keyof JiraTransitionConfig,
-    value: JiraTransitionOption,
-  ): JiraTransitionOption {
-    return (this.cfg.transitionConfig[key] = value);
-  }
-
-  toggleEnabled(isEnabled: boolean): void {
-    this.cfg = {
-      ...this.cfg,
-      isEnabled,
-    };
-    this.notifyModelChange();
+  setTransition(key: keyof JiraTransitionConfig, value: JiraTransitionOption): void {
+    this.partialModelChange({
+      transitionConfig: {
+        ...this.cfg.transitionConfig,
+        [key]: value,
+      },
+    });
   }
 
   notifyModelChange(): void {
@@ -165,10 +155,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
         'No config for ' + (this.section as ConfigFormSection<IssueProviderJira>).key,
       );
     } else {
-      this.modelChange.emit({
-        sectionKey: (this.section as ConfigFormSection<IssueProviderJira>).key,
-        config: this.cfg,
-      });
+      this.modelChange.emit(this.cfg);
     }
   }
 
@@ -207,7 +194,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
         this._jiraApiService
           .getTransitionsForIssue$(issueId, this.cfg)
           .subscribe((val) => {
-            this.cfg.availableTransitions = val;
+            this.partialModelChange({ availableTransitions: val });
             this._snackService.open({
               type: 'SUCCESS',
               msg: T.F.JIRA.S.TRANSITIONS_LOADED,

@@ -4,14 +4,14 @@ import { UiModule } from '../../../../../ui/ui.module';
 
 import { DialogOpenProjectTrackTimeComponent } from './dialog-open-project-track-time/dialog-open-project-track-time.component';
 import { FormsModule } from '@angular/forms';
-import { DialogOpenprojectTransitionComponent } from './dialog-openproject-transition/dialog-openproject-transition.component';
+import { DialogOpenProjectTransitionComponent } from './dialog-openproject-transition/dialog-open-project-transition.component';
 import { MatSliderModule } from '@angular/material/slider';
 
 @NgModule({
   imports: [CommonModule, UiModule, FormsModule, MatSliderModule],
   declarations: [
     DialogOpenProjectTrackTimeComponent,
-    DialogOpenprojectTransitionComponent,
+    DialogOpenProjectTransitionComponent,
   ],
   exports: [],
 })

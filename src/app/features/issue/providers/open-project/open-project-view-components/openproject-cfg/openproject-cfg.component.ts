@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  inject,
   Input,
   OnDestroy,
   OnInit,
@@ -10,18 +9,14 @@ import {
 } from '@angular/core';
 import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { BehaviorSubject, EMPTY, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { HelperClasses } from 'src/app/app.constants';
 import { SnackService } from 'src/app/core/snack/snack.service';
+import { ConfigFormSection } from 'src/app/features/config/global-config.model';
 import {
-  ConfigFormSection,
-  GlobalConfigSectionKey,
-} from 'src/app/features/config/global-config.model';
-import { SearchResultItem } from 'src/app/features/issue/issue.model';
-import { ProjectCfgFormKey } from 'src/app/features/project/project.model';
-import { ProjectService } from 'src/app/features/project/project.service';
-import { WorkContextType } from 'src/app/features/work-context/work-context.model';
-import { WorkContextService } from 'src/app/features/work-context/work-context.service';
+  IssueProviderOpenProject,
+  SearchResultItem,
+} from 'src/app/features/issue/issue.model';
 import { T } from 'src/app/t.const';
 import { expandAnimation } from 'src/app/ui/animations/expand.ani';
 import { OpenProjectApiService } from '../../open-project-api.service';
@@ -31,32 +26,26 @@ import {
 } from '../../open-project-issue/open-project-issue.model';
 import { DEFAULT_OPEN_PROJECT_CFG } from '../../open-project.const';
 import {
-  OpenProjectCfg,
   OpenProjectTransitionConfig,
   OpenProjectTransitionOption,
 } from '../../open-project.model';
-import { Store } from '@ngrx/store';
 import { UiModule } from '../../../../../../ui/ui.module';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
+import { debounceTime, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'openproject-cfg',
   templateUrl: './openproject-cfg.component.html',
-  styleUrls: ['./openproject-cfg.component.scss'],
+  styleUrls: ['./openproject-cfg.compo' + 'nent.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider],
+  imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider, NgForOf],
   animations: [expandAnimation],
 })
 export class OpenprojectCfgComponent implements OnInit, OnDestroy {
-  private _store = inject(Store);
-
-  @Input() section?: ConfigFormSection<OpenProjectCfg>;
-  @Output() save: EventEmitter<{
-    sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
-    config: any;
-  }> = new EventEmitter();
+  @Input() section?: ConfigFormSection<IssueProviderOpenProject>;
+  @Output() modelChange: EventEmitter<IssueProviderOpenProject> = new EventEmitter();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
@@ -64,36 +53,20 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   fields?: FormlyFieldConfig[];
   options: FormlyFormOptions = {};
-  filteredIssueSuggestions$ = EMPTY;
 
-  // TODO make it work
-  // filteredIssueSuggestions$: Observable<SearchResultItem[]> =
-  //   this.issueSuggestionsCtrl.valueChanges.pipe(
-  //     debounceTime(300),
-  //     tap(() => this.isLoading$.next(true)),
-  //     switchMap((searchTerm: string) => {
-  //       return searchTerm && searchTerm.length > 1
-  //         ? this._projectService
-  //             .getOpenProjectCfgForProject$(
-  //               this._workContextService.activeWorkContextId as string,
-  //             )
-  //             .pipe(
-  //               first(),
-  //               switchMap((cfg) =>
-  //                 this._openProjectApiService.searchIssueForRepo$(searchTerm, cfg),
-  //               ),
-  //               catchError(() => {
-  //                 return [];
-  //               }),
-  //             )
-  //         : // Note: the outer array signifies the observable stream the other is the value
-  //           [[]];
-  //       // TODO fix type
-  //     }),
-  //     tap((suggestions) => {
-  //       this.isLoading$.next(false);
-  //     }),
-  //   );
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> =
+    this.issueSuggestionsCtrl.valueChanges.pipe(
+      debounceTime(300),
+      tap(() => this.isLoading$.next(true)),
+      switchMap((searchTerm: string) => {
+        return searchTerm && searchTerm.length > 1
+          ? this._openProjectApiService.searchIssueForRepo$(searchTerm, this.cfg)
+          : [[]];
+      }),
+      tap((suggestions) => {
+        this.isLoading$.next(false);
+      }),
+    );
   transitionConfigOpts: {
     key: keyof OpenProjectTransitionConfig;
     val: OpenProjectTransitionOption;
@@ -104,19 +77,17 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   constructor(
     private _openProjectApiService: OpenProjectApiService,
     private _snackService: SnackService,
-    private _projectService: ProjectService,
-    private _workContextService: WorkContextService,
   ) {}
 
-  private _cfg?: OpenProjectCfg;
+  private _cfg?: IssueProviderOpenProject;
 
-  get cfg(): OpenProjectCfg {
-    return this._cfg as OpenProjectCfg;
+  get cfg(): IssueProviderOpenProject {
+    return this._cfg as IssueProviderOpenProject;
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
-  @Input() set cfg(cfg: OpenProjectCfg) {
-    const newCfg: OpenProjectCfg = cfg ? { ...cfg } : DEFAULT_OPEN_PROJECT_CFG;
+  @Input() set cfg(cfg: IssueProviderOpenProject) {
+    const newCfg: IssueProviderOpenProject = { ...cfg };
 
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_OPEN_PROJECT_CFG.transitionConfig;
@@ -145,7 +116,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<OpenProjectCfg>).items;
+    this.fields = (this.section as ConfigFormSection<IssueProviderOpenProject>).items;
   }
 
   ngOnDestroy(): void {
@@ -164,23 +135,30 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
     transitionConfig[key] = value;
     if (key === 'DONE') {
       if (value === 'ALWAYS_ASK' || value === 'DO_NOT') {
-        this.cfg.isSetProgressOnTaskDone = false;
+        this.partialModelChange({ isSetProgressOnTaskDone: false });
       }
     }
-    this.cfg.transitionConfig = transitionConfig;
+    this.partialModelChange({ transitionConfig });
+
     return value;
   }
 
-  submit(): void {
+  partialModelChange(cfg: Partial<IssueProviderOpenProject>): void {
+    this.cfg = {
+      ...this.cfg,
+      ...cfg,
+    };
+    this.notifyModelChange();
+  }
+
+  notifyModelChange(): void {
     if (!this.cfg) {
       throw new Error(
-        'No config for ' + (this.section as ConfigFormSection<OpenProjectCfg>).key,
+        'No config for ' +
+          (this.section as ConfigFormSection<IssueProviderOpenProject>).key,
       );
     } else {
-      this.save.emit({
-        sectionKey: (this.section as ConfigFormSection<OpenProjectCfg>).key,
-        config: this.cfg,
-      });
+      this.modelChange.emit(this.cfg);
     }
   }
 
@@ -197,7 +175,9 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
         this._openProjectApiService
           .getTransitionsForIssue$(issueId, lockVersion, this.cfg)
           .subscribe((val) => {
-            this.cfg.availableTransitions = val;
+            this.partialModelChange({
+              availableTransitions: val,
+            });
             this._snackService.open({
               type: 'SUCCESS',
               msg: T.F.OPEN_PROJECT.S.TRANSITIONS_LOADED,
@@ -205,20 +185,6 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
           }),
       );
     }
-  }
-
-  toggleEnabled(isEnabled: boolean): void {
-    if (this._workContextService.activeWorkContextType !== WorkContextType.PROJECT) {
-      throw new Error('Should only be called when in project context');
-    }
-    // TODO make it work
-    // const projectId = this._workContextService.activeWorkContextId as string;
-    // this._store.dispatch(
-    //
-    // )
-    // this._projectService.updateIssueProviderConfig(projectId, OPEN_PROJECT_TYPE, {
-    //   isEnabled,
-    // });
   }
 
   displayIssueWith(issue?: OpenProjectWorkPackage): string | undefined {

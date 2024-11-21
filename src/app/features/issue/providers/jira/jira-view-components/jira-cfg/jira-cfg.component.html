@@ -3,9 +3,9 @@
 </div>
 
 <mat-slide-toggle
-  (ngModelChange)="toggleEnabled($event)"
   [ngClass]="HelperClasses.isHideForNoAdvancedFeatures"
   [ngModel]="cfg.isEnabled"
+  (ngModelChange)="partialModelChange({isEnabled: $event})"
   name="isEnabled"
   style="margin-bottom: 8px"
 >
@@ -18,7 +18,7 @@
 >
   <div *ngIf="cfg.isEnabled">
     <formly-form
-      (modelChange)="onModelChange($event)"
+      (modelChange)="partialModelChange($event)"
       [fields]="section?.items"
       [form]="form"
       [model]="cfg"
@@ -28,7 +28,8 @@
 
     <h3 class="sub-section-heading">{{T.F.JIRA.CFG_CMP.TRANSITION|translate}}</h3>
     <mat-slide-toggle
-      [(ngModel)]="cfg.isTransitionIssuesEnabled"
+      [ngModel]="cfg.isTransitionIssuesEnabled"
+      (ngModelChange)="partialModelChange({isTransitionIssuesEnabled: $event})"
       [ngModelOptions]="{standalone: true}"
       name="isTransitionIssuesEnabled"
       style="margin-bottom: 8px"
@@ -121,7 +122,8 @@
       <mat-form-field>
         <mat-label>{{T.F.JIRA.CFG_CMP.STORY_POINTS|translate}}</mat-label>
         <input
-          [(ngModel)]="cfg.storyPointFieldId"
+          [ngModel]="cfg.storyPointFieldId"
+          (ngModelChange)="partialModelChange({storyPointFieldId: $event})"
           [formControl]="customFieldSuggestionsCtrl"
           [matAutocomplete]="storyPointAutoEl"
           class="border-color-primary"
