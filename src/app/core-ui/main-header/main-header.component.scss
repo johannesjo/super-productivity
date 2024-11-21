@@ -384,7 +384,7 @@ simple-counter-button {
     }
 
     @include darkTheme() {
-      background: $dark-theme-bg-slightly-lighter;
+      background: $dark8;
       //border-color: $dark-theme-extra-border-color;
     }
   }
