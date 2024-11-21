@@ -93,6 +93,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: IssueProviderJira) {
     const newCfg: IssueProviderJira = { ...cfg };
+    const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
+    if (isEqual) {
+      return;
+    }
 
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
@@ -129,10 +133,9 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   partialModelChange(cfg: Partial<IssueProviderJira>): void {
-    this.cfg = {
-      ...this.cfg,
-      ...cfg,
-    };
+    Object.keys(cfg).forEach((key) => {
+      this._cfg![key] = cfg[key];
+    });
     this.notifyModelChange();
   }
 
@@ -150,13 +153,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   notifyModelChange(): void {
-    if (!this.cfg) {
-      throw new Error(
-        'No config for ' + (this.section as ConfigFormSection<IssueProviderJira>).key,
-      );
-    } else {
-      this.modelChange.emit(this.cfg);
-    }
+    this.modelChange.emit(this._cfg);
   }
 
   trackByCustomFieldId(i: number, field: any): string {

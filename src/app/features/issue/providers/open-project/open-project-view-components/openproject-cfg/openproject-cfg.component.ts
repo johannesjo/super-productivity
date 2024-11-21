@@ -88,6 +88,11 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: IssueProviderOpenProject) {
     const newCfg: IssueProviderOpenProject = { ...cfg };
+    const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
+
+    if (isEqual) {
+      return;
+    }
 
     if (!newCfg.transitionConfig) {
       newCfg.transitionConfig = DEFAULT_OPEN_PROJECT_CFG.transitionConfig;
@@ -144,22 +149,15 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
   }
 
   partialModelChange(cfg: Partial<IssueProviderOpenProject>): void {
-    this.cfg = {
-      ...this.cfg,
-      ...cfg,
-    };
+    Object.keys(cfg).forEach((key) => {
+      this._cfg![key] = cfg[key];
+    });
+
     this.notifyModelChange();
   }
 
   notifyModelChange(): void {
-    if (!this.cfg) {
-      throw new Error(
-        'No config for ' +
-          (this.section as ConfigFormSection<IssueProviderOpenProject>).key,
-      );
-    } else {
-      this.modelChange.emit(this.cfg);
-    }
+    this.modelChange.emit(this._cfg);
   }
 
   updateTransitionOptions(): void {
