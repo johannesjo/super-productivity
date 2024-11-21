@@ -10,7 +10,7 @@ import { UiModule } from '../../../ui/ui.module';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'add-task-panel-intro',
+  selector: 'issue-panel-intro',
   standalone: true,
   imports: [
     CommonModule,
@@ -21,8 +21,8 @@ import { CommonModule } from '@angular/common';
     MatCardActions,
     MatButton,
   ],
-  templateUrl: './add-task-panel-intro.component.html',
-  styleUrl: './add-task-panel-intro.component.scss',
+  templateUrl: './issue-panel-intro.component.html',
+  styleUrl: './issue-panel-intro.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddTaskPanelIntroComponent {}
+export class IssuePanelIntroComponent {}

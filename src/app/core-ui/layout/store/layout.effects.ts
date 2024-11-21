@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   hideNotesAndAddTaskPanel,
-  toggleAddTaskPanel,
+  toggleIssuePanel,
   toggleShowNotes,
 } from './layout.actions';
 import { filter, mapTo, withLatestFrom } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export class LayoutEffects {
 
   hideSelectedTaskWhenAddTaskPanelShowIsToggled$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(toggleAddTaskPanel),
+      ofType(toggleIssuePanel),
       withLatestFrom(this.layoutService.isShowAddTaskPanel$),
       filter(([, isShowAddTaskPanel]) => isShowAddTaskPanel),
       mapTo(setSelectedTask({ id: null })),

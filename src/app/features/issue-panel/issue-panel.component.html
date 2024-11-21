@@ -1,5 +1,5 @@
 @if (isShowIntro()) {
-<add-task-panel-intro></add-task-panel-intro>
+<issue-panel-intro></issue-panel-intro>
 }
 
 <mat-tab-group
@@ -24,7 +24,7 @@
       </div>
     </ng-template>
     <ng-template matTabContent>
-      <add-issues-panel [issueProvider]="issueProvider"></add-issues-panel>
+      <issue-provider-tab [issueProvider]="issueProvider"></issue-provider-tab>
     </ng-template>
   </mat-tab>
   }

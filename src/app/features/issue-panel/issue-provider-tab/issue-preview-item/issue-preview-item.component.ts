@@ -4,14 +4,14 @@ import { MatIcon } from '@angular/material/icon';
 import { SearchResultItem } from '../../../issue/issue.model';
 
 @Component({
-  selector: 'issue-panel-item',
+  selector: 'issue-preview-item',
   standalone: true,
   imports: [MatIconButton, MatIcon],
-  templateUrl: './issue-panel-item.component.html',
-  styleUrl: './issue-panel-item.component.scss',
+  templateUrl: './issue-preview-item.component.html',
+  styleUrl: './issue-preview-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IssuePanelItemComponent {
+export class IssuePreviewItemComponent {
   itemData = input.required<SearchResultItem>();
   addIssue = output<SearchResultItem>();
 }

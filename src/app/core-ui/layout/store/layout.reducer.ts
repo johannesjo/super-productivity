@@ -6,7 +6,7 @@ import {
   showAddTaskBar,
   showSearchBar,
   toggleAddTaskBar,
-  toggleAddTaskPanel,
+  toggleIssuePanel,
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
@@ -104,7 +104,7 @@ const _reducer = createReducer<LayoutState>(
     isShowAddTaskPanel: false,
   })),
 
-  on(toggleAddTaskPanel, (state) => ({
+  on(toggleIssuePanel, (state) => ({
     ...state,
     isShowAddTaskPanel: !state.isShowAddTaskPanel,
     isShowNotes: false,

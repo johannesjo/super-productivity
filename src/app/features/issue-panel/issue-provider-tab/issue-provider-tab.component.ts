@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { IssuePanelItemComponent } from './issue-panel-item/issue-panel-item.component';
+import { IssuePreviewItemComponent } from './issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { UiModule } from '../../../ui/ui.module';
@@ -33,11 +33,11 @@ import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'add-issues-panel',
+  selector: 'issue-provider-tab',
   standalone: true,
   imports: [
     UiModule,
-    IssuePanelItemComponent,
+    IssuePreviewItemComponent,
     MatIcon,
     MatFormField,
     MatLabel,
@@ -47,11 +47,11 @@ import { MatDialog } from '@angular/material/dialog';
     FormsModule,
     NgIf,
   ],
-  templateUrl: './add-issues-panel.component.html',
-  styleUrl: './add-issues-panel.component.scss',
+  templateUrl: './issue-provider-tab.component.html',
+  styleUrl: './issue-provider-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddIssuesPanelComponent implements OnDestroy, AfterViewInit {
+export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
   private _workContextService = inject(WorkContextService);

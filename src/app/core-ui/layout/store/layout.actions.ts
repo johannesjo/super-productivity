@@ -20,6 +20,6 @@ export const toggleShowNotes = createAction('[Layout] ToggleShow Notes');
 
 export const hideNotesAndAddTaskPanel = createAction('[Layout] Hide Notes');
 
-export const toggleAddTaskPanel = createAction('[Layout] Toggle AddTaskPanel');
+export const toggleIssuePanel = createAction('[Layout] Toggle IssuePanel');
 
-export const hideAddTaskPanel = createAction('[Layout] Hide AddTaskPanel');
+export const hideIssuePanel = createAction('[Layout] Hide IssuePanel');

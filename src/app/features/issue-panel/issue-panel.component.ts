@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { AddTaskPanelIntroComponent } from './add-task-panel-intro/add-task-panel-intro.component';
+import { IssuePanelIntroComponent } from './issue-panel-intro/issue-panel-intro.component';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { IssueModule } from '../issue/issue.module';
 import { MatTooltip } from '@angular/material/tooltip';
-import { AddIssuesPanelComponent } from './add-issues-panel/add-issues-panel.component';
+import { IssueProviderTabComponent } from './issue-provider-tab/issue-provider-tab.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { selectIssueProvidersWithDisabledLast } from '../issue/store/issue-provider.selectors';
@@ -22,27 +22,27 @@ import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 
 @Component({
-  selector: 'add-task-panel',
+  selector: 'issue-panel',
   standalone: true,
   imports: [
     UiModule,
-    AddTaskPanelIntroComponent,
+    IssuePanelIntroComponent,
     MatTabGroup,
     MatTab,
     MatTabLabel,
     MatIcon,
     IssueModule,
     MatTooltip,
-    AddIssuesPanelComponent,
+    IssueProviderTabComponent,
     MatTabContent,
     ContextMenuComponent,
     MatMenuItem,
   ],
-  templateUrl: './add-task-panel.component.html',
-  styleUrl: './add-task-panel.component.scss',
+  templateUrl: './issue-panel.component.html',
+  styleUrl: './issue-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddTaskPanelComponent {
+export class IssuePanelComponent {
   readonly T = T;
   private _store = inject(Store);
   private _matDialog = inject(MatDialog);

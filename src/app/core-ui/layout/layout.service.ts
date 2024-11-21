@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
-  hideAddTaskPanel,
+  hideIssuePanel,
   hideNotesAndAddTaskPanel,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
   showSearchBar,
   toggleAddTaskBar,
-  toggleAddTaskPanel,
+  toggleIssuePanel,
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
@@ -151,10 +151,10 @@ export class LayoutService {
   }
 
   toggleAddTaskPanel(): void {
-    this._store$.dispatch(toggleAddTaskPanel());
+    this._store$.dispatch(toggleIssuePanel());
   }
 
   hideAddTaskPanel(): void {
-    this._store$.dispatch(hideAddTaskPanel());
+    this._store$.dispatch(hideIssuePanel());
   }
 }

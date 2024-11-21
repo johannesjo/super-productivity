@@ -5,7 +5,7 @@ import { UiModule } from '../../ui/ui.module';
 import { TasksModule } from '../tasks/tasks.module';
 import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { NoteModule } from '../note/note.module';
-import { AddTaskPanelComponent } from '../add-task-panel/add-task-panel.component';
+import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
 
 @NgModule({
   declarations: [RightPanelComponent],
@@ -15,7 +15,7 @@ import { AddTaskPanelComponent } from '../add-task-panel/add-task-panel.componen
     TasksModule,
     BetterDrawerModule,
     NoteModule,
-    AddTaskPanelComponent,
+    IssuePanelComponent,
   ],
   exports: [RightPanelComponent],
 })
