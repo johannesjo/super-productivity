@@ -148,3 +148,19 @@ export type IssueProvider =
   | IssueProviderOpenProject
   | IssueProviderGitea
   | IssueProviderRedmine;
+
+export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
+  ? IssueProviderJira
+  : T extends 'GITHUB'
+    ? IssueProviderGithub
+    : T extends 'GITLAB'
+      ? IssueProviderGitlab
+      : T extends 'GITEA'
+        ? IssueProviderGitea
+        : T extends 'OPEN_PROJECT'
+          ? IssueProviderOpenProject
+          : T extends 'REDMINE'
+            ? IssueProviderRedmine
+            : T extends 'CALDAV'
+              ? IssueProviderCaldav
+              : never;
