@@ -39,6 +39,11 @@
 <div class="spinner">
   <mat-spinner diameter="50"></mat-spinner>
 </div>
+} @else if (error()) {
+<error-card
+  [errorTxt]="error()"
+  [actionAdvice]="'Check your config!'"
+></error-card>
 } @else {
 <div
   #dropList

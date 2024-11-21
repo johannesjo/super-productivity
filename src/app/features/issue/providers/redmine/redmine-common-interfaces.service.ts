@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -78,9 +78,7 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((cfg) =>
         this.isEnabled(cfg) && cfg.isSearchIssuesFromRedmine
-          ? this._redmineApiService
-              .searchIssuesInProject$(query, cfg)
-              .pipe(catchError(() => []))
+          ? this._redmineApiService.searchIssuesInProject$(query, cfg)
           : of([]),
       ),
     );

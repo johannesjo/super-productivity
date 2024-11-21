@@ -6,7 +6,7 @@ import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
@@ -143,9 +143,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((caldavCfg) =>
         this.isEnabled(caldavCfg) && caldavCfg.isSearchIssuesFromCaldav
-          ? this._caldavClientService
-              .searchOpenTasks$(searchTerm, caldavCfg)
-              .pipe(catchError(() => []))
+          ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
           : of([]),
       ),
     );

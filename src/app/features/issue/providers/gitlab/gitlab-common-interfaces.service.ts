@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, map, switchMap, tap } from 'rxjs/operators';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.model';
@@ -74,15 +74,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      tap((v) => console.log('gitlabcommon CFG', v)),
       switchMap((gitlabCfg) =>
         this.isEnabled(gitlabCfg) && gitlabCfg.isSearchIssuesFromGitlab
-          ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg).pipe(
-              catchError((err) => {
-                console.error('Error searching issue', err);
-                return [];
-              }),
-            )
+          ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
           : of([]),
       ),
     );

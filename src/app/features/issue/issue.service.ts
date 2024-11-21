@@ -108,17 +108,16 @@ export class IssueService {
     searchTerm: string,
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
-    return this._store.select(selectIssueProviderById(issueProviderId, null)).pipe(
-      switchMap((issueProvider) => {
-        if (!issueProvider) {
-          return of([]);
-        }
-        return this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
-          searchTerm,
-          issueProvider.id,
-        );
-      }),
-    );
+    return this._store
+      .select(selectIssueProviderById(issueProviderId, null))
+      .pipe(
+        switchMap((issueProvider) =>
+          this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
+            searchTerm,
+            issueProvider.id,
+          ),
+        ),
+      );
   }
 
   issueLink$(

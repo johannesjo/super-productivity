@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -80,9 +80,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((giteaCfg) =>
         this.isEnabled(giteaCfg) && giteaCfg.isSearchIssuesFromGitea
-          ? this._giteaApiService
-              .searchIssueForRepo$(searchTerm, giteaCfg)
-              .pipe(catchError(() => []))
+          ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
           : of([]),
       ),
     );

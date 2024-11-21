@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GithubApiService } from './github-api.service';
 import { IssueProviderGithub, SearchResultItem } from '../../issue.model';
@@ -63,9 +63,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((githubCfg) =>
         this.isEnabled(githubCfg) && githubCfg.isSearchIssuesFromGithub
-          ? this._githubApiService
-              .searchIssueForRepo$(searchTerm, githubCfg)
-              .pipe(catchError(() => []))
+          ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
           : of([]),
       ),
     );

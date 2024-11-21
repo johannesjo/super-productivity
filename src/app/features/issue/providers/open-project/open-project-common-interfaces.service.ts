@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { OpenProjectApiService } from './open-project-api.service';
 import { IssueProviderOpenProject, SearchResultItem } from '../../issue.model';
@@ -77,9 +77,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((openProjectCfg) =>
         this.isEnabled(openProjectCfg) && openProjectCfg.isSearchIssuesFromOpenProject
-          ? this._openProjectApiService
-              .searchIssueForRepo$(searchTerm, openProjectCfg)
-              .pipe(catchError(() => []))
+          ? this._openProjectApiService.searchIssueForRepo$(searchTerm, openProjectCfg)
           : of([]),
       ),
     );

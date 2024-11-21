@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
+import { first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
 import { IssueProviderJira, SearchResultItem } from '../../issue.model';
@@ -62,9 +62,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
       tap((v) => console.log('settings', v)),
       switchMap((jiraCfg) =>
         this.isEnabled(jiraCfg) && jiraCfg.isEnabled
-          ? this._jiraApiService
-              .issuePicker$(searchTerm, jiraCfg)
-              .pipe(catchError(() => []))
+          ? this._jiraApiService.issuePicker$(searchTerm, jiraCfg)
           : of([]),
       ),
     );

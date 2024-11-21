@@ -23,12 +23,14 @@ import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip'
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
-import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
 import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { MatDialog } from '@angular/material/dialog';
+import { getErrorTxt } from '../../../util/get-error-text';
+import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -43,6 +45,7 @@ import { MatDialog } from '@angular/material/dialog';
     CdkDrag,
     AsyncPipe,
     FormsModule,
+    ErrorCardComponent,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',
@@ -57,6 +60,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   issueProvider = input.required<IssueProvider>();
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
   searchText = signal('s');
+  error = signal<string | undefined>(undefined);
   isLoading = signal(false);
 
   // TODO add caching in sessionStorage
@@ -66,7 +70,20 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       debounceTime(300),
       tap(() => this.isLoading.set(true)),
       switchMap((searchText) =>
-        this._issueService.searchIssues$(searchText, this.issueProvider().id),
+        this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
+          catchError((e) => {
+            this.error.set(getErrorTxt(e));
+            this.isLoading.set(false);
+            return of(true);
+          }),
+          map((trueOnErrorOrItems) => {
+            if (trueOnErrorOrItems === true) {
+              return [];
+            }
+            this.error.set(undefined);
+            return trueOnErrorOrItems as SearchResultItem[];
+          }),
+        ),
       ),
       switchMap((items) =>
         this._store
@@ -86,6 +103,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
             }),
           ),
       ),
+
       tap(() => this.isLoading.set(false)),
     );
 
