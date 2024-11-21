@@ -198,20 +198,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       throw new Error('No issueData');
     }
 
-    await this._issueService.addTaskWithIssue(
-      item.issueType,
-      item.issueData.id,
-      issueProviderId,
-      // this.isAddToBacklog,
-      false,
-      this._workContextService.activeWorkContextType === WorkContextType.PROJECT
-        ? {
-            projectId: this._workContextService.activeWorkContextId as string,
-          }
-        : {
-            tagIds: [this._workContextService.activeWorkContextId as string],
-          },
-    );
+    await this._issueService.addTaskFromIssue({
+      issueDataReduced: item.issueData,
+      issueProviderId: issueProviderId,
+      issueProviderKey: item.issueType,
+    });
   }
 
   private _move(

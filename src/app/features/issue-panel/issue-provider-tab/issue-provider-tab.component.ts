@@ -17,14 +17,13 @@ import { UiModule } from '../../../ui/ui.module';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
 import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
-import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -45,7 +44,6 @@ import { MatDialog } from '@angular/material/dialog';
     CdkDrag,
     AsyncPipe,
     FormsModule,
-    NgIf,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',
@@ -60,7 +58,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
 
   issueProvider = input.required<IssueProvider>();
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
-  searchText = signal('');
+  searchText = signal('s');
   isLoading = signal(false);
 
   // TODO add caching in sessionStorage
@@ -120,28 +118,20 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     window.clearTimeout(this._focusTimeout);
   }
 
-  // TODO move to service
   addIssue(item: SearchResultItem): void {
-    console.log('Add issue', item);
-    const issueProviderId = this.issueProvider().id;
-    if (!item.issueType || !item.issueData || !issueProviderId) {
-      throw new Error('No issueData');
+    const ip = this.issueProvider();
+
+    if (item.issueType !== ip.issueProviderKey) {
+      throw new Error('Issue Provider and Search Result Type dont match');
     }
 
-    this._issueService.addTaskWithIssue(
-      item.issueType,
-      item.issueData.id,
-      issueProviderId,
-      // this.isAddToBacklog,
-      false,
-      this._workContextService.activeWorkContextType === WorkContextType.PROJECT
-        ? {
-            projectId: this._workContextService.activeWorkContextId as string,
-          }
-        : {
-            tagIds: [this._workContextService.activeWorkContextId as string],
-          },
-    );
+    console.log('Add issue', item);
+
+    this._issueService.addTaskFromIssue({
+      issueDataReduced: item.issueData,
+      issueProviderId: ip.id,
+      issueProviderKey: ip.issueProviderKey,
+    });
   }
 
   openSettings(): void {

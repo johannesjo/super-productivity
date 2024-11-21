@@ -37,6 +37,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from './store/issue-provider.selectors';
+import { WorkContextType } from '../work-context/work-context.model';
+import { WorkContextService } from '../work-context/work-context.service';
 
 @Injectable({
   providedIn: 'root',
@@ -76,6 +78,7 @@ export class IssueService {
     private _giteaInterfaceService: GiteaCommonInterfacesService,
     private _redmineInterfaceService: RedmineCommonInterfacesService,
     private _calendarCommonInterfaceService: CalendarCommonInterfacesService,
+    private _workContextService: WorkContextService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
     private _store: Store,
@@ -186,7 +189,13 @@ export class IssueService {
     );
 
     issuesToAdd.forEach((issue: IssueDataReduced) => {
-      this.addTaskWithIssue(providerKey, issue, issueProviderId, true);
+      // TODO add correct project id
+      this.addTaskFromIssue({
+        issueDataReduced: issue,
+        issueProviderId,
+        issueProviderKey: providerKey,
+        isAddToBackLog: true,
+      });
     });
 
     if (issuesToAdd.length === 1) {
@@ -351,40 +360,100 @@ export class IssueService {
     }
   }
 
-  async addTaskWithIssue(
-    issueType: IssueProviderKey,
-    issueIdOrData: string | number | IssueDataReduced,
-    issueProviderId: string,
-    isAddToBacklog: boolean = false,
-    additional: Partial<Task> = {},
-  ): Promise<string> {
-    if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
+  async addTaskFromIssue({
+    issueDataReduced,
+    issueProviderId,
+    issueProviderKey,
+    additional = {},
+    isAddToBackLog = false,
+  }: {
+    issueDataReduced: IssueDataReduced;
+    issueProviderId: string;
+    issueProviderKey: IssueProviderKey;
+    additional?: Partial<Task>;
+    isAddToBackLog?: boolean;
+  }): Promise<string> {
+    if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
+      throw new Error('No issueData');
+    }
+
+    if (!this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData) {
       throw new Error('Issue method not available');
     }
-    const { issueId, issueData } =
-      typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string'
-        ? {
-            issueId: issueIdOrData,
-            issueData: await this.ISSUE_SERVICE_MAP[issueType]
-              .getById$(issueIdOrData, issueProviderId)
-              .toPromise(),
-          }
-        : {
-            issueId: issueIdOrData.id,
-            issueData: issueIdOrData,
-          };
 
-    const { title = null, ...additionalFields } =
-      this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
+    const { title = null, ...additionalFromProviderIssueService } =
+      this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
 
-    return this._taskService.add(title, isAddToBacklog, {
-      issueType,
-      issueProviderId,
-      issueId: issueId as string,
+    const taskId = this._taskService.add(title, isAddToBackLog, {
+      issueType: issueProviderKey,
+      issueProviderId: issueProviderId,
+      issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
-      ...additionalFields,
+      // add current project id or tag id (will be overwritten by additional)
+      ...(this._workContextService.activeWorkContextType === WorkContextType.PROJECT
+        ? {
+            projectId: this._workContextService.activeWorkContextId as string,
+          }
+        : {
+            tagIds: [this._workContextService.activeWorkContextId as string],
+          }),
+      ...additionalFromProviderIssueService,
       ...additional,
     });
+    return taskId;
+
+    // TODO if we need to refresh data on after add, this is how we would do it
+    // try {
+    //   const freshIssueData = await this.ISSUE_SERVICE_MAP[issueProviderKey]
+    //     .getById$(issueDataReduced.issueData.id, issueProvider.id)
+    //     .toPromise();
+    //   // eslint-disable-next-line @typescript-eslint/no-shadow
+    //   const { title = null, ...additionalFields } =
+    //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
+    //   this._taskService.update(taskId, {});
+    // } catch (e) {
+    //   console.error(e);
+    //   this._taskService.remove(taskId);
+    //   // TODO show error msg
+    // }
   }
+
+  // TODO check if all of this is needed
+  // async addTaskWithIssue(
+  //   issueType: IssueProviderKey,
+  //   issueIdOrData: string | number | IssueDataReduced,
+  //   issueProviderId: string,
+  //   isAddToBacklog: boolean = false,
+  //   additional: Partial<Task> = {},
+  // ): Promise<string> {
+  //   if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
+  //     throw new Error('Issue method not available');
+  //   }
+  //   const { issueId, issueData } =
+  //     typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string'
+  //       ? {
+  //           issueId: issueIdOrData,
+  //           issueData: await this.ISSUE_SERVICE_MAP[issueType]
+  //             .getById$(issueIdOrData, issueProviderId)
+  //             .toPromise(),
+  //         }
+  //       : {
+  //           issueId: issueIdOrData.id,
+  //           issueData: issueIdOrData,
+  //         };
+  //
+  //   const { title = null, ...additionalFields } =
+  //     this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
+  //
+  //   return this._taskService.add(title, isAddToBacklog, {
+  //     issueType,
+  //     issueProviderId,
+  //     issueId: issueId as string,
+  //     issueWasUpdated: false,
+  //     issueLastUpdated: Date.now(),
+  //     ...additionalFields,
+  //     ...additional,
+  //   });
+  // }
 }
