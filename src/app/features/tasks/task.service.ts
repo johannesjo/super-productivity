@@ -700,6 +700,14 @@ export class TaskService {
     this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
   }
 
+  moveToCurrentWorkContext(task: TaskWithSubTasks): void {
+    if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
+      this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
+    } else {
+      this.moveToProject(task, this._workContextService.activeWorkContextId as string);
+    }
+  }
+
   toggleStartTask(): void {
     this._store.dispatch(toggleStart());
   }
@@ -972,14 +980,16 @@ export class TaskService {
     isFromArchive: boolean;
   } | null> {
     if (!issueProviderId) {
-      throw new Error('No project id');
+      throw new Error('No issueProviderId');
     }
 
     const findTaskFn = (task: Task | ArchiveTask | undefined): boolean =>
       !!task &&
+      // NOTE: we check all, since it is theoretically possible for the same issueId to appear across issue providers
       task.issueId === issueId &&
       task.issueType === issueProviderKey &&
       task.issueProviderId === issueProviderId;
+
     const allTasks = (await this._allTasks$.pipe(first()).toPromise()) as Task[];
     const taskWithSameIssue: Task = allTasks.find(findTaskFn) as Task;
 

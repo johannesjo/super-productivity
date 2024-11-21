@@ -39,6 +39,7 @@ import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from './store/issue-provider.selectors';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
+import { ProjectService } from '../project/project.service';
 
 @Injectable({
   providedIn: 'root',
@@ -81,6 +82,7 @@ export class IssueService {
     private _workContextService: WorkContextService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
+    private _projectService: ProjectService,
     private _store: Store,
   ) {}
 
@@ -372,13 +374,23 @@ export class IssueService {
     issueProviderKey: IssueProviderKey;
     additional?: Partial<Task>;
     isAddToBackLog?: boolean;
-  }): Promise<string> {
+  }): Promise<string | undefined> {
     if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
       throw new Error('No issueData');
     }
 
     if (!this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData) {
       throw new Error('Issue method not available');
+    }
+
+    if (
+      await this._checkAndHandleIssueAlreadyAdded(
+        issueProviderKey,
+        issueProviderId,
+        issueDataReduced.id.toString(),
+      )
+    ) {
+      return undefined;
     }
 
     const { title = null, ...additionalFromProviderIssueService } =
@@ -402,22 +414,69 @@ export class IssueService {
       ...additional,
     });
     return taskId;
-
-    // TODO if we need to refresh data on after add, this is how we would do it
-    // try {
-    //   const freshIssueData = await this.ISSUE_SERVICE_MAP[issueProviderKey]
-    //     .getById$(issueDataReduced.issueData.id, issueProvider.id)
-    //     .toPromise();
-    //   // eslint-disable-next-line @typescript-eslint/no-shadow
-    //   const { title = null, ...additionalFields } =
-    //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
-    //   this._taskService.update(taskId, {});
-    // } catch (e) {
-    //   console.error(e);
-    //   this._taskService.remove(taskId);
-    //   // TODO show error msg
-    // }
   }
+
+  private async _checkAndHandleIssueAlreadyAdded(
+    issueType: IssueProviderKey,
+    issueProviderId: string,
+    issueId: string,
+  ): Promise<boolean> {
+    const res = await this._taskService.checkForTaskWithIssueEverywhere(
+      issueId,
+      issueType,
+      issueProviderId,
+    );
+    if (res?.isFromArchive) {
+      this._taskService.restoreTask(res.task, res.subTasks || []);
+      this._snackService.open({
+        ico: 'info',
+        msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+        translateParams: { title: res.task.title },
+      });
+      return true;
+    } else if (res?.task) {
+      if (
+        res.task.projectId &&
+        res.task.projectId === this._workContextService.activeWorkContextId
+      ) {
+        this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+          translateParams: { title: res.task.title },
+        });
+        return true;
+      } else {
+        const taskWithTaskSubTasks = await this._taskService
+          .getByIdWithSubTaskData$(res.task.id)
+          .toPromise();
+        this._taskService.moveToCurrentWorkContext(taskWithTaskSubTasks);
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
+          translateParams: { title: res.task.title },
+        });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // TODO if we need to refresh data on after add, this is how we would do it
+  // try {
+  //   const freshIssueData = await this.ISSUE_SERVICE_MAP[issueProviderKey]
+  //     .getById$(issueDataReduced.issueData.id, issueProvider.id)
+  //     .toPromise();
+  //   // eslint-disable-next-line @typescript-eslint/no-shadow
+  //   const { title = null, ...additionalFields } =
+  //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
+  //   this._taskService.update(taskId, {});
+  // } catch (e) {
+  //   console.error(e);
+  //   this._taskService.remove(taskId);
+  //   // TODO show error msg
+  // }
 
   // TODO check if all of this is needed
   // async addTaskWithIssue(
