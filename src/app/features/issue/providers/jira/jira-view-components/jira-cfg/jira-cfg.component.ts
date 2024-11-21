@@ -16,18 +16,18 @@ import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { JiraCfg, JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
-import { BehaviorSubject, EMPTY, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SearchResultItem } from '../../../../issue.model';
-import { map } from 'rxjs/operators';
+import { catchError, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../../jira.const';
 import { JiraIssue } from '../../jira-issue/jira-issue.model';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
-import { ProjectService } from '../../../../../project/project.service';
 import { WorkContextService } from '../../../../../work-context/work-context.service';
 import { WorkContextType } from '../../../../../work-context/work-context.model';
+import { IssueProviderService } from '../../../../issue-provider.service';
 
 @Component({
   selector: 'jira-cfg',
@@ -38,10 +38,14 @@ import { WorkContextType } from '../../../../../work-context/work-context.model'
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<JiraCfg>;
+  // TODO fixme
   @Output() save: EventEmitter<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
   }> = new EventEmitter();
+  // TODO fixme
+  ISSUE_PROVIDER_ID = 'XXXX';
+
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
@@ -52,33 +56,28 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   fields?: FormlyFieldConfig[];
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
-  // TODO fixme
-  filteredIssueSuggestions$ = EMPTY;
-  // filteredIssueSuggestions$: Observable<SearchResultItem[]> =
-  //   this.issueSuggestionsCtrl.valueChanges.pipe(
-  //     debounceTime(300),
-  //     tap(() => this.isLoading$.next(true)),
-  //     switchMap((searchTerm: string) => {
-  //       return searchTerm && searchTerm.length > 1
-  //         ? this._projectService
-  //             .getJiraCfgForProject$(
-  //               this._workContextService.activeWorkContextId as string,
-  //             )
-  //             .pipe(
-  //               first(),
-  //               switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
-  //               catchError(() => {
-  //                 return [];
-  //               }),
-  //             )
-  //         : // Note: the outer array signifies the observable stream the other is the value
-  //           [[]];
-  //       // TODO fix type
-  //     }),
-  //     tap((suggestions) => {
-  //       this.isLoading$.next(false);
-  //     }),
-  //   );
+
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> =
+    this.issueSuggestionsCtrl.valueChanges.pipe(
+      debounceTime(300),
+      tap(() => this.isLoading$.next(true)),
+      switchMap((searchTerm: string) => {
+        return searchTerm && searchTerm.length > 1
+          ? this._issueProviderService.getCfgOnce$(this.ISSUE_PROVIDER_ID, 'JIRA').pipe(
+              first(),
+              switchMap((cfg) => this._jiraApiService.issuePicker$(searchTerm, cfg)),
+              catchError(() => {
+                return [];
+              }),
+            )
+          : // Note: the outer array signifies the observable stream the other is the value
+            [[]];
+        // TODO fix type
+      }),
+      tap((suggestions) => {
+        this.isLoading$.next(false);
+      }),
+    );
   filteredCustomFieldSuggestions$: Observable<any[]> =
     this.customFieldSuggestionsCtrl.valueChanges.pipe(
       map((value) => this._filterCustomFieldSuggestions(value)),
@@ -93,7 +92,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   constructor(
     private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
-    private _projectService: ProjectService,
+    private _issueProviderService: IssueProviderService,
     private _workContextService: WorkContextService,
   ) {}
 

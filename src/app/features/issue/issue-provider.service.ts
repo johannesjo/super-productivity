@@ -15,6 +15,10 @@ export class IssueProviderService {
     issueProviderId: string,
     issueProviderType: T,
   ): Observable<IssueProviderTypeMap<T>> {
+    if (!issueProviderId || !issueProviderType) {
+      throw new Error('No issueProviderId or type given');
+    }
+
     return this._store
       .select(
         selectIssueProviderById<IssueProviderTypeMap<T>>(
