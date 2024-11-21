@@ -204,7 +204,7 @@ export class SyncProviderService {
         localSyncMeta[cp.id].revTaskArchive !== null;
       if (isPossibleLegacyData && localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE)) {
         alert(this._translateService.instant(T.F.SYNC.A.POSSIBLE_LEGACY_DATA));
-        // localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+        localStorage.removeItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
       }
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
