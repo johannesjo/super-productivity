@@ -355,13 +355,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   async moveTaskToProject(projectId: string): Promise<void> {
     if (projectId === this.task.projectId) {
       return;
-    } else if (this.task.issueId && this.task.issueType !== 'CALENDAR') {
-      this._snackService.open({
-        type: 'CUSTOM',
-        ico: 'block',
-        msg: T.F.TASK.S.MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK,
-      });
-      return;
     } else if (!this.task.repeatCfgId) {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
       this._taskService.moveToProject(taskWithSubTasks, projectId);

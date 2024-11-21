@@ -582,13 +582,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     if (projectId === t.projectId) {
       return;
-    } else if (t.issueId && t.issueType !== 'CALENDAR') {
-      this._snackService.open({
-        type: 'CUSTOM',
-        ico: 'block',
-        msg: T.F.TASK.S.MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK,
-      });
-      return;
     } else if (!t.repeatCfgId) {
       this._taskService.moveToProject(t, projectId);
     } else {

@@ -694,7 +694,7 @@ export class TaskService {
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
-    if (!!task.parentId || (!!task.issueId && task.issueType !== 'CALENDAR')) {
+    if (!!task.parentId) {
       throw new Error('Wrong task model');
     }
     this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
