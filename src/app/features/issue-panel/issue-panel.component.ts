@@ -19,6 +19,7 @@ import { UiModule } from '../../ui/ui.module';
 import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { IssueProviderSetupOverviewComponent } from './issue-provider-setup-overview/issue-provider-setup-overview.component';
+import { WorkContextService } from '../work-context/work-context.service';
 
 @Component({
   selector: 'issue-panel',
@@ -42,11 +43,18 @@ import { IssueProviderSetupOverviewComponent } from './issue-provider-setup-over
 })
 export class IssuePanelComponent {
   readonly T = T;
+
   private _store = inject(Store);
   private _matDialog = inject(MatDialog);
+  private _workContextService = inject(WorkContextService);
 
+  selectedTabIndex = signal(0);
   isShowIntro = signal(false);
   issueProviders = toSignal(this._store.select(selectIssueProvidersWithDisabledLast));
+
+  constructor() {
+    this._setSelectedTabIndex();
+  }
 
   getToolTipText(issueProvider: IssueProvider): string {
     return getIssueProviderTooltip(issueProvider);
@@ -63,5 +71,16 @@ export class IssuePanelComponent {
         issueProvider,
       },
     });
+  }
+
+  private _setSelectedTabIndex(): void {
+    const providers = this.issueProviders();
+    const index = providers?.findIndex(
+      (provider) =>
+        provider.defaultProjectId === this._workContextService.activeWorkContextId,
+    );
+    if (index) {
+      this.selectedTabIndex.set(index !== -1 ? index : 0);
+    }
   }
 }

@@ -6,6 +6,7 @@
   mat-align-tabs="start"
   mat-stretch-tabs="false"
   dynamicHeight="true"
+  [selectedIndex]="selectedTabIndex()"
 >
   @for (issueProvider of issueProviders(); track issueProvider.id) {
   <mat-tab>
