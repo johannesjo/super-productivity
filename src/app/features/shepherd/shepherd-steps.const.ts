@@ -437,15 +437,27 @@ export const SHEPHERD_STEPS = (
         shepherdService,
       ),
     },
+
+    // ------------------------------
     {
-      title: 'Projects',
+      id: TourId.IssueProviders,
+      beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
+      title: 'Issue Integrations',
+      text: 'You can import tasks from a variety of third party tools. To click on this icon <span class="material-icons">playlist_add</span> in the top right corner.',
       attachTo: {
-        element: '.tour-projects',
+        element: '.tour-issuePanelTrigger',
         on: 'bottom',
       },
-      highlightClass: 'shepherd-highlight-inner',
-      text: '<p>Projects are also used to import tasks from <strong>issue providers</strong> like <strong>Jira, OpenProject, GitHub, GitLab, Redmine and Gitea</strong>.</p>',
-      buttons: [NEXT_BTN],
+      when: nextOnObs(
+        layoutService.isShowIssuePanel$.pipe(filter((v) => !!v)),
+        shepherdService,
+      ),
+    },
+    {
+      id: TourId.IssueProviders,
+      title: 'Issue Integrations',
+      text: 'To configure an issue provider, click on one of the buttons in the panel. But for now, lets continue.',
+      buttons: [{ ...NEXT_BTN, text: 'Alright!' }],
     },
 
     // ------------------------------

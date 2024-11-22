@@ -25,7 +25,7 @@ export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowBookmarkBar: boolean;
   isShowNotes: boolean;
-  isShowAddTaskPanel: boolean;
+  isShowIssuePanel: boolean;
   isShowSearchBar: boolean;
   isShowSideNav: boolean;
 }
@@ -36,7 +36,7 @@ const _initialLayoutState: LayoutState = {
   isShowSideNav: false,
   isShowSearchBar: false,
   isShowNotes: false,
-  isShowAddTaskPanel: true,
+  isShowIssuePanel: false,
 };
 
 export const selectLayoutFeatureState =
@@ -57,9 +57,9 @@ export const selectIsShowNotes = createSelector(
   (state) => state.isShowNotes,
 );
 
-export const selectIsShowAddTaskPanel = createSelector(
+export const selectIsShowIssuePanel = createSelector(
   selectLayoutFeatureState,
-  (state) => state.isShowAddTaskPanel,
+  (state) => state.isShowIssuePanel,
 );
 
 export const selectIsShowSearchBar = createSelector(
@@ -95,18 +95,18 @@ const _reducer = createReducer<LayoutState>(
   on(toggleShowNotes, (state) => ({
     ...state,
     isShowNotes: !state.isShowNotes,
-    isShowAddTaskPanel: false,
+    isShowIssuePanel: false,
   })),
 
   on(hideNotesAndAddTaskPanel, (state) => ({
     ...state,
     isShowNotes: false,
-    isShowAddTaskPanel: false,
+    isShowIssuePanel: false,
   })),
 
   on(toggleIssuePanel, (state) => ({
     ...state,
-    isShowAddTaskPanel: !state.isShowAddTaskPanel,
+    isShowIssuePanel: !state.isShowIssuePanel,
     isShowNotes: false,
   })),
 );

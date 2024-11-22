@@ -33,7 +33,7 @@ export class RightPanelComponent implements OnDestroy {
     combineLatest([
       this.layoutService.isShowNotes$,
       this.taskService.selectedTask$,
-      this.layoutService.isShowAddTaskPanel$,
+      this.layoutService.isShowIssuePanel$,
     ]).pipe(
       map(([isShowNotes, selectedTask, isShowAddTaskPanel]) => {
         if (selectedTask) {
@@ -52,7 +52,7 @@ export class RightPanelComponent implements OnDestroy {
     this.taskService.selectedTask$,
     this.taskService.taskDetailPanelTargetPanel$,
     this.layoutService.isShowNotes$,
-    this.layoutService.isShowAddTaskPanel$,
+    this.layoutService.isShowIssuePanel$,
   ]).pipe(
     map(
       ([selectedTask, targetPanel, isShowNotes, isShowAddTaskPanel]) =>

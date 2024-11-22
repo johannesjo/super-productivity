@@ -18,7 +18,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
-  selectIsShowAddTaskPanel,
+  selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowSearchBar,
   selectIsShowSideNav,
@@ -80,10 +80,10 @@ export class LayoutService {
   );
   isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe();
 
-  private _isShowAddTaskPanel$: Observable<boolean> = this._store$.pipe(
-    select(selectIsShowAddTaskPanel),
+  private _isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowIssuePanel),
   );
-  isShowAddTaskPanel$: Observable<boolean> = this._isShowAddTaskPanel$.pipe();
+  isShowIssuePanel$: Observable<boolean> = this._isShowIssuePanel$.pipe();
 
   constructor(
     private _store$: Store<LayoutState>,

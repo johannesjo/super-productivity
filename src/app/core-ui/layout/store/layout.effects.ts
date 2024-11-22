@@ -48,7 +48,7 @@ export class LayoutEffects {
   hideSelectedTaskWhenAddTaskPanelShowIsToggled$ = createEffect(() =>
     this.actions$.pipe(
       ofType(toggleIssuePanel),
-      withLatestFrom(this.layoutService.isShowAddTaskPanel$),
+      withLatestFrom(this.layoutService.isShowIssuePanel$),
       filter(([, isShowAddTaskPanel]) => isShowAddTaskPanel),
       mapTo(setSelectedTask({ id: null })),
     ),
