@@ -52,3 +52,19 @@ header {
   justify-content: center;
   padding: 8px;
 }
+
+.keep-ico {
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(1.3);
+  }
+
+  .active {
+    opacity: 1;
+  }
+}

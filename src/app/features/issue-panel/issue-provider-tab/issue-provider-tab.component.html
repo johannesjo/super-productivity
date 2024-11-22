@@ -33,7 +33,11 @@
     <!--      <mat-icon matPrefix>filter_alt</mat-icon>-->
     <!--      <mat-label>Filter</mat-label>-->
     <mat-label>Search</mat-label>
-    <mat-icon matPrefix>search</mat-icon>
+    <mat-icon
+      matPrefix
+      style="opacity: 0.5"
+      >search</mat-icon
+    >
     <input
       #searchTextEl
       [ngModel]="searchText()"
@@ -43,6 +47,34 @@
       name="search"
       placeholder="Search"
     />
+
+    @if (isPinned()) {
+    <mat-icon
+      class="keep-ico"
+      matSuffix
+      svgIcon="keep_filled"
+      style="cursor: pointer"
+      (click)="unPinSearch()"
+      [matTooltip]="'Clear pinned search query'"
+    ></mat-icon>
+    } @else {
+    <mat-icon
+      class="keep-ico"
+      matSuffix
+      svgIcon="keep"
+      style="cursor: pointer"
+      (click)="pinSearch()"
+      [matTooltip]="'Remember search query'"
+    ></mat-icon>
+    }
+    <!--    @if (searchText()?.length > 0) {-->
+    <!--    <mat-icon-->
+    <!--      style="cursor: pointer"-->
+    <!--      matSuffix-->
+    <!--      (click)="searchText.set('')"-->
+    <!--      >close</mat-icon-->
+    <!--    >-->
+    <!--    }-->
   </mat-form-field>
 </form>
 

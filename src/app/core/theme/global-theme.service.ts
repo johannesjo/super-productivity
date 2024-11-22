@@ -122,6 +122,8 @@ export class GlobalThemeService {
       ['early_on', 'assets/icons/early-on.svg'],
       ['tomorrow', 'assets/icons/tomorrow.svg'],
       ['next_week', 'assets/icons/next-week.svg'],
+      ['keep', 'assets/icons/keep.svg'],
+      ['keep_filled', 'assets/icons/keep-filled.svg'],
     ];
 
     icons.forEach(([name, path]) => {

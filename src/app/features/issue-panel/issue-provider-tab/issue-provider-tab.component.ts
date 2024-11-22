@@ -14,10 +14,10 @@ import { IssuePreviewItemComponent } from './issue-preview-item/issue-preview-it
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { UiModule } from '../../../ui/ui.module';
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
 import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
 import { FormsModule } from '@angular/forms';
@@ -33,6 +33,7 @@ import { getErrorTxt } from '../../../util/get-error-text';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { HelperClasses } from '../../../app.constants';
+import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -43,9 +44,6 @@ import { HelperClasses } from '../../../app.constants';
     MatIcon,
     MatFormField,
     MatLabel,
-    CdkDropList,
-    CdkDrag,
-    AsyncPipe,
     FormsModule,
     ErrorCardComponent,
     NgClass,
@@ -68,6 +66,11 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   searchText = signal('s');
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
+  isPinned = computed(
+    () =>
+      this.issueProvider().pinnedSearch === this.searchText() &&
+      this.searchText().length > 0,
+  );
 
   defaultProject$ = toObservable(this.issueProvider).pipe(
     switchMap((ip) =>
@@ -139,11 +142,38 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
         this.searchTextEl?.nativeElement.focus();
       }, 500);
     }
+    this.searchText.set(this.issueProvider().pinnedSearch || '');
   }
 
   ngOnDestroy(): void {
     // this.dropListService.unregisterDropList(this.dropList!);
     window.clearTimeout(this._focusTimeout);
+  }
+
+  pinSearch(): void {
+    this._store.dispatch(
+      IssueProviderActions.updateIssueProvider({
+        issueProvider: {
+          id: this.issueProvider().id,
+          changes: {
+            pinnedSearch: this.searchText(),
+          },
+        },
+      }),
+    );
+  }
+
+  unPinSearch(): void {
+    this._store.dispatch(
+      IssueProviderActions.updateIssueProvider({
+        issueProvider: {
+          id: this.issueProvider().id,
+          changes: {
+            pinnedSearch: null,
+          },
+        },
+      }),
+    );
   }
 
   addIssue(item: SearchResultItem): void {

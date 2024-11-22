@@ -115,4 +115,5 @@ export const ISSUE_PROVIDER_DEFAULT_COMMON_CFG: Omit<
   isAutoAddToBacklog: false,
   isIntegratedAddTaskBar: false,
   defaultProjectId: null,
+  pinnedSearch: null,
 } as const;

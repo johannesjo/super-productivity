@@ -108,6 +108,7 @@ export interface IssueProviderBase {
   isEnabled: boolean;
   issueProviderKey: IssueProviderKey;
   defaultProjectId: string | null;
+  pinnedSearch: string | null;
   // delete at some point in the future
   migratedFromProjectId?: string;
   isAutoPoll: boolean;
