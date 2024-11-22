@@ -19,6 +19,9 @@
     }
   }
 
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    min-height: 50vh;
+  }
   ::ng-deep .mat-mdc-tab {
     min-width: 40px !important;
     padding-left: 0 !important;

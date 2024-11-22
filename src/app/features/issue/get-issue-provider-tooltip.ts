@@ -27,8 +27,13 @@ const getRepoInitials = (repo: string | null): string | undefined => {
     return undefined;
   }
 
-  const repoName = repo.split('/')[1];
-  const repoNameParts = repoName.split('-');
+  const repoName = repo?.split('/')[1];
+  const repoNameParts = repoName?.split('-');
+
+  if (!repoNameParts) {
+    return undefined;
+  }
+
   if (repoNameParts.length === 1) {
     return repoNameParts[0].substring(0, 2).toUpperCase();
   }
