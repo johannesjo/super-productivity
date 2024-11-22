@@ -58,15 +58,7 @@
 } @else if (!issueItems()?.length) {
 <div class="empty">No items found</div>
 } @else {
-<div
-  #dropList
-  class="item-list"
-  cdk-scrollable
-  cdkDropList
-  cdkDropListSortingDisabled
-  [cdkDropListConnectedTo]="dropListService.dropLists|async"
-  [cdkDropListData]="issueProvider().id"
->
+<div class="item-list">
   <!--  (cdkDropListDropped)="drop($event)"-->
 
   @for (item of issueItems(); track $index) {
@@ -79,8 +71,6 @@
   <!--      </button>-->
   <issue-preview-item
     [itemData]="item"
-    [cdkDragData]="item"
-    cdkDrag
     (addIssue)="addIssue($event)"
   ></issue-preview-item>
   <!--    </div>-->

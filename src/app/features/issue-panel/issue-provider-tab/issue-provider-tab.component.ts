@@ -55,6 +55,9 @@ import { HelperClasses } from '../../../app.constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
+  readonly HelperClasses = HelperClasses;
+  readonly T: typeof T = T;
+
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
   private _matDialog = inject(MatDialog);
@@ -126,12 +129,10 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   @ViewChild(CdkDropList) dropList?: CdkDropList;
   @ViewChild('searchTextEl') searchTextEl!: ElementRef;
 
-  T: typeof T = T;
-
   private _focusTimeout?: number;
 
   ngAfterViewInit(): void {
-    this.dropListService.registerDropList(this.dropList!);
+    // this.dropListService.registerDropList(this.dropList!);
 
     if (this.searchText().length <= 1) {
       this._focusTimeout = window.setTimeout(() => {
@@ -141,7 +142,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.dropListService.unregisterDropList(this.dropList!);
+    // this.dropListService.unregisterDropList(this.dropList!);
     window.clearTimeout(this._focusTimeout);
   }
 
@@ -169,6 +170,4 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       },
     });
   }
-
-  protected readonly HelperClasses = HelperClasses;
 }

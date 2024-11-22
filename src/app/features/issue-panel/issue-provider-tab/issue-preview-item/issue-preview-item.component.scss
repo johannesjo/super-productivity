@@ -13,7 +13,7 @@ $h: $planner-item-height;
   background: $task-c-bg-light;
   border: 1px solid $light-theme-extra-border-color;
 
-  @include grabCursor();
+  //@include grabCursor();
 
   @include darkTheme() {
     color: $task-text-c-dark;
