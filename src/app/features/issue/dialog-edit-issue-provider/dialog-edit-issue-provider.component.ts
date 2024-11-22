@@ -112,7 +112,7 @@ export class DialogEditIssueProviderComponent {
           okTxt: T.G.DELETE,
           message:
             // TODO translate
-            'Are you sure you want to delete this issue provider? Deleting it means that all previously imported issue tasks will loose their reference. This cannot be undone.',
+            'Are you sure you want to delete this issue provider? Deleting it means that <strong>all previously imported issue tasks will loose their reference</strong>. This cannot be undone!',
           // message: T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_CONFIRM_TXT,
           // translateParams: {
           //   nr: 2,
