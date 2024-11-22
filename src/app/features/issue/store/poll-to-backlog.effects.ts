@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, merge, Observable } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { concatMap, filter, first, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { IssueService } from '../issue.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
@@ -38,37 +38,21 @@ export class PollToBacklogEffects {
             switchMap((enabledProviders: IssueProvider[]) =>
               merge(
                 ...enabledProviders
-                  .filter((provider) => provider.defaultProjectId === pId)
+                  .filter(
+                    (provider) =>
+                      provider.defaultProjectId === pId && provider.isAutoAddToBacklog,
+                  )
                   .map((provider) =>
-                    this._issueService
-                      .isAutoImportEnabled$(provider.issueProviderKey, provider.id)
-                      .pipe(
-                        tap((v) =>
-                          console.log(
-                            'pollNewIssuesToBacklog$:isAutoImportEnabled$',
-                            v,
-                            provider,
-                          ),
+                    this._issueService.getPollTimer$(provider.issueProviderKey).pipe(
+                      takeUntil(this.pollToBacklogActions$),
+                      tap(() => console.log('POLL ' + provider.issueProviderKey)),
+                      switchMap(() =>
+                        this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                          provider.issueProviderKey,
+                          provider.id,
                         ),
-                        switchMap((isEnabled) => {
-                          return isEnabled
-                            ? this._issueService
-                                .getPollTimer$(provider.issueProviderKey)
-                                .pipe(
-                                  takeUntil(this.pollToBacklogActions$),
-                                  tap(() =>
-                                    console.log('POLL ' + provider.issueProviderKey),
-                                  ),
-                                  switchMap(() =>
-                                    this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                                      provider.issueProviderKey,
-                                      provider.id,
-                                    ),
-                                  ),
-                                )
-                            : EMPTY;
-                        }),
                       ),
+                    ),
                   ),
               ),
             ),
