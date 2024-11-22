@@ -1,31 +1,26 @@
 @import '../../../../../variables';
 @import '../../../tasks/task/task.component.mixins';
 
-$h: $planner-item-height;
-
 :host {
+  //@include grabCursor();
   display: flex;
   align-items: center;
-  flex: 1;
-  //padding: 8px;
+  padding: 0;
   border-radius: 6px;
-  min-height: $h;
-  background: $task-c-bg-light;
-  border: 1px solid $light-theme-extra-border-color;
+  border: 1px solid;
 
-  //@include grabCursor();
+  @include lightTheme() {
+    background: $task-c-bg-light;
+    border-color: $light-theme-extra-border-color;
+  }
 
   @include darkTheme() {
     color: $task-text-c-dark;
-    background: $task-c-bg-dark;
+    //background: $task-c-bg-dark;
     border-color: $dark-theme-extra-border-color;
   }
+}
 
-  &.isDone {
-    opacity: $task-is-done-dim-opacity;
-
-    .title {
-      text-decoration: line-through;
-    }
-  }
+.title {
+  padding: 4px 0;
 }
