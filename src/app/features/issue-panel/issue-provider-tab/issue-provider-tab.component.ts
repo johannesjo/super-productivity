@@ -17,7 +17,7 @@ import { UiModule } from '../../../ui/ui.module';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
 import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +32,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 import { selectProjectById } from '../../project/store/project.selectors';
+import { HelperClasses } from '../../../app.constants';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -47,6 +48,7 @@ import { selectProjectById } from '../../project/store/project.selectors';
     AsyncPipe,
     FormsModule,
     ErrorCardComponent,
+    NgClass,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',
@@ -167,4 +169,6 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       },
     });
   }
+
+  protected readonly HelperClasses = HelperClasses;
 }
