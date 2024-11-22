@@ -31,6 +31,7 @@ import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-
 import { MatDialog } from '@angular/material/dialog';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
+import { selectProjectById } from '../../project/store/project.selectors';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -62,6 +63,15 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   searchText = signal('s');
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
+
+  defaultProject$ = toObservable(this.issueProvider).pipe(
+    switchMap((ip) =>
+      ip.defaultProjectId
+        ? this._store.select(selectProjectById, { id: ip.defaultProjectId })
+        : of(null),
+    ),
+  );
+  defaultProject = toSignal(this.defaultProject$);
 
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =

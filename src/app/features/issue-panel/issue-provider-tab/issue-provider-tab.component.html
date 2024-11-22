@@ -1,5 +1,5 @@
 <!--- create 10 random list items -->
-<div style="display: flex; align-items: center; margin-top: 16px">
+<header>
   <button
     mat-icon-button
     style="margin-right: 8px; opacity: 0.5"
@@ -8,7 +8,11 @@
     <mat-icon>settings</mat-icon>
   </button>
   <div class="title">{{ issueProviderTooltip() }}</div>
-</div>
+  @let defaultP = defaultProject(); @if (defaultP) {
+  <mat-icon class="arrow">arrow_forward</mat-icon>
+  <div class="default-project">{{ defaultP.title }}</div>
+  }
+</header>
 
 @if (issueProvider().isEnabled) {
 <form

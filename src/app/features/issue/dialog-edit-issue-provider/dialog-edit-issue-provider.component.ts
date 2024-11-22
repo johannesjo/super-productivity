@@ -61,6 +61,7 @@ export class DialogEditIssueProviderComponent {
         ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
         ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
         id: nanoid(),
+        isEnabled: true,
         issueProviderKey: this.issueProviderKey,
       };
   configFormSection: ConfigFormSection<IssueIntegrationCfg> =

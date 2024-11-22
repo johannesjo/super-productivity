@@ -11,9 +11,28 @@
   min-width: 260px;
 }
 
-.title {
+header {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.title,
+.arrow,
+.default-project {
   opacity: 0.5;
+}
+
+.title,
+.default-project {
   font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arrow {
+  margin: 0 $s;
+  min-width: 24px;
 }
 
 .empty {
