@@ -88,7 +88,7 @@
   [actionAdvice]="'Check your config!'"
 ></error-card>
 } @else if (!issueItems()?.length) {
-<div class="empty">No items found</div>
+<div class="empty">No items found (already added are not shown)</div>
 } @else {
 <div class="item-list">
   <!--  (cdkDropListDropped)="drop($event)"-->
