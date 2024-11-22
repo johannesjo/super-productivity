@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   IssueData,
   IssueDataReduced,
+  IssueProvider,
   IssueProviderKey,
   SearchResultItem,
 } from './issue.model';
@@ -273,7 +274,8 @@ export class IssueService {
     }
   }
 
-  async refreshIssueTasks(tasks: Task[]): Promise<void> {
+  // TODO given we have issueProvider available, we could also just pass that
+  async refreshIssueTasks(tasks: Task[], issueProvider: IssueProvider): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
     const tasksIssueIdsByIssueProviderKey: any = {};
     const tasksWithoutIssueId: Readonly<Task>[] = [];
