@@ -7,11 +7,12 @@ import { IssueService } from '../issue.service';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
 @Injectable()
 export class PollIssueUpdatesEffects {
   pollIssueTaskUpdatesActions$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext),
+    ofType(setActiveWorkContext, loadAllData),
   );
 
   pollIssueChangesForCurrentContext$: Observable<any> = createEffect(
