@@ -482,42 +482,4 @@ export class IssueService {
   //   this._taskService.remove(taskId);
   //   // TODO show error msg
   // }
-
-  // TODO check if all of this is needed
-  // async addTaskWithIssue(
-  //   issueType: IssueProviderKey,
-  //   issueIdOrData: string | number | IssueDataReduced,
-  //   issueProviderId: string,
-  //   isAddToBacklog: boolean = false,
-  //   additional: Partial<Task> = {},
-  // ): Promise<string> {
-  //   if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
-  //     throw new Error('Issue method not available');
-  //   }
-  //   const { issueId, issueData } =
-  //     typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string'
-  //       ? {
-  //           issueId: issueIdOrData,
-  //           issueData: await this.ISSUE_SERVICE_MAP[issueType]
-  //             .getById$(issueIdOrData, issueProviderId)
-  //             .toPromise(),
-  //         }
-  //       : {
-  //           issueId: issueIdOrData.id,
-  //           issueData: issueIdOrData,
-  //         };
-  //
-  //   const { title = null, ...additionalFields } =
-  //     this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
-  //
-  //   return this._taskService.add(title, isAddToBacklog, {
-  //     issueType,
-  //     issueProviderId,
-  //     issueId: issueId as string,
-  //     issueWasUpdated: false,
-  //     issueLastUpdated: Date.now(),
-  //     ...additionalFields,
-  //     ...additional,
-  //   });
-  // }
 }
