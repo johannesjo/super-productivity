@@ -20,6 +20,7 @@ export class PollIssueUpdatesEffects {
       this.pollIssueTaskUpdatesActions$.pipe(
         switchMap(() =>
           merge(
+            // TODO refactor to use enabled providers instead
             ...ISSUE_PROVIDER_TYPES.map((providerKey) =>
               this._issueService.getPollTimer$(providerKey).pipe(
                 switchMap(() =>
@@ -35,10 +36,7 @@ export class PollIssueUpdatesEffects {
                             throw new Error('No issueProviderId for task');
                           }
                           return this._issueService
-                            .isAutoUpdateIssuesEnabledOnce$(
-                              providerKey,
-                              task.issueProviderId,
-                            )
+                            .isAutoPollEnabled$(providerKey, task.issueProviderId)
                             .pipe(
                               filter((isEnabled) => isEnabled),
                               mapTo(task),

@@ -12,13 +12,11 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return true;
   }
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(
-    issueProviderId: string,
-  ): Observable<boolean> {
+  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
     return of(false);
   }
 
-  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
+  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
     return of(false);
   }
 

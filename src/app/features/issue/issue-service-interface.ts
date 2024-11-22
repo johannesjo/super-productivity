@@ -13,11 +13,9 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(
-    issueProviderId: string,
-  ): Observable<boolean>;
+  isAutoImportEnabled$(issueProviderId: string): Observable<boolean>;
 
-  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean>;
+  isAutoPollEnabled$(issueProviderId: string): Observable<boolean>;
 
   pollTimer$: Observable<number>;
 

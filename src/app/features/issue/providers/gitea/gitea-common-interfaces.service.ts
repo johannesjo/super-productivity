@@ -33,9 +33,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     return isGiteaEnabled(cfg);
   }
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(
-    issueProviderId: string,
-  ): Observable<boolean> {
+  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map(
         (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
@@ -43,7 +41,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
+  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );

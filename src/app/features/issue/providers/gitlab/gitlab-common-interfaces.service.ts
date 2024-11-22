@@ -28,9 +28,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(
-    issueProviderId: string,
-  ): Observable<boolean> {
+  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map(
         (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
@@ -38,7 +36,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
+  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );

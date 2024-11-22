@@ -130,22 +130,18 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, issueProviderId);
   }
 
-  isBacklogPollEnabledForProjectOnce$(
+  isAutoImportEnabled$(
     providerKey: IssueProviderKey,
     issueProviderId: string,
   ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[
-      providerKey
-    ].isBacklogPollingEnabledForDefaultProjectOnce$(issueProviderId);
+    return this.ISSUE_SERVICE_MAP[providerKey].isAutoImportEnabled$(issueProviderId);
   }
 
-  isAutoUpdateIssuesEnabledOnce$(
+  isAutoPollEnabled$(
     providerKey: IssueProviderKey,
     issueProviderId: string,
   ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isAutoUpdateIssuesEnabledOnce$(
-      issueProviderId,
-    );
+    return this.ISSUE_SERVICE_MAP[providerKey].isAutoPollEnabled$(issueProviderId);
   }
 
   getPollTimer$(providerKey: IssueProviderKey): Observable<number> {

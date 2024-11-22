@@ -25,9 +25,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
 
-  isBacklogPollingEnabledForDefaultProjectOnce$(
-    issueProviderId: string,
-  ): Observable<boolean> {
+  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map(
         (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
@@ -35,7 +33,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
+  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );
