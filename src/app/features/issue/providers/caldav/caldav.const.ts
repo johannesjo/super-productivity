@@ -5,10 +5,7 @@ import {
 } from '../../../config/global-config.model';
 import { T } from '../../../../t.const';
 import { IssueProviderCaldav } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   isEnabled: false,
@@ -16,9 +13,6 @@ export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   resourceName: null,
   username: null,
   password: null,
-  isAutoAddToBacklog: false,
-  isAutoPoll: false,
-  isSearchIssuesFromCaldav: false,
   isTransitionIssuesEnabled: false,
   categoryFilter: null,
 };
@@ -27,7 +21,6 @@ export const CALDAV_POLL_INTERVAL = 10 * 60 * 1000;
 export const CALDAV_INITIAL_POLL_DELAY = 8 * 1000;
 
 export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'caldavUrl',
     type: 'input',
@@ -66,29 +59,7 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
       label: T.F.CALDAV.FORM.CALDAV_PASSWORD,
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-  {
-    key: 'isSearchIssuesFromCaldav',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.CALDAV.FORM.IS_SEARCH_ISSUES_FROM_CALDAV,
-    },
-  },
-  {
-    key: 'isAutoPoll',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.CALDAV.FORM.IS_AUTO_POLL,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.CALDAV.FORM.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
+  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
   {
     key: 'isTransitionIssuesEnabled',
     type: 'checkbox',

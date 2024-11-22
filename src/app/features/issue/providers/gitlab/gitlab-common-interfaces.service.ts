@@ -5,7 +5,7 @@ import { concatMap, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.model';
-import { GitlabCfg } from './gitlab';
+import { GitlabCfg } from './gitlab.model';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import {

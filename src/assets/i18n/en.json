@@ -97,9 +97,6 @@
         "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
         "CALDAV_URL": "CalDav URL (the base URL)",
         "CALDAV_USER": "Your CalDav username",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add uncompleted CalDav todos to your backlog",
-        "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatically complete CalDav todos on task completion"
       },
       "FORM_SECTION": {
@@ -185,9 +182,6 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from Gitea to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Show issues from git as suggestions when adding new tasks",
         "HOST": "Host (e.g.: https://try.gitea.io)",
         "TOKEN": "Access Token",
         "REPO_FULL_NAME": "Username or Organization name/project",
@@ -228,10 +222,7 @@
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
         "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me",
-        "IS_AUTO_POLL": "Automatically poll imported redmine issues for changes",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Show issues from redmine as suggestions when adding new tasks",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add open issues from redmine"
+        "SCOPE_CREATED": "Created by me"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
@@ -254,9 +245,6 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically import unresolved issues from GitHub",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "username/repositoryName",
         "TOKEN": "Access Token",
         "TOKEN_DESCRIPTION": "Required for private repository access",
@@ -299,9 +287,6 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically import issues from GitLab",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "(default) project ID or user name/project",
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
@@ -420,16 +405,10 @@
         "TIME_SPENT_TOOLTIP": "Add different times",
         "TITLE": "Jira: Submit Worklog"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatically import unresolved issues from GitHub",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks"
-      },
+      "FORM": {},
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for importing issues to Super Productivity automatically",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to Jira when sub task is done",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically import issues from Jira",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to Jira when task is done",
         "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks",
@@ -608,9 +587,6 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically import unresolved work packages from OpenProject",
-        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",

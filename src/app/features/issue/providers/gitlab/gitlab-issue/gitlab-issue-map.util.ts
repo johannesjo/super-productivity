@@ -1,7 +1,7 @@
 import { GitlabIssue } from './gitlab-issue.model';
 import { GitlabOriginalIssue } from '../gitlab-api/gitlab-api-responses';
 import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
-import { GitlabCfg } from '../gitlab';
+import { GitlabCfg } from '../gitlab.model';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 
 export const mapGitlabIssue = (

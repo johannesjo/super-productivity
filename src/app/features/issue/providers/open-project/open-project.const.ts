@@ -8,19 +8,13 @@ import {
 import { JIRA_WORK_LOG_EXPORT_FORM_OPTIONS } from '../jira/jira.const';
 import { JiraWorklogExportDefaultTime } from '../jira/jira.model';
 import { IssueProviderOpenProject } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   isEnabled: false,
   host: null,
   projectId: null,
   token: null,
-  isSearchIssuesFromOpenProject: false,
-  isAutoPoll: false,
-  isAutoAddToBacklog: false,
   isShowTimeTrackingDialog: false,
   isShowTimeTrackingDialogForEachSubTask: false,
   timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime.AllTime,
@@ -42,7 +36,6 @@ export const OPEN_PROJECT_INITIAL_POLL_DELAY = 8 * 1000;
 
 export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpenProject>[] =
   [
-    // ISSUE_PROVIDER_FF_CREDENTIALS,
     {
       key: 'host',
       type: 'input',
@@ -98,32 +91,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
         ],
       },
     },
-    ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-    ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-    {
-      key: 'isSearchIssuesFromOpenProject',
-      type: 'checkbox',
-
-      templateOptions: {
-        label: T.F.OPEN_PROJECT.FORM.IS_SEARCH_ISSUES_FROM_OPEN_PROJECT,
-      },
-    },
-    {
-      key: 'isAutoPoll',
-      type: 'checkbox',
-
-      templateOptions: {
-        label: T.F.OPEN_PROJECT.FORM.IS_AUTO_POLL,
-      },
-    },
-    {
-      key: 'isAutoAddToBacklog',
-      type: 'checkbox',
-
-      templateOptions: {
-        label: T.F.OPEN_PROJECT.FORM.IS_AUTO_IMPORT_ISSUES,
-      },
-    },
+    ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
     {
       key: 'isShowTimeTrackingDialog',
       type: 'checkbox',

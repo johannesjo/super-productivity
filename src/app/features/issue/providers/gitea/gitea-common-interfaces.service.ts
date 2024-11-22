@@ -79,7 +79,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((giteaCfg) =>
-        this.isEnabled(giteaCfg) && giteaCfg.isSearchIssuesFromGitea
+        this.isEnabled(giteaCfg)
           ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
           : of([]),
       ),

@@ -142,7 +142,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((caldavCfg) =>
-        this.isEnabled(caldavCfg) && caldavCfg.isSearchIssuesFromCaldav
+        this.isEnabled(caldavCfg)
           ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
           : of([]),
       ),

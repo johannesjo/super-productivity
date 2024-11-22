@@ -1,5 +1,5 @@
 import { DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION } from './providers/jira/jira.const';
-import { IssueProviderKey } from './issue.model';
+import { IssueProviderBase, IssueProviderKey } from './issue.model';
 import {
   DEFAULT_GITHUB_CFG,
   GITHUB_CONFIG_FORM_SECTION,
@@ -106,3 +106,13 @@ export const ISSUE_STR_MAP: { [key: string]: { ISSUE_STR: string; ISSUES_STR: st
     [GITEA_TYPE]: DEFAULT_ISSUE_STRS,
     [REDMINE_TYPE]: DEFAULT_ISSUE_STRS,
   } as const;
+
+export const ISSUE_PROVIDER_DEFAULT_COMMON_CFG: Omit<
+  IssueProviderBase,
+  'id' | 'issueProviderKey' | 'isEnabled'
+> = {
+  isAutoPoll: true,
+  isAutoAddToBacklog: false,
+  isIntegratedAddTaskBar: false,
+  defaultProjectId: null,
+} as const;

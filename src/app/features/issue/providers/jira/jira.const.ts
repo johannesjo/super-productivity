@@ -7,10 +7,7 @@ import {
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
 import { IssueProviderJira } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -23,10 +20,8 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   isWonkyCookieMode: false,
   usePAT: false,
 
-  isAutoPollTickets: true,
   searchJqlQuery: '',
 
-  isAutoAddToBacklog: true,
   autoAddBacklogJqlQuery:
     'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved',
 
@@ -133,7 +128,6 @@ export const JIRA_WORK_LOG_EXPORT_CHECKBOXES: {
 ];
 
 const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -197,27 +191,6 @@ const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] =
 
 const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
   {
-    key: 'isAutoPollTickets',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_AUTO_POLL_TICKETS,
-    },
-  },
-  {
-    key: 'isCheckToReAssignTicketOnTaskStart',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
-  {
     key: 'autoAddBacklogJqlQuery',
     type: 'input',
     templateOptions: {
@@ -229,6 +202,13 @@ const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
     type: 'input',
     templateOptions: {
       label: T.F.JIRA.FORM_ADV.SEARCH_JQL_QUERY,
+    },
+  },
+  {
+    key: 'isCheckToReAssignTicketOnTaskStart',
+    type: 'checkbox',
+    templateOptions: {
+      label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START,
     },
   },
   {
@@ -283,8 +263,7 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
   ],
   items: [
     ...JIRA_CREDENTIALS_FORM_CFG,
-    ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-    ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+    ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
     ...JIRA_ADVANCED_FORM_CFG,
   ],
 };

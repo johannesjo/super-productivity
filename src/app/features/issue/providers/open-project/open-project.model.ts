@@ -14,9 +14,6 @@ export interface OpenProjectTransitionConfig {
   DONE: OpenProjectTransitionOption;
 }
 export interface OpenProjectCfg extends BaseIssueProviderCfg {
-  isSearchIssuesFromOpenProject: boolean;
-  isAutoAddToBacklog: boolean;
-  isAutoPoll: boolean;
   isShowTimeTrackingDialog: boolean;
   isShowTimeTrackingDialogForEachSubTask: boolean;
   timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime;

@@ -18,6 +18,7 @@ import {
 import { nanoid } from 'nanoid';
 import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_TYPES,
 } from '../../features/issue/issue.const';
 import { JiraCfg } from '../../features/issue/providers/jira/jira.model';
@@ -26,7 +27,7 @@ import { CaldavCfg } from '../../features/issue/providers/caldav/caldav.model';
 import { RedmineCfg } from '../../features/issue/providers/redmine/redmine.model';
 import { GithubCfg } from '../../features/issue/providers/github/github.model';
 import { GiteaCfg } from '../../features/issue/providers/gitea/gitea.model';
-import { GitlabCfg } from '../../features/issue/providers/gitlab/gitlab';
+import { GitlabCfg } from '../../features/issue/providers/gitlab/gitlab.model';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 import { MODEL_VERSION } from '../model-version';
@@ -169,6 +170,7 @@ function _addIssueProvidersForProject(data: AppDataComplete, project: Project): 
     if (_isMigrateIssueProvider(value, key as IssueProviderKey)) {
       count++;
       const issueProvider = {
+        ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
         issueProviderKey: key,
         migratedFromProjectId: project.id,
         defaultProjectId: project.id,

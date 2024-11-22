@@ -1,5 +1,5 @@
 // TODO use as a checklist
-import { GitlabCfg } from './gitlab';
+import { GitlabCfg } from './gitlab.model';
 import { T } from '../../../../t.const';
 import {
   ConfigFormSection,
@@ -7,19 +7,13 @@ import {
 } from '../../../config/global-config.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 import { IssueProviderGitlab } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isEnabled: false,
   project: null,
   gitlabBaseUrl: null,
   token: null,
-  isSearchIssuesFromGitlab: false,
-  isAutoPoll: false,
-  isAutoAddToBacklog: false,
   filterUsername: null,
   scope: 'created-by-me',
   source: 'project',
@@ -40,7 +34,6 @@ export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'project',
     type: 'input',
@@ -114,29 +107,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
         /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-  {
-    key: 'isSearchIssuesFromGitlab',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.IS_SEARCH_ISSUES_FROM_GITLAB,
-    },
-  },
-  {
-    key: 'isAutoPoll',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.IS_AUTO_POLL,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
+  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
   {
     key: 'filterUsername',
     type: 'input',

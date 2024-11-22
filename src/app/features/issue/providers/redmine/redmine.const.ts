@@ -5,10 +5,7 @@ import {
 import { T } from 'src/app/t.const';
 import { RedmineCfg } from './redmine.model';
 import { IssueProviderRedmine } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const REDMINE_POLL_INTERVAL = 5 * 60 * 1000;
 export const REDMINE_INITIAL_POLL_DELAY = 8 * 1000;
@@ -31,7 +28,6 @@ export enum ScopeOptions {
 }
 
 export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -79,32 +75,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
       ],
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-  {
-    key: 'isSearchIssuesFromRedmine',
-    type: 'checkbox',
-
-    templateOptions: {
-      label: T.F.REDMINE.FORM.IS_SEARCH_ISSUES_FROM_REDMINE,
-    },
-  },
-  {
-    key: 'isAutoPoll',
-    type: 'checkbox',
-
-    templateOptions: {
-      label: T.F.REDMINE.FORM.IS_AUTO_POLL,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-
-    templateOptions: {
-      label: T.F.REDMINE.FORM.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
+  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 ];
 
 export const REDMINE_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderRedmine> = {

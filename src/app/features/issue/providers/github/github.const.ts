@@ -6,18 +6,12 @@ import {
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
 import { IssueProviderGithub } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isEnabled: false,
   repo: null,
   token: null,
-  isSearchIssuesFromGithub: false,
-  isAutoPoll: false,
-  isAutoAddToBacklog: false,
   filterUsername: null,
   filterIssuesAssignedToMe: false,
 };
@@ -32,7 +26,6 @@ export const GITHUB_INITIAL_POLL_DELAY = 8 * 1000;
 export const GITHUB_API_BASE_URL = 'https://api.github.com/';
 
 export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'repo',
     type: 'input',
@@ -60,29 +53,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-  {
-    key: 'isSearchIssuesFromGithub',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB,
-    },
-  },
-  {
-    key: 'isAutoPoll',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITHUB.FORM.IS_AUTO_POLL,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITHUB.FORM.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
+  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
   {
     key: 'filterUsername',
     type: 'input',

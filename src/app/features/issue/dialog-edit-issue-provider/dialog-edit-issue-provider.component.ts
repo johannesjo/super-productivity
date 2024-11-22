@@ -7,6 +7,7 @@ import { IssueIntegrationCfg, IssueProvider, IssueProviderKey } from '../issue.m
 import { IssueModule } from '../issue.module';
 import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_FORM_CFGS_MAP,
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
@@ -58,9 +59,9 @@ export class DialogEditIssueProviderComponent {
     ? { ...this.issueProvider }
     : {
         ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
+        ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
         id: nanoid(),
         issueProviderKey: this.issueProviderKey,
-        isEnabled: true,
       };
   configFormSection: ConfigFormSection<IssueIntegrationCfg> =
     ISSUE_PROVIDER_FORM_CFGS_MAP[this.issueProviderKey];

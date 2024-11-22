@@ -5,10 +5,7 @@ import {
 import { T } from 'src/app/t.const';
 import { GiteaCfg } from './gitea.model';
 import { IssueProviderGitea } from '../../issue.model';
-import {
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-} from '../../common-issue-form-stuff.const';
+import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
 export const GITEA_POLL_INTERVAL = 5 * 60 * 1000;
 export const GITEA_INITIAL_POLL_DELAY = 8 * 1000;
@@ -18,9 +15,6 @@ export const DEFAULT_GITEA_CFG: GiteaCfg = {
   host: null,
   repoFullname: null,
   token: null,
-  isAutoPoll: false,
-  isSearchIssuesFromGitea: false,
-  isAutoAddToBacklog: false,
   scope: 'created-by-me',
 };
 
@@ -31,7 +25,6 @@ export enum ScopeOptions {
 }
 
 export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] = [
-  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -82,29 +75,7 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
       ],
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
-  {
-    key: 'isSearchIssuesFromGitea',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITEA.FORM.IS_SEARCH_ISSUES_FROM_GITEA,
-    },
-  },
-  {
-    key: 'isAutoPoll',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITEA.FORM.IS_AUTO_POLL,
-    },
-  },
-  {
-    key: 'isAutoAddToBacklog',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITEA.FORM.IS_AUTO_IMPORT_ISSUES,
-    },
-  },
+  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 ];
 
 export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGitea> = {

@@ -1,4 +1,4 @@
-import { GitlabCfg } from './gitlab';
+import { GitlabCfg } from './gitlab.model';
 
 export const isGitlabEnabled = (gitlabCfg: GitlabCfg): boolean =>
   !!gitlabCfg && gitlabCfg.isEnabled && !!gitlabCfg.project;

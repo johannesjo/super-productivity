@@ -8,7 +8,7 @@ import {
   GithubIssue,
   GithubIssueReduced,
 } from './providers/github/github-issue/github-issue.model';
-import { GitlabCfg } from './providers/gitlab/gitlab';
+import { GitlabCfg } from './providers/gitlab/gitlab.model';
 import { GitlabIssue } from './providers/gitlab/gitlab-issue/gitlab-issue.model';
 import {
   CaldavIssue,
@@ -110,6 +110,9 @@ export interface IssueProviderBase {
   defaultProjectId: string | null;
   // delete at some point in the future
   migratedFromProjectId?: string;
+  isAutoPoll: boolean;
+  isAutoAddToBacklog: boolean;
+  isIntegratedAddTaskBar: boolean;
 }
 
 export interface IssueProviderJira extends IssueProviderBase, JiraCfg {

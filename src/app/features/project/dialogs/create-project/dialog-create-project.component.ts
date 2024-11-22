@@ -24,7 +24,7 @@ import { GiteaCfg } from '../../../issue/providers/gitea/gitea.model';
 import { RedmineCfg } from '../../../issue/providers/redmine/redmine.model';
 import { T } from '../../../../t.const';
 import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/work-context.const';
-import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab';
+import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab.model';
 import { CaldavCfg } from 'src/app/features/issue/providers/caldav/caldav.model';
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
 import { getRandomWorkContextColor } from '../../../work-context/work-context-color';

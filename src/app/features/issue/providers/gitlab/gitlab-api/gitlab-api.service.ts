@@ -11,7 +11,7 @@ import { parseUrl, stringifyUrl } from 'query-string';
 import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
-import { GitlabCfg } from '../gitlab';
+import { GitlabCfg } from '../gitlab.model';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';

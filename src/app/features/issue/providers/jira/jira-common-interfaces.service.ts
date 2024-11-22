@@ -37,7 +37,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   isAutoUpdateIssuesEnabledOnce$(issueProviderId: string): Observable<boolean> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPollTickets),
+      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
     );
   }
 
