@@ -5,6 +5,11 @@ import {
   ConfigFormSection,
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
+import { IssueProviderGithub } from '../../issue.model';
+import {
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+} from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isEnabled: false,
@@ -26,7 +31,8 @@ export const GITHUB_INITIAL_POLL_DELAY = 8 * 1000;
 // export const GITHUB_POLL_INTERVAL = 15 * 1000;
 export const GITHUB_API_BASE_URL = 'https://api.github.com/';
 
-export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
+export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[] = [
+  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'repo',
     type: 'input',
@@ -57,6 +63,8 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
   {
     key: 'isSearchIssuesFromGithub',
     type: 'checkbox',
@@ -99,7 +107,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   },
 ];
 
-export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection<GithubCfg> = {
+export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGithub> = {
   title: 'GitHub',
   key: 'GITHUB',
   items: GITHUB_CONFIG_FORM,

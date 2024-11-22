@@ -257,7 +257,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub agli arretrati",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
-        "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare",
+        "REPO": "username/repositoryName",
         "TOKEN": "Token di accesso",
         "TOKEN_DESCRIPTION": "Richiesto per l'accesso al repository privato",
         "IS_ASSIGNEE_FILTER": "Filtra issue assegnate a me"
@@ -422,7 +422,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da git agli arretrati",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
-        "REPO": "\"username/repositoryName\" per il repository git che vuoi tracciare"
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usato per aggiungere automaticamente attività arretrate",

@@ -6,6 +6,11 @@ import {
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
+import { IssueProviderGitlab } from '../../issue.model';
+import {
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+} from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isEnabled: false,
@@ -34,7 +39,8 @@ export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
 
-export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
+export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[] = [
+  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'project',
     type: 'input',
@@ -114,6 +120,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
         /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/,
     },
   },
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
   {
     key: 'isSearchIssuesFromGitlab',
     type: 'checkbox',
@@ -167,7 +175,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<GitlabCfg>[] = [
   },
 ];
 
-export const GITLAB_CONFIG_FORM_SECTION: ConfigFormSection<GitlabCfg> = {
+export const GITLAB_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGitlab> = {
   title: 'GitLab',
   key: 'GITLAB',
   items: GITLAB_CONFIG_FORM,

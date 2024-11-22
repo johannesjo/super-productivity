@@ -230,7 +230,7 @@
         "IS_AUTO_IMPORT_ISSUES": "未解決の課題をGitHubからバックログに自動的に追加",
         "IS_AUTO_POLL": "変更についてインポートされたGitの課題を自動的にポーリングします",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの課題を提案として表示する",
-        "REPO": "追跡したいgitリポジトリの \"username/repositoryName\"",
+        "REPO": "username/repositoryName",
         "TOKEN": "アクセストークン",
         "TOKEN_DESCRIPTION": "プライベートリポジトリへのアクセスに必要"
       },

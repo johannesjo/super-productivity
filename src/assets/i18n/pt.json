@@ -258,7 +258,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitHub para alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
-        "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear",
+        "REPO": "username/repositoryName",
         "TOKEN": "Token de acesso",
         "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado",
         "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim"
@@ -423,7 +423,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
-        "REPO": "\"username/repositoryName\" para o repositório git que você deseja rastrear"
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para adicionar tarefas automaticamente ao backlog",

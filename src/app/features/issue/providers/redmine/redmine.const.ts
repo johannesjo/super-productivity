@@ -4,6 +4,11 @@ import {
 } from 'src/app/features/config/global-config.model';
 import { T } from 'src/app/t.const';
 import { RedmineCfg } from './redmine.model';
+import { IssueProviderRedmine } from '../../issue.model';
+import {
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+} from '../../common-issue-form-stuff.const';
 
 export const REDMINE_POLL_INTERVAL = 5 * 60 * 1000;
 export const REDMINE_INITIAL_POLL_DELAY = 8 * 1000;
@@ -25,7 +30,8 @@ export enum ScopeOptions {
   assignedToMe = 'assigned-to-me',
 }
 
-export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
+export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>[] = [
+  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -73,6 +79,8 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
       ],
     },
   },
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
   {
     key: 'isSearchIssuesFromRedmine',
     type: 'checkbox',
@@ -99,7 +107,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<RedmineCfg>[] = [
   },
 ];
 
-export const REDMINE_CONFIG_FORM_SECTION: ConfigFormSection<RedmineCfg> = {
+export const REDMINE_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderRedmine> = {
   title: T.F.REDMINE.FORM_SECTION.TITLE,
   key: 'REDMINE',
   items: REDMINE_CONFIG_FORM,

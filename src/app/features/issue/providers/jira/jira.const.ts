@@ -6,6 +6,11 @@ import {
   ConfigFormSection,
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
+import { IssueProviderJira } from '../../issue.model';
+import {
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+} from '../../common-issue-form-stuff.const';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -127,7 +132,8 @@ export const JIRA_WORK_LOG_EXPORT_CHECKBOXES: {
   },
 ];
 
-export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
+export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
+  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -188,9 +194,11 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
       label: T.F.JIRA.FORM_CRED.USE_PAT,
     },
   },
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
 ];
 
-export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
+export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
   {
     key: 'isAutoPollTickets',
     type: 'checkbox',
@@ -253,7 +261,7 @@ export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   },
 ];
 
-export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<JiraCfg> = {
+export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
   title: 'Jira',
   key: JIRA_ISSUE_TYPE,
   customSection: 'JIRA_CFG',

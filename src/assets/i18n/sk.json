@@ -259,7 +259,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
         "IS_AUTO_POLL": "Automaticky zisťovať zmeny v importovaných problémoch git",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovať problémy z git ako návrhy pri pridávaní nových úloh",
-        "REPO": "\"username/repositoryName\" pre úložisko git, ktoré chcete sledovať "
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL používaný na automatické pridávanie úloh do nevybavených úloh",

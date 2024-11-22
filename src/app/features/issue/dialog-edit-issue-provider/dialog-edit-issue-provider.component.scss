@@ -3,16 +3,20 @@
 :host {
   @include mq(xxs) {
     display: block;
-    min-width: 400px;
+    width: 400px;
   }
 
   @include mq(xs) {
     display: block;
-    min-width: 500px;
+    width: 500px;
+  }
+
+  @include mq(sm) {
+    display: block;
+    width: 600px;
   }
 
   help-section {
-    max-width: 400px;
     margin: auto;
   }
 
@@ -24,5 +28,25 @@
     //  display: block;
     //  margin: 0 auto 16px !important;
     //}
+  }
+}
+
+:host::ng-deep {
+  .tpl hr {
+    margin-bottom: 32px;
+    border-color: $light-theme-separator-color;
+
+    @include darkTheme() {
+      border-color: $dark-theme-separator-color;
+    }
+  }
+
+  .sub-section-heading {
+    margin-top: 32px;
+  }
+
+  .sub-section-heading,
+  .sub-section-heading-first {
+    font-size: 19px;
   }
 }

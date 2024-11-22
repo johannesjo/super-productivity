@@ -257,7 +257,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Automatically import unresolved issues from GitHub",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "REPO": "username/repositoryName",
         "TOKEN": "Access Token",
         "TOKEN_DESCRIPTION": "Required for private repository access",
         "IS_ASSIGNEE_FILTER": "Filter Issues Assigned to Me"
@@ -347,6 +347,8 @@
     },
     "ISSUE": {
       "HOW_TO_GET_A_TOKEN": "How to get a token?",
+      "DEFAULT_PROJECT_LABEL": "Default Super Productivity Project",
+      "DEFAULT_PROJECT_DESCRIPTION": "Project assigned to tasks created from issues.",
       "DEFAULT": {
         "ISSUES_STR": "issues",
         "ISSUE_STR": "issue"
@@ -421,8 +423,7 @@
       "FORM": {
         "IS_AUTO_IMPORT_ISSUES": "Automatically import unresolved issues from GitHub",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track"
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for importing issues to Super Productivity automatically",

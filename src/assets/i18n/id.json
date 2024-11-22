@@ -217,7 +217,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan masalah dari git sebagai saran saat menambahkan tugas baru",
-        "REPO": "\"username/repositoryName\" untuk repositori git yang ingin Anda lacak",
+        "REPO": "username/repositoryName",
         "TOKEN": "Akses Token",
         "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi"
       },
@@ -355,7 +355,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
-        "REPO": "\"username/repositoryName\" untuk repositori Git yang ingin Anda lacak"
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL digunakan untuk menambahkan tugas secara otomatis ke backlog",

@@ -396,7 +396,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitHub al registro de trabajo",
         "IS_AUTO_POLL": "Comprobar automáticamente los problemas de git importados por cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "REPO": "\"username/repositoryName\" para el repositorio de git que desee seguir"
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para agregar tareas automáticamente al registro de trabajo",

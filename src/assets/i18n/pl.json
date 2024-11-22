@@ -139,7 +139,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track",
+        "REPO": "username/repositoryName",
         "TOKEN": "Access Token",
         "TOKEN_DESCRIPTION": "Required for private repository access"
       },
@@ -262,7 +262,7 @@
         "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"username/repositoryName\" for the git repository you want to track"
+        "REPO": "username/repositoryName"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",

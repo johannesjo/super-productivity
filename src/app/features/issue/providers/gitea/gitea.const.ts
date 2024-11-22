@@ -4,6 +4,11 @@ import {
 } from 'src/app/features/config/global-config.model';
 import { T } from 'src/app/t.const';
 import { GiteaCfg } from './gitea.model';
+import { IssueProviderGitea } from '../../issue.model';
+import {
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+} from '../../common-issue-form-stuff.const';
 
 export const GITEA_POLL_INTERVAL = 5 * 60 * 1000;
 export const GITEA_INITIAL_POLL_DELAY = 8 * 1000;
@@ -25,7 +30,8 @@ export enum ScopeOptions {
   assignedToMe = 'assigned-to-me',
 }
 
-export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
+export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] = [
+  // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
     type: 'input',
@@ -81,6 +87,8 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
       ],
     },
   },
+  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
   {
     key: 'isSearchIssuesFromGitea',
     type: 'checkbox',
@@ -107,7 +115,7 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<GiteaCfg>[] = [
   },
 ];
 
-export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<GiteaCfg> = {
+export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGitea> = {
   title: 'Gitea',
   key: 'GITEA',
   items: GITEA_CONFIG_FORM,
