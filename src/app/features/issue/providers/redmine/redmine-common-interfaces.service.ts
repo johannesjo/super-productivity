@@ -77,7 +77,7 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
   searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((cfg) =>
-        this.isEnabled(cfg) && cfg.isSearchIssuesFromRedmine
+        this.isEnabled(cfg)
           ? this._redmineApiService.searchIssuesInProject$(query, cfg)
           : of([]),
       ),

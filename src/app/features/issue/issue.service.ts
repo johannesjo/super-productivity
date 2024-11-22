@@ -40,6 +40,7 @@ import { selectIssueProviderById } from './store/issue-provider.selectors';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
+import { IssueProviderService } from './issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -79,6 +80,7 @@ export class IssueService {
     private _giteaInterfaceService: GiteaCommonInterfacesService,
     private _redmineInterfaceService: RedmineCommonInterfacesService,
     private _calendarCommonInterfaceService: CalendarCommonInterfacesService,
+    private _issueProviderService: IssueProviderService,
     private _workContextService: WorkContextService,
     private _snackService: SnackService,
     private _translateService: TranslateService,
@@ -409,6 +411,11 @@ export class IssueService {
           }
         : {
             tagIds: [this._workContextService.activeWorkContextId as string],
+            projectId: (
+              await this._issueProviderService
+                .getCfgOnce$(issueProviderId, issueProviderKey)
+                .toPromise()
+            ).defaultProjectId,
           }),
       ...additionalFromProviderIssueService,
       ...additional,

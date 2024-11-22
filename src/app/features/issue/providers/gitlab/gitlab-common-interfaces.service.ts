@@ -75,7 +75,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((gitlabCfg) =>
-        this.isEnabled(gitlabCfg) && gitlabCfg.isSearchIssuesFromGitlab
+        this.isEnabled(gitlabCfg)
           ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
           : of([]),
       ),

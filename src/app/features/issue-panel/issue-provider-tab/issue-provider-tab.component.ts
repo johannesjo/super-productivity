@@ -69,6 +69,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       filter((searchText) => searchText.length >= 1),
       debounceTime(300),
       tap(() => this.isLoading.set(true)),
+
       switchMap((searchText) =>
         this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
           catchError((e) => {
@@ -85,6 +86,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
           }),
         ),
       ),
+
       switchMap((items) =>
         this._store
           .select(selectAllTaskIssueIdsForIssueProvider(this.issueProvider()))

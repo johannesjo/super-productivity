@@ -61,7 +61,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId).pipe(
       tap((v) => console.log('settings', v)),
       switchMap((jiraCfg) =>
-        this.isEnabled(jiraCfg) && jiraCfg.isEnabled
+        this.isEnabled(jiraCfg)
           ? this._jiraApiService
               .issuePicker$(searchTerm, jiraCfg)
               .pipe(tap((v) => console.log('jira.issuePicker$', v)))

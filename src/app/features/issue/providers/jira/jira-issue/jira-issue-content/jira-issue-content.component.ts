@@ -11,6 +11,7 @@ import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject } from 
 import { map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { devError } from '../../../../../../util/dev-error';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 interface JiraSubtaskWithUrl extends JiraSubtask {
   href: string;
@@ -35,8 +36,8 @@ export class JiraIssueContentComponent {
   issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((task) =>
       this._jiraCommonInterfacesService.issueLink$(
-        task.issueId as string,
-        task.projectId as string,
+        assertTruthy(task.issueId),
+        assertTruthy(task.issueProviderId),
       ),
     ),
   );
@@ -49,7 +50,7 @@ export class JiraIssueContentComponent {
         ? forkJoin(
             ...issue.subtasks.map((ist: any) => {
               return this._jiraCommonInterfacesService
-                .issueLink$(ist.key as string, task.projectId as string)
+                .issueLink$(assertTruthy(ist.issueId), assertTruthy(task.issueProviderId))
                 .pipe(
                   map((issueUrl) => ({
                     ...ist,
@@ -71,7 +72,7 @@ export class JiraIssueContentComponent {
         ? forkJoin(
             ...issue.relatedIssues.map((ist: any) => {
               return this._jiraCommonInterfacesService
-                .issueLink$(ist.key as string, task.projectId as string)
+                .issueLink$(assertTruthy(ist.key), assertTruthy(task.issueProviderId))
                 .pipe(
                   map((issueUrl) => ({
                     ...ist,

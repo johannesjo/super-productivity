@@ -15,6 +15,8 @@ export class IssueProviderService {
     issueProviderId: string,
     issueProviderType: T,
   ): Observable<IssueProviderTypeMap<T>> {
+    // throw new Error('Test err');
+
     if (!issueProviderId || !issueProviderType) {
       throw new Error('No issueProviderId or type given');
     }

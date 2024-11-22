@@ -62,7 +62,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((githubCfg) =>
-        this.isEnabled(githubCfg) && githubCfg.isSearchIssuesFromGithub
+        this.isEnabled(githubCfg)
           ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
           : of([]),
       ),

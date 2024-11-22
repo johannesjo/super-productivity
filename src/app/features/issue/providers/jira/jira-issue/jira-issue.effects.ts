@@ -16,7 +16,7 @@ import { JiraIssueReduced } from './jira-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Task } from '../../../../tasks/task.model';
 import { TaskService } from '../../../../tasks/task.service';
-import { BehaviorSubject, EMPTY, Observable, of, throwError, timer } from 'rxjs';
+import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../jira-view-components/dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState, IssueProviderJira } from '../../../issue.model';
@@ -29,8 +29,6 @@ import { DialogJiraAddWorklogComponent } from '../jira-view-components/dialog-ji
 import { selectCurrentTaskParentOrCurrent } from '../../../../tasks/store/task.selectors';
 import { HANDLED_ERROR_PROP_STR } from '../../../../../app.constants';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import { setActiveWorkContext } from '../../../../work-context/store/work-context.actions';
-import { WorkContextType } from '../../../../work-context/work-context.model';
 import { isJiraEnabled } from '../is-jira-enabled.util';
 import { IssueProviderService } from '../../../issue-provider.service';
 
@@ -233,26 +231,6 @@ export class JiraIssueEffects {
         concatMap(({ jiraCfg, task }) => {
           return this._handleTransitionForIssue(IssueLocalState.DONE, jiraCfg, task);
         }),
-      ),
-    { dispatch: false },
-  );
-
-  // HOOKS
-  private _isInitialRequestForProjectDone$: BehaviorSubject<boolean> =
-    new BehaviorSubject<boolean>(false);
-
-  checkConnection$: Observable<any> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(setActiveWorkContext),
-        tap(() => this._isInitialRequestForProjectDone$.next(false)),
-        filter(({ activeType }) => activeType === WorkContextType.PROJECT),
-        concatMap(({ activeId }) => this._getCfgOnce$(activeId)),
-        // NOTE: might not be loaded yet
-        filter((jiraCfg) => isJiraEnabled(jiraCfg)),
-        // just fire any single request
-        concatMap((jiraCfg) => this._jiraApiService.getCurrentUser$(jiraCfg)),
-        tap(() => this._isInitialRequestForProjectDone$.next(true)),
       ),
     { dispatch: false },
   );
