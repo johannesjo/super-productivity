@@ -15,12 +15,18 @@ import { OpenProjectApiService } from '../../open-project-api.service';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { UiModule } from '../../../../../../ui/ui.module';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe, NgForOf } from '@angular/common';
+import { MatSlider } from '@angular/material/slider';
 
 @Component({
   selector: 'dialog-open-project-transition',
   templateUrl: './dialog-open-project-transition.component.html',
   styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, MatSlider],
 })
 export class DialogOpenProjectTransitionComponent {
   T: typeof T = T;

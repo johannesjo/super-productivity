@@ -22,13 +22,18 @@ import { concatMap, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { UiModule } from '../../../../../../ui/ui.module';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 
 @Component({
   selector: 'dialog-open-project-track-time',
   templateUrl: './dialog-open-project-track-time.component.html',
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   animations: [expandFadeAnimation],
+  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, NgIf],
 })
 export class DialogOpenProjectTrackTimeComponent {
   T: typeof T = T;
