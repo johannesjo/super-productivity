@@ -25,13 +25,13 @@ import { IssueProviderService } from '../../../../issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
-  selector: 'jira-cfg',
-  templateUrl: './jira-cfg.component.html',
-  styleUrls: ['./jira-cfg.component.scss'],
+  selector: 'jira-additonal-cfg',
+  templateUrl: './jira-additional-cfg.component.html',
+  styleUrls: ['./jira-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
 })
-export class JiraCfgComponent implements OnInit, OnDestroy {
+export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<IssueProviderJira>;
 
   @Output() modelChange: EventEmitter<IssueProviderJira> = new EventEmitter();

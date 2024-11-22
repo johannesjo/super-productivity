@@ -1,12 +1,4 @@
-import {
-  ConfigFormConfig,
-  GenericConfigFormSection,
-} from '../config/global-config.model';
-import {
-  DEFAULT_JIRA_CFG,
-  JIRA_CONFIG_FORM_SECTION,
-  JIRA_ISSUE_TYPE,
-} from './providers/jira/jira.const';
+import { DEFAULT_JIRA_CFG, JIRA_CONFIG_FORM_SECTION } from './providers/jira/jira.const';
 import { IssueProviderKey } from './issue.model';
 import {
   DEFAULT_GITHUB_CFG,
@@ -95,36 +87,6 @@ export const ISSUE_PROVIDER_FORM_CFGS_MAP = {
   [GITEA_TYPE]: GITEA_CONFIG_FORM_SECTION,
   [REDMINE_TYPE]: REDMINE_CONFIG_FORM_SECTION,
 } as const;
-
-export const ISSUE_PROVIDER_WITH_CUSTOM_COMP = [JIRA_ISSUE_TYPE, OPEN_PROJECT_TYPE];
-
-// TODO remove
-export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
-  GITLAB_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  GITHUB_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  REDMINE_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  JIRA_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  CALDAV_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  OPEN_PROJECT_CONFIG_FORM_SECTION as GenericConfigFormSection,
-  GITEA_CONFIG_FORM_SECTION as GenericConfigFormSection,
-].map((providerCfg) => ({
-  ...providerCfg,
-  // NOTE we don't do this for jira as there is a custom cfg component with an enabled toggle
-  ...(providerCfg.items && !ISSUE_PROVIDER_WITH_CUSTOM_COMP.includes(providerCfg.key)
-    ? {
-        items: [
-          {
-            key: 'isEnabled',
-            type: 'toggle',
-            templateOptions: {
-              label: T.G.ENABLED,
-            },
-          },
-          ...providerCfg.items,
-        ],
-      }
-    : {}),
-}));
 
 const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
   ISSUE_STR: T.F.ISSUE.DEFAULT.ISSUE_STR,

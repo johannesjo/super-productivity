@@ -53,29 +53,40 @@
       </ng-container>
     </help-section>
 
-    @switch (issueProviderKey) {
-    <!-- -->
-    @case ("JIRA") {
-    <jira-cfg
-      [section]="configFormSection"
-      [cfg]="model"
-      (modelChange)="customCfgCmpSave($event)"
-    ></jira-cfg>
-    <!-- -->
-    } @case ("OPEN_PROJECT") {
-    <openproject-cfg
-      [section]="configFormSection"
-      [cfg]="model"
-      (modelChange)="customCfgCmpSave($event)"
-    ></openproject-cfg>
-    <!-- -->
-    } @default {
+    <div style="margin-bottom: 32px">
+      <mat-slide-toggle
+        [ngModel]="model.isEnabled"
+        (ngModelChange)="changeEnabled($event)"
+        [ngModelOptions]="{standalone: true}"
+      >
+        {{ T.G.ENABLED|translate }}
+      </mat-slide-toggle>
+    </div>
+
+    @if (model.isEnabled) {
     <formly-form
       [(model)]="model"
       [fields]="fields"
       [form]="form"
     ></formly-form>
-    } }
+
+    @switch (issueProviderKey) {
+    <!-- -->
+    @case ("JIRA") {
+    <jira-additonal-cfg
+      [section]="configFormSection"
+      [cfg]="model"
+      (modelChange)="customCfgCmpSave($event)"
+    ></jira-additonal-cfg>
+    <!-- -->
+    } @case ("OPEN_PROJECT") {
+    <open-project-additional-cfg
+      [section]="configFormSection"
+      [cfg]="model"
+      (modelChange)="customCfgCmpSave($event)"
+    ></open-project-additional-cfg>
+    <!-- -->
+    } } }
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

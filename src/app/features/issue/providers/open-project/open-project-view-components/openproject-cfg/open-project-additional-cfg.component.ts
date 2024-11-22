@@ -36,15 +36,15 @@ import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
-  selector: 'openproject-cfg',
-  templateUrl: './openproject-cfg.component.html',
-  styleUrls: ['./openproject-cfg.compo' + 'nent.scss'],
+  selector: 'open-project-additional-cfg',
+  templateUrl: './open-project-additional-cfg.component.html',
+  styleUrls: ['./open-project-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider, NgForOf],
   animations: [expandAnimation],
 })
-export class OpenprojectCfgComponent implements OnInit, OnDestroy {
+export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<IssueProviderOpenProject>;
   @Output() modelChange: EventEmitter<IssueProviderOpenProject> = new EventEmitter();
   T: typeof T = T;

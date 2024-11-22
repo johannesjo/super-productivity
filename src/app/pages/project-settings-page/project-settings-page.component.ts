@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { T } from '../../t.const';
 import {
-  ConfigFormConfig,
   ConfigFormSection,
   GlobalConfigSectionKey,
 } from '../../features/config/global-config.model';
@@ -20,10 +19,7 @@ import {
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../features/project/project.service';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
-import {
-  DEFAULT_ISSUE_PROVIDER_CFGS,
-  ISSUE_PROVIDER_FORM_CFGS,
-} from '../../features/issue/issue.const';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../../features/issue/issue.const';
 import {
   WorkContextAdvancedCfg,
   WorkContextThemeCfg,
@@ -42,7 +38,6 @@ import { isObject } from '../../util/is-object';
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
-  issueIntegrationFormCfg: ConfigFormConfig;
   basicFormCfg: ConfigFormSection<Project>;
 
   currentProject?: Project | null;
@@ -59,7 +54,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   ) {
     // somehow they are only unproblematic if assigned here
     this.projectThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
-    this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
     this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
   }
 

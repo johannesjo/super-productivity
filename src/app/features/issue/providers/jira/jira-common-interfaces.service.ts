@@ -60,7 +60,6 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      tap((v) => console.log('settings', v)),
       switchMap((jiraCfg) =>
         this.isEnabled(jiraCfg)
           ? this._jiraApiService

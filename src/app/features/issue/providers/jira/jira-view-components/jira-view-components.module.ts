@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { JiraCfgStepperComponent } from './jira-cfg-stepper/jira-cfg-stepper.component';
 import { UiModule } from '../../../../../ui/ui.module';
-import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
+import { JiraAdditionalCfgComponent } from './jira-cfg/jira-additional-cfg.component';
 import { FormsModule } from '@angular/forms';
 import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-jira-transition.component';
 import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-jira-add-worklog.component';
@@ -13,8 +13,8 @@ import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-
     DialogJiraTransitionComponent,
     DialogJiraAddWorklogComponent,
     JiraCfgStepperComponent,
-    JiraCfgComponent,
+    JiraAdditionalCfgComponent,
   ],
-  exports: [JiraCfgStepperComponent, JiraCfgComponent],
+  exports: [JiraCfgStepperComponent, JiraAdditionalCfgComponent],
 })
 export class JiraViewComponentsModule {}

@@ -10,14 +10,16 @@ import {
   ISSUE_PROVIDER_FORM_CFGS_MAP,
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgForOf, NgIf } from '@angular/common';
 import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
-import { OpenprojectCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/openproject-cfg.component';
+import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
+import { HelperClasses } from '../../../app.constants';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -28,7 +30,9 @@ import { nanoid } from 'nanoid';
     NgIf,
     NgForOf,
     JiraViewComponentsModule,
-    OpenprojectCfgComponent,
+    OpenProjectAdditionalCfgComponent,
+    FormsModule,
+    MatInputModule,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',
@@ -49,7 +53,7 @@ export class DialogEditIssueProviderComponent {
   isEdit: boolean = !!this.issueProvider;
 
   model: Partial<IssueProvider> = this.isEdit
-    ? this.issueProvider
+    ? { ...this.issueProvider }
     : {
         ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
         id: nanoid(),
@@ -58,18 +62,8 @@ export class DialogEditIssueProviderComponent {
       };
   configFormSection: ConfigFormSection<IssueIntegrationCfg> =
     ISSUE_PROVIDER_FORM_CFGS_MAP[this.issueProviderKey];
-  fields = this.isEdit
-    ? [
-        {
-          key: 'isEnabled',
-          type: 'toggle',
-          templateOptions: {
-            label: T.G.ENABLED,
-          },
-        },
-        ...this.configFormSection.items!,
-      ]
-    : this.configFormSection.items!;
+
+  fields = this.configFormSection.items;
 
   title: string = ISSUE_PROVIDER_HUMANIZED[this.issueProviderKey];
 
@@ -79,7 +73,7 @@ export class DialogEditIssueProviderComponent {
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
 
-  submit(): void {
+  submit(isSkipClose = false): void {
     if (this.form.valid) {
       if (this.isEdit) {
         this._store.dispatch(
@@ -97,7 +91,9 @@ export class DialogEditIssueProviderComponent {
           }),
         );
       }
-      this._matDialogRef.close(this.model);
+      if (!isSkipClose) {
+        this._matDialogRef.close(this.model);
+      }
     }
   }
 
@@ -134,11 +130,21 @@ export class DialogEditIssueProviderComponent {
       });
   }
 
-  customCfgCmpSave(config: IssueIntegrationCfg): void {
-    console.log('customCfgCmpSave()', config);
+  customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
+    console.log('customCfgCmpSave()', cfgUpdates);
+    Object.keys(cfgUpdates).forEach((key) => {
+      this.model![key] = cfgUpdates[key];
+    });
+  }
+
+  changeEnabled(isEnabled: boolean): void {
+    // this.model.isEnabled = isEnabled;
     this.model = {
       ...this.model,
-      ...config,
-    } as any;
+      isEnabled,
+    };
+    this.submit(true);
   }
+
+  protected readonly HelperClasses = HelperClasses;
 }
