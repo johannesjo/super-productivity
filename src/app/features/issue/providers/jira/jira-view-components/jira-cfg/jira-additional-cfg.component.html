@@ -97,8 +97,6 @@
     <mat-form-field>
       <mat-label>{{ T.F.JIRA.CFG_CMP.STORY_POINTS|translate }}</mat-label>
       <input
-        [ngModel]="cfg.storyPointFieldId"
-        (ngModelChange)="partialModelChange({storyPointFieldId: $event})"
         [formControl]="customFieldSuggestionsCtrl"
         [matAutocomplete]="storyPointAutoEl"
         class="border-color-primary"

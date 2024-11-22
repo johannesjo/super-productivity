@@ -8,7 +8,7 @@ import {
   Output,
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
@@ -43,7 +43,6 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   customFields: any[] = [];
   customFieldsPromise?: Promise<any>;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  fields?: FormlyFieldConfig[];
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
 
@@ -93,8 +92,6 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: IssueProviderJira) {
-    console.log('XXXXXXXXXX');
-
     const newCfg: IssueProviderJira = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
     if (isEqual) {
@@ -128,7 +125,11 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<IssueProviderJira>).items;
+    this._subs.add(
+      this.customFieldSuggestionsCtrl.valueChanges.subscribe((value) => {
+        this.partialModelChange({ storyPointFieldId: value });
+      }),
+    );
   }
 
   ngOnDestroy(): void {

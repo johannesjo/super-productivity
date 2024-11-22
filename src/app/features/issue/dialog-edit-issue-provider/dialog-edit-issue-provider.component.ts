@@ -40,7 +40,8 @@ import { MatInputModule } from '@angular/material/input';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogEditIssueProviderComponent {
-  T: typeof T = T;
+  readonly T: typeof T = T;
+  readonly HelperClasses = HelperClasses;
   readonly d = inject<{
     issueProvider?: IssueProvider;
     issueProviderKey?: IssueProviderKey;
@@ -134,7 +135,9 @@ export class DialogEditIssueProviderComponent {
   customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
     console.log('customCfgCmpSave()', cfgUpdates);
     Object.keys(cfgUpdates).forEach((key) => {
-      this.model![key] = cfgUpdates[key];
+      if (key !== 'isEnabled') {
+        this.model![key] = cfgUpdates[key];
+      }
     });
   }
 
@@ -146,6 +149,4 @@ export class DialogEditIssueProviderComponent {
     };
     this.submit(true);
   }
-
-  protected readonly HelperClasses = HelperClasses;
 }
