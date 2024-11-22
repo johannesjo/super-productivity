@@ -26,7 +26,7 @@ import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
-import { switchMap } from 'rxjs/operators';
+import { first, switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -111,16 +111,15 @@ export class IssueService {
     searchTerm: string,
     issueProviderId: string,
   ): Observable<SearchResultItem[]> {
-    return this._store
-      .select(selectIssueProviderById(issueProviderId, null))
-      .pipe(
-        switchMap((issueProvider) =>
-          this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
-            searchTerm,
-            issueProvider.id,
-          ),
+    return this._store.select(selectIssueProviderById(issueProviderId, null)).pipe(
+      first(),
+      switchMap((issueProvider) =>
+        this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
+          searchTerm,
+          issueProvider.id,
         ),
-      );
+      ),
+    );
   }
 
   issueLink$(

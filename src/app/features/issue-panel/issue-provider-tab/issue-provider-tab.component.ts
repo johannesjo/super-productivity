@@ -23,7 +23,15 @@ import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip'
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
-import { catchError, debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
@@ -62,8 +70,12 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   private _store = inject(Store);
 
   issueProvider = input.required<IssueProvider>();
+  issueProvider$ = toObservable(this.issueProvider);
+
+  searchText = signal('');
+  searchTxt$ = toObservable(this.searchText);
+
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
-  searchText = signal('s');
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
   isPinned = computed(
@@ -72,7 +84,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       this.searchText().length > 0,
   );
 
-  defaultProject$ = toObservable(this.issueProvider).pipe(
+  defaultProject$ = this.issueProvider$.pipe(
     switchMap((ip) =>
       ip.defaultProjectId
         ? this._store.select(selectProjectById, { id: ip.defaultProjectId })
@@ -83,13 +95,30 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
 
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
-    toObservable(this.searchText).pipe(
+    this.searchTxt$.pipe(
       filter((searchText) => searchText.length >= 1),
       debounceTime(300),
+      tap((v) => console.log('searchText1', v)),
+
+      switchMap((searchText) => {
+        console.log(searchText);
+        return this.issueProvider$.pipe(
+          distinctUntilChanged((a, b) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { pinnedSearch, ...restA } = a;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { pinnedSearch: pinnedSearchB, ...restB } = b;
+            // return JSON.stringify(restA) === JSON.stringify(restB);
+            return JSON.stringify(restA) === JSON.stringify(restB);
+          }),
+          map((ip): [string, IssueProvider] => [searchText, ip as any]),
+        );
+      }),
+
       tap(() => this.isLoading.set(true)),
 
-      switchMap((searchText) =>
-        this._issueService.searchIssues$(searchText, this.issueProvider().id).pipe(
+      switchMap(([searchText, issueProvider]: [string, IssueProvider]) =>
+        this._issueService.searchIssues$(searchText, issueProvider.id).pipe(
           catchError((e) => {
             this.error.set(getErrorTxt(e));
             this.isLoading.set(false);
@@ -126,7 +155,6 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
 
       tap(() => this.isLoading.set(false)),
     );
-
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
   @ViewChild(CdkDropList) dropList?: CdkDropList;
