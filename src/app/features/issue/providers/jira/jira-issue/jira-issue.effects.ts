@@ -31,6 +31,7 @@ import { HANDLED_ERROR_PROP_STR } from '../../../../../app.constants';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { isJiraEnabled } from '../is-jira-enabled.util';
 import { IssueProviderService } from '../../../issue-provider.service';
+import { assertTruthy } from '../../../../../util/assert-truthy';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -41,7 +42,7 @@ export class JiraIssueEffects {
       this._actions$.pipe(
         ofType(updateTask),
         filter(({ task }) => task.changes.isDone === true),
-        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         concatMap((task) =>
           task.parentId
             ? this._taskService
@@ -58,7 +59,11 @@ export class JiraIssueEffects {
                     jiraCfg.isWorklogEnabled &&
                     jiraCfg.isAddWorklogOnSubTaskDone
                   ) {
-                    this._openWorklogDialog(subTask, mainTask.issueId as string, jiraCfg);
+                    this._openWorklogDialog(
+                      subTask,
+                      assertTruthy(mainTask.issueId),
+                      jiraCfg,
+                    );
                   } else if (
                     jiraCfg.isAddWorklogOnSubTaskDone &&
                     !subTask &&
@@ -120,7 +125,7 @@ export class JiraIssueEffects {
         // TODO refactor to actions
         switchMap(({ jiraCfg, currentTaskOrParent }) => {
           return this._jiraApiService
-            .getReducedIssueById$(currentTaskOrParent.issueId as string, jiraCfg)
+            .getReducedIssueById$(assertTruthy(currentTaskOrParent.issueId), jiraCfg)
             .pipe(
               withLatestFrom(this._jiraApiService.getCurrentUser$(jiraCfg)),
               concatMap(([issue, currentUser]) => {
@@ -214,7 +219,7 @@ export class JiraIssueEffects {
         ofType(updateTask),
         filter(({ task }): boolean => !!task.changes.isDone),
         // NOTE: as this is only a partial object we need to get the full one
-        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         filter((task: Task) => task && task.issueType === JIRA_TYPE),
         concatMap((task: Task) => {
           if (!task.issueProviderId) {
@@ -276,7 +281,10 @@ export class JiraIssueEffects {
           // return throwError({[HANDLED_ERROR_PROP_STR]: 'Jira: No valid transition configured'});
           return timer(2000).pipe(
             concatMap(() =>
-              this._jiraApiService.getReducedIssueById$(task.issueId as string, jiraCfg),
+              this._jiraApiService.getReducedIssueById$(
+                assertTruthy(task.issueId),
+                jiraCfg,
+              ),
             ),
             concatMap((issue: JiraIssueReduced) =>
               this._openTransitionDialog(issue, localState, task),

@@ -14,6 +14,7 @@ import { OpenProjectOriginalStatus } from '../../open-project-api-responses';
 import { OpenProjectApiService } from '../../open-project-api.service';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
   selector: 'dialog-open-project-transition',
@@ -26,7 +27,7 @@ export class DialogOpenProjectTransitionComponent {
 
   _openProjectCfg$: Observable<IssueProviderOpenProject> =
     this._issueProviderService.getCfgOnce$(
-      this.data.task.issueProviderId as string,
+      assertTruthy(this.data.task.issueProviderId),
       'OPEN_PROJECT',
     );
 

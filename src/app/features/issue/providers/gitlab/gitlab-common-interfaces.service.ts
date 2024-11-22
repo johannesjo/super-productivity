@@ -15,6 +15,7 @@ import {
 } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
+import { assertTruthy } from '../../../../util/assert-truthy';
 
 @Injectable({
   providedIn: 'root',
@@ -152,7 +153,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       if (!iidsByProject.has(project)) {
         iidsByProject.set(project, []);
       }
-      iidsByProject.get(project)?.push(task.issueId as string);
+      iidsByProject.get(project)?.push(assertTruthy(task.issueId));
     }
 
     iidsByProject.forEach(async (allIds, project) => {
@@ -162,7 +163,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
             .getByIds$(project, allIds.slice(i, i + paramsCount), cfg)
             .toPromise()
         ).forEach((found) => {
-          issues.set(found.id as string, found);
+          issues.set(assertTruthy(found.id).toString(), found);
         });
       }
     });

@@ -21,6 +21,7 @@ import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-p
 import { concatMap, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -47,7 +48,7 @@ export class DialogOpenProjectTrackTimeComponent {
   timeSpentLoggedDelta: number;
 
   activityId: number = 1;
-  activities$ = this._getCfgOnce$(this.data.task.issueProviderId as string).pipe(
+  activities$ = this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId)).pipe(
     concatMap((cfg) => {
       return this._openProjectApiService.getActivitiesForTrackTime$(
         this.workPackage.id,
@@ -75,7 +76,7 @@ export class DialogOpenProjectTrackTimeComponent {
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
     this.timeLoggedForWorkPackage = parseOpenProjectDuration(
-      this.workPackage.spentTime as string,
+      assertTruthy(this.workPackage.spentTime),
     );
     this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(
@@ -84,7 +85,7 @@ export class DialogOpenProjectTrackTimeComponent {
     );
 
     this._subs.add(
-      this._getCfgOnce$(this.data.task.issueProviderId as string)
+      this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId))
         .pipe(first())
         .subscribe((cfg) => {
           if (cfg.timeTrackingDialogDefaultTime) {

@@ -20,6 +20,7 @@ import { IssueService } from 'src/app/features/issue/issue.service';
 import { T } from 'src/app/t.const';
 import { DialogOpenProjectTransitionComponent } from '../../open-project-view-components/dialog-openproject-transition/dialog-open-project-transition.component';
 import { IssueProviderService } from '../../../../issue-provider.service';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Injectable()
 export class OpenProjectEffects {
@@ -49,7 +50,8 @@ export class OpenProjectEffects {
                   ) {
                     this._openTrackTimeDialog(
                       subTask,
-                      +(mainTask.issueId as string),
+                      // TODO looks fishy???
+                      +assertTruthy(mainTask.issueId),
                       openProjectCfg,
                     );
                   } else if (
@@ -60,7 +62,8 @@ export class OpenProjectEffects {
                   ) {
                     this._openTrackTimeDialog(
                       mainTask,
-                      +(mainTask.issueId as string),
+                      // TODO looks fishy???
+                      +assertTruthy(mainTask.issueId),
                       openProjectCfg,
                     );
                   }
@@ -113,7 +116,7 @@ export class OpenProjectEffects {
         ofType(updateTask),
         filter(({ task }): boolean => !!task.changes.isDone),
         // NOTE: as this is only a partial object we need to get the full one
-        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         filter((task: Task) => task && task.issueType === OPEN_PROJECT_TYPE),
         concatMap((task: Task) => {
           if (!task.issueProviderId) {

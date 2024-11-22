@@ -11,6 +11,7 @@ import { CaldavClientService } from '../caldav-client.service';
 import { CaldavCfg } from '../caldav.model';
 import { updateTask } from '../../../../tasks/store/task.actions';
 import { IssueProviderService } from '../../../issue-provider.service';
+import { assertTruthy } from '../../../../../util/assert-truthy';
 
 @Injectable()
 export class CaldavIssueEffects {
@@ -20,7 +21,7 @@ export class CaldavIssueEffects {
       this._actions$.pipe(
         ofType(updateTask),
         filter(({ task }): boolean => 'isDone' in task.changes),
-        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         filter((task: Task) => task && task.issueType === CALDAV_TYPE),
         concatMap((task: Task) => {
           if (!task.issueProviderId) {
@@ -51,7 +52,7 @@ export class CaldavIssueEffects {
 
   private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
     return this._caldavClientService
-      .updateCompletedState$(caldavCfg, task.issueId as string, task.isDone)
+      .updateCompletedState$(caldavCfg, assertTruthy(task.issueId), task.isDone)
       .pipe(concatMap(() => this._issueService.refreshIssueTask(task, true)));
   }
 }

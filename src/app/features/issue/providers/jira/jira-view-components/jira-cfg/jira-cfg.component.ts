@@ -22,6 +22,7 @@ import { SnackService } from '../../../../../../core/snack/snack.service';
 import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
 import { IssueProviderService } from '../../../../issue-provider.service';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
   selector: 'jira-cfg',
@@ -186,10 +187,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
       this.issueSuggestionsCtrl.setValue('');
       return;
     } else {
-      const issueId = searchResultItem.issueData.id as string;
+      const issueId = assertTruthy(searchResultItem.issueData.id);
       this._subs.add(
         this._jiraApiService
-          .getTransitionsForIssue$(issueId, this.cfg)
+          .getTransitionsForIssue$(issueId.toString(), this.cfg)
           .subscribe((val) => {
             this.partialModelChange({ availableTransitions: val });
             this._snackService.open({

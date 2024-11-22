@@ -33,6 +33,7 @@ import { UiModule } from '../../../../../../ui/ui.module';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
+import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Component({
   selector: 'openproject-cfg',
@@ -166,7 +167,7 @@ export class OpenprojectCfgComponent implements OnInit, OnDestroy {
       this.issueSuggestionsCtrl.setValue('');
       return;
     } else {
-      const issueId = searchResultItem.issueData.id as string;
+      const issueId = assertTruthy(searchResultItem.issueData.id);
       const lockVersion = (searchResultItem.issueData as OpenProjectWorkPackageReduced)
         .lockVersion;
       this._subs.add(

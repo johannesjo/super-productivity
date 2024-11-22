@@ -12,6 +12,7 @@ import { JiraCfg } from './jira.model';
 import { isJiraEnabled } from './is-jira-enabled.util';
 import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
 import { IssueProviderService } from '../../issue-provider.service';
+import { assertTruthy } from '../../../../util/assert-truthy';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +49,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   getById$(issueId: string | number, issueProviderId: string): Observable<JiraIssue> {
     return this._getCfgOnce$(issueProviderId).pipe(
       switchMap((jiraCfg) =>
-        this._jiraApiService.getIssueById$(issueId as string, jiraCfg),
+        this._jiraApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
       ),
     );
   }

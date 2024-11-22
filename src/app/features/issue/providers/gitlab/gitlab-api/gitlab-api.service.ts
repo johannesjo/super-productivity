@@ -33,6 +33,7 @@ import {
 } from '../gitlab-issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
 import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
+import { assertTruthy } from '../../../../../util/assert-truthy';
 
 @Injectable({
   providedIn: 'root',
@@ -465,7 +466,7 @@ export class GitlabApiService {
       projectURL = this.getProject(projectConfig);
     }
 
-    projectURL = (projectURL as string).replace(/\//gi, '%2F');
+    projectURL = assertTruthy(projectURL).toString().replace(/\//gi, '%2F');
 
     if (project || projectConfig.source === 'project') {
       apiURL += 'projects/' + projectURL;

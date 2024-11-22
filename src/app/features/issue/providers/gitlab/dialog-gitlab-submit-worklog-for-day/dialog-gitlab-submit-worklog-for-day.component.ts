@@ -12,6 +12,7 @@ import { Store } from '@ngrx/store';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
 import { updateTask } from '../../../../tasks/store/task.actions';
+import { assertTruthy } from '../../../../../util/assert-truthy';
 
 interface TmpTask {
   id: string;
@@ -37,7 +38,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   tmpTasks$: BehaviorSubject<TmpTask[]> = new BehaviorSubject<TmpTask[]>(
     this.data.tasksForIssueProvider.map((t) => ({
       id: t.id,
-      issueId: t.issueId as string,
+      issueId: assertTruthy(t.issueId),
       title: t.title,
       issueTimeTracked: t.issueTimeTracked,
       timeSpentOnDay: t.timeSpentOnDay,
