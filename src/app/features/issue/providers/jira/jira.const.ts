@@ -141,7 +141,7 @@ const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] =
       type: 'url',
       /* eslint-disable-next-line */
       pattern:
-        /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/i,
+        /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
       required: true,
       label: T.F.JIRA.FORM_CRED.HOST,
     },
