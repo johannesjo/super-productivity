@@ -53,6 +53,7 @@
       </ng-container>
     </help-section>
 
+    @if (isEdit) {
     <div style="margin-bottom: 32px">
       <mat-slide-toggle
         [ngModel]="model.isEnabled"
@@ -62,8 +63,16 @@
         {{ T.G.ENABLED|translate }}
       </mat-slide-toggle>
     </div>
-
+    }
+    <!-- -->
     @if (model.isEnabled) {
+    <!-- -->
+    @if (issueProviderKey === 'JIRA') {
+    <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
+      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
+    </div>
+    }
+
     <formly-form
       [(model)]="model"
       [fields]="fields"

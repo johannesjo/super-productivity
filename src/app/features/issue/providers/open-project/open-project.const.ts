@@ -46,7 +46,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'host',
       type: 'input',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.HOST,
         type: 'text',
@@ -57,7 +57,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'token',
       type: 'input',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.TOKEN,
         required: true,
@@ -66,7 +66,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     },
     {
       type: 'link',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         url: 'https://www.openproject.org/docs/getting-started/my-account/#access-tokens',
         txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
@@ -75,7 +75,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'projectId',
       type: 'input',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.PROJECT_ID,
         type: 'text',
@@ -87,7 +87,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
       key: 'scope',
       type: 'select',
       defaultValue: 'created-by-me',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         required: true,
         label: T.F.OPEN_PROJECT.FORM.SCOPE,
@@ -103,7 +103,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'isSearchIssuesFromOpenProject',
       type: 'checkbox',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.IS_SEARCH_ISSUES_FROM_OPEN_PROJECT,
       },
@@ -111,7 +111,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'isAutoPoll',
       type: 'checkbox',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.IS_AUTO_POLL,
       },
@@ -119,7 +119,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'isAutoAddToBacklog',
       type: 'checkbox',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.IS_AUTO_IMPORT_ISSUES,
       },
@@ -127,7 +127,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
     {
       key: 'isShowTimeTrackingDialog',
       type: 'checkbox',
-      hideExpression: (model: any) => !model.isEnabled,
+
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG,
         description: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION,

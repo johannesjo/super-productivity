@@ -14,7 +14,7 @@ import { FormGroup, FormsModule } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
-import { NgForOf, NgIf } from '@angular/common';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
@@ -33,6 +33,7 @@ import { MatInputModule } from '@angular/material/input';
     OpenProjectAdditionalCfgComponent,
     FormsModule,
     MatInputModule,
+    NgClass,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

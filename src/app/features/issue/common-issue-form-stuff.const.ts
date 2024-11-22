@@ -18,7 +18,9 @@ export const ISSUE_PROVIDER_FF_CREDENTIALS: LimitedFormlyFieldConfig<IssueProvid
   props: {
     tag: 'h3',
     class: 'sub-section-heading-first',
-    text: T.F.JIRA.FORM_SECTION.CREDENTIALS,
+    // TODO add translation
+    // text: T.F.JIRA.FORM_SECTION.CREDENTIALS,
+    text: 'Credentials',
   },
 };
 

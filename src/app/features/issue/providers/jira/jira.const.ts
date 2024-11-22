@@ -132,7 +132,7 @@ export const JIRA_WORK_LOG_EXPORT_CHECKBOXES: {
   },
 ];
 
-export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
+const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
   // ISSUE_PROVIDER_FF_CREDENTIALS,
   {
     key: 'host',
@@ -164,8 +164,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJi
     },
   },
   {
-    type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
+    type: 'link',
     templateOptions: {
       url: 'https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
@@ -194,11 +193,9 @@ export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJi
       label: T.F.JIRA.FORM_CRED.USE_PAT,
     },
   },
-  ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
-  ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
 ];
 
-export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
+const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
   {
     key: 'isAutoPollTickets',
     type: 'checkbox',
@@ -285,25 +282,9 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
     },
   ],
   items: [
-    {
-      type: 'tpl',
-      className: 'tpl',
-      templateOptions: {
-        tag: 'h3',
-        class: 'sub-section-heading',
-        text: T.F.JIRA.FORM_SECTION.CREDENTIALS,
-      },
-    },
     ...JIRA_CREDENTIALS_FORM_CFG,
-    {
-      type: 'tpl',
-      className: 'tpl',
-      templateOptions: {
-        tag: 'h3',
-        class: 'sub-section-heading',
-        text: T.F.JIRA.FORM_SECTION.ADV_CFG,
-      },
-    },
+    ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+    ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
     ...JIRA_ADVANCED_FORM_CFG,
   ],
 };

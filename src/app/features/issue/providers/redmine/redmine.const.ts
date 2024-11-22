@@ -35,7 +35,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'host',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.HOST,
       type: 'text',
@@ -46,7 +46,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'api_key',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.API_KEY,
       required: true,
@@ -56,7 +56,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'projectId',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.PROJECT_ID,
       type: 'text',
@@ -68,7 +68,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
     key: 'scope',
     type: 'select',
     defaultValue: 'assigned-to-me',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       required: true,
       label: T.F.REDMINE.FORM.SCOPE,
@@ -84,7 +84,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'isSearchIssuesFromRedmine',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.IS_SEARCH_ISSUES_FROM_REDMINE,
     },
@@ -92,7 +92,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'isAutoPoll',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.IS_AUTO_POLL,
     },
@@ -100,7 +100,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
+
     templateOptions: {
       label: T.F.REDMINE.FORM.IS_AUTO_IMPORT_ISSUES,
     },

@@ -31,7 +31,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'caldavUrl',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.CALDAV.FORM.CALDAV_URL,
@@ -43,7 +42,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'resourceName',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.CALDAV.FORM.CALDAV_RESOURCE,
@@ -53,7 +51,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'username',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.CALDAV.FORM.CALDAV_USER,
@@ -63,7 +60,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'password',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       type: 'password',
@@ -75,7 +71,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'isSearchIssuesFromCaldav',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_SEARCH_ISSUES_FROM_CALDAV,
     },
@@ -83,7 +78,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'isAutoPoll',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_AUTO_POLL,
     },
@@ -91,7 +85,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_AUTO_IMPORT_ISSUES,
     },
@@ -99,7 +92,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'isTransitionIssuesEnabled',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED,
     },
@@ -107,7 +99,6 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
   {
     key: 'categoryFilter',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.CALDAV.FORM.CALDAV_CATEGORY_FILTER,
       type: 'text',

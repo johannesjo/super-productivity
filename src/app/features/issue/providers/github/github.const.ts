@@ -36,7 +36,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'repo',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.REPO,
       required: true,
@@ -47,7 +46,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'token',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.TOKEN,
       required: true,
@@ -57,7 +55,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   },
   {
     type: 'link',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       url: 'https://github.com/johannesjo/super-productivity/blob/master/docs/github-access-token-instructions.md',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
@@ -68,7 +65,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'isSearchIssuesFromGithub',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB,
     },
@@ -76,7 +72,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'isAutoPoll',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_AUTO_POLL,
     },
@@ -84,7 +79,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_AUTO_IMPORT_ISSUES,
     },
@@ -92,7 +86,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'filterUsername',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.FILTER_USER,
     },
@@ -100,7 +93,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'filterIssuesAssignedToMe',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
     },

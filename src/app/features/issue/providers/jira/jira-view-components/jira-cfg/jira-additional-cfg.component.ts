@@ -93,6 +93,8 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() set cfg(cfg: IssueProviderJira) {
+    console.log('XXXXXXXXXX');
+
     const newCfg: IssueProviderJira = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
     if (isEqual) {

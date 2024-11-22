@@ -35,7 +35,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'host',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.HOST,
       type: 'text',
@@ -46,7 +45,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'token',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.TOKEN,
       required: true,
@@ -55,7 +53,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   },
   {
     type: 'link',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       url: 'https://www.jetbrains.com/help/youtrack/cloud/integration-with-gitea.html#enable-youtrack-integration-gitea',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
@@ -64,7 +61,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'repoFullname',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.REPO_FULL_NAME,
       type: 'text',
@@ -76,7 +72,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
     key: 'scope',
     type: 'select',
     defaultValue: 'created-by-me',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.GITEA.FORM.SCOPE,
@@ -92,7 +87,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'isSearchIssuesFromGitea',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.IS_SEARCH_ISSUES_FROM_GITEA,
     },
@@ -100,7 +94,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'isAutoPoll',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.IS_AUTO_POLL,
     },
@@ -108,7 +101,6 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITEA.FORM.IS_AUTO_IMPORT_ISSUES,
     },

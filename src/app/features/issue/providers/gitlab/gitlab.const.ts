@@ -44,7 +44,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'project',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.GITLAB.FORM.PROJECT,
@@ -55,7 +54,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'token',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.TOKEN,
       type: 'password',
@@ -73,7 +71,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   },
   {
     type: 'link',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       url: 'https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
@@ -83,7 +80,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
     key: 'source',
     type: 'select',
     defaultValue: 'project',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.GITLAB.FORM.SOURCE,
@@ -98,7 +94,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
     key: 'scope',
     type: 'select',
     defaultValue: 'created-by-me',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       required: true,
       label: T.F.GITLAB.FORM.SCOPE,
@@ -112,7 +107,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'gitlabBaseUrl',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
       type: 'text',
@@ -125,7 +119,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'isSearchIssuesFromGitlab',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_SEARCH_ISSUES_FROM_GITLAB,
     },
@@ -133,7 +126,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'isAutoPoll',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_POLL,
     },
@@ -141,7 +133,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.IS_AUTO_IMPORT_ISSUES,
     },
@@ -149,7 +140,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'filterUsername',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.FILTER_USER,
     },
@@ -157,7 +147,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'filter',
     type: 'input',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       type: 'text',
       label: T.F.GITLAB.FORM.FILTER,
@@ -167,7 +156,6 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   {
     key: 'isEnableTimeTracking',
     type: 'checkbox',
-    hideExpression: (model: any) => !model.isEnabled,
     templateOptions: {
       label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
       description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
