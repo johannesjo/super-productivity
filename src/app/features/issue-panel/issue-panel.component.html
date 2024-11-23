@@ -8,25 +8,25 @@
   dynamicHeight="true"
   [selectedIndex]="selectedTabIndex()"
 >
-  @for (issueProvider of issueProviders(); track issueProvider.id) {
+  @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {
   <mat-tab>
     <ng-template mat-tab-label>
       <div
         class="tab-header-item"
-        [class.disabled]="!issueProvider.isEnabled"
-        (longPressIOS)="openEditIssueProvider(issueProvider)"
-        (longPress)="openEditIssueProvider(issueProvider)"
+        [class.disabled]="!entry.issueProvider.isEnabled"
+        (longPressIOS)="openEditIssueProvider(entry.issueProvider)"
+        (longPress)="openEditIssueProvider(entry.issueProvider)"
       >
         <mat-icon
-          [svgIcon]="issueProvider.issueProviderKey|issueIcon"
-          [matTooltip]="getToolTipText(issueProvider)"
+          [svgIcon]="entry.issueProvider.issueProviderKey|issueIcon"
+          [matTooltip]="entry.issueProvider.tooltip"
           matTooltipPosition="above"
         ></mat-icon>
-        <div class="initials">{{ getIssueProviderInitials(issueProvider) }}</div>
+        <div class="initials">{{ entry.initials }}</div>
       </div>
     </ng-template>
     <ng-template matTabContent>
-      <issue-provider-tab [issueProvider]="issueProvider"></issue-provider-tab>
+      <issue-provider-tab [issueProvider]="entry.issueProvider"></issue-provider-tab>
     </ng-template>
   </mat-tab>
   }

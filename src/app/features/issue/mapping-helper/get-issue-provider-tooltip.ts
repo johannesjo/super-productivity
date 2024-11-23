@@ -31,7 +31,7 @@ const getRepoInitials = (repo: string | null): string | undefined => {
   const repoNameParts = repoName?.split('-');
 
   if (!repoNameParts) {
-    return undefined;
+    return repo.substring(0, 2).toUpperCase();
   }
 
   if (repoNameParts.length === 1) {
@@ -47,6 +47,8 @@ const getRepoInitials = (repo: string | null): string | undefined => {
 export const getIssueProviderInitials = (
   issueProvider: IssueProvider,
 ): string | undefined | null => {
+  console.log(issueProvider.issueProviderKey);
+
   switch (issueProvider.issueProviderKey) {
     case 'JIRA':
       return issueProvider.host
@@ -54,8 +56,12 @@ export const getIssueProviderInitials = (
         ?.replace('http://', '')
         ?.substring(0, 2)
         ?.toUpperCase();
-    // case 'CALDAV':
-    //   return issueProvider.resourceName?.substring(0, 2).toUpperCase();
+    case 'CALDAV':
+      return issueProvider.caldavUrl
+        ?.replace('https://', '')
+        ?.replace('http://', '')
+        ?.substring(0, 2)
+        ?.toUpperCase();
     case 'REDMINE':
       return issueProvider.projectId?.substring(0, 2).toUpperCase();
     case 'OPEN_PROJECT':

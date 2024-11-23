@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Signal,
+  signal,
+} from '@angular/core';
 import { IssuePanelIntroComponent } from './issue-panel-intro/issue-panel-intro.component';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
@@ -52,16 +59,23 @@ export class IssuePanelComponent {
   isShowIntro = signal(false);
   issueProviders = toSignal(this._store.select(selectIssueProvidersWithDisabledLast));
 
+  issueProvidersMapped: Signal<
+    {
+      issueProvider: IssueProvider;
+      initials?: string | null;
+      tooltip: string;
+    }[]
+  > = computed(
+    () =>
+      this.issueProviders()?.map((p) => ({
+        issueProvider: p,
+        initials: getIssueProviderInitials(p),
+        tooltip: getIssueProviderTooltip(p),
+      })) || [],
+  );
+
   constructor() {
     this._setSelectedTabIndex();
-  }
-
-  getToolTipText(issueProvider: IssueProvider): string {
-    return getIssueProviderTooltip(issueProvider);
-  }
-
-  getIssueProviderInitials(issueProvider: IssueProvider): string | null | undefined {
-    return getIssueProviderInitials(issueProvider);
   }
 
   openEditIssueProvider(issueProvider: IssueProvider): void {
