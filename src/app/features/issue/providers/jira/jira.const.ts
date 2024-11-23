@@ -2,10 +2,7 @@
 import { JiraCfg, JiraWorklogExportDefaultTime } from './jira.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 import { T } from '../../../../t.const';
-import {
-  ConfigFormSection,
-  LimitedFormlyFieldConfig,
-} from '../../../config/global-config.model';
+import { ConfigFormSection } from '../../../config/global-config.model';
 import { IssueProviderJira } from '../../issue.model';
 import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
 
@@ -127,117 +124,6 @@ export const JIRA_WORK_LOG_EXPORT_CHECKBOXES: {
   },
 ];
 
-const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
-  {
-    key: 'host',
-    type: 'input',
-    templateOptions: {
-      type: 'url',
-      /* eslint-disable-next-line */
-      pattern:
-        /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
-      required: true,
-      label: T.F.JIRA.FORM_CRED.HOST,
-    },
-  },
-  {
-    key: 'userName',
-    type: 'input',
-    templateOptions: {
-      required: true,
-      label: T.F.JIRA.FORM_CRED.USER_NAME,
-    },
-  },
-  {
-    key: 'password',
-    type: 'input',
-    templateOptions: {
-      required: true,
-      label: T.F.JIRA.FORM_CRED.PASSWORD,
-      type: 'password',
-    },
-  },
-  {
-    type: 'link',
-    templateOptions: {
-      url: 'https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
-      txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
-      type: 'url',
-    },
-  },
-  {
-    key: 'isAllowSelfSignedCertificate',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
-    },
-  },
-  {
-    key: 'isWonkyCookieMode',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_CRED.WONKY_COOKIE_MODE,
-    },
-  },
-  {
-    key: 'usePAT',
-    type: 'checkbox',
-    templateOptions: {
-      required: false,
-      label: T.F.JIRA.FORM_CRED.USE_PAT,
-    },
-  },
-];
-
-const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<IssueProviderJira>[] = [
-  {
-    key: 'autoAddBacklogJqlQuery',
-    type: 'input',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.AUTO_ADD_BACKLOG_JQL_QUERY,
-    },
-  },
-  {
-    key: 'searchJqlQuery',
-    type: 'input',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.SEARCH_JQL_QUERY,
-    },
-  },
-  {
-    key: 'isCheckToReAssignTicketOnTaskStart',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START,
-    },
-  },
-  {
-    key: 'isWorklogEnabled',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_WORKLOG_ENABLED,
-    },
-  },
-  {
-    key: 'isAddWorklogOnSubTaskDone',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.IS_ADD_WORKLOG_ON_SUB_TASK_DONE,
-    },
-  },
-  {
-    hideExpression: (model: any) => {
-      return !model.isWorklogEnabled;
-    },
-    key: 'worklogDialogDefaultTime',
-    type: 'select',
-    templateOptions: {
-      label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
-      options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
-    },
-  },
-];
-
 export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
   title: 'Jira',
   key: JIRA_ISSUE_TYPE,
@@ -262,8 +148,121 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
     },
   ],
   items: [
-    ...JIRA_CREDENTIALS_FORM_CFG,
-    ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
-    ...JIRA_ADVANCED_FORM_CFG,
+    {
+      key: 'host',
+      type: 'input',
+      templateOptions: {
+        type: 'url',
+        /* eslint-disable-next-line */
+        pattern:
+          /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
+        required: true,
+        label: T.F.JIRA.FORM_CRED.HOST,
+      },
+    },
+    {
+      key: 'userName',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.F.JIRA.FORM_CRED.USER_NAME,
+      },
+    },
+    {
+      key: 'password',
+      type: 'input',
+      templateOptions: {
+        required: true,
+        label: T.F.JIRA.FORM_CRED.PASSWORD,
+        type: 'password',
+      },
+    },
+    {
+      type: 'link',
+      templateOptions: {
+        url: 'https://confluence.atlassian.com/cloud/api-tokens-938839638.html',
+        txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
+        type: 'url',
+      },
+    },
+
+    {
+      type: 'collapsible',
+      // todo translate
+      props: { label: 'Advanced Config' },
+      fieldGroup: [
+        {
+          key: 'isAllowSelfSignedCertificate',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
+          },
+        },
+        {
+          key: 'isWonkyCookieMode',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_CRED.WONKY_COOKIE_MODE,
+          },
+        },
+        {
+          key: 'usePAT',
+          type: 'checkbox',
+          templateOptions: {
+            required: false,
+            label: T.F.JIRA.FORM_CRED.USE_PAT,
+          },
+        },
+
+        ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+
+        {
+          key: 'autoAddBacklogJqlQuery',
+          type: 'input',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.AUTO_ADD_BACKLOG_JQL_QUERY,
+          },
+        },
+        {
+          key: 'searchJqlQuery',
+          type: 'input',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.SEARCH_JQL_QUERY,
+          },
+        },
+        {
+          key: 'isCheckToReAssignTicketOnTaskStart',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START,
+          },
+        },
+        {
+          key: 'isWorklogEnabled',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.IS_WORKLOG_ENABLED,
+          },
+        },
+        {
+          key: 'isAddWorklogOnSubTaskDone',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.IS_ADD_WORKLOG_ON_SUB_TASK_DONE,
+          },
+        },
+        {
+          hideExpression: (model: any) => {
+            return !model.isWorklogEnabled;
+          },
+          key: 'worklogDialogDefaultTime',
+          type: 'select',
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
+            options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
+          },
+        },
+      ],
+    },
   ],
 };
