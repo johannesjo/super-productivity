@@ -91,41 +91,50 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
         ],
       },
     },
-    ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
     {
-      key: 'isShowTimeTrackingDialog',
-      type: 'checkbox',
+      type: 'collapsible',
+      // todo translate
+      props: { label: 'Advanced Config' },
+      fieldGroup: [
+        ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+        {
+          key: 'isShowTimeTrackingDialog',
+          type: 'checkbox',
 
-      templateOptions: {
-        label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG,
-        description: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION,
-      },
+          templateOptions: {
+            label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG,
+            description: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION,
+          },
+        },
+        {
+          key: 'isShowTimeTrackingDialogForEachSubTask',
+          type: 'checkbox',
+          hideExpression: (model: any) =>
+            !model.isShowTimeTrackingDialog || !model.isEnabled,
+          templateOptions: {
+            label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
+          },
+        },
+        {
+          key: 'timeTrackingDialogDefaultTime',
+          type: 'select',
+          hideExpression: (model: any) =>
+            !model.isShowTimeTrackingDialog || !model.isEnabled,
+          templateOptions: {
+            label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
+            options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
+          },
+        },
+        // TODO also remove translation and model if removing it for good
+        // {
+        //   key: 'filterUsername',
+        //   type: 'input',
+        //   templateOptions: {
+        //     label: T.F.OPEN_PROJECT.FORM.FILTER_USER,
+        //   },
+        // },
+      ],
     },
-    {
-      key: 'isShowTimeTrackingDialogForEachSubTask',
-      type: 'checkbox',
-      hideExpression: (model: any) => !model.isShowTimeTrackingDialog || !model.isEnabled,
-      templateOptions: {
-        label: T.F.OPEN_PROJECT.FORM.IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK,
-      },
-    },
-    {
-      key: 'timeTrackingDialogDefaultTime',
-      type: 'select',
-      hideExpression: (model: any) => !model.isShowTimeTrackingDialog || !model.isEnabled,
-      templateOptions: {
-        label: T.F.JIRA.FORM_ADV.WORKLOG_DEFAULT_TIME_MODE,
-        options: JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
-      },
-    },
-    // TODO also remove translation and model if removing it for good
-    // {
-    //   key: 'filterUsername',
-    //   type: 'input',
-    //   templateOptions: {
-    //     label: T.F.OPEN_PROJECT.FORM.FILTER_USER,
-    //   },
-    // },
   ];
 
 export const OPEN_PROJECT_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderOpenProject> =
