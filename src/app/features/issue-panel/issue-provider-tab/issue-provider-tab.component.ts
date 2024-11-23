@@ -42,6 +42,7 @@ import { ErrorCardComponent } from '../../../ui/error-card/error-card.component'
 import { selectProjectById } from '../../project/store/project.selectors';
 import { HelperClasses } from '../../../app.constants';
 import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
+import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -164,8 +165,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     // this.dropListService.registerDropList(this.dropList!);
-
-    if (this.searchText().length <= 1) {
+    if (this.searchText().length <= 1 && IS_MOUSE_PRIMARY) {
       this._focusTimeout = window.setTimeout(() => {
         this.searchTextEl?.nativeElement.focus();
       }, 500);
