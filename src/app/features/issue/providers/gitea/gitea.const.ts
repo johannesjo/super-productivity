@@ -75,7 +75,12 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
       ],
     },
   },
-  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+  {
+    type: 'collapsible',
+    // todo translate
+    props: { label: 'Advanced Config' },
+    fieldGroup: [...ISSUE_PROVIDER_COMMON_FORM_FIELDS],
+  },
 ];
 
 export const GITEA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGitea> = {

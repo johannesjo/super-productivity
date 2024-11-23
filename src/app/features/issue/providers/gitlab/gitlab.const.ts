@@ -98,39 +98,46 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
     },
   },
   {
-    key: 'gitlabBaseUrl',
-    type: 'input',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
-      type: 'url',
-      pattern:
-        /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
-    },
-  },
-  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
-  {
-    key: 'filterUsername',
-    type: 'input',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.FILTER_USER,
-    },
-  },
-  {
-    key: 'filter',
-    type: 'input',
-    templateOptions: {
-      type: 'text',
-      label: T.F.GITLAB.FORM.FILTER,
-      description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
-    },
-  },
-  {
-    key: 'isEnableTimeTracking',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
-      description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
-    },
+    type: 'collapsible',
+    // todo translate
+    props: { label: 'Advanced Config' },
+    fieldGroup: [
+      {
+        key: 'gitlabBaseUrl',
+        type: 'input',
+        templateOptions: {
+          label: T.F.GITLAB.FORM.GITLAB_BASE_URL,
+          type: 'url',
+          pattern:
+            /^(http(s)?:\/\/)?(localhost|[\w.\-]+(?:\.[\w\.\-]+)+)(:\d+)?(\/[^\s]*)?$/i,
+        },
+      },
+      ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+      {
+        key: 'filterUsername',
+        type: 'input',
+        templateOptions: {
+          label: T.F.GITLAB.FORM.FILTER_USER,
+        },
+      },
+      {
+        key: 'filter',
+        type: 'input',
+        templateOptions: {
+          type: 'text',
+          label: T.F.GITLAB.FORM.FILTER,
+          description: T.F.GITLAB.FORM.FILTER_DESCRIPTION,
+        },
+      },
+      {
+        key: 'isEnableTimeTracking',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
+          description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
+        },
+      },
+    ],
   },
 ];
 

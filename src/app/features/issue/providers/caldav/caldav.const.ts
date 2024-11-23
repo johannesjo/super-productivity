@@ -59,21 +59,29 @@ export const CALDAV_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderCaldav>[]
       label: T.F.CALDAV.FORM.CALDAV_PASSWORD,
     },
   },
-  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+
   {
-    key: 'isTransitionIssuesEnabled',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED,
-    },
-  },
-  {
-    key: 'categoryFilter',
-    type: 'input',
-    templateOptions: {
-      label: T.F.CALDAV.FORM.CALDAV_CATEGORY_FILTER,
-      type: 'text',
-    },
+    type: 'collapsible',
+    // todo translate
+    props: { label: 'Advanced Config' },
+    fieldGroup: [
+      ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+      {
+        key: 'isTransitionIssuesEnabled',
+        type: 'checkbox',
+        templateOptions: {
+          label: T.F.CALDAV.FORM.IS_TRANSITION_ISSUES_ENABLED,
+        },
+      },
+      {
+        key: 'categoryFilter',
+        type: 'input',
+        templateOptions: {
+          label: T.F.CALDAV.FORM.CALDAV_CATEGORY_FILTER,
+          type: 'text',
+        },
+      },
+    ],
   },
 ];
 

@@ -57,6 +57,7 @@ export const ISSUE_PROVIDER_COMMON_FORM_FIELDS: LimitedFormlyFieldConfig<IssuePr
     //   },
     // },
     {
+      // TODO use disabled instead of hideExpression
       hideExpression: (model: any) => !model.defaultProjectId,
       key: 'isAutoAddToBacklog',
       type: 'checkbox',

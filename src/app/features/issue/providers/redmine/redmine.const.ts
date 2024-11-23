@@ -75,7 +75,12 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
       ],
     },
   },
-  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+  {
+    type: 'collapsible',
+    // todo translate
+    props: { label: 'Advanced Config' },
+    fieldGroup: [...ISSUE_PROVIDER_COMMON_FORM_FIELDS],
+  },
 ];
 
 export const REDMINE_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderRedmine> = {
