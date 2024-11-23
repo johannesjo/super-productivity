@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GithubApiService } from './github-api.service';
 import { IssueProviderGithub, SearchResultItem } from '../../issue.model';
@@ -24,22 +24,15 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map(
-        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
-      ),
-    );
-  }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
-  }
-
   isEnabled(cfg: GithubCfg): boolean {
     return isGithubEnabled(cfg);
+  }
+
+  testConnection$(cfg: GithubCfg): Observable<boolean> {
+    return this._githubApiService.searchIssueForRepo$('', cfg).pipe(
+      map((res) => Array.isArray(res)),
+      first(),
+    );
   }
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {

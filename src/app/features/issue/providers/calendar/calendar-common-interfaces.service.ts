@@ -3,6 +3,7 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
+import { CaldavCfg } from '../caldav/caldav.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,18 +13,14 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return true;
   }
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return of(false);
-  }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return of(false);
-  }
-
   pollTimer$: Observable<number> = EMPTY;
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {
     return of('NONE');
+  }
+
+  testConnection$(cfg: CaldavCfg): Observable<boolean> {
+    return of(true);
   }
 
   getById$(id: number, issueProviderId: string): Observable<IssueData> {

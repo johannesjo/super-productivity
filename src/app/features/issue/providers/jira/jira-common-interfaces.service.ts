@@ -25,22 +25,15 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map(
-        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
-      ),
-    );
-  }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
-  }
-
   isEnabled(cfg: JiraCfg): boolean {
     return isJiraEnabled(cfg);
+  }
+
+  testConnection$(cfg: JiraCfg): Observable<boolean> {
+    return this._jiraApiService.issuePicker$('', cfg).pipe(
+      map((res) => Array.isArray(res)),
+      first(),
+    );
   }
 
   // NOTE: we're using the issueKey instead of the real issueId

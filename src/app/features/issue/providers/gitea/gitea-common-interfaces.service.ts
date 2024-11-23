@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -29,25 +29,18 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     private readonly _issueProviderService: IssueProviderService,
   ) {}
 
+  pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
+
   isEnabled(cfg: GiteaCfg): boolean {
     return isGiteaEnabled(cfg);
   }
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map(
-        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
-      ),
+  testConnection$(cfg: GiteaCfg): Observable<boolean> {
+    return this._giteaApiService.searchIssueForRepo$('', cfg).pipe(
+      map((res) => Array.isArray(res)),
+      first(),
     );
   }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
-  }
-
-  pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
 
   issueLink$(issueNumber: string | number, issueProviderId: string): Observable<string> {
     return this._getCfgOnce$(issueProviderId).pipe(

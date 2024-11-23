@@ -74,7 +74,8 @@
     }
 
     <formly-form
-      [(model)]="model"
+      [model]="model"
+      (modelChange)="formlyModelChange($event)"
       [fields]="fields"
       [form]="form"
     ></formly-form>
@@ -108,7 +109,6 @@
       {{ T.G.CANCEL|translate }}
     </button>
 
-    <!-- TODO implement -->
     @if (isEdit) {
     <button
       (click)="remove()"
@@ -119,6 +119,26 @@
       <mat-icon>delete_forever</mat-icon>
       {{ T.G.DELETE|translate }}
     </button>
+    } @else {
+    <!-- -->
+    @if (isConnectionWorks()) {
+    <div class="success-info">
+      <mat-icon>check</mat-icon>
+    </div>
+    } @else {
+    <button
+      (click)="testConnection()"
+      mat-button
+      color="primary"
+      type="button"
+      [disabled]="form.invalid"
+    >
+      <mat-icon>online_prediction</mat-icon>
+      Test
+      <!--      {{ T.G.DELETE|translate }}-->
+    </button>
+    }
+    <!-- -->
     }
     <button
       color="primary"

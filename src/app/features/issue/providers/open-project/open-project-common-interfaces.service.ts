@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { OpenProjectApiService } from './open-project-api.service';
 import { IssueProviderOpenProject, SearchResultItem } from '../../issue.model';
@@ -36,22 +36,15 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     OPEN_PROJECT_POLL_INTERVAL,
   );
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map(
-        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
-      ),
-    );
-  }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
-  }
-
   isEnabled(cfg: OpenProjectCfg): boolean {
     return isOpenProjectEnabled(cfg);
+  }
+
+  testConnection$(cfg: OpenProjectCfg): Observable<boolean> {
+    return this._openProjectApiService.searchIssueForRepo$('', cfg).pipe(
+      map((res) => Array.isArray(res)),
+      first(),
+    );
   }
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {

@@ -128,20 +128,22 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
           tap(() => this.isLoading.set(true)),
 
           switchMap(([searchText, issueProvider]: [string, IssueProvider]) =>
-            this._issueService.searchIssues$(searchText, issueProvider.id).pipe(
-              catchError((e) => {
-                this.error.set(getErrorTxt(e));
-                this.isLoading.set(false);
-                return of(true);
-              }),
-              map((trueOnErrorOrItems) => {
-                if (trueOnErrorOrItems === true) {
-                  return [];
-                }
-                this.error.set(undefined);
-                return trueOnErrorOrItems as SearchResultItem[];
-              }),
-            ),
+            this._issueService
+              .searchIssues$(searchText, issueProvider.id, issueProvider.issueProviderKey)
+              .pipe(
+                catchError((e) => {
+                  this.error.set(getErrorTxt(e));
+                  this.isLoading.set(false);
+                  return of(true);
+                }),
+                map((trueOnErrorOrItems) => {
+                  if (trueOnErrorOrItems === true) {
+                    return [];
+                  }
+                  this.error.set(undefined);
+                  return trueOnErrorOrItems as SearchResultItem[];
+                }),
+              ),
           ),
 
           switchMap((items) =>

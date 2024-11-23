@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { UiModule } from '../../../ui/ui.module';
@@ -21,6 +21,8 @@ import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/ope
 import { nanoid } from 'nanoid';
 import { HelperClasses } from '../../../app.constants';
 import { MatInputModule } from '@angular/material/input';
+import { IssueService } from '../issue.service';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -48,6 +50,7 @@ export class DialogEditIssueProviderComponent {
     issueProviderKey?: IssueProviderKey;
   }>(MAT_DIALOG_DATA);
 
+  isConnectionWorks = signal(false);
   form = new FormGroup({});
 
   issueProviderKey: IssueProviderKey = (this.d.issueProvider?.issueProviderKey ||
@@ -76,6 +79,8 @@ export class DialogEditIssueProviderComponent {
 
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
+  private _issueService = inject(IssueService);
+  private _snackService = inject(SnackService);
 
   submit(isSkipClose = false): void {
     if (this.form.valid) {
@@ -103,6 +108,43 @@ export class DialogEditIssueProviderComponent {
 
   cancel(): void {
     this._matDialogRef.close();
+  }
+
+  formlyModelChange(model: Partial<IssueProvider>): void {
+    this.updateModel(model);
+  }
+
+  customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
+    console.log('customCfgCmpSave()', cfgUpdates);
+    this.updateModel(cfgUpdates);
+  }
+
+  updateModel(model: Partial<IssueProvider>): void {
+    Object.keys(model).forEach((key) => {
+      if (key !== 'isEnabled') {
+        this.model![key] = model[key];
+      }
+    });
+    this.isConnectionWorks.set(false);
+  }
+
+  testConnection(): void {
+    this._issueService
+      .testConnection$(this.model as IssueProvider)
+      .subscribe((isSuccess) => {
+        this.isConnectionWorks.set(isSuccess);
+        if (isSuccess) {
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: 'Connection works!',
+          });
+        } else {
+          this._snackService.open({
+            type: 'ERROR',
+            msg: 'Connection failed',
+          });
+        }
+      });
   }
 
   remove(): void {
@@ -134,15 +176,6 @@ export class DialogEditIssueProviderComponent {
       });
   }
 
-  customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
-    console.log('customCfgCmpSave()', cfgUpdates);
-    Object.keys(cfgUpdates).forEach((key) => {
-      if (key !== 'isEnabled') {
-        this.model![key] = cfgUpdates[key];
-      }
-    });
-  }
-
   changeEnabled(isEnabled: boolean): void {
     // this.model.isEnabled = isEnabled;
     this.model = {
@@ -150,5 +183,6 @@ export class DialogEditIssueProviderComponent {
       isEnabled,
     };
     this.submit(true);
+    this.isConnectionWorks.set(false);
   }
 }

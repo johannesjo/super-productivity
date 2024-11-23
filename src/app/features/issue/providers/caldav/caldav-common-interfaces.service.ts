@@ -6,7 +6,7 @@ import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { concatMap, map, switchMap } from 'rxjs/operators';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
@@ -27,22 +27,15 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
 
   pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map(
-        (cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog && !!cfg.defaultProjectId,
-      ),
-    );
-  }
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
-  }
-
   isEnabled(cfg: CaldavCfg): boolean {
     return isCaldavEnabled(cfg);
+  }
+
+  testConnection$(cfg: CaldavCfg): Observable<boolean> {
+    return this._caldavClientService.searchOpenTasks$('', cfg).pipe(
+      map((res) => Array.isArray(res)),
+      first(),
+    );
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {

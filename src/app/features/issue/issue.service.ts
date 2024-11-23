@@ -26,7 +26,7 @@ import { Task } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
-import { first, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -36,8 +36,6 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
-import { Store } from '@ngrx/store';
-import { selectIssueProviderById } from './store/issue-provider.selectors';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
@@ -86,8 +84,13 @@ export class IssueService {
     private _snackService: SnackService,
     private _translateService: TranslateService,
     private _projectService: ProjectService,
-    private _store: Store,
   ) {}
+
+  testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
+    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection$(
+      issueProviderCfg,
+    );
+  }
 
   getById$(
     issueType: IssueProviderKey,
@@ -110,15 +113,11 @@ export class IssueService {
   searchIssues$(
     searchTerm: string,
     issueProviderId: string,
+    issueProviderKey: IssueProviderKey,
   ): Observable<SearchResultItem[]> {
-    return this._store.select(selectIssueProviderById(issueProviderId, null)).pipe(
-      first(),
-      switchMap((issueProvider) =>
-        this.ISSUE_SERVICE_MAP[issueProvider.issueProviderKey].searchIssues$(
-          searchTerm,
-          issueProvider.id,
-        ),
-      ),
+    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
+      searchTerm,
+      issueProviderId,
     );
   }
 
@@ -128,20 +127,6 @@ export class IssueService {
     issueProviderId: string,
   ): Observable<string> {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, issueProviderId);
-  }
-
-  isAutoImportEnabled$(
-    providerKey: IssueProviderKey,
-    issueProviderId: string,
-  ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isAutoImportEnabled$(issueProviderId);
-  }
-
-  isAutoPollEnabled$(
-    providerKey: IssueProviderKey,
-    issueProviderId: string,
-  ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isAutoPollEnabled$(issueProviderId);
   }
 
   getPollTimer$(providerKey: IssueProviderKey): Observable<number> {

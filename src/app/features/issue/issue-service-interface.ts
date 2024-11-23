@@ -13,9 +13,7 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  isAutoImportEnabled$(issueProviderId: string): Observable<boolean>;
-
-  isAutoPollEnabled$(issueProviderId: string): Observable<boolean>;
+  testConnection$(cfg: IssueIntegrationCfg): Observable<boolean>;
 
   pollTimer$: Observable<number>;
 
