@@ -1,4 +1,4 @@
-import { SearchResultItem } from './issue.model';
+import { SearchResultItem } from '../issue.model';
 
 const ISSUE_DONE_STATE_NAME_GUESSES = ['closed', 'done', 'completed', 'resolved'];
 

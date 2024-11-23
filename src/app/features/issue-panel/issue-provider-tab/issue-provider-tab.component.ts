@@ -19,7 +19,7 @@ import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
 import { NgClass } from '@angular/common';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
-import { getIssueProviderTooltip } from '../../issue/get-issue-provider-tooltip';
+import { getIssueProviderTooltip } from '../../issue/mapping-helper/get-issue-provider-tooltip';
 import { FormsModule } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { IssueService } from '../../issue/issue.service';
@@ -27,7 +27,6 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  filter,
   map,
   switchMap,
   tap,
@@ -43,6 +42,8 @@ import { selectProjectById } from '../../project/store/project.selectors';
 import { HelperClasses } from '../../../app.constants';
 import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
+import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-provider-help-link';
+import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -65,6 +66,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   readonly HelperClasses = HelperClasses;
   readonly T: typeof T = T;
   readonly SEARCH_MIN_LENGTH = 1;
+  readonly ISSUE_PROVIDER_HUMANIZED = ISSUE_PROVIDER_HUMANIZED;
 
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
@@ -78,6 +80,9 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   searchTxt$ = toObservable(this.searchText);
 
   issueProviderTooltip = computed(() => getIssueProviderTooltip(this.issueProvider()));
+  issueProviderHelpLink = computed(() =>
+    getIssueProviderHelpLink(this.issueProvider().issueProviderKey),
+  );
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
   isPinned = computed(
@@ -98,64 +103,69 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
     this.searchTxt$.pipe(
-      filter((searchText) => searchText.length >= this.SEARCH_MIN_LENGTH),
-      debounceTime(300),
-      tap((v) => console.log('searchText1', v)),
+      switchMap((st) => {
+        if (st.length < this.SEARCH_MIN_LENGTH) {
+          return of({ added: [], notAdded: [] });
+        }
+        return of(st).pipe(
+          debounceTime(300),
+          tap((v) => console.log('searchText1', v)),
 
-      switchMap((searchText) => {
-        console.log(searchText);
-        return this.issueProvider$.pipe(
-          distinctUntilChanged((a, b) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { pinnedSearch, ...restA } = a;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { pinnedSearch: pinnedSearchB, ...restB } = b;
-            // return JSON.stringify(restA) === JSON.stringify(restB);
-            return JSON.stringify(restA) === JSON.stringify(restB);
+          switchMap((searchText) => {
+            return this.issueProvider$.pipe(
+              distinctUntilChanged((a, b) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { pinnedSearch, ...restA } = a;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { pinnedSearch: pinnedSearchB, ...restB } = b;
+                // return JSON.stringify(restA) === JSON.stringify(restB);
+                return JSON.stringify(restA) === JSON.stringify(restB);
+              }),
+              map((ip): [string, IssueProvider] => [searchText, ip as any]),
+            );
           }),
-          map((ip): [string, IssueProvider] => [searchText, ip as any]),
+
+          tap(() => this.isLoading.set(true)),
+
+          switchMap(([searchText, issueProvider]: [string, IssueProvider]) =>
+            this._issueService.searchIssues$(searchText, issueProvider.id).pipe(
+              catchError((e) => {
+                this.error.set(getErrorTxt(e));
+                this.isLoading.set(false);
+                return of(true);
+              }),
+              map((trueOnErrorOrItems) => {
+                if (trueOnErrorOrItems === true) {
+                  return [];
+                }
+                this.error.set(undefined);
+                return trueOnErrorOrItems as SearchResultItem[];
+              }),
+            ),
+          ),
+
+          switchMap((items) =>
+            this._store
+              .select(selectAllTaskIssueIdsForIssueProvider(this.issueProvider()))
+              .pipe(
+                map((allIssueIdsForProvider) => {
+                  const added: SearchResultItem[] = [];
+                  const notAdded: SearchResultItem[] = [];
+                  items.forEach((item) => {
+                    if (allIssueIdsForProvider.includes(item.issueData.id.toString())) {
+                      added.push(item);
+                    } else {
+                      notAdded.push(item);
+                    }
+                  });
+                  return { added, notAdded };
+                }),
+              ),
+          ),
+
+          tap(() => this.isLoading.set(false)),
         );
       }),
-
-      tap(() => this.isLoading.set(true)),
-
-      switchMap(([searchText, issueProvider]: [string, IssueProvider]) =>
-        this._issueService.searchIssues$(searchText, issueProvider.id).pipe(
-          catchError((e) => {
-            this.error.set(getErrorTxt(e));
-            this.isLoading.set(false);
-            return of(true);
-          }),
-          map((trueOnErrorOrItems) => {
-            if (trueOnErrorOrItems === true) {
-              return [];
-            }
-            this.error.set(undefined);
-            return trueOnErrorOrItems as SearchResultItem[];
-          }),
-        ),
-      ),
-
-      switchMap((items) =>
-        this._store
-          .select(selectAllTaskIssueIdsForIssueProvider(this.issueProvider()))
-          .pipe(
-            map((allIssueIdsForProvider) => {
-              const added: SearchResultItem[] = [];
-              const notAdded: SearchResultItem[] = [];
-              items.forEach((item) => {
-                if (allIssueIdsForProvider.includes(item.issueData.id.toString())) {
-                  added.push(item);
-                } else {
-                  notAdded.push(item);
-                }
-              });
-              return { added, notAdded };
-            }),
-          ),
-      ),
-
-      tap(() => this.isLoading.set(false)),
     );
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 

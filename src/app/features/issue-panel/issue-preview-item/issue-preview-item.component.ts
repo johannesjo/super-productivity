@@ -8,7 +8,7 @@ import {
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SearchResultItem } from '../../issue/issue.model';
-import { isIssueDone } from '../../issue/is-issue-done';
+import { isIssueDone } from '../../issue/mapping-helper/is-issue-done';
 
 @Component({
   selector: 'issue-preview-item',

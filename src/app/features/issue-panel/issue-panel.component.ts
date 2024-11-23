@@ -12,7 +12,7 @@ import { IssueProvider } from '../issue/issue.model';
 import {
   getIssueProviderInitials,
   getIssueProviderTooltip,
-} from '../issue/get-issue-provider-tooltip';
+} from '../issue/mapping-helper/get-issue-provider-tooltip';
 import { MatDialog } from '@angular/material/dialog';
 
 import { UiModule } from '../../ui/ui.module';

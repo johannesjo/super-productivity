@@ -1,4 +1,4 @@
-import { IssueProvider } from './issue.model';
+import { IssueProvider } from '../issue.model';
 
 export const getIssueProviderTooltip = (issueProvider: IssueProvider): string => {
   const v = (() => {
