@@ -57,13 +57,15 @@ export const ISSUE_PROVIDER_COMMON_FORM_FIELDS: LimitedFormlyFieldConfig<IssuePr
     //   },
     // },
     {
-      // TODO use disabled instead of hideExpression
-      hideExpression: (model: any) => !model.defaultProjectId,
       key: 'isAutoAddToBacklog',
       type: 'checkbox',
+      expressions: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'props.disabled': '!model.defaultProjectId',
+      },
       props: {
         // label: T.F.CALDAV.FORM.IS_AUTO_IMPORT_ISSUES,
-        label: 'Auto import to default project',
+        label: 'Auto import to default project (requires default project)',
       },
     },
     {
