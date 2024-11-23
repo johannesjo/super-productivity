@@ -69,6 +69,11 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
       {
         key: 'filterIssuesAssignedToMe',
         type: 'checkbox',
+        expressions: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // 'props.disabled': '!model.filterUsername',
+          hide: '!model.filterUsername',
+        },
         props: {
           label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
         },
