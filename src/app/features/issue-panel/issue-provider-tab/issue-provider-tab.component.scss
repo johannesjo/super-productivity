@@ -9,6 +9,7 @@
   flex-grow: 1;
   max-width: 100%;
   min-width: 260px;
+  overflow: hidden;
 }
 
 header {
@@ -45,6 +46,7 @@ header {
   gap: 8px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .spinner {
