@@ -64,6 +64,7 @@ import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
 export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   readonly HelperClasses = HelperClasses;
   readonly T: typeof T = T;
+  readonly SEARCH_MIN_LENGTH = 1;
 
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
@@ -97,7 +98,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   // TODO add caching in sessionStorage
   issueItems$: Observable<{ added: SearchResultItem[]; notAdded: SearchResultItem[] }> =
     this.searchTxt$.pipe(
-      filter((searchText) => searchText.length >= 1),
+      filter((searchText) => searchText.length >= this.SEARCH_MIN_LENGTH),
       debounceTime(300),
       tap((v) => console.log('searchText1', v)),
 

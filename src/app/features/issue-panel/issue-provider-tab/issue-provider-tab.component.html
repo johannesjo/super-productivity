@@ -57,7 +57,8 @@
       (click)="unPinSearch()"
       [matTooltip]="'Clear pinned search query'"
     ></mat-icon>
-    } @else {
+    } @else if(issueProvider()?.pinnedSearch?.length||searchText()?.length >=
+    SEARCH_MIN_LENGTH) {
     <mat-icon
       class="keep-ico"
       matSuffix
