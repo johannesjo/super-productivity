@@ -393,7 +393,7 @@ export class IssueService {
 
     const { title = null, ...additionalFromProviderIssueService } =
       this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
-    console.log({ title });
+    console.log({ title, additionalFromProviderIssueService });
 
     const taskId = this._taskService.add(title, isAddToBackLog, {
       issueType: issueProviderKey,

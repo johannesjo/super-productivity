@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { IssuePreviewItemComponent } from './issue-preview-item/issue-preview-item.component';
+import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { UiModule } from '../../../ui/ui.module';

@@ -85,10 +85,30 @@ export type IssueDataReduced =
   | GiteaIssue
   | RedmineIssue;
 
-export interface SearchResultItem {
+export type IssueDataReducedMap = {
+  [K in IssueProviderKey]: K extends 'JIRA'
+    ? JiraIssueReduced
+    : K extends 'GITHUB'
+      ? GithubIssueReduced
+      : K extends 'GITLAB'
+        ? GitlabIssue
+        : K extends 'CALDAV'
+          ? CaldavIssueReduced
+          : K extends 'OPEN_PROJECT'
+            ? OpenProjectWorkPackageReduced
+            : K extends 'GITEA'
+              ? GiteaIssue
+              : K extends 'REDMINE'
+                ? RedmineIssue
+                : never;
+};
+
+export interface SearchResultItem<
+  T extends keyof IssueDataReducedMap = keyof IssueDataReducedMap,
+> {
   title: string;
-  issueType: IssueProviderKey;
-  issueData: IssueDataReduced;
+  issueType: T;
+  issueData: IssueDataReducedMap[T];
   titleHighlighted?: string;
 }
 
