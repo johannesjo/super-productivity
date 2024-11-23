@@ -24,16 +24,16 @@ import { IssueProvider } from './issue.model';
 //   },
 // };
 
-const ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER: LimitedFormlyFieldConfig<IssueProvider> =
-  {
-    type: 'tpl',
-    className: 'tpl',
-    props: {
-      tag: 'h3',
-      class: 'sub-section-heading',
-      text: T.F.JIRA.FORM_SECTION.ADV_CFG,
-    },
-  };
+// const ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER: LimitedFormlyFieldConfig<IssueProvider> =
+//   {
+//     type: 'tpl',
+//     className: 'tpl',
+//     props: {
+//       tag: 'h3',
+//       class: 'sub-section-heading',
+//       text: T.F.JIRA.FORM_SECTION.ADV_CFG,
+//     },
+//   };
 
 const ISSUE_PROVIDER_FF_DEFAULT_PROJECT: LimitedFormlyFieldConfig<IssueProvider> = {
   key: 'defaultProjectId',
@@ -47,7 +47,7 @@ const ISSUE_PROVIDER_FF_DEFAULT_PROJECT: LimitedFormlyFieldConfig<IssueProvider>
 
 export const ISSUE_PROVIDER_COMMON_FORM_FIELDS: LimitedFormlyFieldConfig<IssueProvider>[] =
   [
-    ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
+    // ISSUE_PROVIDER_FF_ADVANCED_SETTINGS_HEADER,
     ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
     // {
     //   key: 'isIntegratedAddTaskBar',

@@ -29,7 +29,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'repo',
     type: 'input',
-    templateOptions: {
+    props: {
       label: T.F.GITHUB.FORM.REPO,
       required: true,
       type: 'text',
@@ -39,7 +39,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   {
     key: 'token',
     type: 'input',
-    templateOptions: {
+    props: {
       label: T.F.GITHUB.FORM.TOKEN,
       required: true,
       description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
@@ -48,25 +48,32 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
   },
   {
     type: 'link',
-    templateOptions: {
+    props: {
       url: 'https://github.com/johannesjo/super-productivity/blob/master/docs/github-access-token-instructions.md',
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
-  ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
   {
-    key: 'filterUsername',
-    type: 'input',
-    templateOptions: {
-      label: T.F.GITHUB.FORM.FILTER_USER,
-    },
-  },
-  {
-    key: 'filterIssuesAssignedToMe',
-    type: 'checkbox',
-    templateOptions: {
-      label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
-    },
+    type: 'collapsible',
+    // todo translate
+    props: { label: 'Advanced Config' },
+    fieldGroup: [
+      ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+      {
+        key: 'filterUsername',
+        type: 'input',
+        props: {
+          label: T.F.GITHUB.FORM.FILTER_USER,
+        },
+      },
+      {
+        key: 'filterIssuesAssignedToMe',
+        type: 'checkbox',
+        props: {
+          label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
+        },
+      },
+    ],
   },
 ];
 

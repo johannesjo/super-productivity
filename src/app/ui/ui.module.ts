@@ -88,6 +88,7 @@ import { markedOptionsFactory } from './marked-options-factory';
 
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 import { LocalDateStrPipe } from './pipes/local-date-str.pipe';
+import { FormlyCollapsibleComponent } from './formly-collapsible/formly-collapsible.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -103,6 +104,7 @@ const COMPONENT_AND_PIPES = [
   DurationToStringPipe,
   EnlargeImgDirective,
   FormlyTranslatedTemplateComponent,
+  FormlyCollapsibleComponent,
   FullPageSpinnerComponent,
   HelpSectionComponent,
   HumanizeTimestampPipe,
@@ -193,6 +195,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
           name: 'tpl',
           component: FormlyTranslatedTemplateComponent,
         },
+        { name: 'collapsible', component: FormlyCollapsibleComponent, wrappers: [] },
       ],
       extras: {
         immutable: true,

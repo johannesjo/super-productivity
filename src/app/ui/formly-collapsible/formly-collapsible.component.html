@@ -1,0 +1,46 @@
+<!--<div>-->
+<!--  <button-->
+<!--    type="button"-->
+<!--    (click)="toggle()"-->
+<!--  >-->
+<!--    {{ to.label }}-->
+<!--  </button>-->
+
+<!--  @if(isVisible()) {-->
+<!--  <div style="border: 1px solid red">-->
+<!--    @for (field of field.fieldGroup; track field.id) {-->
+<!--    <formly-field [field]="field"></formly-field>-->
+<!--    }-->
+<!--  </div>-->
+<!--  }-->
+<!--</div>-->
+
+<!--<collapsible-->
+<!--  [isIconBefore]="true"-->
+<!--  [title]="to.label|translate"-->
+<!--&gt;-->
+<!--  <div style="border: 1px solid red">-->
+<!--    @for (field of field.fieldGroup; track field.id) {-->
+<!--    <formly-field [field]="field"></formly-field>-->
+<!--    }-->
+<!--  </div>-->
+<!--</collapsible>-->
+
+<div
+  (click)="toggle();"
+  class="collapsible-header"
+>
+  <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
+
+  <div class="collapsible-title">{{to.label|translate}}</div>
+</div>
+
+<div
+  *ngIf="isExpanded()"
+  class="collapsible-panel ani-expand-collapse"
+  [@expand]
+>
+  @for (field of field.fieldGroup; track field.id) {
+  <formly-field [field]="field"></formly-field>
+  }
+</div>
