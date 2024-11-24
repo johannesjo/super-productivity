@@ -118,6 +118,8 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
         type: 'input',
         templateOptions: {
           label: T.F.GITLAB.FORM.FILTER_USER,
+          description:
+            'To filter out comments and other changes by yourself when polling for issue updates',
         },
       },
       {

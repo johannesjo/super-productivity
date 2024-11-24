@@ -171,6 +171,7 @@ function _addIssueProvidersForProject(data: AppDataComplete, project: Project): 
       count++;
       const issueProvider = {
         ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
+        ...DEFAULT_ISSUE_PROVIDER_CFGS[key as IssueProviderKey],
         issueProviderKey: key,
         migratedFromProjectId: project.id,
         defaultProjectId: project.id,

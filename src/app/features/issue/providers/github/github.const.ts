@@ -12,8 +12,8 @@ export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isEnabled: false,
   repo: null,
   token: null,
-  filterUsername: null,
-  filterIssuesAssignedToMe: false,
+  filterUsernameForIssueUpdates: null,
+  backlogQuery: 'sort:updated state:open assignee:@me',
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -42,7 +42,6 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
     props: {
       label: T.F.GITHUB.FORM.TOKEN,
       required: true,
-      description: T.F.GITHUB.FORM.TOKEN_DESCRIPTION,
       type: 'password',
     },
   },
@@ -60,23 +59,36 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
     fieldGroup: [
       ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
       {
-        key: 'filterUsername',
+        key: 'filterUsernameForIssueUpdates',
         type: 'input',
-        props: {
-          label: T.F.GITHUB.FORM.FILTER_USER,
-        },
-      },
-      {
-        key: 'filterIssuesAssignedToMe',
-        type: 'checkbox',
         expressions: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           // 'props.disabled': '!model.filterUsername',
-          hide: '!model.filterUsername',
+          hide: '!model.isAutoPoll',
         },
         props: {
-          label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
+          label: T.F.GITHUB.FORM.FILTER_USER,
+          // description: T.F.GITHUB.FORM.FILTER_USER_DESCRIPTION,
+          // todo translate
+          description:
+            'To filter out comments and other changes by yourself when polling for issue updates',
         },
+      },
+      {
+        key: 'backlogQuery',
+        type: 'input',
+        expressions: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // 'props.disabled': '!model.filterUsername',
+          hide: '!model.isAutoAddToBacklog || !model.defaultProjectId',
+        },
+        props: {
+          // label: T.F.GITHUB.FORM.IS_ASSIGNEE_FILTER,
+          // TODO translate
+          label: 'Search query to use for importing to backlog',
+          defaultValue: DEFAULT_GITHUB_CFG.backlogQuery,
+        },
+        resetOnHide: false,
       },
     ],
   },

@@ -123,7 +123,7 @@ export interface IssueProviderState extends EntityState<IssueProvider> {
 
 // export type IssueProviderState = EntityState<IssueProvider>;
 
-export interface IssueProviderBase {
+export interface IssueProviderBase extends BaseIssueProviderCfg {
   id: string;
   isEnabled: boolean;
   issueProviderKey: IssueProviderKey;

@@ -247,8 +247,7 @@
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "REPO": "username/repositoryName",
         "TOKEN": "Access Token",
-        "TOKEN_DESCRIPTION": "Required for private repository access",
-        "IS_ASSIGNEE_FILTER": "Filter Issues Assigned to Me"
+        "IS_ASSIGNEE_FILTER": "Only import issues assigned to me to backlog"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
@@ -285,7 +284,7 @@
         "TOTAL_MSG": "You will submit <em>{{totalTimeToSubmit}}</em> work time for today in total to <em>{{nrOfTasksToSubmit}}</em> different issues."
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "FILTER_USER": "Filter username",
         "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
         "PROJECT": "(default) project ID or user name/project",
         "SCOPE": "Scope",
@@ -585,7 +584,7 @@
         "UPDATE_STATUS": "Update Status"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "FILTER_USER": "Filter username",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",

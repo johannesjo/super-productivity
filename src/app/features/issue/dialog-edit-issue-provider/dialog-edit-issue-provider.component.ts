@@ -61,8 +61,8 @@ export class DialogEditIssueProviderComponent {
   model: Partial<IssueProvider> = this.isEdit
     ? { ...this.issueProvider }
     : {
-        ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
         ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
+        ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
         id: nanoid(),
         isEnabled: true,
         issueProviderKey: this.issueProviderKey,

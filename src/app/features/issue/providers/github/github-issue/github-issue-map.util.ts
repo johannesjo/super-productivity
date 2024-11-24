@@ -1,6 +1,6 @@
 import { GithubIssue, GithubIssueReduced } from './github-issue.model';
 import { GithubOriginalIssue } from '../github-api-responses';
-import { IssueProviderKey, SearchResultItem } from '../../../issue.model';
+import { SearchResultItem } from '../../../issue.model';
 
 export const mapGithubIssue = (issue: GithubOriginalIssue): GithubIssue => {
   return {
@@ -52,10 +52,12 @@ export const mapGithubReducedIssueFromGraphQL = ({ node }: any): GithubIssueRedu
   };
 };
 
-export const mapGithubIssueToSearchResult = (issue: GithubIssue): SearchResultItem => {
+export const mapGithubIssueToSearchResult = (
+  issue: GithubIssueReduced,
+): SearchResultItem<'GITHUB'> => {
   return {
     title: '#' + issue.number + ' ' + issue.title,
-    issueType: 'GITHUB' as IssueProviderKey,
+    issueType: 'GITHUB',
     issueData: issue,
   };
 };

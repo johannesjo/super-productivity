@@ -76,11 +76,14 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     const issue = await this._githubApiService.getById$(+task.issueId, cfg).toPromise();
 
     // NOTE we are not able to filter out user updates to the issue itself by the user
-    const filterUserName = cfg.filterUsername && cfg.filterUsername.toLowerCase();
+    const filterUserName =
+      cfg.filterUsernameForIssueUpdates &&
+      cfg.filterUsernameForIssueUpdates.toLowerCase();
     const commentsByOthers =
       filterUserName && filterUserName.length > 1
         ? issue.comments.filter(
-            (comment) => comment.user.login.toLowerCase() !== cfg.filterUsername,
+            (comment) =>
+              comment.user.login.toLowerCase() !== cfg.filterUsernameForIssueUpdates,
           )
         : issue.comments;
 
@@ -137,12 +140,14 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     allExistingIssueIds: number[] | string[],
   ): Promise<GithubIssueReduced[]> {
     const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
-    if (!cfg.token) {
-      return await this._githubApiService.getLast100IssuesForRepo$(cfg).toPromise();
-    }
     return await this._githubApiService
-      .getImportToBacklogIssuesFromGraphQL(cfg)
+      .searchIssueForRepoNoMap$(cfg.backlogQuery || 'sort:updated state:open', cfg)
+      .pipe(first())
       .toPromise();
+
+    // .map((issue) => issue.issueData as GithubIssueReduced)
+
+    // .filter((issue) => allExistingIssueIds.includes(issue.issueData.id as string));
   }
 
   getAddTaskData(issue: GithubIssueReduced): Partial<Task> & { title: string } {
