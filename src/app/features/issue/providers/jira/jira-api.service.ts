@@ -407,6 +407,17 @@ export class JiraApiService {
     transform: any,
     jiraCfg: JiraCfg,
   ): Observable<any> {
+    if (!this._isExtension) {
+      return fromPromise(
+        fetch(url, requestInit)
+          .then((response) => response.body)
+          .then(streamToJson as any)
+          .then((res) =>
+            transform ? transform({ response: res }, jiraCfg) : { response: res },
+          ),
+      );
+    }
+
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -426,12 +437,7 @@ export class JiraApiService {
     });
 
     const requestToSend = { requestId, requestInit, url };
-    if (IS_ELECTRON) {
-      window.ea.makeJiraRequest({
-        ...requestToSend,
-        jiraCfg,
-      });
-    } else if (this._isExtension) {
+    if (this._isExtension) {
       this._chromeExtensionInterfaceService.dispatchEvent(
         'SP_JIRA_REQUEST',
         requestToSend,
@@ -617,4 +623,29 @@ export class JiraApiService {
     }
     throw new Error('Jira: btoo not supported');
   }
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+async function streamToString(stream: ReadableStream): Promise<string> {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+  let done = false;
+
+  while (!done) {
+    const { value, done: doneReading } = await reader.read();
+    done = doneReading;
+    if (value) {
+      result += decoder.decode(value, { stream: true });
+    }
+  }
+
+  result += decoder.decode(); // flush the decoder
+  return result;
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+async function streamToJson(stream: ReadableStream): Promise<any> {
+  const text = await streamToString(stream);
+  return JSON.parse(text);
 }
