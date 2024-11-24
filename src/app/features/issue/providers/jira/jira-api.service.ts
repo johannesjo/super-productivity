@@ -127,14 +127,41 @@ export class JiraApiService {
           showSubTasks: true,
           showSubTaskParent: true,
           query: searchStr,
-          currentJQL: cfg.searchJqlQuery,
+          currentJQL: cfg.searchJqlQuery || '',
         },
         transform: mapToSearchResults,
         // NOTE: we pass the cfg as well to avoid race conditions
       },
       cfg,
-    });
+    })
+      .pipe
+      // switchMap((res) =>
+      //   res.length > 0 ? of(res) : this.fallBackSearch$(searchTerm, cfg),
+      // ),
+      ();
   }
+
+  // fallBackSearch$(searchTerm: string, cfg: JiraCfg): Observable<SearchResultItem[]> {
+  //   const options = {
+  //     maxResults: JIRA_MAX_RESULTS,
+  //     fields: [
+  //       ...JIRA_ADDITIONAL_ISSUE_FIELDS,
+  //       ...(cfg.storyPointFieldId ? [cfg.storyPointFieldId] : []),
+  //     ],
+  //   };
+  //   return this._sendRequest$({
+  //     jiraReqCfg: {
+  //       transform: mapIssuesResponse as (res: any, cfg?: JiraCfg) => any,
+  //       pathname: 'search',
+  //       method: 'POST',
+  //       body: {
+  //         ...options,
+  //         jql: searchTerm,
+  //       },
+  //     },
+  //     cfg,
+  //   });
+  // }
 
   listFields$(cfg: JiraCfg): Observable<any> {
     return this._sendRequest$({
