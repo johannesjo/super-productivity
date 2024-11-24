@@ -39,6 +39,7 @@ jobs:
         run: npm i
 
       - run: npm run lint
+      - run: npm run lint:scss:ci
       - run: npm run test
       - run: npm run e2e
       - name: Upload performance metrics as an artifact
