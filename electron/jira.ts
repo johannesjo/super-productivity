@@ -39,6 +39,9 @@ export const sendJiraRequest = ({
         try {
           log(JSON.stringify(response));
         } catch (e) {}
+        response.text().then((text: any) => {
+          log('JIRA ERR RES TEXT', text);
+        });
         throw Error(response.statusText);
       }
       return response;
