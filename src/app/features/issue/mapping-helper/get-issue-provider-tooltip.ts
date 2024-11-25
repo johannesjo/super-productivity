@@ -47,8 +47,6 @@ const getRepoInitials = (repo: string | null): string | undefined => {
 export const getIssueProviderInitials = (
   issueProvider: IssueProvider,
 ): string | undefined | null => {
-  console.log(issueProvider.issueProviderKey);
-
   switch (issueProvider.issueProviderKey) {
     case 'JIRA':
       return issueProvider.host
