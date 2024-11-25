@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -9,6 +10,8 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SearchResultItem } from '../../issue/issue.model';
 import { isIssueDone } from '../../issue/mapping-helper/is-issue-done';
+import { IssueService } from '../../issue/issue.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'issue-preview-item',
@@ -23,9 +26,24 @@ import { isIssueDone } from '../../issue/mapping-helper/is-issue-done';
   },
 })
 export class IssuePreviewItemComponent {
+  private _issueService = inject(IssueService);
+
+  issueProviderId = input.required<string>();
   itemData = input.required<SearchResultItem>();
   addIssue = output<SearchResultItem>();
   isIssueDone = computed(() => {
     return isIssueDone(this.itemData());
   });
+
+  async openIssue(): Promise<void> {
+    const url = await this._issueService
+      .issueLink$(
+        this.itemData().issueType,
+        this.itemData().issueData.id,
+        this.issueProviderId(),
+      )
+      .pipe(first())
+      .toPromise();
+    window.open(url, '_blank');
+  }
 }
