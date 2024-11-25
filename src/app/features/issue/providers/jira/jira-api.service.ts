@@ -438,7 +438,7 @@ export class JiraApiService {
       return fromPromise(
         fetch(url, requestInit)
           .then((response) => response.body)
-          .then(streamToJson as any)
+          .then(streamToJsonIfPossible as any)
           .then((res) =>
             transform ? transform({ response: res }, jiraCfg) : { response: res },
           ),
@@ -672,7 +672,12 @@ async function streamToString(stream: ReadableStream): Promise<string> {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-async function streamToJson(stream: ReadableStream): Promise<any> {
+async function streamToJsonIfPossible(stream: ReadableStream): Promise<any> {
   const text = await streamToString(stream);
-  return JSON.parse(text);
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('Jira: Could not parse response', text);
+    return text;
+  }
 }
