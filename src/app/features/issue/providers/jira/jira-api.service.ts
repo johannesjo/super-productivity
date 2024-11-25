@@ -33,6 +33,7 @@ import {
   mapTo,
   shareReplay,
   take,
+  timeoutWith,
 } from 'rxjs/operators';
 import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
 import moment from 'moment';
@@ -84,7 +85,11 @@ export class JiraApiService {
   private _isExtension: boolean = false;
   private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
     ? of(true).pipe()
-    : this._chromeExtensionInterfaceService.onReady$.pipe(mapTo(true), shareReplay(1));
+    : this._chromeExtensionInterfaceService.onReady$.pipe(
+        mapTo(true),
+        shareReplay(1),
+        timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
+      );
 
   constructor(
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
