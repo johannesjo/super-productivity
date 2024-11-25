@@ -28,10 +28,31 @@ import { dedupeByKey } from '../../../../../util/de-dupe-by-key';
 import { JIRA_TYPE } from '../../../issue.const';
 
 export const mapToSearchResults = (res: any): SearchResultItem[] => {
+  console.log(res);
+
   const issues = dedupeByKey(
     res.response.sections.map((sec: any) => sec.issues).flat(),
     'key',
   ).map((issue: any) => {
+    return {
+      title: issue.key + ' ' + issue.summaryText,
+      titleHighlighted: issue.key + ' ' + issue.summary,
+      issueType: JIRA_TYPE as IssueProviderKey,
+      issueData: {
+        ...issue,
+        summary: issue.summaryText,
+        // NOTE: we always use the key, because it allows us to create the right link
+        id: issue.key,
+      },
+    };
+  });
+  return issues;
+};
+
+export const mapToSearchResultsForJQL = (res: any): SearchResultItem[] => {
+  console.log(res);
+
+  const issues = dedupeByKey(res.response.issues, 'key').map((issue: any) => {
     return {
       title: issue.key + ' ' + issue.summaryText,
       titleHighlighted: issue.key + ' ' + issue.summary,

@@ -12,6 +12,7 @@ import {
   mapIssuesResponse,
   mapResponse,
   mapToSearchResults,
+  mapToSearchResultsForJQL,
   mapTransitionResponse,
 } from './jira-issue/jira-issue-map.util';
 import {
@@ -134,7 +135,7 @@ export class JiraApiService {
           //   ...(cfg.storyPointFieldId ? [cfg.storyPointFieldId] : []),
           // ],
         },
-        transform: mapToSearchResults,
+        transform: mapToSearchResultsForJQL,
         // NOTE: we pass the cfg as well to avoid race conditions
       },
       cfg,
