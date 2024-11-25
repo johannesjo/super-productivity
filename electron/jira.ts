@@ -32,17 +32,21 @@ export const sendJiraRequest = ({
         }
       : {}),
   } as RequestInit)
-    .then((response: any) => {
+    .then(async (response: any) => {
       // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
         error('Jira Error Error Response ELECTRON: ', response);
         try {
           log(JSON.stringify(response));
         } catch (e) {}
-        response.text().then((text: any) => {
-          log('JIRA ERR RES TEXT', text);
-        });
-        throw Error(response.statusText);
+
+        let errText;
+        try {
+          errText = await response.text();
+        } catch (e2) {
+          throw Error(response.statusText);
+        }
+        throw Error(errText || response.statusText);
       }
       return response;
     })
