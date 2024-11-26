@@ -81,7 +81,7 @@ export const createWindow = ({
     webPreferences: {
       scrollBounce: true,
       backgroundThrottling: false,
-      webSecurity: true,
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       // make remote module work with those two settings
