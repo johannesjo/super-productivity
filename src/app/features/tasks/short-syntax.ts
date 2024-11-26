@@ -287,7 +287,21 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
         title: task.title.replace(`@${inputDate}`, ''),
       };
     }
+
+    const simpleMatch = rr[0].match(/\d+/);
+    if (simpleMatch && simpleMatch[0] && typeof +simpleMatch[0] === 'number') {
+      const nr = +simpleMatch[0];
+      if (nr <= 24) {
+        const plannedAt = new Date();
+        plannedAt.setHours(nr, 0, 0, 0);
+        return {
+          plannedAt: plannedAt.getTime(),
+          title: task.title.replace(`@${nr}`, ''),
+        };
+      }
+    }
   }
+
   return {};
 };
 
