@@ -156,7 +156,7 @@
     "chai": "^5.1.1",
     "chart.js": "^4.4.3",
     "chromedriver": "^130.0.4",
-    "chrono-node": "^2.7.6",
+    "chrono-node": "^2.7.7",
     "clipboard": "^2.0.8",
     "conventional-changelog-cli": "^4.1.0",
     "core-js": "^3.39.0",
