@@ -287,8 +287,9 @@ const appCloseHandler = (app: App): void => {
 
 const appMinimizeHandler = (app: App): void => {
   if (!(app as any).isQuiting) {
-    // TOOD better handling for weird typing issue??
-    mainWin.on('minimize' as any, (event: Event) => {
+    // TODO find reason for the typing error
+    // @ts-ignore
+    mainWin.on('minimize', (event: Event) => {
       getSettings(mainWin, (appCfg: GlobalConfigState) => {
         if (appCfg.misc.isMinimizeToTray) {
           event.preventDefault();
