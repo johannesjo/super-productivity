@@ -43,6 +43,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   @Input() isShowClose?: boolean;
   @Input() projectId?: string | null;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() cancel: EventEmitter<void> = new EventEmitter();
 
   T: typeof T = T;
