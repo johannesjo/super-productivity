@@ -54,3 +54,9 @@ $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
   // needs to be important to overwrite inside mat option
   margin-right: 3px !important;
 }
+
+ngx-emoji.tag-ico {
+  position: relative;
+  top: -1px;
+  left: -2px;
+}
