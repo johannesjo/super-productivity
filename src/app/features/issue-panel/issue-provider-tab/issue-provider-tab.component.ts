@@ -105,12 +105,11 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     this.searchTxt$.pipe(
       switchMap((st) => {
         if (st.length < this.SEARCH_MIN_LENGTH) {
+          this.isLoading.set(false);
           return of({ added: [], notAdded: [] });
         }
         return of(st).pipe(
-          debounceTime(300),
-          tap((v) => console.log('searchText1', v)),
-
+          debounceTime(400),
           switchMap((searchText) => {
             return this.issueProvider$.pipe(
               distinctUntilChanged((a, b) => {
