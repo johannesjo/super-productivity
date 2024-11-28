@@ -1024,6 +1024,7 @@
         "REMIND_AT": "Remind at",
         "QA_NEXT_MONTH": "Schedule next Month",
         "QA_NEXT_WEEK": "Schedule next Week",
+        "QA_REMOVE_TODAY": "Remove task from today",
         "QA_TODAY": "Schedule Today",
         "QA_TOMORROW": "Schedule Tomorrow",
         "RO_10M": "10 minutes before it starts",
