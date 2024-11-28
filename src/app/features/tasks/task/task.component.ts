@@ -50,8 +50,8 @@ import { Update } from '@ngrx/entity';
 import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import {
-  isTaskNotPlannedForToday,
-  isTaskPlannedForToday,
+  isShowRemoveFromToday,
+  isShowAddToToday,
   isTodayTag,
 } from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
@@ -217,12 +217,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     window.clearTimeout(this._currentPanTimeout);
   }
 
-  isTaskNotPlannedForToday(): boolean {
-    return isTaskNotPlannedForToday(this.task());
+  isShowRemoveFromToday(): boolean {
+    return isShowRemoveFromToday(this.task());
   }
-
-  isTaskPlannedForToday(): boolean {
-    return isTaskPlannedForToday(this.task(), this.workContextService.isToday);
+  isShowAddToToday(): boolean {
+    return isShowAddToToday(this.task(), this.workContextService.isToday);
   }
 
   scheduleTask(): void {

@@ -63,10 +63,7 @@ import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { isToday } from '../../../../util/is-today.util';
 import { DateAdapter } from '@angular/material/core';
-import {
-  isTaskPlannedForToday,
-  isTaskNotPlannedForToday,
-} from '../../util/is-task-today';
+import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -548,7 +545,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         );
       }
     } else if (newDay === getWorklogStr()) {
-      if (this.isTaskPlannedForToday()) {
+      if (this.isShowAddToToday()) {
         this.addToMyDay();
 
         this._snackService.open({
@@ -571,11 +568,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
   }
 
-  isTaskNotPlannedForToday(): boolean {
-    return isTaskNotPlannedForToday(this.task);
+  isShowRemoveFromToday(): boolean {
+    return isShowRemoveFromToday(this.task);
   }
 
-  isTaskPlannedForToday(): boolean {
-    return isTaskPlannedForToday(this.task, this.workContextService.isToday);
+  isShowAddToToday(): boolean {
+    return isShowAddToToday(this.task, this.workContextService.isToday);
   }
 }

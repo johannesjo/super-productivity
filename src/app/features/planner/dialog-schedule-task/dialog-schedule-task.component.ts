@@ -38,10 +38,7 @@ import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { DateAdapter } from '@angular/material/core';
-import {
-  isTaskNotPlannedForToday,
-  isTaskPlannedForToday,
-} from '../../tasks/util/is-task-today';
+import { isShowAddToToday, isShowRemoveFromToday } from '../../tasks/util/is-task-today';
 import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
@@ -305,7 +302,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         this.removeFromMyDay();
       }
     } else if (newDay === getWorklogStr()) {
-      if (this.isTaskPlannedForToday()) {
+      if (this.isShowAddToToday()) {
         this.addToMyDay();
 
         this._snackService.open({
@@ -362,11 +359,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     this.submit();
   }
 
-  isTaskNotPlannedForToday(): boolean {
-    return isTaskNotPlannedForToday(this.task);
+  isShowRemoveFromToday(): boolean {
+    return isShowRemoveFromToday(this.task);
   }
 
-  isTaskPlannedForToday(): boolean {
-    return isTaskPlannedForToday(this.task, this.workContextService.isToday);
+  isShowAddToToday(): boolean {
+    return isShowAddToToday(this.task, this.workContextService.isToday);
   }
 }

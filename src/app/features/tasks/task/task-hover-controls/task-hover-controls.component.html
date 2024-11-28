@@ -25,7 +25,7 @@
 
 <button
   (click)="parent.addToMyDay()"
-  *ngIf="isTaskPlannedForToday()"
+  *ngIf="isShowAddToToday()"
   title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{kb.moveToTodaysTasks?'['+kb.moveToTodaysTasks+']':''}}"
   class="ico-btn"
   color=""
@@ -36,7 +36,7 @@
 
 <button
   (click)="parent.removeFromMyDay()"
-  *ngIf="isTaskNotPlannedForToday()"
+  *ngIf="isShowRemoveFromToday()"
   [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
   class="ico-btn"
   color=""

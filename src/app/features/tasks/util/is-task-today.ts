@@ -1,22 +1,22 @@
-import { TaskWithSubTasks, Task } from '../task.model';
+import { TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TODAY_TAG } from '../../tag/tag.const';
 
-export const isTodayTag = (task: TaskWithSubTasks | Task): boolean =>
+export const isTodayTag = (task: TaskWithSubTasks | TaskCopy): boolean =>
   task.tagIds.includes(TODAY_TAG.id);
 
-export const isTaskNotPlannedForToday = (task: TaskWithSubTasks | Task): boolean =>
+export const isShowRemoveFromToday = (task: TaskWithSubTasks | TaskCopy): boolean =>
   !!(
     !task.isDone &&
     isTodayTag(task) &&
     (task.projectId || task.tagIds?.length > 1 || task.parentId)
   );
 
-export const isTaskPlannedForToday = (
-  task: TaskWithSubTasks | Task,
+export const isShowAddToToday = (
+  task: TaskWithSubTasks | TaskCopy,
   workContextIsToday: boolean,
 ): boolean => {
   return (
-    !isTaskNotPlannedForToday(task) &&
+    !isShowRemoveFromToday(task) &&
     !(task.parentId && workContextIsToday) &&
     !isTodayTag(task)
   );

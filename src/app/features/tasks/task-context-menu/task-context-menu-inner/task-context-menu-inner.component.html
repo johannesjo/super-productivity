@@ -34,9 +34,9 @@
       (click)="quickAccessBtnClick(0)"
       [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
     >
-      <mat-icon *ngIf="isTaskPlannedForToday()">wb_sunny</mat-icon>
+      <mat-icon *ngIf="isShowAddToToday()">wb_sunny</mat-icon>
       <mat-icon
-        *ngIf="isTaskNotPlannedForToday()"
+        *ngIf="isShowRemoveFromToday()"
         svgIcon="remove_today"
       ></mat-icon>
     </button>
