@@ -105,12 +105,13 @@ export class DataImportService {
         this._imexMetaService.setDataImportInProgress(false);
         this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_IMPORT });
       } catch (e) {
+        console.error(e);
+        await this._importLocalDBBackup();
+        // NOTE: needs to come after otherwise the snack will never show, due to the success snack of the import
         this._snackService.open({
           type: 'ERROR',
           msg: T.F.SYNC.S.ERROR_FALLBACK_TO_BACKUP,
         });
-        console.error(e);
-        await this._importLocalDBBackup();
         this._imexMetaService.setDataImportInProgress(false);
       }
     } else if (this._dataRepairService.isRepairPossibleAndConfirmed(migratedData)) {
