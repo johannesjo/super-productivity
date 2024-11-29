@@ -37,7 +37,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Workaround for nx issue
+      - name: Workaround for nx issue 1
+        run: choco install python --version=3.9.0
+      - name: Workaround for nx issue 2
+        run: choco install visualstudio2019buildtools --version=16.11.0.0
+      - name: Workaround for nx issue 3
         run: npm install @nx/nx-win32-x64-msvc
 
       - name: Install npm Packages
@@ -94,7 +98,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Workaround for nx issue and dmg licence issue
+      - name: Workaround for npm install issue 1
+        run: brew install python@3.9
+      - name: Workaround for npm install issue 2
         run: npm install @nx/nx-darwin-arm64 dmg-license
 
       - name: Install npm Packages
