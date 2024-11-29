@@ -1,3 +1,5 @@
+## [10.2.1](https://github.com/johannesjo/super-productivity/compare/v10.2.0...v10.2.1) (2024-11-29)
+
 # [10.2.0](https://github.com/johannesjo/super-productivity/compare/v10.1.1...v10.2.0) (2024-11-29)
 
 ### Bug Fixes
