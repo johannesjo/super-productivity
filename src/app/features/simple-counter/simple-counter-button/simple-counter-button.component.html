@@ -51,12 +51,11 @@
       class="main-btn repeated-countdown"
       mat-mini-fab
     >
-      <mat-icon *ngIf="!sc.isOn">{{ sc.icon }}</mat-icon>
-      <mat-icon *ngIf="sc.isOn">{{ sc.iconOn || sc.icon }}</mat-icon>
+      <mat-icon>{{ sc.icon }}</mat-icon>
     </button>
     <div
       class="extra-label"
-      *ngIf="countdownTime$|async as countdownTime"
+      *ngIf="sc.isOn && (countdownTime$|async) as countdownTime"
     >
       {{ countdownTime|msToMinuteClockString }}
     </div>
