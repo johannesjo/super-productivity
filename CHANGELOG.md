@@ -1,3 +1,5 @@
+# [10.3.0-rc.2](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.1...v10.3.0-rc.2) (2024-11-29)
+
 # [10.3.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.0...v10.3.0-rc.1) (2024-11-29)
 
 # [10.3.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v10.2.3...v10.3.0-rc.0) (2024-11-29)
