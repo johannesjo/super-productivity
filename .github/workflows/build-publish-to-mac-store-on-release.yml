@@ -37,9 +37,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Workaround for npm install issue 1
-        run: brew install python@3.9
-      - name: Workaround for npm install issue 2
+      - name: Workaround for nx issue and dmg licence issue
         run: npm install @nx/nx-darwin-arm64 dmg-license
 
       - name: Install npm Packages

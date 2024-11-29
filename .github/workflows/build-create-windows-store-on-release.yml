@@ -53,11 +53,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Workaround for nx issue 1
-        run: choco install python --version=3.9.0
-      - name: Workaround for nx issue 2
-        run: choco install visualstudio2019buildtools --version=16.11.0.0
-      - name: Workaround for nx issue 3
+      - name: Workaround for nx issue
         run: npm install @nx/nx-win32-x64-msvc
 
       - name: Install npm Packages
