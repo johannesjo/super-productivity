@@ -1,3 +1,9 @@
+## [10.2.2](https://github.com/johannesjo/super-productivity/compare/v10.2.1...v10.2.2) (2024-11-29)
+
+### Reverts
+
+- Revert "build: remove nx workaround" ([ecf0b6c](https://github.com/johannesjo/super-productivity/commit/ecf0b6cd8f257154ec88ed7887d719dbbf0ccef1))
+
 ## [10.2.1](https://github.com/johannesjo/super-productivity/compare/v10.2.0...v10.2.1) (2024-11-29)
 
 # [10.2.0](https://github.com/johannesjo/super-productivity/compare/v10.1.1...v10.2.0) (2024-11-29)
