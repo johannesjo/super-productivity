@@ -1,7 +1,7 @@
 name: Build All & Release
 on:
   push:
-    branches: [master, test/git-actions]
+    branches: [master, release/*, test/git-actions]
     tags:
       - v*
 
