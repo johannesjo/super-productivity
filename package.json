@@ -136,7 +136,7 @@
     "@ngrx/store-devtools": "^18.1.1",
     "@ngx-formly/core": "6.3.11",
     "@ngx-formly/material": "6.3.11",
-    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/core": "^16.0.3",
     "@ngx-translate/http-loader": "^7.0.0",
     "@schematics/angular": "^18.0.4",
     "@types/electron-localshortcut": "^3.1.3",
