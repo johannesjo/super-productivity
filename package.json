@@ -148,7 +148,7 @@
     "@types/node": "20.12.4",
     "@types/node-fetch": "^2.6.6",
     "@types/object-path": "^0.11.4",
-    "@typescript-eslint/eslint-plugin": "7.13.1",
+    "@typescript-eslint/eslint-plugin": "8.16.0",
     "@typescript-eslint/parser": "7.13.1",
     "@typescript-eslint/utils": "^8.16.0",
     "angular-material-css-vars": "^7.0.0",
