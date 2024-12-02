@@ -245,7 +245,7 @@ You can find the Android app here:
        height="50" />
 </a>
 
-The sources can be [found here](https://github.com/johannesjo/super-productivity-android).
+The sources can be [found here](/android).
 
 ## :hearts: Contributing
 
