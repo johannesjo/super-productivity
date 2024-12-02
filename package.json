@@ -102,7 +102,7 @@
     "@angular-devkit/build-angular": "^18.2.12",
     "@angular-eslint/builder": "^18.4.2",
     "@angular-eslint/eslint-plugin": "^18.4.2",
-    "@angular-eslint/eslint-plugin-template": "^18.4.2",
+    "@angular-eslint/eslint-plugin-template": "^19.0.0",
     "@angular-eslint/schematics": "^18.4.2",
     "@angular-eslint/template-parser": "^18.4.2",
     "@angular/animations": "^18.2.13",
