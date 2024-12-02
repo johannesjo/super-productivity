@@ -26,6 +26,11 @@ import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue/redmine-issue.model';
 import { EntityState } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import {
+  CalendarIssue,
+  CalendarIssueReduced,
+  CalendarProviderCfg,
+} from './providers/calendar/calendar.model';
 
 export interface BaseIssueProviderCfg {
   isEnabled: boolean;
@@ -36,16 +41,17 @@ export type IssueProviderKey =
   | 'GITHUB'
   | 'GITLAB'
   | 'CALDAV'
+  | 'CALENDAR'
   | 'OPEN_PROJECT'
   | 'GITEA'
-  | 'REDMINE'
-  | 'CALENDAR';
+  | 'REDMINE';
 
 export type IssueIntegrationCfg =
   | JiraCfg
   | GithubCfg
   | GitlabCfg
   | CaldavCfg
+  | CalendarProviderCfg
   | OpenProjectCfg
   | GiteaCfg
   | RedmineCfg;
@@ -62,6 +68,7 @@ export interface IssueIntegrationCfgs {
   GITHUB?: GithubCfg;
   GITLAB?: GitlabCfg;
   CALDAV?: CaldavCfg;
+  CALENDAR?: CalendarProviderCfg;
   OPEN_PROJECT?: OpenProjectCfg;
   GITEA?: GiteaCfg;
   REDMINE?: RedmineCfg;
@@ -72,6 +79,7 @@ export type IssueData =
   | GithubIssue
   | GitlabIssue
   | CaldavIssue
+  | CalendarIssue
   | OpenProjectWorkPackage
   | GiteaIssue
   | RedmineIssue;
@@ -82,6 +90,7 @@ export type IssueDataReduced =
   | GitlabIssue
   | OpenProjectWorkPackageReduced
   | CaldavIssueReduced
+  | CalendarIssueReduced
   | GiteaIssue
   | RedmineIssue;
 
@@ -94,13 +103,15 @@ export type IssueDataReducedMap = {
         ? GitlabIssue
         : K extends 'CALDAV'
           ? CaldavIssueReduced
-          : K extends 'OPEN_PROJECT'
-            ? OpenProjectWorkPackageReduced
-            : K extends 'GITEA'
-              ? GiteaIssue
-              : K extends 'REDMINE'
-                ? RedmineIssue
-                : never;
+          : K extends 'CALENDAR'
+            ? CalendarIssueReduced
+            : K extends 'OPEN_PROJECT'
+              ? OpenProjectWorkPackageReduced
+              : K extends 'GITEA'
+                ? GiteaIssue
+                : K extends 'REDMINE'
+                  ? RedmineIssue
+                  : never;
 };
 
 export interface SearchResultItem<
@@ -164,11 +175,16 @@ export interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
   issueProviderKey: 'REDMINE';
 }
 
+export interface IssueProviderCalendar extends IssueProviderBase, CalendarProviderCfg {
+  issueProviderKey: 'CALENDAR';
+}
+
 export type IssueProvider =
   | IssueProviderJira
   | IssueProviderGithub
   | IssueProviderGitlab
   | IssueProviderCaldav
+  | IssueProviderCalendar
   | IssueProviderOpenProject
   | IssueProviderGitea
   | IssueProviderRedmine;
@@ -187,4 +203,6 @@ export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
             ? IssueProviderRedmine
             : T extends 'CALDAV'
               ? IssueProviderCaldav
-              : never;
+              : T extends 'CALENDAR'
+                ? IssueProviderCalendar
+                : never;

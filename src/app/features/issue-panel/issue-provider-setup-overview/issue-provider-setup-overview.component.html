@@ -1,4 +1,22 @@
-<h4 style="text-align: center; margin-top: 16px">Setup integration</h4>
+<h4>Connect Calendar</h4>
+<div class="items">
+  <button
+    mat-raised-button
+    (click)="openSetupDialog('CALENDAR')"
+  >
+    <mat-icon>calendar_month</mat-icon>
+    <span>Google Calendar (iCal)</span>
+  </button>
+  <button
+    mat-raised-button
+    (click)="openSetupDialog('CALENDAR')"
+  >
+    <mat-icon>calendar_month</mat-icon>
+    <span>Outlook 365 (iCal)</span>
+  </button>
+</div>
+
+<h4>Setup Issue Provider</h4>
 
 <div class="items">
   <button

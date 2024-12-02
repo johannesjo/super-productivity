@@ -3,7 +3,12 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { Store } from '@ngrx/store';
 import { UiModule } from '../../../ui/ui.module';
 import { T } from '../../../t.const';
-import { IssueIntegrationCfg, IssueProvider, IssueProviderKey } from '../issue.model';
+import {
+  IssueIntegrationCfg,
+  IssueProvider,
+  IssueProviderKey,
+  IssueProviderTypeMap,
+} from '../issue.model';
 import { IssueModule } from '../issue.module';
 import {
   DEFAULT_ISSUE_PROVIDER_CFGS,
@@ -60,13 +65,14 @@ export class DialogEditIssueProviderComponent {
 
   model: Partial<IssueProvider> = this.isEdit
     ? { ...this.issueProvider }
-    : {
+    : ({
         ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
         ...DEFAULT_ISSUE_PROVIDER_CFGS[this.issueProviderKey],
         id: nanoid(),
         isEnabled: true,
         issueProviderKey: this.issueProviderKey,
-      };
+      } as IssueProviderTypeMap<IssueProviderKey>);
+
   configFormSection: ConfigFormSection<IssueIntegrationCfg> =
     ISSUE_PROVIDER_FORM_CFGS_MAP[this.issueProviderKey];
 

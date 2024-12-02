@@ -2,4 +2,13 @@
   display: grid;
   gap: 12px;
   grid-template-columns: auto auto;
+
+  > button {
+    min-height: 50px;
+  }
+}
+
+h4 {
+  text-align: center;
+  margin-top: 16px;
 }

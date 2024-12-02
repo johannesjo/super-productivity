@@ -35,15 +35,16 @@ import { IssueProvider } from './issue.model';
 //     },
 //   };
 
-const ISSUE_PROVIDER_FF_DEFAULT_PROJECT: LimitedFormlyFieldConfig<IssueProvider> = {
-  key: 'defaultProjectId',
-  type: 'project-select',
-  defaultValue: false,
-  props: {
-    label: T.F.ISSUE.DEFAULT_PROJECT_LABEL,
-    description: T.F.ISSUE.DEFAULT_PROJECT_DESCRIPTION,
-  },
-} as const;
+export const ISSUE_PROVIDER_FF_DEFAULT_PROJECT: LimitedFormlyFieldConfig<IssueProvider> =
+  {
+    key: 'defaultProjectId',
+    type: 'project-select',
+    defaultValue: false,
+    props: {
+      label: T.F.ISSUE.DEFAULT_PROJECT_LABEL,
+      description: T.F.ISSUE.DEFAULT_PROJECT_DESCRIPTION,
+    },
+  } as const;
 
 export const ISSUE_PROVIDER_COMMON_FORM_FIELDS: LimitedFormlyFieldConfig<IssueProvider>[] =
   [
