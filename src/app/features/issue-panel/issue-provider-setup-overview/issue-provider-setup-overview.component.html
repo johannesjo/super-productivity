@@ -2,17 +2,24 @@
 <div class="items">
   <button
     mat-raised-button
-    (click)="openSetupDialog('CALENDAR')"
+    (click)="openSetupDialog('CALENDAR', 'GOOGLE')"
   >
     <mat-icon>calendar_month</mat-icon>
     <span>Google Calendar (iCal)</span>
   </button>
   <button
     mat-raised-button
-    (click)="openSetupDialog('CALENDAR')"
+    (click)="openSetupDialog('CALENDAR', 'OUTLOOK365')"
   >
     <mat-icon>calendar_month</mat-icon>
     <span>Outlook 365 (iCal)</span>
+  </button>
+  <button
+    mat-raised-button
+    (click)="openSetupDialog('CALENDAR', 'OTHER')"
+  >
+    <mat-icon>calendar_month</mat-icon>
+    <span>iCal Other</span>
   </button>
 </div>
 

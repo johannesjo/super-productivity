@@ -28,6 +28,7 @@ import { HelperClasses } from '../../../app.constants';
 import { MatInputModule } from '@angular/material/input';
 import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -53,6 +54,7 @@ export class DialogEditIssueProviderComponent {
   readonly d = inject<{
     issueProvider?: IssueProvider;
     issueProviderKey?: IssueProviderKey;
+    calendarContextInfoTarget?: CalendarContextInfoTarget;
   }>(MAT_DIALOG_DATA);
 
   isConnectionWorks = signal(false);

@@ -7,6 +7,7 @@ import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { UiModule } from '../../../ui/ui.module';
+import { CalendarContextInfoTarget } from '../../issue/providers/calendar/calendar.model';
 
 @Component({
   selector: 'issue-provider-setup-overview',
@@ -21,11 +22,15 @@ export class IssueProviderSetupOverviewComponent {
   private _store = inject(Store);
   private _matDialog = inject(MatDialog);
 
-  openSetupDialog(issueProviderKey: IssueProviderKey): void {
+  openSetupDialog(
+    issueProviderKey: IssueProviderKey,
+    calendarContextInfoTarget?: CalendarContextInfoTarget,
+  ): void {
     this._matDialog.open(DialogEditIssueProviderComponent, {
       restoreFocus: true,
       data: {
         issueProviderKey,
+        calendarContextInfoTarget,
       },
     });
   }

@@ -67,6 +67,30 @@
     <!-- -->
     @if (model.isEnabled) {
     <!-- -->
+    @if (issueProviderKey === 'CALENDAR') {
+    <!-- -->
+    @if(d.calendarContextInfoTarget === 'GOOGLE'){
+    <div style="margin-bottom: 16px">
+      <a
+        target="_blank"
+        href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only"
+        >How to get the iCal url for Google Calendar?</a
+      >
+      <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
+    </div>
+    }
+    <!-- -->
+    @if(d.calendarContextInfoTarget === 'OUTLOOK365'){
+    <div style="margin-bottom: 16px">
+      <a
+        target="_blank"
+        href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only"
+        >How to get the iCal url for Outlook 365?</a
+      >
+      <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
+    </div>
+    } }
+    <!-- -->
     @if (issueProviderKey === 'JIRA') {
     <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
       <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>

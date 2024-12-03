@@ -8,6 +8,8 @@ export interface CalendarProviderCfg extends BaseIssueProviderCfg {
   showBannerBeforeThreshold: null | number;
 }
 
+export type CalendarContextInfoTarget = 'GOOGLE' | 'OUTLOOK365' | 'OTHER';
+
 export interface CalendarIssue {
   id: string;
 }
