@@ -8,11 +8,11 @@ import {
   IssueProviderCalendar,
   SearchResultItem,
 } from '../../issue.model';
-import { CaldavCfg } from '../caldav/caldav.model';
 import { CalendarIntegrationService } from '../../../calendar-integration/calendar-integration.service';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueProviderService } from '../../issue-provider.service';
-import { CalendarIssueReduced } from './calendar.model';
+import { CalendarIssueReduced, CalendarProviderCfg } from './calendar.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -20,19 +20,28 @@ import { CalendarIssueReduced } from './calendar.model';
 export class CalendarCommonInterfacesService implements IssueServiceInterface {
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _issueProviderService = inject(IssueProviderService);
+  private _http = inject(HttpClient);
 
-  isEnabled(cfg: any): boolean {
-    return true;
+  isEnabled(cfg: IssueProviderCalendar): boolean {
+    return cfg.isEnabled && cfg.icalUrl?.length > 0;
   }
 
+  // We currently don't support polling for calendar events
   pollTimer$: Observable<number> = EMPTY;
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {
     return of('NONE');
   }
 
-  testConnection$(cfg: CaldavCfg): Observable<boolean> {
-    return of(true);
+  testConnection$(cfg: CalendarProviderCfg): Observable<boolean> {
+    //  simple http get request
+    return this._http.get(cfg.icalUrl, { responseType: 'text' }).pipe(
+      map((v) => !!v),
+      catchError((err) => {
+        console.error(err);
+        return of(false);
+      }),
+    );
   }
 
   getById$(id: number, issueProviderId: string): Observable<IssueData> {
