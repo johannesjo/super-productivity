@@ -63,6 +63,9 @@ export const getIssueProviderInitials = (
         ?.substring(0, 2)
         ?.toUpperCase();
     case 'CALENDAR':
+      if (issueProvider.icalUrl.includes('google')) return 'G';
+      if (issueProvider.icalUrl.includes('office365')) return 'MS';
+
       return issueProvider.icalUrl
         ?.replace('https://', '')
         ?.replace('http://', '')
