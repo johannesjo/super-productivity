@@ -9,6 +9,16 @@ export interface CalendarProviderCfg extends BaseIssueProviderCfg {
   showBannerBeforeThreshold: null | number;
 }
 
+export type LegacyCalendarProvider = Readonly<{
+  isEnabled: boolean;
+  id: string;
+  icalUrl: string;
+  icon?: string;
+  defaultProjectId: string | null;
+  checkUpdatesEvery: number;
+  showBannerBeforeThreshold: null | number;
+}>;
+
 export type CalendarContextInfoTarget = 'GOOGLE' | 'OUTLOOK365' | 'OTHER';
 
 export interface CalendarIssue extends CalendarIntegrationEvent {

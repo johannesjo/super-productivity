@@ -31,6 +31,7 @@ import { GitlabCfg } from '../../features/issue/providers/gitlab/gitlab.model';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 import { MODEL_VERSION } from '../model-version';
+import { LegacyCalendarProvider } from '../../features/issue/providers/calendar/calendar.model';
 
 export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => {
   console.log('[M] Starting cross model migrations...', data);
@@ -44,6 +45,10 @@ export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => 
   ) {
     newData = migrateIssueProvidersFromProjects(newData);
   }
+  if (data.globalConfig?.calendarIntegration?.calendarProviders?.length) {
+    newData = migrateIssueProvidersFromCalendars(newData);
+  }
+
   if (!data.note[MODEL_VERSION_KEY]) {
     newData = migrateGlobalNoteModel(newData);
   }
@@ -86,6 +91,48 @@ const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComple
       )
     ) {
       copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
+      return copy;
+    } else {
+      throw new Error('Migration aborted');
+    }
+  }
+
+  return data;
+};
+
+const migrateIssueProvidersFromCalendars = (data: AppDataComplete): AppDataComplete => {
+  const copy = { ...data };
+
+  if (!copy.issueProvider) {
+    copy.issueProvider = issueProviderInitialState;
+  }
+
+  let migrations: string[] = [];
+  if (!!data.globalConfig?.calendarIntegration?.calendarProviders?.length) {
+    data.globalConfig.calendarIntegration.calendarProviders.forEach(
+      (calProvider): void => {
+        if (calProvider) {
+          migrations = migrations.concat(
+            _addIssueProvidersForCalendar(copy, calProvider),
+          );
+        }
+      },
+    );
+  }
+
+  if (migrations.length > 0) {
+    console.log('Issue providers migrated from calProviders to standalone:', migrations);
+    if (
+      confirm(
+        `Do the following migrations?
+
+Create issue providers from ${migrations.length} calProviders
+`,
+      )
+    ) {
+      copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
+      // @ts-ignore
+      delete copy.globalConfig.calendarIntegration.calendarProviders;
       return copy;
     } else {
       throw new Error('Migration aborted');
@@ -193,6 +240,36 @@ function _addIssueProvidersForProject(data: AppDataComplete, project: Project): 
     return [`${count} for ${project.title}`];
   }
   return [];
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function _addIssueProvidersForCalendar(
+  data: AppDataComplete,
+  legacyCalProvider: LegacyCalendarProvider,
+): string[] {
+  if (!legacyCalProvider.id) {
+    return [];
+  }
+
+  const issueProvider = {
+    ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
+    ...DEFAULT_ISSUE_PROVIDER_CFGS['CALENDAR'],
+    issueProviderKey: 'CALENDAR',
+    ...legacyCalProvider,
+  } as IssueProvider;
+
+  console.log('Migrating issue provider from calendarProvider', {
+    newIssueProvider: issueProvider,
+    legacyCalProvider,
+  });
+
+  _addIssueProvider(data, issueProvider);
+
+  // Update tasks to reflect the migration
+  _updateTasksForIssueProvider(data, issueProvider, legacyCalProvider.id);
+
+  // alert(`Migrated ${count} issue providers for calendarProvider ${calendarProvider.title}`);
+  return [`migrated calendar`];
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
