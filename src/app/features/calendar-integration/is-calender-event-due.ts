@@ -1,10 +1,10 @@
 import { CalendarIntegrationEvent } from './calendar-integration.model';
-import { CalendarProvider } from '../config/global-config.model';
+import { IssueProviderCalendar } from '../issue/issue.model';
 // NOTE: we start 120 minutes ago
 const START_OFFSET = 2 * 60 * 60 * 1000;
 export const isCalenderEventDue = (
   calEv: CalendarIntegrationEvent,
-  calProvider: CalendarProvider,
+  calProvider: IssueProviderCalendar,
   skippedEventIds: string[],
   now: number,
 ): boolean => {

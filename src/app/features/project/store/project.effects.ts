@@ -250,18 +250,6 @@ export class ProjectEffects {
           if (id === cfg.misc.defaultProjectId) {
             this._globalConfigService.updateSection('misc', { defaultProjectId: null });
           }
-          if (
-            cfg.calendarIntegration.calendarProviders.find(
-              (p) => p.defaultProjectId === id,
-            )
-          ) {
-            this._globalConfigService.updateSection('calendarIntegration', {
-              ...cfg.calendarIntegration,
-              calendarProviders: cfg.calendarIntegration.calendarProviders.map((p) =>
-                p.defaultProjectId === id ? { ...p, defaultProjectId: null } : p,
-              ),
-            });
-          }
         }),
       ),
     { dispatch: false },

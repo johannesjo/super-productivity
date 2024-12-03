@@ -9,7 +9,6 @@ import {
   tap,
 } from 'rxjs/operators';
 import { getRelevantEventsForCalendarIntegrationFromIcal } from '../schedule/ical/get-relevant-events-from-ical';
-import { CalendarProvider } from '../config/global-config.model';
 import {
   BehaviorSubject,
   combineLatest,
@@ -24,10 +23,6 @@ import { SnackService } from '../../core/snack/snack.service';
 import { getStartOfDayTimestamp } from '../../util/get-start-of-day-timestamp';
 import { getEndOfDayTimestamp } from '../../util/get-end-of-day-timestamp';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
-import {
-  selectCalendarProviderById,
-  selectCalendarProviders,
-} from '../config/store/global-config.reducer';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
@@ -36,6 +31,9 @@ import { Store } from '@ngrx/store';
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { TaskService } from '../tasks/task.service';
+import { IssueProviderService } from '../issue/issue-provider.service';
+import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
+import { IssueProviderCalendar } from '../issue/issue.model';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -106,6 +104,7 @@ export class CalendarIntegrationService {
     private _snackService: SnackService,
     private _store: Store,
     private _taskService: TaskService,
+    private _issueProviderService: IssueProviderService,
   ) {
     // console.log(
     //   localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY),
@@ -123,10 +122,11 @@ export class CalendarIntegrationService {
     }
   }
 
+  // TODO move to issue provider function
   async addEventAsTask(calEv: CalendarIntegrationEvent): Promise<void> {
     const getCalProvider = calEv.calProviderId
-      ? await this._store
-          .select(selectCalendarProviderById, { id: calEv.calProviderId })
+      ? await this._issueProviderService
+          .getCfgOnce$(calEv.calProviderId, 'CALENDAR')
           .pipe(first())
           .toPromise()
       : undefined;
@@ -156,7 +156,7 @@ export class CalendarIntegrationService {
   }
 
   requestEvents$(
-    calProvider: CalendarProvider,
+    calProvider: IssueProviderCalendar,
     start = getStartOfDayTimestamp(),
     end = getEndOfDayTimestamp(),
   ): Observable<CalendarIntegrationEvent[]> {
@@ -186,7 +186,7 @@ export class CalendarIntegrationService {
   }
 
   private _requestEventsForSchedule$(
-    calProvider: CalendarProvider,
+    calProvider: IssueProviderCalendar,
   ): Observable<CalendarIntegrationEvent[]> {
     return this.requestEvents$(calProvider, Date.now(), Date.now() + ONE_MONTHS);
   }

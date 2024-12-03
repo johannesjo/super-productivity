@@ -1,13 +1,11 @@
 import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { selectCalendarProviders } from '../../config/store/global-config.reducer';
 import { distinctUntilChanged, first, map, switchMap, tap } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, forkJoin, timer } from 'rxjs';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { BannerService } from '../../../core/banner/banner.service';
 import { DatePipe } from '@angular/common';
-import { CalendarProvider } from '../../config/global-config.model';
 import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { TaskService } from '../../tasks/task.service';
 import { isCalenderEventDue } from '../is-calender-event-due';
@@ -18,6 +16,8 @@ import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigat
 import { T } from '../../../t.const';
 import { isValidUrl } from '../../../util/is-valid-url';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
+import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
+import { IssueProviderCalendar } from '../../issue/issue.model';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -79,7 +79,7 @@ export class CalendarIntegrationEffects {
   );
 
   private _currentlyShownBanners$ = new BehaviorSubject<
-    { id: string; calEv: CalendarIntegrationEvent; calProvider: CalendarProvider }[]
+    { id: string; calEv: CalendarIntegrationEvent; calProvider: IssueProviderCalendar }[]
   >([]);
   showBanner = createEffect(
     () => this._currentlyShownBanners$.pipe(tap((v) => this._showBanner(v))),
@@ -101,7 +101,7 @@ export class CalendarIntegrationEffects {
 
   private _addEvToShow(
     calEv: CalendarIntegrationEvent,
-    calProvider: CalendarProvider,
+    calProvider: IssueProviderCalendar,
   ): void {
     const curVal = this._currentlyShownBanners$.getValue();
     console.log('addEvToShow', curVal, calEv);
@@ -125,7 +125,7 @@ export class CalendarIntegrationEffects {
     allEvsToShow: {
       id: string;
       calEv: CalendarIntegrationEvent;
-      calProvider: CalendarProvider;
+      calProvider: IssueProviderCalendar;
     }[],
   ): Promise<void> {
     console.log('SHOW BANNER');

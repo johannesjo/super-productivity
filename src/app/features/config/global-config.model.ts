@@ -127,19 +127,6 @@ export type SyncConfig = Readonly<{
   localFileSync: LocalFileSyncConfig;
 }>;
 
-export type CalendarIntegrationConfig = Readonly<{
-  calendarProviders: CalendarProvider[];
-}>;
-export type CalendarProvider = Readonly<{
-  isEnabled: boolean;
-  id: string;
-  icalUrl: string;
-  icon?: string;
-  defaultProjectId: string | null;
-  checkUpdatesEvery: number;
-  showBannerBeforeThreshold: null | number;
-}>;
-
 export type ScheduleConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
@@ -185,7 +172,6 @@ export type GlobalConfigState = Readonly<{
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   timeTracking: TimeTrackingConfig;
-  calendarIntegration: CalendarIntegrationConfig;
   reminder: ReminderConfig;
   schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;
@@ -202,7 +188,6 @@ export type GlobalSectionConfig =
   | MiscConfig
   | PomodoroConfig
   | KeyboardConfig
-  | CalendarIntegrationConfig
   | ScheduleConfig
   | ReminderConfig
   | SyncConfig;

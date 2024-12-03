@@ -149,9 +149,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTrackingReminderShowOnMobile: false,
     trackingReminderMinTime: 5 * minute,
   },
-  calendarIntegration: {
-    calendarProviders: [],
-  },
   reminder: {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,

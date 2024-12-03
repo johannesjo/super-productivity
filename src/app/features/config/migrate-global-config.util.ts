@@ -1,5 +1,4 @@
 import {
-  CalendarProvider,
   GlobalConfigState,
   IdleConfig,
   TakeABreakConfig,
@@ -28,8 +27,6 @@ export const migrateGlobalConfigState = (
   globalConfigState = _migrateSyncCfg(globalConfigState);
 
   globalConfigState = _migrateToNewTimeTrackingConfig(globalConfigState);
-
-  globalConfigState = _migrateTimelineCalendarsToCalendarIntegration(globalConfigState);
 
   globalConfigState = _migrateMotivationalImg(globalConfigState);
 
@@ -254,37 +251,6 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     }
 
     return { ...config, sync: { ...config.sync, syncProvider } };
-  }
-  return config;
-};
-
-const _migrateTimelineCalendarsToCalendarIntegration = (
-  config: GlobalConfigState,
-): GlobalConfigState => {
-  if ((config.schedule as any)?.calendarProviders?.length) {
-    const convertedCalendars: CalendarProvider[] = (
-      config.schedule as any
-    ).calendarProviders.map((oldCalProvider) => ({
-      isEnabled: oldCalProvider.isEnabled,
-      icalUrl: oldCalProvider.icalUrl,
-      icon: oldCalProvider.icon,
-      defaultProjectId: null,
-      checkUpdatesEvery: 60 * 60 * 1000,
-      showBannerBeforeThreshold: 15 * 60 * 1000,
-    }));
-
-    delete (config.schedule as any).calendarProviders;
-    return {
-      ...config,
-      schedule: {
-        ...config.schedule,
-        ...({ calendarProviders: undefined } as any),
-      },
-      calendarIntegration: {
-        ...config.calendarIntegration,
-        calendarProviders: [...convertedCalendars],
-      },
-    };
   }
   return config;
 };

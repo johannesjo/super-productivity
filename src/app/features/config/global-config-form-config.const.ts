@@ -16,7 +16,6 @@ import { SCHEDULE_FORM_CFG } from './form-cfgs/schedule-form.const';
 import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
 import { IS_FIREFOX } from '../../util/is-firefox';
-import { CALENDAR_FORM_CFG } from './form-cfgs/calendar-form.const';
 import { REMINDER_FORM_CFG } from './form-cfgs/reminder-form.const';
 import { SHORT_SYNTAX_FORM_CFG } from './form-cfgs/short-syntax-form.const';
 
@@ -34,7 +33,6 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   IDLE_FORM_CFG,
   KEYBOARD_SETTINGS_FORM_CFG,
   TIME_TRACKING_FORM_CFG,
-  CALENDAR_FORM_CFG,
   REMINDER_FORM_CFG,
   SCHEDULE_FORM_CFG,
 ].filter(filterGlobalConfigForm);
