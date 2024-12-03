@@ -1,5 +1,6 @@
 // TODO correct type
 import { BaseIssueProviderCfg } from '../../issue.model';
+import { CalendarIntegrationEvent } from '../../../calendar-integration/calendar-integration.model';
 
 export interface CalendarProviderCfg extends BaseIssueProviderCfg {
   icalUrl: string;
@@ -10,10 +11,8 @@ export interface CalendarProviderCfg extends BaseIssueProviderCfg {
 
 export type CalendarContextInfoTarget = 'GOOGLE' | 'OUTLOOK365' | 'OTHER';
 
-export interface CalendarIssue {
+export interface CalendarIssue extends CalendarIntegrationEvent {
   id: string;
 }
 
-export interface CalendarIssueReduced {
-  id: string;
-}
+export type CalendarIssueReduced = CalendarIssue;

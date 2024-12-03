@@ -5,6 +5,7 @@ import {
   distinctUntilChanged,
   first,
   map,
+  shareReplay,
   switchMap,
   tap,
 } from 'rxjs/operators';
@@ -54,7 +55,7 @@ export class CalendarIntegrationService {
                   return of({ itemsForProvider: [], calProvider });
                 }
 
-                return this._requestEventsForSchedule$(calProvider).pipe(
+                return this.requestEventsForSchedule$(calProvider).pipe(
                   first(),
                   map((itemsForProvider: CalendarIntegrationEvent[]) => ({
                     itemsForProvider,
@@ -93,7 +94,7 @@ export class CalendarIntegrationService {
             )
           : (of([]) as Observable<ScheduleCalendarMapEntry[]>);
       }),
-      // shareReplay(1),
+      shareReplay({ bufferSize: 1, refCount: true }),
     ),
   );
 
@@ -185,7 +186,7 @@ export class CalendarIntegrationService {
     );
   }
 
-  private _requestEventsForSchedule$(
+  requestEventsForSchedule$(
     calProvider: IssueProviderCalendar,
   ): Observable<CalendarIntegrationEvent[]> {
     return this.requestEvents$(calProvider, Date.now(), Date.now() + ONE_MONTHS);
