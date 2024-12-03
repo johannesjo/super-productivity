@@ -1303,7 +1303,7 @@
       "TITLE": "Automatic Backups"
     },
     "CALENDARS": {
-      "BROWSER_WARNING": "<b>This will likely NOT work with the Browser version of Super Productivity.<br /> Please <a href=\"https://super-productivity.com/download/\">download the desktop version</a> to use this feature!</b>",
+      "BROWSER_WARNING": "Due to cross origin restrictions <b>this will likely NOT work with the Browser version of Super Productivity.<br /> Please <a href=\"https://super-productivity.com/download/\">download the desktop version</a> to use this feature!</b>",
       "CAL_PATH": "Url of the iCal source",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
       "CAL_PROVIDERS_ADD": "Add Calendar iCal source",

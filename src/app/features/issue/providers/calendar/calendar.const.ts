@@ -3,6 +3,7 @@ import { T } from '../../../../t.const';
 import { IssueProviderCalendar } from '../../issue.model';
 import { CalendarProviderCfg } from './calendar.model';
 import { ISSUE_PROVIDER_FF_DEFAULT_PROJECT } from '../../common-issue-form-stuff.const';
+import { IS_ELECTRON } from '../../../../app.constants';
 
 export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
   isEnabled: false,
@@ -16,6 +17,18 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
   help: T.GCF.CALENDARS.HELP,
   key: 'CALENDAR',
   items: [
+    ...(!IS_ELECTRON
+      ? [
+          {
+            type: 'tpl',
+            className: 'tpl',
+            templateOptions: {
+              tag: 'p',
+              text: T.GCF.CALENDARS.BROWSER_WARNING,
+            },
+          },
+        ]
+      : []),
     {
       type: 'input',
       key: 'icalUrl',
@@ -60,5 +73,19 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
         description: T.G.DURATION_DESCRIPTION,
       },
     },
+    // {
+    //   type: 'icon',
+    //   key: 'icon',
+    //   hooks: {
+    //     onInit: (field) => {
+    //       if (!field?.formControl?.value) {
+    //         field?.formControl?.setValue('event');
+    //       }
+    //     },
+    //   },
+    //   templateOptions: {
+    //     label: T.GCF.CALENDARS.ICON,
+    //   },
+    // },
   ],
 };
