@@ -44,8 +44,8 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  getById$(id: number, issueProviderId: string): Observable<IssueData> {
-    return of({} as any);
+  getById$(id: number, issueProviderId: string): Observable<IssueData | null> {
+    return of(null);
   }
 
   getAddTaskData(
@@ -61,7 +61,6 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
       issueWasUpdated: false,
       issueLastUpdated: new Date().getTime(),
       plannedAt: calEv.start,
-      // projectId: getCalProvider?.defaultProjectId || null,
     };
   }
 

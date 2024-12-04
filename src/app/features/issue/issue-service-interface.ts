@@ -19,7 +19,7 @@ export interface IssueServiceInterface {
 
   issueLink$(issueId: string | number, issueProviderId: string): Observable<string>;
 
-  getById$(id: string | number, issueProviderId: string): Observable<IssueData>;
+  getById$(id: string | number, issueProviderId: string): Observable<IssueData | null>;
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 

@@ -98,8 +98,8 @@ export class IssueService {
     issueType: IssueProviderKey,
     id: string | number,
     issueProviderId: string,
-  ): Observable<IssueData> {
-    // account for issue refreshment
+  ): Observable<IssueData | null> {
+    // account for (manual) issue refreshing
     if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
       this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
     }
@@ -107,7 +107,7 @@ export class IssueService {
       .getById$(id, issueProviderId)
       .pipe(
         switchMap((issue) =>
-          merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
+          merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
         ),
       );
   }
