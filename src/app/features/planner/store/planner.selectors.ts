@@ -320,7 +320,6 @@ const getIcalEventsForDay = (
           start,
           end,
           calendarEvent: {
-            ico: icalMapEntry.icon,
             ...calEv,
           },
         });

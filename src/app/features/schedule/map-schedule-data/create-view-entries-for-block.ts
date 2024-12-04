@@ -35,7 +35,7 @@ export const createViewEntriesForBlock = (
         type: SVEType.CalendarEvent,
         data: {
           ...calendarEvent,
-          icon: calendarEvent.icon || 'event',
+          icon: 'event',
         },
         duration: calendarEvent.duration,
       });

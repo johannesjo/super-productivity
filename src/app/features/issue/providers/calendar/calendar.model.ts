@@ -13,7 +13,6 @@ export type LegacyCalendarProvider = Readonly<{
   isEnabled: boolean;
   id: string;
   icalUrl: string;
-  icon?: string;
   defaultProjectId: string | null;
   checkUpdatesEvery: number;
   showBannerBeforeThreshold: null | number;

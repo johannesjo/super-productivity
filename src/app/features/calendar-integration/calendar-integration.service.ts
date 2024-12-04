@@ -75,7 +75,6 @@ export class CalendarIntegrationService {
                   map(([allCalendarTaskEventIds, skippedEventIds]) => {
                     return resultForProviders.map(({ itemsForProvider, calProvider }) => {
                       return {
-                        icon: calProvider.icon || null,
                         //   // filter out items already added as tasks
                         items: itemsForProvider.filter(
                           (calEv) =>

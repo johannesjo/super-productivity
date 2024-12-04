@@ -238,7 +238,7 @@ const createBlockerBlocksForCalendarEvents = (
             start,
             end,
             type: BlockedBlockType.CalendarEvent,
-            data: { ...calEv, icon: icalMapEntry.icon },
+            data: { ...calEv },
           });
           wasMerged = true;
           break;
@@ -254,7 +254,7 @@ const createBlockerBlocksForCalendarEvents = (
               start,
               end,
               type: BlockedBlockType.CalendarEvent,
-              data: { ...calEv, icon: icalMapEntry.icon },
+              data: { ...calEv },
             },
           ],
         });
