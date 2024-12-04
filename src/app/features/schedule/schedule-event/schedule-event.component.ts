@@ -214,6 +214,7 @@ export class ScheduleEventComponent implements OnInit {
         issueDataReduced: data,
         issueProviderId: data.calProviderId,
         issueProviderKey: 'CALENDAR',
+        isForceDefaultProject: true,
       });
     }
   }

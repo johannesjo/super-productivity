@@ -39,6 +39,7 @@ export class PlannerCalendarEventComponent {
       issueDataReduced: this.calendarEvent,
       issueProviderId: this.calendarEvent.calProviderId,
       issueProviderKey: 'CALENDAR',
+      isForceDefaultProject: true,
     });
   }
 }

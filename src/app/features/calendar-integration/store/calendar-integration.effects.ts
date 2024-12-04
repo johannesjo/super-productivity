@@ -185,10 +185,8 @@ export class CalendarIntegrationEffects {
                 issueProviderKey: 'CALENDAR',
                 issueProviderId: calProvider.id,
                 issueDataReduced: calEv,
-                additional: {
-                  // from the banner we should always add to the default project rather than current context
-                  projectId: calProvider.defaultProjectId,
-                },
+                // from the banner we should always add to the default project rather than current context
+                isForceDefaultProject: true,
               });
             },
           },

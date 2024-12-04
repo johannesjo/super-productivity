@@ -22,7 +22,7 @@ import {
   REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
-import { Task } from '../tasks/task.model';
+import { Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
@@ -350,16 +350,17 @@ export class IssueService {
   async addTaskFromIssue({
     issueDataReduced,
     issueProviderId,
-    // TODO rename
     issueProviderKey,
     additional = {},
     isAddToBackLog = false,
+    isForceDefaultProject = false,
   }: {
     issueDataReduced: IssueDataReduced;
     issueProviderId: string;
     issueProviderKey: IssueProviderKey;
     additional?: Partial<Task>;
     isAddToBackLog?: boolean;
+    isForceDefaultProject?: boolean;
   }): Promise<string | undefined> {
     if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
       throw new Error('No issueData');
@@ -383,26 +384,38 @@ export class IssueService {
       this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
     console.log({ title, additionalFromProviderIssueService });
 
+    const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
+      if (
+        this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
+        !isForceDefaultProject
+      ) {
+        return { projectId: this._workContextService.activeWorkContextId as string };
+      } else {
+        const defaultProjectId = (
+          await this._issueProviderService
+            .getCfgOnce$(issueProviderId, issueProviderKey)
+            .toPromise()
+        ).defaultProjectId;
+
+        return {
+          tagIds:
+            this._workContextService.activeWorkContextType === WorkContextType.TAG
+              ? [this._workContextService.activeWorkContextId as string]
+              : [],
+          projectId: defaultProjectId,
+        };
+      }
+    };
+
     const taskData = {
       issueType: issueProviderKey,
       issueProviderId: issueProviderId,
       issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
-      // add current project id or tag id (will be overwritten by additional)
-      ...(this._workContextService.activeWorkContextType === WorkContextType.PROJECT
-        ? {
-            projectId: this._workContextService.activeWorkContextId as string,
-          }
-        : {
-            tagIds: [this._workContextService.activeWorkContextId as string],
-            projectId: (
-              await this._issueProviderService
-                .getCfgOnce$(issueProviderId, issueProviderKey)
-                .toPromise()
-            ).defaultProjectId,
-          }),
       ...additionalFromProviderIssueService,
+      // NOTE: if we were to add tags, this could be overwritten here
+      ...(await getProjectOrTagId()),
       ...additional,
     };
 
