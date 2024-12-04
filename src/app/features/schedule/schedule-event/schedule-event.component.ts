@@ -16,7 +16,6 @@ import { MatIcon } from '@angular/material/icon';
 import { delay, first, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectProjectById } from '../../project/store/project.selectors';
-import { MatMiniFabButton } from '@angular/material/button';
 import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
 import {
   SCHEDULE_TASK_MIN_DURATION_IN_MS,
@@ -27,14 +26,7 @@ import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { AsyncPipe } from '@angular/common';
 import { IssueModule } from '../../issue/issue.module';
-import {
-  MatMenu,
-  MatMenuContent,
-  MatMenuItem,
-  MatMenuTrigger,
-} from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { TaskCopy } from '../../tasks/task.model';
@@ -45,25 +37,14 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
-import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 import { BehaviorSubject, of } from 'rxjs';
+import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'schedule-event',
   standalone: true,
-  imports: [
-    MatIcon,
-    MatMiniFabButton,
-    AsyncPipe,
-    IssueModule,
-    MatMenu,
-    MatMenuContent,
-    MatMenuItem,
-    TranslateModule,
-    MatMenuTrigger,
-    TaskContextMenuComponent,
-  ],
+  imports: [MatIcon, IssueModule, TranslateModule, TaskContextMenuComponent],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -229,7 +210,11 @@ export class ScheduleEventComponent implements OnInit {
       this._isBeingSubmitted = true;
 
       const data = this.se.data as ScheduleFromCalendarEvent;
-      this._calendarIntegrationService.addEventAsTask(data);
+      this._issueService.addTaskFromIssue({
+        issueDataReduced: data,
+        issueProviderId: data.calProviderId,
+        issueProviderKey: 'CALENDAR',
+      });
     }
   }
 
@@ -245,7 +230,7 @@ export class ScheduleEventComponent implements OnInit {
     private _elRef: ElementRef,
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
-    private _calendarIntegrationService: CalendarIntegrationService,
+    private _issueService: IssueService,
   ) {}
 
   ngOnInit(): void {

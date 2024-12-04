@@ -1,5 +1,5 @@
 import { isCalenderEventDue } from './is-calender-event-due';
-import { CalendarProvider } from '../config/global-config.model';
+import { IssueProviderCalendar } from '../issue/issue.model';
 
 describe('isCalenderEventDue()', () => {
   it('should be true if event starts now', () => {
@@ -8,7 +8,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 5, title: 'T', duration: 1 },
         {
           showBannerBeforeThreshold: 0,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         [],
         5,
       ),
@@ -21,7 +21,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 5, title: 'T', duration: 1 },
         {
           showBannerBeforeThreshold: 2,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         [],
         3,
       ),
@@ -34,7 +34,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 5, title: 'T', duration: 1 },
         {
           showBannerBeforeThreshold: 2,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         [],
         1,
       ),
@@ -47,7 +47,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 5, title: 'T', duration: 1 },
         {
           showBannerBeforeThreshold: null,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         [],
         4,
       ),
@@ -60,7 +60,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 5, title: 'T', duration: 1 },
         {
           showBannerBeforeThreshold: 0,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         ['CID'],
         0,
       ),
@@ -73,7 +73,7 @@ describe('isCalenderEventDue()', () => {
         { id: 'CID', calProviderId: 'PR', start: 6, title: 'T', duration: 88 },
         {
           showBannerBeforeThreshold: 0,
-        } as CalendarProvider,
+        } as IssueProviderCalendar,
         [],
         1,
       ),

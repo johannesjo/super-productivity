@@ -40,6 +40,7 @@ import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { IssueProviderService } from './issue-provider.service';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 
 @Injectable({
   providedIn: 'root',
@@ -84,6 +85,7 @@ export class IssueService {
     private _snackService: SnackService,
     private _translateService: TranslateService,
     private _projectService: ProjectService,
+    private _calendarIntegrationService: CalendarIntegrationService,
   ) {}
 
   testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
@@ -348,6 +350,7 @@ export class IssueService {
   async addTaskFromIssue({
     issueDataReduced,
     issueProviderId,
+    // TODO rename
     issueProviderKey,
     additional = {},
     isAddToBackLog = false,
@@ -380,7 +383,7 @@ export class IssueService {
       this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
     console.log({ title, additionalFromProviderIssueService });
 
-    const taskId = this._taskService.add(title, isAddToBackLog, {
+    const taskData = {
       issueType: issueProviderKey,
       issueProviderId: issueProviderId,
       issueId: issueDataReduced.id.toString(),
@@ -401,7 +404,17 @@ export class IssueService {
           }),
       ...additionalFromProviderIssueService,
       ...additional,
-    });
+    };
+
+    const taskId = taskData.plannedAt
+      ? await this._taskService.addAndSchedule(title, taskData, taskData.plannedAt)
+      : this._taskService.add(title, isAddToBackLog, taskData);
+
+    // TODO more elegant solution for skipped calendar events
+    if (issueProviderKey === CALENDAR_TYPE) {
+      this._calendarIntegrationService.skipCalendarEvent(issueDataReduced.id.toString());
+    }
+
     return taskId;
   }
 

@@ -31,8 +31,6 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { TaskService } from '../tasks/task.service';
-import { IssueProviderService } from '../issue/issue-provider.service';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
 
@@ -103,8 +101,6 @@ export class CalendarIntegrationService {
     private _http: HttpClient,
     private _snackService: SnackService,
     private _store: Store,
-    private _taskService: TaskService,
-    private _issueProviderService: IssueProviderService,
   ) {
     // console.log(
     //   localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY),
@@ -120,30 +116,6 @@ export class CalendarIntegrationService {
         this.skippedEventIds$.next(skippedEvIds || []);
       } catch (e) {}
     }
-  }
-
-  // TODO move to issue provider function
-  async addEventAsTask(calEv: CalendarIntegrationEvent): Promise<void> {
-    const getCalProvider = calEv.calProviderId
-      ? await this._issueProviderService
-          .getCfgOnce$(calEv.calProviderId, 'CALENDAR')
-          .pipe(first())
-          .toPromise()
-      : undefined;
-
-    await this._taskService.addAndSchedule(
-      calEv.title,
-      {
-        projectId: getCalProvider?.defaultProjectId || null,
-        issueId: calEv.id,
-        issueProviderId: calEv.calProviderId,
-        issueType: 'CALENDAR',
-        timeEstimate: calEv.duration,
-        notes: calEv.description || '',
-      },
-      calEv.start,
-    );
-    this.skipCalendarEvent(calEv.id);
   }
 
   skipCalendarEvent(evId: string): void {

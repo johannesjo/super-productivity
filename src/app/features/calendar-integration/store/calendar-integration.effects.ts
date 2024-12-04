@@ -18,6 +18,7 @@ import { isValidUrl } from '../../../util/is-valid-url';
 import { distinctUntilChangedObject } from '../../../util/distinct-until-changed-object';
 import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../../issue/issue.model';
+import { IssueService } from '../../issue/issue.service';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -96,6 +97,7 @@ export class CalendarIntegrationEffects {
     private _taskService: TaskService,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _navigateToTaskService: NavigateToTaskService,
+    private _issueService: IssueService,
     @Inject(LOCALE_ID) private locale: string,
   ) {}
 
@@ -179,17 +181,15 @@ export class CalendarIntegrationEffects {
             label: T.F.CALENDARS.BANNER.ADD_AS_TASK,
             fn: () => {
               this._skipEv(calEv.id);
-              this._taskService.addAndSchedule(
-                calEv.title,
-                {
+              this._issueService.addTaskFromIssue({
+                issueProviderKey: 'CALENDAR',
+                issueProviderId: calProvider.id,
+                issueDataReduced: calEv,
+                additional: {
+                  // from the banner we should always add to the default project rather than current context
                   projectId: calProvider.defaultProjectId,
-                  issueId: calEv.id,
-                  issueProviderId: calProvider.id,
-                  issueType: 'CALENDAR',
-                  timeEstimate: calEv.duration,
                 },
-                calEv.start,
-              );
+              });
             },
           },
     });

@@ -897,7 +897,6 @@ describe('createBlockerBlocks()', () => {
     it('should work for calendar events', () => {
       const icalEventMap: ScheduleCalendarMapEntry[] = [
         {
-          icon: '',
           items: [
             {
               id: 'EventId',
@@ -957,7 +956,7 @@ describe('createBlockerBlocks()', () => {
               data: {
                 calProviderId: 'PR',
                 duration: 3600000,
-                icon: '',
+                icon: 'aaa',
                 start: 118800000,
                 title: 'XXX',
                 id: 'EventId',

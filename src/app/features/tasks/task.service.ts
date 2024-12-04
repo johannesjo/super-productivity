@@ -309,10 +309,11 @@ export class TaskService {
     additional: Partial<Task> = {},
     plannedAt: number,
     remindCfg: TaskReminderOptionId = TaskReminderOptionId.AtStart,
-  ): Promise<void> {
+  ): Promise<string> {
     const id = this.add(title, undefined, additional, undefined);
     const task = await this.getByIdOnce$(id).toPromise();
     this.scheduleTask(task, plannedAt, remindCfg);
+    return id;
   }
 
   remove(task: TaskWithSubTasks): void {

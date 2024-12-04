@@ -60,6 +60,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
       notes: calEv.description || '',
       issueWasUpdated: false,
       issueLastUpdated: new Date().getTime(),
+      plannedAt: calEv.start,
       // projectId: getCalProvider?.defaultProjectId || null,
     };
   }
