@@ -17,6 +17,7 @@ import {
 } from '../../features/issue/issue.model';
 import { nanoid } from 'nanoid';
 import {
+  ICAL_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
   ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_TYPES,
@@ -253,8 +254,8 @@ function _addIssueProvidersForCalendar(
 
   const issueProvider = {
     ...ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
-    ...DEFAULT_ISSUE_PROVIDER_CFGS['CALENDAR'],
-    issueProviderKey: 'CALENDAR',
+    ...DEFAULT_ISSUE_PROVIDER_CFGS[ICAL_TYPE],
+    issueProviderKey: ICAL_TYPE,
     ...legacyCalProvider,
   } as IssueProvider;
 

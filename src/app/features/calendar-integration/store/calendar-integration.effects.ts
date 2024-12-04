@@ -182,7 +182,7 @@ export class CalendarIntegrationEffects {
             fn: () => {
               this._skipEv(calEv.id);
               this._issueService.addTaskFromIssue({
-                issueProviderKey: 'CALENDAR',
+                issueProviderKey: 'ICAL',
                 issueProviderId: calProvider.id,
                 issueDataReduced: calEv,
                 // from the banner we should always add to the default project rather than current context

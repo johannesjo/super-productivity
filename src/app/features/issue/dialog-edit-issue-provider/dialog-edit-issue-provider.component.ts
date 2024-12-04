@@ -11,6 +11,7 @@ import {
 } from '../issue.model';
 import { IssueModule } from '../issue.module';
 import {
+  ICAL_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
   ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_FORM_CFGS_MAP,
@@ -193,4 +194,6 @@ export class DialogEditIssueProviderComponent {
     this.submit(true);
     this.isConnectionWorks.set(false);
   }
+
+  protected readonly ICAL_TYPE = ICAL_TYPE;
 }

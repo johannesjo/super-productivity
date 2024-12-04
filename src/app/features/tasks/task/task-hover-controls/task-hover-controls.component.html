@@ -58,7 +58,7 @@
 
 <button
   (click)="parent.toggleShowDetailPanel()"
-  *ngIf="!task().notes && (!task().issueId||task().issueType==='CALENDAR') && !isSelected()"
+  *ngIf="!task().notes && (!task().issueId||task().issueType===ICAL_TYPE) && !isSelected()"
   title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
   class="ico-btn show-additional-info-btn"
   color=""

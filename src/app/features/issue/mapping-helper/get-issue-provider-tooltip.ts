@@ -13,7 +13,7 @@ export const getIssueProviderTooltip = (issueProvider: IssueProvider): string =>
         return issueProvider.repoFullname;
       case 'CALDAV':
         return issueProvider.caldavUrl;
-      case 'CALENDAR':
+      case 'ICAL':
         return issueProvider.icalUrl;
       case 'REDMINE':
         return issueProvider.projectId;
@@ -62,7 +62,7 @@ export const getIssueProviderInitials = (
         ?.replace('http://', '')
         ?.substring(0, 2)
         ?.toUpperCase();
-    case 'CALENDAR':
+    case 'ICAL':
       if (issueProvider.icalUrl.includes('google')) return 'G';
       if (issueProvider.icalUrl.includes('office365')) return 'MS';
 

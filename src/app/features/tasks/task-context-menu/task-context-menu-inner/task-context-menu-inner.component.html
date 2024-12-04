@@ -197,7 +197,7 @@
 
   <!--TODO maybe handle dynamically -->
   <a
-    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     [href]="issueUrl$|async"
     mat-menu-item
     style="color: inherit"
@@ -209,7 +209,7 @@
 
   <button
     (click)="updateIssueData()"
-    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     mat-menu-item
   >
     <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>

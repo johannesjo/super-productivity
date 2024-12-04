@@ -13,6 +13,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueProviderService } from '../../issue-provider.service';
 import { CalendarIssueReduced, CalendarProviderCfg } from './calendar.model';
 import { HttpClient } from '@angular/common/http';
+import { ICAL_TYPE } from '../../issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -55,7 +56,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
       title: calEv.title,
       issueId: calEv.id,
       issueProviderId: calEv.calProviderId,
-      issueType: 'CALENDAR',
+      issueType: 'ICAL',
       timeEstimate: calEv.duration,
       notes: calEv.description || '',
       issueWasUpdated: false,
@@ -74,7 +75,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
           )
           .map((calEvent) => ({
             title: calEvent.title,
-            issueType: 'CALENDAR',
+            issueType: ICAL_TYPE,
             issueData: calEvent,
           })),
       ),
@@ -107,6 +108,6 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderCalendar> {
-    return this._issueProviderService.getCfgOnce$(issueProviderId, 'CALENDAR');
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'ICAL');
   }
 }

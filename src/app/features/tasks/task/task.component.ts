@@ -60,6 +60,7 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { PlannerService } from '../../planner/planner.service';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ICAL_TYPE } from '../../issue/issue.const';
 
 @Component({
   selector: 'task',
@@ -925,4 +926,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.focusNext();
     }
   }
+
+  protected readonly ICAL_TYPE = ICAL_TYPE;
 }

@@ -38,7 +38,7 @@ export class PlannerCalendarEventComponent {
     this._issueService.addTaskFromIssue({
       issueDataReduced: this.calendarEvent,
       issueProviderId: this.calendarEvent.calProviderId,
-      issueProviderKey: 'CALENDAR',
+      issueProviderKey: 'ICAL',
       isForceDefaultProject: true,
     });
   }

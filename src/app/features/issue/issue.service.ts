@@ -10,7 +10,7 @@ import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
-  CALENDAR_TYPE,
+  ICAL_TYPE,
   GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
@@ -54,7 +54,7 @@ export class IssueService {
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
-    [CALENDAR_TYPE]: this._calendarCommonInterfaceService,
+    [ICAL_TYPE]: this._calendarCommonInterfaceService,
   };
 
   // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
@@ -67,7 +67,7 @@ export class IssueService {
     [OPEN_PROJECT_TYPE]: {},
     [GITEA_TYPE]: {},
     [REDMINE_TYPE]: {},
-    [CALENDAR_TYPE]: {},
+    [ICAL_TYPE]: {},
   };
 
   constructor(
@@ -424,7 +424,7 @@ export class IssueService {
       : this._taskService.add(title, isAddToBackLog, taskData);
 
     // TODO more elegant solution for skipped calendar events
-    if (issueProviderKey === CALENDAR_TYPE) {
+    if (issueProviderKey === ICAL_TYPE) {
       this._calendarIntegrationService.skipCalendarEvent(issueDataReduced.id.toString());
     }
 

@@ -25,6 +25,7 @@ import { updateTask } from '../../tasks/store/task.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { FocusModePage } from '../focus-mode.const';
+import { ICAL_TYPE } from '../../issue/issue.const';
 
 @Component({
   selector: 'focus-mode-main',
@@ -160,4 +161,6 @@ export class FocusModeMainComponent implements OnDestroy {
       this.taskService.update(this.task.id, { title: newTitle });
     }
   }
+
+  protected readonly ICAL_TYPE = ICAL_TYPE;
 }

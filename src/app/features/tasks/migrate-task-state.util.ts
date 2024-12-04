@@ -1,6 +1,6 @@
 import { Dictionary } from '@ngrx/entity';
 import { Task, TaskArchive, TaskCopy, TaskState } from './task.model';
-import { GITHUB_TYPE } from '../issue/issue.const';
+import { GITHUB_TYPE, ICAL_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
 import moment from 'moment';
 import { convertToWesternArabic } from '../../util/numeric-converter';
@@ -43,7 +43,14 @@ const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy =
   task = _convertToWesternArabicDateKeys(task);
   task = _updateUndefinedNoteFields(task);
   task = _updateTimeEstimate(task, taskState);
+  task = _updateIssueCalendarToIcal(task);
   return task;
+};
+
+const _updateIssueCalendarToIcal = (task: Task): Task => {
+  return task.issueType === ('CALENDAR' as any)
+    ? { ...task, issueType: ICAL_TYPE }
+    : task;
 };
 
 const _updateUndefinedNoteFields = (task: Task): Task => {

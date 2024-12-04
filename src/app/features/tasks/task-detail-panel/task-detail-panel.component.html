@@ -147,7 +147,7 @@
   <task-detail-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.issueId && task.issueType !=='CALENDAR'"
+    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     [expanded]="isExpandedIssuePanel && !isDialogMode"
     [type]="'panel'"
   >

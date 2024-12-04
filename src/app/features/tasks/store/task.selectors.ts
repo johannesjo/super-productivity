@@ -233,7 +233,7 @@ export const selectMainTasksWithoutTag = createSelector(
 export const selectAllCalendarTaskEventIds = createSelector(
   selectAllTasks,
   (tasks: Task[]): string[] =>
-    tasks.filter((task) => task.issueType === 'CALENDAR').map((t) => t.issueId as string),
+    tasks.filter((task) => task.issueType === 'ICAL').map((t) => t.issueId as string),
 );
 
 export const selectTasksWorkedOnOrDoneFlat = createSelector(

@@ -213,7 +213,7 @@ export class ScheduleEventComponent implements OnInit {
       this._issueService.addTaskFromIssue({
         issueDataReduced: data,
         issueProviderId: data.calProviderId,
-        issueProviderKey: 'CALENDAR',
+        issueProviderKey: 'ICAL',
         isForceDefaultProject: true,
       });
     }

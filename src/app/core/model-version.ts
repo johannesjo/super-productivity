@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
 export enum MODEL_VERSION {
-  TASK = 3.6,
+  // issueProvider model
+  TASK = 4.0,
   // needs to be always the same as TASK !!!
   TASK_ARCHIVE = 3.5,
   // issueProvider model

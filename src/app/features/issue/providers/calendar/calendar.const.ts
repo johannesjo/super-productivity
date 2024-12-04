@@ -4,7 +4,7 @@ import { IssueProviderCalendar } from '../../issue.model';
 import { CalendarProviderCfg } from './calendar.model';
 import { ISSUE_PROVIDER_FF_DEFAULT_PROJECT } from '../../common-issue-form-stuff.const';
 import { IS_ELECTRON } from '../../../../app.constants';
-import { CALENDAR_TYPE } from '../../issue.const';
+import { ICAL_TYPE } from '../../issue.const';
 
 export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
   isEnabled: false,
@@ -14,9 +14,9 @@ export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
 };
 
 export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
-  title: CALENDAR_TYPE,
+  title: ICAL_TYPE,
   help: T.GCF.CALENDARS.HELP,
-  key: 'CALENDAR',
+  key: 'ICAL',
   items: [
     ...(!IS_ELECTRON
       ? [

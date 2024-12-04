@@ -41,7 +41,7 @@ export type IssueProviderKey =
   | 'GITHUB'
   | 'GITLAB'
   | 'CALDAV'
-  | 'CALENDAR'
+  | 'ICAL'
   | 'OPEN_PROJECT'
   | 'GITEA'
   | 'REDMINE';
@@ -103,7 +103,7 @@ export type IssueDataReducedMap = {
         ? GitlabIssue
         : K extends 'CALDAV'
           ? CaldavIssueReduced
-          : K extends 'CALENDAR'
+          : K extends 'ICAL'
             ? CalendarIssueReduced
             : K extends 'OPEN_PROJECT'
               ? OpenProjectWorkPackageReduced
@@ -176,7 +176,7 @@ export interface IssueProviderRedmine extends IssueProviderBase, RedmineCfg {
 }
 
 export interface IssueProviderCalendar extends IssueProviderBase, CalendarProviderCfg {
-  issueProviderKey: 'CALENDAR';
+  issueProviderKey: 'ICAL';
 }
 
 export type IssueProvider =
@@ -203,6 +203,6 @@ export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
             ? IssueProviderRedmine
             : T extends 'CALDAV'
               ? IssueProviderCaldav
-              : T extends 'CALENDAR'
+              : T extends 'ICAL'
                 ? IssueProviderCalendar
                 : never;

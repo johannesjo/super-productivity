@@ -9,6 +9,7 @@ import {
   IssueProviderKey,
   IssueProviderState,
 } from '../issue.model';
+import { ICAL_TYPE } from '../issue.const';
 
 export const selectIssueProviderState = createFeatureSelector<IssueProviderState>(
   ISSUE_PROVIDER_FEATURE_KEY,
@@ -60,7 +61,7 @@ export const selectCalendarProviders = createSelector(
   selectEnabledIssueProviders,
   (issueProviders): IssueProviderCalendar[] =>
     issueProviders.filter(
-      (ip): ip is IssueProviderCalendar => ip.issueProviderKey === 'CALENDAR',
+      (ip): ip is IssueProviderCalendar => ip.issueProviderKey === ICAL_TYPE,
     ),
 );
 

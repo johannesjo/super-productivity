@@ -240,7 +240,7 @@
         <div>
           <button
             (click)="toggleShowDetailPanel()"
-            *ngIf="t.notes|| (t.issueId&&t.issueType!=='CALENDAR') || isSelected()"
+            *ngIf="t.notes|| (t.issueId&&t.issueType!==ICAL_TYPE) || isSelected()"
             title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}}  {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
             [class.closeBtn]="!t.issueWasUpdated && isSelected()"
             class="ico-btn show-additional-info-btn"

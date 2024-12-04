@@ -56,7 +56,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { TaskDetailItemComponent } from './task-additional-info-item/task-detail-item.component';
 import { IssueData, IssueProviderJira, IssueProviderKey } from '../../issue/issue.model';
-import { JIRA_TYPE } from '../../issue/issue.const';
+import { ICAL_TYPE, JIRA_TYPE } from '../../issue/issue.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
@@ -154,7 +154,7 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     this.issueDataTrigger$.pipe(
       switchMap((args) => {
         if (args && args.id && args.type) {
-          if (this._taskData?.issueType === 'CALENDAR') {
+          if (this._taskData?.issueType === 'ICAL') {
             return of(null);
           }
           if (!this._taskData || !this._taskData.issueProviderId) {
@@ -509,4 +509,6 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
       this.focusItem(this.itemEls.first, 0);
     }, 150);
   }
+
+  protected readonly ICAL_TYPE = ICAL_TYPE;
 }

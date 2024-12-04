@@ -64,6 +64,7 @@ import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { isToday } from '../../../../util/is-today.util';
 import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
+import { ICAL_TYPE } from '../../../issue/issue.const';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -568,4 +569,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   isShowAddToToday(): boolean {
     return isShowAddToToday(this.task, this.workContextService.isToday);
   }
+
+  protected readonly ICAL_TYPE = ICAL_TYPE;
 }
