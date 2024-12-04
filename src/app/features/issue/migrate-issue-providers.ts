@@ -1,34 +1,37 @@
-import { IssueProviderState } from './issue.model';
+import { IssueProvider, IssueProviderState } from './issue.model';
+import { isMigrateModel } from '../../util/model-version';
+import { MODEL_VERSION } from '../../core/model-version';
+import { MODEL_VERSION_KEY } from '../../app.constants';
+import { Dictionary } from '@ngrx/entity';
 
 export const migrateIssueProviderState = (
   issueProviderState: IssueProviderState,
 ): IssueProviderState => {
-  return issueProviderState;
+  if (
+    !isMigrateModel(issueProviderState, MODEL_VERSION.ISSUE_PROVIDER, 'IssueProvider')
+  ) {
+    return issueProviderState;
+  }
 
-  // if (!isMigrateModel(issueProviderState, MODEL_VERSION.PROJECT, 'IssueProvider')) {
-  //   return issueProviderState;
-  // }
-  //
-  // const issueProviderEntities: Dictionary<IssueProvider> = { ...issueProviderState.entities };
-  // Object.keys(issueProviderEntities).forEach((key) => {
-  //   issueProviderEntities[key] = _updateThemeModel(issueProviderEntities[key] as IssueProvider);
-  //   issueProviderEntities[key] = _convertToWesternArabicDateKeys(
-  //     issueProviderEntities[key] as IssueProvider,
-  //   );
-  //   issueProviderEntities[key] = _reduceWorkStartEndPrecision(issueProviderEntities[key] as IssueProvider);
-  //
-  //   // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
-  //   issueProviderEntities[key] = _extendIssueProviderDefaults(issueProviderEntities[key] as IssueProvider);
-  //   issueProviderEntities[key] = _migrateIsEnabledForIssueProviders(
-  //     issueProviderEntities[key] as IssueProvider,
-  //   );
-  //   issueProviderEntities[key] = _removeOutdatedData(issueProviderEntities[key] as IssueProvider);
-  // });
-  //
-  // return {
-  //   ..._fixIds(issueProviderState),
-  //   entities: issueProviderEntities,
-  //   // Update model version after all migrations ran successfully
-  //   [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
-  // };
+  const issueProviderEntities: Dictionary<IssueProvider> = {
+    ...issueProviderState.entities,
+  };
+  Object.keys(issueProviderEntities).forEach((key) => {
+    issueProviderEntities[key] = _updateIssueProviderKeyToICAL(
+      issueProviderEntities[key] as IssueProvider,
+    );
+  });
+
+  return {
+    ...issueProviderState,
+    entities: issueProviderEntities,
+    // Update model version after all migrations ran successfully
+    [MODEL_VERSION_KEY]: MODEL_VERSION.ISSUE_PROVIDER,
+  };
+};
+
+const _updateIssueProviderKeyToICAL = (issueProvider: IssueProvider): IssueProvider => {
+  return issueProvider.issueProviderKey === ('CALENDAR' as any)
+    ? ({ ...issueProvider, issueProviderKey: 'ICAL' } as IssueProvider)
+    : issueProvider;
 };

@@ -7,7 +7,7 @@ export enum MODEL_VERSION {
   TASK_ARCHIVE = 3.5,
   // issueProvider model
   PROJECT = 7.0,
-  ISSUE_PROVIDER = 1.0,
+  ISSUE_PROVIDER = 1.1,
   GLOBAL_CONFIG = 3.51,
   METRIC = 1.0,
   SIMPLE_COUNTER = 2.0,

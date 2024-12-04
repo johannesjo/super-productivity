@@ -95,11 +95,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _focusModeService: FocusModeService,
     private readonly _configService: GlobalConfigService,
-  ) {
-    this.isRouteWithRightPanel$.subscribe((v) =>
-      console.log(`isRouteWithRightPanel$`, v),
-    );
-  }
+  ) {}
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
