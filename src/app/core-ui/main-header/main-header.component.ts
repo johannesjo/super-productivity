@@ -68,18 +68,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   isRouteWithSidePanel$: Observable<boolean> = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.url.match(/(tasks|timeline|daily-summary)$/)),
-    startWith(!!this._router.url.match(/(tasks|timeline|daily-summary)$/)),
+    map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
+    startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
   );
   isRouteWithRightPanel$: Observable<boolean> = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.url.match(/(tasks|timeline)$/)),
-    startWith(!!this._router.url.match(/(tasks|timeline)$/)),
-  );
-  isInboxRoute$: Observable<boolean> = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.url.match(/(inbox)$/)),
-    startWith(!!this._router.url.match(/(inbox)$/)),
+    map((event) => !!event.urlAfterRedirects.match(/(tasks)$/)),
+    startWith(!!this._router.url.match(/(tasks)$/)),
   );
 
   private _subs: Subscription = new Subscription();
@@ -100,7 +95,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _focusModeService: FocusModeService,
     private readonly _configService: GlobalConfigService,
-  ) {}
+  ) {
+    this.isRouteWithRightPanel$.subscribe((v) =>
+      console.log(`isRouteWithRightPanel$`, v),
+    );
+  }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();

@@ -44,7 +44,6 @@ export enum TourId {
   DeleteTask = 'DeleteTask',
   Sync = 'Sync',
   Projects = 'Projects',
-  Calendars = 'Calendars',
   ProductivityHelper = 'ProductivityHelper',
   IssueProviders = 'IssueProviders',
   FinishDay = 'FinishDay',
@@ -442,7 +441,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.IssueProviders,
       beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
-      title: 'Issue Integrations',
+      title: 'Issue Integrations & Calendars',
       text: 'You can import tasks from a variety of third party tools. To click on this icon <span class="material-icons">playlist_add</span> in the top right corner.',
       attachTo: {
         element: '.tour-issuePanelTrigger',
@@ -455,8 +454,8 @@ export const SHEPHERD_STEPS = (
     },
     {
       id: TourId.IssueProviders,
-      title: 'Issue Integrations',
-      text: 'To configure an issue provider, click on one of the buttons in the panel. But for now, lets continue.',
+      title: 'Issue Integrations & Calendars',
+      text: 'To configure an issue provider or calendar, click on one of the buttons in the panel. But for now, lets continue.',
       buttons: [{ ...NEXT_BTN, text: 'Alright!' }],
     },
 
@@ -536,52 +535,6 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Configure Sync',
       text: 'This covers syncing. If you have any questions you can always ask them <a href="https://github.com/johannesjo/super-productivity/discussions">on the projects GitHub page</a>. ',
-      buttons: [NEXT_BTN],
-    },
-
-    // ------------------------------
-    {
-      id: TourId.Calendars,
-      when: {
-        show: () => {
-          router.navigate(['config']).then(() => {
-            shepherdService.next();
-          });
-        },
-      },
-    },
-    {
-      title: 'Connect Calendars',
-      text: `On the settings page, you can also find the <strong>Calendars</strong> section. ${CLICK_B} on it!`,
-      beforeShowPromise: () => promiseTimeout(500),
-      attachTo: {
-        element: '.section-calendarIntegration',
-        on: 'top',
-      },
-      when: (() => {
-        let intId: number;
-        return {
-          show: () => {
-            intId = waitForEl('.tour-calendarSectionOpen', () => shepherdService.next());
-          },
-          hide: () => {
-            window.clearInterval(intId);
-          },
-        };
-      })(),
-      scrollTo: true,
-    },
-    {
-      title: 'Connect Calendars',
-      // eslint-disable-next-line max-len
-      text: `<p>You will need a link or file path to your calendar to show its events when they are due and within the timeline. You can load calendar data as iCal.</p><ul>
-<li><a target="_blank" href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Get iCal Link for Google Calendar</a></li>
-<li><a target="_blank" href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Get iCal Link for Outlook 365</a></li>
-</ul>`,
-      attachTo: {
-        element: '.config-section:nth-of-type(6)',
-        on: 'top',
-      },
       buttons: [NEXT_BTN],
     },
 
