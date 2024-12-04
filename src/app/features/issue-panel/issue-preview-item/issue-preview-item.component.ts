@@ -28,6 +28,7 @@ import { first } from 'rxjs/operators';
 export class IssuePreviewItemComponent {
   private _issueService = inject(IssueService);
 
+  isNoLink = input<boolean>(false);
   issueProviderId = input.required<string>();
   itemData = input.required<SearchResultItem>();
   addIssue = output<SearchResultItem>();

@@ -1,0 +1,30 @@
+@if (isLoading()) {
+<div class="spinner">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>
+} @else if (error()) {
+<error-card
+  [errorTxt]="error()"
+  [actionAdvice]="'Check your config!'"
+></error-card>
+} @else if (!agendaItems()?.length) {
+<div class="empty">No items found (already added are not shown)</div>
+} @else {
+<div class="agenda">
+  @for (day of agendaItems(); track day.dayStr) {
+  <div class="agenda-day">
+    <h4>{{ day.dayStr }}</h4>
+    <div class="item-list">
+      @for (item of day.itemsForDay; track item.issueData.id) {
+      <issue-preview-item
+        [isNoLink]="true"
+        [issueProviderId]="issueProvider().id"
+        [itemData]="item"
+        (addIssue)="addIssue($event)"
+      ></issue-preview-item>
+      }
+    </div>
+  </div>
+  }
+</div>
+}

@@ -131,6 +131,7 @@ export class CalendarIntegrationService {
     calProvider: IssueProviderCalendar,
     start = getStartOfDayTimestamp(),
     end = getEndOfDayTimestamp(),
+    isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
     console.log('REQUEST EVENTS', calProvider, start, end);
 
@@ -152,6 +153,9 @@ export class CalendarIntegrationService {
             errTxt: err?.toString() || err?.status || err?.message || 'UNKNOWN :(',
           },
         });
+        if (isForwardError) {
+          throw new Error(err);
+        }
         return of([]);
       }),
     );
@@ -159,8 +163,14 @@ export class CalendarIntegrationService {
 
   requestEventsForSchedule$(
     calProvider: IssueProviderCalendar,
+    isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
-    return this.requestEvents$(calProvider, Date.now(), Date.now() + ONE_MONTHS);
+    return this.requestEvents$(
+      calProvider,
+      Date.now(),
+      Date.now() + ONE_MONTHS,
+      isForwardError,
+    );
   }
 
   private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {

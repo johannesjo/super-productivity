@@ -31,6 +31,14 @@ header {
   text-overflow: ellipsis;
 }
 
+.title {
+  white-space: nowrap;
+}
+
+.default-project {
+  min-width: 70px;
+}
+
 .arrow {
   margin: 0 $s;
   min-width: 24px;

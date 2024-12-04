@@ -23,7 +23,11 @@
   <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
 </div>
 }
+<!---->
+@if(ip.issueProviderKey === 'ICAL') {
+<issue-panel-calendar-agenda [issueProvider]="ip"></issue-panel-calendar-agenda>
 
+} @else {
 <form
   class="example-form"
   style="width: 100%; margin: 8px 0 16px"
@@ -89,7 +93,8 @@
     <!--    }-->
   </mat-form-field>
 </form>
-
+}
+<!---->
 @if (isLoading()) {
 <div class="spinner">
   <mat-spinner diameter="50"></mat-spinner>

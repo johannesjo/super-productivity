@@ -44,6 +44,7 @@ import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
 import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-provider-help-link';
 import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
+import { IssuePanelCalendarAgendaComponent } from '../issue-panel-calendar-agenda/issue-panel-calendar-agenda.component';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -57,6 +58,7 @@ import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
     FormsModule,
     ErrorCardComponent,
     NgClass,
+    IssuePanelCalendarAgendaComponent,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',

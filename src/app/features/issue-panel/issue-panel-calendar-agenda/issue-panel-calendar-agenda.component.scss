@@ -1,0 +1,24 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+h4 {
+  text-align: center;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.agenda {
+  margin-top: 24px;
+  gap: 8px;
+}
+
+.agenda-day {
+  margin-bottom: 16px;
+
+  issue-preview-item {
+    margin-bottom: 8px;
+  }
+}

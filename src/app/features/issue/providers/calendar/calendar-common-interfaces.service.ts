@@ -67,7 +67,9 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
 
   searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg) => this._calendarIntegrationService.requestEventsForSchedule$(cfg)),
+      switchMap((cfg) =>
+        this._calendarIntegrationService.requestEventsForSchedule$(cfg, true),
+      ),
       map((calEvents) =>
         calEvents
           .filter((calEvent) =>
