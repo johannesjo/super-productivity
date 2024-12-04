@@ -1306,14 +1306,10 @@
       "BROWSER_WARNING": "Due to cross origin restrictions <b>this will likely NOT work with the Browser version of Super Productivity.<br /> Please <a href=\"https://super-productivity.com/download/\">download the desktop version</a> to use this feature!</b>",
       "CAL_PATH": "Url of the iCal source",
       "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
-      "CAL_PROVIDERS_ADD": "Add Calendar iCal source",
-      "CAL_PROVIDERS_INFO": "You can load calendar data as iCal (e.g. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). The data will be integrated in the schedule and you will be prompted to create tasks for calendar events, if they are due.",
       "CHECK_UPDATES": "Check for remote updates every X",
       "DEFAULT_PROJECT": "Default Project for added calendar tasks",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
-      "ICON": "Icon for Schedule",
-      "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)",
-      "TITLE": "Calendars"
+      "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)"
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
