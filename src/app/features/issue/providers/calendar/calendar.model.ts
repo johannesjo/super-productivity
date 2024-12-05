@@ -4,6 +4,7 @@ import { CalendarIntegrationEvent } from '../../../calendar-integration/calendar
 
 export interface CalendarProviderCfg extends BaseIssueProviderCfg {
   icalUrl: string;
+  isAutoImportForCurrentDay: boolean;
   icon?: string;
   checkUpdatesEvery: number;
   showBannerBeforeThreshold: null | number;

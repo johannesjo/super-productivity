@@ -7,9 +7,10 @@ import { IS_ELECTRON } from '../../../../app.constants';
 
 export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
   isEnabled: false,
+  icalUrl: '',
+  isAutoImportForCurrentDay: false,
   checkUpdatesEvery: 2 * 60 * 60000,
   showBannerBeforeThreshold: 2 * 60 * 60000,
-  icalUrl: '',
 };
 
 export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
@@ -39,6 +40,16 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
       },
     },
     ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
+    {
+      type: 'checkbox',
+      key: 'isAutoImportForCurrentDay',
+      templateOptions: {
+        type: 'url',
+        // TODO translation
+        // label: T.GCF.CALENDARS.CAL_PATH,
+        label: 'Auto import events as tasks for current day',
+      },
+    },
     {
       type: 'duration',
       key: 'checkUpdatesEvery',

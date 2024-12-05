@@ -1,4 +1,4 @@
-import { Inject, Injectable, LOCALE_ID } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { distinctUntilChanged, first, map, switchMap, tap } from 'rxjs/operators';
@@ -7,7 +7,6 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 import { BannerService } from '../../../core/banner/banner.service';
 import { DatePipe } from '@angular/common';
 import { CalendarIntegrationEvent } from '../calendar-integration.model';
-import { TaskService } from '../../tasks/task.service';
 import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -19,6 +18,7 @@ import { distinctUntilChangedObject } from '../../../util/distinct-until-changed
 import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../../issue/issue.model';
 import { IssueService } from '../../issue/issue.service';
+import { isToday } from '../../../util/is-today.util';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -55,6 +55,21 @@ export class CalendarIntegrationEffects {
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
                     tap(() => {
+                      if (calProvider.isAutoImportForCurrentDay) {
+                        allEventsToday.forEach((calEv) => {
+                          if (isToday(calEv.start)) {
+                            this._issueService.addTaskFromIssue({
+                              issueProviderKey: 'ICAL',
+                              issueProviderId: calProvider.id,
+                              issueDataReduced: calEv,
+                              // from this context we should always add to the default project rather than current context
+                              isForceDefaultProject: true,
+                            });
+                          }
+                        });
+                        // this._issueService.addTaskFromIssue()
+                      }
+
                       const eventsToShowBannerFor = allEventsToday.filter((calEv) =>
                         isCalenderEventDue(
                           calEv,
@@ -94,11 +109,9 @@ export class CalendarIntegrationEffects {
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
     private _bannerService: BannerService,
     private _datePipe: DatePipe,
-    private _taskService: TaskService,
     private _calendarIntegrationService: CalendarIntegrationService,
     private _navigateToTaskService: NavigateToTaskService,
     private _issueService: IssueService,
-    @Inject(LOCALE_ID) private locale: string,
   ) {}
 
   private _addEvToShow(
