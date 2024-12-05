@@ -1,14 +1,8 @@
 import { Dictionary } from '@ngrx/entity';
 import { Project, ProjectState } from './project.model';
 import { DEFAULT_PROJECT } from './project.const';
-import {
-  MODEL_VERSION_KEY,
-  THEME_COLOR_MAP,
-  WORKLOG_DATE_STR_FORMAT,
-} from '../../app.constants';
+import { MODEL_VERSION_KEY, THEME_COLOR_MAP } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
-import moment from 'moment';
-import { convertToWesternArabic } from '../../util/numeric-converter';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { MODEL_VERSION } from '../../core/model-version';
@@ -22,9 +16,6 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   const projectEntities: Dictionary<Project> = { ...projectState.entities };
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key] as Project);
-    projectEntities[key] = _convertToWesternArabicDateKeys(
-      projectEntities[key] as Project,
-    );
     projectEntities[key] = _reduceWorkStartEndPrecision(projectEntities[key] as Project);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
@@ -65,27 +56,6 @@ const _removeOutdatedData = (project: Project): Project => {
   return copy;
 };
 
-const __convertToWesternArabicDateKeys = (workStartEnd: {
-  [key: string]: any;
-}): {
-  [key: string]: any;
-} => {
-  return workStartEnd
-    ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
-        const date = moment(convertToWesternArabic(dateKey));
-        if (!date.isValid()) {
-          throw new Error(
-            'Cannot migrate invalid non western arabic date string ' + dateKey,
-          );
-        }
-        const westernArabicKey = date.locale('en').format(WORKLOG_DATE_STR_FORMAT);
-        return {
-          ...acc,
-          [westernArabicKey]: workStartEnd[dateKey],
-        };
-      }, {})
-    : workStartEnd;
-};
 const __reduceWorkStartEndPrecision = (workStartEnd: {
   [key: string]: any;
 }): {
@@ -106,16 +76,6 @@ const _reduceWorkStartEndPrecision = (project: Project): Project => {
     ...project,
     workStart: __reduceWorkStartEndPrecision(project.workStart),
     workEnd: __reduceWorkStartEndPrecision(project.workEnd),
-  };
-};
-
-const _convertToWesternArabicDateKeys = (project: Project): Project => {
-  return {
-    ...project,
-    workStart: __convertToWesternArabicDateKeys(project.workStart),
-    workEnd: __convertToWesternArabicDateKeys(project.workEnd),
-    breakNr: __convertToWesternArabicDateKeys(project.breakNr),
-    breakTime: __convertToWesternArabicDateKeys(project.breakTime),
   };
 };
 

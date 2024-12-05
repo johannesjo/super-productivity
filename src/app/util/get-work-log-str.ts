@@ -1,8 +1,10 @@
-import moment from 'moment';
+// export const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
 
-import { WORKLOG_DATE_STR_FORMAT } from '../app.constants';
-
+// YYYY-MM-DD is the format we use
 export const getWorklogStr = (date: Date | number | string = new Date()): string => {
-  // NOTE: locale is important as it might break a lot of stuff for non arabic numbers
-  return moment(date).locale('en').format(WORKLOG_DATE_STR_FORMAT);
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
