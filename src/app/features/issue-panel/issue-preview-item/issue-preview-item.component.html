@@ -6,9 +6,9 @@
   <mat-icon>add</mat-icon>
 </button>
 
-<div class="title">{{ itemData().title }}</div>
+<div class="title">{{ customTitleStr() || itemData().title }}</div>
 
-@if(!isNoLink()){
+@if(itemData().issueType !== ICAL_TYPE) {
 <button
   class="open-issue"
   mat-icon-button

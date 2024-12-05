@@ -17,9 +17,9 @@
     <div class="item-list">
       @for (item of day.itemsForDay; track item.issueData.id) {
       <issue-preview-item
-        [isNoLink]="true"
         [issueProviderId]="issueProvider().id"
         [itemData]="item"
+        [customTitleStr]="(item.issueData.start|date:'shortTime') + ' – ' + item.issueData.title"
         (addIssue)="addIssue($event)"
       ></issue-preview-item>
       }

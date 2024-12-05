@@ -12,6 +12,7 @@ import { SearchResultItem } from '../../issue/issue.model';
 import { isIssueDone } from '../../issue/mapping-helper/is-issue-done';
 import { IssueService } from '../../issue/issue.service';
 import { first } from 'rxjs/operators';
+import { ICAL_TYPE } from '../../issue/issue.const';
 
 @Component({
   selector: 'issue-preview-item',
@@ -26,15 +27,16 @@ import { first } from 'rxjs/operators';
   },
 })
 export class IssuePreviewItemComponent {
+  public readonly ICAL_TYPE = ICAL_TYPE;
   private _issueService = inject(IssueService);
 
-  isNoLink = input<boolean>(false);
   issueProviderId = input.required<string>();
   itemData = input.required<SearchResultItem>();
   addIssue = output<SearchResultItem>();
   isIssueDone = computed(() => {
     return isIssueDone(this.itemData());
   });
+  customTitleStr = input<string | undefined>();
 
   async openIssue(): Promise<void> {
     const url = await this._issueService
