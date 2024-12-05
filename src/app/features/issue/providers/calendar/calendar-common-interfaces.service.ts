@@ -11,7 +11,7 @@ import {
 import { CalendarIntegrationService } from '../../../calendar-integration/calendar-integration.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueProviderService } from '../../issue-provider.service';
-import { CalendarIssueReduced, CalendarProviderCfg } from './calendar.model';
+import { ICalIssueReduced, CalendarProviderCfg } from './calendar.model';
 import { HttpClient } from '@angular/common/http';
 import { ICAL_TYPE } from '../../issue.const';
 
@@ -50,7 +50,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   }
 
   getAddTaskData(
-    calEv: CalendarIssueReduced,
+    calEv: ICalIssueReduced,
   ): Partial<Readonly<TaskCopy>> & { title: string } {
     return {
       title: calEv.title,

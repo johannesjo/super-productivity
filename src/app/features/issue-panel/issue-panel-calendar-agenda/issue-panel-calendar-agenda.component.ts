@@ -15,7 +15,7 @@ import { IssueService } from '../../issue/issue.service';
 import { IssueProvider, SearchResultItem } from '../../issue/issue.model';
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { T } from 'src/app/t.const';
-import { CalendarIssueReduced } from '../../issue/providers/calendar/calendar.model';
+import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model';
 import { getErrorTxt } from 'src/app/util/get-error-text';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
@@ -43,7 +43,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   agendaItems = signal<
     {
       dayStr: string;
-      itemsForDay: SearchResultItem[];
+      itemsForDay: SearchResultItem<'ICAL'>[];
     }[]
   >([]);
 
@@ -103,7 +103,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       .subscribe(
         (items: SearchResultItem[]) => {
           this.isLoading.set(false);
-          this._setAgendaItems(items);
+          this._setAgendaItems(items as SearchResultItem<'ICAL'>[]);
         },
         (e) => {
           this.isLoading.set(false);
@@ -114,10 +114,10 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       );
   }
 
-  private _setAgendaItems(items: SearchResultItem[]): void {
+  private _setAgendaItems(items: SearchResultItem<'ICAL'>[]): void {
     const agenda = items.reduce(
       (acc, item) => {
-        const date = getWorklogStr((item.issueData as CalendarIssueReduced).start);
+        const date = getWorklogStr((item.issueData as ICalIssueReduced).start);
 
         const existingDay = acc.find((day) => day.dayStr === date);
         if (existingDay) {
@@ -130,7 +130,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
         }
         return acc;
       },
-      [] as { dayStr: string; itemsForDay: SearchResultItem[] }[],
+      [] as { dayStr: string; itemsForDay: SearchResultItem<'ICAL'>[] }[],
     );
 
     this.agendaItems.set(agenda.sort((a, b) => (a.dayStr > b.dayStr ? 1 : -1)));

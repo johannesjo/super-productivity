@@ -27,8 +27,8 @@ import { RedmineIssue } from './providers/redmine/redmine-issue/redmine-issue.mo
 import { EntityState } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import {
-  CalendarIssue,
-  CalendarIssueReduced,
+  ICalIssue,
+  ICalIssueReduced,
   CalendarProviderCfg,
 } from './providers/calendar/calendar.model';
 
@@ -79,7 +79,7 @@ export type IssueData =
   | GithubIssue
   | GitlabIssue
   | CaldavIssue
-  | CalendarIssue
+  | ICalIssue
   | OpenProjectWorkPackage
   | GiteaIssue
   | RedmineIssue;
@@ -90,7 +90,7 @@ export type IssueDataReduced =
   | GitlabIssue
   | OpenProjectWorkPackageReduced
   | CaldavIssueReduced
-  | CalendarIssueReduced
+  | ICalIssueReduced
   | GiteaIssue
   | RedmineIssue;
 
@@ -104,7 +104,7 @@ export type IssueDataReducedMap = {
         : K extends 'CALDAV'
           ? CaldavIssueReduced
           : K extends 'ICAL'
-            ? CalendarIssueReduced
+            ? ICalIssueReduced
             : K extends 'OPEN_PROJECT'
               ? OpenProjectWorkPackageReduced
               : K extends 'GITEA'

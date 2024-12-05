@@ -21,8 +21,8 @@ export type LegacyCalendarProvider = Readonly<{
 
 export type CalendarContextInfoTarget = 'GOOGLE' | 'OUTLOOK365' | 'OTHER';
 
-export interface CalendarIssue extends CalendarIntegrationEvent {
+export interface ICalIssue extends CalendarIntegrationEvent {
   id: string;
 }
 
-export type CalendarIssueReduced = CalendarIssue;
+export type ICalIssueReduced = ICalIssue;
