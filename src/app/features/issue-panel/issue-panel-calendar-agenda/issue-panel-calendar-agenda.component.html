@@ -13,7 +13,7 @@
 <div class="agenda">
   @for (day of agendaItems(); track day.dayStr) {
   <div class="agenda-day">
-    <h4>{{ day.dayStr }}</h4>
+    <h4>{{ day.dayStr|date:'shortDate' }}</h4>
     <div class="item-list">
       @for (item of day.itemsForDay; track item.issueData.id) {
       <issue-preview-item

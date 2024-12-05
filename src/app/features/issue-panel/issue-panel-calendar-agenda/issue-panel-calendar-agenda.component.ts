@@ -17,11 +17,13 @@ import { CdkDropList } from '@angular/cdk/drag-drop';
 import { T } from 'src/app/t.const';
 import { CalendarIssueReduced } from '../../issue/providers/calendar/calendar.model';
 import { getErrorTxt } from 'src/app/util/get-error-text';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
   standalone: true,
-  imports: [ErrorCardComponent, IssuePreviewItemComponent, MatProgressSpinner],
+  imports: [ErrorCardComponent, IssuePreviewItemComponent, MatProgressSpinner, DatePipe],
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -115,9 +117,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   private _setAgendaItems(items: SearchResultItem[]): void {
     const agenda = items.reduce(
       (acc, item) => {
-        const date = new Date(
-          (item.issueData as CalendarIssueReduced).start,
-        ).toLocaleDateString();
+        const date = getWorklogStr((item.issueData as CalendarIssueReduced).start);
 
         const existingDay = acc.find((day) => day.dayStr === date);
         if (existingDay) {
@@ -133,6 +133,6 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       [] as { dayStr: string; itemsForDay: SearchResultItem[] }[],
     );
 
-    this.agendaItems.set(agenda);
+    this.agendaItems.set(agenda.sort((a, b) => (a.dayStr > b.dayStr ? 1 : -1)));
   }
 }
