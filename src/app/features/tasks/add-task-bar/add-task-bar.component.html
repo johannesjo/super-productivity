@@ -4,16 +4,16 @@
 <form
   (submit)="addTask()"
   @blendInOut
-  [class.isElevated]="isElevated"
-  [class.mat-elevation-z3]="!isElevated"
-  [class.mat-elevation-z4]="isElevated"
+  [class.isElevated]="isElevated()"
+  [class.mat-elevation-z3]="!isElevated()"
+  [class.mat-elevation-z4]="isElevated()"
   class="add-task-form"
   matAutocompleteOrigin
   #origin="matAutocompleteOrigin"
 >
   <div class="input-wrapper">
     <div
-      *ngIf="(isLoading$|async)"
+      *ngIf="(isLoading())"
       class="spinner"
     >
       <mat-spinner diameter="50"></mat-spinner>
@@ -21,20 +21,20 @@
 
     <input
       #inputEl
-      [tabindex]="tabindex"
+      [tabindex]="tabindex()"
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
       [matAutocompleteConnectedTo]="origin"
       [mentionConfig]="mentionConfig$|async"
       spellcheck="false"
-      [placeholder]="(doubleEnterCount > 0)
+      [placeholder]="(doubleEnterCount() > 0)
          ? (T.F.TASK.ADD_TASK_BAR.START|translate)
-         : isAddToBottom
-           ? isAddToBacklog
+         : isAddToBottom()
+           ? isAddToBacklog()
             ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_BACKLOG|translate)
             : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_TODAY|translate)
-           : isAddToBacklog
+           : isAddToBacklog()
             ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_BACKLOG|translate)
             : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_TODAY|translate)"
       matInput
@@ -51,34 +51,43 @@
           type="submit"
           mat-icon-button
         >
-          <mat-icon *ngIf="activatedIssueTask">add_box</mat-icon>
-          <mat-icon *ngIf="!activatedIssueTask">add</mat-icon>
+          @if(activatedIssueTask){
+          <mat-icon>add_box</mat-icon>
+          }@else {
+          <mat-icon>add</mat-icon>
+          }
         </button>
       </div>
 
       <button
-        (click)="isAddToBottom=!isAddToBottom"
+        (click)="isAddToBottom.set(!isAddToBottom())"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TOP_OR_BOTTOM|translate"
         matTooltipPosition="above"
         class="switch-add-to-bot-btn"
         mat-icon-button
         type="button"
       >
-        <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
-        <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
+        @if(isAddToBottom()){
+        <mat-icon>vertical_align_bottom</mat-icon>
+        }@else {
+        <mat-icon>vertical_align_top</mat-icon>
+        }
       </button>
 
       <button
         *ngIf="isAddToBacklogAvailable$|async"
-        (click)="isAddToBacklog=!isAddToBacklog"
+        (click)="isAddToBacklog.set(!isAddToBacklog())"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"
         matTooltipPosition="above"
         class="switch-add-to-btn"
         mat-icon-button
         type="button"
       >
-        <mat-icon *ngIf="isAddToBacklog">arrow_downward</mat-icon>
-        <mat-icon *ngIf="!isAddToBacklog">arrow_upward</mat-icon>
+        @if(isAddToBacklog()){
+        <mat-icon>arrow_downward</mat-icon>
+        }@else {
+        <mat-icon>arrow_upward</mat-icon>
+        }
       </button>
     </div>
   </div>
@@ -144,7 +153,7 @@
       <tag
         *ngIf="item.ctx"
         [tag]="item.ctx"
-        [isHideTitle]="isHideTagTitles"
+        [isHideTitle]="isHideTagTitles()"
       ></tag>
       <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
     </mat-option>

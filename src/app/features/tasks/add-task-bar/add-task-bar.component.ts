@@ -1,19 +1,18 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
+  input,
   OnDestroy,
-  Output,
+  output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { T } from '../../../t.const';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -38,22 +37,23 @@ import { map } from 'rxjs/operators';
   animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
-  @Input() tabindex: number = 0;
-  @Input() isDoubleEnterMode: boolean = false;
-  @Input() isElevated: boolean = false;
-  @Input() isHideTagTitles: boolean = false;
-  @Input() isDisableAutoFocus: boolean = false;
-  @Input() planForDay?: string;
-  @Output() blurred: EventEmitter<any> = new EventEmitter();
-  @Output() done: EventEmitter<any> = new EventEmitter();
+  tabindex = input<number>(0);
+  isDoubleEnterMode = input<boolean>(false);
+  isElevated = input<boolean>(false);
+  isHideTagTitles = input<boolean>(false);
+  isDisableAutoFocus = input<boolean>(false);
+  planForDay = input<string | undefined>(undefined);
+  blurred = output<void>();
+  done = output<void>();
+
+  isAddToBottom = signal(false);
+  isAddToBacklog = signal(false);
+  isLoading = signal(false);
+  doubleEnterCount = signal(0);
 
   @ViewChild('inputEl', { static: true }) inputEl?: ElementRef;
 
-  isAddToBottom: boolean = false;
-
   T: typeof T = T;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  doubleEnterCount: number = 0;
 
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
@@ -73,27 +73,24 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
 
-  isAddToBacklog: boolean = false;
-
   private _isAddInProgress?: boolean;
+  private _lastAddedTaskId?: string;
+
   private _delayBlurTimeout?: number;
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
-  private _lastAddedTaskId?: string;
-  private _subs: Subscription = new Subscription();
 
   constructor(
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
-    private _cd: ChangeDetectorRef,
     private _store: Store,
     private _addTaskBarService: AddTaskBarService,
   ) {}
 
   ngAfterViewInit(): void {
-    this.isAddToBottom = !!this.planForDay || this.isAddToBottom;
-    if (!this.isDisableAutoFocus) {
+    this.isAddToBottom.set(!!this.planForDay() || this.isAddToBottom());
+    if (!this.isDisableAutoFocus()) {
       this._focusInput();
     }
 
@@ -105,12 +102,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             this.blurred.emit();
             this.activatedIssueTask$.next(null);
           } else if (ev.key === '1' && ev.ctrlKey) {
-            this.isAddToBottom = !this.isAddToBottom;
-            this._cd.detectChanges();
+            this.isAddToBottom.set(!this.isAddToBottom());
             ev.preventDefault();
           } else if (ev.key === '2' && ev.ctrlKey) {
-            this.isAddToBacklog = !this.isAddToBacklog;
-            this._cd.detectChanges();
+            this.isAddToBacklog.set(!this.isAddToBacklog());
             ev.preventDefault();
           }
         },
@@ -145,7 +140,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (this._lastAddedTaskId) {
       this._taskService.focusTaskIfPossible(this._lastAddedTaskId);
     }
-    this._subs.unsubscribe();
   }
 
   onOptionActivated(val: any): void {
@@ -177,10 +171,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
           this._delayBlurTimeout = window.setTimeout(() => {
-            this.blurred.emit(ev);
+            this.blurred.emit();
           }, 300);
         } else {
-          this.blurred.emit(ev);
+          this.blurred.emit();
         }
       }, 220);
     }
@@ -199,18 +193,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     } else if (typeof item === 'string') {
       const newTaskStr = item as string;
       if (newTaskStr.length > 0) {
-        this.doubleEnterCount = 0;
+        this.doubleEnterCount.set(0);
         this._lastAddedTaskId = this._taskService.add(
           newTaskStr,
-          this.isAddToBacklog,
+          this.isAddToBacklog(),
           {},
-          this.isAddToBottom,
+          this.isAddToBottom(),
         );
-      } else if (this.doubleEnterCount > 0) {
+      } else if (this.doubleEnterCount() > 0) {
         this.blurred.emit();
         this.done.emit();
-      } else if (this.isDoubleEnterMode) {
-        this.doubleEnterCount++;
+      } else if (this.isDoubleEnterMode()) {
+        this.doubleEnterCount.set(this.doubleEnterCount() + 1);
       }
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
       this._lastAddedTaskId =
@@ -221,7 +215,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       this._planForDayAfterAddTaskIfConfigured(this._lastAddedTaskId);
     }
 
-    if (this.planForDay) {
+    if (this.planForDay()) {
       this.blurred.emit();
     } else {
       this._focusInput();
@@ -234,7 +228,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
-    const planForDay = this.planForDay;
+    const planForDay = this.planForDay();
     if (planForDay) {
       this._taskService.getByIdOnce$(taskId).subscribe((task) => {
         if (getWorklogStr() !== planForDay) {
@@ -242,7 +236,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             PlannerActions.planTaskForDay({
               task: task,
               day: planForDay,
-              isAddToTop: !this.isAddToBottom,
+              isAddToTop: !this.isAddToBottom(),
             }),
           );
         }
