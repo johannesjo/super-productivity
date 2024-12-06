@@ -28,6 +28,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { MentionConfig } from 'angular-mentions/lib/mention-config';
 import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
+import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
 
 @Component({
   selector: 'add-task-bar',
@@ -48,6 +49,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   isAddToBottom = signal(false);
   isAddToBacklog = signal(false);
+  isSearchIssueProviders = signal(false);
   isLoading = signal(false);
   doubleEnterCount = signal(0);
 
@@ -72,6 +74,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
+
+  isSearchIssueProvidersAvailable$: Observable<boolean> = this._store
+    .select(selectEnabledIssueProviders)
+    .pipe(map((issueProviders) => issueProviders.length > 0));
 
   private _isAddInProgress?: boolean;
   private _lastAddedTaskId?: string;
@@ -105,6 +111,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             this.isAddToBottom.set(!this.isAddToBottom());
             ev.preventDefault();
           } else if (ev.key === '2' && ev.ctrlKey) {
+            this.isSearchIssueProviders.set(!this.isSearchIssueProviders());
+            ev.preventDefault();
+          } else if (ev.key === '3' && ev.ctrlKey) {
             this.isAddToBacklog.set(!this.isAddToBacklog());
             ev.preventDefault();
           }

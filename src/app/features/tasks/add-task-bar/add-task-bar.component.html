@@ -75,6 +75,22 @@
       </button>
 
       <button
+        *ngIf="isSearchIssueProvidersAvailable$|async"
+        (click)="isSearchIssueProviders.set(!isSearchIssueProviders())"
+        [matTooltip]="'Toggle searching issue providers'"
+        matTooltipPosition="above"
+        class="switch-add-to-btn"
+        mat-icon-button
+        type="button"
+      >
+        @if(isSearchIssueProviders()){
+        <mat-icon>youtube_searched_for</mat-icon>
+        }@else {
+        <mat-icon>search_off</mat-icon>
+        }
+      </button>
+
+      <button
         *ngIf="isAddToBacklogAvailable$|async"
         (click)="isAddToBacklog.set(!isAddToBacklog())"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"
