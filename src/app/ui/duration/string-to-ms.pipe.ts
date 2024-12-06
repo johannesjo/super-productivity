@@ -9,26 +9,40 @@ export const stringToMs = (strValue: string, args?: any): number => {
   let h: number | undefined;
   let m: number | undefined;
   let s: number | undefined;
+  let previousLastChar: string | undefined;
 
-  const arrValue = strValue.split(' ');
+  // Add spaces after letters to ease further splitting.
+  strValue = strValue.replace(/([a-zA-Z]+)\s*/g, '$1 ');
+  // Replace commas by dots to allow using them as float separator.
+  strValue = strValue.replace(',', '.');
+
+  const arrValue = strValue.trim().split(' ');
 
   arrValue.forEach((val: string) => {
     if (val.length > 0) {
-      const lastChar = val.slice(-1);
-      const amount = parseInt(val.slice(0, val.length - 1), 10);
+      const lastChar = val.slice(-1).toLowerCase();
+      const amount = parseFloat(val);
 
       if (lastChar === 's') {
         s = amount;
-      }
-      if (lastChar === 'm') {
+      } else if (lastChar === 'm') {
         m = amount;
-      }
-      if (lastChar === 'h') {
+      } else if (lastChar === 'h') {
         h = amount;
-      }
-      if (lastChar === 'd') {
+      } else if (lastChar === 'd') {
         d = amount;
+      } else {
+        if (previousLastChar === 's') {
+          // Don't track milliseconds.
+        } else if (previousLastChar === 'm') {
+          s = amount;
+        } else if (previousLastChar === 'h') {
+          m = amount;
+        } else if (previousLastChar === 'd') {
+          h = amount;
+        }
       }
+      previousLastChar = lastChar;
     }
   });
 
