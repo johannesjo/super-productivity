@@ -45,9 +45,13 @@ export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => 
     data.project.ids.find((id) => data.project.entities[id]?.issueIntegrationCfgs)
   ) {
     newData = migrateIssueProvidersFromProjects(newData);
-    if (data.globalConfig?.calendarIntegration?.calendarProviders?.length) {
-      newData = migrateIssueProvidersFromCalendars(newData);
-    }
+  }
+  if (
+    (!data.issueProvider ||
+      (!data.issueProvider[MODEL_VERSION_KEY] && !data.issueProvider.ids.length)) &&
+    data.globalConfig?.calendarIntegration?.calendarProviders?.length
+  ) {
+    newData = migrateIssueProvidersFromCalendars(newData);
   }
 
   if (!data.note[MODEL_VERSION_KEY]) {
