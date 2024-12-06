@@ -14,6 +14,7 @@ export const IssueProviderActions = createActionGroup({
     'Upsert IssueProviders': props<{ issueProviders: IssueProvider[] }>(),
     'Update IssueProvider': props<{ issueProvider: Update<IssueProvider> }>(),
     'Update IssueProviders': props<{ issueProviders: Update<IssueProvider>[] }>(),
+    'Sort IssueProviders First': props<{ ids: string[] }>(),
     'Delete IssueProvider': props<{ id: string }>(),
     'Delete IssueProviders': props<{ ids: string[] }>(),
     'Clear IssueProviders': emptyProps(),

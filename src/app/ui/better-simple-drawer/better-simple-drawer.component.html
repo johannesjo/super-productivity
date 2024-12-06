@@ -6,7 +6,7 @@
 </div>
 
 <div
-  (swiperight)="close()"
+  (swiperight)="IS_TOUCH_PRIMARY && close()"
   [style]="sideStyle"
   class="side"
   (transitionend)="updateStyleAfterTransition()"

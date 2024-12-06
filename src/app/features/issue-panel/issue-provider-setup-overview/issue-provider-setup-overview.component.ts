@@ -16,11 +16,14 @@ import {
 } from '../../issue/mapping-helper/get-issue-provider-tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { moveItemInArray } from 'src/app/util/move-item-in-array';
+import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 
 @Component({
   selector: 'issue-provider-setup-overview',
   standalone: true,
-  imports: [UiModule, MatIcon, TranslateModule, IssueModule],
+  imports: [UiModule, MatIcon, TranslateModule, IssueModule, CdkDropList, CdkDrag],
   templateUrl: './issue-provider-setup-overview.component.html',
   styleUrl: './issue-provider-setup-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,5 +65,17 @@ export class IssueProviderSetupOverviewComponent {
         calendarContextInfoTarget,
       },
     });
+  }
+
+  drop(ev: CdkDragDrop<any[]>): void {
+    ev.event.preventDefault();
+    ev.event.stopPropagation();
+    const currentValue = this.issueProvidersMapped();
+    const newItems = moveItemInArray(currentValue, ev.previousIndex, ev.currentIndex);
+    this._store.dispatch(
+      IssueProviderActions.sortIssueProvidersFirst({
+        ids: newItems.map((p) => p.issueProvider.id),
+      }),
+    );
   }
 }

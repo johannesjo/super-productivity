@@ -96,4 +96,6 @@ export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
       this._getWidthRelatedStyles(),
     );
   }
+
+  protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 }

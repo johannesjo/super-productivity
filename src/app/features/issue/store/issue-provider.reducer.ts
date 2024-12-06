@@ -54,6 +54,12 @@ export const issueProviderReducer = createReducer(
   on(IssueProviderActions.loadIssueProviders, (state, action) =>
     adapter.setAll(action.issueProviders, state),
   ),
+
+  on(IssueProviderActions.sortIssueProvidersFirst, (state, action) => ({
+    ...state,
+    ids: [...action.ids, ...state.ids.filter((id) => !action.ids.includes(id))],
+  })),
+
   on(IssueProviderActions.clearIssueProviders, (state) => adapter.removeAll(state)),
 );
 

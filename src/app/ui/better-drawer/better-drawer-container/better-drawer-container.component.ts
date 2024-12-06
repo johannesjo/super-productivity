@@ -158,4 +158,6 @@ export class BetterDrawerContainerComponent
       this._getWidthRelatedStyles(),
     );
   }
+
+  protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 }

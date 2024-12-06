@@ -46,7 +46,11 @@ h4 {
 }
 
 .provider-items {
-  justify-content: center;
   display: flex;
-  flex-wrap: wrap;
+  //flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 4px;
+  margin-bottom: 16px;
 }
