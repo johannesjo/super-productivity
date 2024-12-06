@@ -23,6 +23,10 @@ import { UntypedFormControl } from '@angular/forms';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Task } from '../task.model';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
+import { truncate } from '../../../util/truncate';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
+import { IssueService } from '../../issue/issue.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +38,8 @@ export class AddTaskBarService {
     private _tagService: TagService,
     private _projectService: ProjectService,
     private _globalConfigService: GlobalConfigService,
+    private _snackService: SnackService,
+    private _issueService: IssueService,
   ) {}
 
   getFilteredIssueSuggestions$(
@@ -108,6 +114,77 @@ export class AddTaskBarService {
         return { mentions };
       }),
     );
+  }
+
+  async addTaskFromExistingTaskOrIssue(
+    item: AddTaskSuggestion,
+  ): Promise<string | undefined> {
+    if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
+      const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
+      this._taskService.updateTags(task, [
+        ...task.tagIds,
+        this._workContextService.activeWorkContextId as string,
+      ]);
+
+      this._snackService.open({
+        ico: 'playlist_add',
+        msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
+        translateParams: {
+          title: truncate(item.title),
+          contextTitle:
+            item.ctx && item.ctx.title ? truncate(item.ctx.title) : '~the void~',
+        },
+      });
+      return item.taskId;
+    } else if (item.taskId) {
+      if (!item.projectId) {
+        console.log(item);
+        throw new Error('Weird add task case1');
+      }
+      this._projectService.moveTaskToTodayList(item.taskId, item.projectId);
+      this._snackService.open({
+        ico: 'arrow_upward',
+        msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+        translateParams: { title: item.title },
+      });
+      return item.taskId;
+    } else {
+      // if (!item.issueType || !item.issueData) {
+      //   throw new Error('No issueData');
+      // }
+      // const res = await this._taskService.checkForTaskWithIssueInProject(
+      //   item.issueData.id,
+      //   item.issueType,
+      //   this._workContextService.activeWorkContextId as string,
+      // );
+      // if (!res) {
+      //   this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
+      //     item.issueType,
+      //     item.issueData.id,
+      //     this._workContextService.activeWorkContextId as string,
+      //     this.isAddToBacklog,
+      //   );
+      // } else if (res.isFromArchive) {
+      //   this._lastAddedTaskId = res.task.id;
+      //   this._taskService.restoreTask(res.task, res.subTasks || []);
+      //   this._snackService.open({
+      //     ico: 'info',
+      //     msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+      //     translateParams: { title: res.task.title },
+      //   });
+      // } else if (res.task.projectId) {
+      //   this._lastAddedTaskId = res.task.id;
+      //   this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
+      //   this._snackService.open({
+      //     ico: 'arrow_upward',
+      //     msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+      //     translateParams: { title: res.task.title },
+      //   });
+      // } else {
+      //   throw new Error('Weird add task case2');
+      // }
+    }
+    return undefined;
   }
 
   private _searchForProject$(

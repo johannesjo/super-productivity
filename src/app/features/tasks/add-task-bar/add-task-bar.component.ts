@@ -14,13 +14,9 @@ import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { IssueService } from '../../issue/issue.service';
-import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { truncate } from '../../../util/truncate';
-import { ProjectService } from '../../project/project.service';
 import { ShortSyntaxTag } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
@@ -43,7 +39,6 @@ import { map } from 'rxjs/operators';
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() tabindex: number = 0;
-  @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
   @Input() isElevated: boolean = false;
   @Input() isHideTagTitles: boolean = false;
@@ -53,6 +48,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Output() done: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('inputEl', { static: true }) inputEl?: ElementRef;
+
+  isAddToBottom: boolean = false;
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -69,7 +66,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   shortSyntaxTags$: Observable<ShortSyntaxTag[]> =
     this._addTaskBarService.getShortSyntaxTags$(this.taskSuggestionsCtrl);
 
-  inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
   mentionConfig$: Observable<MentionConfig> = this._addTaskBarService.getMentionConfig$();
@@ -90,15 +86,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   constructor(
     private _taskService: TaskService,
     private _workContextService: WorkContextService,
-    private _issueService: IssueService,
-    private _snackService: SnackService,
-    private _projectService: ProjectService,
     private _cd: ChangeDetectorRef,
     private _store: Store,
     private _addTaskBarService: AddTaskBarService,
-  ) {
-    this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
-  }
+  ) {}
 
   ngAfterViewInit(): void {
     this.isAddToBottom = !!this.planForDay || this.isAddToBottom;
@@ -222,69 +213,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this.doubleEnterCount++;
       }
     } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
-      this._lastAddedTaskId = item.taskId;
-      const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
-      this._taskService.updateTags(task, [
-        ...task.tagIds,
-        this._workContextService.activeWorkContextId as string,
-      ]);
-
-      this._snackService.open({
-        ico: 'playlist_add',
-        msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
-        translateParams: {
-          title: truncate(item.title),
-          contextTitle:
-            item.ctx && item.ctx.title ? truncate(item.ctx.title) : '~the void~',
-        },
-      });
-    } else if (item.taskId) {
-      if (!item.projectId) {
-        console.log(item);
-        throw new Error('Weird add task case1');
-      }
-      this._lastAddedTaskId = item.taskId;
-      this._projectService.moveTaskToTodayList(item.taskId, item.projectId);
-      this._snackService.open({
-        ico: 'arrow_upward',
-        msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
-        translateParams: { title: item.title },
-      });
-    } else {
-      // if (!item.issueType || !item.issueData) {
-      //   throw new Error('No issueData');
-      // }
-      // const res = await this._taskService.checkForTaskWithIssueInProject(
-      //   item.issueData.id,
-      //   item.issueType,
-      //   this._workContextService.activeWorkContextId as string,
-      // );
-      // if (!res) {
-      //   this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
-      //     item.issueType,
-      //     item.issueData.id,
-      //     this._workContextService.activeWorkContextId as string,
-      //     this.isAddToBacklog,
-      //   );
-      // } else if (res.isFromArchive) {
-      //   this._lastAddedTaskId = res.task.id;
-      //   this._taskService.restoreTask(res.task, res.subTasks || []);
-      //   this._snackService.open({
-      //     ico: 'info',
-      //     msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
-      //     translateParams: { title: res.task.title },
-      //   });
-      // } else if (res.task.projectId) {
-      //   this._lastAddedTaskId = res.task.id;
-      //   this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
-      //   this._snackService.open({
-      //     ico: 'arrow_upward',
-      //     msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
-      //     translateParams: { title: res.task.title },
-      //   });
-      // } else {
-      //   throw new Error('Weird add task case2');
-      // }
+      this._lastAddedTaskId =
+        await this._addTaskBarService.addTaskFromExistingTaskOrIssue(item);
     }
 
     if (this._lastAddedTaskId) {
@@ -300,6 +230,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this.taskSuggestionsCtrl.setValue('');
     this._isAddInProgress = false;
     sessionStorage.setItem(SS.TODO_TMP, '');
+    this._isAddInProgress = false;
   }
 
   private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
