@@ -12,41 +12,16 @@ import {
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import {
-  debounceTime,
-  filter,
-  first,
-  map,
-  startWith,
-  switchMap,
-  take,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
-import {
-  BehaviorSubject,
-  combineLatest,
-  forkJoin,
-  from,
-  Observable,
-  of,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
-import { Task } from '../task.model';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { WorkContextType } from '../../work-context/work-context.model';
-import { SearchResultItem } from '../../issue/issue.model';
 import { truncate } from '../../../util/truncate';
-import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
-import { Tag } from '../../tag/tag.model';
-import { Project } from '../../project/project.model';
-import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
+import { ShortSyntaxTag } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -55,10 +30,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { GlobalConfigService } from '../../config/global-config.service';
-import { ShortSyntaxConfig } from '../../config/global-config.model';
-import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
-import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
+import { MentionConfig } from 'angular-mentions/lib/mention-config';
+import { AddTaskBarService } from './add-task-bar.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'add-task-bar',
@@ -68,7 +42,6 @@ import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
   animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
-  @Input() isAddToBacklog: boolean = false;
   @Input() tabindex: number = 0;
   @Input() isAddToBottom: boolean = false;
   @Input() isDoubleEnterMode: boolean = false;
@@ -88,110 +61,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
   filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
-    this.taskSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(300),
-      tap(() => this.isLoading$.next(true)),
-      withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
-      switchMap(([searchTerm, { activeType, activeId }]) =>
-        activeType === WorkContextType.PROJECT
-          ? this._searchForProject$(searchTerm, activeId)
-          : this._searchForTag$(searchTerm, activeId),
-      ) as any,
-      // don't show issues twice
-      // NOTE: this only works because backlog items come first
-      map((items: AddTaskSuggestion[]) =>
-        items.reduce((unique: AddTaskSuggestion[], item: AddTaskSuggestion) => {
-          return item.issueData &&
-            unique.find(
-              // NOTE: we check defined because we don't want to run into
-              // false == false or similar
-              (u) =>
-                !!u.taskIssueId &&
-                !!item.issueData &&
-                u.taskIssueId === item.issueData.id,
-            )
-            ? unique
-            : [...unique, item];
-        }, []),
-      ),
-      tap(() => {
-        this.isLoading$.next(false);
-      }),
-    );
+    this._addTaskBarService.getFilteredIssueSuggestions$(this.taskSuggestionsCtrl);
 
   activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> =
     new BehaviorSubject<AddTaskSuggestion | null>(null);
-  activatedIssueTask: AddTaskSuggestion | null = null;
 
-  shortSyntaxTags: ShortSyntaxTag[] = [];
   shortSyntaxTags$: Observable<ShortSyntaxTag[]> =
-    this.taskSuggestionsCtrl.valueChanges.pipe(
-      filter((val) => typeof val === 'string'),
-      withLatestFrom(
-        this._tagService.tags$,
-        this._projectService.list$,
-        this._workContextService.activeWorkContext$,
-      ),
-      map(([val, tags, projects, activeWorkContext]) =>
-        shortSyntaxToTags({
-          val,
-          tags,
-          projects,
-          defaultColor: activeWorkContext.theme.primary,
-          shortSyntaxConfig: this._shortSyntaxConfig,
-        }),
-      ),
-      startWith([]),
-    );
+    this._addTaskBarService.getShortSyntaxTags$(this.taskSuggestionsCtrl);
 
   inputVal: string = '';
   inputVal$: Observable<string> = this.taskSuggestionsCtrl.valueChanges;
 
-  tagSuggestions$: Observable<Tag[]> = this._tagService.tagsNoMyDayAndNoList$;
-
-  projectSuggestions$: Observable<Project[]> = this._projectService.list$.pipe(
-    map((ps) => ps.filter((p) => !p.isHiddenFromMenu)),
-  );
+  mentionConfig$: Observable<MentionConfig> = this._addTaskBarService.getMentionConfig$();
 
   isAddToBacklogAvailable$: Observable<boolean> =
     this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
 
-  // isAddToBacklogAvailable$: Observable<boolean> = this.shortSyntaxTags$.pipe(
-  //   switchMap((shortSyntaxTags) => {
-  //     const shortSyntaxProjectId =
-  //       shortSyntaxTags.length &&
-  //       shortSyntaxTags.find((tag: ShortSyntaxTag) => tag.projectId)?.projectId;
-  //
-  //     if (typeof shortSyntaxProjectId === 'string') {
-  //       return this._projectService
-  //         .getByIdOnce$(shortSyntaxProjectId)
-  //         .pipe(map((project) => project.isEnableBacklog));
-  //     }
-  //
-  //     return this._workContextService.activeWorkContext$.pipe(
-  //       map((ctx) => !!ctx.isEnableBacklog),
-  //     );
-  //   }),
-  // );
-
-  mentionConfig$: Observable<MentionConfig> = combineLatest([
-    this._globalConfigService.shortSyntax$,
-    this.tagSuggestions$,
-    this.projectSuggestions$,
-  ]).pipe(
-    map(([cfg, tagSuggestions, projectSuggestions]) => {
-      const mentions: Mentions[] = [];
-      if (cfg.isEnableTag) {
-        mentions.push({ items: tagSuggestions, labelKey: 'title', triggerChar: '#' });
-      }
-      if (cfg.isEnableProject) {
-        mentions.push({ items: projectSuggestions, labelKey: 'title', triggerChar: '+' });
-      }
-      return {
-        mentions,
-      };
-    }),
-  );
+  isAddToBacklog: boolean = false;
 
   private _isAddInProgress?: boolean;
   private _delayBlurTimeout?: number;
@@ -200,7 +86,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _saveTmpTodoTimeout?: number;
   private _lastAddedTaskId?: string;
   private _subs: Subscription = new Subscription();
-  private _shortSyntaxConfig: ShortSyntaxConfig = DEFAULT_GLOBAL_CONFIG.shortSyntax;
 
   constructor(
     private _taskService: TaskService,
@@ -208,22 +93,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     private _issueService: IssueService,
     private _snackService: SnackService,
     private _projectService: ProjectService,
-    private _tagService: TagService,
     private _cd: ChangeDetectorRef,
     private _store: Store,
-    private _globalConfigService: GlobalConfigService,
+    private _addTaskBarService: AddTaskBarService,
   ) {
-    this._subs.add(
-      this.activatedIssueTask$.subscribe((v) => (this.activatedIssueTask = v)),
-    );
-    this._subs.add(this.shortSyntaxTags$.subscribe((v) => (this.shortSyntaxTags = v)));
     this._subs.add(this.inputVal$.subscribe((v) => (this.inputVal = v)));
-
-    this._subs.add(
-      this._globalConfigService.shortSyntax$.subscribe(
-        (shortSyntaxConfig) => (this._shortSyntaxConfig = shortSyntaxConfig),
-      ),
-    );
   }
 
   ngAfterViewInit(): void {
@@ -238,7 +112,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         (ev: KeyboardEvent) => {
           if (ev.key === 'Escape') {
             this.blurred.emit();
-            // needs to be set otherwise the activatedIssueTask won't reflect the task that is added
             this.activatedIssueTask$.next(null);
           } else if (ev.key === '1' && ev.ctrlKey) {
             this.isAddToBottom = !this.isAddToBottom;
@@ -292,7 +165,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
 
-    // NOTE: related target is null for all elements that are not focusable (e.g. items without tabindex, non-buttons, non-inputs etc.)
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -311,7 +183,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
-      // we need to wait since otherwise addTask is not working
       this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
           this._delayBlurTimeout = window.setTimeout(() => {
@@ -325,7 +196,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   displayWith(issue?: JiraIssue): string | undefined {
-    // NOTE: apparently issue can be undefined for displayWith
     return issue?.summary;
   }
 
@@ -368,8 +238,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             item.ctx && item.ctx.title ? truncate(item.ctx.title) : '~the void~',
         },
       });
-      // NOTE: it's important that this comes before the issue check
-      // so that backlog issues are found first
     } else if (item.taskId) {
       if (!item.projectId) {
         console.log(item);
@@ -451,23 +319,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private async _getCtxForTaskSuggestion({
-    projectId,
-    tagIds,
-  }: AddTaskSuggestion): Promise<Tag | Project> {
-    if (projectId) {
-      return await this._projectService.getByIdOnce$(projectId).toPromise();
-    } else {
-      const firstTagId = (tagIds as string[])[0];
-      if (!firstTagId) {
-        throw new Error('No first tag');
-      }
-      return await this._tagService.getTagById$(firstTagId).pipe(first()).toPromise();
-    }
-  }
-
   private _focusInput(): void {
-    // for android we need to make sure that a focus event is called to open the keyboard
     if (IS_ANDROID_WEB_VIEW) {
       document.body.focus();
       (this.inputEl as ElementRef).nativeElement.focus();
@@ -476,93 +328,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         (this.inputEl as ElementRef).nativeElement.focus();
       }, 1000);
     } else {
-      // for non mobile we don't need this, since it's much faster
       this._autofocusTimeout = window.setTimeout(() => {
         (this.inputEl as ElementRef).nativeElement.focus();
       });
-    }
-  }
-
-  private _filterBacklog(searchText: string, task: Task): boolean {
-    try {
-      return !!task.title.toLowerCase().match(searchText.toLowerCase());
-    } catch (e) {
-      console.warn('RegEx Error', e);
-      return false;
-    }
-  }
-
-  private _searchForProject$(
-    searchTerm: string,
-    projectId: string,
-  ): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
-    if (searchTerm && searchTerm.length > 0) {
-      return this._workContextService.backlogTasks$.pipe(
-        map((tasks) =>
-          tasks
-            .filter((task) => this._filterBacklog(searchTerm, task))
-            .map(
-              (task): AddTaskSuggestion => ({
-                title: task.title,
-                taskId: task.id,
-                projectId,
-                taskIssueId: task.issueId || undefined,
-                issueType: task.issueType || undefined,
-              }),
-            ),
-        ),
-      );
-    } else {
-      return of([]);
-    }
-  }
-
-  private _searchForTag$(
-    searchTerm: string,
-    currentTagId: string,
-  ): Observable<(AddTaskSuggestion | SearchResultItem)[]> {
-    if (searchTerm && searchTerm.length > 0) {
-      return this._taskService.getAllParentWithoutTag$(currentTagId).pipe(
-        take(1),
-        map((tasks) =>
-          tasks
-            .filter((task) => this._filterBacklog(searchTerm, task))
-            .map((task): AddTaskSuggestion => {
-              return {
-                title: task.title,
-                taskId: task.id,
-                taskIssueId: task.issueId || undefined,
-                issueType: task.issueType || undefined,
-                projectId: task.projectId || undefined,
-
-                isFromOtherContextAndTagOnlySearch: true,
-                tagIds: task.tagIds,
-              };
-            }),
-        ),
-        switchMap((tasks) =>
-          !!tasks.length
-            ? forkJoin(
-                tasks.map((task) => {
-                  const isFromProject = !!task.projectId;
-                  return from(this._getCtxForTaskSuggestion(task)).pipe(
-                    first(),
-                    map((ctx) => ({
-                      ...task,
-                      ctx: {
-                        ...ctx,
-                        icon: (ctx && (ctx as Tag).icon) || (isFromProject && 'list'),
-                      },
-                    })),
-                  );
-                }),
-              )
-            : of([]),
-        ),
-        // TODO revisit typing here
-      ) as any;
-    } else {
-      return of([]);
     }
   }
 }

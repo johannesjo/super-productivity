@@ -1,3 +1,6 @@
+@let shortSyntaxTags = (shortSyntaxTags$|async); @let activatedIssueTask =
+(activatedIssueTask$|async);
+
 <form
   (submit)="addTask()"
   @blendInOut
@@ -91,7 +94,7 @@
 
       <ng-container *ngIf="activatedIssueTask">
         <div
-          *ngIf="activatedIssueTask.issueType"
+          *ngIf="activatedIssueTask?.issueType"
           class="info-text add-existing"
         >
           <mat-icon>playlist_add</mat-icon>
