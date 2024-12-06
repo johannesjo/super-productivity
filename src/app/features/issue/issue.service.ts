@@ -5,15 +5,16 @@ import {
   IssueProvider,
   IssueProviderKey,
   SearchResultItem,
+  SearchResultItemWithProviderId,
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
-  ICAL_TYPE,
   GITEA_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  ICAL_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
   ISSUE_PROVIDER_ICON_MAP,
   ISSUE_STR_MAP,
@@ -26,7 +27,7 @@ import { Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -41,6 +42,8 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { IssueProviderService } from './issue-provider.service';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { Store } from '@ngrx/store';
+import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -86,6 +89,7 @@ export class IssueService {
     private _translateService: TranslateService,
     private _projectService: ProjectService,
     private _calendarIntegrationService: CalendarIntegrationService,
+    private _store: Store,
   ) {}
 
   testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
@@ -120,6 +124,26 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
       searchTerm,
       issueProviderId,
+    );
+  }
+
+  searchAllEnabledIssueProviders$(
+    searchTerm: string,
+  ): Observable<SearchResultItemWithProviderId[]> {
+    return this._store.select(selectEnabledIssueProviders).pipe(
+      switchMap((enabledProviders) => {
+        const searchObservables = enabledProviders.map((provider) =>
+          this.searchIssues$(searchTerm, provider.id, provider.issueProviderKey).pipe(
+            map((results) =>
+              results.map((result) => ({
+                ...result,
+                issueProviderId: provider.id,
+              })),
+            ),
+          ),
+        );
+        return forkJoin(searchObservables).pipe(map((results) => results.flat()));
+      }),
     );
   }
 
@@ -180,7 +204,7 @@ export class IssueService {
         issueDataReduced: issue,
         issueProviderId,
         issueProviderKey: providerKey,
-        isAddToBackLog: true,
+        isAddToBacklog: true,
       });
     });
 
@@ -352,14 +376,14 @@ export class IssueService {
     issueProviderId,
     issueProviderKey,
     additional = {},
-    isAddToBackLog = false,
+    isAddToBacklog = false,
     isForceDefaultProject = false,
   }: {
     issueDataReduced: IssueDataReduced;
     issueProviderId: string;
     issueProviderKey: IssueProviderKey;
     additional?: Partial<Task>;
-    isAddToBackLog?: boolean;
+    isAddToBacklog?: boolean;
     isForceDefaultProject?: boolean;
   }): Promise<string | undefined> {
     if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
@@ -421,7 +445,7 @@ export class IssueService {
 
     const taskId = taskData.plannedAt
       ? await this._taskService.addAndSchedule(title, taskData, taskData.plannedAt)
-      : this._taskService.add(title, isAddToBackLog, taskData);
+      : this._taskService.add(title, isAddToBacklog, taskData);
 
     // TODO more elegant solution for skipped calendar events
     if (issueProviderKey === ICAL_TYPE) {

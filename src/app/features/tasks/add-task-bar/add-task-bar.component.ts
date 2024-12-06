@@ -29,6 +29,7 @@ import { MentionConfig } from 'angular-mentions/lib/mention-config';
 import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'add-task-bar',
@@ -47,11 +48,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   blurred = output<void>();
   done = output<void>();
 
+  isLoading = signal(false);
+  doubleEnterCount = signal(0);
   isAddToBottom = signal(false);
   isAddToBacklog = signal(false);
   isSearchIssueProviders = signal(false);
-  isLoading = signal(false);
-  doubleEnterCount = signal(0);
+  isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
 
   @ViewChild('inputEl', { static: true }) inputEl?: ElementRef;
 
@@ -60,7 +62,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
   filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
-    this._addTaskBarService.getFilteredIssueSuggestions$(this.taskSuggestionsCtrl);
+    this._addTaskBarService.getFilteredIssueSuggestions$(
+      this.taskSuggestionsCtrl,
+      this.isSearchIssueProviders$,
+      this.isLoading,
+    );
 
   activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> =
     new BehaviorSubject<AddTaskSuggestion | null>(null);
@@ -217,9 +223,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       } else if (this.isDoubleEnterMode()) {
         this.doubleEnterCount.set(this.doubleEnterCount() + 1);
       }
-    } else if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
+    } else if (
+      (item.taskId && item.isFromOtherContextAndTagOnlySearch) ||
+      !!item.issueData
+    ) {
       this._lastAddedTaskId =
-        await this._addTaskBarService.addTaskFromExistingTaskOrIssue(item);
+        await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
+          item,
+          this.isAddToBacklog(),
+        );
     }
 
     const planForDay = this.planForDay();

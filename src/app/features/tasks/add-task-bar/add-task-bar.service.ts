@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, WritableSignal } from '@angular/core';
 import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   debounceTime,
@@ -8,6 +8,7 @@ import {
   startWith,
   switchMap,
   take,
+  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { TaskService } from '../task.service';
@@ -27,6 +28,7 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
+import { assertTruthy } from '../../../util/assert-truthy';
 
 @Injectable({
   providedIn: 'root',
@@ -44,15 +46,45 @@ export class AddTaskBarService {
 
   getFilteredIssueSuggestions$(
     taskSuggestionsCtrl: UntypedFormControl,
+    isSearchIssueProviders$: Observable<boolean>,
+    isLoading: WritableSignal<boolean>,
   ): Observable<AddTaskSuggestion[]> {
     return taskSuggestionsCtrl.valueChanges.pipe(
+      tap(() => {
+        isLoading.set(false);
+      }),
       debounceTime(300),
+      tap(() => {
+        isLoading.set(true);
+      }),
       withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
       switchMap(([searchTerm, { activeType, activeId }]) =>
-        activeType === WorkContextType.PROJECT
-          ? this._searchForProject$(searchTerm, activeId)
-          : this._searchForTag$(searchTerm, activeId),
+        isSearchIssueProviders$.pipe(
+          switchMap((isIssueSearch) =>
+            isIssueSearch
+              ? this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
+                  map((issueSuggestions) =>
+                    issueSuggestions.map(
+                      (issueSuggestion) =>
+                        ({
+                          title: issueSuggestion.title,
+                          titleHighlighted: issueSuggestion.titleHighlighted,
+                          issueData: issueSuggestion.issueData,
+                          issueType: issueSuggestion.issueType,
+                          issueProviderId: issueSuggestion.issueProviderId,
+                        }) as AddTaskSuggestion,
+                    ),
+                  ),
+                )
+              : activeType === WorkContextType.PROJECT
+                ? this._searchForProject$(searchTerm, activeId)
+                : this._searchForTag$(searchTerm, activeId),
+          ),
+        ),
       ),
+      tap(() => {
+        isLoading.set(false);
+      }),
       // don't show issues twice
       // NOTE: this only works because backlog items come first
       map((items: AddTaskSuggestion[]) =>
@@ -122,6 +154,7 @@ export class AddTaskBarService {
 
   async addTaskFromExistingTaskOrIssue(
     item: AddTaskSuggestion,
+    isAddToBacklog: boolean,
   ): Promise<string | undefined> {
     if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
       const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
@@ -153,42 +186,43 @@ export class AddTaskBarService {
       });
       return item.taskId;
     } else {
-      // if (!item.issueType || !item.issueData) {
-      //   throw new Error('No issueData');
-      // }
-      // const res = await this._taskService.checkForTaskWithIssueInProject(
-      //   item.issueData.id,
-      //   item.issueType,
-      //   this._workContextService.activeWorkContextId as string,
-      // );
-      // if (!res) {
-      //   this._lastAddedTaskId = await this._issueService.addTaskWithIssue(
-      //     item.issueType,
-      //     item.issueData.id,
-      //     this._workContextService.activeWorkContextId as string,
-      //     this.isAddToBacklog,
-      //   );
-      // } else if (res.isFromArchive) {
-      //   this._lastAddedTaskId = res.task.id;
-      //   this._taskService.restoreTask(res.task, res.subTasks || []);
-      //   this._snackService.open({
-      //     ico: 'info',
-      //     msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
-      //     translateParams: { title: res.task.title },
-      //   });
-      // } else if (res.task.projectId) {
-      //   this._lastAddedTaskId = res.task.id;
-      //   this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
-      //   this._snackService.open({
-      //     ico: 'arrow_upward',
-      //     msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
-      //     translateParams: { title: res.task.title },
-      //   });
-      // } else {
-      //   throw new Error('Weird add task case2');
-      // }
+      if (!item.issueType || !item.issueData) {
+        throw new Error('No issueData');
+      }
+
+      const res = await this._taskService.checkForTaskWithIssueEverywhere(
+        item.issueData.id,
+        item.issueType,
+        this._workContextService.activeWorkContextId as string,
+      );
+      console.log(res);
+      if (!res) {
+        return await this._issueService.addTaskFromIssue({
+          issueProviderKey: item.issueType,
+          issueProviderId: assertTruthy(item.issueProviderId),
+          issueDataReduced: assertTruthy(item.issueData),
+          isAddToBacklog: isAddToBacklog,
+        });
+      } else if (res.isFromArchive) {
+        this._taskService.restoreTask(res.task, res.subTasks || []);
+        this._snackService.open({
+          ico: 'info',
+          msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+          translateParams: { title: res.task.title },
+        });
+        return res.task.id;
+      } else if (res.task.projectId) {
+        this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+          translateParams: { title: res.task.title },
+        });
+        return res.task.id;
+      } else {
+        throw new Error('Weird add task case2');
+      }
     }
-    return undefined;
   }
 
   private _searchForProject$(

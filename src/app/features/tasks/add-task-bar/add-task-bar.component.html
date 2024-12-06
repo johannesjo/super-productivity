@@ -109,9 +109,9 @@
   </div>
 
   <div class="info-bar">
-    <ng-container *ngIf="inputVal.length > 0">
+    <ng-container *ngIf="inputVal?.length > 0">
       <div
-        *ngIf="!activatedIssueTask && !shortSyntaxTags.length"
+        *ngIf="!activatedIssueTask && !shortSyntaxTags?.length"
         class="info-text"
       >
         {{ T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate }}
@@ -137,7 +137,7 @@
         </div>
       </ng-container>
 
-      <ng-container *ngIf="!activatedIssueTask && shortSyntaxTags.length">
+      <ng-container *ngIf="!activatedIssueTask && shortSyntaxTags?.length">
         @for (shortSyntaxTag of (shortSyntaxTags); track shortSyntaxTag.title ||
         shortSyntaxTag) {
         <tag [tag]="shortSyntaxTag"></tag>

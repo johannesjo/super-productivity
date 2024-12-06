@@ -123,6 +123,10 @@ export interface SearchResultItem<
   titleHighlighted?: string;
 }
 
+export interface SearchResultItemWithProviderId extends SearchResultItem {
+  issueProviderId: string;
+}
+
 // ISSUE PROVIDER MODEL
 // --------------------
 

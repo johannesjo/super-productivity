@@ -8,8 +8,9 @@ export interface AddTaskSuggestion {
   // all issue types
   issueType?: IssueProviderKey;
   issueData?: IssueData;
+  issueProviderId?: string;
 
-  // jira only
+  // issue only
   titleHighlighted?: string;
 
   // task only
