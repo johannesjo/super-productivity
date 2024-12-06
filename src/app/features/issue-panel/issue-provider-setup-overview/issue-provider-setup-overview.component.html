@@ -76,3 +76,20 @@
     <span>Gitea</span>
   </button>
 </div>
+
+@if(issueProvidersMapped().length > 1) {
+<h4>Sort Order</h4>
+<div class="provider-items">
+  @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {
+
+  <div class="tab-header-item">
+    <mat-icon
+      [svgIcon]="entry.issueProvider.issueProviderKey|issueIcon"
+      matTooltipPosition="above"
+    ></mat-icon>
+    <div class="initials">{{ entry.initials }}</div>
+  </div>
+  }
+</div>
+
+}

@@ -1,3 +1,5 @@
+@import '../../../../variables.scss';
+
 .items {
   display: grid;
   gap: 12px;
@@ -11,4 +13,40 @@
 h4 {
   text-align: center;
   margin-top: 16px;
+}
+
+// keep in sync with src/app/features/issue-panel/issue-panel.component.scss#
+// TODO or extract as component
+.tab-header-item {
+  min-width: 52px;
+  min-height: 48px;
+  padding-left: 8px;
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  @include grabCursor();
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
+.initials {
+  margin-top: 1px;
+  font-size: 12px;
+  border-radius: 50%;
+  background: #fff;
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lightest;
+    color: #ffffff;
+  }
+}
+
+.provider-items {
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
 }
