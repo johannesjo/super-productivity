@@ -53,10 +53,14 @@ export class AddTaskBarService {
           ? this._searchForProject$(searchTerm, activeId)
           : this._searchForTag$(searchTerm, activeId),
       ),
+      // don't show issues twice
+      // NOTE: this only works because backlog items come first
       map((items: AddTaskSuggestion[]) =>
         items.reduce((unique: AddTaskSuggestion[], item: AddTaskSuggestion) => {
           return item.issueData &&
             unique.find(
+              // NOTE: we check defined because we don't want to run into
+              // false == false or similar
               (u) =>
                 !!u.taskIssueId &&
                 !!item.issueData &&

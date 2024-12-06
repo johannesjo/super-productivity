@@ -150,6 +150,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
 
+    // NOTE: related target is null for all elements that are not focusable (e.g. items without tabindex, non-buttons, non-inputs etc.)
     if (relatedTarget) {
       const { className } = relatedTarget;
       isUIelement =
@@ -168,6 +169,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     if (relatedTarget && isUIelement) {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
+      // we need to wait since otherwise addTask is not working
       this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
           this._delayBlurTimeout = window.setTimeout(() => {
@@ -211,12 +213,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         await this._addTaskBarService.addTaskFromExistingTaskOrIssue(item);
     }
 
-    if (this._lastAddedTaskId) {
-      this._planForDayAfterAddTaskIfConfigured(this._lastAddedTaskId);
-    }
-
-    if (this.planForDay()) {
+    const planForDay = this.planForDay();
+    if (planForDay) {
       this.blurred.emit();
+      if (this._lastAddedTaskId) {
+        this._planTaskForDay(this._lastAddedTaskId, planForDay);
+      }
     } else {
       this._focusInput();
     }
@@ -227,21 +229,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     this._isAddInProgress = false;
   }
 
-  private _planForDayAfterAddTaskIfConfigured(taskId: string): void {
-    const planForDay = this.planForDay();
-    if (planForDay) {
-      this._taskService.getByIdOnce$(taskId).subscribe((task) => {
-        if (getWorklogStr() !== planForDay) {
-          this._store.dispatch(
-            PlannerActions.planTaskForDay({
-              task: task,
-              day: planForDay,
-              isAddToTop: !this.isAddToBottom(),
-            }),
-          );
-        }
-      });
-    }
+  private _planTaskForDay(taskId: string, day: string): void {
+    this._taskService.getByIdOnce$(taskId).subscribe((task) => {
+      if (getWorklogStr() !== day) {
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: task,
+            day,
+            isAddToTop: !this.isAddToBottom(),
+          }),
+        );
+      }
+    });
   }
 
   private _focusInput(): void {
