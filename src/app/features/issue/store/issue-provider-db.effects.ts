@@ -23,6 +23,8 @@ export class IssueProviderDbEffects {
           IssueProviderActions.upsertIssueProviders,
           IssueProviderActions.deleteIssueProviders,
 
+          IssueProviderActions.sortIssueProvidersFirst,
+
           IssueProviderActions.clearIssueProviders,
         ),
         switchMap(() => this.saveToLs$(false)),
