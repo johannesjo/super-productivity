@@ -268,7 +268,7 @@ export const addNewTagsFromShortSyntax = createAction(
   TaskActionTypes.AddNewTagsFromShortSyntax,
 
   props<{
-    task: Task;
+    taskId: string;
     newTitles: string[];
   }>(),
 );
