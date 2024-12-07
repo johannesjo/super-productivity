@@ -1,0 +1,37 @@
+
+### Bug Fixes
+
+* edge case when creating new tags together with existing tags in short syntax
+* **issueProvider:** migration leading to double entries for providers
+* **issueProvider:** migration leading to double entries for providers 2
+### Features
+
+* **calendar:** add agenda view instead of search for calendar
+* **calendar:** add feature to auto import current day events as tasks
+* **calendar:** add migration for CALENDAR type to ICAL
+* **calendar:** add migration for calendars
+* **calendar:** add search for calendar items
+* **calendar:** also show time for agenda items
+* **calendar:** check missing implementations for calendar service
+* **calendar:** cleanup translations
+* **calendar:** further improve config dialog
+* **calendar:** further improve config dialog 2
+* **calendar:** handle edge case when adding calendar task
+* **calendar:** improve initials
+* **calendar:** improve styling
+* **calendar:** improve typing
+* **calendar:** make test connection work
+* **calendar:** migrate basic calendar functionality to issue providers
+* **calendar:** outline adding calendars like issue providers and add basic dialog
+* **calendar:** remove icon from calendar model
+* **calendar:** rename CALENDAR type to ICAL
+* **calendar:** sort agenda by day
+* **calendar:** unify add function for calendar events
+* **calendar:** update shepherd tutorial with changes
+* change icons for adding tasks to backlog and today list
+* get rid of moment for getWorklogStr
+* **issueProvider:** add ui for adding from add task bar
+* **issueProvider:** add ui for making providers sortable
+* **issueProvider:** also save model when sorted
+* **issueProvider:** make issue providers sortable
+* **issueProvider:** make searching all issue providers from bar work

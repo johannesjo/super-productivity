@@ -1,3 +1,43 @@
+# [10.3.0-rc.3](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.2...v10.3.0-rc.3) (2024-12-07)
+
+### Bug Fixes
+
+- edge case when creating new tags together with existing tags in short syntax ([c1d608a](https://github.com/johannesjo/super-productivity/commit/c1d608a08060dc61be7a26b4d19e8fcbcbc33ece))
+- **issueProvider:** migration leading to double entries for providers ([dbe7c68](https://github.com/johannesjo/super-productivity/commit/dbe7c6806fe202f2dc9024ef776169564f52eafa))
+- **issueProvider:** migration leading to double entries for providers 2 ([b6cd302](https://github.com/johannesjo/super-productivity/commit/b6cd3029dbd999124c876b84b1cca75158e3b149))
+
+### Features
+
+- **calendar:** add agenda view instead of search for calendar ([ace57f4](https://github.com/johannesjo/super-productivity/commit/ace57f484ca26626759a9164657bd43234d27330))
+- **calendar:** add feature to auto import current day events as tasks ([04ddf34](https://github.com/johannesjo/super-productivity/commit/04ddf34460fd31a73bb78ce2a7a50b54521889fa))
+- **calendar:** add migration for CALENDAR type to ICAL ([c427bed](https://github.com/johannesjo/super-productivity/commit/c427bed0eb4fa10758c79ed05586bf9b21899f3d))
+- **calendar:** add migration for calendars ([4ace3b0](https://github.com/johannesjo/super-productivity/commit/4ace3b07b40208c387439db76b5a9b125e1a2fca))
+- **calendar:** add search for calendar items ([cf5fabe](https://github.com/johannesjo/super-productivity/commit/cf5fabef0979fe58c18a40ae55507eda94871b76))
+- **calendar:** also show time for agenda items ([1e9b3e5](https://github.com/johannesjo/super-productivity/commit/1e9b3e53d485cfee651c71e3b76215abd187d9f2))
+- **calendar:** check missing implementations for calendar service ([ec98bf7](https://github.com/johannesjo/super-productivity/commit/ec98bf7f71951ed23f49fcec312ceffb184d1a94))
+- **calendar:** cleanup translations ([4ab21ed](https://github.com/johannesjo/super-productivity/commit/4ab21ed41b7680acf7eea58554afc88503d3e9e3))
+- **calendar:** further improve config dialog ([f4f8c41](https://github.com/johannesjo/super-productivity/commit/f4f8c41e44662e52fd628bb66b289b638c243bff))
+- **calendar:** further improve config dialog 2 ([2b2d7df](https://github.com/johannesjo/super-productivity/commit/2b2d7df29ab29cc3b76f3498724990cbdb0e2b91))
+- **calendar:** handle edge case when adding calendar task ([6933c75](https://github.com/johannesjo/super-productivity/commit/6933c7511a2cc067dc7228de2cf0cc9c97049e07))
+- **calendar:** improve initials ([f551f99](https://github.com/johannesjo/super-productivity/commit/f551f992f2b98a696e42293549c50589a6276f94))
+- **calendar:** improve styling ([14361d4](https://github.com/johannesjo/super-productivity/commit/14361d4ee35ab3c8717936573d0f82f8dbae749d))
+- **calendar:** improve typing ([c688bf1](https://github.com/johannesjo/super-productivity/commit/c688bf1f3476cbf8496106aaad9abd9cc47083a5))
+- **calendar:** make test connection work ([dc5a934](https://github.com/johannesjo/super-productivity/commit/dc5a934df0faa38fe13dcda13cb28392669acf2b))
+- **calendar:** migrate basic calendar functionality to issue providers ([31d0915](https://github.com/johannesjo/super-productivity/commit/31d0915279ebe58c3e615038cdcb84c6360aa987))
+- **calendar:** outline adding calendars like issue providers and add basic dialog ([93c61db](https://github.com/johannesjo/super-productivity/commit/93c61db139dfb3c00a30f1f069051f4d40197f32))
+- **calendar:** remove icon from calendar model ([5089cf1](https://github.com/johannesjo/super-productivity/commit/5089cf1b2a5be53e37addd97db49dc4d96f5b195))
+- **calendar:** rename CALENDAR type to ICAL ([91712b3](https://github.com/johannesjo/super-productivity/commit/91712b3d86484c32f00a451d1af50da76ffd2204))
+- **calendar:** sort agenda by day ([d6159cb](https://github.com/johannesjo/super-productivity/commit/d6159cbaa14a7e0be19d1a802b6d411c01695ee3))
+- **calendar:** unify add function for calendar events ([c477ad4](https://github.com/johannesjo/super-productivity/commit/c477ad4357a31c0ca6ced77024f8de7c6b314323))
+- **calendar:** update shepherd tutorial with changes ([6ceb38f](https://github.com/johannesjo/super-productivity/commit/6ceb38f40bc81e499b08828555a95a631568b226))
+- change icons for adding tasks to backlog and today list ([a6becb1](https://github.com/johannesjo/super-productivity/commit/a6becb17c128690618c6fc8259f8cc815adf8f2e))
+- get rid of moment for getWorklogStr ([7d6dd25](https://github.com/johannesjo/super-productivity/commit/7d6dd25d99ddc5b925a7ae40d5c2c644f8b9970d))
+- **issueProvider:** add ui for adding from add task bar ([0f66ff8](https://github.com/johannesjo/super-productivity/commit/0f66ff8d37f3ea8ea9bf626f77239831dc6f10c5))
+- **issueProvider:** add ui for making providers sortable ([5414351](https://github.com/johannesjo/super-productivity/commit/5414351d658b55257492f24a27ab8dc0a2264772))
+- **issueProvider:** also save model when sorted ([f7c7a87](https://github.com/johannesjo/super-productivity/commit/f7c7a8720b2624574cf31aaf2883923867b1a8b4))
+- **issueProvider:** make issue providers sortable ([044dd1c](https://github.com/johannesjo/super-productivity/commit/044dd1c79b81324d36a77a375bbb633511eac58c))
+- **issueProvider:** make searching all issue providers from bar work ([1e04417](https://github.com/johannesjo/super-productivity/commit/1e04417323dda346b462dcb2075247526f05f910))
+
 # [10.3.0-rc.2](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.1...v10.3.0-rc.2) (2024-11-29)
 
 # [10.3.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.0...v10.3.0-rc.1) (2024-11-29)
