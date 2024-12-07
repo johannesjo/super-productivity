@@ -37,7 +37,7 @@ appx:
   identityName: ___johannesjo.SuperProductivity
 
 linux:
-  category: Utility
+  category: Office;ProjectManagement
   target:
     - AppImage
     - deb
