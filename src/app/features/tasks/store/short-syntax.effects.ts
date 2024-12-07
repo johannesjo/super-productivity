@@ -156,7 +156,9 @@ export class ShortSyntaxEffects {
         }
 
         if (r.newTagTitles.length) {
-          actions.push(addNewTagsFromShortSyntax({ task, newTitles: r.newTagTitles }));
+          actions.push(
+            addNewTagsFromShortSyntax({ taskId: task.id, newTitles: r.newTagTitles }),
+          );
         }
 
         if (tagIds && tagIds.length) {
@@ -184,7 +186,7 @@ export class ShortSyntaxEffects {
       ofType(addNewTagsFromShortSyntax),
       // needed cause otherwise task gets the focus after blur & hide
       tap((v) => this._layoutService.hideAddTaskBar()),
-      concatMap(({ task, newTitles }) => {
+      concatMap(({ taskId, newTitles }) => {
         return this._matDialog
           .open(DialogConfirmComponent, {
             restoreFocus: true,
@@ -205,7 +207,9 @@ export class ShortSyntaxEffects {
           })
           .afterClosed()
           .pipe(
-            mergeMap((isConfirm: boolean) => {
+            // NOTE: it is important to get a fresh task here, since otherwise we might run into #3728
+            withLatestFrom(this._taskService.getByIdOnce$(taskId)),
+            mergeMap(([isConfirm, task]) => {
               const actions: any[] = [];
               if (isConfirm) {
                 const newTagIds = [...task.tagIds];

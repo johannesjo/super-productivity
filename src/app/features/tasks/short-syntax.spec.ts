@@ -428,6 +428,28 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('should work for edge case #3728', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tag error #testing #someNewTag3',
+        tagIds: [],
+      };
+      const r = shortSyntax(t, CONFIG, [
+        ...ALL_TAGS,
+        { ...DEFAULT_TAG, id: 'testing_id', title: 'testing' },
+      ]);
+
+      expect(r).toEqual({
+        newTagTitles: ['someNewTag3'],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Test tag error',
+          tagIds: ['testing_id'],
+        },
+      });
+    });
+
     it('should not add new "asd #asd" tag when disabled', () => {
       const t = {
         ...TASK,
