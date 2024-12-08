@@ -48,8 +48,9 @@ h4 {
 .provider-items {
   display: flex;
   //flex-direction: column;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+  overflow: auto;
   gap: 12px;
   margin: 4px;
   margin-bottom: 16px;

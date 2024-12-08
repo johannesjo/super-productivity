@@ -30,10 +30,11 @@ export const selectEnabledIssueProviders = createSelector(
 
 export const selectIssueProvidersWithDisabledLast = createSelector(
   selectAll,
-  (issueProviders: IssueProvider[]): IssueProvider[] =>
-    issueProviders.sort((a: IssueProvider, b: IssueProvider) =>
-      a.isEnabled === b.isEnabled ? 0 : a.isEnabled ? -1 : 1,
-    ),
+  (issueProviders: IssueProvider[]): IssueProvider[] => {
+    const enabled = issueProviders.filter((ip) => ip.isEnabled);
+    const disabled = issueProviders.filter((ip) => !ip.isEnabled);
+    return [...enabled, ...disabled];
+  },
 );
 
 export const selectIssueProviderById = <T extends IssueProvider>(
