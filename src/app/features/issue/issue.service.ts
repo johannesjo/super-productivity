@@ -27,7 +27,7 @@ import { Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -44,6 +44,7 @@ import { IssueProviderService } from './issue-provider.service';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
+import { getErrorTxt } from '../../util/get-error-text';
 
 @Injectable({
   providedIn: 'root',
@@ -140,6 +141,18 @@ export class IssueService {
                 issueProviderId: provider.id,
               })),
             ),
+            catchError((err) => {
+              this._snackService.open({
+                svgIco: ISSUE_PROVIDER_ICON_MAP[provider.issueProviderKey],
+                msg: T.F.ISSUE.S.ERR_GENERIC,
+                type: 'ERROR',
+                translateParams: {
+                  issueProviderName: ISSUE_PROVIDER_HUMANIZED[provider.issueProviderKey],
+                  errTxt: getErrorTxt(err),
+                },
+              });
+              throw new Error(err);
+            }),
           ),
         );
         return forkJoin(searchObservables).pipe(map((results) => results.flat()));

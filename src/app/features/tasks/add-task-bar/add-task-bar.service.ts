@@ -1,6 +1,7 @@
 import { Injectable, WritableSignal } from '@angular/core';
 import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
+  catchError,
   debounceTime,
   filter,
   first,
@@ -75,6 +76,9 @@ export class AddTaskBarService {
                         }) as AddTaskSuggestion,
                     ),
                   ),
+                  catchError(() => {
+                    return of([]);
+                  }),
                 )
               : activeType === WorkContextType.PROJECT
                 ? this._searchForProject$(searchTerm, activeId)
