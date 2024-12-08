@@ -11,7 +11,7 @@ import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isEnabled: false,
-  project: null,
+  project: '',
   gitlabBaseUrl: null,
   token: null,
   filterUsername: null,

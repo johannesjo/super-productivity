@@ -15,7 +15,6 @@ import {
 } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
-import { assertTruthy } from '../../../../util/assert-truthy';
 
 @Injectable({
   providedIn: 'root',
@@ -42,7 +41,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: string, issueProviderId: string): Observable<string> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => {
-        const project: string = this._gitlabApiService.getProject(cfg, issueId);
+        const project: string = cfg.project;
         if (cfg.gitlabBaseUrl) {
           const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
             ? cfg.gitlabBaseUrl
@@ -87,9 +86,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(task.issueProviderId).toPromise();
-    const fullIssueRef = this._gitlabApiService.getFullIssueRef(task.issueId, cfg);
-    const idFormatChanged = task.issueId !== fullIssueRef;
-    const issue = await this._gitlabApiService.getById$(fullIssueRef, cfg).toPromise();
+    const issue = await this._gitlabApiService.getById$(task.issueId, cfg).toPromise();
 
     const issueUpdate: number = new Date(issue.updated_at).getTime();
     const commentsByOthers =
@@ -108,7 +105,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
     const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
 
-    if (wasUpdated || idFormatChanged) {
+    if (wasUpdated) {
       return {
         taskChanges: {
           ...this.getAddTaskData(issue),
@@ -131,33 +128,6 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     }
 
     const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
-    const issues = new Map<string, GitlabIssue>();
-    const paramsCount = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
-    const iidsByProject = new Map<string, string[]>();
-    let i = 0;
-
-    for (const task of tasks) {
-      if (!task.issueId) {
-        continue;
-      }
-      const project = this._gitlabApiService.getProject(cfg, task.issueId);
-      if (!iidsByProject.has(project)) {
-        iidsByProject.set(project, []);
-      }
-      iidsByProject.get(project)?.push(assertTruthy(task.issueId));
-    }
-
-    iidsByProject.forEach(async (allIds, project) => {
-      for (i = 0; i < allIds.length; i += paramsCount) {
-        (
-          await this._gitlabApiService
-            .getByIds$(project, allIds.slice(i, i + paramsCount), cfg)
-            .toPromise()
-        ).forEach((found) => {
-          issues.set(assertTruthy(found.id).toString(), found);
-        });
-      }
-    });
 
     const updatedIssues: {
       task: Task;
@@ -169,10 +139,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       if (!task.issueId) {
         continue;
       }
-      let idFormatChanged = false;
-      const fullIssueRef = this._gitlabApiService.getFullIssueRef(task.issueId, cfg);
-      idFormatChanged = task.issueId !== fullIssueRef;
-      const issue = issues.get(fullIssueRef);
+      const issue = await this._gitlabApiService.getById$(task.issueId, cfg).toPromise();
       if (issue) {
         const issueUpdate: number = new Date(issue.updated_at).getTime();
         const commentsByOthers =
@@ -187,9 +154,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           issueUpdate,
         ].sort();
         const lastRemoteUpdate = updates[updates.length - 1];
-        const wasUpdated = lastRemoteUpdate > (tasks[i].issueLastUpdated || 0);
-        const project_tag_missing = task.tagIds.indexOf(issue.project) === -1;
-        if (wasUpdated || idFormatChanged || project_tag_missing) {
+        const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
+        const projectTagMissing = task.tagIds.indexOf(issue.project) === -1;
+        if (wasUpdated || projectTagMissing) {
           updatedIssues.push({
             task,
             taskChanges: {
@@ -210,7 +177,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issuePoints: issue.weight,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
-      issueId: issue.number.toString(),
+      issueId: issue.id.toString(),
     };
   }
 

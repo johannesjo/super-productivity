@@ -14,7 +14,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 import { GitlabCfg } from '../gitlab.model';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
 import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
-import { GITLAB_API_BASE_URL, GITLAB_PROJECT_REGEX } from '../gitlab.const';
+import { GITLAB_API_BASE_URL } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import {
   catchError,
@@ -79,35 +79,28 @@ export class GitlabApiService {
     }
   }
 
-  getByIds$(
-    project: string,
-    ids: string[] | number[],
-    cfg: GitlabCfg,
-  ): Observable<GitlabIssue[]> {
-    const iids = ids.map((id: string | number): string => {
-      return this._getIidFromIssue(id);
-    });
-    const queryParams = 'iids[]=' + iids.join('&iids[]=');
-
-    return this._sendIssuePaginatedRequest$(
-      {
-        url: `${this._apiLink(cfg, project, true)}/issues?${queryParams}${this.getScopeParam(
-          cfg,
-        )}${this.getCustomFilterParam(cfg)}`,
-      },
-      cfg,
-    ).pipe(
-      mergeMap((issues: GitlabIssue[]) => {
-        if (issues && issues.length) {
-          return forkJoin([
-            ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
-          ]);
-        } else {
-          return of([]);
-        }
-      }),
-    );
-  }
+  // getByIds$(ids: string[] | number[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
+  //   const queryParams = 'iids[]=' + ids.join('&iids[]=');
+  //   // const PARAMS_COUNT = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
+  //   return this._sendIssuePaginatedRequest$(
+  //     {
+  //       url: `${this._apiLink(cfg)}/issues?${queryParams}${this.getScopeParam(
+  //         cfg,
+  //       )}${this.getCustomFilterParam(cfg)}`,
+  //     },
+  //     cfg,
+  //   ).pipe(
+  //     mergeMap((issues: GitlabIssue[]) => {
+  //       if (issues && issues.length) {
+  //         return forkJoin([
+  //           ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
+  //         ]);
+  //       } else {
+  //         return of([]);
+  //       }
+  //     }),
+  //   );
+  // }
 
   getIssueWithComments$(issue: GitlabIssue, cfg: GitlabCfg): Observable<GitlabIssue> {
     return this._getIssueComments$(issue, cfg).pipe(
@@ -151,23 +144,6 @@ export class GitlabApiService {
     );
   }
 
-  // getProjectIssuesWithComments$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
-  //   if (!this._isValidSettings(cfg)) {
-  //     return EMPTY;
-  //   }
-  //   return this._getProjectIssues$(1, cfg).pipe(
-  //     mergeMap((issues: GitlabIssue[]) => {
-  //       if (issues && issues.length) {
-  //         return forkJoin([
-  //           ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
-  //         ]);
-  //       } else {
-  //         return of([]);
-  //       }
-  //     }),
-  //   );
-  // }
-
   getProjectIssues$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendIssuePaginatedRequest$(
       {
@@ -179,31 +155,6 @@ export class GitlabApiService {
       },
       cfg,
     ).pipe(take(1));
-  }
-
-  getFullIssueRef(issue: string | number, projectConfig: GitlabCfg): string {
-    if (GitlabApiService.getPartsFromIssue(issue).length === 2) {
-      return issue.toString();
-    } else {
-      return this.getProject(projectConfig, issue) + '#' + this._getIidFromIssue(issue);
-    }
-  }
-
-  getProject(projectConfig: GitlabCfg, issue?: string | number | undefined): string {
-    if (issue) {
-      const parts: string[] = GitlabApiService.getPartsFromIssue(issue);
-      if (parts.length === 2) {
-        return parts[0];
-      }
-    }
-
-    const projectURL: string = projectConfig.project ? projectConfig.project : '';
-
-    const projectPath = projectURL.match(GITLAB_PROJECT_REGEX);
-    if (!projectPath) {
-      throwError('Gitlab Project URL');
-    }
-    return projectURL;
   }
 
   addTimeSpentToIssue$(
@@ -221,10 +172,7 @@ export class GitlabApiService {
 
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(
-          cfg,
-          cfg.project || undefined,
-        )}/issues/${this._getIidFromIssue(issueId)}/add_spent_time`,
+        url: `${this._apiLink(cfg)}/issues/${issueId}/add_spent_time`,
         method: 'POST',
         data: {
           duration: duration,
@@ -246,34 +194,10 @@ export class GitlabApiService {
   }> {
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(
-          cfg,
-          cfg.project || undefined,
-        )}/issues/${this._getIidFromIssue(issueId)}/time_stats`,
+        url: `${this._apiLink(cfg)}/issues/${issueId}/time_stats`,
       },
       cfg,
     ).pipe(map((res) => (res as any).body));
-  }
-
-  private _getIidFromIssue(issue: string | number): string {
-    const parts: string[] = GitlabApiService.getPartsFromIssue(issue);
-    if (parts.length === 2) {
-      return parts[1];
-    } else {
-      return parts[0];
-    }
-  }
-
-  private _getIssueNumberFromTitle(title: string): string {
-    return title.split(' ')[0].replace('#', '');
-  }
-
-  public static getPartsFromIssue(issue: string | number): string[] {
-    if (typeof issue === 'string') {
-      return issue.split('#');
-    } else {
-      return [issue.toString()];
-    }
   }
 
   private _getIssueComments$(
@@ -307,15 +231,6 @@ export class GitlabApiService {
       },
     });
     return false;
-  }
-
-  private _sendRequest$(
-    params: HttpRequest<string> | any,
-    cfg: GitlabCfg,
-  ): Observable<any> {
-    return this._sendRawRequest$(params, cfg).pipe(
-      map((res: any) => (res && res.body ? res.body : res)),
-    );
   }
 
   private _sendIssuePaginatedRequest$(
@@ -375,7 +290,8 @@ export class GitlabApiService {
       ...params,
       method: params.method || 'GET',
       headers: {
-        ...(cfg.token ? { Authorization: 'Bearer ' + cfg.token } : {}),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ...(cfg.token ? { 'PRIVATE-TOKEN': cfg.token } : {}),
         ...(params.headers ? params.headers : {}),
       },
     };
@@ -392,6 +308,8 @@ export class GitlabApiService {
         responseType: params.responseType,
       },
     ];
+    console.log(allArgs);
+
     const req = new HttpRequest(p.method, p.url, ...allArgs);
     return this._http.request(req).pipe(
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
@@ -440,40 +358,25 @@ export class GitlabApiService {
   }
 
   private _issueApiLink(cfg: GitlabCfg, issue: string | number): string {
-    return `${this._apiLink(cfg, this.getProject(cfg, issue), true)}/issues/${issue}`;
+    return `${this._apiLink(cfg)}issues/${issue}`;
   }
 
-  private _apiLink(
-    projectConfig: GitlabCfg,
-    project?: string | number,
-    onlyApiUrl = false,
-  ): string {
+  private _apiLink(cfg: GitlabCfg): string {
     let apiURL: string = '';
 
-    if (projectConfig.gitlabBaseUrl) {
-      const fixedUrl = projectConfig.gitlabBaseUrl.match(/.*\/$/)
-        ? projectConfig.gitlabBaseUrl
-        : `${projectConfig.gitlabBaseUrl}/`;
+    if (cfg.gitlabBaseUrl) {
+      const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
+        ? cfg.gitlabBaseUrl
+        : `${cfg.gitlabBaseUrl}/`;
       apiURL = fixedUrl + 'api/v4/';
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
-    if (onlyApiUrl) return apiURL;
 
-    let projectURL = project;
+    const projectURL = assertTruthy(cfg.project).toString().replace(/\//gi, '%2F');
+    // TODO validate
 
-    if (!projectURL) {
-      projectURL = this.getProject(projectConfig);
-    }
-
-    projectURL = assertTruthy(projectURL).toString().replace(/\//gi, '%2F');
-
-    if (project || projectConfig.source === 'project') {
-      apiURL += 'projects/' + projectURL;
-    } else if (projectConfig.source === 'group') {
-      apiURL += 'groups/' + projectURL;
-    }
-
+    apiURL += 'projects/' + projectURL;
     return apiURL;
   }
 }

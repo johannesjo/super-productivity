@@ -336,8 +336,7 @@ export class IssueService {
         task: Task;
         taskChanges: Partial<Task>;
         issue: IssueData;
-      }[] = await // TODO export fn to type instead
-      (this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks as any)(
+      }[] = await this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks(
         tasksIssueIdsByIssueProviderKey[providerKey],
       );
 
