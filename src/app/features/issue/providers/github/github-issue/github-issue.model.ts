@@ -25,6 +25,9 @@ export type GithubIssueReduced = Readonly<{
   id: number;
   number: number;
 
+  // to include labels as tags
+  labels: GithubLabel[];
+
   // removed
   // node_id: string;
   // assignees: GithubOriginalUser[];
@@ -40,7 +43,7 @@ export type GithubIssue = GithubIssueReduced &
     events_url: string;
     html_url: string;
     body: string;
-    labels: GithubLabel[];
+    // labels: GithubLabel[];
     milestone: GithubMileStone;
     locked: boolean;
     active_lock_reason: string;
