@@ -28,6 +28,7 @@ import {
 } from 'rxjs/operators';
 import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
 import {
+  getPartsFromGitlabIssueId,
   mapGitlabIssue,
   mapGitlabIssueToSearchResult,
 } from '../gitlab-issue/gitlab-issue-map.util';
@@ -45,6 +46,8 @@ export class GitlabApiService {
   ) {}
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
+    console.log(this._issueApiLink(cfg, id));
+
     return this._sendIssuePaginatedRequest$(
       {
         url: this._issueApiLink(cfg, id),
@@ -53,12 +56,7 @@ export class GitlabApiService {
     ).pipe(
       mergeAll(),
       mergeMap((issue: GitlabIssue) => {
-        return this.getIssueWithComments$(issue, cfg).pipe(
-          map((issueWithComments) => ({
-            ...issueWithComments,
-            iid: issue.iid,
-          })),
-        );
+        return this.getIssueWithComments$(issue, cfg);
       }),
     );
   }
@@ -79,6 +77,7 @@ export class GitlabApiService {
     }
   }
 
+  // TODO more efficient to do it like this
   // getByIds$(ids: string[] | number[], cfg: GitlabCfg): Observable<GitlabIssue[]> {
   //   const queryParams = 'iids[]=' + ids.join('&iids[]=');
   //   // const PARAMS_COUNT = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
@@ -170,9 +169,11 @@ export class GitlabApiService {
     total_time_spent: null | number;
   }*/
 
+    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
+
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues/${issueId}/add_spent_time`,
+        url: `${this._apiLink(cfg)}/issues/${projectIssueId}/add_spent_time`,
         method: 'POST',
         data: {
           duration: duration,
@@ -192,9 +193,10 @@ export class GitlabApiService {
     time_estimate: null | number;
     total_time_spent: null | number;
   }> {
+    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues/${issueId}/time_stats`,
+        url: `${this._apiLink(cfg)}/issues/${projectIssueId}/time_stats`,
       },
       cfg,
     ).pipe(map((res) => (res as any).body));
@@ -357,8 +359,10 @@ export class GitlabApiService {
     return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.' });
   }
 
-  private _issueApiLink(cfg: GitlabCfg, issue: string | number): string {
-    return `${this._apiLink(cfg)}issues/${issue}`;
+  private _issueApiLink(cfg: GitlabCfg, issueId: string): string {
+    console.log(issueId);
+    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
+    return `${this._apiLink(cfg)}/issues/${projectIssueId}`;
   }
 
   private _apiLink(cfg: GitlabCfg): string {
@@ -374,8 +378,6 @@ export class GitlabApiService {
     }
 
     const projectURL = assertTruthy(cfg.project).toString().replace(/\//gi, '%2F');
-    // TODO validate
-
     apiURL += 'projects/' + projectURL;
     return apiURL;
   }

@@ -69,20 +69,21 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
       txt: T.F.ISSUE.HOW_TO_GET_A_TOKEN,
     },
   },
-  {
-    key: 'source',
-    type: 'select',
-    defaultValue: 'project',
-    templateOptions: {
-      required: true,
-      label: T.F.GITLAB.FORM.SOURCE,
-      options: [
-        { value: 'project', label: T.F.GITLAB.FORM.SOURCE_PROJECT },
-        { value: 'group', label: T.F.GITLAB.FORM.SOURCE_GROUP },
-        { value: 'global', label: T.F.GITLAB.FORM.SOURCE_GLOBAL },
-      ],
-    },
-  },
+  // TODO remove completely including translations
+  // {
+  //   key: 'source',
+  //   type: 'select',
+  //   defaultValue: 'project',
+  //   templateOptions: {
+  //     required: true,
+  //     label: T.F.GITLAB.FORM.SOURCE,
+  //     options: [
+  //       { value: 'project', label: T.F.GITLAB.FORM.SOURCE_PROJECT },
+  //       { value: 'group', label: T.F.GITLAB.FORM.SOURCE_GROUP },
+  //       { value: 'global', label: T.F.GITLAB.FORM.SOURCE_GLOBAL },
+  //     ],
+  //   },
+  // },
   {
     key: 'scope',
     type: 'select',

@@ -34,13 +34,12 @@ export type GitlabIssue = Readonly<{
   wasUpdated: boolean;
   commentsNr: number;
   // apiUrl: string;
-  _id: number;
+  // _id: number;
   // transformed
   comments: GitlabComment[];
   url: string;
-  id: number | string; // global id, not compatible with the Gitlab API
-  iid: number; // project specific id, i.e. the issue number #123
-  project: string;
+  id: string; // global id, not compatible with the Gitlab API
+  // iid: number; // project specific id, i.e. the issue number #123
 
   // according to the docs: "Users on GitLab Starter, Bronze, or higher will also see the weight parameter"
   weight?: number;

@@ -11,7 +11,7 @@ export const mapGitlabIssue = (
     html_url: issue.web_url,
     // eslint-disable-next-line id-blacklist
     number: issue.iid,
-    iid: issue.iid,
+    // iid: issue.iid,
     state: issue.state,
     title: issue.title,
     body: issue.description,
@@ -26,25 +26,33 @@ export const mapGitlabIssue = (
     // added
     wasUpdated: false,
     commentsNr: issue.user_notes_count,
-    _id: issue.id,
+    // _id: issue.id,
 
     // transformed
     comments: [],
     url: issue.web_url,
     // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
     // when we can get issues from multiple projects we use full refence as id
-    id: /* issue.references.full, */ issue.id,
-    project: getPartsFromGitlabIssueUrl(issue.references.full)[0],
+    id: issue.references.full,
     links: issue._links,
   };
 };
 
-export const getPartsFromGitlabIssueUrl = (issue: string | number): string[] => {
-  if (typeof issue === 'string') {
-    return issue.split('#');
-  } else {
-    return [issue.toString()];
+export const getPartsFromGitlabIssueId = (
+  issueId: string,
+): { project: string; projectIssueId: string } => {
+  const parts = issueId.split('#');
+  const project = parts[0];
+  const projectIssueId = parts[1];
+
+  if (!project || !projectIssueId) {
+    throw new Error('Cannot parse GitLab project and issueId');
   }
+
+  return {
+    project,
+    projectIssueId,
+  };
 };
 
 // export const getGitlabFullIssueRef = (

@@ -155,8 +155,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
         ].sort();
         const lastRemoteUpdate = updates[updates.length - 1];
         const wasUpdated = lastRemoteUpdate > (task.issueLastUpdated || 0);
-        const projectTagMissing = task.tagIds.indexOf(issue.project) === -1;
-        if (wasUpdated || projectTagMissing) {
+        if (wasUpdated) {
           updatedIssues.push({
             task,
             taskChanges: {
@@ -177,7 +176,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issuePoints: issue.weight,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
-      issueId: issue.id.toString(),
+      issueId: issue.id,
     };
   }
 
