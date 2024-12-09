@@ -7,7 +7,10 @@ import {
 } from '../../../config/global-config.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 import { IssueProviderGitlab } from '../../issue.model';
-import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
+import {
+  CROSS_ORIGIN_WARNING,
+  ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+} from '../../common-issue-form-stuff.const';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isEnabled: false,
@@ -33,6 +36,7 @@ export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[] = [
+  ...CROSS_ORIGIN_WARNING,
   {
     key: 'project',
     type: 'input',

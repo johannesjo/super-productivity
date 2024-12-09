@@ -1,6 +1,8 @@
 import { T } from '../../t.const';
 import { LimitedFormlyFieldConfig } from '../config/global-config.model';
 import { IssueProvider } from './issue.model';
+import { IS_ELECTRON } from '../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 // NOTE: FILE IS REQUIRED TO AVOID CIRCULAR DEPENDENCY ISSUES
 
@@ -45,6 +47,21 @@ export const ISSUE_PROVIDER_FF_DEFAULT_PROJECT: LimitedFormlyFieldConfig<IssuePr
       description: T.F.ISSUE.DEFAULT_PROJECT_DESCRIPTION,
     },
   } as const;
+
+export const CROSS_ORIGIN_WARNING: LimitedFormlyFieldConfig<IssueProvider>[] =
+  !IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+    ? [
+        {
+          type: 'tpl',
+          className: 'tpl',
+          props: {
+            tag: 'div',
+            class: 'warning-box',
+            text: T.F.ISSUE.CROSS_ORIGIN_BROWSER_WARNING,
+          },
+        },
+      ]
+    : [];
 
 export const ISSUE_PROVIDER_COMMON_FORM_FIELDS: LimitedFormlyFieldConfig<IssueProvider>[] =
   [

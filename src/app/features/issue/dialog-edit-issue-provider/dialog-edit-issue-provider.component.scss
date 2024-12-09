@@ -32,6 +32,19 @@
 }
 
 :host::ng-deep {
+  .tpl .warning-box {
+    margin: 16px;
+    margin-bottom: 32px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+
+    &:before {
+      @include materialIcon('warning');
+      margin-right: 8px;
+    }
+  }
+
   .tpl hr {
     margin-bottom: 32px;
     border-color: $light-theme-separator-color;

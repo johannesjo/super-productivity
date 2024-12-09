@@ -331,6 +331,7 @@
       }
     },
     "ISSUE": {
+      "CROSS_ORIGIN_BROWSER_WARNING": "This integration will likely not work in your browser. Please download the Desktop or Android version of Super Productivity!",
       "HOW_TO_GET_A_TOKEN": "How to get a token?",
       "DEFAULT_PROJECT_LABEL": "Default Super Productivity Project",
       "DEFAULT_PROJECT_DESCRIPTION": "Project assigned to tasks created from issues.",
