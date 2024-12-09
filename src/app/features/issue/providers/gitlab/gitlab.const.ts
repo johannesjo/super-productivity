@@ -15,8 +15,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   gitlabBaseUrl: null,
   token: null,
   filterUsername: null,
-  scope: 'created-by-me',
-  source: 'project',
+  scope: 'all',
   filter: null,
   isEnableTimeTracking: false,
 };
@@ -42,6 +41,7 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
       pattern: GITLAB_PROJECT_REGEX,
+      description: T.F.GITLAB.FORM.PROJECT_HINT,
     },
   },
   {
@@ -85,24 +85,24 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
   //   },
   // },
   {
-    key: 'scope',
-    type: 'select',
-    defaultValue: 'created-by-me',
-    templateOptions: {
-      required: true,
-      label: T.F.GITLAB.FORM.SCOPE,
-      options: [
-        { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },
-        { value: 'created-by-me', label: T.F.GITLAB.FORM.SCOPE_CREATED },
-        { value: 'assigned-to-me', label: T.F.GITLAB.FORM.SCOPE_ASSIGNED },
-      ],
-    },
-  },
-  {
     type: 'collapsible',
     // todo translate
     props: { label: 'Advanced Config' },
     fieldGroup: [
+      {
+        key: 'scope',
+        type: 'select',
+        defaultValue: 'created-by-me',
+        templateOptions: {
+          required: true,
+          label: T.F.GITLAB.FORM.SCOPE,
+          options: [
+            { value: 'all', label: T.F.GITLAB.FORM.SCOPE_ALL },
+            { value: 'created-by-me', label: T.F.GITLAB.FORM.SCOPE_CREATED },
+            { value: 'assigned-to-me', label: T.F.GITLAB.FORM.SCOPE_ASSIGNED },
+          ],
+        },
+      },
       {
         key: 'gitlabBaseUrl',
         type: 'input',

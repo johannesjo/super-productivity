@@ -286,7 +286,8 @@
       "FORM": {
         "FILTER_USER": "Filter username",
         "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
-        "PROJECT": "(default) project ID or user name/project",
+        "PROJECT": "user name/project",
+        "PROJECT_HINT": "e.g. johannesjo/super-productivity",
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
         "SCOPE_ASSIGNED": "Assigned to me",
