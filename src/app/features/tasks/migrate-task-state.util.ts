@@ -41,7 +41,24 @@ const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy =
   task = _updateUndefinedNoteFields(task);
   task = _updateTimeEstimate(task, taskState);
   task = _updateIssueCalendarToIcal(task);
+  task = _removeLegacyGitLabIssueData(task);
   return task;
+};
+
+const _removeLegacyGitLabIssueData = (task: Task): Task => {
+  return task.issueType === 'GITLAB' &&
+    (typeof task.issueId !== 'string' || !task.issueId.includes('#'))
+    ? {
+        ...task,
+        issueId: null,
+        issueType: null,
+        issueWasUpdated: null,
+        issueLastUpdated: null,
+        issueAttachmentNr: null,
+        issuePoints: null,
+        issueTimeTracked: null,
+      }
+    : task;
 };
 
 const _updateIssueCalendarToIcal = (task: Task): Task => {

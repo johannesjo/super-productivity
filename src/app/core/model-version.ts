@@ -2,9 +2,9 @@
 
 export enum MODEL_VERSION {
   // issueProvider model
-  TASK = 4.0,
+  TASK = 4.1,
   // needs to be always the same as TASK !!!
-  TASK_ARCHIVE = 3.5,
+  TASK_ARCHIVE = MODEL_VERSION.TASK,
   // issueProvider model
   PROJECT = 7.0,
   ISSUE_PROVIDER = 1.1,
