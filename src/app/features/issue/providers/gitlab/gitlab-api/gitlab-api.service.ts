@@ -457,7 +457,6 @@ export class GitlabApiService {
     } else {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
-    if (onlyApiUrl) return apiURL;
 
     let projectURL = project;
 
