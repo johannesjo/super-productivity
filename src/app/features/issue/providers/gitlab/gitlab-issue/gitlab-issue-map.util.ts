@@ -32,12 +32,19 @@ export const mapGitlabIssue = (
     comments: [],
     url: issue.web_url,
     // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
-    // when we can get issues from multiple projects we use full refence as id
+    // when we can get issues from multiple projects we use full reference as id
+    // also @see below
+    // e.g.: johannesjo/test-repo#44
     id: issue.references.full,
     links: issue._links,
   };
 };
 
+/* Explanation:
+ * We're doing this, since the id property is something only admins can use and more of an internal GitLab thing.
+ * Since iid is just a number that is counted up, we use issue.reference.full which translates to
+ * "johannesjo/test-repo#44"
+ * */
 export const getPartsFromGitlabIssueId = (
   issueId: string,
 ): { project: string; projectIssueId: string } => {
