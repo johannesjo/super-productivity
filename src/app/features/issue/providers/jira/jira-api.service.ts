@@ -473,6 +473,14 @@ export class JiraApiService {
           .then((res) =>
             transform ? transform({ response: res }, jiraCfg) : { response: res },
           ),
+      ).pipe(
+        catchError((err) => {
+          console.log(err);
+          console.log(getErrorTxt(err));
+          const errTxt = `Jira: ${getErrorTxt(err)}`;
+          this._snackService.open({ type: 'ERROR', msg: errTxt });
+          return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
+        }),
       );
     }
 
