@@ -178,11 +178,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  addToMyDay(): void {
+  addToToday(): void {
     this._taskService.addTodayTag(this.data.task);
   }
 
-  removeFromMyDay(): void {
+  removeFromToday(): void {
     this._taskService.updateTags(
       this.data.task,
       this.data.task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
@@ -273,7 +273,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  submit(): void {
+  submit(isRemoveFromToday = false): void {
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
@@ -283,7 +283,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     const newDay = getWorklogStr(newDayDate);
     const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
-    if (this.selectedTime) {
+    if (isRemoveFromToday) {
+      this.removeFromToday();
+    } else if (this.selectedTime) {
       const task = this.data.task;
       const newDate = new Date(
         getDateTimeFromClockString(this.selectedTime, this.selectedDate as Date),
@@ -297,13 +299,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         false,
       );
       if (isTodayI) {
-        this.addToMyDay();
+        this.addToToday();
       } else {
-        this.removeFromMyDay();
+        this.removeFromToday();
       }
     } else if (newDay === getWorklogStr()) {
       if (this.isShowAddToToday()) {
-        this.addToMyDay();
+        this.addToToday();
 
         this._snackService.open({
           type: 'SUCCESS',
@@ -311,7 +313,12 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           translateParams: { date: formattedDate },
         });
       } else {
-        this.removeFromMyDay();
+        this._snackService.open({
+          type: 'CUSTOM',
+          ico: 'info',
+          msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
+          translateParams: { date: formattedDate },
+        });
       }
     } else {
       this._store.dispatch(
@@ -323,6 +330,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         translateParams: { date: formattedDate },
       });
     }
+
     this.close(true);
   }
 
@@ -332,14 +340,16 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     switch (item) {
       case 0:
-        this.selectedDate = tDate;
         break;
       case 1:
+        this.selectedDate = tDate;
+        break;
+      case 2:
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
         this.selectedDate = tomorrow;
         break;
-      case 2:
+      case 3:
         const nextFirstDayOfWeek = tDate;
         const dayOffset =
           (this._dateAdapter.getFirstDayOfWeek() -
@@ -349,14 +359,15 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
         this.selectedDate = nextFirstDayOfWeek;
         break;
-      case 3:
+      case 4:
         const nextMonth = tDate;
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         this.selectedDate = nextMonth;
         break;
     }
 
-    this.submit();
+    const isRemoveFromToday = item === 0 && this.isShowRemoveFromToday();
+    this.submit(isRemoveFromToday);
   }
 
   isShowRemoveFromToday(): boolean {
