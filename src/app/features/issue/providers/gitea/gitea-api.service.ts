@@ -1,17 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { GiteaCfg } from './gitea.model';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
-import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { GITEA_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import {
@@ -33,6 +26,7 @@ import {
 } from './gitea.const';
 import { SearchResultItem } from '../../issue.model';
 import { GiteaUser } from './gitea-api-responses';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 
 @Injectable({
   providedIn: 'root',
@@ -186,7 +180,9 @@ export class GiteaApiService {
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
       filter((res) => !(res === Object(res) && res.type === 0)),
       map((res: any) => (res && res.body ? res.body : res)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$(GITEA_TYPE, this._snackService, err),
+      ),
     );
   }
 
@@ -211,44 +207,6 @@ export class GiteaApiService {
       !!cfg.repoFullname &&
       cfg.repoFullname.length > 0
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): ObservableInput<unknown> {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITEA_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[GITEA_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
-      });
-    }
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitea: ' + error.message });
-    }
-
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitea: Api request failed.' });
   }
 }
 

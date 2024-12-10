@@ -1,17 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { RedmineCfg } from './redmine.model';
 import { catchError, filter, map } from 'rxjs/operators';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
-import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { ISSUE_PROVIDER_HUMANIZED, REDMINE_TYPE } from '../../issue.const';
 import {
@@ -23,6 +16,7 @@ import {
 import { mapRedmineSearchResultItemToSearchResult } from './redmine-issue/redmine-issue-map.util';
 import { SearchResultItem } from '../../issue.model';
 import { ScopeOptions } from './redmine.const';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -113,7 +107,9 @@ export class RedmineApiService {
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
       filter((res) => !(res === Object(res) && res.type === 0)),
       map((res: any) => (res && res.body ? res.body : res)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$(REDMINE_TYPE, this._snackService, err),
+      ),
     );
   }
 
@@ -138,45 +134,6 @@ export class RedmineApiService {
       !!cfg.projectId &&
       cfg.projectId.length > 0
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): Observable<unknown> {
-    console.log(error);
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[REDMINE_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[REDMINE_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.REDMINE.S.ERR_UNKNOWN,
-      });
-    }
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: `Redmine: ${error.message}` });
-    }
-
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'Redmine: Api request failed.' });
   }
 }
 

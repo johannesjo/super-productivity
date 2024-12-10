@@ -1,14 +1,8 @@
 import { Injectable } from '@angular/core';
 import { OpenProjectCfg } from './open-project.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-} from '@angular/common/http';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import {
   OpenProjectOriginalStatus,
   OpenProjectOriginalWorkPackageReduced,
@@ -25,11 +19,11 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { SearchResultItem } from '../../issue.model';
-import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 import { devError } from '../../../../util/dev-error';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 
 @Injectable({
   providedIn: 'root',
@@ -307,46 +301,9 @@ export class OpenProjectApiService {
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
       filter((res) => !(res === Object(res) && res.type === 0)),
       map((res: any) => (res && res.body ? res.body : res)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$(OPEN_PROJECT_TYPE, this._snackService, err),
+      ),
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): ObservableInput<unknown> {
-    console.log(error);
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
-      });
-    }
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'OpenProject: ' + error.message });
-    }
-
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'OpenProject: Api request failed.' });
   }
 }

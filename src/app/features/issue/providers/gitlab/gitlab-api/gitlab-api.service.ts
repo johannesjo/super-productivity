@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
   HttpClient,
-  HttpErrorResponse,
   HttpEvent,
   HttpHeaders,
   HttpParams,
   HttpRequest,
 } from '@angular/common/http';
 import { parseUrl, stringifyUrl } from 'query-string';
-import { EMPTY, forkJoin, Observable, ObservableInput, of, throwError } from 'rxjs';
+import { EMPTY, forkJoin, Observable, of } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab.model';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
-import { HANDLED_ERROR_PROP_STR } from 'src/app/app.constants';
 import { GITLAB_API_BASE_URL } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import {
@@ -35,6 +33,7 @@ import {
 import { SearchResultItem } from '../../../issue.model';
 import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 import { assertTruthy } from '../../../../../util/assert-truthy';
+import { handleIssueProviderHttpError$ } from '../../../handle-issue-provider-http-error';
 
 @Injectable({
   providedIn: 'root',
@@ -313,50 +312,18 @@ export class GitlabApiService {
     console.log(allArgs);
 
     const req = new HttpRequest(p.method, p.url, ...allArgs);
+
     return this._http.request(req).pipe(
       // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
       filter((res) => !(res === Object(res) && res.type === 0)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$<HttpEvent<unknown>>(
+          GITLAB_TYPE,
+          this._snackService,
+          err,
+        ),
+      ),
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<HttpEvent<unknown>>,
-  ): ObservableInput<HttpEvent<unknown>> {
-    console.error(error);
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITLAB_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[GITLAB_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.GITLAB.S.ERR_UNKNOWN,
-      });
-    }
-
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: ' + error.message });
-    }
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitlab: Api request failed.' });
   }
 
   private _issueApiLink(cfg: GitlabCfg, issueId: string): string {
