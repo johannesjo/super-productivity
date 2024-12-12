@@ -17,8 +17,8 @@ import {
 } from '../../features/issue/issue.model';
 import { nanoid } from 'nanoid';
 import {
-  ICAL_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ICAL_TYPE,
   ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_TYPES,
 } from '../../features/issue/issue.const';
@@ -89,17 +89,8 @@ const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComple
 
   if (migrations.length > 0) {
     console.log('Issue providers migrated from projects to standalone:', migrations);
-    if (
-      confirm(
-        'Do the following migrations?\n\nCreate issue providers from projects:\n' +
-          migrations.join('\n'),
-      )
-    ) {
-      copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
-      return copy;
-    } else {
-      throw new Error('Migration aborted');
-    }
+    copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
+    return copy;
   }
 
   return data;
@@ -127,21 +118,10 @@ const migrateIssueProvidersFromCalendars = (data: AppDataComplete): AppDataCompl
 
   if (migrations.length > 0) {
     console.log('Issue providers migrated from calProviders to standalone:', migrations);
-    if (
-      confirm(
-        `Do the following migrations?
-
-Create issue providers from ${migrations.length} calProviders
-`,
-      )
-    ) {
-      copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
-      // @ts-ignore
-      delete copy.globalConfig.calendarIntegration.calendarProviders;
-      return copy;
-    } else {
-      throw new Error('Migration aborted');
-    }
+    copy.issueProvider[MODEL_VERSION_KEY] = MODEL_VERSION.ISSUE_PROVIDER;
+    // @ts-ignore
+    delete copy.globalConfig.calendarIntegration.calendarProviders;
+    return copy;
   }
 
   return data;
