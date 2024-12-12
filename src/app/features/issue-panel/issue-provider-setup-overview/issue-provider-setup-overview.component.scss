@@ -1,5 +1,9 @@
 @import '../../../../variables.scss';
 
+:host {
+  display: block;
+  padding: 0 12px;
+}
 .items {
   display: grid;
   gap: 12px;
@@ -36,11 +40,8 @@ h4 {
 .initials {
   margin-top: 1px;
   font-size: 12px;
-  border-radius: 50%;
-  background: #fff;
 
   @include darkTheme() {
-    background: $dark-theme-bg-lightest;
     color: #ffffff;
   }
 }
