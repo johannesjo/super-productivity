@@ -1,7 +1,8 @@
 @import '../../../variables.scss';
 
 :host {
-  padding: 8px 12px;
+  // NOTE 0 because we want the inner scrollbars at the very right
+  padding: 8px 0;
   position: absolute;
   top: 0;
   right: 0;

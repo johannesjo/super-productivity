@@ -1,5 +1,7 @@
 @import '../../../../variables';
 
+$pad: 12px;
+
 :host {
   margin-top: 0;
   position: relative;
@@ -10,6 +12,11 @@
   max-width: 100%;
   min-width: 260px;
   overflow: hidden;
+}
+
+:host > * {
+  padding-left: $pad;
+  padding-right: $pad;
 }
 
 header {
