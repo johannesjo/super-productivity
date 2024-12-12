@@ -185,8 +185,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       (this.inputEl as ElementRef).nativeElement.focus();
     } else {
       // we need to wait since otherwise addTask is not working
+      window.clearTimeout(this._delayBlurTimeout);
       this._delayBlurTimeout = window.setTimeout(() => {
         if (this._isAddInProgress) {
+          window.clearTimeout(this._delayBlurTimeout);
           this._delayBlurTimeout = window.setTimeout(() => {
             this.blurred.emit();
           }, 300);

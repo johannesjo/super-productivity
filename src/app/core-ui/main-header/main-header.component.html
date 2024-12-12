@@ -230,7 +230,7 @@
     </button>
 
     <button
-      class="toggle-notes-btn"
+      class="toggle-notes-btn e2e-toggle-notes-btn"
       [title]="!(isRouteWithSidePanel$|async) ? (T.MH.NOTES_PANEL_INFO|translate) : ''"
       [disabled]="!(isRouteWithSidePanel$|async)"
       [class.isActive]="(layoutService.isShowNotes$|async)"
