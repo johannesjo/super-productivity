@@ -20,8 +20,10 @@
   }
 
   ::ng-deep .mat-mdc-tab-body-wrapper {
-    min-height: 50vh;
+    min-height: 0;
+    height: 100%;
   }
+
   ::ng-deep .mat-mdc-tab {
     min-width: 40px !important;
     padding-left: 0 !important;
