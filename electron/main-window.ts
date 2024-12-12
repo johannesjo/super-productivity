@@ -182,8 +182,10 @@ function initWinEventListeners(app: any): void {
 
   // open new window links in browser
   mainWin.webContents.on('will-navigate', (ev, url) => {
-    ev.preventDefault();
-    openUrlInBrowser(url);
+    if (!url.includes('localhost')) {
+      ev.preventDefault();
+      openUrlInBrowser(url);
+    }
   });
   mainWin.webContents.setWindowOpenHandler((details) => {
     openUrlInBrowser(details.url);
