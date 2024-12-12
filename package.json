@@ -207,7 +207,7 @@
     "rxjs": "^6.6.7",
     "shepherd.js": "^11.2.0",
     "stacktrace-js": "^2.0.1",
-    "start-server-and-test": "^2.0.9",
+    "start-server-and-test": "^1.15.5",
     "ts-node": "~10.9.1",
     "tslib": "^2.7.0",
     "typescript": "~5.4.5",
