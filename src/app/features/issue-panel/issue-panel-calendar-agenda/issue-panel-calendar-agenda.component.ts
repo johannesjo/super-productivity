@@ -19,6 +19,7 @@ import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model'
 import { getErrorTxt } from 'src/app/util/get-error-text';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
@@ -27,6 +28,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation],
 })
 export class IssuePanelCalendarAgendaComponent implements OnInit {
   readonly T: typeof T = T;

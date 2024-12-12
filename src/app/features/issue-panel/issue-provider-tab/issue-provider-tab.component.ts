@@ -45,6 +45,7 @@ import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
 import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-provider-help-link';
 import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
 import { IssuePanelCalendarAgendaComponent } from '../issue-panel-calendar-agenda/issue-panel-calendar-agenda.component';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -63,6 +64,7 @@ import { IssuePanelCalendarAgendaComponent } from '../issue-panel-calendar-agend
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation],
 })
 export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   readonly HelperClasses = HelperClasses;

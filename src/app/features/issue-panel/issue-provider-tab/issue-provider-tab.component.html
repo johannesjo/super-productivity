@@ -107,10 +107,13 @@
 } @else if (!issueItems()?.length && searchText()?.length > 0) {
 <div class="empty">No items found (already added are not shown)</div>
 } @else {
-<div class="item-list">
+<div
+  class="item-list"
+  [@standardList]="issueItems()?.length"
+>
   <!--  (cdkDropListDropped)="drop($event)"-->
 
-  @for (item of issueItems(); track $index) {
+  @for (item of issueItems(); track item.issueData.id) {
   <!--    <div style="display: flex; align-items: center">-->
   <!--      <button-->
   <!--        mat-icon-button-->

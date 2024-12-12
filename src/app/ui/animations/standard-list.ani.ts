@@ -9,7 +9,7 @@ import {
 } from '@angular/animations';
 import { ANI_FAST_TIMING } from './animation.const';
 
-const ANI = [
+export const STANDARD_LIST_ANI = [
   query(':enter', style({ opacity: 0, height: 0 }), { optional: true }),
 
   query(
@@ -38,5 +38,5 @@ const ANI = [
 ];
 
 export const standardListAnimation = trigger('standardList', [
-  transition(':increment, :decrement', ANI),
+  transition(':increment, :decrement', STANDARD_LIST_ANI),
 ]);
