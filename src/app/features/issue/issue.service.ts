@@ -505,7 +505,13 @@ export class IssueService {
         this._snackService.open({
           ico: 'arrow_upward',
           msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
-          translateParams: { title: res.task.title },
+          translateParams: {
+            title: res.task.title,
+            contextTitle: res.task.projectId
+              ? (await this._projectService.getByIdOnce$(res.task.projectId).toPromise())
+                  ?.title
+              : 'another tag',
+          },
         });
         return true;
       }
