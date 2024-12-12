@@ -40,7 +40,6 @@ import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { LanguageService } from './core/language/language.service';
 import { ConfigModule } from './features/config/config.module';
 import { ProjectModule } from './features/project/project.module';
-import { EntityDataModule } from '@ngrx/data';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { WorkContextModule } from './features/work-context/work-context.module';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
@@ -144,7 +143,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
         deps: [HttpClient],
       },
     }),
-    EntityDataModule,
     CdkDropListGroup,
   ],
   providers: [
