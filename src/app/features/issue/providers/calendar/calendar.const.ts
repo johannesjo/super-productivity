@@ -41,16 +41,6 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
     },
     ISSUE_PROVIDER_FF_DEFAULT_PROJECT,
     {
-      type: 'checkbox',
-      key: 'isAutoImportForCurrentDay',
-      templateOptions: {
-        type: 'url',
-        // TODO translation
-        // label: T.GCF.CALENDARS.CAL_PATH,
-        label: 'Auto import events as tasks for current day',
-      },
-    },
-    {
       type: 'duration',
       key: 'checkUpdatesEvery',
       hooks: {
@@ -82,6 +72,16 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
         isAllowSeconds: true,
         label: T.GCF.CALENDARS.SHOW_BANNER_THRESHOLD,
         description: T.G.DURATION_DESCRIPTION,
+      },
+    },
+    {
+      type: 'checkbox',
+      key: 'isAutoImportForCurrentDay',
+      templateOptions: {
+        type: 'url',
+        // TODO translation
+        // label: T.GCF.CALENDARS.CAL_PATH,
+        label: 'Auto import events as tasks for current day',
       },
     },
     // {
