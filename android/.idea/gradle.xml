@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor" />
+            <option value="$PROJECT_DIR$/../node_modules/@capacitor/app/android" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />
