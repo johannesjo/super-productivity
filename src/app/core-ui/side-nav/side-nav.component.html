@@ -136,7 +136,6 @@
   </button>
 
   <div
-    *ngIf="tagList.length"
     [@standardList]="tagList?.length"
     cdkDropList
     (cdkDropListDropped)="dropOnTagList(tagList, $event)"
