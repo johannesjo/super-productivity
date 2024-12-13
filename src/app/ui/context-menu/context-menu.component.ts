@@ -32,7 +32,7 @@ import { NgTemplateOutlet } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContextMenuComponent implements OnInit {
-  leftClickTriggerEl = input<HTMLElement | MatMenuItem | MatIconButton>();
+  leftClickTriggerEl = input<HTMLElement | MatMenuItem | MatIconButton | undefined>();
   rightClickTriggerEl = input.required<HTMLElement | MatMenuItem | MatIconButton>();
   contextMenu = input.required<TemplateRef<any>>();
 
