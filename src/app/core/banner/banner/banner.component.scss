@@ -5,6 +5,7 @@ $vertical-button-margin: $s;
 :host {
   display: block;
   position: relative;
+  z-index: $z-banner;
 }
 
 .content-wrapper {
