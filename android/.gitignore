@@ -92,3 +92,6 @@ app/src/main/res/xml/config.xml
 /app/fdroid/release
 /app/play/release
 /app/src/play/java/com/superproductivity/superproductivity/GoogleClientId.java
+
+###############
+.idea/deploymentTargetSelector.xml

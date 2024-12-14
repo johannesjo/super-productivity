@@ -52,6 +52,7 @@ import { SS } from '../../../../core/persistence/storage-keys.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { stripTrailing } from '../../../../util/strip-trailing';
+import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -85,13 +86,14 @@ export class JiraApiService {
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess: boolean = !!sessionStorage.getItem(BLOCK_ACCESS_KEY);
   private _isExtension: boolean = false;
-  private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
-    ? of(true).pipe()
-    : this._chromeExtensionInterfaceService.onReady$.pipe(
-        mapTo(true),
-        shareReplay(1),
-        timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
-      );
+  private _isInterfacesReadyIfNeeded$: Observable<boolean> =
+    IS_ELECTRON || IS_ANDROID_WEB_VIEW
+      ? of(true).pipe()
+      : this._chromeExtensionInterfaceService.onReady$.pipe(
+          mapTo(true),
+          shareReplay(1),
+          timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
+        );
 
   constructor(
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
@@ -371,7 +373,7 @@ export class JiraApiService {
       settings.host &&
       settings.userName &&
       settings.password &&
-      (IS_ELECTRON || this._isExtension)
+      (IS_ELECTRON || this._isExtension || IS_ANDROID_WEB_VIEW)
     );
   }
 
@@ -408,7 +410,7 @@ export class JiraApiService {
           this._snackService.open({
             type: 'ERROR',
             msg:
-              !IS_ELECTRON && !this._isExtension
+              !IS_ELECTRON && !this._isExtension && !IS_ANDROID_WEB_VIEW
                 ? T.F.JIRA.S.EXTENSION_NOT_LOADED
                 : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
           });
