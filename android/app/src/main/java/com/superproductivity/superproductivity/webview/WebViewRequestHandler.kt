@@ -53,7 +53,10 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
                 return null
             }
 
-            Log.v("TW", "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}")
+            Log.v(
+                "TW",
+                "interceptRequest mf:${request?.isForMainFrame.toString()} ${request.method} ${request?.url}"
+            )
 
             // since we currently don't have a way to also post the body, we only handle GET, HEAD and OPTIONS requests
             // see https://github.com/KonstantinSchubert/request_data_webviewclient for a possible solution
@@ -64,20 +67,25 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
             val client = OkHttpClient()
             val newRequestBuilder = Request.Builder()
                 .url(request.url.toString())
-                .removeHeader("User-Agent")
-                .removeHeader("Origin")
-                .removeHeader("Referer")
                 .method(request.method, null)
 
             for ((key, value) in request.requestHeaders) {
+                Log.v("TW", "interceptRequest header:${key} – ${value}")
+                if(key == "User-Agent" || key == "Origin" || key == "Referer") {
+                    continue
+                }
                 newRequestBuilder.addHeader(key, value)
             }
+
             val newRequest = newRequestBuilder.build()
 
             if (request.method.uppercase() == "OPTIONS") {
                 Log.v("TW", "OPTIONS request triggered")
                 client.newCall(newRequest).execute().use { response ->
-                    Log.v("TW", "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}")
+                    Log.v(
+                        "TW",
+                        "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}"
+                    )
                     if (response.code != 200) {
                         Log.v("TW", "OPTIONS overwrite")
                         return OptionsAllowResponse.build()
@@ -95,7 +103,11 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
                     .toMutableMap()
 
                 upsertKeyValue(responseHeaders, "Access-Control-Allow-Origin", "*")
-                upsertKeyValue(responseHeaders, "Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                upsertKeyValue(
+                    responseHeaders,
+                    "Access-Control-Allow-Methods",
+                    "GET, POST, OPTIONS"
+                )
 
                 val contentType = response.header("Content-Type", "text/plain")
                 val contentEncoding = response.header("Content-Encoding", "utf-8")
@@ -119,7 +131,11 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
         }
     }
 
-    fun upsertKeyValue(responseHeaders: MutableMap<String, String?>, keyToChange: String, value: String): MutableMap<String, String?> {
+    fun upsertKeyValue(
+        responseHeaders: MutableMap<String, String?>,
+        keyToChange: String,
+        value: String
+    ): MutableMap<String, String?> {
         val keyToChangeLower = keyToChange.lowercase()
         for (key in responseHeaders.keys) {
             if (key.lowercase() == keyToChangeLower) {
