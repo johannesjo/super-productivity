@@ -71,26 +71,29 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
 
             for ((key, value) in request.requestHeaders) {
                 Log.v("TW", "interceptRequest header:${key} – ${value}")
-                if(key == "User-Agent" || key == "Origin" || key == "Referer") {
+                if (key == "User-Agent" || key == "Origin" || key == "Referer" || key == "Sec-Fetch-Mode") {
                     continue
                 }
                 newRequestBuilder.addHeader(key, value)
             }
 
+            newRequestBuilder.header("User-Agent", "curl/7.64.1")
             val newRequest = newRequestBuilder.build()
 
             if (request.method.uppercase() == "OPTIONS") {
                 Log.v("TW", "OPTIONS request triggered")
-                client.newCall(newRequest).execute().use { response ->
-                    Log.v(
-                        "TW",
-                        "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}"
-                    )
-                    if (response.code != 200) {
-                        Log.v("TW", "OPTIONS overwrite")
-                        return OptionsAllowResponse.build()
-                    }
-                }
+                return OptionsAllowResponse.build()
+                // to execute actual OPTIONS request uncomment the following lines
+//                client.newCall(newRequest).execute().use { response ->
+//                    Log.v(
+//                        "TW",
+//                        "OPTIONS original response: ${response.code} ${response.message} ${response.body?.string()}"
+//                    )
+//                    if (response.code != 200) {
+//                        Log.v("TW", "OPTIONS overwrite")
+//                        return OptionsAllowResponse.build()
+//                    }
+//                }
             }
             //-------------
 
@@ -111,7 +114,7 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
 
                 val contentType = response.header("Content-Type", "text/plain")
                 val contentEncoding = response.header("Content-Encoding", "utf-8")
-                // TODO check if this needs to be adjusted for HEAD requests
+
                 val inputStream = ByteArrayInputStream(response.body?.bytes())
                 val reasonPhrase =
                     response.message.ifEmpty { "OK" } // provide a default value if the message is null or empty

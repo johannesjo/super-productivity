@@ -22,7 +22,7 @@ class OptionsAllowResponse {
                 "Access-Control-Allow-Methods" to "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
                 "Access-Control-Max-Age" to "7200",
                 "Access-Control-Allow-Credentials" to "true",
-                "Access-Control-Allow-Headers" to "accept, authorization, Content-Type",
+                "Access-Control-Allow-Headers" to "*",
 //                "Via" to "1.1 vegur"
             )
 
