@@ -56,6 +56,7 @@ import { CalendarIntegrationModule } from './features/calendar-integration/calen
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { IssuePanelModule } from './features/issue-panel/issue-panel.module';
+import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -131,7 +132,10 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
       validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !IS_ELECTRON && (environment.production || environment.stage),
+      enabled:
+        !IS_ELECTRON &&
+        !IS_ANDROID_WEB_VIEW &&
+        (environment.production || environment.stage),
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000',

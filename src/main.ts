@@ -31,7 +31,7 @@ platformBrowserDynamic()
     ) {
       console.log('Registering Service worker');
       return navigator.serviceWorker.register('ngsw-worker.js');
-    } else if ('serviceWorker' in navigator && IS_ELECTRON) {
+    } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
       navigator.serviceWorker
         .getRegistrations()
         .then((registrations) => {
