@@ -54,7 +54,8 @@ header {
 .empty {
   text-align: center;
   font-style: italic;
-  line-height: $planner-item-height;
+  margin-top: $s * 2;
+  margin-bottom: $s * 2;
 }
 
 .item-list {
