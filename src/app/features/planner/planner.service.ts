@@ -160,7 +160,7 @@ export class PlannerService {
             return '';
           }
           if (day.timeEstimate === 0) {
-            return `<br />∑ ${day.itemsTotal}`;
+            return ` – ∑ ${day.itemsTotal}`;
           }
 
           return `<br />∑ ${day.itemsTotal} ｜ ${msToString(day.timeEstimate)}`;
