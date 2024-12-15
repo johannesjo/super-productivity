@@ -65,6 +65,7 @@ import { isToday } from '../../../../util/is-today.util';
 import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
+import { PlannerService } from '../../../planner/planner.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -162,6 +163,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     private readonly _store: Store,
     private readonly _focusModeService: FocusModeService,
     private readonly _dateAdapter: DateAdapter<unknown>,
+    private readonly _plannerService: PlannerService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -509,7 +511,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     // this.submit();
   }
 
-  private _schedule(selectedDate: Date): void {
+  private async _schedule(selectedDate: Date): Promise<void> {
     if (!selectedDate) {
       console.warn('no selected date');
       return;
@@ -545,7 +547,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: { date: formattedDate },
+          translateParams: {
+            date: formattedDate,
+            extra: await this._plannerService.getSnackExtraStr(newDay),
+          },
         });
       } else {
         this.removeFromMyDay();
@@ -557,7 +562,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: formattedDate },
+        translateParams: {
+          date: formattedDate,
+          extra: await this._plannerService.getSnackExtraStr(newDay),
+        },
       });
     }
   }

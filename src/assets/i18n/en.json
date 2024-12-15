@@ -643,7 +643,7 @@
       "S": {
         "REMOVED_PLAN_DATE": "Removed plan date for task '{{taskTitle}}'",
         "TASK_ALREADY_PLANNED": "Task is already planned for {{date}}",
-        "TASK_PLANNED_FOR": "Task planned for {{date}}"
+        "TASK_PLANNED_FOR": "Task planned for <strong>{{date}}</strong>{{extra}}"
       },
       "TASK_DRAWER": "Task Drawer",
       "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'"

@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { selectPlannedTasksById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
@@ -20,6 +27,7 @@ import { GlobalTrackingIntervalService } from '../../core/global-tracking-interv
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
+import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 @Injectable({
   providedIn: 'root',
@@ -136,4 +144,28 @@ export class PlannerService {
     private _dateService: DateService,
     private _globalTrackingIntervalService: GlobalTrackingIntervalService,
   ) {}
+
+  getDayOnce$(dayStr: string): Observable<PlannerDay | undefined> {
+    return this.days$.pipe(
+      map((days) => days.find((d) => d.dayDate === dayStr)),
+      first(),
+    );
+  }
+
+  getSnackExtraStr(dayStr: string): Promise<string> {
+    return this.getDayOnce$(dayStr)
+      .pipe(
+        map((day) => {
+          if (!day) {
+            return '';
+          }
+          if (day.timeEstimate === 0) {
+            return `<br />∑ ${day.itemsTotal}`;
+          }
+
+          return `<br />∑ ${day.itemsTotal} / ${msToString(day.timeEstimate)}`;
+        }),
+      )
+      .toPromise();
+  }
 }

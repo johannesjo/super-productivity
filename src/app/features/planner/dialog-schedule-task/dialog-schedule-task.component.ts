@@ -273,7 +273,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  submit(isRemoveFromToday = false): void {
+  async submit(isRemoveFromToday = false): Promise<void> {
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
@@ -310,7 +310,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: { date: formattedDate },
+          translateParams: {
+            date: formattedDate,
+            extra: await this._plannerService.getSnackExtraStr(newDay),
+          },
         });
       } else {
         this._snackService.open({
@@ -327,7 +330,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: { date: formattedDate },
+        translateParams: {
+          date: formattedDate,
+          extra: await this._plannerService.getSnackExtraStr(newDay),
+        },
       });
     }
 
