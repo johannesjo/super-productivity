@@ -163,7 +163,7 @@ export class PlannerService {
             return `<br />∑ ${day.itemsTotal}`;
           }
 
-          return `<br />∑ ${day.itemsTotal} / ${msToString(day.timeEstimate)}`;
+          return `<br />∑ ${day.itemsTotal} ｜ ${msToString(day.timeEstimate)}`;
         }),
       )
       .toPromise();
