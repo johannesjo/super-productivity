@@ -300,8 +300,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       );
       if (isTodayI) {
         this.addToToday();
-      } else {
-        this.removeFromToday();
       }
     } else if (newDay === getWorklogStr()) {
       if (this.isShowAddToToday()) {

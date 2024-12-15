@@ -485,14 +485,17 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     tDate.setMinutes(0, 0, 0);
     switch (item) {
       case 0:
-        this._schedule(tDate);
+        this._schedule(tDate, this.isShowRemoveFromToday());
         break;
       case 1:
+        this._schedule(tDate);
+        break;
+      case 2:
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
         this._schedule(tomorrow);
         break;
-      case 2:
+      case 3:
         const nextFirstDayOfWeek = tDate;
         const dayOffset =
           (this._dateAdapter.getFirstDayOfWeek() -
@@ -502,16 +505,15 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
         this._schedule(nextFirstDayOfWeek);
         break;
-      case 3:
-        const nextMonth = tDate;
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        this._schedule(nextMonth);
-        break;
+      // case 4:
+      //   const nextMonth = tDate;
+      //   nextMonth.setMonth(nextMonth.getMonth() + 1);
+      //   this._schedule(nextMonth);
+      //   break;
     }
-    // this.submit();
   }
 
-  private async _schedule(selectedDate: Date): Promise<void> {
+  private async _schedule(selectedDate: Date, isRemoveFromToday = false): Promise<void> {
     if (!selectedDate) {
       console.warn('no selected date');
       return;
@@ -521,7 +523,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     const newDay = getWorklogStr(newDayDate);
     const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
-    if (this.task.plannedAt) {
+    if (isRemoveFromToday) {
+      this.removeFromMyDay();
+    } else if (this.task.plannedAt) {
       const task = this.task;
       const newDate = combineDateAndTime(new Date(this.task.plannedAt), newDayDate);
 
@@ -552,8 +556,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             extra: await this._plannerService.getSnackExtraStr(newDay),
           },
         });
-      } else {
-        this.removeFromMyDay();
       }
     } else {
       this._store.dispatch(
