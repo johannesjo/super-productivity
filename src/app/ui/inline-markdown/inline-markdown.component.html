@@ -34,7 +34,19 @@
   *ngIf="isShowControls"
   class="controls"
 >
+  @if(isShowChecklistToggle){
+  <!--  -->
   <button
+    [matTooltip]="'Toggle checklist mode'"
+    (click)="toggleChecklistMode($event)"
+    mat-icon-button
+  >
+    <mat-icon>checklist</mat-icon>
+  </button>
+  }
+
+  <button
+    [matTooltip]="'Open in fullscreen'"
     (click)="openFullScreen()"
     mat-icon-button
   >

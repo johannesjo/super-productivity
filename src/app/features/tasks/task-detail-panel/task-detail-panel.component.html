@@ -179,9 +179,15 @@
     [type]="'panel'"
   >
     <ng-container panel-header>
+      @if(isMarkdownChecklist){
+      <mat-icon>checklist</mat-icon>
+      Checklist
+      <!-- -->
+      } @else {
       <mat-icon *ngIf="task.notes">chat</mat-icon>
       <mat-icon *ngIf="!task.notes">chat_bubble_outline</mat-icon>
       <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
+      }
     </ng-container>
 
     <ng-container panel-content>
@@ -192,6 +198,7 @@
         (keyboardUnToggle)="focusItem(noteWrapperElRef)"
         [isFocus]="isFocusNotes"
         [isShowControls]="true"
+        [isShowChecklistToggle]="true"
         [model]="task.notes|| defaultTaskNotes"
       ></inline-markdown>
     </ng-container>

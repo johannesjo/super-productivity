@@ -19,6 +19,7 @@ import { map, startWith } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { isMarkdownChecklist } from '../../features/markdown-checklist/is-markdown-checklist';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -32,6 +33,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() isLock: boolean = false;
   @Input() isShowControls: boolean = false;
+  @Input() isShowChecklistToggle: boolean = false;
 
   @Output() changed: EventEmitter<string> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
@@ -42,6 +44,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @ViewChild('previewEl') previewEl: MarkdownComponent | undefined;
 
   isHideOverflow: boolean = false;
+  isChecklistMode: boolean = false;
   isShowEdit: boolean = false;
   modelCopy: string | undefined;
 
@@ -78,6 +81,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         this.resizeParsedToFit();
       });
     }
+
+    this.isChecklistMode =
+      this.isChecklistMode && this.isShowChecklistToggle && !!v && isMarkdownChecklist(v);
   }
 
   @Input() set isFocus(val: boolean) {
@@ -101,6 +107,10 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (this._hideOverFlowTimeout) {
       window.clearTimeout(this._hideOverFlowTimeout);
     }
+  }
+
+  checklistToggle(): void {
+    this.isChecklistMode = !this.isChecklistMode;
   }
 
   keypressHandler(ev: KeyboardEvent): void {
@@ -205,6 +215,18 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   setBlur(ev: Event): void {
     this.blurred.emit(ev);
+  }
+
+  toggleChecklistMode(ev: Event): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.isChecklistMode = true;
+    this._toggleShowEdit();
+    if (this.modelCopy && isMarkdownChecklist(this.modelCopy)) {
+      this.modelCopy += '\n- [ ] ';
+    } else {
+      this.modelCopy = '- [ ] ';
+    }
   }
 
   private _toggleShowEdit(): void {

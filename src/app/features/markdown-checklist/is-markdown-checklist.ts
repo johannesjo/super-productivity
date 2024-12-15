@@ -14,10 +14,16 @@ Some text yeah
 
 export const isMarkdownChecklist = (text: string): boolean => {
   try {
-    const lines = text.split('\n');
-    return lines.every(
-      (it) => it.trim() === '' || it.startsWith('- [x] ') || it.startsWith('- [ ] '),
+    const lines = text.split('\n').filter((it) => it.trim() !== '');
+
+    if (lines.length === 0) {
+      return false;
+    }
+
+    const items = lines.filter(
+      (it) => it.trim().startsWith('- [x] ') || it.trim().startsWith('- [ ] '),
     );
+    return items.length === lines.length || items.length >= 3;
   } catch (e) {
     console.error('Checklist parsing failed');
     console.error(e);

@@ -71,6 +71,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
+import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 
 interface IssueAndType {
   id: string | number | null;
@@ -105,6 +106,7 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
   isDragOver: boolean = false;
+  isMarkdownChecklist: boolean = false;
 
   T: typeof T = T;
   issueAttachments: TaskAttachment[] = [];
@@ -333,6 +335,7 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;
     this.isExpandedNotesPanel =
       !IS_MOBILE && (!!newVal.notes || (!newVal.issueId && !newVal.attachments?.length));
+    this.isMarkdownChecklist = isMarkdownChecklist(newVal.notes || '');
   }
 
   get progress(): number {
