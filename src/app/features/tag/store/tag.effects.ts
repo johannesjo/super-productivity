@@ -61,6 +61,7 @@ import { DateService } from 'src/app/core/date/date.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
+import { selectTaskById } from '../../tasks/store/task.selectors';
 
 @Injectable()
 export class TagEffects {
@@ -442,7 +443,7 @@ export class TagEffects {
         ({ newTagIds, task }) =>
           newTagIds.includes(NO_LIST_TAG.id) && newTagIds.length >= 2,
       ),
-      // tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
+      tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
       map(({ newTagIds, task }) =>
         updateTaskTags({
           task: {
@@ -467,6 +468,26 @@ export class TagEffects {
         updateTaskTags({
           task: { ...task, projectId: targetProjectId },
           newTagIds: task.tagIds.filter((id) => id !== NO_LIST_TAG.id),
+          isSkipExcludeCheck: true,
+        }),
+      ),
+    ),
+  );
+  removeUnlistedTagForTransferTask$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(PlannerActions.transferTask),
+      filter(
+        ({ task, newDay, prevDay, today }) =>
+          newDay === today && prevDay !== today && task.tagIds.includes(NO_LIST_TAG.id),
+      ),
+      switchMap(({ task }) =>
+        this._store$.select(selectTaskById, { id: task.id }).pipe(first()),
+      ),
+      filter((task) => task.tagIds.includes(NO_LIST_TAG.id) && task.tagIds.length >= 2),
+      map((freshTask) =>
+        updateTaskTags({
+          task: freshTask,
+          newTagIds: freshTask.tagIds.filter((id) => id !== NO_LIST_TAG.id),
           isSkipExcludeCheck: true,
         }),
       ),
