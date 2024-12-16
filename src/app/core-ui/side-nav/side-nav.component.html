@@ -58,7 +58,7 @@
     <!--    </button>-->
 
     <button
-      *ngIf="projectList.length"
+      [style.display]="projectList.length ? '' : 'none'"
       class="additional-btn"
       #projectExpandBtn2
       mat-icon-button
