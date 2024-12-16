@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Ime CalDav resursa (kalendar)",
         "CALDAV_URL": "CalDav URL (osnovni URL)",
         "CALDAV_USER": "Tvoje CalDav korisničko ime",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatski završi CalDav zadatke nakon završavanja zadatka",
         "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj nezavršene CalDav zadatke u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj ima li promjena u uvezenim zadacima",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaži nezavršene CalDav zadatke kao prijedloge tijekom dodavanja novih zadataka",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatski završi CalDav zadatke nakon završavanja zadatka"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaži nezavršene CalDav zadatke kao prijedloge tijekom dodavanja novih zadataka"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih CalDav zadataka za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti zadaci navesti kao prijedlozi s poveznicom na zadatak te s daljnjim informacija o zadatku.</p> <p>Osim toga, sve nezavršene zadatke možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p><p>Da bi to za nextcloud radilo na mobilnom uređaju i webu, možda ćeš morati staviti „https://app.super-productivity.com” na popis dopuštenih putem nextcloud programa <a href='https://apps.nextcloud. com/apps/webapppassword'>webapppassword<a>.</p>",
@@ -184,9 +184,6 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastito izrađenih promjena)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj popis neriješenih Gitea problema u odlagalište",
-        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "HOST": "Host računalo (npr.: https://try.gitea.io)",
         "TOKEN": "Token za pristup",
         "REPO_FULL_NAME": "Korisničko ime ili ime organizacije/projekta",
@@ -194,7 +191,10 @@
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
         "SCOPE_ASSIGNED": "Meni dodijeljeno",
-        "SCOPE_CREATED": "Od mene stvoreno"
+        "SCOPE_CREATED": "Od mene stvoreno",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj popis neriješenih Gitea problema u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih Gitea problema za određeni repozitorij na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski u odlagalište zadataka i sinkronizirati ih.</p><p>Za dobivanje ograničenja korištenja i za pristupanje možeš navesti token za pristup.",
@@ -253,13 +253,13 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
+        "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
+        "TOKEN": "Token za pristup",
+        "IS_ASSIGNEE_FILTER": "Filtar za meni dodijelenje zadatke",
         "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj neriješene GitHub probleme u odlagalište",
         "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
-        "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
-        "TOKEN": "Token za pristup",
-        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju",
-        "IS_ASSIGNEE_FILTER": "Filtar za meni dodijelenje zadatke"
+        "TOKEN_DESCRIPTION": "Potrebno za pristup privatnom repozitoriju"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih GitHub problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p><p>Za zaobilaženje ograničenja upotrebe i za pristupanje, možeš zadati pristupni token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Više informacija mogu se pronaći odvje</a>.",
@@ -298,9 +298,6 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
         "GITLAB_BASE_URL": "Prilagođeni osnovni GitLab URL (opcionalno)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj neriješene GitLab probleme u odlagalište",
-        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
         "PROJECT": "(standardni) ID projekta ili korisničko ime/projekt",
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
@@ -314,7 +311,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Prikaži dijalog evidentiranja vremena nakon pritiska na gumb „Završi dan”",
         "TOKEN": "Token za pristup",
         "FILTER": "Prilagođeni filtar",
-        "FILTER_DESCRIPTION": "Pogledaj https://docs.gitlab.com/ee/api/issues.html#list-issues. Višestruki se mogu združiti sa znakom „&”"
+        "FILTER_DESCRIPTION": "Pogledaj https://docs.gitlab.com/ee/api/issues.html#list-issues. Višestruki se mogu združiti sa znakom „&”",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj neriješene GitLab probleme u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git probleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa nezavršenih GitLab problema (online verzija ili instanca vlastitog histinga) za određeni projekt na ploči za stvaranje zadataka u prikazu dnevnog planiranja. U popisu će se ti problemi navesti kao prijedlozi s poveznicom na problem te s daljnjim informacija o problemu.</p> <p>Osim toga, sve neriješene probleme možeš automatski dodati u odlagalište zadataka i sinkronizirati ih.</p>",
@@ -417,17 +417,9 @@
         "TIME_SPENT_TOOLTIP": "Dodaj različita vremena",
         "TITLE": "Jira: Pošalji dnevnik rada"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj nezavršene GitHub probleme u odlagalište",
-        "IS_AUTO_POLL": "Automatski preispitaj uvezene git porbleme za promjenama",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
-        "REPO": "„username/repositoryName” za git repozitorij koji želiš pratiti"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "Korišteni JQL za automatsko dodavanje zadataka u odlagalište",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je podzadatak obavljen",
-        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj Jira probleme u odlagalište",
-        "IS_AUTO_POLL_TICKETS": "Automatski preispitaj uvezene probleme za promjenama, te obavijesti",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Provjeri je li problem koji se trenutačno obrađuje dodijeljen trenutačnom korisniku",
         "IS_WORKLOG_ENABLED": "Otvori dijaloški okvir za slanje dnevnika rada na Jira kad je zadatak obavljen",
         "SEARCH_JQL_QUERY": "JQL upit za ograničavanje pretraživanja zadataka",
@@ -435,7 +427,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Upiši svo utrošeno vrijeme minus zapisano vrijeme",
         "WORKLOG_DEFAULT_TIME_MODE": "Standardna vremenska vrijednost za dijaloški okvir",
         "WORKLOG_DEFAULT_TODAY": "Upiši samo danas utrošeno vrijeme",
-        "WORKLOG_DEFAULT_YESTERDAY": "Upiši samo jučer utrošeno vrijeme"
+        "WORKLOG_DEFAULT_YESTERDAY": "Upiši samo jučer utrošeno vrijeme",
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj Jira probleme u odlagalište",
+        "IS_AUTO_POLL_TICKETS": "Automatski preispitaj uvezene probleme za promjenama, te obavijesti"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Dozvoli samopotpisani certifikat",
@@ -447,7 +441,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Napredna konfiguracija",
-        "CREDENTIALS": "Podaci za prijavu",
         "HELP_ARR": {
           "H1": "Osnovna konfiguracija",
           "H2": "Postavke dnevnika rada",
@@ -460,7 +453,8 @@
           "P2_2": "<em>'Otvori dijaloški okvir dnevnika rada kad je podzadatak obavljen, a ne za same zadatke s podzadacima'</em> otvara dijaloški okvir dnevnika rada svaki put kad označiš Jira podzadatak kao obavljen. Budući da već pratiš tvoje vrijeme putem podzadataka, nijedan dijaloški okvir se neće otvoriti kad označiš sam Jira zadatak kao obavljen.",
           "P2_3": "<em>'Automatski pošalji aktualiziranja u dnevnik rada bez dijaloškog okvira'</em>, radi to što kaže. Budući da višestruko označavanje zadatka kao obavljenog dovodi do toga da se cijelo radno vrijeme prati dvaput. To se ne preporučuje.",
           "P3_1": "Ovdje možeš ponovo konfigurirati standardne tranzicije. Jira omogućuje veliki broj konfiguracija tranzicija koji obično stupaju na snagu kao različiti stupci na tvojoj Jira ploči agilnih. Mi ne možemo pretpostaviti mjesto i vrijeme tranzicija tvojih zadataka te ih moraš to postaviti ručno."
-        }
+        },
+        "CREDENTIALS": "Podaci za prijavu"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Odgovorna osoba",
@@ -503,6 +497,12 @@
         "LOGIN_SUCCESS": "Prijava je uspjela!",
         "TEST_CREDENTIALS": "Testiraj podatke za prijavu",
         "WELCOME_USER": "Zdravo {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Automatski dodaj nezavršene GitHub probleme u odlagalište",
+        "IS_AUTO_POLL": "Automatski preispitaj uvezene git porbleme za promjenama",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Prikaži git probleme kao prijedloge prilikom dodavanja novih zadataka",
+        "REPO": "„username/repositoryName” za git repozitorij koji želiš pratiti"
       }
     },
     "METRIC": {
@@ -607,9 +607,6 @@
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje tvojih promjena)",
         "HOST": "Host (npr.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "AUtomatski dodaj neriješene radne pakete OpenProjecta u odlagalište",
-        "IS_AUTO_POLL": "AUtomatski preispitaj uvezene radne pakete OpenProjecta za promjenama",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Prikaži radne pakete kao prijedloge prilikom dodavanja novih zadataka",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Prikaži dijaloški okvir praćenja vremena za prijavu OpenProjectu",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Zahtijeva aktiviranje modula za praćenje vremena za OpenProject projekt",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Prikaži dijaloški okvir za praćenje vremena kad se podzadaci završe",
@@ -619,7 +616,10 @@
         "SCOPE": "Opseg",
         "SCOPE_ALL": "Sve",
         "SCOPE_ASSIGNED": "Meni dodijeljeno",
-        "SCOPE_CREATED": "Od mene stvoreno"
+        "SCOPE_CREATED": "Od mene stvoreno",
+        "IS_AUTO_IMPORT_ISSUES": "AUtomatski dodaj neriješene radne pakete OpenProjecta u odlagalište",
+        "IS_AUTO_POLL": "AUtomatski preispitaj uvezene radne pakete OpenProjecta za promjenama",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Prikaži radne pakete kao prijedloge prilikom dodavanja novih zadataka"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ovdje možeš konfigurirati Super Productivity za prikaz popisa otvorenih radnih OpenProject paketa. Da bi ovo funkcioniralo u pregledniku, vjerojatno ćeš morati konfigurirati CORS za tvoj OpenProject poslužitelj da bi se dozvolio pristup s app.super-productivity.com</p>",
@@ -1024,11 +1024,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan iz <strong>{{contextTitle}}</strong> u trenutačni popis",
         "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljeni zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
         "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadnju oznaku zadatka koji nije projekt. To nije dozvoljeno!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Premještanje zadataka problema u jedan drugi projekt nije dozvoljeno",
         "REMINDER_ADDED": "Terminirani zadatak „{{title}}”",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak „{{title}}”",
-        "TASK_CREATED": "Stvoren je zadatak „{{title}}”"
+        "TASK_CREATED": "Stvoren je zadatak „{{title}}”",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Premještanje zadataka problema u jedan drugi projekt nije dozvoljeno"
       },
       "SELECT_OR_CREATE": "Odaberi ili stvori zadatak",
       "SUMMARY_TABLE": {
@@ -1271,13 +1271,13 @@
       "BROWSER_WARNING": "<b>Ovo vjerojatno NEĆE funkcionirati s verzijom preglednika Super Productivity.<br/> Za korištenje ove funkcije <a href=\"https://super-productivity.com/download/\">preuzmi desktop verziju</a>!</b>",
       "CAL_PATH": "Url iCal izvora",
       "CAL_PROVIDERS": "Pružatelji kalendara (eksperimentalno i opcionalno)",
-      "CAL_PROVIDERS_ADD": "Dodaj iCal izvor za kalendar",
-      "CAL_PROVIDERS_INFO": "Podatke kalendara možeš učitati kao iCal (npr. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit %2Cget-your-calendar-view-only\">Google Kalendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an- iCal-link-from-Office-365\">Outlook 365</a>). Podaci će se integrirati u vremensku traku i ćeš morati izraditi zadatke za događaje u kalendaru, ako su dospjeli.",
       "CHECK_UPDATES": "Traži eksterna aktualiziranja svakih X",
       "DEFAULT_PROJECT": "Standardni projekt za dodane zadatke kalendara",
       "HELP": "Kalendare za podsjetnik možeš integrirati i dodati ih kao zadatke unutar Super Productivity. Integracija radi pomoću iCal formata. Da bi ovo funkcioniralo, tvoji kalendari moraju biti dostupni putem interneta ili putem sustava datoteka.",
-      "ICON": "Ikona za vremensku traku",
       "SHOW_BANNER_THRESHOLD": "Prikaži obavijest X prije događaja (prazno za deaktivirano)",
+      "CAL_PROVIDERS_ADD": "Dodaj iCal izvor za kalendar",
+      "CAL_PROVIDERS_INFO": "Podatke kalendara možeš učitati kao iCal (npr. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit %2Cget-your-calendar-view-only\">Google Kalendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an- iCal-link-from-Office-365\">Outlook 365</a>). Podaci će se integrirati u vremensku traku i ćeš morati izraditi zadatke za događaje u kalendaru, ako su dospjeli.",
+      "ICON": "Ikona za vremensku traku",
       "TITLE": "Kalendari"
     },
     "EVALUATION": {
