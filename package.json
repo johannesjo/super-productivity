@@ -151,7 +151,7 @@
     "@typescript-eslint/parser": "7.18.0",
     "@typescript-eslint/types": "^8.17.0",
     "@typescript-eslint/utils": "^7.18.0",
-    "angular-material-css-vars": "^7.0.0",
+    "angular-material-css-vars": "^8.0.0",
     "angular-mentions": "^1.5.0",
     "axios": "^1.7.8",
     "chai": "^5.1.2",
