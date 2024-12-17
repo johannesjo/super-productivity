@@ -10,6 +10,7 @@ import { FocusModePage } from '../focus-mode/focus-mode.const';
   templateUrl: './procrastination.component.html',
   styleUrls: ['./procrastination.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ProcrastinationComponent {
   T: typeof T = T;

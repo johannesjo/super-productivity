@@ -43,7 +43,6 @@ import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'dialog-schedule-task',
-  standalone: true,
   imports: [UiModule, CommonModule, FormsModule],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',

@@ -20,6 +20,7 @@ import { T } from '../../../t.const';
   templateUrl: './dialog-time-estimate.component.html',
   styleUrls: ['./dialog-time-estimate.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogTimeEstimateComponent implements AfterViewInit {
   T: typeof T = T;

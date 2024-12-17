@@ -21,6 +21,7 @@ export interface TagComponentTag {
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TagComponent {
   tag = input.required<TagComponentTag>();

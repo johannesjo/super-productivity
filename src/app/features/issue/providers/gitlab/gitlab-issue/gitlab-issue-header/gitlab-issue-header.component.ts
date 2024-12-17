@@ -7,6 +7,7 @@ import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
   templateUrl: './gitlab-issue-header.component.html',
   styleUrls: ['./gitlab-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class GitlabIssueHeaderComponent {
   T: typeof T = T;

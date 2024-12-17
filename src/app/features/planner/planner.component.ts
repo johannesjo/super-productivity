@@ -12,6 +12,7 @@ import { T } from '../../t.const';
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class PlannerComponent {
   readonly T = T;

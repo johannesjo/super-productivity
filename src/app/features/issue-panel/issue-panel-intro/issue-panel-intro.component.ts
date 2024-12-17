@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'issue-panel-intro',
-  standalone: true,
   imports: [
     CommonModule,
     UiModule,

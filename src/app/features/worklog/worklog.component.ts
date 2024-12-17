@@ -36,6 +36,7 @@ import { selectAllProjectColorsAndTitles } from '../project/store/project.select
     fadeAnimation,
     fadeInSlowAnimation,
   ],
+  standalone: false,
 })
 export class WorklogComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;

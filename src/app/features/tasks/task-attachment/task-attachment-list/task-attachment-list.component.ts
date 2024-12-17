@@ -13,6 +13,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
   styleUrls: ['./task-attachment-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  standalone: false,
 })
 export class TaskAttachmentListComponent {
   @Input() taskId?: string;

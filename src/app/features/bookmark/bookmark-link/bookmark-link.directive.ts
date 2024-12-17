@@ -6,6 +6,7 @@ import { T } from '../../../t.const';
 
 @Directive({
   selector: '[bookmarkLink]',
+  standalone: false,
 })
 export class BookmarkLinkDirective {
   @Input() type?: BookmarkType;

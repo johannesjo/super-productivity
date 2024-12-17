@@ -4,6 +4,7 @@ import { IS_IOS } from '../../util/is-ios';
 
 @Directive({
   selector: '[longPressIOS]',
+  standalone: false,
 })
 export class LongPressIOSDirective implements OnDestroy {
   @Output()

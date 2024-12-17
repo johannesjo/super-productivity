@@ -33,6 +33,7 @@ import { ICAL_TYPE } from '../../issue/issue.const';
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation],
+  standalone: false,
 })
 export class FocusModeMainComponent implements OnDestroy {
   timeToGo$ = this._store.select(selectFocusSessionTimeToGo);

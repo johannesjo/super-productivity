@@ -36,6 +36,7 @@ import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
+  standalone: false,
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   T: typeof T = T;

@@ -6,6 +6,7 @@ import { FieldType } from '@ngx-formly/core';
   templateUrl: './formly-link-widget.component.html',
   styleUrls: ['./formly-link-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FormlyLinkWidgetComponent extends FieldType {
   constructor() {

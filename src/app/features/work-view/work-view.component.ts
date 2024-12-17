@@ -48,6 +48,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     workViewProjectChangeAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   // TODO refactor all to signals

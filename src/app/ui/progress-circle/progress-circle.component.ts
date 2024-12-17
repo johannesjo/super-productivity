@@ -12,6 +12,7 @@ import {
   templateUrl: './progress-circle.component.html',
   styleUrls: ['./progress-circle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ProgressCircleComponent {
   @Input() set progress(progressIN: number) {

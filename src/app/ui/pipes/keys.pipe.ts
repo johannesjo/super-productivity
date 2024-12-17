@@ -3,6 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
   name: 'keys',
   pure: false,
+  standalone: false,
 })
 export class KeysPipe implements PipeTransform {
   transform(value: any, sort: any, filterOutKeys?: any): any {

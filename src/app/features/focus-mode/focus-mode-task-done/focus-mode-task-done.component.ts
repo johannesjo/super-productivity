@@ -16,6 +16,7 @@ import { T } from 'src/app/t.const';
   templateUrl: './focus-mode-task-done.component.html',
   styleUrls: ['./focus-mode-task-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FocusModeTaskDoneComponent {
   currentTask$ = this._store.select(selectCurrentTask);

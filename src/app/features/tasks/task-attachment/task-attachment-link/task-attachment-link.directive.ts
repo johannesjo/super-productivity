@@ -6,6 +6,7 @@ import { T } from '../../../../t.const';
 
 @Directive({
   selector: '[taskAttachmentLink]',
+  standalone: false,
 })
 export class TaskAttachmentLinkDirective {
   @Input() type?: TaskAttachmentType;

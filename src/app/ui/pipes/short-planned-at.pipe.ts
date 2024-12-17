@@ -4,6 +4,7 @@ import { isToday } from '../../util/is-today.util';
 
 @Pipe({
   name: 'shortPlannedAt',
+  standalone: false,
 })
 export class ShortPlannedAtPipe implements PipeTransform {
   constructor(

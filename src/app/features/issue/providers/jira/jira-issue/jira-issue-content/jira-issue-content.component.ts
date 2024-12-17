@@ -23,6 +23,7 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
   styleUrls: ['./jira-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class JiraIssueContentComponent {
   description?: string;

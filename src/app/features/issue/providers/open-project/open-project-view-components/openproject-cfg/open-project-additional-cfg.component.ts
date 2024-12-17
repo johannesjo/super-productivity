@@ -40,7 +40,6 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   templateUrl: './open-project-additional-cfg.component.html',
   styleUrls: ['./open-project-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider, NgForOf],
   animations: [expandAnimation],
 })

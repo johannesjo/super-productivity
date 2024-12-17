@@ -41,6 +41,7 @@ const MAX_RESULTS = 100;
   styleUrls: ['./search-bar.component.scss'],
   animations: [blendInOutAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
   @Output() blurred: EventEmitter<any> = new EventEmitter();

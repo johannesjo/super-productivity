@@ -18,7 +18,6 @@ import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'context-menu',
-  standalone: true,
   imports: [
     MatMenu,
     MatMenuTrigger,

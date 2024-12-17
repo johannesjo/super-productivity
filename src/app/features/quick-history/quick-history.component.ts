@@ -15,6 +15,7 @@ import { KeyValue } from '@angular/common';
   styleUrls: ['./quick-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation, fadeInSlowAnimation],
+  standalone: false,
 })
 export class QuickHistoryComponent {
   visibility: boolean[] = [];

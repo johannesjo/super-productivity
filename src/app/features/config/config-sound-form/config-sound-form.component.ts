@@ -15,6 +15,7 @@ const sectionKey = 'sound';
   selector: 'config-sound-form',
   templateUrl: './config-sound-form.component.html',
   styleUrls: ['./config-sound-form.component.scss'],
+  standalone: false,
 })
 export class ConfigSoundFormComponent {
   @Input() set cfg(cfg: SoundConfig) {

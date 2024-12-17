@@ -3,6 +3,7 @@ import { Task } from '../task.model';
 
 @Pipe({
   name: 'subTaskTotalTimeSpent',
+  standalone: false,
 })
 export class SubTaskTotalTimeSpentPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = getSubTasksTotalTimeSpent;

@@ -11,6 +11,7 @@ import { RedmineIssue } from '../redmine-issue.model';
   styleUrls: ['./redmine-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class RedmineIssueContentComponent {
   @Input() issue?: RedmineIssue;

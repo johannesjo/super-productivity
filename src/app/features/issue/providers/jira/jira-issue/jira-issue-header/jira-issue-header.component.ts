@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
   templateUrl: './jira-issue-header.component.html',
   styleUrls: ['./jira-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class JiraIssueHeaderComponent {
   @Input() task?: TaskWithSubTasks;

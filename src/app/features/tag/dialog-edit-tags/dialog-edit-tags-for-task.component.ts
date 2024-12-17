@@ -15,6 +15,7 @@ import { Tag } from '../tag.model';
   templateUrl: './dialog-edit-tags-for-task.component.html',
   styleUrls: ['./dialog-edit-tags-for-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogEditTagsForTaskComponent implements OnDestroy {
   T: typeof T = T;

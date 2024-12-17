@@ -12,6 +12,7 @@ import { expandAnimation } from '../animations/expand.ani';
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.isExpanded]': 'isExpanded()',
   },
+  standalone: false,
 })
 export class FormlyCollapsibleComponent extends FieldWrapper {
   isExpanded = signal(false);

@@ -48,6 +48,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   templateUrl: './daily-summary.component.html',
   styleUrls: ['./daily-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
   T: typeof T = T;

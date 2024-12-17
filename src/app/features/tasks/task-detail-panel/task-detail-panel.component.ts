@@ -89,6 +89,7 @@ interface IssueDataAndType {
   styleUrls: ['./task-detail-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
+  standalone: false,
 })
 export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;

@@ -6,7 +6,6 @@ import { T } from 'src/app/t.const';
 
 @Component({
   selector: 'add-task-inline',
-  standalone: true,
   imports: [TasksModule, UiModule, CommonModule],
   templateUrl: './add-task-inline.component.html',
   styleUrl: './add-task-inline.component.scss',

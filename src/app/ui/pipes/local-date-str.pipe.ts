@@ -4,6 +4,7 @@ import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 
 @Pipe({
   name: 'localDateStr',
+  standalone: false,
 })
 export class LocalDateStrPipe implements PipeTransform {
   constructor(

@@ -20,7 +20,6 @@ import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'side-nav-item',
-  standalone: true,
   imports: [
     RouterLink,
     UiModule,

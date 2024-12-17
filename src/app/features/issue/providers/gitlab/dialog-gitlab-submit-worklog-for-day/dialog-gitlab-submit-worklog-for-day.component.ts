@@ -30,6 +30,7 @@ interface TmpTask {
   templateUrl: './dialog-gitlab-submit-worklog-for-day.component.html',
   styleUrls: ['./dialog-gitlab-submit-worklog-for-day.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogGitlabSubmitWorklogForDayComponent {
   isLoading = false;

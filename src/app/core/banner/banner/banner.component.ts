@@ -13,6 +13,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [bannerAnimation, fadeAnimation],
+  standalone: false,
 })
 export class BannerComponent {
   T: typeof T = T;

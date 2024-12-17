@@ -7,6 +7,7 @@ import { T } from 'src/app/t.const';
   templateUrl: './dialog-get-and-enter-auth-code.component.html',
   styleUrls: ['./dialog-get-and-enter-auth-code.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogGetAndEnterAuthCodeComponent {
   T: typeof T = T;

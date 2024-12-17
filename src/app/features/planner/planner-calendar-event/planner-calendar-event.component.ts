@@ -14,6 +14,7 @@ import { IssueService } from '../../issue/issue.service';
   templateUrl: './planner-calendar-event.component.html',
   styleUrl: './planner-calendar-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class PlannerCalendarEventComponent {
   private _issueService = inject(IssueService);

@@ -29,6 +29,7 @@ import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-s
   templateUrl: './dialog-idle.component.html',
   styleUrls: ['./dialog-idle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
   T: typeof T = T;

@@ -11,6 +11,7 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class PlanTasksTomorrowComponent {
   T: typeof T = T;

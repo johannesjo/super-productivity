@@ -69,6 +69,7 @@ export const stringToMs = (strValue: string, args?: any): number => {
 
 @Pipe({
   name: 'stringToMs',
+  standalone: false,
 })
 export class StringToMsPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = stringToMs;

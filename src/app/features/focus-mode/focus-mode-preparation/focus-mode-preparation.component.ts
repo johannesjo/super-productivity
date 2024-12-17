@@ -18,6 +18,7 @@ const COUNTDOWN_DURATION = 5;
   styleUrls: ['./focus-mode-preparation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
+  standalone: false,
 })
 export class FocusModePreparationComponent implements OnDestroy {
   T: typeof T = T;

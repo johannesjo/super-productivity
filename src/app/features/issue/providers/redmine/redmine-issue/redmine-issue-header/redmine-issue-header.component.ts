@@ -7,6 +7,7 @@ import { T } from '../../../../../../t.const';
   templateUrl: './redmine-issue-header.component.html',
   styleUrls: ['./redmine-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class RedmineIssueHeaderComponent {
   T: typeof T = T;

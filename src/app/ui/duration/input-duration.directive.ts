@@ -48,6 +48,7 @@ const ZERO_VAL = '0m';
     INPUT_DURATION_VALUE_ACCESSOR,
     INPUT_DURATION_VALIDATORS,
   ],
+  standalone: false,
 })
 export class InputDurationDirective
   implements ControlValueAccessor, Validator, AfterViewChecked

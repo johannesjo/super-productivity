@@ -9,6 +9,7 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
   templateUrl: './dialog-sync-permission.component.html',
   styleUrls: ['./dialog-sync-permission.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogSyncPermissionComponent {
   T: typeof T = T;

@@ -10,6 +10,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   templateUrl: './select-project.component.html',
   styleUrls: ['./select-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SelectProjectComponent extends FieldType<FormlyFieldConfig> {
   T: typeof T = T;

@@ -30,7 +30,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 
 @Component({
   selector: 'issue-panel',
-  standalone: true,
   imports: [
     UiModule,
     IssuePanelIntroComponent,

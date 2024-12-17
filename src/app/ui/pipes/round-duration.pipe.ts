@@ -3,6 +3,7 @@ import { roundDurationVanilla } from '../../util/round-duration';
 
 @Pipe({
   name: 'roundDuration',
+  standalone: false,
 })
 export class RoundDurationPipe implements PipeTransform {
   transform(value: number, ...args: unknown[]): number | undefined {

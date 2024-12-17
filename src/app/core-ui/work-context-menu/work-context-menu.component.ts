@@ -18,7 +18,6 @@ import { ProjectService } from '../../features/project/project.service';
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [RouterLink, UiModule, RouterModule, NgIf],
 })
 export class WorkContextMenuComponent {

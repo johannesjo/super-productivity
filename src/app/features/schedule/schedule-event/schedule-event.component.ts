@@ -43,7 +43,6 @@ import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'schedule-event',
-  standalone: true,
   imports: [MatIcon, IssueModule, TranslateModule, TaskContextMenuComponent],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',

@@ -21,6 +21,7 @@ interface TagWithTimeSpent {
   templateUrl: './tasks-by-tag.component.html',
   styleUrls: ['./tasks-by-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TasksByTagComponent {
   T: typeof T = T;

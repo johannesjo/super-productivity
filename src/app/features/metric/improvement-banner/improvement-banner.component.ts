@@ -12,6 +12,7 @@ import { DateService } from 'src/app/core/date/date.service';
   styleUrls: ['./improvement-banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [improvementBannerAnimation],
+  standalone: false,
 })
 export class ImprovementBannerComponent implements OnDestroy {
   T: typeof T = T;

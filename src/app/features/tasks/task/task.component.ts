@@ -77,8 +77,7 @@ import { ICAL_TYPE } from '../../issue/issue.const';
     '[class.isSelected]': 'isSelected()',
     '[class.hasNoSubTasks]': 'task().subTaskIds.length === 0',
   },
-
-  /* eslint-enable @typescript-eslint/naming-convention*/
+  standalone: false,
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   task = input.required<TaskWithSubTasks>();

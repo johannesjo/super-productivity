@@ -20,7 +20,6 @@ import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-co
 
 @Component({
   selector: 'task-context-menu',
-  standalone: true,
   imports: [
     AsyncPipe,
     IssueModule,

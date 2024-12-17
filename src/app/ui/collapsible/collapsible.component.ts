@@ -14,6 +14,7 @@ import { expandAnimation } from '../animations/expand.ani';
   styleUrls: ['./collapsible.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class CollapsibleComponent {
   @Input() title?: string;

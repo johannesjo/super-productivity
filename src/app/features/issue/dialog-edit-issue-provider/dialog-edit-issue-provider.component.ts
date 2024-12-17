@@ -33,7 +33,6 @@ import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model'
 
 @Component({
   selector: 'dialog-edit-issue-provider',
-  standalone: true,
   imports: [
     UiModule,
     IssueModule,

@@ -3,7 +3,6 @@ import { UiModule } from '../ui.module';
 
 @Component({
   selector: 'error-card',
-  standalone: true,
   imports: [UiModule],
   templateUrl: './error-card.component.html',
   styleUrl: './error-card.component.scss',

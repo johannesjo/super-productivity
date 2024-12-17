@@ -18,6 +18,7 @@ import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form
   templateUrl: './config-form.component.html',
   styleUrls: ['./config-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ConfigFormComponent {
   T: typeof T = T;

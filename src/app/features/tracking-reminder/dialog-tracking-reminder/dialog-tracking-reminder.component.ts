@@ -10,6 +10,7 @@ import { T } from '../../../t.const';
   templateUrl: './dialog-tracking-reminder.component.html',
   styleUrls: ['./dialog-tracking-reminder.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogTrackingReminderComponent implements OnInit {
   T: typeof T = T;

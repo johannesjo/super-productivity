@@ -24,6 +24,7 @@ import { T } from 'src/app/t.const';
   templateUrl: './focus-mode-duration-selection.component.html',
   styleUrls: ['./focus-mode-duration-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;

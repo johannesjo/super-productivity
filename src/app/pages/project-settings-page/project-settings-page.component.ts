@@ -34,6 +34,7 @@ import { isObject } from '../../util/is-object';
   templateUrl: './project-settings-page.component.html',
   styleUrls: ['./project-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;

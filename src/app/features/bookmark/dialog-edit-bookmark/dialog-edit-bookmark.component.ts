@@ -18,6 +18,7 @@ interface BookmarkSelectType {
   templateUrl: './dialog-edit-bookmark.component.html',
   styleUrls: ['./dialog-edit-bookmark.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogEditBookmarkComponent implements OnInit {
   T: typeof T = T;

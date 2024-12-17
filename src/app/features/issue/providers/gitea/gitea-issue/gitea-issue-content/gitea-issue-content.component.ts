@@ -11,6 +11,7 @@ import { GiteaIssue } from '../gitea-issue.model';
   styleUrls: ['./gitea-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class GiteaIssueContentComponent {
   @Input() issue?: GiteaIssue;

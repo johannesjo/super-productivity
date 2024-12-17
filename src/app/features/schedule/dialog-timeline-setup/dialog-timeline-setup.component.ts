@@ -18,7 +18,6 @@ import { TranslateModule } from '@ngx-translate/core';
   templateUrl: './dialog-timeline-setup.component.html',
   styleUrls: ['./dialog-timeline-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [UiModule, CommonModule, TranslateModule],
 })
 export class DialogTimelineSetupComponent implements OnDestroy {

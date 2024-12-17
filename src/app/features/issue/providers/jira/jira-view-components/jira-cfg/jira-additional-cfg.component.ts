@@ -30,6 +30,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   styleUrls: ['./jira-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<IssueProviderJira>;

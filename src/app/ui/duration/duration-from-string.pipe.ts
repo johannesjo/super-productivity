@@ -4,6 +4,7 @@ import { stringToMs } from './string-to-ms.pipe';
 
 @Pipe({
   name: 'durationFromString',
+  standalone: false,
 })
 export class DurationFromStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = durationFromString;

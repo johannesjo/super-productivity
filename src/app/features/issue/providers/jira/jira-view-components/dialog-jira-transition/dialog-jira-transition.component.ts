@@ -17,6 +17,7 @@ import { IssueProviderService } from '../../../../issue-provider.service';
   templateUrl: './dialog-jira-transition.component.html',
   styleUrls: ['./dialog-jira-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogJiraTransitionComponent {
   T: typeof T = T;

@@ -22,6 +22,7 @@ import { T } from '../../../t.const';
   styleUrls: ['./bookmark-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, slideAnimation],
+  standalone: false,
 })
 export class BookmarkBarComponent implements OnDestroy {
   isDragOver: boolean = false;

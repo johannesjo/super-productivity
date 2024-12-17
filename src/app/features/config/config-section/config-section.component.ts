@@ -32,6 +32,7 @@ import { exists } from '../../../util/exists';
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;

@@ -18,7 +18,6 @@ import { skipWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-task-detail-panel',
-  standalone: true,
   imports: [
     CommonModule,
     TasksModule,

@@ -22,6 +22,7 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
   templateUrl: './planner-day.component.html',
   styleUrl: './planner-day.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class PlannerDayComponent {
   @Input() day!: PlannerDay;

@@ -33,6 +33,7 @@ import { getAppVersionStr } from '../../util/get-app-version-str';
   templateUrl: './config-page.component.html',
   styleUrls: ['./config-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;

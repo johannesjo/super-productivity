@@ -29,6 +29,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
+  standalone: false,
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() isLock: boolean = false;

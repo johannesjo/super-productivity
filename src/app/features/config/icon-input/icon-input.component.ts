@@ -8,6 +8,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   templateUrl: './icon-input.component.html',
   styleUrls: ['./icon-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class IconInputComponent extends FieldType<FormlyFieldConfig> {
   filteredIcons: string[] = [];

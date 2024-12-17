@@ -7,6 +7,7 @@ import { T } from '../../../../../../t.const';
   templateUrl: './github-issue-header.component.html',
   styleUrls: ['./github-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class GithubIssueHeaderComponent {
   T: typeof T = T;

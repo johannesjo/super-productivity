@@ -29,6 +29,7 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
   styleUrls: ['./better-drawer-container.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
+  standalone: false,
 })
 export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy

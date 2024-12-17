@@ -21,7 +21,6 @@ export interface DialogIncompleteSyncData {
 
 @Component({
   selector: 'dialog-incomplete-sync',
-  standalone: true,
   imports: [MatDialogContent, TranslateModule, UiModule, FormsModule, NgIf],
   templateUrl: './dialog-incomplete-sync.component.html',
   styleUrl: './dialog-incomplete-sync.component.scss',

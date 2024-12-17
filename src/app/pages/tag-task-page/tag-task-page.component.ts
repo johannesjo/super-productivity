@@ -6,6 +6,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
   templateUrl: './tag-task-page.component.html',
   styleUrls: ['./tag-task-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TagTaskPageComponent {
   constructor(public workContextService: WorkContextService) {}

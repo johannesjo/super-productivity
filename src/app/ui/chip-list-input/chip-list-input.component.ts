@@ -34,6 +34,7 @@ interface Suggestion {
   templateUrl: './chip-list-input.component.html',
   styleUrls: ['./chip-list-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ChipListInputComponent implements OnDestroy {
   T: typeof T = T;

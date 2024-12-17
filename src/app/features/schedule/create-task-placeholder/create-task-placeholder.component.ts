@@ -23,7 +23,6 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'create-task-placeholder',
-  standalone: true,
   imports: [MatIcon, DatePipe],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',

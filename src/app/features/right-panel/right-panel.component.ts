@@ -18,6 +18,7 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
     slideInFromTopAni,
     slideInFromRightAni,
   ],
+  standalone: false,
 })
 export class RightPanelComponent implements OnDestroy {
   // NOTE: used for debugging

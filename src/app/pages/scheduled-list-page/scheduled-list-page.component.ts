@@ -22,6 +22,7 @@ import { selectAllTasksWithPlannedDay } from '../../features/planner/store/plann
   styleUrls: ['./scheduled-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  standalone: false,
 })
 export class ScheduledListPageComponent {
   T: typeof T = T;

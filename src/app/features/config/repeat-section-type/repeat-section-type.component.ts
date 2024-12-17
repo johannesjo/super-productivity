@@ -9,6 +9,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
   styleUrls: ['./repeat-section-type.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  standalone: false,
 })
 export class RepeatSectionTypeComponent extends FieldArrayType {
   T: typeof T = T;

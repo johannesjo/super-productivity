@@ -14,6 +14,7 @@ import {
   templateUrl: './task-detail-item.component.html',
   styleUrls: ['./task-detail-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TaskDetailItemComponent {
   @Input() type: 'input' | 'panel' = 'input';

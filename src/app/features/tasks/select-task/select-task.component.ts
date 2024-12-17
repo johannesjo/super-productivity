@@ -26,6 +26,7 @@ import { selectAllProjects } from '../../project/store/project.selectors';
   templateUrl: './select-task.component.html',
   styleUrls: ['./select-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
   T: typeof T = T;

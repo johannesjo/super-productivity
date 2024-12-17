@@ -19,6 +19,7 @@ import { DateAdapter } from '@angular/material/core';
   styleUrls: ['./worklog-week.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation],
+  standalone: false,
 })
 export class WorklogWeekComponent {
   visibility: boolean[] = [];

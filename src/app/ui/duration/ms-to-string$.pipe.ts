@@ -5,6 +5,7 @@ import { msToString } from './ms-to-string.pipe';
 
 @Pipe({
   name: 'msToString$',
+  standalone: false,
 })
 export class MsToStringPipe$ implements PipeTransform {
   transform(value$: Observable<any> | undefined, showSeconds?: boolean): any {

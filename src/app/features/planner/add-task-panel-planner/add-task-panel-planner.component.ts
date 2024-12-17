@@ -24,6 +24,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
   templateUrl: './add-task-panel-planner.component.html',
   styleUrl: './add-task-panel-planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class AddTaskPanelPlannerComponent {
   T: typeof T = T;

@@ -23,7 +23,6 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
-  standalone: true,
   imports: [ErrorCardComponent, IssuePreviewItemComponent, MatProgressSpinner, DatePipe],
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',

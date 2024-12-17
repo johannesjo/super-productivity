@@ -25,6 +25,7 @@ import { BannerId } from '../../../core/banner/banner.model';
   templateUrl: './simple-counter-button.component.html',
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   T: typeof T = T;

@@ -10,6 +10,7 @@ import { DateService } from 'src/app/core/date/date.service';
   templateUrl: './dialog-simple-counter-edit.component.html',
   styleUrls: ['./dialog-simple-counter-edit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogSimpleCounterEditComponent {
   T: typeof T = T;

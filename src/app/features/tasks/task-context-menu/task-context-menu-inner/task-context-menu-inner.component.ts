@@ -69,7 +69,6 @@ import { PlannerService } from '../../../planner/planner.service';
 
 @Component({
   selector: 'task-context-menu-inner',
-  standalone: true,
   imports: [
     AsyncPipe,
     IssueModule,

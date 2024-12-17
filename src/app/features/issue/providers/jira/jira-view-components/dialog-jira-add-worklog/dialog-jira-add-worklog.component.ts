@@ -24,6 +24,7 @@ import { IssueProviderActions } from '../../../../store/issue-provider.actions';
   styleUrls: ['./dialog-jira-add-worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
+  standalone: false,
 })
 export class DialogJiraAddWorklogComponent implements OnDestroy {
   T: typeof T = T;

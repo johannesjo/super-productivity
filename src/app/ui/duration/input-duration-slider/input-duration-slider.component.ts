@@ -21,6 +21,7 @@ import { T } from '../../../t.const';
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [dotAnimation],
+  standalone: false,
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   T: typeof T = T;

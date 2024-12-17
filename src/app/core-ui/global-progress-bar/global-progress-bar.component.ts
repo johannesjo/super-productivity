@@ -12,6 +12,7 @@ import {
   styleUrls: ['./global-progress-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, fadeInOutBottomAnimation, fadeOutAnimation],
+  standalone: false,
 })
 export class GlobalProgressBarComponent {
   constructor(public globalProgressBarService: GlobalProgressBarService) {}

@@ -40,6 +40,7 @@ import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date
   templateUrl: './dialog-edit-task-repeat-cfg.component.html',
   styleUrls: ['./dialog-edit-task-repeat-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   T: typeof T = T;

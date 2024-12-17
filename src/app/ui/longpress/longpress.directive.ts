@@ -3,6 +3,7 @@ import { UI_LONG_PRESS_DURATION } from '../ui.const';
 
 @Directive({
   selector: '[longPress]',
+  standalone: false,
 })
 export class LongPressDirective implements OnDestroy {
   @Output()

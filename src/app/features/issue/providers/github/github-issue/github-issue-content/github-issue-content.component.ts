@@ -11,6 +11,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./github-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class GithubIssueContentComponent {
   @Input() issue?: GithubIssue;

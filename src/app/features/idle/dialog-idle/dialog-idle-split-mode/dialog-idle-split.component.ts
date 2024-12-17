@@ -18,6 +18,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   templateUrl: './dialog-idle-split.component.html',
   styleUrls: ['./dialog-idle-split.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogIdleSplitComponent implements OnInit {
   T: typeof T = T;

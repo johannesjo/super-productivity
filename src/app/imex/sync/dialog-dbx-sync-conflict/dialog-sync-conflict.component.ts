@@ -8,6 +8,7 @@ import { DialogConflictResolutionResult } from '../sync.model';
   templateUrl: './dialog-sync-conflict.component.html',
   styleUrls: ['./dialog-sync-conflict.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogSyncConflictComponent {
   T: typeof T = T;

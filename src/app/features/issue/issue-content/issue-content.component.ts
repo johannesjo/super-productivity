@@ -16,6 +16,7 @@ import { IssueData } from '../issue.model';
   templateUrl: './issue-content.component.html',
   styleUrls: ['./issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class IssueContentComponent {
   @Input() task?: TaskWithSubTasks;

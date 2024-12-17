@@ -14,6 +14,7 @@ import { NoteService } from '../note.service';
     '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogAddNoteComponent
   extends DialogFullscreenMarkdownComponent

@@ -9,6 +9,7 @@ import { PlannerService } from '../planner.service';
   templateUrl: './planner-plan-view.component.html',
   styleUrl: './planner-plan-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class PlannerPlanViewComponent {
   days$: Observable<PlannerDay[]> = this._plannerService.days$;

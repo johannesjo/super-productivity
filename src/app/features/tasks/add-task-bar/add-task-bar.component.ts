@@ -37,6 +37,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
+  standalone: false,
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   tabindex = input<number>(0);

@@ -20,6 +20,7 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   templateUrl: './split.component.html',
   styleUrls: ['./split.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SplitComponent implements AfterViewInit {
   @Input() splitTopEl?: ElementRef;

@@ -22,6 +22,7 @@ import { mapTo, switchMap } from 'rxjs/operators';
   styleUrls: ['./backlog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  standalone: false,
 })
 export class BacklogComponent implements AfterViewInit {
   @Input() backlogTasks: TaskWithSubTasks[] = [];

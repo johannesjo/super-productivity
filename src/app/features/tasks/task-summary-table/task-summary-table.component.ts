@@ -15,6 +15,7 @@ import { DateService } from 'src/app/core/date/date.service';
   templateUrl: './task-summary-table.component.html',
   styleUrls: ['./task-summary-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TaskSummaryTableComponent {
   @Input() flatTasks: Task[] = [];

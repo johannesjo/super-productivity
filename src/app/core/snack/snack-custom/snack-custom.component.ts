@@ -15,6 +15,7 @@ import { debounceTime } from 'rxjs/operators';
   templateUrl: './snack-custom.component.html',
   styleUrls: ['./snack-custom.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SnackCustomComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();

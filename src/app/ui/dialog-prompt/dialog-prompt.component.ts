@@ -7,6 +7,7 @@ import { T } from '../../t.const';
   templateUrl: './dialog-prompt.component.html',
   styleUrls: ['./dialog-prompt.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogPromptComponent {
   T: typeof T = T;

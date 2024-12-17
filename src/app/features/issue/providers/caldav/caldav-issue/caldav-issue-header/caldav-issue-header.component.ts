@@ -7,6 +7,7 @@ import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
   templateUrl: './caldav-issue-header.component.html',
   styleUrls: ['./caldav-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class CaldavIssueHeaderComponent {
   T: typeof T = T;

@@ -25,6 +25,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, fadeAnimation],
+  standalone: false,
 })
 export class NotesComponent implements OnInit, OnDestroy {
   T: typeof T = T;

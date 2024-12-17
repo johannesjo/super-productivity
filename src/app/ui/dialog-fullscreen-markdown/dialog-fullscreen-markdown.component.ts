@@ -14,6 +14,7 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
   templateUrl: './dialog-fullscreen-markdown.component.html',
   styleUrls: ['./dialog-fullscreen-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
   T: typeof T = T;

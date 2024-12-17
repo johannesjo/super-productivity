@@ -23,6 +23,7 @@ import { DateService } from 'src/app/core/date/date.service';
   templateUrl: './task-summary-tables.component.html',
   styleUrls: ['./task-summary-tables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TaskSummaryTablesComponent {
   T: typeof T = T;

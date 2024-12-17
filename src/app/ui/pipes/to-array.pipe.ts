@@ -3,6 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
   name: 'toArray',
   pure: false,
+  standalone: false,
 })
 export class ToArrayPipe implements PipeTransform {
   transform(obj: any, filterOutKeys?: any): any {

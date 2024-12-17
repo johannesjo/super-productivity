@@ -10,6 +10,7 @@ import { T } from '../../../t.const';
   templateUrl: './dialog-pomodoro-break.component.html',
   styleUrls: ['./dialog-pomodoro-break.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogPomodoroBreakComponent {
   T: typeof T = T;

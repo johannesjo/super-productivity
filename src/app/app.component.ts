@@ -57,6 +57,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     warpInAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class AppComponent implements OnDestroy {
   productivityTipTitle: string = productivityTip && productivityTip[0];

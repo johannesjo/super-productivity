@@ -4,6 +4,7 @@ import j2m from 'jira2md';
 
 @Pipe({
   name: 'jiraToMarkdown',
+  standalone: false,
 })
 export class JiraToMarkdownPipe implements PipeTransform {
   transform(value: string): string {

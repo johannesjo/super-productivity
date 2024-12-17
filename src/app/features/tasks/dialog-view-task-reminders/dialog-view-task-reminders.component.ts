@@ -23,6 +23,7 @@ const M = 1000 * 60;
   styleUrls: ['./dialog-view-task-reminders.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  standalone: false,
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
   T: typeof T = T;

@@ -17,6 +17,7 @@ const MAP = [
 
 @Pipe({
   name: 'numberToMonth',
+  standalone: false,
 })
 export class NumberToMonthPipe implements PipeTransform {
   transform(value: any, args?: any): any {

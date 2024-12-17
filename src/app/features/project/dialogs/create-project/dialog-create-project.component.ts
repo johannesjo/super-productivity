@@ -35,6 +35,7 @@ import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-fr
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   T: typeof T = T;

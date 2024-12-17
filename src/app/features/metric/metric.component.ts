@@ -15,6 +15,7 @@ import { WorkContextService } from '../work-context/work-context.service';
   styleUrls: ['./metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
+  standalone: false,
 })
 export class MetricComponent {
   T: typeof T = T;

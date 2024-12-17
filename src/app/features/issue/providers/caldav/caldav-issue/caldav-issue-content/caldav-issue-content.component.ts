@@ -11,6 +11,7 @@ import { CaldavIssue } from '../caldav-issue.model';
   styleUrls: ['./caldav-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class CaldavIssueContentComponent {
   @Input() issue?: CaldavIssue;

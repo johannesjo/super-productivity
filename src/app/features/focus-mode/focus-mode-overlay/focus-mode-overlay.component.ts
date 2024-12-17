@@ -23,6 +23,7 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
   styleUrls: ['./focus-mode-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeInAnimation, warpAnimation, warpInAnimation],
+  standalone: false,
 })
 export class FocusModeOverlayComponent implements OnDestroy {
   FocusModePage: typeof FocusModePage = FocusModePage;

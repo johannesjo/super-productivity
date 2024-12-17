@@ -7,6 +7,7 @@ import { T } from '../../t.const';
   templateUrl: './dialog-confirm.component.html',
   styleUrls: ['./dialog-confirm.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogConfirmComponent {
   T: typeof T = T;

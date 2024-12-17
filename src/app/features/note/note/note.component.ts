@@ -24,6 +24,7 @@ import { Project } from '../../project/project.model';
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NoteComponent implements OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -31,7 +31,6 @@ import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
   templateUrl: './dialog-open-project-track-time.component.html',
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   animations: [expandFadeAnimation],
   imports: [UiModule, FormsModule, NgForOf, AsyncPipe, NgIf],
 })

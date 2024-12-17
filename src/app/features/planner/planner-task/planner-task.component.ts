@@ -27,6 +27,7 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
   templateUrl: './planner-task.component.html',
   styleUrl: './planner-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input({ required: true }) task!: TaskCopy;

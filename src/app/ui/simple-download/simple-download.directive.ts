@@ -3,6 +3,7 @@ import { download } from '../../util/download';
 
 @Directive({
   selector: '[simpleDownload]',
+  standalone: false,
 })
 export class SimpleDownloadDirective {
   @Input() simpleDownload?: string;

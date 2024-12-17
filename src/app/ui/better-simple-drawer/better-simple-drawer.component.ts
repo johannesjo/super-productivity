@@ -13,12 +13,10 @@ import {
 import { ReplaySubject, Subscription } from 'rxjs';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'better-simple-drawer',
-  standalone: true,
-  imports: [NgIf],
+  imports: [],
   templateUrl: './better-simple-drawer.component.html',
   styleUrl: './better-simple-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

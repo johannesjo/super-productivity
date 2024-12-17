@@ -14,7 +14,6 @@ import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'inline-multiline-input',
-  standalone: true,
   imports: [ReactiveFormsModule, FormsModule, TranslateModule],
   templateUrl: './inline-multiline-input.component.html',
   styleUrl: './inline-multiline-input.component.scss',

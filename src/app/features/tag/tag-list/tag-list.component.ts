@@ -19,6 +19,7 @@ import { Project } from '../../project/project.model';
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
+  standalone: false,
 })
 export class TagListComponent {
   task = input.required<Task>();

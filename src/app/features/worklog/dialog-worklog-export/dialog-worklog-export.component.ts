@@ -10,6 +10,7 @@ import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
   templateUrl: './dialog-worklog-export.component.html',
   styleUrls: ['./dialog-worklog-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogWorklogExportComponent {
   T: typeof T = T;

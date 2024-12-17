@@ -13,6 +13,7 @@ import { privacyExport } from './privacy-export';
   templateUrl: './file-imex.component.html',
   styleUrls: ['./file-imex.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FileImexComponent {
   @ViewChild('fileInput', { static: true }) fileInputRef?: ElementRef;

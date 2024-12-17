@@ -16,7 +16,6 @@ import { ICAL_TYPE } from '../../issue/issue.const';
 
 @Component({
   selector: 'issue-preview-item',
-  standalone: true,
   imports: [MatIconButton, MatIcon],
   templateUrl: './issue-preview-item.component.html',
   styleUrl: './issue-preview-item.component.scss',

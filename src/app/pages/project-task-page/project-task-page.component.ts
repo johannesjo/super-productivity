@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
   templateUrl: './project-task-page.component.html',
   styleUrls: ['./project-task-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ProjectTaskPageComponent {
   isShowBacklog$: Observable<boolean> = this.workContextService.activeWorkContext$.pipe(

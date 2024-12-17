@@ -25,7 +25,6 @@ import { MatSlider } from '@angular/material/slider';
   templateUrl: './dialog-open-project-transition.component.html',
   styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [UiModule, FormsModule, NgForOf, AsyncPipe, MatSlider],
 })
 export class DialogOpenProjectTransitionComponent {

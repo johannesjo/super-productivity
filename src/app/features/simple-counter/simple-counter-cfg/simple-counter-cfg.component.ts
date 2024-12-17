@@ -27,6 +27,7 @@ import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form
   templateUrl: './simple-counter-cfg.component.html',
   styleUrls: ['./simple-counter-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
   @Input() cfg?: SimpleCounterConfig;

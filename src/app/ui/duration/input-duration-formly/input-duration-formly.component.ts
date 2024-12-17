@@ -8,6 +8,7 @@ import { stringToMs } from '../string-to-ms.pipe';
   templateUrl: './input-duration-formly.component.html',
   styleUrls: ['./input-duration-formly.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
   @ViewChild('inputEl', { static: true, read: ElementRef }) input!: ElementRef;

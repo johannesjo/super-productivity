@@ -15,6 +15,7 @@ import {
   templateUrl: './issue-header.component.html',
   styleUrls: ['./issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class IssueHeaderComponent {
   @Input() task?: TaskWithSubTasks;

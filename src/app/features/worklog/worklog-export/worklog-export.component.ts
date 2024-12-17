@@ -35,6 +35,7 @@ import { createRows, formatRows, formatText } from './worklog-export.util';
   templateUrl: './worklog-export.component.html',
   styleUrls: ['./worklog-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
   @Input() rangeStart?: Date;

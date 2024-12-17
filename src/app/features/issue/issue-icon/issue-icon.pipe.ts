@@ -4,6 +4,7 @@ import { ISSUE_PROVIDER_ICON_MAP } from '../issue.const';
 
 @Pipe({
   name: 'issueIcon',
+  standalone: false,
 })
 export class IssueIconPipe implements PipeTransform {
   // NOTE: null is only accepted to make view more performant

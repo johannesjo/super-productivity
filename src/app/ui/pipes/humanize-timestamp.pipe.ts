@@ -3,6 +3,7 @@ import moment from 'moment';
 
 @Pipe({
   name: 'humanizeTimestamp',
+  standalone: false,
 })
 export class HumanizeTimestampPipe implements PipeTransform {
   transform(value: any): any {

@@ -71,7 +71,6 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 
 @Component({
   selector: 'schedule',
-  standalone: true,
   imports: [
     UiModule,
     NgStyle,
@@ -89,11 +88,6 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // TODO this does not work
-  // host: {
-  //   // eslint-disable-next-line @typescript-eslint/naming-convention
-  //   cdkScrollable: '',
-  // },
 })
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
   FH = FH;

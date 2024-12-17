@@ -12,6 +12,7 @@ interface NewTimeEntry {
   templateUrl: './dialog-add-time-estimate-for-other-day.component.html',
   styleUrls: ['./dialog-add-time-estimate-for-other-day.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogAddTimeEstimateForOtherDayComponent {
   T: typeof T = T;

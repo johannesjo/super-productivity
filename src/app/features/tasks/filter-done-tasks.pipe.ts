@@ -18,6 +18,7 @@ export const filterDoneTasks = (
 
 @Pipe({
   name: 'filterDoneTasks',
+  standalone: false,
 })
 export class FilterDoneTasksPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = filterDoneTasks;

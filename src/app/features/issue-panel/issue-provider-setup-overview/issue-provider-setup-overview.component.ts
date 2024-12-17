@@ -22,7 +22,6 @@ import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 
 @Component({
   selector: 'issue-provider-setup-overview',
-  standalone: true,
   imports: [UiModule, MatIcon, TranslateModule, IssueModule, CdkDropList, CdkDrag],
   templateUrl: './issue-provider-setup-overview.component.html',
   styleUrl: './issue-provider-setup-overview.component.scss',

@@ -25,6 +25,7 @@ import { DateService } from 'src/app/core/date/date.service';
   templateUrl: './evaluation-sheet.component.html',
   styleUrls: ['./evaluation-sheet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   @Output() save: EventEmitter<any> = new EventEmitter();

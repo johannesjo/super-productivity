@@ -15,6 +15,7 @@ import {
   templateUrl: './inline-input.component.html',
   styleUrls: ['./inline-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class InlineInputComponent implements AfterViewInit {
   @Input() type: 'text' | 'duration' | 'time' = 'text';

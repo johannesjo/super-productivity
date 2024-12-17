@@ -17,6 +17,7 @@ import { T } from 'src/app/t.const';
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   selectedTask: string | Task | undefined;

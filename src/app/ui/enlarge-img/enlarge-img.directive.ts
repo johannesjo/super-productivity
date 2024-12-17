@@ -5,6 +5,7 @@ const LARGE_IMG_ID = 'enlarged-img';
 
 @Directive({
   selector: '[enlargeImg]',
+  standalone: false,
 })
 export class EnlargeImgDirective {
   imageEl: HTMLElement;

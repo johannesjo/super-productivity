@@ -18,6 +18,7 @@ interface TaskAttachmentSelectType {
   templateUrl: './dialog-edit-task-attachment.component.html',
   styleUrls: ['./dialog-edit-task-attachment.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogEditTaskAttachmentComponent {
   types: TaskAttachmentSelectType[];

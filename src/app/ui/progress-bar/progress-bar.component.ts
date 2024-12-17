@@ -11,6 +11,7 @@ import {
   template: '',
   styleUrls: ['./progress-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ProgressBarComponent {
   @HostBinding('class') @Input() cssClass: string = 'bg-primary';

@@ -11,6 +11,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./open-project-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  standalone: false,
 })
 export class OpenProjectIssueContentComponent {
   @Input() issue?: OpenProjectWorkPackage;

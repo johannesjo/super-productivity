@@ -7,6 +7,7 @@ import { expandFadeAnimation } from '../animations/expand.ani';
   styleUrls: ['./help-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
+  standalone: false,
 })
 export class HelpSectionComponent {
   @Input() isShowHelp: boolean = false;

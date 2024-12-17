@@ -11,6 +11,7 @@ import { ProjectService } from '../project/project.service';
   // templateUrl: './shepherd.component.html',
   // styleUrls: ['./shepherd.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ShepherdComponent implements AfterViewInit {
   constructor(

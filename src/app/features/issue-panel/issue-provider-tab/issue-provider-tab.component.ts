@@ -49,7 +49,6 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 
 @Component({
   selector: 'issue-provider-tab',
-  standalone: true,
   imports: [
     UiModule,
     IssuePreviewItemComponent,

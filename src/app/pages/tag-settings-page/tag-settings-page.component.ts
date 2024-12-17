@@ -30,6 +30,7 @@ import { isObject } from '../../util/is-object';
   templateUrl: './tag-settings-page.component.html',
   styleUrls: ['./tag-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
   T: typeof T = T;

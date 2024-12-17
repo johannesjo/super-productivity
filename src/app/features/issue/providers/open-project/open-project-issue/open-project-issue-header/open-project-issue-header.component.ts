@@ -7,6 +7,7 @@ import { T } from '../../../../../../t.const';
   templateUrl: './open-project-issue-header.component.html',
   styleUrls: ['./open-project-issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class OpenProjectIssueHeaderComponent {
   T: typeof T = T;

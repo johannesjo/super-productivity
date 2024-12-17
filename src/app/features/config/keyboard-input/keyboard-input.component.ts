@@ -7,6 +7,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   templateUrl: './keyboard-input.component.html',
   styleUrls: ['./keyboard-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class KeyboardInputComponent extends FieldType<FormlyFieldConfig> {
   // @ViewChild(MatInput, {static: true}) formFieldControl: MatInput;

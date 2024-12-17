@@ -46,6 +46,7 @@ export interface DropModelDataForList {
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [taskListAnimation, expandFadeFastAnimation],
+  standalone: false,
 })
 export class TaskListComponent implements OnDestroy, AfterViewInit {
   tasks = input<TaskWithSubTasks[]>([]);

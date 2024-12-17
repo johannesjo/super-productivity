@@ -15,6 +15,7 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './formly-translated-template.component.html',
   styleUrls: ['./formly-translated-template.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class FormlyTranslatedTemplateComponent
   extends FieldType

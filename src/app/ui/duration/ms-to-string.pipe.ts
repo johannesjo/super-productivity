@@ -30,6 +30,7 @@ export const msToString = (
 
 @Pipe({
   name: 'msToString',
+  standalone: false,
 })
 export class MsToStringPipe implements PipeTransform {
   transform: (

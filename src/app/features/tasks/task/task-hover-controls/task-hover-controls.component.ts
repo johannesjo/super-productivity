@@ -12,7 +12,6 @@ import { ICAL_TYPE } from '../../../issue/issue.const';
 
 @Component({
   selector: 'task-hover-controls',
-  standalone: true,
   imports: [NgIf, MatIcon, TranslateModule, UiModule],
   templateUrl: './task-hover-controls.component.html',
   styleUrl: './task-hover-controls.component.scss',

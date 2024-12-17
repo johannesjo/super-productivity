@@ -32,6 +32,7 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
   templateUrl: './dialog-add-planned-tasks.component.html',
   styleUrl: './dialog-add-planned-tasks.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DialogAddPlannedTasksComponent {
   T: typeof T = T;
