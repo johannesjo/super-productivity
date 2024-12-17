@@ -114,6 +114,13 @@
               [isForToday]="isForToday"
               [isShowYesterday]="isForToday && isIncludeYesterday"
             ></tasks-by-tag>
+
+            <section style="margin-top: 48px">
+              <h3 style="font-weight: bold; margin-bottom: 4px">
+                {{T.PDS.WEEK|translate}}
+              </h3>
+              <worklog-week *ngIf="isForToday"></worklog-week>
+            </section>
           </ng-container>
 
           <ng-template #loading>
@@ -147,15 +154,6 @@
       >
         <section class="tab-inner">
           <plan-tasks-tomorrow></plan-tasks-tomorrow>
-        </section>
-      </mat-tab>
-
-      <mat-tab
-        *ngIf="isForToday"
-        [label]="T.PDS.WEEK|translate"
-      >
-        <section class="tab-inner full-width">
-          <worklog-week></worklog-week>
         </section>
       </mat-tab>
     </mat-tab-group>
