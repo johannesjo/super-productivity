@@ -93,12 +93,10 @@ export const createWindow = ({
   // see: https://pratikpc.medium.com/bypassing-cors-with-electron-ab7eaf331605
   mainWin.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details;
-    upsertKeyValue(requestHeaders, 'Origin', null);
-    upsertKeyValue(requestHeaders, 'Referer', null);
-    upsertKeyValue(requestHeaders, 'User-Agent', ['']);
-    upsertKeyValue(requestHeaders, 'Access-Control-Allow-Origin', ['*']);
     delete requestHeaders['Origin'];
     delete requestHeaders['Referer'];
+    // NOTE this is needed for GitHub api requests to work
+    // delete requestHeaders['User-Agent'];
 
     callback({ requestHeaders });
   });
@@ -107,9 +105,7 @@ export const createWindow = ({
     const { responseHeaders } = details;
     upsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*']);
     upsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*']);
-    upsertKeyValue(responseHeaders, 'Access-Control-Allow-Methods', [
-      'GET, POST, PUT, DELETE, OPTIONS',
-    ]);
+    upsertKeyValue(responseHeaders, 'Access-Control-Allow-Methods', ['*']);
 
     callback({
       responseHeaders,
