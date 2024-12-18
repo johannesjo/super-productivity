@@ -5,11 +5,10 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   Output,
   ViewChild,
 } from '@angular/core';
-import { AsyncPipe, JsonPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
@@ -31,6 +30,7 @@ import { T } from '../../../t.const';
 import { Tag } from '../tag.model';
 import { TagService } from '../tag.service';
 import { TagModule } from '../tag.module';
+import { TaskService } from '../../tasks/task.service';
 
 interface Suggestion {
   id: string;
@@ -52,24 +52,18 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     MatChipInput,
     MatChipRow,
     MatIcon,
-    NgIf,
     UiModule,
-    JsonPipe,
     TagModule,
   ],
   templateUrl: './tag-edit.component.html',
   styleUrl: './tag-edit.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TagEditComponent implements OnDestroy {
+export class TagEditComponent {
   T: typeof T = T;
 
   private _tagService = inject(TagService);
-
-  @Input() label?: string;
-  @Input() additionalActionIcon?: string;
-  @Input() additionalActionTooltip?: string;
-  @Input() additionalActionTooltipUnToggle?: string;
+  private _taskService = inject(TaskService);
 
   @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
@@ -81,10 +75,10 @@ export class TagEditComponent implements OnDestroy {
   modelItems: Suggestion[] = [];
   inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
-  isAutoFocus = false;
+
   @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
-  private _modelIds: string[] = [];
+  private _tagIds: string[] = [];
 
   suggestionsIn: Suggestion[] = [];
 
@@ -94,43 +88,23 @@ export class TagEditComponent implements OnDestroy {
     map(([val, tagSuggestions]) =>
       val !== null
         ? this._filter(val)
-        : tagSuggestions.filter((suggestion) => !this._modelIds.includes(suggestion.id)),
+        : tagSuggestions.filter((suggestion) => !this._tagIds.includes(suggestion.id)),
     ),
   );
 
-  private _autoFocusTimeout?: number;
   private _subs: Subscription = new Subscription();
 
   constructor() {
     this._subs.add(
       this.tagSuggestions$.subscribe((suggestions) => {
         this.suggestionsIn = suggestions;
-        this._updateModelItems(this._modelIds);
+        this._updateModelItems(this._tagIds);
       }),
     );
   }
 
-  // constructor(@Attribute('autoFocus') public autoFocus: Attribute) {
-  //   if (typeof autoFocus === # FID Animation Appointment Torsten und Thuan (4.12.24)
-  // * 'string') {
-  //     this.isAutoFocus = true;
-  //     this._autoFocusTimeout = window.setTimeout(() => {
-  //       this.inputEl?.nativeElement.focus();
-  //       // NOTE: we need to wait a little for the tag dialog to be there
-  //     }, 300);
-  //   }
-  // }
-
-  ngOnDestroy(): void {
-    if (this._autoFocusTimeout) {
-      window.clearTimeout(this._autoFocusTimeout);
-    }
-  }
-
-  @Input() set model(v: string[]) {
-    this._modelIds = v;
-    console.log(v);
-
+  @Input() set tagIds(v: string[]) {
+    this._tagIds = v;
     this._updateModelItems(v);
   }
 
@@ -193,7 +167,7 @@ export class TagEditComponent implements OnDestroy {
 
   private _add(id: string): void {
     // prevent double items
-    if (!this._modelIds.includes(id)) {
+    if (!this._tagIds.includes(id)) {
       this.addItem.emit(id);
     }
   }
@@ -216,7 +190,7 @@ export class TagEditComponent implements OnDestroy {
     return this.suggestionsIn.filter(
       (suggestion) =>
         suggestion.title.toLowerCase().indexOf(filterValue) === 0 &&
-        !this._modelIds.includes(suggestion.id),
+        !this._tagIds.includes(suggestion.id),
     );
   }
 }

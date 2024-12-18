@@ -305,10 +305,7 @@
       <mat-icon>style</mat-icon>
     </ng-container>
     <ng-container input-value>
-      <tag-edit
-        [label]="T.F.TAG.D_EDIT.LABEL|translate"
-        [model]="task.tagIds"
-      ></tag-edit>
+      <tag-edit [tagIds]="task.tagIds"></tag-edit>
     </ng-container>
   </task-detail-item>
 

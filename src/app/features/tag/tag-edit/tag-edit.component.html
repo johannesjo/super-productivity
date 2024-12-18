@@ -11,21 +11,11 @@
       matChipRemove
       >cancel
     </mat-icon>
-
-    <button
-      (click)="additionalAction.emit(modelItem.id)"
-      *ngIf="additionalActionIcon"
-      class="additional"
-      mat-icon-button
-    >
-      <mat-icon style="transform: rotate(45deg)">{{ additionalActionIcon }}</mat-icon>
-    </button>
   </mat-chip-row>
   }
   <input
     #inputElRef
     (matChipInputTokenEnd)="add($event)"
-    [autofocus]="isAutoFocus"
     [formControl]="inputCtrl"
     [matAutocomplete]="autoElRef"
     [matChipInputAddOnBlur]="true"
