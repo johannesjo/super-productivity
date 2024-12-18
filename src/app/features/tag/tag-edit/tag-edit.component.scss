@@ -30,6 +30,7 @@
       color: $dark-theme-text-color;
     }
 
+    &:hover,
     &:focus {
       outline: none;
       border-bottom-color: rgba(0, 0, 0, 0.12);
@@ -37,5 +38,37 @@
         border-bottom-color: rgba(255, 255, 255, 0.12);
       }
     }
+
+    &:hover {
+      :host-context(.isNoTouchOnly.isLightTheme) & {
+        background: #eee;
+      }
+
+      :host-context(.isNoTouchOnly.isDarkTheme) & {
+        background: $dark-theme-bg-lightest;
+      }
+    }
+  }
+}
+
+:host-context(.isMousePrimary task-detail-item) {
+  ::ng-deep * {
+    //--mdc-chip-outline-color: transparent !important;
+  }
+  ::ng-deep .mdc-evolution-chip__cell--trailing {
+    opacity: 0.05;
+    margin-left: -4px;
+    transition: opacity 0.2s;
+  }
+}
+
+:host-context(.isMousePrimary task-detail-item:hover) {
+  ::ng-deep * {
+    --mdc-chip-outline-color: rgba(125, 125, 125, 0.4) !important;
+  }
+
+  ::ng-deep .mdc-evolution-chip__cell--trailing {
+    opacity: 1;
+    width: auto;
   }
 }

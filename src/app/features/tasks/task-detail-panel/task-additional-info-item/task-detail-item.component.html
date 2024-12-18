@@ -2,6 +2,7 @@
   <section
     (click)="type==='input' && onInputItemClick()"
     class="input-item"
+    [class.standard-size]="type==='input'"
     [class.full-size]="type==='fullSizeInput'"
   >
     <div

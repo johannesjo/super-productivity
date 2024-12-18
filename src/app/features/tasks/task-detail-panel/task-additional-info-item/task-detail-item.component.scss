@@ -85,7 +85,7 @@
 }
 
 mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
-.input-item {
+.input-item.standard-size {
   &:hover,
   &:focus {
     :host-context(.isNoTouchOnly.isLightTheme) & {
