@@ -182,6 +182,14 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   white-space: nowrap;
 }
 
+.ripple {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
 // Input-Item
 // ----------
 .input-item {
@@ -191,6 +199,12 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   height: 48px;
   cursor: pointer;
   color: $light-theme-text-color;
+
+  &.full-size {
+    height: auto;
+    min-height: 48px;
+    align-items: flex-start;
+  }
 
   @include darkTheme() {
     color: $dark-theme-text-color;
@@ -224,6 +238,13 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   ::ng-deep mat-icon:first-of-type {
     margin-right: $s;
   }
+
+  .full-size & {
+    min-width: 40px;
+    min-height: 48px;
+    flex-grow: 0;
+    margin-right: 0;
+  }
 }
 
 .input-item__value {
@@ -233,6 +254,17 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   align-items: center;
   margin-right: $s * 3;
 
+  .full-size & {
+    min-width: 40px;
+    flex-grow: 1;
+    padding-top: 4px;
+    padding-bottom: 4px;
+
+    > * {
+      display: block;
+    }
+  }
+
   &,
   ::ng-deep span {
     overflow: hidden;
@@ -240,12 +272,13 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     white-space: nowrap;
   }
 
-  ::ng-deep mat-icon {
-    margin-right: $s;
-    font-size: 32px;
-    height: 32px;
-    width: 32px;
-  }
+  // TODO find out if still needed
+  //::ng-deep mat-icon {
+  //  margin-right: $s;
+  //  font-size: 32px;
+  //  height: 32px;
+  //  width: 32px;
+  //}
 
   @include lightTheme() {
     color: rgba(

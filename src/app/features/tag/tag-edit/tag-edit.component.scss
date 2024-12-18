@@ -1,0 +1,20 @@
+:host {
+  width: 100%;
+
+  mat-form-field {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  input {
+    background: transparent;
+    appearance: none;
+    display: block;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    color: red;
+  }
+}

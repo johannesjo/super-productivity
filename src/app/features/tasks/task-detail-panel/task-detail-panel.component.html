@@ -295,6 +295,23 @@
     </ng-container>
   </task-detail-item>
 
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (keyPress)="onItemKeyPress($event)"
+    type="fullSizeInput"
+    class="input-item --estimate"
+  >
+    <ng-container input-title>
+      <mat-icon>style</mat-icon>
+    </ng-container>
+    <ng-container input-value>
+      <tag-edit
+        [label]="T.F.TAG.D_EDIT.LABEL|translate"
+        [model]="task.tagIds"
+      ></tag-edit>
+    </ng-container>
+  </task-detail-item>
+
   <div class="date-info">
     <div>Created on {{task?.created|date:'short'}}</div>
     <div *ngIf="task.doneOn">Completed on {{task?.doneOn|date:'short'}}</div>

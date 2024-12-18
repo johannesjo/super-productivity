@@ -1,0 +1,50 @@
+<!--<mat-form-field class="example-chip-list">-->
+<!--  <mat-label>Favorite Fruits</mat-label>-->
+
+<mat-chip-grid #chipListElRef>
+  @for (modelItem of modelItems; track modelItem.id) {
+  <mat-chip-row
+    (removed)="remove(modelItem.id)"
+    [removable]="true"
+  >
+    {{ modelItem.title }}
+
+    <mat-icon
+      [matTooltip]="T.G.REMOVE|translate"
+      matChipRemove
+      >cancel
+    </mat-icon>
+
+    <button
+      (click)="additionalAction.emit(modelItem.id)"
+      *ngIf="additionalActionIcon"
+      class="additional"
+      mat-icon-button
+    >
+      <mat-icon style="transform: rotate(45deg)">{{ additionalActionIcon }}</mat-icon>
+    </button>
+  </mat-chip-row>
+  }
+  <input
+    #inputElRef
+    (matChipInputTokenEnd)="add($event)"
+    [autofocus]="isAutoFocus"
+    [formControl]="inputCtrl"
+    [matAutocomplete]="autoElRef"
+    [matChipInputAddOnBlur]="true"
+    [matChipInputFor]="chipListElRef"
+    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+    (keydown)="triggerCtrlEnterSubmit($event)"
+  />
+</mat-chip-grid>
+<mat-autocomplete
+  #autoElRef="matAutocomplete"
+  (optionSelected)="selected($event)"
+>
+  @for (suggestion of filteredSuggestions$ | async; track suggestion.id) {
+  <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
+  }
+</mat-autocomplete>
+<!--</mat-form-field>-->
+
+<!--<div>{{modelItems|json}}</div>-->
