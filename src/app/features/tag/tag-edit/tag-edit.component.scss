@@ -1,10 +1,16 @@
+@import '../../../../variables.scss';
+
 :host {
   width: 100%;
 
-  mat-form-field {
-    width: 100%;
-    margin: 0;
-    padding: 0;
+  tag {
+    padding-right: 0;
+  }
+
+  ::ng-deep
+    .mat-mdc-standard-chip.mdc-evolution-chip--with-trailing-action
+    .mdc-evolution-chip__action--primary {
+    padding-left: 8px;
   }
 
   input {
@@ -14,7 +20,22 @@
     width: 100%;
     box-shadow: none;
     border: none;
-    border-bottom: 1px solid #ddd;
-    color: red;
+    color: $light-theme-text-color;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    height: 40px;
+    padding: 2px;
+
+    @include darkTheme() {
+      color: $dark-theme-text-color;
+    }
+
+    &:focus {
+      outline: none;
+      border-bottom-color: rgba(0, 0, 0, 0.12);
+      @include darkTheme() {
+        border-bottom-color: rgba(255, 255, 255, 0.12);
+      }
+    }
   }
 }

@@ -30,6 +30,7 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../../t.const';
 import { Tag } from '../tag.model';
 import { TagService } from '../tag.service';
+import { TagModule } from '../tag.module';
 
 interface Suggestion {
   id: string;
@@ -54,6 +55,7 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     NgIf,
     UiModule,
     JsonPipe,
+    TagModule,
   ],
   templateUrl: './tag-edit.component.html',
   styleUrl: './tag-edit.component.scss',

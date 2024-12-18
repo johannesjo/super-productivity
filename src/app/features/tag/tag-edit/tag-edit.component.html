@@ -1,13 +1,10 @@
-<!--<mat-form-field class="example-chip-list">-->
-<!--  <mat-label>Favorite Fruits</mat-label>-->
-
 <mat-chip-grid #chipListElRef>
   @for (modelItem of modelItems; track modelItem.id) {
   <mat-chip-row
     (removed)="remove(modelItem.id)"
     [removable]="true"
   >
-    {{ modelItem.title }}
+    <tag [tag]="modelItem"></tag>
 
     <mat-icon
       [matTooltip]="T.G.REMOVE|translate"
@@ -35,6 +32,7 @@
     [matChipInputFor]="chipListElRef"
     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
     (keydown)="triggerCtrlEnterSubmit($event)"
+    [placeholder]="'+ add tag'"
   />
 </mat-chip-grid>
 <mat-autocomplete
@@ -45,6 +43,3 @@
   <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
   }
 </mat-autocomplete>
-<!--</mat-form-field>-->
-
-<!--<div>{{modelItems|json}}</div>-->

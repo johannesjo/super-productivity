@@ -204,6 +204,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     height: auto;
     min-height: 48px;
     align-items: flex-start;
+    cursor: default;
   }
 
   @include darkTheme() {
@@ -259,6 +260,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     flex-grow: 1;
     padding-top: 4px;
     padding-bottom: 4px;
+    min-height: 48px;
 
     > * {
       display: block;

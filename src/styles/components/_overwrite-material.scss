@@ -5,6 +5,14 @@
   --mat-menu-item-label-text-size: 14px;
 }
 
+* {
+  --mdc-chip-container-shape-radius: 4px !important;
+  --mdc-chip-elevated-container-color: transparent !important;
+  //--mdc-chip-outline-color: var(--mdc-chip-outline-color, var(--mat-sys-outline)) !important;
+  --mdc-chip-outline-color: rgba(125, 125, 125, 0.4) !important;
+  --mdc-chip-outline-width: 1px !important;
+}
+
 .mat-drawer.mat-drawer-side {
   // should be below notes panel
   z-index: 1 !important;
