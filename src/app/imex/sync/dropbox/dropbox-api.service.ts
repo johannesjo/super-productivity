@@ -14,6 +14,7 @@ import { generatePKCECodes } from '../generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
 import { SyncProvider } from '../sync-provider.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { environment } from '../../../../environments/environment';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -249,7 +250,9 @@ export class DropboxApiService {
       this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
       this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
     } else {
-      console.log('LEGACY TOKENS');
+      if (environment.production) {
+        console.log('LEGACY TOKENS');
+      }
       // TODO remove legacy stuff
       this._dataInitService.isAllDataLoadedInitially$
         .pipe(
@@ -258,7 +261,9 @@ export class DropboxApiService {
           first(),
         )
         .subscribe((v) => {
-          console.log('SETTING LEGACY TOKENS', v as any);
+          if (environment.production) {
+            console.log('SETTING LEGACY TOKENS', v as any);
+          }
           this.updateTokens({
             accessToken: (v as any)?.accessToken,
             refreshToken: (v as any)?.refreshToken,
@@ -281,7 +286,10 @@ export class DropboxApiService {
     if (refreshToken) {
       this._refreshToken$.next(refreshToken);
     }
-    console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+
+    if (environment.production) {
+      console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+    }
 
     await this._persistenceLocalService.updateDropboxSyncMeta({
       accessToken,

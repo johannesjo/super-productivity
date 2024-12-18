@@ -20,7 +20,7 @@ export class DropListService {
     } else {
       this.dropLists.next([...this.dropLists.getValue(), dropList]);
     }
-    console.log(this.dropLists.getValue());
+    // console.log(this.dropLists.getValue());
   }
 
   unregisterDropList(dropList: CdkDropList): void {

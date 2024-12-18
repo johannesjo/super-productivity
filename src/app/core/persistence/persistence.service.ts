@@ -316,8 +316,6 @@ export class PersistenceService {
   // }
 
   async loadComplete(isMigrate = false): Promise<AppDataComplete> {
-    console.log('LOAD COMPLETE', isMigrate);
-
     const projectState = await this.project.loadState();
     const pids = projectState ? (projectState.ids as string[]) : [];
     if (!pids) {

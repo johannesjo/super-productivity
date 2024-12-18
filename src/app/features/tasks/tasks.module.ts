@@ -38,6 +38,7 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
 import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.component';
 import { TaskHoverControlsComponent } from './task/task-hover-controls/task-hover-controls.component';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { TagEditComponent } from '../tag/tag-edit/tag-edit.component';
 
 @NgModule({
   imports: [
@@ -66,6 +67,7 @@ import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
     TaskHoverControlsComponent,
     CdkDropList,
     CdkDrag,
+    TagEditComponent,
   ],
   declarations: [
     TaskComponent,
