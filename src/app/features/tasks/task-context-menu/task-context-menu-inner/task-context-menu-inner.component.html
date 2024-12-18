@@ -250,16 +250,16 @@
     <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
   </button>
 
-  <button
-    (click)="editTags();"
-    mat-menu-item
-  >
-    <span class="menuItemLeft">
-      <mat-icon>style</mat-icon>
-      {{ T.F.TASK.CMP.EDIT_TAGS|translate }}
-    </span>
-    <span class="key-i">{{ kb.taskEditTags }}</span>
-  </button>
+  <!--  <button-->
+  <!--    (click)="editTags();"-->
+  <!--    mat-menu-item-->
+  <!--  >-->
+  <!--    <span class="menuItemLeft">-->
+  <!--      <mat-icon>style</mat-icon>-->
+  <!--      {{ T.F.TASK.CMP.EDIT_TAGS|translate }}-->
+  <!--    </span>-->
+  <!--    <span class="key-i">{{ kb.taskEditTags }}</span>-->
+  <!--  </button>-->
 
   <button
     *ngIf="!task.parentId && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"
