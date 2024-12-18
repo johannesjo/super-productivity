@@ -12,11 +12,13 @@ import {
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../jira.const';
 import { JiraWorklogExportDefaultTime } from '../../jira.model';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
+import { TaskService } from '../../../../../tasks/task.service';
+import { first, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -43,12 +45,24 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   timeSpentToday: number;
   timeSpentLoggedDelta: number;
 
+  issueProviderId$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
+
   private _subs = new Subscription();
 
   constructor(
     private _jiraApiService: JiraApiService,
     private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
     private _snackService: SnackService,
+    private _taskService: TaskService,
     private _issueProviderService: IssueProviderService,
     private _store: Store,
     @Inject(MAT_DIALOG_DATA)
@@ -67,8 +81,13 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
 
     this._subs.add(
-      this._issueProviderService
-        .getCfgOnce$(this.data.task.issueProviderId!, 'JIRA')
+      this.issueProviderId$
+        .pipe(
+          first(),
+          switchMap((issueProviderId) =>
+            this._issueProviderService.getCfgOnce$(issueProviderId, 'JIRA'),
+          ),
+        )
         .subscribe((cfg) => {
           if (cfg.worklogDialogDefaultTime) {
             this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
@@ -87,21 +106,17 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   }
 
   async submitWorklog(): Promise<void> {
-    if (
-      this.issue.id &&
-      this.started &&
-      this.timeSpent &&
-      this.data.task.issueProviderId
-    ) {
+    const issueProviderId = await this.issueProviderId$.pipe(first()).toPromise();
+    if (this.issue.id && this.started && this.timeSpent && issueProviderId) {
       const cfg = await this._issueProviderService
-        .getCfgOnce$(this.data.task.issueProviderId, 'JIRA')
+        .getCfgOnce$(issueProviderId, 'JIRA')
         .toPromise();
 
       if (this.defaultTimeCheckboxContent?.isChecked === true) {
         this._store.dispatch(
           IssueProviderActions.updateIssueProvider({
             issueProvider: {
-              id: this.data.task.issueProviderId,
+              id: issueProviderId,
               changes: {
                 worklogDialogDefaultTime: this.defaultTimeCheckboxContent.value,
               },
