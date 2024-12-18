@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { TasksModule } from '../tasks.module';
 import {
   MAT_DIALOG_DATA,
-  MatDialogActions,
   MatDialogContent,
   MatDialogRef,
 } from '@angular/material/dialog';
@@ -18,14 +17,7 @@ import { skipWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-task-detail-panel',
-  imports: [
-    CommonModule,
-    TasksModule,
-    UiModule,
-    TranslateModule,
-    MatDialogContent,
-    MatDialogActions,
-  ],
+  imports: [CommonModule, TasksModule, UiModule, TranslateModule, MatDialogContent],
   templateUrl: './dialog-task-detail-panel.component.html',
   styleUrl: './dialog-task-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

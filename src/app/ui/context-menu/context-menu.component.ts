@@ -12,20 +12,12 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { WorkContextMenuComponent } from '../../core-ui/work-context-menu/work-context-menu.component';
 import { MatIconButton } from '@angular/material/button';
 import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'context-menu',
-  imports: [
-    MatMenu,
-    MatMenuTrigger,
-    MatMenuContent,
-    WorkContextMenuComponent,
-    MatMenuItem,
-    NgTemplateOutlet,
-  ],
+  imports: [MatMenu, MatMenuTrigger, MatMenuContent, NgTemplateOutlet],
   templateUrl: './context-menu.component.html',
   styleUrl: './context-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

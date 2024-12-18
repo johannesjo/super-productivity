@@ -34,8 +34,7 @@ import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, DatePipe, NgClass, NgIf, NgStyle } from '@angular/common';
-import { StuckDirective } from '../../../ui/stuck/stuck.directive';
+import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import {
@@ -43,7 +42,6 @@ import {
   CdkDragMove,
   CdkDragRelease,
   CdkDragStart,
-  CdkDropList,
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
@@ -56,7 +54,6 @@ import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
@@ -73,16 +70,11 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
   selector: 'schedule',
   imports: [
     UiModule,
-    NgStyle,
     AsyncPipe,
-    NgClass,
-    StuckDirective,
     ScheduleEventComponent,
     CdkDrag,
-    CdkDropList,
     DatePipe,
     NgIf,
-    InlineMultilineInputComponent,
     CreateTaskPlaceholderComponent,
   ],
   templateUrl: './schedule.component.html',
