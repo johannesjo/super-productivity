@@ -299,6 +299,7 @@
     #tagEditDetailItemElRef
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
+    (editActionTriggered)="tagEditElRef.focusInput()"
     type="fullSizeInput"
     class="input-item --estimate"
   >
@@ -307,6 +308,7 @@
     </ng-container>
     <ng-container input-value>
       <tag-edit
+        #tagEditElRef
         [task]="task"
         [tagIds]="task.tagIds"
         (escapePress)="tagEditDetailItemElRef.focusEl()"

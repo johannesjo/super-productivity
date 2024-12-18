@@ -124,6 +124,12 @@ export class TagEditComponent {
     }
   }
 
+  focusInput(): void {
+    if (this.inputEl) {
+      this.inputEl.nativeElement.focus();
+    }
+  }
+
   remove(id: string): void {
     this._updateModel(this.tagIds().filter((tid) => tid !== id));
   }
