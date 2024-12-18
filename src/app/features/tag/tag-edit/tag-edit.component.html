@@ -21,7 +21,7 @@
     [matChipInputAddOnBlur]="true"
     [matChipInputFor]="chipListElRef"
     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-    (keydown)="triggerCtrlEnterSubmit($event)"
+    (keydown)="onKeydown($event)"
     [placeholder]="'+ add tag'"
   />
 </mat-chip-grid>

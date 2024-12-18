@@ -296,6 +296,7 @@
   </task-detail-item>
 
   <task-detail-item
+    #tagEditDetailItemElRef
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
     type="fullSizeInput"
@@ -305,7 +306,11 @@
       <mat-icon>style</mat-icon>
     </ng-container>
     <ng-container input-value>
-      <tag-edit [tagIds]="task.tagIds"></tag-edit>
+      <tag-edit
+        [task]="task"
+        [tagIds]="task.tagIds"
+        (escapePress)="tagEditDetailItemElRef.focusEl()"
+      ></tag-edit>
     </ng-container>
   </task-detail-item>
 

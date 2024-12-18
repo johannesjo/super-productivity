@@ -3,10 +3,9 @@ import {
   Component,
   computed,
   ElementRef,
-  EventEmitter,
   inject,
   input,
-  Output,
+  output,
   ViewChild,
 } from '@angular/core';
 import {
@@ -29,6 +28,7 @@ import { TagService } from '../tag.service';
 import { TagModule } from '../tag.module';
 import { TaskService } from '../../tasks/task.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TaskCopy } from '../../tasks/task.model';
 
 interface Suggestion {
   id: string;
@@ -62,13 +62,10 @@ export class TagEditComponent {
   private _tagService = inject(TagService);
   private _taskService = inject(TaskService);
 
+  task = input.required<TaskCopy>();
   tagIds = input.required<string[]>();
 
-  @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
-  @Output() ctrlEnterSubmit: EventEmitter<void> = new EventEmitter<void>();
+  escapePress = output<void>();
 
   inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
@@ -121,8 +118,14 @@ export class TagEditComponent {
     }
   }
 
+  onKeydown(event: KeyboardEvent): void {
+    if (event.code === 'Escape') {
+      this.escapePress.emit();
+    }
+  }
+
   remove(id: string): void {
-    this.removeItem.emit(id);
+    this._updateModel(this.tagIds().filter((tid) => tid !== id));
   }
 
   selected(event: MatAutocompleteSelectedEvent): void {
@@ -133,17 +136,8 @@ export class TagEditComponent {
     this.inputCtrl.setValue(null);
   }
 
-  triggerCtrlEnterSubmit(ev: KeyboardEvent): void {
-    const isCyrillic = /^[А-яёЁ]$/.test(ev.key);
-    if (isCyrillic) {
-      this.separatorKeysCodes = [ENTER];
-    } else {
-      this.separatorKeysCodes = DEFAULT_SEPARATOR_KEY_CODES;
-    }
-
-    if (ev.code === 'Enter' && ev.ctrlKey) {
-      this.ctrlEnterSubmit.next();
-    }
+  private _updateModel(v: string[]): void {
+    this._taskService.updateTags(this.task(), v);
   }
 
   private _getExistingSuggestionByTitle(v: string): Suggestion | undefined {
@@ -153,7 +147,7 @@ export class TagEditComponent {
   private _add(id: string): void {
     // prevent double items
     if (!this.tagIds().includes(id)) {
-      this.addItem.emit(id);
+      this._updateModel([...this.tagIds(), id]);
     }
   }
 
@@ -162,7 +156,18 @@ export class TagEditComponent {
     if (existing) {
       this._add(existing.id);
     } else {
-      this.addNewItem.emit(v);
+      this._createNewTag(v);
     }
   }
+
+  private _createNewTag(title: string): void {
+    const cleanTitle = (t: string): string => {
+      return t.replace('#', '');
+    };
+
+    const id = this._tagService.addTag({ title: cleanTitle(title) });
+    this._add(id);
+  }
+
+  protected readonly onkeydown = onkeydown;
 }
