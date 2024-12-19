@@ -83,7 +83,8 @@ const _reducer = createReducer<NoteState>(
     activeContextType !== WorkContextType.PROJECT
       ? {
           ...state,
-          noteIds: ids,
+          todayOrder: ids,
+          // ids: unique([...ids, ...state.ids]),
         }
       : state,
   ),
