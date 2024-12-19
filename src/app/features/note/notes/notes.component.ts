@@ -65,20 +65,9 @@ export class NotesComponent {
       return;
     }
 
-    // console.log(event);
-    // console.log(
-    //   previousIndex,
-    //   currentIndex,
-    //   moveItemInArray(notes, previousIndex, currentIndex).map((note) => note.id),
-    // );
-
     this.noteService.updateOrder(
       moveItemInArray(notes, previousIndex, currentIndex).map((note) => note.id),
     );
-  }
-
-  trackById(i: number, note: Note): string {
-    return note.id;
   }
 
   addNote(): void {
