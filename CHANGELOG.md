@@ -1,3 +1,16 @@
+## [11.0.2](https://github.com/johannesjo/super-productivity/compare/v11.0.1...v11.0.2) (2024-12-19)
+
+### Bug Fixes
+
+- build error ([68db334](https://github.com/johannesjo/super-productivity/commit/68db334ab238f60c5f698a455194fd810e079d7c))
+
+### Features
+
+- **issue:** go back to classic way of doing jira requests as it is more reliable ([264ced7](https://github.com/johannesjo/super-productivity/commit/264ced70d4e4bc27a2344d452e9ef7cab19ebb1a))
+- **issue:** improve error handling for backlog import ([b3f7eb0](https://github.com/johannesjo/super-productivity/commit/b3f7eb0953985a94607ac56eabad3a4f436753f3))
+- **issue:** improve jira error handling ([a33de8c](https://github.com/johannesjo/super-productivity/commit/a33de8cdce4290758bcacacea56b71aad721251d))
+- **issue:** make post requests work for jira api ([0e892dd](https://github.com/johannesjo/super-productivity/commit/0e892dd8572faaa1c691322342829a997eb5124f))
+
 ## [11.0.1](https://github.com/johannesjo/super-productivity/compare/v11.0.0...v11.0.1) (2024-12-19)
 
 ### Bug Fixes
