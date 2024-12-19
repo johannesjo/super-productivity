@@ -12,12 +12,12 @@
     @at-root .isSmallMainContainer &,
       :host::ng-deep .isSmallMainContainer &,
       :host-context(.isSmallMainContainer) & {
-      //border: 2px solid red !important;
+      // border: 2px solid red !important;
       @content;
     }
   } @else {
     :host-context(.isSmallMainContainer) {
-      //border: 2px solid lightblue !important;
+      // border: 2px solid lightblue !important;
       @content;
     }
   }
@@ -37,7 +37,7 @@
     @at-root .isVerySmallMainContainer &,
       :host::ng-deep .isVerySmallMainContainer &,
       :host-context(.isVerySmallMainContainer) & {
-      //border: 2px solid greenyellow !important;
+      // border: 2px solid greenyellow !important;
       @content;
     }
   } @else {

@@ -29,9 +29,9 @@
 .collapsible-title {
   flex-grow: 1;
 
-  :host.isInline & {
-    //display: inline-block;
-  }
+  // :host.isInline & {
+  //   display: inline-block;
+  // }
 }
 
 .collapsible-expand-icon {

@@ -7,30 +7,30 @@ $owl-shadow: none;
 $owl-today-not-selected: $c-primary;
 
 // dark theme
-$owl-dark-text-color-strong: rgba(255, 255, 255, 0.9);
-$owl-dark-text-color: rgba(255, 255, 255, 0.75);
-$owl-dark-text-color-less-intense: rgba(255, 255, 255, 0.5);
-$owl-dark-text-color-muted: rgba(255, 255, 255, 0.15);
+$owl-dark-text-color-strong: rgb(255 255 255 / 90%);
+$owl-dark-text-color: rgb(255 255 255 / 75%);
+$owl-dark-text-color-less-intense: rgb(255 255 255 / 50%);
+$owl-dark-text-color-muted: rgb(255 255 255 / 15%);
 
-$owl-dark-light-selected-bg: rgba(49, 49, 49, 1);
+$owl-dark-light-selected-bg: rgb(49 49 49 / 100%);
 
-$owl-dark-divider-color: rgba(255, 255, 255, 0.12);
+$owl-dark-divider-color: rgb(255 255 255 / 12%);
 
-$owl-dark-inp-bg-color: rgba(255, 255, 255, 0.08);
+$owl-dark-inp-bg-color: rgb(255 255 255 / 8%);
 $owl-dark-inp-fg-color: $owl-dark-text-color-strong;
 $owl-dark-arrow-color: $owl-dark-text-color-strong;
 
 // light (default) theme
-$owl-text-color-strong: rgba(0, 0, 0, 0.9);
-$owl-text-color: rgba(0, 0, 0, 0.75);
-$owl-text-color-less-intense: rgba(0, 0, 0, 0.5);
-$owl-text-color-muted: rgba(0, 0, 0, 0.15);
+$owl-text-color-strong: rgb(0 0 0 / 90%);
+$owl-text-color: rgb(0 0 0 / 75%);
+$owl-text-color-less-intense: rgb(0 0 0 / 50%);
+$owl-text-color-muted: rgb(0 0 0 / 15%);
 
-$owl-light-selected-bg: rgb(238, 238, 238);
+$owl-light-selected-bg: rgb(238 238 238);
 
-$owl-divider-color: rgba(0, 0, 0, 0.12);
+$owl-divider-color: rgb(0 0 0 / 12%);
 
-$owl-inp-bg-color: rgba(0, 0, 0, 0.04);
+$owl-inp-bg-color: rgb(0 0 0 / 4%);
 
 $owl-inp-fg-color: $owl-text-color-strong;
 $owl-arrow-color: $owl-text-color-strong;
@@ -252,7 +252,7 @@ $owl-missing: $owl-light-selected-bg !default;
     background-color: $owl-accent-color;
 
     &.owl-dt-calendar-cell-today {
-      box-shadow: inset 0 0 0 2px hsla(0, 0%, 100%, 0.85);
+      box-shadow: inset 0 0 0 2px hsl(0 0% 100% / 85%);
     }
   }
 

@@ -16,7 +16,7 @@
   }
 
   > button:nth-of-type(n + 2) {
-    //>  button:last-of-type {
+    // >  button:last-of-type {
     border-radius: 0;
     align-self: stretch;
     display: inline-flex;
@@ -53,10 +53,10 @@
     }
   }
 
-  //button:first-of-type:focus + button {
-  //  @include mousePrimaryDevice(true) {
-  //    opacity: 0.8;
-  //    display: inline-flex;
-  //  }
-  //}
+  // button:first-of-type:focus + button {
+  //   @include mousePrimaryDevice(true) {
+  //     opacity: 0.8;
+  //     display: inline-flex;
+  //   }
+  // }
 }

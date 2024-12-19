@@ -7,11 +7,11 @@
     position: relative;
   }
 
-  .section-wrapper {
-    //display: grid;
-    //grid-template-columns: 50% 50%;
-    //grid-gap: 0 $s*2;
-  }
+  // .section-wrapper {
+  //   display: grid;
+  //   grid-template-columns: 50% 50%;
+  //   grid-gap: 0 $s * 2;
+  // }
 
   .config-section {
     @include dividerBorderColor(1px);
@@ -22,7 +22,7 @@
 
     @include darkTheme {
       background-color: $dark-theme-card-bg;
-      //background-color: $dark-theme-bg-slightly-lighter;
+      // background-color: $dark-theme-bg-slightly-lighter;
     }
 
     .md-title {

@@ -2,7 +2,7 @@
 @import '../../tasks/task/task.component.mixins';
 
 :host {
-  //@include grabCursor();
+  // @include grabCursor();
   display: flex;
   align-items: center;
   padding: 0;
@@ -16,7 +16,7 @@
 
   @include darkTheme() {
     color: $task-text-c-dark;
-    //background: $task-c-bg-dark;
+    // background: $task-c-bg-dark;
     border-color: $dark-theme-extra-border-color;
   }
 

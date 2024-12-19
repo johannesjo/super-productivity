@@ -8,18 +8,18 @@
   justify-content: center;
   padding-top: 8px;
   padding-bottom: 8px;
-  //gap: 16px;
-
-  //border-top: 1px solid;
-  //border-bottom: 1px solid;
+  // gap: 16px;
+  //
+  // border-top: 1px solid;
+  // border-bottom: 1px solid;
 
   @include darkTheme() {
-    //border-color: $dark-theme-extra-border-color;
-    //background: $dark-theme-bg-lighter;
+    // border-color: $dark-theme-extra-border-color;
+    // background: $dark-theme-bg-lighter;
   }
   @include lightTheme() {
-    //border-color: $light-theme-extra-border-color;
-    //background: $light-theme-bg-darker;
+    // border-color: $light-theme-extra-border-color;
+    // background: $light-theme-bg-darker;
   }
 }
 

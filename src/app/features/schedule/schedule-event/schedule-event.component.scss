@@ -16,7 +16,7 @@ $margin-right: 10px;
   align-items: flex-start;
   margin-bottom: $margin-bottom;
   border: 1px solid $light-theme-separator-color;
-  //box-shadow: $whiteframe-shadow-1dp;
+  // box-shadow: $whiteframe-shadow-1dp;
   background: #fff;
   color: $light-theme-text-color;
   position: relative;
@@ -27,16 +27,15 @@ $margin-right: 10px;
   overflow: visible !important;
   min-width: 0;
 
-  &.no-project {
-  }
-
-  &:hover {
-    //z-index: 3;
-    //overflow: visible;
-  }
+  // &.no-project {}
+  //
+  // &:hover {
+  //   z-index: 3;
+  //   overflow: visible;
+  // }
 
   @include darkTheme() {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgb(255 255 255 / 10%);
     border-left-color: var(--project-color, $dark-theme-separator-color);
     background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
@@ -44,14 +43,14 @@ $margin-right: 10px;
 
   &.very-short-event {
     // slightly move up to  reduce chance of overlap with next
-    //margin-top: -2px;
+    // margin-top: -2px;
     align-items: center;
 
-    //.title {
-    //  column-width: unset;
-    //  line-clamp: 1;
-    //  max-width: 200px;
-    //}
+    // .title {
+    //   column-width: unset;
+    //   line-clamp: 1;
+    //   max-width: 200px;
+    // }
   }
 
   &.split-start {
@@ -124,7 +123,7 @@ $margin-right: 10px;
   left: 0;
   right: -1 * ($margin-right + 4);
   z-index: 3;
-  //background: rgba(255, 0, 0, 0.1);
+  // background: rgba(255, 0, 0, 0.1);
   display: block;
 }
 
@@ -141,7 +140,7 @@ $margin-right: 10px;
     border-left-style: solid;
 
     @include darkTheme() {
-      //border-color: $dark-theme-separator-color;
+      // border-color: $dark-theme-separator-color;
       background: $dark-theme-bg;
       background: $dark1;
     }
@@ -176,7 +175,7 @@ $margin-right: 10px;
 
     &:hover {
       opacity: 1;
-      //outline: 1px solid $c-accent;
+      // outline: 1px solid $c-accent;
       border-color: $c-accent;
 
       .ico {
@@ -190,7 +189,7 @@ $margin-right: 10px;
   }
 }
 
-//  scheduable tasks
+// scheduable tasks
 :host {
   &.ScheduledRepeatProjection .ico {
     color: $c-primary;
@@ -224,7 +223,8 @@ $margin-right: 10px;
     .time-badge {
       color: $light-theme-text-color;
       border-color: $c-primary;
-      //color: $c-primary;
+
+      // color: $c-primary;
       @include darkTheme() {
         color: $dark-theme-text-color;
         border-color: $c-primary;
@@ -263,7 +263,7 @@ $margin-right: 10px;
   }
 
   :host.very-short-event & {
-    //bottom: 4px
+    // bottom: 4px
     margin-top: -4px;
   }
 
@@ -373,7 +373,7 @@ $margin-right: 10px;
   text-align: left;
   // somehow this fixes the cut off lines problem
   column-width: 250px;
-  //font-weight: bold;
+  // font-weight: bold;
 
   @include mq(xs, max) {
     column-width: 120px;
@@ -397,8 +397,8 @@ $margin-right: 10px;
   :host.RepeatProjectionSplitContinued &,
   :host.SplitTaskContinuedLast &,
   :host.RepeatProjectionSplitContinuedLast {
-    //white-space: nowrap;
-    //max-width: 100%;
+    // white-space: nowrap;
+    // max-width: 100%;
     line-clamp: 1;
   }
 }
@@ -431,6 +431,7 @@ $margin-right: 10px;
 }
 
 $offset: 40px;
+
 :host.drag-over {
   transform: translateY($offset);
   z-index: 3;
@@ -445,12 +446,13 @@ $offset: 40px;
     left: 0;
     right: -1 * ($margin-right + 4);
     z-index: 3;
-    //border: 1px solid red;
-    //background: rgba(255, 0, 0, 0.2);
+    // border: 1px solid red;
+    // background: rgba(255, 0, 0, 0.2);
   }
 }
 
 $offsetShortEvent: 15px;
+
 :host.very-short-event.drag-over {
   transform: translateY($offsetShortEvent);
   z-index: 3;

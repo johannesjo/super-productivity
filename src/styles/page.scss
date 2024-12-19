@@ -10,9 +10,9 @@ app-root,
   height: 100%;
   height: -webkit-fill-available;
   box-sizing: border-box;
-  //font-family: 'Montserrat', 'Roboto', sans-serif;
-  //font-family: 'Open Sans', sans-serif;
-  //font-family: 'Roboto', sans-serif;
+  // font-family: 'Montserrat', 'Roboto', sans-serif;
+  // font-family: 'Open Sans', sans-serif;
+  // font-family: 'Roboto', sans-serif;
   font-family: 'Roboto', 'Comic Sans MS';
 }
 
@@ -63,11 +63,11 @@ body {
 
     &.isDisableBackgroundGradient {
       background: $light-theme-bg;
-      //&:before {
-      //  display: block;
-      //  opacity: .3;
-      //  background: mat-css-vars.mat-css-color(50, 1);
-      //}
+      // &:before {
+      //   display: block;
+      //   opacity: 0.3;
+      //   background: mat-css-vars.mat-css-color(50, 1);
+      // }
     }
 
     &:before {

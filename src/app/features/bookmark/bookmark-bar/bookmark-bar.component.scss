@@ -10,7 +10,7 @@ $bookmarkMinWidth: 56px;
 
 :host {
   display: block;
-  //@include mat-css-color-and-contrast(800);
+  // @include mat-css-color-and-contrast(800);
   .list-controls > button,
   .global-bookmark a {
     background: transparent;
@@ -19,7 +19,7 @@ $bookmarkMinWidth: 56px;
 
 .global-bookmark-list-outer {
   padding-bottom: $sTopBottom;
-  //box-shadow: $whiteframe-shadow-3dp;
+  // box-shadow: $whiteframe-shadow-3dp;
 }
 
 .controls-and-list-wrapper {
@@ -165,7 +165,7 @@ $bookmarkMinWidth: 56px;
     border-radius: 0;
     flex-grow: 1;
     transition: $transition-duration-s;
-    //border-radius: 0;
+    // border-radius: 0;
     margin: 0;
     padding: 0;
     min-height: 0;

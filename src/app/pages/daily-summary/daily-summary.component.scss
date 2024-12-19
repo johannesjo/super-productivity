@@ -10,8 +10,8 @@ $summary-point-inner-margin: $s;
   ::ng-deep {
     .mat-mdc-tab .mdc-tab__text-label {
       @include darkTheme() {
-        //color: $dark-theme-text-color;
-        //font-weight: 300;
+        // color: $dark-theme-text-color;
+        // font-weight: 300;
       }
     }
   }
@@ -39,18 +39,18 @@ $summary-point-inner-margin: $s;
   }
 
   // in case we every want to go sticky
-  //::ng-deep .mat-tab-header {
-  //  top: 0;
-  //  z-index: 1000;
-  //  position: sticky;
-  //  position: -webkit-sticky; /* macOS/iOS Safari */
-  //}
+  // ::ng-deep .mat-tab-header {
+  //   top: 0;
+  //   z-index: 1000;
+  //   position: sticky;
+  //   position: -webkit-sticky; /* macOS/iOS Safari */
+  // }
 }
 
 .page-wrapper {
-  //display: flex;
-  //align-items: center;
-  //flex-direction: column;
+  // display: flex;
+  // align-items: center;
+  // flex-direction: column;
   text-align: center;
 }
 
@@ -90,13 +90,13 @@ $summary-point-inner-margin: $s;
   align-items: center;
   text-align: center;
   margin: $summary-point-inner-margin;
-  //flex-grow: 1;
+  // flex-grow: 1;
   flex-basis: 160px;
   position: relative;
 }
 
-.summary-text {
-}
+// .summary-text {
+// }
 
 .summary-val {
   font-weight: bold;
@@ -114,9 +114,9 @@ $summary-point-inner-margin: $s;
   button {
     margin: 0 $s * 0.5;
 
-    mat-icon + mat-icon {
-      //margin-left: -$s;
-    }
+    // mat-icon + mat-icon {
+    //   margin-left: -$s;
+    // }
   }
 }
 
@@ -138,7 +138,7 @@ $summary-point-inner-margin: $s;
     display: block;
     font-size: $this-ico-size;
     color: $yellow;
-    //transform-origin: center center;
+    // transform-origin: center center;
     animation: success-animation-sun #{$this-ani-style};
     backface-visibility: hidden;
   }

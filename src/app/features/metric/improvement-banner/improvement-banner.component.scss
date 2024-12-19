@@ -26,7 +26,8 @@ $weird-task-list-f: 5px;
   align-items: center;
   border-radius: 16px;
   user-select: none;
-  -webkit-user-select: none; /* Safari */
+  -webkit-user-select: none;
+  /* Safari */
   display: flex;
   font-weight: 500;
   font-size: 14px;
@@ -41,19 +42,19 @@ $weird-task-list-f: 5px;
 
   @include lightTheme() {
     border: 1px solid #333;
-    //background-color: rgba(var(--palette-background-unselected-chip), 1);
+    // background-color: rgba(var(--palette-background-unselected-chip), 1);
     color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
     // this would be the bookmark button border
-    //border-color: rgba(0, 0, 0, 0.12);
-    border-color: rgba(0, 0, 0, 0.33);
+    // border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgb(0 0 0 / 33%);
   }
 
   @include darkTheme() {
     border: 1px solid;
     color: #fff;
     // this would be the bookmark button border
-    //border-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.33);
+    // border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgb(255 255 255 / 33%);
   }
 
   &:active {
@@ -83,6 +84,7 @@ $weird-task-list-f: 5px;
         var(--palette-foreground-text-alpha, 1)
       );
     }
+
     @include darkTheme() {
       color: white;
     }

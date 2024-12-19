@@ -27,7 +27,7 @@ More info: https://sass-lang.com/d/function-units
       $height *
       0.8333 +
       px
-      hsl(math.floor(math.random() * 360), 100%, 50%);
+      hsl(math.floor(math.random() * 360) 100% 50%);
   $box-shadow2:
     $box-shadow2,
     0 0 #fff;
@@ -51,7 +51,7 @@ More info: https://sass-lang.com/d/function-units
     position: absolute;
     width: 5px;
     height: 5px;
-    //border-radius: 50%;
+    // border-radius: 50%;
     box-shadow: $box-shadow2;
     animation:
       1s bang ease-out infinite backwards,

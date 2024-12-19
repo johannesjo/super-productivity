@@ -1,0 +1,4 @@
+# This file allows you to ignore formatting commits in git blame
+
+# This commit adds whitespace to satisfy stylelint
+f0aab20cf433ff308480af018a1c5312c06e5752

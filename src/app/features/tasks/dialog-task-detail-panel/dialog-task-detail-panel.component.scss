@@ -9,7 +9,7 @@
     min-width: 340px;
 
     @include darkTheme() {
-      background: rgb(39, 39, 39) !important;
+      background: rgb(39 39 39) !important;
       border: 4px solid $dark24;
     }
 
@@ -31,9 +31,9 @@
       display: none !important;
     }
 
-    .wrapper {
-      //padding: 16px;
-    }
+    // .wrapper {
+    //   padding: 16px;
+    // }
 
     task-detail-item {
       margin-left: $s;

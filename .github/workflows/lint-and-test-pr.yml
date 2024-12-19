@@ -39,6 +39,8 @@ jobs:
         run: npm i
 
       - run: npm run lint
+        # Introduced incrementally, intendend to conform to `stylelint-config-standard-scss`. The check is disabled untill all fails are fixed
+      # - run: npm run lint:scss:ci
       - run: npm run test
       - run: npm run e2e
       - name: Upload performance metrics as an artifact

@@ -37,9 +37,9 @@
   margin-bottom: 4px;
   border-radius: 6px;
   // NOTE bg color is set in material overwrite file since otherwise it does not seem to work
-  background: rgba(0, 0, 0, 0.05);
+  background: rgb(0 0 0 / 5%);
 
   @include darkTheme(true) {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgb(255 255 255 / 5%) !important;
   }
 }

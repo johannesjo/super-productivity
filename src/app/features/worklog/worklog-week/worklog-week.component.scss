@@ -26,8 +26,8 @@ $this-border-radius: 8px;
 }
 
 .scroll-wrapper {
-  //max-height: 280px;
-  //@include scrollY;
+  // max-height: 280px;
+  // @include scrollY;
 }
 
 .caption {
@@ -161,7 +161,7 @@ $this-border-radius: 8px;
   // MAGIC NUMBER ALERT!!!
   margin-left: -4 * $s;
   margin-right: -4 * $s;
-  //margin-top: $s;
+  // margin-top: $s;
 }
 
 .simple-counter-item {

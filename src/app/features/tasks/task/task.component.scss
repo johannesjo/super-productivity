@@ -22,8 +22,8 @@
 
   &.isSelected {
     z-index: $z-is-selected-host;
-    //position: sticky;
-    //top: 16px;
+    // position: sticky;
+    // top: 16px;
   }
 
   &.isCurrent {
@@ -45,9 +45,9 @@
   margin-bottom: 0;
 }
 
-//::ng-deep task .box {
+// ::ng-deep task .box {
 //  background: red !important;
-//}
+// }
 
 .box {
   position: absolute;
@@ -94,7 +94,7 @@
     transition-property: left, right, box-shadow;
     box-shadow: $task-selected-shadow-light;
     // because of the shadow, this looks better
-    //bottom: 2px;
+    // bottom: 2px;
 
     @include darkTheme {
       box-shadow: $task-selected-shadow-dark;
@@ -117,6 +117,7 @@
 
   :host:focus > .inner-wrapper > & {
     border-radius: $task-border-radius;
+
     // we don't want focus borders for touch only devices
     @include noTouchOnly() {
       border-color: $task-c-focus;
@@ -135,10 +136,10 @@
     border-radius: $task-border-radius;
     box-shadow: $task-current-shadow-light;
     // because of the shadow, this looks better
-    //bottom: 2px;
+    // bottom: 2px;
 
     @include mq(xs) {
-      //transform: scale($task-current-task-zoom);
+      // transform: scale($task-current-task-zoom);
       left: -1 * ($task-border-radius);
       right: -1 * ($task-border-radius);
     }
@@ -149,9 +150,11 @@
     @include mq(xs) {
       right: -34px;
     }
+
     @include mq(md) {
       right: -234px;
     }
+
     @include mq(xl) {
       right: -1 * ($task-border-radius);
     }
@@ -189,7 +192,7 @@
   }
 
   @include mq(xs) {
-    //margin: $s $s*2 $s $s*3;
+    // margin: $s $s*2 $s $s*3;
     margin: $s $s $s $s * 5;
   }
 
@@ -217,7 +220,8 @@
   align-items: stretch;
   flex-wrap: nowrap;
   user-select: none;
-  -webkit-user-select: none; /* Safari */
+  -webkit-user-select: none;
+  /* Safari */
   justify-content: space-between;
   min-height: $task-first-line-min-height;
   touch-action: pan-y;
@@ -227,10 +231,10 @@
     justify-content: flex-end;
   }
 
-  //@include smallMainContainer{
+  // @include smallMainContainer{
   //  flex-wrap: wrap;
   //  justify-content: flex-end;
-  //}
+  // }
 }
 
 .title-and-left-btns-wrapper {
@@ -243,11 +247,11 @@
   flex-shrink: 1;
   flex-basis: 70%;
   // we cannot do this since this cuts of the box shadow of the task edit
-  //overflow: hidden;
+  // overflow: hidden;
 
   @include mq(xs, max) {
-    //margin-bottom: 5px;
-    //flex-shrink: 0;
+    // margin-bottom: 5px;
+    // flex-shrink: 0;
     flex-basis: 50%;
   }
 
@@ -293,14 +297,14 @@
       }
     }
 
-    &:hover {
-      //@include darkTheme() {
-      //  background: rgba(255, 255, 255, 0.1);
-      //}
-      //@include lightTheme() {
-      //  background: rgba(0, 0, 0, 0.05);
-      //}
-    }
+    // &:hover {
+    //   @include darkTheme() {
+    //    background: rgba(255, 255, 255, 0.1);
+    //   }
+    //   @include lightTheme() {
+    //    background: rgba(0, 0, 0, 0.05);
+    //   }
+    // }
   }
 
   @include mq(xs, max) {
@@ -324,7 +328,7 @@
   flex-grow: 1;
   flex-shrink: 1;
   // we cannot do this since this cuts of the box shadow of the task edit
-  //overflow: hidden;
+  // overflow: hidden;
 
   > * {
     @include touchOnlyDevice {
@@ -450,12 +454,15 @@
 
   @include verySmallMainContainer {
     flex-direction: row;
+
     &:after {
       display: none;
     }
+
     .time {
       flex-direction: row;
     }
+
     .separator {
       display: block;
     }
@@ -606,9 +613,9 @@ progress-bar {
   height: 40px;
   min-width: 40px;
   z-index: $z-drag-handle;
-  //display: flex;
-  //justify-content: center;
-  //align-items: center;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
   position: relative;
 
   // fixes drag and drop on mobile
@@ -649,9 +656,10 @@ progress-bar {
   .drag-handle-ico {
     @include mq(xs) {
       opacity: 0.15;
-      //.first-line:hover & {
-      //opacity: 0.3;
-      //}
+
+      // .first-line:hover & {
+      //   opacity: 0.3;
+      // }
     }
 
     :host.isCurrent & {
@@ -682,7 +690,7 @@ progress-bar {
 }
 
 $this-play-size: 22px;
-//
+
 .play-icon-indicator {
   position: absolute;
   top: 50%;
@@ -701,12 +709,12 @@ $this-play-size: 22px;
 
   @include mq(xs) {
     margin-top: 0;
-    //left: 10px;
+    // left: 10px;
   }
 
-  //.first-line:hover & {
+  // .first-line:hover & {
   //  display: none;
-  //}
+  // }
 }
 
 .ico-btn {
@@ -752,9 +760,9 @@ $this-play-size: 22px;
   transition-property: all;
   box-shadow: $whiteframe-shadow-1dp;
 
-  :host-context(.isNoTouchOnly) & {
-    //opacity: 0;
-  }
+  // :host-context(.isNoTouchOnly) & {
+  //   opacity: 0;
+  // }
 
   :host:hover & {
     opacity: 1;
@@ -797,9 +805,11 @@ $this-play-size: 22px;
   0% {
     transform: scale(0.5) rotate(-180deg);
   }
+
   50% {
     transform: scale(1) rotate(-90deg);
   }
+
   100% {
     transform: scale(1) rotate(0deg);
   }
@@ -808,7 +818,8 @@ $this-play-size: 22px;
 .isPreventPointerEventsWhilePanning {
   * {
     user-select: none !important;
-    -webkit-user-select: none !important; /* Safari */
+    -webkit-user-select: none !important;
+    /* Safari */
     pointer-events: none !important;
     transition: none !important;
   }

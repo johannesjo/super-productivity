@@ -14,10 +14,10 @@
   border-bottom: 1px solid transparent;
 
   @include lightTheme() {
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: rgb(0 0 0 / 15%);
   }
   @include darkTheme() {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgb(255 255 255 / 15%);
   }
 
   &.isNotScrolled {

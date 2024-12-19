@@ -40,7 +40,7 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   flex-wrap: nowrap;
   align-items: center;
   padding: $navVerticalPadding $mobileHorizontalPadding;
-  //flex-wrap: wrap;
+  // flex-wrap: wrap;
   min-height: $bar-height-large;
 
   @include mq(xs) {
@@ -50,11 +50,11 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
 }
 
 .current-work-context-title {
-  //font-weight: bold;
+  // font-weight: bold;
   font-size: 18px;
   overflow: hidden;
   text-overflow: ellipsis;
-  //flex-grow: 1;
+  // flex-grow: 1;
   white-space: nowrap;
   max-width: 100%;
   cursor: pointer;
@@ -376,16 +376,16 @@ simple-counter-button {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     z-index: -1;
-    box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px -2px 3px 0px rgb(0 0 0 / 30%);
 
     @include lightTheme() {
       background: $light-theme-selected-task-bg-color;
-      //border-color: rgba(0, 0, 0, 0.12);
+      // border-color: rgba(0, 0, 0, 0.12);
     }
 
     @include darkTheme() {
       background: $dark8;
-      //border-color: $dark-theme-extra-border-color;
+      // border-color: $dark-theme-extra-border-color;
     }
   }
 

@@ -14,15 +14,15 @@ table {
 
     th,
     td {
-      &:first-child {
-        //padding-left: 0;
-      }
+      // &:first-child {
+      //   padding-left: 0;
+      // }
     }
     th,
     td {
-      &:last-child {
-        //padding-right: 0;
-      }
+      // &:last-child {
+      //   padding-right: 0;
+      // }
     }
   }
 }

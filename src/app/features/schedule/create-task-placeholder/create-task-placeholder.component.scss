@@ -6,7 +6,7 @@
   position: relative;
   grid-row: 149 / span 2;
   grid-column: 4 / span 2;
-  //box-shadow: $whiteframe-shadow-3dp;
+  // box-shadow: $whiteframe-shadow-3dp;
   background: #fff;
   pointer-events: none;
   z-index: 33;
@@ -30,7 +30,7 @@
     cursor: pointer;
     position: absolute;
     bottom: 100%;
-    //margin-bottom: -6px;
+    // margin-bottom: -6px;
     border: 2px dashed $c-accent;
     background: inherit;
     left: 50%;

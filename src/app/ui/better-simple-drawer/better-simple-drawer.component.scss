@@ -148,7 +148,7 @@ $z-this-side: 2 + $z-this-content;
 
   @include lightTheme() {
     background: $light-theme-bg-darker;
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgb(0 0 0 / 12%);
   }
 
   @include darkTheme() {

@@ -32,8 +32,7 @@
       padding-top: 0;
     }
 
-    .mat-calendar-body-active {
-    }
+    // .mat-calendar-body-active {}
 
     .mat-calendar-body-cell-content {
       background: transparent !important;
@@ -64,7 +63,7 @@
 .form-ctrl-wrapper {
   margin: 0 16px;
   margin-top: 16px;
-  //border-top: 1px solid $light-theme-separator-color;
+  // border-top: 1px solid $light-theme-separator-color;
 
   @include darkTheme() {
     border-color: $dark-theme-separator-color;
@@ -86,7 +85,7 @@
   transform: translateX(-50%);
 
   @include darkTheme() {
-    background: rgb(80, 80, 80);
+    background: rgb(80 80 80);
   }
 }
 
@@ -100,6 +99,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
     @include darkTheme() {
       color: $dark-theme-text-color;
     }
@@ -111,6 +111,7 @@
   justify-content: space-evenly;
   border-bottom: 1px solid $light-theme-extra-border-color;
   height: 48px;
+
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
   }
@@ -127,6 +128,7 @@
 
   button + button {
     border-left: 1px solid $light-theme-extra-border-color;
+
     @include darkTheme() {
       border-color: $dark-theme-extra-border-color;
     }

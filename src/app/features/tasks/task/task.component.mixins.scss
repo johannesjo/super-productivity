@@ -56,15 +56,15 @@ $task-c-drag-drop-bg-dark: $dark12;
 $task-c-selected-bg-light: $light-theme-selected-task-bg-color;
 $task-c-selected-bg-dark: $dark4;
 
-//// new colors a bit darker
-//$task-c-bg-dark: $dark2;
-//$sub-task-c-bg-dark-done: $dark3;
-//$sub-task-c-bg-dark: $dark4;
-//$task-c-selected-bg-dark: $dark6;
-//$sub-task-c-bg-dark-in-selected: $dark8;
-//$task-c-current-bg-dark: $dark12;
+// new colors a bit darker
+// $task-c-bg-dark: $dark2;
+// $sub-task-c-bg-dark-done: $dark3;
+// $sub-task-c-bg-dark: $dark4;
+// $task-c-selected-bg-dark: $dark6;
+// $sub-task-c-bg-dark-in-selected: $dark8;
+// $task-c-current-bg-dark: $dark12;
 
-////// new colors
+// new colors
 $task-c-bg-dark: $dark3;
 $sub-task-c-bg-dark: $dark4_5;
 $task-c-selected-bg-dark: $dark6;
@@ -139,7 +139,7 @@ $sub-task-c-bg-dark-done: $dark2;
       -webkit-user-select: text; /* Safari */
 
       // the magic number is 15/14 so we scale to whole pixels
-      //transform: scale(1.071428571);
+      // transform: scale(1.071428571);
       transition: $transition-enter;
       outline: none;
       outline: 1px solid $c-accent;

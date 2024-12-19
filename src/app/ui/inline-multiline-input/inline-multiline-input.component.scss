@@ -1,5 +1,5 @@
 @import '../../../variables';
-//@import '../../../tasks/task/task.component.mixins';
+// @import '../../../tasks/task/task.component.mixins';
 
 :host {
   display: block;
@@ -29,6 +29,6 @@
   box-shadow: $whiteframe-shadow-4dp;
 
   @include darkTheme() {
-    //background: $dark12;
+    // background: $dark12;
   }
 }

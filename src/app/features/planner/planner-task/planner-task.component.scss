@@ -175,7 +175,7 @@ $h: $planner-item-height;
     align-items: center;
 
     @include mq(xs, max) {
-      //display: none;
+      // display: none;
     }
 
     mat-icon {

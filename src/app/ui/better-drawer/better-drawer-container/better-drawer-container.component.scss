@@ -32,10 +32,10 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   // NOTE: prevents overlapping with nav when open
   max-width: 700px;
   background: transparent;
-  //border: 1px solid;
-  //border-right: 0;
-  //border-bottom: 0;
-  //box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12) !important;
+  // border: 1px solid;
+  // border-right: 0;
+  // border-bottom: 0;
+  // box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12) !important;
 
   @include mq(sm, max) {
     // NOTE: prevents overlapping with nav when open
@@ -48,13 +48,13 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
   @include lightTheme() {
     background: $light-theme-selected-task-bg-color;
-    //border-color: rgba(0, 0, 0, 0.12);
+    // border-color: rgba(0, 0, 0, 0.12);
   }
 
   @include darkTheme() {
     background: $dark-theme-bg-slightly-lighter;
     background: $dark6;
-    //border-color: $dark-theme-extra-border-color;
+    // border-color: $dark-theme-extra-border-color;
   }
 
   :host.isOver & {
@@ -126,7 +126,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
 
   @include lightTheme() {
     background: $light-theme-bg-darker;
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgb(0 0 0 / 12%);
   }
 
   @include darkTheme() {
@@ -144,6 +144,6 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   }
 
   @include mq(xs) {
-    //display: none;
+    // display: none;
   }
 }

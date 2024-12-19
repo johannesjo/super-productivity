@@ -14,7 +14,7 @@
   &:before {
     position: absolute;
     content: '';
-    background: rgba(0, 0, 0, 0.5);
+    background: rgb(0 0 0 / 50%);
     width: 100%;
     top: 0;
     left: 0;
@@ -32,8 +32,8 @@
     left: 0;
     z-index: 44;
     box-shadow:
-      inset 0 10px 20px rgba(0, 0, 0, 0.19),
-      inset 0 6px 6px rgba(0, 0, 0, 0.23);
+      inset 0 10px 20px rgb(0 0 0 / 19%),
+      inset 0 6px 6px rgb(0 0 0 / 23%);
   }
 
   @include darkTheme {
@@ -45,7 +45,7 @@
     background: $c-primary-200;
 
     &:before {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgb(0 0 0 / 20%);
     }
   }
 }

@@ -7,7 +7,7 @@
   @include darkTheme() {
     border-radius: 4px;
     background: $dark-theme-bg !important;
-    background: rgb(39, 39, 39) !important;
+    background: rgb(39 39 39) !important;
     border: 4px solid $dark24;
   }
 
@@ -48,13 +48,14 @@
   margin-right: -4px;
   margin-left: -4px;
   border-radius: 8px;
-  //position: sticky;
-  //top: -2px;
-  //&.is-stuck {
-  //  background: white;
-  //  box-shadow: $whiteframe-shadow-2dp;
-  //  z-index: 10;
-  //}
+  // position: sticky;
+  // top: -2px;
+  //
+  // &.is-stuck {
+  //   background: white;
+  //   box-shadow: $whiteframe-shadow-2dp;
+  //   z-index: 10;
+  // }
 }
 
 .day-title {

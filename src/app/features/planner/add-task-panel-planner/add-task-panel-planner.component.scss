@@ -25,7 +25,7 @@
   display: flex;
   flex-grow: 0;
   align-items: center;
-  //padding: 8px 4px;
+  // padding: 8px 4px;
 
   box-shadow: $whiteframe-shadow-2dp;
 
@@ -85,10 +85,10 @@
     color: inherit;
     border: 0;
     border-left: 1px solid;
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: rgb(0 0 0 / 10%);
 
     @include darkTheme {
-      border-color: rgba(255, 255, 255, 0.1);
+      border-color: rgb(255 255 255 / 10%);
     }
   }
 }

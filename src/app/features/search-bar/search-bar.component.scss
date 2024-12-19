@@ -2,7 +2,7 @@
 
 :host {
   display: block;
-  //overflow: hidden;
+  // overflow: hidden;
   text-align: start;
   position: fixed;
   top: $s;
@@ -155,8 +155,8 @@ $short-syntax-bar-height: 28px;
   border-top: 1px dashed $light-theme-extra-border-color;
   position: relative;
   z-index: 1;
-  //border-bottom-left-radius: $card-border-radius;
-  //border-bottom-right-radius: $card-border-radius;
+  // border-bottom-left-radius: $card-border-radius;
+  // border-bottom-right-radius: $card-border-radius;
   pointer-events: none;
 
   @include darkTheme {

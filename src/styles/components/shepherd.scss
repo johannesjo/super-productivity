@@ -1,4 +1,4 @@
-//@import "shepherd.js/dist/css/shepherd.css";
+// @import "shepherd.js/dist/css/shepherd.css";
 
 .shepherd-modal-overlay-container {
   display: none;
@@ -17,8 +17,8 @@
   border-radius: 3px;
   border: 1px solid #b4b4b4;
   box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.2),
-    0 2px 0 0 rgba(255, 255, 255, 0.7) inset;
+    0 1px 1px rgb(0 0 0 / 20%),
+    0 2px 0 0 rgb(255 255 255 / 70%) inset;
   color: #333;
   display: inline-block;
   font-size: 0.85em;
@@ -69,7 +69,7 @@
 
 .shepherd-header {
   padding: $s 1rem !important;
-  //background: transparent !important;
+  // background: transparent !important;
   @include darkTheme(true) {
     background: $dark8 !important;
   }
@@ -214,26 +214,32 @@
   pointer-events: none;
 }
 
-//.shepherd-modal-overlay-container {
-//  height: 0;
-//  left: 0;
-//  opacity: 0;
-//  overflow: hidden;
-//  pointer-events: none;
-//  position: fixed;
-//  top: 0;
-//  transition: all .3s ease-out, height 0ms .3s, opacity .3s 0ms;
-//  width: 100vw;
-//  z-index: 9997
-//}
+// .shepherd-modal-overlay-container {
+//   height: 0;
+//   left: 0;
+//   opacity: 0;
+//   overflow: hidden;
+//   pointer-events: none;
+//   position: fixed;
+//   top: 0;
+//   transition:
+//     all 0.3s ease-out,
+//     height 0ms 0.3s,
+//     opacity 0.3s 0ms;
+//   width: 100vw;
+//   z-index: 9997;
+// }
 //
-//.shepherd-modal-overlay-container.shepherd-modal-is-visible {
-//  height: 100vh;
-//  opacity: .5;
-//  transform: translateZ(0);
-//  transition: all .3s ease-out, height 0s 0s, opacity .3s 0s
-//}
+// .shepherd-modal-overlay-container.shepherd-modal-is-visible {
+//   height: 100vh;
+//   opacity: 0.5;
+//   transform: translateZ(0);
+//   transition:
+//     all 0.3s ease-out,
+//     height 0s 0s,
+//     opacity 0.3s 0s;
+// }
 //
-//.shepherd-modal-overlay-container.shepherd-modal-is-visible path {
-//  pointer-events: all
-//}
+// .shepherd-modal-overlay-container.shepherd-modal-is-visible path {
+//   pointer-events: all;
+// }

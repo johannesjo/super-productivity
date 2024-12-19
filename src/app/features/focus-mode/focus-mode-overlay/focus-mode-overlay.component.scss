@@ -28,8 +28,8 @@
   }
 }
 
-header {
-}
+// header {
+// }
 
 main {
   flex-grow: 1;
@@ -63,7 +63,7 @@ main {
   }
 
   mat-icon {
-    font-size: 32px !important; //make it bigger, the default being 24px.
+    font-size: 32px !important; // make it bigger, the default being 24px.
     width: 32px;
     height: 32px;
   }

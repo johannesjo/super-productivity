@@ -103,8 +103,8 @@ h2 {
     margin-right: $s;
   }
 
-  .time-val {
-  }
+  // .time-val {
+  // }
 
   .no-wrap {
     display: inline-block;
@@ -154,8 +154,8 @@ h2 {
 .today {
   position: absolute;
   left: 0;
-  //transition: max-height, min-height 500ms ease-in-out;
-  //transition: all 500ms linear;
+  // transition: max-height, min-height 500ms ease-in-out;
+  // transition: all 500ms linear;
   width: 100%;
 
   &.isAnimatable {

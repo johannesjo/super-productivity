@@ -34,7 +34,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     border: 1px solid $light-theme-extra-border-color;
   }
 
-  //.controls,
+  // .controls,
   > a:focus + .controls,
   &.focus .controls,
   &:hover .controls {
@@ -103,7 +103,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   left: 0;
   right: 0;
   top: 0;
-  //transform: translateY(25%);
+  // transform: translateY(25%);
   z-index: 5;
   visibility: hidden;
   display: flex;
@@ -128,20 +128,20 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     border-width: 0;
 
     @include lightTheme() {
-      background: rgba(255, 255, 255, 0.4);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: rgb(255 255 255 / 40%);
+      border-color: rgb(255 255 255 / 50%);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgb(255 255 255 / 90%);
       }
     }
 
     @include darkTheme() {
-      background: rgba(0, 0, 0, 0.4);
-      border-color: rgba(0, 0, 0, 0.5);
+      background: rgb(0 0 0 / 40%);
+      border-color: rgb(0 0 0 / 50%);
 
       &:hover {
-        background: rgba(0, 0, 0, 0.9);
+        background: rgb(0 0 0 / 90%);
       }
     }
   }
