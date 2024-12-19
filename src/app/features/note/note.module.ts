@@ -10,6 +10,7 @@ import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
 import { TagModule } from '../tag/tag.module';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -19,6 +20,8 @@ import { TagModule } from '../tag/tag.module';
     TagModule,
     StoreModule.forFeature(NOTE_FEATURE_NAME, noteReducer),
     EffectsModule.forFeature([NoteEffects]),
+    CdkDropList,
+    CdkDrag,
   ],
   declarations: [NotesComponent, NoteComponent, DialogAddNoteComponent],
   exports: [NotesComponent],

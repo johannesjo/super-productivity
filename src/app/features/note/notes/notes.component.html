@@ -21,20 +21,25 @@
 
 <div
   [@standardList]="(workContextService.notes$|async)?.length"
-  [dragulaModel]="(workContextService.notes$|async)"
+  cdkDropList
+  [cdkDropListData]="(workContextService.notes$|async)"
+  (cdkDropListDropped)="drop($event)"
   class="notes"
-  dragula="NOTES"
 >
   <ng-container *ngIf="(workContextService.notes$|async) as notes">
-    <note
+    <div
       *ngFor="let note of notes; trackBy:trackById; let i = index;"
-      [isFocus]="isElementWasAdded && i===0"
-      [note]="note"
-    ></note>
+      cdkDrag
+    >
+      <note
+        [isFocus]="isElementWasAdded && i===0"
+        [note]="note"
+      ></note>
+    </div>
 
     <div
       class="no-notes-info"
-      *ngIf="notes.length ===0"
+      *ngIf="notes.length === 0"
     >
       {{T.F.NOTE.NOTES_CMP.NO_NOTES|translate}}
     </div>
