@@ -93,11 +93,24 @@ export const createWindow = ({
   // see: https://pratikpc.medium.com/bypassing-cors-with-electron-ab7eaf331605
   mainWin.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details;
-    delete requestHeaders['Origin'];
-    delete requestHeaders['Referer'];
-    // NOTE this is needed for GitHub api requests to work
-    // delete requestHeaders['User-Agent'];
+    removeKeyInAnyCase(requestHeaders, 'Origin');
+    removeKeyInAnyCase(requestHeaders, 'Referer');
+    removeKeyInAnyCase(requestHeaders, 'Cookie');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua-mobile');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua-platform');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-dest');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-mode');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-site');
+    removeKeyInAnyCase(requestHeaders, 'accept-encoding');
+    removeKeyInAnyCase(requestHeaders, 'accept-language');
+    removeKeyInAnyCase(requestHeaders, 'priority');
+    removeKeyInAnyCase(requestHeaders, 'accept');
 
+    // NOTE this is needed for GitHub api requests to work :(
+    if (!details.url.includes('github.com')) {
+      removeKeyInAnyCase(requestHeaders, 'User-Agent');
+    }
     callback({ requestHeaders });
   });
 
@@ -325,4 +338,14 @@ const upsertKeyValue = <T>(obj: T, keyToChange: string, value: string[]): T => {
   }
   // Insert at end instead
   obj[keyToChange] = value;
+};
+
+const removeKeyInAnyCase = <T>(obj: T, keyToRemove: string): T => {
+  const keyToRemoveLower = keyToRemove.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === keyToRemoveLower) {
+      delete obj[key];
+      return;
+    }
+  }
 };
