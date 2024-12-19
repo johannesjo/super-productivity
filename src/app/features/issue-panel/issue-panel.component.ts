@@ -27,6 +27,9 @@ import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { IssueProviderSetupOverviewComponent } from './issue-provider-setup-overview/issue-provider-setup-overview.component';
 import { WorkContextService } from '../work-context/work-context.service';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { moveItemInArray } from '../../util/move-item-in-array';
+import { IssueProviderActions } from '../issue/store/issue-provider.actions';
 
 @Component({
   selector: 'issue-panel',
@@ -42,6 +45,8 @@ import { WorkContextService } from '../work-context/work-context.service';
     IssueProviderTabComponent,
     MatTabContent,
     IssueProviderSetupOverviewComponent,
+    CdkDropList,
+    CdkDrag,
   ],
   templateUrl: './issue-panel.component.html',
   styleUrl: './issue-panel.component.scss',
@@ -84,6 +89,21 @@ export class IssuePanelComponent {
         issueProvider,
       },
     });
+  }
+
+  drop(ev: CdkDragDrop<string[]>): void {
+    const issueProviders = this.issueProviders();
+    if (!issueProviders) {
+      return;
+    }
+
+    const currentValue = this.issueProvidersMapped();
+    const newItems = moveItemInArray(currentValue, ev.previousIndex, ev.currentIndex);
+    this._store.dispatch(
+      IssueProviderActions.sortIssueProvidersFirst({
+        ids: newItems.map((p) => p.issueProvider.id),
+      }),
+    );
   }
 
   private _setSelectedTabIndex(): void {
