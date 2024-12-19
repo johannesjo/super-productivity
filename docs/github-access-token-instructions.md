@@ -3,7 +3,7 @@
 ## Personal Access Token
 For polling Gitlab Issues you need to provide a access Token.   
 
-1. Got to User Settings / Access tokens 
+1. Got to User Settings / Access tokens (On Github you can go [here](https://github.com/settings/personal-access-tokens))
 2. Add new Token with the Scope `api`
 
 ![Personal Token](https://github.com/user-attachments/assets/76fb204e-450a-4516-9d93-897ae2a32f6d)
