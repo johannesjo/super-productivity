@@ -49,7 +49,6 @@ import { SimpleDownloadDirective } from './simple-download/simple-download.direc
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
-import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
@@ -204,8 +203,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
     FormlyMatToggleModule,
     FormlyMaterialModule,
     FormlyMatDatepickerModule,
-    // fix https://stackoverflow.com/questions/62755093/angular-error-generic-type-modulewithproviderst-requires-1-type-arguments
-    (DragulaModule as any).forRoot(),
 
     // my modules
     ValidationModule,
@@ -216,7 +213,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,
     ...OTHER_3RD_PARTY_MODS_WITHOUT_CFG,
-    DragulaModule,
     FormlyMaterialModule,
     FormlyModule,
     MarkdownModule,
