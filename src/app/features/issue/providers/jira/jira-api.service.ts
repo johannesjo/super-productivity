@@ -472,9 +472,12 @@ export class JiraApiService {
         fetch(url, requestInit)
           .then((response) => response.body)
           .then(streamToJsonIfPossible as any)
-          .then((res) =>
-            transform ? transform({ response: res }, jiraCfg) : { response: res },
-          ),
+          .then((res) => {
+            if ((res as any)?.errorMessages?.length) {
+              throw new Error((res as any).errorMessages.join(', '));
+            }
+            return transform ? transform({ response: res }, jiraCfg) : { response: res };
+          }),
       ).pipe(
         catchError((err) => {
           console.log(err);
