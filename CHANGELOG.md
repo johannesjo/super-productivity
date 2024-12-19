@@ -1,3 +1,27 @@
+## [11.0.1](https://github.com/johannesjo/super-productivity/compare/v11.0.0...v11.0.1) (2024-12-19)
+
+### Bug Fixes
+
+- don't reopen last selected task on reload ([a579136](https://github.com/johannesjo/super-productivity/commit/a579136b09fba552856022e2aab5530efa0bc352))
+- github api requests not working anymore ([61f6bc5](https://github.com/johannesjo/super-productivity/commit/61f6bc55f1aec42c415031608d4b63eb3c98c5b3))
+- No issueProviderId or type given [#3771](https://github.com/johannesjo/super-productivity/issues/3771) ([5cc8370](https://github.com/johannesjo/super-productivity/commit/5cc837034f2344b64fd71be2612052821c9bd093))
+- today's notes not being sortable ([ee2caae](https://github.com/johannesjo/super-productivity/commit/ee2caaecdf2da49c7f903a7b68fe4d55825bb5e7))
+- warnings ([54fa772](https://github.com/johannesjo/super-productivity/commit/54fa77268bdba65863aed42fc2066144d3635996))
+
+### Features
+
+- also connect keyboard controls ([9f9c89c](https://github.com/johannesjo/super-productivity/commit/9f9c89ceb78506b7c609f65b8b244a66fa2b36fa))
+- hide edit tags from context menu ([299af17](https://github.com/johannesjo/super-productivity/commit/299af172def89f5222a0c7fd55f8bfdc02a3d5cc))
+- improve styling for new tag edit ([56e8d59](https://github.com/johannesjo/super-productivity/commit/56e8d59453fe7b592e2a6af2f1028283e56fa7f1))
+- integrate week into daily summary review ([5daf21d](https://github.com/johannesjo/super-productivity/commit/5daf21d521a53bf173b47dce7eda3512accaf265))
+- make tags actually editable ([f006398](https://github.com/johannesjo/super-productivity/commit/f00639894ca8d338a8a09ad1189e33cc44f428ab))
+- migrate bookmarks drag and drop to cdk drag and drop ([292b5d2](https://github.com/johannesjo/super-productivity/commit/292b5d2e3f733387847caa48abca7ba5232fc1a2))
+- outline most basic tag input component for side panel ([816f812](https://github.com/johannesjo/super-productivity/commit/816f81207f6e426ac9aa3f5a04fa377e3cd6e86e))
+- polish new tag edit component ([d130d8e](https://github.com/johannesjo/super-productivity/commit/d130d8e264beb042b014e0838d056f6a9ec53262))
+- reduce number of dev logs ([1e6fec2](https://github.com/johannesjo/super-productivity/commit/1e6fec2853845f5b04fed8f84235991ef5699a1b))
+- remove dragula dependency completely ([5adb09f](https://github.com/johannesjo/super-productivity/commit/5adb09f6846ca7d7cefa973aac0a2af42680d51b))
+- replace dragula with cdk drop for notes ([0df9e6b](https://github.com/johannesjo/super-productivity/commit/0df9e6b0c54c8358defc3b5432c10222458930ff))
+
 # [11.0.0](https://github.com/johannesjo/super-productivity/compare/v10.3.0-rc.3...v11.0.0) (2024-12-16)
 
 ### Bug Fixes
