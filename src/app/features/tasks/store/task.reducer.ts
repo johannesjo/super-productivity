@@ -96,6 +96,7 @@ export const taskReducer = createReducer<TaskState>(
       ? migrateTaskState({
           ...appDataComplete.task,
           currentTaskId: null,
+          selectedTaskId: null,
           lastCurrentTaskId: appDataComplete.task.currentTaskId,
           isDataLoaded: true,
         })
