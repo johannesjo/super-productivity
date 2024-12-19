@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   HostListener,
-  OnDestroy,
   ViewChild,
 } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
@@ -11,10 +10,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { DragulaService } from 'ng2-dragula';
-import { Subscription } from 'rxjs';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { T } from '../../../t.const';
+import { moveItemInArray } from '../../../util/move-item-in-array';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'bookmark-bar',
@@ -24,36 +23,18 @@ import { T } from '../../../t.const';
   animations: [fadeAnimation, slideAnimation],
   standalone: false,
 })
-export class BookmarkBarComponent implements OnDestroy {
+export class BookmarkBarComponent {
   isDragOver: boolean = false;
   isEditMode: boolean = false;
   dragEnterTarget?: HTMLElement;
-  LIST_ID: string = 'BOOKMARKS';
   T: typeof T = T;
   isContextMenuDisabled: boolean = false;
   bookmarkBarHeight: number = 50;
-  private _subs: Subscription = new Subscription();
 
   constructor(
     public readonly bookmarkService: BookmarkService,
     private readonly _matDialog: MatDialog,
-    private _dragulaService: DragulaService,
-  ) {
-    // NOTE: not working because we have an svg
-    // this._dragulaService.createGroup(this.LIST_ID, {
-    // moves: function (el, container, handle) {
-    //   return handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
-    // }
-    // });
-
-    this._subs.add(
-      this._dragulaService.dropModel(this.LIST_ID).subscribe(({ targetModel }: any) => {
-        // const {target, source, targetModel, item} = params;
-        const newIds = targetModel.map((m: Bookmark) => m.id);
-        this.bookmarkService.reorderBookmarks(newIds);
-      }),
-    );
-  }
+  ) {}
 
   @ViewChild('bookmarkBar', { read: ElementRef }) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
@@ -61,8 +42,16 @@ export class BookmarkBarComponent implements OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
+  drop(event: CdkDragDrop<Bookmark[]>): void {
+    const previousIndex = event.previousIndex;
+    const currentIndex = event.currentIndex;
+    const bookmarks = event.container.data;
+
+    this.bookmarkService.reorderBookmarks(
+      moveItemInArray(bookmarks, previousIndex, currentIndex).map(
+        (bookmark) => bookmark.id,
+      ),
+    );
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {

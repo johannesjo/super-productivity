@@ -55,22 +55,26 @@
       </mat-menu>
     </div>
 
+    @let bookmarks = (bookmarkService.bookmarks$|async);
     <div
       [class.isEditMode]="isEditMode"
-      [dragulaModel]="(bookmarkService.bookmarks$|async)"
-      [dragula]="LIST_ID"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="bookmarks"
+      (cdkDropListDropped)="drop($event)"
       class="global-bookmark-list-inner"
     >
       <div
-        *ngIf="!(bookmarkService.bookmarks$|async)?.length"
+        *ngIf="!bookmarks?.length"
         class="msg"
       >
         {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
       </div>
 
       <div
-        *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"
+        *ngFor="let bookmark of bookmarks; trackBy: trackByFn"
         class="global-bookmark"
+        cdkDrag
         draggable="false"
       >
         <a

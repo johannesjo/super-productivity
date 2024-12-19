@@ -82,7 +82,7 @@
 <div
   class="provider-items"
   cdkDropList
-  cdkDropListOrientation="horizontal"
+  cdkDropListOrientation="mixed"
   (cdkDropListDropped)="drop($event)"
 >
   @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {

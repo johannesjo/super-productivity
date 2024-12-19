@@ -9,6 +9,7 @@ import { BOOKMARK_FEATURE_NAME, bookmarkReducer } from './store/bookmark.reducer
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { FormsModule } from '@angular/forms';
 import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -17,6 +18,8 @@ import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
     FormsModule,
     StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
     EffectsModule.forFeature([BookmarkEffects]),
+    CdkDropList,
+    CdkDrag,
   ],
   declarations: [
     BookmarkBarComponent,
