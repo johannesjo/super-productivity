@@ -27,13 +27,10 @@ $margin-right: 10px;
   overflow: visible !important;
   min-width: 0;
 
-  &.no-project {
-  }
-
-  &:hover {
-    //z-index: 3;
-    //overflow: visible;
-  }
+  // &:hover {
+  //   z-index: 3;
+  //   overflow: visible;
+  // }
 
   @include darkTheme() {
     border-color: rgba(255, 255, 255, 0.1);
