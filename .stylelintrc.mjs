@@ -9,6 +9,7 @@ export default {
     'scss/comment-no-empty': null, // allow for double slash multiline comments
     'scss/load-no-partial-leading-underscore': null, // this project uses underscored files
     'scss/operator-no-newline-after': null, // prettier conficts with this rule
+    'scss/load-partial-extension': null, // it's code style not an error
     'selector-pseudo-element-no-unknown': [
       true,
       {
