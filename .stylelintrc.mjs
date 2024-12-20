@@ -3,6 +3,7 @@ export default {
   extends: 'stylelint-config-recommended-scss',
   rules: {
     'no-empty-source': null,
+    'block-no-empty': [true, { severity: 'warning' }],
     'no-descending-specificity': null,
     'selector-type-no-unknown': null, // stylelint doesn't recognize angular components
     'scss/comment-no-empty': null, // allow for double slash multiline comments

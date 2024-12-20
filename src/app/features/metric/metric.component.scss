@@ -27,9 +27,6 @@ table {
   }
 }
 
-.chart-wrapper {
-}
-
 .pie-charts {
   @include mq(sm) {
     display: flex;
