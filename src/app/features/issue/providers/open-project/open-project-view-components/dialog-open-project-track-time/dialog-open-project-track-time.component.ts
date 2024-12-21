@@ -12,19 +12,20 @@ import {
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../../jira/jira.const';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import { DateService } from 'src/app/core/date/date.service';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { OpenProjectCfg } from '../../open-project.model';
 import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-project-work-package-subject.util';
-import { concatMap, first } from 'rxjs/operators';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { TaskService } from '../../../../../tasks/task.service';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -52,7 +53,7 @@ export class DialogOpenProjectTrackTimeComponent {
   timeSpentLoggedDelta: number;
 
   activityId: number = 1;
-  activities$ = this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId)).pipe(
+  activities$ = this._getCfgOnce$().pipe(
     concatMap((cfg) => {
       return this._openProjectApiService.getActivitiesForTrackTime$(
         this.workPackage.id,
@@ -60,6 +61,16 @@ export class DialogOpenProjectTrackTimeComponent {
       );
     }),
   );
+  _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
   private _subs = new Subscription();
 
   constructor(
@@ -68,6 +79,7 @@ export class DialogOpenProjectTrackTimeComponent {
     private _snackService: SnackService,
     private _store: Store,
     private _issueProviderService: IssueProviderService,
+    private _taskService: TaskService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       workPackage: OpenProjectWorkPackage;
@@ -89,7 +101,7 @@ export class DialogOpenProjectTrackTimeComponent {
     );
 
     this._subs.add(
-      this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId))
+      this._getCfgOnce$()
         .pipe(first())
         .subscribe((cfg) => {
           if (cfg.timeTrackingDialogDefaultTime) {
@@ -111,9 +123,7 @@ export class DialogOpenProjectTrackTimeComponent {
       this.timeSpent &&
       this.data.task.issueProviderId
     ) {
-      const cfg = await this._getCfgOnce$(this.data.task.issueProviderId)
-        .pipe(first())
-        .toPromise();
+      const cfg = await this._getCfgOnce$().pipe(first()).toPromise();
 
       if (this.defaultTimeCheckboxContent?.isChecked === true) {
         this._store.dispatch(
@@ -190,7 +200,11 @@ export class DialogOpenProjectTrackTimeComponent {
     }
   }
 
-  private _getCfgOnce$(issueProviderId: string): Observable<OpenProjectCfg> {
-    return this._issueProviderService.getCfgOnce$(issueProviderId, 'OPEN_PROJECT');
+  private _getCfgOnce$(): Observable<OpenProjectCfg> {
+    return this._issueProviderIdOnce$.pipe(
+      switchMap((issueProviderId) =>
+        this._issueProviderService.getCfgOnce$(issueProviderId, 'OPEN_PROJECT'),
+      ),
+    );
   }
 }

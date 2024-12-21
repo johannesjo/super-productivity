@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
-import { concatMap, first, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { SnackService } from 'src/app/core/snack/snack.service';
 import {
   IssueLocalState,
@@ -19,6 +19,7 @@ import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgForOf } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
+import { TaskService } from '../../../../../tasks/task.service';
 
 @Component({
   selector: 'dialog-open-project-transition',
@@ -30,10 +31,25 @@ import { MatSlider } from '@angular/material/slider';
 export class DialogOpenProjectTransitionComponent {
   T: typeof T = T;
 
+  _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
+
   _openProjectCfg$: Observable<IssueProviderOpenProject> =
-    this._issueProviderService.getCfgOnce$(
-      assertTruthy(this.data.task.issueProviderId),
-      'OPEN_PROJECT',
+    this._issueProviderIdOnce$.pipe(
+      switchMap(() =>
+        this._issueProviderService.getCfgOnce$(
+          assertTruthy(this.data.task.issueProviderId),
+          'OPEN_PROJECT',
+        ),
+      ),
     );
 
   availableTransitions$: Observable<OpenProjectOriginalStatus[]> =
@@ -56,6 +72,7 @@ export class DialogOpenProjectTransitionComponent {
     private _issueProviderService: IssueProviderService,
     private _matDialogRef: MatDialogRef<DialogOpenProjectTransitionComponent>,
     private _snackService: SnackService,
+    private _taskService: TaskService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       issue: OpenProjectWorkPackage;
@@ -63,9 +80,6 @@ export class DialogOpenProjectTransitionComponent {
       task: Task;
     },
   ) {
-    if (!this.data.task.issueProviderId) {
-      throw new Error('No issueProviderId for task');
-    }
     this.percentageDone = data.issue.percentageDone;
   }
 
