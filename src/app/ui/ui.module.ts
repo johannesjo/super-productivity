@@ -88,6 +88,7 @@ import { markedOptionsFactory } from './marked-options-factory';
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 import { LocalDateStrPipe } from './pipes/local-date-str.pipe';
 import { FormlyCollapsibleComponent } from './formly-collapsible/formly-collapsible.component';
+import { ShortTime2Pipe } from './pipes/short-time2.pipe';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -129,6 +130,7 @@ const COMPONENT_AND_PIPES = [
   ToArrayPipe,
   SortPipe,
   RoundDurationPipe,
+  ShortTime2Pipe,
   ShortPlannedAtPipe,
   LocalDateStrPipe,
 ];
@@ -221,6 +223,7 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
   ],
   providers: [
     provideMarkdown(),
+    ShortTime2Pipe,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,

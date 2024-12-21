@@ -860,6 +860,7 @@ $min-badge-size: $s * 2.25;
   border: 1px solid $light-theme-extra-border-color;
   background: #fff;
   border-radius: $card-border-radius;
+  white-space: nowrap;
 
   // avoid affecting drag handle
   pointer-events: none;
@@ -871,7 +872,6 @@ $min-badge-size: $s * 2.25;
 
   ::ng-deep span {
     font-size: 10px;
-    padding-left: 2px;
   }
 }
 

@@ -72,11 +72,17 @@
         class="time"
         (click)="editTaskReminderOrReScheduleIfPossible(scheduledItem.task)"
       >
-        <span>{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</span>
+        <span
+          class="time-time"
+          [innerHTML]="scheduledItem.start|roundDuration|shortTime2"
+        ></span>
         <mat-icon>alarm</mat-icon>
       </div>
       } @else {
-      <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
+      <div
+        class="time time-time"
+        [innerHTML]="scheduledItem.start|roundDuration|shortTime2"
+      ></div>
       }
 
       <!-- -->

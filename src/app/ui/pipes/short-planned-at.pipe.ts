@@ -1,6 +1,6 @@
 import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { isToday } from '../../util/is-today.util';
+import { ShortTime2Pipe } from './short-time2.pipe';
 
 @Pipe({
   name: 'shortPlannedAt',
@@ -8,7 +8,7 @@ import { isToday } from '../../util/is-today.util';
 })
 export class ShortPlannedAtPipe implements PipeTransform {
   constructor(
-    private datePipe: DatePipe,
+    private _shortTime2Pipe: ShortTime2Pipe,
     @Inject(LOCALE_ID) private locale: string,
   ) {}
 
@@ -20,17 +20,7 @@ export class ShortPlannedAtPipe implements PipeTransform {
     const locale = this.locale;
 
     if (isToday(value) || args[0] === 'timeOnly') {
-      const str = `${new Date(value).toLocaleTimeString(locale, {
-        hour: 'numeric',
-        minute: 'numeric',
-      })}`;
-      return (
-        str
-          // .replace(' ', ' ')
-          .replace(' ', '')
-          .replace('AM', '<span>AM</span>')
-          .replace('PM', '<span>PM</span>')
-      );
+      return this._shortTime2Pipe.transform(value, ...args);
     } else {
       const str = `${new Date(value).toLocaleDateString(locale, {
         month: 'numeric',
