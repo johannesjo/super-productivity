@@ -459,7 +459,7 @@ class JavaScriptInterface(
         }
 
         // File doesn't exist or was deleted successfully, so create it
-        file = folder?.createFile("text/plain", filePath)
+        file = folder?.createFile("application/json", filePath)
 
         if (file != null) {
             Log.d("SuperProductivity", "File created successfully: ${file.uri}")
