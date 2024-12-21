@@ -36,7 +36,7 @@ const _initialLayoutState: LayoutState = {
   isShowSideNav: false,
   isShowSearchBar: false,
   isShowNotes: false,
-  isShowIssuePanel: true,
+  isShowIssuePanel: false,
 };
 
 export const selectLayoutFeatureState =
