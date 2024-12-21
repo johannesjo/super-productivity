@@ -222,7 +222,10 @@
           mat-icon-button
         >
           <mat-icon>alarm</mat-icon>
-          <div class="time-badge">{{ t.plannedAt|shortPlannedAt }}</div>
+          <div
+            class="time-badge"
+            [innerHTML]="t.plannedAt|shortPlannedAt"
+          ></div>
         </button>
 
         <button

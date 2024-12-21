@@ -24,11 +24,13 @@ export class ShortPlannedAtPipe implements PipeTransform {
         hour: 'numeric',
         minute: 'numeric',
       })}`;
-      // fallback as 12:00 PM is too long
-      if (str.length >= 7) {
-        return this.datePipe.transform(value, 'H:mm');
-      }
-      return str;
+      return (
+        str
+          // .replace(' ', ' ')
+          .replace(' ', '')
+          .replace('AM', '<span>AM</span>')
+          .replace('PM', '<span>PM</span>')
+      );
     } else {
       const str = `${new Date(value).toLocaleDateString(locale, {
         month: 'numeric',
