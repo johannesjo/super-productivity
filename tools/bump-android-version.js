@@ -5,6 +5,15 @@ const path = require('path');
 const packageJson = require('../package.json');
 const version = packageJson.version;
 
+if (version.includes('-' || version.includes('rc'))) {
+  console.log('Version contains - or rc – skipping android version bump');
+  return;
+}
+
+String.prototype.insertAt = function (index, string) {
+  return this.substr(0, index) + string + this.substr(index);
+};
+
 // Define the path to build.gradle
 const gradleFilePath = path.join(__dirname, '..', 'android', 'app', 'build.gradle');
 
@@ -12,14 +21,20 @@ const gradleFilePath = path.join(__dirname, '..', 'android', 'app', 'build.gradl
 let gradleFileContent = fs.readFileSync(gradleFilePath, 'utf8');
 
 // Update the versionCode and versionName
-const versionCodeDroid = version
-  .split('.')
-  .map((num) => num.padStart(2, '0'))
-  .join('');
+const versionCodeDroid =
+  version
+    .split('.')
+    .map((num) => num.padStart(2, '0'))
+    .join('') * 10000;
+const versionCodeDroidWithUnderscores = versionCodeDroid
+  .toString()
+  .insertAt(6, '_')
+  .insertAt(4, '_')
+  .insertAt(2, '_');
 
 gradleFileContent = gradleFileContent.replace(
-  /versionCode \d+/g,
-  `versionCode ${versionCodeDroid}`,
+  /versionCode (\d|_)+/g,
+  `versionCode ${versionCodeDroidWithUnderscores}`,
 );
 gradleFileContent = gradleFileContent.replace(
   /versionName "[^"]+"/g,

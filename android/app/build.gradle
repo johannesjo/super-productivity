@@ -20,7 +20,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 34
         compileSdk 34
-        versionCode 110003_00_02_0000
+        versionCode 11_00_03_0000
         versionName "11.0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
