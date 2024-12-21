@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "El nombre del recurso CalDav (el calendario)",
         "CALDAV_URL": "URL de CalDav (la URL base)",
         "CALDAV_USER": "Su nombre de usuario de CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Completar automáticamente CalDav todos al completar la tarea",
         "IS_AUTO_IMPORT_ISSUES": "Agregue automáticamente todos los trabajos de CalDav incompletos a su cartera de pedidos",
         "IS_AUTO_POLL": "Sondear automáticamente las tareas importadas en busca de cambios",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostrar todos los CalDav incompletos como sugerencia al agregar nuevas tareas",
-        "IS_TRANSITION_ISSUES_ENABLED": "Completar automáticamente CalDav todos al completar la tarea"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostrar todos los CalDav incompletos como sugerencia al agregar nuevas tareas"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para enumerar las tareas de CalDav incompletas para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace a la tarea, así como más información sobre ella.</p> <p>Además, puede agregar y sincronizar automáticamente todas las tareas pendientes incompletas a su lista de tareas pendientes.</p>",
@@ -182,12 +182,12 @@
     "GITEA": {
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar cambios realizados por ti mismo)",
-        "IS_AUTO_POLL": "Sondear automáticamente los problemas de Git importados en busca de cambios",
         "TOKEN": "Token de acceso",
         "REPO_FULL_NAME": "Nombre de usuario o nombre de la organización/proyecto",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí"
+        "SCOPE_CREATED": "Creado por mí",
+        "IS_AUTO_POLL": "Sondear automáticamente los problemas de Git importados en busca de cambios"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsable",
@@ -232,13 +232,13 @@
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
+        "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
+        "TOKEN": "Token de acceso",
+        "IS_ASSIGNEE_FILTER": "Filtrar problemas asignados a mí",
         "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitHub a la cola de tareas",
         "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
-        "TOKEN": "Token de acceso",
-        "TOKEN_DESCRIPTION": "Requerido para el acceso al repositorio privado",
-        "IS_ASSIGNEE_FILTER": "Filtrar problemas asignados a mí"
+        "TOKEN_DESCRIPTION": "Requerido para el acceso al repositorio privado"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GitHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
@@ -275,9 +275,6 @@
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
         "GITLAB_BASE_URL": "URL base personalizada de GitLab",
-        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitLab a la cola de tareas",
-        "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "PROJECT": "Ruta completa o nombre de usuario / proyecto",
         "SCOPE": "alcance",
         "SCOPE_ALL": "TODOS",
@@ -291,7 +288,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Mostrar el diálogo de seguimiento de tiempo después de hacer clic en finalizar día",
         "TOKEN": "Token de acceso",
         "FILTER": "Filtro personalizado",
-        "FILTER_DESCRIPTION": "Consulta https://docs.gitlab.com/ee/api/issues.html#list-issues. Se pueden combinar varios utilizando &"
+        "FILTER_DESCRIPTION": "Consulta https://docs.gitlab.com/ee/api/issues.html#list-issues. Se pueden combinar varios utilizando &",
+        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitLab a la cola de tareas",
+        "IS_AUTO_POLL": "Obtener automáticamente los problemas de git para los cambios",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas"
       },
       "FORM_SECTION": {
         "HELP": "<p> Aquí puede configurar SuperProductividad para enumerar los problemas abiertos de GitLab (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto. </p> <p> Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a la acumulación de tareas. </p>",
@@ -392,17 +392,9 @@
         "TIME_SPENT_TOOLTIP": "Agregar diferentes horarios",
         "TITLE": "Jira: enviar registro de trabajo"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitHub al registro de trabajo",
-        "IS_AUTO_POLL": "Comprobar automáticamente los problemas de git importados por cambios",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para agregar tareas automáticamente al registro de trabajo",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir el cuadro de diálogo para enviar el registro de trabajo a Jira cuando se realiza la subtarea",
-        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas al registro de trabajo de Jira",
-        "IS_AUTO_POLL_TICKETS": "Verifica automáticamente los problemas importados por cambios y notifica",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Compruebe si el problema actualmente trabajado está asignado al usuario actual",
         "IS_WORKLOG_ENABLED": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la tarea",
         "SEARCH_JQL_QUERY": "Consulta JQL para limitar las tareas del buscador.",
@@ -410,7 +402,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Complete todo el tiempo dedicado menos el tiempo registrado",
         "WORKLOG_DEFAULT_TIME_MODE": "Valor de tiempo predeterminado para el diálogo",
         "WORKLOG_DEFAULT_TODAY": "Llene solo el tiempo dedicado hoy",
-        "WORKLOG_DEFAULT_YESTERDAY": "Llena solo el tiempo dedicado ayer"
+        "WORKLOG_DEFAULT_YESTERDAY": "Llena solo el tiempo dedicado ayer",
+        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas al registro de trabajo de Jira",
+        "IS_AUTO_POLL_TICKETS": "Verifica automáticamente los problemas importados por cambios y notifica"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Permitir certificado autofirmado",
@@ -422,7 +416,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configuración avanzada",
-        "CREDENTIALS": "Credenciales",
         "HELP_ARR": {
           "H1": "Configuracion básica",
           "H2": "Ajustes de registro de trabajo",
@@ -435,7 +428,8 @@
           "P2_2": "<em>'Abrir el cuadro de diálogo del registro de trabajo cuando la subtarea ha sido terminada y no para tareas con subtareas propias'</em> abre un cuadro de diálogo del registro de trabajo cada vez que marca una subtarea de un problema de Jira como realizada. Debido a que ya realiza un seguimiento de su tiempo a través de las subtareas, no se abre ningún cuadro de diálogo una vez que marca la tarea Jira como realizada.",
           "P2_3": "<em>'Enviar actualizaciones al registro de trabajo automáticamente sin diálogo'</em> hace lo que dice. Debido a que marcar una tarea como realizada varias veces conduce a que todo el tiempo trabajado se registre dos veces, esto no se recomienda.",
           "P3_1": "Aquí puede reconfigurar sus transiciones por defecto. Jira permite una configuración amplia de las transiciones que generalmente entran en acción como diferentes columnas en su tablero ágil de Jira. No podemos hacer suposiciones acerca de dónde y cuándo hacer la transición de sus tareas y usted necesita configurarlas manualmente."
-        }
+        },
+        "CREDENTIALS": "Credenciales"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Asignado",
@@ -477,6 +471,12 @@
         "LOGIN_SUCCESS": "¡Inicio de sesión exitoso!",
         "TEST_CREDENTIALS": "Credenciales de prueba",
         "WELCOME_USER": "¡Bienvenido {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Agregar automáticamente problemas sin resolver desde GitHub al registro de trabajo",
+        "IS_AUTO_POLL": "Comprobar automáticamente los problemas de git importados por cambios",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -566,9 +566,6 @@
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
         "HOST": "Anfitrión (por ejemplo: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Agregue automáticamente paquetes de trabajo no resueltos de OpenProject a la lista de trabajos pendientes",
-        "IS_AUTO_POLL": "Sondear automáticamente los paquetes de trabajo de OpenProject importados en busca de cambios",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar paquetes de trabajo como sugerencias al agregar nuevas tareas",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Mostrar el cuadro de diálogo de seguimiento del tiempo para informar a OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requiere que el módulo de seguimiento de tiempo esté habilitado para el proyecto OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostrar el cuadro de diálogo de seguimiento del tiempo cuando se completan las subtareas",
@@ -578,7 +575,10 @@
         "SCOPE": "Alcance",
         "SCOPE_ALL": "TODOS",
         "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí"
+        "SCOPE_CREATED": "Creado por mí",
+        "IS_AUTO_IMPORT_ISSUES": "Agregue automáticamente paquetes de trabajo no resueltos de OpenProject a la lista de trabajos pendientes",
+        "IS_AUTO_POLL": "Sondear automáticamente los paquetes de trabajo de OpenProject importados en busca de cambios",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar paquetes de trabajo como sugerencias al agregar nuevas tareas"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puede configurar SuperProductivity para enumerar los paquetes de trabajo abiertos de OpenProject. Tenga en cuenta que para que esto funcione en el navegador probablemente necesite configurar CORS para su servidor OpenProject, para permitir el acceso desde app.super-productivity.com</p>",
@@ -984,11 +984,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Se agregó la tarea <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> a la lista actual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarea restaurada <strong>{{title}}</strong> relacionada con el problema desde el archivo",
         "LAST_TAG_DELETION_WARNING": "Estás intentando eliminar la última etiqueta de una tarea que no es de proyecto. ¡Esto no esta permitido!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "No se permite mover tareas de issue a otro proyecto",
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
         "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
-        "TASK_CREATED": "Tarea creada \"{{title}}\""
+        "TASK_CREATED": "Tarea creada \"{{title}}\"",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "No se permite mover tareas de issue a otro proyecto"
       },
       "SELECT_OR_CREATE": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {
@@ -1241,9 +1241,6 @@
       "LOCATION_INFO": "Las copias de seguridad se guardan en:",
       "TITLE": "Copias de seguridad automáticas"
     },
-    "CALENDARS": {
-      "TITLE": "Calendarios"
-    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Ocultar hoja de evaluación en resumen diario",
       "TITLE": "Evaluación y métrica"
@@ -1402,6 +1399,9 @@
       "L_IS_SHOW_ON_MOBILE": "Mostrar en la aplicación móvil",
       "L_MIN_TIME": "Tiempo a esperar antes de que se mueste el recordatorio",
       "TITLE": "Recordatorio de Seguimiento de Tiempo"
+    },
+    "CALENDARS": {
+      "TITLE": "Calendarios"
     }
   },
   "GLOBAL_SNACK": {

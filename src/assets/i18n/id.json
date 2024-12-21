@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Nama sumber daya CalDav (kalender)",
         "CALDAV_URL": "URL CalDav (URL dasar)",
         "CALDAV_USER": "Nama pengguna caldav Anda",
+        "IS_TRANSITION_ISSUES_ENABLED": "Selesaikan tugas CalDav secara otomatis saat menyelesaikan tugas",
         "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan todos CalDav yang belum selesai ke backlog Anda",
         "IS_AUTO_POLL": "Secara otomatis polling tugas yang diimpor untuk perubahan",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Tampilkan todos CalDav yang belum selesai sebagai saran saat menambahkan tugas baru",
-        "IS_TRANSITION_ISSUES_ENABLED": "Selesaikan tugas CalDav secara otomatis saat menyelesaikan tugas"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Tampilkan todos CalDav yang belum selesai sebagai saran saat menambahkan tugas baru"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar tugas CalDav yang belum selesai untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan terdaftar sebagai saran dan akan memberikan tautan ke todo serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua tugas yang belum selesai ke backlog tugas Anda</p><p>Agar berfungsi untuk nextcloud di aplikasi web, Anda mungkin perlu memasukkannya ke daftar putih (whitelist) \"https://app.super-productivity.com\" melalui aplikasi Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
@@ -145,9 +145,6 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
-        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari Gitea ke backlog",
-        "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
         "HOST": "Host (contoh: https://try.gitea.io)",
         "TOKEN": "Akses Token",
         "REPO_FULL_NAME": "Nama pengguna atau nama/proyek Organisasi",
@@ -156,6 +153,9 @@
         "SCOPE_ALL": "Semua",
         "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
         "SCOPE_CREATED": "Dibuat oleh saya",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari Gitea ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
         "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi"
       },
       "FORM_SECTION": {
@@ -214,11 +214,11 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
+        "REPO": "username/repositoryName",
+        "TOKEN": "Akses Token",
         "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
         "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan masalah dari git sebagai saran saat menambahkan tugas baru",
-        "REPO": "username/repositoryName",
-        "TOKEN": "Akses Token",
         "TOKEN_DESCRIPTION": "Diperlukan untuk akses repositori pribadi"
       },
       "FORM_SECTION": {
@@ -246,9 +246,6 @@
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "GITLAB_BASE_URL": "URL dasar GitLab khusus (opsional)",
-        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari GitLab ke backlog",
-        "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Tampilkan Git issues sebagai saran saat menambahkan tugas baru",
         "PROJECT": "(default) ID proyek atau nama pengguna/proyek",
         "SCOPE": "Cakupan",
         "SCOPE_ALL": "Semua",
@@ -258,7 +255,10 @@
         "SOURCE_GLOBAL": "Semua",
         "SOURCE_GROUP": "Grup",
         "SOURCE_PROJECT": "Proyek",
-        "TOKEN": "Akses Token"
+        "TOKEN": "Akses Token",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan masalah yang belum terselesaikan dari GitLab ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling Git issues yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Tampilkan Git issues sebagai saran saat menambahkan tugas baru"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open GitLab issues (baik versi online atau instance yang dihosting sendiri) untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p>",
@@ -351,17 +351,9 @@
         "TIME_SPENT_TOOLTIP": "Tambahkan waktu yang berbeda",
         "TITLE": "Jira: Kirim worklog"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
-        "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL digunakan untuk menambahkan tugas secara otomatis ke backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Buka dialog untuk mengirimkan worklog ke Jira ketika sub tugas selesai",
-        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues dari Jira ke backlog",
-        "IS_AUTO_POLL_TICKETS": "Periksa issues yang diimpor untuk perubahan secara otomatis dan beri tahu",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Periksa apakah issues yang sedang dikerjakan ditugaskan ke pengguna saat ini",
         "IS_WORKLOG_ENABLED": "Buka dialog untuk mengirimkan worklog ke Jira saat tugas selesai",
         "SEARCH_JQL_QUERY": "JQL Query untuk membatasi tugas pencarian",
@@ -369,7 +361,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Isi semua waktu yang dihabiskan dikurangi waktu login",
         "WORKLOG_DEFAULT_TIME_MODE": "Nilai waktu default untuk dialog",
         "WORKLOG_DEFAULT_TODAY": "Isi hanya waktu yang dihabiskan hari ini",
-        "WORKLOG_DEFAULT_YESTERDAY": "Isi hanya waktu yang dihabiskan kemarin"
+        "WORKLOG_DEFAULT_YESTERDAY": "Isi hanya waktu yang dihabiskan kemarin",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues dari Jira ke backlog",
+        "IS_AUTO_POLL_TICKETS": "Periksa issues yang diimpor untuk perubahan secara otomatis dan beri tahu"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Isi hanya waktu yang dihabiskan kemarin",
@@ -381,7 +375,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Konfigurasi Lanjutan",
-        "CREDENTIALS": "Kredensial",
         "HELP_ARR": {
           "H1": "Konfigurasi dasar",
           "H2": "Pengaturan worklog",
@@ -394,7 +387,8 @@
           "P2_2": "<em>'Buka dialog worklog saat sub tugas selesai dan bukan untuk tugas dengan sub tugas itu sendiri'</em> membuka dialog worklog setiap kali Anda menandai subtugas dari masalah Jira sebagai selesai. Karena Anda sudah melacak waktu Anda melalui sub tugas, tidak ada dialog yang dibuka setelah Anda menandai tugas Jira itu sendiri sebagai selesai.",
           "P2_3": "<em>'Kirim pembaruan ke worklog secara otomatis tanpa dialog'</em> melakukan apa yang dikatakannya. Karena menandai tugas sebagai selesai beberapa kali menyebabkan seluruh waktu kerja dilacak dua kali, ini tidak disarankan.",
           "P3_1": "Di sini Anda dapat mengkonfigurasi ulang transisi default Anda. Jira memungkinkan konfigurasi transisi yang luas yang biasanya mulai beraksi sebagai kolom yang berbeda di papan gesit Jira Anda, kami tidak dapat membuat asumsi tentang di mana dan kapan harus mentransisikan tugas Anda dan Anda perlu mengaturnya secara manual."
-        }
+        },
+        "CREDENTIALS": "Kredensial"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Penerima tugas",
@@ -437,6 +431,12 @@
         "LOGIN_SUCCESS": "Login berhasil!",
         "TEST_CREDENTIALS": "Tes Kredensial",
         "WELCOME_USER": "Selamat datang {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan issues yang belum terselesaikan dari GitHub ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling masalah git yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Tampilkan issues dari Git sebagai saran saat menambahkan tugas baru",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -541,9 +541,6 @@
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "HOST": "Host (contoh.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan work packages yang belum terselesaikan dari OpenProject ke backlog",
-        "IS_AUTO_POLL": "Secara otomatis polling work packages OpenProject yang diimpor untuk perubahan",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Tampilkan work packages sebagai saran saat menambahkan tugas baru",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Tampilkan dialog pelacakan waktu untuk melapor ke OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Membutuhkan modul pelacakan waktu untuk diaktifkan untuk proyek OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Tampilkan dialog pelacakan waktu ketika sub tugas selesai",
@@ -553,7 +550,10 @@
         "SCOPE": "Cakupan",
         "SCOPE_ALL": "Semua",
         "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
-        "SCOPE_CREATED": "Dibuat oleh saya"
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "IS_AUTO_IMPORT_ISSUES": "Secara otomatis menambahkan work packages yang belum terselesaikan dari OpenProject ke backlog",
+        "IS_AUTO_POLL": "Secara otomatis polling work packages OpenProject yang diimpor untuk perubahan",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Tampilkan work packages sebagai saran saat menambahkan tugas baru"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar work packages OpenProject yang terbuka. Harap Perhatikan bahwa agar ini berfungsi di browser, Anda mungkin perlu mengonfigurasi CORS untuk server OpenProject Anda, untuk mengizinkan akses dari app.super-productivity.com</p>",
@@ -941,11 +941,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Menambahkan tugas <strong>{{title}}</strong> dari <strong>{{contextTitle}}</strong> ke daftar terbaru",
         "FOUND_RESTORE_FROM_ARCHIVE": "Memulihkan tugas <strong>{{title}}</strong> yang terkait dengan masalah dari arsip",
         "LAST_TAG_DELETION_WARNING": "Anda mencoba menghapus tag terakhir dari tugas non-proyek. Ini tidak diperbolehkan!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Memindahkan tugas masalah ke proyek lain tidak diperbolehkan",
         "REMINDER_ADDED": "Tugas \"{{title}}\" terjadwal",
         "REMINDER_DELETED": "Pengingat yang dihapus untuk tugas",
         "REMINDER_UPDATED": "Pengingat yang diperbarui untuk tugas \"{{title}}\"",
-        "TASK_CREATED": "tugas yang dibuat \"{{title}}\""
+        "TASK_CREATED": "tugas yang dibuat \"{{title}}\"",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Memindahkan tugas masalah ke proyek lain tidak diperbolehkan"
       },
       "SELECT_OR_CREATE": "Pilih atau buat tugas",
       "SUMMARY_TABLE": {
