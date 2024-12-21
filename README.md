@@ -215,7 +215,7 @@ flatpak run com.super_productivity.SuperProductivity
 ```
 
 <a href='https://flathub.org/apps/com.super_productivity.SuperProductivity'>
-    <img width='240' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
+    <img width='175' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
   </a>
 
 #### Aur - Arch Linux
