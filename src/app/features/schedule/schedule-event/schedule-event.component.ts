@@ -6,8 +6,10 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  Inject,
   inject,
   Input,
+  LOCALE_ID,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -70,6 +72,9 @@ export class ScheduleEventComponent implements OnInit {
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
 
+  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
+    .hour12;
+
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
   @ViewChild('taskContextMenu', { static: false, read: TaskContextMenuComponent })
@@ -87,7 +92,11 @@ export class ScheduleEventComponent implements OnInit {
       (this.se as any)?.data?.title ||
       (this.se.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE');
 
-    const startClockStr = getClockStringFromHours(this.se.startHours);
+    const startClockStr = getClockStringFromHours(
+      this.is12HourFormat && this.se.startHours > 12
+        ? this.se.startHours - 12
+        : this.se.startHours,
+    );
     const endClockStr = getClockStringFromHours(
       this.se.startHours + this.se.timeLeftInHours,
     );
@@ -231,6 +240,7 @@ export class ScheduleEventComponent implements OnInit {
     private _matDialog: MatDialog,
     private _cd: ChangeDetectorRef,
     private _issueService: IssueService,
+    @Inject(LOCALE_ID) private locale: string,
   ) {}
 
   ngOnInit(): void {

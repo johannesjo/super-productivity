@@ -148,12 +148,13 @@ header {
 
 .time {
   grid-column: 1;
-  text-align: right;
   align-self: end;
   font-size: 80%;
   position: relative;
   color: #70757a;
   padding-right: 6px;
+  line-height: 1.2;
+  text-align: right;
 }
 
 .col {

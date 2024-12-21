@@ -20,10 +20,11 @@ import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { UiModule } from '../../../ui/ui.module';
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe],
+  imports: [MatIcon, DatePipe, UiModule],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
