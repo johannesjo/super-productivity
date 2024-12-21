@@ -141,8 +141,10 @@ $short-syntax-bar-height: 28px;
     opacity: 1;
   }
 
+  /* stylelint-disable block-no-empty */
   @include mq(xs) {
   }
+  /* stylelint-enable block-no-empty */
 }
 
 .info-bar {

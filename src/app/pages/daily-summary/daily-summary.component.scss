@@ -95,9 +95,6 @@ $summary-point-inner-margin: $s;
   position: relative;
 }
 
-.summary-text {
-}
-
 .summary-val {
   font-weight: bold;
 }
@@ -113,10 +110,6 @@ $summary-point-inner-margin: $s;
 
   button {
     margin: 0 $s * 0.5;
-
-    mat-icon + mat-icon {
-      //margin-left: -$s;
-    }
   }
 }
 

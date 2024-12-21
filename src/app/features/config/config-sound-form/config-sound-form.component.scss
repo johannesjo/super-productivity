@@ -26,9 +26,6 @@ $this-panel-padding-left-right: 12px;
   padding: 10px $this-panel-padding-left-right;
 }
 
-:host ::ng-deep .collapsible-expand-icon {
-}
-
 :host ::ng-deep .collapsible-panel {
   //border-top: 1px solid black;
   overflow: visible;

@@ -540,11 +540,6 @@ $owl-missing: $owl-light-selected-bg !default;
   }
 }
 
-@media all and (orientation: portrait) {
-  .owl-dt-dialog-container {
-  }
-}
-
 .owl-dt-container-buttons {
   display: -webkit-box;
   display: flex;
