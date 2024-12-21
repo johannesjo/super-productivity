@@ -3,7 +3,7 @@ import {
   HAMMER_GESTURE_CONFIG,
   HammerModule,
 } from '@angular/platform-browser';
-import { ErrorHandler, NgModule } from '@angular/core';
+import { ErrorHandler, LOCALE_ID, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -150,6 +150,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     CdkDropListGroup,
   ],
   providers: [
+    { provide: LOCALE_ID, useValue: navigator.language },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
