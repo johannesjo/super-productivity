@@ -91,8 +91,12 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   // events = [
 
+  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
+    .hour12;
   times: string[] = this.rowsByNr.map((rowVal, index) => {
-    return index.toString() + ':00';
+    return this.is12HourFormat && index >= 13
+      ? (index - 12).toString() + ':00'
+      : index.toString() + ':00';
   });
 
   T: typeof T = T;
