@@ -201,6 +201,23 @@ sudo snap set core experimental.refresh-app-awareness=true
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
 
+#### Flatpak - Most distributions
+Must install Flatpak first. See [setup instructions for all distributions](https://flathub.org/setup).
+
+Install via command-line:
+
+```bash
+# install
+flatpak install flathub com.super_productivity.SuperProductivity
+
+# run
+flatpak run com.super_productivity.SuperProductivity
+```
+
+<a href='https://flathub.org/apps/com.super_productivity.SuperProductivity'>
+    <img width='240' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
+  </a>
+
 #### Aur - Arch Linux
 
 ```bash
