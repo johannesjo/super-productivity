@@ -14,8 +14,6 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   host: null,
   userName: null,
   password: null,
-  isWonkyCookieMode: false,
-  usePAT: false,
 
   searchJqlQuery: '',
 
@@ -198,21 +196,6 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
         //     label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
         //   },
         // },
-        {
-          key: 'isWonkyCookieMode',
-          type: 'checkbox',
-          templateOptions: {
-            label: T.F.JIRA.FORM_CRED.WONKY_COOKIE_MODE,
-          },
-        },
-        {
-          key: 'usePAT',
-          type: 'checkbox',
-          templateOptions: {
-            required: false,
-            label: T.F.JIRA.FORM_CRED.USE_PAT,
-          },
-        },
 
         ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 

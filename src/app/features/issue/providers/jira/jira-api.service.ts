@@ -388,9 +388,6 @@ export class JiraApiService {
   }): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
-      concatMap(() =>
-        IS_ELECTRON && cfg.isWonkyCookieMode ? this._checkSetWonkyCookie(cfg) : of(true),
-      ),
       concatMap(() => {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${
@@ -545,21 +542,12 @@ export class JiraApiService {
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
-        ...(IS_ELECTRON && cfg.isWonkyCookieMode
-          ? {
-              Cookie: sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) as string,
-            }
-          : cfg.usePAT
-            ? {
-                Cookie: '',
-                authorization: `Bearer ${cfg.password}`,
-              }
-            : {
-                Cookie: '',
-                authorization: `Basic ${this._b64EncodeUnicode(
-                  `${cfg.userName}:${cfg.password}`,
-                )}`,
-              }),
+        ...{
+          Cookie: '',
+          authorization: `Basic ${this._b64EncodeUnicode(
+            `${cfg.userName}:${cfg.password}`,
+          )}`,
+        },
       },
     };
   }

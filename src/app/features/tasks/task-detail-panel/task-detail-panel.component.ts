@@ -60,7 +60,6 @@ import { ICAL_TYPE, JIRA_TYPE } from '../../issue/issue.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
-import { SS } from '../../../core/persistence/storage-keys.const';
 import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
@@ -276,9 +275,6 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
           if (jiraCfg.isEnabled) {
             window.ea.jiraSetupImgHeaders({
               jiraCfg,
-              wonkyCookie: jiraCfg.isWonkyCookieMode
-                ? sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) || undefined
-                : undefined,
             });
           }
         });

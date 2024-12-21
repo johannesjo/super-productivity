@@ -100,7 +100,7 @@ export interface ElectronAPI {
     jiraCfg: JiraCfg;
   }): void;
 
-  jiraSetupImgHeaders(args: { jiraCfg: JiraCfg; wonkyCookie?: string }): void;
+  jiraSetupImgHeaders(args: { jiraCfg: JiraCfg }): void;
 
   backupAppData(appData: AppDataComplete): void;
 

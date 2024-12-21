@@ -22,8 +22,6 @@ export interface JiraCfg extends BaseIssueProviderCfg {
   host: string | null;
   userName: string | null;
   password?: string | null;
-  isWonkyCookieMode: boolean;
-  usePAT: boolean;
 
   isAllowSelfSignedCertificate: boolean;
   searchJqlQuery: string;
