@@ -1,3 +1,22 @@
+## [11.0.3](https://github.com/johannesjo/super-productivity/compare/v11.0.2...v11.0.3) (2024-12-21)
+
+### Bug Fixes
+
+- **android:** android file sync not working [#3782](https://github.com/johannesjo/super-productivity/issues/3782) ([0cea914](https://github.com/johannesjo/super-productivity/commit/0cea91441c87e0a91e193ecb06277e568f5aa123))
+- issue panel being opened on start ([672ae67](https://github.com/johannesjo/super-productivity/commit/672ae67bfdc8d36194a01a52a1c25176ef7cb699))
+- **issueProvider:** crash on task done and related [#3779](https://github.com/johannesjo/super-productivity/issues/3779) ([bc4123e](https://github.com/johannesjo/super-productivity/commit/bc4123e742fd9f9dda5911e2c83d48452f84fd88))
+
+### Features
+
+- adjust locale to browser locale on app start [#3676](https://github.com/johannesjo/super-productivity/issues/3676) ([33c26c5](https://github.com/johannesjo/super-productivity/commit/33c26c52942f12b8c0c98816261547cb67200020))
+- also display am and pm for planner task badge [#3676](https://github.com/johannesjo/super-productivity/issues/3676) ([f0b27dc](https://github.com/johannesjo/super-productivity/commit/f0b27dc15baf00b14ea481cc22086a08286021c8))
+- also display am and pm for task time badge [#3676](https://github.com/johannesjo/super-productivity/issues/3676) ([4274434](https://github.com/johannesjo/super-productivity/commit/42744340a6ea50791c24bac3fd3c60ab69bc4055))
+- also localize schedule better [#3676](https://github.com/johannesjo/super-productivity/issues/3676) ([b55dd14](https://github.com/johannesjo/super-productivity/commit/b55dd14bc2e58d821752950554f0e9b782ee4ff8))
+- **android:** formatting ([25b5585](https://github.com/johannesjo/super-productivity/commit/25b5585faca725e3fcb6d6af017cecd7d52c1098))
+- **issueProvider:** remove jira pat and wonkyCookie modes [#2528](https://github.com/johannesjo/super-productivity/issues/2528) ([67b5430](https://github.com/johannesjo/super-productivity/commit/67b54307c69a5ee9babb04a617aa96ff9df0c777))
+- move monday-friday setting up ([3e9bdf1](https://github.com/johannesjo/super-productivity/commit/3e9bdf1b846faffef0b59c1d1668d427e2519d59))
+- use 12-hour format for schedule times [#3676](https://github.com/johannesjo/super-productivity/issues/3676) ([733a554](https://github.com/johannesjo/super-productivity/commit/733a554611e97bd8b69c58892f8ecde8a76a0cc0))
+
 ## [11.0.2](https://github.com/johannesjo/super-productivity/compare/v11.0.1...v11.0.2) (2024-12-19)
 
 ### Bug Fixes
