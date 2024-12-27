@@ -125,6 +125,8 @@ $margin-right: 10px;
   display: block;
 }
 
+/* stylelint-disable no-duplicate-selectors */
+
 // non draggable
 :host {
   &.CalendarEvent,
@@ -229,6 +231,8 @@ $margin-right: 10px;
     }
   }
 }
+
+/* stylelint-enable no-duplicate-selectors */
 
 .time-badge {
   opacity: 1 !important;
@@ -404,12 +408,8 @@ $margin-right: 10px;
 :host-context(.is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
-  :host.TaskPlannedForDay,
-  :host.SplitTaskPlannedForDay,
   :host.Task,
-  :host.SplitTask,
-  :host.SplitTask,
-  :host.Task {
+  :host.SplitTask {
     box-shadow: $whiteframe-shadow-6dp;
   }
 }
@@ -417,12 +417,8 @@ $margin-right: 10px;
 :host-context(.isDarkTheme .is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
-  :host.TaskPlannedForDay,
-  :host.SplitTaskPlannedForDay,
   :host.Task,
-  :host.SplitTask,
-  :host.SplitTask,
-  :host.Task {
+  :host.SplitTask {
     background: $dark24;
   }
 }

@@ -17,7 +17,6 @@
       font-size: 10px;
       min-width: 18px;
       padding: 1px 4px 0;
-      pointer-events: none;
       border: 1px solid $light-theme-extra-border-color;
       background: #fff;
       border-radius: 12px;
@@ -36,10 +35,8 @@
   &.isHidden {
     display: none !important;
   }
-}
 
-// color bar left styles
-:host {
+  // color bar left styles
   .color-bar,
   &.isActiveRoute:before {
     content: '';
@@ -76,12 +73,14 @@
   &.isActiveRoute {
     font-weight: bold;
     color: $c-primary-800;
+
     @include darkTheme() {
       color: $c-primary;
     }
 
     mat-icon {
       color: $c-primary-800;
+
       @include darkTheme() {
         color: $c-primary;
       }

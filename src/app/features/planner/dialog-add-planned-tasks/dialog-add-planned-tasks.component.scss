@@ -104,6 +104,8 @@
 
 .scheduled {
   flex-grow: 1;
+  /* Additional styles if needed */
+  margin-top: 16px;
 }
 
 .normal-tasks-items,
@@ -114,11 +116,6 @@
 
 .normal-tasks-items > * {
   margin-bottom: 8px;
-}
-
-.scheduled {
-  /* Additional styles if needed */
-  margin-top: 16px;
 }
 
 .scheduled-item {

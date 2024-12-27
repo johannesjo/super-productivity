@@ -67,16 +67,14 @@
   @include mq(xs) {
     display: none !important;
   }
-}
 
-.hide-gt-sm {
-  @include mq(sm, max) {
+  @include mq(xs) {
     display: none !important;
   }
 }
 
-.show-xs-only {
-  @include mq(xs) {
+.hide-gt-sm {
+  @include mq(sm, max) {
     display: none !important;
   }
 }
