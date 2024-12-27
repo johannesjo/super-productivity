@@ -154,3 +154,8 @@ $short-syntax-bar-height: 32px;
     border-color: $dark-theme-extra-border-color;
   }
 }
+
+// Make the popover on top of the preview component
+::ng-deep .cdk-overlay-container:has(.overlay-pane_calendar) {
+  z-index: 10000;
+}
