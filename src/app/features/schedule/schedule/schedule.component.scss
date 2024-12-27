@@ -104,7 +104,6 @@ header {
 
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
     background: $dark-theme-bg-lighter;
   }
@@ -186,14 +185,13 @@ header {
 
 .row {
   grid-column: 2 / -1;
-}
-
-.row {
   border-top: 1px solid $grid-color;
 
   @include darkTheme() {
     border-color: $grid-color-dark;
   }
+
+  pointer-events: none;
 }
 
 .current-time {
@@ -221,10 +219,6 @@ header {
   position: relative;
   z-index: 99 !important;
   box-shadow: $whiteframe-shadow-20dp;
-}
-
-.row {
-  pointer-events: none;
 }
 
 .drop-label {

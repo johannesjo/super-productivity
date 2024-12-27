@@ -18,9 +18,7 @@ app-root,
 
 html {
   overflow: hidden !important;
-}
 
-html {
   button,
   a {
     -webkit-app-region: no-drag !important;
@@ -110,6 +108,7 @@ body {
 
 .page-wrapper {
   padding: $s $s $s * 9;
+
   @include mq(xs) {
     padding: $s 2 * $s $s * 9;
   }
@@ -197,9 +196,11 @@ img {
     &::-webkit-scrollbar-thumb {
       background: var(--scrollbar-color-thumb);
     }
+
     &::-webkit-scrollbar-track {
       background: var(--scrollbar-color-track);
     }
+
     &::-webkit-scrollbar {
       max-width: var(--scrollbar-width-legacy);
       max-height: var(--scrollbar-width-legacy);

@@ -72,9 +72,7 @@ $short-syntax-bar-height: 28px;
 
     color: #000000;
     background: #ffffff;
-  }
 
-  input {
     @include darkTheme {
       background-color: $dark-theme-bg-lightest;
       color: $dark-theme-text-color-most-intense;
