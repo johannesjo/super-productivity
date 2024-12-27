@@ -9,6 +9,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
@@ -45,10 +46,12 @@ import { SearchResultItem } from '../../issue/issue.model';
 import { truncate } from '../../../util/truncate';
 import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
+import { Popover } from '../../../ui/popover';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
+import { SimpleSchedulePickerComponent } from '../../planner/simple-schedule-picker/simple-schedule-picker.component';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { SS } from '../../../core/persistence/storage-keys.const';
@@ -80,11 +83,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Output() blurred: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl', { static: true }) inputEl?: ElementRef;
+  @ViewChild('inputEl', { static: true }) inputEl!: ElementRef;
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  popover = inject(Popover);
   doubleEnterCount: number = 0;
+  ignoreBlur: boolean = false;
+  scheduledDate: Date | null = null;
 
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
@@ -241,6 +247,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             this.blurred.emit();
             // needs to be set otherwise the activatedIssueTask won't reflect the task that is added
             this.activatedIssueTask$.next(null);
+          } else if (ev.key === '@') {
+            this.ignoreBlur = true;
+            // Need to pass origin element to calculate the position to insert the popover
+            this.popover.open(SimpleSchedulePickerComponent, {
+              origin: this.inputEl,
+            });
           } else if (ev.key === '1' && ev.ctrlKey) {
             this.isAddToBottom = !this.isAddToBottom;
             this._cd.detectChanges();
@@ -290,6 +302,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   onBlur(ev: FocusEvent): void {
+    if (this.ignoreBlur) {
+      this.ignoreBlur = false;
+      return;
+    }
     const relatedTarget: HTMLElement = ev.relatedTarget as HTMLElement;
     let isUIelement = false;
 
