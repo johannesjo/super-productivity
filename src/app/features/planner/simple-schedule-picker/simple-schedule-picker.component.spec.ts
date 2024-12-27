@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SimpleSchedulePicker } from './simple-schedule-picker.component';
+import { SimpleSchedulePickerComponent } from './simple-schedule-picker.component';
 
 describe('DialogTimeDisplayComponent', () => {
-  let component: SimpleSchedulePicker;
-  let fixture: ComponentFixture<SimpleSchedulePicker>;
+  let component: SimpleSchedulePickerComponent;
+  let fixture: ComponentFixture<SimpleSchedulePickerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SimpleSchedulePicker],
+      imports: [SimpleSchedulePickerComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SimpleSchedulePicker);
+    fixture = TestBed.createComponent(SimpleSchedulePickerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

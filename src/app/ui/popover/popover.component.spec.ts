@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CalendarPopoverComponent } from './popover-container';
+import { CdkPopoverContainerComponent } from './popover-container';
 
 describe('CalendarPopoverComponent', () => {
-  let component: CalendarPopoverComponent;
-  let fixture: ComponentFixture<CalendarPopoverComponent>;
+  let component: CdkPopoverContainerComponent;
+  let fixture: ComponentFixture<CdkPopoverContainerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CalendarPopoverComponent],
+      imports: [CdkPopoverContainerComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CalendarPopoverComponent);
+    fixture = TestBed.createComponent(CdkPopoverContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
