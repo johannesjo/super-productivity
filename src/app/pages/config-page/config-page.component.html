@@ -1,8 +1,8 @@
 <div class="page-settings page-wrapper">
-  <div *ngIf="globalCfg">
+  @if (globalCfg) {
+  <div>
     <div class="section-wrapper component-wrapper">
       <h1 class="mat-h1">{{T.PS.GLOBAL_SETTINGS|translate}}</h1>
-
       <div
         class="dark-mode-select"
         style="display: flex"
@@ -30,25 +30,21 @@
           </mat-button-toggle-group>
         </div>
       </div>
-
-      <section
-        *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
-        class="config-section section-{{section.key}}"
-      >
+      @for (section of globalConfigFormCfg; track trackBySectionKey($index, section)) {
+      <section class="config-section section-{{section.key}}">
         <config-section
           (save)="saveGlobalCfg($event)"
           [cfg]="getGlobalCfgSection(section.key)"
           [section]="section"
         ></config-section>
       </section>
-
+      }
       <section class="config-section">
         <config-sound-form
           [cfg]="getGlobalCfgSection('sound')"
           (save)="saveGlobalCfg($event)"
         ></config-sound-form>
       </section>
-
       <div class="tour-productivityHelper">
         <h2
           class="mat-h2"
@@ -56,36 +52,36 @@
         >
           {{T.PS.PRODUCTIVITY_HELPER|translate}}
         </h2>
-        <section
-          *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
-          class="config-section"
-        >
+        @for (section of globalProductivityConfigFormCfg; track trackBySectionKey($index,
+        section)) {
+        <section class="config-section">
           <config-section
             (save)="saveGlobalCfg($event)"
             [cfg]="getGlobalCfgSection(section.key)"
             [section]="section"
           ></config-section>
         </section>
+        }
       </div>
-
       <h2
         class="mat-h2"
         style="margin-top: 32px"
       >
         {{T.PS.SYNC_EXPORT|translate}}
       </h2>
-      <section
-        *ngFor="let section of globalSyncProviderFormCfg; trackBy:trackBySectionKey;"
-        class="config-section tour-syncSection"
-      >
+      @for (section of globalSyncProviderFormCfg; track trackBySectionKey($index,
+      section)) {
+      <section class="config-section tour-syncSection">
         <config-section
           (save)="saveGlobalCfg($event)"
           [cfg]="getGlobalCfgSection(section.key)"
           [section]="section"
         ></config-section>
       </section>
+      }
     </div>
   </div>
+  }
 </div>
 
 <footer

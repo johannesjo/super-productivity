@@ -21,7 +21,7 @@ import { FormGroup, FormsModule } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
@@ -36,8 +36,6 @@ import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model'
   imports: [
     UiModule,
     IssueModule,
-    NgIf,
-    NgForOf,
     JiraViewComponentsModule,
     OpenProjectAdditionalCfgComponent,
     FormsModule,

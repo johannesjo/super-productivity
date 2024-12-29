@@ -11,11 +11,9 @@
     color="primary"
     mat-fab
   >
-    <span
-      *ngIf="counter"
-      class="counter"
-      >{{counter}}</span
-    >
+    @if (counter) {
+    <span class="counter">{{counter}}</span>
+    }
     <mat-icon>library_books</mat-icon>
   </button>
 </div>

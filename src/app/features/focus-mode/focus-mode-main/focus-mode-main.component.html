@@ -1,119 +1,107 @@
-<ng-container *ngIf="taskService.currentTask$|async as task">
-  <inline-multiline-input
-    (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
-    [value]="task.title"
-    class="task-title"
-  ></inline-multiline-input>
-
-  <div class="progress-wrapper">
-    <progress-circle [progress]="sessionProgress$|async"></progress-circle>
-
-    <div class="progress-label-wrapper">
-      <div
-        class="focus-time"
-        title="Focus time"
-      >
-        <!--        {{focusModeTimeToGo / 60000}}min-->
-        {{(timeToGo$|async|msToMinuteClockString)}}
-      </div>
-      <!--      <div class="task-times">-->
-      <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
-      <!--      </div>-->
-    </div>
-  </div>
-
-  <ng-container
-    *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
-  >
-    <section
-      class="simple-counter-buttons"
-      *ngIf="enabledSimpleCounters.length"
-    >
-      <simple-counter-button
-        *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
-        [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
-        [simpleCounter]="simpleCounter"
-      ></simple-counter-button>
-    </section>
-  </ng-container>
-
-  <section class="controls">
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT|translate"
-      (click)="finishCurrentTask();"
-    >
-      <mat-icon>done</mat-icon>
-    </button>
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.GO_TO_PROCRASTINATION|translate"
-      (click)="getProcrastinationHelp()"
-    >
-      <mat-icon>flash_on</mat-icon>
-    </button>
-
-    <a
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER|translate"
-      target="_blank"
-      *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
-      [href]="issueUrl$|async"
-    >
-      <div
-        *ngIf="task.issuePoints"
-        class="mini-badge bgc-primary"
-      >
-        {{task.issuePoints}}
-      </div>
-      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-    </a>
-
-    <button
-      (click)="isShowNotes=!isShowNotes"
-      [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS|translate"
-      class="ico-btn show-additional-info-btn"
-      color=""
-      mat-icon-button
-    >
-      <mat-icon *ngIf="!isShowNotes">chat</mat-icon>
-      <mat-icon *ngIf="isShowNotes">expand_less</mat-icon>
-    </button>
-  </section>
-
-  <div
-    class="notes-and-attachments"
-    *ngIf="isShowNotes"
-    @expand
-  >
-    <div class="notes-panel">
-      <inline-markdown
-        (blur)="isFocusNotes=false"
-        (blurred)="isFocusNotes=false"
-        (changed)="changeTaskNotes($event); isFocusNotes=false"
-        [isFocus]="isFocusNotes"
-        [isShowControls]="true"
-        [model]="task.notes|| defaultTaskNotes"
-      ></inline-markdown>
-    </div>
-
+@if (taskService.currentTask$|async; as task) {
+<inline-multiline-input
+  (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
+  [value]="task.title"
+  class="task-title"
+></inline-multiline-input>
+<div class="progress-wrapper">
+  <progress-circle [progress]="sessionProgress$|async"></progress-circle>
+  <div class="progress-label-wrapper">
     <div
-      *ngIf="task.attachments.length"
-      class="attachment-list-wrapper"
-      @fade
+      class="focus-time"
+      title="Focus time"
     >
-      <task-attachment-list
-        [taskId]="task.id"
-        [attachments]="task.attachments"
-      ></task-attachment-list>
+      <!--        {{focusModeTimeToGo / 60000}}min-->
+      {{(timeToGo$|async|msToMinuteClockString)}}
     </div>
+    <!--      <div class="task-times">-->
+    <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
+    <!--      </div>-->
   </div>
-
-  <div
-    *ngIf="isDragOver"
-    class="bgc-accent drag-over-msg"
+</div>
+@if ((simpleCounterService.enabledSimpleCounters$|async); as enabledSimpleCounters) { @if
+(enabledSimpleCounters.length) {
+<section class="simple-counter-buttons">
+  @for (simpleCounter of enabledSimpleCounters; track trackById($index, simpleCounter)) {
+  <simple-counter-button
+    [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
+    [simpleCounter]="simpleCounter"
+  ></simple-counter-button>
+  }
+</section>
+} }
+<section class="controls">
+  <button
+    mat-icon-button
+    [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT|translate"
+    (click)="finishCurrentTask();"
   >
-    <mat-icon>add</mat-icon>
-    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
+    <mat-icon>done</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    [matTooltip]="T.F.FOCUS_MODE.GO_TO_PROCRASTINATION|translate"
+    (click)="getProcrastinationHelp()"
+  >
+    <mat-icon>flash_on</mat-icon>
+  </button>
+  @if (task.issueId && task.issueType !==ICAL_TYPE) {
+  <a
+    mat-icon-button
+    [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER|translate"
+    target="_blank"
+    [href]="issueUrl$|async"
+  >
+    @if (task.issuePoints) {
+    <div class="mini-badge bgc-primary">{{task.issuePoints}}</div>
+    }
+    <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+  </a>
+  }
+  <button
+    (click)="isShowNotes=!isShowNotes"
+    [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS|translate"
+    class="ico-btn show-additional-info-btn"
+    color=""
+    mat-icon-button
+  >
+    @if (!isShowNotes) {
+    <mat-icon>chat</mat-icon>
+    } @if (isShowNotes) {
+    <mat-icon>expand_less</mat-icon>
+    }
+  </button>
+</section>
+@if (isShowNotes) {
+<div
+  class="notes-and-attachments"
+  @expand
+>
+  <div class="notes-panel">
+    <inline-markdown
+      (blur)="isFocusNotes=false"
+      (blurred)="isFocusNotes=false"
+      (changed)="changeTaskNotes($event); isFocusNotes=false"
+      [isFocus]="isFocusNotes"
+      [isShowControls]="true"
+      [model]="task.notes|| defaultTaskNotes"
+    ></inline-markdown>
   </div>
-</ng-container>
+  @if (task.attachments.length) {
+  <div
+    class="attachment-list-wrapper"
+    @fade
+  >
+    <task-attachment-list
+      [taskId]="task.id"
+      [attachments]="task.attachments"
+    ></task-attachment-list>
+  </div>
+  }
+</div>
+} @if (isDragOver) {
+<div class="bgc-accent drag-over-msg">
+  <mat-icon>add</mat-icon>
+  {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
+</div>
+} }

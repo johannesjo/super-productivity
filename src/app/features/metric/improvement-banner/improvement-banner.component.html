@@ -2,8 +2,8 @@
   [@improvementBanner]="improvements.length"
   class="improvements"
 >
+  @for (improvement of improvements; track trackById($index, improvement)) {
   <div
-    *ngFor="let improvement of improvements; trackBy: trackById"
     class="improvement"
     mat-ripple
   >
@@ -16,9 +16,7 @@
     >
       <mat-icon>close</mat-icon>
     </button>
-
     <div class="title">{{improvement?.title}}</div>
-
     <button
       (click)="check(improvement)"
       [matTooltip]="T.F.METRIC.BANNER.CHECK|translate"
@@ -29,4 +27,5 @@
       <mat-icon>check</mat-icon>
     </button>
   </div>
+  }
 </div>

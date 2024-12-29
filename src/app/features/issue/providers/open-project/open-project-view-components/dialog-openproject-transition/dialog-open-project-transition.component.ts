@@ -17,7 +17,7 @@ import { IssueProviderService } from 'src/app/features/issue/issue-provider.serv
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgForOf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
 import { TaskService } from '../../../../../tasks/task.service';
 
@@ -26,7 +26,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   templateUrl: './dialog-open-project-transition.component.html',
   styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, MatSlider],
+  imports: [UiModule, FormsModule, AsyncPipe, MatSlider],
 })
 export class DialogOpenProjectTransitionComponent {
   T: typeof T = T;

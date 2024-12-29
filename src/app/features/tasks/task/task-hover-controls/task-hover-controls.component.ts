@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject, input } from '@angular/core';
-import { NgIf } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { TaskWithSubTasks } from '../../task.model';
 import { T } from 'src/app/t.const';
@@ -12,7 +12,7 @@ import { ICAL_TYPE } from '../../../issue/issue.const';
 
 @Component({
   selector: 'task-hover-controls',
-  imports: [NgIf, MatIcon, TranslateModule, UiModule],
+  imports: [MatIcon, TranslateModule, UiModule],
   templateUrl: './task-hover-controls.component.html',
   styleUrl: './task-hover-controls.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,73 +1,52 @@
-<div
-  *ngIf="simpleCounter() as sc"
-  class="wrapper"
->
-  <ng-container *ngIf="sc.type===SimpleCounterType.StopWatch">
-    <button
-      (click)="toggleStopwatch()"
-      (contextmenu)="edit($event)"
-      (longPress)="edit()"
-      [color]="sc.isOn? 'accent': ''"
-      class="main-btn stopwatch"
-      mat-mini-fab
-    >
-      <mat-icon *ngIf="!sc.isOn">{{ sc.icon }}</mat-icon>
-      <mat-icon *ngIf="sc.isOn">{{ sc.iconOn || sc.icon }}</mat-icon>
-    </button>
-    <div
-      *ngIf="sc.countOnDay[todayStr]"
-      class="label"
-    >
-      {{ sc.countOnDay[todayStr]|msToMinuteClockString }}
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="sc.type===SimpleCounterType.ClickCounter">
-    <button
-      (click)="toggleCounter()"
-      (contextmenu)="edit($event)"
-      (longPress)="edit()"
-      class="main-btn"
-      color=""
-      mat-mini-fab
-    >
-      <mat-icon>{{ sc.icon }}</mat-icon>
-    </button>
-    <div
-      *ngIf="sc.countOnDay[todayStr]"
-      class="label"
-    >
-      {{ sc.countOnDay[todayStr] }}
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="sc.type===SimpleCounterType.RepeatedCountdownReminder">
-    <button
-      (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
-      (contextmenu)="edit($event)"
-      (longPress)="edit()"
-      [color]="(sc.isOn && !isTimeUp())? 'accent': ''"
-      [class.isTimeUp]="isTimeUp()"
-      class="main-btn repeated-countdown"
-      mat-mini-fab
-    >
-      <mat-icon>{{ sc.icon }}</mat-icon>
-    </button>
-    <div
-      class="extra-label"
-      *ngIf="sc.isOn && (countdownTime$|async) as countdownTime"
-    >
-      {{ countdownTime|msToMinuteClockString }}
-    </div>
-
-    <div
-      *ngIf="sc.countOnDay[todayStr] || isTimeUp()"
-      class="label"
-    >
-      {{ isTimeUp() ? "+" : sc.countOnDay[todayStr] }}
-    </div>
-  </ng-container>
-
+@if (simpleCounter(); as sc) {
+<div class="wrapper">
+  @if (sc.type===SimpleCounterType.StopWatch) {
+  <button
+    (click)="toggleStopwatch()"
+    (contextmenu)="edit($event)"
+    (longPress)="edit()"
+    [color]="sc.isOn? 'accent': ''"
+    class="main-btn stopwatch"
+    mat-mini-fab
+  >
+    @if (!sc.isOn) {
+    <mat-icon>{{ sc.icon }}</mat-icon>
+    } @if (sc.isOn) {
+    <mat-icon>{{ sc.iconOn || sc.icon }}</mat-icon>
+    }
+  </button>
+  @if (sc.countOnDay[todayStr]) {
+  <div class="label">{{ sc.countOnDay[todayStr]|msToMinuteClockString }}</div>
+  } } @if (sc.type===SimpleCounterType.ClickCounter) {
+  <button
+    (click)="toggleCounter()"
+    (contextmenu)="edit($event)"
+    (longPress)="edit()"
+    class="main-btn"
+    color=""
+    mat-mini-fab
+  >
+    <mat-icon>{{ sc.icon }}</mat-icon>
+  </button>
+  @if (sc.countOnDay[todayStr]) {
+  <div class="label">{{ sc.countOnDay[todayStr] }}</div>
+  } } @if (sc.type===SimpleCounterType.RepeatedCountdownReminder) {
+  <button
+    (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
+    (contextmenu)="edit($event)"
+    (longPress)="edit()"
+    [color]="(sc.isOn && !isTimeUp())? 'accent': ''"
+    [class.isTimeUp]="isTimeUp()"
+    class="main-btn repeated-countdown"
+    mat-mini-fab
+  >
+    <mat-icon>{{ sc.icon }}</mat-icon>
+  </button>
+  @if (sc.isOn && (countdownTime$|async); as countdownTime) {
+  <div class="extra-label">{{ countdownTime|msToMinuteClockString }}</div>
+  } @if (sc.countOnDay[todayStr] || isTimeUp()) {
+  <div class="label">{{ isTimeUp() ? "+" : sc.countOnDay[todayStr] }}</div>
+  } }
   <!--  <div class="controls">-->
   <!--    <button (click)="edit()"-->
   <!--            class="btn"-->
@@ -85,3 +64,4 @@
   <!--    &lt;!&ndash;    </button>&ndash;&gt;-->
   <!--  </div>-->
 </div>
+}

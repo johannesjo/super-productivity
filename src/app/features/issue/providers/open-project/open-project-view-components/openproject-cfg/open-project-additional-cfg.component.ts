@@ -30,7 +30,7 @@ import {
   OpenProjectTransitionOption,
 } from '../../open-project.model';
 import { UiModule } from '../../../../../../ui/ui.module';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
@@ -40,7 +40,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   templateUrl: './open-project-additional-cfg.component.html',
   styleUrls: ['./open-project-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider, NgForOf],
+  imports: [UiModule, FormsModule, AsyncPipe, MatSlider],
   animations: [expandAnimation],
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {

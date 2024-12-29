@@ -5,20 +5,18 @@
   <span>{{ T.F.PLANNER.D.ADD_PLANNED.TITLE|translate }}</span>
 </h1>
 
-<mat-dialog-content *ngIf="(day$|async) as day">
+@if ((day$|async); as day) {
+<mat-dialog-content>
   <header>
     <!--<div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>-->
-
     <div class="day-counts">
       <span>{{ day.timeEstimate |roundDuration|msToString }}</span>
-
-      <ng-container *ngIf="day.itemsTotal > 5 ">
-        <mat-icon inline="true">task_alt</mat-icon>
-        <span>{{ day.itemsTotal }}</span>
-      </ng-container>
+      @if (day.itemsTotal > 5 ) {
+      <mat-icon inline="true">task_alt</mat-icon>
+      <span>{{ day.itemsTotal }}</span>
+      }
     </div>
   </header>
-
   <div class="normal-tasks">
     <div class="normal-tasks-items">
       @for (task of day.tasks; track task.id) {
@@ -27,7 +25,6 @@
         [day]="day.dayDate"
       ></planner-task>
       }
-
       <!-- -->
       @for (repeatProjection of day.noStartTimeRepeatProjections; track
       repeatProjection.id) {
@@ -35,21 +32,17 @@
         [repeatCfg]="repeatProjection.repeatCfg"
       ></planner-repeat-projection>
       }
-
       <!-- -->
       @if (day.tasks.length === 0 && day.noStartTimeRepeatProjections.length === 0) {
       <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>
       }
     </div>
-
     <add-task-inline [planForDay]="day.dayDate"></add-task-inline>
   </div>
-
   <div class="scheduled">
     <div class="section-title">
       <mat-icon>alarm</mat-icon>
     </div>
-
     <div class="scheduled-items">
       @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
       <div
@@ -67,7 +60,6 @@
         } @else {
         <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
         }
-
         <!-- -->
         @switch (scheduledItem.type) { @case (SCHEDULE_ITEM_TYPE.Task) {
         <planner-task
@@ -85,7 +77,6 @@
         } }
       </div>
       }
-
       <!-- -->
       @if (day.scheduledIItems.length === 0) {
       <div class="empty">{{ T.F.PLANNER.PLAN_VIEW.NO_SCHEDULED_ITEMS|translate }}</div>
@@ -93,6 +84,7 @@
     </div>
   </div>
 </mat-dialog-content>
+}
 
 <mat-dialog-actions align="end">
   <button

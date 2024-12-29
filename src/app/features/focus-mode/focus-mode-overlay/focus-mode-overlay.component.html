@@ -1,66 +1,20 @@
 <div class="mac-os-drag-bar"></div>
 
-<ng-container *ngIf="!(isPomodoroEnabled$|async); else deactivatePomodoroEl">
-  <header>
-    <banner></banner>
-  </header>
-  <main *ngIf="(activePage$|async) as activePage">
-    <button
-      *ngIf="activePage === FocusModePage.ProcrastinationHelp"
-      class="close-btn"
-      mat-icon-button
-      (click)="leaveProcrastinationHelp()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-    <button
-      *ngIf="activePage !== FocusModePage.ProcrastinationHelp"
-      class="close-btn"
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
-      (click)="cancelFocusSession()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-
-    <ng-container [ngSwitch]="activatePage">
-      <div
-        class="scroll-container"
-        *ngSwitchCase="FocusModePage.ProcrastinationHelp"
-        @warpIn
-      >
-        <procrastination></procrastination>
-      </div>
-
-      <focus-mode-task-selection
-        *ngSwitchCase="FocusModePage.TaskSelection"
-        @warpIn
-      ></focus-mode-task-selection>
-
-      <focus-mode-duration-selection
-        *ngSwitchCase="FocusModePage.DurationSelection"
-        @warpIn
-      ></focus-mode-duration-selection>
-
-      <focus-mode-preparation
-        *ngSwitchCase="FocusModePage.Preparation"
-        @warpIn
-      ></focus-mode-preparation>
-
-      <focus-mode-main
-        *ngSwitchCase="FocusModePage.Main"
-        @warpIn
-      ></focus-mode-main>
-
-      <focus-mode-task-done
-        *ngSwitchCase="FocusModePage.SessionDone"
-        @warpIn
-      ></focus-mode-task-done>
-    </ng-container>
-  </main>
-</ng-container>
-
-<ng-template #deactivatePomodoroEl>
+@if (!(isPomodoroEnabled$|async)) {
+<header>
+  <banner></banner>
+</header>
+@if ((activePage$|async); as activePage) {
+<main>
+  @if (activePage === FocusModePage.ProcrastinationHelp) {
+  <button
+    class="close-btn"
+    mat-icon-button
+    (click)="leaveProcrastinationHelp()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+  } @if (activePage !== FocusModePage.ProcrastinationHelp) {
   <button
     class="close-btn"
     mat-icon-button
@@ -69,24 +23,52 @@
   >
     <mat-icon>close</mat-icon>
   </button>
-  <div class="pomodoro-info-wrapper">
-    <div class="pomodoro-info-msg">{{T.F.FOCUS_MODE.POMODORO_INFO|translate}}</div>
-    <div style="text-align: center">
-      <button
-        mat-stroked-button
-        color="primary"
-        (click)="deactivatePomodoro()"
-      >
-        <mat-icon>alarm_off</mat-icon>
-        {{T.F.FOCUS_MODE.POMODORO_DISABLE|translate}}
-      </button>
-      <button
-        mat-stroked-button
-        (click)="cancelFocusSession()"
-      >
-        <mat-icon>arrow_back</mat-icon>
-        {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
-      </button>
-    </div>
+  } @switch (activatePage) { @case (FocusModePage.ProcrastinationHelp) {
+  <div
+    class="scroll-container"
+    @warpIn
+  >
+    <procrastination></procrastination>
   </div>
-</ng-template>
+  } @case (FocusModePage.TaskSelection) {
+  <focus-mode-task-selection @warpIn></focus-mode-task-selection>
+  } @case (FocusModePage.DurationSelection) {
+  <focus-mode-duration-selection @warpIn></focus-mode-duration-selection>
+  } @case (FocusModePage.Preparation) {
+  <focus-mode-preparation @warpIn></focus-mode-preparation>
+  } @case (FocusModePage.Main) {
+  <focus-mode-main @warpIn></focus-mode-main>
+  } @case (FocusModePage.SessionDone) {
+  <focus-mode-task-done @warpIn></focus-mode-task-done>
+  } }
+</main>
+} } @else {
+<button
+  class="close-btn"
+  mat-icon-button
+  [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
+  (click)="cancelFocusSession()"
+>
+  <mat-icon>close</mat-icon>
+</button>
+<div class="pomodoro-info-wrapper">
+  <div class="pomodoro-info-msg">{{T.F.FOCUS_MODE.POMODORO_INFO|translate}}</div>
+  <div style="text-align: center">
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="deactivatePomodoro()"
+    >
+      <mat-icon>alarm_off</mat-icon>
+      {{T.F.FOCUS_MODE.POMODORO_DISABLE|translate}}
+    </button>
+    <button
+      mat-stroked-button
+      (click)="cancelFocusSession()"
+    >
+      <mat-icon>arrow_back</mat-icon>
+      {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
+    </button>
+  </div>
+</div>
+}

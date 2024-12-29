@@ -5,10 +5,8 @@
 
 <right-panel [isAlwaysOver]="true">
   <div class="page-wrapper">
-    <div
-      *ngIf="isForToday"
-      style="text-align: center"
-    >
+    @if (isForToday) {
+    <div style="text-align: center">
       <a
         class="back-btn"
         color="primary"
@@ -20,13 +18,14 @@
         <!--<mat-icon>playlist_play</mat-icon>-->
       </a>
     </div>
+    }
 
     <h1 class="done-headline mat-headline-5">
-      <span
-        *ngIf="isForToday"
-        [innerHTML]="T.PDS.CELEBRATE|translate"
-      ></span>
-      <span *ngIf="!isForToday">{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
+      @if (isForToday) {
+      <span [innerHTML]="T.PDS.CELEBRATE|translate"></span>
+      } @if (!isForToday) {
+      <span>{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
+      }
     </h1>
     <div class="daily-summary-summary">
       <div class="summary-point">
@@ -74,10 +73,8 @@
         </div>
       </div>
 
-      <div
-        *ngIf="(isBreakTrackingSupport$|async)"
-        class="summary-point"
-      >
+      @if ((isBreakTrackingSupport$|async)) {
+      <div class="summary-point">
         <mat-icon>free_breakfast</mat-icon>
         <div class="summary-text">
           {{T.PDS.BREAK_LABEL|translate}}
@@ -86,6 +83,7 @@
           </div>
         </div>
       </div>
+      }
     </div>
 
     <mat-tab-group
@@ -96,47 +94,40 @@
     >
       <mat-tab [label]="'1. ' + (T.PDS.REVIEW_TASKS|translate)">
         <section class="tab-inner">
-          <ng-container
-            *ngIf="(tasksWorkedOnOrDoneOrRepeatableFlat$|async) as tasks; else loading"
-          >
-            <task-summary-tables
-              *ngIf="tasks?.length; else noTasks"
-              [dayStr]="dayStr"
-              [flatTasks]="tasks"
-              [isForToday]="isForToday"
-              [isShowYesterday]="isForToday && isIncludeYesterday"
-            ></task-summary-tables>
-
-            <tasks-by-tag
-              *ngIf="tasks?.length;"
-              [dayStr]="dayStr"
-              [flatTasks]="tasks"
-              [isForToday]="isForToday"
-              [isShowYesterday]="isForToday && isIncludeYesterday"
-            ></tasks-by-tag>
-
-            <section style="margin-top: 48px">
-              <h3 style="font-weight: bold; margin-bottom: 4px">
-                {{T.PDS.WEEK|translate}}
-              </h3>
-              <worklog-week *ngIf="isForToday"></worklog-week>
-            </section>
-          </ng-container>
-
-          <ng-template #loading>
-            <mat-spinner style="margin: auto"></mat-spinner>
-          </ng-template>
-
-          <ng-template #noTasks>
-            <p>{{T.PDS.NO_TASKS|translate}}</p>
-          </ng-template>
+          @if ((tasksWorkedOnOrDoneOrRepeatableFlat$|async); as tasks) { @if
+          (tasks?.length) {
+          <task-summary-tables
+            [dayStr]="dayStr"
+            [flatTasks]="tasks"
+            [isForToday]="isForToday"
+            [isShowYesterday]="isForToday && isIncludeYesterday"
+          ></task-summary-tables>
+          } @else {
+          <p>{{T.PDS.NO_TASKS|translate}}</p>
+          } @if (tasks?.length;) {
+          <tasks-by-tag
+            [dayStr]="dayStr"
+            [flatTasks]="tasks"
+            [isForToday]="isForToday"
+            [isShowYesterday]="isForToday && isIncludeYesterday"
+          ></tasks-by-tag>
+          }
+          <section style="margin-top: 48px">
+            <h3 style="font-weight: bold; margin-bottom: 4px">
+              {{T.PDS.WEEK|translate}}
+            </h3>
+            @if (isForToday) {
+            <worklog-week></worklog-week>
+            }
+          </section>
+          } @else {
+          <mat-spinner style="margin: auto"></mat-spinner>
+          }
         </section>
       </mat-tab>
 
-      <mat-tab
-        *ngIf="!(configService.evaluation$|async)?.isHideEvaluationSheet"
-        [label]="'2. '+ (T.PDS.EVALUATE_DAY|translate)"
-      >
+      @if (!(configService.evaluation$|async)?.isHideEvaluationSheet) {
+      <mat-tab [label]="'2. '+ (T.PDS.EVALUATE_DAY|translate)">
         <section
           class="tab-inner"
           style="max-width: 600px"
@@ -147,46 +138,45 @@
           ></evaluation-sheet>
         </section>
       </mat-tab>
-
+      } @if (isForToday) {
       <mat-tab
-        *ngIf="isForToday"
         [label]="((configService.evaluation$|async)?.isHideEvaluationSheet ? '2. ' : '3. ')+(T.PDS.PLAN_TOMORROW|translate)"
       >
         <section class="tab-inner">
           <plan-tasks-tomorrow></plan-tasks-tomorrow>
         </section>
       </mat-tab>
+      }
     </mat-tab-group>
 
     <section class="daily-summary-actions">
       <div class="bottom-buttons">
+        @if (isForToday) {
         <button
           (click)="finishDay()"
           [matTooltip]="T.PDS.SAVE_AND_GO_HOME_TOOLTIP|translate"
-          *ngIf="isForToday"
           color="primary"
           mat-flat-button
         >
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.SAVE_AND_GO_HOME|translate}}
         </button>
+        } @if (!isForToday) {
         <button
           (click)="finishDay()"
-          *ngIf="!isForToday"
           color="primary"
           mat-flat-button
         >
           <mat-icon>wb_sunny</mat-icon>
           {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
         </button>
+        }
       </div>
     </section>
   </div>
 
-  <div
-    *ngIf="showSuccessAnimation"
-    class="success-animation-wrapper"
-  >
+  @if (showSuccessAnimation) {
+  <div class="success-animation-wrapper">
     <mat-icon>wb_sunny</mat-icon>
     <div class="unicorn-wrapper">
       <img
@@ -195,4 +185,5 @@
       />
     </div>
   </div>
+  }
 </right-panel>

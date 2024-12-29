@@ -10,7 +10,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { Subscription } from 'rxjs';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { UiModule } from '../../../ui/ui.module';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -18,7 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
   templateUrl: './dialog-timeline-setup.component.html',
   styleUrls: ['./dialog-timeline-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiModule, CommonModule, TranslateModule],
+  imports: [UiModule, TranslateModule],
 })
 export class DialogTimelineSetupComponent implements OnDestroy {
   T: typeof T = T;

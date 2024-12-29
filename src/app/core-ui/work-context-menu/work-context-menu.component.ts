@@ -10,7 +10,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { Project } from '../../features/project/project.model';
 import { UiModule } from '../../ui/ui.module';
-import { NgIf } from '@angular/common';
+
 import { ProjectService } from '../../features/project/project.service';
 
 @Component({
@@ -18,7 +18,7 @@ import { ProjectService } from '../../features/project/project.service';
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, UiModule, RouterModule, NgIf],
+  imports: [RouterLink, UiModule, RouterModule],
 })
 export class WorkContextMenuComponent {
   @Input() project!: Project;

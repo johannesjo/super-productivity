@@ -5,12 +5,11 @@
   class="search-form mat-elevation-z4"
 >
   <div class="input-wrapper">
-    <div
-      *ngIf="(isLoading$|async)"
-      class="spinner"
-    >
+    @if ((isLoading$|async)) {
+    <div class="spinner">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
+    }
     <mat-icon class="search-icon">search</mat-icon>
     <input
       #inputEl
@@ -45,22 +44,22 @@
     autoActiveFirstOption
     [displayWith]="getOptionText"
   >
+    @for (item of (filteredIssueSuggestions$|async); track trackByFn($index, item)) {
     <mat-option
       (click)="navigateToItem(item)"
       class="search-mat-option"
-      *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
       [value]="item"
     >
-      <tag
-        *ngIf="item.ctx"
-        [tag]="item.ctx"
-      ></tag>
+      @if (item.ctx) {
+      <tag [tag]="item.ctx"></tag>
+      }
       <span>{{item?.titleHighlighted || item?.title}}</span>
-      <mat-icon
-        *ngIf="item.issueType"
-        [svgIcon]="item.issueType|issueIcon"
-      ></mat-icon>
-      <mat-icon *ngIf="item.isArchiveTask">archive</mat-icon>
+      @if (item.issueType) {
+      <mat-icon [svgIcon]="item.issueType|issueIcon"></mat-icon>
+      } @if (item.isArchiveTask) {
+      <mat-icon>archive</mat-icon>
+      }
     </mat-option>
+    }
   </mat-autocomplete>
 </form>

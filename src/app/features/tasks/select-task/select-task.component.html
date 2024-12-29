@@ -8,38 +8,28 @@
     matInput
     required
   />
-  <mat-icon
-    *ngIf="!isCreate"
-    matSuffix=""
-    >track_changes
-  </mat-icon>
-  <mat-icon
-    *ngIf="isCreate"
-    matSuffix=""
-    >add
-  </mat-icon>
+  @if (!isCreate) {
+  <mat-icon matSuffix="">track_changes </mat-icon>
+  } @if (isCreate) {
+  <mat-icon matSuffix="">add </mat-icon>
+  }
 
   <mat-autocomplete
     #auto="matAutocomplete"
     [autoActiveFirstOption]="true"
     [displayWith]="displayWith"
   >
-    <mat-option
-      *ngFor="let task of filteredTasks; trackBy:trackById"
-      [value]="task"
-    >
-      <mat-icon
-        *ngIf="task.issueType"
-        [svgIcon]="task.issueType|issueIcon"
-      ></mat-icon>
-      <mat-icon *ngIf="!task.issueType && !projectMap[task.projectId]"
-        >library_books
-      </mat-icon>
-      <tag
-        *ngIf="projectMap[task.projectId]"
-        [tag]="projectMap[task.projectId]"
-      ></tag>
+    @for (task of filteredTasks; track trackById($index, task)) {
+    <mat-option [value]="task">
+      @if (task.issueType) {
+      <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+      } @if (!task.issueType && !projectMap[task.projectId]) {
+      <mat-icon>library_books </mat-icon>
+      } @if (projectMap[task.projectId]) {
+      <tag [tag]="projectMap[task.projectId]"></tag>
+      }
       <span [innerHTML]="task.title"></span>
     </mat-option>
+    }
   </mat-autocomplete>
 </mat-form-field>

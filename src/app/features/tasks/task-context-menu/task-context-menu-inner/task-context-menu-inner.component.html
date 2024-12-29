@@ -85,9 +85,10 @@
     </button>
   </div>
 
+  @if (isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent &&
+  !task.subTaskIds.length) {
   <button
     (click)="startTask()"
-    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && !isCurrent && !task.subTaskIds.length"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -99,10 +100,10 @@
     </span>
     <span class="key-i">{{ kb.togglePlay }}</span>
   </button>
-
+  } @if (isAdvancedControls() && !IS_TOUCH_PRIMARY && !task.isDone &&
+  !task.subTaskIds.length) {
   <button
     (click)="goToFocusMode()"
-    *ngIf="isAdvancedControls() && !IS_TOUCH_PRIMARY && !task.isDone && !task.subTaskIds.length"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -111,10 +112,10 @@
     </span>
     <!--    <span class="key-i">{{ kb.goToFocusMode }}</span>-->
   </button>
-
+  } @if (isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && isCurrent &&
+  !task.subTaskIds.length) {
   <button
     (click)="pauseTask()"
-    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.isDone && isCurrent && !task.subTaskIds.length"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -123,10 +124,9 @@
     </span>
     <span class="key-i">{{ kb.togglePlay }}</span>
   </button>
-
+  } @if (IS_TOUCH_PRIMARY || !isAdvancedControls()) {
   <button
     (click)="toggleTaskDone()"
-    *ngIf="IS_TOUCH_PRIMARY || !isAdvancedControls()"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -138,19 +138,18 @@
     </span>
     <span class="key-i">{{ kb.taskToggleDone }}</span>
   </button>
-
+  } @if (isAdvancedControls() && IS_TOUCH_PRIMARY && !task.parentId && !task.isDone &&
+  isTodayTag && (task.projectId || task.tagIds?.length > 1)) {
   <button
     (click)="removeFromMyDay()"
-    *ngIf="isAdvancedControls() && IS_TOUCH_PRIMARY && !task.parentId && !task.isDone && isTodayTag && (task.projectId || task.tagIds?.length > 1)"
     mat-menu-item
   >
     <mat-icon svgIcon="remove_today"></mat-icon>
     {{ T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate }}
   </button>
-
+  } @if (!task.subTaskIds.length) {
   <button
     (click)="estimateTime()"
-    *ngIf="!task.subTaskIds.length"
     class="hide-xs"
     mat-menu-item
   >
@@ -160,6 +159,7 @@
     </span>
     <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
   </button>
+  }
 
   <!--    <button-->
   <!--      (click)="scheduleTask()"-->
@@ -181,9 +181,9 @@
   <!--      </ng-container>-->
   <!--    </button>-->
 
+  @if (isAdvancedControls() && !task.parentId&&!task.isDone) {
   <button
     (click)="addSubTask();"
-    *ngIf="isAdvancedControls() && !task.parentId&&!task.isDone"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -192,6 +192,7 @@
     </span>
     <span class="key-i">{{ kb.taskAddSubTask }}</span>
   </button>
+  }
 
   <button
     (click)="addAttachment();"
@@ -206,8 +207,8 @@
   </button>
 
   <!--TODO maybe handle dynamically -->
+  @if (task.issueId && task.issueType !==ICAL_TYPE) {
   <a
-    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     [href]="issueUrl$|async"
     mat-menu-item
     style="color: inherit"
@@ -216,19 +217,18 @@
     <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
     {{ T.F.TASK.CMP.OPEN_ISSUE|translate }}
   </a>
-
+  } @if (task.issueId && task.issueType !==ICAL_TYPE) {
   <button
     (click)="updateIssueData()"
-    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     mat-menu-item
   >
     <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
     {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA|translate }}
   </button>
-
+  } @if (isAdvancedControls() && !task.parentId && !isBacklog && task.projectId &&
+  (isShowMoveFromAndToBacklogBtns$|async)) {
   <button
     (click)="moveToBacklog();"
-    *ngIf="isAdvancedControls() && !task.parentId && !isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -237,10 +237,10 @@
     </span>
     <span class="key-i">{{ kb.moveToBacklog }}</span>
   </button>
-
+  } @if (isAdvancedControls() && !task.parentId && isBacklog && task.projectId &&
+  (isShowMoveFromAndToBacklogBtns$|async)) {
   <button
     (click)="moveToToday();"
-    *ngIf="isAdvancedControls() && !task.parentId && isBacklog && task.projectId && (isShowMoveFromAndToBacklogBtns$|async)"
     mat-menu-item
   >
     <span class="menuItemLeft">
@@ -249,6 +249,7 @@
     </span>
     <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
   </button>
+  }
 
   <!--  <button-->
   <!--    (click)="editTags();"-->
@@ -261,8 +262,8 @@
   <!--    <span class="key-i">{{ kb.taskEditTags }}</span>-->
   <!--  </button>-->
 
+  @if (!task.parentId && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0) {
   <button
-    *ngIf="!task.parentId && !task.repeatCfgId && (moveToProjectList$|async)?.length > 0"
     [matMenuTriggerFor]="projectMenu"
     mat-menu-item
   >
@@ -273,15 +274,15 @@
     </span>
     <span class="key-i">{{ kb.taskMoveToProject }}</span>
   </button>
-
+  } @if (task.parentId) {
   <button
-    *ngIf="task.parentId"
     (click)="convertToMainTask()"
     mat-menu-item
   >
     <mat-icon>subdirectory_arrow_left</mat-icon>
     {{ (T.F.TASK.CMP.CONVERT_TO_PARENT_TASK)|translate }}
   </button>
+  }
 
   <button
     (click)="deleteTask()"
@@ -302,12 +303,14 @@
   (closed)="focusRelatedTaskOrNext()"
 >
   <ng-template matMenuContent>
+    @for (project of (moveToProjectList$|async); track trackByProjectId($index, project))
+    {
     <button
       (click)="moveTaskToProject(project.id)"
-      *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
       mat-menu-item
     >
       {{ project.title }}
     </button>
+    }
   </ng-template>
 </mat-menu>

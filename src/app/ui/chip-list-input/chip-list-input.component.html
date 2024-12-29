@@ -14,9 +14,9 @@
         >cancel
       </mat-icon>
 
+      @if (additionalActionIcon) {
       <button
         (click)="additionalAction.emit(modelItem.id)"
-        *ngIf="additionalActionIcon"
         [class.isToggled]="isToggled(modelItem.id)"
         [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip"
         class="additional"
@@ -24,6 +24,7 @@
       >
         <mat-icon style="transform: rotate(45deg)">{{ additionalActionIcon }}</mat-icon>
       </button>
+      }
     </mat-chip-row>
     }
     <input

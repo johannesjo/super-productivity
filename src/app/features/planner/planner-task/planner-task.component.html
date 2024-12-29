@@ -5,36 +5,30 @@
     class="drag-handle-ico"
     svgIcon="drag_handle"
   ></mat-icon>
-  <mat-icon
-    *ngIf="isCurrent"
-    class="play-icon-indicator"
-    >play_arrow
-  </mat-icon>
+  @if (isCurrent) {
+  <mat-icon class="play-icon-indicator">play_arrow </mat-icon>
+  }
   <div class="type-ico-wrapper">
-    <div *ngIf="task.repeatCfgId">
-      <div
-        class="repeat-date-badge"
-        *ngIf="!isRepeatTaskCreatedToday"
-      >
-        {{ task.created|date:'d.M' }}
-      </div>
+    @if (task.repeatCfgId) {
+    <div>
+      @if (!isRepeatTaskCreatedToday) {
+      <div class="repeat-date-badge">{{ task.created|date:'d.M' }}</div>
+      } @if (task.repeatCfgId) {
       <mat-icon
-        *ngIf="task.repeatCfgId"
         [style.transform]="isCurrent ? 'scale(1.4)': ''"
         svgIcon="repeat"
       >
       </mat-icon>
+      }
     </div>
-
-    <div *ngIf="task.issueId">
-      <div
-        *ngIf="task.issuePoints"
-        class="mini-badge bgc-primary"
-      >
-        {{ task.issuePoints }}
-      </div>
+    } @if (task.issueId) {
+    <div>
+      @if (task.issuePoints) {
+      <div class="mini-badge bgc-primary">{{ task.issuePoints }}</div>
+      }
       <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
     </div>
+    }
   </div>
 </div>
 
@@ -45,12 +39,9 @@
   (touchstart)="onTouchStart($event)"
 >
   <div class="wrap">
-    <div
-      class="parent-title"
-      *ngIf="parentTitle"
-    >
-      {{ parentTitle }}
-    </div>
+    @if (parentTitle) {
+    <div class="parent-title">{{ parentTitle }}</div>
+    }
 
     <div class="title">{{ task.title }}</div>
 
@@ -68,11 +59,12 @@
     [style.pointer-events]="task.subTaskIds?.length && 'none'"
     class="planner-time-remaining-shared"
   >
+    @if (task.subTaskIds?.length) {
     <mat-icon
-      *ngIf="task.subTaskIds?.length"
       svgIcon="estimate_remaining"
       inline="true"
     ></mat-icon>
+    }
 
     <inline-input
       (changed)="updateTimeEstimate( $event)"

@@ -1,6 +1,6 @@
 <ng-container>
+  @if (task?.issueWasUpdated) {
   <div
-    *ngIf="task?.issueWasUpdated"
     @expand
     style="text-align: center"
   >
@@ -12,6 +12,7 @@
       {{T.F.OPEN_PROJECT.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
+  }
 
   <div class="table-wrapper">
     <table class="issue-table">
@@ -26,12 +27,13 @@
         </td>
       </tr>
 
-      <tr *ngIf="issue?._embedded.type?.name">
+      @if (issue?._embedded.type?.name) {
+      <tr>
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.TYPE|translate}}</th>
         <td>{{issue?._embedded.type.name}}</td>
       </tr>
-
-      <tr *ngIf="issue?._embedded.status">
+      } @if (issue?._embedded.status) {
+      <tr>
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.STATUS|translate}}</th>
         <td>
           <span
@@ -41,13 +43,13 @@
           >{{issue?._embedded.status.name}}
         </td>
       </tr>
-
-      <tr *ngIf="issue?._embedded.assignee?.name">
+      } @if (issue?._embedded.assignee?.name) {
+      <tr>
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
         <td>{{issue?._embedded.assignee.name}}</td>
       </tr>
-
-      <tr *ngIf="issue?.description?.raw || issue?.description?.html">
+      } @if (issue?.description?.raw || issue?.description?.html) {
+      <tr>
         <th>{{T.F.OPEN_PROJECT.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td class="issue-description">
           <div
@@ -57,6 +59,7 @@
           ></div>
         </td>
       </tr>
+      }
     </table>
 
     <!--    <div *ngIf="issue?.comments">-->

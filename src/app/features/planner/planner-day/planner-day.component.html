@@ -10,10 +10,10 @@
   <div class="day-counts">
     <span>{{ day.timeEstimate |roundDuration|msToString }}</span>
 
-    <ng-container *ngIf="day.itemsTotal > 5 ">
-      <mat-icon inline="true">task_alt</mat-icon>
-      <span>{{ day.itemsTotal }}</span>
-    </ng-container>
+    @if (day.itemsTotal > 5 ) {
+    <mat-icon inline="true">task_alt</mat-icon>
+    <span>{{ day.itemsTotal }}</span>
+    }
   </div>
 </header>
 

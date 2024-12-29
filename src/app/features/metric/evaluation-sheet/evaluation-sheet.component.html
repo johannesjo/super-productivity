@@ -7,9 +7,9 @@
     <p>{{T.F.METRIC.EVAL_FORM.HELP_P2|translate}}</p>
   </help-section>
 
+  @if (metricForDay) {
   <form
     #f="ngForm"
-    *ngIf="metricForDay"
     name="form"
     novalidate
   >
@@ -29,11 +29,10 @@
           type="number"
         />
         <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
-        <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
-          {{T.V.E_1TO10|translate}}
-        </mat-error>
+        @if (mood.invalid && (mood.dirty || mood.touched)) {
+        <mat-error> {{T.V.E_1TO10|translate}} </mat-error>
+        }
       </mat-form-field>
-
       <mat-form-field>
         <mat-label>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate}}</mat-label>
         <input
@@ -49,14 +48,11 @@
           type="number"
         />
         <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
-        <mat-error
-          *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)"
-        >
-          {{T.V.E_1TO10|translate}}
-        </mat-error>
+        @if (productivity.invalid && (productivity.dirty || productivity.touched)) {
+        <mat-error> {{T.V.E_1TO10|translate}} </mat-error>
+        }
       </mat-form-field>
     </div>
-
     <chip-list-input
       (addItem)="addObstruction($event)"
       (addNewItem)="addNewObstruction($event)"
@@ -65,7 +61,6 @@
       [model]="metricForDay.obstructions"
       [suggestions]="(obstructionService.obstructions$|async)"
     ></chip-list-input>
-
     <chip-list-input
       (addItem)="addImprovement($event)"
       (addNewItem)="addNewImprovement($event)"
@@ -74,7 +69,6 @@
       [model]="metricForDay.improvements"
       [suggestions]="(improvementService.improvements$|async)"
     ></chip-list-input>
-
     <chip-list-input
       (addItem)="addImprovementTomorrow($event)"
       (addNewItem)="addNewImprovementTomorrow($event)"
@@ -89,11 +83,10 @@
       additionalActionIcon="repeat"
     ></chip-list-input>
   </form>
+  }
 </div>
-<div
-  *ngIf="(workContextService.isActiveWorkContextProject$|async)"
-  style="text-align: center; margin-top: 8px; margin-bottom: 16px"
->
+@if ((workContextService.isActiveWorkContextProject$|async)) {
+<div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
   <button
     (click)="addNote()"
     mat-button
@@ -102,3 +95,4 @@
     {{T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW|translate}}
   </button>
 </div>
+}

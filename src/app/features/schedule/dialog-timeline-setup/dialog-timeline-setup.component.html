@@ -8,18 +8,19 @@
   [formGroup]="formGroup"
 >
   <mat-dialog-content>
+    @if (data?.isInfoShownInitially) {
     <div
-      *ngIf="data?.isInfoShownInitially"
       class="text"
       [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
     ></div>
-
-    <help-section *ngIf="!data?.isInfoShownInitially">
+    } @if (!data?.isInfoShownInitially) {
+    <help-section>
       <div
         [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
         class="side-info"
       ></div>
     </help-section>
+    }
 
     <formly-form
       (modelChange)="timelineCfg=$event"

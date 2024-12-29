@@ -7,7 +7,7 @@
   matNativeControl
 >
   <option [ngValue]="false">{{T.G.NONE | translate}}</option>
-  <ng-container *ngFor="let opt of projectService.list$|async; trackBy: trackById">
-    <option [ngValue]="opt.id">{{ opt.title }}</option>
-  </ng-container>
+  @for (opt of projectService.list$|async; track trackById($index, opt)) {
+  <option [ngValue]="opt.id">{{ opt.title }}</option>
+  }
 </select>

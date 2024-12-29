@@ -11,21 +11,18 @@
   <ng-container better-drawer-side>
     @let panelContent = panelContent$ |async;
     <div class="right-panel">
-      <issue-panel
-        *ngIf="panelContent === 'ADD_TASK_PANEL'"
-        [@slideInFromRight]
-      ></issue-panel>
-      <notes
-        *ngIf="panelContent === 'NOTES'"
-        [@slideInFromRight]
-      ></notes>
+      @if (panelContent === 'ADD_TASK_PANEL') {
+      <issue-panel [@slideInFromRight]></issue-panel>
+      } @if (panelContent === 'NOTES') {
+      <notes [@slideInFromRight]></notes>
+      } @if (selectedTaskWithDelayForNone$|async; as selectedTaskWithDelayForNone) {
       <task-detail-panel
         [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
         [@taskDetailPanelTaskChange]=" selectedTaskWithDelayForNone?.id"
         [@.disabled]="isDisableTaskPanelAni"
-        *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
         [task]="selectedTaskWithDelayForNone"
       ></task-detail-panel>
+      }
     </div>
   </ng-container>
 </better-drawer-container>

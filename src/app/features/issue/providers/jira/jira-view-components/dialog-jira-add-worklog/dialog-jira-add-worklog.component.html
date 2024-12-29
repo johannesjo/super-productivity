@@ -56,25 +56,27 @@
 
       <mat-menu #contextMenu="matMenu">
         <ng-template matMenuContent>
+          @for (opt of defaultTimeOptions; track opt) {
           <button
-            *ngFor="let opt of defaultTimeOptions"
             mat-menu-item
             type="button"
             (click)="fill(opt.value)"
           >
             {{opt.label|translate}} ({{(getTimeToLogForMode(opt.value)|msToString)}})
           </button>
+          }
         </ng-template>
       </mat-menu>
 
+      @if (defaultTimeCheckboxContent) {
       <mat-checkbox
-        *ngIf="defaultTimeCheckboxContent"
         [@expandFade]
         [checked]="defaultTimeCheckboxContent.isChecked"
         (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
         style="margin-bottom: 20px"
         >{{defaultTimeCheckboxContent.label|translate}}
       </mat-checkbox>
+      }
 
       <mat-form-field>
         <mat-label>{{T.F.JIRA.DIALOG_WORKLOG.STARTED|translate}}</mat-label>

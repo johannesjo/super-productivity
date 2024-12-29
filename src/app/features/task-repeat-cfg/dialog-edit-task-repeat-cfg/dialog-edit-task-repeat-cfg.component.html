@@ -53,9 +53,9 @@
       {{T.G.CANCEL|translate}}
     </button>
 
+    @if (isEdit) {
     <button
       (click)="remove()"
-      *ngIf="isEdit"
       color="primary"
       mat-stroked-button
       type="button"
@@ -63,6 +63,7 @@
       <mat-icon>delete_forever</mat-icon>
       {{T.G.REMOVE|translate}}
     </button>
+    }
 
     <button
       [disabled]="!formGroup1.valid || !formGroup2.valid"

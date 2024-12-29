@@ -1,216 +1,207 @@
-<ng-container *ngIf="(tasks$|async) as tasks">
-  <h1 mat-dialog-title>
-    <mat-icon class="dialog-header-icon">alarm</mat-icon>
-    <span
-      >{{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.DUE_TASKS :
-      T.F.TASK.D_REMINDER_VIEW.DUE_TASK)|translate}}</span
-    >
-  </h1>
-
-  <mat-dialog-content>
-    <div
-      [@standardList]="tasks.length"
-      class="tasks"
-    >
-      <div
-        *ngFor="let task of tasks; trackBy:trackById "
-        class="task"
-      >
-        <div class="title-wrapper">
-          <div class="title">{{task.title}}</div>
-          <tag-list
-            [isShowProjectTagAlways]="true"
-            [task]="task"
-          ></tag-list>
-        </div>
-        <div
-          *ngIf="isMultiple"
-          class="actions"
+@if ((tasks$|async); as tasks) {
+<h1 mat-dialog-title>
+  <mat-icon class="dialog-header-icon">alarm</mat-icon>
+  <span
+    >{{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.DUE_TASKS :
+    T.F.TASK.D_REMINDER_VIEW.DUE_TASK)|translate}}</span
+  >
+</h1>
+<mat-dialog-content>
+  <div
+    [@standardList]="tasks.length"
+    class="tasks"
+  >
+    @for (task of tasks; track trackById($index, task)) {
+    <div class="task">
+      <div class="title-wrapper">
+        <div class="title">{{task.title}}</div>
+        <tag-list
+          [isShowProjectTagAlways]="true"
+          [task]="task"
+        ></tag-list>
+      </div>
+      @if (isMultiple) {
+      <div class="actions">
+        <button
+          (click)="dismiss(task)"
+          [title]="T.G.DISMISS|translate"
+          class="hide-xs"
+          color=""
+          mat-icon-button
+          type="button"
         >
+          <mat-icon>alarm_off</mat-icon>
+        </button>
+        <button
+          (dblclick)="snooze(task,10)"
+          [matMenuTriggerFor]="snoozeMenu"
+          [title]="T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate"
+          color=""
+          mat-icon-button
+          type="button"
+        >
+          <mat-icon>snooze</mat-icon>
+        </button>
+        <button
+          (click)="addToToday(task)"
+          [title]="T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate"
+          color=""
+          mat-icon-button
+          type="button"
+        >
+          <mat-icon>wb_sunny</mat-icon>
+        </button>
+        <mat-menu #snoozeMenu="matMenu">
           <button
-            (click)="dismiss(task)"
-            [title]="T.G.DISMISS|translate"
-            class="hide-xs"
-            color=""
-            mat-icon-button
-            type="button"
-          >
-            <mat-icon>alarm_off</mat-icon>
-          </button>
-
-          <button
-            (dblclick)="snooze(task,10)"
-            [matMenuTriggerFor]="snoozeMenu"
-            [title]="T.F.TASK.D_REMINDER_VIEW.SNOOZE|translate"
-            color=""
-            mat-icon-button
-            type="button"
+            (click)="snooze(task,10)"
+            mat-menu-item
           >
             <mat-icon>snooze</mat-icon>
+            {{T.G.MINUTES|translate:{m: 10} }}
           </button>
-
           <button
-            (click)="addToToday(task)"
-            [title]="T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY|translate"
-            color=""
-            mat-icon-button
-            type="button"
+            (click)="snooze(task,30)"
+            mat-menu-item
           >
-            <mat-icon>wb_sunny</mat-icon>
+            <mat-icon>snooze</mat-icon>
+            {{T.G.MINUTES|translate:{m: 30} }}
           </button>
-
-          <mat-menu #snoozeMenu="matMenu">
-            <button
-              (click)="snooze(task,10)"
-              mat-menu-item
-            >
-              <mat-icon>snooze</mat-icon>
-              {{T.G.MINUTES|translate:{m: 10} }}
-            </button>
-            <button
-              (click)="snooze(task,30)"
-              mat-menu-item
-            >
-              <mat-icon>snooze</mat-icon>
-              {{T.G.MINUTES|translate:{m: 30} }}
-            </button>
-            <button
-              (click)="snooze(task,60)"
-              mat-menu-item
-            >
-              <mat-icon>snooze</mat-icon>
-              {{T.G.MINUTES|translate:{m: 60} }}
-            </button>
-            <button
-              (click)="rescheduleUntilTomorrow(task)"
-              [disabled]="isDisableControls"
-              mat-menu-item
-            >
-              <mat-icon>schedule</mat-icon>
-              {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
-            </button>
-            <button
-              (click)="dismiss(task)"
-              mat-menu-item
-            >
-              <mat-icon>alarm_off</mat-icon>
-              {{T.G.DISMISS|translate}}
-            </button>
-            <button
-              (click)="editReminder(task)"
-              mat-menu-item
-            >
-              <mat-icon>edit</mat-icon>
-              {{T.G.EDIT|translate}}
-            </button>
-          </mat-menu>
-        </div>
+          <button
+            (click)="snooze(task,60)"
+            mat-menu-item
+          >
+            <mat-icon>snooze</mat-icon>
+            {{T.G.MINUTES|translate:{m: 60} }}
+          </button>
+          <button
+            (click)="rescheduleUntilTomorrow(task)"
+            [disabled]="isDisableControls"
+            mat-menu-item
+          >
+            <mat-icon>schedule</mat-icon>
+            {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
+          </button>
+          <button
+            (click)="dismiss(task)"
+            mat-menu-item
+          >
+            <mat-icon>alarm_off</mat-icon>
+            {{T.G.DISMISS|translate}}
+          </button>
+          <button
+            (click)="editReminder(task)"
+            mat-menu-item
+          >
+            <mat-icon>edit</mat-icon>
+            {{T.G.EDIT|translate}}
+          </button>
+        </mat-menu>
       </div>
+      }
     </div>
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button
-        (dblclick)="snoozeAll(10)"
-        [disabled]="isDisableControls"
-        [matMenuTriggerFor]="snoozeAllMenu"
-        color="primary"
-        mat-button
-        type="button"
-      >
-        <mat-icon>snooze</mat-icon>
-        {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL :
-        T.F.TASK.D_REMINDER_VIEW.SNOOZE)|translate }}
-      </button>
-
-      <button
-        (click)="markAsDone()"
-        *ngIf="!isMultiple && (isSingleOnToday$|async)"
-        [disabled]="isDisableControls"
-        color="primary"
-        mat-stroked-button
-        type="button"
-      >
-        <mat-icon>check</mat-icon>
-        {{T.F.TASK.D_REMINDER_VIEW.DONE|translate }}
-      </button>
-
-      <button
-        (click)="addAllToToday()"
-        *ngIf="!(isSingleOnToday$|async)"
-        [disabled]="isDisableControls"
-        color="primary"
-        mat-stroked-button
-        type="button"
-      >
-        <mat-icon>wb_sunny</mat-icon>
-        {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.ADD_ALL_TO_TODAY :
-        T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY)|translate }}
-      </button>
-
-      <button
-        (click)="play()"
-        *ngIf="!isMultiple||(isSingleOnToday$|async)"
-        [disabled]="isDisableControls"
-        color="primary"
-        mat-stroked-button
-        type="button"
-      >
-        <mat-icon>play_arrow</mat-icon>
-        {{(T.F.TASK.D_REMINDER_VIEW.START|translate)}}
-      </button>
-    </div>
-  </mat-dialog-actions>
-
-  <mat-menu #snoozeAllMenu="matMenu">
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
     <button
-      (click)="snoozeAll(10)"
+      (dblclick)="snoozeAll(10)"
       [disabled]="isDisableControls"
-      mat-menu-item
+      [matMenuTriggerFor]="snoozeAllMenu"
+      color="primary"
+      mat-button
+      type="button"
     >
       <mat-icon>snooze</mat-icon>
-      {{T.G.MINUTES|translate:{m: 10} }}
+      {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL :
+      T.F.TASK.D_REMINDER_VIEW.SNOOZE)|translate }}
     </button>
+    @if (!isMultiple && (isSingleOnToday$|async)) {
     <button
-      (click)="snoozeAll(30)"
+      (click)="markAsDone()"
       [disabled]="isDisableControls"
-      mat-menu-item
+      color="primary"
+      mat-stroked-button
+      type="button"
     >
-      <mat-icon>snooze</mat-icon>
-      {{T.G.MINUTES|translate:{m: 30} }}
+      <mat-icon>check</mat-icon>
+      {{T.F.TASK.D_REMINDER_VIEW.DONE|translate }}
     </button>
+    } @if (!(isSingleOnToday$|async)) {
     <button
-      (click)="snoozeAll(60)"
+      (click)="addAllToToday()"
       [disabled]="isDisableControls"
-      mat-menu-item
+      color="primary"
+      mat-stroked-button
+      type="button"
     >
-      <mat-icon>snooze</mat-icon>
-      {{T.G.MINUTES|translate:{m: 60} }}
+      <mat-icon>wb_sunny</mat-icon>
+      {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.ADD_ALL_TO_TODAY :
+      T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY)|translate }}
     </button>
+    } @if (!isMultiple||(isSingleOnToday$|async)) {
     <button
-      (click)="rescheduleAllUntilTomorrow()"
+      (click)="play()"
       [disabled]="isDisableControls"
-      mat-menu-item
+      color="primary"
+      mat-stroked-button
+      type="button"
     >
-      <mat-icon>schedule</mat-icon>
-      {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
+      <mat-icon>play_arrow</mat-icon>
+      {{(T.F.TASK.D_REMINDER_VIEW.START|translate)}}
     </button>
-    <button
-      (click)="editReminder(tasks[0], true)"
-      *ngIf="!isMultiple"
-      mat-menu-item
-    >
-      <mat-icon>edit</mat-icon>
-      {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_EDIT|translate}}
-    </button>
-    <button
-      (click)="dismissAll()"
-      [disabled]="isDisableControls"
-      mat-menu-item
-    >
-      <mat-icon>alarm_off</mat-icon>
-      {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL : T.G.DISMISS)|translate}}
-    </button>
-  </mat-menu>
-</ng-container>
+    }
+  </div>
+</mat-dialog-actions>
+<mat-menu #snoozeAllMenu="matMenu">
+  <button
+    (click)="snoozeAll(10)"
+    [disabled]="isDisableControls"
+    mat-menu-item
+  >
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 10} }}
+  </button>
+  <button
+    (click)="snoozeAll(30)"
+    [disabled]="isDisableControls"
+    mat-menu-item
+  >
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 30} }}
+  </button>
+  <button
+    (click)="snoozeAll(60)"
+    [disabled]="isDisableControls"
+    mat-menu-item
+  >
+    <mat-icon>snooze</mat-icon>
+    {{T.G.MINUTES|translate:{m: 60} }}
+  </button>
+  <button
+    (click)="rescheduleAllUntilTomorrow()"
+    [disabled]="isDisableControls"
+    mat-menu-item
+  >
+    <mat-icon>schedule</mat-icon>
+    {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
+  </button>
+  @if (!isMultiple) {
+  <button
+    (click)="editReminder(tasks[0], true)"
+    mat-menu-item
+  >
+    <mat-icon>edit</mat-icon>
+    {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_EDIT|translate}}
+  </button>
+  }
+  <button
+    (click)="dismissAll()"
+    [disabled]="isDisableControls"
+    mat-menu-item
+  >
+    <mat-icon>alarm_off</mat-icon>
+    {{(isMultiple ? T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL : T.G.DISMISS)|translate}}
+  </button>
+</mat-menu>
+}

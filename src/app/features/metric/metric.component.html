@@ -1,7 +1,7 @@
 <div class="wrapper">
+  @if (projectMetricsService.simpleMetrics$|async; as sm) {
   <section
     class="basic-stats"
-    *ngIf="projectMetricsService.simpleMetrics$|async as sm"
     [@fade]
   >
     <h1
@@ -10,7 +10,6 @@
     >
       {{ T.PM.TITLE|translate }}
     </h1>
-
     <!--  <h2>Basic Metrics</h2>-->
     <p><i>{{ sm.start }} – {{ sm.end }}</i></p>
     <div class="material-table">
@@ -61,25 +60,15 @@
       </table>
     </div>
   </section>
-
-  <p
-    *ngIf="!(metricService.hasData$|async)"
-    style="margin-top: 32px"
-  >
-    {{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate }}
-  </p>
-
-  <section
-    *ngIf="(metricService.hasData$|async)"
-    class="metric-metrics"
-  >
+  } @if (!(metricService.hasData$|async)) {
+  <p style="margin-top: 32px">{{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate }}</p>
+  } @if ((metricService.hasData$|async)) {
+  <section class="metric-metrics">
     <h1>{{ T.F.METRIC.CMP.GLOBAL_METRICS|translate }}</h1>
     <section class="pie-charts">
-      <section
-        *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts"
-      >
+      @if ((metricService.improvementCountsPieChartData$|async); as improvementCounts) {
+      <section>
         <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT|translate }}</h3>
-
         <canvas
           [type]="pieChartType"
           [data]="improvementCounts"
@@ -89,10 +78,8 @@
         >
         </canvas>
       </section>
-
-      <section
-        *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts"
-      >
+      } @if ((metricService.obstructionCountsPieChartData$|async); as obstructionCounts) {
+      <section>
         <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT|translate }}</h3>
         <canvas
           [type]="pieChartType"
@@ -103,10 +90,11 @@
         >
         </canvas>
       </section>
+      }
     </section>
-
     <section class="line-charts">
-      <section *ngIf="(productivityHappiness$|async) as productivityHappiness">
+      @if ((productivityHappiness$|async); as productivityHappiness) {
+      <section>
         <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME|translate }}</h3>
         <div class="chart-wrapper">
           <div class="inner-chart-wrapper">
@@ -120,16 +108,15 @@
           </div>
         </div>
       </section>
+      }
     </section>
   </section>
-
-  <section
-    *ngIf="(metricService.hasData$|async)"
-    class="metric-metrics"
-  >
+  } @if ((metricService.hasData$|async)) {
+  <section class="metric-metrics">
     <h2>{{ T.F.METRIC.CMP.SIMPLE_COUNTERS|translate }}</h2>
     <section class="line-charts">
-      <section *ngIf="(simpleClickCounterData$|async) as simpleCounterClickData">
+      @if ((simpleClickCounterData$|async); as simpleCounterClickData) {
+      <section>
         <h3>{{ T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME|translate }}</h3>
         <div class="chart-wrapper">
           <div class="inner-chart-wrapper">
@@ -145,7 +132,8 @@
           </div>
         </div>
       </section>
-      <section *ngIf="(simpleCounterStopWatchData$|async) as simpleCounterStopWatchData">
+      } @if ((simpleCounterStopWatchData$|async); as simpleCounterStopWatchData) {
+      <section>
         <h3>{{ T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME|translate }}</h3>
         <div class="chart-wrapper">
           <div class="inner-chart-wrapper">
@@ -161,6 +149,8 @@
           </div>
         </div>
       </section>
+      }
     </section>
   </section>
+  }
 </div>

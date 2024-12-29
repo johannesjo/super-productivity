@@ -18,11 +18,10 @@
   (optionSelected)="onIconSelect($event.option.value)"
   [autoActiveFirstOption]="false"
 >
-  <mat-option
-    *ngFor="let icon of (filteredIcons); trackBy: trackByIndex"
-    [value]="icon"
-  >
+  @for (icon of (filteredIcons); track trackByIndex($index, icon)) {
+  <mat-option [value]="icon">
     <mat-icon>{{icon}}</mat-icon>
     <span>{{icon}}</span>
   </mat-option>
+  }
 </mat-autocomplete>

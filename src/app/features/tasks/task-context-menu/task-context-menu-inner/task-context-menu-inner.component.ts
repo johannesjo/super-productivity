@@ -9,7 +9,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { IssueModule } from '../../../issue/issue.module';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -76,10 +76,8 @@ import { PlannerService } from '../../../planner/planner.service';
     MatMenu,
     MatMenuContent,
     MatMenuItem,
-    NgForOf,
     TranslateModule,
     MatMenuTrigger,
-    NgIf,
     MatIconButton,
     MatTooltip,
   ],

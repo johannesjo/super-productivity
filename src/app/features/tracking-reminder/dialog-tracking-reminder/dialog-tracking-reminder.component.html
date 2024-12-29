@@ -14,13 +14,13 @@
     ></select-task>
 
     <div class="track-to-label">
-      <span *ngIf="!isCreate"
-        >{{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TRACK_TO|translate}}</span
-      >
+      @if (!isCreate) {
+      <span>{{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TRACK_TO|translate}}</span>
+      } @if (isCreate) {
       <span
-        *ngIf="isCreate"
         [innerHTML]="T.F.TIME_TRACKING.D_TRACKING_REMINDER.CREATE_AND_TRACK|translate"
       ></span>
+      }
     </div>
   </div>
 
@@ -44,9 +44,11 @@
       mat-stroked-button
       type="submit"
     >
-      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
-      <mat-icon *ngIf="isCreate">add</mat-icon>
-      {{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TASK|translate}}
+      @if (!isCreate) {
+      <mat-icon>track_changes</mat-icon>
+      } @if (isCreate) {
+      <mat-icon>add</mat-icon>
+      } {{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TASK|translate}}
     </button>
   </div>
 </form>

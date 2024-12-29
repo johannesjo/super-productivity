@@ -1,22 +1,13 @@
-<ng-template #spinner>
-  <full-page-spinner></full-page-spinner>
-</ng-template>
-
 <div class="page-wrapper">
+  @if ( (taskRepeatCfgs$|async); as taskRepeatCfgs) {
   <section
-    *ngIf=" (taskRepeatCfgs$|async) as taskRepeatCfgs; else spinner"
     class="component-wrapper"
     style="margin-top: 24px"
   >
     <h2>{{ T.SCHEDULE.REPEATED_TASKS|translate }}</h2>
-
-    <p
-      *ngIf="!taskRepeatCfgs?.length"
-      class="no-scheduled-tasks"
-    >
-      {{ T.SCHEDULE.NO_REPEATABLE_TASKS|translate }}
-    </p>
-
+    @if (!taskRepeatCfgs?.length) {
+    <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_REPEATABLE_TASKS|translate }}</p>
+    }
     <div
       [@standardList]="taskRepeatCfgs?.length"
       class="repeat-task-cfgs"
@@ -35,13 +26,11 @@
                   [value]="taskRepeatCfg.title"
                   class="task-title"
                 ></inline-multiline-input>
-
                 <tag-list
                   [isShowProjectTagAlways]="true"
                   [task]="taskRepeatCfg"
                 ></tag-list>
               </div>
-
               <div
                 (click)="editTaskRepeatCfg(taskRepeatCfg)"
                 class="repeat-text-and-icon"
@@ -57,21 +46,17 @@
       }
     </div>
   </section>
-
+  } @else {
+  <full-page-spinner></full-page-spinner>
+  } @if ( (scheduledTaskService.allScheduledTasks$|async); as allScheduledTasks) {
   <section
-    *ngIf=" (scheduledTaskService.allScheduledTasks$|async) as allScheduledTasks; else spinner"
     class="component-wrapper"
     style="margin-top: 24px"
   >
     <h2>{{ T.SCHEDULE.SCHEDULED_TASKS_WITH_REMINDER|translate }}</h2>
-
-    <p
-      *ngIf="!allScheduledTasks?.length"
-      class="no-scheduled-tasks"
-    >
-      {{ T.SCHEDULE.NO_SCHEDULED|translate }}
-    </p>
-
+    @if (!allScheduledTasks?.length) {
+    <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_SCHEDULED|translate }}</p>
+    }
     <div
       [@standardList]="allScheduledTasks?.length"
       class="tasks"
@@ -91,7 +76,6 @@
             <div class="date show-xs-only">
               {{ task.plannedAt|date:'d MMM, ' }}, {{ task.plannedAt|date:'shortTime' }}
             </div>
-
             <div class="time-left">({{ task.plannedAt|humanizeTimestamp }})</div>
           </div>
           <mat-icon>alarm</mat-icon>
@@ -100,21 +84,17 @@
       }
     </div>
   </section>
-
+  } @else {
+  <full-page-spinner></full-page-spinner>
+  } @if ((tasksPlannedForDays$|async); as allScheduledTasks) {
   <section
-    *ngIf="(tasksPlannedForDays$|async) as allScheduledTasks; else spinner"
     class="component-wrapper"
     style="margin-top: 24px"
   >
     <h2>{{ T.SCHEDULE.NO_SCHEDULED_TITLE|translate }}</h2>
-
-    <p
-      *ngIf="!allScheduledTasks?.length"
-      class="no-scheduled-tasks"
-    >
-      {{ T.SCHEDULE.NO_SCHEDULED|translate }}
-    </p>
-
+    @if (!allScheduledTasks?.length) {
+    <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_SCHEDULED|translate }}</p>
+    }
     <div
       [@standardList]="allScheduledTasks?.length"
       class="tasks"
@@ -136,4 +116,7 @@
       }
     </div>
   </section>
+  } @else {
+  <full-page-spinner></full-page-spinner>
+  }
 </div>

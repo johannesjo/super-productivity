@@ -1,11 +1,9 @@
-<div
-  class="wrap-add-planned"
-  *ngIf="workContextService.isToday
-  &&(isAlwaysShowIfAny || (workContextService.activeWorkContext$|async)?.taskIds.length ===0)
-  && (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
->
+@if (workContextService.isToday &&(isAlwaysShowIfAny ||
+(workContextService.activeWorkContext$|async)?.taskIds.length ===0) &&
+(addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async); as plannedForToday) {
+<div class="wrap-add-planned">
+  @if (plannedForToday?.length) {
   <button
-    *ngIf="plannedForToday?.length"
     (click)="addTasksForTomorrowService.movePlannedTasksToToday(plannedForToday)"
     class="add-scheduled"
     color=""
@@ -15,20 +13,19 @@
     <mat-icon>playlist_add</mat-icon>
     {{ T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{ nr: plannedForToday.length } }}
   </button>
-
-  <ng-container
-    *ngIf="plannedForToday.length === 0 && (addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$|async) as nrOfPlannerItemsForTomorrow"
+  } @if (plannedForToday.length === 0 &&
+  (addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$|async); as
+  nrOfPlannerItemsForTomorrow) { @if (nrOfPlannerItemsForTomorrow) {
+  <button
+    class="add-scheduled"
+    (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
+    color=""
+    mat-stroked-button
+    tabindex="1"
   >
-    <button
-      *ngIf="nrOfPlannerItemsForTomorrow"
-      class="add-scheduled"
-      (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
-      color=""
-      mat-stroked-button
-      tabindex="1"
-    >
-      <mat-icon>playlist_add</mat-icon>
-      {{ T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr: nrOfPlannerItemsForTomorrow } }}
-    </button>
-  </ng-container>
+    <mat-icon>playlist_add</mat-icon>
+    {{ T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr: nrOfPlannerItemsForTomorrow } }}
+  </button>
+  } }
 </div>
+}

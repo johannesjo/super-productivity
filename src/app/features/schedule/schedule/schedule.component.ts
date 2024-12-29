@@ -34,7 +34,7 @@ import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import {
@@ -74,7 +74,6 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     ScheduleEventComponent,
     CdkDrag,
     DatePipe,
-    NgIf,
     CreateTaskPlaceholderComponent,
   ],
   templateUrl: './schedule.component.html',

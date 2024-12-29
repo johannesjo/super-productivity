@@ -46,8 +46,8 @@
     >
       {{ T.G.CANCEL|translate }}
     </button>
+    @if (!IS_ANDROID_WEB_VIEW) {
     <button
-      *ngIf="!IS_ANDROID_WEB_VIEW"
       (click)="closeApp()"
       color="primary"
       mat-stroked-button
@@ -55,6 +55,7 @@
       <mat-icon>power_settings_new</mat-icon>
       {{ T.F.SYNC.D_INCOMPLETE_SYNC.BTN_CLOSE_APP|translate }}
     </button>
+    }
 
     <button
       (click)="close('FORCE_UPDATE_REMOTE')"

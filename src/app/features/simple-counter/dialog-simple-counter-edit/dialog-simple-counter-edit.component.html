@@ -3,9 +3,9 @@
 
   <mat-dialog-content>
     <div class="form-wrapper">
-      <mat-form-field
-        *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter || data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder"
-      >
+      @if (data.simpleCounter.type === SimpleCounterType.ClickCounter ||
+      data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder) {
+      <mat-form-field>
         <input
           (ngModelChange)="onModelChange($event)"
           [ngModel]="val"
@@ -15,7 +15,8 @@
           type="number"
         />
       </mat-form-field>
-      <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.StopWatch">
+      } @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
+      <mat-form-field>
         <input
           (ngModelChange)="onModelChange($event)"
           [ngModel]="val"
@@ -27,6 +28,7 @@
         />
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>
+      }
     </div>
   </mat-dialog-content>
 

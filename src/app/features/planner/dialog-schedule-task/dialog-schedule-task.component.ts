@@ -19,7 +19,7 @@ import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -43,7 +43,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 
 @Component({
   selector: 'dialog-schedule-task',
-  imports: [UiModule, CommonModule, FormsModule],
+  imports: [UiModule, FormsModule],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

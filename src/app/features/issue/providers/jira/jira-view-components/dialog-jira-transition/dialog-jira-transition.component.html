@@ -27,13 +27,13 @@
     <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
-      <mat-option
-        *ngFor="let transition of (availableTransitions$|async); trackBy: trackByIndex"
-        [value]="transition"
-      >
+      @for (transition of (availableTransitions$|async); track trackByIndex($index,
+      transition)) {
+      <mat-option [value]="transition">
         <!--<img [src]="transition.to.iconUrl">-->
         {{transition.name}}
       </mat-option>
+      }
     </mat-select>
   </mat-form-field>
 </mat-dialog-content>

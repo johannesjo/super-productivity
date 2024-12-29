@@ -37,11 +37,9 @@
           name="type"
           required="true"
         >
-          <mat-option
-            *ngFor="let type of types; trackBy:trackByIndex"
-            [value]="type.type"
-            >{{ (type.title|translate) }}
-          </mat-option>
+          @for (type of types; track trackByIndex($index, type)) {
+          <mat-option [value]="type.type">{{ (type.title|translate) }} </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>

@@ -4,21 +4,21 @@
 >
   <h1>{{T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION|translate}}</h1>
 
-  <ng-container *ngIf="task$|async as task">
-    <div class="for-task">
-      <div>for task "<em>{{task?.title}}</em>"</div>
-    </div>
-    <div style="text-align: center; margin-bottom: 8px">
-      <button
-        mat-stroked-button
-        type="button"
-        (click)="selectDifferentTask()"
-      >
-        <!--      <mat-icon>arrow_back_ios</mat-icon>-->
-        {{T.F.FOCUS_MODE.SELECT_ANOTHER_TASK|translate}}
-      </button>
-    </div>
-  </ng-container>
+  @if (task$|async; as task) {
+  <div class="for-task">
+    <div>for task "<em>{{task?.title}}</em>"</div>
+  </div>
+  <div style="text-align: center; margin-bottom: 8px">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="selectDifferentTask()"
+    >
+      <!--      <mat-icon>arrow_back_ios</mat-icon>-->
+      {{T.F.FOCUS_MODE.SELECT_ANOTHER_TASK|translate}}
+    </button>
+  </div>
+  }
   <input-duration-slider
     [model]="sessionDuration$|async"
     (modelChange)="onFocusModeDurationChanged($event)"

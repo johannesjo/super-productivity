@@ -10,7 +10,7 @@ import { UiModule } from '../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { download } from '../../../util/download';
 import { DataImportService } from '../data-import.service';
-import { NgIf } from '@angular/common';
+
 import { IS_ELECTRON } from '../../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
@@ -21,7 +21,7 @@ export interface DialogIncompleteSyncData {
 
 @Component({
   selector: 'dialog-incomplete-sync',
-  imports: [MatDialogContent, TranslateModule, UiModule, FormsModule, NgIf],
+  imports: [MatDialogContent, TranslateModule, UiModule, FormsModule],
   templateUrl: './dialog-incomplete-sync.component.html',
   styleUrl: './dialog-incomplete-sync.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

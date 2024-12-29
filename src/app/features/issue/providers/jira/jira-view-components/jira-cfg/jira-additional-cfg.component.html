@@ -10,10 +10,8 @@
     {{ T.F.JIRA.CFG_CMP.ENABLE_TRANSITIONS|translate }}
   </mat-slide-toggle>
 
-  <section
-    *ngIf="cfg.isTransitionIssuesEnabled"
-    @expand
-  >
+  @if (cfg.isTransitionIssuesEnabled) {
+  <section @expand>
     <mat-form-field>
       <mat-label
         >{{ T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate }}
@@ -24,36 +22,35 @@
         class="border-color-primary"
         matInput
       />
-
       <mat-autocomplete
         #autoEl="matAutocomplete"
         (optionSelected)="updateTransitionOptions()"
         [autoActiveFirstOption]="true"
         [displayWith]="displayIssueWith"
       >
+        @if ((isLoading$|async)) {
         <mat-option
-          *ngIf="(isLoading$|async)"
           [value]="issueSuggestionsCtrl.value"
           class="is-loading"
         >
           <mat-spinner diameter="50"></mat-spinner>
         </mat-option>
-        <mat-option
-          *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByIssueId;"
-          [value]="issue"
-          ><span>{{ issue?.title }}</span>
-        </mat-option>
+        } @for (issue of (filteredIssueSuggestions$|async); track trackByIssueId($index,
+        issue)) {
+        <mat-option [value]="issue"><span>{{ issue?.title }}</span> </mat-option>
+        }
       </mat-autocomplete>
     </mat-form-field>
-
-    <div *ngFor="let opt of transitionConfigOpts">
+    @for (opt of transitionConfigOpts; track opt) {
+    <div>
       <mat-form-field>
-        <label *ngIf="opt.key==='OPEN'">{{ T.F.JIRA.CFG_CMP.OPEN|translate }}</label>
-        <label *ngIf="opt.key==='IN_PROGRESS'"
-          >{{ T.F.JIRA.CFG_CMP.IN_PROGRESS|translate }}</label
-        >
-        <label *ngIf="opt.key==='DONE'">{{ T.F.JIRA.CFG_CMP.DONE|translate }}</label>
-
+        @if (opt.key==='OPEN') {
+        <label>{{ T.F.JIRA.CFG_CMP.OPEN|translate }}</label>
+        } @if (opt.key==='IN_PROGRESS') {
+        <label>{{ T.F.JIRA.CFG_CMP.IN_PROGRESS|translate }}</label>
+        } @if (opt.key==='DONE') {
+        <label>{{ T.F.JIRA.CFG_CMP.DONE|translate }}</label>
+        }
         <!-- TODO check for a better way to do this -->
         <!--          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"-->
         <mat-select
@@ -65,16 +62,15 @@
           <mat-option value="ALWAYS_ASK"
             >{{ T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate }}
           </mat-option>
-          <mat-option
-            *ngFor="let transition of cfg.availableTransitions"
-            [value]="transition"
-          >
-            {{ transition.name }}
-          </mat-option>
+          @for (transition of cfg.availableTransitions; track transition) {
+          <mat-option [value]="transition"> {{ transition.name }} </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>
+    }
   </section>
+  }
 
   <section>
     <h3 class="sub-section-heading">
@@ -107,11 +103,12 @@
         #storyPointAutoEl="matAutocomplete"
         [autoActiveFirstOption]="true"
       >
-        <mat-option
-          *ngFor="let field of (filteredCustomFieldSuggestions$|async); trackBy:trackByCustomFieldId;"
-          [value]="field.id"
+        @for (field of (filteredCustomFieldSuggestions$|async); track
+        trackByCustomFieldId($index, field)) {
+        <mat-option [value]="field.id"
           ><span>{{ field?.id }}: {{ field?.name }}</span>
         </mat-option>
+        }
       </mat-autocomplete>
     </mat-form-field>
   </section>

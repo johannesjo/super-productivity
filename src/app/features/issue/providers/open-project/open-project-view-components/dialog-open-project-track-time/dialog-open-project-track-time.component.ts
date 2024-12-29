@@ -24,7 +24,7 @@ import { IssueProviderActions } from '../../../../store/issue-provider.actions';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../../../../tasks/task.service';
 
 @Component({
@@ -33,7 +33,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
-  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, NgIf],
+  imports: [UiModule, FormsModule, AsyncPipe],
 })
 export class DialogOpenProjectTrackTimeComponent {
   T: typeof T = T;
