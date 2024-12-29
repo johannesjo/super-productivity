@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  input,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
@@ -35,8 +36,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   projectMap: { [key: string]: Project } = {};
   isCreate: boolean = false;
   @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
-  @Input() isLimitToProject: boolean = false;
-  @Input() isIncludeDoneTasks: boolean = false;
+  readonly isLimitToProject = input<boolean>(false);
+  readonly isIncludeDoneTasks = input<boolean>(false);
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
@@ -44,6 +45,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
     private _store: Store,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set initialTask(task: Task) {
     if ((task && !this.taskSelectCtrl.value) || this.taskSelectCtrl.value === '') {
       this.isCreate = false;
@@ -60,11 +63,11 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
           this.projectMap[project.id] = project;
         });
       });
-    const tasks$: Observable<Task[]> = this.isLimitToProject
-      ? this.isIncludeDoneTasks
+    const tasks$: Observable<Task[]> = this.isLimitToProject()
+      ? this.isIncludeDoneTasks()
         ? this._workContextService.trackableTasksForActiveContext$
         : this._workContextService.startableTasksForActiveContext$
-      : this.isIncludeDoneTasks
+      : this.isIncludeDoneTasks()
         ? this._store.select(selectTrackableTasksActiveContextFirst)
         : this._store.select(selectStartableTasksActiveContextFirst);
 

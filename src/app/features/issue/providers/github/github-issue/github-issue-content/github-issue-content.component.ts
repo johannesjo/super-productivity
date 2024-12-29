@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { GithubComment, GithubIssue } from '../github-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
@@ -14,8 +14,11 @@ import { TaskService } from '../../../../../tasks/task.service';
   standalone: false,
 })
 export class GithubIssueContentComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() issue?: GithubIssue;
-  @Input() task?: TaskWithSubTasks;
+  readonly task = input<TaskWithSubTasks>();
 
   T: typeof T = T;
 
@@ -45,13 +48,14 @@ export class GithubIssueContentComponent {
   }
 
   hideUpdates(): void {
-    if (!this.task) {
+    const task = this.task();
+    if (!task) {
       throw new Error('No task');
     }
     if (!this.issue) {
       throw new Error('No issue');
     }
-    this._taskService.markIssueUpdatesAsRead(this.task.id);
+    this._taskService.markIssueUpdatesAsRead(task.id);
   }
 
   trackByIndex(i: number, p: any): number {

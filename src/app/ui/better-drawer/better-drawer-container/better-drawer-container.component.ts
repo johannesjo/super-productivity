@@ -10,6 +10,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  input,
 } from '@angular/core';
 import { fadeAnimation } from '../../animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -34,7 +35,7 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
 export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy
 {
-  @Input() sideWidth: number = 0;
+  readonly sideWidth = input<number>(0);
   @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
   containerWidth$: Observable<number> = this.contentEl$.pipe(
@@ -79,6 +80,8 @@ export class BetterDrawerContainerComponent
 
   private _isOpen: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOpen(v: boolean) {
     this._isOpen = v;
     this._updateStyle();
@@ -86,6 +89,8 @@ export class BetterDrawerContainerComponent
 
   private _isOver: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOver(v: boolean) {
     this._isOver = v;
     this._updateStyle();
@@ -144,7 +149,7 @@ export class BetterDrawerContainerComponent
   isRTL: boolean = false;
 
   private _getWidthRelatedStyles(): string {
-    const widthStyle = ` width: ${this.sideWidth}%;`,
+    const widthStyle = ` width: ${this.sideWidth()}%;`,
       margin = this.isRTL ? 'margin-left' : 'margin-right';
 
     return this.isOverGet
@@ -153,7 +158,7 @@ export class BetterDrawerContainerComponent
         : 'transform: translateX(100%);'
       : this.isOpenGet
         ? `${margin}: 0; ${widthStyle}`
-        : `${margin}: ${-1 * this.sideWidth}%; ${widthStyle}`;
+        : `${margin}: ${-1 * this.sideWidth()}%; ${widthStyle}`;
   }
 
   private _updateStyle(): void {

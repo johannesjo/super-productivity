@@ -2,15 +2,15 @@
   (click)="toggleExpand();"
   class="collapsible-header"
 >
-  @if (isIconBefore) {
+  @if (isIconBefore()) {
   <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
   } @if (icon) {
   <mat-icon class="collapsible-additional-icon">{{icon}} </mat-icon>
   }
 
-  <div class="collapsible-title">{{title}}</div>
+  <div class="collapsible-title">{{title()}}</div>
 
-  @if (!isIconBefore) {
+  @if (!isIconBefore()) {
   <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
   }
 </div>

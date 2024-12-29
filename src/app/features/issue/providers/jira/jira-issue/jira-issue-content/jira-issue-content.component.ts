@@ -91,6 +91,8 @@ export class JiraIssueContentComponent {
     private readonly _jiraCommonInterfacesService: JiraCommonInterfacesService,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('issue') set issueIn(i: JiraIssue) {
     this.issue = i;
     this._issue$.next(i);
@@ -103,6 +105,8 @@ export class JiraIssueContentComponent {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskIn(v: TaskWithSubTasks) {
     this.task = v;
     this._task$.next(v);

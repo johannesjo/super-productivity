@@ -35,6 +35,9 @@ import { exists } from '../../../util/exists';
   standalone: false,
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;
   @Output() save: EventEmitter<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
@@ -59,6 +62,8 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     return this._cfg;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(v: any) {
     this._cfg = v;
     if (v && this._instance) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TaskAttachment } from '../task-attachment.model';
 import { TaskAttachmentService } from '../task-attachment.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,9 +16,9 @@ import { SnackService } from 'src/app/core/snack/snack.service';
   standalone: false,
 })
 export class TaskAttachmentListComponent {
-  @Input() taskId?: string;
-  @Input() attachments?: TaskAttachment[];
-  @Input() isDisableControls: boolean = false;
+  readonly taskId = input<string>();
+  readonly attachments = input<TaskAttachment[]>();
+  readonly isDisableControls = input<boolean>(false);
 
   T: typeof T = T;
   isError: boolean[] = [];
@@ -30,7 +30,7 @@ export class TaskAttachmentListComponent {
   ) {}
 
   openEditDialog(attachment?: TaskAttachment): void {
-    if (!this.taskId) {
+    if (!this.taskId()) {
       throw new Error('No task id given');
     }
 
@@ -43,18 +43,19 @@ export class TaskAttachmentListComponent {
       })
       .afterClosed()
       .subscribe((attachmentIN) => {
-        if (!this.taskId) {
+        const taskId = this.taskId();
+        if (!taskId) {
           throw new Error('No taskId');
         }
         if (attachmentIN) {
           if (attachmentIN.id) {
             this.attachmentService.updateAttachment(
-              this.taskId,
+              taskId,
               attachmentIN.id,
               attachmentIN,
             );
           } else {
-            this.attachmentService.addAttachment(this.taskId, attachmentIN);
+            this.attachmentService.addAttachment(taskId, attachmentIN);
           }
         }
       });
@@ -72,10 +73,11 @@ export class TaskAttachmentListComponent {
   }
 
   remove(id: string): void {
-    if (!this.taskId) {
+    const taskId = this.taskId();
+    if (!taskId) {
       throw new Error('No taskId');
     }
-    this.attachmentService.deleteAttachment(this.taskId, id);
+    this.attachmentService.deleteAttachment(taskId, id);
   }
 
   trackByFn(i: number, attachment: TaskAttachment): string | number | null {

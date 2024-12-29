@@ -8,6 +8,7 @@ import {
   Input,
   Output,
   viewChild,
+  input,
 } from '@angular/core';
 
 @Component({
@@ -18,9 +19,14 @@ import {
   standalone: false,
 })
 export class InlineInputComponent implements AfterViewInit {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() type: 'text' | 'duration' | 'time' = 'text';
-  @Input() value?: string | number;
-  @Input() displayValue?: string;
+  readonly value = input<string | number>();
+  readonly displayValue = input<string>();
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() newValue?: string | number;
 
   @Output() changed: EventEmitter<string | number> = new EventEmitter();
@@ -58,7 +64,7 @@ export class InlineInputComponent implements AfterViewInit {
 
     if (
       (this.newValue || this.newValue === '' || this.newValue === 0) &&
-      this.newValue !== this.value
+      this.newValue !== this.value()
     ) {
       this.changed.emit(this.newValue);
     }

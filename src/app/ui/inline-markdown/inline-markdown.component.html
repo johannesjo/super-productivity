@@ -32,9 +32,9 @@
   }
 </div>
 
-@if (isShowControls) {
+@if (isShowControls()) {
 <div class="controls">
-  @if(isShowChecklistToggle){
+  @if(isShowChecklistToggle()){
   <!--  -->
   <button
     [matTooltip]="'Toggle checklist mode'"

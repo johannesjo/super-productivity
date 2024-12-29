@@ -5,6 +5,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  input,
   OnDestroy,
   Output,
   viewChild,
@@ -39,11 +40,14 @@ interface Suggestion {
 export class ChipListInputComponent implements OnDestroy {
   T: typeof T = T;
 
-  @Input() label?: string;
+  readonly label = input<string>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() additionalActionIcon?: string;
-  @Input() additionalActionTooltip?: string;
-  @Input() additionalActionTooltipUnToggle?: string;
-  @Input() toggledItems?: string[];
+  readonly additionalActionTooltip = input<string>();
+  readonly additionalActionTooltipUnToggle = input<string>();
+  readonly toggledItems = input<string[]>();
 
   @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
@@ -89,11 +93,15 @@ export class ChipListInputComponent implements OnDestroy {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set suggestions(val: Suggestion[]) {
     this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
     this._updateModelItems(this._modelIds);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(v: string[]) {
     this._modelIds = v;
     this._updateModelItems(v);
@@ -106,7 +114,7 @@ export class ChipListInputComponent implements OnDestroy {
     }
 
     if (!matAutocomplete.isOpen) {
-      const input = event.input;
+      const inp = event.input;
       const value = event.value;
 
       // Add our fruit
@@ -114,7 +122,7 @@ export class ChipListInputComponent implements OnDestroy {
         this._addByTitle(value.trim());
       }
 
-      input.value = '';
+      inp.value = '';
 
       this.inputCtrl.setValue(null);
     }
@@ -134,7 +142,8 @@ export class ChipListInputComponent implements OnDestroy {
   }
 
   isToggled(id: string): boolean {
-    return !!this.toggledItems && this.toggledItems.includes(id);
+    const toggledItems = this.toggledItems();
+    return !!toggledItems && toggledItems.includes(id);
   }
 
   triggerCtrlEnterSubmit(ev: KeyboardEvent): void {

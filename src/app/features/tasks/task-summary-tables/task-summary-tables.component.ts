@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,11 +28,11 @@ import { DateService } from 'src/app/core/date/date.service';
 export class TaskSummaryTablesComponent {
   T: typeof T = T;
 
-  @Input() dayStr: string = this._dateService.todayStr();
+  readonly dayStr = input<string>(this._dateService.todayStr());
 
-  @Input() isForToday: boolean = true;
+  readonly isForToday = input<boolean>(true);
 
-  @Input() isShowYesterday: boolean = false;
+  readonly isShowYesterday = input<boolean>(false);
   flatTasks: Task[] = [];
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
@@ -64,6 +64,8 @@ export class TaskSummaryTablesComponent {
     private _dateService: DateService,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
     this.flatTasks = v;
     const pids = unique(
@@ -95,7 +97,7 @@ export class TaskSummaryTablesComponent {
   ): Promise<void> {
     const taskIds = this.flatTasks.map((task) => task.id);
     await this._taskService.roundTimeSpentForDayEverywhere({
-      day: this.dayStr,
+      day: this.dayStr(),
       taskIds,
       roundTo,
       isRoundUp,
@@ -112,12 +114,12 @@ export class TaskSummaryTablesComponent {
     project: Project | { id: string | null; title: string },
   ): ProjectWithTasks {
     let yesterdayStr: string | undefined;
-    if (this.isShowYesterday && this.isForToday) {
+    if (this.isShowYesterday() && this.isForToday()) {
       const t = new Date();
       t.setDate(t.getDate() - 1);
       yesterdayStr = this._dateService.todayStr(t);
     }
 
-    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr, yesterdayStr);
+    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr(), yesterdayStr);
   }
 }

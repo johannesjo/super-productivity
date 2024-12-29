@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  input,
 } from '@angular/core';
 import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -44,7 +45,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   animations: [expandAnimation],
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
-  @Input() section?: ConfigFormSection<IssueProviderOpenProject>;
+  readonly section = input<ConfigFormSection<IssueProviderOpenProject>>();
   @Output() modelChange: EventEmitter<IssueProviderOpenProject> = new EventEmitter();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
@@ -86,6 +87,8 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(cfg: IssueProviderOpenProject) {
     const newCfg: IssueProviderOpenProject = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
@@ -121,7 +124,7 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<IssueProviderOpenProject>).items;
+    this.fields = (this.section() as ConfigFormSection<IssueProviderOpenProject>).items;
   }
 
   ngOnDestroy(): void {

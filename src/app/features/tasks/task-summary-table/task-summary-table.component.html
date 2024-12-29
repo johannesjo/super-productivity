@@ -1,6 +1,6 @@
 <div class="table-wrapper mat-elevation-z1">
   <table
-    [dataSource]="flatTasks"
+    [dataSource]="flatTasks()"
     class="summary-table"
     mat-table
   >
@@ -49,13 +49,13 @@
         @if (!task.subTaskIds?.length) {
         <inline-input
           (changed)="updateTimeSpentTodayForTask(task, $event)"
-          [displayValue]="task.timeSpentOnDay[day]|msToClockString"
+          [displayValue]="task.timeSpentOnDay[day()]|msToClockString"
           [type]="'duration'"
-          [value]="task.timeSpentOnDay[day]"
+          [value]="task.timeSpentOnDay[day()]"
         >
         </inline-input>
         } @if (task.subTaskIds?.length) {
-        <span>{{task.timeSpentOnDay[day]|msToClockString}}</span>
+        <span>{{task.timeSpentOnDay[day()]|msToClockString}}</span>
         }
       </td>
     </ng-container>

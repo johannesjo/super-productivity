@@ -2,7 +2,7 @@
   (click)="focusInput()"
   class="inline-input-wrapper"
 >
-  <div class="value-wrapper">{{displayValue || value}}</div>
+  <div class="value-wrapper">{{displayValue() || value()}}</div>
 
   @if (type==='duration') {
   <input
@@ -11,7 +11,7 @@
     (blur)="blur()"
     (keypress)="keypressHandler($event)"
     (ngModelChange)="onChange($event)"
-    [ngModel]="value"
+    [ngModel]="value()"
     class="duration-input"
     inputDuration
   />
@@ -21,7 +21,7 @@
     (blur)="blur()"
     (keypress)="keypressHandler($event)"
     (ngModelChange)="onChange($event)"
-    [ngModel]="value"
+    [ngModel]="value()"
     [type]="type"
   />
   }

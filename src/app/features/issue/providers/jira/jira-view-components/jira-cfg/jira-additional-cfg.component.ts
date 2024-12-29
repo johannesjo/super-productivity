@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  input,
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
@@ -33,7 +34,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   standalone: false,
 })
 export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
-  @Input() section?: ConfigFormSection<IssueProviderJira>;
+  readonly section = input<ConfigFormSection<IssueProviderJira>>();
 
   @Output() modelChange: EventEmitter<IssueProviderJira> = new EventEmitter();
 
@@ -92,6 +93,8 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(cfg: IssueProviderJira) {
     const newCfg: IssueProviderJira = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);

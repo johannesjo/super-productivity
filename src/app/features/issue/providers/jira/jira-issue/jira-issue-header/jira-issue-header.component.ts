@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { isOnline$ } from 'src/app/util/is-online';
 import { Observable } from 'rxjs';
@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
   standalone: false,
 })
 export class JiraIssueHeaderComponent {
-  @Input() task?: TaskWithSubTasks;
+  readonly task = input<TaskWithSubTasks>();
   isOnline$: Observable<boolean> = isOnline$;
 
   constructor() {}

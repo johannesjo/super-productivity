@@ -18,6 +18,8 @@ const sectionKey = 'sound';
   standalone: false,
 })
 export class ConfigSoundFormComponent {
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(cfg: SoundConfig) {
     this.config = { ...cfg };
     this.patchForm();

@@ -4,7 +4,7 @@ import {
   HostBinding,
   HostListener,
   inject,
-  Input,
+  input,
 } from '@angular/core';
 import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 import { IssueService } from '../../issue/issue.service';
@@ -19,7 +19,7 @@ import { IssueService } from '../../issue/issue.service';
 export class PlannerCalendarEventComponent {
   private _issueService = inject(IssueService);
 
-  @Input({ required: true }) calendarEvent!: ScheduleFromCalendarEvent;
+  readonly calendarEvent = input.required<ScheduleFromCalendarEvent>();
   isBeingSubmitted = false;
 
   @HostBinding('attr.title') title = `Convert to task`;
@@ -37,8 +37,8 @@ export class PlannerCalendarEventComponent {
 
     this.isBeingSubmitted = true;
     this._issueService.addTaskFromIssue({
-      issueDataReduced: this.calendarEvent,
-      issueProviderId: this.calendarEvent.calProviderId,
+      issueDataReduced: this.calendarEvent(),
+      issueProviderId: this.calendarEvent().calProviderId,
       issueProviderKey: 'ICAL',
       isForceDefaultProject: true,
     });

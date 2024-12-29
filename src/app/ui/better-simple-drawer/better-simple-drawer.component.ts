@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  input,
 } from '@angular/core';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -22,7 +23,7 @@ import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
-  @Input() sideWidth: number = 0;
+  readonly sideWidth = input<number>(0);
   @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
 
@@ -43,6 +44,8 @@ export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
 
   private _isOpen: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOpen(v: boolean) {
     this._isOpen = v;
     this._updateStyle();
@@ -50,6 +53,8 @@ export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
 
   private _isOver: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOver(v: boolean) {
     this._isOver = v;
     this._updateStyle();
@@ -84,11 +89,11 @@ export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
   }
 
   private _getWidthRelatedStyles(): string {
-    const widthStyle = ` width: ${this.sideWidth}px;`;
+    const widthStyle = ` width: ${this.sideWidth()}px;`;
 
     return this.isOpenGet
       ? `margin-right: 0; ${widthStyle}`
-      : `margin-right: ${-1 * this.sideWidth}px; ${widthStyle}`;
+      : `margin-right: ${-1 * this.sideWidth()}px; ${widthStyle}`;
   }
 
   private _updateStyle(): void {

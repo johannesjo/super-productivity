@@ -7,9 +7,9 @@
   >
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
-    @if (!isShowYesterday) {
+    @if (!isShowYesterday()) {
     <div>{{project.timeSpentToday|msToString}}</div>
-    } @if (isShowYesterday) {
+    } @if (isShowYesterday()) {
     <div>
       {{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}} @if
       (project.timeSpentYesterday >0) { ({{project.timeSpentYesterday|msToString}}
@@ -20,7 +20,7 @@
   }
   <task-summary-table
     (updated)="onTaskSummaryEdit()"
-    [day]="dayStr"
+    [day]="dayStr()"
     [flatTasks]="project.tasks"
   ></task-summary-table>
   <div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
@@ -32,7 +32,7 @@
       <mat-icon>restore</mat-icon>
       {{T.PDS.ROUND_TIME_SPENT|translate}}
     </button>
-    @if (isForToday) {
+    @if (isForToday()) {
     <button
       (click)="showExportModal(project.id)"
       mat-button

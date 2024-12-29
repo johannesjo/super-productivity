@@ -1,7 +1,7 @@
 <better-drawer-container
   (wasClosed)="close()"
   [isOpen]="isOpen$|async"
-  [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
+  [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$|async)"
   [sideWidth]="40"
 >
   <ng-container better-drawer-content>
@@ -17,7 +17,7 @@
       <notes [@slideInFromRight]></notes>
       } @if (selectedTaskWithDelayForNone$|async; as selectedTaskWithDelayForNone) {
       <task-detail-panel
-        [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
+        [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$|async)"
         [@taskDetailPanelTaskChange]=" selectedTaskWithDelayForNone?.id"
         [@.disabled]="isDisableTaskPanelAni"
         [task]="selectedTaskWithDelayForNone"

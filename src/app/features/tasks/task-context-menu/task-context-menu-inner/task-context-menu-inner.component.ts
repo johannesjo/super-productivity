@@ -139,6 +139,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private _isTaskDeleteTriggered: boolean = false;
   private _isOpenedFromKeyboard = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
     this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);

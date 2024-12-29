@@ -7,6 +7,7 @@ import {
   HostListener,
   Input,
   Renderer2,
+  input,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -53,9 +54,9 @@ const ZERO_VAL = '0m';
 export class InputDurationDirective
   implements ControlValueAccessor, Validator, AfterViewChecked
 {
-  @Input() isAllowSeconds: boolean = false;
-  @Input() isValidate: boolean = true;
-  @Input() isShowZeroVal: boolean = true;
+  readonly isAllowSeconds = input<boolean>(false);
+  readonly isValidate = input<boolean>(true);
+  readonly isShowZeroVal = input<boolean>(true);
 
   // by the Control Value Accessor
   // @ts-ignore
@@ -93,6 +94,8 @@ export class InputDurationDirective
   }
 
   // TODO all around dirty
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set ngModel(msVal: number) {
     if (msVal && msVal !== this._msValue) {
       this._msValue = msVal;
@@ -129,7 +132,7 @@ export class InputDurationDirective
 
   // ControlValueAccessor: Validator
   validate(c: AbstractControl): ValidationErrors | null {
-    return this._validator !== null && this._validator !== undefined && this.isValidate
+    return this._validator !== null && this._validator !== undefined && this.isValidate()
       ? this._validator(c)
       : null;
   }
@@ -139,11 +142,11 @@ export class InputDurationDirective
     if (!value) {
       value = '';
     }
-    const toStr = this._msToString.transform(value, this.isAllowSeconds, true);
+    const toStr = this._msToString.transform(value, this.isAllowSeconds(), true);
     this._renderer.setProperty(
       this._elementRef.nativeElement,
       'value',
-      this.isShowZeroVal ? toStr || ZERO_VAL : toStr,
+      this.isShowZeroVal() ? toStr || ZERO_VAL : toStr,
     );
   }
 
@@ -151,7 +154,11 @@ export class InputDurationDirective
     // TODO maximum dirty hackyness, but works for now :(
     if (!this._value) {
       this._msValue = this._stringToMs.transform(this._elementRef.nativeElement.value);
-      this._value = this._msToString.transform(this._msValue, this.isAllowSeconds, true);
+      this._value = this._msToString.transform(
+        this._msValue,
+        this.isAllowSeconds(),
+        true,
+      );
     }
     return this._value
       ? null

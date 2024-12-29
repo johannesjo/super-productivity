@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   Output,
+  input,
 } from '@angular/core';
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
@@ -18,8 +18,8 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class TaskSummaryTableComponent {
-  @Input() flatTasks: Task[] = [];
-  @Input() day: string = this._dateService.todayStr();
+  readonly flatTasks = input<Task[]>([]);
+  readonly day = input<string>(this._dateService.todayStr());
   @Output() updated: EventEmitter<void> = new EventEmitter();
 
   T: typeof T = T;
@@ -33,7 +33,7 @@ export class TaskSummaryTableComponent {
     this._taskService.updateEverywhere(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
-        [this.day]: +newVal,
+        [this.day()]: +newVal,
       },
     });
     this.updated.emit();

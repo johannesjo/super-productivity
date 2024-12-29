@@ -5,6 +5,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  input,
 } from '@angular/core';
 import {
   ConfigFormSection,
@@ -30,8 +31,10 @@ import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form
   standalone: false,
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
-  @Input() cfg?: SimpleCounterConfig;
+  readonly cfg = input<SimpleCounterConfig>();
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set section(section: ConfigFormSection<SimpleCounterConfig>) {
     if (section.items) {
       this.items = adjustToLiveFormlyForm(section.items);

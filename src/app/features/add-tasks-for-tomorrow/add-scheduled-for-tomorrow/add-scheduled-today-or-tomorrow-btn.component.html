@@ -1,4 +1,4 @@
-@if (workContextService.isToday &&(isAlwaysShowIfAny ||
+@if (workContextService.isToday &&(isAlwaysShowIfAny() ||
 (workContextService.activeWorkContext$|async)?.taskIds.length ===0) &&
 (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async); as plannedForToday) {
 <div class="wrap-add-planned">

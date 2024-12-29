@@ -50,6 +50,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     private _dateService: DateService,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set day(val: string) {
     this.day$.next(val);
   }

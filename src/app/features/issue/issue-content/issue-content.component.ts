@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import {
   CALDAV_TYPE,
@@ -19,8 +19,11 @@ import { IssueData } from '../issue.model';
   standalone: false,
 })
 export class IssueContentComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() task?: TaskWithSubTasks;
-  @Input() issueData?: IssueData;
+  readonly issueData = input<IssueData>();
   readonly GITLAB_TYPE: string = GITLAB_TYPE;
   readonly GITHUB_TYPE: string = GITHUB_TYPE;
   readonly REDMINE_TYPE: string = REDMINE_TYPE;

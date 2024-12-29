@@ -36,6 +36,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   readonly circleEl = viewChild<ElementRef>('circleEl');
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() label: string = '';
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
 
@@ -48,6 +51,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   _model: number = 0;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(val: number) {
     if (this._model !== val) {
       this._model = val;

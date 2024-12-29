@@ -1,5 +1,5 @@
 <mat-form-field>
-  <mat-label>{{ label }}</mat-label>
+  <mat-label>{{ label() }}</mat-label>
   <mat-chip-grid #chipListElRef>
     @for (modelItem of modelItems; track modelItem.id) {
     <mat-chip-row
@@ -18,7 +18,7 @@
       <button
         (click)="additionalAction.emit(modelItem.id)"
         [class.isToggled]="isToggled(modelItem.id)"
-        [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle: additionalActionTooltip"
+        [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle(): additionalActionTooltip()"
         class="additional"
         mat-icon-button
       >

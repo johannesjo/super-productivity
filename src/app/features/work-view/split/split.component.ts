@@ -8,6 +8,7 @@ import {
   Output,
   Renderer2,
   viewChild,
+  input,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -23,11 +24,14 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   standalone: false,
 })
 export class SplitComponent implements AfterViewInit {
-  @Input() splitTopEl?: ElementRef;
-  @Input() splitBottomEl?: ElementRef;
-  @Input() containerEl?: HTMLElement;
+  readonly splitTopEl = input<ElementRef>();
+  readonly splitBottomEl = input<ElementRef>();
+  readonly containerEl = input<HTMLElement>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() counter?: number;
-  @Input() isAnimateBtn?: boolean;
+  readonly isAnimateBtn = input<boolean>();
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number = 100;
@@ -38,13 +42,15 @@ export class SplitComponent implements AfterViewInit {
 
   constructor(private _renderer: Renderer2) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set splitPos(pos: number) {
     if (pos !== this.pos) {
       this._updatePos(pos, true);
 
       if (this._isViewInitialized) {
-        this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
-        this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
+        this._renderer.addClass(this.splitTopEl(), ANIMATABLE_CLASS);
+        this._renderer.addClass(this.splitBottomEl(), ANIMATABLE_CLASS);
       }
     }
   }
@@ -52,13 +58,13 @@ export class SplitComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this._isViewInitialized = true;
     this._updatePos(this.pos, false);
-    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
-    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitTopEl(), ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitBottomEl(), ANIMATABLE_CLASS);
   }
 
   toggle(): void {
-    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
-    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitTopEl(), ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitBottomEl(), ANIMATABLE_CLASS);
     let newPos = 50;
     if (this.pos > 45 && this.pos < 55) {
       newPos = 100;
@@ -102,7 +108,8 @@ export class SplitComponent implements AfterViewInit {
   }
 
   onMove(ev: TouchEvent | MouseEvent): void {
-    if (!this.containerEl) {
+    const containerEl = this.containerEl();
+    if (!containerEl) {
       throw new Error('No container el');
     }
 
@@ -110,11 +117,11 @@ export class SplitComponent implements AfterViewInit {
     const clientY = isTouchOnly()
       ? (ev as TouchEvent).touches[0].clientY
       : (ev as MouseEvent).clientY;
-    this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
-    this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
+    this._renderer.removeClass(this.splitTopEl(), ANIMATABLE_CLASS);
+    this._renderer.removeClass(this.splitBottomEl(), ANIMATABLE_CLASS);
     this._isDrag = true;
-    const bounds = this.containerEl.getBoundingClientRect();
-    const h = this.containerEl.offsetHeight;
+    const bounds = containerEl.getBoundingClientRect();
+    const h = containerEl.offsetHeight;
     const headerHeight = bounds.top;
 
     let percentage = ((clientY - headerHeight) / h) * 100;
@@ -133,9 +140,11 @@ export class SplitComponent implements AfterViewInit {
     }
 
     this.pos = pos;
-    if (this.splitTopEl && this.splitBottomEl) {
-      this._renderer.setStyle(this.splitTopEl, 'height', `${pos}%`);
-      this._renderer.setStyle(this.splitBottomEl, 'height', `${100 - pos}%`);
+    const splitTopEl = this.splitTopEl();
+    const splitBottomEl = this.splitBottomEl();
+    if (splitTopEl && splitBottomEl) {
+      this._renderer.setStyle(splitTopEl, 'height', `${pos}%`);
+      this._renderer.setStyle(splitBottomEl, 'height', `${100 - pos}%`);
       // this._renderer.setStyle(
       //   this._el.nativeElement,
       //   'top',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { Task } from '../task.model';
 import { unique } from '../../../util/unique';
@@ -25,9 +25,9 @@ interface TagWithTimeSpent {
 })
 export class TasksByTagComponent {
   T: typeof T = T;
-  @Input() dayStr: string = this._dateService.todayStr();
-  @Input() isForToday: boolean = true;
-  @Input() isShowYesterday: boolean = false;
+  readonly dayStr = input<string>(this._dateService.todayStr());
+  readonly isForToday = input<boolean>(true);
+  readonly isShowYesterday = input<boolean>(false);
   flatTasks: Task[] = [];
   todaysTasksTagIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   tagsWithTimeSpent$: Observable<TagWithTimeSpent[]> = this.todaysTasksTagIds$.pipe(
@@ -41,6 +41,8 @@ export class TasksByTagComponent {
     }),
   );
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('flatTasks') set flatTasksIn(tasks: Task[]) {
     this.flatTasks = tasks;
     const tagIds: string[] = unique(
@@ -70,8 +72,8 @@ export class TasksByTagComponent {
       timeSpentToday: this.flatTasks
         .filter((task) => task.tagIds.includes(tag.id))
         .reduce((acc, task) => {
-          let v: number = task.timeSpentOnDay[this.dayStr] || 0;
-          if (this.isShowYesterday && this.isForToday) {
+          let v: number = task.timeSpentOnDay[this.dayStr()] || 0;
+          if (this.isShowYesterday() && this.isForToday()) {
             v = v + (task.timeSpentOnDay[yesterdayDayStr] || 0);
           }
           return acc + v;

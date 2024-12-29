@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
 
@@ -11,7 +11,7 @@ import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
 })
 export class GitlabIssueHeaderComponent {
   T: typeof T = T;
-  @Input() public task?: TaskWithSubTasks;
+  public readonly task = input<TaskWithSubTasks>();
 
   constructor() {}
 }

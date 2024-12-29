@@ -24,6 +24,8 @@ export class InlineMultilineInputComponent {
   @HostBinding('class.is-focused') isFocused = false;
 
   // NOTE: we only need this for tasks since, sometimes with the short syntax there are no changes to the title as they are stripped away
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set resetToLastExternalValueTrigger(value: unknown) {
     // console.log({
     //   tmp: this.tmpValue,
@@ -37,6 +39,8 @@ export class InlineMultilineInputComponent {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set value(value: string) {
     this.tmpValue = value;
     this.lastExternalValue = value;

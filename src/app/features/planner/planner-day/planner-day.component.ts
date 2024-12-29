@@ -25,6 +25,9 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
   standalone: false,
 })
 export class PlannerDayComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() day!: PlannerDay;
 
   protected readonly T = T;

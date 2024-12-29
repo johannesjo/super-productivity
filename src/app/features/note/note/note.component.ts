@@ -5,6 +5,7 @@ import {
   OnChanges,
   SimpleChanges,
   viewChild,
+  input,
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
@@ -30,12 +31,14 @@ export class NoteComponent implements OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   note!: Note;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('note') set noteSet(v: Note) {
     this.note = v;
     this._note$.next(v);
   }
 
-  @Input() isFocus?: boolean;
+  readonly isFocus = input<boolean>();
 
   readonly markdownEl = viewChild<HTMLElement>('markdownEl');
 

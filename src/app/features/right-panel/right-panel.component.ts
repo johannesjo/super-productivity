@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, input } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -22,7 +22,7 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
 })
 export class RightPanelComponent implements OnDestroy {
   // NOTE: used for debugging
-  @Input() isAlwaysOver: boolean = false;
+  readonly isAlwaysOver = input<boolean>(false);
 
   // to still display its data when panel is closing
   selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks | null> =

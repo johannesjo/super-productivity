@@ -3,8 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   Output,
+  input,
 } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import {
@@ -25,7 +25,7 @@ import { mapTo, switchMap } from 'rxjs/operators';
   standalone: false,
 })
 export class BacklogComponent implements AfterViewInit {
-  @Input() backlogTasks: TaskWithSubTasks[] = [];
+  readonly backlogTasks = input<TaskWithSubTasks[]>([]);
 
   private _readyTimerDuration$ = new Subject<number>();
   ready$ = this._readyTimerDuration$.pipe(
@@ -49,11 +49,11 @@ export class BacklogComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     let initialDelay = 0;
-    if (this.backlogTasks.length > 99) {
+    if (this.backlogTasks().length > 99) {
       initialDelay = 700;
-    } else if (this.backlogTasks.length > 30) {
+    } else if (this.backlogTasks().length > 30) {
       initialDelay = 500;
-    } else if (this.backlogTasks.length > 15) {
+    } else if (this.backlogTasks().length > 15) {
       initialDelay = 300;
     }
     this._readyTimerDuration$.next(initialDelay);

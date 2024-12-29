@@ -3,10 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
+  input,
 } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -38,11 +38,11 @@ import { createRows, formatRows, formatText } from './worklog-export.util';
   standalone: false,
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
-  @Input() rangeStart?: Date;
-  @Input() rangeEnd?: Date;
-  @Input() isWorklogExport?: boolean;
-  @Input() isShowClose?: boolean;
-  @Input() projectId?: string | null;
+  readonly rangeStart = input<Date>();
+  readonly rangeEnd = input<Date>();
+  readonly isWorklogExport = input<boolean>();
+  readonly isShowClose = input<boolean>();
+  readonly projectId = input<string | null>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() cancel: EventEmitter<void> = new EventEmitter();
@@ -102,15 +102,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (!this.rangeStart || !this.rangeEnd) {
+    const rangeStart = this.rangeStart();
+    const rangeEnd = this.rangeEnd();
+    if (!rangeStart || !rangeEnd) {
       throw new Error('Worklog: Invalid date range');
     }
     this.fileName =
-      'tasks' +
-      getWorklogStr(this.rangeStart) +
-      '-' +
-      getWorklogStr(this.rangeEnd) +
-      '.csv';
+      'tasks' + getWorklogStr(rangeStart) + '-' + getWorklogStr(rangeEnd) + '.csv';
 
     this._subs.add(
       this._workContextService.advancedCfg$
@@ -140,10 +138,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._subs.add(
       combineLatest([
         this._worklogService.getTaskListForRange$(
-          this.rangeStart,
-          this.rangeEnd,
+          rangeStart,
+          rangeEnd,
           true,
-          this.projectId,
+          this.projectId(),
         ),
         this._workContextService.activeWorkContext$,
         this._projectService.list$,

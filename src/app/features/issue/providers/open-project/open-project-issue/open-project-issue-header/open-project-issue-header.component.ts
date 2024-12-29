@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 
@@ -11,7 +11,7 @@ import { T } from '../../../../../../t.const';
 })
 export class OpenProjectIssueHeaderComponent {
   T: typeof T = T;
-  @Input() task?: TaskWithSubTasks;
+  readonly task = input<TaskWithSubTasks>();
 
   constructor() {}
 }

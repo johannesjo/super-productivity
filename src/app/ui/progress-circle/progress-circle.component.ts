@@ -15,6 +15,8 @@ import {
   standalone: false,
 })
 export class ProgressCircleComponent {
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set progress(progressIN: number) {
     const progressCircle = this.progressCircle();
     if (progressCircle) {

@@ -6,6 +6,7 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  input,
   OnDestroy,
   OnInit,
   Output,
@@ -32,9 +33,9 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   standalone: false,
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
-  @Input() isLock: boolean = false;
-  @Input() isShowControls: boolean = false;
-  @Input() isShowChecklistToggle: boolean = false;
+  readonly isLock = input<boolean>(false);
+  readonly isShowControls = input<boolean>(false);
+  readonly isShowChecklistToggle = input<boolean>(false);
 
   @Output() changed: EventEmitter<string> = new EventEmitter();
   @Output() focused: EventEmitter<Event> = new EventEmitter();
@@ -73,6 +74,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     return this._model;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(v: string | undefined) {
     this._model = v;
     this.modelCopy = v;
@@ -84,9 +87,14 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
 
     this.isChecklistMode =
-      this.isChecklistMode && this.isShowChecklistToggle && !!v && isMarkdownChecklist(v);
+      this.isChecklistMode &&
+      this.isShowChecklistToggle() &&
+      !!v &&
+      isMarkdownChecklist(v);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isFocus(val: boolean) {
     if (!this.isShowEdit && val) {
       this._toggleShowEdit();
@@ -94,7 +102,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.isLock) {
+    if (this.isLock()) {
       this._toggleShowEdit();
     } else {
       this.resizeParsedToFit();
@@ -140,7 +148,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   untoggleShowEdit(): void {
-    if (!this.isLock) {
+    if (!this.isLock()) {
       this.resizeParsedToFit();
       this.isShowEdit = false;
     }

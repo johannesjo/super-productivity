@@ -1,10 +1,10 @@
-@if (task?.issueWasUpdated) {
+@if (task()?.issueWasUpdated) {
 <mat-icon
   color="accent"
   style="margin-right: 8px"
   >update
 </mat-icon>
-} @if (!task?.issueWasUpdated) {
+} @if (!task()?.issueWasUpdated) {
 <mat-icon
   style="margin-right: 8px"
   svgIcon="open_project"

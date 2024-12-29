@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -21,7 +21,10 @@ import { ProjectService } from '../../features/project/project.service';
   imports: [RouterLink, UiModule, RouterModule],
 })
 export class WorkContextMenuComponent {
-  @Input() project!: Project;
+  readonly project = input.required<Project>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() contextId!: string;
   T: typeof T = T;
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
@@ -36,6 +39,8 @@ export class WorkContextMenuComponent {
     private _router: Router,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('contextType') set contextTypeSet(v: WorkContextType) {
     this.isForProject = v === WorkContextType.PROJECT;
     this.base = this.isForProject ? 'project' : 'tag';

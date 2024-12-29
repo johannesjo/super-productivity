@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TasksModule } from '../../tasks/tasks.module';
 import { UiModule } from '../../../ui/ui.module';
 
@@ -14,7 +14,7 @@ import { T } from 'src/app/t.const';
 export class AddTaskInlineComponent {
   T: typeof T = T;
 
-  @Input() planForDay?: string;
+  readonly planForDay = input<string>();
 
   isShowAddTask = false;
 }

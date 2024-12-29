@@ -86,6 +86,8 @@ export class ScheduleEventComponent implements OnInit {
   private _isBeingSubmitted: boolean = false;
   private _projectId$ = new BehaviorSubject<string | null>(null);
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input({ required: true })
   set event(event: ScheduleEvent) {
     this.se = event;

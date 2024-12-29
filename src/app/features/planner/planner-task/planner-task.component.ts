@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   viewChild,
+  input,
 } from '@angular/core';
 import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
@@ -30,8 +31,11 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
   standalone: false,
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input({ required: true }) task!: TaskCopy;
-  @Input() day?: string;
+  readonly day = input<string>();
 
   isRepeatTaskCreatedToday = false;
 

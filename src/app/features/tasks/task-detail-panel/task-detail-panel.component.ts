@@ -10,6 +10,7 @@ import {
   OnDestroy,
   viewChildren,
   viewChild,
+  input,
 } from '@angular/core';
 import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
@@ -90,7 +91,10 @@ interface IssueDataAndType {
   standalone: false,
 })
 export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
-  @Input() isOver: boolean = false;
+  readonly isOver = input<boolean>(false);
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() isDialogMode: boolean = false;
 
   readonly itemEls = viewChildren(TaskDetailItemComponent);
@@ -288,6 +292,8 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     return this._taskData as TaskWithSubTasks;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set task(newVal: TaskWithSubTasks) {
     const prev = this._taskData;
     this._taskData = newVal;

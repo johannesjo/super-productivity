@@ -96,7 +96,7 @@
           </div>
         </div>
         <div class="col">
-          @if ((isWorklogExport)) {
+          @if ((isWorklogExport())) {
           <mat-form-field class="md-block">
             <label>{{T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY|translate}}</label>
             <input
@@ -214,7 +214,7 @@
     {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
   </a>
 
-  @if (isShowClose) {
+  @if (isShowClose()) {
   <button
     (click)="onCloseClick()"
     color="primary"

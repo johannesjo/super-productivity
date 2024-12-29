@@ -1,8 +1,8 @@
 <ul
-  [@standardList]="attachments?.length"
+  [@standardList]="attachments()?.length"
   class="attachments"
 >
-  @for (attachment of attachments; track trackByFn(i, attachment); let i = $index) {
+  @for (attachment of attachments(); track trackByFn(i, attachment); let i = $index) {
   <li
     class="attachment"
     draggable="false"
@@ -29,7 +29,7 @@
       />
       }
     </a>
-    @if (!isDisableControls) {
+    @if (!isDisableControls()) {
     <div class="controls border-color-primary">
       <a
         class="view-btn"

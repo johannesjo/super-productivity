@@ -17,8 +17,16 @@ import {
   standalone: false,
 })
 export class TaskDetailItemComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() type: 'input' | 'fullSizeInput' | 'panel' = 'input';
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() expanded: boolean = false;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() inputIcon?: string;
 
   @Output() collapseParent: EventEmitter<void> = new EventEmitter();
