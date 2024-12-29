@@ -2,9 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import {
@@ -33,7 +32,7 @@ export class BacklogComponent implements AfterViewInit {
     mapTo(true),
   );
 
-  @Output() closeBacklog: EventEmitter<any> = new EventEmitter<any>();
+  readonly closeBacklog = output<any>();
 
   T: typeof T = T;
 

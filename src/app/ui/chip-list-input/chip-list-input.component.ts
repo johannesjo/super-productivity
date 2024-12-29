@@ -3,12 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
   input,
   OnDestroy,
-  Output,
   viewChild,
+  output,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -49,11 +48,11 @@ export class ChipListInputComponent implements OnDestroy {
   readonly additionalActionTooltipUnToggle = input<string>();
   readonly toggledItems = input<string[]>();
 
-  @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
-  @Output() ctrlEnterSubmit: EventEmitter<void> = new EventEmitter<void>();
+  readonly addItem = output<string>();
+  readonly addNewItem = output<string>();
+  readonly removeItem = output<string>();
+  readonly additionalAction = output<string>();
+  readonly ctrlEnterSubmit = output<void>();
 
   suggestionsIn: Suggestion[] = [];
   modelItems: Suggestion[] = [];
@@ -155,7 +154,7 @@ export class ChipListInputComponent implements OnDestroy {
     }
 
     if (ev.code === 'Enter' && ev.ctrlKey) {
-      this.ctrlEnterSubmit.next();
+      this.ctrlEnterSubmit.emit();
     }
   }
 

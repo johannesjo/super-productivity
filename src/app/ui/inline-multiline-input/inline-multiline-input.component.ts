@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
-  Output,
   viewChild,
+  output,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
@@ -54,7 +53,7 @@ export class InlineMultilineInputComponent {
   readonly textarea =
     viewChild.required<ElementRef<HTMLTextAreaElement>>('textAreaElement');
 
-  @Output() valueEdited = new EventEmitter<{
+  readonly valueEdited = output<{
     newVal: string;
     wasChanged: boolean;
   }>();

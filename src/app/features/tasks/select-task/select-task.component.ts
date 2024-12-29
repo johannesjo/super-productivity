@@ -1,12 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
@@ -35,7 +34,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   filteredTasks: Task[] = [];
   projectMap: { [key: string]: Project } = {};
   isCreate: boolean = false;
-  @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
+  readonly taskChange = output<Task | string>();
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
   private _destroy$: Subject<boolean> = new Subject<boolean>();

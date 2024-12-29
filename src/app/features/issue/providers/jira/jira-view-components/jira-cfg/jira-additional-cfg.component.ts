@@ -1,12 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
@@ -36,7 +35,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
 export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   readonly section = input<ConfigFormSection<IssueProviderJira>>();
 
-  @Output() modelChange: EventEmitter<IssueProviderJira> = new EventEmitter();
+  readonly modelChange = output<IssueProviderJira>();
 
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
@@ -161,7 +160,7 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   notifyModelChange(): void {
-    this.modelChange.emit(this._cfg);
+    this.modelChange.emit(this._cfg as IssueProviderJira);
   }
 
   trackByCustomFieldId(i: number, field: any): string {

@@ -3,14 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
   input,
+  output,
 } from '@angular/core';
 import { fadeAnimation } from '../../animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -36,7 +35,7 @@ export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy
 {
   readonly sideWidth = input<number>(0);
-  @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
+  readonly wasClosed = output<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
   containerWidth$: Observable<number> = this.contentEl$.pipe(
     switchMap((el) => observeWidth(el)),

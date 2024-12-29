@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
@@ -28,7 +27,7 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  @Output() save: EventEmitter<any> = new EventEmitter();
+  readonly save = output<any>();
   T: typeof T = T;
   metricForDay?: MetricCopy;
   day$: BehaviorSubject<string> = new BehaviorSubject(this._dateService.todayStr());

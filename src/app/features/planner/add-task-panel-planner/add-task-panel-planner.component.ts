@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -28,7 +28,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 })
 export class AddTaskPanelPlannerComponent {
   T: typeof T = T;
-  @Output() closePanel = new EventEmitter<void>();
+  readonly closePanel = output<void>();
 
   ADD_TASK_PANEL = ADD_TASK_PANEL_ID;
   filterValue: string = '';

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey, SoundConfig } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
@@ -25,10 +25,10 @@ export class ConfigSoundFormComponent {
     this.patchForm();
   }
 
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: SoundConfig;
-  }> = new EventEmitter();
+  }>();
 
   soundForm = new FormGroup({
     volume: new FormControl<number>(0),

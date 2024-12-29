@@ -3,12 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
-  Output,
   viewChild,
   input,
+  output,
 } from '@angular/core';
 
 @Component({
@@ -29,7 +28,7 @@ export class InlineInputComponent implements AfterViewInit {
   //  Your application code writes to the input. This prevents migration.
   @Input() newValue?: string | number;
 
-  @Output() changed: EventEmitter<string | number> = new EventEmitter();
+  readonly changed = output<string | number>();
   readonly inputEl = viewChild<ElementRef>('inputEl');
   readonly inputElDuration = viewChild<ElementRef>('inputElDuration');
 

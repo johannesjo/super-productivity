@@ -3,12 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
-  Output,
   Renderer2,
   viewChild,
   input,
+  output,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -32,7 +31,7 @@ export class SplitComponent implements AfterViewInit {
   //  and migrating would break narrowing currently.
   @Input() counter?: number;
   readonly isAnimateBtn = input<boolean>();
-  @Output() posChanged: EventEmitter<number> = new EventEmitter();
+  readonly posChanged = output<number>();
 
   pos: number = 100;
   eventSubs?: Subscription;

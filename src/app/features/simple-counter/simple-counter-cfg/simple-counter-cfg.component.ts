@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import {
   ConfigFormSection,
@@ -41,10 +40,10 @@ export class SimpleCounterCfgComponent implements OnDestroy {
     }
   }
 
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
-  }> = new EventEmitter();
+  }>();
 
   T: typeof T = T;
   form: UntypedFormGroup = new UntypedFormGroup({});

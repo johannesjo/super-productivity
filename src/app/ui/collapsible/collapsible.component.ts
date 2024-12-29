@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   HostBinding,
   Input,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { expandAnimation } from '../animations/expand.ani';
 
@@ -34,7 +33,7 @@ export class CollapsibleComponent {
   //  break.
   @HostBinding('class.isInline') @Input() isInline: boolean = false;
 
-  @Output() isExpandedChange: EventEmitter<boolean> = new EventEmitter();
+  readonly isExpandedChange = output<boolean>();
 
   constructor() {}
 

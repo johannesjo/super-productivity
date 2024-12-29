@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { T } from '../../../t.const';
@@ -20,7 +14,7 @@ import { DateService } from 'src/app/core/date/date.service';
 export class TaskSummaryTableComponent {
   readonly flatTasks = input<Task[]>([]);
   readonly day = input<string>(this._dateService.todayStr());
-  @Output() updated: EventEmitter<void> = new EventEmitter();
+  readonly updated = output<void>();
 
   T: typeof T = T;
 

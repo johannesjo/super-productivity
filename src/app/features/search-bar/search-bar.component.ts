@@ -3,9 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   OnDestroy,
-  Output,
+  output,
   viewChild,
 } from '@angular/core';
 import { T } from '../../t.const';
@@ -44,7 +43,7 @@ const MAX_RESULTS = 100;
   standalone: false,
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
-  @Output() blurred: EventEmitter<any> = new EventEmitter();
+  readonly blurred = output<any | void>();
 
   readonly inputEl = viewChild.required<ElementRef>('inputEl');
   readonly searchForm = viewChild.required<ElementRef>('searchForm');
@@ -145,7 +144,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
       this.inputEl().nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
-          this.blurred.emit();
+          this.blurred.emit(undefined);
         } else if (
           ev.key === 'Enter' &&
           (!this.taskSuggestionsCtrl.value ||
@@ -192,7 +191,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     if (!item) return;
     this.isLoading$.next(true);
     this._navigateToTaskService.navigate(item.id, item.isArchiveTask).then(() => {
-      this.blurred.emit();
+      this.blurred.emit(undefined);
     });
   }
 

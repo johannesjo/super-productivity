@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   OnDestroy,
   OnInit,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -45,7 +44,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   readonly projectId = input<string | null>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native
-  @Output() cancel: EventEmitter<void> = new EventEmitter();
+  readonly cancel = output<void>();
 
   T: typeof T = T;
   isShowAsText: boolean = false;

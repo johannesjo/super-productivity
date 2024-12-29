@@ -2,14 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
   input,
+  output,
 } from '@angular/core';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -24,7 +23,7 @@ import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 })
 export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
   readonly sideWidth = input<number>(0);
-  @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
+  readonly wasClosed = output<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
 
   sideStyle: SafeStyle = '';

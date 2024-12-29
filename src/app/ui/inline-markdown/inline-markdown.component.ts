@@ -3,13 +3,12 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
   input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
   viewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
@@ -37,10 +36,10 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   readonly isShowControls = input<boolean>(false);
   readonly isShowChecklistToggle = input<boolean>(false);
 
-  @Output() changed: EventEmitter<string> = new EventEmitter();
-  @Output() focused: EventEmitter<Event> = new EventEmitter();
-  @Output() blurred: EventEmitter<Event> = new EventEmitter();
-  @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
+  readonly changed = output<string>();
+  readonly focused = output<Event>();
+  readonly blurred = output<Event>();
+  readonly keyboardUnToggle = output<Event>();
   readonly wrapperEl = viewChild<ElementRef>('wrapperEl');
   readonly textareaEl = viewChild<ElementRef>('textareaEl');
   readonly previewEl = viewChild<MarkdownComponent>('previewEl');
@@ -160,7 +159,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
-      this.changed.emit(this.modelCopy);
+      this.changed.emit(this.modelCopy as string);
     }
   }
 

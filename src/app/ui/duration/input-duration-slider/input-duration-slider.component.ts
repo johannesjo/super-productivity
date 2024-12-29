@@ -3,12 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   viewChild,
+  output,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
@@ -40,7 +39,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input() label: string = '';
-  @Output() modelChange: EventEmitter<number> = new EventEmitter();
+  readonly modelChange = output<number>();
 
   constructor(
     private _el: ElementRef,

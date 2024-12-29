@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
@@ -25,10 +18,10 @@ export class ConfigFormComponent {
   T: typeof T = T;
   config?: Record<string, unknown>;
   readonly sectionKey = input<GlobalConfigSectionKey | ProjectCfgFormKey>();
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: unknown;
-  }> = new EventEmitter();
+  }>();
   fields?: FormlyFieldConfig[];
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};

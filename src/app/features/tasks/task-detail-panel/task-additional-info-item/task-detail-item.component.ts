@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   HostListener,
   Input,
-  Output,
+  output,
 } from '@angular/core';
 
 @Component({
@@ -29,9 +28,9 @@ export class TaskDetailItemComponent {
   //  and migrating would break narrowing currently.
   @Input() inputIcon?: string;
 
-  @Output() collapseParent: EventEmitter<void> = new EventEmitter();
-  @Output() keyPress: EventEmitter<KeyboardEvent> = new EventEmitter();
-  @Output() editActionTriggered: EventEmitter<void> = new EventEmitter();
+  readonly collapseParent = output<void>();
+  readonly keyPress = output<KeyboardEvent>();
+  readonly editActionTriggered = output<void>();
 
   @HostBinding('tabindex') readonly tabindex: number = 3;
 

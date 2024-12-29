@@ -4,13 +4,12 @@ import {
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   ViewContainerRef,
   viewChild,
+  output,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import {
@@ -39,10 +38,10 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: any;
-  }> = new EventEmitter();
+  }>();
   readonly customFormRef = viewChild('customForm', { read: ViewContainerRef });
   isExpanded: boolean = false;
   private _subs: Subscription = new Subscription();

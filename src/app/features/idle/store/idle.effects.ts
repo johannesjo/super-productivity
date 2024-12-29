@@ -296,9 +296,9 @@ export class IdleEffects {
     // NOTE needs to be imported somewhere. otherwise won't work
     private _takeABreakService: TakeABreakService,
   ) {
-    window.setTimeout(() => {
-      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    }, 2700);
+    // window.setTimeout(() => {
+    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+    // }, 2700);
   }
 
   private _initIdlePoll(initialIdleTime: number): void {

@@ -1,12 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   input,
+  output,
 } from '@angular/core';
 import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -46,7 +45,7 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   readonly section = input<ConfigFormSection<IssueProviderOpenProject>>();
-  @Output() modelChange: EventEmitter<IssueProviderOpenProject> = new EventEmitter();
+  readonly modelChange = output<IssueProviderOpenProject>();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
@@ -160,7 +159,7 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   notifyModelChange(): void {
-    this.modelChange.emit(this._cfg);
+    this.modelChange.emit(this._cfg as IssueProviderOpenProject);
   }
 
   updateTransitionOptions(): void {
