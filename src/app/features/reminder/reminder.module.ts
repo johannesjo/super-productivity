@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { NoteModule } from '../note/note.module';
@@ -36,15 +36,15 @@ import { ReminderCountdownEffects } from './store/reminder-countdown.effects';
   ],
 })
 export class ReminderModule {
-  constructor(
-    private readonly _reminderService: ReminderService,
-    private readonly _matDialog: MatDialog,
-    private readonly _uiHelperService: UiHelperService,
-    private readonly _notifyService: NotifyService,
-    private readonly _layoutService: LayoutService,
-    private readonly _dataInitService: DataInitService,
-    private readonly _syncTriggerService: SyncTriggerService,
-  ) {
+  private readonly _reminderService = inject(ReminderService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _uiHelperService = inject(UiHelperService);
+  private readonly _notifyService = inject(NotifyService);
+  private readonly _layoutService = inject(LayoutService);
+  private readonly _dataInitService = inject(DataInitService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
+
+  constructor() {
     from(this._reminderService.init())
       .pipe(
         // we do this to wait for syncing and the like

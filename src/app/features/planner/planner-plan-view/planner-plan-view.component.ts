@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { T } from '../../../t.const';
 import { PlannerDay } from '../planner.model';
@@ -12,9 +12,9 @@ import { PlannerService } from '../planner.service';
   standalone: false,
 })
 export class PlannerPlanViewComponent {
+  private _plannerService = inject(PlannerService);
+
   days$: Observable<PlannerDay[]> = this._plannerService.days$;
 
   protected readonly T = T;
-
-  constructor(private _plannerService: PlannerService) {}
 }

@@ -1,6 +1,5 @@
 import {
   AfterViewChecked,
-  Attribute,
   Directive,
   ElementRef,
   forwardRef,
@@ -8,6 +7,8 @@ import {
   Input,
   Renderer2,
   input,
+  HostAttributeToken,
+  inject,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -54,6 +55,12 @@ const ZERO_VAL = '0m';
 export class InputDurationDirective
   implements ControlValueAccessor, Validator, AfterViewChecked
 {
+  inputDuration = inject(new HostAttributeToken('inputDuration'));
+  private _elementRef = inject(ElementRef);
+  private _stringToMs = inject(StringToMsPipe);
+  private _msToString = inject(MsToStringPipe);
+  private _renderer = inject(Renderer2);
+
   readonly isAllowSeconds = input<boolean>(false);
   readonly isValidate = input<boolean>(true);
   readonly isShowZeroVal = input<boolean>(true);
@@ -70,14 +77,6 @@ export class InputDurationDirective
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | undefined | null;
   private _msValue: number | undefined;
-
-  constructor(
-    @Attribute('inputDuration') public inputDuration: Attribute,
-    private _elementRef: ElementRef,
-    private _stringToMs: StringToMsPipe,
-    private _msToString: MsToStringPipe,
-    private _renderer: Renderer2,
-  ) {}
 
   private _value: string | undefined;
 

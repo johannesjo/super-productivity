@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { fadeAnimation, fadeInSlowAnimation } from '../../ui/animations/fade.ani';
 import { WorklogService } from '../worklog/worklog.service';
@@ -18,15 +18,13 @@ import { KeyValue } from '@angular/common';
   standalone: false,
 })
 export class QuickHistoryComponent {
+  readonly worklogService = inject(WorklogService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _taskService = inject(TaskService);
+
   visibility: boolean[] = [];
   T: typeof T = T;
   keys: (o: Record<string, unknown>) => string[] = Object.keys;
-
-  constructor(
-    public readonly worklogService: WorklogService,
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _taskService: TaskService,
-  ) {}
 
   sortDays(a: KeyValue<string, WorklogDay>, b: KeyValue<string, WorklogDay>): number {
     // avoid comparison by key (day) because a week may span across two months

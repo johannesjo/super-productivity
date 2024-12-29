@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, OnDestroy, inject } from '@angular/core';
 
 const DEFAULT_PINNED_CLASS = 'is-stuck';
 
@@ -7,9 +7,9 @@ const DEFAULT_PINNED_CLASS = 'is-stuck';
   standalone: true,
 })
 export class StuckDirective implements AfterViewInit, OnDestroy {
-  private _observer?: IntersectionObserver;
+  private elRef = inject(ElementRef);
 
-  constructor(private elRef: ElementRef) {}
+  private _observer?: IntersectionObserver;
 
   ngAfterViewInit(): void {
     const el = this.elRef.nativeElement as HTMLElement;

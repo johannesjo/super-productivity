@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { Task } from '../task.model';
 import { unique } from '../../../util/unique';
@@ -24,6 +24,9 @@ interface TagWithTimeSpent {
   standalone: false,
 })
 export class TasksByTagComponent {
+  private readonly _store = inject(Store);
+  private readonly _dateService = inject(DateService);
+
   T: typeof T = T;
   readonly dayStr = input<string>(this._dateService.todayStr());
   readonly isForToday = input<boolean>(true);
@@ -50,11 +53,6 @@ export class TasksByTagComponent {
     );
     this.todaysTasksTagIds$.next(tagIds);
   }
-
-  constructor(
-    private readonly _store: Store,
-    private readonly _dateService: DateService,
-  ) {}
 
   trackById(i: number, item: Tag): string {
     return item.id;

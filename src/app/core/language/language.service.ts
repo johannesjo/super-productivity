@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateAdapter } from '@angular/material/core';
 import moment from 'moment';
@@ -15,6 +15,10 @@ import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-co
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
+  private _translateService = inject(TranslateService);
+  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private _globalConfigService = inject(GlobalConfigService);
+
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
   private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isLangRTL: Observable<boolean> = this.isRTL.asObservable();
@@ -22,11 +26,7 @@ export class LanguageService {
   // Temporary solution for knowing the rtl languages
   private readonly rtlLanguages: LanguageCode[] = RTL_LANGUAGES;
 
-  constructor(
-    private _translateService: TranslateService,
-    private _dateAdapter: DateAdapter<unknown>,
-    private _globalConfigService: GlobalConfigService,
-  ) {
+  constructor() {
     this._initMonkeyPatchFirstDayOfWeek();
   }
 

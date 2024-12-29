@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -33,6 +33,12 @@ import { msToString } from '../../ui/duration/ms-to-string.pipe';
   providedIn: 'root',
 })
 export class PlannerService {
+  private _store = inject(Store);
+  private _reminderService = inject(ReminderService);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+
   includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
@@ -136,14 +142,6 @@ export class PlannerService {
     .select(selectTaskIdPlannedDayMap)
     // make this more performant by sharing stream
     .pipe(shareReplay(1));
-
-  constructor(
-    private _store: Store,
-    private _reminderService: ReminderService,
-    private _calendarIntegrationService: CalendarIntegrationService,
-    private _dateService: DateService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-  ) {}
 
   getDayOnce$(dayStr: string): Observable<PlannerDay | undefined> {
     return this.days$.pipe(

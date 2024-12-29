@@ -4,6 +4,7 @@ import {
   ElementRef,
   HostListener,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,17 +25,15 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
   standalone: false,
 })
 export class BookmarkBarComponent {
+  readonly bookmarkService = inject(BookmarkService);
+  private readonly _matDialog = inject(MatDialog);
+
   isDragOver: boolean = false;
   isEditMode: boolean = false;
   dragEnterTarget?: HTMLElement;
   T: typeof T = T;
   isContextMenuDisabled: boolean = false;
   bookmarkBarHeight: number = 50;
-
-  constructor(
-    public readonly bookmarkService: BookmarkService,
-    private readonly _matDialog: MatDialog,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor queries cannot be migrated as they are too complex.

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { Improvement } from '../improvement/improvement.model';
 import { ImprovementService } from '../improvement/improvement.service';
 import { improvementBannerAnimation } from './improvement-banner.ani';
@@ -15,15 +15,15 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class ImprovementBannerComponent implements OnDestroy {
+  improvementService = inject(ImprovementService);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   improvements: Improvement[] = [];
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public improvementService: ImprovementService,
-    private _dateService: DateService,
-  ) {
+  constructor() {
     this._subs.add(
       this.improvementService.improvementBannerImprovements$.subscribe(
         (val) => (this.improvements = val || []),

@@ -7,6 +7,7 @@ import {
   OnDestroy,
   viewChildren,
   viewChild,
+  inject,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -52,6 +53,16 @@ import { updateProject } from '../../features/project/store/project.actions';
   standalone: false,
 })
 export class SideNavComponent implements OnDestroy {
+  readonly tagService = inject(TagService);
+  readonly projectService = inject(ProjectService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _layoutService = inject(LayoutService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _shepherdService = inject(ShepherdService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _store = inject(Store);
+
   readonly navEntries = viewChildren<MatMenuItem>('menuEntry');
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
@@ -103,17 +114,7 @@ export class SideNavComponent implements OnDestroy {
     return this._globalConfigService.cfg?.misc.isUseMinimalNav ? 'minimal-nav' : '';
   }
 
-  constructor(
-    public readonly tagService: TagService,
-    public readonly projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    private readonly _matDialog: MatDialog,
-    private readonly _layoutService: LayoutService,
-    private readonly _taskService: TaskService,
-    private readonly _shepherdService: ShepherdService,
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _store: Store,
-  ) {
+  constructor() {
     this._subs.add(
       this.workContextService.activeWorkContextId$.subscribe(
         (id) => (this.activeWorkContextId = id),

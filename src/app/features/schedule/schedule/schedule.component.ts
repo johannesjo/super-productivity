@@ -5,7 +5,6 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  Inject,
   LOCALE_ID,
   OnDestroy,
   viewChild,
@@ -81,6 +80,17 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
+  taskService = inject(TaskService);
+  layoutService = inject(LayoutService);
+  shortcutService = inject(ShortcutService);
+  private _matDialog = inject(MatDialog);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _elRef = inject(ElementRef);
+  private locale = inject(LOCALE_ID);
+
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
@@ -262,18 +272,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   private _currentAniTimeout: number | undefined;
 
-  constructor(
-    public taskService: TaskService,
-    public layoutService: LayoutService,
-    public shortcutService: ShortcutService,
-    private _matDialog: MatDialog,
-    private _calendarIntegrationService: CalendarIntegrationService,
-    private _store: Store,
-    private _dateService: DateService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _elRef: ElementRef,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {
+  constructor() {
     if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },

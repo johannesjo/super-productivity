@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { GithubCfg } from './github.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import {
@@ -34,10 +34,8 @@ const BASE = GITHUB_API_BASE_URL;
   providedIn: 'root',
 })
 export class GithubApiService {
-  constructor(
-    private _snackService: SnackService,
-    private _http: HttpClient,
-  ) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   getById$(
     issueId: number,

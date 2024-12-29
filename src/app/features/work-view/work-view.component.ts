@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
@@ -51,6 +52,18 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false,
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
+  taskService = inject(TaskService);
+  takeABreakService = inject(TakeABreakService);
+  planningModeService = inject(PlanningModeService);
+  improvementService = inject(ImprovementService);
+  layoutService = inject(LayoutService);
+  workContextService = inject(WorkContextService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _activatedRoute = inject(ActivatedRoute);
+  private _projectService = inject(ProjectService);
+  private _cd = inject(ChangeDetectorRef);
+  private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+
   // TODO refactor all to signals
   undoneTasks = input<TaskWithSubTasks[]>([]);
   doneTasks = input<TaskWithSubTasks[]>([]);
@@ -90,20 +103,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
-
-  constructor(
-    public taskService: TaskService,
-    public takeABreakService: TakeABreakService,
-    public planningModeService: PlanningModeService,
-    public improvementService: ImprovementService,
-    public layoutService: LayoutService,
-    public workContextService: WorkContextService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _activatedRoute: ActivatedRoute,
-    private _projectService: ProjectService,
-    private _cd: ChangeDetectorRef,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor queries cannot be migrated as they are too complex.

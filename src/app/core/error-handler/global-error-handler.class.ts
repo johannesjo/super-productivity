@@ -1,4 +1,4 @@
-import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
+import { ErrorHandler, Injectable, Injector, inject } from '@angular/core';
 import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
@@ -14,7 +14,7 @@ import { error } from 'electron-log/renderer';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor(@Inject(Injector) private injector: Injector) {}
+  private injector = inject<Injector>(Injector);
 
   // TODO Cleanup this mess
   async handleError(err: any): Promise<void> {

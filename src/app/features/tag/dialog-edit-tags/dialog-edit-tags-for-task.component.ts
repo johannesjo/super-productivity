@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { TaskService } from '../../tasks/task.service';
@@ -18,6 +18,12 @@ import { Tag } from '../tag.model';
   standalone: false,
 })
 export class DialogEditTagsForTaskComponent implements OnDestroy {
+  private _taskService = inject(TaskService);
+  private _tagService = inject(TagService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogEditTagsForTaskComponent>>(MatDialogRef);
+  data = inject<DialogEditTagsForTaskPayload>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   title: string = truncate(this.data.task.title, 20);
   task$: Observable<Task> = this._taskService.getByIdLive$(this.data.task.id);
@@ -28,12 +34,7 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _taskService: TaskService,
-    private _tagService: TagService,
-    private _matDialogRef: MatDialogRef<DialogEditTagsForTaskComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogEditTagsForTaskPayload,
-  ) {
+  constructor() {
     this._subs.add(
       this.task$.subscribe((task) => {
         this.tagIds = task.tagIds;

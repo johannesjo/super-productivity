@@ -6,6 +6,7 @@ import {
   OnInit,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
@@ -33,6 +34,10 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   standalone: false,
 })
 export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
+  private _jiraApiService = inject(JiraApiService);
+  private _snackService = inject(SnackService);
+  private _issueProviderService = inject(IssueProviderService);
+
   readonly section = input<ConfigFormSection<IssueProviderJira>>();
 
   readonly modelChange = output<IssueProviderJira>();
@@ -78,12 +83,6 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   }[] = [];
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _snackService: SnackService,
-    private _issueProviderService: IssueProviderService,
-  ) {}
 
   private _cfg?: IssueProviderJira;
 

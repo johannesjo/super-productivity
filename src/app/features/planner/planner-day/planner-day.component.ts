@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { T } from '../../../t.const';
 import { PlannerDay, ScheduleItem, ScheduleItemType } from '../planner.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -25,6 +25,12 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
   standalone: false,
 })
 export class PlannerDayComponent {
+  private _store = inject(Store);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _reminderService = inject(ReminderService);
+  private _dateService = inject(DateService);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -32,14 +38,6 @@ export class PlannerDayComponent {
 
   protected readonly T = T;
   protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
-
-  constructor(
-    private _store: Store,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _reminderService: ReminderService,
-    private _dateService: DateService,
-  ) {}
 
   // TODO correct type
   drop(

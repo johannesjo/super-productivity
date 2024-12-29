@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { JiraApiService } from '../../jira-api.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
@@ -29,6 +29,19 @@ import { first, map, switchMap } from 'rxjs/operators';
   standalone: false,
 })
 export class DialogJiraAddWorklogComponent implements OnDestroy {
+  private _jiraApiService = inject(JiraApiService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogJiraAddWorklogComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _store = inject(Store);
+  data = inject<{
+    issue: JiraIssue;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   timeSpent: number;
   timeLogged: number;
@@ -58,20 +71,7 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-    private _issueProviderService: IssueProviderService,
-    private _store: Store,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      issue: JiraIssue;
-      task: Task;
-    },
-    private _dateService: DateService,
-  ) {
+  constructor() {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
     this.timeLogged = this.issue.timespent * 1000;

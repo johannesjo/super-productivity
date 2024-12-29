@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DROPBOX_APP_KEY } from './dropbox.const';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -20,6 +20,12 @@ import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _dataInitService = inject(DataInitService);
+  private _matDialog = inject(MatDialog);
+  private _snackService = inject(SnackService);
+  private _persistenceLocalService = inject(PersistenceLocalService);
+
   // keep as fallback
   private _accessToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
     1,
@@ -39,13 +45,7 @@ export class DropboxApiService {
       first(),
     );
 
-  constructor(
-    private _globalConfigService: GlobalConfigService,
-    private _dataInitService: DataInitService,
-    private _matDialog: MatDialog,
-    private _snackService: SnackService,
-    private _persistenceLocalService: PersistenceLocalService,
-  ) {
+  constructor() {
     this._initTokens();
   }
 

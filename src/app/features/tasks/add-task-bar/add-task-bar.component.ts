@@ -8,6 +8,7 @@ import {
   output,
   signal,
   viewChild,
+  inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
@@ -40,6 +41,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
   standalone: false,
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+  private _addTaskBarService = inject(AddTaskBarService);
+
   tabindex = input<number>(0);
   isDoubleEnterMode = input<boolean>(false);
   isElevated = input<boolean>(false);
@@ -93,13 +99,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
-
-  constructor(
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _store: Store,
-    private _addTaskBarService: AddTaskBarService,
-  ) {}
 
   ngAfterViewInit(): void {
     this.isAddToBottom.set(!!this.planForDay() || this.isAddToBottom());

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { MetricService } from './metric.service';
 // import { Color } from 'ng2-charts';
@@ -18,6 +18,10 @@ import { WorkContextService } from '../work-context/work-context.service';
   standalone: false,
 })
 export class MetricComponent {
+  workContextService = inject(WorkContextService);
+  metricService = inject(MetricService);
+  projectMetricsService = inject(ProjectMetricsService);
+
   T: typeof T = T;
 
   productivityHappiness$: Observable<LineChartData> =
@@ -76,10 +80,4 @@ export class MetricComponent {
     },
   };
   lineChartType: ChartType = 'line';
-
-  constructor(
-    public workContextService: WorkContextService,
-    public metricService: MetricService,
-    public projectMetricsService: ProjectMetricsService,
-  ) {}
 }

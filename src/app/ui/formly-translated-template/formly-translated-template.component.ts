@@ -5,6 +5,7 @@ import {
   OnDestroy,
   OnInit,
   viewChild,
+  inject,
 } from '@angular/core';
 import { FieldType } from '@ngx-formly/core';
 import { Subscription } from 'rxjs';
@@ -21,14 +22,12 @@ export class FormlyTranslatedTemplateComponent
   extends FieldType
   implements OnInit, OnDestroy
 {
+  private _translateService = inject(TranslateService);
+
   readonly tplWrapper = viewChild<ElementRef>('tplWrapper');
 
   private _el?: HTMLElement;
   private _subs: Subscription = new Subscription();
-
-  constructor(private _translateService: TranslateService) {
-    super();
-  }
 
   ngOnInit(): void {
     if (!this.field.templateOptions) {

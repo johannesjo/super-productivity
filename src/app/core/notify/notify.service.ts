@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NotifyModel } from './notify.model';
 import { environment } from '../../../environments/environment';
 import { IS_ELECTRON } from '../../app.constants';
@@ -12,10 +12,8 @@ import { androidInterface } from '../../features/android/android-interface';
   providedIn: 'root',
 })
 export class NotifyService {
-  constructor(
-    private _translateService: TranslateService,
-    private _uiHelperService: UiHelperService,
-  ) {}
+  private _translateService = inject(TranslateService);
+  private _uiHelperService = inject(UiHelperService);
 
   async notifyDesktop(options: NotifyModel): Promise<Notification | undefined> {
     if (!IS_MOBILE) {

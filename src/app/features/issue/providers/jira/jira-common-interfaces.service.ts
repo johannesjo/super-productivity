@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { first, map, switchMap, tap } from 'rxjs/operators';
@@ -18,10 +18,8 @@ import { assertTruthy } from '../../../../util/assert-truthy';
   providedIn: 'root',
 })
 export class JiraCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _jiraApiService: JiraApiService,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {}
+  private readonly _jiraApiService = inject(JiraApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
 
   pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PlannerActions } from './planner.actions';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
@@ -14,6 +14,10 @@ import {
 
 @Injectable()
 export class PlannerEffects {
+  private _actions$ = inject(Actions);
+  private _store = inject(Store);
+  private _persistenceService = inject(PersistenceService);
+
   saveToDB$ = createEffect(
     () => {
       return this._actions$.pipe(
@@ -62,12 +66,6 @@ export class PlannerEffects {
       }),
     );
   });
-
-  constructor(
-    private _actions$: Actions,
-    private _store: Store,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   private _saveToLs(
     plannerState: PlannerState,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   setCurrentTask,
@@ -37,6 +37,14 @@ import { TaskService } from '../../tasks/task.service';
 
 @Injectable()
 export class PomodoroEffects {
+  private _pomodoroService = inject(PomodoroService);
+  private _actions$ = inject(Actions);
+  private _notifyService = inject(NotifyService);
+  private _matDialog = inject(MatDialog);
+  private _snackService = inject(SnackService);
+  private _store$ = inject<Store<any>>(Store);
+  private _taskService = inject(TaskService);
+
   currentTaskId$: Observable<string | null> = this._store$.pipe(
     select(selectCurrentTaskId),
   );
@@ -266,14 +274,4 @@ export class PomodoroEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _pomodoroService: PomodoroService,
-    private _actions$: Actions,
-    private _notifyService: NotifyService,
-    private _matDialog: MatDialog,
-    private _snackService: SnackService,
-    private _store$: Store<any>,
-    private _taskService: TaskService,
-  ) {}
 }

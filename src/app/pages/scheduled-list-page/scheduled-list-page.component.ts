@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, LOCALE_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, LOCALE_ID, inject } from '@angular/core';
 import { T } from '../../t.const';
 import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,19 +25,17 @@ import { selectAllTasksWithPlannedDay } from '../../features/planner/store/plann
   standalone: false,
 })
 export class ScheduledListPageComponent {
+  scheduledTaskService = inject(ScheduledTaskService);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  private _translateService = inject(TranslateService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private locale = inject(LOCALE_ID);
+
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
   tasksPlannedForDays$ = this._store.select(selectAllTasksWithPlannedDay);
-
-  constructor(
-    public scheduledTaskService: ScheduledTaskService,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    private _translateService: TranslateService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {}
 
   editReminder(task: TaskCopy, ev: MouseEvent): void {
     ev.preventDefault();

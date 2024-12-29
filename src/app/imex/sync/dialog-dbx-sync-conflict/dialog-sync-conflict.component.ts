@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { DialogConflictResolutionResult } from '../sync.model';
@@ -11,6 +11,13 @@ import { DialogConflictResolutionResult } from '../sync.model';
   standalone: false,
 })
 export class DialogSyncConflictComponent {
+  private _matDialogRef = inject<MatDialogRef<DialogSyncConflictComponent>>(MatDialogRef);
+  data = inject<{
+    remote: number;
+    local: number;
+    lastSync: number;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   remoteDate: number = this.data.remote;
@@ -24,15 +31,9 @@ export class DialogSyncConflictComponent {
   isHighlightRemote: boolean = this.data.remote >= this.data.local;
   isHighlightLocal: boolean = this.data.local >= this.data.remote;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogSyncConflictComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      remote: number;
-      local: number;
-      lastSync: number;
-    },
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

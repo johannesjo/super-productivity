@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { PlannerActions } from '../store/planner.actions';
@@ -35,6 +35,16 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
   standalone: false,
 })
 export class DialogAddPlannedTasksComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogAddPlannedTasksComponent>>(MatDialogRef);
+  private _plannerService = inject(PlannerService);
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _reminderService = inject(ReminderService);
+  private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+
   T: typeof T = T;
   day$ = this._plannerService.plannerDayForAllDueToday$.pipe();
   protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
@@ -54,16 +64,9 @@ export class DialogAddPlannedTasksComponent {
     map((tasks) => tasks.filter((task) => !!task)),
   );
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
-    private _plannerService: PlannerService,
-    private _store: Store,
-    private _dateService: DateService,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _reminderService: ReminderService,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     // prevent close since it does not reappear
     _matDialogRef.disableClose = true;
   }

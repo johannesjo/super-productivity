@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
@@ -39,22 +40,20 @@ import { selectAllProjectColorsAndTitles } from '../project/store/project.select
   standalone: false,
 })
 export class WorklogComponent implements AfterViewInit, OnDestroy {
+  readonly worklogService = inject(WorklogService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _store = inject(Store);
+
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
   allProjectsColorAndTitle: { [key: string]: { title: string; color: string } } = {};
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    public readonly worklogService: WorklogService,
-    public readonly workContextService: WorkContextService,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _taskService: TaskService,
-    private readonly _matDialog: MatDialog,
-    private readonly _router: Router,
-    private readonly _route: ActivatedRoute,
-    private readonly _store: Store,
-  ) {}
 
   ngAfterViewInit(): void {
     this._subs.add(

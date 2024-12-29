@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
@@ -13,11 +13,9 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   standalone: false,
 })
 export class SelectProjectComponent extends FieldType<FormlyFieldConfig> {
-  T: typeof T = T;
+  projectService = inject(ProjectService);
 
-  constructor(public projectService: ProjectService) {
-    super();
-  }
+  T: typeof T = T;
 
   get type(): string {
     return this.to.type || 'text';

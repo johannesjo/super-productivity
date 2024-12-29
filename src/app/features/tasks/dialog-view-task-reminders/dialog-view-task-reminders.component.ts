@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Reminder } from '../../reminder/reminder.model';
 import { Task, TaskWithReminderData } from '../task.model';
@@ -26,6 +26,16 @@ const M = 1000 * 60;
   standalone: false,
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogViewTaskRemindersComponent>>(MatDialogRef);
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _matDialog = inject(MatDialog);
+  private _reminderService = inject(ReminderService);
+  data = inject<{
+    reminders: Reminder[];
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   isDisableControls: boolean = false;
   reminders$: BehaviorSubject<Reminder[]> = new BehaviorSubject(this.data.reminders);
@@ -59,14 +69,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogViewTaskRemindersComponent>,
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _matDialog: MatDialog,
-    private _reminderService: ReminderService,
-    @Inject(MAT_DIALOG_DATA) public data: { reminders: Reminder[] },
-  ) {
+  constructor() {
     // this._matDialogRef.disableClose = true;
     this._subs.add(
       this._reminderService.onReloadModel$.subscribe(() => {

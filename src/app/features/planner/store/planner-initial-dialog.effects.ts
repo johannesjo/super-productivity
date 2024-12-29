@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { delay, exhaustMap, first, map, switchMap } from 'rxjs/operators';
 import { combineLatest, EMPTY, merge, of } from 'rxjs';
@@ -18,6 +18,13 @@ import { PlannerService } from '../planner.service';
 
 @Injectable()
 export class PlannerInitialDialogEffects {
+  private _actions$ = inject(Actions);
+  private _store = inject(Store);
+  private _syncTriggerService = inject(SyncTriggerService);
+  private _matDialog = inject(MatDialog);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _plannerService = inject(PlannerService);
+
   // INITIAL DIALOG
   // ---------------
   showDialogAfterAppLoad$ = createEffect(
@@ -106,26 +113,4 @@ export class PlannerInitialDialogEffects {
     },
     // { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store: Store,
-    private _syncTriggerService: SyncTriggerService,
-    private _matDialog: MatDialog,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _plannerService: PlannerService,
-  ) {
-    // this._matDialog
-    //   .open(DialogAddPlannedTasksComponent, {
-    //     data: {
-    //       missingTasks: [],
-    //     },
-    //   })
-    //   .afterClosed()
-    //   .pipe(
-    //     map(() =>
-    //       PlannerActions.updatePlannerDialogLastShown({ today: getWorklogStr() }),
-    //     ),
-    //   );
-  }
 }

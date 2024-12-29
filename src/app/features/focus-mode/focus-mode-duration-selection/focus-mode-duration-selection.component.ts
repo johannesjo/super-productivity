@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
@@ -27,6 +28,8 @@ import { T } from 'src/app/t.const';
   standalone: false,
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
+  private readonly _store = inject(Store);
+
   T: typeof T = T;
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   task$ = this._store.select(selectCurrentTask);
@@ -36,7 +39,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   cfg?: FocusModeConfig;
   private _onDestroy$ = new Subject<void>();
 
-  constructor(private readonly _store: Store) {
+  constructor() {
     this.cfg$.pipe(takeUntil(this._onDestroy$)).subscribe((v) => (this.cfg = v));
   }
 

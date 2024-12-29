@@ -3,8 +3,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Inject,
   viewChild,
+  inject,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -50,6 +50,21 @@ import { WorkContextService } from '../../work-context/work-context.service';
   animations: [expandFadeAnimation, fadeAnimation],
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
+  data = inject<{
+    task: Task;
+    targetDay?: string;
+  }>(MAT_DIALOG_DATA);
+  private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
+  private _cd = inject(ChangeDetectorRef);
+  private _store = inject(Store);
+  private _snackService = inject(SnackService);
+  private _datePipe = inject(DatePipe);
+  private _taskService = inject(TaskService);
+  private workContextService = inject(WorkContextService);
+  private _reminderService = inject(ReminderService);
+  private _plannerService = inject(PlannerService);
+  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+
   T: typeof T = T;
   minDate = new Date();
   readonly calendar = viewChild.required(MatCalendar);
@@ -69,20 +84,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
   private _timeCheckVal: string | null = null;
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task; targetDay?: string },
-    private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
-    private _cd: ChangeDetectorRef,
-    private _store: Store,
-    private _snackService: SnackService,
-    private _datePipe: DatePipe,
-    private _taskService: TaskService,
-    private workContextService: WorkContextService,
-    private _reminderService: ReminderService,
-    private _plannerService: PlannerService,
-    private readonly _dateAdapter: DateAdapter<unknown>,
-  ) {}
 
   async ngAfterViewInit(): Promise<void> {
     if (this.data.task.reminderId) {

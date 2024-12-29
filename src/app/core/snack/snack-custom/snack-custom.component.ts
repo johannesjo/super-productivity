@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Inject,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { SnackParams } from '../snack.model';
@@ -18,12 +18,10 @@ import { debounceTime } from 'rxjs/operators';
   standalone: false,
 })
 export class SnackCustomComponent implements OnInit, OnDestroy {
-  private _subs: Subscription = new Subscription();
+  data = inject<SnackParams>(MAT_SNACK_BAR_DATA);
+  snackBarRef = inject<MatSnackBarRef<SnackCustomComponent>>(MatSnackBarRef);
 
-  constructor(
-    @Inject(MAT_SNACK_BAR_DATA) public data: SnackParams,
-    public snackBarRef: MatSnackBarRef<SnackCustomComponent>,
-  ) {}
+  private _subs: Subscription = new Subscription();
 
   ngOnInit(): void {
     if (this.data.promise) {

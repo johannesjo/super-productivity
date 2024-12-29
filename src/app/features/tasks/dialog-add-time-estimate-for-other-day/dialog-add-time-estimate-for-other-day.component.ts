@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 
@@ -15,12 +15,13 @@ interface NewTimeEntry {
   standalone: false,
 })
 export class DialogAddTimeEstimateForOtherDayComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogAddTimeEstimateForOtherDayComponent>>(MatDialogRef);
+
   T: typeof T = T;
   newEntry: NewTimeEntry;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogAddTimeEstimateForOtherDayComponent>,
-  ) {
+  constructor() {
     this.newEntry = {
       date: '',
       timeSpent: 0,

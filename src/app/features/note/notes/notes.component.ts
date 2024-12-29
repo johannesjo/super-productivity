@@ -3,6 +3,7 @@ import {
   Component,
   HostListener,
   viewChild,
+  inject,
 } from '@angular/core';
 import { NoteService } from '../note.service';
 import { MatButton } from '@angular/material/button';
@@ -25,18 +26,16 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
   standalone: false,
 })
 export class NotesComponent {
+  noteService = inject(NoteService);
+  workContextService = inject(WorkContextService);
+  private _matDialog = inject(MatDialog);
+
   T: typeof T = T;
   isElementWasAdded: boolean = false;
   isDragOver: boolean = false;
   dragEnterTarget?: HTMLElement;
 
   readonly buttonEl = viewChild<MatButton>('buttonEl');
-
-  constructor(
-    public noteService: NoteService,
-    public workContextService: WorkContextService,
-    private _matDialog: MatDialog,
-  ) {}
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
     this.dragEnterTarget = ev.target as HTMLElement;

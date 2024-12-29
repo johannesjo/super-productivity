@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { updateGlobalConfigSection } from './store/global-config.actions';
 import { Observable } from 'rxjs';
@@ -33,6 +33,8 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
   providedIn: 'root',
 })
 export class GlobalConfigService {
+  private readonly _store = inject<Store<any>>(Store);
+
   cfg$: Observable<GlobalConfigState>;
 
   misc$: Observable<MiscConfig> = this._store.pipe(
@@ -74,7 +76,7 @@ export class GlobalConfigService {
 
   cfg?: GlobalConfigState;
 
-  constructor(private readonly _store: Store<any>) {
+  constructor() {
     this.cfg$ = this._store.pipe(
       select(selectConfigFeatureState),
       distinctUntilChanged(distinctUntilChangedObject),

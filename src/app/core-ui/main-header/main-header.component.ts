@@ -6,6 +6,7 @@ import {
   OnInit,
   Renderer2,
   viewChild,
+  inject,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -39,6 +40,22 @@ import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
   standalone: false,
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
+  readonly projectService = inject(ProjectService);
+  readonly workContextService = inject(WorkContextService);
+  readonly bookmarkService = inject(BookmarkService);
+  readonly taskService = inject(TaskService);
+  readonly pomodoroService = inject(PomodoroService);
+  readonly layoutService = inject(LayoutService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  readonly syncProviderService = inject(SyncProviderService);
+  readonly globalConfigService = inject(GlobalConfigService);
+  private readonly _tagService = inject(TagService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _snackService = inject(SnackService);
+  private readonly _router = inject(Router);
+  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _configService = inject(GlobalConfigService);
+
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
@@ -79,24 +96,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   );
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    public readonly projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    public readonly bookmarkService: BookmarkService,
-    public readonly taskService: TaskService,
-    public readonly pomodoroService: PomodoroService,
-    public readonly layoutService: LayoutService,
-    public readonly simpleCounterService: SimpleCounterService,
-    public readonly syncProviderService: SyncProviderService,
-    public readonly globalConfigService: GlobalConfigService,
-    private readonly _tagService: TagService,
-    private readonly _renderer: Renderer2,
-    private readonly _snackService: SnackService,
-    private readonly _router: Router,
-    private readonly _focusModeService: FocusModeService,
-    private readonly _configService: GlobalConfigService,
-  ) {}
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();

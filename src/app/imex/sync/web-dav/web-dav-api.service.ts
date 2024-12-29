@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -35,6 +35,9 @@ export interface AndroidWebDAVClientError extends Error {
 
 @Injectable({ providedIn: 'root' })
 export class WebDavApiService {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _dataInitService = inject(DataInitService);
+
   private _cfg$: Observable<{
     baseUrl: string;
     userName: string;
@@ -65,13 +68,6 @@ export class WebDavApiService {
       tap((isTokenAvailable) => !isTokenAvailable && new Error('WebDAV API not ready')),
       first(),
     );
-
-  // private _lazyWebDavClientCache: Promise<CreateClientType> | null = null;
-
-  constructor(
-    private _globalConfigService: GlobalConfigService,
-    private _dataInitService: DataInitService,
-  ) {}
 
   private getWebDavClientCreator(): Promise<CreateClientType> {
     return Promise.resolve(createClient);

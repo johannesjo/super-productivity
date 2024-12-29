@@ -5,6 +5,7 @@ import {
   OnDestroy,
   input,
   output,
+  inject,
 } from '@angular/core';
 import {
   ConfigFormSection,
@@ -30,6 +31,9 @@ import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form
   standalone: false,
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _matDialog = inject(MatDialog);
+
   readonly cfg = input<SimpleCounterConfig>();
 
   // TODO: Skipped for migration because:
@@ -62,10 +66,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   private _inModelCopy?: SimpleCounterConfig;
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _matDialog: MatDialog, // private readonly _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     this._subs.add(
       this.simpleCounterCfg$.subscribe((v) => {
         this.editModel = v;

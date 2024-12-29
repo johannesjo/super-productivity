@@ -1,4 +1,4 @@
-import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { LOCALE_ID, Pipe, PipeTransform, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 
@@ -7,10 +7,8 @@ import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
   standalone: false,
 })
 export class LocalDateStrPipe implements PipeTransform {
-  constructor(
-    private datePipe: DatePipe,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {}
+  private datePipe = inject(DatePipe);
+  private locale = inject(LOCALE_ID);
 
   transform(value: string | null, ...args: unknown[]): string | null {
     if (typeof value !== 'string') {

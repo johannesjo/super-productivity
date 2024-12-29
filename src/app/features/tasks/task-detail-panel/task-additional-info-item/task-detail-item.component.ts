@@ -6,6 +6,7 @@ import {
   HostListener,
   Input,
   output,
+  inject,
 } from '@angular/core';
 
 @Component({
@@ -16,6 +17,8 @@ import {
   standalone: false,
 })
 export class TaskDetailItemComponent {
+  elementRef = inject(ElementRef);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -33,8 +36,6 @@ export class TaskDetailItemComponent {
   readonly editActionTriggered = output<void>();
 
   @HostBinding('tabindex') readonly tabindex: number = 3;
-
-  constructor(public elementRef: ElementRef) {}
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     const tagName = (ev.target as HTMLElement).tagName.toLowerCase();

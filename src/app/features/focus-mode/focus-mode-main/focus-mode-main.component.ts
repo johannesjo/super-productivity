@@ -4,6 +4,7 @@ import {
   HostBinding,
   HostListener,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
@@ -36,6 +37,13 @@ import { ICAL_TYPE } from '../../issue/issue.const';
   standalone: false,
 })
 export class FocusModeMainComponent implements OnDestroy {
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  readonly taskService = inject(TaskService);
+  private readonly _taskAttachmentService = inject(TaskAttachmentService);
+  private readonly _issueService = inject(IssueService);
+  private readonly _store = inject(Store);
+
   timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
 
@@ -63,14 +71,7 @@ export class FocusModeMainComponent implements OnDestroy {
   private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
 
-  constructor(
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _globalConfigService: GlobalConfigService,
-    public readonly taskService: TaskService,
-    private readonly _taskAttachmentService: TaskAttachmentService,
-    private readonly _issueService: IssueService,
-    private readonly _store: Store,
-  ) {
+  constructor() {
     this._globalConfigService.misc$
       .pipe(takeUntil(this._onDestroy$))
       .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));

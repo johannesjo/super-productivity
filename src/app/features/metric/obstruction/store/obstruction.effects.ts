@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
@@ -16,6 +16,10 @@ import { selectUnusedObstructionIds } from '../../store/metric.selectors';
 
 @Injectable()
 export class ObstructionEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+
   updateObstructions$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -35,12 +39,6 @@ export class ObstructionEffects {
       map(([a, unusedIds]) => deleteObstructions({ ids: unusedIds })),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   private _saveToLs(obstructionState: ObstructionState): void {
     this._persistenceService.obstruction.saveState(obstructionState, {

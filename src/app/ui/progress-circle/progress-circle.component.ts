@@ -5,6 +5,7 @@ import {
   Input,
   Renderer2,
   viewChild,
+  inject,
 } from '@angular/core';
 
 @Component({
@@ -15,6 +16,8 @@ import {
   standalone: false,
 })
 export class ProgressCircleComponent {
+  private readonly _renderer = inject(Renderer2);
+
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set progress(progressIN: number) {
@@ -34,6 +37,4 @@ export class ProgressCircleComponent {
   }
 
   readonly progressCircle = viewChild<ElementRef>('progressCircle');
-
-  constructor(private readonly _renderer: Renderer2) {}
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { androidInterface } from '../../../features/android/android-interface';
@@ -12,12 +12,15 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
   standalone: false,
 })
 export class DialogSyncPermissionComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogSyncPermissionComponent>>(MatDialogRef);
+  private _globalConfigService = inject(GlobalConfigService);
+
   T: typeof T = T;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogSyncPermissionComponent>,
-    private _globalConfigService: GlobalConfigService,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

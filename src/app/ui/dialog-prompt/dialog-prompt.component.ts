@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
 
@@ -10,14 +10,11 @@ import { T } from '../../t.const';
   standalone: false,
 })
 export class DialogPromptComponent {
+  private _matDialogRef = inject<MatDialogRef<DialogPromptComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   txtVal: string = '';
-
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogPromptComponent>,
-    // TODO rename data.placeholder to data.label
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {}
 
   close(isSave: boolean): void {
     if (isSave) {

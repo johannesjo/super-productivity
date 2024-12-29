@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DateService } from '../../core/date/date.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -15,14 +15,14 @@ import { T } from '../../t.const';
   standalone: false,
 })
 export class PlannerComponent {
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  layoutService = inject(LayoutService);
+
   readonly T = T;
   isPanelOpen = false;
 
-  constructor(
-    private _store: Store,
-    private _dateService: DateService,
-    public layoutService: LayoutService,
-  ) {
+  constructor() {
     this._store
       .select(selectTaskFeatureState)
       .pipe(takeUntilDestroyed())

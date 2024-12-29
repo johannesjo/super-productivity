@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
@@ -9,6 +9,10 @@ import { IssueProviderActions } from './issue-provider.actions';
 
 @Injectable()
 export class IssueProviderDbEffects {
+  private _actions$ = inject(Actions);
+  private _store = inject(Store);
+  private _persistenceService = inject(PersistenceService);
+
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -31,12 +35,6 @@ export class IssueProviderDbEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store: Store,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
     return this._store.pipe(

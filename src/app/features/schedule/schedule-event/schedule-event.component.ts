@@ -6,7 +6,6 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
-  Inject,
   inject,
   Input,
   LOCALE_ID,
@@ -51,6 +50,13 @@ import { IssueService } from '../../issue/issue.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScheduleEventComponent implements OnInit {
+  private _store = inject(Store);
+  private _elRef = inject(ElementRef);
+  private _matDialog = inject(MatDialog);
+  private _cd = inject(ChangeDetectorRef);
+  private _issueService = inject(IssueService);
+  private locale = inject(LOCALE_ID);
+
   T: typeof T = T;
   @HostBinding('title') hoverTitle: string = '';
   @HostBinding('class') cssClass: string = '';
@@ -236,15 +242,6 @@ export class ScheduleEventComponent implements OnInit {
       this.openContextMenu(ev);
     }
   }
-
-  constructor(
-    private _store: Store,
-    private _elRef: ElementRef,
-    private _matDialog: MatDialog,
-    private _cd: ChangeDetectorRef,
-    private _issueService: IssueService,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {}
 
   ngOnInit(): void {
     if (this.task) {

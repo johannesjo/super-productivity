@@ -6,6 +6,7 @@ import {
   OnInit,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
@@ -29,6 +30,9 @@ import { selectAllProjects } from '../../project/store/project.selectors';
   standalone: false,
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+
   T: typeof T = T;
   taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
   filteredTasks: Task[] = [];
@@ -38,11 +42,6 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
   private _destroy$: Subject<boolean> = new Subject<boolean>();
-
-  constructor(
-    private _workContextService: WorkContextService,
-    private _store: Store,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

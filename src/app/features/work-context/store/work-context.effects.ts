@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
 import { setSelectedTask } from '../../tasks/store/task.actions';
@@ -10,6 +10,10 @@ import { setActiveWorkContext } from './work-context.actions';
 
 @Injectable()
 export class WorkContextEffects {
+  private _actions$ = inject(Actions);
+  private _taskService = inject(TaskService);
+  private _bannerService = inject(BannerService);
+
   // TODO improve
   // updateContextsStorage$ = createEffect(() => this._actions$.pipe(
   //   ofType(
@@ -49,10 +53,4 @@ export class WorkContextEffects {
       map(() => setSelectedTask({ id: null })),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _taskService: TaskService,
-    private _bannerService: BannerService,
-  ) {}
 }

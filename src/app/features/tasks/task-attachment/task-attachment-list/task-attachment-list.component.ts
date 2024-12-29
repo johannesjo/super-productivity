@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
 import { TaskAttachment } from '../task-attachment.model';
 import { TaskAttachmentService } from '../task-attachment.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,18 +16,16 @@ import { SnackService } from 'src/app/core/snack/snack.service';
   standalone: false,
 })
 export class TaskAttachmentListComponent {
+  readonly attachmentService = inject(TaskAttachmentService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _snackService = inject(SnackService);
+
   readonly taskId = input<string>();
   readonly attachments = input<TaskAttachment[]>();
   readonly isDisableControls = input<boolean>(false);
 
   T: typeof T = T;
   isError: boolean[] = [];
-
-  constructor(
-    public readonly attachmentService: TaskAttachmentService,
-    private readonly _matDialog: MatDialog,
-    private readonly _snackService: SnackService,
-  ) {}
 
   openEditDialog(attachment?: TaskAttachment): void {
     if (!this.taskId()) {

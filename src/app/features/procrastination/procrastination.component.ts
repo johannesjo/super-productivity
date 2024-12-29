@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { T } from '../../t.const';
 import { Store } from '@ngrx/store';
@@ -13,12 +13,10 @@ import { FocusModePage } from '../focus-mode/focus-mode.const';
   standalone: false,
 })
 export class ProcrastinationComponent {
-  T: typeof T = T;
+  taskService = inject(TaskService);
+  private _store = inject(Store);
 
-  constructor(
-    public taskService: TaskService,
-    private _store: Store,
-  ) {}
+  T: typeof T = T;
 
   backToWork(): void {
     this._store.dispatch(

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { JiraIssue, JiraRelatedIssue, JiraSubtask } from '../jira-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
@@ -26,6 +26,9 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
   standalone: false,
 })
 export class JiraIssueContentComponent {
+  private readonly _taskService = inject(TaskService);
+  private readonly _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+
   description?: string;
   attachments?: TaskAttachment[];
   T: typeof T = T;
@@ -85,11 +88,6 @@ export class JiraIssueContentComponent {
         : of(undefined),
     ),
   );
-
-  constructor(
-    private readonly _taskService: TaskService,
-    private readonly _jiraCommonInterfacesService: JiraCommonInterfacesService,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

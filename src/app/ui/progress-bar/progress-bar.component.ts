@@ -4,6 +4,7 @@ import {
   ElementRef,
   HostBinding,
   Input,
+  inject,
 } from '@angular/core';
 
 @Component({
@@ -14,12 +15,12 @@ import {
   standalone: false,
 })
 export class ProgressBarComponent {
+  private _elRef = inject(ElementRef);
+
   // TODO: Skipped for migration because:
   //  This input is used in combination with `@HostBinding` and migrating would
   //  break.
   @HostBinding('class') @Input() cssClass: string = 'bg-primary';
-
-  constructor(private _elRef: ElementRef) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

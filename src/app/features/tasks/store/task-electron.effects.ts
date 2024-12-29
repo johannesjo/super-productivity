@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { addTimeSpent, setCurrentTask, unsetCurrentTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
@@ -12,6 +12,10 @@ import { selectIsFocusOverlayShown } from '../../focus-mode/store/focus-mode.sel
 
 @Injectable()
 export class TaskElectronEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _configService = inject(GlobalConfigService);
+
   taskChangeElectron$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -69,10 +73,4 @@ export class TaskElectronEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _configService: GlobalConfigService,
-  ) {}
 }

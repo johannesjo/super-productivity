@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal } from '@angular/core';
+import { Injectable, WritableSignal, inject } from '@angular/core';
 import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   catchError,
@@ -35,15 +35,13 @@ import { assertTruthy } from '../../../util/assert-truthy';
   providedIn: 'root',
 })
 export class AddTaskBarService {
-  constructor(
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _tagService: TagService,
-    private _projectService: ProjectService,
-    private _globalConfigService: GlobalConfigService,
-    private _snackService: SnackService,
-    private _issueService: IssueService,
-  ) {}
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _tagService = inject(TagService);
+  private _projectService = inject(ProjectService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _snackService = inject(SnackService);
+  private _issueService = inject(IssueService);
 
   getFilteredIssueSuggestions$(
     taskSuggestionsCtrl: UntypedFormControl,

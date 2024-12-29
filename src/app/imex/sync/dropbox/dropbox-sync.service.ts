@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
@@ -20,6 +20,11 @@ import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxSyncService implements SyncProviderServiceInterface {
+  private _dropboxApiService = inject(DropboxApiService);
+  private _dataInitService = inject(DataInitService);
+  private _snackService = inject(SnackService);
+  private _store = inject(Store);
+
   id: SyncProvider = SyncProvider.Dropbox;
   isUploadForcePossible: boolean = true;
 
@@ -27,13 +32,6 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
     concatMap(() => this._dropboxApiService.isTokenAvailable$),
     distinctUntilChanged(),
   );
-
-  constructor(
-    private _dropboxApiService: DropboxApiService,
-    private _dataInitService: DataInitService,
-    private _snackService: SnackService,
-    private _store: Store,
-  ) {}
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,

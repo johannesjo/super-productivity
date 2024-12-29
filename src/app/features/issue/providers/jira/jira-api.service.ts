@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
@@ -83,6 +83,12 @@ interface JiraRequestCfg {
   providedIn: 'root',
 })
 export class JiraApiService {
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _globalProgressBarService = inject(GlobalProgressBarService);
+  private _snackService = inject(SnackService);
+  private _bannerService = inject(BannerService);
+  private _matDialog = inject(MatDialog);
+
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess: boolean = !!sessionStorage.getItem(BLOCK_ACCESS_KEY);
   private _isExtension: boolean = false;
@@ -95,13 +101,7 @@ export class JiraApiService {
           timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
         );
 
-  constructor(
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _globalProgressBarService: GlobalProgressBarService,
-    private _snackService: SnackService,
-    private _bannerService: BannerService,
-    private _matDialog: MatDialog,
-  ) {
+  constructor() {
     // set up callback listener for electron
     if (IS_ELECTRON) {
       window.ea.on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
@@ -20,15 +21,13 @@ import { T } from 'src/app/t.const';
   standalone: false,
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
+  readonly taskService = inject(TaskService);
+  private readonly _store = inject(Store);
+
   selectedTask: string | Task | undefined;
   initialTask$ = this.taskService.firstStartableTask$.pipe(first());
   focusTimeout = 0;
   T: typeof T = T;
-
-  constructor(
-    public readonly taskService: TaskService,
-    private readonly _store: Store,
-  ) {}
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {

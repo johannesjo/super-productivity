@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { T } from '../../../t.const';
@@ -20,15 +20,19 @@ export class DialogAddNoteComponent
   extends DialogFullscreenMarkdownComponent
   implements OnDestroy
 {
+  override _matDialogRef: MatDialogRef<DialogAddNoteComponent>;
+  private _noteService = inject(NoteService);
+
   override T: typeof T = T;
   override data: { content: string };
 
-  constructor(
-    public override _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
-    private _noteService: NoteService,
-  ) {
+  constructor() {
+    const _matDialogRef = inject<MatDialogRef<DialogAddNoteComponent>>(MatDialogRef);
+
     const data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
-    super(_matDialogRef, data);
+    super();
+    this._matDialogRef = _matDialogRef;
+
     this.data = data;
   }
 

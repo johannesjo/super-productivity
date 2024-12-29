@@ -4,7 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  Inject,
+  inject,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Task, TaskCopy, TimeSpentOnDayCopy } from '../task.model';
@@ -23,20 +23,22 @@ import { T } from '../../../t.const';
   standalone: false,
 })
 export class DialogTimeEstimateComponent implements AfterViewInit {
+  private _matDialogRef = inject<MatDialogRef<DialogTimeEstimateComponent>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _cd = inject(ChangeDetectorRef);
+  private _el = inject(ElementRef);
+  data = inject(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   todayStr: string;
   task: Task;
   taskCopy: TaskCopy;
   timeSpentOnDayCopy: TimeSpentOnDayCopy;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogTimeEstimateComponent>,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _cd: ChangeDetectorRef,
-    private _el: ElementRef,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
+  constructor() {
+    const _taskService = this._taskService;
+
     this.task = this.data.task;
     this.todayStr = getTodayStr();
     this._taskService = _taskService;

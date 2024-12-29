@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Inject,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
@@ -32,6 +32,14 @@ import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-s
   standalone: false,
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
+  configService = inject(GlobalConfigService);
+  private _taskService = inject(TaskService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogIdleComponent, DialogIdleReturnData>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  data = inject<DialogIdlePassedData>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   lastCurrentTask$: Observable<Task> = this.data.lastCurrentTaskId
@@ -49,14 +57,10 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(
-    public configService: GlobalConfigService,
-    private _taskService: TaskService,
-    private _matDialogRef: MatDialogRef<DialogIdleComponent, DialogIdleReturnData>,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    @Inject(MAT_DIALOG_DATA) public data: DialogIdlePassedData,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+    const data = this.data;
+
     this.simpleCounterToggleBtns = (
       data.enabledSimpleStopWatchCounters as SimpleCounter[]
     ).map(

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,6 +26,14 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class TaskSummaryTablesComponent {
+  readonly workContextService = inject(WorkContextService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _worklogService = inject(WorklogService);
+  private readonly _projectService = inject(ProjectService);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
 
   readonly dayStr = input<string>(this._dateService.todayStr());
@@ -53,16 +61,6 @@ export class TaskSummaryTablesComponent {
       return mappedProjects;
     }),
   );
-
-  constructor(
-    public readonly workContextService: WorkContextService,
-    private readonly _taskService: TaskService,
-    private readonly _translateService: TranslateService,
-    private readonly _matDialog: MatDialog,
-    private readonly _worklogService: WorklogService,
-    private readonly _projectService: ProjectService,
-    private _dateService: DateService,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

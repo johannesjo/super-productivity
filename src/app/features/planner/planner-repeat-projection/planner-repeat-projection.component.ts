@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
@@ -13,15 +13,13 @@ import { TranslateService } from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerRepeatProjectionComponent {
+  private _matDialog = inject(MatDialog);
+  private _translateService = inject(TranslateService);
+
   repeatCfg = input.required<TaskRepeatCfg>();
   overWriteTimeEstimate = input(0);
 
   T = T;
-
-  constructor(
-    private _matDialog: MatDialog,
-    private _translateService: TranslateService,
-  ) {}
 
   editTaskRepeatCfg(): void {
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {

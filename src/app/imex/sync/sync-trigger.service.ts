@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, timer } from 'rxjs';
 import {
   auditTime,
@@ -42,6 +42,11 @@ const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
   providedIn: 'root',
 })
 export class SyncTriggerService {
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _dataInitService = inject(DataInitService);
+  private readonly _idleService = inject(IdleService);
+  private readonly _persistenceService = inject(PersistenceService);
+
   private _onUpdateLocalDataTrigger$: Observable<{
     appDataKey: AllowedDBKeys;
     data: any;
@@ -155,13 +160,6 @@ export class SyncTriggerService {
     this._afterInitialSyncDoneAndDataLoadedInitially$,
     timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
   ).pipe(first(), shareReplay(1));
-
-  constructor(
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _dataInitService: DataInitService,
-    private readonly _idleService: IdleService,
-    private readonly _persistenceService: PersistenceService,
-  ) {}
 
   getSyncTrigger$(
     syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Task } from '../../../tasks/task.model';
 import { selectIdleTime } from '../../store/idle.selectors';
 import { Store } from '@ngrx/store';
@@ -21,22 +21,20 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   standalone: false,
 })
 export class DialogIdleSplitComponent implements OnInit {
+  private _store = inject(Store);
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogIdleSplitComponent, DialogIdleSplitReturnData>>(
+      MatDialogRef,
+    );
+  private _data = inject<DialogIdleSplitPassedData>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = this._data.simpleCounterToggleBtns;
 
   idleTime$ = this._store.select(selectIdleTime);
   trackItems: IdleTrackItem[] = [];
-
-  constructor(
-    private _store: Store,
-    private _simpleCounterService: SimpleCounterService,
-    private _matDialogRef: MatDialogRef<
-      DialogIdleSplitComponent,
-      DialogIdleSplitReturnData
-    >,
-    @Inject(MAT_DIALOG_DATA) private _data: DialogIdleSplitPassedData,
-  ) {}
 
   ngOnInit(): void {
     this.trackItems =

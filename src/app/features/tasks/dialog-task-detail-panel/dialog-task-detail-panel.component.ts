@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TasksModule } from '../tasks.module';
 import {
@@ -23,14 +23,19 @@ import { skipWhile } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogTaskDetailPanelComponent implements OnDestroy {
+  data = inject<{
+    taskId: string;
+  }>(MAT_DIALOG_DATA);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogTaskDetailPanelComponent>>(MatDialogRef);
+  private _store = inject(Store);
+
   T: typeof T = T;
   task$ = this._store.select(selectSelectedTask).pipe(skipWhile((v) => !v));
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { taskId: string },
-    private _matDialogRef: MatDialogRef<DialogTaskDetailPanelComponent>,
-    private _store: Store,
-  ) {
+  constructor() {
+    const data = this.data;
+
     this._store.dispatch(
       setSelectedTask({
         id: data.taskId,

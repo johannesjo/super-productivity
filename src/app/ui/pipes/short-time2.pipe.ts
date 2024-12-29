@@ -1,11 +1,11 @@
-import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { LOCALE_ID, Pipe, PipeTransform, inject } from '@angular/core';
 
 @Pipe({
   name: 'shortTime2',
   standalone: false,
 })
 export class ShortTime2Pipe implements PipeTransform {
-  constructor(@Inject(LOCALE_ID) private locale: string) {}
+  private locale = inject(LOCALE_ID);
 
   transform(value: number | undefined | null, ...args: unknown[]): string | null {
     if (typeof value !== 'number') {

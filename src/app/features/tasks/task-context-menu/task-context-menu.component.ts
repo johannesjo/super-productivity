@@ -4,6 +4,7 @@ import {
   Component,
   input,
   viewChild,
+  inject,
 } from '@angular/core';
 import { IssueModule } from '../../issue/issue.module';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,6 +19,8 @@ import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-co
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskContextMenuComponent {
+  private _cd = inject(ChangeDetectorRef);
+
   task = input.required<TaskWithSubTasks | Task>();
   isAdvancedControls = input<boolean>(false);
 
@@ -26,8 +29,6 @@ export class TaskContextMenuComponent {
   readonly taskContextMenuInner = viewChild('taskContextMenuInner', {
     read: TaskContextMenuInnerComponent,
   });
-
-  constructor(private _cd: ChangeDetectorRef) {}
 
   open(ev: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
     this.isShowInner = true;

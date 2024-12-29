@@ -12,6 +12,7 @@ import {
   signal,
   Signal,
   viewChild,
+  inject,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
@@ -30,6 +31,9 @@ import { UiModule } from '../../../ui/ui.module';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTaskPlaceholderComponent implements OnDestroy {
+  private _taskService = inject(TaskService);
+  private _store = inject(Store);
+
   isEditMode = input.required<boolean>();
   time = input<string>();
   date = input<string>();
@@ -63,10 +67,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     window.clearTimeout(this._editEndTimeout);
   }
 
-  constructor(
-    private _taskService: TaskService,
-    private _store: Store,
-  ) {
+  constructor() {
     effect(() => {
       if (this.isEditMode()) {
         this.textAreaElement()?.nativeElement.focus();

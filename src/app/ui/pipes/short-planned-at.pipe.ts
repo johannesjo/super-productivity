@@ -1,4 +1,4 @@
-import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { LOCALE_ID, Pipe, PipeTransform, inject } from '@angular/core';
 import { isToday } from '../../util/is-today.util';
 import { ShortTime2Pipe } from './short-time2.pipe';
 
@@ -7,10 +7,8 @@ import { ShortTime2Pipe } from './short-time2.pipe';
   standalone: false,
 })
 export class ShortPlannedAtPipe implements PipeTransform {
-  constructor(
-    private _shortTime2Pipe: ShortTime2Pipe,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {}
+  private _shortTime2Pipe = inject(ShortTime2Pipe);
+  private locale = inject(LOCALE_ID);
 
   transform(value: number | null, ...args: unknown[]): string | null {
     if (typeof value !== 'number') {

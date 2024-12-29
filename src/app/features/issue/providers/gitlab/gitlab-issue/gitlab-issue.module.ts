@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GitlabIssueHeaderComponent } from './gitlab-issue-header/gitlab-issue-header.component';
 import { GitlabIssueContentComponent } from './gitlab-issue-content/gitlab-issue-content.component';
@@ -27,12 +27,12 @@ import { IssueProviderService } from '../../../issue-provider.service';
   exports: [GitlabIssueHeaderComponent, GitlabIssueContentComponent],
 })
 export class GitlabIssueModule {
-  constructor(
-    private readonly _beforeFinishDayService: BeforeFinishDayService,
-    private readonly _workContextService: WorkContextService,
-    private readonly _matDialog: MatDialog,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {
+  private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _issueProviderService = inject(IssueProviderService);
+
+  constructor() {
     this._beforeFinishDayService.addAction(async () => {
       const tasksForCurrentList =
         await this._workContextService.allTasksForCurrentContext$

@@ -9,6 +9,7 @@ import {
   ViewChild,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -22,14 +23,14 @@ import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BetterSimpleDrawerComponent implements OnInit, OnDestroy {
+  private _domSanitizer = inject(DomSanitizer);
+
   readonly sideWidth = input<number>(0);
   readonly wasClosed = output<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
 
   sideStyle: SafeStyle = '';
   private _subs: Subscription = new Subscription();
-
-  constructor(private _domSanitizer: DomSanitizer) {}
 
   @HostBinding('class.isOpen') get isOpenGet(): boolean {
     return this._isOpen;

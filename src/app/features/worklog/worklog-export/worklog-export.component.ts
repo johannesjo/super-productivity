@@ -6,6 +6,7 @@ import {
   OnInit,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -37,6 +38,13 @@ import { createRows, formatRows, formatText } from './worklog-export.util';
   standalone: false,
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
+  private _snackService = inject(SnackService);
+  private _worklogService = inject(WorklogService);
+  private _workContextService = inject(WorkContextService);
+  private _changeDetectorRef = inject(ChangeDetectorRef);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+
   readonly rangeStart = input<Date>();
   readonly rangeEnd = input<Date>();
   readonly isWorklogExport = input<boolean>();
@@ -90,15 +98,6 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   ];
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    private _snackService: SnackService,
-    private _worklogService: WorklogService,
-    private _workContextService: WorkContextService,
-    private _changeDetectorRef: ChangeDetectorRef,
-    private _projectService: ProjectService,
-    private _tagService: TagService,
-  ) {}
 
   ngOnInit(): void {
     const rangeStart = this.rangeStart();

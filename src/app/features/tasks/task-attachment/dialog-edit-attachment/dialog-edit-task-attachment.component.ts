@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../../app.constants';
 import {
@@ -21,14 +21,15 @@ interface TaskAttachmentSelectType {
   standalone: false,
 })
 export class DialogEditTaskAttachmentComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogEditTaskAttachmentComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
   types: TaskAttachmentSelectType[];
   attachmentCopy: TaskAttachmentCopy;
   T: typeof T = T;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogEditTaskAttachmentComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
+  constructor() {
     this.attachmentCopy = { ...this.data.attachment } as TaskAttachmentCopy;
     if (!this.attachmentCopy.type) {
       this.attachmentCopy.type = 'LINK';

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -43,6 +43,12 @@ import { getTaskById } from '../tasks/store/task.reducer.util';
   providedIn: 'root',
 })
 export class ProjectService {
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _store$ = inject<Store<any>>(Store);
+  private readonly _actions$ = inject(Actions);
+
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
@@ -75,17 +81,6 @@ export class ProjectService {
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(
     ofType(moveProjectTaskToBacklogList),
   );
-
-  // DYNAMIC
-
-  constructor(
-    private readonly _persistenceService: PersistenceService,
-    private readonly _snackService: SnackService,
-    private readonly _workContextService: WorkContextService,
-    // TODO correct type?
-    private readonly _store$: Store<any>,
-    private readonly _actions$: Actions,
-  ) {}
 
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {
     return this._store$.pipe(

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
@@ -23,7 +23,7 @@ const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   providedIn: 'root',
 })
 export class PersistenceLocalService {
-  constructor(private _databaseService: DatabaseService) {}
+  private _databaseService = inject(DatabaseService);
 
   async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);

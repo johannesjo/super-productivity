@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   SyncProvider,
   SyncProviderServiceInterface,
@@ -18,6 +18,8 @@ const ERROR_MSG_DOWNLOAD = 'Could not load file with android adapter';
   providedIn: 'root',
 })
 export class LocalFileSyncAndroidService implements SyncProviderServiceInterface {
+  private _globalConfigService = inject(GlobalConfigService);
+
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean = false;
   isReady$: Observable<boolean> = of(IS_ANDROID_WEB_VIEW).pipe(
@@ -28,8 +30,6 @@ export class LocalFileSyncAndroidService implements SyncProviderServiceInterface
     ),
     map((v) => !!v),
   );
-
-  constructor(private _globalConfigService: GlobalConfigService) {}
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,

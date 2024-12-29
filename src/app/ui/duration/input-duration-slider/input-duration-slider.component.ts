@@ -8,6 +8,7 @@ import {
   OnInit,
   viewChild,
   output,
+  inject,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
@@ -23,6 +24,9 @@ import { T } from '../../../t.const';
   standalone: false,
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
+  private _el = inject(ElementRef);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   minutesBefore: number = 0;
   dots: any[] = [];
@@ -41,10 +45,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   @Input() label: string = '';
   readonly modelChange = output<number>();
 
-  constructor(
-    private _el: ElementRef,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.el = this._el.nativeElement;
   }
 

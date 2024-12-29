@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 
@@ -10,18 +10,15 @@ import { T } from 'src/app/t.const';
   standalone: false,
 })
 export class DialogGetAndEnterAuthCodeComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogGetAndEnterAuthCodeComponent>>(MatDialogRef);
+  data = inject<{
+    providerName: string;
+    url: string;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   token?: string;
-
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogGetAndEnterAuthCodeComponent>,
-    // @ts-ignore
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      providerName: string;
-      url: string;
-    },
-  ) {}
 
   close(token?: string): void {
     this._matDialogRef.close(token);

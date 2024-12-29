@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
@@ -21,6 +21,11 @@ interface BookmarkSelectType {
   standalone: false,
 })
 export class DialogEditBookmarkComponent implements OnInit {
+  private _matDialogRef = inject<MatDialogRef<DialogEditBookmarkComponent>>(MatDialogRef);
+  data = inject<{
+    bookmark: Bookmark;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   types?: BookmarkSelectType[];
   bookmarkCopy?: BookmarkCopy;
@@ -35,11 +40,6 @@ export class DialogEditBookmarkComponent implements OnInit {
       );
     }),
   );
-
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark },
-  ) {}
 
   ngOnInit(): void {
     this.bookmarkCopy = { ...this.data.bookmark } as BookmarkCopy;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,9 +11,9 @@ import { map } from 'rxjs/operators';
   standalone: false,
 })
 export class ProjectTaskPageComponent {
+  workContextService = inject(WorkContextService);
+
   isShowBacklog$: Observable<boolean> = this.workContextService.activeWorkContext$.pipe(
     map((workContext) => !!workContext.isEnableBacklog),
   );
-
-  constructor(public workContextService: WorkContextService) {}
 }

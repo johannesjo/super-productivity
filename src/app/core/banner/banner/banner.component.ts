@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BannerService } from '../banner.service';
 import { Banner, BannerAction, BannerId } from '../banner.model';
 import { concatMap, mapTo } from 'rxjs/operators';
@@ -16,6 +16,8 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
   standalone: false,
 })
 export class BannerComponent {
+  bannerService = inject(BannerService);
+
   T: typeof T = T;
   private _dirtyReference?: string | null;
   // TODO maybe improve if initial delay is annoying
@@ -35,8 +37,6 @@ export class BannerComponent {
       }
     }),
   );
-
-  constructor(public bannerService: BannerService) {}
 
   dismiss(bannerId: string): void {
     this.bannerService.dismiss(bannerId as BannerId);

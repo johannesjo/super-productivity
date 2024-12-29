@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import {
@@ -35,6 +35,15 @@ import { assertTruthy } from '../../../../../util/assert-truthy';
 
 @Injectable()
 export class JiraIssueEffects {
+  private readonly _actions$ = inject(Actions);
+  private readonly _store$ = inject<Store<any>>(Store);
+  private readonly _snackService = inject(SnackService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _issueProviderService = inject(IssueProviderService);
+  private readonly _jiraApiService = inject(JiraApiService);
+  private readonly _issueService = inject(IssueService);
+  private readonly _matDialog = inject(MatDialog);
+
   // -----
 
   addWorkLog$: any = createEffect(
@@ -239,17 +248,6 @@ export class JiraIssueEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _actions$: Actions,
-    private readonly _store$: Store<any>,
-    private readonly _snackService: SnackService,
-    private readonly _taskService: TaskService,
-    private readonly _issueProviderService: IssueProviderService,
-    private readonly _jiraApiService: JiraApiService,
-    private readonly _issueService: IssueService,
-    private readonly _matDialog: MatDialog,
-  ) {}
 
   private _handleTransitionForIssue(
     localState: IssueLocalState,

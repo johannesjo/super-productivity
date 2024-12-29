@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   concatMap,
@@ -42,6 +42,16 @@ import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
+  private _actions$ = inject(Actions);
+  private _taskService = inject(TaskService);
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+  private _dateService = inject(DateService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _syncTriggerService = inject(SyncTriggerService);
+  private _syncProviderService = inject(SyncProviderService);
+  private _matDialog = inject(MatDialog);
+
   updateTaskRepeatCfgs$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -280,18 +290,6 @@ export class TaskRepeatCfgEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _taskService: TaskService,
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _dateService: DateService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _syncTriggerService: SyncTriggerService,
-    private _syncProviderService: SyncProviderService,
-    private _matDialog: MatDialog,
-  ) {}
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
     this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {

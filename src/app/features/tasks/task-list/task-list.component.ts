@@ -6,6 +6,7 @@ import {
   input,
   OnDestroy,
   viewChild,
+  inject,
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
@@ -49,6 +50,12 @@ export interface DropModelDataForList {
   standalone: false,
 })
 export class TaskListComponent implements OnDestroy, AfterViewInit {
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+  private _issueService = inject(IssueService);
+  dropListService = inject(DropListService);
+
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
@@ -89,14 +96,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   readonly dropList = viewChild(CdkDropList);
 
   T: typeof T = T;
-
-  constructor(
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _store: Store,
-    private _issueService: IssueService,
-    public dropListService: DropListService,
-  ) {}
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');

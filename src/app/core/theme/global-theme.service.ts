@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
 import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
@@ -22,6 +22,16 @@ import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
+  private document = inject<Document>(DOCUMENT);
+  private _materialCssVarsService = inject(MaterialCssVarsService);
+  private _workContextService = inject(WorkContextService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _matIconRegistry = inject(MatIconRegistry);
+  private _domSanitizer = inject(DomSanitizer);
+  private _chartThemeService = inject(NgChartThemeService);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _imexMetaService = inject(ImexMetaService);
+
   isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(
     switchMap((cfg) => {
       switch (cfg.darkMode) {
@@ -49,18 +59,6 @@ export class GlobalThemeService {
     ),
     distinctUntilChanged(),
   );
-
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private _materialCssVarsService: MaterialCssVarsService,
-    private _workContextService: WorkContextService,
-    private _globalConfigService: GlobalConfigService,
-    private _matIconRegistry: MatIconRegistry,
-    private _domSanitizer: DomSanitizer,
-    private _chartThemeService: NgChartThemeService,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _imexMetaService: ImexMetaService,
-  ) {}
 
   init(): void {
     // This is here to make web page reloads on non-work-context pages at least usable

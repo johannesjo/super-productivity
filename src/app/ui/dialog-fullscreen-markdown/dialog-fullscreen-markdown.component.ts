@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { Subscription } from 'rxjs';
@@ -17,15 +17,18 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
   standalone: false,
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
+  _matDialogRef = inject<MatDialogRef<DialogFullscreenMarkdownComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public _matDialogRef: MatDialogRef<DialogFullscreenMarkdownComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+    const data = this.data;
+
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
     if (
       ALL_VIEW_MODES.includes(lastViewMode as ViewMode) &&

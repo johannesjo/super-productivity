@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, input } from '@angular/core';
+import { Directive, ElementRef, HostListener, input, inject } from '@angular/core';
 import { download } from '../../util/download';
 
 @Directive({
@@ -6,10 +6,10 @@ import { download } from '../../util/download';
   standalone: false,
 })
 export class SimpleDownloadDirective {
+  private _el = inject(ElementRef);
+
   readonly simpleDownload = input<string>();
   readonly simpleDownloadData = input<string>();
-
-  constructor(private _el: ElementRef) {}
 
   @HostListener('click') onClick(): void {
     if (!this._el.nativeElement.getAttribute('download')) {

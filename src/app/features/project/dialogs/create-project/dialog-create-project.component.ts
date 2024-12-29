@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Inject,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Project, ProjectCopy } from '../../project.model';
@@ -38,6 +38,11 @@ import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-fr
   standalone: false,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
+  private _project = inject<Project>(MAT_DIALOG_DATA);
+  private _projectService = inject(ProjectService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogCreateProjectComponent>>(MatDialogRef);
+
   T: typeof T = T;
   projectData: ProjectCopy | Partial<ProjectCopy> = {
     ...DEFAULT_PROJECT,
@@ -70,11 +75,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
   private _isSaveTmpProject: boolean = false;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) private _project: Project,
-    private _projectService: ProjectService,
-    private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here,
     this.basicSettingsFormCfg = removeDebounceFromFormItems(
       CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG.items as FormlyFieldConfig[],

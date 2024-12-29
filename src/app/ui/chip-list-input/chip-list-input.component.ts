@@ -1,5 +1,4 @@
 import {
-  Attribute,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -8,6 +7,8 @@ import {
   OnDestroy,
   viewChild,
   output,
+  HostAttributeToken,
+  inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -37,6 +38,8 @@ interface Suggestion {
   standalone: false,
 })
 export class ChipListInputComponent implements OnDestroy {
+  autoFocus = inject(new HostAttributeToken('autoFocus'));
+
   T: typeof T = T;
 
   readonly label = input<string>();
@@ -76,7 +79,9 @@ export class ChipListInputComponent implements OnDestroy {
 
   private _autoFocusTimeout?: number;
 
-  constructor(@Attribute('autoFocus') public autoFocus: Attribute) {
+  constructor() {
+    const autoFocus = this.autoFocus;
+
     if (typeof autoFocus === 'string') {
       this.isAutoFocus = true;
       this._autoFocusTimeout = window.setTimeout(() => {

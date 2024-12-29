@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  viewChild,
+  inject,
+} from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { AppDataComplete } from '../sync/sync.model';
@@ -16,14 +22,12 @@ import { privacyExport } from './privacy-export';
   standalone: false,
 })
 export class FileImexComponent {
+  private _dataImportService = inject(DataImportService);
+  private _snackService = inject(SnackService);
+  private _router = inject(Router);
+
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
-
-  constructor(
-    private _dataImportService: DataImportService,
-    private _snackService: SnackService,
-    private _router: Router,
-  ) {}
 
   // NOTE: after promise done the file is NOT yet read
   async handleFileInput(ev: any): Promise<void> {

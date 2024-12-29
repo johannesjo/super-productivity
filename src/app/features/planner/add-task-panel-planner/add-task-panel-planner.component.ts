@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -27,6 +27,11 @@ import { TODAY_TAG } from '../../tag/tag.const';
   standalone: false,
 })
 export class AddTaskPanelPlannerComponent {
+  private _store = inject(Store);
+  private _taskService = inject(TaskService);
+  private _plannerPlanViewService = inject(PlannerService);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   readonly closePanel = output<void>();
 
@@ -85,13 +90,6 @@ export class AddTaskPanelPlannerComponent {
       });
     }),
   );
-
-  constructor(
-    private _store: Store,
-    private _taskService: TaskService,
-    private _plannerPlanViewService: PlannerService,
-    private _dateService: DateService,
-  ) {}
 
   drop(ev: CdkDragDrop<string, string, TaskCopy>): void {
     const t = ev.item.data;

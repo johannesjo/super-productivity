@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { OpenProjectWorkPackage } from '../open-project-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
@@ -14,6 +14,8 @@ import { TaskService } from '../../../../../tasks/task.service';
   standalone: false,
 })
 export class OpenProjectIssueContentComponent {
+  private readonly _taskService = inject(TaskService);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -21,8 +23,6 @@ export class OpenProjectIssueContentComponent {
   readonly task = input<TaskWithSubTasks>();
 
   T: typeof T = T;
-
-  constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates(): void {
     const task = this.task();

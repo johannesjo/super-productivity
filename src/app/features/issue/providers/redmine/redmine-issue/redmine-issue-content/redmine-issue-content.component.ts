@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, Input, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, input, inject } from '@angular/core';
 import { TaskWithSubTasks } from 'src/app/features/tasks/task.model';
 import { TaskService } from 'src/app/features/tasks/task.service';
 import { T } from 'src/app/t.const';
@@ -14,6 +14,8 @@ import { RedmineIssue } from '../redmine-issue.model';
   standalone: false,
 })
 export class RedmineIssueContentComponent {
+  private readonly _taskService = inject(TaskService);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -21,8 +23,6 @@ export class RedmineIssueContentComponent {
   readonly task = input<TaskWithSubTasks>();
 
   T: typeof T = T;
-
-  constructor(private readonly _taskService: TaskService) {}
 
   hideUpdates(): void {
     const task = this.task();

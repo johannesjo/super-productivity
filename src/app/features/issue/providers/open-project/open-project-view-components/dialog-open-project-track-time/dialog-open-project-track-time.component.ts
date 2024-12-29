@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { OpenProjectApiService } from '../../open-project-api.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
@@ -36,6 +36,19 @@ import { TaskService } from '../../../../../tasks/task.service';
   imports: [UiModule, FormsModule, AsyncPipe],
 })
 export class DialogOpenProjectTrackTimeComponent {
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogOpenProjectTrackTimeComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _store = inject(Store);
+  private _issueProviderService = inject(IssueProviderService);
+  private _taskService = inject(TaskService);
+  data = inject<{
+    workPackage: OpenProjectWorkPackage;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   timeSpent: number;
   started: string;
@@ -73,20 +86,7 @@ export class DialogOpenProjectTrackTimeComponent {
       );
   private _subs = new Subscription();
 
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _matDialogRef: MatDialogRef<DialogOpenProjectTrackTimeComponent>,
-    private _snackService: SnackService,
-    private _store: Store,
-    private _issueProviderService: IssueProviderService,
-    private _taskService: TaskService,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      workPackage: OpenProjectWorkPackage;
-      task: Task;
-    },
-    private _dateService: DateService,
-  ) {
+  constructor() {
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
     this.started = this._convertTimestamp(this.data.task.created);

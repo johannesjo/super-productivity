@@ -4,13 +4,13 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
-  Inject,
   Input,
   LOCALE_ID,
   OnDestroy,
   viewChildren,
   viewChild,
   input,
+  inject,
 } from '@angular/core';
 import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
@@ -91,6 +91,21 @@ interface IssueDataAndType {
   standalone: false,
 })
 export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
+  attachmentService = inject(TaskAttachmentService);
+  taskService = inject(TaskService);
+  layoutService = inject(LayoutService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _issueService = inject(IssueService);
+  private _reminderService = inject(ReminderService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  readonly plannerService = inject(PlannerService);
+  private readonly _attachmentService = inject(TaskAttachmentService);
+  private _translateService = inject(TranslateService);
+  private locale = inject(LOCALE_ID);
+  private _cd = inject(ChangeDetectorRef);
+
   readonly isOver = input<boolean>(false);
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -222,22 +237,7 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   private _focusTimeout?: number;
   private _dragEnterTarget?: HTMLElement;
 
-  constructor(
-    public attachmentService: TaskAttachmentService,
-    public taskService: TaskService,
-    public layoutService: LayoutService,
-    private _globalConfigService: GlobalConfigService,
-    private _issueService: IssueService,
-    private _reminderService: ReminderService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    public readonly plannerService: PlannerService,
-    private readonly _attachmentService: TaskAttachmentService,
-    private _translateService: TranslateService,
-    @Inject(LOCALE_ID) private locale: string,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     // NOTE: needs to be assigned here before any setter is called
     this.issueAttachments$
       .pipe(takeUntil(this._onDestroy$))

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
@@ -18,6 +18,11 @@ import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class NoteEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+  private _workContextService = inject(WorkContextService);
+
   updateNote$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
@@ -35,13 +40,6 @@ export class NoteEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
-  ) {}
 
   private _saveToLs(noteState: NoteState): void {
     this._persistenceService.note.saveState(noteState, {

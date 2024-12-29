@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { hideFocusOverlay, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
@@ -19,6 +19,8 @@ import { T } from 'src/app/t.const';
   standalone: false,
 })
 export class FocusModeTaskDoneComponent {
+  private _store = inject(Store);
+
   currentTask$ = this._store.select(selectCurrentTask);
   lastCurrentTask$ = this._store.select(selectLastCurrentTask);
   taskTitle$ = this.lastCurrentTask$.pipe(
@@ -31,8 +33,6 @@ export class FocusModeTaskDoneComponent {
   );
   lastSessionDuration$ = this._store.select(selectLastFocusSessionDuration);
   T: typeof T = T;
-
-  constructor(private _store: Store) {}
 
   closeFocusOverlay(): void {
     this._store.dispatch(hideFocusOverlay());

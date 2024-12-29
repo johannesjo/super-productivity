@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { TaskWithSubTasks } from '../../task.model';
@@ -18,6 +18,8 @@ import { ICAL_TYPE } from '../../../issue/issue.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskHoverControlsComponent {
+  parent = inject<TaskComponent>(TaskComponent);
+
   task = input.required<TaskWithSubTasks>();
   isCurrent = input.required<boolean>();
   isSelected = input.required<boolean>();
@@ -28,8 +30,6 @@ export class TaskHoverControlsComponent {
 
   T: typeof T = T;
   IS_TOUCH_PRIMARY: boolean = IS_TOUCH_PRIMARY;
-
-  constructor(@Inject(TaskComponent) public parent: TaskComponent) {}
 
   get kb(): KeyboardConfig {
     return this.parent.kb;

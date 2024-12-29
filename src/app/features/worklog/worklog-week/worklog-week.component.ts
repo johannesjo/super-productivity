@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorklogService } from '../worklog.service';
 import { DialogWorklogExportComponent } from '../dialog-worklog-export/dialog-worklog-export.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,17 +22,15 @@ import { DateAdapter } from '@angular/material/core';
   standalone: false,
 })
 export class WorklogWeekComponent {
+  readonly worklogService = inject(WorklogService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _taskService = inject(TaskService);
+  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+
   visibility: boolean[] = [];
   T: typeof T = T;
   keys: (o: Record<string, unknown>) => string[] = Object.keys;
-
-  constructor(
-    public readonly worklogService: WorklogService,
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _matDialog: MatDialog,
-    private readonly _taskService: TaskService,
-    private _dateAdapter: DateAdapter<unknown>,
-  ) {}
 
   sortDays(a: any, b: any): number {
     return a.key - b.key;

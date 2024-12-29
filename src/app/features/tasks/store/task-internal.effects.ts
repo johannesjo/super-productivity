@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addSubTask,
@@ -27,6 +27,10 @@ import {
 
 @Injectable()
 export class TaskInternalEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _workContextSession = inject(WorkContextService);
+
   onAllSubTasksDone$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(updateTask),
@@ -172,12 +176,6 @@ export class TaskInternalEffects {
       }),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _workContextSession: WorkContextService,
-  ) {}
 
   private _findNextTask(
     state: TaskState,

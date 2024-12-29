@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   signal,
+  inject,
 } from '@angular/core';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
@@ -28,6 +29,13 @@ import { BannerId } from '../../../core/banner/banner.model';
   standalone: false,
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _matDialog = inject(MatDialog);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _dateService = inject(DateService);
+  private _bannerService = inject(BannerService);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = this._dateService.todayStr();
@@ -64,15 +72,6 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       ),
     ),
   );
-
-  constructor(
-    private _simpleCounterService: SimpleCounterService,
-    private _matDialog: MatDialog,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _dateService: DateService,
-    private _bannerService: BannerService,
-    private _cd: ChangeDetectorRef,
-  ) {}
 
   ngOnInit(): void {
     this._subs.add(

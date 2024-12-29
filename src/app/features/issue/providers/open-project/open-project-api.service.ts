@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { OpenProjectCfg } from './open-project.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
@@ -29,10 +29,8 @@ import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-
   providedIn: 'root',
 })
 export class OpenProjectApiService {
-  constructor(
-    private _snackService: SnackService,
-    private _http: HttpClient,
-  ) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   getById$(
     workPackageId: number,

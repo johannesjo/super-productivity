@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, inject } from '@angular/core';
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { T } from '../../../t.const';
@@ -12,16 +12,14 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class TaskSummaryTableComponent {
+  private _taskService = inject(TaskService);
+  private _dateService = inject(DateService);
+
   readonly flatTasks = input<Task[]>([]);
   readonly day = input<string>(this._dateService.todayStr());
   readonly updated = output<void>();
 
   T: typeof T = T;
-
-  constructor(
-    private _taskService: TaskService,
-    private _dateService: DateService,
-  ) {}
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string): void {
     this._taskService.updateEverywhere(task.id, {

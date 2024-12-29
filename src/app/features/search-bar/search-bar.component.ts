@@ -6,6 +6,7 @@ import {
   OnDestroy,
   output,
   viewChild,
+  inject,
 } from '@angular/core';
 import { T } from '../../t.const';
 import { UntypedFormControl } from '@angular/forms';
@@ -43,6 +44,12 @@ const MAX_RESULTS = 100;
   standalone: false,
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+  private _navigateToTaskService = inject(NavigateToTaskService);
+  private _router = inject(Router);
+
   readonly blurred = output<any | void>();
 
   readonly inputEl = viewChild.required<ElementRef>('inputEl');
@@ -69,14 +76,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
       ...this._mapTasksToSearchItems(true, archiveTasks, projects, tags),
     ]),
   );
-
-  constructor(
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _tagService: TagService,
-    private _navigateToTaskService: NavigateToTaskService,
-    private _router: Router,
-  ) {}
 
   private _mapTasksToSearchItems(
     isArchiveTask: boolean,

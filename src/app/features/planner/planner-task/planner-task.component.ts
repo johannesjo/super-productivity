@@ -9,6 +9,7 @@ import {
   OnInit,
   viewChild,
   input,
+  inject,
 } from '@angular/core';
 import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
@@ -31,6 +32,11 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
   standalone: false,
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
+  private _taskService = inject(TaskService);
+  private _cd = inject(ChangeDetectorRef);
+  private _matDialog = inject(MatDialog);
+  private _projectService = inject(ProjectService);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -84,15 +90,6 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
       : t.timeEstimate - t.timeSpent > 0
         ? t.timeEstimate - t.timeSpent
         : 0;
-  }
-
-  constructor(
-    private _taskService: TaskService,
-    private _cd: ChangeDetectorRef,
-    private _matDialog: MatDialog,
-    private _projectService: ProjectService,
-  ) {
-    super();
   }
 
   ngOnInit(): void {

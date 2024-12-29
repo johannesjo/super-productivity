@@ -10,6 +10,7 @@ import {
   ViewContainerRef,
   viewChild,
   output,
+  inject,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import {
@@ -34,6 +35,11 @@ import { exists } from '../../../util/exists';
   standalone: false,
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
+  private _cd = inject(ChangeDetectorRef);
+  private _componentFactoryResolver = inject(ComponentFactoryResolver);
+  private _workContextService = inject(WorkContextService);
+  private _translateService = inject(TranslateService);
+
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
@@ -47,13 +53,6 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   private _subs: Subscription = new Subscription();
   private _instance?: Component;
   private _viewDestroyTimeout?: number;
-
-  constructor(
-    private _cd: ChangeDetectorRef,
-    private _componentFactoryResolver: ComponentFactoryResolver,
-    private _workContextService: WorkContextService,
-    private _translateService: TranslateService,
-  ) {}
 
   private _cfg: any;
 

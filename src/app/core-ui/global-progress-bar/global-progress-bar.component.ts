@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { GlobalProgressBarService } from './global-progress-bar.service';
 import {
   fadeAnimation,
@@ -15,5 +15,5 @@ import {
   standalone: false,
 })
 export class GlobalProgressBarComponent {
-  constructor(public globalProgressBarService: GlobalProgressBarService) {}
+  globalProgressBarService = inject(GlobalProgressBarService);
 }

@@ -1,4 +1,11 @@
-import { Directive, ElementRef, HostListener, Renderer2, input } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostListener,
+  Renderer2,
+  input,
+  inject,
+} from '@angular/core';
 import { getCoords } from './get-coords';
 
 const LARGE_IMG_ID = 'enlarged-img';
@@ -8,6 +15,9 @@ const LARGE_IMG_ID = 'enlarged-img';
   standalone: false,
 })
 export class EnlargeImgDirective {
+  private _renderer = inject(Renderer2);
+  private _el = inject(ElementRef);
+
   imageEl: HTMLElement;
   newImageEl?: HTMLElement;
   lightboxParentEl: HTMLElement = document.body;
@@ -18,10 +28,7 @@ export class EnlargeImgDirective {
 
   readonly enlargeImg = input<string>();
 
-  constructor(
-    private _renderer: Renderer2,
-    private _el: ElementRef,
-  ) {
+  constructor() {
     this.imageEl = this._el.nativeElement;
   }
 

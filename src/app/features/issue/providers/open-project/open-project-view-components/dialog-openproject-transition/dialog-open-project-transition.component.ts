@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable, of } from 'rxjs';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
@@ -29,6 +29,19 @@ import { TaskService } from '../../../../../tasks/task.service';
   imports: [UiModule, FormsModule, AsyncPipe, MatSlider],
 })
 export class DialogOpenProjectTransitionComponent {
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _issueService = inject(IssueService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogOpenProjectTransitionComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  data = inject<{
+    issue: OpenProjectWorkPackage;
+    localState: IssueLocalState;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
@@ -66,20 +79,9 @@ export class DialogOpenProjectTransitionComponent {
   chosenTransition?: OpenProjectOriginalStatus;
   percentageDone: number;
 
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _issueService: IssueService,
-    private _issueProviderService: IssueProviderService,
-    private _matDialogRef: MatDialogRef<DialogOpenProjectTransitionComponent>,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      issue: OpenProjectWorkPackage;
-      localState: IssueLocalState;
-      task: Task;
-    },
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.percentageDone = data.issue.percentageDone;
   }
 

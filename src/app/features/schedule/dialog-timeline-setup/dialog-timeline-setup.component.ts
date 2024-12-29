@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -21,17 +21,20 @@ import { TranslateModule } from '@ngx-translate/core';
   imports: [UiModule, TranslateModule],
 })
 export class DialogTimelineSetupComponent implements OnDestroy {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogTimelineSetupComponent>>(MatDialogRef);
+  data = inject<{
+    isInfoShownInitially: boolean;
+  }>(MAT_DIALOG_DATA);
+  private _globalConfigService = inject(GlobalConfigService);
+
   T: typeof T = T;
   timelineCfg: ScheduleConfig;
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
   formConfig: FormlyFieldConfig[] = SCHEDULE_FORM_CFG.items as FormlyFieldConfig[];
   private _subs = new Subscription();
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogTimelineSetupComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { isInfoShownInitially: boolean },
-    private _globalConfigService: GlobalConfigService,
-  ) {
+  constructor() {
     this.timelineCfg = DEFAULT_GLOBAL_CONFIG.schedule;
     this._subs.add(
       this._globalConfigService.timelineCfg$.subscribe((v) => (this.timelineCfg = v)),

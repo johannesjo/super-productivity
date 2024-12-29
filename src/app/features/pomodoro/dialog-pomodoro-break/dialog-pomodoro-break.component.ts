@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { PomodoroService } from '../pomodoro.service';
 import { filter, map, mapTo, takeUntil, withLatestFrom } from 'rxjs/operators';
@@ -13,6 +13,10 @@ import { T } from '../../../t.const';
   standalone: false,
 })
 export class DialogPomodoroBreakComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogPomodoroBreakComponent>>(MatDialogRef);
+  pomodoroService = inject(PomodoroService);
+
   T: typeof T = T;
   isStopCurrentTime$: Subject<boolean> = new Subject();
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
@@ -31,10 +35,7 @@ export class DialogPomodoroBreakComponent {
     mapTo(true),
   );
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogPomodoroBreakComponent>,
-    public pomodoroService: PomodoroService,
-  ) {
+  constructor() {
     // _matDialogRef.disableClose = true;
 
     this._subs.add(

@@ -4,6 +4,7 @@ import {
   Component,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import {
@@ -24,6 +25,8 @@ import { mapTo, switchMap } from 'rxjs/operators';
   standalone: false,
 })
 export class BacklogComponent implements AfterViewInit {
+  taskService = inject(TaskService);
+
   readonly backlogTasks = input<TaskWithSubTasks[]>([]);
 
   private _readyTimerDuration$ = new Subject<number>();
@@ -35,16 +38,6 @@ export class BacklogComponent implements AfterViewInit {
   readonly closeBacklog = output<any>();
 
   T: typeof T = T;
-
-  // we do it here to have the tasks in memory all the time
-  // backlogTasks$: Observable<TaskWithSubTasks[]> = this._projectService.isProjectChanging$.pipe(
-  //   delay(50),
-  //   switchMap((isChanging) => isChanging ? of([]) : this.taskService.backlogTasks$),
-  //   startWith([])
-  // );
-  // backlogTasks$: Observable<TaskWithSubTasks[]> = this.taskService.backlogTasks$;
-
-  constructor(public taskService: TaskService) {}
 
   ngAfterViewInit(): void {
     let initialDelay = 0;

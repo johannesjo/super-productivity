@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
@@ -101,6 +101,15 @@ import { DateService } from 'src/app/core/date/date.service';
   providedIn: 'root',
 })
 export class TaskService {
+  private readonly _store = inject<Store<any>>(Store);
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _tagService = inject(TagService);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _imexMetaService = inject(ImexMetaService);
+  private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);
+  private readonly _dateService = inject(DateService);
+  private readonly _router = inject(Router);
+
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
   currentTaskId$: Observable<string | null> = this._store.pipe(
@@ -167,16 +176,7 @@ export class TaskService {
   private _lastFocusedTaskEl: HTMLElement | null = null;
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
-  constructor(
-    private readonly _store: Store<any>,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _tagService: TagService,
-    private readonly _workContextService: WorkContextService,
-    private readonly _imexMetaService: ImexMetaService,
-    private readonly _timeTrackingService: GlobalTrackingIntervalService,
-    private readonly _dateService: DateService,
-    private readonly _router: Router,
-  ) {
+  constructor() {
     document.addEventListener(
       'focus',
       (ev) => {

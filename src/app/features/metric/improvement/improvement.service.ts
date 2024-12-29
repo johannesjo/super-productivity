@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllImprovements,
@@ -28,6 +28,9 @@ import { DateService } from 'src/app/core/date/date.service';
   providedIn: 'root',
 })
 export class ImprovementService {
+  private _store$ = inject<Store<ImprovementState>>(Store);
+  private _dateService = inject(DateService);
+
   improvements$: Observable<Improvement[]> = this._store$.pipe(
     select(selectAllImprovements),
   );
@@ -40,11 +43,6 @@ export class ImprovementService {
   hasLastTrackedImprovements$: Observable<boolean> = this._store$.pipe(
     select(selectHasLastTrackedImprovements),
   );
-
-  constructor(
-    private _store$: Store<ImprovementState>,
-    private _dateService: DateService,
-  ) {}
 
   addImprovement(title: string): string {
     const id = nanoid();

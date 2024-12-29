@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -51,6 +52,19 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   standalone: false,
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
+  readonly configService = inject(GlobalConfigService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _router = inject(Router);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _worklogService = inject(WorklogService);
+  private readonly _cd = inject(ChangeDetectorRef);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _syncProviderService = inject(SyncProviderService);
+  private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
+  private readonly _dateService = inject(DateService);
+
   T: typeof T = T;
   _onDestroy$ = new Subject<void>();
 
@@ -157,20 +171,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   private _successAnimationTimeout?: number;
 
-  constructor(
-    public readonly configService: GlobalConfigService,
-    public readonly workContextService: WorkContextService,
-    private readonly _taskService: TaskService,
-    private readonly _router: Router,
-    private readonly _matDialog: MatDialog,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _worklogService: WorklogService,
-    private readonly _cd: ChangeDetectorRef,
-    private readonly _activatedRoute: ActivatedRoute,
-    private readonly _syncProviderService: SyncProviderService,
-    private readonly _beforeFinishDayService: BeforeFinishDayService,
-    private readonly _dateService: DateService,
-  ) {
+  constructor() {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);

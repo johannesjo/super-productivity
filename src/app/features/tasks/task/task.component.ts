@@ -9,6 +9,7 @@ import {
   OnDestroy,
   Renderer2,
   viewChild,
+  inject,
 } from '@angular/core';
 import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, of } from 'rxjs';
@@ -80,6 +81,18 @@ import { ICAL_TYPE } from '../../issue/issue.const';
   standalone: false,
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
+  private readonly _taskService = inject(TaskService);
+  private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _configService = inject(GlobalConfigService);
+  private readonly _attachmentService = inject(TaskAttachmentService);
+  private readonly _elementRef = inject(ElementRef);
+  private readonly _snackService = inject(SnackService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _projectService = inject(ProjectService);
+  readonly plannerService = inject(PlannerService);
+  readonly workContextService = inject(WorkContextService);
+
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
   isInSubTaskList = input<boolean>(false);
@@ -145,20 +158,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private _dragEnterTarget?: HTMLElement;
   private _currentPanTimeout?: number;
   private _isTaskDeleteTriggered = false;
-
-  constructor(
-    private readonly _taskService: TaskService,
-    private readonly _taskRepeatCfgService: TaskRepeatCfgService,
-    private readonly _matDialog: MatDialog,
-    private readonly _configService: GlobalConfigService,
-    private readonly _attachmentService: TaskAttachmentService,
-    private readonly _elementRef: ElementRef,
-    private readonly _snackService: SnackService,
-    private readonly _renderer: Renderer2,
-    private readonly _projectService: ProjectService,
-    public readonly plannerService: PlannerService,
-    public readonly workContextService: WorkContextService,
-  ) {}
 
   // methods come last
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {

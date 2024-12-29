@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
@@ -36,6 +37,9 @@ import { getAppVersionStr } from '../../util/get-app-version-str';
   standalone: false,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
+  private readonly _cd = inject(ChangeDetectorRef);
+  readonly configService = inject(GlobalConfigService);
+
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
   globalSyncProviderFormCfg: ConfigFormConfig;
@@ -48,10 +52,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private readonly _cd: ChangeDetectorRef,
-    public readonly configService: GlobalConfigService,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here
     this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
     this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG;

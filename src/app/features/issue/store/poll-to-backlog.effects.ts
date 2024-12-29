@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { merge, Observable } from 'rxjs';
 import {
@@ -22,6 +22,13 @@ import { getErrorTxt } from '../../../util/get-error-text';
 
 @Injectable()
 export class PollToBacklogEffects {
+  private readonly _issueService = inject(IssueService);
+  private readonly _actions$ = inject(Actions);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _store = inject(Store);
+
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext),
   );
@@ -80,13 +87,4 @@ export class PollToBacklogEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _issueService: IssueService,
-    private readonly _actions$: Actions,
-    private readonly _workContextService: WorkContextService,
-    private readonly _syncTriggerService: SyncTriggerService,
-    private readonly _snackService: SnackService,
-    private readonly _store: Store,
-  ) {}
 }

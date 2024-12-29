@@ -6,6 +6,7 @@ import {
   SimpleChanges,
   viewChild,
   input,
+  inject,
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
@@ -28,6 +29,11 @@ import { Project } from '../../project/project.model';
   standalone: false,
 })
 export class NoteComponent implements OnChanges {
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _noteService = inject(NoteService);
+  private readonly _projectService = inject(ProjectService);
+  private readonly _workContextService = inject(WorkContextService);
+
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   note!: Note;
 
@@ -79,13 +85,6 @@ export class NoteComponent implements OnChanges {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
-
-  constructor(
-    private readonly _matDialog: MatDialog,
-    private readonly _noteService: NoteService,
-    private readonly _projectService: ProjectService,
-    private readonly _workContextService: WorkContextService,
-  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.note) {

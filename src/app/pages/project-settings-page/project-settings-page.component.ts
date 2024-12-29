@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { T } from '../../t.const';
 import {
@@ -37,6 +38,10 @@ import { isObject } from '../../util/is-object';
   standalone: false,
 })
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
+  readonly workContextService = inject(WorkContextService);
+  readonly projectService = inject(ProjectService);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   projectThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   basicFormCfg: ConfigFormSection<Project>;
@@ -48,11 +53,7 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly workContextService: WorkContextService,
-    public readonly projectService: ProjectService,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here
     this.projectThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.basicFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;

@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   output,
+  inject,
 } from '@angular/core';
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
@@ -27,6 +28,14 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
+  obstructionService = inject(ObstructionService);
+  improvementService = inject(ImprovementService);
+  workContextService = inject(WorkContextService);
+  private _metricService = inject(MetricService);
+  private _matDialog = inject(MatDialog);
+  private _cd = inject(ChangeDetectorRef);
+  private _dateService = inject(DateService);
+
   readonly save = output<any>();
   T: typeof T = T;
   metricForDay?: MetricCopy;
@@ -38,16 +47,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   );
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    public obstructionService: ObstructionService,
-    public improvementService: ImprovementService,
-    public workContextService: WorkContextService,
-    private _metricService: MetricService,
-    private _matDialog: MatDialog,
-    private _cd: ChangeDetectorRef,
-    private _dateService: DateService,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

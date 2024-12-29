@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
@@ -13,6 +13,11 @@ import { T } from '../../../t.const';
   standalone: false,
 })
 export class DialogTrackingReminderComponent implements OnInit {
+  private _taskService = inject(TaskService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogTrackingReminderComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   lastCurrentTask$: Observable<Task> = this._taskService.getByIdOnce$(
     this.data.lastCurrentTaskId,
@@ -21,11 +26,9 @@ export class DialogTrackingReminderComponent implements OnInit {
   newTaskTitle?: string;
   isCreate?: boolean;
 
-  constructor(
-    private _taskService: TaskService,
-    private _matDialogRef: MatDialogRef<DialogTrackingReminderComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

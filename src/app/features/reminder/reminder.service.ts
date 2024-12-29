@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
@@ -20,6 +20,12 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class ReminderService {
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _noteService = inject(NoteService);
+  private readonly _imexMetaService = inject(ImexMetaService);
+
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
     skipUntil(
@@ -43,13 +49,7 @@ export class ReminderService {
   private _w: Worker;
   private _reminders: Reminder[] = [];
 
-  constructor(
-    private readonly _persistenceService: PersistenceService,
-    private readonly _snackService: SnackService,
-    private readonly _taskService: TaskService,
-    private readonly _noteService: NoteService,
-    private readonly _imexMetaService: ImexMetaService,
-  ) {
+  constructor() {
     // this._triggerPauseAfterUpdate$.subscribe((v) => console.log('_triggerPauseAfterUpdate$', v));
     // this._pauseAfterUpdate$.subscribe((v) => console.log('_pauseAfterUpdate$', v));
     // this._onRemindersActive$.subscribe((v) => console.log('_onRemindersActive$', v));

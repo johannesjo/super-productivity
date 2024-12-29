@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 
 @Component({
@@ -9,5 +9,5 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
   standalone: false,
 })
 export class TagTaskPageComponent {
-  constructor(public workContextService: WorkContextService) {}
+  workContextService = inject(WorkContextService);
 }

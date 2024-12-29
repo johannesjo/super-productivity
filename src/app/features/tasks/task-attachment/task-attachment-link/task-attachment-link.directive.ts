@@ -1,4 +1,4 @@
-import { Directive, HostListener, input } from '@angular/core';
+import { Directive, HostListener, input, inject } from '@angular/core';
 import { IS_ELECTRON } from '../../../../app.constants';
 import { TaskAttachmentType } from '../task-attachment.model';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -9,10 +9,10 @@ import { T } from '../../../../t.const';
   standalone: false,
 })
 export class TaskAttachmentLinkDirective {
+  private _snackService = inject(SnackService);
+
   readonly type = input<TaskAttachmentType>();
   readonly href = input<string>();
-
-  constructor(private _snackService: SnackService) {}
 
   @HostListener('click', ['$event']) onClick(ev: Event): void {
     const href = this.href();

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
@@ -24,10 +24,8 @@ import { IssueProviderService } from '../../issue-provider.service';
   providedIn: 'root',
 })
 export class GiteaCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _giteaApiService: GiteaApiService,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {}
+  private readonly _giteaApiService = inject(GiteaApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
 
   pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -16,10 +16,8 @@ import { IssueProviderService } from '../../issue-provider.service';
   providedIn: 'root',
 })
 export class CaldavCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _issueProviderService: IssueProviderService,
-    private readonly _caldavClientService: CaldavClientService,
-  ) {}
+  private readonly _issueProviderService = inject(IssueProviderService);
+  private readonly _caldavClientService = inject(CaldavClientService);
 
   private static _formatIssueTitleForSnack(title: string): string {
     return truncate(title);

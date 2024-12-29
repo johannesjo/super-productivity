@@ -8,6 +8,7 @@ import {
   viewChild,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -23,6 +24,8 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   standalone: false,
 })
 export class SplitComponent implements AfterViewInit {
+  private _renderer = inject(Renderer2);
+
   readonly splitTopEl = input<ElementRef>();
   readonly splitBottomEl = input<ElementRef>();
   readonly containerEl = input<HTMLElement>();
@@ -38,8 +41,6 @@ export class SplitComponent implements AfterViewInit {
   readonly buttonEl = viewChild<ElementRef>('buttonEl');
   private _isDrag: boolean = false;
   private _isViewInitialized: boolean = false;
-
-  constructor(private _renderer: Renderer2) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

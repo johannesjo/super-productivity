@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { T } from '../../t.const';
 import {
@@ -33,6 +34,10 @@ import { isObject } from '../../util/is-object';
   standalone: false,
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
+  readonly tagService = inject(TagService);
+  readonly workContextService = inject(WorkContextService);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   tagThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   basicFormCfg: ConfigFormSection<Tag>;
@@ -43,11 +48,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly tagService: TagService,
-    public readonly workContextService: WorkContextService,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here
     this.tagThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.basicFormCfg = BASIC_TAG_CONFIG_FORM_CONFIG;

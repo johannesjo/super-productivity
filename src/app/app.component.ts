@@ -6,6 +6,7 @@ import {
   OnDestroy,
   ViewContainerRef,
   viewChild,
+  inject,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -60,6 +61,26 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   standalone: false,
 })
 export class AppComponent implements OnDestroy {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _shortcutService = inject(ShortcutService);
+  private _bannerService = inject(BannerService);
+  private _snackService = inject(SnackService);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _translateService = inject(TranslateService);
+  private _globalThemeService = inject(GlobalThemeService);
+  private _uiHelperService = inject(UiHelperService);
+  private _languageService = inject(LanguageService);
+  private _androidService = inject(AndroidService);
+  private _bookmarkService = inject(BookmarkService);
+  private _startTrackingReminderService = inject(TrackingReminderService);
+  private _activatedRoute = inject(ActivatedRoute);
+  readonly syncTriggerService = inject(SyncTriggerService);
+  readonly imexMetaService = inject(ImexMetaService);
+  readonly workContextService = inject(WorkContextService);
+  readonly layoutService = inject(LayoutService);
+  readonly focusModeService = inject(FocusModeService);
+  readonly globalThemeService = inject(GlobalThemeService);
+
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
@@ -83,27 +104,7 @@ export class AppComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
 
-  constructor(
-    private _globalConfigService: GlobalConfigService,
-    private _shortcutService: ShortcutService,
-    private _bannerService: BannerService,
-    private _snackService: SnackService,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _translateService: TranslateService,
-    private _globalThemeService: GlobalThemeService,
-    private _uiHelperService: UiHelperService,
-    private _languageService: LanguageService,
-    private _androidService: AndroidService,
-    private _bookmarkService: BookmarkService,
-    private _startTrackingReminderService: TrackingReminderService,
-    private _activatedRoute: ActivatedRoute,
-    public readonly syncTriggerService: SyncTriggerService,
-    public readonly imexMetaService: ImexMetaService,
-    public readonly workContextService: WorkContextService,
-    public readonly layoutService: LayoutService,
-    public readonly focusModeService: FocusModeService,
-    public readonly globalThemeService: GlobalThemeService,
-  ) {
+  constructor() {
     this._snackService.open({
       ico: 'lightbulb',
       config: {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
@@ -13,18 +13,19 @@ import { DateService } from 'src/app/core/date/date.service';
   standalone: false,
 })
 export class DialogSimpleCounterEditComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogSimpleCounterEditComponent>>(MatDialogRef);
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _dateService = inject(DateService);
+  data = inject<{
+    simpleCounter: SimpleCounter;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
 
   todayStr: string = this._dateService.todayStr();
   val: number = this.data.simpleCounter.countOnDay[this.todayStr];
-
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogSimpleCounterEditComponent>,
-    private _simpleCounterService: SimpleCounterService,
-    private _dateService: DateService,
-    @Inject(MAT_DIALOG_DATA) public data: { simpleCounter: SimpleCounter },
-  ) {}
 
   submit(): void {
     this._simpleCounterService.setCounterToday(this.data.simpleCounter.id, this.val);

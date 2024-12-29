@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { EMPTY, from, merge, Observable, of, Subject, timer } from 'rxjs';
@@ -52,6 +52,18 @@ const BANNER_ID: BannerId = BannerId.TakeABreak;
   providedIn: 'root',
 })
 export class TakeABreakService {
+  private _taskService = inject(TaskService);
+  private _timeTrackingService = inject(GlobalTrackingIntervalService);
+  private _idleService = inject(IdleService);
+  private _actions$ = inject(Actions);
+  private _configService = inject(GlobalConfigService);
+  private _workContextService = inject(WorkContextService);
+  private _notifyService = inject(NotifyService);
+  private _pomodoroService = inject(PomodoroService);
+  private _bannerService = inject(BannerService);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _uiHelperService = inject(UiHelperService);
+
   otherNoBreakTIme$ = new Subject<number>();
 
   private _timeWithNoCurrentTask$: Observable<number> =
@@ -207,19 +219,7 @@ export class TakeABreakService {
     [number, GlobalConfigState, boolean, boolean]
   > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
-  constructor(
-    private _taskService: TaskService,
-    private _timeTrackingService: GlobalTrackingIntervalService,
-    private _idleService: IdleService,
-    private _actions$: Actions,
-    private _configService: GlobalConfigService,
-    private _workContextService: WorkContextService,
-    private _notifyService: NotifyService,
-    private _pomodoroService: PomodoroService,
-    private _bannerService: BannerService,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _uiHelperService: UiHelperService,
-  ) {
+  constructor() {
     this._tick$.subscribe((v) => console.log(`_tick$`, v));
 
     this._triggerReset$

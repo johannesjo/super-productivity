@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DateService } from '../../../../../core/date/date.service';
@@ -33,6 +33,18 @@ interface TmpTask {
   standalone: false,
 })
 export class DialogGitlabSubmitWorklogForDayComponent {
+  readonly data = inject<{
+    issueProviderId: string;
+    tasksForIssueProvider: Task[];
+  }>(MAT_DIALOG_DATA);
+  private readonly _matDialogRef =
+    inject<MatDialogRef<DialogGitlabSubmitWorklogForDayComponent>>(MatDialogRef);
+  private readonly _dateService = inject(DateService);
+  private readonly _gitlabApiService = inject(GitlabApiService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _issueProviderService = inject(IssueProviderService);
+  private readonly _store = inject(Store);
+
   isLoading = false;
   day: string = this._dateService.todayStr();
 
@@ -75,19 +87,9 @@ export class DialogGitlabSubmitWorklogForDayComponent {
   );
   T: typeof T = T;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA)
-    public readonly data: {
-      issueProviderId: string;
-      tasksForIssueProvider: Task[];
-    },
-    private readonly _matDialogRef: MatDialogRef<DialogGitlabSubmitWorklogForDayComponent>,
-    private readonly _dateService: DateService,
-    private readonly _gitlabApiService: GitlabApiService,
-    private readonly _snackService: SnackService,
-    private readonly _issueProviderService: IssueProviderService,
-    private readonly _store: Store,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
     void this._loadAlreadyTrackedData();
   }

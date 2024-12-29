@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
 
@@ -10,12 +10,10 @@ import { T } from '../../t.const';
   standalone: false,
 })
 export class DialogConfirmComponent {
-  T: typeof T = T;
+  private _matDialogRef = inject<MatDialogRef<DialogConfirmComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogConfirmComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {}
+  T: typeof T = T;
 
   close(res: any): void {
     this._matDialogRef.close(res);

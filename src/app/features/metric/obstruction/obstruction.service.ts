@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { selectAllObstructions } from './store/obstruction.reducer';
 import {
@@ -15,11 +15,11 @@ import { nanoid } from 'nanoid';
   providedIn: 'root',
 })
 export class ObstructionService {
+  private _store$ = inject<Store<ObstructionState>>(Store);
+
   obstructions$: Observable<Obstruction[]> = this._store$.pipe(
     select(selectAllObstructions),
   );
-
-  constructor(private _store$: Store<ObstructionState>) {}
 
   addObstruction(title: string): string {
     const id = nanoid();

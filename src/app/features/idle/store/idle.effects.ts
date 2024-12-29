@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -53,6 +53,17 @@ const IDLE_POLL_INTERVAL = 1000;
 
 @Injectable()
 export class IdleEffects {
+  private actions$ = inject(Actions);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _workContextService = inject(WorkContextService);
+  private _taskService = inject(TaskService);
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  private _uiHelperService = inject(UiHelperService);
+  private _dateService = inject(DateService);
+  private _takeABreakService = inject(TakeABreakService);
+
   private _isFrontEndIdlePollRunning = false;
   private _clearIdlePollInterval?: () => void;
   private _isDialogOpen: boolean = false;
@@ -282,24 +293,6 @@ export class IdleEffects {
       mapTo(resetIdle()),
     ),
   );
-
-  constructor(
-    private actions$: Actions,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _workContextService: WorkContextService,
-    private _taskService: TaskService,
-    private _simpleCounterService: SimpleCounterService,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    private _uiHelperService: UiHelperService,
-    private _dateService: DateService,
-    // NOTE needs to be imported somewhere. otherwise won't work
-    private _takeABreakService: TakeABreakService,
-  ) {
-    // window.setTimeout(() => {
-    //   this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    // }, 2700);
-  }
 
   private _initIdlePoll(initialIdleTime: number): void {
     const idleStart = Date.now();

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { TaskService } from './task.service';
@@ -8,6 +8,9 @@ import { devError } from '../../util/dev-error';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduledTaskService {
+  private _taskService = inject(TaskService);
+  private _reminderService = inject(ReminderService);
+
   allScheduledTasks$: Observable<TaskWithReminderData[]> =
     this._reminderService.reminders$.pipe(
       map((reminders) => reminders.filter((reminder) => reminder.type === 'TASK')),
@@ -57,9 +60,4 @@ export class ScheduledTaskService {
       ),
       shareReplay(1),
     );
-
-  constructor(
-    private _taskService: TaskService,
-    private _reminderService: ReminderService,
-  ) {}
 }

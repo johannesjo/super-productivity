@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { ReminderService } from '../reminder.service';
 import {
@@ -34,6 +34,16 @@ const COUNTDOWN_MAGIC_GAP = 500;
 
 @Injectable()
 export class ReminderCountdownEffects {
+  private actions$ = inject(Actions);
+  private _reminderService = inject(ReminderService);
+  private _datePipe = inject(DatePipe);
+  private _store = inject(Store);
+  private _bannerService = inject(BannerService);
+  private _dataInitService = inject(DataInitService);
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _router = inject(Router);
+
   reminderCountdownBanner$ = createEffect(
     () =>
       this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -87,18 +97,6 @@ export class ReminderCountdownEffects {
 
   private _skippedReminderIds$ = new BehaviorSubject<string[]>([]);
   private _currentBannerReminder?: Reminder;
-
-  constructor(
-    private actions$: Actions,
-    private _reminderService: ReminderService,
-    private _datePipe: DatePipe,
-    private _store: Store,
-    private _bannerService: BannerService,
-    private _dataInitService: DataInitService,
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _router: Router,
-  ) {}
 
   private _skipReminder(reminderId: string): void {
     this._skippedReminderIds$.next([...this._skippedReminderIds$.getValue(), reminderId]);

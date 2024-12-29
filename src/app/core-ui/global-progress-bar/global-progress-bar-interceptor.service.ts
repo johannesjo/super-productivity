@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpEvent,
   HttpHandler,
@@ -12,7 +12,9 @@ import axios from 'axios';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalProgressBarInterceptorService implements HttpInterceptor {
-  constructor(private globalProgressBarService: GlobalProgressBarService) {
+  private globalProgressBarService = inject(GlobalProgressBarService);
+
+  constructor() {
     axios.interceptors.request.use(
       (config) => {
         this.globalProgressBarService.countUp(config.url as string);

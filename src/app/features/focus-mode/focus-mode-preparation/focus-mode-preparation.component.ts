@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import {
   setFocusSessionActivePage,
   startFocusSession,
@@ -21,6 +21,8 @@ const COUNTDOWN_DURATION = 5;
   standalone: false,
 })
 export class FocusModePreparationComponent implements OnDestroy {
+  private readonly _store = inject(Store);
+
   T: typeof T = T;
 
   private _onDestroy$ = new Subject<void>();
@@ -31,7 +33,7 @@ export class FocusModePreparationComponent implements OnDestroy {
     startWith(COUNTDOWN_DURATION),
   );
 
-  constructor(private readonly _store: Store) {
+  constructor() {
     this.countdown$.pipe(delay(1000), takeUntil(this._onDestroy$)).subscribe((v) => {
       if (v <= 0) {
         this.startSession();

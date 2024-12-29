@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { Observable, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
@@ -26,6 +26,11 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
   standalone: false,
 })
 export class FocusModeOverlayComponent implements OnDestroy {
+  readonly taskService = inject(TaskService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _store = inject(Store);
+  private readonly _router = inject(Router);
+
   FocusModePage: typeof FocusModePage = FocusModePage;
 
   activePage$ = this._store.select(selectFocusSessionActivePage);
@@ -47,12 +52,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
     }
   };
 
-  constructor(
-    public readonly taskService: TaskService,
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _store: Store,
-    private readonly _router: Router,
-  ) {
+  constructor() {
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
 
     this.taskService.currentTask$

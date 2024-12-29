@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  input,
+  inject,
+} from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -21,6 +27,9 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
   standalone: false,
 })
 export class RightPanelComponent implements OnDestroy {
+  taskService = inject(TaskService);
+  layoutService = inject(LayoutService);
+
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
 
@@ -68,10 +77,7 @@ export class RightPanelComponent implements OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(
-    public taskService: TaskService,
-    public layoutService: LayoutService,
-  ) {
+  constructor() {
     this._subs.add(
       this.isOpen$.subscribe((isOpen) => {
         if (!isOpen) {

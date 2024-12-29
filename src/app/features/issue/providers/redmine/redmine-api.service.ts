@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { RedmineCfg } from './redmine.model';
@@ -24,10 +24,8 @@ import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-
   providedIn: 'root',
 })
 export class RedmineApiService {
-  constructor(
-    private _snackService: SnackService,
-    private _http: HttpClient,
-  ) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   searchIssuesInProject$(query: string, cfg: RedmineCfg): Observable<SearchResultItem[]> {
     return this._sendRequest$(

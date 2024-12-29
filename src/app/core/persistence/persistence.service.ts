@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AllowedDBKeys, DB, DB_LEGACY_PROJECT_PREFIX } from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
@@ -72,6 +72,11 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
   providedIn: 'root',
 })
 export class PersistenceService {
+  private _databaseService = inject(DatabaseService);
+  private _compressionService = inject(CompressionService);
+  private _persistenceLocalService = inject(PersistenceLocalService);
+  private _store = inject<Store<any>>(Store);
+
   // handled as private but needs to be assigned before the creations
   _baseModels: PersistenceBaseModel<unknown>[] = [];
   _projectModels: PersistenceForProjectModel<unknown, unknown>[] = [];
@@ -148,13 +153,6 @@ export class PersistenceService {
 
   private _isBlockSaving: boolean = false;
   private _invalidDataCount = 0;
-
-  constructor(
-    private _databaseService: DatabaseService,
-    private _compressionService: CompressionService,
-    private _persistenceLocalService: PersistenceLocalService,
-    private _store: Store<any>,
-  ) {}
 
   async getValidCompleteData(): Promise<AppDataComplete> {
     const d = await this.loadComplete();

@@ -10,6 +10,7 @@ import {
   OnInit,
   output,
   viewChild,
+  inject,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -32,6 +33,10 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   standalone: false,
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
+  private _cd = inject(ChangeDetectorRef);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _matDialog = inject(MatDialog);
+
   readonly isLock = input<boolean>(false);
   readonly isShowControls = input<boolean>(false);
   readonly isShowChecklistToggle = input<boolean>(false);
@@ -55,11 +60,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   );
   private _hideOverFlowTimeout: number | undefined;
 
-  constructor(
-    private _cd: ChangeDetectorRef,
-    private _globalConfigService: GlobalConfigService,
-    private _matDialog: MatDialog,
-  ) {
+  constructor() {
     this.resizeParsedToFit();
   }
 

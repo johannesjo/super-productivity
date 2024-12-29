@@ -10,6 +10,7 @@ import {
   ViewChild,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { fadeAnimation } from '../../animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -34,6 +35,10 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
 export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy
 {
+  private _elementRef = inject(ElementRef);
+  private _domSanitizer = inject(DomSanitizer);
+  private _languageService = inject(LanguageService);
+
   readonly sideWidth = input<number>(0);
   readonly wasClosed = output<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
@@ -53,11 +58,7 @@ export class BetterDrawerContainerComponent
   sideStyle: SafeStyle = '';
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _elementRef: ElementRef,
-    private _domSanitizer: DomSanitizer,
-    private _languageService: LanguageService,
-  ) {
+  constructor() {
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
     });

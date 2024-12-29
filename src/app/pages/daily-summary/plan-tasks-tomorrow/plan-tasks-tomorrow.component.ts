@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import { TaskService } from '../../../features/tasks/task.service';
 import { T } from 'src/app/t.const';
@@ -14,11 +14,9 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
   standalone: false,
 })
 export class PlanTasksTomorrowComponent {
-  T: typeof T = T;
+  workContextService = inject(WorkContextService);
+  taskService = inject(TaskService);
+  _taskRepeatCfgService = inject(TaskRepeatCfgService);
 
-  constructor(
-    public workContextService: WorkContextService,
-    public taskService: TaskService,
-    public _taskRepeatCfgService: TaskRepeatCfgService,
-  ) {}
+  T: typeof T = T;
 }

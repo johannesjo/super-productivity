@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Inject,
   LOCALE_ID,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -43,6 +43,18 @@ import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date
   standalone: false,
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
+  private _tagService = inject(TagService);
+  private _cd = inject(ChangeDetectorRef);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
+  private _translateService = inject(TranslateService);
+  private _locale = inject(LOCALE_ID);
+  private _data = inject<{
+    task?: Task;
+    repeatCfg?: TaskRepeatCfg;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   repeatCfgInitial?: TaskRepeatCfgCopy;
@@ -58,15 +70,9 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _tagService: TagService,
-    private _cd: ChangeDetectorRef,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _matDialogRef: MatDialogRef<DialogEditTaskRepeatCfgComponent>,
-    private _translateService: TranslateService,
-    @Inject(LOCALE_ID) private _locale: string,
-    @Inject(MAT_DIALOG_DATA) private _data: { task?: Task; repeatCfg?: TaskRepeatCfg },
-  ) {
+  constructor() {
+    const _locale = this._locale;
+
     if (this._data.repeatCfg) {
       // NOTE: just for typing....
       this.repeatCfg = { ...this._data.repeatCfg };

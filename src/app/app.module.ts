@@ -3,7 +3,7 @@ import {
   HAMMER_GESTURE_CONFIG,
   HammerModule,
 } from '@angular/platform-browser';
-import { ErrorHandler, LOCALE_ID, NgModule } from '@angular/core';
+import { ErrorHandler, LOCALE_ID, NgModule, inject } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -157,7 +157,9 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   ],
 })
 export class AppModule {
-  constructor(private _languageService: LanguageService) {
+  private _languageService = inject(LanguageService);
+
+  constructor() {
     this._languageService.setDefault(LanguageCode.en);
     this._languageService.setFromBrowserLngIfAutoSwitchLng();
   }

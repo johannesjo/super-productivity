@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
@@ -17,10 +17,8 @@ import { IssueProviderService } from '../../issue-provider.service';
   providedIn: 'root',
 })
 export class GithubCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _githubApiService: GithubApiService,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {}
+  private readonly _githubApiService = inject(GithubApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
 
   pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
 

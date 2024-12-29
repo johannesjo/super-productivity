@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -21,6 +21,12 @@ import { ProjectService } from '../../features/project/project.service';
   imports: [RouterLink, UiModule, RouterModule],
 })
 export class WorkContextMenuComponent {
+  private _matDialog = inject(MatDialog);
+  private _tagService = inject(TagService);
+  private _projectService = inject(ProjectService);
+  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
+
   readonly project = input.required<Project>();
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -30,14 +36,6 @@ export class WorkContextMenuComponent {
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
   isForProject: boolean = true;
   base: string = 'project';
-
-  constructor(
-    private _matDialog: MatDialog,
-    private _tagService: TagService,
-    private _projectService: ProjectService,
-    private _workContextService: WorkContextService,
-    private _router: Router,
-  ) {}
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
@@ -26,10 +26,8 @@ import { IssueProviderService } from '../../issue-provider.service';
   providedIn: 'root',
 })
 export class OpenProjectCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _openProjectApiService: OpenProjectApiService,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {}
+  private readonly _openProjectApiService = inject(OpenProjectApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
 
   pollTimer$: Observable<number> = timer(
     OPEN_PROJECT_INITIAL_POLL_DELAY,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogContent,
@@ -27,15 +27,17 @@ export interface DialogIncompleteSyncData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogIncompleteSyncComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogIncompleteSyncComponent>>(MatDialogRef);
+  private _dataImportService = inject(DataImportService);
+  data? = inject<DialogIncompleteSyncData>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogIncompleteSyncComponent>,
-    private _dataImportService: DataImportService,
-    @Inject(MAT_DIALOG_DATA)
-    public data?: DialogIncompleteSyncData,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

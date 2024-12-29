@@ -6,6 +6,7 @@ import {
   OnInit,
   input,
   output,
+  inject,
 } from '@angular/core';
 import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -44,6 +45,9 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   animations: [expandAnimation],
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _snackService = inject(SnackService);
+
   readonly section = input<ConfigFormSection<IssueProviderOpenProject>>();
   readonly modelChange = output<IssueProviderOpenProject>();
   T: typeof T = T;
@@ -73,11 +77,6 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }[] = [];
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _snackService: SnackService,
-  ) {}
 
   private _cfg?: IssueProviderOpenProject;
 

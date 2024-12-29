@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
@@ -16,6 +16,9 @@ const ANDROID_DB_KEY = 'backup';
 
 @Injectable()
 export class LocalBackupService {
+  private _configService = inject(GlobalConfigService);
+  private _persistenceService = inject(PersistenceService);
+
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
   );
@@ -24,11 +27,6 @@ export class LocalBackupService {
     switchMap(() => interval(DEFAULT_BACKUP_INTERVAL)),
     tap(() => this._backup()),
   );
-
-  constructor(
-    private _configService: GlobalConfigService,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   init(): void {
     this._triggerBackupSave$.subscribe();

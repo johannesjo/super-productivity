@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IssueLocalState, IssueProviderJira } from '../../../../issue.model';
 import { JiraIssueReduced } from '../../jira-issue/jira-issue.model';
@@ -21,6 +21,19 @@ import { TaskService } from '../../../../../tasks/task.service';
   standalone: false,
 })
 export class DialogJiraTransitionComponent {
+  private _jiraApiService = inject(JiraApiService);
+  private _issueService = inject(IssueService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogJiraTransitionComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  data = inject<{
+    issue: JiraIssueReduced;
+    localState: IssueLocalState;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
@@ -48,21 +61,6 @@ export class DialogJiraTransitionComponent {
   );
 
   chosenTransition?: JiraOriginalTransition;
-
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _issueService: IssueService,
-    private _issueProviderService: IssueProviderService,
-    private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      issue: JiraIssueReduced;
-      localState: IssueLocalState;
-      task: Task;
-    },
-  ) {}
 
   close(): void {
     this._matDialogRef.close();
