@@ -28,6 +28,17 @@
       </div>
 
       <div class="other-days">
+        <button
+          (click)="showAddForAnotherDayForm()"
+          color="primary"
+          style="margin-bottom: 16px"
+          mat-button
+          type="button"
+        >
+          <mat-icon>add</mat-icon>
+          {{T.F.TASK.D_TIME.ADD_FOR_OTHER_DAY|translate}}
+        </button>
+
         <div
           *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr;trackBy:trackByIndex"
           class="other-day"
@@ -56,16 +67,6 @@
             <mat-icon>delete_forever</mat-icon>
           </button>
         </div>
-
-        <button
-          (click)="showAddForAnotherDayForm()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon>add</mat-icon>
-          {{T.F.TASK.D_TIME.ADD_FOR_OTHER_DAY|translate}}
-        </button>
       </div>
     </mat-dialog-content>
 
