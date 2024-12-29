@@ -5,7 +5,7 @@ import {
   computed,
   input,
   OnDestroy,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
@@ -86,7 +86,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   });
   allTasksLength = computed(() => this.tasks()?.length ?? 0);
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
+  readonly dropList = viewChild(CdkDropList);
 
   T: typeof T = T;
 
@@ -99,11 +99,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   ) {}
 
   ngAfterViewInit(): void {
-    this.dropListService.registerDropList(this.dropList!, this.listId() === 'SUB');
+    this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
   }
 
   ngOnDestroy(): void {
-    this.dropListService.unregisterDropList(this.dropList!);
+    this.dropListService.unregisterDropList(this.dropList()!);
   }
 
   trackByFn(i: number, task: Task): string {

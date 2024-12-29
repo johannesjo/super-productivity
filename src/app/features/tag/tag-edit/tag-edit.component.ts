@@ -6,7 +6,7 @@ import {
   inject,
   input,
   output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import {
   MatAutocomplete,
@@ -70,8 +70,8 @@ export class TagEditComponent {
   inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
 
-  @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
+  readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputElRef');
+  readonly matAutocomplete = viewChild<MatAutocomplete>('autoElRef');
 
   inputVal = toSignal<string>(this.inputCtrl.valueChanges);
   tagSuggestions = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
@@ -99,11 +99,12 @@ export class TagEditComponent {
   });
 
   add(event: MatChipInputEvent): void {
-    if (!this.matAutocomplete) {
+    const matAutocomplete = this.matAutocomplete();
+    if (!matAutocomplete) {
       throw new Error('Auto complete undefined');
     }
 
-    if (!this.matAutocomplete.isOpen) {
+    if (!matAutocomplete.isOpen) {
       const inp = event.input;
       const value = event.value;
 
@@ -125,8 +126,9 @@ export class TagEditComponent {
   }
 
   focusInput(): void {
-    if (this.inputEl) {
-      this.inputEl.nativeElement.focus();
+    const inputEl = this.inputEl();
+    if (inputEl) {
+      inputEl.nativeElement.focus();
     }
   }
 
@@ -136,8 +138,9 @@ export class TagEditComponent {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this._add(event.option.value);
-    if (this.inputEl) {
-      this.inputEl.nativeElement.value = '';
+    const inputEl = this.inputEl();
+    if (inputEl) {
+      inputEl.nativeElement.value = '';
     }
     this.inputCtrl.setValue(null);
   }

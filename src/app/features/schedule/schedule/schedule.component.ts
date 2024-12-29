@@ -8,7 +8,7 @@ import {
   Inject,
   LOCALE_ID,
   OnDestroy,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
@@ -258,7 +258,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   dragCloneEl: HTMLElement | null = null;
   destroyRef = inject(DestroyRef);
 
-  @ViewChild('gridContainer') gridContainer!: ElementRef;
+  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
 
   private _currentAniTimeout: number | undefined;
 
@@ -332,7 +332,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     // console.log(ev);
     if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
-      const gridContainer = this.gridContainer.nativeElement;
+      const gridContainer = this.gridContainer().nativeElement;
       const gridStyles = window.getComputedStyle(gridContainer);
 
       const rowSizes = gridStyles.gridTemplateRows

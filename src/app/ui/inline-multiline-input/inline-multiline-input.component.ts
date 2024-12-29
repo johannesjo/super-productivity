@@ -6,7 +6,7 @@ import {
   HostBinding,
   Input,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
@@ -47,7 +47,8 @@ export class InlineMultilineInputComponent {
   lastExternalValue?: string;
   tmpValue?: string;
 
-  @ViewChild('textAreaElement') textarea!: ElementRef<HTMLTextAreaElement>;
+  readonly textarea =
+    viewChild.required<ElementRef<HTMLTextAreaElement>>('textAreaElement');
 
   @Output() valueEdited = new EventEmitter<{
     newVal: string;
@@ -78,7 +79,7 @@ export class InlineMultilineInputComponent {
     this._setTxtHeight();
     try {
       window.setTimeout(() => {
-        const el = this.textarea.nativeElement;
+        const el = this.textarea().nativeElement;
         el.setSelectionRange(el.value.length, el.value.length);
         el.selectionStart = el.selectionEnd = el.value.length;
       });
@@ -124,7 +125,7 @@ export class InlineMultilineInputComponent {
   }
 
   private _forceBlur(): void {
-    this.textarea.nativeElement.blur();
+    this.textarea().nativeElement.blur();
   }
 
   private _submit(): void {
@@ -153,15 +154,15 @@ export class InlineMultilineInputComponent {
   private _setTxtHeight(): void {
     try {
       // reset height
-      this.textarea.nativeElement.style.height = 'auto';
-      this.textarea.nativeElement.style.height =
-        this.textarea.nativeElement.scrollHeight + 'px';
+      const textarea = this.textarea();
+      textarea.nativeElement.style.height = 'auto';
+      textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
     } catch (e) {
       setTimeout(() => {
         // reset height
-        this.textarea.nativeElement.style.height = 'auto';
-        this.textarea.nativeElement.style.height =
-          this.textarea.nativeElement.scrollHeight + 'px';
+        const textarea = this.textarea();
+        textarea.nativeElement.style.height = 'auto';
+        textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
       });
     }
   }

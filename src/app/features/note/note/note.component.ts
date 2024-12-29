@@ -4,7 +4,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
@@ -37,7 +37,7 @@ export class NoteComponent implements OnChanges {
 
   @Input() isFocus?: boolean;
 
-  @ViewChild('markdownEl') markdownEl?: HTMLElement;
+  readonly markdownEl = viewChild<HTMLElement>('markdownEl');
 
   isLongNote?: boolean;
   shortenedNote?: string;

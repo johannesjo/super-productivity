@@ -8,9 +8,8 @@ import {
   Input,
   LOCALE_ID,
   OnDestroy,
-  QueryList,
-  ViewChild,
-  ViewChildren,
+  viewChildren,
+  viewChild,
 } from '@angular/core';
 import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
@@ -94,10 +93,9 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   @Input() isOver: boolean = false;
   @Input() isDialogMode: boolean = false;
 
-  @ViewChildren(TaskDetailItemComponent)
-  itemEls?: QueryList<TaskDetailItemComponent>;
-  @ViewChild('attachmentPanelElRef')
-  attachmentPanelElRef?: TaskDetailItemComponent;
+  readonly itemEls = viewChildren(TaskDetailItemComponent);
+  readonly attachmentPanelElRef =
+    viewChild<TaskDetailItemComponent>('attachmentPanelElRef');
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 
   _onDestroy$ = new Subject<void>();
@@ -377,11 +375,12 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
       )
       .subscribe(([v]) => {
         if (v === TaskDetailTargetPanel.Attachments) {
-          if (!this.attachmentPanelElRef) {
+          const attachmentPanelElRef = this.attachmentPanelElRef();
+          if (!attachmentPanelElRef) {
             devError('this.attachmentPanelElRef not ready');
             this._focusFirst();
           } else {
-            this.focusItem(this.attachmentPanelElRef);
+            this.focusItem(attachmentPanelElRef);
           }
         } else {
           this._focusFirst();
@@ -458,30 +457,29 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   onItemKeyPress(ev: KeyboardEvent): void {
-    if (!this.itemEls) {
+    const itemEls = this.itemEls();
+    if (!itemEls) {
       throw new Error();
     }
 
     if (ev.key === 'ArrowUp' && this.selectedItemIndex > 0) {
       this.selectedItemIndex--;
-      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
-    } else if (
-      ev.key === 'ArrowDown' &&
-      this.itemEls.toArray().length > this.selectedItemIndex + 1
-    ) {
+      itemEls[this.selectedItemIndex].focusEl();
+    } else if (ev.key === 'ArrowDown' && itemEls.length > this.selectedItemIndex + 1) {
       this.selectedItemIndex++;
-      this.itemEls.toArray()[this.selectedItemIndex].focusEl();
+      itemEls[this.selectedItemIndex].focusEl();
     }
   }
 
   focusItem(cmpInstance: TaskDetailItemComponent, timeoutDuration: number = 150): void {
     window.clearTimeout(this._focusTimeout);
     this._focusTimeout = window.setTimeout(() => {
-      if (!this.itemEls) {
+      const itemEls = this.itemEls();
+      if (!itemEls) {
         throw new Error();
       }
 
-      const i = this.itemEls.toArray().findIndex((el) => el === cmpInstance);
+      const i = itemEls.findIndex((el) => el === cmpInstance);
       if (i === -1) {
         this.focusItem(cmpInstance);
       } else {
@@ -503,10 +501,11 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
 
   private _focusFirst(): void {
     this._focusTimeout = window.setTimeout(() => {
-      if (!this.itemEls) {
+      const itemEls = this.itemEls();
+      if (!itemEls) {
         throw new Error();
       }
-      this.focusItem(this.itemEls.first, 0);
+      this.focusItem(itemEls.at(0)!, 0);
     }, 150);
   }
 

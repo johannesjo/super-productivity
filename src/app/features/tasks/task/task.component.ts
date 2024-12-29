@@ -8,7 +8,7 @@ import {
   input,
   OnDestroy,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, of } from 'rxjs';
@@ -112,14 +112,16 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   isFirstLineHover: boolean = false;
 
-  @ViewChild('taskTitleEditEl', { static: true }) taskTitleEditEl?: ElementRef;
-  @ViewChild('blockLeftEl') blockLeftElRef?: ElementRef;
-  @ViewChild('blockRightEl') blockRightElRef?: ElementRef;
-  @ViewChild('innerWrapperEl', { static: true }) innerWrapperElRef?: ElementRef;
-  @ViewChild('projectMenuTriggerEl', { static: false, read: MatMenuTrigger })
-  projectMenuTrigger?: MatMenuTrigger;
-  @ViewChild('taskContextMenu', { static: true, read: TaskContextMenuComponent })
-  taskContextMenu?: TaskContextMenuComponent;
+  readonly taskTitleEditEl = viewChild<ElementRef>('taskTitleEditEl');
+  readonly blockLeftElRef = viewChild<ElementRef>('blockLeftEl');
+  readonly blockRightElRef = viewChild<ElementRef>('blockRightEl');
+  readonly innerWrapperElRef = viewChild<ElementRef>('innerWrapperEl');
+  readonly projectMenuTrigger = viewChild('projectMenuTriggerEl', {
+    read: MatMenuTrigger,
+  });
+  readonly taskContextMenu = viewChild('taskContextMenu', {
+    read: TaskContextMenuComponent,
+  });
 
   private _task$ = toObservable(this.task);
 
@@ -468,17 +470,18 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   focusTitleForEdit(): void {
-    if (!this.taskTitleEditEl || !(this.taskTitleEditEl as any).textarea.nativeElement) {
-      console.log(this.taskTitleEditEl);
+    const taskTitleEditEl = this.taskTitleEditEl();
+    if (!taskTitleEditEl || !(taskTitleEditEl as any).textarea.nativeElement) {
+      console.log(taskTitleEditEl);
       throw new Error('No el');
     }
-    (this.taskTitleEditEl as any).textarea.nativeElement.focus();
+    (taskTitleEditEl as any).textarea.nativeElement.focus();
     //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    (this.taskTitleEditEl as any).textarea.nativeElement?.blur();
-    this.taskContextMenu?.open(event);
+    (this.taskTitleEditEl() as any).textarea.nativeElement?.blur();
+    this.taskContextMenu()?.open(event);
   }
 
   onTagsUpdated(tagIds: string[]): void {
@@ -489,7 +492,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
-    if (!this.taskTitleEditEl) {
+    const taskTitleEditEl = this.taskTitleEditEl();
+    if (!taskTitleEditEl) {
       throw new Error('No el');
     }
 
@@ -498,7 +502,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === (this.taskTitleEditEl as any).textarea.nativeElement ||
+      document.activeElement === (taskTitleEditEl as any).textarea.nativeElement ||
       ev.isFinal
     ) {
       return;
@@ -514,13 +518,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (!IS_TOUCH_PRIMARY || (!this.isLockPanLeft && !this.isLockPanRight)) {
       return;
     }
-    if (!this.blockLeftElRef || !this.blockRightElRef) {
+    const blockLeftElRef = this.blockLeftElRef();
+    const blockRightElRef = this.blockRightElRef();
+    if (!blockLeftElRef || !blockRightElRef) {
       throw new Error('No el');
     }
 
     this.isPreventPointerEventsWhilePanning = false;
-    this._renderer.removeStyle(this.blockLeftElRef.nativeElement, 'transition');
-    this._renderer.removeStyle(this.blockRightElRef.nativeElement, 'transition');
+    this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
+    this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
 
     if (this._currentPanTimeout) {
       window.clearTimeout(this._currentPanTimeout);
@@ -528,11 +534,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
-        this._renderer.setStyle(
-          this.blockRightElRef.nativeElement,
-          'transform',
-          `scaleX(1)`,
-        );
+        this._renderer.setStyle(blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
           if (this.workContextService.isToday) {
             if (this.task().repeatCfgId) {
@@ -554,11 +556,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
           this._resetAfterPan();
         }, 100);
       } else if (this.isLockPanRight) {
-        this._renderer.setStyle(
-          this.blockLeftElRef.nativeElement,
-          'transform',
-          `scaleX(1)`,
-        );
+        this._renderer.setStyle(blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
           this.toggleTaskDone();
           this._resetAfterPan();
@@ -696,11 +694,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     ) {
       return;
     }
-    if (!this.innerWrapperElRef) {
+    const innerWrapperElRef = this.innerWrapperElRef();
+    if (!innerWrapperElRef) {
       throw new Error('No el');
     }
 
-    const targetRef = this.isLockPanRight ? this.blockLeftElRef : this.blockRightElRef;
+    const targetRef = this.isLockPanRight
+      ? this.blockLeftElRef()
+      : this.blockRightElRef();
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
@@ -720,7 +721,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this._renderer.setStyle(targetRef.nativeElement, 'width', `${moveBy}px`);
       this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
       this._renderer.setStyle(
-        this.innerWrapperElRef.nativeElement,
+        innerWrapperElRef.nativeElement,
         'transform',
         `translateX(${ev.deltaX}px`,
       );
@@ -728,11 +729,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   private _resetAfterPan(): void {
+    const blockLeftElRef = this.blockLeftElRef();
+    const blockRightElRef = this.blockRightElRef();
+    const innerWrapperElRef = this.innerWrapperElRef();
     if (
-      !this.taskTitleEditEl ||
-      !this.blockLeftElRef ||
-      !this.blockRightElRef ||
-      !this.innerWrapperElRef
+      !this.taskTitleEditEl() ||
+      !blockLeftElRef ||
+      !blockRightElRef ||
+      !innerWrapperElRef
     ) {
       throw new Error('No el');
     }
@@ -744,9 +748,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     // const scale = 0;
     // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
     // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.removeClass(this.blockLeftElRef.nativeElement, 'isActive');
-    this._renderer.removeClass(this.blockRightElRef.nativeElement, 'isActive');
-    this._renderer.setStyle(this.innerWrapperElRef.nativeElement, 'transform', ``);
+    this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
+    this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
+    this._renderer.setStyle(innerWrapperElRef.nativeElement, 'transform', ``);
   }
 
   get kb(): KeyboardConfig {
@@ -793,16 +797,18 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.addAttachment();
     }
     if (!t.parentId && checkKeyCombo(ev, keys.taskMoveToProject)) {
-      if (!this.projectMenuTrigger) {
+      const projectMenuTrigger = this.projectMenuTrigger();
+      if (!projectMenuTrigger) {
         throw new Error('No el');
       }
-      this.projectMenuTrigger.openMenu();
+      projectMenuTrigger.openMenu();
     }
     if (checkKeyCombo(ev, keys.taskOpenContextMenu)) {
-      if (!this.taskContextMenu) {
+      const taskContextMenu = this.taskContextMenu();
+      if (!taskContextMenu) {
         throw new Error('No el');
       }
-      this.taskContextMenu.open(ev, true);
+      taskContextMenu.open(ev, true);
     }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {

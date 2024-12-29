@@ -5,9 +5,8 @@ import {
   HostBinding,
   HostListener,
   OnDestroy,
-  QueryList,
-  ViewChild,
-  ViewChildren,
+  viewChildren,
+  viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -53,13 +52,13 @@ import { updateProject } from '../../features/project/store/project.actions';
   standalone: false,
 })
 export class SideNavComponent implements OnDestroy {
-  @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
+  readonly navEntries = viewChildren<MatMenuItem>('menuEntry');
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
   keyboardFocusTimeout?: number;
-  @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
+  readonly projectExpandBtn = viewChild('projectExpandBtn', { read: ElementRef });
   isProjectsExpanded: boolean = this.fetchProjectListState();
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isProjectsExpanded,
@@ -77,7 +76,7 @@ export class SideNavComponent implements OnDestroy {
     ),
   );
 
-  @ViewChild('tagExpandBtn', { read: ElementRef }) tagExpandBtn?: ElementRef;
+  readonly tagExpandBtn = viewChild('tagExpandBtn', { read: ElementRef });
   isTagsExpanded: boolean = this.fetchTagListState();
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isTagsExpanded,
@@ -123,9 +122,10 @@ export class SideNavComponent implements OnDestroy {
 
     this._subs.add(
       this._layoutService.isShowSideNav$.subscribe((isShow) => {
-        if (this.navEntries && isShow) {
+        const navEntries = this.navEntries();
+        if (navEntries && isShow) {
           this.keyManager = new FocusKeyManager<MatMenuItem>(
-            this.navEntries,
+            navEntries,
           ).withVerticalOrientation(true);
           window.clearTimeout(this.keyboardFocusTimeout);
           this.keyboardFocusTimeout = window.setTimeout(() => {
@@ -190,9 +190,9 @@ export class SideNavComponent implements OnDestroy {
   }
 
   checkFocusProject(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.projectExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
-        return value._getHostElement() === this.projectExpandBtn?.nativeElement;
+    if (ev.key === 'ArrowLeft' && this.projectExpandBtn()?.nativeElement) {
+      const targetIndex = this.navEntries().findIndex((value) => {
+        return value._getHostElement() === this.projectExpandBtn()?.nativeElement;
       });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
@@ -217,9 +217,9 @@ export class SideNavComponent implements OnDestroy {
   }
 
   checkFocusTag(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.tagExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
-        return value._getHostElement() === this.tagExpandBtn?.nativeElement;
+    if (ev.key === 'ArrowLeft' && this.tagExpandBtn()?.nativeElement) {
+      const targetIndex = this.navEntries().findIndex((value) => {
+        return value._getHostElement() === this.tagExpandBtn()?.nativeElement;
       });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);

@@ -71,6 +71,8 @@ export class BetterDrawerContainerComponent
     return this._isOver;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild('contentElRef', { read: ElementRef }) set setContentElRef(ref: ElementRef) {
     this.contentEl$.next(ref.nativeElement);
   }

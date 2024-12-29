@@ -4,7 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { FieldType } from '@ngx-formly/core';
 import { Subscription } from 'rxjs';
@@ -21,7 +21,7 @@ export class FormlyTranslatedTemplateComponent
   extends FieldType
   implements OnInit, OnDestroy
 {
-  @ViewChild('tplWrapper', { static: true }) tplWrapper?: ElementRef;
+  readonly tplWrapper = viewChild<ElementRef>('tplWrapper');
 
   private _el?: HTMLElement;
   private _subs: Subscription = new Subscription();
@@ -54,11 +54,12 @@ export class FormlyTranslatedTemplateComponent
   }
 
   private _createTag(): void {
-    if (!this.field.templateOptions || !this.tplWrapper) {
+    const tplWrapper = this.tplWrapper();
+    if (!this.field.templateOptions || !tplWrapper) {
       throw new Error();
     }
     const tag = this.field.templateOptions.tag || 'div';
-    const tplWrapperEl = this.tplWrapper.nativeElement;
+    const tplWrapperEl = tplWrapper.nativeElement;
 
     if (tplWrapperEl) {
       this._el = document.createElement(tag);
@@ -67,7 +68,7 @@ export class FormlyTranslatedTemplateComponent
         (this._el as HTMLElement).classList.add(this.field.templateOptions.class);
       }
 
-      this.tplWrapper.nativeElement.append(this._el);
+      tplWrapper.nativeElement.append(this._el);
     }
   }
 }

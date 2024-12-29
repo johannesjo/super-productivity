@@ -11,7 +11,7 @@ import {
   Input,
   LOCALE_ID,
   OnInit,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
@@ -77,8 +77,9 @@ export class ScheduleEventComponent implements OnInit {
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
-  @ViewChild('taskContextMenu', { static: false, read: TaskContextMenuComponent })
-  taskContextMenu?: TaskContextMenuComponent;
+  readonly taskContextMenu = viewChild('taskContextMenu', {
+    read: TaskContextMenuComponent,
+  });
 
   protected readonly SVEType = SVEType;
   destroyRef = inject(DestroyRef);
@@ -264,7 +265,7 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    this.taskContextMenu?.open(event);
+    this.taskContextMenu()?.open(event);
   }
 
   deleteTask(): void {

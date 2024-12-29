@@ -8,7 +8,7 @@ import {
   input,
   OnDestroy,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
@@ -173,8 +173,8 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     );
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
-  @ViewChild('searchTextEl') searchTextEl!: ElementRef;
+  readonly dropList = viewChild(CdkDropList);
+  readonly searchTextEl = viewChild.required<ElementRef>('searchTextEl');
 
   private _focusTimeout?: number;
 
@@ -182,7 +182,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     // this.dropListService.registerDropList(this.dropList!);
     if (this.searchText().length <= 1 && IS_MOUSE_PRIMARY) {
       this._focusTimeout = window.setTimeout(() => {
-        this.searchTextEl?.nativeElement.focus();
+        this.searchTextEl()?.nativeElement.focus();
       }, 500);
     }
     this.searchText.set(this.issueProvider().pinnedSearch || '');

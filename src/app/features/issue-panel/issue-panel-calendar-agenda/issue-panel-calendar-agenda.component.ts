@@ -5,7 +5,7 @@ import {
   input,
   OnInit,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
@@ -39,7 +39,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
+  readonly dropList = viewChild(CdkDropList);
 
   agendaItems = signal<
     {

@@ -8,7 +8,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
@@ -34,7 +34,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   endHandler?: () => void;
   moveHandler?: (ev: any) => void;
 
-  @ViewChild('circleEl', { static: true }) circleEl?: ElementRef;
+  readonly circleEl = viewChild<ElementRef>('circleEl');
 
   @Input() label: string = '';
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
@@ -57,7 +57,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startHandler = (ev) => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
@@ -83,7 +83,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       ) {
         return;
       }
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      const circleEl = this.circleEl();
+      if (!this.endHandler || !this.moveHandler || !circleEl) {
         throw new Error();
       }
 
@@ -92,8 +93,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
       const convertThetaToCssDegrees = (thetaIN: number): number => 90 - thetaIN;
 
-      const centerX = this.circleEl.nativeElement.offsetWidth / 2;
-      const centerY = this.circleEl.nativeElement.offsetHeight / 2;
+      const centerX = circleEl.nativeElement.offsetWidth / 2;
+      const centerY = circleEl.nativeElement.offsetHeight / 2;
 
       let offsetX;
 
@@ -117,7 +118,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     };
 
     this.endHandler = () => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
@@ -138,7 +139,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl) {
+    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl()) {
       throw new Error();
     }
 
@@ -154,10 +155,11 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setCircleRotation(cssDegrees: number): void {
-    if (!this.circleEl) {
+    const circleEl = this.circleEl();
+    if (!circleEl) {
       throw new Error();
     }
-    this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
+    circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
   setDots(hours: number = 0): void {

@@ -7,7 +7,7 @@ import {
   Input,
   Output,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -32,7 +32,7 @@ export class SplitComponent implements AfterViewInit {
 
   pos: number = 100;
   eventSubs?: Subscription;
-  @ViewChild('buttonEl', { static: true }) buttonEl?: ElementRef;
+  readonly buttonEl = viewChild<ElementRef>('buttonEl');
   private _isDrag: boolean = false;
   private _isViewInitialized: boolean = false;
 

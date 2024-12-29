@@ -4,7 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   Inject,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { UiModule } from '../../../ui/ui.module';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -52,7 +52,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 export class DialogScheduleTaskComponent implements AfterViewInit {
   T: typeof T = T;
   minDate = new Date();
-  @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
+  readonly calendar = viewChild.required(MatCalendar);
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   task: TaskCopy = this.data.task;
@@ -124,7 +124,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedDate = dateStrToUtcDate(this.data.targetDay);
     }
 
-    this.calendar.activeDate = new Date(this.selectedDate || new Date());
+    this.calendar().activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();
 
     setTimeout(() => {
@@ -168,7 +168,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       if (
         this.selectedDate &&
         new Date(this.selectedDate).getTime() ===
-          new Date(this.calendar.activeDate).getTime()
+          new Date(this.calendar().activeDate).getTime()
       ) {
         this.submit();
       }
@@ -211,7 +211,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // we do the timeout is there to make sure this happens after our click handler
     setTimeout(() => {
       this.selectedDate = new Date(newDate);
-      this.calendar.activeDate = this.selectedDate;
+      this.calendar().activeDate = this.selectedDate;
     });
   }
 

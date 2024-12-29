@@ -6,8 +6,8 @@ import {
   input,
   Input,
   output,
-  ViewChild,
   ViewEncapsulation,
+  viewChild,
 } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { IssueModule } from '../../../issue/issue.module';
@@ -95,10 +95,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   contextMenuPosition: { x: string; y: string } = { x: '100px', y: '100px' };
 
-  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
-  contextMenuTrigger?: MatMenuTrigger;
+  readonly contextMenuTrigger = viewChild('contextMenuTriggerEl', {
+    read: MatMenuTrigger,
+  });
 
-  @ViewChild('contextMenu', { static: true, read: MatMenu }) contextMenu?: MatMenu;
+  readonly contextMenu = viewChild('contextMenu', { read: MatMenu });
 
   task!: TaskWithSubTasks | Task;
 
@@ -186,7 +187,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
-    this.contextMenuTrigger?.openMenu();
+    this.contextMenuTrigger()?.openMenu();
   }
 
   focusRelatedTaskOrNext(): void {

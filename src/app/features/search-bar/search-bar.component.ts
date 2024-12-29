@@ -6,7 +6,7 @@ import {
   EventEmitter,
   OnDestroy,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { T } from '../../t.const';
 import { UntypedFormControl } from '@angular/forms';
@@ -46,9 +46,9 @@ const MAX_RESULTS = 100;
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
   @Output() blurred: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl') inputEl!: ElementRef;
-  @ViewChild('searchForm') searchForm!: ElementRef;
-  @ViewChild(MatAutocompleteTrigger) autocomplete!: MatAutocompleteTrigger;
+  readonly inputEl = viewChild.required<ElementRef>('inputEl');
+  readonly searchForm = viewChild.required<ElementRef>('searchForm');
+  readonly autocomplete = viewChild.required(MatAutocompleteTrigger);
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
@@ -143,7 +143,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     );
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
-      this.inputEl.nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
+      this.inputEl().nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
           this.blurred.emit();
         } else if (
@@ -176,15 +176,15 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private _shakeSearchForm(): void {
-    this.searchForm.nativeElement.classList.toggle('shake-form');
-    this.searchForm.nativeElement.onanimationend = () => {
-      this.searchForm.nativeElement.classList.toggle('shake-form');
+    this.searchForm().nativeElement.classList.toggle('shake-form');
+    this.searchForm().nativeElement.onanimationend = () => {
+      this.searchForm().nativeElement.classList.toggle('shake-form');
     };
   }
 
   onAnimationEvent(event: AnimationEvent): void {
     if (event.fromState) {
-      this.inputEl.nativeElement.focus();
+      this.inputEl().nativeElement.focus();
     }
   }
 

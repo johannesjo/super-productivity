@@ -7,7 +7,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
@@ -41,8 +41,9 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
 
   moveToProjectList$!: Observable<Project[]>;
 
-  @ViewChild('taskContextMenu', { static: true, read: TaskContextMenuComponent })
-  taskContextMenu?: TaskContextMenuComponent;
+  readonly taskContextMenu = viewChild('taskContextMenu', {
+    read: TaskContextMenuComponent,
+  });
 
   @HostBinding('class.isDone')
   get isDone(): boolean {
@@ -114,7 +115,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    this.taskContextMenu?.open(event);
+    this.taskContextMenu()?.open(event);
   }
 
   estimateTimeClick(ev: MouseEvent): void {

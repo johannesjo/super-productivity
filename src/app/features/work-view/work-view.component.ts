@@ -105,6 +105,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     private _addTasksForTomorrowService: AddTasksForTomorrowService,
   ) {}
 
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);

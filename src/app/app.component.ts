@@ -4,8 +4,8 @@ import {
   HostBinding,
   HostListener,
   OnDestroy,
-  ViewChild,
   ViewContainerRef,
+  viewChild,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -65,8 +65,8 @@ export class AppComponent implements OnDestroy {
 
   @HostBinding('@.disabled') isDisableAnimations = false;
 
-  @ViewChild('notesElRef', { read: ViewContainerRef }) notesElRef?: ViewContainerRef;
-  @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef?: ViewContainerRef;
+  readonly notesElRef = viewChild('notesElRef', { read: ViewContainerRef });
+  readonly sideNavElRef = viewChild('sideNavElRef', { read: ViewContainerRef });
 
   isRTL: boolean = false;
 

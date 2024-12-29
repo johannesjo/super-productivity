@@ -9,7 +9,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -40,9 +40,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() focused: EventEmitter<Event> = new EventEmitter();
   @Output() blurred: EventEmitter<Event> = new EventEmitter();
   @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
-  @ViewChild('wrapperEl', { static: true }) wrapperEl: ElementRef | undefined;
-  @ViewChild('textareaEl') textareaEl: ElementRef | undefined;
-  @ViewChild('previewEl') previewEl: MarkdownComponent | undefined;
+  readonly wrapperEl = viewChild<ElementRef>('wrapperEl');
+  readonly textareaEl = viewChild<ElementRef>('textareaEl');
+  readonly previewEl = viewChild<MarkdownComponent>('previewEl');
 
   isHideOverflow: boolean = false;
   isChecklistMode: boolean = false;
@@ -144,10 +144,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       this.resizeParsedToFit();
       this.isShowEdit = false;
     }
-    if (!this.textareaEl) {
+    const textareaEl = this.textareaEl();
+    if (!textareaEl) {
       throw new Error('Textarea not visible');
     }
-    this.modelCopy = this.textareaEl.nativeElement.value;
+    this.modelCopy = textareaEl.nativeElement.value;
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
@@ -157,17 +158,17 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   resizeTextareaToFit(): void {
     this._hideOverflow();
-    if (!this.textareaEl) {
+    const textareaEl = this.textareaEl();
+    if (!textareaEl) {
       throw new Error('Textarea not visible');
     }
-    if (!this.wrapperEl) {
+    const wrapperEl = this.wrapperEl();
+    if (!wrapperEl) {
       throw new Error('Wrapper el not visible');
     }
-    this.textareaEl.nativeElement.style.height = 'auto';
-    this.textareaEl.nativeElement.style.height =
-      this.textareaEl.nativeElement.scrollHeight + 'px';
-    this.wrapperEl.nativeElement.style.height =
-      this.textareaEl.nativeElement.offsetHeight + 'px';
+    textareaEl.nativeElement.style.height = 'auto';
+    textareaEl.nativeElement.style.height = textareaEl.nativeElement.scrollHeight + 'px';
+    wrapperEl.nativeElement.style.height = textareaEl.nativeElement.offsetHeight + 'px';
   }
 
   openFullScreen(): void {
@@ -193,20 +194,22 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this._hideOverflow();
 
     setTimeout(() => {
-      if (!this.previewEl) {
-        if (this.textareaEl) {
+      const previewEl = this.previewEl();
+      if (!previewEl) {
+        if (this.textareaEl()) {
           this.resizeTextareaToFit();
         }
         return;
       }
-      if (!this.wrapperEl) {
+      const wrapperEl = this.wrapperEl();
+      if (!wrapperEl) {
         throw new Error('Wrapper el not visible');
       }
-      this.previewEl.element.nativeElement.style.height = 'auto';
+      previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
-      this.wrapperEl.nativeElement.style.height =
-        this.previewEl.element.nativeElement.offsetHeight + 'px';
-      this.previewEl.element.nativeElement.style.height = '';
+      wrapperEl.nativeElement.style.height =
+        previewEl.element.nativeElement.offsetHeight + 'px';
+      previewEl.element.nativeElement.style.height = '';
     });
   }
 
@@ -234,11 +237,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this.isShowEdit = true;
     this.modelCopy = this.model || '';
     setTimeout(() => {
-      if (!this.textareaEl) {
+      const textareaEl = this.textareaEl();
+      if (!textareaEl) {
         throw new Error('Textarea not visible');
       }
-      this.textareaEl.nativeElement.value = this.modelCopy;
-      this.textareaEl.nativeElement.focus();
+      textareaEl.nativeElement.value = this.modelCopy;
+      textareaEl.nativeElement.focus();
       this.resizeTextareaToFit();
     });
   }
@@ -256,10 +260,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   private _makeLinksWorkForElectron(): void {
-    if (!this.wrapperEl) {
+    const wrapperEl = this.wrapperEl();
+    if (!wrapperEl) {
       throw new Error('Wrapper el not visible');
     }
-    this.wrapperEl.nativeElement.addEventListener('click', (ev: MouseEvent) => {
+    wrapperEl.nativeElement.addEventListener('click', (ev: MouseEvent) => {
       const target = ev.target as HTMLElement;
       if (target.tagName && target.tagName.toLowerCase() === 'a') {
         const href = target.getAttribute('href');
@@ -273,7 +278,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   private _handleCheckboxClick(targetEl: HTMLElement): void {
     const allCheckboxes =
-      this.previewEl?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
+      this.previewEl()?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
 
     const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
     if (checkIndex !== -1 && this._model) {

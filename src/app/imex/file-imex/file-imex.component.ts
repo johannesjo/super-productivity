@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { AppDataComplete } from '../sync/sync.model';
@@ -16,7 +16,7 @@ import { privacyExport } from './privacy-export';
   standalone: false,
 })
 export class FileImexComponent {
-  @ViewChild('fileInput', { static: true }) fileInputRef?: ElementRef;
+  readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
 
   constructor(
@@ -50,14 +50,15 @@ export class FileImexComponent {
         await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
       }
 
-      if (!this.fileInputRef) {
+      const fileInputRef = this.fileInputRef();
+      if (!fileInputRef) {
         throw new Error('No file input Ref element');
       }
 
       // clear input
-      this.fileInputRef.nativeElement.value = '';
-      this.fileInputRef.nativeElement.type = 'text';
-      this.fileInputRef.nativeElement.type = 'file';
+      fileInputRef.nativeElement.value = '';
+      fileInputRef.nativeElement.type = 'text';
+      fileInputRef.nativeElement.type = 'file';
     };
     reader.readAsText(file);
   }

@@ -4,7 +4,7 @@ import {
   ElementRef,
   HostBinding,
   input,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { UiModule } from '../../../ui/ui.module';
@@ -41,8 +41,7 @@ export class SideNavItemComponent {
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
-  @ViewChild('routeBtn', { static: true, read: ElementRef })
-  routeBtn!: ElementRef;
+  readonly routeBtn = viewChild.required('routeBtn', { read: ElementRef });
 
   @HostBinding('class.hasTasks')
   get workContextHasTasks(): boolean {
@@ -60,6 +59,6 @@ export class SideNavItemComponent {
   }
 
   focus(): void {
-    this.routeBtn.nativeElement.focus();
+    this.routeBtn().nativeElement.focus();
   }
 }

@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   input,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { IssueModule } from '../../issue/issue.module';
 import { TranslateModule } from '@ngx-translate/core';
@@ -23,17 +23,15 @@ export class TaskContextMenuComponent {
 
   isShowInner: boolean = false;
 
-  @ViewChild('taskContextMenuInner', {
-    static: false,
+  readonly taskContextMenuInner = viewChild('taskContextMenuInner', {
     read: TaskContextMenuInnerComponent,
-  })
-  taskContextMenuInner?: TaskContextMenuInnerComponent;
+  });
 
   constructor(private _cd: ChangeDetectorRef) {}
 
   open(ev: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
     this.isShowInner = true;
     this._cd.detectChanges();
-    this.taskContextMenuInner?.open(ev, isOpenedFromKeyBoard);
+    this.taskContextMenuInner()?.open(ev, isOpenedFromKeyBoard);
   }
 }

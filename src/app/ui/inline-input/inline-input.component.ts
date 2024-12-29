@@ -7,7 +7,7 @@ import {
   HostBinding,
   Input,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 
 @Component({
@@ -24,8 +24,8 @@ export class InlineInputComponent implements AfterViewInit {
   @Input() newValue?: string | number;
 
   @Output() changed: EventEmitter<string | number> = new EventEmitter();
-  @ViewChild('inputEl') inputEl?: ElementRef;
-  @ViewChild('inputElDuration') inputElDuration?: ElementRef;
+  readonly inputEl = viewChild<ElementRef>('inputEl');
+  readonly inputElDuration = viewChild<ElementRef>('inputElDuration');
 
   @HostBinding('class.isFocused') isFocused: boolean = false;
 
@@ -36,15 +36,15 @@ export class InlineInputComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.activeInputEl =
       this.type === 'duration'
-        ? (this.inputElDuration as ElementRef).nativeElement
-        : (this.inputEl as ElementRef).nativeElement;
+        ? (this.inputElDuration() as ElementRef).nativeElement
+        : (this.inputEl() as ElementRef).nativeElement;
   }
 
   focusInput(): void {
     this.activeInputEl =
       this.type === 'duration'
-        ? (this.inputElDuration as ElementRef).nativeElement
-        : (this.inputEl as ElementRef).nativeElement;
+        ? (this.inputElDuration() as ElementRef).nativeElement
+        : (this.inputEl() as ElementRef).nativeElement;
 
     this.isFocused = true;
     (this.activeInputEl as HTMLElement).focus();

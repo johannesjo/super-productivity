@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { NoteService } from '../note.service';
 import { MatButton } from '@angular/material/button';
@@ -30,7 +30,7 @@ export class NotesComponent {
   isDragOver: boolean = false;
   dragEnterTarget?: HTMLElement;
 
-  @ViewChild('buttonEl', { static: true }) buttonEl?: MatButton;
+  readonly buttonEl = viewChild<MatButton>('buttonEl');
 
   constructor(
     public noteService: NoteService,

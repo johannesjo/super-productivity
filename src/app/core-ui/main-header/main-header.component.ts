@@ -5,7 +5,7 @@ import {
   OnDestroy,
   OnInit,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -44,7 +44,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   circumference: number = this.progressCircleRadius * Math.PI * 2;
   isShowSimpleCounterBtnsMobile: boolean = false;
 
-  @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
+  readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
   currentTaskContext$: Observable<Project | Tag | null> =
     this.taskService.currentTaskParentOrCurrent$.pipe(
@@ -104,17 +104,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-      if (this.circleSvg) {
+      const circleSvg = this.circleSvg();
+      if (circleSvg) {
         let progress = progressIN || 1;
         if (progress > 1) {
           progress = 1;
         }
         const dashOffset = this.circumference * -1 * progress;
-        this._renderer.setStyle(
-          this.circleSvg.nativeElement,
-          'stroke-dashoffset',
-          dashOffset,
-        );
+        this._renderer.setStyle(circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
       }
     });
   }

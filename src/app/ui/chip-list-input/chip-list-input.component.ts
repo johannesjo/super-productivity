@@ -7,7 +7,7 @@ import {
   Input,
   OnDestroy,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -56,8 +56,8 @@ export class ChipListInputComponent implements OnDestroy {
   inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
   isAutoFocus = false;
-  @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
+  readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputElRef');
+  readonly matAutocomplete = viewChild<MatAutocomplete>('autoElRef');
   private _modelIds: string[] = [];
 
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
@@ -77,7 +77,7 @@ export class ChipListInputComponent implements OnDestroy {
     if (typeof autoFocus === 'string') {
       this.isAutoFocus = true;
       this._autoFocusTimeout = window.setTimeout(() => {
-        this.inputEl?.nativeElement.focus();
+        this.inputEl()?.nativeElement.focus();
         // NOTE: we need to wait a little for the tag dialog to be there
       }, 300);
     }
@@ -100,11 +100,12 @@ export class ChipListInputComponent implements OnDestroy {
   }
 
   add(event: MatChipInputEvent): void {
-    if (!this.matAutocomplete) {
+    const matAutocomplete = this.matAutocomplete();
+    if (!matAutocomplete) {
       throw new Error('Auto complete undefined');
     }
 
-    if (!this.matAutocomplete.isOpen) {
+    if (!matAutocomplete.isOpen) {
       const input = event.input;
       const value = event.value;
 
@@ -125,8 +126,9 @@ export class ChipListInputComponent implements OnDestroy {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this._add(event.option.value);
-    if (this.inputEl) {
-      this.inputEl.nativeElement.value = '';
+    const inputEl = this.inputEl();
+    if (inputEl) {
+      inputEl.nativeElement.value = '';
     }
     this.inputCtrl.setValue(null);
   }

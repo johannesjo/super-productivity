@@ -4,7 +4,7 @@ import {
   ElementRef,
   Input,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 
 @Component({
@@ -16,21 +16,22 @@ import {
 })
 export class ProgressCircleComponent {
   @Input() set progress(progressIN: number) {
-    if (this.progressCircle) {
+    const progressCircle = this.progressCircle();
+    if (progressCircle) {
       let progress = progressIN || 0;
       if (progress > 100) {
         progress = 100;
       }
 
       this._renderer.setStyle(
-        this.progressCircle.nativeElement,
+        progressCircle.nativeElement,
         'stroke-dasharray',
         `${progress} ,100`,
       );
     }
   }
 
-  @ViewChild('progressCircle', { static: true }) progressCircle?: ElementRef;
+  readonly progressCircle = viewChild<ElementRef>('progressCircle');
 
   constructor(private readonly _renderer: Renderer2) {}
 }

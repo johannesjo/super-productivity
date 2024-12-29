@@ -9,8 +9,8 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild,
   ViewContainerRef,
+  viewChild,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import {
@@ -40,8 +40,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: any;
   }> = new EventEmitter();
-  @ViewChild('customForm', { read: ViewContainerRef, static: true })
-  customFormRef?: ViewContainerRef;
+  readonly customFormRef = viewChild('customForm', { read: ViewContainerRef });
   isExpanded: boolean = false;
   private _subs: Subscription = new Subscription();
   private _instance?: Component;
@@ -84,13 +83,14 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       this._workContextService.onWorkContextChange$.subscribe(() => {
         this._cd.markForCheck();
 
+        const customFormRef = this.customFormRef();
         if (
           this.section &&
           this.section.customSection &&
-          this.customFormRef &&
+          customFormRef &&
           this.section.customSection
         ) {
-          this.customFormRef.clear();
+          customFormRef.clear();
           // dirty trick to make sure data is actually there
           this._viewDestroyTimeout = window.setTimeout(() => {
             this._loadCustomSection((this.section as any).customSection);
@@ -126,7 +126,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     if (componentToRender) {
       const factory: ComponentFactory<any> =
         this._componentFactoryResolver.resolveComponentFactory(componentToRender as any);
-      const ref = exists<any>(this.customFormRef).createComponent(factory);
+      const ref = exists<any>(this.customFormRef()).createComponent(factory);
 
       // NOTE: important that this is set only if we actually have a value
       // otherwise the default fallback will be overwritten

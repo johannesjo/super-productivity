@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { stringToMs } from '../string-to-ms.pipe';
@@ -11,7 +11,7 @@ import { stringToMs } from '../string-to-ms.pipe';
   standalone: false,
 })
 export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
-  @ViewChild('inputEl', { static: true, read: ElementRef }) input!: ElementRef;
+  readonly input = viewChild.required('inputEl', { read: ElementRef });
 
   // @ViewChild(MatInput, {static: true}) formFieldControl?: MatInput;
   onInputValueChange(ev: Event): void {
@@ -30,10 +30,11 @@ export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
 
   private _updateValue(val: string): void {
     this.formControl.setValue(val ? stringToMs(val) : null);
-    this.input.nativeElement.value = val;
+    this.input().nativeElement.value = val;
     setTimeout(() => {
-      if (this.input.nativeElement.value !== val) {
-        this.input.nativeElement.value = val;
+      const input = this.input();
+      if (input.nativeElement.value !== val) {
+        input.nativeElement.value = val;
       }
     });
   }
