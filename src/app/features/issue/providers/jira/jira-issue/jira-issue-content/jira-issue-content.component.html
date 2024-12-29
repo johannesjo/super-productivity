@@ -90,12 +90,12 @@
       <th>{{T.F.JIRA.ISSUE_CONTENT.RELATED|translate}}</th>
       <td>
         <ul class="related-issue-list">
-          @for (ri of relatedIssues; track ri) {
+          @for (ri of relatedIssues; track ri.id) {
           <li>
             <i>{{ri.relatedHow}} => </i>
             <a
               target="_blank"
-              [href]="ri.href"
+              [href]="ri['href']"
               >{{ri.key}} {{ri.summary}}</a
             >
           </li>

@@ -1,8 +1,7 @@
 <h3>{{T.PDS.TIME_SPENT_TODAY_BY_TAG|translate}}</h3>
 <table>
   <tbody>
-    @for (tagWithTimeSpent of (tagsWithTimeSpent$|async); track trackById($index,
-    tagWithTimeSpent)) {
+    @for (tagWithTimeSpent of (tagsWithTimeSpent$|async); track tagWithTimeSpent.id) {
     <tr>
       <td>
         <tag

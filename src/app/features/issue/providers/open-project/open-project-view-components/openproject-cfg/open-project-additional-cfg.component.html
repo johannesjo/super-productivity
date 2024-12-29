@@ -35,13 +35,12 @@
         >
           <mat-spinner diameter="50"></mat-spinner>
         </mat-option>
-        } @for (issue of (filteredIssueSuggestions$|async); track trackByIssueId($index,
-        issue)) {
+        } @for (issue of (filteredIssueSuggestions$|async); track issue.issueData.id) {
         <mat-option [value]="issue"><span>{{ issue?.title }}</span> </mat-option>
         }
       </mat-autocomplete>
     </mat-form-field>
-    @for (opt of transitionConfigOpts; track opt) {
+    @for (opt of transitionConfigOpts; track opt.key) {
     <div>
       <mat-form-field>
         @if (opt.key==='OPEN') {
@@ -62,7 +61,7 @@
           <mat-option value="ALWAYS_ASK">
             {{ T.F.OPEN_PROJECT.CFG_CMP.ALWAYS_ASK|translate }}
           </mat-option>
-          @for (transition of cfg.availableTransitions; track transition) {
+          @for (transition of cfg.availableTransitions; track transition.id) {
           <mat-option [value]="transition"> {{ transition.name }} </mat-option>
           }
         </mat-select>

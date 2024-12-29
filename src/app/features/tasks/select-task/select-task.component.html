@@ -1,5 +1,5 @@
 <mat-form-field>
-  <mat-label>{{T.F.TASK.SELECT_OR_CREATE|translate}}</mat-label>
+  <mat-label>{{ T.F.TASK.SELECT_OR_CREATE|translate }}</mat-label>
   <input
     [formControl]="taskSelectCtrl"
     [matAutocomplete]="auto"
@@ -9,9 +9,9 @@
     required
   />
   @if (!isCreate) {
-  <mat-icon matSuffix="">track_changes </mat-icon>
+  <mat-icon matSuffix="">track_changes</mat-icon>
   } @if (isCreate) {
-  <mat-icon matSuffix="">add </mat-icon>
+  <mat-icon matSuffix="">add</mat-icon>
   }
 
   <mat-autocomplete
@@ -23,10 +23,16 @@
     <mat-option [value]="task">
       @if (task.issueType) {
       <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
-      } @if (!task.issueType && !projectMap[task.projectId]) {
-      <mat-icon>library_books </mat-icon>
+      }
+      <!---->
+      @if (task.projectId) {
+      <!---->
+      @if (!task.issueType && !projectMap[task.projectId]) {
+      <mat-icon>library_books</mat-icon>
       } @if (projectMap[task.projectId]) {
       <tag [tag]="projectMap[task.projectId]"></tag>
+      }
+      <!---->
       }
       <span [innerHTML]="task.title"></span>
     </mat-option>

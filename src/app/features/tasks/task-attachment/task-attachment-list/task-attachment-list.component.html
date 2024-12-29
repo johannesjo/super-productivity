@@ -63,6 +63,7 @@
       >
         <mat-icon>edit</mat-icon>
       </button>
+      @if(attachment.id){
       <button
         (click)="remove(attachment.id)"
         class="trash-btn"
@@ -70,6 +71,7 @@
       >
         <mat-icon color="warn">delete_forever</mat-icon>
       </button>
+      }
     </div>
     }
   </li>

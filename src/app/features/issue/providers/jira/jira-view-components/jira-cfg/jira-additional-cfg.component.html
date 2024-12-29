@@ -35,8 +35,9 @@
         >
           <mat-spinner diameter="50"></mat-spinner>
         </mat-option>
-        } @for (issue of (filteredIssueSuggestions$|async); track trackByIssueId($index,
-        issue)) {
+        }
+        <!---->
+        @for (issue of (filteredIssueSuggestions$|async); track issue.issueData.id) {
         <mat-option [value]="issue"><span>{{ issue?.title }}</span> </mat-option>
         }
       </mat-autocomplete>

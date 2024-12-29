@@ -30,7 +30,6 @@
     <ng-template matMenuContent>
       <work-context-menu
         [contextId]="activeWorkContextTypeAndId.activeId"
-        [project]="projectService.currentProject$|async"
         [contextType]="activeWorkContextTypeAndId.activeType"
       ></work-context-menu>
     </ng-template>

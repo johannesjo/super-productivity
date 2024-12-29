@@ -30,7 +30,7 @@
           </mat-button-toggle-group>
         </div>
       </div>
-      @for (section of globalConfigFormCfg; track trackBySectionKey($index, section)) {
+      @for (section of globalConfigFormCfg; track section.key) {
       <section class="config-section section-{{section.key}}">
         <config-section
           (save)="saveGlobalCfg($event)"
@@ -52,8 +52,7 @@
         >
           {{T.PS.PRODUCTIVITY_HELPER|translate}}
         </h2>
-        @for (section of globalProductivityConfigFormCfg; track trackBySectionKey($index,
-        section)) {
+        @for (section of globalProductivityConfigFormCfg; track section.key) {
         <section class="config-section">
           <config-section
             (save)="saveGlobalCfg($event)"
@@ -69,8 +68,7 @@
       >
         {{T.PS.SYNC_EXPORT|translate}}
       </h2>
-      @for (section of globalSyncProviderFormCfg; track trackBySectionKey($index,
-      section)) {
+      @for (section of globalSyncProviderFormCfg; track section.key) {
       <section class="config-section tour-syncSection">
         <config-section
           (save)="saveGlobalCfg($event)"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -8,7 +8,6 @@ import { TagService } from '../../features/tag/tag.service';
 import { first } from 'rxjs/operators';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Router, RouterLink, RouterModule } from '@angular/router';
-import { Project } from '../../features/project/project.model';
 import { UiModule } from '../../ui/ui.module';
 
 import { ProjectService } from '../../features/project/project.service';
@@ -27,7 +26,6 @@ export class WorkContextMenuComponent {
   private _workContextService = inject(WorkContextService);
   private _router = inject(Router);
 
-  readonly project = input.required<Project>();
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.

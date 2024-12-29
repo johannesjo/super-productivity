@@ -1,4 +1,4 @@
-@for (project of (projects$|async); track trackById($index, project)) {
+@for (project of (projects$|async) || []; track project.id) {
 <section class="project-section">
   @if (project.id !== (workContextService.activeWorkContextId$|async)) {
   <div
@@ -11,9 +11,10 @@
     <div>{{project.timeSpentToday|msToString}}</div>
     } @if (isShowYesterday()) {
     <div>
-      {{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}} @if
-      (project.timeSpentYesterday >0) { ({{project.timeSpentYesterday|msToString}}
-      {{T.G.YESTERDAY|translate}}) }
+      {{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}}
+      <!---->
+      @if (project.timeSpentYesterday && project.timeSpentYesterday >0) {
+      ({{project.timeSpentYesterday|msToString}} {{T.G.YESTERDAY|translate}}) }
     </div>
     }
   </div>

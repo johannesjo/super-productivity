@@ -191,10 +191,6 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
     return issue?.subject;
   }
 
-  trackByIssueId(i: number, issue: OpenProjectWorkPackage): number {
-    return issue.id;
-  }
-
   showSetProgressOption(key: any): boolean {
     const transitionOption = this.getTransition(key).valueOf();
     let shouldShow: boolean = false;

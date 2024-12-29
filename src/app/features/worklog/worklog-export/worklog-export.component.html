@@ -28,7 +28,7 @@
       <mat-icon>add</mat-icon>
     </button>
     <mat-menu #addColMenu="matMenu">
-      @for (colOpt of colOpts; track trackByIndex($index, colOpt)) {
+      @for (colOpt of colOpts; track $index) {
       <button
         (click)="addCol(colOpt.id)"
         mat-menu-item
@@ -40,7 +40,7 @@
     <div class="table-wrapper material-table _no-elevation">
       <table>
         <tr class="control-row">
-          @for (col of options.cols; track trackByIndex(i, col); let i = $index) {
+          @for (col of options.cols; track i; let i = $index) {
           <td>
             <mat-select
               (selectionChange)="onOptionsChange()"
@@ -57,8 +57,7 @@
           }
         </tr>
         <tr>
-          @for (headlineCol of headlineCols; track trackByIndex(i, headlineCol); let i =
-          $index) {
+          @for (headlineCol of headlineCols; track i; let i = $index) {
           <th [ngClass]="options.cols[i]">{{headlineCol}}</th>
           }
         </tr>
@@ -119,8 +118,7 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              @for (roundOption of roundTimeOptions; track trackByIndex($index,
-              roundOption)) {
+              @for (roundOption of roundTimeOptions; track $index) {
               <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -138,8 +136,7 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              @for (roundOption of roundTimeOptions; track trackByIndex($index,
-              roundOption)) {
+              @for (roundOption of roundTimeOptions; track $index) {
               <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -157,8 +154,7 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              @for (roundOption of roundTimeOptions; track trackByIndex($index,
-              roundOption)) {
+              @for (roundOption of roundTimeOptions; track $index) {
               <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
@@ -173,8 +169,7 @@
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.groupBy"
             >
-              @for (groupByOption of groupByOptions; track trackByIndex($index,
-              groupByOption)) {
+              @for (groupByOption of groupByOptions; track $index) {
               <mat-option [value]="groupByOption.id">
                 {{groupByOption.title|translate}}
               </mat-option>

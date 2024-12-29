@@ -2,7 +2,7 @@ import { Project } from '../../project/project.model';
 import { Task } from '../task.model';
 
 export interface ProjectWithTasks {
-  id?: string | null;
+  id: string | null;
   title?: string;
   color?: string;
   tasks: Task[];

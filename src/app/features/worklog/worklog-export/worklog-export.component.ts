@@ -70,7 +70,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     { id: 'HOUR', title: T.F.WORKLOG.EXPORT.O.FULL_HOURS },
   ];
 
-  colOpts: { id: string; title: string }[] = [
+  colOpts: { id: WorklogColTypes; title: string }[] = [
     { id: 'DATE', title: T.F.WORKLOG.EXPORT.O.DATE },
     { id: 'START', title: T.F.WORKLOG.EXPORT.O.STARTED_WORKING },
     { id: 'END', title: T.F.WORKLOG.EXPORT.O.ENDED_WORKING },
@@ -217,9 +217,5 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   addCol(colOpt: WorklogColTypes): void {
     this.options.cols.push(colOpt);
-  }
-
-  trackByIndex(i: number, p: any): number {
-    return i;
   }
 }

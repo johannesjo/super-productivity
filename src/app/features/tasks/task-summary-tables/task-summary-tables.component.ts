@@ -89,7 +89,7 @@ export class TaskSummaryTablesComponent {
   }
 
   async roundTimeForTasks(
-    projectId: string,
+    projectId: string | null,
     roundTo: RoundTimeOption,
     isRoundUp: boolean = false,
   ): Promise<void> {
@@ -102,10 +102,6 @@ export class TaskSummaryTablesComponent {
       projectId,
     });
     this._worklogService.refreshWorklog();
-  }
-
-  trackById(i: number, item: Project): string {
-    return item.id;
   }
 
   private _mapToProjectWithTasks(

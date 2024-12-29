@@ -54,9 +54,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   constructor() {
     // somehow they are only unproblematic if assigned here
-    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
-    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG;
-    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG;
+    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.slice();
+    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG.slice();
+    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG.slice();
 
     // NOTE: needs special handling cause of the async stuff
     if (IS_ANDROID_WEB_VIEW) {
