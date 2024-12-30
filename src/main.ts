@@ -52,6 +52,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -141,8 +142,9 @@ bootstrapApplication(AppComponent, {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
-    // TODO check if this can be removed
+    // TODO check if these can be removed
     DatePipe,
+    ShortTime2Pipe,
     provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
