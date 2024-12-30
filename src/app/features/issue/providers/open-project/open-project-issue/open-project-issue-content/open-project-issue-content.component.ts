@@ -4,6 +4,9 @@ import { OpenProjectWorkPackage } from '../open-project-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatButton } from '@angular/material/button';
+import { MarkdownComponent } from 'ngx-markdown';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'open-project-issue-content',
@@ -11,7 +14,7 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./open-project-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [MatButton, MarkdownComponent, TranslatePipe],
 })
 export class OpenProjectIssueContentComponent {
   private readonly _taskService = inject(TaskService);

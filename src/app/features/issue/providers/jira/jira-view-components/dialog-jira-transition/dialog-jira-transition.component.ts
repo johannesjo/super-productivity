@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+} from '@angular/material/dialog';
 import { IssueLocalState, IssueProviderJira } from '../../../../issue.model';
 import { JiraIssueReduced } from '../../jira-issue/jira-issue.model';
 import { Observable, of } from 'rxjs';
@@ -12,13 +18,35 @@ import { Task } from '../../../../../tasks/task.model';
 import { IssueService } from '../../../../issue.service';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { MatOption } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-jira-transition',
   templateUrl: './dialog-jira-transition.component.html',
   styleUrls: ['./dialog-jira-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogTitle,
+    MatIcon,
+    CdkScrollable,
+    MatDialogContent,
+    MatFormField,
+    MatSelect,
+    FormsModule,
+    MatOption,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogJiraTransitionComponent {
   private _jiraApiService = inject(JiraApiService);

@@ -10,7 +10,12 @@ import {
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormControl,
+  UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -24,6 +29,16 @@ import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSelect } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'jira-additonal-cfg',
@@ -31,7 +46,22 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
   styleUrls: ['./jira-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatSlideToggle,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    MatOption,
+    MatProgressSpinner,
+    MatSelect,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   private _jiraApiService = inject(JiraApiService);

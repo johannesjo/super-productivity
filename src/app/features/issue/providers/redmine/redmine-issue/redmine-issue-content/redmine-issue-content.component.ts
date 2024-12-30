@@ -4,6 +4,8 @@ import { TaskService } from 'src/app/features/tasks/task.service';
 import { T } from 'src/app/t.const';
 import { expandAnimation } from 'src/app/ui/animations/expand.ani';
 import { RedmineIssue } from '../redmine-issue.model';
+import { MatButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'redmine-issue-content',
@@ -11,7 +13,7 @@ import { RedmineIssue } from '../redmine-issue.model';
   styleUrls: ['./redmine-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [MatButton, TranslatePipe],
 })
 export class RedmineIssueContentComponent {
   private readonly _taskService = inject(TaskService);

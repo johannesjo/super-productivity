@@ -3,15 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   input,
   Input,
   output,
-  ViewEncapsulation,
   viewChild,
-  inject,
+  ViewEncapsulation,
 } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { IssueModule } from '../../../issue/issue.module';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatMenu,
@@ -67,12 +66,12 @@ import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { PlannerService } from '../../../planner/planner.service';
+import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'task-context-menu-inner',
   imports: [
     AsyncPipe,
-    IssueModule,
     MatIcon,
     MatMenu,
     MatMenuContent,
@@ -81,6 +80,7 @@ import { PlannerService } from '../../../planner/planner.service';
     MatMenuTrigger,
     MatIconButton,
     MatTooltip,
+    IssueIconPipe,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',

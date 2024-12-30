@@ -4,6 +4,11 @@ import { TaskService } from 'src/app/features/tasks/task.service';
 import { T } from 'src/app/t.const';
 import { expandAnimation } from 'src/app/ui/animations/expand.ani';
 import { GiteaIssue } from '../gitea-issue.model';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MarkdownComponent } from 'ngx-markdown';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'gitea-issue-content',
@@ -11,7 +16,15 @@ import { GiteaIssue } from '../gitea-issue.model';
   styleUrls: ['./gitea-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [
+    MatButton,
+    MatChipListbox,
+    MatChipOption,
+    MarkdownComponent,
+    MatAnchor,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class GiteaIssueContentComponent {
   private readonly _taskService = inject(TaskService);

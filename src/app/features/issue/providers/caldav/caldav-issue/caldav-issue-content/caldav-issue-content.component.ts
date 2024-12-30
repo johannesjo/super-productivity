@@ -4,6 +4,10 @@ import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 import { CaldavIssue } from '../caldav-issue.model';
+import { MatButton } from '@angular/material/button';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MarkdownComponent } from 'ngx-markdown';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'caldav-issue-content',
@@ -11,7 +15,7 @@ import { CaldavIssue } from '../caldav-issue.model';
   styleUrls: ['./caldav-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [MatButton, MatChipListbox, MatChipOption, MarkdownComponent, TranslatePipe],
 })
 export class CaldavIssueContentComponent {
   private readonly _taskService = inject(TaskService);

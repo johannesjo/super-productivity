@@ -9,7 +9,6 @@ import {
 import { IssuePanelIntroComponent } from './issue-panel-intro/issue-panel-intro.component';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
-import { IssueModule } from '../issue/issue.module';
 import { MatTooltip } from '@angular/material/tooltip';
 import { IssueProviderTabComponent } from './issue-provider-tab/issue-provider-tab.component';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -40,7 +39,6 @@ import { IssueProviderActions } from '../issue/store/issue-provider.actions';
     MatTab,
     MatTabLabel,
     MatIcon,
-    IssueModule,
     MatTooltip,
     IssueProviderTabComponent,
     MatTabContent,

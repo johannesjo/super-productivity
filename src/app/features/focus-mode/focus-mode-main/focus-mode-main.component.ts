@@ -37,8 +37,8 @@ import { TaskAttachmentModule } from '../../tasks/task-attachment/task-attachmen
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
-import { IssueModule } from '../../issue/issue.module';
 import { T } from '../../../t.const';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'focus-mode-main',
@@ -59,7 +59,7 @@ import { T } from '../../../t.const';
     AsyncPipe,
     MsToMinuteClockStringPipe,
     TranslatePipe,
-    IssueModule,
+    IssueIconPipe,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {

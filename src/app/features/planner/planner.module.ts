@@ -18,7 +18,6 @@ import { TagModule } from '../tag/tag.module';
 import { PlannerTaskComponent } from './planner-task/planner-task.component';
 import { PlannerRepeatProjectionComponent } from './planner-repeat-projection/planner-repeat-projection.component';
 import { PlannerCalendarEventComponent } from './planner-calendar-event/planner-calendar-event.component';
-import { IssueModule } from '../issue/issue.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogAddPlannedTasksComponent } from './dialog-add-planned-tasks/dialog-add-planned-tasks.component';
 import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.component';
@@ -51,7 +50,6 @@ import { TaskContextMenuComponent } from '../tasks/task-context-menu/task-contex
     WorkViewModule,
     TagModule,
     CdkDragPlaceholder,
-    IssueModule,
     AddTaskInlineComponent,
     BetterSimpleDrawerComponent,
     TaskContextMenuComponent,

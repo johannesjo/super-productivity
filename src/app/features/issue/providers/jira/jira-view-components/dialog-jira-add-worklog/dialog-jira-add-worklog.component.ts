@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { JiraApiService } from '../../jira-api.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+} from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { JiraIssue } from '../../jira-issue/jira-issue.model';
 import { Task } from '../../../../../tasks/task.model';
@@ -19,6 +25,29 @@ import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
 import { TaskService } from '../../../../../tasks/task.service';
 import { first, map, switchMap } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import {
+  MatLabel,
+  MatFormField,
+  MatSuffix,
+  MatError,
+} from '@angular/material/form-field';
+import { InputDurationDirective } from '../../../../../../ui/duration/input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import {
+  MatMenuTrigger,
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+} from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -26,7 +55,31 @@ import { first, map, switchMap } from 'rxjs/operators';
   styleUrls: ['./dialog-jira-add-worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
-  standalone: false,
+  imports: [
+    FormsModule,
+    MatDialogTitle,
+    MatIcon,
+    CdkScrollable,
+    MatDialogContent,
+    MatLabel,
+    MatFormField,
+    InputDurationDirective,
+    MatInput,
+    MatSuffix,
+    MatMenuTrigger,
+    MatTooltip,
+    MatIconButton,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatCheckbox,
+    MatError,
+    CdkTextareaAutosize,
+    MatDialogActions,
+    MatButton,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogJiraAddWorklogComponent implements OnDestroy {
   private _jiraApiService = inject(JiraApiService);

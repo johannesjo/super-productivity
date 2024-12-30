@@ -12,7 +12,7 @@
       title="Focus time"
     >
       <!--        {{focusModeTimeToGo / 60000}}min-->
-      {{(timeToGo$|async|msToMinuteClockString)}}
+      {{ (timeToGo$|async|msToMinuteClockString) }}
     </div>
     <!--      <div class="task-times">-->
     <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
@@ -45,7 +45,7 @@
   >
     <mat-icon>flash_on</mat-icon>
   </button>
-  @if (task.issueId && task.issueType !==ICAL_TYPE) {
+  @if (task.issueId && task.issueType !== ICAL_TYPE) {
   <a
     mat-icon-button
     [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER|translate"
@@ -53,7 +53,7 @@
     [href]="issueUrl$|async"
   >
     @if (task.issuePoints) {
-    <div class="mini-badge bgc-primary">{{task.issuePoints}}</div>
+    <div class="mini-badge bgc-primary">{{ task.issuePoints }}</div>
     }
     <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
   </a>
@@ -102,6 +102,6 @@
 } @if (isDragOver) {
 <div class="bgc-accent drag-over-msg">
   <mat-icon>add</mat-icon>
-  {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
+  {{ T.F.TASK.CMP.DROP_ATTACHMENT|translate:{ title: task.title } }}
 </div>
 } }

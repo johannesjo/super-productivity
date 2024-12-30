@@ -6,14 +6,13 @@ import {
   viewChild,
   inject,
 } from '@angular/core';
-import { IssueModule } from '../../issue/issue.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskContextMenuInnerComponent } from './task-context-menu-inner/task-context-menu-inner.component';
 
 @Component({
   selector: 'task-context-menu',
-  imports: [IssueModule, TranslateModule, TaskContextMenuInnerComponent],
+  imports: [TranslateModule, TaskContextMenuInnerComponent],
   templateUrl: './task-context-menu.component.html',
   styleUrl: './task-context-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

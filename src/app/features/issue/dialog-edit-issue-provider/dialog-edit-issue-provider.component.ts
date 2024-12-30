@@ -9,10 +9,9 @@ import {
   IssueProviderKey,
   IssueProviderTypeMap,
 } from '../issue.model';
-import { IssueModule } from '../issue.module';
 import {
-  ICAL_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ICAL_TYPE,
   ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_FORM_CFGS_MAP,
   ISSUE_PROVIDER_HUMANIZED,
@@ -35,7 +34,6 @@ import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model'
   selector: 'dialog-edit-issue-provider',
   imports: [
     UiModule,
-    IssueModule,
     JiraViewComponentsModule,
     OpenProjectAdditionalCfgComponent,
     FormsModule,

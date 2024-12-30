@@ -12,6 +12,15 @@ import { map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { devError } from '../../../../../../util/dev-error';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { JiraToMarkdownPipe } from '../../../../../../ui/pipes/jira-to-markdown.pipe';
+import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
+import { SortPipe } from '../../../../../../ui/pipes/sort.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface JiraSubtaskWithUrl extends JiraSubtask {
   href: string;
@@ -23,7 +32,21 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
   styleUrls: ['./jira-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [
+    MatButton,
+    MatChipListbox,
+    MatChipOption,
+    MarkdownComponent,
+    MatAnchor,
+    MatIcon,
+    AsyncPipe,
+    DatePipe,
+    JiraToMarkdownPipe,
+    MsToStringPipe,
+    SortPipe,
+    TranslatePipe,
+    MarkdownPipe,
+  ],
 })
 export class JiraIssueContentComponent {
   private readonly _taskService = inject(TaskService);

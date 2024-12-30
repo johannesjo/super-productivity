@@ -10,7 +10,6 @@ import { DialogTimeEstimateComponent } from './dialog-time-estimate/dialog-time-
 import { TaskDetailPanelComponent } from './task-detail-panel/task-detail-panel.component';
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { TaskAttachmentModule } from './task-attachment/task-attachment.module';
-import { IssueModule } from '../issue/issue.module';
 import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
 import { TaskSummaryTableComponent } from './task-summary-table/task-summary-table.component';
 import { DialogAddTimeEstimateForOtherDayComponent } from './dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
@@ -32,7 +31,6 @@ import { TagEditComponent } from '../tag/tag-edit/tag-edit.component';
 @NgModule({
   imports: [
     CommonModule,
-    IssueModule,
     MentionModule,
     UiModule,
     FormsModule,

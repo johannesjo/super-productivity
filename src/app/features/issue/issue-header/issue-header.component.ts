@@ -9,13 +9,28 @@ import {
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
 } from '../issue.const';
+import { JiraIssueHeaderComponent } from '../providers/jira/jira-issue/jira-issue-header/jira-issue-header.component';
+import { GithubIssueHeaderComponent } from '../providers/github/github-issue/github-issue-header/github-issue-header.component';
+import { RedmineIssueHeaderComponent } from '../providers/redmine/redmine-issue/redmine-issue-header/redmine-issue-header.component';
+import { GitlabIssueHeaderComponent } from '../providers/gitlab/gitlab-issue/gitlab-issue-header/gitlab-issue-header.component';
+import { CaldavIssueHeaderComponent } from '../providers/caldav/caldav-issue/caldav-issue-header/caldav-issue-header.component';
+import { OpenProjectIssueHeaderComponent } from '../providers/open-project/open-project-issue/open-project-issue-header/open-project-issue-header.component';
+import { GiteaIssueHeaderComponent } from '../providers/gitea/gitea-issue/gitea-issue-header/gitea-issue-header.component';
 
 @Component({
   selector: 'issue-header',
   templateUrl: './issue-header.component.html',
   styleUrls: ['./issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    JiraIssueHeaderComponent,
+    GithubIssueHeaderComponent,
+    RedmineIssueHeaderComponent,
+    GitlabIssueHeaderComponent,
+    CaldavIssueHeaderComponent,
+    OpenProjectIssueHeaderComponent,
+    GiteaIssueHeaderComponent,
+  ],
 })
 export class IssueHeaderComponent {
   // TODO: Skipped for migration because:

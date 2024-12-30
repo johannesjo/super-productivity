@@ -7,8 +7,10 @@ import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-j
 import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
 @NgModule({
-  imports: [CommonModule, UiModule, FormsModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    UiModule,
+    FormsModule,
     DialogJiraTransitionComponent,
     DialogJiraAddWorklogComponent,
     JiraAdditionalCfgComponent,

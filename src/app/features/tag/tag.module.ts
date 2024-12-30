@@ -5,10 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { TagListComponent } from './tag-list/tag-list.component';
 import { DialogEditTagsForTaskComponent } from './dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { TagComponent } from './tag/tag.component';
-import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
-  imports: [CommonModule, UiModule, FormsModule, IssueModule],
+  imports: [CommonModule, UiModule, FormsModule],
   declarations: [
     TagListComponent,
     DialogEditTagsForTaskComponent,

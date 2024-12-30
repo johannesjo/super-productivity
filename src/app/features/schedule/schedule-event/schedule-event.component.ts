@@ -27,7 +27,6 @@ import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { IssueModule } from '../../issue/issue.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { TaskCopy } from '../../tasks/task.model';
@@ -44,7 +43,7 @@ import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'schedule-event',
-  imports: [MatIcon, IssueModule, TranslateModule, TaskContextMenuComponent],
+  imports: [MatIcon, TranslateModule, TaskContextMenuComponent],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

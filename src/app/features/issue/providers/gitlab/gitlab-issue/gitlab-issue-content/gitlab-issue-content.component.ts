@@ -4,6 +4,13 @@ import { GitlabIssue } from '../gitlab-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { SortPipe } from '../../../../../../ui/pipes/sort.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'gitlab-issue-content',
@@ -11,7 +18,19 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./gitlab-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [
+    MatButton,
+    MatChipListbox,
+    MatChipOption,
+    MarkdownComponent,
+    MatAnchor,
+    MatIcon,
+    AsyncPipe,
+    DatePipe,
+    SortPipe,
+    TranslatePipe,
+    MarkdownPipe,
+  ],
 })
 export class GitlabIssueContentComponent {
   private readonly _taskService = inject(TaskService);
