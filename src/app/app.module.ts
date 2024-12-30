@@ -3,7 +3,13 @@ import {
   HAMMER_GESTURE_CONFIG,
   HammerModule,
 } from '@angular/platform-browser';
-import { ErrorHandler, inject, LOCALE_ID, NgModule } from '@angular/core';
+import {
+  ErrorHandler,
+  inject,
+  LOCALE_ID,
+  NgModule,
+  SecurityContext,
+} from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -44,6 +50,13 @@ import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { SearchBarComponent } from './features/search-bar/search-bar.component';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatNativeDateModule } from '@angular/material/core';
+import { DatePipe } from '@angular/common';
+import { FormlyConfigModule } from './ui/formly-config.module';
+import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
+import { markedOptionsFactory } from './ui/marked-options-factory';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -54,7 +67,19 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   bootstrap: [AppComponent],
   imports: [
     FeatureStoresModule,
-    // Other Local
+
+    MatMomentDateModule,
+    MatNativeDateModule,
+
+    FormlyConfigModule,
+    MarkdownModule.forRoot({
+      markedOptions: {
+        provide: MARKED_OPTIONS,
+        useFactory: markedOptionsFactory,
+      },
+      sanitize: SecurityContext.HTML,
+    }),
+    MaterialCssVarsModule.forRoot(),
 
     MatSidenavModule,
     ReminderModule,
@@ -128,6 +153,15 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
+    // TODO check if this can be removed
+    DatePipe,
+    provideMarkdown(),
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
+    },
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
   ],
 })
 export class AppModule {
