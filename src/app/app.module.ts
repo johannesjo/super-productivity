@@ -18,7 +18,6 @@ import { reducers } from './root-store';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { PagesModule } from './pages/pages.module';
-import { MainHeaderModule } from './core-ui/main-header/main-header.module';
 import {
   HttpClient,
   provideHttpClient,
@@ -28,7 +27,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { TasksModule } from './features/tasks/tasks.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
-import { CoreUiModule } from './core-ui/core-ui.module';
 import { GlobalErrorHandler } from './core/error-handler/global-error-handler.class';
 import { MyHammerConfig } from '../hammer-config.class';
 import { ProcrastinationModule } from './features/procrastination/procrastination.module';
@@ -52,6 +50,9 @@ import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
 import { FeatureStoresModule } from './root-store/feature-stores.module';
 import { BannerComponent } from './core/banner/banner/banner.component';
+import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
+import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
+import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -66,9 +67,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     ProjectModule,
     // Other Local
     UiModule,
-    CoreUiModule,
     PagesModule,
-    MainHeaderModule,
     MatSidenavModule,
     ProcrastinationModule,
     IssuePanelModule,
@@ -137,6 +136,9 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     CdkDropListGroup,
     BookmarkBarComponent,
     BannerComponent,
+    GlobalProgressBarComponent,
+    MainHeaderComponent,
+    SideNavComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },
