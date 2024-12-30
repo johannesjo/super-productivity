@@ -5,11 +5,11 @@ import {
   computed,
   ElementRef,
   HostListener,
+  inject,
   input,
   OnDestroy,
   Renderer2,
   viewChild,
-  inject,
 } from '@angular/core';
 import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, of } from 'rxjs';
@@ -48,11 +48,10 @@ import { throttle } from 'helpful-decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
-import { SnackService } from '../../../core/snack/snack.service';
 import { isToday } from '../../../util/is-today.util';
 import {
-  isShowRemoveFromToday,
   isShowAddToToday,
+  isShowRemoveFromToday,
   isTodayTag,
 } from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
@@ -62,6 +61,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE } from '../../issue/issue.const';
+import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 
 @Component({
   selector: 'task',
@@ -87,7 +87,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _configService = inject(GlobalConfigService);
   private readonly _attachmentService = inject(TaskAttachmentService);
   private readonly _elementRef = inject(ElementRef);
-  private readonly _snackService = inject(SnackService);
   private readonly _renderer = inject(Renderer2);
   private readonly _projectService = inject(ProjectService);
   readonly plannerService = inject(PlannerService);
@@ -125,7 +124,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   isFirstLineHover: boolean = false;
 
-  readonly taskTitleEditEl = viewChild<ElementRef>('taskTitleEditEl');
+  readonly taskTitleEditEl = viewChild<InlineMultilineInputComponent>('taskTitleEditEl');
   readonly blockLeftElRef = viewChild<ElementRef>('blockLeftEl');
   readonly blockRightElRef = viewChild<ElementRef>('blockRightEl');
   readonly innerWrapperElRef = viewChild<ElementRef>('innerWrapperEl');
@@ -221,6 +220,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isShowRemoveFromToday(): boolean {
     return isShowRemoveFromToday(this.task());
   }
+
   isShowAddToToday(): boolean {
     return isShowAddToToday(this.task(), this.workContextService.isToday);
   }
@@ -470,11 +470,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   focusTitleForEdit(): void {
     const taskTitleEditEl = this.taskTitleEditEl();
-    if (!taskTitleEditEl || !(taskTitleEditEl as any).textarea.nativeElement) {
+    if (!taskTitleEditEl || !taskTitleEditEl.textarea().nativeElement) {
       console.log(taskTitleEditEl);
       throw new Error('No el');
     }
-    (taskTitleEditEl as any).textarea.nativeElement.focus();
+    taskTitleEditEl.textarea().nativeElement.focus();
     //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
