@@ -24,9 +24,9 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { BookmarkLinkDirective } from '../bookmark-link/bookmark-link.directive';
-import { UiModule } from '../../../ui/ui.module';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { EnlargeImgDirective } from '../../../ui/enlarge-img/enlarge-img.directive';
 
 @Component({
   selector: 'bookmark-bar',
@@ -45,9 +45,10 @@ import { TranslatePipe } from '@ngx-translate/core';
     CdkDrag,
     MatAnchor,
     BookmarkLinkDirective,
-    UiModule,
+
     AsyncPipe,
     TranslatePipe,
+    EnlargeImgDirective,
   ],
 })
 export class BookmarkBarComponent {

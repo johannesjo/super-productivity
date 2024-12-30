@@ -9,7 +9,6 @@ import { Store } from '@ngrx/store';
 import { selectSelectedTask } from '../store/task.selectors';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
-import { UiModule } from '../../../ui/ui.module';
 import { setSelectedTask } from '../store/task.actions';
 import { TaskDetailTargetPanel } from '../task.model';
 import { skipWhile } from 'rxjs/operators';
@@ -17,13 +16,7 @@ import { TaskDetailPanelComponent } from '../task-detail-panel/task-detail-panel
 
 @Component({
   selector: 'dialog-task-detail-panel',
-  imports: [
-    CommonModule,
-    UiModule,
-    TranslateModule,
-    MatDialogContent,
-    TaskDetailPanelComponent,
-  ],
+  imports: [CommonModule, TranslateModule, MatDialogContent, TaskDetailPanelComponent],
   templateUrl: './dialog-task-detail-panel.component.html',
   styleUrl: './dialog-task-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

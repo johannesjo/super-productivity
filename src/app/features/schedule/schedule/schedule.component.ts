@@ -9,7 +9,6 @@ import {
   OnDestroy,
   viewChild,
 } from '@angular/core';
-import { UiModule } from '../../../ui/ui.module';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
@@ -57,6 +56,9 @@ import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -68,12 +70,14 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 @Component({
   selector: 'schedule',
   imports: [
-    UiModule,
     AsyncPipe,
     ScheduleEventComponent,
     CdkDrag,
     DatePipe,
     CreateTaskPlaceholderComponent,
+    MatIcon,
+    TranslatePipe,
+    MatTooltip,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',

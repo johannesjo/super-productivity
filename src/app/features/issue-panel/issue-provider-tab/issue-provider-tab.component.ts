@@ -12,8 +12,7 @@ import {
 } from '@angular/core';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { UiModule } from '../../../ui/ui.module';
+import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
@@ -46,11 +45,15 @@ import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-p
 import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
 import { IssuePanelCalendarAgendaComponent } from '../issue-panel-calendar-agenda/issue-panel-calendar-agenda.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { MatIconButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'issue-provider-tab',
   imports: [
-    UiModule,
     IssuePreviewItemComponent,
     MatIcon,
     MatFormField,
@@ -59,6 +62,12 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
     ErrorCardComponent,
     NgClass,
     IssuePanelCalendarAgendaComponent,
+    MatIconButton,
+    TranslatePipe,
+    MatHint,
+    MatInput,
+    MatTooltip,
+    MatProgressSpinner,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',

@@ -1,14 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnDestroy,
   OnInit,
-  input,
   output,
-  inject,
 } from '@angular/core';
-import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  UntypedFormControl,
+  UntypedFormGroup,
+} from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { HelperClasses } from 'src/app/app.constants';
@@ -30,18 +35,45 @@ import {
   OpenProjectTransitionConfig,
   OpenProjectTransitionOption,
 } from '../../open-project.model';
-import { UiModule } from '../../../../../../ui/ui.module';
 import { AsyncPipe } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSelect } from '@angular/material/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'open-project-additional-cfg',
   templateUrl: './open-project-additional-cfg.component.html',
   styleUrls: ['./open-project-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiModule, FormsModule, AsyncPipe, MatSlider],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatSlider,
+    MatSlideToggle,
+    ReactiveFormsModule,
+    TranslatePipe,
+    MatFormField,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    MatOption,
+    MatProgressSpinner,
+    MatSelect,
+    MatCheckbox,
+    MatInput,
+    MatLabel,
+  ],
   animations: [expandAnimation],
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {

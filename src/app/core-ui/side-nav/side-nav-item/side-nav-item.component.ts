@@ -7,7 +7,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
-import { UiModule } from '../../../ui/ui.module';
 
 import {
   WorkContextCommon,
@@ -17,16 +16,22 @@ import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuItem } from '@angular/material/menu';
 
 @Component({
   selector: 'side-nav-item',
   imports: [
     RouterLink,
-    UiModule,
+
     RouterModule,
     WorkContextMenuComponent,
     ContextMenuComponent,
     CdkDragPlaceholder,
+    MatIconButton,
+    MatIcon,
+    MatMenuItem,
   ],
   templateUrl: './side-nav-item.component.html',
   styleUrl: './side-nav-item.component.scss',

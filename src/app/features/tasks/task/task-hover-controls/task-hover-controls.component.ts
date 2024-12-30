@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { TaskWithSubTasks } from '../../task.model';
@@ -6,13 +6,12 @@ import { T } from 'src/app/t.const';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
 import { TaskComponent } from '../task.component';
 import { TranslateModule } from '@ngx-translate/core';
-import { UiModule } from '../../../../ui/ui.module';
 import { KeyboardConfig } from '../../../config/keyboard-config.model';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 
 @Component({
   selector: 'task-hover-controls',
-  imports: [MatIcon, TranslateModule, UiModule],
+  imports: [MatIcon, TranslateModule],
   templateUrl: './task-hover-controls.component.html',
   styleUrl: './task-hover-controls.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

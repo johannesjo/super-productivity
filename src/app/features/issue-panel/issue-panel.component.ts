@@ -20,8 +20,6 @@ import {
   getIssueProviderTooltip,
 } from '../issue/mapping-helper/get-issue-provider-tooltip';
 import { MatDialog } from '@angular/material/dialog';
-
-import { UiModule } from '../../ui/ui.module';
 import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { IssueProviderSetupOverviewComponent } from './issue-provider-setup-overview/issue-provider-setup-overview.component';
@@ -34,7 +32,6 @@ import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
 @Component({
   selector: 'issue-panel',
   imports: [
-    UiModule,
     IssuePanelIntroComponent,
     MatTabGroup,
     MatTab,

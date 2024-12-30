@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { OpenProjectApiService } from '../../open-project-api.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
@@ -22,10 +28,26 @@ import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
-import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+import { InputDurationDirective } from '../../../../../../ui/duration/input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -33,7 +55,31 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
-  imports: [UiModule, FormsModule, AsyncPipe],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatIcon,
+    MatDialogContent,
+    MatFormField,
+    MatMenuTrigger,
+    MatTooltip,
+    TranslatePipe,
+    InputDurationDirective,
+    MatInput,
+    MatIconButton,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MsToStringPipe,
+    MatCheckbox,
+    CdkTextareaAutosize,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatDialogTitle,
+    MatLabel,
+    MatError,
+  ],
 })
 export class DialogOpenProjectTrackTimeComponent {
   private _openProjectApiService = inject(OpenProjectApiService);

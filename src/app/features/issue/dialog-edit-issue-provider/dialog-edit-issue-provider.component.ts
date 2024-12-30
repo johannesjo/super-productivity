@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { UiModule } from '../../../ui/ui.module';
 import { T } from '../../../t.const';
 import {
   IssueIntegrationCfg,
@@ -16,7 +21,7 @@ import {
   ISSUE_PROVIDER_FORM_CFGS_MAP,
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
-import { FormGroup, FormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
@@ -30,17 +35,31 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model';
 import { IssueIconPipe } from '../issue-icon/issue-icon.pipe';
 import { JiraAdditionalCfgComponent } from '../providers/jira/jira-view-components/jira-cfg/jira-additional-cfg.component';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormlyModule } from '@ngx-formly/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
   imports: [
-    UiModule,
     OpenProjectAdditionalCfgComponent,
     FormsModule,
     MatInputModule,
     NgClass,
     IssueIconPipe,
     JiraAdditionalCfgComponent,
+    ReactiveFormsModule,
+    MatDialogContent,
+    HelpSectionComponent,
+    TranslatePipe,
+    MatSlideToggle,
+    FormlyModule,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

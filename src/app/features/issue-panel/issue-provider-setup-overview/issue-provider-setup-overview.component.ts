@@ -6,13 +6,12 @@ import { IssueProviderKey } from '../../issue/issue.model';
 import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
-import { UiModule } from '../../../ui/ui.module';
 import { CalendarContextInfoTarget } from '../../issue/providers/calendar/calendar.model';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
 
 @Component({
   selector: 'issue-provider-setup-overview',
-  imports: [UiModule, MatIcon, TranslateModule],
+  imports: [MatIcon, TranslateModule],
   templateUrl: './issue-provider-setup-overview.component.html',
   styleUrl: './issue-provider-setup-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

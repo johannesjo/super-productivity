@@ -3,11 +3,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  viewChild,
   inject,
+  viewChild,
 } from '@angular/core';
-import { UiModule } from '../../../ui/ui.module';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import {
   Task,
   TaskCopy,
@@ -37,13 +40,34 @@ import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { DateAdapter } from '@angular/material/core';
+import { DateAdapter, MatOption } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../tasks/util/is-task-today';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'dialog-schedule-task',
-  imports: [UiModule, FormsModule],
+  imports: [
+    FormsModule,
+    MatTooltip,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    TranslatePipe,
+    MatButton,
+    MatDialogActions,
+    MatCalendar,
+    MatInput,
+    MatLabel,
+  ],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

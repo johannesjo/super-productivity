@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { Observable, of } from 'rxjs';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { SnackService } from 'src/app/core/snack/snack.service';
@@ -15,18 +21,36 @@ import { OpenProjectApiService } from '../../open-project-api.service';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
-import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-import { MatSlider } from '@angular/material/slider';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatFormField } from '@angular/material/form-field';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'dialog-open-project-transition',
   templateUrl: './dialog-open-project-transition.component.html',
   styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiModule, FormsModule, AsyncPipe, MatSlider],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatSlider,
+    MatDialogTitle,
+    MatIcon,
+    TranslatePipe,
+    MatDialogContent,
+    MatSliderThumb,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatButton,
+  ],
 })
 export class DialogOpenProjectTransitionComponent {
   private _openProjectApiService = inject(OpenProjectApiService);

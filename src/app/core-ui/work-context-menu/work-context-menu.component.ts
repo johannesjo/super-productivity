@@ -8,16 +8,18 @@ import { TagService } from '../../features/tag/tag.service';
 import { first } from 'rxjs/operators';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Router, RouterLink, RouterModule } from '@angular/router';
-import { UiModule } from '../../ui/ui.module';
 
 import { ProjectService } from '../../features/project/project.service';
+import { MatMenuItem } from '@angular/material/menu';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'work-context-menu',
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, UiModule, RouterModule],
+  imports: [RouterLink, RouterModule, MatMenuItem, TranslatePipe, MatIcon],
 })
 export class WorkContextMenuComponent {
   private _matDialog = inject(MatDialog);

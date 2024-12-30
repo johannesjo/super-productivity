@@ -12,6 +12,7 @@ import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
   MatAutocompleteTrigger,
+  MatOption,
 } from '@angular/material/autocomplete';
 import {
   MatChipGrid,
@@ -20,8 +21,7 @@ import {
   MatChipRow,
 } from '@angular/material/chips';
 import { MatIcon } from '@angular/material/icon';
-import { UiModule } from '../../../ui/ui.module';
-import { UntypedFormControl } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../../t.const';
 import { TagService } from '../tag.service';
@@ -29,6 +29,8 @@ import { TaskService } from '../../tasks/task.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskCopy } from '../../tasks/task.model';
 import { TagComponent } from '../tag/tag.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface Suggestion {
   id: string;
@@ -49,8 +51,12 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     MatChipInput,
     MatChipRow,
     MatIcon,
-    UiModule,
+
     TagComponent,
+    MatTooltip,
+    ReactiveFormsModule,
+    MatOption,
+    TranslatePipe,
   ],
   templateUrl: './tag-edit.component.html',
   styleUrl: './tag-edit.component.scss',

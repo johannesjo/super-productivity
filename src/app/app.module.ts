@@ -13,7 +13,6 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
-import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
@@ -56,7 +55,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   imports: [
     FeatureStoresModule,
     // Other Local
-    UiModule,
+
     MatSidenavModule,
     ReminderModule,
     MaterialCssVarsModule.forRoot(),

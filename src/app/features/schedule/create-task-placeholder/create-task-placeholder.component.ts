@@ -6,13 +6,13 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  inject,
   input,
   OnDestroy,
   output,
   signal,
   Signal,
   viewChild,
-  inject,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
@@ -21,11 +21,11 @@ import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { UiModule } from '../../../ui/ui.module';
+import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, UiModule],
+  imports: [MatIcon, DatePipe, ShortTime2Pipe],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

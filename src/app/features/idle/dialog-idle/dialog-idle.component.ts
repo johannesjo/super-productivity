@@ -35,9 +35,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
-import { UiModule } from '../../../ui/ui.module';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'dialog-idle',
@@ -56,9 +56,10 @@ import { SelectTaskComponent } from '../../tasks/select-task/select-task.compone
     MatDialogActions,
     MatButton,
     AsyncPipe,
-    UiModule,
+
     TranslatePipe,
     SelectTaskComponent,
+    MsToStringPipe,
   ],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
