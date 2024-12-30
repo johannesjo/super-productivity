@@ -46,7 +46,6 @@ import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FormlyModule } from '@ngx-formly/core';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -115,12 +114,6 @@ bootstrapApplication(AppComponent, {
         ? StoreDevtoolsModule.instrument({ connectInZone: true })
         : [],
       ReactiveFormsModule,
-      FormlyModule.forRoot({
-        extras: {
-          immutable: true,
-        },
-        validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
-      }),
       ServiceWorkerModule.register('ngsw-worker.js', {
         enabled:
           !IS_ELECTRON &&

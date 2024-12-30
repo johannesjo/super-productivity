@@ -17,13 +17,16 @@ import { KeyboardInputComponent } from '../features/config/keyboard-input/keyboa
 import { IconInputComponent } from '../features/config/icon-input/icon-input.component';
 import { SelectProjectComponent } from '../features/config/select-project/select-project.component';
 import { RepeatSectionTypeComponent } from '../features/config/repeat-section-type/repeat-section-type.component';
+import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
+    FormlyMatSliderModule,
     ReactiveFormsModule,
     FormlyModule.forRoot({
+      validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
       types: [
         { name: 'link', component: FormlyLinkWidgetComponent },
         {
