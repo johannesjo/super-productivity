@@ -1,5 +1,5 @@
 import { Component, Input, output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GlobalConfigSectionKey, SoundConfig } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { exists } from 'src/app/util/exists';
@@ -8,6 +8,14 @@ import { SOUND_OPTS } from '../form-cfgs/sound-form.const';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { playSound } from '../../../util/play-sound';
 import { playDoneSound } from '../../tasks/util/play-done-sound';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const sectionKey = 'sound';
 
@@ -15,7 +23,20 @@ const sectionKey = 'sound';
   selector: 'config-sound-form',
   templateUrl: './config-sound-form.component.html',
   styleUrls: ['./config-sound-form.component.scss'],
-  standalone: false,
+  imports: [
+    CollapsibleComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSlider,
+    MatInput,
+    MatSliderThumb,
+    MatSelect,
+    MatOption,
+    MatSlideToggle,
+    TranslatePipe,
+  ],
 })
 export class ConfigSoundFormComponent {
   // TODO: Skipped for migration because:

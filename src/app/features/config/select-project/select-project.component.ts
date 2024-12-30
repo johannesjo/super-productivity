@@ -3,14 +3,25 @@ import { FieldType } from '@ngx-formly/material';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from 'src/app/t.const';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { MatInput } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'select-project',
   templateUrl: './select-project.component.html',
   styleUrls: ['./select-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatInput,
+    FormsModule,
+    ReactiveFormsModule,
+    FormlyModule,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class SelectProjectComponent extends FieldType<FormlyFieldConfig> {
   projectService = inject(ProjectService);

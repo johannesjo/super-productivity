@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
@@ -12,7 +12,7 @@ import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form
   templateUrl: './config-form.component.html',
   styleUrls: ['./config-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule],
 })
 export class ConfigFormComponent {
   T: typeof T = T;

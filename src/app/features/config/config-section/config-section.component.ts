@@ -4,13 +4,13 @@ import {
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
+  inject,
   Input,
   OnDestroy,
   OnInit,
-  ViewContainerRef,
-  viewChild,
   output,
-  inject,
+  viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import {
@@ -20,11 +20,14 @@ import {
 } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { Subscription } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TagCfgFormKey } from '../../tag/tag.model';
 import { customConfigFormSectionComponent } from '../custom-config-form-section-component';
 import { exists } from '../../../util/exists';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { ConfigFormComponent } from '../config-form/config-form.component';
 
 @Component({
   selector: 'config-section',
@@ -32,7 +35,12 @@ import { exists } from '../../../util/exists';
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    CollapsibleComponent,
+    HelpSectionComponent,
+    ConfigFormComponent,
+    TranslatePipe,
+  ],
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   private _cd = inject(ChangeDetectorRef);

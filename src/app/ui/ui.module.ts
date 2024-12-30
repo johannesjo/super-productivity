@@ -89,6 +89,10 @@ import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 import { LocalDateStrPipe } from './pipes/local-date-str.pipe';
 import { FormlyCollapsibleComponent } from './formly-collapsible/formly-collapsible.component';
 import { ShortTime2Pipe } from './pipes/short-time2.pipe';
+import { KeyboardInputComponent } from '../features/config/keyboard-input/keyboard-input.component';
+import { IconInputComponent } from '../features/config/icon-input/icon-input.component';
+import { SelectProjectComponent } from '../features/config/select-project/select-project.component';
+import { RepeatSectionTypeComponent } from '../features/config/repeat-section-type/repeat-section-type.component';
 
 const DIALOG_COMPONENTS = [
   DialogConfirmComponent,
@@ -197,6 +201,29 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
           component: FormlyTranslatedTemplateComponent,
         },
         { name: 'collapsible', component: FormlyCollapsibleComponent, wrappers: [] },
+        {
+          name: 'keyboard',
+          component: KeyboardInputComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'icon',
+          component: IconInputComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'project-select',
+          component: SelectProjectComponent,
+          // technically no input, but as the properties get us what we need...
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'repeat',
+          component: RepeatSectionTypeComponent,
+        },
       ],
       extras: {
         immutable: true,

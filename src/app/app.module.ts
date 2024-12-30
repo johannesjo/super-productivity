@@ -37,7 +37,6 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { LanguageService } from './core/language/language.service';
-import { ConfigModule } from './features/config/config.module';
 import { ProjectModule } from './features/project/project.module';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
@@ -63,7 +62,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   bootstrap: [AppComponent],
   imports: [
     // Those features need to be included first for store not to mess up, probably because we use it initially at many places
-    ConfigModule,
     FeatureStoresModule,
     ProjectModule,
     // Other Local

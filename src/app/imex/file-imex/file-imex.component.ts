@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  viewChild,
   inject,
+  viewChild,
 } from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -13,13 +13,17 @@ import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Router } from '@angular/router';
 import { privacyExport } from './privacy-export';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'file-imex',
   templateUrl: './file-imex.component.html',
   styleUrls: ['./file-imex.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class FileImexComponent {
   private _dataImportService = inject(DataImportService);
