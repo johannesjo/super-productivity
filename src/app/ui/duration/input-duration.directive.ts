@@ -4,11 +4,10 @@ import {
   ElementRef,
   forwardRef,
   HostListener,
+  inject,
+  input,
   Input,
   Renderer2,
-  input,
-  HostAttributeToken,
-  inject,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -55,7 +54,6 @@ const ZERO_VAL = '0m';
 export class InputDurationDirective
   implements ControlValueAccessor, Validator, AfterViewChecked
 {
-  inputDuration = inject(new HostAttributeToken('inputDuration'));
   private _elementRef = inject(ElementRef);
   private _stringToMs = inject(StringToMsPipe);
   private _msToString = inject(MsToStringPipe);
