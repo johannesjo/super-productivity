@@ -28,10 +28,7 @@ export const msToString = (
   return parsed.trim();
 };
 
-@Pipe({
-  name: 'msToString',
-  standalone: false,
-})
+@Pipe({ name: 'msToString' })
 export class MsToStringPipe implements PipeTransform {
   transform: (
     value: any,

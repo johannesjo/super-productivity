@@ -1,10 +1,10 @@
 import {
   Directive,
   forwardRef,
+  input,
   OnChanges,
   OnInit,
   SimpleChanges,
-  input,
 } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, Validator, ValidatorFn } from '@angular/forms';
 
@@ -19,7 +19,6 @@ const MIN_VALIDATOR: any = {
 @Directive({
   selector: '[min][formControlName],[min][formControl],[min][ngModel]',
   providers: [MIN_VALIDATOR],
-  standalone: false,
 })
 export class MinDirective implements Validator, OnInit, OnChanges {
   readonly min = input<number>();

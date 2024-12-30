@@ -5,17 +5,19 @@ import {
   ElementRef,
   HostBinding,
   Input,
-  viewChild,
   input,
   output,
+  viewChild,
 } from '@angular/core';
+import { InputDurationDirective } from '../duration/input-duration.directive';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'inline-input',
   templateUrl: './inline-input.component.html',
   styleUrls: ['./inline-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [InputDurationDirective, FormsModule],
 })
 export class InlineInputComponent implements AfterViewInit {
   // TODO: Skipped for migration because:

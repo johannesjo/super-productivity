@@ -1,10 +1,7 @@
-import { Directive, ElementRef, HostListener, input, inject } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject, input } from '@angular/core';
 import { download } from '../../util/download';
 
-@Directive({
-  selector: '[simpleDownload]',
-  standalone: false,
-})
+@Directive({ selector: '[simpleDownload]' })
 export class SimpleDownloadDirective {
   private _el = inject(ElementRef);
 

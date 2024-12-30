@@ -4,13 +4,13 @@ import {
   Component,
   ElementRef,
   HostBinding,
+  inject,
   Input,
+  input,
   OnDestroy,
   OnInit,
-  ViewChild,
-  input,
   output,
-  inject,
+  ViewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../../animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -30,7 +30,6 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
   styleUrls: ['./better-drawer-container.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  standalone: false,
 })
 export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy

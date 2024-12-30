@@ -1,10 +1,10 @@
 import {
   Directive,
   forwardRef,
+  input,
   OnChanges,
   OnInit,
   SimpleChanges,
-  input,
 } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, Validator, ValidatorFn } from '@angular/forms';
 
@@ -19,7 +19,6 @@ const MAX_VALIDATOR: any = {
 @Directive({
   selector: '[max][formControlName],[max][formControl],[max][ngModel]',
   providers: [MAX_VALIDATOR],
-  standalone: false,
 })
 export class MaxDirective implements Validator, OnInit, OnChanges {
   readonly max = input<number>();

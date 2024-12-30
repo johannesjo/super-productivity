@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BetterDrawerContainerComponent } from './better-drawer-container/better-drawer-container.component';
 
 @NgModule({
-  declarations: [BetterDrawerContainerComponent],
   exports: [BetterDrawerContainerComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, BetterDrawerContainerComponent],
 })
 export class BetterDrawerModule {}

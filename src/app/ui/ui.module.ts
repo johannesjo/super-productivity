@@ -205,12 +205,12 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
     FormlyMatToggleModule,
     FormlyMaterialModule,
     FormlyMatDatepickerModule,
-
     // my modules
     ValidationModule,
     BetterDrawerModule,
+    ...COMPONENT_AND_PIPES,
+    FormlyLinkWidgetComponent,
   ],
-  declarations: [...COMPONENT_AND_PIPES, FormlyLinkWidgetComponent],
   exports: [
     ...COMPONENT_AND_PIPES,
     ...MAT_MODULES,

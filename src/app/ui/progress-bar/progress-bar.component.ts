@@ -3,8 +3,8 @@ import {
   Component,
   ElementRef,
   HostBinding,
-  Input,
   inject,
+  Input,
 } from '@angular/core';
 
 @Component({
@@ -12,7 +12,6 @@ import {
   template: '',
   styleUrls: ['./progress-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
 })
 export class ProgressBarComponent {
   private _elRef = inject(ElementRef);

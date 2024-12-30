@@ -24,6 +24,8 @@ import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/bu
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MsToStringPipe } from '../../../../ui/duration/ms-to-string.pipe';
+import { InputDurationSliderComponent } from '../../../../ui/duration/input-duration-slider/input-duration-slider.component';
 
 @Component({
   selector: 'dialog-idle-split',
@@ -44,6 +46,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatDialogActions,
     AsyncPipe,
     TranslatePipe,
+    MsToStringPipe,
+    InputDurationSliderComponent,
   ],
 })
 export class DialogIdleSplitComponent implements OnInit {

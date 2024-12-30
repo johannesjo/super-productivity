@@ -7,6 +7,7 @@ import {
   output,
 } from '@angular/core';
 import { expandAnimation } from '../animations/expand.ani';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'collapsible',
@@ -14,7 +15,7 @@ import { expandAnimation } from '../animations/expand.ani';
   styleUrls: ['./collapsible.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  standalone: false,
+  imports: [MatIcon],
 })
 export class CollapsibleComponent {
   readonly title = input<string>();

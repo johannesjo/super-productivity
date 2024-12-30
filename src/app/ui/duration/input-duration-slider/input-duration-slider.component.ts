@@ -3,17 +3,20 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  inject,
   Input,
   OnDestroy,
   OnInit,
-  viewChild,
   output,
-  inject,
+  viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
+import { InputDurationDirective } from '../input-duration.directive';
+import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'input-duration-slider',
@@ -21,7 +24,7 @@ import { T } from '../../../t.const';
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [dotAnimation],
-  standalone: false,
+  imports: [InputDurationDirective, FormsModule, TranslatePipe],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   private _el = inject(ElementRef);

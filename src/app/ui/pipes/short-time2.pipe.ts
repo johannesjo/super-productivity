@@ -1,9 +1,6 @@
-import { LOCALE_ID, Pipe, PipeTransform, inject } from '@angular/core';
+import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-  name: 'shortTime2',
-  standalone: false,
-})
+@Pipe({ name: 'shortTime2' })
 export class ShortTime2Pipe implements PipeTransform {
   private locale = inject(LOCALE_ID);
 

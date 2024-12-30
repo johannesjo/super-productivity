@@ -4,13 +4,13 @@ import {
   Component,
   ElementRef,
   HostBinding,
+  inject,
   Input,
   input,
   OnDestroy,
   OnInit,
   output,
   viewChild,
-  inject,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -21,6 +21,11 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { isMarkdownChecklist } from '../../features/markdown-checklist/is-markdown-checklist';
+import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -30,7 +35,14 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  standalone: false,
+  imports: [
+    FormsModule,
+    MarkdownComponent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    AsyncPipe,
+  ],
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   private _cd = inject(ChangeDetectorRef);

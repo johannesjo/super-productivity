@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   OnInit,
   viewChild,
-  inject,
 } from '@angular/core';
 import { FieldType } from '@ngx-formly/core';
 import { Subscription } from 'rxjs';
@@ -16,7 +16,6 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './formly-translated-template.component.html',
   styleUrls: ['./formly-translated-template.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
 })
 export class FormlyTranslatedTemplateComponent
   extends FieldType

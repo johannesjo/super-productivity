@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
   Renderer2,
   viewChild,
-  inject,
 } from '@angular/core';
 
 @Component({
@@ -13,7 +13,6 @@ import {
   templateUrl: './progress-circle.component.html',
   styleUrls: ['./progress-circle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
 })
 export class ProgressCircleComponent {
   private readonly _renderer = inject(Renderer2);

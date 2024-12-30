@@ -2,18 +2,15 @@ import {
   Directive,
   ElementRef,
   HostListener,
-  Renderer2,
-  input,
   inject,
+  input,
+  Renderer2,
 } from '@angular/core';
 import { getCoords } from './get-coords';
 
 const LARGE_IMG_ID = 'enlarged-img';
 
-@Directive({
-  selector: '[enlargeImg]',
-  standalone: false,
-})
+@Directive({ selector: '[enlargeImg]' })
 export class EnlargeImgDirective {
   private _renderer = inject(Renderer2);
   private _el = inject(ElementRef);

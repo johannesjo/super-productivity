@@ -1,10 +1,7 @@
 import { Directive, HostListener, OnDestroy, output } from '@angular/core';
 import { UI_LONG_PRESS_DURATION } from '../ui.const';
 
-@Directive({
-  selector: '[longPress]',
-  standalone: false,
-})
+@Directive({ selector: '[longPress]' })
 export class LongPressDirective implements OnDestroy {
   readonly longPress = output<MouseEvent | TouchEvent>();
 

@@ -27,10 +27,7 @@ export const msToClockString = (
   return parsed.trim();
 };
 
-@Pipe({
-  name: 'msToClockString',
-  standalone: false,
-})
+@Pipe({ name: 'msToClockString' })
 export class MsToClockStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = msToClockString;
 }
