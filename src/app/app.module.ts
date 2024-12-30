@@ -57,6 +57,7 @@ import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { IssuePanelModule } from './features/issue-panel/issue-panel.module';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
+import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -148,6 +149,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
       },
     }),
     CdkDropListGroup,
+    BookmarkBarComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },

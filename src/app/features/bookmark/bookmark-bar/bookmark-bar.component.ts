@@ -3,8 +3,8 @@ import {
   Component,
   ElementRef,
   HostListener,
-  ViewChild,
   inject,
+  ViewChild,
 } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,7 +14,19 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { T } from '../../../t.const';
 import { moveItemInArray } from '../../../util/move-item-in-array';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { MatIcon } from '@angular/material/icon';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { BookmarkLinkDirective } from '../bookmark-link/bookmark-link.directive';
+import { UiModule } from '../../../ui/ui.module';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'bookmark-bar',
@@ -22,7 +34,21 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
   styleUrls: ['./bookmark-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, slideAnimation],
-  standalone: false,
+  imports: [
+    MatIcon,
+    MatButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    CdkDropList,
+    CdkDrag,
+    MatAnchor,
+    BookmarkLinkDirective,
+    UiModule,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class BookmarkBarComponent {
   readonly bookmarkService = inject(BookmarkService);

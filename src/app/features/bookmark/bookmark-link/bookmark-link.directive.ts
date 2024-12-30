@@ -4,10 +4,7 @@ import { BookmarkType } from '../bookmark.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 
-@Directive({
-  selector: '[bookmarkLink]',
-  standalone: false,
-})
+@Directive({ selector: '[bookmarkLink]' })
 export class BookmarkLinkDirective {
   private _snackService = inject(SnackService);
 
