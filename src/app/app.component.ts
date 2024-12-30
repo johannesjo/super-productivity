@@ -3,10 +3,10 @@ import {
   Component,
   HostBinding,
   HostListener,
-  OnDestroy,
-  ViewContainerRef,
-  viewChild,
   inject,
+  OnDestroy,
+  viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -14,7 +14,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON } from './app.constants';
+import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
@@ -24,7 +24,6 @@ import { BannerService } from './core/banner/banner.service';
 import { LS } from './core/persistence/storage-keys.const';
 import { BannerId } from './core/banner/banner.model';
 import { T } from './t.const';
-import { TranslateService } from '@ngx-translate/core';
 import { GlobalThemeService } from './core/theme/global-theme.service';
 import { UiHelperService } from './features/ui-helper/ui-helper.service';
 import { LanguageService } from './core/language/language.service';
@@ -42,6 +41,22 @@ import { IS_MOBILE } from './util/is-mobile';
 import { FocusModeService } from './features/focus-mode/focus-mode.service';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
+import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import { SearchBarComponent } from './features/search-bar/search-bar.component';
+import {
+  MatSidenav,
+  MatSidenavContainer,
+  MatSidenavContent,
+} from '@angular/material/sidenav';
+import { Dir } from '@angular/cdk/bidi';
+import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
+import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
+import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
+import { BannerComponent } from './core/banner/banner/banner.component';
+import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
+import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
+import { ShepherdComponent } from './features/shepherd/shepherd.component';
+import { AsyncPipe } from '@angular/common';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -58,7 +73,23 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     warpInAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    AddTaskBarComponent,
+    SearchBarComponent,
+    MatSidenavContainer,
+    Dir,
+    MatSidenav,
+    SideNavComponent,
+    MatSidenavContent,
+    MainHeaderComponent,
+    BookmarkBarComponent,
+    BannerComponent,
+    RouterOutlet,
+    GlobalProgressBarComponent,
+    FocusModeOverlayComponent,
+    ShepherdComponent,
+    AsyncPipe,
+  ],
 })
 export class AppComponent implements OnDestroy {
   private _globalConfigService = inject(GlobalConfigService);
@@ -66,7 +97,6 @@ export class AppComponent implements OnDestroy {
   private _bannerService = inject(BannerService);
   private _snackService = inject(SnackService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
-  private _translateService = inject(TranslateService);
   private _globalThemeService = inject(GlobalThemeService);
   private _uiHelperService = inject(UiHelperService);
   private _languageService = inject(LanguageService);
@@ -105,6 +135,9 @@ export class AppComponent implements OnDestroy {
   private _intervalTimer?: NodeJS.Timeout;
 
   constructor() {
+    this._languageService.setDefault(LanguageCode.en);
+    this._languageService.setFromBrowserLngIfAutoSwitchLng();
+
     this._snackService.open({
       ico: 'lightbulb',
       config: {
