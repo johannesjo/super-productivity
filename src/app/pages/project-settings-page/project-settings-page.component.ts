@@ -29,13 +29,16 @@ import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-conte
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isObject } from '../../util/is-object';
+import { MatIcon } from '@angular/material/icon';
+import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'project-settings',
   templateUrl: './project-settings-page.component.html',
   styleUrls: ['./project-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatIcon, ConfigSectionComponent, TranslatePipe],
 })
 export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
   readonly workContextService = inject(WorkContextService);

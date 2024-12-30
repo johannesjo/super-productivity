@@ -17,7 +17,6 @@ import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
-import { PagesModule } from './pages/pages.module';
 import {
   HttpClient,
   provideHttpClient,
@@ -66,7 +65,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     ProjectModule,
     // Other Local
     UiModule,
-    PagesModule,
     MatSidenavModule,
     ProcrastinationModule,
     IssuePanelModule,

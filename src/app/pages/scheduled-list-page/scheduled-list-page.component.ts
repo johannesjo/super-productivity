@@ -10,11 +10,20 @@ import { Store } from '@ngrx/store';
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getTaskRepeatInfoText } from '../../features/tasks/task-detail-panel/get-task-repeat-info-text.util';
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
 import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TagModule } from '../../features/tag/tag.module';
+import { MatRipple } from '@angular/material/core';
+import { MatIcon } from '@angular/material/icon';
+import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
+import { PlannerModule } from '../../features/planner/planner.module';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
 
 @Component({
   selector: 'scheduled-list-page',
@@ -22,7 +31,20 @@ import { selectAllTasksWithPlannedDay } from '../../features/planner/store/plann
   styleUrls: ['./scheduled-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardContent,
+    InlineMultilineInputComponent,
+    TagModule,
+    MatRipple,
+    MatIcon,
+    FullPageSpinnerComponent,
+    PlannerModule,
+    AsyncPipe,
+    DatePipe,
+    HumanizeTimestampPipe,
+    TranslatePipe,
+  ],
 })
 export class ScheduledListPageComponent {
   scheduledTaskService = inject(ScheduledTaskService);

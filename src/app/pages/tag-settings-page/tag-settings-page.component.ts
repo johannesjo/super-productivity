@@ -25,13 +25,16 @@ import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-conte
 import { BASIC_TAG_CONFIG_FORM_CONFIG } from '../../features/tag/tag-form-cfg.const';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isObject } from '../../util/is-object';
+import { MatIcon } from '@angular/material/icon';
+import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'project-settings',
   templateUrl: './tag-settings-page.component.html',
   styleUrls: ['./tag-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatIcon, ConfigSectionComponent, TranslatePipe],
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
   readonly tagService = inject(TagService);
