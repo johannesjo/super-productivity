@@ -40,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
+import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 
 @Component({
   selector: 'main-header',
@@ -62,6 +63,7 @@ import { TagComponent } from '../../features/tag/tag/tag.component';
     MsToMinuteClockStringPipe,
     TranslatePipe,
     TagComponent,
+    SimpleCounterButtonComponent,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {

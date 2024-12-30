@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToStringPipe } from '../../../../ui/duration/ms-to-string.pipe';
 import { InputDurationSliderComponent } from '../../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import { SelectTaskComponent } from '../../../tasks/select-task/select-task.component';
 
 @Component({
   selector: 'dialog-idle-split',
@@ -47,6 +48,7 @@ import { InputDurationSliderComponent } from '../../../../ui/duration/input-dura
     TranslatePipe,
     MsToStringPipe,
     InputDurationSliderComponent,
+    SelectTaskComponent,
   ],
 })
 export class DialogIdleSplitComponent implements OnInit {

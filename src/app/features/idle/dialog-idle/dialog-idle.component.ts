@@ -37,6 +37,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
 import { UiModule } from '../../../ui/ui.module';
 import { TranslatePipe } from '@ngx-translate/core';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 
 @Component({
   selector: 'dialog-idle',
@@ -57,6 +58,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     AsyncPipe,
     UiModule,
     TranslatePipe,
+    SelectTaskComponent,
   ],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {

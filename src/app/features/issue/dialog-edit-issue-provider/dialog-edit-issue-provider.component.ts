@@ -21,7 +21,6 @@ import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgClass } from '@angular/common';
-import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
 import { HelperClasses } from '../../../app.constants';
@@ -30,17 +29,18 @@ import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model';
 import { IssueIconPipe } from '../issue-icon/issue-icon.pipe';
+import { JiraAdditionalCfgComponent } from '../providers/jira/jira-view-components/jira-cfg/jira-additional-cfg.component';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
   imports: [
     UiModule,
-    JiraViewComponentsModule,
     OpenProjectAdditionalCfgComponent,
     FormsModule,
     MatInputModule,
     NgClass,
     IssueIconPipe,
+    JiraAdditionalCfgComponent,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

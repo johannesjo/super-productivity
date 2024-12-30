@@ -71,7 +71,6 @@ import { FormlyTranslatedTemplateComponent } from './formly-translated-template/
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { DialogFullscreenMarkdownComponent } from './dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { JiraToMarkdownPipe } from './pipes/jira-to-markdown.pipe';
-import { BetterDrawerModule } from './better-drawer/better-drawer.module';
 import { SortPipe } from './pipes/sort.pipe';
 import { LongPressDirective } from './longpress/longpress.directive';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
@@ -234,7 +233,6 @@ const OTHER_3RD_PARTY_MODS_WITHOUT_CFG = [TranslateModule];
     FormlyMatDatepickerModule,
     // my modules
     ValidationModule,
-    BetterDrawerModule,
     ...COMPONENT_AND_PIPES,
     FormlyLinkWidgetComponent,
   ],

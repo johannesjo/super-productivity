@@ -16,13 +16,14 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 
 @Component({
   selector: 'focus-mode-task-selection',
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButton, AsyncPipe, TranslatePipe],
+  imports: [FormsModule, MatButton, AsyncPipe, TranslatePipe, SelectTaskComponent],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
