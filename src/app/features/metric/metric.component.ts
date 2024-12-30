@@ -37,11 +37,7 @@ export class MetricComponent {
   simpleCounterStopWatchData$: Observable<LineChartData> =
     this.metricService.getSimpleCounterStopwatchMetrics$();
 
-  pieChartOptions: ChartConfiguration<
-    'pie' & 'pie' & 'pie',
-    Array<number>,
-    any
-  >['options'] = {
+  pieChartOptions: ChartConfiguration<'pie', Array<number>, any>['options'] = {
     scales: {
       x: {
         ticks: {
@@ -70,7 +66,7 @@ export class MetricComponent {
   pieChartType: ChartType = 'pie';
 
   lineChartOptions: ChartConfiguration<
-    'line' & 'line' & 'line',
+    'line',
     (number | undefined)[],
     string
   >['options'] = {

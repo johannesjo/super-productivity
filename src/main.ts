@@ -53,6 +53,7 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -145,6 +146,7 @@ bootstrapApplication(AppComponent, {
     // TODO check if these can be removed
     DatePipe,
     ShortTime2Pipe,
+    provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
