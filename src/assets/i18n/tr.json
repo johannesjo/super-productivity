@@ -1400,9 +1400,9 @@
     "SHORT_SYNTAX": {
       "TITLE": "Kısa Sözdizimi",
       "HELP": "<p>Görev oluştururken kısa sözdizimi seçeneklerini buradan kontrol edebilirsiniz</p>",
-      "IS_ENABLE_PROJECT": "Proje kısa sözdizimini etkinleştir (+<Project name>)",
-      "IS_ENABLE_TAG": "Etiket kısa sözdizimini etkinleştir (#<Tag>)",
-      "IS_ENABLE_DUE": "Zamanı gelmiş kısa sözdizimini etkinleştir (@<Due time>)"
+      "IS_ENABLE_PROJECT": "Proje kısa sözdizimini etkinleştir (+<Proje adı>)",
+      "IS_ENABLE_TAG": "Etiket kısa sözdizimini etkinleştir (#<Etiket>)",
+      "IS_ENABLE_DUE": "Zamanı gelmiş kısa sözdizimini etkinleştir (@<Yapılacak zaman>)"
     },
     "POMODORO": {
       "BREAK_DURATION": "Kısa molaların süresi",
