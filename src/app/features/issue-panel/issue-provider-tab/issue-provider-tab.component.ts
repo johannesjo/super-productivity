@@ -13,7 +13,6 @@ import {
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
-import { CdkDropList } from '@angular/cdk/drag-drop';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
 import { NgClass } from '@angular/common';
@@ -182,8 +181,8 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     );
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
-  readonly dropList = viewChild(CdkDropList);
-  readonly searchTextEl = viewChild.required<ElementRef>('searchTextEl');
+  // readonly dropList = viewChild(CdkDropList);
+  readonly searchTextEl = viewChild<ElementRef>('searchTextEl');
 
   private _focusTimeout?: number;
 
@@ -191,7 +190,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     // this.dropListService.registerDropList(this.dropList!);
     if (this.searchText().length <= 1 && IS_MOUSE_PRIMARY) {
       this._focusTimeout = window.setTimeout(() => {
-        this.searchTextEl()?.nativeElement.focus();
+        this.searchTextEl()?.nativeElement?.focus();
       }, 500);
     }
     this.searchText.set(this.issueProvider().pinnedSearch || '');
