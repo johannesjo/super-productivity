@@ -38,7 +38,6 @@ import { ProjectModule } from './features/project/project.module';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
-import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { AndroidModule } from './features/android/android.module';
@@ -75,7 +74,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     ReminderModule,
     NoteModule,
     TasksModule,
-    SyncModule,
     MaterialCssVarsModule.forRoot(),
     SearchBarModule,
     FocusModeModule,

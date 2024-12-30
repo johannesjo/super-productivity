@@ -1,15 +1,30 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { androidInterface } from '../../../features/android/android-interface';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-sync-permission',
   templateUrl: './dialog-sync-permission.component.html',
   styleUrls: ['./dialog-sync-permission.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class DialogSyncPermissionComponent {
   private _matDialogRef =
