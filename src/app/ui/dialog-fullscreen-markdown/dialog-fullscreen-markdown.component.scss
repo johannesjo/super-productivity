@@ -92,10 +92,4 @@
   flex-shrink: 0;
   margin: 8px;
   margin-right: auto;
-
-  ::ng-deep {
-    mat-pseudo-checkbox {
-      display: none !important;
-    }
-  }
 }
