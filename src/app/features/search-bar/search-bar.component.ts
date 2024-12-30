@@ -212,9 +212,8 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   navigateToItem(item: SearchItem): void {
     if (!item) return;
     this.isLoading$.next(true);
-    this._navigateToTaskService.navigate(item.id, item.isArchiveTask).then(() => {
-      this.blurred.emit(undefined);
-    });
+    this.blurred.emit(undefined);
+    this._navigateToTaskService.navigate(item.id, item.isArchiveTask).then(() => {});
   }
 
   getOptionText(item: SearchItem): string {
