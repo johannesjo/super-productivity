@@ -716,7 +716,7 @@
         "SETUP_REDMINE_PROJECT": "Redmine Entegrasyonunu Kur"
       },
       "D_DELETE": {
-        "MSG": "\"{{title}\" projesini silmek istediğinizden emin misiniz?"
+        "MSG": "\"{{title}}\" projesini silmek istediğinizden emin misiniz?"
       },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Proje İş Biriktirme Listesini Etkinleştir",
@@ -1462,7 +1462,14 @@
     "DELETE_TAG": "Etiketi Sil",
     "GO_TO_TASK_LIST": "Görev listesine git",
     "HM": {
-      "CONTRIBUTE": "Katkıda bulun"
+      "CALENDARS": "Nasıl Yapılır: Takvim eşleştirme",
+      "CONTRIBUTE": "Katkıda bulun",
+      "GET_HELP_ONLINE": "Online yardım al",
+      "KEYBOARD": "Nasıl Yapılır: Gelişmiş Klavye",
+      "REPORT_A_PROBLEM": "Sorun bildir",
+      "START_WELCOME": "Hoşgeldin turunu başlat",
+      "SYNC": "Nasıl Yapılır: Eşitleme ayarlamak",
+      "REDDIT_COMMUNITY": "Reddit Topluluğu"
     },
     "HELP": "Yardım",
     "METRICS": "İstatistikler",
@@ -1474,11 +1481,14 @@
     "PROJECT_MENU": "Proje Menüsü",
     "PROJECT_SETTINGS": "Proje Ayarları",
     "QUICK_HISTORY": "Hızlı Geçmiş",
+    "REPEAT_SCHEDULED": "Tekrar/Planlanmış",
+    "SCHEDULE": "Takvim",
     "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
     "TASKS": "Görevler",
     "TASK_LIST": "Görev listesi",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Göster/Gizle Sorun Paneli",
     "TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
@@ -1590,7 +1600,8 @@
     "RESET_BREAK_TIMER": "Mola zamanlayıcısı olmadan sıfırla",
     "TIME_ESTIMATED": "Tahmini Süre:",
     "WITHOUT_BREAK": "Mola vermeden:",
-    "WORKING_TODAY": "Bugün çalışıyorum:"
+    "WORKING_TODAY": "Bugün çalışıyorum:",
+    "TODAY_REMAINING": "Bugün kalan:"
   },
   "PP": {
     "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
