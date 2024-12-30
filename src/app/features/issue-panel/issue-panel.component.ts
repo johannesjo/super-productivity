@@ -29,6 +29,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemInArray } from '../../util/move-item-in-array';
 import { IssueProviderActions } from '../issue/store/issue-provider.actions';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'issue-panel',
@@ -45,6 +46,7 @@ import { IssueProviderActions } from '../issue/store/issue-provider.actions';
     IssueProviderSetupOverviewComponent,
     CdkDropList,
     CdkDrag,
+    IssueIconPipe,
   ],
   templateUrl: './issue-panel.component.html',
   styleUrl: './issue-panel.component.scss',

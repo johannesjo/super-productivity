@@ -24,6 +24,7 @@ import { AddTaskInlineComponent } from './add-task-inline/add-task-inline.compon
 import { PlannerDayComponent } from './planner-day/planner-day.component';
 import { BetterSimpleDrawerComponent } from '../../ui/better-simple-drawer/better-simple-drawer.component';
 import { TaskContextMenuComponent } from '../tasks/task-context-menu/task-context-menu.component';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { TaskContextMenuComponent } from '../tasks/task-context-menu/task-contex
     AddTaskInlineComponent,
     BetterSimpleDrawerComponent,
     TaskContextMenuComponent,
+    IssueIconPipe,
   ],
   exports: [
     PlannerTaskComponent,

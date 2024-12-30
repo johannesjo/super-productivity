@@ -3,13 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   output,
   viewChild,
-  inject,
 } from '@angular/core';
 import { T } from '../../t.const';
-import { UntypedFormControl } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   debounceTime,
@@ -20,7 +20,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { Router } from '@angular/router';
 import { DEFAULT_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
@@ -30,8 +29,20 @@ import { Task } from '../tasks/task.model';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { AnimationEvent } from '@angular/animations';
 import { SearchItem } from './search-bar.model';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
 import { NavigateToTaskService } from '../../core-ui/navigate-to-task/navigate-to-task.service';
+import { AsyncPipe } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { TagModule } from '../tag/tag.module';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const MAX_RESULTS = 100;
 
@@ -41,14 +52,26 @@ const MAX_RESULTS = 100;
   styleUrls: ['./search-bar.component.scss'],
   animations: [blendInOutAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    AsyncPipe,
+    MatProgressSpinner,
+    MatIcon,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MatIconButton,
+    MatInput,
+    MatAutocomplete,
+    MatOption,
+    TagModule,
+    IssueIconPipe,
+    TranslatePipe,
+  ],
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _navigateToTaskService = inject(NavigateToTaskService);
-  private _router = inject(Router);
 
   readonly blurred = output<any | void>();
 

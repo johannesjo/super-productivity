@@ -29,6 +29,7 @@ import { MatInputModule } from '@angular/material/input';
 import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model';
+import { IssueIconPipe } from '../issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -39,6 +40,7 @@ import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model'
     FormsModule,
     MatInputModule,
     NgClass,
+    IssueIconPipe,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

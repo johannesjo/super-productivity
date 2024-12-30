@@ -53,7 +53,7 @@
       @if (item.ctx) {
       <tag [tag]="item.ctx"></tag>
       }
-      <span>{{item?.titleHighlighted || item?.title}}</span>
+      <span>{{ item?.titleHighlighted || item?.title }}</span>
       @if (item.issueType) {
       <mat-icon [svgIcon]="item.issueType|issueIcon"></mat-icon>
       } @if (item.isArchiveTask) {

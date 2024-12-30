@@ -1,16 +1,33 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { PomodoroService } from '../pomodoro.service';
 import { filter, map, mapTo, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { T } from '../../../t.const';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 
 @Component({
   selector: 'dialog-pomodoro-break',
   templateUrl: './dialog-pomodoro-break.component.html',
   styleUrls: ['./dialog-pomodoro-break.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    AsyncPipe,
+    MatDialogContent,
+    TranslatePipe,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    MsToMinuteClockStringPipe,
+  ],
 })
 export class DialogPomodoroBreakComponent {
   private _matDialogRef =

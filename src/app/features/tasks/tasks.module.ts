@@ -27,6 +27,9 @@ import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.
 import { TaskHoverControlsComponent } from './task/task-hover-controls/task-hover-controls.component';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { TagEditComponent } from '../tag/tag-edit/tag-edit.component';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
+import { IssueContentComponent } from '../issue/issue-content/issue-content.component';
+import { IssueHeaderComponent } from '../issue/issue-header/issue-header.component';
 
 @NgModule({
   imports: [
@@ -46,6 +49,9 @@ import { TagEditComponent } from '../tag/tag-edit/tag-edit.component';
     CdkDropList,
     CdkDrag,
     TagEditComponent,
+    IssueIconPipe,
+    IssueContentComponent,
+    IssueHeaderComponent,
   ],
   declarations: [
     TaskComponent,

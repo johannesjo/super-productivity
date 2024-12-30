@@ -37,7 +37,6 @@ import { ProjectModule } from './features/project/project.module';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
-import { SearchBarModule } from './features/search-bar/search-bar.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -50,6 +49,7 @@ import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
+import { SearchBarComponent } from './features/search-bar/search-bar.component';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -72,7 +72,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     NoteModule,
     TasksModule,
     MaterialCssVarsModule.forRoot(),
-    SearchBarModule,
     // External
     BrowserModule,
     BrowserAnimationsModule,
@@ -133,6 +132,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     MainHeaderComponent,
     SideNavComponent,
     FocusModeOverlayComponent,
+    SearchBarComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },
