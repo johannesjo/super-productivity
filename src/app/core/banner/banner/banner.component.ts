@@ -6,6 +6,11 @@ import { merge, Observable, of, timer } from 'rxjs';
 import { T } from '../../../t.const';
 import { bannerAnimation } from './banner.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'banner',
@@ -13,7 +18,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [bannerAnimation, fadeAnimation],
-  standalone: false,
+  imports: [MatProgressBar, MatIcon, MatButton, AsyncPipe, TranslatePipe],
 })
 export class BannerComponent {
   bannerService = inject(BannerService);

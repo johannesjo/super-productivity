@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   OnInit,
   Renderer2,
   viewChild,
-  inject,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -26,10 +26,21 @@ import { SimpleCounterService } from '../../features/simple-counter/simple-count
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatRipple } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
+import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
+import { TagModule } from '../../features/tag/tag.module';
+import { SimpleCounterModule } from '../../features/simple-counter/simple-counter.module';
+import { AsyncPipe } from '@angular/common';
+import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'main-header',
@@ -37,7 +48,23 @@ import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
-  standalone: false,
+  imports: [
+    MatIconButton,
+    MatIcon,
+    MatRipple,
+    RouterLink,
+    MatTooltip,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    WorkContextMenuComponent,
+    TagModule,
+    MatMiniFabButton,
+    SimpleCounterModule,
+    AsyncPipe,
+    MsToMinuteClockStringPipe,
+    TranslatePipe,
+  ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly projectService = inject(ProjectService);

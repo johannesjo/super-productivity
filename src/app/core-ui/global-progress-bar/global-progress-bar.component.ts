@@ -5,6 +5,9 @@ import {
   fadeInOutBottomAnimation,
   fadeOutAnimation,
 } from '../../ui/animations/fade.ani';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'global-progress-bar',
@@ -12,7 +15,7 @@ import {
   styleUrls: ['./global-progress-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, fadeInOutBottomAnimation, fadeOutAnimation],
-  standalone: false,
+  imports: [MatProgressBar, AsyncPipe, TranslatePipe],
 })
 export class GlobalProgressBarComponent {
   globalProgressBarService = inject(GlobalProgressBarService);

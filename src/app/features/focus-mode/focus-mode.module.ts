@@ -8,13 +8,13 @@ import { FocusModeMainComponent } from './focus-mode-main/focus-mode-main.compon
 import { FocusModeTaskSelectionComponent } from './focus-mode-task-selection/focus-mode-task-selection.component';
 import { FocusModeTaskDoneComponent } from './focus-mode-task-done/focus-mode-task-done.component';
 import { TasksModule } from '../tasks/tasks.module';
-import { BannerModule } from '../../core/banner/banner.module';
 import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selection/focus-mode-duration-selection.component';
 import { IssueModule } from '../issue/issue.module';
 import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
 import { ProcrastinationModule } from '../procrastination/procrastination.module';
 import { FocusModePreparationComponent } from './focus-mode-preparation/focus-mode-preparation.component';
 import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
+import { BannerComponent } from '../../core/banner/banner/banner.component';
 
 @NgModule({
   declarations: [
@@ -32,11 +32,11 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
     TaskAttachmentModule,
     TasksModule,
     IssueModule,
-    BannerModule,
     SimpleCounterModule,
 
     ProcrastinationModule,
     InlineMultilineInputComponent,
+    BannerComponent,
   ],
   exports: [FocusModeOverlayComponent],
 })

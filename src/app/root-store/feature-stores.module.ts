@@ -97,9 +97,12 @@ import { LocalFileSyncElectronEffects } from '../imex/sync/local-file-sync/store
 import { OpenProjectEffects } from '../features/issue/providers/open-project/open-project-issue/store/open-project.effects';
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
+import { LocalBackupService } from '../imex/local-backup/local-backup.service';
 
 @NgModule({
   declarations: [],
+  // TODO remove when possible
+  providers: [LocalBackupService],
   imports: [
     StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
     EffectsModule.forFeature([BookmarkEffects]),

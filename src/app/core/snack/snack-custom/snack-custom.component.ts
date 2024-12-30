@@ -1,21 +1,25 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   OnDestroy,
   OnInit,
-  inject,
 } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { SnackParams } from '../snack.model';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'snack-custom',
   templateUrl: './snack-custom.component.html',
   styleUrls: ['./snack-custom.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatIcon, MatButton, MatIconButton, MatProgressBar, TranslatePipe],
 })
 export class SnackCustomComponent implements OnInit, OnDestroy {
   data = inject<SnackParams>(MAT_SNACK_BAR_DATA);

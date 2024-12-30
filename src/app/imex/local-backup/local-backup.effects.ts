@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { take, tap } from 'rxjs/operators';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';

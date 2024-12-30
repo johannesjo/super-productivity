@@ -22,8 +22,8 @@ import { ContextMenuComponent } from '../../ui/context-menu/context-menu.compone
     ScheduleEventComponent,
     SideNavItemComponent,
     ContextMenuComponent,
+    SideNavComponent,
   ],
-  declarations: [SideNavComponent],
   exports: [SideNavComponent],
 })
 export class SideNavModule {}

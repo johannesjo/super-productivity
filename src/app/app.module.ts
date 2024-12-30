@@ -15,7 +15,6 @@ import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
 import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
-import { CoreModule } from './core/core.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { PagesModule } from './pages/pages.module';
@@ -52,6 +51,7 @@ import { IssuePanelModule } from './features/issue-panel/issue-panel.module';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
 import { FeatureStoresModule } from './root-store/feature-stores.module';
+import { BannerComponent } from './core/banner/banner/banner.component';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -65,7 +65,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     FeatureStoresModule,
     ProjectModule,
     // Other Local
-    CoreModule,
     UiModule,
     CoreUiModule,
     PagesModule,
@@ -75,7 +74,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     IssuePanelModule,
     TrackingReminderModule,
     ReminderModule,
-    CoreUiModule,
     NoteModule,
     TasksModule,
     SyncModule,
@@ -138,6 +136,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     }),
     CdkDropListGroup,
     BookmarkBarComponent,
+    BannerComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },

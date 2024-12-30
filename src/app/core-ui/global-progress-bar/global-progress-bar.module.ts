@@ -13,8 +13,7 @@ import { GlobalProgressBarInterceptorService } from './global-progress-bar-inter
       multi: true,
     },
   ],
-  declarations: [GlobalProgressBarComponent],
-  imports: [CommonModule, UiModule],
+  imports: [CommonModule, UiModule, GlobalProgressBarComponent],
   exports: [GlobalProgressBarComponent],
 })
 export class GlobalProgressBarModule {}

@@ -5,7 +5,6 @@ import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
-  imports: [UiModule, CommonModule, MatSnackBarModule],
-  declarations: [SnackCustomComponent],
+  imports: [UiModule, CommonModule, MatSnackBarModule, SnackCustomComponent],
 })
 export class SnackModule {}

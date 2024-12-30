@@ -19,8 +19,8 @@ import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu
     TagModule,
     SimpleCounterModule,
     WorkContextMenuComponent,
+    MainHeaderComponent,
   ],
-  declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],
 })
 export class MainHeaderModule {}

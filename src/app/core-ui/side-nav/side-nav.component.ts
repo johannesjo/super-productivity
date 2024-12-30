@@ -4,10 +4,10 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
-  OnDestroy,
-  viewChildren,
-  viewChild,
   inject,
+  OnDestroy,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -24,7 +24,12 @@ import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { FocusKeyManager } from '@angular/cdk/a11y';
-import { MatMenuItem } from '@angular/material/menu';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
@@ -34,7 +39,7 @@ import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
 import { Store } from '@ngrx/store';
 import {
@@ -43,6 +48,14 @@ import {
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { updateProject } from '../../features/project/store/project.actions';
+import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'side-nav',
@@ -50,7 +63,23 @@ import { updateProject } from '../../features/project/store/project.actions';
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
-  standalone: false,
+  imports: [
+    SideNavItemComponent,
+    MatMenuItem,
+    RouterLink,
+    RouterLinkActive,
+    MatIcon,
+    MatIconButton,
+    MatTooltip,
+    ContextMenuComponent,
+    CdkDropList,
+    CdkDrag,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    TranslatePipe,
+    AsyncPipe,
+  ],
 })
 export class SideNavComponent implements OnDestroy {
   readonly tagService = inject(TagService);
