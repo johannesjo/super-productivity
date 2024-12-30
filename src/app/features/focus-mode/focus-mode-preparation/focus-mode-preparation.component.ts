@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import {
   setFocusSessionActivePage,
   startFocusSession,
@@ -9,6 +9,8 @@ import { interval, Observable, Subject } from 'rxjs';
 import { delay, map, startWith, takeUntil, takeWhile } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { T } from 'src/app/t.const';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const COUNTDOWN_DURATION = 5;
 
@@ -18,7 +20,7 @@ const COUNTDOWN_DURATION = 5;
   styleUrls: ['./focus-mode-preparation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  standalone: false,
+  imports: [AsyncPipe, TranslatePipe],
 })
 export class FocusModePreparationComponent implements OnDestroy {
   private readonly _store = inject(Store);

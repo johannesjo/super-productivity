@@ -2,8 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   inject,
+  OnDestroy,
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
@@ -12,13 +12,18 @@ import { Store } from '@ngrx/store';
 import { setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
+import { FormsModule } from '@angular/forms';
+import { TasksModule } from '../../tasks/tasks.module';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'focus-mode-task-selection',
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [FormsModule, TasksModule, MatButton, AsyncPipe, TranslatePipe],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);

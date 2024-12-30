@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { Observable, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
@@ -16,6 +16,18 @@ import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
 import { T } from 'src/app/t.const';
 import { selectIsPomodoroEnabled } from '../../config/store/global-config.reducer';
+import { BannerComponent } from '../../../core/banner/banner/banner.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ProcrastinationModule } from '../../procrastination/procrastination.module';
+import { FocusModeTaskSelectionComponent } from '../focus-mode-task-selection/focus-mode-task-selection.component';
+import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-selection/focus-mode-duration-selection.component';
+import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
+import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
+import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -23,7 +35,21 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
   styleUrls: ['./focus-mode-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeInAnimation, warpAnimation, warpInAnimation],
-  standalone: false,
+  imports: [
+    BannerComponent,
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+    ProcrastinationModule,
+    FocusModeTaskSelectionComponent,
+    FocusModeDurationSelectionComponent,
+    FocusModePreparationComponent,
+    FocusModeMainComponent,
+    FocusModeTaskDoneComponent,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
   readonly taskService = inject(TaskService);

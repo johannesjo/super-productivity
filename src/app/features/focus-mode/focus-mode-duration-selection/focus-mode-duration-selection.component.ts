@@ -2,8 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   inject,
+  OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
@@ -18,14 +18,25 @@ import { Observable, Subject } from 'rxjs';
 import { FocusModeConfig } from '../../config/global-config.model';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 import { takeUntil } from 'rxjs/operators';
-import { T } from 'src/app/t.const';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'focus-mode-duration-selection',
   templateUrl: './focus-mode-duration-selection.component.html',
   styleUrls: ['./focus-mode-duration-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    FormsModule,
+    MatButton,
+    InputDurationSliderComponent,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   private readonly _store = inject(Store);

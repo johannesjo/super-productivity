@@ -10,13 +10,17 @@ import { selectLastFocusSessionDuration } from '../store/focus-mode.selectors';
 import { map, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { T } from 'src/app/t.const';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'focus-mode-task-done',
   templateUrl: './focus-mode-task-done.component.html',
   styleUrls: ['./focus-mode-task-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatButton, AsyncPipe, MsToStringPipe, TranslatePipe],
 })
 export class FocusModeTaskDoneComponent {
   private _store = inject(Store);

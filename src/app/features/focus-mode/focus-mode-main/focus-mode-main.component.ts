@@ -3,8 +3,8 @@ import {
   Component,
   HostBinding,
   HostListener,
-  OnDestroy,
   inject,
+  OnDestroy,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
@@ -13,7 +13,6 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
-import { T } from 'src/app/t.const';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
@@ -27,6 +26,19 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
+import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
+import { SimpleCounterModule } from '../../simple-counter/simple-counter.module';
+import { MatIconAnchor, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
+import { TaskAttachmentModule } from '../../tasks/task-attachment/task-attachment.module';
+import { AsyncPipe } from '@angular/common';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueModule } from '../../issue/issue.module';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'focus-mode-main',
@@ -34,7 +46,21 @@ import { ICAL_TYPE } from '../../issue/issue.const';
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation],
-  standalone: false,
+  imports: [
+    InlineMultilineInputComponent,
+    ProgressCircleComponent,
+    SimpleCounterModule,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatIconAnchor,
+    InlineMarkdownComponent,
+    TaskAttachmentModule,
+    AsyncPipe,
+    MsToMinuteClockStringPipe,
+    TranslatePipe,
+    IssueModule,
+  ],
 })
 export class FocusModeMainComponent implements OnDestroy {
   readonly simpleCounterService = inject(SimpleCounterService);
