@@ -22,11 +22,11 @@ import { uniqueByProp } from '../../../util/unique-by-prop';
 import { ProjectService } from '../../project/project.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { MatIcon } from '@angular/material/icon';
-import { TagModule } from '../../tag/tag.module';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 
 const M = 1000 * 60;
 
@@ -40,7 +40,6 @@ const M = 1000 * 60;
     MatDialogTitle,
     MatIcon,
     MatDialogContent,
-    TagModule,
     MatIconButton,
     MatMenuTrigger,
     MatMenu,
@@ -49,6 +48,7 @@ const M = 1000 * 60;
     MatButton,
     AsyncPipe,
     TranslatePipe,
+    TagListComponent,
   ],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {

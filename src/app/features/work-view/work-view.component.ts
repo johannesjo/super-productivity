@@ -4,17 +4,17 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   OnInit,
   ViewChild,
-  inject,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   from,
   fromEvent,
@@ -37,6 +37,21 @@ import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RightPanelComponent } from '../right-panel/right-panel.component';
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
+import { ImprovementBannerComponent } from '../metric/improvement-banner/improvement-banner.component';
+import { AddTaskBarComponent } from '../tasks/add-task-bar/add-task-bar.component';
+import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
+import { TaskListComponent } from '../tasks/task-list/task-list.component';
+import { SplitComponent } from './split/split.component';
+import { BacklogComponent } from './backlog/backlog.component';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'work-view',
@@ -49,7 +64,26 @@ import { toSignal } from '@angular/core/rxjs-interop';
     workViewProjectChangeAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    RightPanelComponent,
+    CdkDropListGroup,
+    CdkScrollable,
+    MatTooltip,
+    MatIcon,
+    MatMiniFabButton,
+    ImprovementBannerComponent,
+    MatButton,
+    RouterLink,
+    AddTaskBarComponent,
+    AddScheduledTodayOrTomorrowBtnComponent,
+    TaskListComponent,
+    SplitComponent,
+    BacklogComponent,
+    MatFabButton,
+    AsyncPipe,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   taskService = inject(TaskService);

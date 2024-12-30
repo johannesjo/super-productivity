@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  input,
   inject,
+  input,
+  OnDestroy,
 } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
@@ -13,6 +13,11 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
 import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
+import { BetterDrawerContainerComponent } from '../../ui/better-drawer/better-drawer-container/better-drawer-container.component';
+import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
+import { NotesComponent } from '../note/notes/notes.component';
+import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'right-panel',
@@ -24,7 +29,13 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
     slideInFromTopAni,
     slideInFromRightAni,
   ],
-  standalone: false,
+  imports: [
+    BetterDrawerContainerComponent,
+    IssuePanelComponent,
+    NotesComponent,
+    TaskDetailPanelComponent,
+    AsyncPipe,
+  ],
 })
 export class RightPanelComponent implements OnDestroy {
   taskService = inject(TaskService);

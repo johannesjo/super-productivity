@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
+  input,
   OnDestroy,
   OnInit,
-  input,
   output,
-  inject,
 } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -29,13 +29,49 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { createRows, formatRows, formatText } from './worklog-export.util';
+import { MatDialogActions, MatDialogContent } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { MatAnchor, MatButton, MatMiniFabButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { NgClass } from '@angular/common';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { SimpleDownloadDirective } from '../../../ui/simple-download/simple-download.directive';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'worklog-export',
   templateUrl: './worklog-export.component.html',
   styleUrls: ['./worklog-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogContent,
+    FormsModule,
+    MatMiniFabButton,
+    MatMenuTrigger,
+    MatTooltip,
+    MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatSelect,
+    MatOption,
+    NgClass,
+    CollapsibleComponent,
+    MatSlideToggle,
+    MatFormField,
+    MatInput,
+    MatDialogActions,
+    MatButton,
+    MatAnchor,
+    SimpleDownloadDirective,
+    TranslatePipe,
+  ],
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
   private _snackService = inject(SnackService);

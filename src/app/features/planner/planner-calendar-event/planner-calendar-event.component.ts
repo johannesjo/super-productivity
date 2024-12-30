@@ -8,13 +8,15 @@ import {
 } from '@angular/core';
 import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 import { IssueService } from '../../issue/issue.service';
+import { MatIcon } from '@angular/material/icon';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'planner-calendar-event',
   templateUrl: './planner-calendar-event.component.html',
   styleUrl: './planner-calendar-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatIcon, MsToStringPipe],
 })
 export class PlannerCalendarEventComponent {
   private _issueService = inject(IssueService);

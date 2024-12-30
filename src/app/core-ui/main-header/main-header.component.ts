@@ -36,11 +36,10 @@ import { MatRipple } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
 import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
-import { TagModule } from '../../features/tag/tag.module';
-import { SimpleCounterModule } from '../../features/simple-counter/simple-counter.module';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../../features/tag/tag/tag.component';
 
 @Component({
   selector: 'main-header',
@@ -58,12 +57,11 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatMenu,
     MatMenuContent,
     WorkContextMenuComponent,
-    TagModule,
     MatMiniFabButton,
-    SimpleCounterModule,
     AsyncPipe,
     MsToMinuteClockStringPipe,
     TranslatePipe,
+    TagComponent,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {

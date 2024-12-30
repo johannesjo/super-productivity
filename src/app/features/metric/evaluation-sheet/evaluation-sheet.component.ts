@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   Input,
   OnDestroy,
   OnInit,
   output,
-  inject,
 } from '@angular/core';
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
@@ -19,13 +19,41 @@ import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-no
 import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { DateService } from 'src/app/core/date/date.service';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MaxDirective } from '../../../ui/validation/max.directive';
+import { MinDirective } from '../../../ui/validation/min.directive';
+import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'evaluation-sheet',
   templateUrl: './evaluation-sheet.component.html',
   styleUrls: ['./evaluation-sheet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    HelpSectionComponent,
+    RouterLink,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MaxDirective,
+    MinDirective,
+    MatHint,
+    MatError,
+    ChipListInputComponent,
+    MatButton,
+    MatIcon,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   obstructionService = inject(ObstructionService);

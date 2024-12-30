@@ -11,7 +11,15 @@ import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { T } from '../../../t.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { DateAdapter } from '@angular/material/core';
+import { DateAdapter, MatRipple } from '@angular/material/core';
+import { AsyncPipe, KeyValuePipe, NgFor } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
+import { MatButton } from '@angular/material/button';
+import { MomentFormatPipe } from '../../../ui/pipes/moment-format.pipe';
+import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'worklog-week',
@@ -19,7 +27,19 @@ import { DateAdapter } from '@angular/material/core';
   styleUrls: ['./worklog-week.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation],
-  standalone: false,
+  imports: [
+    NgFor,
+    MatRipple,
+    MatIcon,
+    InlineInputComponent,
+    MatButton,
+    AsyncPipe,
+    KeyValuePipe,
+    MomentFormatPipe,
+    MsToClockStringPipe,
+    MsToMinuteClockStringPipe,
+    TranslatePipe,
+  ],
 })
 export class WorklogWeekComponent {
   readonly worklogService = inject(WorklogService);

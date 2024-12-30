@@ -1,14 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   OnDestroy,
   OnInit,
-  inject,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { Project, ProjectCopy } from '../../project.model';
-import { UntypedFormGroup } from '@angular/forms';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/providers/jira/jira.model';
@@ -29,13 +35,24 @@ import { CaldavCfg } from 'src/app/features/issue/providers/caldav/caldav.model'
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
 import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
 import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-from-form-items';
+import { MatButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-create-project',
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogTitle,
+    FormsModule,
+    ReactiveFormsModule,
+    MatDialogContent,
+    FormlyModule,
+    MatDialogActions,
+    MatButton,
+    TranslatePipe,
+  ],
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   private _project = inject<Project>(MAT_DIALOG_DATA);

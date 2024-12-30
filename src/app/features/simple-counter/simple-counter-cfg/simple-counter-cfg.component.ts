@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnDestroy,
-  input,
   output,
-  inject,
 } from '@angular/core';
 import {
   ConfigFormSection,
@@ -13,8 +13,8 @@ import {
 } from '../../config/global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { SimpleCounterConfig } from '../simple-counter.model';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { SimpleCounterService } from '../simple-counter.service';
 import { map } from 'rxjs/operators';
@@ -22,13 +22,23 @@ import { Observable, Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'simple-counter-cfg',
   templateUrl: './simple-counter-cfg.component.html',
   styleUrls: ['./simple-counter-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    FormlyModule,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
   readonly simpleCounterService = inject(SimpleCounterService);

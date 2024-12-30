@@ -42,11 +42,11 @@ import { MentionModule } from 'angular-mentions';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TagModule } from '../../tag/tag.module';
 import { MatOption } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 @Component({
   selector: 'add-task-bar',
@@ -65,12 +65,12 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
     MatIconButton,
     MatIcon,
     MatTooltip,
-    TagModule,
     MatAutocomplete,
     MatOption,
     AsyncPipe,
     TranslatePipe,
     IssueIconPipe,
+    TagComponent,
   ],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {

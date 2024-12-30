@@ -1,10 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { Improvement } from '../improvement/improvement.model';
 import { ImprovementService } from '../improvement/improvement.service';
 import { improvementBannerAnimation } from './improvement-banner.ani';
 import { Subscription } from 'rxjs';
 import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
+import { MatRipple } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'improvement-banner',
@@ -12,7 +17,7 @@ import { DateService } from 'src/app/core/date/date.service';
   styleUrls: ['./improvement-banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [improvementBannerAnimation],
-  standalone: false,
+  imports: [MatRipple, MatIconButton, MatTooltip, MatIcon, TranslatePipe],
 })
 export class ImprovementBannerComponent implements OnDestroy {
   improvementService = inject(ImprovementService);

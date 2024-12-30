@@ -4,12 +4,12 @@ import {
   Component,
   HostBinding,
   HostListener,
+  inject,
   Input,
+  input,
   OnDestroy,
   OnInit,
   viewChild,
-  input,
-  inject,
 } from '@angular/core';
 import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
@@ -23,13 +23,29 @@ import { takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '../../../core/base-component/base.component';
 import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
+import { MatIcon } from '@angular/material/icon';
+import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
+import { TagListComponent } from '../../tag/tag-list/tag-list.component';
+import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
+import { DatePipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'planner-task',
   templateUrl: './planner-task.component.html',
   styleUrl: './planner-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatIcon,
+    LongPressIOSDirective,
+    TagListComponent,
+    InlineInputComponent,
+    TaskContextMenuComponent,
+    DatePipe,
+    MsToStringPipe,
+    IssueIconPipe,
+  ],
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   private _taskService = inject(TaskService);

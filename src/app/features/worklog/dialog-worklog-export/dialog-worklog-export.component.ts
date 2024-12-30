@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { WorklogExportSettingsCopy } from '../worklog.model';
 import { T } from '../../../t.const';
 import moment from 'moment';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
+import { WorklogExportComponent } from '../worklog-export/worklog-export.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-worklog-export',
   templateUrl: './dialog-worklog-export.component.html',
   styleUrls: ['./dialog-worklog-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatDialogTitle, WorklogExportComponent, TranslatePipe],
 })
 export class DialogWorklogExportComponent {
   private _matDialogRef =

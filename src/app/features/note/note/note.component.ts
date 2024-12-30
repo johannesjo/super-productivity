@@ -1,12 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnChanges,
   SimpleChanges,
   viewChild,
-  input,
-  inject,
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
@@ -14,19 +14,45 @@ import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { TagComponentTag } from '../../tag/tag/tag.component';
+import { TagComponent, TagComponentTag } from '../../tag/tag/tag.component';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
+import { EnlargeImgDirective } from '../../../ui/enlarge-img/enlarge-img.directive';
+import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
+import { MarkdownComponent } from 'ngx-markdown';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'note',
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    EnlargeImgDirective,
+    LongPressDirective,
+    MarkdownComponent,
+    MatIconButton,
+    MatIcon,
+    TagComponent,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class NoteComponent implements OnChanges {
   private readonly _matDialog = inject(MatDialog);

@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { NoteService } from '../note.service';
+import { FormsModule } from '@angular/forms';
+import { MarkdownComponent } from 'ngx-markdown';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   // selector: 'dialog-add-note',
@@ -14,7 +21,16 @@ import { NoteService } from '../note.service';
     '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    FormsModule,
+    MarkdownComponent,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    TranslatePipe,
+  ],
 })
 export class DialogAddNoteComponent
   extends DialogFullscreenMarkdownComponent

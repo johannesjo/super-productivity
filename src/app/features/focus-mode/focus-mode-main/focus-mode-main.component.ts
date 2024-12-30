@@ -28,7 +28,6 @@ import { FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import { SimpleCounterModule } from '../../simple-counter/simple-counter.module';
 import { MatIconAnchor, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -39,6 +38,7 @@ import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clo
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counter-button/simple-counter-button.component';
 
 @Component({
   selector: 'focus-mode-main',
@@ -49,7 +49,6 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
   imports: [
     InlineMultilineInputComponent,
     ProgressCircleComponent,
-    SimpleCounterModule,
     MatIconButton,
     MatTooltip,
     MatIcon,
@@ -60,6 +59,7 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
     MsToMinuteClockStringPipe,
     TranslatePipe,
     IssueIconPipe,
+    SimpleCounterButtonComponent,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {

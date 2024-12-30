@@ -9,10 +9,10 @@ import { Store } from '@ngrx/store';
 import { selectAllTags } from '../../tag/store/tag.reducer';
 import { Tag } from '../../tag/tag.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { TagModule } from '../../tag/tag.module';
 import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 interface TagWithTimeSpent {
   id: string;
@@ -25,7 +25,7 @@ interface TagWithTimeSpent {
   templateUrl: './tasks-by-tag.component.html',
   styleUrls: ['./tasks-by-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TagModule, AsyncPipe, MsToStringPipe, TranslatePipe],
+  imports: [AsyncPipe, MsToStringPipe, TranslatePipe, TagComponent],
 })
 export class TasksByTagComponent {
   private readonly _store = inject(Store);

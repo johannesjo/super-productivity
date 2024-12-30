@@ -26,9 +26,9 @@ import { MatInput } from '@angular/material/input';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatIcon } from '@angular/material/icon';
 import { MatOption } from '@angular/material/core';
-import { TagModule } from '../../tag/tag.module';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 @Component({
   selector: 'select-task',
@@ -46,9 +46,9 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
     MatSuffix,
     MatAutocomplete,
     MatOption,
-    TagModule,
     TranslatePipe,
     IssueIconPipe,
+    TagComponent,
   ],
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {

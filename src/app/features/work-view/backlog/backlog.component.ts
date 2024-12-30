@@ -2,9 +2,9 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
-  inject,
 } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import {
@@ -15,6 +15,10 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { T } from '../../../t.const';
 import { Subject, timer } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
+import { TaskListComponent } from '../../tasks/task-list/task-list.component';
+import { FullPageSpinnerComponent } from '../../../ui/full-page-spinner/full-page-spinner.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'backlog',
@@ -22,7 +26,7 @@ import { mapTo, switchMap } from 'rxjs/operators';
   styleUrls: ['./backlog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
-  standalone: false,
+  imports: [TaskListComponent, FullPageSpinnerComponent, AsyncPipe, TranslatePipe],
 })
 export class BacklogComponent implements AfterViewInit {
   taskService = inject(TaskService);

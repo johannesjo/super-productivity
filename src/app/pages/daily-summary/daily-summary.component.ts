@@ -40,14 +40,11 @@ import { shareReplayUntil } from '../../util/share-replay-until';
 import { DateService } from 'src/app/core/date/date.service';
 import { Action } from '@ngrx/store';
 import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
-import { RightPanelModule } from '../../features/right-panel/right-panel.module';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { WorklogModule } from '../../features/worklog/worklog.module';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MetricModule } from '../../features/metric/metric.module';
 import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
@@ -56,6 +53,9 @@ import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
 import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
+import { RightPanelComponent } from '../../features/right-panel/right-panel.component';
+import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
+import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -66,17 +66,13 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   styleUrls: ['./daily-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RightPanelModule,
     MatAnchor,
     RouterLink,
     MatIcon,
     InlineInputComponent,
     MatTabGroup,
     MatTab,
-
-    WorklogModule,
     MatProgressSpinner,
-    MetricModule,
     PlanTasksTomorrowComponent,
     MatButton,
     MatTooltip,
@@ -86,6 +82,9 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     TranslatePipe,
     TaskSummaryTablesComponent,
     TasksByTagComponent,
+    RightPanelComponent,
+    EvaluationSheetComponent,
+    WorklogWeekComponent,
   ],
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {

@@ -40,9 +40,9 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { TagModule } from '../tag/tag.module';
 import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../tag/tag/tag.component';
 
 const MAX_RESULTS = 100;
 
@@ -62,9 +62,9 @@ const MAX_RESULTS = 100;
     MatInput,
     MatAutocomplete,
     MatOption,
-    TagModule,
     IssueIconPipe,
     TranslatePipe,
+    TagComponent,
   ],
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {

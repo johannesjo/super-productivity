@@ -71,7 +71,6 @@ import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-inpu
 import { MatIcon } from '@angular/material/icon';
 import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
-import { TagModule } from '../../tag/tag.module';
 import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -82,6 +81,7 @@ import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
+import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 
 @Component({
   selector: 'task',
@@ -104,7 +104,6 @@ import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pi
     LongPressIOSDirective,
     MatIconButton,
     InlineMultilineInputComponent,
-    TagModule,
     TaskHoverControlsComponent,
     ProgressBarComponent,
     MatMiniFabButton,
@@ -121,6 +120,7 @@ import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pi
     TranslatePipe,
     IssueIconPipe,
     SubTaskTotalTimeSpentPipe,
+    TagListComponent,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {

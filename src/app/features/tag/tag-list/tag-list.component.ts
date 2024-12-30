@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  input,
   inject,
+  input,
 } from '@angular/core';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Tag } from '../tag.model';
@@ -18,6 +18,7 @@ import { Store } from '@ngrx/store';
 import { selectTagFeatureState } from '../store/tag.reducer';
 import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
+import { TagComponent } from '../tag/tag.component';
 
 @Component({
   selector: 'tag-list',
@@ -25,7 +26,7 @@ import { Project } from '../../project/project.model';
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
-  standalone: false,
+  imports: [TagComponent],
 })
 export class TagListComponent {
   private readonly _store = inject(Store);

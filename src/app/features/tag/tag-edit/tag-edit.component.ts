@@ -25,10 +25,10 @@ import { UntypedFormControl } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../../t.const';
 import { TagService } from '../tag.service';
-import { TagModule } from '../tag.module';
 import { TaskService } from '../../tasks/task.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskCopy } from '../../tasks/task.model';
+import { TagComponent } from '../tag/tag.component';
 
 interface Suggestion {
   id: string;
@@ -50,7 +50,7 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     MatChipRow,
     MatIcon,
     UiModule,
-    TagModule,
+    TagComponent,
   ],
   templateUrl: './tag-edit.component.html',
   styleUrl: './tag-edit.component.scss',

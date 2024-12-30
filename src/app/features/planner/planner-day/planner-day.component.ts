@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { T } from '../../../t.const';
 import { PlannerDay, ScheduleItem, ScheduleItemType } from '../planner.model';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
 import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
@@ -16,13 +16,37 @@ import { moveTaskInTagList } from '../../tag/store/tag.actions';
 import { DateService } from '../../../core/date/date.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { MatIcon } from '@angular/material/icon';
+import { PlannerTaskComponent } from '../planner-task/planner-task.component';
+import { PlannerRepeatProjectionComponent } from '../planner-repeat-projection/planner-repeat-projection.component';
+import { AddTaskInlineComponent } from '../add-task-inline/add-task-inline.component';
+import { DatePipe, NgClass } from '@angular/common';
+import { PlannerCalendarEventComponent } from '../planner-calendar-event/planner-calendar-event.component';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
+import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'planner-day',
   templateUrl: './planner-day.component.html',
   styleUrl: './planner-day.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatIcon,
+    CdkDropList,
+    PlannerTaskComponent,
+    CdkDrag,
+    PlannerRepeatProjectionComponent,
+    AddTaskInlineComponent,
+    NgClass,
+    PlannerCalendarEventComponent,
+    DatePipe,
+    MsToStringPipe,
+    RoundDurationPipe,
+    ShortTime2Pipe,
+    TranslatePipe,
+  ],
 })
 export class PlannerDayComponent {
   private _store = inject(Store);

@@ -3,16 +3,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
-  Renderer2,
-  viewChild,
   input,
   output,
-  inject,
+  Renderer2,
+  viewChild,
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { isTouchOnly } from '../../../util/is-touch-only';
+import { MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 const ANIMATABLE_CLASS = 'isAnimatable';
 
@@ -21,7 +23,7 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   templateUrl: './split.component.html',
   styleUrls: ['./split.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [MatFabButton, MatIcon],
 })
 export class SplitComponent implements AfterViewInit {
   private _renderer = inject(Renderer2);

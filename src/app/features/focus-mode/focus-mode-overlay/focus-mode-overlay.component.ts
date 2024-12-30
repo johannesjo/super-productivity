@@ -20,7 +20,6 @@ import { BannerComponent } from '../../../core/banner/banner/banner.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { ProcrastinationModule } from '../../procrastination/procrastination.module';
 import { FocusModeTaskSelectionComponent } from '../focus-mode-task-selection/focus-mode-task-selection.component';
 import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-selection/focus-mode-duration-selection.component';
 import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
@@ -28,6 +27,7 @@ import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.compo
 import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ProcrastinationComponent } from '../../procrastination/procrastination.component';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -40,7 +40,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatIconButton,
     MatIcon,
     MatTooltip,
-    ProcrastinationModule,
     FocusModeTaskSelectionComponent,
     FocusModeDurationSelectionComponent,
     FocusModePreparationComponent,
@@ -49,6 +48,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatButton,
     AsyncPipe,
     TranslatePipe,
+    ProcrastinationComponent,
   ],
 })
 export class FocusModeOverlayComponent implements OnDestroy {

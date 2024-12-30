@@ -23,23 +23,18 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { GlobalErrorHandler } from './core/error-handler/global-error-handler.class';
 import { MyHammerConfig } from '../hammer-config.class';
-import { ProcrastinationModule } from './features/procrastination/procrastination.module';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { LanguageService } from './core/language/language.service';
-import { ProjectModule } from './features/project/project.module';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
-import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { IssuePanelModule } from './features/issue-panel/issue-panel.module';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
 import { FeatureStoresModule } from './root-store/feature-stores.module';
@@ -56,21 +51,14 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 @NgModule({
-  declarations: [AppComponent, ShepherdComponent],
+  declarations: [AppComponent],
   bootstrap: [AppComponent],
   imports: [
-    // Those features need to be included first for store not to mess up, probably because we use it initially at many places
     FeatureStoresModule,
-    ProjectModule,
     // Other Local
     UiModule,
     MatSidenavModule,
-    ProcrastinationModule,
-    IssuePanelModule,
-    TrackingReminderModule,
     ReminderModule,
-    NoteModule,
-
     MaterialCssVarsModule.forRoot(),
     // External
     BrowserModule,
@@ -134,6 +122,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     FocusModeOverlayComponent,
     SearchBarComponent,
     AddTaskBarComponent,
+    ShepherdComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },

@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
-  viewChild,
   inject,
+  viewChild,
 } from '@angular/core';
 import { NoteService } from '../note.service';
 import { MatButton } from '@angular/material/button';
@@ -14,8 +14,12 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { Note } from '../note.model';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemInArray } from '../../../util/move-item-in-array';
+import { MatIcon } from '@angular/material/icon';
+import { NoteComponent } from '../note/note.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'notes',
@@ -23,7 +27,15 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, fadeAnimation],
-  standalone: false,
+  imports: [
+    MatButton,
+    MatIcon,
+    CdkDropList,
+    CdkDrag,
+    NoteComponent,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class NotesComponent {
   noteService = inject(NoteService);

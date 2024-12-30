@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
 import { ADD_TASK_PANEL_ID } from '../planner.model';
 import { PlannerActions } from '../store/planner.actions';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith, withLatestFrom } from 'rxjs/operators';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { selectTagFeatureState } from '../../tag/store/tag.reducer';
 import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
@@ -18,13 +18,28 @@ import { PlannerService } from '../planner.service';
 import { T } from 'src/app/t.const';
 import { DateService } from '../../../core/date/date.service';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { PlannerTaskComponent } from '../planner-task/planner-task.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'add-task-panel-planner',
   templateUrl: './add-task-panel-planner.component.html',
   styleUrl: './add-task-panel-planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatIconButton,
+    MatIcon,
+    FormsModule,
+    ReactiveFormsModule,
+    CdkDropList,
+    PlannerTaskComponent,
+    CdkDrag,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class AddTaskPanelPlannerComponent {
   private _store = inject(Store);
