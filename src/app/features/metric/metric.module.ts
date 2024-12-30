@@ -5,28 +5,12 @@ import { MetricComponent } from './metric.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { ImprovementBannerComponent } from './improvement-banner/improvement-banner.component';
-import { StoreModule } from '@ngrx/store';
-import { METRIC_FEATURE_NAME, metricReducer } from './store/metric.reducer';
-import { EffectsModule } from '@ngrx/effects';
-import { MetricEffects } from './store/metric.effects';
-import { ObstructionModule } from './obstruction/obstruction.module';
-import { ImprovementModule } from './improvement/improvement.module';
 import { RouterModule } from '@angular/router';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 @NgModule({
   providers: [provideCharts(withDefaultRegisterables())],
-  imports: [
-    CommonModule,
-    FormsModule,
-    UiModule,
-    ObstructionModule,
-    ImprovementModule,
-    StoreModule.forFeature(METRIC_FEATURE_NAME, metricReducer),
-    EffectsModule.forFeature([MetricEffects]),
-    RouterModule,
-    BaseChartDirective,
-  ],
+  imports: [CommonModule, FormsModule, UiModule, RouterModule, BaseChartDirective],
   declarations: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],
   exports: [EvaluationSheetComponent, MetricComponent, ImprovementBannerComponent],
 })

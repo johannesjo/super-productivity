@@ -9,10 +9,6 @@ import { FocusModeTaskSelectionComponent } from './focus-mode-task-selection/foc
 import { FocusModeTaskDoneComponent } from './focus-mode-task-done/focus-mode-task-done.component';
 import { TasksModule } from '../tasks/tasks.module';
 import { BannerModule } from '../../core/banner/banner.module';
-import { EffectsModule } from '@ngrx/effects';
-import { FocusModeEffects } from './store/focus-mode.effects';
-import { StoreModule } from '@ngrx/store';
-import { FOCUS_MODE_FEATURE_KEY, focusModeReducer } from './store/focus-mode.reducer';
 import { FocusModeDurationSelectionComponent } from './focus-mode-duration-selection/focus-mode-duration-selection.component';
 import { IssueModule } from '../issue/issue.module';
 import { SimpleCounterModule } from '../simple-counter/simple-counter.module';
@@ -38,8 +34,7 @@ import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/i
     IssueModule,
     BannerModule,
     SimpleCounterModule,
-    StoreModule.forFeature(FOCUS_MODE_FEATURE_KEY, focusModeReducer),
-    EffectsModule.forFeature([FocusModeEffects]),
+
     ProcrastinationModule,
     InlineMultilineInputComponent,
   ],

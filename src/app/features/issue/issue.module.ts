@@ -10,13 +10,6 @@ import { GitlabIssueModule } from './providers/gitlab/gitlab-issue/gitlab-issue.
 import { CaldavIssueModule } from './providers/caldav/caldav-issue/caldav-issue.module';
 import { OpenProjectIssueModule } from './providers/open-project/open-project-issue/open-project-issue.module';
 import { GiteaIssueModule } from './providers/gitea/gitea-issue/gitea-issue.module';
-import { EffectsModule } from '@ngrx/effects';
-import { PollToBacklogEffects } from './store/poll-to-backlog.effects';
-import { PollIssueUpdatesEffects } from './store/poll-issue-updates.effects';
-import { StoreModule } from '@ngrx/store';
-import { IssueProviderDbEffects } from './store/issue-provider-db.effects';
-import { issueProvidersFeature } from './store/issue-provider.reducer';
-import { UnlinkAllTasksOnProviderDeletionEffects } from './store/unlink-all-tasks-on-provider-deletion.effects';
 
 @NgModule({
   imports: [
@@ -28,13 +21,6 @@ import { UnlinkAllTasksOnProviderDeletionEffects } from './store/unlink-all-task
     CaldavIssueModule,
     OpenProjectIssueModule,
     GiteaIssueModule,
-    StoreModule.forFeature(issueProvidersFeature),
-    EffectsModule.forFeature([
-      PollToBacklogEffects,
-      PollIssueUpdatesEffects,
-      IssueProviderDbEffects,
-      UnlinkAllTasksOnProviderDeletionEffects,
-    ]),
   ],
   declarations: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],
   exports: [IssueHeaderComponent, IssueContentComponent, IssueIconPipe],

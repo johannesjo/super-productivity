@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
-import { TagEffects } from './store/tag.effects';
-import { TAG_FEATURE_NAME, tagReducer } from './store/tag.reducer';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { TagListComponent } from './tag-list/tag-list.component';
@@ -12,14 +8,7 @@ import { TagComponent } from './tag/tag.component';
 import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UiModule,
-    FormsModule,
-    StoreModule.forFeature(TAG_FEATURE_NAME, tagReducer),
-    EffectsModule.forFeature([TagEffects]),
-    IssueModule,
-  ],
+  imports: [CommonModule, UiModule, FormsModule, IssueModule],
   declarations: [
     TagListComponent,
     DialogEditTagsForTaskComponent,

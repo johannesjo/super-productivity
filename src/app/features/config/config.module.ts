@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StoreModule } from '@ngrx/store';
-import { CONFIG_FEATURE_NAME, globalConfigReducer } from './store/global-config.reducer';
-import { EffectsModule } from '@ngrx/effects';
-import { GlobalConfigEffects } from './store/global-config.effects';
 import { ConfigSectionComponent } from './config-section/config-section.component';
 import { ConfigFormComponent } from './config-form/config-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -54,8 +50,7 @@ import { TranslateModule } from '@ngx-translate/core';
     }),
     FormlyMatSliderModule,
     CommonModule,
-    StoreModule.forFeature(CONFIG_FEATURE_NAME, globalConfigReducer),
-    EffectsModule.forFeature([GlobalConfigEffects]),
+
     UiModule,
     FileImexModule,
     MatSliderModule,

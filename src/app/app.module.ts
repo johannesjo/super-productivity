@@ -3,7 +3,7 @@ import {
   HAMMER_GESTURE_CONFIG,
   HammerModule,
 } from '@angular/platform-browser';
-import { ErrorHandler, LOCALE_ID, NgModule, inject } from '@angular/core';
+import { ErrorHandler, inject, LOCALE_ID, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -27,7 +27,6 @@ import {
 } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { TasksModule } from './features/tasks/tasks.module';
-import { BookmarkModule } from './features/bookmark/bookmark.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
@@ -41,23 +40,20 @@ import { LanguageService } from './core/language/language.service';
 import { ConfigModule } from './features/config/config.module';
 import { ProjectModule } from './features/project/project.module';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
-import { WorkContextModule } from './features/work-context/work-context.module';
 import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
 import { IdleModule } from './features/idle/idle.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
-import { FinishDayBeforeCloseModule } from './features/finish-day-before-close/finish-day-before-close.module';
 import { AndroidModule } from './features/android/android.module';
-import { DominaModeModule } from './features/domina-mode/domina-mode.module';
 import { FocusModeModule } from './features/focus-mode/focus-mode.module';
-import { CalendarIntegrationModule } from './features/calendar-integration/calendar-integration.module';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { IssuePanelModule } from './features/issue-panel/issue-panel.module';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
+import { FeatureStoresModule } from './root-store/feature-stores.module';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -69,8 +65,8 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   imports: [
     // Those features need to be included first for store not to mess up, probably because we use it initially at many places
     ConfigModule,
+    FeatureStoresModule,
     ProjectModule,
-    WorkContextModule,
     // Other Local
     CoreModule,
     UiModule,
@@ -85,15 +81,11 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     ReminderModule,
     CoreUiModule,
     NoteModule,
-    BookmarkModule,
     TasksModule,
     SyncModule,
     MaterialCssVarsModule.forRoot(),
     SearchBarModule,
-    FinishDayBeforeCloseModule,
-    DominaModeModule,
     FocusModeModule,
-    CalendarIntegrationModule,
     AndroidModule,
     // External
     BrowserModule,

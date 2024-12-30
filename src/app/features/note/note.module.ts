@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StoreModule } from '@ngrx/store';
-import { NOTE_FEATURE_NAME, noteReducer } from './store/note.reducer';
-import { EffectsModule } from '@ngrx/effects';
-import { NoteEffects } from './store/note.effects';
 import { NotesComponent } from './notes/notes.component';
 import { NoteComponent } from './note/note.component';
 import { UiModule } from '../../ui/ui.module';
@@ -13,16 +9,7 @@ import { TagModule } from '../tag/tag.module';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    UiModule,
-    TagModule,
-    StoreModule.forFeature(NOTE_FEATURE_NAME, noteReducer),
-    EffectsModule.forFeature([NoteEffects]),
-    CdkDropList,
-    CdkDrag,
-  ],
+  imports: [CommonModule, FormsModule, UiModule, TagModule, CdkDropList, CdkDrag],
   declarations: [NotesComponent, NoteComponent, DialogAddNoteComponent],
   exports: [NotesComponent],
 })

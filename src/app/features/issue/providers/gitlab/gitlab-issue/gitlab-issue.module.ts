@@ -1,11 +1,9 @@
-import { NgModule, inject } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GitlabIssueHeaderComponent } from './gitlab-issue-header/gitlab-issue-header.component';
 import { GitlabIssueContentComponent } from './gitlab-issue-content/gitlab-issue-content.component';
 import { UiModule } from 'src/app/ui/ui.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { EffectsModule } from '@ngrx/effects';
-import { GitlabIssueEffects } from './gitlab-issue.effects';
 import { BeforeFinishDayService } from '../../../../before-finish-day/before-finish-day.service';
 import { first } from 'rxjs/operators';
 import { GITLAB_TYPE } from '../../../issue.const';
@@ -17,13 +15,7 @@ import { IssueProviderService } from '../../../issue-provider.service';
 
 @NgModule({
   declarations: [GitlabIssueHeaderComponent, GitlabIssueContentComponent],
-  imports: [
-    CommonModule,
-    UiModule,
-    FormsModule,
-    ReactiveFormsModule,
-    EffectsModule.forFeature([GitlabIssueEffects]),
-  ],
+  imports: [CommonModule, UiModule, FormsModule, ReactiveFormsModule],
   exports: [GitlabIssueHeaderComponent, GitlabIssueContentComponent],
 })
 export class GitlabIssueModule {
