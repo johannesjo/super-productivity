@@ -55,6 +55,7 @@ export class BetterDrawerContainerComponent
     distinctUntilChanged(),
   );
   sideStyle: SafeStyle = '';
+  private _isFirstRender: boolean = true;
   private _subs: Subscription = new Subscription();
 
   constructor() {
@@ -162,8 +163,12 @@ export class BetterDrawerContainerComponent
 
   private _updateStyle(): void {
     this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(
-      this._getWidthRelatedStyles(),
+      this._getWidthRelatedStyles() + (this._isFirstRender ? ' transition: none;' : ''),
     );
+
+    setTimeout(() => {
+      this._isFirstRender = false;
+    });
   }
 
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
