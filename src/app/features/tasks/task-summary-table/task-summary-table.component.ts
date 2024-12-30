@@ -5,10 +5,14 @@ import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
 import {
   MatCell,
+  MatCellDef,
   MatColumnDef,
   MatHeaderCell,
+  MatHeaderCellDef,
   MatHeaderRow,
+  MatHeaderRowDef,
   MatRow,
+  MatRowDef,
   MatTable,
 } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
@@ -34,6 +38,10 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatRow,
     MsToClockStringPipe,
     TranslatePipe,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRowDef,
+    MatRowDef,
   ],
 })
 export class TaskSummaryTableComponent {
