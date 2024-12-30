@@ -44,7 +44,6 @@ import { undoTaskDeleteMetaReducer } from './root-store/meta/undo-task-delete.me
 import { actionLoggerReducer } from './root-store/meta/action-logger.reducer';
 import { SyncModule } from './imex/sync/sync.module';
 import { SearchBarModule } from './features/search-bar/search-bar.module';
-import { IdleModule } from './features/idle/idle.module';
 import { TrackingReminderModule } from './features/tracking-reminder/tracking-reminder.module';
 import { AndroidModule } from './features/android/android.module';
 import { FocusModeModule } from './features/focus-mode/focus-mode.module';
@@ -75,7 +74,6 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     MainHeaderModule,
     MatSidenavModule,
     ProcrastinationModule,
-    IdleModule,
     IssuePanelModule,
     TrackingReminderModule,
     ReminderModule,

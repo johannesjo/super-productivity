@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Task } from '../../../tasks/task.model';
 import { selectIdleTime } from '../../store/idle.selectors';
 import { Store } from '@ngrx/store';
-import { SimpleCounterService } from '../../../simple-counter/simple-counter.service';
 import { T } from 'src/app/t.const';
 import {
   DialogIdleSplitPassedData,
@@ -11,18 +10,44 @@ import {
   SimpleCounterIdleBtn,
 } from '../dialog-idle.model';
 import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { TasksModule } from '../../../tasks/tasks.module';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-idle-split',
   templateUrl: './dialog-idle-split.component.html',
   styleUrls: ['./dialog-idle-split.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogContent,
+    MatButtonToggleGroup,
+    FormsModule,
+    MatButtonToggle,
+    MatIcon,
+    TasksModule,
+    MatMiniFabButton,
+    MatTooltip,
+    MatIconButton,
+    MatButton,
+    MatDialogActions,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogIdleSplitComponent implements OnInit {
   private _store = inject(Store);
-  private _simpleCounterService = inject(SimpleCounterService);
   private _matDialogRef =
     inject<MatDialogRef<DialogIdleSplitComponent, DialogIdleSplitReturnData>>(
       MatDialogRef,

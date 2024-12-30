@@ -1,11 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   OnDestroy,
   OnInit,
-  inject,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
@@ -23,13 +29,36 @@ import {
   SimpleCounterIdleBtn,
 } from './dialog-idle.model';
 import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-split.component';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { TasksModule } from '../../tasks/tasks.module';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { AsyncPipe } from '@angular/common';
+import { UiModule } from '../../../ui/ui.module';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-idle',
   templateUrl: './dialog-idle.component.html',
   styleUrls: ['./dialog-idle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    FormsModule,
+    MatDialogContent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    TasksModule,
+    MatMiniFabButton,
+    MatCheckbox,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    UiModule,
+    TranslatePipe,
+  ],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
   configService = inject(GlobalConfigService);
