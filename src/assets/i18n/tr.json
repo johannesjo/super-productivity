@@ -336,7 +336,7 @@
         "L_INTERVAL": "İfadeyi tekrarlama aralığı",
         "L_TEXT": "Metin",
         "L_TEXT_DESCRIPTION": "Örn.: \"${currentTaskTitle} üzerinde çalış!\"",
-        "TITLE": "Domina Mode"
+        "TITLE": "Domina Modu"
       }
     },
     "ISSUE": {
