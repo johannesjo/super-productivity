@@ -32,13 +32,13 @@ import { MatIconAnchor, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
-import { TaskAttachmentModule } from '../../tasks/task-attachment/task-attachment.module';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counter-button/simple-counter-button.component';
+import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-attachment-list/task-attachment-list.component';
 
 @Component({
   selector: 'focus-mode-main',
@@ -54,7 +54,7 @@ import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counte
     MatIcon,
     MatIconAnchor,
     InlineMarkdownComponent,
-    TaskAttachmentModule,
+    TaskAttachmentListComponent,
     AsyncPipe,
     MsToMinuteClockStringPipe,
     TranslatePipe,

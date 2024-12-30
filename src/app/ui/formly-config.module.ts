@@ -69,6 +69,7 @@ import { RepeatSectionTypeComponent } from '../features/config/repeat-section-ty
     FormlyMaterialModule,
     FormlyMatDatepickerModule,
     // my modules
+    // might be needed for formly to pick up on directives
     ValidationModule,
     FormlyLinkWidgetComponent,
   ],

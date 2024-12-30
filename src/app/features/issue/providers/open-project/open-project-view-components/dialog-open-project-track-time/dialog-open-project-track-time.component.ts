@@ -43,7 +43,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { InputDurationDirective } from '../../../../../../ui/duration/input-duration.directive';
 import { MatInput } from '@angular/material/input';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -79,6 +79,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatDialogTitle,
     MatLabel,
     MatError,
+    MatButton,
   ],
 })
 export class DialogOpenProjectTrackTimeComponent {

@@ -8,10 +8,11 @@ import { TaskComponent } from '../task.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { KeyboardConfig } from '../../../config/keyboard-config.model';
 import { ICAL_TYPE } from '../../../issue/issue.const';
+import { MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'task-hover-controls',
-  imports: [MatIcon, TranslateModule],
+  imports: [MatIcon, TranslateModule, MatIconButton],
   templateUrl: './task-hover-controls.component.html',
   styleUrl: './task-hover-controls.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
