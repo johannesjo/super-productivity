@@ -19,7 +19,6 @@ import {
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { TasksModule } from '../../../tasks/tasks.module';
 import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
@@ -38,7 +37,7 @@ import { InputDurationSliderComponent } from '../../../../ui/duration/input-dura
     FormsModule,
     MatButtonToggle,
     MatIcon,
-    TasksModule,
+
     MatMiniFabButton,
     MatTooltip,
     MatIconButton,

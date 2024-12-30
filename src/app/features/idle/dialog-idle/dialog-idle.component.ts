@@ -33,7 +33,6 @@ import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { TasksModule } from '../../tasks/tasks.module';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
 import { UiModule } from '../../../ui/ui.module';
@@ -50,7 +49,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatIconButton,
     MatTooltip,
     MatIcon,
-    TasksModule,
+
     MatMiniFabButton,
     MatCheckbox,
     MatDialogActions,

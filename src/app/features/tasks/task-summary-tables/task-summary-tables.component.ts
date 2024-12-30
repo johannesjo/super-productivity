@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, Input } from '@angular/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,19 +11,41 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   mapToProjectWithTasks,
   ProjectWithTasks,
 } from './map-to-project-with-tasks.util';
 import { DateService } from 'src/app/core/date/date.service';
+import { MatIcon } from '@angular/material/icon';
+import { TaskSummaryTableComponent } from '../task-summary-table/task-summary-table.component';
+import { MatButton } from '@angular/material/button';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'task-summary-tables',
   templateUrl: './task-summary-tables.component.html',
   styleUrls: ['./task-summary-tables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatIcon,
+    TaskSummaryTableComponent,
+    MatButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    AsyncPipe,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class TaskSummaryTablesComponent {
   readonly workContextService = inject(WorkContextService);

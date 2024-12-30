@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { Reminder } from '../../reminder/reminder.model';
 import { Task, TaskWithReminderData } from '../task.model';
 import { TaskService } from '../task.service';
@@ -14,6 +21,12 @@ import { getTomorrow } from '../../../util/get-tomorrow';
 import { uniqueByProp } from '../../../util/unique-by-prop';
 import { ProjectService } from '../../project/project.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { MatIcon } from '@angular/material/icon';
+import { TagModule } from '../../tag/tag.module';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const M = 1000 * 60;
 
@@ -23,7 +36,20 @@ const M = 1000 * 60;
   styleUrls: ['./dialog-view-task-reminders.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
-  standalone: false,
+  imports: [
+    MatDialogTitle,
+    MatIcon,
+    MatDialogContent,
+    TagModule,
+    MatIconButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
   private _matDialogRef =

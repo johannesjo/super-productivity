@@ -7,8 +7,10 @@ import { TaskAttachmentLinkDirective } from './task-attachment-link/task-attachm
 import { TaskAttachmentListComponent } from './task-attachment-list/task-attachment-list.component';
 
 @NgModule({
-  imports: [CommonModule, UiModule, FormsModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    UiModule,
+    FormsModule,
     DialogEditTaskAttachmentComponent,
     TaskAttachmentLinkDirective,
     TaskAttachmentListComponent,

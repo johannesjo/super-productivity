@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../../app.constants';
 import {
   TaskAttachment,
@@ -7,6 +13,14 @@ import {
   TaskAttachmentType,
 } from '../task-attachment.model';
 import { T } from '../../../../t.const';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface TaskAttachmentSelectType {
   type: TaskAttachmentType;
@@ -18,7 +32,20 @@ interface TaskAttachmentSelectType {
   templateUrl: './dialog-edit-task-attachment.component.html',
   styleUrls: ['./dialog-edit-task-attachment.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    FormsModule,
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class DialogEditTaskAttachmentComponent {
   private _matDialogRef =

@@ -1,15 +1,40 @@
-import { ChangeDetectionStrategy, Component, input, output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
+import {
+  MatCell,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderRow,
+  MatRow,
+  MatTable,
+} from '@angular/material/table';
+import { MatIcon } from '@angular/material/icon';
+import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
+import { MatIconButton } from '@angular/material/button';
+import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'task-summary-table',
   templateUrl: './task-summary-table.component.html',
   styleUrls: ['./task-summary-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatIcon,
+    InlineInputComponent,
+    MatIconButton,
+    MatHeaderRow,
+    MatRow,
+    MsToClockStringPipe,
+    TranslatePipe,
+  ],
 })
 export class TaskSummaryTableComponent {
   private _taskService = inject(TaskService);

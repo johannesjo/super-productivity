@@ -1,13 +1,10 @@
-import { Directive, HostListener, input, inject } from '@angular/core';
+import { Directive, HostListener, inject, input } from '@angular/core';
 import { IS_ELECTRON } from '../../../../app.constants';
 import { TaskAttachmentType } from '../task-attachment.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
 
-@Directive({
-  selector: '[taskAttachmentLink]',
-  standalone: false,
-})
+@Directive({ selector: '[taskAttachmentLink]' })
 export class TaskAttachmentLinkDirective {
   private _snackService = inject(SnackService);
 

@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   ElementRef,
+  forwardRef,
   HostListener,
   inject,
   input,
@@ -40,7 +41,12 @@ import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-e
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 import { T } from '../../../t.const';
-import { MatMenuTrigger } from '@angular/material/menu';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -62,6 +68,20 @@ import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { MatIcon } from '@angular/material/icon';
+import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { TagModule } from '../../tag/tag.module';
+import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
+import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
+import { TaskListComponent } from '../task-list/task-list.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
+import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
 
 @Component({
   selector: 'task',
@@ -78,7 +98,30 @@ import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-inpu
     '[class.isSelected]': 'isSelected()',
     '[class.hasNoSubTasks]': 'task().subTaskIds.length === 0',
   },
-  standalone: false,
+  imports: [
+    MatIcon,
+    MatMenuTrigger,
+    LongPressIOSDirective,
+    MatIconButton,
+    InlineMultilineInputComponent,
+    TagModule,
+    TaskHoverControlsComponent,
+    ProgressBarComponent,
+    MatMiniFabButton,
+    forwardRef(() => TaskListComponent),
+    TaskContextMenuComponent,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    AsyncPipe,
+    DatePipe,
+    MsToStringPipe,
+    ShortPlannedAtPipe,
+    LocalDateStrPipe,
+    TranslatePipe,
+    IssueIconPipe,
+    SubTaskTotalTimeSpentPipe,
+  ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);

@@ -6,7 +6,15 @@ import {
   ElementRef,
   inject,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { Task, TaskCopy, TimeSpentOnDayCopy } from '../task.model';
 import { TaskService } from '../task.service';
 import { getTodayStr } from '../util/get-today-str';
@@ -14,13 +22,41 @@ import { createTaskCopy } from '../util/create-task-copy';
 import { DialogAddTimeEstimateForOtherDayComponent } from '../dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { T } from '../../../t.const';
+import { FormsModule } from '@angular/forms';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
+import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import { KeysPipe } from '../../../ui/pipes/keys.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-time-estimate',
   templateUrl: './dialog-time-estimate.component.html',
   styleUrls: ['./dialog-time-estimate.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogTitle,
+    FormsModule,
+    MatDialogContent,
+    HelpSectionComponent,
+    InputDurationSliderComponent,
+    MatButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    InputDurationDirective,
+    MatInput,
+    MatPrefix,
+    MatIconButton,
+    MatDialogActions,
+    MatDialogClose,
+    KeysPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogTimeEstimateComponent implements AfterViewInit {
   private _matDialogRef = inject<MatDialogRef<DialogTimeEstimateComponent>>(MatDialogRef);

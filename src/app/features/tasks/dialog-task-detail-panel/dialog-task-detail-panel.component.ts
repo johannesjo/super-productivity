@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TasksModule } from '../tasks.module';
 import {
   MAT_DIALOG_DATA,
   MatDialogContent,
@@ -14,10 +13,17 @@ import { UiModule } from '../../../ui/ui.module';
 import { setSelectedTask } from '../store/task.actions';
 import { TaskDetailTargetPanel } from '../task.model';
 import { skipWhile } from 'rxjs/operators';
+import { TaskDetailPanelComponent } from '../task-detail-panel/task-detail-panel.component';
 
 @Component({
   selector: 'dialog-task-detail-panel',
-  imports: [CommonModule, TasksModule, UiModule, TranslateModule, MatDialogContent],
+  imports: [
+    CommonModule,
+    UiModule,
+    TranslateModule,
+    MatDialogContent,
+    TaskDetailPanelComponent,
+  ],
   templateUrl: './dialog-task-detail-panel.component.html',
   styleUrl: './dialog-task-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

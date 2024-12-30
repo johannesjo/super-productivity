@@ -23,7 +23,6 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { TasksModule } from './features/tasks/tasks.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { GlobalErrorHandler } from './core/error-handler/global-error-handler.class';
@@ -50,6 +49,7 @@ import { MainHeaderComponent } from './core-ui/main-header/main-header.component
 import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { SearchBarComponent } from './features/search-bar/search-bar.component';
+import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
 
 // NOTE: export required for aot to work
 export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
@@ -70,7 +70,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     TrackingReminderModule,
     ReminderModule,
     NoteModule,
-    TasksModule,
+
     MaterialCssVarsModule.forRoot(),
     // External
     BrowserModule,
@@ -133,6 +133,7 @@ export const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
     SideNavComponent,
     FocusModeOverlayComponent,
     SearchBarComponent,
+    AddTaskBarComponent,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: navigator.language },

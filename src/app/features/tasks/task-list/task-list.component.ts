@@ -3,10 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  forwardRef,
+  inject,
   input,
   OnDestroy,
   viewChild,
-  inject,
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
@@ -30,6 +31,10 @@ import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue.model';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TaskComponent } from '../task/task.component';
+import { AsyncPipe } from '@angular/common';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -47,7 +52,14 @@ export interface DropModelDataForList {
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [taskListAnimation, expandFadeFastAnimation],
-  standalone: false,
+  imports: [
+    MatButton,
+    MatIcon,
+    CdkDropList,
+    CdkDrag,
+    AsyncPipe,
+    forwardRef(() => TaskComponent),
+  ],
 })
 export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _taskService = inject(TaskService);

@@ -4,7 +4,6 @@ import { ReminderService } from './reminder.service';
 import { NoteModule } from '../note/note.module';
 import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
-import { TasksModule } from '../tasks/tasks.module';
 import {
   concatMap,
   delay,
@@ -26,7 +25,7 @@ import { from, merge, of, timer } from 'rxjs';
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule, NoteModule, TasksModule],
+  imports: [CommonModule, NoteModule],
 })
 export class ReminderModule {
   private readonly _reminderService = inject(ReminderService);

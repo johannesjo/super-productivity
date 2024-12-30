@@ -4,17 +4,32 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  inject,
   Input,
   output,
-  inject,
 } from '@angular/core';
+import { MatRipple } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 @Component({
   selector: 'task-detail-item',
   templateUrl: './task-detail-item.component.html',
   styleUrls: ['./task-detail-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatRipple,
+    MatIconButton,
+    MatIcon,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+  ],
 })
 export class TaskDetailItemComponent {
   elementRef = inject(ElementRef);

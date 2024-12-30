@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { TaskAttachment } from '../task-attachment.model';
 import { TaskAttachmentService } from '../task-attachment.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -6,6 +6,10 @@ import { DialogEditTaskAttachmentComponent } from '../dialog-edit-attachment/dia
 import { standardListAnimation } from '../../../../ui/animations/standard-list.ani';
 import { T } from '../../../../t.const';
 import { SnackService } from 'src/app/core/snack/snack.service';
+import { TaskAttachmentLinkDirective } from '../task-attachment-link/task-attachment-link.directive';
+import { MatIcon } from '@angular/material/icon';
+import { EnlargeImgDirective } from '../../../../ui/enlarge-img/enlarge-img.directive';
+import { MatAnchor, MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'task-attachment-list',
@@ -13,7 +17,13 @@ import { SnackService } from 'src/app/core/snack/snack.service';
   styleUrls: ['./task-attachment-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
-  standalone: false,
+  imports: [
+    TaskAttachmentLinkDirective,
+    MatIcon,
+    EnlargeImgDirective,
+    MatAnchor,
+    MatButton,
+  ],
 })
 export class TaskAttachmentListComponent {
   readonly attachmentService = inject(TaskAttachmentService);

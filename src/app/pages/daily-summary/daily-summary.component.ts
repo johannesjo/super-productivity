@@ -2,9 +2,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   OnDestroy,
   OnInit,
-  inject,
 } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -44,8 +44,7 @@ import { RightPanelModule } from '../../features/right-panel/right-panel.module'
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { TasksModule } from '../../features/tasks/tasks.module';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { WorklogModule } from '../../features/worklog/worklog.module';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MetricModule } from '../../features/metric/metric.module';
@@ -55,6 +54,8 @@ import { AsyncPipe } from '@angular/common';
 import { MomentFormatPipe } from '../../ui/pipes/moment-format.pipe';
 import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
+import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -72,7 +73,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     InlineInputComponent,
     MatTabGroup,
     MatTab,
-    TasksModule,
+
     WorklogModule,
     MatProgressSpinner,
     MetricModule,
@@ -83,6 +84,8 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     MomentFormatPipe,
     MsToClockStringPipe,
     TranslatePipe,
+    TaskSummaryTablesComponent,
+    TasksByTagComponent,
   ],
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {

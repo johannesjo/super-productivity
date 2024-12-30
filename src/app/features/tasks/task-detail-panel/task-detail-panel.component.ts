@@ -4,13 +4,13 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
+  inject,
   Input,
+  input,
   LOCALE_ID,
   OnDestroy,
-  viewChildren,
   viewChild,
-  input,
-  inject,
+  viewChildren,
 } from '@angular/core';
 import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
@@ -63,7 +63,7 @@ import { devError } from '../../../util/dev-error';
 import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { shareReplayUntil } from '../../../util/share-replay-until';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { PlannerService } from '../../planner/planner.service';
@@ -71,6 +71,21 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
+import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { MatIcon } from '@angular/material/icon';
+import { TaskListComponent } from '../task-list/task-list.component';
+import { MatButton } from '@angular/material/button';
+import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { IssueHeaderComponent } from '../../issue/issue-header/issue-header.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { IssueContentComponent } from '../../issue/issue-content/issue-content.component';
+import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
+import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
+import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 interface IssueAndType {
   id: string | number | null;
@@ -88,7 +103,26 @@ interface IssueDataAndType {
   styleUrls: ['./task-detail-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
-  standalone: false,
+  imports: [
+    InlineMultilineInputComponent,
+    TaskDetailItemComponent,
+    MatIcon,
+    TaskListComponent,
+    MatButton,
+    ProgressBarComponent,
+    MatTooltip,
+    IssueHeaderComponent,
+    MatProgressBar,
+    IssueContentComponent,
+    InlineMarkdownComponent,
+    TaskAttachmentListComponent,
+    TagEditComponent,
+    AsyncPipe,
+    DatePipe,
+    MsToStringPipe,
+    TranslatePipe,
+    IssueIconPipe,
+  ],
 })
 export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   attachmentService = inject(TaskAttachmentService);

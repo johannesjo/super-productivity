@@ -1,14 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnDestroy,
   OnInit,
-  input,
   output,
-  inject,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
@@ -21,13 +21,35 @@ import {
 } from '../../work-context/store/work-context.selectors';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatIcon } from '@angular/material/icon';
+import { MatOption } from '@angular/material/core';
+import { TagModule } from '../../tag/tag.module';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'select-task',
   templateUrl: './select-task.component.html',
   styleUrls: ['./select-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatInput,
+    FormsModule,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MatIcon,
+    MatSuffix,
+    MatAutocomplete,
+    MatOption,
+    TagModule,
+    TranslatePipe,
+    IssueIconPipe,
+  ],
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
   private _workContextService = inject(WorkContextService);

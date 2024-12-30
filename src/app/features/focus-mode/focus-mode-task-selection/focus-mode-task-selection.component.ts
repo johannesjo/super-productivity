@@ -13,7 +13,6 @@ import { setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
-import { TasksModule } from '../../tasks/tasks.module';
 import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -23,7 +22,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TasksModule, MatButton, AsyncPipe, TranslatePipe],
+  imports: [FormsModule, MatButton, AsyncPipe, TranslatePipe],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);

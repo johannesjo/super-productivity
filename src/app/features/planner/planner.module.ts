@@ -11,7 +11,6 @@ import {
 } from '@angular/cdk/drag-drop';
 import { BetterDrawerModule } from '../../ui/better-drawer/better-drawer.module';
 import { NoteModule } from '../note/note.module';
-import { TasksModule } from '../tasks/tasks.module';
 import { WorkViewModule } from '../work-view/work-view.module';
 import { AddTaskPanelPlannerComponent } from './add-task-panel-planner/add-task-panel-planner.component';
 import { TagModule } from '../tag/tag.module';
@@ -47,7 +46,7 @@ import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
     CdkDrag,
     BetterDrawerModule,
     NoteModule,
-    TasksModule,
+
     WorkViewModule,
     TagModule,
     CdkDragPlaceholder,

@@ -3,14 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   output,
   signal,
   viewChild,
-  inject,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -31,6 +31,22 @@ import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
 import { toObservable } from '@angular/core/rxjs-interop';
+import {
+  MatAutocomplete,
+  MatAutocompleteOrigin,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatInput } from '@angular/material/input';
+import { MentionModule } from 'angular-mentions';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TagModule } from '../../tag/tag.module';
+import { MatOption } from '@angular/material/core';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'add-task-bar',
@@ -38,7 +54,24 @@ import { toObservable } from '@angular/core/rxjs-interop';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
-  standalone: false,
+  imports: [
+    FormsModule,
+    MatAutocompleteOrigin,
+    MatProgressSpinner,
+    MatInput,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MentionModule,
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+    TagModule,
+    MatAutocomplete,
+    MatOption,
+    AsyncPipe,
+    TranslatePipe,
+    IssueIconPipe,
+  ],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _taskService = inject(TaskService);

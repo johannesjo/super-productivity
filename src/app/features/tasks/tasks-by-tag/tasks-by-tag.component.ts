@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, Input } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { Task } from '../task.model';
 import { unique } from '../../../util/unique';
@@ -9,6 +9,10 @@ import { Store } from '@ngrx/store';
 import { selectAllTags } from '../../tag/store/tag.reducer';
 import { Tag } from '../../tag/tag.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { TagModule } from '../../tag/tag.module';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface TagWithTimeSpent {
   id: string;
@@ -21,7 +25,7 @@ interface TagWithTimeSpent {
   templateUrl: './tasks-by-tag.component.html',
   styleUrls: ['./tasks-by-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [TagModule, AsyncPipe, MsToStringPipe, TranslatePipe],
 })
 export class TasksByTagComponent {
   private readonly _store = inject(Store);
