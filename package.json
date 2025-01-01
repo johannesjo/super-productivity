@@ -200,7 +200,7 @@
     "nightwatch": "^3.6.3",
     "object-path": "^0.11.8",
     "p-throttle": "^3.1.0",
-    "prettier": "^3.3.2",
+    "prettier": "^3.4.2",
     "pretty-quick": "^4.0.0",
     "query-string": "^7.1.1",
     "rxjs": "^6.6.7",
