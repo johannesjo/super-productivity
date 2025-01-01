@@ -18,6 +18,7 @@ import {
   MatChipGrid,
   MatChipInput,
   MatChipInputEvent,
+  MatChipRemove,
   MatChipRow,
 } from '@angular/material/chips';
 import { MatIcon } from '@angular/material/icon';
@@ -51,7 +52,7 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     MatChipInput,
     MatChipRow,
     MatIcon,
-
+    MatChipRemove,
     TagComponent,
     MatTooltip,
     ReactiveFormsModule,
