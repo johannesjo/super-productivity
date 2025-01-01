@@ -112,7 +112,7 @@
     "@angular/compiler": "^19.0.4",
     "@angular/compiler-cli": "^19.0.4",
     "@angular/core": "^19.0.4",
-    "@angular/forms": "^19.0.4",
+    "@angular/forms": "^19.0.5",
     "@angular/language-service": "^19.0.4",
     "@angular/material": "^19.0.3",
     "@angular/material-moment-adapter": "^19.0.3",
