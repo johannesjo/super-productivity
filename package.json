@@ -105,7 +105,7 @@
     "@angular-eslint/eslint-plugin-template": "^19.0.0",
     "@angular-eslint/schematics": "^18.4.2",
     "@angular-eslint/template-parser": "^18.4.2",
-    "@angular/animations": "^19.0.4",
+    "@angular/animations": "^19.0.5",
     "@angular/cdk": "^19.0.3",
     "@angular/cli": "^19.0.5",
     "@angular/common": "^19.0.4",
