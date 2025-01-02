@@ -5,6 +5,7 @@ import {
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
+  MatDialogTitle,
 } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { T } from '../../../t.const';
@@ -60,6 +61,7 @@ import { MatIcon } from '@angular/material/icon';
     MatDialogActions,
     MatButton,
     MatIcon,
+    MatDialogTitle,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

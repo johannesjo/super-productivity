@@ -8,10 +8,11 @@ import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarContextInfoTarget } from '../../issue/providers/calendar/calendar.model';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'issue-provider-setup-overview',
-  imports: [MatIcon, TranslateModule],
+  imports: [MatIcon, TranslateModule, MatButton],
   templateUrl: './issue-provider-setup-overview.component.html',
   styleUrl: './issue-provider-setup-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
