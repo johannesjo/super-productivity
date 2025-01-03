@@ -25,7 +25,11 @@ import { Task, TaskArchive, TaskCopy } from '../../tasks/task.model';
 import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
+import {
+  TaskRepeatCfg,
+  TaskRepeatCfgCopy,
+  TaskRepeatCfgState,
+} from '../task-repeat-cfg.model';
 import { forkJoin, from, merge, of } from 'rxjs';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
@@ -182,69 +186,9 @@ export class TaskRepeatCfgEffects {
                   console.log(todayTasks, archiveTasks);
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
                   // TODO update reminders if given
-                  todayTasks.forEach((task) => {
-                    // NOTE: projects can't be updated from the dialog,
-                    // if (
-                    //   typeof changes.projectId === 'string' &&
-                    //   task.projectId !== changes.projectId
-                    // ) {
-                    //   const withSubTasks = await this._taskService
-                    //     .getByIdWithSubTaskData$(task.id)
-                    //     .pipe(take(1))
-                    //     .toPromise();
-                    //   this._taskService.moveToProject(withSubTasks, changes.projectId);
-                    // }
-                    if (
-                      (changes.startTime || changes.remindAt) &&
-                      completeCfg.remindAt &&
-                      completeCfg.startTime &&
-                      isToday(task.created)
-                    ) {
-                      const dateTime = getDateTimeFromClockString(
-                        completeCfg.startTime as string,
-                        new Date(),
-                      );
-                      if (task.reminderId) {
-                        this._taskService.reScheduleTask({
-                          task,
-                          plannedAt: dateTime,
-                          remindCfg: completeCfg.remindAt,
-                          isMoveToBacklog: false,
-                        });
-                      } else {
-                        this._taskService.scheduleTask(
-                          task,
-                          dateTime,
-                          completeCfg.remindAt,
-                        );
-                      }
-                    }
-                    if (changes.tagIds) {
-                      this._taskService.updateTags(task, changes.tagIds);
-                    }
-                    if (changes.title || changes.notes) {
-                      this._taskService.update(task.id, {
-                        ...(changes.title
-                          ? {
-                              title: changes.title,
-                            }
-                          : {}),
-                        ...(changes.notes
-                          ? {
-                              notes: changes.notes,
-                            }
-                          : {}),
-                      });
-                    }
-                    if (
-                      typeof changes.defaultEstimate === 'number' &&
-                      task.subTaskIds.length === 0
-                    ) {
-                      this._taskService.update(task.id, {
-                        timeEstimate: changes.defaultEstimate,
-                      });
-                    }
-                  });
+                  todayTasks.forEach((task) =>
+                    this._updateRegularTaskInstance(task, changes, completeCfg),
+                  );
 
                   const archiveUpdates: Update<TaskCopy>[] = archiveTasks.map((task) => {
                     const changesForArchiveTask: Partial<TaskCopy> = {};
@@ -290,6 +234,67 @@ export class TaskRepeatCfgEffects {
       ),
     { dispatch: false },
   );
+
+  private _updateRegularTaskInstance(
+    task: TaskCopy,
+    changes: Partial<TaskRepeatCfgCopy>,
+    completeCfg: TaskRepeatCfgCopy,
+  ): void {
+    // NOTE: projects can't be updated from the dialog,
+    // if (
+    //   typeof changes.projectId === 'string' &&
+    //   task.projectId !== changes.projectId
+    // ) {
+    //   const withSubTasks = await this._taskService
+    //     .getByIdWithSubTaskData$(task.id)
+    //     .pipe(take(1))
+    //     .toPromise();
+    //   this._taskService.moveToProject(withSubTasks, changes.projectId);
+    // }
+    if (
+      (changes.startTime || changes.remindAt) &&
+      completeCfg.remindAt &&
+      completeCfg.startTime &&
+      isToday(task.created)
+    ) {
+      const dateTime = getDateTimeFromClockString(
+        completeCfg.startTime as string,
+        new Date(),
+      );
+      if (task.reminderId) {
+        this._taskService.reScheduleTask({
+          task,
+          plannedAt: dateTime,
+          remindCfg: completeCfg.remindAt,
+          isMoveToBacklog: false,
+        });
+      } else {
+        this._taskService.scheduleTask(task, dateTime, completeCfg.remindAt);
+      }
+    }
+    if (changes.tagIds) {
+      this._taskService.updateTags(task, changes.tagIds);
+    }
+    if (changes.title || changes.notes) {
+      this._taskService.update(task.id, {
+        ...(changes.title
+          ? {
+              title: changes.title,
+            }
+          : {}),
+        ...(changes.notes
+          ? {
+              notes: changes.notes,
+            }
+          : {}),
+      });
+    }
+    if (typeof changes.defaultEstimate === 'number' && task.subTaskIds.length === 0) {
+      this._taskService.update(task.id, {
+        timeEstimate: changes.defaultEstimate,
+      });
+    }
+  }
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
     this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {
