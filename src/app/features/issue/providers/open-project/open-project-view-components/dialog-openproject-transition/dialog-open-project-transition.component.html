@@ -3,48 +3,49 @@
     class="dialog-header-icon"
     svgIcon="open_project"
   ></mat-icon>
-  <span>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.TITLE|translate}}</span>
+  <span>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.TITLE|translate }}</span>
 </h1>
 
 <mat-dialog-content>
   <table>
     <tr>
-      <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.TASK_NAME|translate}}</th>
-      <td>{{data.task ? data.task?.title : '–'}}</td>
+      <th>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.TASK_NAME|translate }}</th>
+      <td>{{ data.task ? data.task?.title : '–' }}</td>
     </tr>
     <tr>
-      <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.CURRENT_STATUS|translate}}</th>
+      <th>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.CURRENT_STATUS|translate }}</th>
       <td>
-        {{data.issue?._embedded?.status?.name ? data.issue?._embedded?.status?.name :
-        '–'}}
+        {{ data.issue?._embedded?.status?.name ? data.issue?._embedded?.status?.name : '–'
+        }}
       </td>
     </tr>
     <tr>
-      <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.CURRENT_ASSIGNEE|translate}}</th>
+      <th>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.CURRENT_ASSIGNEE|translate }}</th>
       <td>
-        {{data.issue?._embedded?.assignee?.name ? data.issue?._embedded?.assignee?.name :
-        '–'}}
+        {{ data.issue?._embedded?.assignee?.name ? data.issue?._embedded?.assignee?.name :
+        '–' }}
       </td>
     </tr>
     <tr>
-      <th>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.PERCENTAGE_DONE|translate}}</th>
+      <th>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.PERCENTAGE_DONE|translate }}</th>
       <td>
         <!-- TODO: The 'tickInterval' property no longer exists -->
         <mat-slider
           thumbLabel
-          [(ngModel)]="percentageDone"
           [displayWith]="displayThumbWith"
           step="5"
           min="0"
           max="100"
           aria-label="units"
-          ><input matSliderThumb
+          ><input
+            matSliderThumb
+            [(ngModel)]="percentageDone"
         /></mat-slider>
       </td>
     </tr>
   </table>
   <mat-form-field>
-    <label>{{T.F.OPEN_PROJECT.DIALOG_TRANSITION.CHOOSE_STATUS|translate}}</label>
+    <label>{{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.CHOOSE_STATUS|translate }}</label>
     <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
@@ -52,7 +53,7 @@
       transition)) {
       <mat-option [value]="transition">
         <!--<img [src]="transition.to.iconUrl">-->
-        {{transition.name}}
+        {{ transition.name }}
       </mat-option>
       }
     </mat-select>
@@ -68,7 +69,7 @@
       mat-button
       type="button"
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL|translate }}
     </button>
     <button
       (click)="transitionIssue()"
@@ -76,7 +77,7 @@
       color="primary"
       mat-stroked-button
     >
-      {{T.F.OPEN_PROJECT.DIALOG_TRANSITION.TITLE|translate}}
+      {{ T.F.OPEN_PROJECT.DIALOG_TRANSITION.TITLE|translate }}
     </button>
   </div>
 </mat-dialog-actions>

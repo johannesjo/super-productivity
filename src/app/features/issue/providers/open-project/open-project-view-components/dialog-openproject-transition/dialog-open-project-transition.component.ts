@@ -23,7 +23,7 @@ import { IssueProviderService } from 'src/app/features/issue/issue-provider.serv
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatSliderModule } from '@angular/material/slider';
 import { TaskService } from '../../../../../tasks/task.service';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -39,12 +39,11 @@ import { MatButton } from '@angular/material/button';
   imports: [
     FormsModule,
     AsyncPipe,
-    MatSlider,
     MatDialogTitle,
     MatIcon,
     TranslatePipe,
     MatDialogContent,
-    MatSliderThumb,
+    MatSliderModule,
     MatFormField,
     MatSelect,
     MatOption,
