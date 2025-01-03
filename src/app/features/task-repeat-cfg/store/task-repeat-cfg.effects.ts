@@ -1,11 +1,13 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   concatMap,
   delay,
   filter,
   first,
+  map,
   mergeMap,
+  switchMap,
   take,
   tap,
   withLatestFrom,
@@ -142,6 +144,26 @@ export class TaskRepeatCfgEffects {
         ofType(deleteTaskRepeatCfg),
         tap(({ id }) => {
           this._removeRepeatCfgFromArchiveTasks(id);
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  updateTaskAfterMakingItRepeatable$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(addTaskRepeatCfgToTask),
+        switchMap(({ taskRepeatCfg, taskId }) => {
+          return this._taskService.getByIdOnce$(taskId).pipe(
+            first(),
+            map((task) => ({
+              task,
+              taskRepeatCfg,
+            })),
+          );
+        }),
+        tap(({ task, taskRepeatCfg }) => {
+          this._updateRegularTaskInstance(task, taskRepeatCfg, taskRepeatCfg);
         }),
       ),
     { dispatch: false },
