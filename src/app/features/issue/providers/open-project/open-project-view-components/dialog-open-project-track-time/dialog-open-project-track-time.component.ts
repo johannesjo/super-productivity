@@ -27,7 +27,6 @@ import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-p
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
-import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../../../../tasks/task.service';
@@ -138,9 +137,8 @@ export class DialogOpenProjectTrackTimeComponent {
     this.workPackage = this.data.workPackage;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
-    this.timeLoggedForWorkPackage = parseOpenProjectDuration(
-      assertTruthy(this.workPackage.spentTime),
-    );
+
+    this.timeLoggedForWorkPackage = parseOpenProjectDuration(this.workPackage.spentTime);
     this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(
       0,
