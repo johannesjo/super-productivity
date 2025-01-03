@@ -52,6 +52,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   readonly isLock = input<boolean>(false);
   readonly isShowControls = input<boolean>(false);
   readonly isShowChecklistToggle = input<boolean>(false);
+  readonly isDefaultText = input<boolean>(false);
 
   readonly changed = output<string>();
   readonly focused = output<Event>();
@@ -246,7 +247,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     ev.stopPropagation();
     this.isChecklistMode = true;
     this._toggleShowEdit();
-    this.modelCopy += '\n- [ ] ';
+
+    if (this.isDefaultText()) {
+      this.modelCopy = '- [ ] ';
+    } else {
+      this.modelCopy += '\n- [ ] ';
+    }
   }
 
   private _toggleShowEdit(): void {

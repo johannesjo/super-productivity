@@ -185,6 +185,7 @@
         [isFocus]="isFocusNotes"
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
+        [isDefaultText]="!task.notes"
         [model]="task.notes|| defaultTaskNotes"
       ></inline-markdown>
     </ng-container>
