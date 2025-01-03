@@ -246,11 +246,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     ev.stopPropagation();
     this.isChecklistMode = true;
     this._toggleShowEdit();
-    if (this.modelCopy && isMarkdownChecklist(this.modelCopy)) {
-      this.modelCopy += '\n- [ ] ';
-    } else {
-      this.modelCopy = '- [ ] ';
-    }
+    this.modelCopy += '\n- [ ] ';
   }
 
   private _toggleShowEdit(): void {
