@@ -5,6 +5,10 @@ export default {
     'no-empty-source': null,
     'block-no-empty': [true, { severity: 'warning' }],
     'no-descending-specificity': null,
+    'font-family-no-missing-generic-family-keyword': [
+      true,
+      { ignoreFontFamilies: ['Material Icons'] },
+    ],
     'selector-type-no-unknown': null, // stylelint doesn't recognize angular components
     'scss/comment-no-empty': null, // allow for double slash multiline comments
     'scss/load-no-partial-leading-underscore': null, // this project uses underscored files
