@@ -101,13 +101,23 @@ export class TakeABreakService {
       filter(() => !!this._taskService.currentTaskId),
     ),
     this._actions$.pipe(ofType(idleDialogResult)).pipe(
-      map(({ trackItems, idleTime }) => {
+      switchMap(({ trackItems, idleTime, isResetBreakTimer }) => {
         if (trackItems.find((t) => t.type === 'BREAK')) {
-          return 0;
+          return of(0);
         }
-        return trackItems.reduce(
-          (acc, t) => acc + (typeof t.time === 'number' ? t.time : idleTime),
-          0,
+        if ((trackItems.length === 0 || trackItems.length === 1) && !isResetBreakTimer) {
+          return EMPTY;
+        }
+        return of(
+          trackItems.reduce(
+            (acc, t) =>
+              t.type === 'BREAK'
+                ? // every break resets the timer to zero
+                  0
+                : // for type TASK we add the time
+                  acc + (typeof t.time === 'number' ? t.time : 0),
+            0,
+          ),
         );
       }),
     ),

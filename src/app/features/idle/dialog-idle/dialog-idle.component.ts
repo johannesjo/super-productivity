@@ -142,6 +142,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         if (res) {
           this._matDialogRef.close({
+            isResetBreakTimer: this.isResetBreakTimer,
             trackItems: res.trackItems,
           });
         }
@@ -161,6 +162,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   skipTrack(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [],
       simpleCounterToggleBtnsWhenNoTrackItems: this.simpleCounterToggleBtns,
     });
@@ -168,6 +170,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   trackAsBreak(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [
         {
           type: 'BREAK',
@@ -180,11 +183,11 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   track(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [
         {
           type: 'TASK',
           time: 'IDLE_TIME',
-          isResetBreakTimer: this.isResetBreakTimer,
           simpleCounterToggleBtns: this.simpleCounterToggleBtns,
           ...(this.isCreate
             ? { title: this.newTaskTitle as string }
