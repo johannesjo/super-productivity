@@ -32,6 +32,10 @@ export const initIpcInterfaces = (): void => {
   ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
   ipcMain.on(IPC.RELAUNCH, () => app.relaunch());
   ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
+  ipcMain.on(
+    IPC.SHOW_EMOJI_PANEL,
+    () => app.isEmojiPanelSupported() && app.showEmojiPanel(),
+  );
   ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
   ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
   ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));

@@ -19,6 +19,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
       type: 'icon',
       templateOptions: {
         label: T.F.TAG.FORM_BASIC.L_ICON,
+        description: T.G.ICON_INP_DESCRIPTION,
       },
     },
     {
@@ -67,6 +68,7 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
       type: 'icon',
       templateOptions: {
         label: T.F.TAG.FORM_BASIC.L_ICON,
+        description: T.G.ICON_INP_DESCRIPTION,
       },
     },
     {

@@ -46,6 +46,7 @@ const ea: ElectronAPI = {
     webFrame.setZoomFactor(zoomFactor);
   },
   getZoomFactor: () => webFrame.getZoomFactor(),
+  isLinux: () => process.platform === 'linux',
   isMacOS: () => process.platform === 'darwin',
   isSnap: () => process && process.env && !!process.env.SNAP,
 
@@ -59,6 +60,7 @@ const ea: ElectronAPI = {
   shutdownNow: () => _send('SHUTDOWN_NOW'),
   reloadMainWin: () => _send('RELOAD_MAIN_WIN'),
   openDevTools: () => _send('OPEN_DEV_TOOLS'),
+  showEmojiPanel: () => _send('SHOW_EMOJI_PANEL'),
   informAboutAppReady: () => _send('APP_READY'),
 
   openPath: (path: string) => _send('OPEN_PATH', path),

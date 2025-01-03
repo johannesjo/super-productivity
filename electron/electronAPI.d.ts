@@ -54,6 +54,8 @@ export interface ElectronAPI {
 
   openExternalUrl(url: string): void;
 
+  isLinux(): boolean;
+
   isMacOS(): boolean;
 
   isSnap(): boolean;
@@ -63,6 +65,8 @@ export interface ElectronAPI {
   reloadMainWin(): void;
 
   openDevTools(): void;
+
+  showEmojiPanel(): void;
 
   relaunch(): void;
 

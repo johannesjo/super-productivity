@@ -68,6 +68,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             key: 'icon',
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
+              description: T.G.ICON_INP_DESCRIPTION,
             },
           },
           {
@@ -78,6 +79,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
+              description: T.G.ICON_INP_DESCRIPTION,
             },
           },
           {

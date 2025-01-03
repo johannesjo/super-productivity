@@ -22,6 +22,7 @@ export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
       type: 'icon',
       templateOptions: {
         label: T.F.TAG.FORM_BASIC.L_ICON,
+        description: T.G.ICON_INP_DESCRIPTION,
       },
     },
     {

@@ -25,3 +25,13 @@
   </mat-option>
   }
 </mat-autocomplete>
+
+@if(IS_ELECTRON && !isLinux){
+<mat-icon
+  matSuffix
+  type="button"
+  [matTooltip]="'Open system emoji picker if any'"
+  (click)="openEmojiPicker()"
+  >add_reaction</mat-icon
+>
+}
