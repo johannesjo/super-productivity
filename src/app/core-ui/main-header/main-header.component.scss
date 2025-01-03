@@ -122,7 +122,6 @@ button {
   &.isOpen {
     mat-icon {
       transform: rotate(180deg);
-      transition-property: transform !important;
       transition: $transition-standard !important;
     }
   }
@@ -162,7 +161,6 @@ button {
     border-radius: 50%;
     margin: auto;
     transform: scale(1, 1);
-    animation-timing-function: ease-in-out;
     animation: pulse 2s infinite;
     background: $c-accent;
     opacity: 0.6;
