@@ -11,6 +11,7 @@ export default {
     'scss/operator-no-newline-after': null, // prettier conficts with this rule
     'scss/operator-no-unspaced': null, // code style not error
     'scss/load-partial-extension': null, // it's code style not an error
+    'scss/no-global-function-names': null, // to pass this a big migration is required, to be re-enabled later
     'selector-pseudo-element-no-unknown': [
       true,
       {
