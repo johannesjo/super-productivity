@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "CalDav资源的名称（日历）",
         "CALDAV_URL": "CalDav URL（基本URL）",
         "CALDAV_USER": "您的CalDav用户名",
+        "IS_TRANSITION_ISSUES_ENABLED": "完成任务后自动完成CalDav待办事项",
         "IS_AUTO_IMPORT_ISSUES": "自动将未完成的CalDav待办事项添加到您的待办事项中",
         "IS_AUTO_POLL": "自动轮询导入的任务以进行更改",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "添加新任务时，显示未完成的CalDav待办事项作为建议",
-        "IS_TRANSITION_ISSUES_ENABLED": "完成任务后自动完成CalDav待办事项"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "添加新任务时，显示未完成的CalDav待办事项作为建议"
       },
       "FORM_SECTION": {
         "HELP": "<p>在这里，您可以配置SuperProductivity在每日计划视图的任务创建面板中列出特定项目的未完成的CalDav待办事项。它们将被列为建议，并提供指向待办事项的链接以及有关此事项的更多信息。</p> <p>另外，您可以自动将所有未完成的待办事项添加并同步到任务积压中。</p>",
@@ -177,11 +177,11 @@
       },
       "FORM": {
         "FILTER_USER": "用户名（请输入您的用户名）",
+        "REPO": "GitHub：“username / repositoryName”",
+        "TOKEN": "访问令牌",
         "IS_AUTO_IMPORT_ISSUES": "自动将 GitHub 未解决的 Issue 添加到待办事项",
         "IS_AUTO_POLL": "自动拉取导入的git Issue",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将 git 中的 Issue 显示为建议",
-        "REPO": "GitHub：“username / repositoryName”",
-        "TOKEN": "访问令牌",
         "TOKEN_DESCRIPTION": "访问私有存储库时需要用到"
       },
       "FORM_SECTION": {
@@ -209,9 +209,6 @@
       "FORM": {
         "FILTER_USER": "用户名（例如，自行过滤掉该用户做出的更改）",
         "GITLAB_BASE_URL": "自定义GitLab基本URL",
-        "IS_AUTO_IMPORT_ISSUES": "自动将未解决的 Issue 从 GitLab 添加到待办事项",
-        "IS_AUTO_POLL": "自动拉取导入的 git 的 Issue 以进行更改",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的 Issue 显示为建议",
         "PROJECT": "GitLab 完整路径或用户名/repo",
         "SCOPE": "范围",
         "SCOPE_ALL": "所有",
@@ -221,7 +218,10 @@
         "SOURCE_GLOBAL": "所有",
         "SOURCE_GROUP": "组",
         "SOURCE_PROJECT": "项目",
-        "TOKEN": "访问令牌"
+        "TOKEN": "访问令牌",
+        "IS_AUTO_IMPORT_ISSUES": "自动将未解决的 Issue 从 GitLab 添加到待办事项",
+        "IS_AUTO_POLL": "自动拉取导入的 git 的 Issue 以进行更改",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任务时，将git中的 Issue 显示为建议"
       },
       "FORM_SECTION": {
         "HELP": "<p>在这里，您可以配置 Super Productivity 在日常计划视图的任务创建面板中列出特定项目的打开的 GitLab Issue（在线版本或自托管实例）。它们将作为建议列出，并提供指向该 Issue 的链接以及有关此 Issue 的更多信息。</p> <p>此外，您可以自动将所有未解决的 Issue 添加并同步到待办事项。</p>",
@@ -322,17 +322,9 @@
         "TIME_SPENT_TOOLTIP": "添加不同的时间",
         "TITLE": "Jira：提交工作日志Worklog"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "自动将未解决的 Issue 从GitHub添加到待办事项",
-        "IS_AUTO_POLL": "自动拉取导入的git Issue 进行的更改",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的Issue显示为建议",
-        "REPO": "您要跟踪的git存储库的“username / repositoryName”"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用于自动向待办事项添加任务",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任务完成后，打开对话框将工作日志提交给Jira",
-        "IS_AUTO_IMPORT_ISSUES": "自动向Jira待办事项添加 Issue ",
-        "IS_AUTO_POLL_TICKETS": "自动检查导入的 Issue 以进行更改并通知",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "检查当前处理的 Issue 是否已分配给当前用户",
         "IS_WORKLOG_ENABLED": "打开对话框，在任务完成时将工作日志提交给Jira",
         "SEARCH_JQL_QUERY": "JQL Query用于限制搜索任务",
@@ -340,7 +332,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "填写所有花费的时间减去记录的时间",
         "WORKLOG_DEFAULT_TIME_MODE": "对话框的默认时间值",
         "WORKLOG_DEFAULT_TODAY": "只填写今天花费的时间",
-        "WORKLOG_DEFAULT_YESTERDAY": "只填写昨天花费的时间"
+        "WORKLOG_DEFAULT_YESTERDAY": "只填写昨天花费的时间",
+        "IS_AUTO_IMPORT_ISSUES": "自动向Jira待办事项添加 Issue ",
+        "IS_AUTO_POLL_TICKETS": "自动检查导入的 Issue 以进行更改并通知"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "允许自签名证书",
@@ -352,7 +346,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "高级配置",
-        "CREDENTIALS": "证书",
         "HELP_ARR": {
           "H1": "基本配置",
           "H2": "工作日志设置",
@@ -365,7 +358,8 @@
           "P2_2": "<em>'当子任务完成时打开工作日志对话框而不是子任务本身的任务'</em> 每次将Jira Issue 的子任务标记为已完成时打开工作日志对话框。因为您已经通过子任务记录了时间，所以一旦将Jira任务标记为已完成，就不会打开任何对话框。",
           "P2_3": "<em>'在没有对话框的情况下自动向工作日志发送更新'</em> 完成了它所说的内容。由于将任务标记为已完成多次会导致整个工作时间被记录两次，因此不建议这样做。",
           "P3_1": "在这里，您可以重新配置默认转换。 Jira支持广泛的转换配置，通常会在Jira Agile板上的不同列中生效，我们无法对转换任务的位置和时间做出假设，您需要手动设置它。"
-        }
+        },
+        "CREDENTIALS": "证书"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "代理人 Assignee",
@@ -406,6 +400,12 @@
         "LOGIN_SUCCESS": "登陆成功！",
         "TEST_CREDENTIALS": "测试证书",
         "WELCOME_USER": "欢迎 {{user}}！"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "自动将未解决的 Issue 从GitHub添加到待办事项",
+        "IS_AUTO_POLL": "自动拉取导入的git Issue 进行的更改",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的Issue显示为建议",
+        "REPO": "您要跟踪的git存储库的“username / repositoryName”"
       }
     },
     "METRIC": {
@@ -489,9 +489,6 @@
       "FORM": {
         "FILTER_USER": "用户名（例如，自行过滤掉更改）",
         "HOST": "主机（例如：https://www.openproject.org/）",
-        "IS_AUTO_IMPORT_ISSUES": "自动将 OpenProject 中未解决的工作包添加到 backlog",
-        "IS_AUTO_POLL": "自动轮询导入的 OpenProject 工作包的更改",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "添加新任务时将工作包显示为建议",
         "IS_SHOW_TIME_TRACKING_DIALOG": "显示时间跟踪对话框以向 OpenProject 报告",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "需要为 OpenProject 项目启用时间跟踪模块",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "子任务完成时显示时间跟踪对话框",
@@ -501,7 +498,10 @@
         "SCOPE": "范围",
         "SCOPE_ALL": "所有",
         "SCOPE_ASSIGNED": "分配给我",
-        "SCOPE_CREATED": "由我创建"
+        "SCOPE_CREATED": "由我创建",
+        "IS_AUTO_IMPORT_ISSUES": "自动将 OpenProject 中未解决的工作包添加到 backlog",
+        "IS_AUTO_POLL": "自动轮询导入的 OpenProject 工作包的更改",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "添加新任务时将工作包显示为建议"
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此处配置 SuperProductivity 以列出打开的 OpenProject 工作包。请注意，要使其在浏览器中工作，您可能需要为 OpenProject 服务器配置 CORS，以允许从 app.super-productivity.com 访问</p>",
@@ -918,11 +918,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "已将任务 <strong>{{title}}</strong> 从 <strong>{{contextTitle}}</strong> 添加到当前列表",
         "FOUND_RESTORE_FROM_ARCHIVE": "已恢复的任务 <strong>{{title}}</strong> 与存档 Issue 相关",
         "LAST_TAG_DELETION_WARNING": "您正在尝试删除非项目任务的最后一个标签。这是不允许的！",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "不允许将关联到 Issue 的任务移动到其他项目中。",
         "REMINDER_ADDED": "已计划任务“{{title}}”",
         "REMINDER_DELETED": "已删除任务提醒",
         "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒",
-        "TASK_CREATED": "已创建任务“{{title}}”"
+        "TASK_CREATED": "已创建任务“{{title}}”",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "不允许将关联到 Issue 的任务移动到其他项目中。"
       },
       "SELECT_OR_CREATE": "选择或创建任务",
       "SUMMARY_TABLE": {
