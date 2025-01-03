@@ -83,6 +83,15 @@ body .mat-mdc-dialog-surface {
   margin-bottom: $s * 2;
 }
 
+// needs to be global cause of cdk overlay
+// is used for select-task
+mat-option.isDone {
+  .mdc-list-item__primary-text {
+    text-decoration: line-through !important;
+    opacity: 0.4 !important;
+  }
+}
+
 // BUTTONS
 // -----------
 .mat-mdc-menu-item-text {
