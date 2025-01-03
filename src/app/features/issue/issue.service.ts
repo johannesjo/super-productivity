@@ -120,6 +120,10 @@ export class IssueService {
     issueProviderId: string,
     issueProviderKey: IssueProviderKey,
   ): Observable<SearchResultItem[]> {
+    // check if text is more than just special chars
+    if (searchTerm.replace(/[\W_]+/g, '').trim().length === 0) {
+      return of([]);
+    }
     return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
       searchTerm,
       issueProviderId,

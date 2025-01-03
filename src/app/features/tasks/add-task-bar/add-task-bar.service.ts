@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal, inject } from '@angular/core';
+import { inject, Injectable, WritableSignal } from '@angular/core';
 import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   catchError,
@@ -59,29 +59,34 @@ export class AddTaskBarService {
       withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
       switchMap(([searchTerm, { activeType, activeId }]) =>
         isSearchIssueProviders$.pipe(
-          switchMap((isIssueSearch) =>
-            isIssueSearch
-              ? this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
-                  map((issueSuggestions) =>
-                    issueSuggestions.map(
-                      (issueSuggestion) =>
-                        ({
-                          title: issueSuggestion.title,
-                          titleHighlighted: issueSuggestion.titleHighlighted,
-                          issueData: issueSuggestion.issueData,
-                          issueType: issueSuggestion.issueType,
-                          issueProviderId: issueSuggestion.issueProviderId,
-                        }) as AddTaskSuggestion,
-                    ),
+          switchMap((isIssueSearch) => {
+            if (isIssueSearch) {
+              if (!searchTerm?.length) {
+                return of([]);
+              }
+              return this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
+                map((issueSuggestions) =>
+                  issueSuggestions.map(
+                    (issueSuggestion) =>
+                      ({
+                        title: issueSuggestion.title,
+                        titleHighlighted: issueSuggestion.titleHighlighted,
+                        issueData: issueSuggestion.issueData,
+                        issueType: issueSuggestion.issueType,
+                        issueProviderId: issueSuggestion.issueProviderId,
+                      }) as AddTaskSuggestion,
                   ),
-                  catchError(() => {
-                    return of([]);
-                  }),
-                )
-              : activeType === WorkContextType.PROJECT
-                ? this._searchForProject$(searchTerm, activeId)
-                : this._searchForTag$(searchTerm, activeId),
-          ),
+                ),
+                catchError(() => {
+                  return of([]);
+                }),
+              );
+            }
+
+            return activeType === WorkContextType.PROJECT
+              ? this._searchForProject$(searchTerm, activeId)
+              : this._searchForTag$(searchTerm, activeId);
+          }),
         ),
       ),
       tap(() => {
