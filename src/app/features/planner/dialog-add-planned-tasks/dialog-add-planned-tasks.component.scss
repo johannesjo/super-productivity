@@ -104,6 +104,8 @@
 
 .scheduled {
   flex-grow: 1;
+  /* Additional styles if needed */
+  margin-top: 16px;
 }
 
 .normal-tasks-items,
@@ -116,11 +118,6 @@
   margin-bottom: 8px;
 }
 
-.scheduled {
-  /* Additional styles if needed */
-  margin-top: 16px;
-}
-
 .scheduled-item {
   display: flex;
   align-items: center;
@@ -128,8 +125,6 @@
 
   &.Task .time {
     cursor: pointer;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
     border-radius: 50%;
     background: #fff;
 

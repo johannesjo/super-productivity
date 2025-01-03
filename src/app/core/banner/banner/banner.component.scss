@@ -6,6 +6,13 @@ $vertical-button-margin: $s;
   display: block;
   position: relative;
   z-index: $z-banner;
+
+  mat-progress-bar {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+  }
 }
 
 .content-wrapper {
@@ -78,14 +85,5 @@ $vertical-button-margin: $s;
     max-height: 30vh;
     margin: auto auto 8px;
     object-fit: cover;
-  }
-}
-
-:host {
-  mat-progress-bar {
-    position: absolute;
-    bottom: 2px;
-    left: 0;
-    right: 0;
   }
 }

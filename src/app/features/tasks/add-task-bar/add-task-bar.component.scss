@@ -42,7 +42,6 @@
   background: #ffffff;
 
   @include darkTheme {
-    color: #eeeeee;
     // 58 overlay 53 normal
     background-color: $dark-theme-bg-lighter;
     color: $dark-theme-text-color-most-intense;

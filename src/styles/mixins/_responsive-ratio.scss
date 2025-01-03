@@ -3,7 +3,8 @@
 @import '../functions/_ddivide';
 
 @mixin responsiveRatio($x, $y, $pseudo: false) {
-  $padding: unquote((ddivide(math.div($y, $x))) * 100 + '%');
+  $padding: (ddivide(math.div($y, $x))) * 100 + '%';
+
   @if $pseudo {
     &:before {
       @include pseudo($pos: relative);

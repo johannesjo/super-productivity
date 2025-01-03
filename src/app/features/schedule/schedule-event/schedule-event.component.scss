@@ -27,13 +27,10 @@ $margin-right: 10px;
   overflow: visible !important;
   min-width: 0;
 
-  &.no-project {
-  }
-
-  &:hover {
-    //z-index: 3;
-    //overflow: visible;
-  }
+  // &:hover {
+  //   z-index: 3;
+  //   overflow: visible;
+  // }
 
   @include darkTheme() {
     border-color: rgba(255, 255, 255, 0.1);
@@ -127,6 +124,8 @@ $margin-right: 10px;
   //background: rgba(255, 0, 0, 0.1);
   display: block;
 }
+
+/* stylelint-disable no-duplicate-selectors */
 
 // non draggable
 :host {
@@ -232,6 +231,8 @@ $margin-right: 10px;
     }
   }
 }
+
+/* stylelint-enable no-duplicate-selectors */
 
 .time-badge {
   opacity: 1 !important;
@@ -407,12 +408,8 @@ $margin-right: 10px;
 :host-context(.is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
-  :host.TaskPlannedForDay,
-  :host.SplitTaskPlannedForDay,
   :host.Task,
-  :host.SplitTask,
-  :host.SplitTask,
-  :host.Task {
+  :host.SplitTask {
     box-shadow: $whiteframe-shadow-6dp;
   }
 }
@@ -420,12 +417,8 @@ $margin-right: 10px;
 :host-context(.isDarkTheme .is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
-  :host.TaskPlannedForDay,
-  :host.SplitTaskPlannedForDay,
   :host.Task,
-  :host.SplitTask,
-  :host.SplitTask,
-  :host.Task {
+  :host.SplitTask {
     background: $dark24;
   }
 }

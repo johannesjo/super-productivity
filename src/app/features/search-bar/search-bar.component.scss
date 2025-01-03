@@ -72,9 +72,7 @@ $short-syntax-bar-height: 28px;
 
     color: #000000;
     background: #ffffff;
-  }
 
-  input {
     @include darkTheme {
       background-color: $dark-theme-bg-lightest;
       color: $dark-theme-text-color-most-intense;
@@ -141,8 +139,10 @@ $short-syntax-bar-height: 28px;
     opacity: 1;
   }
 
+  /* stylelint-disable block-no-empty */
   @include mq(xs) {
   }
+  /* stylelint-enable block-no-empty */
 }
 
 .info-bar {

@@ -496,6 +496,17 @@
 
   &:hover {
     opacity: 1 !important;
+    mat-icon {
+      animation: $transition-duration-m success-btn-ani linear;
+    }
+
+    .check {
+      display: none;
+    }
+
+    .undo {
+      display: block;
+    }
   }
 
   mat-icon {
@@ -507,20 +518,6 @@
 
     &.undo {
       display: none;
-    }
-  }
-
-  &:hover {
-    mat-icon {
-      animation: $transition-duration-m success-btn-ani linear;
-    }
-
-    .check {
-      display: none;
-    }
-
-    .undo {
-      display: block;
     }
   }
 }

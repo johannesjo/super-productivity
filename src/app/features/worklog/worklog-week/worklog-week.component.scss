@@ -25,10 +25,10 @@ $this-border-radius: 8px;
   }
 }
 
-.scroll-wrapper {
-  //max-height: 280px;
-  //@include scrollY;
-}
+// .scroll-wrapper {
+//   max-height: 280px;
+//   @include scrollY;
+// }
 
 .caption {
   border-top-left-radius: $this-border-radius;
@@ -78,9 +78,6 @@ $this-border-radius: 8px;
       font-weight: normal;
       margin-bottom: 0;
     }
-  }
-
-  .icon-indicator-bar {
   }
 
   .center-box {

@@ -224,11 +224,6 @@ $this-stroke-width: 4px;
       transform: scale(1.05);
     }
   }
-
-  &:focus {
-    + label {
-    }
-  }
 }
 
 label {

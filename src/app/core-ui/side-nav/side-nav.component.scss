@@ -42,22 +42,14 @@ $spacer: $s;
 
       .mat-mdc-menu-item {
         padding: 0 8px;
+
         @include mq(xxs) {
           padding: 0 13px;
         }
       }
     }
   }
-}
 
-@media (min-width: $side-nav-width-switch-l) {
-  :host {
-    max-width: $side-nav-width-l;
-    width: $side-nav-width-l;
-  }
-}
-
-:host {
   a,
   button {
     height: 44px !important;
@@ -74,6 +66,13 @@ $spacer: $s;
         var(--palette-foreground-text-dark-alpha)
       );
     }
+  }
+}
+
+@media (min-width: $side-nav-width-switch-l) {
+  :host {
+    max-width: $side-nav-width-l;
+    width: $side-nav-width-l;
   }
 }
 
@@ -131,9 +130,6 @@ section {
 
 .route-link.isActiveRoute {
   background-color: mat-css-color-primary(500, 0.04);
-}
-
-.route-link.isActiveRoute {
   font-weight: bold;
 }
 
@@ -143,6 +139,7 @@ section {
   @include lightTheme {
     color: $c-primary-800;
   }
+
   @include darkTheme {
     color: $c-primary;
   }

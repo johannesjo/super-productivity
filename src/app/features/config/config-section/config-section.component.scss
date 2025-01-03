@@ -37,9 +37,6 @@ $this-panel-padding-left-right: 12px;
   padding: 10px $this-panel-padding-left-right;
 }
 
-:host ::ng-deep .collapsible-expand-icon {
-}
-
 :host ::ng-deep .collapsible-panel {
   //border-top: 1px solid black;
   overflow: visible;
@@ -55,13 +52,10 @@ $this-panel-padding-left-right: 12px;
 }
 
 :host ::ng-deep .help-btn {
-  display: none;
   position: absolute;
   top: -40px;
   right: -2px;
-}
 
-:host ::ng-deep .help-btn {
   display: block;
   animation: $transition-duration-m help-ico-animation $ani-standard-timing;
 }
