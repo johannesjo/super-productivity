@@ -1,4 +1,4 @@
-<form (submit)="submit()">
+<form (submit)="$event.preventDefault();submit()">
   <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>
 
   <mat-dialog-content>

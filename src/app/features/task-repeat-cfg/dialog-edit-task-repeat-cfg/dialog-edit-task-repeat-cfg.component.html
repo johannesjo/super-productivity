@@ -1,5 +1,5 @@
 <form
-  (submit)="save()"
+  (submit)="$event.preventDefault();save()"
   class="dialog-help-wrapper"
 >
   <h1 mat-dialog-title>

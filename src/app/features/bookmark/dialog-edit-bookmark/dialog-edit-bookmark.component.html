@@ -1,7 +1,7 @@
 @if (bookmarkCopy) {
 <form
   #form="ngForm"
-  (submit)="submit()"
+  (submit)="$event.preventDefault();submit()"
 >
   <h1 mat-dialog-title>
     {{ (bookmarkCopy.id ? (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :

@@ -4,7 +4,7 @@
 </h1>
 
 <form
-  (submit)="saveAndClose()"
+  (submit)="$event.preventDefault();saveAndClose()"
   [formGroup]="formGroup"
 >
   <mat-dialog-content>

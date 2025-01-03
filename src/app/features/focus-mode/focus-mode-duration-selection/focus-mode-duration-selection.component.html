@@ -1,5 +1,5 @@
 <form
-  (submit)="onSubmit($event)"
+  (submit)="$event.preventDefault();onSubmit($event)"
   novalidate
 >
   <h1>{{T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION|translate}}</h1>

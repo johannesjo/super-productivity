@@ -2,7 +2,7 @@
 (activatedIssueTask$|async); @let inputVal = (inputVal$|async)||'';
 
 <form
-  (submit)="addTask()"
+  (submit)="$event.preventDefault();addTask()"
   @blendInOut
   [class.isElevated]="isElevated()"
   [class.mat-elevation-z3]="!isElevated()"

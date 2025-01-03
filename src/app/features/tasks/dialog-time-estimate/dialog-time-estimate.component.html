@@ -2,7 +2,7 @@
   <h1 mat-dialog-title>{{T.F.TASK.D_TIME.TITLE|translate}}</h1>
 
   <form
-    (submit)="submit()"
+    (submit)="$event.preventDefault();submit()"
     class="mat-body"
     name="time-estimate-form"
   >

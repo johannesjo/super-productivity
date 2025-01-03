@@ -1,5 +1,5 @@
 <form
-  (submit)="submitWorklog()"
+  (submit)="$event.preventDefault();submitWorklog()"
   class="mat-body"
   name="time-estimate-form"
 >

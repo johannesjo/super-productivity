@@ -7,7 +7,7 @@
 </h1>
 
 <form
-  (ngSubmit)="submit()"
+  (ngSubmit)="$event.preventDefault(); submit()"
   [formGroup]="formTheme"
 >
   <mat-dialog-content>

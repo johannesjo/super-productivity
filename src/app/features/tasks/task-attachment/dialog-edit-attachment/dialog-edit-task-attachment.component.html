@@ -1,6 +1,6 @@
 <form
   #form="ngForm"
-  (submit)="submit()"
+  (submit)="$event.preventDefault();submit()"
 >
   <h1 mat-dialog-title>
     {{ (attachmentCopy.id ? (T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT) :

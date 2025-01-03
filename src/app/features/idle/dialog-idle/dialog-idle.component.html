@@ -1,5 +1,5 @@
 @if (isTaskDataLoadedIfNeeded) {
-<form (submit)="track()">
+<form (submit)="$event.preventDefault();track()">
   <div
     class="dialog-content"
     mat-dialog-content

@@ -1,5 +1,5 @@
 <form
-  (submit)="postTime()"
+  (submit)="$event.preventDefault();postTime()"
   class="mat-body"
   name="time-estimate-form"
 >
