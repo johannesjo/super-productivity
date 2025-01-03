@@ -128,7 +128,6 @@ $sub-task-c-bg-dark-done: $dark2;
   ::ng-deep textarea {
     min-height: 20px;
     border: 1px solid transparent;
-    transition-property: background-color, transform;
     line-height: 1.5;
     padding: 3px 0 3px 5px;
     cursor: text;
