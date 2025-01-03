@@ -128,9 +128,15 @@ mat-option.isDone {
 
 // ICONS
 // -----
+
 mat-icon,
 .mat-icon {
   vertical-align: middle;
+}
+
+.mat-icon.mat-icon {
+  // to make utf emojis look better
+  overflow: visible;
 }
 
 .mat-icon {
