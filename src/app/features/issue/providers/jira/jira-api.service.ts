@@ -464,28 +464,6 @@ export class JiraApiService {
     transform: any,
     jiraCfg: JiraCfg,
   ): Observable<any> {
-    // if (!this._isExtension) {
-    //   return fromPromise(
-    //     fetch(url, requestInit)
-    //       .then((response) => response.body)
-    //       .then(streamToJsonIfPossible as any)
-    //       .then((res) => {
-    //         if ((res as any)?.errorMessages?.length) {
-    //           throw new Error((res as any).errorMessages.join(', '));
-    //         }
-    //         return transform ? transform({ response: res }, jiraCfg) : { response: res };
-    //       }),
-    //   ).pipe(
-    //     catchError((err) => {
-    //       console.log(err);
-    //       console.log(getErrorTxt(err));
-    //       const errTxt = `Jira: ${getErrorTxt(err)}`;
-    //       this._snackService.open({ type: 'ERROR', msg: errTxt });
-    //       return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
-    //     }),
-    //   );
-    // }
-
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -514,6 +492,26 @@ export class JiraApiService {
       this._chromeExtensionInterfaceService.dispatchEvent(
         'SP_JIRA_REQUEST',
         requestToSend,
+      );
+    } else if (IS_ANDROID_WEB_VIEW) {
+      return fromPromise(
+        fetch(url, requestInit)
+          .then((response) => response.body)
+          .then(streamToJsonIfPossible as any)
+          .then((res) => {
+            if ((res as any)?.errorMessages?.length) {
+              throw new Error((res as any).errorMessages.join(', '));
+            }
+            return transform ? transform({ response: res }, jiraCfg) : { response: res };
+          }),
+      ).pipe(
+        catchError((err) => {
+          console.log(err);
+          console.log(getErrorTxt(err));
+          const errTxt = `Jira: ${getErrorTxt(err)}`;
+          this._snackService.open({ type: 'ERROR', msg: errTxt });
+          return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
+        }),
       );
     } else {
       throw new Error('Jira: No valid interface found');
@@ -691,32 +689,32 @@ export class JiraApiService {
   }
 }
 
-// // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-// async function streamToString(stream: ReadableStream): Promise<string> {
-//   const reader = stream.getReader();
-//   const decoder = new TextDecoder();
-//   let result = '';
-//   let done = false;
-//
-//   while (!done) {
-//     const { value, done: doneReading } = await reader.read();
-//     done = doneReading;
-//     if (value) {
-//       result += decoder.decode(value, { stream: true });
-//     }
-//   }
-//
-//   result += decoder.decode(); // flush the decoder
-//   return result;
-// }
-//
-// // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-// async function streamToJsonIfPossible(stream: ReadableStream): Promise<any> {
-//   const text = await streamToString(stream);
-//   try {
-//     return JSON.parse(text);
-//   } catch (e) {
-//     console.error('Jira: Could not parse response', text);
-//     return text;
-//   }
-// }
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+async function streamToString(stream: ReadableStream): Promise<string> {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+  let done = false;
+
+  while (!done) {
+    const { value, done: doneReading } = await reader.read();
+    done = doneReading;
+    if (value) {
+      result += decoder.decode(value, { stream: true });
+    }
+  }
+
+  result += decoder.decode(); // flush the decoder
+  return result;
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+async function streamToJsonIfPossible(stream: ReadableStream): Promise<any> {
+  const text = await streamToString(stream);
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('Jira: Could not parse response', text);
+    return text;
+  }
+}
