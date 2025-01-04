@@ -36,7 +36,7 @@ import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { first, map, skip, take } from 'rxjs/operators';
+import { map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { FocusModeService } from './features/focus-mode/focus-mode.service';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
@@ -233,15 +233,6 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
     ev.preventDefault();
-  }
-
-  @HostListener('document:paste', ['$event'])
-  async onPaste(ev: ClipboardEvent): Promise<void> {
-    if (
-      await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()
-    ) {
-      this._bookmarkService.createFromPaste(ev);
-    }
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
