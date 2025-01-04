@@ -207,7 +207,7 @@
     "pretty-quick": "^4.0.0",
     "query-string": "^7.1.1",
     "rxjs": "^6.6.7",
-    "shepherd.js": "^11.2.0",
+    "shepherd.js": "^14.3.0",
     "stacktrace-js": "^2.0.1",
     "start-server-and-test": "^2.0.9",
     "stylelint-config-recommended-scss": "^14.1.0",
