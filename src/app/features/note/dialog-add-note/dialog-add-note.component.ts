@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
@@ -11,6 +10,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Component({
   // selector: 'dialog-add-note',
@@ -36,35 +36,42 @@ export class DialogAddNoteComponent
   extends DialogFullscreenMarkdownComponent
   implements OnDestroy
 {
-  override _matDialogRef: MatDialogRef<DialogAddNoteComponent>;
+  // override _matDialogRef: MatDialogRef<DialogAddNoteComponent> =
+  //   inject<MatDialogRef<DialogAddNoteComponent>>(MatDialogRef);
   private _noteService = inject(NoteService);
+  private _snackService = inject(SnackService);
 
   override T: typeof T = T;
-  override data: { content: string };
 
   constructor() {
-    const _matDialogRef = inject<MatDialogRef<DialogAddNoteComponent>>(MatDialogRef);
-
-    const data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
     super();
-    this._matDialogRef = _matDialogRef;
-
-    this.data = data;
+    this.data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
   }
 
-  override close(isSkipSave: boolean = false): void {
-    if (!isSkipSave && this.data.content && this.data.content.trim().length > 0) {
-      this._noteService.add({ content: this.data.content }, true);
-      this._clearSessionStorage();
+  override close(isSkipSave: boolean = false, isEscapeClose: boolean = false): void {
+    if (!isEscapeClose) {
+      if (!isSkipSave && this.data?.content && this.data.content.trim().length > 0) {
+        this._noteService.add({ content: this.data.content }, true);
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: this.T.F.NOTE.S.NOTE_ADDED,
+          ico: 'comment',
+        });
+        this._clearSessionStorage();
+      }
+
+      if (isSkipSave) {
+        this._clearSessionStorage();
+      }
     }
     this._matDialogRef.close();
   }
 
-  override ngModelChange(val: string = this.data.content || ''): void {
+  override ngModelChange(val: string = this.data?.content || ''): void {
     sessionStorage.setItem(SS.NOTE_TMP, val);
   }
 
   private _clearSessionStorage(): void {
-    sessionStorage.setItem(SS.NOTE_TMP, '');
+    sessionStorage.removeItem(SS.NOTE_TMP);
   }
 }

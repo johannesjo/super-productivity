@@ -42,6 +42,9 @@ module.exports = {
       .url(`${BASE}/#/tag/TODAY/settings`)
       .pause(500)
 
+      // to open notes dialog
+      .sendKeys('body', 'n')
+
       .noError()
 
       .end(),

@@ -34,7 +34,7 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
 })
 export class DialogFullscreenMarkdownComponent implements OnDestroy {
   _matDialogRef = inject<MatDialogRef<DialogFullscreenMarkdownComponent>>(MatDialogRef);
-  data = inject(MAT_DIALOG_DATA);
+  data: { content: string } = inject(MAT_DIALOG_DATA) || { content: '' };
 
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
@@ -42,14 +42,12 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor() {
-    const _matDialogRef = this._matDialogRef;
-    const data = this.data;
-
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
     if (
       ALL_VIEW_MODES.includes(lastViewMode as ViewMode) &&
       // empty notes should never be in preview mode
-      data.content.trim().length > 0
+      this.data &&
+      this.data.content.trim().length > 0
     ) {
       this.viewMode = lastViewMode as ViewMode;
 
@@ -59,12 +57,12 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     }
 
     // we want to save as default
-    _matDialogRef.disableClose = true;
+    this._matDialogRef.disableClose = true;
     this._subs.add(
-      _matDialogRef.keydownEvents().subscribe((e) => {
+      this._matDialogRef.keydownEvents().subscribe((e) => {
         if ((e as any).keyCode === ESCAPE) {
           e.preventDefault();
-          this.close();
+          this.close(undefined, true);
         }
       }),
     );
@@ -82,8 +80,8 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  close(isSkipSave: boolean = false): void {
-    this._matDialogRef.close(isSkipSave || this.data.content);
+  close(isSkipSave: boolean = false, isEscapeClose: boolean = false): void {
+    this._matDialogRef.close(!isSkipSave ? this.data?.content : undefined);
   }
 
   onViewModeChange(): void {

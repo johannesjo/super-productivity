@@ -556,6 +556,9 @@ const T = {
         DISABLE_PARSE: 'F.NOTE.NOTE_CMP.DISABLE_PARSE',
         ENABLE_PARSE: 'F.NOTE.NOTE_CMP.ENABLE_PARSE',
       },
+      S: {
+        NOTE_ADDED: 'F.NOTE.S.NOTE_ADDED',
+      },
     },
     OPEN_PROJECT: {
       CFG_CMP: {

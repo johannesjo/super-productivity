@@ -549,6 +549,9 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing for preview",
         "ENABLE_PARSE": "Enable markdown parse"
+      },
+      "S": {
+        "NOTE_ADDED": "Note saved"
       }
     },
     "OPEN_PROJECT": {
