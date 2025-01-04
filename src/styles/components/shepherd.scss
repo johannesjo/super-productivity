@@ -39,21 +39,19 @@
 }
 
 .shepherd-header {
-  h3 {
-    margin: 0;
-    font-weight: bold;
-  }
-
   padding: $s 1rem !important;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  line-height: 2em;
 
-  //background: transparent !important;
   @include darkTheme(true) {
     background: $dark8 !important;
   }
 
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  line-height: 2em;
+  h3 {
+    margin: 0;
+    font-weight: bold;
+  }
 }
 
 .shepherd-element[data-popper-reference-hidden]:not(.shepherd-centered) {

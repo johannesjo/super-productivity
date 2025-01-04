@@ -67,10 +67,6 @@
   @include mq(xs) {
     display: none !important;
   }
-
-  @include mq(xs) {
-    display: none !important;
-  }
 }
 
 .hide-gt-sm {
