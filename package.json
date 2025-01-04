@@ -212,6 +212,7 @@
     "shepherd.js": "^11.2.0",
     "stacktrace-js": "^2.0.1",
     "start-server-and-test": "^2.0.9",
+    "stylelint": "^16.12.0",
     "stylelint-config-recommended-scss": "^14.1.0",
     "ts-node": "~10.9.1",
     "tslib": "^2.7.0",
