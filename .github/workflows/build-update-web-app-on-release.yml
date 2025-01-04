@@ -47,7 +47,7 @@ jobs:
         run: npm i
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Test Unit
         run: npm run test
