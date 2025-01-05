@@ -100,7 +100,12 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
     // ]);
     this.isLoading.set(true);
     this._issueService
-      .searchIssues$('', this.issueProvider().id, this.issueProvider().issueProviderKey)
+      .searchIssues$(
+        '',
+        this.issueProvider().id,
+        this.issueProvider().issueProviderKey,
+        true,
+      )
       .subscribe(
         (items: SearchResultItem[]) => {
           this.isLoading.set(false);
