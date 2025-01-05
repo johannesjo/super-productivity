@@ -88,7 +88,7 @@ export class GithubApiService {
 
     return this._sendRequest$(
       {
-        url: `${BASE}search/issues?q=${encodeURIComponent(searchText.replace('#', '') + repoQuery)}`,
+        url: `${BASE}search/issues?q=${encodeURIComponent(searchText) + encodeURI(repoQuery)}`,
       },
       cfg,
     ).pipe(
