@@ -1,3 +1,9 @@
+## [11.1.1](https://github.com/johannesjo/super-productivity/compare/v11.1.0...v11.1.1) (2025-01-05)
+
+### Bug Fixes
+
+- make build happy ([e6d3236](https://github.com/johannesjo/super-productivity/commit/e6d3236ab777f9f7f347aa24b9a5222e5570ba4e))
+
 # [11.1.0](https://github.com/johannesjo/super-productivity/compare/v11.0.3...v11.1.0) (2025-01-05)
 
 ### Bug Fixes
