@@ -30,7 +30,6 @@ import { TaskService } from '../../tasks/task.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskCopy } from '../../tasks/task.model';
 import { TagComponent } from '../tag/tag.component';
-import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 interface Suggestion {
@@ -54,7 +53,6 @@ const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
     MatIcon,
     MatChipRemove,
     TagComponent,
-    MatTooltip,
     ReactiveFormsModule,
     MatOption,
     TranslatePipe,

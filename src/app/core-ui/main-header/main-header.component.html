@@ -1,3 +1,5 @@
+@let activeWorkContextTypeAndId = workContextService.activeWorkContextTypeAndId$|async;
+
 <!--<div class="wrapper ">-->
 <div class="wrapper">
   @if (!(layoutService.isNavAlwaysVisible$|async)) {
@@ -8,8 +10,9 @@
   >
     <mat-icon>menu</mat-icon>
   </button>
-  } @if (workContextService.activeWorkContextTypeAndId$|async; as
-  activeWorkContextTypeAndId) {
+  }
+  <!---->
+  @if (activeWorkContextTypeAndId) {
   <div
     [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
     class="current-work-context-title"
