@@ -1,3 +1,46 @@
+# [11.1.0](https://github.com/johannesjo/super-productivity/compare/v11.0.3...v11.1.0) (2025-01-05)
+
+### Bug Fixes
+
+- add missing matPrefix and matSuffix ([b6be01c](https://github.com/johannesjo/super-productivity/commit/b6be01cb660d6aa89ab553028d675d9984e99e1d))
+- add missing provider ([3797916](https://github.com/johannesjo/super-productivity/commit/3797916b6b0f06b7d2a0c7262838b016b2204224))
+- add task inline ([d48e3d7](https://github.com/johannesjo/super-productivity/commit/d48e3d7164fbbd3c26bf19ebabcde593bfdb1033))
+- also make open project transition work again [#3779](https://github.com/johannesjo/super-productivity/issues/3779) ([c4185a4](https://github.com/johannesjo/super-productivity/commit/c4185a4ffa77a9fac069c6f54746a2381d9f1903))
+- error ([d26a632](https://github.com/johannesjo/super-productivity/commit/d26a632fab9be76fc4126af23c38c01527cceffa))
+- error for open project when marking sub task as done [#3779](https://github.com/johannesjo/super-productivity/issues/3779) ([c45c0c7](https://github.com/johannesjo/super-productivity/commit/c45c0c755988dd7d6d275f1150e0ea533dd2c7bc))
+- error for open project when marking task as done [#3779](https://github.com/johannesjo/super-productivity/issues/3779) ([333f81d](https://github.com/johannesjo/super-productivity/commit/333f81dbf6d461c1c4f7595fb1aa121f9f618bee))
+- error for search bar ([b6b78a4](https://github.com/johannesjo/super-productivity/commit/b6b78a41e291e96d43aa2f27560c96d23e0f5bf1))
+- error when navigating to daily summary ([8c8fddf](https://github.com/johannesjo/super-productivity/commit/8c8fddf9bfac8617dbbee0d21c0669d1942c1097))
+- formly slider ([9645652](https://github.com/johannesjo/super-productivity/commit/964565230dd406b5859949de8d621a204bb93a81))
+- git issue search not working anymore ([933030c](https://github.com/johannesjo/super-productivity/commit/933030c6227ef34b296b9de5e8407a84c459a9f2))
+- idle dialog reset take a break checkmark not working as expected ([aaca8d9](https://github.com/johannesjo/super-productivity/commit/aaca8d9657781144f85047c8217d9ce9946c53e2))
+- issue panel error ([8679ab2](https://github.com/johannesjo/super-productivity/commit/8679ab2e6ba5f7593836590af29641bde3d4f927))
+- make calendar agenda work again ([66d4c4c](https://github.com/johannesjo/super-productivity/commit/66d4c4c05a1d2f58ab553b69c48fffe4381f1c0c))
+- make sub task focus work again ([ff6befe](https://github.com/johannesjo/super-productivity/commit/ff6befe864181694cac4e937d5a15cc1bbcf8670))
+- necessary directives not imported ([95bc21a](https://github.com/johannesjo/super-productivity/commit/95bc21aac3d68f88abe776513314d1f3c0d0dbd8))
+- prevent all forms from reloading the current page ([75101dd](https://github.com/johannesjo/super-productivity/commit/75101dd16f664dbd1a6d5deb57732a906a4e6086))
+- side panel ani triggering initially ([4684738](https://github.com/johannesjo/super-productivity/commit/4684738045a36aa49f2cd6ff72e4109df5b0429f))
+- styling ([c2334e0](https://github.com/johannesjo/super-productivity/commit/c2334e0f76b37b218e1726689e0efa837afef6dd))
+- tag edit remove not showing ([6fcfd18](https://github.com/johannesjo/super-productivity/commit/6fcfd183c213cf62c655d18826dd2b9b3a5b5120))
+- task summary table ([ef5b78f](https://github.com/johannesjo/super-productivity/commit/ef5b78f5e83140570fe55e3ef8568a2a2e32e5af))
+
+### Features
+
+- delete content and checklist add if default [#3814](https://github.com/johannesjo/super-productivity/issues/3814) ([b06f53c](https://github.com/johannesjo/super-productivity/commit/b06f53ce62abbcc2c401bcacff8816acd67923f1))
+- don't delete content on add checklist item [#3814](https://github.com/johannesjo/super-productivity/issues/3814) ([d20dca6](https://github.com/johannesjo/super-productivity/commit/d20dca62d82ca053b15ea151653821aa69ef75e7))
+- improve emoji styling a bit [#3558](https://github.com/johannesjo/super-productivity/issues/3558) ([e2c88ee](https://github.com/johannesjo/super-productivity/commit/e2c88eec2907582965a89b2afa20110f955e98b5))
+- improve emoji support and add info [#3558](https://github.com/johannesjo/super-productivity/issues/3558) ([e3eb074](https://github.com/johannesjo/super-productivity/commit/e3eb0742ec72ff295871e1f852869fd98821a14b))
+- improve google calendar url ([14c5b73](https://github.com/johannesjo/super-productivity/commit/14c5b73396cb358440b8b767dc2fbd44c48b4ba1))
+- improve integrated issue search cases [#3819](https://github.com/johannesjo/super-productivity/issues/3819) ([d014ad4](https://github.com/johannesjo/super-productivity/commit/d014ad42d5f9bce5330af489b9802b2bf723c538))
+- improve note dialog experience and prevent error ([2998549](https://github.com/johannesjo/super-productivity/commit/29985493c49a43c17a58ea2adec1108c30a8a885))
+- improve office 365 help link ([61142c4](https://github.com/johannesjo/super-productivity/commit/61142c4fdfc3b76b60ea4c2d7b2f9ad8ae1f4e88))
+- internationalize repeat instance created day label ([8beac44](https://github.com/johannesjo/super-productivity/commit/8beac445eac3e9fcaaa8eac5c0840528094d8ea8))
+- make done options in select-task less prominent [#3791](https://github.com/johannesjo/super-productivity/issues/3791) ([0eeb0fa](https://github.com/johannesjo/super-productivity/commit/0eeb0fac63399acda9cc2ac2f8cc3abb93adfc33))
+- move add time spent for other day button up ([b2f956b](https://github.com/johannesjo/super-productivity/commit/b2f956b238ac5030fe24f11b5c57a669e796facc))
+- remove bookmark button and bookmark from paste to phase out feature ([f18a0ac](https://github.com/johannesjo/super-productivity/commit/f18a0ac51270717c3a4c74f66b7440cb2978e19a))
+- update task with all repeat cfg value after first making it repeatable [#3101](https://github.com/johannesjo/super-productivity/issues/3101) ([d915efb](https://github.com/johannesjo/super-productivity/commit/d915efb42c79682a4d39f9bc6ca1dcd59a344d9f))
+- use mostly non-working fallback for jira on android to avoid error [#3799](https://github.com/johannesjo/super-productivity/issues/3799) ([8e5d0d9](https://github.com/johannesjo/super-productivity/commit/8e5d0d98d037f14fef7e9cabdf20bb246c7c645c))
+
 ## [11.0.3](https://github.com/johannesjo/super-productivity/compare/v11.0.2...v11.0.3) (2024-12-21)
 
 ### Bug Fixes
