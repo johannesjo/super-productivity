@@ -74,7 +74,7 @@ import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { TaskListComponent } from '../task-list/task-list.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
@@ -82,6 +82,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
+import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 
 @Component({
   selector: 'task',
@@ -113,14 +114,14 @@ import { TagListComponent } from '../../tag/tag-list/tag-list.component';
     MatMenuContent,
     MatMenuItem,
     AsyncPipe,
-    DatePipe,
     MsToStringPipe,
-    ShortPlannedAtPipe,
+    ShortDate2Pipe,
     LocalDateStrPipe,
     TranslatePipe,
     IssueIconPipe,
     SubTaskTotalTimeSpentPipe,
     TagListComponent,
+    ShortPlannedAtPipe,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
