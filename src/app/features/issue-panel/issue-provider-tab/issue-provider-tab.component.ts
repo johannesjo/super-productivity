@@ -12,7 +12,13 @@ import {
 } from '@angular/core';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
+import {
+  MatFormField,
+  MatHint,
+  MatLabel,
+  MatPrefix,
+  MatSuffix,
+} from '@angular/material/form-field';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
 import { NgClass } from '@angular/common';
@@ -65,6 +71,8 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     TranslatePipe,
     MatHint,
     MatInput,
+    MatSuffix,
+    MatPrefix,
     MatTooltip,
     MatProgressSpinner,
   ],

@@ -31,7 +31,12 @@ import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../../../../tasks/task.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatError,
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+} from '@angular/material/form-field';
 import {
   MatMenu,
   MatMenuContent,
@@ -60,6 +65,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatIcon,
     MatDialogContent,
     MatFormField,
+    MatSuffix,
     MatMenuTrigger,
     MatTooltip,
     TranslatePipe,
