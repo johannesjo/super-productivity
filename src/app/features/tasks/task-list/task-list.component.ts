@@ -122,23 +122,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
-    // TODO this gets called very often for nested lists. Maybe there are possibilities to optimize
-    const task = drag.data;
-    // const targetModelId = drag.dropContainer.data.listModelId;
-    const targetModelId = drop.data.listModelId;
-    const isSubtask = !!task.parentId;
-    // console.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
-    // return true;
-    if (isSubtask) {
-      if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        return true;
-      }
-    } else {
-      if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        return true;
-      }
-    }
-    return false;
+    const handleElement = drag.element.nativeElement.querySelector('.drag-handle');
+    return handleElement && handleElement.contains(drag._dragRef._pointerDownEvent.target);
   }
 
   async drop(
