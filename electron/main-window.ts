@@ -201,7 +201,7 @@ function initWinEventListeners(app: any): void {
     return { action: 'deny' };
   });
 
-  // TODO refactor quiting mess
+  // TODO refactor quitting mess
   appCloseHandler(app);
   appMinimizeHandler(app);
 }

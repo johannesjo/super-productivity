@@ -152,7 +152,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             this.options = {
               ...WORKLOG_EXPORT_DEFAULTS,
               ...advancedCfg.worklogExportSettings,
-              // NOTE: if we don't do this typescript(?) get's aggressive
+              // NOTE: if we don't do this typescript(?) gets aggressive
               cols: [
                 ...(advancedCfg.worklogExportSettings
                   ? [...advancedCfg.worklogExportSettings.cols]

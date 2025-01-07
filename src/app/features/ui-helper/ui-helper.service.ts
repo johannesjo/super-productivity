@@ -42,7 +42,7 @@ export class UiHelperService {
 
   focusApp(): void {
     if (IS_ELECTRON) {
-      //  otherwise the last focused task get's focused again leading to unintended keyboard events
+      //  otherwise the last focused task gets focused again leading to unintended keyboard events
       if (document.activeElement) {
         (document.activeElement as HTMLElement).blur();
       }
