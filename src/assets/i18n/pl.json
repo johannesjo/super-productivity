@@ -87,10 +87,10 @@
         "CALDAV_RESOURCE": "Nazwa zasobu CalDav do synchronizacji (kalendarz)",
         "CALDAV_URL": "CalDav URL (podstawowy URL)",
         "CALDAV_USER": "Twój użytkownik CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania",
         "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania CalDav do backlogu",
         "IS_AUTO_POLL": "Automatycznie odpytuj importowane zadania CalDav pod kątem zmian",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaż niedokończone zadania CalDav jako sugestie podczas dodawania nowych zadań",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaż niedokończone zadania CalDav jako sugestie podczas dodawania nowych zadań"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p>",
@@ -136,11 +136,11 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "REPO": "username/repositoryName",
+        "TOKEN": "Access Token",
         "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "username/repositoryName",
-        "TOKEN": "Access Token",
         "TOKEN_DESCRIPTION": "Required for private repository access"
       },
       "FORM_SECTION": {
@@ -180,11 +180,11 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
+        "PROJECT": "project ID or user name/project",
+        "TOKEN": "Access Token",
         "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania GitLab do backlogu",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Pokaż niedokończone zadania z git jako sugestie podczas dodawania nowych zadań",
-        "PROJECT": "project ID or user name/project",
-        "TOKEN": "Access Token"
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Pokaż niedokończone zadania z git jako sugestie podczas dodawania nowych zadań"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -258,20 +258,14 @@
         "TIME_SPENT": "Time Spent",
         "TITLE": "Jira: Submit Worklog"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
+        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
+        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Allow self signed certificate",
@@ -282,7 +276,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Advanced Config",
-        "CREDENTIALS": "Credentials",
         "HELP_ARR": {
           "H1": "Basic configuration",
           "H2": "Worklog settings",
@@ -295,7 +288,8 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        }
+        },
+        "CREDENTIALS": "Credentials"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Przypisany",
@@ -339,6 +333,12 @@
         "LOGIN_SUCCESS": "Login successful!",
         "TEST_CREDENTIALS": "Test Credentials",
         "WELCOME_USER": "Welcome {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {

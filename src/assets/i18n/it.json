@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Il nome della risorsa CalDav (il calendario)",
         "CALDAV_URL": "URL CalDav (l'URL di base)",
         "CALDAV_USER": "Il tuo nome utente CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Completa automaticamente le attività di CalDav al completamento dell'attività",
         "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente le attività CalDav non completate tra gli arretrati",
         "IS_AUTO_POLL": "Esegui automaticamente il polling delle attività importate per le modifiche",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostra le attività di CalDav non completate come suggerimento quando si aggiungono nuove attività",
-        "IS_TRANSITION_ISSUES_ENABLED": "Completa automaticamente le attività di CalDav al completamento dell'attività"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostra le attività di CalDav non completate come suggerimento quando si aggiungono nuove attività"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per elencare le cose da fare CalDav non completate per un progetto specifico nel pannello di creazione dell'attività nella visualizzazione della pianificazione giornaliera. Verranno elencati come suggerimenti e forniranno un collegamento alla cosa da fare, nonché ulteriori informazioni a riguardo.</p> <p>Inoltre, è possibile aggiungere e sincronizzare automaticamente tutte le attività non completate tra le arretrate.</p>",
@@ -185,9 +185,6 @@
       },
       "FORM": {
         "FILTER_USER": "Username (es. per filtrare i tuoi cambiamenti)",
-        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente issue non risolte da Gitea agli arretrati",
-        "IS_AUTO_POLL": "Interroga automaticamente le issue git importate per cercare modifiche",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostra issue da git come suggerimenti durante l'aggiunta di nuove attività",
         "HOST": "Host (es.: https://try.gitea.io)",
         "TOKEN": "Access Token",
         "REPO_FULL_NAME": "Username o nome Organizzazione/Progetto",
@@ -195,7 +192,10 @@
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
         "SCOPE_ASSIGNED": "Assegnate a me",
-        "SCOPE_CREATED": "Create da me"
+        "SCOPE_CREATED": "Create da me",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente issue non risolte da Gitea agli arretrati",
+        "IS_AUTO_POLL": "Interroga automaticamente le issue git importate per cercare modifiche",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostra issue da git come suggerimenti durante l'aggiunta di nuove attività"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui è possibile configurare SuperProductivity in modo che elenchi le issue aperte di Gitea per uno specifico repository nel pannello di creazione delle attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un link all'issue e ulteriori informazioni su di esso.</p> <p>Inoltre è possibile aggiungere e importare automaticamente tutte le issue aperte.</p><p>Per superare i limiti di utilizzo e accedere è possibile fornire un token di accesso.",
@@ -254,13 +254,13 @@
       },
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
+        "REPO": "username/repositoryName",
+        "TOKEN": "Token di accesso",
+        "IS_ASSIGNEE_FILTER": "Filtra issue assegnate a me",
         "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub agli arretrati",
         "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
-        "REPO": "username/repositoryName",
-        "TOKEN": "Token di accesso",
-        "TOKEN_DESCRIPTION": "Richiesto per l'accesso al repository privato",
-        "IS_ASSIGNEE_FILTER": "Filtra issue assegnate a me"
+        "TOKEN_DESCRIPTION": "Richiesto per l'accesso al repository privato"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione attività nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti alle attività arretrate.</p>",
@@ -299,9 +299,6 @@
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
         "GITLAB_BASE_URL": "URL di base GitLab personalizzato",
-        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub agli arretrati",
-        "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
         "PROJECT": "Percorso completo o nome utente / progetto",
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
@@ -315,7 +312,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Mostra la finestra di dialogo del Time Tracking dopo aver cliccato sulla conclusione della giornata",
         "TOKEN": "Token di accesso",
         "FILTER": "Filtro Personalizzato",
-        "FILTER_DESCRIPTION": "Vedi https://docs.gitlab.com/ee/api/issues.html#list-issues. I filtri multipli possono essere combinati con  &"
+        "FILTER_DESCRIPTION": "Vedi https://docs.gitlab.com/ee/api/issues.html#list-issues. I filtri multipli possono essere combinati con  &",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da GitHub agli arretrati",
+        "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività"
       },
       "FORM_SECTION": {
         "HELP": "<p> Qui puoi configurare SuperProductivity per elencare i problemi di GitLab aperti (sia la versione online o un'istanza ospitata autonomamente) per un progetto specifico nel pannello di creazione dell'attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un collegamento al problema, nonché ulteriori informazioni al riguardo. </p> <p> Inoltre puoi aggiungere e sincronizzare automaticamente tutti i problemi aperti nelle attività arretrate. </p>",
@@ -418,17 +418,9 @@
         "TIME_SPENT_TOOLTIP": "Aggiungi tempi diversi",
         "TITLE": "Jira: Invia registro di lavoro"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da git agli arretrati",
-        "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usato per aggiungere automaticamente attività arretrate",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Apri una finestra per inviare il registro di lavoro su jira quando un sotto-attività è completata",
-        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue al backlog di Jira",
-        "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controlla se l'issue sul quale correntemente si sta lavorando è assegnato all'utente corrente",
         "IS_WORKLOG_ENABLED": "Apri una finestra per sottomettere il registro di lavoro su jira quando un'attività è completata",
         "SEARCH_JQL_QUERY": "JQL Query per limitare le attività della ricerca",
@@ -436,7 +428,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Inserisci tutto il tempo trascorso meno il tempo registrato",
         "WORKLOG_DEFAULT_TIME_MODE": "Valore di tempo predefinito per la finestra di dialogo",
         "WORKLOG_DEFAULT_TODAY": "Riempi solo il tempo trascorso oggi",
-        "WORKLOG_DEFAULT_YESTERDAY": "Riempi solo il tempo trascorso ieri"
+        "WORKLOG_DEFAULT_YESTERDAY": "Riempi solo il tempo trascorso ieri",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue al backlog di Jira",
+        "IS_AUTO_POLL_TICKETS": "Controlla automaticamente le modifiche sugli issue importati e notificamelo"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Consenti certificato autofirmato",
@@ -448,7 +442,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configurazione avanzata",
-        "CREDENTIALS": "Credenziali",
         "HELP_ARR": {
           "H1": "Configurazione base",
           "H2": "Impostazioni del registro di lavoro",
@@ -461,7 +454,8 @@
           "P2_2": "<em>'Apri una finestra del registro di lavoro quando una sotto-attività è completata e non per attività con sotto-attività'</em> apre una finestra del registro di lavoro ogni volta che segni una sotto-attività di un issue Jira come completato. Dal momento che tracci già il tempo tramite le sotto-attività, nessuna finestra viene aperta quando segni l'attività Jira stesso come completata.",
           "P2_3": "<em>'Invia automaticamente gli aggiornamenti al registro di lavoro senza aprire finestre'</em> fa ciò che dice. Dato che segnare un'attività come completata spesso porta il tempo totale di lavoro a venir conteggiato due volte, non è consigliato.",
           "P3_1": "Qui puoi riconfigurare le tue transizioni di default. Jira rende disponibili molte transizioni, spesso attivate come diverse colonne sulla tua board agile di Jira, non possiamo assumere dove e quando trasportare tue attività, quindi devi farlo manualmente."
-        }
+        },
+        "CREDENTIALS": "Credenziali"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
@@ -504,6 +498,12 @@
         "LOGIN_SUCCESS": "Login eseguita con successo!",
         "TEST_CREDENTIALS": "Credenziali di test",
         "WELCOME_USER": "Benvenuto {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente gli issue non risolti da git agli arretrati",
+        "IS_AUTO_POLL": "Esegui il polling automatico delle modifiche sugli issue di git importati",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostra gli issue di git come suggerimenti quando aggiungi una nuova attività",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -608,9 +608,6 @@
       "FORM": {
         "FILTER_USER": "Nome utente (ad es. per filtrare le modifiche da soli)",
         "HOST": "Host (es.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente pacchetti di lavoro non risolti da OpenProject agli arretrati",
-        "IS_AUTO_POLL": "Interroga automaticamente i pacchetti di lavoro OpenProject importati per le modifiche",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostra i pacchetti di lavoro come suggerimenti quando aggiungi nuove attività",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Mostra la finestra di dialogo del monitoraggio del tempo per segnalare a OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Richiede che il modulo di monitoraggio del tempo sia abilitato per il progetto OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostra la finestra di dialogo di monitoraggio del tempo quando le attività secondarie sono completate",
@@ -620,7 +617,10 @@
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
         "SCOPE_ASSIGNED": "Assegnato a me",
-        "SCOPE_CREATED": "Creato da me"
+        "SCOPE_CREATED": "Creato da me",
+        "IS_AUTO_IMPORT_ISSUES": "Aggiungi automaticamente pacchetti di lavoro non risolti da OpenProject agli arretrati",
+        "IS_AUTO_POLL": "Interroga automaticamente i pacchetti di lavoro OpenProject importati per le modifiche",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostra i pacchetti di lavoro come suggerimenti quando aggiungi nuove attività"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per elencare i pacchetti di lavoro OpenProject aperti. Nota che per farlo funzionare nel browser devi probabilmente configurare CORS per il tuo server OpenProject, per consentire l'accesso da app.super-productivity.com</p>",
@@ -1077,11 +1077,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Attività <strong>{{title}}</strong> aggiunta da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
         "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Non è possibile spostare issue in un altro progetto",
         "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per attività",
         "REMINDER_UPDATED": "Aggiornato promemoria per attività \"{{title}}\"",
-        "TASK_CREATED": "Creata attività \"{{title}}\""
+        "TASK_CREATED": "Creata attività \"{{title}}\"",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Non è possibile spostare issue in un altro progetto"
       },
       "SELECT_OR_CREATE": "Seleziona o crea attività",
       "SUMMARY_TABLE": {
@@ -1327,13 +1327,13 @@
       "BROWSER_WARNING": "<b>Questo NON funzionerà con la versione Browser di Super Productivity.<br /> <a href=\"https://super-productivity.com/download/\">Scarica la versione desktop</a> per usare questa funzionalità!</b>",
       "CAL_PATH": "Url della sorgente iCal",
       "CAL_PROVIDERS": "Provider di Calendario (sperimentale e opzionale)",
-      "CAL_PROVIDERS_ADD": "Aggiung sorgente Calendario iCal",
-      "CAL_PROVIDERS_INFO": "Puoi caricare i dati del calendario come iCal (es. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). I dati saranno integrati nella pianificazione e ti verrà chiesto di creare attività per gli eventi del calendario, se sono in scadenza.",
       "CHECK_UPDATES": "Verifica aggiornamenti remoti ogni X tempo",
       "DEFAULT_PROJECT": "Progetto predefinito dove aggiungere le attività provenienti dal calendario",
       "HELP": "Puoi integrare calendari per essere ricordati e aggiungerli come attività con Super Productivity. L'integrazione funziona usando il formato iCal. Affinché questo funzioni, il tuo calendario deve essere accessibile sia da Internet che da file system.",
-      "ICON": "Icona per la pianificazione",
       "SHOW_BANNER_THRESHOLD": "Mostra una notifica X tempo prima dell'evento (lascia bianco per disabilitare)",
+      "CAL_PROVIDERS_ADD": "Aggiung sorgente Calendario iCal",
+      "CAL_PROVIDERS_INFO": "Puoi caricare i dati del calendario come iCal (es. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>, <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a>). I dati saranno integrati nella pianificazione e ti verrà chiesto di creare attività per gli eventi del calendario, se sono in scadenza.",
+      "ICON": "Icona per la pianificazione",
       "TITLE": "Calendari"
     },
     "EVALUATION": {

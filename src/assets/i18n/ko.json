@@ -91,10 +91,10 @@
         "CALDAV_RESOURCE": "CalDav 리소스의 이름 (캘린더)",
         "CALDAV_URL": "CalDav URL (기본 URL)",
         "CALDAV_USER": "CalDav 사용자 이름",
+        "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료",
         "IS_AUTO_IMPORT_ISSUES": "완료되지 않은 CalDav 할 일을 백 로그에 자동으로 추가",
         "IS_AUTO_POLL": "가져온 작업을 자동으로 폴링하여 변경 사항을 확인합니다.",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "새 작업을 추가 할 때 완료되지 않은 CalDav 할 일을 제안으로 표시",
-        "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "새 작업을 추가 할 때 완료되지 않은 CalDav 할 일을 제안으로 표시"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기에서 일일 계획 보기의 작업 생성 패널에서 특정 프로젝트에 대해 완료되지 않은 CalDav 할 일을 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안 사항으로 나열되며 할 일에 대한 링크와 이에 대한 추가 정보를 제공합니다.</p> <p>또한 완료되지 않은 모든 할 일을 작업 백로그에 자동으로 추가하고 동기화할 수 있습니다.</p><p>모바일 및 웹의 nextcloud에서 작동하도록 하려면 nextcloud 앱 <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>를 통해 \"https://app.super-productivity.com\"을 허용 목록에 추가해야 할 수 있습니다.</p>",
@@ -154,11 +154,11 @@
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
+        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
+        "TOKEN": "액세스 토큰",
         "IS_AUTO_IMPORT_ISSUES": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
-        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
-        "TOKEN": "액세스 토큰",
         "TOKEN_DESCRIPTION": "개인 저장소 액세스에 필요"
       },
       "FORM_SECTION": {
@@ -189,9 +189,6 @@
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "GITLAB_BASE_URL": "맞춤 GitLab 기본 URL",
-        "IS_AUTO_IMPORT_ISSUES": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
-        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
         "PROJECT": "전체 경로 또는 사용자 이름 / 프로젝트",
         "SCOPE": "범위",
         "SCOPE_ALL": "모든",
@@ -201,7 +198,10 @@
         "SOURCE_GLOBAL": "모든",
         "SOURCE_GROUP": "그룹",
         "SOURCE_PROJECT": "계획",
-        "TOKEN": "액세스 토큰"
+        "TOKEN": "액세스 토큰",
+        "IS_AUTO_IMPORT_ISSUES": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다."
       },
       "FORM_SECTION": {
         "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 GitLab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
@@ -293,17 +293,9 @@
         "TIME_SPENT_TOOLTIP": "다른 시간 추가",
         "TITLE": "Jira : 작업 로그 제출"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
-        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
-        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "백 로그에 작업을 자동으로 추가하는 데 사용되는 JQL",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "하위 작업이 완료되면 작업 로그를 jira에 제출하기위한 열기 대화 상자",
-        "IS_AUTO_IMPORT_ISSUES": "Jira 백 로그에 자동으로 이슈 추가",
-        "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다.",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "현재 발행 된 문제가 현재 사용자에게 할당되었는지 확인",
         "IS_WORKLOG_ENABLED": "작업이 완료되면 작업 로그를 jira로 제출하기위한 열기 대화 상자",
         "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리",
@@ -311,7 +303,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "모든 소요 시간에서 기록 시간을 뺀 값을 입력하세요.",
         "WORKLOG_DEFAULT_TIME_MODE": "대화의 기본 시간 값",
         "WORKLOG_DEFAULT_TODAY": "오늘 보낸 시간만 채우세요",
-        "WORKLOG_DEFAULT_YESTERDAY": "어제 보낸 시간만 채우기"
+        "WORKLOG_DEFAULT_YESTERDAY": "어제 보낸 시간만 채우기",
+        "IS_AUTO_IMPORT_ISSUES": "Jira 백 로그에 자동으로 이슈 추가",
+        "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다."
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "자체 서명 된 인증서 허용",
@@ -323,7 +317,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "고급 구성",
-        "CREDENTIALS": "신임장",
         "HELP_ARR": {
           "H1": "기본 구성",
           "H2": "작업 로그 설정",
@@ -336,7 +329,8 @@
           "P2_2": "<em>'Jira 문제의 하위 작업을 완료로 표시 할 때마다'</em> 은 작업 로그 대화 상자를 열 때마다 하위 작업이 완료되면 작업 로그 열기 대화 상자가 열립니다. 하위 작업을 통해 시간을 이미 추적 했으므로 Jira 작업 자체를 완료로 표시하면 대화 상자가 열리지 않습니다.",
           "P2_3": "<em>'대화 상자없이 작업 로그에 자동으로 업데이트를 보냄'{</em> 은 (는) 말하는 것을 않습니다. 여러 번 완료된 작업을 표시하면 전체 작업 시간이 두 번 추적되기 때문에 권장하지 않습니다.",
           "P3_1": "여기서 기본 전환을 재구성 할 수 있습니다. Jira는 일반적으로 Jira 애자일 보드의 다른 컬럼으로 동작하는 다양한 전환을 가능하게합니다. 우리는 어디에서 언제 작업을 전환 할 것인지를 가정 할 수 없으며 수동으로 설정해야합니다."
-        }
+        },
+        "CREDENTIALS": "신임장"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "담당자",
@@ -377,6 +371,12 @@
         "LOGIN_SUCCESS": "성공적 로그인!",
         "TEST_CREDENTIALS": "자격증 명 테스트",
         "WELCOME_USER": "환영합니다,  {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
+        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
       }
     },
     "METRIC": {
@@ -459,9 +459,6 @@
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "HOST": "호스트(예: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "OpenProject에서 백로그로 미해결 작업 패키지 자동 추가",
-        "IS_AUTO_POLL": "가져온 OpenProject 작업 패키지에서 변경 사항을 자동으로 폴링",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "새 작업을 추가할 때 작업 패키지를 제안으로 표시",
         "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProject에 보고하는 시간 추적 대화 상자 표시",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProject 프로젝트에 대해 시간 추적 모듈을 활성화해야 합니다.",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "하위 작업이 완료되면 시간 추적 대화 상자 표시",
@@ -471,7 +468,10 @@
         "SCOPE": "범위",
         "SCOPE_ALL": "모든",
         "SCOPE_ASSIGNED": "나에게 할당됨",
-        "SCOPE_CREATED": "내가 만든"
+        "SCOPE_CREATED": "내가 만든",
+        "IS_AUTO_IMPORT_ISSUES": "OpenProject에서 백로그로 미해결 작업 패키지 자동 추가",
+        "IS_AUTO_POLL": "가져온 OpenProject 작업 패키지에서 변경 사항을 자동으로 폴링",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "새 작업을 추가할 때 작업 패키지를 제안으로 표시"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기에서 열려 있는 OpenProject 작업 패키지를 나열하도록 SuperProductivity를 구성할 수 있습니다. 이것이 브라우저에서 작동하려면 app.super-productivity.com</p>에서 액세스를 허용하도록 OpenProject 서버에 대해 CORS를 구성해야 합니다.",

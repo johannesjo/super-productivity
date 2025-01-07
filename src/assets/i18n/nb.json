@@ -125,11 +125,11 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. for å filtrere ut endringer selv)",
+        "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
+        "TOKEN": "Tilgangstoken",
         "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
         "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
-        "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
-        "TOKEN": "Tilgangstoken"
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver"
       },
       "FORM_SECTION": {
         "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne GitHub-problemer for et bestemt repo i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
@@ -167,11 +167,11 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. For å filtrere ut endringer selv)",
+        "PROJECT": "Full sti eller brukernavn / prosjekt",
+        "TOKEN": "Tilgangstoken",
         "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitLab til backloggen",
         "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
-        "PROJECT": "Full sti eller brukernavn / prosjekt",
-        "TOKEN": "Tilgangstoken"
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Vis problemer fra git som forslag når du legger til nye oppgaver"
       },
       "FORM_SECTION": {
         "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne GitLab-problemer (enten den online-versjonen eller en selvstyrt forekomst) for et bestemt prosjekt i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
@@ -245,20 +245,14 @@
         "TIME_SPENT": "Tid brukt",
         "TITLE": "Jira: Send inn arbeidslogg"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
-        "IS_AUTO_POLL": "Hent automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
-        "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL brukes til å legge til oppgaver automatisk i backloggen",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Åpne dialogboksen for å sende arbeidsloggen til jira når underoppgaven er fullført",
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk til problemer i Jira-backloggen",
-        "IS_AUTO_POLL_TICKETS": "Sjekk importerte problemer for endringer automatisk og varsle",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Sjekk om det nåværende arbeidet med problemet er tildelt den nåværende brukeren",
         "IS_WORKLOG_ENABLED": "Åpne dialogboksen for å sende arbeidsloggen til Jira når oppgaven er fullført",
-        "SEARCH_JQL_QUERY": "JQL Query for å begrense søkeoppgaver"
+        "SEARCH_JQL_QUERY": "JQL Query for å begrense søkeoppgaver",
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk til problemer i Jira-backloggen",
+        "IS_AUTO_POLL_TICKETS": "Sjekk importerte problemer for endringer automatisk og varsle"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Tillat selvsignert sertifikat",
@@ -269,7 +263,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Avansert konfigurasjon",
-        "CREDENTIALS": "Legitimasjonserklæring",
         "HELP_ARR": {
           "H1": "Grunnleggende konfigurasjon",
           "H2": "Innstillinger for arbeidslogg",
@@ -282,7 +275,8 @@
           "P2_2": "<em>&#39;Åpne arbeidslogg-dialogboksen når underoppgaven er ferdig og ikke for oppgaver med underoppgavene selv&#39;</em> åpner en arbeidslogg-dialog hver gang du merker en underoppgave for et Jira-problem som ferdig. Fordi du allerede sporer tiden din via underoppgavene, åpnes ingen dialog når du merker selve Jira-oppgaven.",
           "P2_3": "<em>&#39;Send oppdateringer til arbeidsloggen automatisk uten dialog&#39;</em> gjør hva det står. Fordi det å merke en oppgave som utført flere ganger fører til at hele arbeidet spores to ganger, anbefales ikke dette.",
           "P3_1": "Her kan du konfigurere standardovergangene dine på nytt. Jira muliggjør en bred konfigurasjon av overganger som vanligvis kommer til handling som forskjellige kolonner på Jira agile-tavle. Vi kan ikke gjøre antakelser om hvor og når du skal overføre oppgavene dine, og du må angi det manuelt."
-        }
+        },
+        "CREDENTIALS": "Legitimasjonserklæring"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Oppdragsgiver",
@@ -326,6 +320,12 @@
         "LOGIN_SUCCESS": "Vellykket innlogging!",
         "TEST_CREDENTIALS": "Test innlogging",
         "WELCOME_USER": "Velkommen {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
+        "IS_AUTO_POLL": "Hent automatisk importerte gitproblemer for endringer",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
+        "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore"
       }
     },
     "METRIC": {

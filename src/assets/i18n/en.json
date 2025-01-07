@@ -407,7 +407,6 @@
         "TIME_SPENT_TOOLTIP": "Add different times",
         "TITLE": "Jira: Submit Worklog"
       },
-      "FORM": {},
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for importing issues to Super Productivity automatically",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to Jira when sub task is done",
