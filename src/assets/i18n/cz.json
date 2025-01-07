@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Název zdroje CalDav (kalendář)",
         "CALDAV_URL": "URL CalDav (základní URL)",
         "CALDAV_USER": "Vaše uživatelské jméno CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automaticky dokončovat úkoly CalDav při dokončení úkolu",
         "IS_AUTO_IMPORT_ISSUES": "Automaticky přidávat neukončené úkoly CalDav do vašeho backlogu",
         "IS_AUTO_POLL": "Automaticky sledovat importované úkoly na změny",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Při přidávání nových úkolů zobrazovat neukončené úkoly CalDav jako návrhy",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automaticky dokončovat úkoly CalDav při dokončení úkolu"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Při přidávání nových úkolů zobrazovat neukončené úkoly CalDav jako návrhy"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby v seznamu úkolů pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení zobrazoval neukončené úkoly CalDav. Budou uvedeny jako návrhy a poskytnou odkaz na úkol a další informace o něm.</p> <p>Kromě toho můžete automaticky přidat a synchronizovat všechny neukončené úkoly do vašeho backlogu úkolů.</p><p>Aby to fungovalo v Nextcloud ve webové aplikaci, možná budete muset přidat „https://app.super-productivity.com“ na bílý seznam pomocí aplikace Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword</a>.</p>",
@@ -171,9 +171,6 @@
       },
       "FORM": {
         "FILTER_USER": "Uživatelské jméno (např. pro filtrování změn od vás)",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky přidat nerozhodnuté problémy z Gitea do backlogu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované problémy z gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
         "HOST": "Hostitel (např.: https://try.gitea.io)",
         "TOKEN": "Přístupový token",
         "REPO_FULL_NAME": "Uživatelské jméno nebo název organizace/projektu",
@@ -182,6 +179,9 @@
         "SCOPE_ALL": "Všechny",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
         "SCOPE_CREATED": "Vytvořeno mnou",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky přidat nerozhodnuté problémy z Gitea do backlogu",
+        "IS_AUTO_POLL": "Automaticky sledovat importované problémy z gitu na změny",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
         "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům"
       },
       "FORM_SECTION": {
@@ -241,13 +241,13 @@
       },
       "FORM": {
         "FILTER_USER": "Uživatelské jméno (např. pro filtrování změn od vás)",
+        "REPO": "\"uživatelské jméno/název repozitáře\" pro gitový repozitář, který chcete sledovat",
+        "TOKEN": "Přístupový token",
+        "IS_ASSIGNEE_FILTER": "Filtrovat úkoly přiřazené mně",
         "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nerozhodnuté problémy z GitHubu",
         "IS_AUTO_POLL": "Automaticky sledovat importované problémy z gitu na změny",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
-        "REPO": "\"uživatelské jméno/název repozitáře\" pro gitový repozitář, který chcete sledovat",
-        "TOKEN": "Přístupový token",
-        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům",
-        "IS_ASSIGNEE_FILTER": "Filtrovat úkoly přiřazené mně"
+        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy GitHubu pro konkrétní repozitář v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p> <p>Kromě toho můžete automaticky importovat všechny otevřené problémy.</p><p>Pro překročení omezení použití a k přístupu můžete poskytnout přístupový token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Více informací o jeho rozsahu naleznete zde</a>.",
@@ -286,9 +286,6 @@
       "FORM": {
         "FILTER_USER": "Uživatelské jméno (např. pro filtrování změn od vás)",
         "GITLAB_BASE_URL": "Vlastní základní adresa GitLabu (volitelné)",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z GitLabu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů",
         "PROJECT": "(výchozí) ID projektu nebo jméno uživatele/projektu",
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všechno",
@@ -302,7 +299,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Zobrazit dialog sledování času po kliknutí na dokončení dne",
         "TOKEN": "Přístupový token",
         "FILTER": "Vlastní filtr",
-        "FILTER_DESCRIPTION": "Viz https://docs.gitlab.com/ee/api/issues.html#list-issues. Lze kombinovat více filtrů pomocí &"
+        "FILTER_DESCRIPTION": "Viz https://docs.gitlab.com/ee/api/issues.html#list-issues. Lze kombinovat více filtrů pomocí &",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z GitLabu",
+        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete konfigurovat SuperProductivity pro zobrazení otevřených úkolů GitLabu (buď online verze nebo self-hosted instance) pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na úkol a další informace o něm.</p> <p>Kromě toho můžete automaticky importovat všechny otevřené úkoly.</p>",
@@ -404,17 +404,9 @@
         "TIME_SPENT_TOOLTIP": "Přidat různé časy",
         "TITLE": "Jira: Odeslat pracovní záznam"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nevyřešené úkoly z GitHubu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů",
-        "REPO": "\"jméno_uživatele/název_repozitáře\" pro sledování gitového repozitáře"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL použité pro automatický import úkolů do Super Productivity",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otevřít dialog pro odeslání pracovního záznamu do Jiry, když je podúkol hotov",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z Jiry",
-        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolovat importované úkoly na změny a informovat",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Zkontrolovat, zda je aktuálně pracovaný úkol přiřazen aktuálnímu uživateli",
         "IS_WORKLOG_ENABLED": "Otevřít dialog pro odeslání pracovního záznamu do Jiry, když je úkol hotov",
         "SEARCH_JQL_QUERY": "JQL dotaz pro omezení hledání úkolů",
@@ -422,7 +414,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vyplnit všechny strávené časy mínus zaznamenaný čas",
         "WORKLOG_DEFAULT_TIME_MODE": "Výchozí hodnota času pro dialog",
         "WORKLOG_DEFAULT_TODAY": "Vyplnit pouze čas strávený dnes",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vyplnit pouze čas strávený včera"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vyplnit pouze čas strávený včera",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z Jiry",
+        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolovat importované úkoly na změny a informovat"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Povolit samo-podepsaný certifikát",
@@ -434,7 +428,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Pokročilá konfigurace",
-        "CREDENTIALS": "Přihlašovací údaje",
         "HELP_ARR": {
           "H1": "Základní konfigurace",
           "H2": "Nastavení záznamu práce",
@@ -447,7 +440,8 @@
           "P2_2": "<em>'Otevřít dialog pracovního záznamu, když je hotov podúkol a ne pro úkoly s podúkoly sami o sobě'</em> otevírá dialog pracovního záznamu pokaždé, když označíte podúkol úkolu Jiry jako hotový. Protože již sledujete svůj čas pomocí podúkolů, není otevírán žádný dialog, když označíte samotný úkol Jiry jako hotový.",
           "P2_3": "<em>'Automaticky odesílat aktualizace pracovního záznamu bez dialogu'</em> dělá to, co říká. Protože označení úkolu jako hotového několikrát vede k celkovému sledování celého pracovního času dvakrát, toto se nedoporučuje.",
           "P3_1": "Zde můžete znovu nakonfigurovat výchozí přechody. Jira umožňuje širokou konfiguraci přechodů, které obvykle vstupují v platnost jako různé sloupce na vaší agilní tabuli Jiry, nemůžeme dělat předpoklady o tom, kde a kdy přecházet úkoly, a musíte je nastavit manuálně."
-        }
+        },
+        "CREDENTIALS": "Přihlašovací údaje"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Přiřazený",
@@ -490,6 +484,12 @@
         "LOGIN_SUCCESS": "Přihlášení bylo úspěšné!",
         "TEST_CREDENTIALS": "Otestovat přihlašovací údaje",
         "WELCOME_USER": "Vítejte, {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nevyřešené úkoly z GitHubu",
+        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů",
+        "REPO": "\"jméno_uživatele/název_repozitáře\" pro sledování gitového repozitáře"
       }
     },
     "METRIC": {
@@ -594,9 +594,6 @@
       "FORM": {
         "FILTER_USER": "Uživatelské jméno (např. k filtrování změn od vás)",
         "HOST": "Hostitel (např.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nerozhodnuté pracovní balíčky z OpenProject",
-        "IS_AUTO_POLL": "Automaticky dotazovat importované pracovní balíčky OpenProject na změny",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazit pracovní balíčky jako návrhy při přidávání nových úkolů",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Zobrazit dialog sledování času pro nahlášení do OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Vyžaduje zapnutý modul sledování času pro projekt v OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zobrazit dialog sledování času při dokončení každého podúkolu",
@@ -606,7 +603,10 @@
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Vše",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
-        "SCOPE_CREATED": "Vytvořeno mnou"
+        "SCOPE_CREATED": "Vytvořeno mnou",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nerozhodnuté pracovní balíčky z OpenProject",
+        "IS_AUTO_POLL": "Automaticky dotazovat importované pracovní balíčky OpenProject na změny",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazit pracovní balíčky jako návrhy při přidávání nových úkolů"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity k zobrazení otevřených pracovních balíčků OpenProject. Upozorňujeme, že pro toto fungování v prohlížeči pravděpodobně musíte nakonfigurovat CORS pro váš server OpenProject, aby umožnil přístup z app.super-productivity.com</p>",
@@ -999,11 +999,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Přidán úkol <strong>{{title}}</strong> z <strong>{{contextTitle}}</strong> do aktuálního seznamu",
         "FOUND_RESTORE_FROM_ARCHIVE": "Obnoven úkol <strong>{{title}}</strong> související s problémem ze archivu",
         "LAST_TAG_DELETION_WARNING": "Snažíte se odebrat poslední značku u úkolu, který není projektový. To není povoleno!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Nelze přesouvat úkoly k jiným projektům u úkolů souvisejících s problémem",
         "REMINDER_ADDED": "Naplánován úkol „{{title}}“",
         "REMINDER_DELETED": "Smazáno připomenutí k úkolu",
         "REMINDER_UPDATED": "Aktualizováno připomenutí k úkolu „{{title}}“",
-        "TASK_CREATED": "Vytvořen úkol „{{title}}“"
+        "TASK_CREATED": "Vytvořen úkol „{{title}}“",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Nelze přesouvat úkoly k jiným projektům u úkolů souvisejících s problémem"
       },
       "SELECT_OR_CREATE": "Vyberte nebo vytvořte úkol",
       "SUMMARY_TABLE": {

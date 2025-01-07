@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Le nom de la ressource CalDav (le calendrier)",
         "CALDAV_URL": "URL CalDav (l'URL de base)",
         "CALDAV_USER": "Votre nom d'utilisateur CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche",
         "IS_AUTO_IMPORT_ISSUES": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
         "IS_AUTO_POLL": "Interroger automatiquement les tâches importées pour les modifications",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches",
-        "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre backlog de tâches.</p>",
@@ -185,9 +185,6 @@
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
-        "IS_AUTO_IMPORT_ISSUES": "Importer automatiquement les problèmes non résolus de Gitea.",
-        "IS_AUTO_POLL": "Interroger automatiquement les problèmes importés de Git pour détecter des changements.",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
         "HOST": "Hôte (e.g.: https://try.gitea.io)",
         "TOKEN": "Jeton d'accès",
         "REPO_FULL_NAME": "Nom d'utilisateur ou nom de l'organisation/projet",
@@ -196,6 +193,9 @@
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Attribués à moi",
         "SCOPE_CREATED": "Créé par moi",
+        "IS_AUTO_IMPORT_ISSUES": "Importer automatiquement les problèmes non résolus de Gitea.",
+        "IS_AUTO_POLL": "Interroger automatiquement les problèmes importés de Git pour détecter des changements.",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
         "TOKEN_DESCRIPTION": "Nécessaire pour l'accès aux dépôts privés"
       },
       "FORM_SECTION": {
@@ -255,13 +255,13 @@
       },
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
+        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
+        "TOKEN": "Jeton d'accès",
+        "IS_ASSIGNEE_FILTER": "Filtrer les problèmes qui m'ont été attribués",
         "IS_AUTO_IMPORT_ISSUES": "Importer automatiquement les problèmes non résolus de GitHub.",
         "IS_AUTO_POLL": "Interroger automatiquement les problèmes importés de Git pour détecter des changements.",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
-        "TOKEN": "Jeton d'accès",
-        "TOKEN_DESCRIPTION": "Requis pour l'accès au référentiel privé",
-        "IS_ASSIGNEE_FILTER": "Filtrer les problèmes qui m'ont été attribués"
+        "TOKEN_DESCRIPTION": "Requis pour l'accès au référentiel privé"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour lister les problèmes ouverts de GitHub pour un dépôt spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront listés comme suggestions et fourniront un lien vers le problème ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez importer automatiquement tous les problèmes ouverts.</p><p>Pour contourner les limites d'utilisation et pour accéder, vous pouvez fournir un jeton d'accès. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Plus d'informations sur ses portées sont disponibles ici</a>.</p>",
@@ -300,9 +300,6 @@
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "GITLAB_BASE_URL": "URL de base GitLab personnalisée",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
-        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "PROJECT": "Chemin complet ou nom d'utilisateur / projet",
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
@@ -316,7 +313,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Afficher la boîte de dialogue de suivi du temps après avoir cliqué sur \"terminer la journée\"",
         "TOKEN": "Jeton d'accès",
         "FILTER": "Filtre personnalisé",
-        "FILTER_DESCRIPTION": "Voir https://docs.gitlab.com/ee/api/issues.html#list-issues. Plusieurs peuvent être combinés avec le caractère &"
+        "FILTER_DESCRIPTION": "Voir https://docs.gitlab.com/ee/api/issues.html#list-issues. Plusieurs peuvent être combinés avec le caractère &",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
+        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches"
       },
       "FORM_SECTION": {
         "HELP": "<p> Ici, vous pouvez configurer SuperProductivity pour répertorier les problèmes ouverts de GitLab (que ce soit la version en ligne ou une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet. </p> <p> En outre, vous pouvez automatiquement ajouter et synchroniser tous les problèmes ouverts à votre carnet de tâches. </p>",
@@ -419,17 +419,9 @@
         "TIME_SPENT_TOOLTIP": "Ajouter des heures différentes",
         "TITLE": "Jira: Soumettre le temps de travail"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
-        "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL utilisé pour ajouter des tâches automatiquement au backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Ouvrir la boîte de dialogue pour soumettre à Jira le temps de travail lorsque la sous-tâche est terminée",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les tickets au backlog de Jira",
-        "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Vérifier si le ticket actuellement traité est affecté à l'utilisateur actuel",
         "IS_WORKLOG_ENABLED": "Ouvrir la boîte de dialogue pour soumettre à jira le temps de travail lorsque la tâche est terminée",
         "SEARCH_JQL_QUERY": "Requête JQL pour limiter la recherche des tâches",
@@ -437,7 +429,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Remplissez tout le temps passé moins le temps enregistré",
         "WORKLOG_DEFAULT_TIME_MODE": "Valeur de temps par défaut pour le dialogue",
         "WORKLOG_DEFAULT_TODAY": "Ne remplissez que le temps passé aujourd'hui",
-        "WORKLOG_DEFAULT_YESTERDAY": "Remplir uniquement le temps passé hier"
+        "WORKLOG_DEFAULT_YESTERDAY": "Remplir uniquement le temps passé hier",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les tickets au backlog de Jira",
+        "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Autoriser le certificat auto-signé",
@@ -449,7 +443,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configuration avancée",
-        "CREDENTIALS": "Identifiants",
         "HELP_ARR": {
           "H1": "configuration de base",
           "H2": "Paramètres du backlog",
@@ -462,7 +455,8 @@
           "P2_2": "<em>'Ouvrir la boîte de dialogue du temps de travail lorsque la sous-tâche est terminée et non pas pour les tâches avec sous-tâches'</em> ouvre une boîte pour le temps de travail chaque fois que vous marquez une sous-tâche d'un ticket Jira comme terminée. Comme vous suivez déjà votre temps via les sous-tâches, aucune boîte de dialogue ne s'ouvre lorsque vous indiquez que la tâche Jira est terminée.",
           "P2_3": "<em>\"Envoyer les mises à jour du temps de travail automatiquement sans boîte de dialogue\"</em> fait ce qu'il dit. Comme marquer une tâche plusieurs fois entraîne le suivi complet du temps de travail complet à deux reprises, ceci n'est pas recommandé.",
           "P3_1": "Ici, vous pouvez reconfigurer vos transitions par défaut. Jira permet une configuration étendue de transitions entrant généralement en action sous forme de colonnes différentes sur votre tableau agile Jira. Nous ne pouvons donc pas supposer où et quand transiter vos tâches et vous devez le définir manuellement."
-        }
+        },
+        "CREDENTIALS": "Identifiants"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsable",
@@ -505,6 +499,12 @@
         "LOGIN_SUCCESS": "Connexion réussie!",
         "TEST_CREDENTIALS": "Tester les identifiants",
         "WELCOME_USER": "Bienvenue {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
+        "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
+        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
       }
     },
     "METRIC": {
@@ -610,9 +610,6 @@
       "FORM": {
         "FILTER_USER": "Nom d'utilisateur (par exemple, pour filtrer vous-même les modifications)",
         "HOST": "Hébergeur (ex : https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
-        "IS_AUTO_POLL": "Sondage automatique des packages de travail OpenProject importés pour les modifications",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Afficher les lots de travaux sous forme de suggestions lors de l'ajout de nouvelles tâches",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Afficher la boîte de dialogue de suivi du temps à signaler à OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Nécessite l'activation du module de suivi du temps pour le projet OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Afficher la boîte de dialogue de suivi du temps lorsque les sous-tâches sont terminées",
@@ -622,7 +619,10 @@
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Assigné à moi",
-        "SCOPE_CREATED": "Créé par moi"
+        "SCOPE_CREATED": "Créé par moi",
+        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
+        "IS_AUTO_POLL": "Sondage automatique des packages de travail OpenProject importés pour les modifications",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Afficher les lots de travaux sous forme de suggestions lors de l'ajout de nouvelles tâches"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les packages de travail OpenProject ouverts. Veuillez noter que pour que cela fonctionne dans le navigateur, vous devez probablement configurer CORS pour votre serveur OpenProject, pour autoriser l'accès depuis app.super-productivity.com</p>",
@@ -1054,7 +1054,6 @@
         "FOR_OTHER": "La tâche est due. Voulez-vous commencer à travailler dessus ?",
         "FROM_PROJECT": "Depuis le projet",
         "FROM_TAG": "Depuis la balise: \"{{title}}\"",
-
         "RESCHEDULE_UNTIL_TOMORROW": "Jusqu'à demain",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Répéter tout",
@@ -1087,11 +1086,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Tâche <strong>{{title}}</strong> ajoutée de <strong>{{contextTitle}}</strong> à la liste actuelle",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche <strong>{{title}}</strong> restaurée en lien avec le ticket de l'archive",
         "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Le déplacement des tâches de résolution vers un autre projet n'est pas autorisé",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
-        "TASK_CREATED": "Tâche créée \"{{title}}\""
+        "TASK_CREATED": "Tâche créée \"{{title}}\"",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Le déplacement des tâches de résolution vers un autre projet n'est pas autorisé"
       },
       "SELECT_OR_CREATE": "Sélectionner ou créer une tâche",
       "SUMMARY_TABLE": {
@@ -1362,13 +1361,13 @@
       "BROWSER_WARNING": "<b>Cela ne fonctionnera probablement PAS avec la version navigateur de Super Productivity.<br /> Veuillez <a href=\"https://super-productivity.com/download/\">télécharger la version de bureau</a> pour utiliser cette fonctionnalité !</b>",
       "CAL_PATH": "URL de la source iCal",
       "CAL_PROVIDERS": "Fournisseur de Calendrier (expérimental et optionnel)",
-      "CAL_PROVIDERS_ADD": "Ajouter une source iCal de Calendrier",
-      "CAL_PROVIDERS_INFO": "Vous pouvez charger des données de calendrier au format iCal (ex : <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Les données seront intégrées dans le planning et vous serez invité à créer des tâches pour les événements du calendrier, si elles sont dues.",
       "CHECK_UPDATES": "Vérifier les mises à jour distantes tous les X",
       "DEFAULT_PROJECT": "Projet par défaut pour les tâches de calendrier ajoutées",
       "HELP": "Vous pouvez intégrer des calendriers pour recevoir des rappels et les ajouter en tant que tâches dans Super Productivity. L'intégration fonctionne en utilisant le format iCal. Pour que cela fonctionne, vos calendriers doivent être accessibles soit sur Internet, soit via le système de fichiers.",
-      "ICON": "Icône pour la Programmation",
       "SHOW_BANNER_THRESHOLD": "Afficher une notification \"X temps\" avant l'événement (vide si désactivé)",
+      "CAL_PROVIDERS_ADD": "Ajouter une source iCal de Calendrier",
+      "CAL_PROVIDERS_INFO": "Vous pouvez charger des données de calendrier au format iCal (ex : <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Les données seront intégrées dans le planning et vous serez invité à créer des tâches pour les événements du calendrier, si elles sont dues.",
+      "ICON": "Icône pour la Programmation",
       "TITLE": "Calendriers"
     },
     "EVALUATION": {

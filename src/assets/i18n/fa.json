@@ -94,10 +94,10 @@
         "CALDAV_RESOURCE": "نام منبع CalDav (تقویم)",
         "CALDAV_URL": "CalDav URL (URL پایه)",
         "CALDAV_USER": "نام کاربری CalDav شما",
+        "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید",
         "IS_AUTO_IMPORT_ISSUES": "به طور خودکار موارد خاموش CalDav را به پرونده خود اضافه کنید",
         "IS_AUTO_POLL": "وظایف وارد شده را به طور خودکار برای تغییرات نظرسنجی کنید",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "هنگام اضافه کردن کارهای جدید ، تالارهای CalDav ناقص را به عنوان پیشنهاد نشان دهید",
-        "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "هنگام اضافه کردن کارهای جدید ، تالارهای CalDav ناقص را به عنوان پیشنهاد نشان دهید"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را پیکربندی کنید تا لیست های انجام نشده CalDav را برای یک پروژه خاص در صفحه ایجاد کار در نمای برنامه ریزی روزانه لیست کنید. آنها به عنوان پیشنهادها لیست می شوند و پیوندی به این کار و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند.</p> <p>علاوه بر این شما می توانید به طور خودکار تمام موارد خاتمه یافته ناقص را به پرونده کار خود اضافه و همگام سازی کنید.</p>",
@@ -180,11 +180,11 @@
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
+        "TOKEN": "توکن دسترسی",
         "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
-        "TOKEN": "توکن دسترسی",
         "TOKEN_DESCRIPTION": "برای دسترسی به مخزن خصوصی مورد نیاز است"
       },
       "FORM_SECTION": {
@@ -216,9 +216,6 @@
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
         "GITLAB_BASE_URL": "URL پایه GitLab سفارشی",
-        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks",
         "PROJECT": "مسیر کامل یا نام کاربری / پروژه",
         "SCOPE": "محدوده",
         "SCOPE_ALL": "همه",
@@ -228,7 +225,10 @@
         "SOURCE_GLOBAL": "همه",
         "SOURCE_GROUP": "گروه",
         "SOURCE_PROJECT": "پروژه",
-        "TOKEN": "توکن دسترسی"
+        "TOKEN": "توکن دسترسی",
+        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks"
       },
       "FORM_SECTION": {
         "HELP": "<p> در اینجا می توانید SuperProductivity را تنظیم کنید تا لیست GitLab باز (یا نسخه آنلاین آن یا یک نمونه خود میزبان) را برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه ریزی روزانه تنظیم کنید. آنها به عنوان پیشنهادات ذکر شده اند و پیوندی به موضوع و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند. </p> <p> علاوه بر این می توانید به طور خودکار همه موارد باز را به بک گراند وظیفه خود اضافه کنید و همگام سازی کنید. </p>",
@@ -325,17 +325,9 @@
         "TIME_SPENT_TOOLTIP": "زمان های مختلف را اضافه کنید",
         "TITLE": "جیرا: ارسال گزارش کار"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
         "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks",
@@ -343,7 +335,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "تمام زمان صرف شده منهای زمان ثبت شده را پر کنید",
         "WORKLOG_DEFAULT_TIME_MODE": "مقدار زمان پیش‌فرض برای گفتگو",
         "WORKLOG_DEFAULT_TODAY": "فقط زمان صرف شده امروز را پر کنید",
-        "WORKLOG_DEFAULT_YESTERDAY": "فقط زمانی را که دیروز صرف کرده اید پر کنید"
+        "WORKLOG_DEFAULT_YESTERDAY": "فقط زمانی را که دیروز صرف کرده اید پر کنید",
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
+        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
@@ -355,7 +349,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "تنظیمات پیشرفته",
-        "CREDENTIALS": "Credentials",
         "HELP_ARR": {
           "H1": "تنظیمات اولیه",
           "H2": "تنظیمات کار (Worklog)",
@@ -368,7 +361,8 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        }
+        },
+        "CREDENTIALS": "Credentials"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "مسئول",
@@ -410,6 +404,12 @@
         "LOGIN_SUCCESS": "Login successful!",
         "TEST_CREDENTIALS": "Test Credentials",
         "WELCOME_USER": "Welcome {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -492,9 +492,6 @@
       "FORM": {
         "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
         "HOST": "میزبان (به عنوان مثال: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
-        "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید",
         "IS_SHOW_TIME_TRACKING_DIALOG": "نمایش گفتگوی ردیابی زمان برای گزارش به OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "برای پروژه OpenProject به ماژول ردیابی زمان نیاز دارد",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "نمایش گفتگوی ردیابی زمان پس از تکمیل وظایف فرعی",
@@ -504,7 +501,10 @@
         "SCOPE": "محدوده",
         "SCOPE_ALL": "همه",
         "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
-        "SCOPE_CREATED": "ایجاد شده توسط من"
+        "SCOPE_CREATED": "ایجاد شده توسط من",
+        "IS_AUTO_IMPORT_ISSUES": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
+        "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را برای لیست بسته های کاری OpenProject باز شده پیکربندی کنید. لطفاً توجه داشته باشید که برای کارکردن در مرورگر ، احتمالاً باید CORS را برای سرور OpenProject خود پیکربندی کنید ، تا از app.super-productivity.com اجازه دسترسی داشته باشید</p>",
@@ -1112,9 +1112,6 @@
       "LOCATION_INFO": "نسخه پشتیبان تهیه شده در:",
       "TITLE": "پشتیبان گیری خودکار"
     },
-    "CALENDARS": {
-      "TITLE": "تقویم‌ها"
-    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "ارزیابی ها و معیارها"
@@ -1260,6 +1257,9 @@
       "L_IS_SHOW_ON_MOBILE": "نمایش در برنامه تلفن همراه",
       "L_MIN_TIME": "زمان انتظار قبل از نشان دادن بنر است",
       "TITLE": "یادآوری ردیابی زمان"
+    },
+    "CALENDARS": {
+      "TITLE": "تقویم‌ها"
     }
   },
   "GLOBAL_SNACK": {

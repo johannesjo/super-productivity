@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Der Name der CalDav-Ressource (der Kalender)",
         "CALDAV_URL": "CalDav-URL (die Basis-URL)",
         "CALDAV_USER": "Ihr CalDav-Benutzername",
+        "IS_TRANSITION_ISSUES_ENABLED": "Führen Sie CalDav-Aufgaben nach Abschluss der Aufgabe automatisch aus",
         "IS_AUTO_IMPORT_ISSUES": "Fügen Sie Ihrem Backlog automatisch unvollständige CalDav-Aufgaben hinzu",
         "IS_AUTO_POLL": "Importierte Aufgaben werden automatisch nach Änderungen abgefragt",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zeigen Sie unvollständige CalDav-Aufgaben als Vorschlag an, wenn Sie neue Aufgaben hinzufügen",
-        "IS_TRANSITION_ISSUES_ENABLED": "Führen Sie CalDav-Aufgaben nach Abschluss der Aufgabe automatisch aus"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zeigen Sie unvollständige CalDav-Aufgaben als Vorschlag an, wenn Sie neue Aufgaben hinzufügen"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass unvollständige CalDav-Aufgaben für ein bestimmtes Projekt im Aufgabenerstellungsfenster in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zur Aufgabe sowie weitere Informationen dazu.</p> <p>Außerdem können Sie automatisch alle nicht abgeschlossenen Aufgaben zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
@@ -185,9 +185,6 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um selbst Änderungen herauszufiltern)",
-        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issue von Gitea automatisch zum Backlog hinzu",
-        "IS_AUTO_POLL": "Importierte Git-Issues automatisch auf Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Probleme von Git als Vorschläge anzeigen, wenn neue Aufgaben hinzugefügt werden",
         "HOST": "Host (z. B. : https://try.gitea.io)",
         "TOKEN": "Zugangstoken",
         "REPO_FULL_NAME": "Benutzername oder Organisationsname/Projekt",
@@ -195,7 +192,10 @@
         "SCOPE": "Umfang",
         "SCOPE_ALL": "Alle",
         "SCOPE_ASSIGNED": "Mir zugewiesen",
-        "SCOPE_CREATED": "Von mir erstellt"
+        "SCOPE_CREATED": "Von mir erstellt",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issue von Gitea automatisch zum Backlog hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Issues automatisch auf Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Probleme von Git als Vorschläge anzeigen, wenn neue Aufgaben hinzugefügt werden"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene Gitea-Issues für ein bestimmtes Repository im Aufgabenerstellungsfenster in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Issue sowie weitere Informationen dazu.</p><p> Darüber hinaus können Sie alle offenen Issues automatisch hinzufügen und importieren.</p><p> Um Nutzungsbeschränkungen zu umgehen und Zugriff zu erhalten, können Sie ein Zugriffstoken bereitstellen.",
@@ -254,13 +254,13 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
+        "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
+        "TOKEN": "Zugangstoken",
+        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues",
         "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
-        "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
-        "TOKEN": "Zugangstoken",
-        "TOKEN_DESCRIPTION": "Erforderlich für den Zugriff auf private Repositories",
-        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues"
+        "TOKEN_DESCRIPTION": "Erforderlich für den Zugriff auf private Repositories"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
@@ -299,9 +299,6 @@
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "GITLAB_BASE_URL": "Benutzerdefinierte GitLab-Basis-URL",
-        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
-        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
         "SCOPE": "Bereich",
         "SCOPE_ALL": "Alles",
@@ -315,7 +312,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Zeigen Sie den Zeiterfassungsdialog an, nachdem Sie auf „Tag beenden“ geklickt haben",
         "TOKEN": "Zugangstoken",
         "FILTER": "Benutzerdefinierte Filter",
-        "FILTER_DESCRIPTION": "Siehe https://docs.gitlab.com/ee/api/issues.html#list-issues. Mehrere können durch \"&\" kombiniert werden"
+        "FILTER_DESCRIPTION": "Siehe https://docs.gitlab.com/ee/api/issues.html#list-issues. Mehrere können durch \"&\" kombiniert werden",
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitLab automatisch zum Backlog hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen"
       },
       "FORM_SECTION": {
         "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene GitLab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
@@ -418,17 +418,9 @@
         "TIME_SPENT_TOOLTIP": "Andere Zeiten hinzufügen",
         "TITLE": "Jira: Worklog einreichen"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
-        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
-        "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL wird zum automatischen Hinzufügen von Aufgaben zum Backlog verwendet",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Öffnet das Dialogfeld, um das Worklog an Jira zu senden, wenn die Unteraufgabe abgeschlossen ist",
-        "IS_AUTO_IMPORT_ISSUES": "Fügt dem Jira-Backlog automatisch Issues hinzu",
-        "IS_AUTO_POLL_TICKETS": "Überprüft importierte Issues automatisch auf Änderungen und benachrichtigt Sie",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüft, ob das aktuell bearbeitete Issue dem aktuellen Benutzer zugeordnet ist",
         "IS_WORKLOG_ENABLED": "Öffnet das Dialogfeld, um das Worklog an Jira zu senden, wenn die Aufgabe erledigt ist",
         "SEARCH_JQL_QUERY": "JQL-Abfrage um die gefundenden Jira-Issues einzuschränken",
@@ -436,7 +428,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Geben Sie die gesamte aufgewendete Zeit abzüglich der protokollierten Zeit ein",
         "WORKLOG_DEFAULT_TIME_MODE": "Standardzeitwert für Dialog",
         "WORKLOG_DEFAULT_TODAY": "Geben Sie nur die heute verbrachte Zeit an",
-        "WORKLOG_DEFAULT_YESTERDAY": "Geben Sie nur die Zeit an, die Sie gestern verbracht haben"
+        "WORKLOG_DEFAULT_YESTERDAY": "Geben Sie nur die Zeit an, die Sie gestern verbracht haben",
+        "IS_AUTO_IMPORT_ISSUES": "Fügt dem Jira-Backlog automatisch Issues hinzu",
+        "IS_AUTO_POLL_TICKETS": "Überprüft importierte Issues automatisch auf Änderungen und benachrichtigt Sie"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Selbstsigniertes Zertifikat zulassen",
@@ -448,7 +442,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Erweiterte Konfiguration",
-        "CREDENTIALS": "Zugangsdaten",
         "HELP_ARR": {
           "H1": "Grundlegende Einstellung",
           "H2": "Worklog-Einstellungen",
@@ -461,7 +454,8 @@
           "P2_2": "<em>'Worklogdialog öffnen, wenn eine Unteraufgabe erledigt ist und nicht für Aufgaben mit Unteraufgaben selbst'</em> öffnet jedes Mal ein Worklogdialogfeld, wenn Sie eine Unteraufgabe eines Jira-Issues als erledigt markieren. Da Sie Ihre Zeit bereits über die Unteraufgaben nachverfolgen, wird kein Dialogfeld geöffnet, sobald Sie die Jira-Aufgabe selbst als erledigt markieren.",
           "P2_3": "<em>'Aktualisierungen automatisch ohne Dialog an das Worklog senden'</em> macht, was es sagt. Da das mehrmalige Markieren einer Aufgabe dazu führt, dass die gesamte Arbeitszeit zweimal erfasst wird, wird dies nicht empfohlen.",
           "P3_1": "Hier können Sie Ihre Standardübergänge neu konfigurieren. Jira ermöglicht eine umfassende Konfiguration von Übergängen, die normalerweise als unterschiedliche Spalten auf Ihrem Jira Agile Board wirksam werden. Super Productivity kann hierzu keine Annahme treffen. Daher müssen Sie die Übergänge manuell einstellen."
-        }
+        },
+        "CREDENTIALS": "Zugangsdaten"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Bearbeiter",
@@ -504,6 +498,12 @@
         "LOGIN_SUCCESS": "Anmeldung erfolgreich!",
         "TEST_CREDENTIALS": "Anmeldeinformationen testen",
         "WELCOME_USER": "Willkommen {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Fügen Sie ungelöste Issues aus GitHub automatisch zum Backlog hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Issues automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Issues von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
+        "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
       }
     },
     "METRIC": {
@@ -609,9 +609,6 @@
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "HOST": "Host (z. B. : https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Ungelöste Arbeitspakete aus OpenProject automatisch zum Backlog hinzufügen",
-        "IS_AUTO_POLL": "Importierte OpenProject-Arbeitspakete automatisch nach Änderungen abfragen",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Arbeitspakete als Vorschläge beim Hinzufügen neuer Aufgaben anzeigen",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Zeiterfassungsdialog anzeigen, um an OpenProject zu berichten",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Erfordert die Aktivierung des Zeiterfassungsmoduls für das OpenProject-Projekt",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zeiterfassungsdialog anzeigen, wenn Unteraufgaben abgeschlossen sind",
@@ -621,7 +618,10 @@
         "SCOPE": "Bereich",
         "SCOPE_ALL": "Alles",
         "SCOPE_ASSIGNED": "Mir zugewiesen",
-        "SCOPE_CREATED": "Von mir erstellt"
+        "SCOPE_CREATED": "Von mir erstellt",
+        "IS_AUTO_IMPORT_ISSUES": "Ungelöste Arbeitspakete aus OpenProject automatisch zum Backlog hinzufügen",
+        "IS_AUTO_POLL": "Importierte OpenProject-Arbeitspakete automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Arbeitspakete als Vorschläge beim Hinzufügen neuer Aufgaben anzeigen"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity konfigurieren, um offene OpenProject-Arbeitspakete aufzulisten. Bitte beachten Sie, dass Sie, damit dies im Browser funktioniert, wahrscheinlich CORS für Ihren OpenProject-Server konfigurieren müssen, um den Zugriff von app.super-productivity.com zu ermöglichen</p>",
@@ -1036,11 +1036,11 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Stichwort einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Das Verschieben von Issues in ein anderes Projekt ist nicht zulässig",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
-        "TASK_CREATED": "Erstellte Aufgabe \"{{title}}\""
+        "TASK_CREATED": "Erstellte Aufgabe \"{{title}}\"",
+        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Das Verschieben von Issues in ein anderes Projekt ist nicht zulässig"
       },
       "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
       "SUMMARY_TABLE": {
@@ -1318,13 +1318,13 @@
       "BROWSER_WARNING": "<b>Dies funktioniert wahrscheinlich NICHT mit der Browserversion von Super Productivity.<br /> Bitte <a href=\"https://super-productivity.com/download/\">laden Sie die Desktop-Version herunter</a> , um diese Funktion zu nutzen!</b>",
       "CAL_PATH": "URL der iCal-Quelle",
       "CAL_PROVIDERS": "Kalenderanbieter (experimentell und optional)",
-      "CAL_PROVIDERS_ADD": "Kalender-iCal-Quelle hinzufügen",
-      "CAL_PROVIDERS_INFO": "Sie können Kalenderdaten als iCal laden (z. B. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Kalender</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Die Daten werden in die Zeitleiste integriert und Sie werden aufgefordert, Aufgaben für Kalenderereignisse zu erstellen, sofern diese fällig sind.",
       "CHECK_UPDATES": "Alle X mal nach Remote-Updates suchen",
       "DEFAULT_PROJECT": "Standardprojekt für hinzugefügte Kalenderaufgaben",
       "HELP": "Sie können Kalender zur Erinnerung integrieren und diese als Aufgaben in Super Productivity hinzufügen. Die Integration funktioniert über das iCal-Format. Damit dies funktioniert, müssen Ihre Kalender entweder über das Internet oder über ein Dateisystem zugänglich sein.",
-      "ICON": "Icon für die Zeitleiste",
       "SHOW_BANNER_THRESHOLD": "Vor dem Ereignis eine Benachrichtigung anzeigen (leer für deaktiviert)",
+      "CAL_PROVIDERS_ADD": "Kalender-iCal-Quelle hinzufügen",
+      "CAL_PROVIDERS_INFO": "Sie können Kalenderdaten als iCal laden (z. B. <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Kalender</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Die Daten werden in die Zeitleiste integriert und Sie werden aufgefordert, Aufgaben für Kalenderereignisse zu erstellen, sofern diese fällig sind.",
+      "ICON": "Icon für die Zeitleiste",
       "TITLE": "Kalender"
     },
     "EVALUATION": {
