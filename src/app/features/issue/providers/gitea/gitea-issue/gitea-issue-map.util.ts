@@ -12,7 +12,7 @@ export const mapGiteaIssueToSearchResult = (issue: GiteaIssue): SearchResultItem
   };
 };
 
-// Gitea uses the issue number intead of issue id to track the issues
+// Gitea uses the issue number instead of issue id to track the issues
 export const mapGiteaIssueIdToIssueNumber = (issue: GiteaIssue): GiteaIssue => {
   return { ...issue, id: issue.number };
 };
