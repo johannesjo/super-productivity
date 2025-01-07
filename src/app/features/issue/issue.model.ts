@@ -85,32 +85,32 @@ export type IssueData =
   | RedmineIssue;
 
 export type IssueDataReduced =
-  | GithubIssueReduced
-  | JiraIssueReduced
-  | GitlabIssue
-  | OpenProjectWorkPackageReduced
-  | CaldavIssueReduced
-  | ICalIssueReduced
-  | GiteaIssue
-  | RedmineIssue;
+  | (GithubIssueReduced & { plannedAt?: string | null })
+  | (JiraIssueReduced & { plannedAt?: string | null })
+  | (GitlabIssue & { plannedAt?: string | null })
+  | (OpenProjectWorkPackageReduced & { plannedAt?: string | null })
+  | (CaldavIssueReduced & { plannedAt?: string | null })
+  | (ICalIssueReduced & { plannedAt?: string | null })
+  | (GiteaIssue & { plannedAt?: string | null })
+  | (RedmineIssue & { plannedAt?: string | null });
 
 export type IssueDataReducedMap = {
   [K in IssueProviderKey]: K extends 'JIRA'
-    ? JiraIssueReduced
+    ? JiraIssueReduced & { plannedAt?: string | null }
     : K extends 'GITHUB'
-      ? GithubIssueReduced
+      ? GithubIssueReduced & { plannedAt?: string | null }
       : K extends 'GITLAB'
-        ? GitlabIssue
+        ? GitlabIssue & { plannedAt?: string | null }
         : K extends 'CALDAV'
-          ? CaldavIssueReduced
+          ? CaldavIssueReduced & { plannedAt?: string | null }
           : K extends 'ICAL'
-            ? ICalIssueReduced
+            ? ICalIssueReduced & { plannedAt?: string | null }
             : K extends 'OPEN_PROJECT'
-              ? OpenProjectWorkPackageReduced
+              ? OpenProjectWorkPackageReduced & { plannedAt?: string | null }
               : K extends 'GITEA'
-                ? GiteaIssue
+                ? GiteaIssue & { plannedAt?: string | null }
                 : K extends 'REDMINE'
-                  ? RedmineIssue
+                  ? RedmineIssue & { plannedAt?: string | null }
                   : never;
 };
 
