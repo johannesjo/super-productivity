@@ -22,6 +22,7 @@ export interface JiraCfg extends BaseIssueProviderCfg {
   host: string | null;
   userName: string | null;
   password?: string | null;
+  usePAT: boolean;
 
   isAllowSelfSignedCertificate: boolean;
   searchJqlQuery: string;

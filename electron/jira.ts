@@ -91,7 +91,11 @@ export const setupRequestHeadersForImages = (jiraCfg: JiraCfg): void => {
   // thankfully only the last attached listener will be used
   // @see: https://electronjs.org/docs/api/web-request
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders.authorization = `Basic ${encoded}`;
+    if (jiraCfg.usePAT) {
+      details.requestHeaders.authorization = `Bearer ${jiraCfg.password}`;
+    } else {
+      details.requestHeaders.authorization = `Basic ${encoded}`;
+    }
     callback({ requestHeaders: details.requestHeaders });
   });
 };

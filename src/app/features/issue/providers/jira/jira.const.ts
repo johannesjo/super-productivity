@@ -14,6 +14,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   host: null,
   userName: null,
   password: null,
+  usePAT: false,
 
   searchJqlQuery: '',
 
@@ -196,6 +197,14 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
         //     label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
         //   },
         // },
+        {
+          key: 'usePAT',
+          type: 'checkbox',
+          templateOptions: {
+            required: false,
+            label: T.F.JIRA.FORM_CRED.USE_PAT,
+          },
+        },
 
         ...ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 
