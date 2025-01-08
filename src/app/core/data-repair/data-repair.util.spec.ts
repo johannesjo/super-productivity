@@ -9,6 +9,7 @@ import { Project, ProjectState } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { IssueProvider } from '../../features/issue/issue.model';
 
 const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
@@ -947,6 +948,36 @@ describe('dataRepair()', () => {
           TEST: {
             ...taskArchiveState.entities.TEST,
             projectId: null,
+          },
+        },
+      },
+    });
+  });
+
+  it('should delete non-existent project ids for issueProviders', () => {
+    const issueProviderState = {
+      ...mock.issueProvider,
+      ...fakeEntityStateFromArray<IssueProvider>([
+        {
+          id: 'TEST',
+          defaultProjectId: 'NON_EXISTENT',
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        issueProvider: issueProviderState,
+      } as any),
+    ).toEqual({
+      ...mock,
+      issueProvider: {
+        ...issueProviderState,
+        entities: {
+          TEST: {
+            ...issueProviderState.entities.TEST,
+            defaultProjectId: null,
           },
         },
       },
