@@ -425,7 +425,7 @@
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
         "USER_NAME": "Email / Username",
-        "USE_PAT": "Use Personal Access Token instead of password",
+        "USE_PAT": "Use Personal Access Token instead (LEGACY)",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
       },
       "FORM_SECTION": {
