@@ -540,12 +540,17 @@ export class JiraApiService {
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
-        ...{
-          Cookie: '',
-          authorization: `Basic ${this._b64EncodeUnicode(
-            `${cfg.userName}:${cfg.password}`,
-          )}`,
-        },
+        ...(cfg.usePAT
+          ? {
+              Cookie: '',
+              authorization: `Bearer ${cfg.password}`,
+            }
+          : {
+              Cookie: '',
+              authorization: `Basic ${this._b64EncodeUnicode(
+                `${cfg.userName}:${cfg.password}`,
+              )}`,
+            }),
       },
     };
   }
