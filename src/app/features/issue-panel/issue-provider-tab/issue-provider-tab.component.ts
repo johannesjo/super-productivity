@@ -116,6 +116,10 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
         ? this._store.select(selectProjectById, { id: ip.defaultProjectId })
         : of(null),
     ),
+    catchError(() => {
+      console.error('Project not found for issueProvider');
+      return of(null);
+    }),
   );
   defaultProject = toSignal(this.defaultProject$);
 

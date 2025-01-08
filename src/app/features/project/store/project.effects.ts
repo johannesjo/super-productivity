@@ -250,6 +250,7 @@ export class ProjectEffects {
       this._actions$.pipe(
         ofType(deleteProject),
         tap(async ({ project, allTaskIds }) => {
+          // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
           await this._persistenceService.removeCompleteRelatedDataForProject(id);
           this._removeAllArchiveTasksForProject(id);

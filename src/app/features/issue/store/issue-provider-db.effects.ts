@@ -6,6 +6,7 @@ import { select, Store } from '@ngrx/store';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectIssueProviderState } from './issue-provider.selectors';
 import { IssueProviderActions } from './issue-provider.actions';
+import { deleteProject } from '../../project/store/project.actions';
 
 @Injectable()
 export class IssueProviderDbEffects {
@@ -17,6 +18,9 @@ export class IssueProviderDbEffects {
     () =>
       this._actions$.pipe(
         ofType(
+          // meta
+          deleteProject,
+
           IssueProviderActions.addIssueProvider,
           IssueProviderActions.updateIssueProvider,
           IssueProviderActions.upsertIssueProvider,
