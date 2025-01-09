@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "De naam van de CalDav-resource (de kalender)",
         "CALDAV_URL": "CalDav-URL (de basis-URL)",
         "CALDAV_USER": "Uw CalDav-gebruikersnaam",
+        "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak",
         "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch niet-voltooide CalDav-taken toe aan uw backlog",
         "IS_AUTO_POLL": "Controleer geïmporteerde taken automatisch op wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Toon onvoltooide CalDav-taken als suggestie bij het toevoegen van nieuwe taken",
-        "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Toon onvoltooide CalDav-taken als suggestie bij het toevoegen van nieuwe taken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om niet-voltooide CalDav-taken voor een specifiek project weer te geven in het taakaanmaakpaneel in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar de taak en meer informatie erover.</p> <p>Bovendien kunt u automatisch alle niet-voltooide taken toevoegen aan en synchroniseren met uw backlog.</p>",
@@ -232,11 +232,11 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
+        "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
+        "TOKEN": "Toegangstoken",
         "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
         "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-        "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
-        "TOKEN": "Toegangstoken",
         "TOKEN_DESCRIPTION": "Vereist voor toegang tot privérepository"
       },
       "FORM_SECTION": {
@@ -270,9 +270,6 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
         "GITLAB_BASE_URL": "Aangepaste GitLab base URL",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
-        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
         "PROJECT": "Volledig pad of gebruikersnaam / project",
         "SCOPE": "strekking",
         "SCOPE_ALL": "Allemaal",
@@ -282,7 +279,10 @@
         "SOURCE_GLOBAL": "Allemaal",
         "SOURCE_GROUP": "Groep",
         "SOURCE_PROJECT": "project",
-        "TOKEN": "Toegangstoken"
+        "TOKEN": "Toegangstoken",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
+        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken"
       },
       "FORM_SECTION": {
         "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw backlog. </p>",
@@ -379,17 +379,9 @@
         "TIME_SPENT_TOOLTIP": "Voeg verschillende tijden toe",
         "TITLE": "Jira: Werklogboek indienen"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
-        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-        "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL gebruikt voor het automatisch toevoegen van taken aan backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialoogvenster om werklog naar jira te sturen wanneer de subtaak is voltooid",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch problemen toe aan de Jira-backlog",
-        "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Controleer of het probleem waaraan momenteel is gewerkt, is toegewezen aan de huidige gebruiker",
         "IS_WORKLOG_ENABLED": "Open dialoogvenster om werklog naar jira te sturen wanneer de taak is voltooid",
         "SEARCH_JQL_QUERY": "JQL Query voor het beperken van zoektaken",
@@ -397,7 +389,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vul alle bestede tijd min de geregistreerde tijd in",
         "WORKLOG_DEFAULT_TIME_MODE": "Standaard tijdwaarde voor dialoog",
         "WORKLOG_DEFAULT_TODAY": "Vul alleen de tijd in die vandaag is doorgebracht",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vul alleen de tijd in die gisteren is doorgebracht"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vul alleen de tijd in die gisteren is doorgebracht",
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch problemen toe aan de Jira-backlog",
+        "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Zelfondertekend certificaat toestaan",
@@ -409,7 +403,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Geavanceerde configuratie",
-        "CREDENTIALS": "Inloggegevens",
         "HELP_ARR": {
           "H1": "Basisconfiguratie",
           "H2": "Worklog-instellingen",
@@ -422,7 +415,8 @@
           "P2_2": "<em>\"Open werklog-dialoogvenster wanneer subtaak is voltooid en niet voor taken met subtaken zelf\"</em> opent een werklog-dialoogvenster telkens wanneer u een subtaak van een Jira-probleem als voltooid markeert. Omdat u uw tijd al bijhoudt via de subtaken, wordt er geen dialoogvenster geopend zodra u de Jira-taak zelf als voltooid markeert.",
           "P2_3": "<em>\"Stuur updates automatisch naar worklog zonder dialoogvenster\"</em> doet wat het zegt. Omdat het markeren van een taak als meerdere keren uitgevoerd ertoe leidt dat de hele werktijd tweemaal wordt bijgehouden, wordt dit niet aanbevolen.",
           "P3_1": "Hier kunt u uw standaardovergangen opnieuw configureren. Jira maakt een brede configuratie mogelijk van overgangen die gewoonlijk in actie komen als verschillende kolommen op uw Jira agile board. We kunnen geen aannames maken over waar en wanneer u uw taken moet overzetten en u moet deze handmatig instellen."
-        }
+        },
+        "CREDENTIALS": "Inloggegevens"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Toegewezen aan",
@@ -464,6 +458,12 @@
         "LOGIN_SUCCESS": "Succesvol ingelogd!",
         "TEST_CREDENTIALS": "Test referenties",
         "WELCOME_USER": "Welkom {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
+        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
+        "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
       }
     },
     "METRIC": {
@@ -551,9 +551,6 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijvoorbeeld om zelf wijzigingen uit te filteren)",
         "HOST": "Host (bijv.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
-        "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Dialoogvenster voor tijdregistratie weergeven om te rapporteren aan OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Vereist dat de tijdregistratiemodule is ingeschakeld voor het OpenProject-project",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Dialoogvenster voor tijdregistratie weergeven wanneer subtaken zijn voltooid",
@@ -563,7 +560,10 @@
         "SCOPE": "strekking",
         "SCOPE_ALL": "Allemaal",
         "SCOPE_ASSIGNED": "Toegewezen aan mij",
-        "SCOPE_CREATED": "Gecreëerd door mij"
+        "SCOPE_CREATED": "Gecreëerd door mij",
+        "IS_AUTO_IMPORT_ISSUES": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
+        "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om open OpenProject-werkpakketten weer te geven. Houd er rekening mee dat om dit in de browser te laten werken, u waarschijnlijk CORS moet configureren voor uw OpenProject-server, om toegang te verlenen vanaf app.super-productivity.com</p>",

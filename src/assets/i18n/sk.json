@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "Názov prostriedku CalDav (kalendár)",
         "CALDAV_URL": "CalDav URL (základná adresa URL)",
         "CALDAV_USER": "Vaše používateľské meno CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatické dokončenie úloh CalDav pri dokončení úlohy",
         "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nedokončených úloh CalDav do zoznamu nedokončených úloh",
         "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných úlohách",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zobrazenie nedokončených úloh CalDav ako návrh pri pridávaní nových úloh",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatické dokončenie úloh CalDav pri dokončení úlohy"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zobrazenie nedokončených úloh CalDav ako návrh pri pridávaní nových úloh"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p><p>To make it work for nextcloud on mobile and web, you might need to whitelist \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
@@ -151,9 +151,6 @@
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
         "GITLAB_BASE_URL": "Vlastná základná adresa URL aplikácie GitLab (voliteľné)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených problémov zo služby GitLab do zoznamu nevyriešených problémov",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazenie problémov zo služby git ako návrhov pri pridávaní nových úloh",
         "PROJECT": "(predvolené) ID projektu alebo meno používateľa/projektu",
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všetko",
@@ -163,7 +160,10 @@
         "SOURCE_GLOBAL": "Všetky",
         "SOURCE_GROUP": "Skupina",
         "SOURCE_PROJECT": "Projekt",
-        "TOKEN": "Prístupový token"
+        "TOKEN": "Prístupový token",
+        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených problémov zo služby GitLab do zoznamu nevyriešených problémov",
+        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazenie problémov zo služby git ako návrhov pri pridávaní nových úloh"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -255,17 +255,9 @@
         "TIME_SPENT_TOOLTIP": "Pridajte rôzne časy",
         "TITLE": "Jira: Odoslať pracovný denník"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
-        "IS_AUTO_POLL": "Automaticky zisťovať zmeny v importovaných problémoch git",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovať problémy z git ako návrhy pri pridávaní nových úloh",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL používaný na automatické pridávanie úloh do nevybavených úloh",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otvorenie dialógového okna na odoslanie pracovného denníka do Jira po dokončení čiastkovej úlohy",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridávať problémy od Jira do nevybavených vecí",
-        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolujte zmeny v importovaných problémoch a informuje",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Po dokončení úlohy otvorte dialógové okno na odoslanie pracovného protokolu spoločnosti Jira",
         "SEARCH_JQL_QUERY": "Dotaz JQL na obmedzenie úloh vyhľadávania",
@@ -273,7 +265,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vyplňte všetok strávený čas mínus zaznamenaný čas",
         "WORKLOG_DEFAULT_TIME_MODE": "Predvolená časová hodnota pre dialógové okno",
         "WORKLOG_DEFAULT_TODAY": "Vyplňte len čas strávený dnes",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vyplňte len čas strávený včera"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vyplňte len čas strávený včera",
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridávať problémy od Jira do nevybavených vecí",
+        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolujte zmeny v importovaných problémoch a informuje"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Povolenie vlastnoručne podpísaného certifikátu",
@@ -285,7 +279,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Rozšírená konfigurácia",
-        "CREDENTIALS": "Údaje",
         "HELP_ARR": {
           "H1": "Základná konfigurácia",
           "H2": "Nastavenia pracovného denníka",
@@ -298,7 +291,8 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        }
+        },
+        "CREDENTIALS": "Údaje"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Príjemca",
@@ -341,6 +335,12 @@
         "LOGIN_SUCCESS": "Prihlásenie bolo úspešné!",
         "TEST_CREDENTIALS": "Skúšobné údaje",
         "WELCOME_USER": "Vitajte {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
+        "IS_AUTO_POLL": "Automaticky zisťovať zmeny v importovaných problémoch git",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovať problémy z git ako návrhy pri pridávaní nových úloh",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -424,9 +424,6 @@
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
         "HOST": "Hostiteľ (napr.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených pracovných balíkov z OpenProject do backlogu",
-        "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných pracovných balíkoch OpenProject",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazovať pracovné balíky ako návrhy pri pridávaní nových úloh",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Zobrazenie dialógového okna na sledovanie času na nahlásenie do programu OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Vyžaduje, aby bol pre projekt OpenProject povolený modul sledovania času",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zobrazenie dialógového okna sledovania času po dokončení čiastkových úloh",
@@ -436,7 +433,10 @@
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všetko",
         "SCOPE_ASSIGNED": "Pridelené mne",
-        "SCOPE_CREATED": "Vytvorené mnou"
+        "SCOPE_CREATED": "Vytvorené mnou",
+        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených pracovných balíkov z OpenProject do backlogu",
+        "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných pracovných balíkoch OpenProject",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazovať pracovné balíky ako návrhy pri pridávaní nových úloh"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",

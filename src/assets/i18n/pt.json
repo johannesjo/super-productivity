@@ -97,10 +97,10 @@
         "CALDAV_RESOURCE": "O nome do recurso CalDav (o calendário)",
         "CALDAV_URL": "URL CalDav (o URL base)",
         "CALDAV_USER": "Seu nome de usuário CalDav",
+        "IS_TRANSITION_ISSUES_ENABLED": "Concluir automaticamente o CalDav todos na conclusão da tarefa",
         "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente CalDav todos incompletos à sua lista de pendências",
         "IS_AUTO_POLL": "Pesquise automaticamente as tarefas importadas em busca de alterações",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostrar CalDav todos incompletos como sugestão ao adicionar novas tarefas",
-        "IS_TRANSITION_ISSUES_ENABLED": "Concluir automaticamente o CalDav todos na conclusão da tarefa"
+        "IS_SEARCH_ISSUES_FROM_CALDAV": "Mostrar CalDav todos incompletos como sugestão ao adicionar novas tarefas"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar SuperProductivity para listar CalDav todos incompletos para um projeto específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para a tarefa, bem como mais informações sobre ela.</p> <p>Além disso, você pode adicionar e sincronizar automaticamente todas as tarefas não concluídas com a lista de pendências de suas tarefas.</p>",
@@ -185,9 +185,6 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar suas próprias alterações)",
-        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente tarefas não resolvidas do Gitea para o backlog",
-        "IS_AUTO_POLL": "Obter automaticamente tarefas do Gitea para atualizações",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar tarefas do Gitea como sugestões ao adicionar novas tarefas",
         "HOST": "Endereço do servidor (ex: https://try.gitea.io)",
         "TOKEN": "Token de acesso",
         "REPO_FULL_NAME": "Nome do usuário ou organização/projeto",
@@ -196,6 +193,9 @@
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuídos a mim",
         "SCOPE_CREATED": "Criados por mim",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente tarefas não resolvidas do Gitea para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente tarefas do Gitea para atualizações",
+        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar tarefas do Gitea como sugestões ao adicionar novas tarefas",
         "TOKEN_DESCRIPTION": "Requerido para acessar repositórios privados"
       },
       "FORM_SECTION": {
@@ -255,13 +255,13 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
+        "REPO": "username/repositoryName",
+        "TOKEN": "Token de acesso",
+        "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim",
         "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
         "IS_AUTO_POLL": "Obter automaticamente issues do GitHub para alterações",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
-        "REPO": "username/repositoryName",
-        "TOKEN": "Token de acesso",
-        "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado",
-        "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim"
+        "TOKEN_DESCRIPTION": "Necessário para acesso ao repositório privado"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar os problemas abertos do GitHub para um repositório específico no painel de criação de tarefas na visualização de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre ele. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no seu log de tarefas.</p>",
@@ -300,9 +300,6 @@
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
         "GITLAB_BASE_URL": "URL base GitLab personalizado",
-        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
-        "IS_AUTO_POLL": "Obter automaticamente issues do GitLab para alterações",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões quando adicionar novas tarefas",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
         "SCOPE": "escopo",
         "SCOPE_ALL": "Todos",
@@ -316,7 +313,10 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Mostrar a caixa de diálogo de controle de tempo após clicar no dia de término",
         "TOKEN": "Token de acesso",
         "FILTER": "Filtro customizado",
-        "FILTER_DESCRIPTION": "Consulte https://docs.gitlab.com/ee/api/issues.html#list-issues. Vários podem ser combinados por &"
+        "FILTER_DESCRIPTION": "Consulte https://docs.gitlab.com/ee/api/issues.html#list-issues. Vários podem ser combinados por &",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitLab para o backlog",
+        "IS_AUTO_POLL": "Obter automaticamente issues do GitLab para alterações",
+        "IS_SEARCH_ISSUES_FROM_GITLAB": "Mostrar issues do GitLab como sugestões quando adicionar novas tarefas"
       },
       "FORM_SECTION": {
         "HELP": "<p> Aqui você pode configurar o SuperProductivity para listar problemas abertos do GitLab (seja a versão on-line ou uma instância auto-hospedada) para um projeto específico no painel de criação de tarefas na exibição de planejamento diário. Eles serão listados como sugestões e fornecerão um link para o problema, além de mais informações sobre o assunto. </p> <p> Além disso, você pode adicionar e sincronizar automaticamente todos os problemas em aberto no backlog de tarefas. </p>",
@@ -419,17 +419,9 @@
         "TIME_SPENT_TOOLTIP": "Adicionar horários diferentes",
         "TITLE": "Jira: Enviar log de trabalho"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
-        "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
-        "REPO": "username/repositoryName"
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para adicionar tarefas automaticamente ao backlog",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir caixa de diálogo para enviar o log de trabalho a jira quando a subtarefa for concluída",
-        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas ao backlog do Jira",
-        "IS_AUTO_POLL_TICKETS": "Verifique os problemas importados para alterações automaticamente e notificar",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Verifique se o problema atualmente trabalhado está atribuído ao usuário atual",
         "IS_WORKLOG_ENABLED": "Abrir caixa de diálogo para enviar o log de trabalho a Jira quando a tarefa estiver concluída",
         "SEARCH_JQL_QUERY": "Consulta JQL para limitar as tarefas do pesquisador",
@@ -437,7 +429,9 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Preencha todo o tempo gasto menos o tempo registrado",
         "WORKLOG_DEFAULT_TIME_MODE": "Valor de tempo padrão para a caixa de diálogo",
         "WORKLOG_DEFAULT_TODAY": "Preencha apenas o tempo gasto hoje",
-        "WORKLOG_DEFAULT_YESTERDAY": "Preencha apenas o tempo gasto ontem"
+        "WORKLOG_DEFAULT_YESTERDAY": "Preencha apenas o tempo gasto ontem",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas ao backlog do Jira",
+        "IS_AUTO_POLL_TICKETS": "Verifique os problemas importados para alterações automaticamente e notificar"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Permitir certificado autoassinado",
@@ -449,7 +443,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "Configurações avançadas",
-        "CREDENTIALS": "Credenciais",
         "HELP_ARR": {
           "H1": "Configurações Básicas",
           "H2": "Configurações do log de trabalho",
@@ -462,7 +455,8 @@
           "P2_2": "<em>'Abre a caixa de diálogo do log de trabalho quando a subtarefa é concluída e não para tarefas com as próprias subtarefas'</em> abre uma caixa de diálogo do log de trabalho toda vez que você marca uma subtarefa de um problema do Jira como concluída. Você já acompanha seu tempo através das subtarefas, nenhuma caixa de diálogo é aberta depois que você marca a tarefa Jira como concluída.",
           "P2_3": "<em>'Enviar atualizações para o log de trabalho automaticamente sem caixa de diálogo'</em> faz o que diz. Como marcar uma tarefa como executada várias vezes faz com que todo o tempo de trabalho seja rastreado duas vezes, isso não é recomendado.",
           "P3_1": "Aqui você pode reconfigurar suas transições padrão. O Jira permite uma ampla configuração de transições que geralmente entram em ação como colunas diferentes no seu painel ágil Jira. Não podemos fazer suposições sobre onde e quando fazer a transição de suas tarefas e você precisa defina-o manualmente"
-        }
+        },
+        "CREDENTIALS": "Credenciais"
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Resposável",
@@ -505,6 +499,12 @@
         "LOGIN_SUCCESS": "Login efetuado com sucesso!",
         "TEST_CREDENTIALS": "Testar credenciais",
         "WELCOME_USER": "Bem-vindo {{user}}!"
+      },
+      "FORM": {
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente problemas não resolvidos do GitHub para o backlog",
+        "IS_AUTO_POLL": "Pesquisar automaticamente problemas importados do git em busca de alterações",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar issues do GitHub como sugestões quando adicionar novas tarefas",
+        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -609,9 +609,6 @@
       "FORM": {
         "FILTER_USER": "Nome de usuário (por exemplo, para filtrar as alterações você mesmo)",
         "HOST": "Host (por exemplo: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente pacotes de trabalho não resolvidos do OpenProject ao backlog",
-        "IS_AUTO_POLL": "Pesquise automaticamente pacotes de trabalho OpenProject importados para alterações",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar pacotes de trabalho como sugestões ao adicionar novas tarefas",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Mostrar caixa de diálogo de rastreamento de tempo para relatar ao OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requer que o módulo de controle de tempo seja habilitado para o projeto OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostrar caixa de diálogo de controle de tempo quando as subtarefas forem concluídas",
@@ -621,7 +618,10 @@
         "SCOPE": "Escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuído a mim",
-        "SCOPE_CREATED": "Criado por mim"
+        "SCOPE_CREATED": "Criado por mim",
+        "IS_AUTO_IMPORT_ISSUES": "Adicionar automaticamente pacotes de trabalho não resolvidos do OpenProject ao backlog",
+        "IS_AUTO_POLL": "Pesquise automaticamente pacotes de trabalho OpenProject importados para alterações",
+        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Mostrar pacotes de trabalho como sugestões ao adicionar novas tarefas"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aqui você pode configurar SuperProductivity para listar pacotes de trabalho OpenProject abertos. Observe que, para que isso funcione no navegador, você provavelmente precisará configurar o CORS para o servidor OpenProject, para permitir o acesso de app.super-productivity.com</p>",
@@ -1349,13 +1349,13 @@
       "BROWSER_WARNING": "<b>Provavelmente isso NÃO funcionará com a versão para navegador do Super Productivity.<br /> <a href=\"https://super-productivity.com/download/\">Baixe a versão para desktop</a> para usar este recurso!</b>",
       "CAL_PATH": "URL da fonte iCal",
       "CAL_PROVIDERS": "Provedores de calendário (experimental e opcional)",
-      "CAL_PROVIDERS_ADD": "Adicionar fonte iCal do calendário",
-      "CAL_PROVIDERS_INFO": "Você pode carregar dados de calendário como iCal (por exemplo, <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Os dados serão integrados na agenda e você será solicitado a criar tarefas para eventos de calendário, se eles forem devidos.",
       "CHECK_UPDATES": "Verifique se há atualizações remotas a cada X",
       "DEFAULT_PROJECT": "Projeto padrão para tarefas de calendário adicionadas",
       "HELP": "Você pode integrar calendários para ser lembrado e adicioná-los como tarefas dentro do Super Productivity. A integração funciona usando o formato iCal. Para que isso funcione, seus calendários precisam estar acessíveis pela internet ou pelo sistema de arquivos.",
-      "ICON": "Ícone para agendamento",
       "SHOW_BANNER_THRESHOLD": "Mostrar uma notificação X antes do evento (em branco para desabilitado)",
+      "CAL_PROVIDERS_ADD": "Adicionar fonte iCal do calendário",
+      "CAL_PROVIDERS_INFO": "Você pode carregar dados de calendário como iCal (por exemplo, <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Os dados serão integrados na agenda e você será solicitado a criar tarefas para eventos de calendário, se eles forem devidos.",
+      "ICON": "Ícone para agendamento",
       "TITLE": "Calendários"
     },
     "EVALUATION": {
