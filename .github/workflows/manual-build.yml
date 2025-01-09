@@ -55,7 +55,7 @@ jobs:
           release: false
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: WinBuildStuff
           path: app-builds/*.exe
@@ -150,7 +150,7 @@ jobs:
       #  if: always()
       # run: ls -la && cat notarization-error.log
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dmg
           path: app-builds/*.dmg

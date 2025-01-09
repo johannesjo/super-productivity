@@ -59,7 +59,7 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.DROID_KEY_PASSWORD }}
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sup-android-release
           path: android/app/build/outputs/*/*
