@@ -772,6 +772,7 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Sembunyikan",
         "START_NOW": "Mulai sekarang",
+        "TXT": "<strong>{{title}}<\\/strong> dimulai pada <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> dimulai dari <strong>{{start}}</strong>!<br> (dan {{nrOfOtherBanners}} tugas-tugas lain yang harus diselesaikan)"
       },
       "S_REMINDER_ERR": "Kesalahan untuk antarmuka pengingat"
@@ -985,6 +986,7 @@
         "EDIT_SCHEDULED": "Ubah pengingat",
         "EDIT_TAGS": "Ubah tag",
         "EDIT_TASK_TITLE": "Edit judul",
+        "FOCUS_SESSION": "Mulai Sesi Fokus",
         "MARK_DONE": "Tandai selesai",
         "MARK_UNDONE": "Tandai belum selesai",
         "MOVE_TO_BACKLOG": "Pindah ke backlog",
@@ -1571,6 +1573,7 @@
     "TASK_LIST": "Task List",
     "TASKS": "Tugas-tugas",
     "TOGGLE_SHOW_BOOKMARKS": "Tampilkan/Sembunyikan Bookmark",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Tampilkan/Sembunyikan Panel Masalah",
     "TOGGLE_SHOW_NOTES": "Tampilkan/Sembunyikan Catatan Proyek",
     "TOGGLE_TRACK_TIME": "Mulai/Hentikan waktu pelacakan",
     "TRIGGER_SYNC": "Memicu sinkronisasi secara manual",

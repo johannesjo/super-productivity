@@ -748,6 +748,7 @@
         "HOST": "Host (e.g.: https://redmine.org)",
         "PROJECT_ID": "Project identificatie",
         "PROJECT_ID_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
+        "SCOPE": "Omvang",
         "SCOPE_ALL": "Allemaal",
         "SCOPE_ASSIGNED": "Aan mij toegewezen",
         "SCOPE_CREATED": "Aangemaakt door mij"
@@ -1572,6 +1573,7 @@
     "TASK_LIST": "Takenlijst",
     "TASKS": "Taken",
     "TOGGLE_SHOW_BOOKMARKS": "Bladwijzers tonen / verbergen",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Toon/Verberg Probleem Paneel",
     "TOGGLE_SHOW_NOTES": "Projectnotities tonen / verbergen",
     "TOGGLE_TRACK_TIME": "Start / stop volgtijd",
     "TRIGGER_SYNC": "Synchronisatie handmatig activeren",

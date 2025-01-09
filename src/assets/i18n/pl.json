@@ -272,6 +272,8 @@
         "PROJECT_HINT": "np. johannesjo/super-produktywność",
         "SCOPE": "Zakres",
         "SCOPE_ALL": "Wszystkie",
+        "SCOPE_ASSIGNED": "Przypisane do mnie",
+        "SCOPE_CREATED": "Utworzone przeze mnie",
         "SOURCE": "Źródło",
         "SOURCE_GLOBAL": "Wszystkie",
         "SOURCE_GROUP": "Grupa",
@@ -532,7 +534,8 @@
         "IN_PROGRESS": "Status uruchamiania zadania",
         "OPEN": "Status wstrzymania zadania",
         "PROGRESS_ON_SAVE": "Domyślny postęp przy zapisie",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Wybierz zagadnienie, aby załadować dostępne przejścia"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Wybierz zagadnienie, aby załadować dostępne przejścia",
+        "TRANSITION": "Zarządzanie przejściami"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Konfiguracja OpenProject dla projektu"
@@ -552,6 +555,7 @@
         "CURRENT_ASSIGNEE": "Obecny cesjonariusz:",
         "CURRENT_STATUS": "Obecny status:",
         "PERCENTAGE_DONE": "Postęp:",
+        "TASK_NAME": "Nazwa zadania:",
         "TITLE": "OpenProject: Status aktualizacji",
         "UPDATE_STATUS": "Status aktualizacji"
       },
@@ -562,15 +566,21 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Wymaga włączenia modułu śledzenia czasu dla projektu OpenProject.",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Wyświetlanie okna dialogowego śledzenia czasu po ukończeniu zadań podrzędnych",
         "PROJECT_ID": "Id projektu",
+        "PROJECT_ID_DESCRIPTION": "Można znaleźć jako część adresu URL, podczas przeglądania projektu w przeglądarce.",
         "SCOPE": "Zakres",
-        "SCOPE_ALL": "Wszystkie"
+        "SCOPE_ALL": "Wszystkie",
+        "SCOPE_ASSIGNED": "Przypisane do mnie",
+        "SCOPE_CREATED": "Utworzone przeze mnie",
+        "TOKEN": "Token dostępu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Tutaj można skonfigurować SuperProductivity do wyświetlania listy otwartych pakietów roboczych OpenProject. Należy pamiętać, że aby to działało w przeglądarce, należy prawdopodobnie skonfigurować CORS dla serwera OpenProject, aby umożliwić dostęp z app.super-productivity.com</p>",
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Osoba przypisana",
         "DESCRIPTION": "Opis",
+        "MARK_AS_CHECKED": "Oznacz aktualizacje jako sprawdzone",
         "STATUS": "Status",
         "SUMMARY": "Podsumowanie",
         "TYPE": "Typ"
@@ -737,8 +747,11 @@
         "API_KEY": "Klucz dostępu API",
         "HOST": "Host (np.: https://redmine.org)",
         "PROJECT_ID": "Identyfikator projektu",
+        "PROJECT_ID_DESCRIPTION": "Można znaleźć jako część adresu URL, podczas przeglądania projektu w przeglądarce.",
         "SCOPE": "Zakres",
-        "SCOPE_ALL": "Wszystkie"
+        "SCOPE_ALL": "Wszystkie",
+        "SCOPE_ASSIGNED": "Przypisane do mnie",
+        "SCOPE_CREATED": "Utworzone przeze mnie"
       },
       "FORM_SECTION": {
         "HELP": "<p>W tym miejscu można skonfigurować SuperProductivity do wyświetlania listy otwartych zgłoszeń Redmine (w wersji online lub w instancji hostowanej samodzielnie) dla określonego projektu w panelu tworzenia zadań w widoku planowania dziennego. Będą one wymienione jako sugestie i będą zawierać link do zgłoszenia, a także więcej informacji na jego temat.</p><p>Ponadto można automatycznie importować wszystkie otwarte sprawy.</p>",
@@ -747,6 +760,7 @@
       "ISSUE_CONTENT": {
         "AUTHOR": "Autor",
         "DESCRIPTION": "Opis",
+        "MARK_AS_CHECKED": "Oznacz aktualizacje jako sprawdzone",
         "PRIORITY": "Priorytet",
         "STATUS": "Status"
       },
@@ -758,6 +772,7 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Ukryj",
         "START_NOW": "Zacznij teraz",
+        "TXT": "<strong>{{title}}<\\/strong> zaczyna się o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> zaczyna się od <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} inne zadania są wymagalne)"
       },
       "S_REMINDER_ERR": "Error for reminder interface"
@@ -971,6 +986,7 @@
         "EDIT_SCHEDULED": "Edit reminder",
         "EDIT_TAGS": "Edit tags",
         "EDIT_TASK_TITLE": "Edytuj tytuł",
+        "FOCUS_SESSION": "Rozpocznij sesję skupienia",
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
@@ -1134,6 +1150,8 @@
         "NOTES": "Domyślne noty",
         "ORDER": "Zamówienie",
         "ORDER_DESCRIPTION": "Kolejność tworzenia zadań powtarzalnych. Wpływa tylko na zadania powtarzalne utworzone w tym samym czasie. Niższa wartość oznacza, że zadanie zostanie utworzone wyżej na liście, a wyższa liczba, że zostanie utworzone niżej. Wartość większa niż 0 oznacza, że elementy będą tworzone na dole normalnych zadań.",
+        "Q_CUSTOM": "Niestandardowa konfiguracja powtórzeń",
+        "Q_DAILY": "Codziennie",
         "Q_MONDAY_TO_FRIDAY": "Od poniedziałku do piątku",
         "Q_MONTHLY_CURRENT_DATE": "Każdego miesiąca w dniu {{dateDayStr}}th",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Co tydzień w dniu {{weekdayStr}}",
@@ -1546,6 +1564,7 @@
     "PROJECT_MENU": "Menu projektu",
     "PROJECT_SETTINGS": "Ustawienia projektów",
     "PROJECTS": "Projekty",
+    "QUICK_HISTORY": "Szybka historia",
     "REPEAT_SCHEDULED": "Powtarzanie/zaplanowane",
     "SCHEDULE": "Harmonogram",
     "SETTINGS": "Ustawienia",
@@ -1554,6 +1573,7 @@
     "TASK_LIST": "Lista zadań",
     "TASKS": "Zadania",
     "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Pokaż/Ukryj panel problemów",
     "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
     "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
     "TRIGGER_SYNC": "Ręczne wyzwalanie synchronizacji",

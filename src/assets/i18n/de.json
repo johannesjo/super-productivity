@@ -1573,6 +1573,7 @@
     "TASK_LIST": "Aufgabenliste",
     "TASKS": "Aufgaben",
     "TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Problemfeld anzeigen/ausblenden",
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
     "TRIGGER_SYNC": "Synchronisierung manuell auslösen",

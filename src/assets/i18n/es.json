@@ -534,7 +534,8 @@
         "IN_PROGRESS": "Estado para iniciar la tarea",
         "OPEN": "Estado de la tarea en pausa",
         "PROGRESS_ON_SAVE": "Progreso por defecto al guardar",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Seleccione el tema para cargar las transiciones disponibles"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Seleccione el tema para cargar las transiciones disponibles",
+        "TRANSITION": "Manejo de Transiciones"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Configurar OpenProject para Project"
@@ -1572,6 +1573,7 @@
     "TASK_LIST": "Lista de tareas",
     "TASKS": "Tareas",
     "TOGGLE_SHOW_BOOKMARKS": "Mostrar/Ocultar Marcadores",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Mostrar/Ocultar Panel de Problemas",
     "TOGGLE_SHOW_NOTES": "Mostrar/Ocultar Notas del Proyecto",
     "TOGGLE_TRACK_TIME": "Iniciar / Detener el tiempo de seguimiento",
     "TRIGGER_SYNC": "Activar la sincronización manualmente",

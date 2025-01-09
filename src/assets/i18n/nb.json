@@ -100,6 +100,7 @@
         "IS_TRANSITION_ISSUES_ENABLED": "Fullfør CalDav-oppgavene automatisk når oppgaven er fullført"
       },
       "FORM_SECTION": {
+        "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste ufullførte CalDav-oppgaver for et spesifikt prosjekt i opprettingspanelet for oppgaver i den daglige planleggingsvisningen. De vil bli listet som forslag og vil gi en lenke til oppgaven samt mer informasjon om den.<\\/p> <p>I tillegg kan du automatisk legge til og synkronisere alle ufullførte oppgaver til oppgavelisten din.<\\/p><p>For at det skal fungere for Nextcloud i nettappen, må du kanskje hviteliste \"https:\\/\\/app.super-productivity.com\" via Nextcloud-appen <a href='https:\\/\\/apps.nextcloud.com\\/apps\\/webapppassword'>webapppassword<a>.<\\/p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -200,6 +201,7 @@
         "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
+        "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne Gitea-problemer for et spesifikt repository i opprettingspanelet for oppgaver i den daglige planleggingsvisningen. De vil bli listet som forslag og vil gi en lenke til problemet samt mer informasjon om det.<\\/p> <p>I tillegg kan du automatisk legge til og importere alle åpne problemer.<\\/p><p>For å komme forbi bruksgrensene og få tilgang kan du gi et tilgangstoken.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
@@ -207,6 +209,7 @@
         "AT": "på",
         "DESCRIPTION": "Beskrivelse",
         "LABELS": "Etiketter",
+        "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "PROJECT": "Prosjekt",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
@@ -267,10 +270,14 @@
         "GITLAB_BASE_URL": "Egendefinert GitLab-base-URL (valgfritt)",
         "PROJECT": "Full sti eller brukernavn / prosjekt",
         "PROJECT_HINT": "f.eks. johannesjo/superproduktivitet",
+        "SCOPE": "Omfang",
         "SCOPE_ALL": "Alle",
+        "SCOPE_ASSIGNED": "Tildelt meg",
+        "SCOPE_CREATED": "Opprettet av meg",
         "SOURCE": "Kilde",
         "SOURCE_GLOBAL": "Alle",
         "SOURCE_GROUP": "Gruppe",
+        "SOURCE_PROJECT": "Prosjekt",
         "SUBMIT_TIMELOGS": "Send inn tidslogger til Gitlab",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Vis tidsregistreringsdialogen etter at du har klikket på sluttdagen",
         "TOKEN": "Tilgangstoken"
@@ -285,6 +292,7 @@
         "DESCRIPTION": "Beskrivelse",
         "LABELS": "Etiketter",
         "MARK_AS_CHECKED": "Merk oppdateringer som merket",
+        "PROJECT": "Prosjekt",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
         "WRITE_A_COMMENT": "Skriv en kommentar"
@@ -526,7 +534,8 @@
         "IN_PROGRESS": "Status for start av oppgave",
         "OPEN": "Status for å sette oppgaven på pause",
         "PROGRESS_ON_SAVE": "Standard fremdrift ved lagring",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Velg utgave for å laste inn tilgjengelige overganger"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Velg utgave for å laste inn tilgjengelige overganger",
+        "TRANSITION": "Håndtering av overganger"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Konfigurer OpenProject for Project"
@@ -546,6 +555,7 @@
         "CURRENT_ASSIGNEE": "Nåværende rettighetshaver:",
         "CURRENT_STATUS": "Nåværende status:",
         "PERCENTAGE_DONE": "Fremgang:",
+        "TASK_NAME": "Oppgavenavn:",
         "TITLE": "OpenProject: Oppdater status",
         "UPDATE_STATUS": "Oppdater status"
       },
@@ -556,14 +566,21 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Krever at tidsregistreringsmodulen er aktivert for OpenProject-prosjektet",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Vis dialogboksen for tidsregistrering når underoppgaver er fullført",
         "PROJECT_ID": "Prosjekt-ID",
-        "SCOPE_ALL": "Alle"
+        "PROJECT_ID_DESCRIPTION": "Kan finnes som en del av URL-en når du ser på prosjektet i nettleseren.",
+        "SCOPE": "Omfang",
+        "SCOPE_ALL": "Alle",
+        "SCOPE_ASSIGNED": "Tildelt meg",
+        "SCOPE_CREATED": "Opprettet av meg",
+        "TOKEN": "Tilgangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste opp åpne OpenProject-arbeidspakker. Vær oppmerksom på at for at dette skal fungere i nettleseren, må du sannsynligvis konfigurere CORS for OpenProject-serveren din, for å tillate tilgang fra app.super-productivity.com</p>",
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Tildelt",
         "DESCRIPTION": "Beskrivelse",
+        "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
         "TYPE": "Type"
@@ -730,14 +747,20 @@
         "API_KEY": "API-tilgangsnøkkel",
         "HOST": "Vert (f.eks.: https://redmine.org)",
         "PROJECT_ID": "Prosjektidentifikator",
-        "SCOPE_ALL": "Alle"
+        "PROJECT_ID_DESCRIPTION": "Kan finnes som en del av URL-en når du ser på prosjektet i nettleseren.",
+        "SCOPE": "Omfang",
+        "SCOPE_ALL": "Alle",
+        "SCOPE_ASSIGNED": "Tildelt meg",
+        "SCOPE_CREATED": "Opprettet av meg"
       },
       "FORM_SECTION": {
+        "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne Redmine (enten det er den nettbaserte versjonen eller en selvhostet instans) problemer for et spesifikt prosjekt i opprettingspanelet for oppgaver i den daglige planleggingsvisningen. De vil bli listet som forslag og vil gi en lenke til problemet samt mer informasjon om det.<\\/p><p>I tillegg kan du automatisk importere alle åpne problemer.<\\/p>",
         "TITLE": "Redmine"
       },
       "ISSUE_CONTENT": {
         "AUTHOR": "Forfatter",
         "DESCRIPTION": "Beskrivelse",
+        "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "PRIORITY": "Prioritet",
         "STATUS": "Status"
       },
@@ -749,6 +772,7 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Skjul",
         "START_NOW": "Start nå",
+        "TXT": "<strong>{{title}}<\\/strong> starter kl <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starter ved <strong>{{start}}</strong>!<br> (og {{nrOfOtherBanners}} andre oppgaver skal utføres)"
       },
       "S_REMINDER_ERR": "Feil for påminnelsesgrensesnitt"
@@ -756,6 +780,7 @@
     "SCHEDULE": {
       "CONTINUED": "fortsatt",
       "D_INITIAL": {
+        "TEXT": "<p>Timeplanen skal gi deg et bedre bilde av hvordan ens planlagte oppgaver utfolder seg over tid. Den genereres automatisk fra oppgavene dine og krever bare <strong>tidsestimater for å fungere</strong>.<\\/p><p>To ting skilles: <strong>Planlagte oppgaver</strong>, som vises på sitt planlagte tidspunkt, og <strong>Regelmessige oppgaver</strong>, som skal flyte rundt disse faste hendelsene.<\\/p><p>Hvis du oppgir en start- og sluttid for arbeidet (anbefalt), vil ikke regelmessige oppgaver vises utenfor disse grensene.<\\/p>",
         "TITLE": "Tidsplan"
       },
       "END": "Arbeidets slutt",
@@ -828,6 +853,7 @@
         "LOCAL": "Lokalt",
         "LOCAL_REMOTE": "Lokal -> Ekstern",
         "REMOTE": "Fjernstyrt",
+        "TEXT": "<p>Oppdatering fra fjern. Både lokale og eksterne data ser ut til å være endret.<\\/p>",
         "TITLE": "Synkronisering: Motstridende data",
         "USE_LOCAL": "Behold det lokale",
         "USE_REMOTE": "Hold fjernkontrollen"
@@ -869,8 +895,10 @@
         },
         "TITLE": "Synkroniser",
         "WEB_DAV": {
+          "CORS_INFO": "<strong>Få det til å fungere i nettleseren:<\\/strong> For å få dette til å fungere i nettleseren må du hviteliste Super Productivity for CORS-forespørselene til din Nextcloud-instans. Dette kan ha negative sikkerhetsimplikasjoner! Vennligst <a href='https:\\/\\/github.com\\/nextcloud\\/server\\/issues\\/3131'>se denne tråden for mer informasjon<\\/a>. En tilnærming for å få dette til å fungere på mobil er å hviteliste \"https:\\/\\/app.super-productivity.com\" via Nextcloud-appen <a href='https:\\/\\/apps.nextcloud.com\\/apps\\/webapppassword'>webapppassword<a>. Bruk på egen risiko!<\\/p>",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Passord",
+          "L_SYNC_FOLDER_PATH": "Synkroniseringsmappebane",
           "L_USER_NAME": "Brukernavn"
         }
       },
@@ -958,6 +986,7 @@
         "EDIT_SCHEDULED": "Rediger påminnelse",
         "EDIT_TAGS": "Rediger koder",
         "EDIT_TASK_TITLE": "Rediger tittel",
+        "FOCUS_SESSION": "Start fokusøkt",
         "MARK_DONE": "Marker som ferdig",
         "MARK_UNDONE": "Merk som ugjort",
         "MOVE_TO_BACKLOG": "Gå til backlog",
@@ -1121,11 +1150,14 @@
         "NOTES": "Misligholdte notater",
         "ORDER": "Bestilling",
         "ORDER_DESCRIPTION": "Opprettelsesrekkefølge for repeterbare oppgaver. Påvirker bare repeterbare oppgaver som opprettes samtidig. En lavere verdi betyr at en oppgave opprettes høyere opp i listen, et høyere tall betyr at den opprettes lenger ned. En verdi større enn 0 betyr at elementer opprettes nederst i listen over normale oppgaver.",
+        "Q_CUSTOM": "Egendefinert gjentakelsesinnstilling",
+        "Q_DAILY": "Hver dag",
         "Q_MONDAY_TO_FRIDAY": "Hver mandag til fredag",
         "Q_MONTHLY_CURRENT_DATE": "Hver måned den {{dateDayStr}}.",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Hver uke på {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Hvert år på {{dayAndMonthStr}}",
         "QUICK_SETTING": "Gjenta konfigurasjon",
+        "REMIND_AT": "Minne på",
         "REMIND_AT_PLACEHOLDER": "Velg når du vil minne",
         "REPEAT_CYCLE": "Gjenta syklusen",
         "REPEAT_EVERY": "Gjenta hver",
@@ -1436,6 +1468,7 @@
       "L_WORK_END": "Arbeidsdagens slutt",
       "L_WORK_START": "Start på arbeidsdagen",
       "LUNCH_BREAK_START_END_DESCRIPTION": "f.eks. 13:00",
+      "TITLE": "Planlegge",
       "WORK_START_END_DESCRIPTION": "f.eks. 17:00"
     },
     "SHORT_SYNTAX": {
@@ -1531,12 +1564,16 @@
     "PROJECT_MENU": "Prosjektmeny",
     "PROJECT_SETTINGS": "Prosjektinnstillinger",
     "PROJECTS": "Prosjekter",
+    "QUICK_HISTORY": "Rask historikk",
     "REPEAT_SCHEDULED": "Gjentatt/planlagt",
+    "SCHEDULE": "Planlegge",
     "SETTINGS": "Innstillinger",
+    "SHOW_SEARCH_BAR": "Vis søkefelt",
     "TAGS": "Merker",
     "TASK_LIST": "Oppgaveliste",
     "TASKS": "Oppgaver",
     "TOGGLE_SHOW_BOOKMARKS": "Vis / skjul bokmerker",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Vis/Gjem problempanel",
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
     "TRIGGER_SYNC": "Utløs synkronisering manuelt",

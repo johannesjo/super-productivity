@@ -234,12 +234,17 @@
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Priradený",
+        "AT": "Na",
         "DESCRIPTION": "Popis",
+        "LABELS": "Štítky",
         "LAST_COMMENT": "Posledný komentár",
         "LOAD_ALL_COMMENTS": "Načítať všetky komentáre {{nr}} ",
         "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Načítať popis a všetky komentáre",
+        "MARK_AS_CHECKED": "Označiť aktualizácie ako skontrolované",
         "STATUS": "Stav",
-        "SUMMARY": "Zhrnutie"
+        "SUMMARY": "Zhrnutie",
+        "WRITE_A_COMMENT": "Napísať komentár"
       },
       "S": {
         "CONFIG_ERROR": "GitHub: Chyba pri mapovaní údajov. Je názov vášho úložiska správny?",
@@ -742,7 +747,11 @@
         "API_KEY": "Prístupový kľúč API",
         "HOST": "Hostiteľ (napr.: https://redmine.org)",
         "PROJECT_ID": "Identifikátor projektu",
-        "SCOPE_ALL": "Všetky"
+        "PROJECT_ID_DESCRIPTION": "Môže sa nájsť ako súčasť URL, keď sa projekt zobrazuje v prehliadači.",
+        "SCOPE": "Rozsah",
+        "SCOPE_ALL": "Všetky",
+        "SCOPE_ASSIGNED": "Priradené mne",
+        "SCOPE_CREATED": "Vytvorené mnou"
       },
       "FORM_SECTION": {
         "HELP": "<p>Tu môžete nakonfigurovať program SuperProductivity tak, aby na paneli vytvárania úloh v zobrazení denného plánovania zobrazoval zoznam otvorených problémov Redmine (buď jeho online verzie, alebo samostatne hostovanej inštancie) pre konkrétny projekt. Budú uvedené ako návrhy a budú obsahovať odkaz na problém, ako aj ďalšie informácie o ňom.</p><p>Okrem toho môžete automaticky importovať všetky otvorené problémy.</p>",
@@ -751,6 +760,7 @@
       "ISSUE_CONTENT": {
         "AUTHOR": "Autor",
         "DESCRIPTION": "Popis",
+        "MARK_AS_CHECKED": "Označiť aktualizácie ako skontrolované",
         "PRIORITY": "Priorita",
         "STATUS": "Stav"
       },
@@ -762,6 +772,7 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Skryť",
         "START_NOW": "Začnite hneď teraz",
+        "TXT": "<strong>{{title}}<\\/strong> začína o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> začína na <strong>{{start}}</strong>!<br> (a {{nrOfOtherBanners}} ďalšie úlohy sú splatné)"
       },
       "S_REMINDER_ERR": "Chyba pre rozhranie pripomienok"
@@ -975,6 +986,7 @@
         "EDIT_SCHEDULED": "Upraviť pripomienku",
         "EDIT_TAGS": "Upraviť štítky",
         "EDIT_TASK_TITLE": "Upraviť názov",
+        "FOCUS_SESSION": "Začať sústredenú reláciu",
         "MARK_DONE": "Označiť ako hotové",
         "MARK_UNDONE": "Označiť ako nedokončené",
         "MOVE_TO_BACKLOG": "Presunúť do zoznamu nevybavených úloh",
@@ -1561,6 +1573,7 @@
     "TASK_LIST": "Zoznam úloh",
     "TASKS": "Úlohy",
     "TOGGLE_SHOW_BOOKMARKS": "Zobraziť/skryť záložky",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Zobraziť/skryť panel problémov",
     "TOGGLE_SHOW_NOTES": "Zobraziť/skryť Poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Začať/pozastaviť sledovanie času",
     "TRIGGER_SYNC": "Ručné spustenie synchronizácie",

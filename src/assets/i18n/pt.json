@@ -1573,6 +1573,7 @@
     "TASK_LIST": "Lista de tarefas",
     "TASKS": "Tarefas",
     "TOGGLE_SHOW_BOOKMARKS": "Mostrar/ocultar favoritos",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Mostrar/ocultar painel de problemas",
     "TOGGLE_SHOW_NOTES": "Mostrar/ocultar notas do projeto",
     "TOGGLE_TRACK_TIME": "Iniciar/parar rastreamento de tempo ",
     "TRIGGER_SYNC": "Acionar a sincronização manualmente",
