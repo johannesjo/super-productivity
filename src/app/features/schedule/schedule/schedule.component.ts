@@ -5,12 +5,10 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  Inject,
   LOCALE_ID,
   OnDestroy,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
-import { UiModule } from '../../../ui/ui.module';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
@@ -34,8 +32,7 @@ import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, DatePipe, NgClass, NgIf, NgStyle } from '@angular/common';
-import { StuckDirective } from '../../../ui/stuck/stuck.directive';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
 import {
@@ -43,7 +40,6 @@ import {
   CdkDragMove,
   CdkDragRelease,
   CdkDragStart,
-  CdkDropList,
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
@@ -56,11 +52,13 @@ import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -71,31 +69,32 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 
 @Component({
   selector: 'schedule',
-  standalone: true,
   imports: [
-    UiModule,
-    NgStyle,
     AsyncPipe,
-    NgClass,
-    StuckDirective,
     ScheduleEventComponent,
     CdkDrag,
-    CdkDropList,
     DatePipe,
-    NgIf,
-    InlineMultilineInputComponent,
     CreateTaskPlaceholderComponent,
+    MatIcon,
+    TranslatePipe,
+    MatTooltip,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // TODO this does not work
-  // host: {
-  //   // eslint-disable-next-line @typescript-eslint/naming-convention
-  //   cdkScrollable: '',
-  // },
 })
 export class ScheduleComponent implements AfterViewInit, OnDestroy {
+  taskService = inject(TaskService);
+  layoutService = inject(LayoutService);
+  shortcutService = inject(ShortcutService);
+  private _matDialog = inject(MatDialog);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _elRef = inject(ElementRef);
+  private locale = inject(LOCALE_ID);
+
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
@@ -105,8 +104,14 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   // events = [
 
+  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
+    .hour12;
   times: string[] = this.rowsByNr.map((rowVal, index) => {
-    return index.toString() + ':00';
+    return this.is12HourFormat
+      ? index >= 13
+        ? (index - 12).toString() + ':00 PM'
+        : index.toString() + ':00 AM'
+      : index.toString() + ':00';
   });
 
   T: typeof T = T;
@@ -267,22 +272,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   dragCloneEl: HTMLElement | null = null;
   destroyRef = inject(DestroyRef);
 
-  @ViewChild('gridContainer') gridContainer!: ElementRef;
+  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
 
   private _currentAniTimeout: number | undefined;
 
-  constructor(
-    public taskService: TaskService,
-    public layoutService: LayoutService,
-    public shortcutService: ShortcutService,
-    private _matDialog: MatDialog,
-    private _calendarIntegrationService: CalendarIntegrationService,
-    private _store: Store,
-    private _dateService: DateService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _elRef: ElementRef,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {
+  constructor() {
     if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
@@ -341,7 +335,7 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     // console.log(ev);
     if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
-      const gridContainer = this.gridContainer.nativeElement;
+      const gridContainer = this.gridContainer().nativeElement;
       const gridStyles = window.getComputedStyle(gridContainer);
 
       const rowSizes = gridStyles.gridTemplateRows

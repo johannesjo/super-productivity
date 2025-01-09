@@ -5,6 +5,7 @@ import {
   input,
   Signal,
 } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 export interface TagComponentTag {
   title: string;
@@ -13,6 +14,7 @@ export interface TagComponentTag {
   theme?: {
     primary: string;
   };
+
   [key: string]: any;
 }
 
@@ -21,6 +23,7 @@ export interface TagComponentTag {
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIcon],
 })
 export class TagComponent {
   tag = input.required<TagComponentTag>();

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { fadeAnimation, fadeInSlowAnimation } from '../../ui/animations/fade.ani';
 import { WorklogService } from '../worklog/worklog.service';
@@ -7,7 +7,15 @@ import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { WorklogDataForDay, WorklogDay } from '../worklog/worklog.model';
 import { T } from 'src/app/t.const';
-import { KeyValue } from '@angular/common';
+import { AsyncPipe, KeyValue, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
+import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
+import { MomentFormatPipe } from '../../ui/pipes/moment-format.pipe';
+import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { MatIcon } from '@angular/material/icon';
+import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
+import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
 
 @Component({
   selector: 'quick-history',
@@ -15,17 +23,29 @@ import { KeyValue } from '@angular/common';
   styleUrls: ['./quick-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation, fadeInSlowAnimation],
+  imports: [
+    TranslatePipe,
+    AsyncPipe,
+    MsToStringPipe,
+    NgForOf,
+    NgIf,
+    MsToClockStringPipe,
+    MomentFormatPipe,
+    MsToMinuteClockStringPipe,
+    MatIcon,
+    InlineInputComponent,
+    KeyValuePipe,
+    FullPageSpinnerComponent,
+  ],
 })
 export class QuickHistoryComponent {
+  readonly worklogService = inject(WorklogService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _taskService = inject(TaskService);
+
   visibility: boolean[] = [];
   T: typeof T = T;
   keys: (o: Record<string, unknown>) => string[] = Object.keys;
-
-  constructor(
-    public readonly worklogService: WorklogService,
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _taskService: TaskService,
-  ) {}
 
   sortDays(a: KeyValue<string, WorklogDay>, b: KeyValue<string, WorklogDay>): number {
     // avoid comparison by key (day) because a week may span across two months

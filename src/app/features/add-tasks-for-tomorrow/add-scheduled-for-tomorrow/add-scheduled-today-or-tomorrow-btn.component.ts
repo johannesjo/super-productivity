@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
 import { T } from '../../../t.const';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
@@ -10,20 +10,17 @@ import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow.service';
 
 @Component({
   selector: 'add-scheduled-today-or-tomorrow-btn',
-  standalone: true,
-  imports: [AsyncPipe, MatButton, MatIcon, NgIf, TranslateModule],
+  imports: [AsyncPipe, MatButton, MatIcon, TranslateModule],
   templateUrl: './add-scheduled-today-or-tomorrow-btn.component.html',
   styleUrl: './add-scheduled-today-or-tomorrow-btn.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddScheduledTodayOrTomorrowBtnComponent {
+  workContextService = inject(WorkContextService);
+  taskService = inject(TaskService);
+  addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+
   protected readonly T = T;
 
-  @Input() public isAlwaysShowIfAny: boolean = false;
-
-  constructor(
-    public workContextService: WorkContextService,
-    public taskService: TaskService,
-    public addTasksForTomorrowService: AddTasksForTomorrowService,
-  ) {}
+  public readonly isAlwaysShowIfAny = input<boolean>(false);
 }

@@ -1,24 +1,20 @@
 <div class="wrapper">
-  <header
-    *ngIf="isDialogMode||isOver|| IS_TOUCH_PRIMARY"
-    class="task-title-wrapper"
-  >
+  @if (isDialogMode||isOver()|| IS_TOUCH_PRIMARY) {
+  <header class="task-title-wrapper">
     <inline-multiline-input
       [resetToLastExternalValueTrigger]="task"
       (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
       [value]="task.title"
       class="task-title"
     ></inline-multiline-input>
-
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon>more_vert</mat-icon>-->
     <!--    </button>-->
   </header>
-
+  } @if (!task.parentId && ((layoutService.isRightPanelOver$|async) || isDialogMode)) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.parentId && ((layoutService.isRightPanelOver$|async) || isDialogMode)"
     [expanded]="task.subTasks?.length > 0 && !isDialogMode"
     [type]="'panel'"
   >
@@ -29,14 +25,11 @@
         }}</span
       >
     </ng-container>
-
     <ng-container panel-content>
-      <div
-        *ngIf="task.subTasks && task.subTasks.length"
-        class="sub-tasks"
-      >
+      @if (task.subTasks && task.subTasks.length) {
+      <div class="sub-tasks">
+        @if (task.subTasks?.length) {
         <task-list
-          *ngIf="task.subTasks?.length"
           [@expand]
           [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
           [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
@@ -45,7 +38,9 @@
           [tasks]="task.subTasks"
           listId="SUB"
         ></task-list>
+        }
       </div>
+      }
       <div style="text-align: center">
         <button
           (click)="addSubTask()"
@@ -57,12 +52,11 @@
       </div>
     </ng-container>
   </task-detail-item>
-
+  } @if (task.parentId) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="taskService.setSelectedIdToParentAndSwitchContextIfNecessary(task)"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.parentId"
     [inputIcon]="'arrow_forward'"
     class="input-item --estimate"
   >
@@ -71,19 +65,17 @@
       <span>{{T.F.TASK.ADDITIONAL_INFO.PARENT|translate}}</span>
     </ng-container>
     <ng-container input-value>
-      <mat-icon
-        *ngIf="(parentTaskData$|async)?.issueType as issueType"
-        [svgIcon]="issueType|issueIcon"
-      ></mat-icon>
+      @if ((parentTaskData$|async)?.issueType; as issueType) {
+      <mat-icon [svgIcon]="issueType|issueIcon"></mat-icon>
+      }
       <span>{{(taskService.getByIdOnce$(task.parentId)|async)?.title}}</span>
     </ng-container>
   </task-detail-item>
-
+  } @if (!task.subTasks?.length) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="estimateTime()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.subTasks?.length"
     [inputIcon]="'edit'"
     class="input-item --estimate"
   >
@@ -100,75 +92,67 @@
         [innerHTML]="task.timeEstimate|msToString"
         class="time-val"
       ></span>
-
       <ng-container input-additional>
         <progress-bar [progress]="progress"></progress-bar>
       </ng-container>
     </ng-container>
   </task-detail-item>
-
-  <ng-container *ngIf="(plannerService.plannedTaskDayMap$|async) as plannedTaskDayMap">
-    <task-detail-item
-      (collapseParent)="collapseParent()"
-      (editActionTriggered)="scheduleTask()"
-      (keyPress)="onItemKeyPress($event)"
-      [inputIcon]="(task.reminderId|| (plannedTaskDayMap||{})[task.id]) ? 'edit': 'add'"
-      class="input-item"
-    >
-      <ng-container input-title>
-        <mat-icon>alarm</mat-icon>
-        <span *ngIf="(task.reminderId|| (plannedTaskDayMap||{})[task.id])"
-          >{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT|translate }}</span
-        >
-        <span *ngIf="!(task.reminderId|| (plannedTaskDayMap||{})[task.id])"
-          >{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK|translate }}</span
-        >
-      </ng-container>
-      <ng-container input-value>
-        <ng-container *ngIf="reminderData$|async as reminderData">
-          <div
-            [matTooltip]="reminderData.remindAt|date:'short'"
-            class="reminder-value"
-            matTooltipPosition="left"
-          >
-            {{ reminderData.remindAt|date:'short' }}
-          </div>
-        </ng-container>
-        <div
-          *ngIf="(plannedTaskDayMap||{})[task.id]"
-          class="reminder-value"
-        >
-          {{ (plannedTaskDayMap || {})[task.id]|date:'shortDate' }}
-        </div>
-      </ng-container>
-    </task-detail-item>
-  </ng-container>
-
+  } @if ((plannerService.plannedTaskDayMap$|async); as plannedTaskDayMap) {
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (editActionTriggered)="scheduleTask()"
+    (keyPress)="onItemKeyPress($event)"
+    [inputIcon]="(task.reminderId|| (plannedTaskDayMap||{})[task.id]) ? 'edit': 'add'"
+    class="input-item"
+  >
+    <ng-container input-title>
+      <mat-icon>alarm</mat-icon>
+      @if ((task.reminderId|| (plannedTaskDayMap||{})[task.id])) {
+      <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT|translate }}</span>
+      } @if (!(task.reminderId|| (plannedTaskDayMap||{})[task.id])) {
+      <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK|translate }}</span>
+      }
+    </ng-container>
+    <ng-container input-value>
+      @if (reminderData$|async; as reminderData) {
+      <div
+        [matTooltip]="reminderData.remindAt|date:'short'"
+        class="reminder-value"
+        matTooltipPosition="left"
+      >
+        {{ reminderData.remindAt|date:'short' }}
+      </div>
+      } @if ((plannedTaskDayMap||{})[task.id]) {
+      <div class="reminder-value">
+        {{ (plannedTaskDayMap || {})[task.id]|date:'shortDate' }}
+      </div>
+      }
+    </ng-container>
+  </task-detail-item>
+  } @if (task.issueId && task.issueType !==ICAL_TYPE) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="task.issueId && task.issueType !==ICAL_TYPE"
     [expanded]="isExpandedIssuePanel && !isDialogMode"
     [type]="'panel'"
   >
     <ng-container panel-header>
       <issue-header [task]="task"></issue-header>
     </ng-container>
-
     <ng-container panel-content>
-      <mat-progress-bar
-        *ngIf="!(isIssueDataLoadedForCurrentType$|async)"
-        [mode]="'indeterminate'"
-      ></mat-progress-bar>
+      @if (!(isIssueDataLoadedForCurrentType$|async)) {
+      <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+      } @if (issueData && (isIssueDataLoadedForCurrentType$|async)) {
       <issue-content
-        *ngIf="issueData && (isIssueDataLoadedForCurrentType$|async)"
         [@expandFadeInOnly]
         [issueData]="issueData"
         [task]="task"
         class="panel-content-wrapper issue-content-wrapper"
       ></issue-content>
+      }
     </ng-container>
   </task-detail-item>
+  }
 
   <task-detail-item
     #noteWrapperElRef
@@ -183,9 +167,11 @@
       <mat-icon>checklist</mat-icon>
       Checklist
       <!-- -->
-      } @else {
-      <mat-icon *ngIf="task.notes">chat</mat-icon>
-      <mat-icon *ngIf="!task.notes">chat_bubble_outline</mat-icon>
+      } @else { @if (task.notes) {
+      <mat-icon>chat</mat-icon>
+      } @if (!task.notes) {
+      <mat-icon>chat_bubble_outline</mat-icon>
+      }
       <span>{{T.F.TASK.ADDITIONAL_INFO.NOTES|translate}}</span>
       }
     </ng-container>
@@ -199,16 +185,17 @@
         [isFocus]="isFocusNotes"
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
+        [isDefaultText]="!task.notes"
         [model]="task.notes|| defaultTaskNotes"
       ></inline-markdown>
     </ng-container>
   </task-detail-item>
 
+  @if (issueAttachments?.length || localAttachments?.length) {
   <task-detail-item
     #attachmentPanelElRef
     (collapseParent)="collapseParent()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="issueAttachments?.length || localAttachments?.length"
     [expanded]="isExpandedAttachmentPanel && !isDialogMode"
     [type]="'panel'"
   >
@@ -219,31 +206,29 @@
         localAttachments?.length } }}</span
       >
     </ng-container>
-
     <ng-container panel-content>
       <div
         class="panel-content-wrapper attachment-list-panel-content-wrapper"
         style="padding-bottom: 8px"
       >
-        <ng-container *ngIf="task.issueType">
-          <task-attachment-list
-            [attachments]="issueAttachments"
-            [isDisableControls]="true"
-            [taskId]="task.id"
-          ></task-attachment-list>
-        </ng-container>
+        @if (task.issueType) {
+        <task-attachment-list
+          [attachments]="issueAttachments"
+          [isDisableControls]="true"
+          [taskId]="task.id"
+        ></task-attachment-list>
+        } @if (issueAttachments?.length && localAttachments?.length) {
         <h3
-          *ngIf="issueAttachments?.length && localAttachments?.length"
           class="mat-h3"
           style="margin-bottom: 0"
         >
           {{T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS|translate}}
         </h3>
+        }
         <task-attachment-list
           [attachments]="localAttachments"
           [taskId]="task.id"
         ></task-attachment-list>
-
         <div style="text-align: center">
           <button
             (click)="addAttachment()"
@@ -256,12 +241,11 @@
       </div>
     </ng-container>
   </task-detail-item>
-
+  } @if (!issueAttachments?.length && !localAttachments?.length) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="addAttachment()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!issueAttachments?.length && !localAttachments?.length"
     [inputIcon]="'add'"
     class="input-item"
   >
@@ -271,12 +255,11 @@
     </ng-container>
     <ng-container input-value></ng-container>
   </task-detail-item>
-
+  } @if (!task.parentId && !task.issueId) {
   <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="editTaskRepeatCfg()"
     (keyPress)="onItemKeyPress($event)"
-    *ngIf="!task.parentId && !task.issueId"
     [inputIcon]="task.repeatCfgId ? 'edit': 'add'"
     class="input-item"
   >
@@ -285,26 +268,50 @@
       <span>{{T.F.TASK.ADDITIONAL_INFO.REPEAT|translate}}</span>
     </ng-container>
     <ng-container input-value>
+      @if (repeatCfgLabel$|async; as repeatCfgLabel) {
       <div
-        *ngIf="repeatCfgLabel$|async as repeatCfgLabel"
         class="reminder-value"
         matTooltipPosition="left"
       >
         {{repeatCfgLabel}}
       </div>
+      }
+    </ng-container>
+  </task-detail-item>
+  }
+
+  <task-detail-item
+    #tagEditDetailItemElRef
+    (collapseParent)="collapseParent()"
+    (keyPress)="onItemKeyPress($event)"
+    (editActionTriggered)="tagEditElRef.focusInput()"
+    type="fullSizeInput"
+    class="input-item --estimate"
+  >
+    <ng-container input-title>
+      <mat-icon>style</mat-icon>
+    </ng-container>
+    <ng-container input-value>
+      <tag-edit
+        #tagEditElRef
+        [task]="task"
+        [tagIds]="task.tagIds"
+        (escapePress)="tagEditDetailItemElRef.focusEl()"
+      ></tag-edit>
     </ng-container>
   </task-detail-item>
 
   <div class="date-info">
     <div>Created on {{task?.created|date:'short'}}</div>
-    <div *ngIf="task.doneOn">Completed on {{task?.doneOn|date:'short'}}</div>
+    @if (task.doneOn) {
+    <div>Completed on {{task?.doneOn|date:'short'}}</div>
+    }
   </div>
 </div>
 
-<div
-  *ngIf="isDragOver"
-  class="bgc-accent drag-over-msg"
->
+@if (isDragOver) {
+<div class="bgc-accent drag-over-msg">
   <mat-icon>add</mat-icon>
   {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task?.title} }}
 </div>
+}

@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -25,6 +25,21 @@ import { fromEvent, merge, Observable, of } from 'rxjs';
   providedIn: 'root',
 })
 export class ShortcutService {
+  private _configService = inject(GlobalConfigService);
+  private _router = inject(Router);
+  private _layoutService = inject(LayoutService);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _snackService = inject(SnackService);
+  private _activatedRoute = inject(ActivatedRoute);
+  private _uiHelperService = inject(UiHelperService);
+  private _bookmarkService = inject(BookmarkService);
+  private _translateService = inject(TranslateService);
+  private _syncProviderService = inject(SyncProviderService);
+  private _ngZone = inject(NgZone);
+  private _store = inject(Store);
+
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
       const e = ev as KeyboardEvent;
@@ -36,22 +51,7 @@ export class ShortcutService {
   );
   backlogPos?: number;
 
-  constructor(
-    private _configService: GlobalConfigService,
-    private _router: Router,
-    private _layoutService: LayoutService,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _snackService: SnackService,
-    private _activatedRoute: ActivatedRoute,
-    private _uiHelperService: UiHelperService,
-    private _bookmarkService: BookmarkService,
-    private _translateService: TranslateService,
-    private _syncProviderService: SyncProviderService,
-    private _ngZone: NgZone,
-    private _store: Store,
-  ) {
+  constructor() {
     this._activatedRoute.queryParams.subscribe((params) => {
       if (params && params.backlogPos) {
         this.backlogPos = +params.backlogPos;

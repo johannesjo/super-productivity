@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  inject,
   OnDestroy,
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
@@ -11,23 +12,27 @@ import { Store } from '@ngrx/store';
 import { setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 
 @Component({
   selector: 'focus-mode-task-selection',
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, MatButton, AsyncPipe, TranslatePipe, SelectTaskComponent],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
+  readonly taskService = inject(TaskService);
+  private readonly _store = inject(Store);
+
   selectedTask: string | Task | undefined;
   initialTask$ = this.taskService.firstStartableTask$.pipe(first());
   focusTimeout = 0;
   T: typeof T = T;
-
-  constructor(
-    public readonly taskService: TaskService,
-    private readonly _store: Store,
-  ) {}
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {

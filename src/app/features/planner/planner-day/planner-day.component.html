@@ -10,10 +10,10 @@
   <div class="day-counts">
     <span>{{ day.timeEstimate |roundDuration|msToString }}</span>
 
-    <ng-container *ngIf="day.itemsTotal > 5 ">
-      <mat-icon inline="true">task_alt</mat-icon>
-      <span>{{ day.itemsTotal }}</span>
-    </ng-container>
+    @if (day.itemsTotal > 5 ) {
+    <mat-icon inline="true">task_alt</mat-icon>
+    <span>{{ day.itemsTotal }}</span>
+    }
   </div>
 </header>
 
@@ -72,11 +72,17 @@
         class="time"
         (click)="editTaskReminderOrReScheduleIfPossible(scheduledItem.task)"
       >
-        <span>{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</span>
+        <span
+          class="time-time"
+          [innerHTML]="scheduledItem.start|roundDuration|shortTime2"
+        ></span>
         <mat-icon>alarm</mat-icon>
       </div>
       } @else {
-      <div class="time">{{ (scheduledItem.start|roundDuration|date:'HH:mm') }}</div>
+      <div
+        class="time time-time"
+        [innerHTML]="scheduledItem.start|roundDuration|shortTime2"
+      ></div>
       }
 
       <!-- -->

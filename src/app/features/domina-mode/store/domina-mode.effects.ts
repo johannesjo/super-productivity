@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { EMPTY, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -9,6 +9,9 @@ import { speak } from '../../../util/speak';
 
 @Injectable()
 export class DominaModeEffects {
+  private actions$ = inject(Actions);
+  private _store$ = inject(Store);
+
   dominaMode$: Observable<unknown> = createEffect(
     () =>
       this._store$.select(selectIsDominaModeConfig).pipe(
@@ -32,9 +35,4 @@ export class DominaModeEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private actions$: Actions,
-    private _store$: Store,
-  ) {}
 }

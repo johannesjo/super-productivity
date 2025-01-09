@@ -54,6 +54,8 @@ export interface ElectronAPI {
 
   openExternalUrl(url: string): void;
 
+  isLinux(): boolean;
+
   isMacOS(): boolean;
 
   isSnap(): boolean;
@@ -63,6 +65,8 @@ export interface ElectronAPI {
   reloadMainWin(): void;
 
   openDevTools(): void;
+
+  showEmojiPanel(): void;
 
   relaunch(): void;
 
@@ -100,7 +104,7 @@ export interface ElectronAPI {
     jiraCfg: JiraCfg;
   }): void;
 
-  jiraSetupImgHeaders(args: { jiraCfg: JiraCfg; wonkyCookie?: string }): void;
+  jiraSetupImgHeaders(args: { jiraCfg: JiraCfg }): void;
 
   backupAppData(appData: AppDataComplete): void;
 

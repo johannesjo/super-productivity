@@ -411,7 +411,7 @@
         "HOST": "Host (por ejemplo, http://my-host.de:1234)",
         "PASSWORD": "Token / Contraseña",
         "USER_NAME": "Email / Nombre de usuario",
-        "USE_PAT": "Usar token de acceso personal en lugar de contraseña",
+        "USE_PAT": "Usar token de acceso personal en lugar de contraseña (LEGACY)",
         "WONKY_COOKIE_MODE": "Autenticación de recuperación de cookies Wonky (solo aplicación de escritorio)"
       },
       "FORM_SECTION": {

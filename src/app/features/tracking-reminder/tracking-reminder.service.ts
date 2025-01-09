@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { IdleService } from '../idle/idle.service';
 import { TaskService } from '../tasks/task.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -29,6 +29,15 @@ import { TakeABreakService } from '../take-a-break/take-a-break.service';
   providedIn: 'root',
 })
 export class TrackingReminderService {
+  private _idleService = inject(IdleService);
+  private _taskService = inject(TaskService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _bannerService = inject(BannerService);
+  private _matDialog = inject(MatDialog);
+  private _translateService = inject(TranslateService);
+  private _dateService = inject(DateService);
+  private _takeABreakService = inject(TakeABreakService);
+
   _cfg$: Observable<TimeTrackingConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.timeTracking),
   );
@@ -63,17 +72,6 @@ export class TrackingReminderService {
     ),
     shareReplay(),
   );
-
-  constructor(
-    private _idleService: IdleService,
-    private _taskService: TaskService,
-    private _globalConfigService: GlobalConfigService,
-    private _bannerService: BannerService,
-    private _matDialog: MatDialog,
-    private _translateService: TranslateService,
-    private _dateService: DateService,
-    private _takeABreakService: TakeABreakService,
-  ) {}
 
   init(): void {
     this.remindCounter$.subscribe((count) => {

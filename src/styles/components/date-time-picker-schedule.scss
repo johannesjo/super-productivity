@@ -540,11 +540,6 @@ $owl-missing: $owl-light-selected-bg !default;
   }
 }
 
-@media all and (orientation: portrait) {
-  .owl-dt-dialog-container {
-  }
-}
-
 .owl-dt-container-buttons {
   display: -webkit-box;
   display: flex;
@@ -858,7 +853,6 @@ $ico-size-real: 20px;
   font-size: 1.3em;
   font-family: inherit;
   color: $owl-text-color-strong;
-  background: transparent;
   -webkit-appearance: none;
   background: none;
   // NOTE: center for android

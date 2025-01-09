@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { forkJoin, Observable } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
@@ -13,6 +13,11 @@ import { selectEnabledIssueProviders } from './issue-provider.selectors';
 
 @Injectable()
 export class PollIssueUpdatesEffects {
+  private _store = inject(Store);
+  private _actions$ = inject(Actions);
+  private readonly _issueService = inject(IssueService);
+  private readonly _workContextService = inject(WorkContextService);
+
   pollIssueTaskUpdatesActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext, loadAllData),
   );
@@ -53,11 +58,4 @@ export class PollIssueUpdatesEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _store: Store,
-    private _actions$: Actions,
-    private readonly _issueService: IssueService,
-    private readonly _workContextService: WorkContextService,
-  ) {}
 }

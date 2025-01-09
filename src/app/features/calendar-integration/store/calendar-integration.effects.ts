@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { distinctUntilChanged, first, map, switchMap, tap } from 'rxjs/operators';
@@ -24,6 +24,14 @@ const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
 @Injectable()
 export class CalendarIntegrationEffects {
+  private _store = inject(Store);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _bannerService = inject(BannerService);
+  private _datePipe = inject(DatePipe);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _navigateToTaskService = inject(NavigateToTaskService);
+  private _issueService = inject(IssueService);
+
   pollChanges$ = createEffect(
     () =>
       this._globalTrackingIntervalService.todayDateStr$.pipe(
@@ -98,21 +106,11 @@ export class CalendarIntegrationEffects {
     { id: string; calEv: CalendarIntegrationEvent; calProvider: IssueProviderCalendar }[]
   >([]);
   showBanner = createEffect(
-    () => this._currentlyShownBanners$.pipe(tap((v) => this._showBanner(v))),
+    () => this._currentlyShownBanners$.pipe(tap((v) => this._showOrHideBanner(v))),
     {
       dispatch: false,
     },
   );
-
-  constructor(
-    private _store: Store,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _bannerService: BannerService,
-    private _datePipe: DatePipe,
-    private _calendarIntegrationService: CalendarIntegrationService,
-    private _navigateToTaskService: NavigateToTaskService,
-    private _issueService: IssueService,
-  ) {}
 
   private _addEvToShow(
     calEv: CalendarIntegrationEvent,
@@ -136,14 +134,13 @@ export class CalendarIntegrationEffects {
     );
   }
 
-  private async _showBanner(
+  private async _showOrHideBanner(
     allEvsToShow: {
       id: string;
       calEv: CalendarIntegrationEvent;
       calProvider: IssueProviderCalendar;
     }[],
   ): Promise<void> {
-    console.log('SHOW BANNER');
     const firstEntry = allEvsToShow[0];
     if (!firstEntry) {
       this._bannerService.dismiss(BannerId.CalendarEvent);

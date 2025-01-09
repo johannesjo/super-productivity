@@ -1,9 +1,9 @@
 <ul
-  [@standardList]="attachments?.length"
+  [@standardList]="attachments()?.length"
   class="attachments"
 >
+  @for (attachment of attachments(); track trackByFn(i, attachment); let i = $index) {
   <li
-    *ngFor="let attachment of attachments; let i = index; trackBy: trackByFn;"
     class="attachment"
     draggable="false"
   >
@@ -17,23 +17,20 @@
       target="_blank"
       taskAttachmentLink
     >
-      <ng-container *ngIf="attachment.type!=='IMG' || isError[i]">
-        <mat-icon *ngIf="attachment.icon">{{attachment.icon}} </mat-icon>
-        <div class="title">{{attachment.title || attachment.path}}</div>
-      </ng-container>
-      <ng-container *ngIf="attachment.type==='IMG' && !isError[i]">
-        <img
-          (error)="isError[i]=true"
-          [enlargeImg]="attachment.originalImgPath"
-          [src]="attachment.originalImgPath||attachment.path"
-        />
-      </ng-container>
+      @if (attachment.type!=='IMG' || isError[i]) { @if (attachment.icon) {
+      <mat-icon>{{attachment.icon}} </mat-icon>
+      }
+      <div class="title">{{attachment.title || attachment.path}}</div>
+      } @if (attachment.type==='IMG' && !isError[i]) {
+      <img
+        (error)="isError[i]=true"
+        [enlargeImg]="attachment.originalImgPath"
+        [src]="attachment.originalImgPath||attachment.path"
+      />
+      }
     </a>
-
-    <div
-      *ngIf="!isDisableControls"
-      class="controls border-color-primary"
-    >
+    @if (!isDisableControls()) {
+    <div class="controls border-color-primary">
       <a
         class="view-btn"
         mat-flat-button
@@ -44,18 +41,21 @@
         target="_blank"
         taskAttachmentLink
       >
-        <mat-icon *ngIf="attachment.type==='IMG'">search</mat-icon>
-        <mat-icon *ngIf="attachment.type!=='IMG'">open_in_new</mat-icon>
+        @if (attachment.type==='IMG') {
+        <mat-icon>search</mat-icon>
+        } @if (attachment.type!=='IMG') {
+        <mat-icon>open_in_new</mat-icon>
+        }
       </a>
+      @if (attachment.type!=='IMG') {
       <button
         (click)="copy(attachment)"
         class="copy-btn"
         mat-flat-button
-        *ngIf="attachment.type!=='IMG'"
       >
         <mat-icon>content_copy</mat-icon>
       </button>
-
+      }
       <button
         (click)="openEditDialog(attachment)"
         class="edit-btn"
@@ -63,6 +63,7 @@
       >
         <mat-icon>edit</mat-icon>
       </button>
+      @if(attachment.id){
       <button
         (click)="remove(attachment.id)"
         class="trash-btn"
@@ -70,6 +71,9 @@
       >
         <mat-icon color="warn">delete_forever</mat-icon>
       </button>
+      }
     </div>
+    }
   </li>
+  }
 </ul>

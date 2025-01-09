@@ -2,13 +2,19 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Inject,
   LOCALE_ID,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { Task, TaskReminderOptionId } from '../../tasks/task.model';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
   DEFAULT_TASK_REPEAT_CFG,
@@ -16,7 +22,7 @@ import {
   TaskRepeatCfgCopy,
 } from '../task-repeat-cfg.model';
 import { Observable, Subscription } from 'rxjs';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { UntypedFormGroup } from '@angular/forms';
 import {
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
@@ -28,11 +34,16 @@ import { unique } from '../../../util/unique';
 import { Tag } from '../../tag/tag.model';
 import { exists } from '../../../util/exists';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -40,8 +51,32 @@ import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date
   templateUrl: './dialog-edit-task-repeat-cfg.component.html',
   styleUrls: ['./dialog-edit-task-repeat-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogTitle,
+    TranslatePipe,
+    MatDialogContent,
+    HelpSectionComponent,
+    FormlyModule,
+    ChipListInputComponent,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    MatIcon,
+  ],
 })
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
+  private _tagService = inject(TagService);
+  private _cd = inject(ChangeDetectorRef);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
+  private _translateService = inject(TranslateService);
+  private _locale = inject(LOCALE_ID);
+  private _data = inject<{
+    task?: Task;
+    repeatCfg?: TaskRepeatCfg;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   repeatCfgInitial?: TaskRepeatCfgCopy;
@@ -57,15 +92,9 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _tagService: TagService,
-    private _cd: ChangeDetectorRef,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _matDialogRef: MatDialogRef<DialogEditTaskRepeatCfgComponent>,
-    private _translateService: TranslateService,
-    @Inject(LOCALE_ID) private _locale: string,
-    @Inject(MAT_DIALOG_DATA) private _data: { task?: Task; repeatCfg?: TaskRepeatCfg },
-  ) {
+  constructor() {
+    const _locale = this._locale;
+
     if (this._data.repeatCfg) {
       // NOTE: just for typing....
       this.repeatCfg = { ...this._data.repeatCfg };
@@ -112,6 +141,10 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_DAILY),
       },
       {
+        value: 'MONDAY_TO_FRIDAY',
+        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_MONDAY_TO_FRIDAY),
+      },
+      {
         value: 'WEEKLY_CURRENT_WEEKDAY',
         label: this._translateService.instant(
           T.F.TASK_REPEAT.F.Q_WEEKLY_CURRENT_WEEKDAY,
@@ -123,10 +156,6 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_MONTHLY_CURRENT_DATE, {
           dateDayStr,
         }),
-      },
-      {
-        value: 'MONDAY_TO_FRIDAY',
-        label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_MONDAY_TO_FRIDAY),
       },
       {
         value: 'YEARLY_CURRENT_DATE',

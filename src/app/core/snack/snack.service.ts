@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SnackParams } from './snack.model';
 import { Observable, Subject } from 'rxjs';
@@ -15,15 +15,15 @@ import { debounce } from 'helpful-decorators';
   providedIn: 'root',
 })
 export class SnackService {
+  private _store$ = inject<Store<any>>(Store);
+  private _translateService = inject(TranslateService);
+  private _actions$ = inject(Actions);
+  private _matSnackBar = inject(MatSnackBar);
+  private _ngZone = inject(NgZone);
+
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
 
-  constructor(
-    private _store$: Store<any>,
-    private _translateService: TranslateService,
-    private _actions$: Actions,
-    private _matSnackBar: MatSnackBar,
-    private _ngZone: NgZone,
-  ) {
+  constructor() {
     const _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
       ofType(setActiveWorkContext),
     );

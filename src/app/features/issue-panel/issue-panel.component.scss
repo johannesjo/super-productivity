@@ -18,26 +18,24 @@
         margin-right: 50px;
       }
     }
-  }
 
-  ::ng-deep .mat-mdc-tab-body-wrapper {
-    min-height: 0;
-    height: 100%;
-  }
+    .mat-mdc-tab-body-wrapper {
+      min-height: 0;
+      height: 100%;
+    }
 
-  ::ng-deep .mat-mdc-tab {
-    min-width: 40px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
+    .mat-mdc-tab {
+      min-width: 40px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
 
-  ::ng-deep .mat-tab-label:last-child {
-    opacity: 1;
-    min-width: 20px;
-    padding: 0;
-  }
+    .mat-tab-label:last-child {
+      opacity: 1;
+      min-width: 20px;
+      padding: 0;
+    }
 
-  ::ng-deep {
     .mat-mdc-tab-group {
       flex: 1;
       display: flex;
@@ -84,4 +82,15 @@
   @include darkTheme() {
     color: #ffffff;
   }
+}
+
+::ng-deep .issue-provider-drag-preview {
+  min-width: 0 !important;
+  background: transparent;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+::ng-deep .issue-provider-drag-preview.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }

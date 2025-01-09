@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DROPBOX_APP_KEY } from './dropbox.const';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { DataInitService } from '../../../core/data-init/data-init.service';
@@ -14,11 +14,18 @@ import { generatePKCECodes } from '../generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
 import { SyncProvider } from '../sync-provider.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { environment } from '../../../../environments/environment';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _dataInitService = inject(DataInitService);
+  private _matDialog = inject(MatDialog);
+  private _snackService = inject(SnackService);
+  private _persistenceLocalService = inject(PersistenceLocalService);
+
   // keep as fallback
   private _accessToken$: ReplaySubject<string | null> = new ReplaySubject<string | null>(
     1,
@@ -38,13 +45,7 @@ export class DropboxApiService {
       first(),
     );
 
-  constructor(
-    private _globalConfigService: GlobalConfigService,
-    private _dataInitService: DataInitService,
-    private _matDialog: MatDialog,
-    private _snackService: SnackService,
-    private _persistenceLocalService: PersistenceLocalService,
-  ) {
+  constructor() {
     this._initTokens();
   }
 
@@ -249,7 +250,9 @@ export class DropboxApiService {
       this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
       this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
     } else {
-      console.log('LEGACY TOKENS');
+      if (environment.production) {
+        console.log('LEGACY TOKENS');
+      }
       // TODO remove legacy stuff
       this._dataInitService.isAllDataLoadedInitially$
         .pipe(
@@ -258,7 +261,9 @@ export class DropboxApiService {
           first(),
         )
         .subscribe((v) => {
-          console.log('SETTING LEGACY TOKENS', v as any);
+          if (environment.production) {
+            console.log('SETTING LEGACY TOKENS', v as any);
+          }
           this.updateTokens({
             accessToken: (v as any)?.accessToken,
             refreshToken: (v as any)?.refreshToken,
@@ -281,7 +286,10 @@ export class DropboxApiService {
     if (refreshToken) {
       this._refreshToken$.next(refreshToken);
     }
-    console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+
+    if (environment.production) {
+      console.log('Update Tokens', { accessToken, refreshToken, expiresAt });
+    }
 
     await this._persistenceLocalService.updateDropboxSyncMeta({
       accessToken,

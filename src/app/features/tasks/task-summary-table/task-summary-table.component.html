@@ -1,6 +1,6 @@
 <div class="table-wrapper mat-elevation-z1">
   <table
-    [dataSource]="flatTasks"
+    [dataSource]="flatTasks()"
     class="summary-table"
     mat-table
   >
@@ -20,12 +20,11 @@
           [class.isSubTask]="task.parentId"
           class="task-title"
         >
-          <mat-icon
-            *ngIf="task.repeatCfgId"
-            class="repeat-task-icon"
-            >repeat
-          </mat-icon>
-          <span *ngIf="task.parentId">–</span>
+          @if (task.repeatCfgId) {
+          <mat-icon class="repeat-task-icon">repeat </mat-icon>
+          } @if (task.parentId) {
+          <span>–</span>
+          }
           <inline-input
             (changed)="updateTaskTitle(task, $event)"
             [value]="task.title"
@@ -47,17 +46,17 @@
         *matCellDef="let task"
         mat-cell
       >
+        @if (!task.subTaskIds?.length) {
         <inline-input
           (changed)="updateTimeSpentTodayForTask(task, $event)"
-          *ngIf="!task.subTaskIds?.length"
-          [displayValue]="task.timeSpentOnDay[day]|msToClockString"
+          [displayValue]="task.timeSpentOnDay[day()]|msToClockString"
           [type]="'duration'"
-          [value]="task.timeSpentOnDay[day]"
+          [value]="task.timeSpentOnDay[day()]"
         >
         </inline-input>
-        <span *ngIf="task.subTaskIds?.length"
-          >{{task.timeSpentOnDay[day]|msToClockString}}</span
-        >
+        } @if (task.subTaskIds?.length) {
+        <span>{{task.timeSpentOnDay[day()]|msToClockString}}</span>
+        }
       </td>
     </ng-container>
 

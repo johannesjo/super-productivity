@@ -1,15 +1,41 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { DialogConflictResolutionResult } from '../sync.model';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'dialog-sync-conflict',
   templateUrl: './dialog-sync-conflict.component.html',
   styleUrls: ['./dialog-sync-conflict.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+    DatePipe,
+  ],
 })
 export class DialogSyncConflictComponent {
+  private _matDialogRef = inject<MatDialogRef<DialogSyncConflictComponent>>(MatDialogRef);
+  data = inject<{
+    remote: number;
+    local: number;
+    lastSync: number;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   remoteDate: number = this.data.remote;
@@ -23,15 +49,9 @@ export class DialogSyncConflictComponent {
   isHighlightRemote: boolean = this.data.remote >= this.data.local;
   isHighlightLocal: boolean = this.data.local >= this.data.remote;
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogSyncConflictComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      remote: number;
-      local: number;
-      lastSync: number;
-    },
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

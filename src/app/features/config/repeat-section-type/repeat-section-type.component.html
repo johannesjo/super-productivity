@@ -2,15 +2,12 @@
   [@standardList]="field.fieldGroup?.length"
   class="list-wrapper"
 >
-  <div
-    *ngFor="let innerField of field.fieldGroup; let i = index; trackBy: trackByFn;"
-    class="row"
-  >
+  @for (innerField of field.fieldGroup; track trackByFn(i, innerField); let i = $index) {
+  <div class="row">
     <formly-field
       [field]="innerField"
       class="field"
     ></formly-field>
-
     <button
       (click)="removeItem(i)"
       color="warn"
@@ -21,6 +18,7 @@
       <mat-icon>delete_forever</mat-icon>
     </button>
   </div>
+  }
 </div>
 
 <div class="footer">

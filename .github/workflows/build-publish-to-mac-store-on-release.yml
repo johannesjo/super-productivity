@@ -50,7 +50,7 @@ jobs:
           PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Test Unit
         run: npm run test

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import {
   concatMap,
@@ -36,6 +36,15 @@ import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-chec
 
 @Injectable()
 export class SyncEffects {
+  private _syncProviderService = inject(SyncProviderService);
+  private _syncTriggerService = inject(SyncTriggerService);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _dataInitService = inject(DataInitService);
+  private _execBeforeCloseService = inject(ExecBeforeCloseService);
+  private readonly _initialPwaUpdateCheckService = inject(InitialPwaUpdateCheckService);
+
   syncBeforeQuit$: any = createEffect(
     () =>
       !IS_ELECTRON
@@ -167,15 +176,4 @@ export class SyncEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _syncProviderService: SyncProviderService,
-    private _syncTriggerService: SyncTriggerService,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-    private _simpleCounterService: SimpleCounterService,
-    private _dataInitService: DataInitService,
-    private _execBeforeCloseService: ExecBeforeCloseService,
-    private readonly _initialPwaUpdateCheckService: InitialPwaUpdateCheckService,
-  ) {}
 }

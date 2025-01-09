@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, LOCALE_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
 import { T } from '../../t.const';
 import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,11 +10,20 @@ import { Store } from '@ngrx/store';
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getTaskRepeatInfoText } from '../../features/tasks/task-detail-panel/get-task-repeat-info-text.util';
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
 import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
+import { MatRipple } from '@angular/material/core';
+import { MatIcon } from '@angular/material/icon';
+import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
+import { TagListComponent } from '../../features/tag/tag-list/tag-list.component';
+import { PlannerTaskComponent } from '../../features/planner/planner-task/planner-task.component';
 
 @Component({
   selector: 'scheduled-list-page',
@@ -22,21 +31,33 @@ import { selectAllTasksWithPlannedDay } from '../../features/planner/store/plann
   styleUrls: ['./scheduled-list-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  imports: [
+    MatCard,
+    MatCardContent,
+    InlineMultilineInputComponent,
+    MatRipple,
+    MatIcon,
+    FullPageSpinnerComponent,
+    AsyncPipe,
+    DatePipe,
+    HumanizeTimestampPipe,
+    TranslatePipe,
+    TagListComponent,
+    PlannerTaskComponent,
+  ],
 })
 export class ScheduledListPageComponent {
+  scheduledTaskService = inject(ScheduledTaskService);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  private _translateService = inject(TranslateService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private locale = inject(LOCALE_ID);
+
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
   tasksPlannedForDays$ = this._store.select(selectAllTasksWithPlannedDay);
-
-  constructor(
-    public scheduledTaskService: ScheduledTaskService,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    private _translateService: TranslateService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    @Inject(LOCALE_ID) private locale: string,
-  ) {}
 
   editReminder(task: TaskCopy, ev: MouseEvent): void {
     ev.preventDefault();

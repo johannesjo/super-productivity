@@ -2,6 +2,7 @@
   class="content"
   [class.split-view]="viewMode==='SPLIT'"
 >
+  @if (viewMode==='TEXT_ONLY' || viewMode==='SPLIT') {
   <textarea
     #textareaEl
     [(ngModel)]="data.content"
@@ -9,14 +10,14 @@
     (ngModelChange)="ngModelChange($event)"
     rows="1"
     tabindex="3"
-    *ngIf="viewMode==='TEXT_ONLY' || viewMode==='SPLIT'"
   ></textarea>
+  } @if (viewMode==='PARSED' || viewMode==='SPLIT') {
   <div
-    *ngIf="viewMode==='PARSED' || viewMode==='SPLIT'"
     markdown
     [data]="data.content"
     class="markdown-preview markdown"
   ></div>
+  }
 </div>
 
 <div class="controls">

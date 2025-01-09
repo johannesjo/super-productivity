@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { UiModule } from '../ui.module';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardContent } from '@angular/material/card';
 
 @Component({
   selector: 'error-card',
-  standalone: true,
-  imports: [UiModule],
+  imports: [MatIcon, MatCardContent, MatCard],
   templateUrl: './error-card.component.html',
   styleUrl: './error-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

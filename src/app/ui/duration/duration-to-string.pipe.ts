@@ -1,8 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-  name: 'durationToString',
-})
+@Pipe({ name: 'durationToString' })
 export class DurationToStringPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = durationToString;
 }

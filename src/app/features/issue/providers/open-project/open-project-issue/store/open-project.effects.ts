@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { setCurrentTask, updateTask } from '../../../../../tasks/store/task.actions';
 import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
@@ -24,6 +24,15 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
 
 @Injectable()
 export class OpenProjectEffects {
+  private readonly _actions$ = inject(Actions);
+  private readonly _store$ = inject<Store<any>>(Store);
+  private readonly _snackService = inject(SnackService);
+  private readonly _openProjectApiService = inject(OpenProjectApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _taskService = inject(TaskService);
+  private readonly _issueService = inject(IssueService);
+
   postTime$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -141,17 +150,6 @@ export class OpenProjectEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _actions$: Actions,
-    private readonly _store$: Store<any>,
-    private readonly _snackService: SnackService,
-    private readonly _openProjectApiService: OpenProjectApiService,
-    private readonly _issueProviderService: IssueProviderService,
-    private readonly _matDialog: MatDialog,
-    private readonly _taskService: TaskService,
-    private readonly _issueService: IssueService,
-  ) {}
 
   private _openTrackTimeDialog(
     task: Task,

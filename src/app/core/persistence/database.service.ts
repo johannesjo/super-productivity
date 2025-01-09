@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { devError } from '../../util/dev-error';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,10 @@ import { AndroidDbAdapterService } from './android-db-adapter.service';
   providedIn: 'root',
 })
 export class DatabaseService {
+  private _translateService = inject(TranslateService);
+  private _indexedDbAdapterService = inject(IndexedDBAdapterService);
+  private _androidDbAdapterService = inject(AndroidDbAdapterService);
+
   private _lastParams?: { a: string; key?: string; data?: unknown };
   // private _adapter: DBAdapter =
   //   IS_ANDROID_WEB_VIEW && androidInterface.saveToDbNew && androidInterface.loadFromDb
@@ -18,11 +22,7 @@ export class DatabaseService {
   //     : this._indexedDbAdapterService;
   private _adapter: DBAdapter = this._indexedDbAdapterService;
 
-  constructor(
-    private _translateService: TranslateService,
-    private _indexedDbAdapterService: IndexedDBAdapterService,
-    private _androidDbAdapterService: AndroidDbAdapterService,
-  ) {
+  constructor() {
     this._adapter = this._indexedDbAdapterService;
     this._init().then();
   }

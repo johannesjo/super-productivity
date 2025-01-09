@@ -3,8 +3,9 @@ import {
   Component,
   HostBinding,
   HostListener,
+  inject,
   OnDestroy,
-  ViewChild,
+  viewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
@@ -13,7 +14,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON } from './app.constants';
+import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
@@ -23,7 +24,6 @@ import { BannerService } from './core/banner/banner.service';
 import { LS } from './core/persistence/storage-keys.const';
 import { BannerId } from './core/banner/banner.model';
 import { T } from './t.const';
-import { TranslateService } from '@ngx-translate/core';
 import { GlobalThemeService } from './core/theme/global-theme.service';
 import { UiHelperService } from './features/ui-helper/ui-helper.service';
 import { LanguageService } from './core/language/language.service';
@@ -36,11 +36,27 @@ import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { first, map, skip, take } from 'rxjs/operators';
+import { map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { FocusModeService } from './features/focus-mode/focus-mode.service';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
+import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import { SearchBarComponent } from './features/search-bar/search-bar.component';
+import {
+  MatSidenav,
+  MatSidenavContainer,
+  MatSidenavContent,
+} from '@angular/material/sidenav';
+import { Dir } from '@angular/cdk/bidi';
+import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
+import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
+import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
+import { BannerComponent } from './core/banner/banner/banner.component';
+import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
+import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
+import { ShepherdComponent } from './features/shepherd/shepherd.component';
+import { AsyncPipe } from '@angular/common';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -57,15 +73,51 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     warpInAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    AddTaskBarComponent,
+    SearchBarComponent,
+    MatSidenavContainer,
+    Dir,
+    MatSidenav,
+    SideNavComponent,
+    MatSidenavContent,
+    MainHeaderComponent,
+    BookmarkBarComponent,
+    BannerComponent,
+    RouterOutlet,
+    GlobalProgressBarComponent,
+    FocusModeOverlayComponent,
+    ShepherdComponent,
+    AsyncPipe,
+  ],
 })
 export class AppComponent implements OnDestroy {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _shortcutService = inject(ShortcutService);
+  private _bannerService = inject(BannerService);
+  private _snackService = inject(SnackService);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _globalThemeService = inject(GlobalThemeService);
+  private _uiHelperService = inject(UiHelperService);
+  private _languageService = inject(LanguageService);
+  private _androidService = inject(AndroidService);
+  private _bookmarkService = inject(BookmarkService);
+  private _startTrackingReminderService = inject(TrackingReminderService);
+  private _activatedRoute = inject(ActivatedRoute);
+  readonly syncTriggerService = inject(SyncTriggerService);
+  readonly imexMetaService = inject(ImexMetaService);
+  readonly workContextService = inject(WorkContextService);
+  readonly layoutService = inject(LayoutService);
+  readonly focusModeService = inject(FocusModeService);
+  readonly globalThemeService = inject(GlobalThemeService);
+
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
   @HostBinding('@.disabled') isDisableAnimations = false;
 
-  @ViewChild('notesElRef', { read: ViewContainerRef }) notesElRef?: ViewContainerRef;
-  @ViewChild('sideNavElRef', { read: ViewContainerRef }) sideNavElRef?: ViewContainerRef;
+  readonly notesElRef = viewChild('notesElRef', { read: ViewContainerRef });
+  readonly sideNavElRef = viewChild('sideNavElRef', { read: ViewContainerRef });
 
   isRTL: boolean = false;
 
@@ -82,27 +134,10 @@ export class AppComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
 
-  constructor(
-    private _globalConfigService: GlobalConfigService,
-    private _shortcutService: ShortcutService,
-    private _bannerService: BannerService,
-    private _snackService: SnackService,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _translateService: TranslateService,
-    private _globalThemeService: GlobalThemeService,
-    private _uiHelperService: UiHelperService,
-    private _languageService: LanguageService,
-    private _androidService: AndroidService,
-    private _bookmarkService: BookmarkService,
-    private _startTrackingReminderService: TrackingReminderService,
-    private _activatedRoute: ActivatedRoute,
-    public readonly syncTriggerService: SyncTriggerService,
-    public readonly imexMetaService: ImexMetaService,
-    public readonly workContextService: WorkContextService,
-    public readonly layoutService: LayoutService,
-    public readonly focusModeService: FocusModeService,
-    public readonly globalThemeService: GlobalThemeService,
-  ) {
+  constructor() {
+    this._languageService.setDefault(LanguageCode.en);
+    this._languageService.setFromBrowserLngIfAutoSwitchLng();
+
     this._snackService.open({
       ico: 'lightbulb',
       config: {
@@ -198,15 +233,6 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
     ev.preventDefault();
-  }
-
-  @HostListener('document:paste', ['$event'])
-  async onPaste(ev: ClipboardEvent): Promise<void> {
-    if (
-      await this.workContextService.isActiveWorkContextProject$.pipe(first()).toPromise()
-    ) {
-      this._bookmarkService.createFromPaste(ev);
-    }
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(

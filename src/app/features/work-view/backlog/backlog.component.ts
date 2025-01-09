@@ -2,9 +2,9 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  inject,
+  input,
+  output,
 } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import {
@@ -15,6 +15,10 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 import { T } from '../../../t.const';
 import { Subject, timer } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
+import { TaskListComponent } from '../../tasks/task-list/task-list.component';
+import { FullPageSpinnerComponent } from '../../../ui/full-page-spinner/full-page-spinner.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'backlog',
@@ -22,9 +26,12 @@ import { mapTo, switchMap } from 'rxjs/operators';
   styleUrls: ['./backlog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
+  imports: [TaskListComponent, FullPageSpinnerComponent, AsyncPipe, TranslatePipe],
 })
 export class BacklogComponent implements AfterViewInit {
-  @Input() backlogTasks: TaskWithSubTasks[] = [];
+  taskService = inject(TaskService);
+
+  readonly backlogTasks = input<TaskWithSubTasks[]>([]);
 
   private _readyTimerDuration$ = new Subject<number>();
   ready$ = this._readyTimerDuration$.pipe(
@@ -32,27 +39,17 @@ export class BacklogComponent implements AfterViewInit {
     mapTo(true),
   );
 
-  @Output() closeBacklog: EventEmitter<any> = new EventEmitter<any>();
+  readonly closeBacklog = output<any>();
 
   T: typeof T = T;
 
-  // we do it here to have the tasks in memory all the time
-  // backlogTasks$: Observable<TaskWithSubTasks[]> = this._projectService.isProjectChanging$.pipe(
-  //   delay(50),
-  //   switchMap((isChanging) => isChanging ? of([]) : this.taskService.backlogTasks$),
-  //   startWith([])
-  // );
-  // backlogTasks$: Observable<TaskWithSubTasks[]> = this.taskService.backlogTasks$;
-
-  constructor(public taskService: TaskService) {}
-
   ngAfterViewInit(): void {
     let initialDelay = 0;
-    if (this.backlogTasks.length > 99) {
+    if (this.backlogTasks().length > 99) {
       initialDelay = 700;
-    } else if (this.backlogTasks.length > 30) {
+    } else if (this.backlogTasks().length > 30) {
       initialDelay = 500;
-    } else if (this.backlogTasks.length > 15) {
+    } else if (this.backlogTasks().length > 15) {
       initialDelay = 300;
     }
     this._readyTimerDuration$.next(initialDelay);

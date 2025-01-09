@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CaldavCfg } from './caldav.model';
 // @ts-ignore
 import DavClient, { namespaces as NS } from '@nextcloud/cdav-library';
@@ -26,9 +26,9 @@ interface ClientCache {
   providedIn: 'root',
 })
 export class CaldavClientService {
-  private _clientCache = new Map<string, ClientCache>();
+  private readonly _snackService = inject(SnackService);
 
-  constructor(private readonly _snackService: SnackService) {}
+  private _clientCache = new Map<string, ClientCache>();
 
   private static _isValidSettings(cfg: CaldavCfg): boolean {
     return (

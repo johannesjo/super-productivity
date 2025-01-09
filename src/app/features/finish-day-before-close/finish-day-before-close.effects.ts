@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { ExecBeforeCloseService } from '../../core/electron/exec-before-close.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -24,6 +24,15 @@ const EXEC_BEFORE_CLOSE_ID = 'FINISH_DAY_BEFORE_CLOSE_EFFECT';
 
 @Injectable()
 export class FinishDayBeforeCloseEffects {
+  private actions$ = inject(Actions);
+  private _execBeforeCloseService = inject(ExecBeforeCloseService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _dataInitService = inject(DataInitService);
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
+  private _translateService = inject(TranslateService);
+
   isEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => this._globalConfigService.misc$),
     map((misc) => misc.isConfirmBeforeExitWithoutFinishDay),
@@ -84,15 +93,4 @@ export class FinishDayBeforeCloseEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private actions$: Actions,
-    private _execBeforeCloseService: ExecBeforeCloseService,
-    private _globalConfigService: GlobalConfigService,
-    private _dataInitService: DataInitService,
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _router: Router,
-    private _translateService: TranslateService,
-  ) {}
 }

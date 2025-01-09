@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TaskAttachment } from './task-attachment.model';
 import { nanoid } from 'nanoid';
@@ -17,10 +17,8 @@ import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
   providedIn: 'root',
 })
 export class TaskAttachmentService {
-  constructor(
-    private _store$: Store<TaskState>,
-    private _matDialog: MatDialog,
-  ) {}
+  private _store$ = inject<Store<TaskState>>(Store);
+  private _matDialog = inject(MatDialog);
 
   addAttachment(taskId: string, taskAttachment: TaskAttachment): void {
     if (!taskAttachment) {

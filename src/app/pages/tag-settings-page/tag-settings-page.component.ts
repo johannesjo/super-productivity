@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { T } from '../../t.const';
 import {
@@ -24,14 +25,22 @@ import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../features/work-conte
 import { BASIC_TAG_CONFIG_FORM_CONFIG } from '../../features/tag/tag-form-cfg.const';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isObject } from '../../util/is-object';
+import { MatIcon } from '@angular/material/icon';
+import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'project-settings',
   templateUrl: './tag-settings-page.component.html',
   styleUrls: ['./tag-settings-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIcon, ConfigSectionComponent, TranslatePipe],
 })
 export class TagSettingsPageComponent implements OnInit, OnDestroy {
+  readonly tagService = inject(TagService);
+  readonly workContextService = inject(WorkContextService);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   tagThemeSettingsFormCfg: ConfigFormSection<WorkContextThemeCfg>;
   basicFormCfg: ConfigFormSection<Tag>;
@@ -42,11 +51,7 @@ export class TagSettingsPageComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly tagService: TagService,
-    public readonly workContextService: WorkContextService,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here
     this.tagThemeSettingsFormCfg = WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG;
     this.basicFormCfg = BASIC_TAG_CONFIG_FORM_CONFIG;

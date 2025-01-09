@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
@@ -83,6 +83,12 @@ interface JiraRequestCfg {
   providedIn: 'root',
 })
 export class JiraApiService {
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _globalProgressBarService = inject(GlobalProgressBarService);
+  private _snackService = inject(SnackService);
+  private _bannerService = inject(BannerService);
+  private _matDialog = inject(MatDialog);
+
   private _requestsLog: { [key: string]: JiraRequestLogItem } = {};
   private _isBlockAccess: boolean = !!sessionStorage.getItem(BLOCK_ACCESS_KEY);
   private _isExtension: boolean = false;
@@ -95,13 +101,7 @@ export class JiraApiService {
           timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
         );
 
-  constructor(
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _globalProgressBarService: GlobalProgressBarService,
-    private _snackService: SnackService,
-    private _bannerService: BannerService,
-    private _matDialog: MatDialog,
-  ) {
+  constructor() {
     // set up callback listener for electron
     if (IS_ELECTRON) {
       window.ea.on(IPC.JIRA_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
@@ -388,9 +388,6 @@ export class JiraApiService {
   }): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
-      concatMap(() =>
-        IS_ELECTRON && cfg.isWonkyCookieMode ? this._checkSetWonkyCookie(cfg) : of(true),
-      ),
       concatMap(() => {
         // assign uuid to request to know which responsive belongs to which promise
         const requestId = `${jiraReqCfg.pathname}__${
@@ -467,25 +464,6 @@ export class JiraApiService {
     transform: any,
     jiraCfg: JiraCfg,
   ): Observable<any> {
-    if (!this._isExtension) {
-      return fromPromise(
-        fetch(url, requestInit)
-          .then((response) => response.body)
-          .then(streamToJsonIfPossible as any)
-          .then((res) =>
-            transform ? transform({ response: res }, jiraCfg) : { response: res },
-          ),
-      ).pipe(
-        catchError((err) => {
-          console.log(err);
-          console.log(getErrorTxt(err));
-          const errTxt = `Jira: ${getErrorTxt(err)}`;
-          this._snackService.open({ type: 'ERROR', msg: errTxt });
-          return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
-        }),
-      );
-    }
-
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
@@ -515,6 +493,26 @@ export class JiraApiService {
         'SP_JIRA_REQUEST',
         requestToSend,
       );
+    } else if (IS_ANDROID_WEB_VIEW) {
+      return fromPromise(
+        fetch(url, requestInit)
+          .then((response) => response.body)
+          .then(streamToJsonIfPossible as any)
+          .then((res) => {
+            if ((res as any)?.errorMessages?.length) {
+              throw new Error((res as any).errorMessages.join(', '));
+            }
+            return transform ? transform({ response: res }, jiraCfg) : { response: res };
+          }),
+      ).pipe(
+        catchError((err) => {
+          console.log(err);
+          console.log(getErrorTxt(err));
+          const errTxt = `Jira: ${getErrorTxt(err)}`;
+          this._snackService.open({ type: 'ERROR', msg: errTxt });
+          return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
+        }),
+      );
     } else {
       throw new Error('Jira: No valid interface found');
     }
@@ -542,21 +540,17 @@ export class JiraApiService {
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
-        ...(IS_ELECTRON && cfg.isWonkyCookieMode
+        ...(cfg.usePAT
           ? {
-              Cookie: sessionStorage.getItem(SS.JIRA_WONKY_COOKIE) as string,
+              Cookie: '',
+              authorization: `Bearer ${cfg.password}`,
             }
-          : cfg.usePAT
-            ? {
-                Cookie: '',
-                authorization: `Bearer ${cfg.password}`,
-              }
-            : {
-                Cookie: '',
-                authorization: `Basic ${this._b64EncodeUnicode(
-                  `${cfg.userName}:${cfg.password}`,
-                )}`,
-              }),
+          : {
+              Cookie: '',
+              authorization: `Basic ${this._b64EncodeUnicode(
+                `${cfg.userName}:${cfg.password}`,
+              )}`,
+            }),
       },
     };
   }

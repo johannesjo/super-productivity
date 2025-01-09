@@ -3,17 +3,20 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
+  inject,
   Input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild,
+  output,
+  viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
+import { InputDurationDirective } from '../input-duration.directive';
+import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'input-duration-slider',
@@ -21,8 +24,12 @@ import { T } from '../../../t.const';
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [dotAnimation],
+  imports: [InputDurationDirective, FormsModule, TranslatePipe],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
+  private _el = inject(ElementRef);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   minutesBefore: number = 0;
   dots: any[] = [];
@@ -33,20 +40,22 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   endHandler?: () => void;
   moveHandler?: (ev: any) => void;
 
-  @ViewChild('circleEl', { static: true }) circleEl?: ElementRef;
+  readonly circleEl = viewChild<ElementRef>('circleEl');
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() label: string = '';
-  @Output() modelChange: EventEmitter<number> = new EventEmitter();
+  readonly modelChange = output<number>();
 
-  constructor(
-    private _el: ElementRef,
-    private _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.el = this._el.nativeElement;
   }
 
   _model: number = 0;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(val: number) {
     if (this._model !== val) {
       this._model = val;
@@ -56,7 +65,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startHandler = (ev) => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
@@ -82,7 +91,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       ) {
         return;
       }
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      const circleEl = this.circleEl();
+      if (!this.endHandler || !this.moveHandler || !circleEl) {
         throw new Error();
       }
 
@@ -91,8 +101,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
       const convertThetaToCssDegrees = (thetaIN: number): number => 90 - thetaIN;
 
-      const centerX = this.circleEl.nativeElement.offsetWidth / 2;
-      const centerY = this.circleEl.nativeElement.offsetHeight / 2;
+      const centerX = circleEl.nativeElement.offsetWidth / 2;
+      const centerY = circleEl.nativeElement.offsetHeight / 2;
 
       let offsetX;
 
@@ -116,7 +126,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     };
 
     this.endHandler = () => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
@@ -137,7 +147,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl) {
+    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl()) {
       throw new Error();
     }
 
@@ -153,10 +163,11 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setCircleRotation(cssDegrees: number): void {
-    if (!this.circleEl) {
+    const circleEl = this.circleEl();
+    if (!circleEl) {
       throw new Error();
     }
-    this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
+    circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
   setDots(hours: number = 0): void {

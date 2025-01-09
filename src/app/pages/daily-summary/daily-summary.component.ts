@@ -2,11 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
@@ -39,6 +40,22 @@ import { shareReplayUntil } from '../../util/share-replay-until';
 import { DateService } from 'src/app/core/date/date.service';
 import { Action } from '@ngrx/store';
 import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
+import { MomentFormatPipe } from '../../ui/pipes/moment-format.pipe';
+import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
+import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
+import { RightPanelComponent } from '../../features/right-panel/right-panel.component';
+import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
+import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -48,8 +65,42 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   templateUrl: './daily-summary.component.html',
   styleUrls: ['./daily-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatAnchor,
+    RouterLink,
+    MatIcon,
+    InlineInputComponent,
+    MatTabGroup,
+    MatTab,
+    MatProgressSpinner,
+    PlanTasksTomorrowComponent,
+    MatButton,
+    MatTooltip,
+    AsyncPipe,
+    MomentFormatPipe,
+    MsToClockStringPipe,
+    TranslatePipe,
+    TaskSummaryTablesComponent,
+    TasksByTagComponent,
+    RightPanelComponent,
+    EvaluationSheetComponent,
+    WorklogWeekComponent,
+  ],
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
+  readonly configService = inject(GlobalConfigService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _router = inject(Router);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _worklogService = inject(WorklogService);
+  private readonly _cd = inject(ChangeDetectorRef);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _syncProviderService = inject(SyncProviderService);
+  private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
+  private readonly _dateService = inject(DateService);
+
   T: typeof T = T;
   _onDestroy$ = new Subject<void>();
 
@@ -156,20 +207,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   private _successAnimationTimeout?: number;
 
-  constructor(
-    public readonly configService: GlobalConfigService,
-    public readonly workContextService: WorkContextService,
-    private readonly _taskService: TaskService,
-    private readonly _router: Router,
-    private readonly _matDialog: MatDialog,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _worklogService: WorklogService,
-    private readonly _cd: ChangeDetectorRef,
-    private readonly _activatedRoute: ActivatedRoute,
-    private readonly _syncProviderService: SyncProviderService,
-    private readonly _beforeFinishDayService: BeforeFinishDayService,
-    private readonly _dateService: DateService,
-  ) {
+  constructor() {
     this._taskService.setSelectedId(null);
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);

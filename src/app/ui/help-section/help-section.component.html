@@ -9,8 +9,8 @@
   <mat-icon>{{isShowHelp ? 'close' : 'help_outline'}}</mat-icon>
 </button>
 
+@if (isShowHelp) {
 <div
-  *ngIf="isShowHelp"
   [@expandFade]
   class="help-text border-color-primary"
 >
@@ -22,3 +22,4 @@
     <mat-icon>help_outline</mat-icon>
   </div>
 </div>
+}

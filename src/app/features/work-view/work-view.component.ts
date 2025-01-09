@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   OnInit,
@@ -13,7 +14,7 @@ import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   from,
   fromEvent,
@@ -36,6 +37,21 @@ import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
 import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RightPanelComponent } from '../right-panel/right-panel.component';
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
+import { ImprovementBannerComponent } from '../metric/improvement-banner/improvement-banner.component';
+import { AddTaskBarComponent } from '../tasks/add-task-bar/add-task-bar.component';
+import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
+import { TaskListComponent } from '../tasks/task-list/task-list.component';
+import { SplitComponent } from './split/split.component';
+import { BacklogComponent } from './backlog/backlog.component';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'work-view',
@@ -48,8 +64,40 @@ import { toSignal } from '@angular/core/rxjs-interop';
     workViewProjectChangeAnimation,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RightPanelComponent,
+    CdkDropListGroup,
+    CdkScrollable,
+    MatTooltip,
+    MatIcon,
+    MatMiniFabButton,
+    ImprovementBannerComponent,
+    MatButton,
+    RouterLink,
+    AddTaskBarComponent,
+    AddScheduledTodayOrTomorrowBtnComponent,
+    TaskListComponent,
+    SplitComponent,
+    BacklogComponent,
+    MatFabButton,
+    AsyncPipe,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
+  taskService = inject(TaskService);
+  takeABreakService = inject(TakeABreakService);
+  planningModeService = inject(PlanningModeService);
+  improvementService = inject(ImprovementService);
+  layoutService = inject(LayoutService);
+  workContextService = inject(WorkContextService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _activatedRoute = inject(ActivatedRoute);
+  private _projectService = inject(ProjectService);
+  private _cd = inject(ChangeDetectorRef);
+  private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+
   // TODO refactor all to signals
   undoneTasks = input<TaskWithSubTasks[]>([]);
   doneTasks = input<TaskWithSubTasks[]>([]);
@@ -90,20 +138,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
 
-  constructor(
-    public taskService: TaskService,
-    public takeABreakService: TakeABreakService,
-    public planningModeService: PlanningModeService,
-    public improvementService: ImprovementService,
-    public layoutService: LayoutService,
-    public workContextService: WorkContextService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _activatedRoute: ActivatedRoute,
-    private _projectService: ProjectService,
-    private _cd: ChangeDetectorRef,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
-  ) {}
-
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild('splitTopEl', { read: ElementRef }) set splitTopElRef(ref: ElementRef) {
     if (ref) {
       this.splitTopEl$.next(ref.nativeElement);

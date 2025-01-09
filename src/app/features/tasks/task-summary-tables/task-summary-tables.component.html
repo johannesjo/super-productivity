@@ -1,28 +1,27 @@
-<section
-  *ngFor="let project of (projects$|async); trackBy: trackById"
-  class="project-section"
->
+@for (project of (projects$|async) || []; track project.id) {
+<section class="project-section">
+  @if (project.id !== (workContextService.activeWorkContextId$|async)) {
   <div
-    *ngIf="project.id !== (workContextService.activeWorkContextId$|async)"
     [style.border-color]="project.color"
     class="project-title"
   >
     <h3>{{project.title}}</h3>
     <mat-icon>timer</mat-icon>
-
-    <div *ngIf="!isShowYesterday">{{project.timeSpentToday|msToString}}</div>
-
-    <div *ngIf="isShowYesterday">
+    @if (!isShowYesterday()) {
+    <div>{{project.timeSpentToday|msToString}}</div>
+    } @if (isShowYesterday()) {
+    <div>
       {{project.timeSpentToday > 0 ? (project.timeSpentToday|msToString) : ''}}
-      <ng-container *ngIf="project.timeSpentYesterday >0">
-        ({{project.timeSpentYesterday|msToString}} {{T.G.YESTERDAY|translate}})
-      </ng-container>
+      <!---->
+      @if (project.timeSpentYesterday && project.timeSpentYesterday >0) {
+      ({{project.timeSpentYesterday|msToString}} {{T.G.YESTERDAY|translate}}) }
     </div>
+    }
   </div>
-
+  }
   <task-summary-table
     (updated)="onTaskSummaryEdit()"
-    [day]="dayStr"
+    [day]="dayStr()"
     [flatTasks]="project.tasks"
   ></task-summary-table>
   <div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
@@ -34,15 +33,15 @@
       <mat-icon>restore</mat-icon>
       {{T.PDS.ROUND_TIME_SPENT|translate}}
     </button>
+    @if (isForToday()) {
     <button
       (click)="showExportModal(project.id)"
-      *ngIf="isForToday"
       mat-button
     >
       <mat-icon>call_made</mat-icon>
       {{T.PDS.EXPORT_TASK_LIST|translate}}
     </button>
-
+    }
     <mat-menu #roundTimeActions="matMenu">
       <ng-template matMenuContent>
         <button
@@ -91,3 +90,4 @@
     </mat-menu>
   </div>
 </section>
+}

@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { SyncProvider } from 'src/app/imex/sync/sync-provider.model';
+import { environment } from 'src/environments/environment';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   [SyncProvider.Dropbox]: {
@@ -22,7 +23,7 @@ const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   providedIn: 'root',
 })
 export class PersistenceLocalService {
-  constructor(private _databaseService: DatabaseService) {}
+  private _databaseService = inject(DatabaseService);
 
   async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);
@@ -37,7 +38,9 @@ export class PersistenceLocalService {
       r[SyncProvider.WebDAV] &&
       r[SyncProvider.LocalFile]
     ) {
-      console.log(r);
+      if (environment.production) {
+        console.log(r);
+      }
       return r;
     }
     return DEFAULT_LOCAL_SYNC_META;

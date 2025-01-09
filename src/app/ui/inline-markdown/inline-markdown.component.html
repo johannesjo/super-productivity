@@ -3,6 +3,7 @@
   [class.isHideOverflow]="isHideOverflow"
   class="markdown-wrapper"
 >
+  @if (isShowEdit || (isTurnOffMarkdownParsing$|async)) {
   <textarea
     #textareaEl
     (blur)="untoggleShowEdit(); setBlur($event)"
@@ -10,41 +11,39 @@
     (input)="resizeTextareaToFit()"
     (keydown)="keypressHandler($event)"
     (keypress)="keypressHandler($event)"
-    *ngIf="isShowEdit || (isTurnOffMarkdownParsing$|async)"
     [@fade]
     [ngModel]="modelCopy"
     class="mat-body-2 markdown-unparsed"
     rows="1"
   ></textarea>
+  }
 
   <!--  (focus)="clickOrFocusPreview($event, true)"-->
+  @if (!(isTurnOffMarkdownParsing$|async)) {
   <div
     #previewEl
     (click)="clickPreview($event)"
-    *ngIf="!(isTurnOffMarkdownParsing$|async)"
     [data]="model"
     [hidden]="isShowEdit"
     class="mat-body-2 markdown-parsed markdown"
     markdown
     tabindex="0"
   ></div>
+  }
 </div>
 
-<div
-  *ngIf="isShowControls"
-  class="controls"
->
-  @if(isShowChecklistToggle){
+@if (isShowControls()) {
+<div class="controls">
+  @if(isShowChecklistToggle()){
   <!--  -->
   <button
-    [matTooltip]="'Toggle checklist mode'"
+    [matTooltip]="'Add checklist item'"
     (click)="toggleChecklistMode($event)"
     mat-icon-button
   >
     <mat-icon>checklist</mat-icon>
   </button>
   }
-
   <button
     [matTooltip]="'Open in fullscreen'"
     (click)="openFullScreen()"
@@ -53,3 +52,4 @@
     <mat-icon>fullscreen</mat-icon>
   </button>
 </div>
+}

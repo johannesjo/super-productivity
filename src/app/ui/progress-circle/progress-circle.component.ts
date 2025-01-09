@@ -2,9 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 
 @Component({
@@ -14,22 +15,25 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgressCircleComponent {
+  private readonly _renderer = inject(Renderer2);
+
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set progress(progressIN: number) {
-    if (this.progressCircle) {
+    const progressCircle = this.progressCircle();
+    if (progressCircle) {
       let progress = progressIN || 0;
       if (progress > 100) {
         progress = 100;
       }
 
       this._renderer.setStyle(
-        this.progressCircle.nativeElement,
+        progressCircle.nativeElement,
         'stroke-dasharray',
         `${progress} ,100`,
       );
     }
   }
 
-  @ViewChild('progressCircle', { static: true }) progressCircle?: ElementRef;
-
-  constructor(private readonly _renderer: Renderer2) {}
+  readonly progressCircle = viewChild<ElementRef>('progressCircle');
 }

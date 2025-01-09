@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
@@ -27,14 +27,12 @@ import { WorkContextType } from '../work-context/work-context.model';
   providedIn: 'root',
 })
 export class NoteService {
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+  private _workContextService = inject(WorkContextService);
+
   notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
   state$: Observable<NoteState> = this._store$.select(selectNoteFeatureState);
-
-  constructor(
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
-  ) {}
 
   getByIdOnce$(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, { id }), take(1));

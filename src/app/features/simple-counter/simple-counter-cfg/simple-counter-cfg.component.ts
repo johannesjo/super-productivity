@@ -1,10 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
+  inject,
+  input,
   Input,
   OnDestroy,
-  Output,
+  output,
 } from '@angular/core';
 import {
   ConfigFormSection,
@@ -12,8 +13,8 @@ import {
 } from '../../config/global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { SimpleCounterConfig } from '../simple-counter.model';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { SimpleCounterService } from '../simple-counter.service';
 import { map } from 'rxjs/operators';
@@ -21,26 +22,42 @@ import { Observable, Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'simple-counter-cfg',
   templateUrl: './simple-counter-cfg.component.html',
   styleUrls: ['./simple-counter-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    FormlyModule,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class SimpleCounterCfgComponent implements OnDestroy {
-  @Input() cfg?: SimpleCounterConfig;
+  readonly simpleCounterService = inject(SimpleCounterService);
+  private readonly _matDialog = inject(MatDialog);
 
+  readonly cfg = input<SimpleCounterConfig>();
+
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set section(section: ConfigFormSection<SimpleCounterConfig>) {
     if (section.items) {
       this.items = adjustToLiveFormlyForm(section.items);
     }
   }
 
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
-  }> = new EventEmitter();
+  }>();
 
   T: typeof T = T;
   form: UntypedFormGroup = new UntypedFormGroup({});
@@ -59,10 +76,7 @@ export class SimpleCounterCfgComponent implements OnDestroy {
   private _inModelCopy?: SimpleCounterConfig;
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly simpleCounterService: SimpleCounterService,
-    private readonly _matDialog: MatDialog, // private readonly _cd: ChangeDetectorRef,
-  ) {
+  constructor() {
     this._subs.add(
       this.simpleCounterCfg$.subscribe((v) => {
         this.editModel = v;

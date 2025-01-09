@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
@@ -66,6 +66,16 @@ import { ReminderService } from '../../reminder/reminder.service';
 
 @Injectable()
 export class ProjectEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _snackService = inject(SnackService);
+  private _projectService = inject(ProjectService);
+  private _persistenceService = inject(PersistenceService);
+  private _bookmarkService = inject(BookmarkService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _dateService = inject(DateService);
+  private _reminderService = inject(ReminderService);
+
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -240,6 +250,7 @@ export class ProjectEffects {
       this._actions$.pipe(
         ofType(deleteProject),
         tap(async ({ project, allTaskIds }) => {
+          // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
           await this._persistenceService.removeCompleteRelatedDataForProject(id);
           this._removeAllArchiveTasksForProject(id);
@@ -346,18 +357,6 @@ export class ProjectEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _snackService: SnackService,
-    private _projectService: ProjectService,
-    private _persistenceService: PersistenceService,
-    private _bookmarkService: BookmarkService,
-    private _globalConfigService: GlobalConfigService,
-    private _dateService: DateService,
-    private _reminderService: ReminderService,
-  ) {}
 
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,

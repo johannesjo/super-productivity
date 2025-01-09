@@ -1,12 +1,13 @@
 <section class="main">
+  @if ((workContextService.mainWorkContext$|async); as mainContext) {
   <side-nav-item
-    *ngIf="(workContextService.mainWorkContext$|async) as mainContext"
     #menuEntry
     [type]="WorkContextType.TAG"
     [defaultIcon]="mainContext.icon"
     [workContext]="mainContext"
     [activeWorkContextId]="activeWorkContextId"
   ></side-nav-item>
+  }
 
   <button
     #menuEntry
@@ -31,10 +32,8 @@
   </button>
 </section>
 
-<section
-  *ngIf="nonHiddenProjects$|async as projectList"
-  class="projects tour-projects"
->
+@if (nonHiddenProjects$|async; as projectList) {
+<section class="projects tour-projects">
   <div class="g-multi-btn-wrapper">
     <button
       #menuEntry
@@ -48,7 +47,6 @@
       <mat-icon>expand_more</mat-icon>
       <span class="title">{{ T.MH.PROJECTS|translate }}</span>
     </button>
-
     <!--    <button-->
     <!--      #projectVisibilityBtn-->
     <!--      mat-icon-button-->
@@ -56,16 +54,14 @@
     <!--    >-->
     <!--      <mat-icon>visibility</mat-icon>-->
     <!--    </button>-->
-
     <button
-      *ngIf="projectList.length"
+      [style.display]="projectList.length ? '' : 'none'"
       class="additional-btn"
       #projectExpandBtn2
       mat-icon-button
     >
       <mat-icon>more_vert</mat-icon>
     </button>
-
     <button
       (click)="addProject()"
       class="additional-btn"
@@ -75,28 +71,26 @@
       <mat-icon>add</mat-icon>
     </button>
   </div>
-
   <!--  [leftClickTriggerEl]="projectVisibilityBtn"-->
   <context-menu
     [contextMenu]="contextMenu"
     [leftClickTriggerEl]="projectExpandBtn2"
     [rightClickTriggerEl]="projectExpandBtn"
   ></context-menu>
-
   <ng-template #contextMenu>
     @for (project of (allProjects$|async); track project.id) {
     <button
       mat-menu-item
       (click)="toggleProjectVisibility(project)"
     >
-      <mat-icon *ngIf="!project.isHiddenFromMenu">visibility</mat-icon>
-      <mat-icon *ngIf="project.isHiddenFromMenu">visibility_off</mat-icon>
-
-      {{ project.title }}
+      @if (!project.isHiddenFromMenu) {
+      <mat-icon>visibility</mat-icon>
+      } @if (project.isHiddenFromMenu) {
+      <mat-icon>visibility_off</mat-icon>
+      } {{ project.title }}
     </button>
     }
   </ng-template>
-
   <div
     [@standardList]="projectList?.length"
     cdkDropList
@@ -117,11 +111,8 @@
     }
   </div>
 </section>
-
-<section
-  *ngIf="(tagList$|async) as tagList"
-  class="tags"
->
+} @if ((tagList$|async); as tagList) {
+<section class="tags">
   <button
     #menuEntry
     #tagExpandBtn
@@ -134,7 +125,6 @@
     <span class="title">{{ T.MH.TAGS|translate }}</span>
     <mat-icon>expand_more</mat-icon>
   </button>
-
   <div
     [@standardList]="tagList?.length"
     cdkDropList
@@ -154,14 +144,9 @@
     ></side-nav-item>
     }
   </div>
-
-  <div
-    *ngIf="!tagList.length && isTagsExpanded"
-    class="no-tags-info"
-  >
-    {{ T.MH.NO_TAG_INFO|translate }}
-  </div>
-
+  @if (!tagList.length && isTagsExpanded) {
+  <div class="no-tags-info">{{ T.MH.NO_TAG_INFO|translate }}</div>
+  }
   <!--  <button (click)="addTag()"-->
   <!--          *ngIf="isTagsExpanded"-->
   <!--   #menuEntry mat-menu-item>-->
@@ -169,6 +154,7 @@
   <!--    {{T.MH.CREATE_TAG|translate}}-->
   <!--  </button>-->
 </section>
+}
 
 <!--<section class="other-task-level-section">-->
 <!--</section>-->
@@ -240,14 +226,15 @@
         <mat-icon>directions</mat-icon>
         <span class="text">{{ T.MH.HM.START_WELCOME|translate }}</span>
       </button>
+      @if (IS_MOUSE_PRIMARY) {
       <button
-        *ngIf="IS_MOUSE_PRIMARY"
         (click)="startTour(TourId.KeyboardNav)"
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
         <span class="text">{{ T.MH.HM.KEYBOARD|translate }}</span>
       </button>
+      }
       <button
         (click)="startTour(TourId.Sync)"
         mat-menu-item

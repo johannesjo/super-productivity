@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
-  Output,
-  ViewChild,
+  viewChild,
+  output,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
@@ -14,7 +13,6 @@ import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'inline-multiline-input',
-  standalone: true,
   imports: [ReactiveFormsModule, FormsModule, TranslateModule],
   templateUrl: './inline-multiline-input.component.html',
   styleUrl: './inline-multiline-input.component.scss',
@@ -25,6 +23,8 @@ export class InlineMultilineInputComponent {
   @HostBinding('class.is-focused') isFocused = false;
 
   // NOTE: we only need this for tasks since, sometimes with the short syntax there are no changes to the title as they are stripped away
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set resetToLastExternalValueTrigger(value: unknown) {
     // console.log({
     //   tmp: this.tmpValue,
@@ -38,6 +38,8 @@ export class InlineMultilineInputComponent {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set value(value: string) {
     this.tmpValue = value;
     this.lastExternalValue = value;
@@ -48,9 +50,10 @@ export class InlineMultilineInputComponent {
   lastExternalValue?: string;
   tmpValue?: string;
 
-  @ViewChild('textAreaElement') textarea!: ElementRef<HTMLTextAreaElement>;
+  readonly textarea =
+    viewChild.required<ElementRef<HTMLTextAreaElement>>('textAreaElement');
 
-  @Output() valueEdited = new EventEmitter<{
+  readonly valueEdited = output<{
     newVal: string;
     wasChanged: boolean;
   }>();
@@ -79,7 +82,7 @@ export class InlineMultilineInputComponent {
     this._setTxtHeight();
     try {
       window.setTimeout(() => {
-        const el = this.textarea.nativeElement;
+        const el = this.textarea().nativeElement;
         el.setSelectionRange(el.value.length, el.value.length);
         el.selectionStart = el.selectionEnd = el.value.length;
       });
@@ -125,7 +128,7 @@ export class InlineMultilineInputComponent {
   }
 
   private _forceBlur(): void {
-    this.textarea.nativeElement.blur();
+    this.textarea().nativeElement.blur();
   }
 
   private _submit(): void {
@@ -154,15 +157,15 @@ export class InlineMultilineInputComponent {
   private _setTxtHeight(): void {
     try {
       // reset height
-      this.textarea.nativeElement.style.height = 'auto';
-      this.textarea.nativeElement.style.height =
-        this.textarea.nativeElement.scrollHeight + 'px';
+      const textarea = this.textarea();
+      textarea.nativeElement.style.height = 'auto';
+      textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
     } catch (e) {
       setTimeout(() => {
         // reset height
-        this.textarea.nativeElement.style.height = 'auto';
-        this.textarea.nativeElement.style.height =
-          this.textarea.nativeElement.scrollHeight + 'px';
+        const textarea = this.textarea();
+        textarea.nativeElement.style.height = 'auto';
+        textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
       });
     }
   }

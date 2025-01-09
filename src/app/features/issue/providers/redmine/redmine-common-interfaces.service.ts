@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, timer } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
@@ -24,10 +24,8 @@ import { IssueProviderService } from '../../issue-provider.service';
   providedIn: 'root',
 })
 export class RedmineCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _redmineApiService: RedmineApiService,
-    private readonly _issueProviderService: IssueProviderService,
-  ) {}
+  private readonly _redmineApiService = inject(RedmineApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
 
   isEnabled(cfg: RedmineCfg): boolean {
     return isRedmineEnabled(cfg);

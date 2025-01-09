@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  inject,
   OnDestroy,
 } from '@angular/core';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -24,6 +25,16 @@ import { SearchQueryParams } from '../search-bar/search-bar.model';
 import { Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectAllProjectColorsAndTitles } from '../project/store/project.selectors';
+import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
+import { AsyncPipe, KeyValuePipe, NgFor, NgIf } from '@angular/common';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
+import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
+import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
+import { NumberToMonthPipe } from '../../ui/pipes/number-to-month.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'worklog',
@@ -36,24 +47,38 @@ import { selectAllProjectColorsAndTitles } from '../project/store/project.select
     fadeAnimation,
     fadeInSlowAnimation,
   ],
+  imports: [
+    FullPageSpinnerComponent,
+    NgIf,
+    NgFor,
+    MatMiniFabButton,
+    MatIcon,
+    MatTooltip,
+    InlineInputComponent,
+    MatIconButton,
+    AsyncPipe,
+    KeyValuePipe,
+    MsToClockStringPipe,
+    MsToStringPipe,
+    NumberToMonthPipe,
+    TranslatePipe,
+  ],
 })
 export class WorklogComponent implements AfterViewInit, OnDestroy {
+  readonly worklogService = inject(WorklogService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _store = inject(Store);
+
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
   allProjectsColorAndTitle: { [key: string]: { title: string; color: string } } = {};
 
   private _subs: Subscription = new Subscription();
-
-  constructor(
-    public readonly worklogService: WorklogService,
-    public readonly workContextService: WorkContextService,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _taskService: TaskService,
-    private readonly _matDialog: MatDialog,
-    private readonly _router: Router,
-    private readonly _route: ActivatedRoute,
-    private readonly _store: Store,
-  ) {}
 
   ngAfterViewInit(): void {
     this._subs.add(

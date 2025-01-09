@@ -1,13 +1,14 @@
+@if (task()?.issueWasUpdated) {
 <mat-icon
-  *ngIf="task?.issueWasUpdated"
   color="accent"
   style="margin-right: 8px"
   >update
 </mat-icon>
+} @if (!task()?.issueWasUpdated) {
 <mat-icon
-  *ngIf="!task?.issueWasUpdated"
   style="margin-right: 8px"
   svgIcon="gitea"
 >
 </mat-icon>
+}
 <span class="tab-label-text">Gitea</span>

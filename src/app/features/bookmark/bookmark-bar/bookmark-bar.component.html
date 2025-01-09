@@ -1,38 +1,38 @@
+@if (bookmarkService.isShowBookmarks$|async) {
 <div
   #bookmarkBar
-  *ngIf="bookmarkService.isShowBookmarks$|async"
   [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
   class="global-bookmark-list-outer"
 >
+  @if (isDragOver) {
   <div
-    *ngIf="isDragOver"
     @fade
     class="bgc-accent drag-over-msg"
   >
     <mat-icon>add</mat-icon>
     {{T.F.BOOKMARK.BAR.DROP|translate}}
   </div>
-
+  }
   <div class="controls-and-list-wrapper">
     <div class="list-controls">
+      @if (!isEditMode) {
       <button
         (menuClosed)="isContextMenuDisabled = false"
         (menuOpened)="isContextMenuDisabled = true"
-        *ngIf="!isEditMode"
         [matMenuTriggerFor]="menu"
         [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
         mat-stroked-button
       >
         <mat-icon>more_vert</mat-icon>
       </button>
+      } @if (isEditMode) {
       <button
         (click)="isEditMode=false; isContextMenuDisabled=false"
-        *ngIf="isEditMode"
         mat-stroked-button
       >
         <mat-icon>check</mat-icon>
       </button>
-
+      }
       <mat-menu #menu="matMenu">
         <ng-template matMenuContent>
           <button
@@ -54,23 +54,21 @@
         </ng-template>
       </mat-menu>
     </div>
-
+    @let bookmarks = (bookmarkService.bookmarks$|async);
     <div
       [class.isEditMode]="isEditMode"
-      [dragulaModel]="(bookmarkService.bookmarks$|async)"
-      [dragula]="LIST_ID"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="bookmarks"
+      (cdkDropListDropped)="drop($event)"
       class="global-bookmark-list-inner"
     >
+      @if (!bookmarks?.length) {
+      <div class="msg">{{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}</div>
+      } @for (bookmark of bookmarks; track trackByFn($index, bookmark)) {
       <div
-        *ngIf="!(bookmarkService.bookmarks$|async)?.length"
-        class="msg"
-      >
-        {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
-      </div>
-
-      <div
-        *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"
         class="global-bookmark"
+        cdkDrag
         draggable="false"
       >
         <a
@@ -86,21 +84,19 @@
           target="_blank"
           type="{{bookmark.type}}"
         >
-          <mat-icon *ngIf="bookmark.icon">{{bookmark.icon}} </mat-icon>
-          {{bookmark.title}}
+          @if (bookmark.icon) {
+          <mat-icon>{{bookmark.icon}} </mat-icon>
+          } {{bookmark.title}}
         </a>
-
-        <div
-          *ngIf="isEditMode"
-          class="controls"
-        >
+        @if (isEditMode) {
+        <div class="controls">
+          @if (isEditMode) {
           <mat-icon
-            *ngIf="isEditMode"
             @fade
             class="drag-handle bgc-400"
             svgIcon="drag_handle"
           ></mat-icon>
-
+          }
           <button
             (click)="openEditDialog(bookmark)"
             aria-label="open edit dialog"
@@ -120,7 +116,10 @@
             <mat-icon>delete_forever</mat-icon>
           </button>
         </div>
+        }
       </div>
+      }
     </div>
   </div>
 </div>
+}

@@ -76,25 +76,3 @@
     <span>Gitea</span>
   </button>
 </div>
-
-@if(issueProvidersMapped().length > 1) {
-<h4>Sort Order</h4>
-<div
-  class="provider-items"
-  cdkDropList
-  cdkDropListOrientation="horizontal"
-  (cdkDropListDropped)="drop($event)"
->
-  @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {
-
-  <div
-    class="tab-header-item provider-item"
-    cdkDrag
-  >
-    <mat-icon [svgIcon]="entry.issueProvider.issueProviderKey|issueIcon"></mat-icon>
-    <div class="initials">{{ entry.initials }}</div>
-  </div>
-  }
-</div>
-
-}

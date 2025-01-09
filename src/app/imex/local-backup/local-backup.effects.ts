@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { take, tap } from 'rxjs/operators';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
@@ -14,6 +14,11 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Injectable()
 export class LocalBackupEffects {
+  private _actions$ = inject(Actions);
+  private _localBackupService = inject(LocalBackupService);
+  private _dataImportService = inject(DataImportService);
+  private _translateService = inject(TranslateService);
+
   checkForBackupIfNoTasks$: any =
     (IS_ELECTRON || IS_ANDROID_BACKUP_READY) &&
     createEffect(
@@ -27,13 +32,6 @@ export class LocalBackupEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _actions$: Actions,
-    private _localBackupService: LocalBackupService,
-    private _dataImportService: DataImportService,
-    private _translateService: TranslateService,
-  ) {}
 
   private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete): Promise<void> {
     if (

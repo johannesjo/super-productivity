@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  forwardRef,
+  inject,
   input,
   OnDestroy,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
@@ -29,6 +31,10 @@ import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue.model';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { TaskComponent } from '../task/task.component';
+import { AsyncPipe } from '@angular/common';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -46,8 +52,22 @@ export interface DropModelDataForList {
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [taskListAnimation, expandFadeFastAnimation],
+  imports: [
+    MatButton,
+    MatIcon,
+    CdkDropList,
+    CdkDrag,
+    AsyncPipe,
+    forwardRef(() => TaskComponent),
+  ],
 })
 export class TaskListComponent implements OnDestroy, AfterViewInit {
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+  private _issueService = inject(IssueService);
+  dropListService = inject(DropListService);
+
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
@@ -85,24 +105,16 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   });
   allTasksLength = computed(() => this.tasks()?.length ?? 0);
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
+  readonly dropList = viewChild(CdkDropList);
 
   T: typeof T = T;
 
-  constructor(
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _store: Store,
-    private _issueService: IssueService,
-    public dropListService: DropListService,
-  ) {}
-
   ngAfterViewInit(): void {
-    this.dropListService.registerDropList(this.dropList!, this.listId() === 'SUB');
+    this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
   }
 
   ngOnDestroy(): void {
-    this.dropListService.unregisterDropList(this.dropList!);
+    this.dropListService.unregisterDropList(this.dropList()!);
   }
 
   trackByFn(i: number, task: Task): string {

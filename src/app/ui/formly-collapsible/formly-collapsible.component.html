@@ -35,8 +35,8 @@
   <div class="collapsible-title">{{(to.label||'')|translate}}</div>
 </div>
 
+@if (isExpanded()) {
 <div
-  *ngIf="isExpanded()"
   class="collapsible-panel ani-expand-collapse"
   [@expand]
 >
@@ -44,3 +44,4 @@
   <formly-field [field]="field"></formly-field>
   }
 </div>
+}

@@ -1,5 +1,5 @@
+@if (isHideDone() || isHideAll()) {
 <div
-  *ngIf="isHideDone() || isHideAll()"
   @expandFadeFast
   class="done-task-box"
 >
@@ -16,6 +16,7 @@
     <mat-icon>expand_more</mat-icon>
   </button>
 </div>
+}
 
 <div
   #listEl
@@ -29,8 +30,8 @@
   [attr.data-id]="listModelId()"
   class="task-list-inner"
 >
+  @for (task of filteredTasks(); track trackByFn(i, task); let i = $index) {
   <task
-    *ngFor="let task of filteredTasks(); trackBy: trackByFn; let i = index;"
     [isInSubTaskList]="isSubTaskList()"
     [isBacklog]="isBacklog()"
     [task]="task"
@@ -38,11 +39,9 @@
     [cdkDragData]="task"
   >
   </task>
+  }
 </div>
 
-<div
-  *ngIf="noTasksMsg() && !allTasksLength()"
-  class="no-tasks"
->
-  {{ noTasksMsg() }}
-</div>
+@if (noTasksMsg() && !allTasksLength()) {
+<div class="no-tasks">{{ noTasksMsg() }}</div>
+}

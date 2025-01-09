@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import { IS_ELECTRON } from '../../app.constants';
   providedIn: 'root',
 })
 export class DataRepairService {
-  constructor(private _translateService: TranslateService) {}
+  private _translateService = inject(TranslateService);
 
   repairData(dataIn: AppDataComplete): AppDataComplete {
     return dataRepair(dataIn);

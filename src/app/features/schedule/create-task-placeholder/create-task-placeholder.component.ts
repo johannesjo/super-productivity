@@ -6,12 +6,13 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  inject,
   input,
   OnDestroy,
   output,
   signal,
   Signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
@@ -20,16 +21,19 @@ import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 
 @Component({
   selector: 'create-task-placeholder',
-  standalone: true,
-  imports: [MatIcon, DatePipe],
+  imports: [MatIcon, DatePipe, ShortTime2Pipe],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTaskPlaceholderComponent implements OnDestroy {
+  private _taskService = inject(TaskService);
+  private _store = inject(Store);
+
   isEditMode = input.required<boolean>();
   time = input<string>();
   date = input<string>();
@@ -46,8 +50,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   // time = computed(() => {})
   editEnd = output<void>();
 
-  @ViewChild('textAreaElement', { static: true, read: ElementRef })
-  textAreaElement?: ElementRef<HTMLTextAreaElement>;
+  readonly textAreaElement = viewChild('textAreaElement', { read: ElementRef });
 
   private _editEndTimeout: number | undefined;
 
@@ -59,18 +62,15 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.textAreaElement?.nativeElement.focus();
+    this.textAreaElement()?.nativeElement.focus();
     // cancel blur
     window.clearTimeout(this._editEndTimeout);
   }
 
-  constructor(
-    private _taskService: TaskService,
-    private _store: Store,
-  ) {
+  constructor() {
     effect(() => {
       if (this.isEditMode()) {
-        this.textAreaElement?.nativeElement.focus();
+        this.textAreaElement()?.nativeElement.focus();
       }
     });
   }
@@ -87,15 +87,16 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   async onKeyDown(event: KeyboardEvent): Promise<void> {
+    const textAreaElement = this.textAreaElement();
     if (
       event.key === 'Enter' &&
       typeof this.plannedAt() === 'number' &&
-      this.textAreaElement?.nativeElement.value
+      textAreaElement?.nativeElement.value
     ) {
       this.editEnd.emit();
       if (this.isForDayMode()) {
         const id = this._taskService.add(
-          this.textAreaElement?.nativeElement.value || '',
+          textAreaElement?.nativeElement.value || '',
           false,
           {
             timeEstimate: 30 * 60 * 1000,
@@ -110,7 +111,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         );
       } else {
         this._taskService.addAndSchedule(
-          this.textAreaElement?.nativeElement.value || '',
+          textAreaElement?.nativeElement.value || '',
           {
             timeEstimate: 30 * 60 * 1000,
           },

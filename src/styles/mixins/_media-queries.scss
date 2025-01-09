@@ -1,10 +1,12 @@
+@use 'sass:map';
+
 @mixin mq($size, $type: min) {
   $f: 0;
   @if ($type == max) {
     $f: -1;
   }
 
-  $width: map-get(
+  $width: map.get(
     (
       'xxxs': $layout-xxxs,
       'xxs': $layout-xxs,

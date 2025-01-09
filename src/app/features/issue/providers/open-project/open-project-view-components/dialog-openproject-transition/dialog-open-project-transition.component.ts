@@ -1,7 +1,13 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
-import { concatMap, first, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
+import { Observable, of } from 'rxjs';
+import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { SnackService } from 'src/app/core/snack/snack.service';
 import {
   IssueLocalState,
@@ -15,26 +21,71 @@ import { OpenProjectApiService } from '../../open-project-api.service';
 import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
 import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
-import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgForOf } from '@angular/common';
-import { MatSlider } from '@angular/material/slider';
+import { AsyncPipe } from '@angular/common';
+import { MatSliderModule } from '@angular/material/slider';
+import { TaskService } from '../../../../../tasks/task.service';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatFormField } from '@angular/material/form-field';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'dialog-open-project-transition',
   templateUrl: './dialog-open-project-transition.component.html',
   styleUrls: ['./dialog-open-project-transition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, MatSlider],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatDialogTitle,
+    MatIcon,
+    TranslatePipe,
+    MatDialogContent,
+    MatSliderModule,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatButton,
+  ],
 })
 export class DialogOpenProjectTransitionComponent {
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _issueService = inject(IssueService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogOpenProjectTransitionComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  data = inject<{
+    issue: OpenProjectWorkPackage;
+    localState: IssueLocalState;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
+  _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
+
   _openProjectCfg$: Observable<IssueProviderOpenProject> =
-    this._issueProviderService.getCfgOnce$(
-      assertTruthy(this.data.task.issueProviderId),
-      'OPEN_PROJECT',
+    this._issueProviderIdOnce$.pipe(
+      switchMap(() =>
+        this._issueProviderService.getCfgOnce$(
+          assertTruthy(this.data.task.issueProviderId),
+          'OPEN_PROJECT',
+        ),
+      ),
     );
 
   availableTransitions$: Observable<OpenProjectOriginalStatus[]> =
@@ -51,22 +102,9 @@ export class DialogOpenProjectTransitionComponent {
   chosenTransition?: OpenProjectOriginalStatus;
   percentageDone: number;
 
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _issueService: IssueService,
-    private _issueProviderService: IssueProviderService,
-    private _matDialogRef: MatDialogRef<DialogOpenProjectTransitionComponent>,
-    private _snackService: SnackService,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      issue: OpenProjectWorkPackage;
-      localState: IssueLocalState;
-      task: Task;
-    },
-  ) {
-    if (!this.data.task.issueProviderId) {
-      throw new Error('No issueProviderId for task');
-    }
+  constructor() {
+    const data = this.data;
+
     this.percentageDone = data.issue.percentageDone;
   }
 

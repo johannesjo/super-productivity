@@ -5,7 +5,7 @@ import {
   input,
   OnInit,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
@@ -23,7 +23,6 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
-  standalone: true,
   imports: [ErrorCardComponent, IssuePreviewItemComponent, MatProgressSpinner, DatePipe],
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',
@@ -40,7 +39,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
+  readonly dropList = viewChild(CdkDropList);
 
   agendaItems = signal<
     {
@@ -101,7 +100,12 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
     // ]);
     this.isLoading.set(true);
     this._issueService
-      .searchIssues$('', this.issueProvider().id, this.issueProvider().issueProviderKey)
+      .searchIssues$(
+        '',
+        this.issueProvider().id,
+        this.issueProvider().issueProviderKey,
+        true,
+      )
       .subscribe(
         (items: SearchResultItem[]) => {
           this.isLoading.set(false);

@@ -2,26 +2,27 @@
   (click)="focusInput()"
   class="inline-input-wrapper"
 >
-  <div class="value-wrapper">{{displayValue || value}}</div>
+  <div class="value-wrapper">{{displayValue() || value()}}</div>
 
+  @if (type==='duration') {
   <input
     #inputElDuration
     spellcheck="false"
     (blur)="blur()"
     (keypress)="keypressHandler($event)"
     (ngModelChange)="onChange($event)"
-    *ngIf="type==='duration'"
-    [ngModel]="value"
+    [ngModel]="value()"
     class="duration-input"
     inputDuration
   />
+  } @if (type!=='duration') {
   <input
     #inputEl
     (blur)="blur()"
     (keypress)="keypressHandler($event)"
     (ngModelChange)="onChange($event)"
-    *ngIf="type!=='duration'"
-    [ngModel]="value"
+    [ngModel]="value()"
     [type]="type"
   />
+  }
 </div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Router,
@@ -17,10 +17,8 @@ import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mod
 
 @Injectable({ providedIn: 'root' })
 export class ActiveWorkContextGuard {
-  constructor(
-    private _workContextService: WorkContextService,
-    private _router: Router,
-  ) {}
+  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -42,10 +40,8 @@ export class ActiveWorkContextGuard {
 
 @Injectable({ providedIn: 'root' })
 export class ValidTagIdGuard {
-  constructor(
-    private _tagService: TagService,
-    private _dataInitService: DataInitService,
-  ) {}
+  private _tagService = inject(TagService);
+  private _dataInitService = inject(DataInitService);
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -63,7 +59,7 @@ export class ValidTagIdGuard {
 
 @Injectable({ providedIn: 'root' })
 export class FocusOverlayOpenGuard {
-  constructor(private _store: Store) {}
+  private _store = inject(Store);
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -75,10 +71,8 @@ export class FocusOverlayOpenGuard {
 
 @Injectable({ providedIn: 'root' })
 export class ValidProjectIdGuard {
-  constructor(
-    private _projectService: ProjectService,
-    private _dataInitService: DataInitService,
-  ) {}
+  private _projectService = inject(ProjectService);
+  private _dataInitService = inject(DataInitService);
 
   canActivate(
     next: ActivatedRouteSnapshot,

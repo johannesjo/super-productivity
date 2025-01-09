@@ -104,7 +104,6 @@ header {
 
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-slightly-lighter;
     color: $dark-theme-text-color;
     background: $dark-theme-bg-lighter;
   }
@@ -148,12 +147,13 @@ header {
 
 .time {
   grid-column: 1;
-  text-align: right;
   align-self: end;
   font-size: 80%;
   position: relative;
   color: #70757a;
   padding-right: 6px;
+  line-height: 1.2;
+  text-align: right;
 }
 
 .col {
@@ -186,14 +186,13 @@ header {
 
 .row {
   grid-column: 2 / -1;
-}
-
-.row {
   border-top: 1px solid $grid-color;
 
   @include darkTheme() {
     border-color: $grid-color-dark;
   }
+
+  pointer-events: none;
 }
 
 .current-time {
@@ -221,10 +220,6 @@ header {
   position: relative;
   z-index: 99 !important;
   box-shadow: $whiteframe-shadow-20dp;
-}
-
-.row {
-  pointer-events: none;
 }
 
 .drop-label {

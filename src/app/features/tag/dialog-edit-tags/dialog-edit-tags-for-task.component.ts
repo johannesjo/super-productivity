@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { TaskService } from '../../tasks/task.service';
 import { DialogEditTagsForTaskPayload } from './dialog-edit-tags-for-task.payload';
@@ -9,14 +15,35 @@ import { Task } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
 import { Observable, Subscription } from 'rxjs';
 import { Tag } from '../tag.model';
+import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-edit-tags',
   templateUrl: './dialog-edit-tags-for-task.component.html',
   styleUrls: ['./dialog-edit-tags-for-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    ChipListInputComponent,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogEditTagsForTaskComponent implements OnDestroy {
+  private _taskService = inject(TaskService);
+  private _tagService = inject(TagService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogEditTagsForTaskComponent>>(MatDialogRef);
+  data = inject<DialogEditTagsForTaskPayload>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   title: string = truncate(this.data.task.title, 20);
   task$: Observable<Task> = this._taskService.getByIdLive$(this.data.task.id);
@@ -27,12 +54,7 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _taskService: TaskService,
-    private _tagService: TagService,
-    private _matDialogRef: MatDialogRef<DialogEditTagsForTaskComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogEditTagsForTaskPayload,
-  ) {
+  constructor() {
     this._subs.add(
       this.task$.subscribe((task) => {
         this.tagIds = task.tagIds;

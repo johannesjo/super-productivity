@@ -1,21 +1,18 @@
+@if (note) {
 <div
-  *ngIf="note"
-  [class.isFocused]="isFocus"
+  [class.isFocused]="isFocus()"
   [class.isImg]="note.imgUrl"
   class="note"
 >
+  @if (note.imgUrl) {
   <img
-    *ngIf="note.imgUrl"
     [enlargeImg]="note.imgUrl"
     [src]="note.imgUrl"
     (longPress)="editFullscreen($event)"
     class="note-img"
   />
-
-  <div
-    *ngIf="!note.imgUrl"
-    class="content"
-  >
+  } @if (!note.imgUrl) {
+  <div class="content">
     <div
       (click)="editFullscreen($event)"
       markdown
@@ -23,32 +20,28 @@
       class="markdown-preview markdown"
     ></div>
   </div>
-
+  }
   <div
     class="bottom-controls handle-drag"
     [class.isOver]="note.imgUrl"
   >
+    @if (note.projectId) {
     <button
       mat-icon-button
       (click)="togglePinToToday()"
-      *ngIf="note.projectId"
     >
-      <mat-icon *ngIf="!note.isPinnedToToday">wb_sunny</mat-icon>
-      <mat-icon
-        *ngIf="note.isPinnedToToday"
-        svgIcon="remove_today"
-      ></mat-icon>
+      @if (!note.isPinnedToToday) {
+      <mat-icon>wb_sunny</mat-icon>
+      } @if (note.isPinnedToToday) {
+      <mat-icon svgIcon="remove_today"></mat-icon>
+      }
     </button>
-
-    <tag
-      *ngIf="projectTag$|async as projectTag"
-      [tag]="projectTag"
-    ></tag>
-
+    } @if (projectTag$|async; as projectTag) {
+    <tag [tag]="projectTag"></tag>
+    }
     <!--    <button mat-icon-button>-->
     <!--      <mat-icon class="drag-handle-ico" svgIcon="drag_handle"></mat-icon>-->
     <!--    </button>-->
-
     <button
       [matMenuTriggerFor]="menu"
       mat-icon-button
@@ -57,6 +50,7 @@
     </button>
   </div>
 </div>
+}
 
 <mat-menu #menu="matMenu">
   <ng-template matMenuContent>
@@ -69,17 +63,19 @@
       T.F.TASK.CMP.ADD_TO_PROJECT)|translate}}
     </button>
 
+    @if (!note.imgUrl) {
     <button
       (click)="toggleLock()"
-      *ngIf="!note.imgUrl"
       mat-menu-item
     >
-      <mat-icon *ngIf="note.isLock">lock</mat-icon>
-      <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
-
-      {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
+      @if (note.isLock) {
+      <mat-icon>lock</mat-icon>
+      } @if (!note.isLock) {
+      <mat-icon>lock_open</mat-icon>
+      } {{note.isLock ? (T.F.NOTE.NOTE_CMP.ENABLE_PARSE|translate) :
       (T.F.NOTE.NOTE_CMP.DISABLE_PARSE|translate)}}
     </button>
+    }
 
     <button
       (click)="removeNote()"
@@ -91,13 +87,15 @@
 
     <mat-menu #projectMenu="matMenu">
       <ng-template matMenuContent>
+        @for (project of (moveToProjectList$|async); track trackByProjectId($index,
+        project)) {
         <button
           (click)="moveNoteToProject(project.id)"
-          *ngFor="let project of (moveToProjectList$|async); trackBy:trackByProjectId;"
           mat-menu-item
         >
           {{project.title}}
         </button>
+        }
       </ng-template>
     </mat-menu>
   </ng-template>

@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { MatInput } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'keyboard-input',
   templateUrl: './keyboard-input.component.html',
   styleUrls: ['./keyboard-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatInput, FormsModule, ReactiveFormsModule, FormlyModule],
 })
 export class KeyboardInputComponent extends FieldType<FormlyFieldConfig> {
   // @ViewChild(MatInput, {static: true}) formFieldControl: MatInput;

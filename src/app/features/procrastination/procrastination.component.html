@@ -93,21 +93,18 @@
       </section>
     </mat-tab>
 
-    <mat-tab
-      *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask"
-      [label]="T.F.PROCRASTINATION.SPLIT_UP.TITLE|translate"
-    >
+    @if ((taskService.currentTaskOrCurrentParent$|async); as currentTask) {
+    <mat-tab [label]="T.F.PROCRASTINATION.SPLIT_UP.TITLE|translate">
       <section class="tab-inner no-box">
         <p>{{T.F.PROCRASTINATION.SPLIT_UP.INTRO|translate}}</p>
-
         <task [task]="currentTask"></task>
-
         <p
           [innerHTML]="T.F.PROCRASTINATION.SPLIT_UP.OUTRO|translate"
           style="margin-top: 16px"
         ></p>
       </section>
     </mat-tab>
+    }
   </mat-tab-group>
 
   <div style="text-align: center; margin-top: 32px">

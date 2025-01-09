@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { IS_ELECTRON } from '../../app.constants';
@@ -9,6 +9,8 @@ import { ipcAnyFileDownloaded$ } from '../ipc-events';
 
 @Injectable()
 export class ElectronEffects {
+  private _snackService = inject(SnackService);
+
   fileDownloadedSnack$: Observable<unknown> | false =
     IS_ELECTRON &&
     createEffect(
@@ -36,6 +38,4 @@ export class ElectronEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(private _snackService: SnackService) {}
 }

@@ -1,10 +1,8 @@
-import { NgModule } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
-import { NoteModule } from '../note/note.module';
 import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
-import { TasksModule } from '../tasks/tasks.module';
 import {
   concatMap,
   delay,
@@ -23,28 +21,21 @@ import { throttle } from 'helpful-decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { from, merge, of, timer } from 'rxjs';
-import { EffectsModule } from '@ngrx/effects';
-import { ReminderCountdownEffects } from './store/reminder-countdown.effects';
 
 @NgModule({
   declarations: [],
-  imports: [
-    CommonModule,
-    NoteModule,
-    TasksModule,
-    EffectsModule.forFeature([ReminderCountdownEffects]),
-  ],
+  imports: [CommonModule],
 })
 export class ReminderModule {
-  constructor(
-    private readonly _reminderService: ReminderService,
-    private readonly _matDialog: MatDialog,
-    private readonly _uiHelperService: UiHelperService,
-    private readonly _notifyService: NotifyService,
-    private readonly _layoutService: LayoutService,
-    private readonly _dataInitService: DataInitService,
-    private readonly _syncTriggerService: SyncTriggerService,
-  ) {
+  private readonly _reminderService = inject(ReminderService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _uiHelperService = inject(UiHelperService);
+  private readonly _notifyService = inject(NotifyService);
+  private readonly _layoutService = inject(LayoutService);
+  private readonly _dataInitService = inject(DataInitService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
+
+  constructor() {
     from(this._reminderService.init())
       .pipe(
         // we do this to wait for syncing and the like

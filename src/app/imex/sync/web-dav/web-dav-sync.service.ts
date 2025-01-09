@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   SyncProvider,
   SyncProviderServiceInterface,
@@ -16,6 +16,10 @@ import { WebDavHeadResponse } from './web-dav.model';
 
 @Injectable({ providedIn: 'root' })
 export class WebDavSyncService implements SyncProviderServiceInterface {
+  private _webDavApiService = inject(WebDavApiService);
+  private _dataInitService = inject(DataInitService);
+  private _globalConfigService = inject(GlobalConfigService);
+
   id: SyncProvider = SyncProvider.WebDAV;
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
@@ -26,13 +30,6 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   private _cfg$: Observable<WebDavConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync.webDav),
   );
-
-  //
-  constructor(
-    private _webDavApiService: WebDavApiService,
-    private _dataInitService: DataInitService,
-    private _globalConfigService: GlobalConfigService,
-  ) {}
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,

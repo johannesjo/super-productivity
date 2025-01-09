@@ -1,7 +1,5 @@
-<div
-  *ngIf="(tags()?.length > 0)"
-  class="tags-container"
->
+@if ((tags()?.length > 0)) {
+<div class="tags-container">
   <div class="tags">
     @for (tag of tags(); track tag.id) {
     <!-- -->
@@ -9,3 +7,4 @@
     }
   </div>
 </div>
+}

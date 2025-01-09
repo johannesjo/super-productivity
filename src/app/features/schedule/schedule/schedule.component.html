@@ -167,8 +167,8 @@
     <div class="circle"></div>
   </div>
 
+  @if (newTaskPlaceholder$|async; as newTaskPlaceholder) {
   <create-task-placeholder
-    *ngIf="newTaskPlaceholder$|async as newTaskPlaceholder"
     [isEditMode]="isCreateTaskActive"
     [time]="newTaskPlaceholder.time"
     [date]="newTaskPlaceholder.date"
@@ -176,6 +176,7 @@
     [style]="newTaskPlaceholder.style"
   >
   </create-task-placeholder>
+  }
 </div>
 <!--</div>-->
 

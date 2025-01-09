@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllSimpleCounters,
@@ -30,6 +30,9 @@ import { DateService } from 'src/app/core/date/date.service';
   providedIn: 'root',
 })
 export class SimpleCounterService {
+  private _store$ = inject<Store<SimpleCounterState>>(Store);
+  private _dateService = inject(DateService);
+
   simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(
     select(selectAllSimpleCounters),
   );
@@ -49,11 +52,6 @@ export class SimpleCounterService {
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledAndToggledSimpleCounters,
   );
-
-  constructor(
-    private _store$: Store<SimpleCounterState>,
-    private _dateService: DateService,
-  ) {}
 
   updateAll(items: SimpleCounter[]): void {
     this._store$.dispatch(updateAllSimpleCounters({ items }));

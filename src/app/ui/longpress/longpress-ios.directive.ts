@@ -1,17 +1,16 @@
-import { Directive, ElementRef, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Directive, ElementRef, inject, OnDestroy, output } from '@angular/core';
 import { UI_LONG_PRESS_DURATION } from '../ui.const';
 import { IS_IOS } from '../../util/is-ios';
 
-@Directive({
-  selector: '[longPressIOS]',
-})
+@Directive({ selector: '[longPressIOS]' })
 export class LongPressIOSDirective implements OnDestroy {
-  @Output()
-  longPressIOS: EventEmitter<MouseEvent | TouchEvent> = new EventEmitter();
+  readonly longPressIOS = output<MouseEvent | TouchEvent>();
 
   private longPressTimeout: any;
 
-  constructor(el: ElementRef) {
+  constructor() {
+    const el = inject(ElementRef);
+
     if (IS_IOS) {
       const htmlEl: HTMLHtmlElement = el.nativeElement;
       ['touchstart'].forEach((evtName) =>

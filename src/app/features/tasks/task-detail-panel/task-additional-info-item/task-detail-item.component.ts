@@ -2,31 +2,55 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   HostListener,
+  inject,
   Input,
-  Output,
+  output,
 } from '@angular/core';
+import { MatRipple } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 @Component({
   selector: 'task-detail-item',
   templateUrl: './task-detail-item.component.html',
   styleUrls: ['./task-detail-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatRipple,
+    MatIconButton,
+    MatIcon,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+  ],
 })
 export class TaskDetailItemComponent {
-  @Input() type: 'input' | 'panel' = 'input';
+  elementRef = inject(ElementRef);
+
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
+  @Input() type: 'input' | 'fullSizeInput' | 'panel' = 'input';
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() expanded: boolean = false;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() inputIcon?: string;
 
-  @Output() collapseParent: EventEmitter<void> = new EventEmitter();
-  @Output() keyPress: EventEmitter<KeyboardEvent> = new EventEmitter();
-  @Output() editActionTriggered: EventEmitter<void> = new EventEmitter();
+  readonly collapseParent = output<void>();
+  readonly keyPress = output<KeyboardEvent>();
+  readonly editActionTriggered = output<void>();
 
   @HostBinding('tabindex') readonly tabindex: number = 3;
-
-  constructor(public elementRef: ElementRef) {}
 
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     const tagName = (ev.target as HTMLElement).tagName.toLowerCase();

@@ -437,7 +437,7 @@
         "HOST": "Host (z. B .: http://my-host.de:1234)",
         "PASSWORD": "Token / Passwort",
         "USER_NAME": "E-Mail / Benutzername",
-        "USE_PAT": "Verwenden Sie ein persönliches Zugriffstoken anstelle eines Passworts",
+        "USE_PAT": "Persönliches Zugriffstoken verwenden (LEGACY)",
         "WONKY_COOKIE_MODE": "Instabile Cookie Fallback-Authentifizierung (nur Desktop-App)"
       },
       "FORM_SECTION": {

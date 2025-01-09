@@ -1,7 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { merge, Observable } from 'rxjs';
-import { concatMap, filter, first, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  filter,
+  first,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { IssueService } from '../issue.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -9,9 +17,18 @@ import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './issue-provider.selectors';
 import { IssueProvider } from '../issue.model';
+import { SnackService } from '../../../core/snack/snack.service';
+import { getErrorTxt } from '../../../util/get-error-text';
 
 @Injectable()
 export class PollToBacklogEffects {
+  private readonly _issueService = inject(IssueService);
+  private readonly _actions$ = inject(Actions);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _store = inject(Store);
+
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext),
   );
@@ -52,6 +69,15 @@ export class PollToBacklogEffects {
                           provider.id,
                         ),
                       ),
+                      catchError((e) => {
+                        console.error(e);
+                        this._snackService.open({
+                          type: 'ERROR',
+                          // TODO translate
+                          msg: `${provider.issueProviderKey}: Failed to poll new issues for backlog import – \n ${getErrorTxt(e)}`,
+                        });
+                        return [];
+                      }),
                     ),
                   ),
               ),
@@ -61,12 +87,4 @@ export class PollToBacklogEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _issueService: IssueService,
-    private readonly _actions$: Actions,
-    private readonly _workContextService: WorkContextService,
-    private readonly _syncTriggerService: SyncTriggerService,
-    private readonly _store: Store,
-  ) {}
 }

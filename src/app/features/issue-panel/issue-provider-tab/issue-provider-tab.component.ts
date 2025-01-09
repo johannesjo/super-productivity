@@ -8,13 +8,17 @@ import {
   input,
   OnDestroy,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { IssuePreviewItemComponent } from '../issue-preview-item/issue-preview-item.component';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { UiModule } from '../../../ui/ui.module';
-import { CdkDropList } from '@angular/cdk/drag-drop';
+import {
+  MatFormField,
+  MatHint,
+  MatLabel,
+  MatPrefix,
+  MatSuffix,
+} from '@angular/material/form-field';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { T } from 'src/app/t.const';
 import { NgClass } from '@angular/common';
@@ -46,12 +50,15 @@ import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-p
 import { ISSUE_PROVIDER_HUMANIZED } from '../../issue/issue.const';
 import { IssuePanelCalendarAgendaComponent } from '../issue-panel-calendar-agenda/issue-panel-calendar-agenda.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { MatIconButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'issue-provider-tab',
-  standalone: true,
   imports: [
-    UiModule,
     IssuePreviewItemComponent,
     MatIcon,
     MatFormField,
@@ -60,6 +67,14 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
     ErrorCardComponent,
     NgClass,
     IssuePanelCalendarAgendaComponent,
+    MatIconButton,
+    TranslatePipe,
+    MatHint,
+    MatInput,
+    MatSuffix,
+    MatPrefix,
+    MatTooltip,
+    MatProgressSpinner,
   ],
   templateUrl: './issue-provider-tab.component.html',
   styleUrl: './issue-provider-tab.component.scss',
@@ -101,6 +116,10 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
         ? this._store.select(selectProjectById, { id: ip.defaultProjectId })
         : of(null),
     ),
+    catchError(() => {
+      console.error('Project not found for issueProvider');
+      return of(null);
+    }),
   );
   defaultProject = toSignal(this.defaultProject$);
 
@@ -174,8 +193,8 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     );
   issueItems = toSignal(this.issueItems$.pipe(map((v) => v.notAdded)));
 
-  @ViewChild(CdkDropList) dropList?: CdkDropList;
-  @ViewChild('searchTextEl') searchTextEl!: ElementRef;
+  // readonly dropList = viewChild(CdkDropList);
+  readonly searchTextEl = viewChild<ElementRef>('searchTextEl');
 
   private _focusTimeout?: number;
 
@@ -183,7 +202,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
     // this.dropListService.registerDropList(this.dropList!);
     if (this.searchText().length <= 1 && IS_MOUSE_PRIMARY) {
       this._focusTimeout = window.setTimeout(() => {
-        this.searchTextEl?.nativeElement.focus();
+        this.searchTextEl()?.nativeElement?.focus();
       }, 500);
     }
     this.searchText.set(this.issueProvider().pinnedSearch || '');

@@ -5,12 +5,13 @@
   <ng-content select="[better-drawer-content]"></ng-content>
 </div>
 
+@if (isOpenGet && isOverGet) {
 <div
   (click)="close()"
-  *ngIf="isOpenGet && isOverGet"
   @fade
   class="backdrop"
 ></div>
+}
 
 <div
   (swiperight)="IS_TOUCH_PRIMARY && close()"

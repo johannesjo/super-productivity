@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   input,
   OnDestroy,
   OnInit,
@@ -19,14 +20,33 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
+import { MatMiniFabButton } from '@angular/material/button';
+import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 
 @Component({
   selector: 'simple-counter-button',
   templateUrl: './simple-counter-button.component.html',
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatMiniFabButton,
+    LongPressDirective,
+    MatIcon,
+    AsyncPipe,
+    MsToMinuteClockStringPipe,
+  ],
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _matDialog = inject(MatDialog);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _dateService = inject(DateService);
+  private _bannerService = inject(BannerService);
+  private _cd = inject(ChangeDetectorRef);
+
   T: typeof T = T;
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
   todayStr: string = this._dateService.todayStr();
@@ -63,15 +83,6 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       ),
     ),
   );
-
-  constructor(
-    private _simpleCounterService: SimpleCounterService,
-    private _matDialog: MatDialog,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _dateService: DateService,
-    private _bannerService: BannerService,
-    private _cd: ChangeDetectorRef,
-  ) {}
 
   ngOnInit(): void {
     this._subs.add(

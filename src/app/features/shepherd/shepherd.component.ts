@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ShepherdService } from './shepherd.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { concatMap, first } from 'rxjs/operators';
@@ -13,11 +13,9 @@ import { ProjectService } from '../project/project.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShepherdComponent implements AfterViewInit {
-  constructor(
-    private shepherdMyService: ShepherdService,
-    private _dataInitService: DataInitService,
-    private _projectService: ProjectService,
-  ) {}
+  private shepherdMyService = inject(ShepherdService);
+  private _dataInitService = inject(DataInitService);
+  private _projectService = inject(ProjectService);
 
   ngAfterViewInit(): void {
     if (!localStorage.getItem(LS.IS_SHOW_TOUR) && navigator.userAgent !== 'NIGHTWATCH') {

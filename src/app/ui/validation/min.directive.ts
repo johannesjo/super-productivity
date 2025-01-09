@@ -1,7 +1,7 @@
 import {
   Directive,
   forwardRef,
-  Input,
+  input,
   OnChanges,
   OnInit,
   SimpleChanges,
@@ -21,14 +21,15 @@ const MIN_VALIDATOR: any = {
   providers: [MIN_VALIDATOR],
 })
 export class MinDirective implements Validator, OnInit, OnChanges {
-  @Input() min?: number;
+  readonly min = input<number>();
 
   private _validator?: ValidatorFn;
   private _onChange?: () => void;
 
   ngOnInit(): void {
-    if (typeof this.min === 'number') {
-      this._validator = minValidator(this.min);
+    const min = this.min();
+    if (typeof min === 'number') {
+      this._validator = minValidator(min);
     }
   }
 

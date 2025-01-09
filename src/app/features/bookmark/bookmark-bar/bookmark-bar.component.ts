@@ -3,7 +3,7 @@ import {
   Component,
   ElementRef,
   HostListener,
-  OnDestroy,
+  inject,
   ViewChild,
 } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
@@ -11,10 +11,22 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { DragulaService } from 'ng2-dragula';
-import { Subscription } from 'rxjs';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { T } from '../../../t.const';
+import { moveItemInArray } from '../../../util/move-item-in-array';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { MatIcon } from '@angular/material/icon';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { BookmarkLinkDirective } from '../bookmark-link/bookmark-link.directive';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { EnlargeImgDirective } from '../../../ui/enlarge-img/enlarge-img.directive';
 
 @Component({
   selector: 'bookmark-bar',
@@ -22,46 +34,52 @@ import { T } from '../../../t.const';
   styleUrls: ['./bookmark-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, slideAnimation],
+  imports: [
+    MatIcon,
+    MatButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    CdkDropList,
+    CdkDrag,
+    MatAnchor,
+    BookmarkLinkDirective,
+
+    AsyncPipe,
+    TranslatePipe,
+    EnlargeImgDirective,
+  ],
 })
-export class BookmarkBarComponent implements OnDestroy {
+export class BookmarkBarComponent {
+  readonly bookmarkService = inject(BookmarkService);
+  private readonly _matDialog = inject(MatDialog);
+
   isDragOver: boolean = false;
   isEditMode: boolean = false;
   dragEnterTarget?: HTMLElement;
-  LIST_ID: string = 'BOOKMARKS';
   T: typeof T = T;
   isContextMenuDisabled: boolean = false;
   bookmarkBarHeight: number = 50;
-  private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly bookmarkService: BookmarkService,
-    private readonly _matDialog: MatDialog,
-    private _dragulaService: DragulaService,
-  ) {
-    // NOTE: not working because we have an svg
-    // this._dragulaService.createGroup(this.LIST_ID, {
-    // moves: function (el, container, handle) {
-    //   return handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
-    // }
-    // });
-
-    this._subs.add(
-      this._dragulaService.dropModel(this.LIST_ID).subscribe(({ targetModel }: any) => {
-        // const {target, source, targetModel, item} = params;
-        const newIds = targetModel.map((m: Bookmark) => m.id);
-        this.bookmarkService.reorderBookmarks(newIds);
-      }),
-    );
-  }
-
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild('bookmarkBar', { read: ElementRef }) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }
   }
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
+  drop(event: CdkDragDrop<Bookmark[]>): void {
+    const previousIndex = event.previousIndex;
+    const currentIndex = event.currentIndex;
+    const bookmarks = event.container.data;
+
+    this.bookmarkService.reorderBookmarks(
+      moveItemInArray(bookmarks, previousIndex, currentIndex).map(
+        (bookmark) => bookmark.id,
+      ),
+    );
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { DOCUMENT } from '@angular/common';
@@ -10,7 +10,7 @@ import { throttleTime } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UiHelperService {
-  constructor(@Inject(DOCUMENT) private _document: Document) {}
+  private _document = inject<Document>(DOCUMENT);
 
   initElectron(): void {
     this._initMousewheelZoomForElectron();
@@ -42,7 +42,7 @@ export class UiHelperService {
 
   focusApp(): void {
     if (IS_ELECTRON) {
-      //  otherwise the last focused task get's focused again leading to unintended keyboard events
+      //  otherwise the last focused task gets focused again leading to unintended keyboard events
       if (document.activeElement) {
         (document.activeElement as HTMLElement).blur();
       }

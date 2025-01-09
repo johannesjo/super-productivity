@@ -9,7 +9,6 @@ import {
 import { IssuePanelIntroComponent } from './issue-panel-intro/issue-panel-intro.component';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
-import { IssueModule } from '../issue/issue.module';
 import { MatTooltip } from '@angular/material/tooltip';
 import { IssueProviderTabComponent } from './issue-provider-tab/issue-provider-tab.component';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -21,28 +20,30 @@ import {
   getIssueProviderTooltip,
 } from '../issue/mapping-helper/get-issue-provider-tooltip';
 import { MatDialog } from '@angular/material/dialog';
-
-import { UiModule } from '../../ui/ui.module';
 import { T } from '../../t.const';
 import { DialogEditIssueProviderComponent } from '../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { IssueProviderSetupOverviewComponent } from './issue-provider-setup-overview/issue-provider-setup-overview.component';
 import { WorkContextService } from '../work-context/work-context.service';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { moveItemInArray } from '../../util/move-item-in-array';
+import { IssueProviderActions } from '../issue/store/issue-provider.actions';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'issue-panel',
-  standalone: true,
   imports: [
-    UiModule,
     IssuePanelIntroComponent,
     MatTabGroup,
     MatTab,
     MatTabLabel,
     MatIcon,
-    IssueModule,
     MatTooltip,
     IssueProviderTabComponent,
     MatTabContent,
     IssueProviderSetupOverviewComponent,
+    CdkDropList,
+    CdkDrag,
+    IssueIconPipe,
   ],
   templateUrl: './issue-panel.component.html',
   styleUrl: './issue-panel.component.scss',
@@ -85,6 +86,21 @@ export class IssuePanelComponent {
         issueProvider,
       },
     });
+  }
+
+  drop(ev: CdkDragDrop<string[]>): void {
+    const issueProviders = this.issueProviders();
+    if (!issueProviders) {
+      return;
+    }
+
+    const currentValue = this.issueProvidersMapped();
+    const newItems = moveItemInArray(currentValue, ev.previousIndex, ev.currentIndex);
+    this._store.dispatch(
+      IssueProviderActions.sortIssueProvidersFirst({
+        ids: newItems.map((p) => p.issueProvider.id),
+      }),
+    );
   }
 
   private _setSelectedTabIndex(): void {

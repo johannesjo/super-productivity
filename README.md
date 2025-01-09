@@ -201,6 +201,23 @@ sudo snap set core experimental.refresh-app-awareness=true
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
 </a>
 
+#### Flatpak - Most distributions
+Must install Flatpak first. See [setup instructions for all distributions](https://flathub.org/setup).
+
+Install via command-line:
+
+```bash
+# install
+flatpak install flathub com.super_productivity.SuperProductivity
+
+# run
+flatpak run com.super_productivity.SuperProductivity
+```
+
+<a href='https://flathub.org/apps/com.super_productivity.SuperProductivity'>
+    <img width='175' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
+  </a>
+
 #### Aur - Arch Linux
 
 ```bash
@@ -269,7 +286,7 @@ There are several ways to help.
 
 7. **[Make a feature or improvement request](https://github.com/johannesjo/super-productivity/issues/new)**: Something can be done better? Something essential missing? Let us know!
 
-8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be programmer to help. Some of the icons really need improvement and many of the translations could use some love.
+8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be a programmer to help. Some of the icons really need improvement and many of the translations could use some love.
 
 [![inlang status badge](https://badge.inlang.com/?url=github.com/johannesjo/super-productivity)](https://fink.inlang.com/github.com/johannesjo/super-productivity?ref=badge)
 
@@ -279,7 +296,7 @@ You can use the Fink Localization Editor to edit, lint, and add translations for
 
 ### Running the development server
 
-To run the development server you need to have node installed at least in the version 14. Go to https://nodejs.org for installation instructions.
+To run the development server you need to have Node installed at least in the version 14. Go to https://nodejs.org for installation instructions.
 
 **Clone repo**
 
@@ -341,7 +358,7 @@ This container only serves the web app, and the user data is stored in the brows
 
 ### Integrate with WebDAV backend server
 
-You can integrate the container with a WebDAV server container to provides WebDAV service with base url `http://localhost/webdav`.
+You can integrate the container with a WebDAV server container to provide WebDAV service with base url `http://localhost/webdav`.
 
 **Download pre-configured files**
 
@@ -371,7 +388,7 @@ Additionally to accessing the web app from your browser at `http://localhost`, y
 
 ## Custom themes (desktop only)
 
-In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom css to restyle everything. To load a custom theme you simply need put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
+In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom CSS to restyle everything. To load a custom theme you simply need to put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
 
 There is a great set of [themes available for download in this repository](https://github.com/johannesjo/super-productivity-themes/tree/main/dist) as well as some [info on how to create your own custom themes](https://github.com/johannesjo/super-productivity-themes).
 
@@ -381,7 +398,7 @@ If using the integrated WebDAV Syncing is not working out for you, you can also 
 
 ## Automatic Backups
 
-For the desktop version automatic backups are stored per default in the `backup` sub folder of the [user data folder](#user-data-folder). Once you located a backup you can restore it on the settings page under `Sync & Export/Import/Export/Import from file`.
+For the desktop version automatic backups are stored by default in the `backup` subfolder of the [user data folder](#user-data-folder). Once you locate a backup, you can restore it on the settings page under `Sync & Export/Import/Export/Import from file`.
 
 ## User Data Folder
 
@@ -393,7 +410,7 @@ Where user data is stored differs from OS to OS. The most common locations are:
 | **Windows** | `C:\Users\<YOUR_USER_NAME>\AppData\Roaming\superProductivity/` or `%APPDATA%\superProductivity` |
 | **Linux**   | `~/.config/superProductivity/`                                                                  |
 
-The path should be shown when you go to the "Automatic Backups` section on the configuration page (minus the "backup" sub folder). You can also see it printed out when you start the app from the command line.
+The path should be shown when you go to the "Automatic Backups" section on the configuration page (minus the "backup" subfolder). You can also see it printed out when you start the app from the command line.
 
 For web browsers, data is simply stored for the current user inside the browser storage.
 

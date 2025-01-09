@@ -23,7 +23,7 @@ const _generateKey = async (password: string): Promise<CryptoKey> => {
   const ops = {
     name: 'PBKDF2',
     // TODO this is probably not very secure
-    // on the other hand: the salt is used for saving the password securely, so maybe it is not imporant
+    // on the other hand: the salt is used for saving the password securely, so maybe it is not important
     // for our specific use case? We would need to need some security expert input on this
     salt: enc.encode(password),
     iterations: 1000,

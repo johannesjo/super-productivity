@@ -8,8 +8,9 @@ import {
   HostListener,
   inject,
   Input,
+  LOCALE_ID,
   OnInit,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
@@ -26,7 +27,6 @@ import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { IssueModule } from '../../issue/issue.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { TaskCopy } from '../../tasks/task.model';
@@ -43,13 +43,19 @@ import { IssueService } from '../../issue/issue.service';
 
 @Component({
   selector: 'schedule-event',
-  standalone: true,
-  imports: [MatIcon, IssueModule, TranslateModule, TaskContextMenuComponent],
+  imports: [MatIcon, TranslateModule, TaskContextMenuComponent],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScheduleEventComponent implements OnInit {
+  private _store = inject(Store);
+  private _elRef = inject(ElementRef);
+  private _matDialog = inject(MatDialog);
+  private _cd = inject(ChangeDetectorRef);
+  private _issueService = inject(IssueService);
+  private locale = inject(LOCALE_ID);
+
   T: typeof T = T;
   @HostBinding('title') hoverTitle: string = '';
   @HostBinding('class') cssClass: string = '';
@@ -71,16 +77,22 @@ export class ScheduleEventComponent implements OnInit {
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
 
+  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
+    .hour12;
+
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
-  @ViewChild('taskContextMenu', { static: false, read: TaskContextMenuComponent })
-  taskContextMenu?: TaskContextMenuComponent;
+  readonly taskContextMenu = viewChild('taskContextMenu', {
+    read: TaskContextMenuComponent,
+  });
 
   protected readonly SVEType = SVEType;
   destroyRef = inject(DestroyRef);
   private _isBeingSubmitted: boolean = false;
   private _projectId$ = new BehaviorSubject<string | null>(null);
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input({ required: true })
   set event(event: ScheduleEvent) {
     this.se = event;
@@ -88,7 +100,11 @@ export class ScheduleEventComponent implements OnInit {
       (this.se as any)?.data?.title ||
       (this.se.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE');
 
-    const startClockStr = getClockStringFromHours(this.se.startHours);
+    const startClockStr = getClockStringFromHours(
+      this.is12HourFormat && this.se.startHours > 12
+        ? this.se.startHours - 12
+        : this.se.startHours,
+    );
     const endClockStr = getClockStringFromHours(
       this.se.startHours + this.se.timeLeftInHours,
     );
@@ -226,14 +242,6 @@ export class ScheduleEventComponent implements OnInit {
     }
   }
 
-  constructor(
-    private _store: Store,
-    private _elRef: ElementRef,
-    private _matDialog: MatDialog,
-    private _cd: ChangeDetectorRef,
-    private _issueService: IssueService,
-  ) {}
-
   ngOnInit(): void {
     if (this.task) {
       this._projectId$
@@ -255,7 +263,7 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    this.taskContextMenu?.open(event);
+    this.taskContextMenu()?.open(event);
   }
 
   deleteTask(): void {

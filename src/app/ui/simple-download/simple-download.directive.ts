@@ -1,19 +1,17 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject, input } from '@angular/core';
 import { download } from '../../util/download';
 
-@Directive({
-  selector: '[simpleDownload]',
-})
+@Directive({ selector: '[simpleDownload]' })
 export class SimpleDownloadDirective {
-  @Input() simpleDownload?: string;
-  @Input() simpleDownloadData?: string;
+  private _el = inject(ElementRef);
 
-  constructor(private _el: ElementRef) {}
+  readonly simpleDownload = input<string>();
+  readonly simpleDownloadData = input<string>();
 
   @HostListener('click') onClick(): void {
     if (!this._el.nativeElement.getAttribute('download')) {
-      const fileName = this.simpleDownload as string;
-      download(fileName, this.simpleDownloadData as string);
+      const fileName = this.simpleDownload() as string;
+      download(fileName, this.simpleDownloadData() as string);
     }
   }
 }

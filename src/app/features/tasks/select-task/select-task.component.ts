@@ -1,13 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
+  inject,
+  input,
   Input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
@@ -20,29 +21,52 @@ import {
 } from '../../work-context/store/work-context.selectors';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatIcon } from '@angular/material/icon';
+import { MatOption } from '@angular/material/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 @Component({
   selector: 'select-task',
   templateUrl: './select-task.component.html',
   styleUrls: ['./select-task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatInput,
+    FormsModule,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MatIcon,
+    MatSuffix,
+    MatAutocomplete,
+    MatOption,
+    TranslatePipe,
+    IssueIconPipe,
+    TagComponent,
+  ],
 })
 export class SelectTaskComponent implements OnInit, OnDestroy {
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+
   T: typeof T = T;
   taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
   filteredTasks: Task[] = [];
   projectMap: { [key: string]: Project } = {};
   isCreate: boolean = false;
-  @Output() taskChange: EventEmitter<Task | string> = new EventEmitter();
-  @Input() isLimitToProject: boolean = false;
-  @Input() isIncludeDoneTasks: boolean = false;
+  readonly taskChange = output<Task | string>();
+  readonly isLimitToProject = input<boolean>(false);
+  readonly isIncludeDoneTasks = input<boolean>(false);
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
-  constructor(
-    private _workContextService: WorkContextService,
-    private _store: Store,
-  ) {}
-
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set initialTask(task: Task) {
     if ((task && !this.taskSelectCtrl.value) || this.taskSelectCtrl.value === '') {
       this.isCreate = false;
@@ -59,11 +83,11 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
           this.projectMap[project.id] = project;
         });
       });
-    const tasks$: Observable<Task[]> = this.isLimitToProject
-      ? this.isIncludeDoneTasks
+    const tasks$: Observable<Task[]> = this.isLimitToProject()
+      ? this.isIncludeDoneTasks()
         ? this._workContextService.trackableTasksForActiveContext$
         : this._workContextService.startableTasksForActiveContext$
-      : this.isIncludeDoneTasks
+      : this.isIncludeDoneTasks()
         ? this._store.select(selectTrackableTasksActiveContextFirst)
         : this._store.select(selectStartableTasksActiveContextFirst);
 

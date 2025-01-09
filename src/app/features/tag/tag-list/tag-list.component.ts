@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Tag } from '../tag.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +18,7 @@ import { Store } from '@ngrx/store';
 import { selectTagFeatureState } from '../store/tag.reducer';
 import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
+import { TagComponent } from '../tag/tag.component';
 
 @Component({
   selector: 'tag-list',
@@ -19,8 +26,13 @@ import { Project } from '../../project/project.model';
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
+  imports: [TagComponent],
 })
 export class TagListComponent {
+  private readonly _store = inject(Store);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _matDialog = inject(MatDialog);
+
   task = input.required<Task>();
 
   isShowProjectTagAlways = input(false);
@@ -62,10 +74,4 @@ export class TagListComponent {
     }
     return null;
   });
-
-  constructor(
-    private readonly _store: Store,
-    private readonly _workContextService: WorkContextService,
-    private readonly _matDialog: MatDialog,
-  ) {}
 }

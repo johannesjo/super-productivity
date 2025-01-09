@@ -1,45 +1,43 @@
+@let activeWorkContextTypeAndId = workContextService.activeWorkContextTypeAndId$|async;
+
 <!--<div class="wrapper ">-->
 <div class="wrapper">
+  @if (!(layoutService.isNavAlwaysVisible$|async)) {
   <button
     (click)="layoutService.toggleSideNav()"
-    *ngIf="!(layoutService.isNavAlwaysVisible$|async)"
     class="burger-trigger tour-burgerTrigger"
     mat-icon-button
   >
     <mat-icon>menu</mat-icon>
   </button>
-
-  <ng-container
-    *ngIf="workContextService.activeWorkContextTypeAndId$|async as activeWorkContextTypeAndId"
+  }
+  <!---->
+  @if (activeWorkContextTypeAndId) {
+  <div
+    [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
+    class="current-work-context-title"
+    mat-ripple
+    routerLink="/active/tasks"
   >
-    <div
-      [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-      class="current-work-context-title"
-      mat-ripple
-      routerLink="/active/tasks"
-    >
-      {{ workContextService.activeWorkContextTitle$|async }}
-    </div>
-
-    <button
-      [mat-menu-trigger-for]="activeWorkContextMenu"
-      [matTooltip]="T.MH.PROJECT_MENU|translate"
-      class="project-settings-btn hide-xxxs"
-      mat-icon-button
-    >
-      <mat-icon>more_vert</mat-icon>
-    </button>
-
-    <mat-menu #activeWorkContextMenu="matMenu">
-      <ng-template matMenuContent>
-        <work-context-menu
-          [contextId]="activeWorkContextTypeAndId.activeId"
-          [project]="projectService.currentProject$|async"
-          [contextType]="activeWorkContextTypeAndId.activeType"
-        ></work-context-menu>
-      </ng-template>
-    </mat-menu>
-  </ng-container>
+    {{ workContextService.activeWorkContextTitle$|async }}
+  </div>
+  <button
+    [mat-menu-trigger-for]="activeWorkContextMenu"
+    [matTooltip]="T.MH.PROJECT_MENU|translate"
+    class="project-settings-btn hide-xxxs"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #activeWorkContextMenu="matMenu">
+    <ng-template matMenuContent>
+      <work-context-menu
+        [contextId]="activeWorkContextTypeAndId.activeId"
+        [contextType]="activeWorkContextTypeAndId.activeType"
+      ></work-context-menu>
+    </ng-template>
+  </mat-menu>
+  }
 
   <nav class="action-nav">
     <button
@@ -59,25 +57,27 @@
       <mat-icon>search</mat-icon>
     </button>
 
+    @if ((syncProviderService.isEnabled$|async)) {
     <button
-      *ngIf="(syncProviderService.isEnabled$|async)"
       matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
       (click)="sync()"
       mat-icon-button
     >
       <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
     </button>
+    }
 
-    <button
-      (click)="bookmarkService.toggleBookmarks()"
-      *ngIf="(workContextService.isActiveWorkContextProject$|async)"
-      [class.isOpen]="bookmarkService.isShowBookmarks$|async"
-      matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{kb.toggleBookmarks?'['+kb.toggleBookmarks+']':''}}"
-      class="bookmark-btn e2e-bookmark-btn"
-      mat-icon-button
-    >
-      <mat-icon>bookmark</mat-icon>
-    </button>
+    <!--    @if ((workContextService.isActiveWorkContextProject$|async)) {-->
+    <!--    <button-->
+    <!--      (click)="bookmarkService.toggleBookmarks()"-->
+    <!--      [class.isOpen]="bookmarkService.isShowBookmarks$|async"-->
+    <!--      matTooltip="{{T.MH.TOGGLE_SHOW_BOOKMARKS|translate}}{{kb.toggleBookmarks?'['+kb.toggleBookmarks+']':''}}"-->
+    <!--      class="bookmark-btn e2e-bookmark-btn"-->
+    <!--      mat-icon-button-->
+    <!--    >-->
+    <!--      <mat-icon>bookmark</mat-icon>-->
+    <!--    </button>-->
+    <!--    }-->
 
     <!--    <button *ngIf="!(layoutService.isBothAlwaysVisible$|async)"-->
     <!--            (click)="layoutService.toggleNotes()"-->
@@ -88,8 +88,8 @@
     <!--      </mat-icon>-->
     <!--    </button>-->
 
+    @if (!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode) {
     <button
-      *ngIf="!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode"
       mat-icon-button
       matTooltip="Enter focus mode {{kb.goToFocusMode?'['+kb.goToFocusMode+']':''}}"
       class="hide-xxs"
@@ -97,25 +97,26 @@
     >
       <mat-icon>center_focus_strong</mat-icon>
     </button>
+    }
 
     <div class="play-btn-wrapper">
+      @if ((taskService.currentTask$|async); as currentTask) {
       <div
-        *ngIf="(taskService.currentTask$|async) as currentTask"
         @fade
         class="current-task-title"
       >
         <div class="title">{{ currentTask.title }}</div>
+        @if ((currentTaskContext$|async); as currentTaskContext) {
         <tag
-          *ngIf="(currentTaskContext$|async) as currentTaskContext"
           @expandFadeHorizontal
           [tag]="currentTaskContext"
           class="project"
         ></tag>
+        }
       </div>
-      <div
-        *ngIf="(taskService.currentTaskId$|async)"
-        class="pulse-circle"
-      ></div>
+      } @if ((taskService.currentTaskId$|async)) {
+      <div class="pulse-circle"></div>
+      }
 
       <button
         (click)="taskService.toggleStartTask()"
@@ -125,18 +126,20 @@
         class="play-btn tour-playBtn mat-elevation-z3"
         mat-mini-fab
       >
-        <ng-container *ngIf="(pomodoroService.isEnabled$|async)">
-          <mat-icon *ngIf="(pomodoroService.isBreak$|async)">free_breakfast</mat-icon>
-          <ng-container *ngIf="!(pomodoroService.isBreak$|async)">
-            <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
-            <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
-          </ng-container>
-        </ng-container>
-
-        <ng-container *ngIf="!(pomodoroService.isEnabled$|async)">
-          <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
-          <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
-        </ng-container>
+        @if ((pomodoroService.isEnabled$|async)) { @if ((pomodoroService.isBreak$|async))
+        {
+        <mat-icon>free_breakfast</mat-icon>
+        } @if (!(pomodoroService.isBreak$|async)) { @if
+        (!(taskService.currentTaskId$|async)) {
+        <mat-icon>play_arrow</mat-icon>
+        } @if ((taskService.currentTaskId$|async)) {
+        <mat-icon>pause</mat-icon>
+        } } } @if (!(pomodoroService.isEnabled$|async)) { @if
+        (!(taskService.currentTaskId$|async)) {
+        <mat-icon>play_arrow</mat-icon>
+        } @if ((taskService.currentTaskId$|async)) {
+        <mat-icon>pause</mat-icon>
+        } }
 
         <svg
           class="circle-svg"
@@ -158,67 +161,67 @@
         </svg>
       </button>
 
-      <ng-container *ngIf="(pomodoroService.cfg$|async)?.isEnabled">
-        <div class="pomodoro-label">
-          {{ (pomodoroService.currentSessionTime$|async|msToMinuteClockString) }}
-        </div>
-        <div class="pomodoro-controls">
-          <button
-            (click)="pomodoroService.finishPomodoroSession()"
-            [matTooltip]="T.F.POMODORO.S.SESSION_SKIP|translate"
-            matTooltipPosition="left"
-            class="pomodoro-btn"
-            color=""
-            mat-mini-fab
-          >
-            <mat-icon>skip_next</mat-icon>
-          </button>
-          <button
-            (click)="pomodoroService.stop()"
-            [matTooltip]="T.F.POMODORO.S.RESET|translate"
-            matTooltipPosition="left"
-            class="pomodoro-btn"
-            color=""
-            mat-mini-fab
-          >
-            <mat-icon>restart_alt</mat-icon>
-          </button>
-        </div>
-      </ng-container>
-    </div>
-
-    <ng-container
-      *ngIf="(simpleCounterService.enabledSimpleCounters$|async) as enabledSimpleCounters"
-    >
-      <div
-        *ngIf="enabledSimpleCounters.length"
-        class="simple-counter-buttons-outer-wrapper"
-      >
+      @if ((pomodoroService.cfg$|async)?.isEnabled) {
+      <div class="pomodoro-label">
+        {{ (pomodoroService.currentSessionTime$|async|msToMinuteClockString) }}
+      </div>
+      <div class="pomodoro-controls">
         <button
-          (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
-          class="simple-counter-mobile-trigger show-xs-only"
-          [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
+          (click)="pomodoroService.finishPomodoroSession()"
+          [matTooltip]="T.F.POMODORO.S.SESSION_SKIP|translate"
+          matTooltipPosition="left"
+          class="pomodoro-btn"
+          color=""
           mat-mini-fab
         >
-          <mat-icon *ngIf="!isShowSimpleCounterBtnsMobile">timer</mat-icon>
-          <mat-icon *ngIf="isShowSimpleCounterBtnsMobile">close</mat-icon>
+          <mat-icon>skip_next</mat-icon>
         </button>
-
-        <div
-          class="simple-counter-buttons"
-          [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+        <button
+          (click)="pomodoroService.stop()"
+          [matTooltip]="T.F.POMODORO.S.RESET|translate"
+          matTooltipPosition="left"
+          class="pomodoro-btn"
+          color=""
+          mat-mini-fab
         >
-          <simple-counter-button
-            [matTooltip]="simpleCounter.title"
-            *ngFor="let simpleCounter of enabledSimpleCounters; trackBy: trackById"
-            [simpleCounter]="simpleCounter"
-          ></simple-counter-button>
-        </div>
+          <mat-icon>restart_alt</mat-icon>
+        </button>
       </div>
-    </ng-container>
+      }
+    </div>
+
+    @if ((simpleCounterService.enabledSimpleCounters$|async); as enabledSimpleCounters) {
+    @if (enabledSimpleCounters.length) {
+    <div class="simple-counter-buttons-outer-wrapper">
+      <button
+        (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
+        class="simple-counter-mobile-trigger show-xs-only"
+        [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
+        mat-mini-fab
+      >
+        @if (!isShowSimpleCounterBtnsMobile) {
+        <mat-icon>timer</mat-icon>
+        } @if (isShowSimpleCounterBtnsMobile) {
+        <mat-icon>close</mat-icon>
+        }
+      </button>
+      <div
+        class="simple-counter-buttons"
+        [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+      >
+        @for (simpleCounter of enabledSimpleCounters; track trackById($index,
+        simpleCounter)) {
+        <simple-counter-button
+          [matTooltip]="simpleCounter.title"
+          [simpleCounter]="simpleCounter"
+        ></simple-counter-button>
+        }
+      </div>
+    </div>
+    } }
 
     <button
-      class="toggle-notes-btn tour-issuePanelTrigger"
+      class="toggle-notes-btn tour-issuePanelTrigger e2e-toggle-issue-provider-panel"
       [disabled]="!(isRouteWithSidePanel$|async)"
       [class.isActive]="(layoutService.isShowIssuePanel$|async)"
       [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"

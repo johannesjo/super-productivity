@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SearchQueryParams } from '../../features/search-bar/search-bar.model';
 import { first } from 'rxjs/operators';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -16,13 +16,11 @@ import { T } from '../../t.const';
   providedIn: 'root',
 })
 export class NavigateToTaskService {
-  constructor(
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _router: Router,
-    private _workContextService: WorkContextService,
-    private _snackService: SnackService,
-  ) {}
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _router = inject(Router);
+  private _workContextService = inject(WorkContextService);
+  private _snackService = inject(SnackService);
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
     try {

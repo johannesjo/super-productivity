@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addNewTagsFromShortSyntax,
@@ -36,6 +36,15 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 
 @Injectable()
 export class ShortSyntaxEffects {
+  private _actions$ = inject(Actions);
+  private _taskService = inject(TaskService);
+  private _tagService = inject(TagService);
+  private _projectService = inject(ProjectService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _snackService = inject(SnackService);
+  private _matDialog = inject(MatDialog);
+  private _layoutService = inject(LayoutService);
+
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(addTask, updateTask),
@@ -233,15 +242,4 @@ export class ShortSyntaxEffects {
       }),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _taskService: TaskService,
-    private _tagService: TagService,
-    private _projectService: ProjectService,
-    private _globalConfigService: GlobalConfigService,
-    private _snackService: SnackService,
-    private _matDialog: MatDialog,
-    private _layoutService: LayoutService,
-  ) {}
 }

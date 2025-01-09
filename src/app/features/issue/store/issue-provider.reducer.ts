@@ -5,6 +5,7 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateIssueProviderState } from '../migrate-issue-providers';
+import { deleteProject } from '../../project/store/project.actions';
 
 export const ISSUE_PROVIDER_FEATURE_KEY = 'issueProvider';
 
@@ -26,6 +27,16 @@ export const issueProviderReducer = createReducer(
       ? migrateIssueProviderState({ ...appDataComplete.issueProvider })
       : oldState,
   ),
+  on(deleteProject, (state, { project }) =>
+    adapter.updateMany(
+      state.ids
+        .map((id) => state.entities[id])
+        .filter((ip) => ip?.defaultProjectId === project.id)
+        .map((ip) => ({ id: ip!.id, changes: { defaultProjectId: null } })),
+      state,
+    ),
+  ),
+  // -----------
 
   on(IssueProviderActions.addIssueProvider, (state, action) =>
     adapter.addOne(action.issueProvider, state),

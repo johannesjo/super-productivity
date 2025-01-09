@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { filter, shareReplay, switchMap, take } from 'rxjs/operators';
 import { ProjectService } from '../../features/project/project.service';
@@ -12,6 +12,12 @@ import { DataRepairService } from '../data-repair/data-repair.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
+  private _persistenceService = inject(PersistenceService);
+  private _projectService = inject(ProjectService);
+  private _workContextService = inject(WorkContextService);
+  private _store$ = inject<Store<any>>(Store);
+  private _dataRepairService = inject(DataRepairService);
+
   isAllDataLoadedInitially$: Observable<boolean> = from(this.reInit()).pipe(
     switchMap(() => this._workContextService.isActiveWorkContextProject$),
     switchMap((isProject) =>
@@ -26,13 +32,7 @@ export class DataInitService {
     shareReplay(1),
   );
 
-  constructor(
-    private _persistenceService: PersistenceService,
-    private _projectService: ProjectService,
-    private _workContextService: WorkContextService,
-    private _store$: Store<any>,
-    private _dataRepairService: DataRepairService,
-  ) {
+  constructor() {
     // TODO better construction than this
     this.isAllDataLoadedInitially$.pipe(take(1)).subscribe(() => {
       // here because to avoid circular dependencies

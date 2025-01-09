@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   IssueData,
   IssueDataReduced,
@@ -50,6 +50,23 @@ import { getErrorTxt } from '../../util/get-error-text';
   providedIn: 'root',
 })
 export class IssueService {
+  private _taskService = inject(TaskService);
+  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+  private _githubCommonInterfacesService = inject(GithubCommonInterfacesService);
+  private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
+  private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
+  private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
+  private _giteaInterfaceService = inject(GiteaCommonInterfacesService);
+  private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
+  private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _workContextService = inject(WorkContextService);
+  private _snackService = inject(SnackService);
+  private _translateService = inject(TranslateService);
+  private _projectService = inject(ProjectService);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _store = inject(Store);
+
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
@@ -73,25 +90,6 @@ export class IssueService {
     [REDMINE_TYPE]: {},
     [ICAL_TYPE]: {},
   };
-
-  constructor(
-    private _taskService: TaskService,
-    private _jiraCommonInterfacesService: JiraCommonInterfacesService,
-    private _githubCommonInterfacesService: GithubCommonInterfacesService,
-    private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
-    private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
-    private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
-    private _giteaInterfaceService: GiteaCommonInterfacesService,
-    private _redmineInterfaceService: RedmineCommonInterfacesService,
-    private _calendarCommonInterfaceService: CalendarCommonInterfacesService,
-    private _issueProviderService: IssueProviderService,
-    private _workContextService: WorkContextService,
-    private _snackService: SnackService,
-    private _translateService: TranslateService,
-    private _projectService: ProjectService,
-    private _calendarIntegrationService: CalendarIntegrationService,
-    private _store: Store,
-  ) {}
 
   testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
     return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection$(
@@ -121,7 +119,12 @@ export class IssueService {
     searchTerm: string,
     issueProviderId: string,
     issueProviderKey: IssueProviderKey,
+    isEmptySearch = false,
   ): Observable<SearchResultItem[]> {
+    // check if text is more than just special chars
+    if (searchTerm.replace(/[\W_]+/g, '').trim().length === 0 && !isEmptySearch) {
+      return of([]);
+    }
     return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
       searchTerm,
       issueProviderId,

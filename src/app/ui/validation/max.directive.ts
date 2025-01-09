@@ -1,7 +1,7 @@
 import {
   Directive,
   forwardRef,
-  Input,
+  input,
   OnChanges,
   OnInit,
   SimpleChanges,
@@ -21,14 +21,15 @@ const MAX_VALIDATOR: any = {
   providers: [MAX_VALIDATOR],
 })
 export class MaxDirective implements Validator, OnInit, OnChanges {
-  @Input() max?: number;
+  readonly max = input<number>();
 
   private _validator?: ValidatorFn;
   private _onChange?: () => void;
 
   ngOnInit(): void {
-    if (typeof this.max === 'number') {
-      this._validator = maxValidator(this.max);
+    const max = this.max();
+    if (typeof max === 'number') {
+      this._validator = maxValidator(max);
     }
   }
 

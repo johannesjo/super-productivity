@@ -1,20 +1,20 @@
-import { Directive, HostListener, Input } from '@angular/core';
+import { Directive, HostListener, input, inject } from '@angular/core';
 import { IS_ELECTRON } from '../../../app.constants';
 import { BookmarkType } from '../bookmark.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 
-@Directive({
-  selector: '[bookmarkLink]',
-})
+@Directive({ selector: '[bookmarkLink]' })
 export class BookmarkLinkDirective {
-  @Input() type?: BookmarkType;
-  @Input() href?: BookmarkType;
+  private _snackService = inject(SnackService);
 
-  constructor(private _snackService: SnackService) {}
+  readonly type = input<BookmarkType>();
+  readonly href = input<BookmarkType>();
 
   @HostListener('click', ['$event']) onClick(ev: Event): void {
-    if (!this.type || !this.href) {
+    const type = this.type();
+    const href = this.href();
+    if (!type || !href) {
       return;
     }
 
@@ -24,20 +24,20 @@ export class BookmarkLinkDirective {
     }
     if (IS_ELECTRON) {
       ev.preventDefault();
-      if (!this.type || this.type === 'LINK') {
-        this._openExternalUrl(this.href);
-      } else if (this.type === 'FILE') {
-        window.ea.openPath(this.href);
-      } else if (this.type === 'COMMAND') {
+      if (!type || type === 'LINK') {
+        this._openExternalUrl(href);
+      } else if (type === 'FILE') {
+        window.ea.openPath(href);
+      } else if (type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
-          translateParams: { str: this.href },
+          translateParams: { str: href },
           ico: 'laptop_windows',
         });
-        this._exec(this.href);
+        this._exec(href);
       }
-    } else if (this.type === 'LINK') {
-      this._openExternalUrl(this.href);
+    } else if (type === 'LINK') {
+      this._openExternalUrl(href);
     }
   }
 

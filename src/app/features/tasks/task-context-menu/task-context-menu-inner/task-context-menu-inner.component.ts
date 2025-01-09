@@ -3,14 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   input,
   Input,
   output,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
-import { IssueModule } from '../../../issue/issue.module';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatMenu,
@@ -66,23 +66,21 @@ import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { PlannerService } from '../../../planner/planner.service';
+import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'task-context-menu-inner',
-  standalone: true,
   imports: [
     AsyncPipe,
-    IssueModule,
     MatIcon,
     MatMenu,
     MatMenuContent,
     MatMenuItem,
-    NgForOf,
     TranslateModule,
     MatMenuTrigger,
-    NgIf,
     MatIconButton,
     MatTooltip,
+    IssueIconPipe,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',
@@ -90,6 +88,22 @@ import { PlannerService } from '../../../planner/planner.service';
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class TaskContextMenuInnerComponent implements AfterViewInit {
+  private _datePipe = inject(DatePipe);
+  private readonly _taskService = inject(TaskService);
+  private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _issueService = inject(IssueService);
+  private readonly _attachmentService = inject(TaskAttachmentService);
+  private readonly _elementRef = inject(ElementRef);
+  private readonly _snackService = inject(SnackService);
+  private readonly _projectService = inject(ProjectService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _store = inject(Store);
+  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _plannerService = inject(PlannerService);
+
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
 
@@ -98,10 +112,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   contextMenuPosition: { x: string; y: string } = { x: '100px', y: '100px' };
 
-  @ViewChild('contextMenuTriggerEl', { static: true, read: MatMenuTrigger })
-  contextMenuTrigger?: MatMenuTrigger;
+  readonly contextMenuTrigger = viewChild('contextMenuTriggerEl', {
+    read: MatMenuTrigger,
+  });
 
-  @ViewChild('contextMenu', { static: true, read: MatMenu }) contextMenu?: MatMenu;
+  readonly contextMenu = viewChild('contextMenu', { read: MatMenu });
 
   task!: TaskWithSubTasks | Task;
 
@@ -141,30 +156,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private _isTaskDeleteTriggered: boolean = false;
   private _isOpenedFromKeyboard = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
     this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
     this.isCurrent = this._taskService.currentTaskId === v.id;
     this._task$.next(v);
   }
-
-  constructor(
-    private _datePipe: DatePipe,
-    private readonly _taskService: TaskService,
-    private readonly _taskRepeatCfgService: TaskRepeatCfgService,
-    private readonly _matDialog: MatDialog,
-    private readonly _issueService: IssueService,
-    private readonly _attachmentService: TaskAttachmentService,
-    private readonly _elementRef: ElementRef,
-    private readonly _snackService: SnackService,
-    private readonly _projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _store: Store,
-    private readonly _focusModeService: FocusModeService,
-    private readonly _dateAdapter: DateAdapter<unknown>,
-    private readonly _plannerService: PlannerService,
-  ) {}
 
   ngAfterViewInit(): void {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
@@ -189,7 +188,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
-    this.contextMenuTrigger?.openMenu();
+    this.contextMenuTrigger()?.openMenu();
   }
 
   focusRelatedTaskOrNext(): void {

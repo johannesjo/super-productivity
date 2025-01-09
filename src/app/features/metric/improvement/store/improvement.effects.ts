@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -25,6 +25,11 @@ import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable()
 export class ImprovementEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+  private _dateService = inject(DateService);
+
   updateImprovements$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -59,13 +64,6 @@ export class ImprovementEffects {
       map(([a, unusedIds]) => deleteImprovements({ ids: unusedIds })),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _dateService: DateService,
-  ) {}
 
   private _saveToLs(improvementState: ImprovementState): void {
     this._persistenceService.improvement.saveState(improvementState, {

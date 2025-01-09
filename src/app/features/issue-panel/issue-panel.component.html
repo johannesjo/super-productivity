@@ -7,12 +7,20 @@
   mat-stretch-tabs="false"
   dynamicHeight="true"
   preserveContent="false"
+  cdkDropList
+  cdkDropListOrientation="horizontal"
+  (cdkDropListDropped)="drop($event)"
+  cdkDropListElementContainer=".mat-mdc-tab-labels"
+  class="example-drag-tabs"
   [selectedIndex]="selectedTabIndex()"
 >
   @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {
   <mat-tab>
     <ng-template mat-tab-label>
       <div
+        cdkDrag
+        cdkDragRootElement=".mat-mdc-tab"
+        cdkDragPreviewClass="issue-provider-drag-preview"
         class="tab-header-item"
         [class.disabled]="!entry.issueProvider.isEnabled"
         (longPressIOS)="openEditIssueProvider(entry.issueProvider)"

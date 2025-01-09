@@ -4,12 +4,12 @@ import {
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
-  EventEmitter,
+  inject,
   Input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild,
+  output,
+  viewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
@@ -20,11 +20,14 @@ import {
 } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { Subscription } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TagCfgFormKey } from '../../tag/tag.model';
 import { customConfigFormSectionComponent } from '../custom-config-form-section-component';
 import { exists } from '../../../util/exists';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { ConfigFormComponent } from '../config-form/config-form.component';
 
 @Component({
   selector: 'config-section',
@@ -32,26 +35,32 @@ import { exists } from '../../../util/exists';
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CollapsibleComponent,
+    HelpSectionComponent,
+    ConfigFormComponent,
+    TranslatePipe,
+  ],
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
+  private _cd = inject(ChangeDetectorRef);
+  private _componentFactoryResolver = inject(ComponentFactoryResolver);
+  private _workContextService = inject(WorkContextService);
+  private _translateService = inject(TranslateService);
+
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() section?: ConfigFormSection<{ [key: string]: any }>;
-  @Output() save: EventEmitter<{
+  readonly save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: any;
-  }> = new EventEmitter();
-  @ViewChild('customForm', { read: ViewContainerRef, static: true })
-  customFormRef?: ViewContainerRef;
+  }>();
+  readonly customFormRef = viewChild('customForm', { read: ViewContainerRef });
   isExpanded: boolean = false;
   private _subs: Subscription = new Subscription();
   private _instance?: Component;
   private _viewDestroyTimeout?: number;
-
-  constructor(
-    private _cd: ChangeDetectorRef,
-    private _componentFactoryResolver: ComponentFactoryResolver,
-    private _workContextService: WorkContextService,
-    private _translateService: TranslateService,
-  ) {}
 
   private _cfg: any;
 
@@ -59,6 +68,8 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     return this._cfg;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(v: any) {
     this._cfg = v;
     if (v && this._instance) {
@@ -83,13 +94,14 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
       this._workContextService.onWorkContextChange$.subscribe(() => {
         this._cd.markForCheck();
 
+        const customFormRef = this.customFormRef();
         if (
           this.section &&
           this.section.customSection &&
-          this.customFormRef &&
+          customFormRef &&
           this.section.customSection
         ) {
-          this.customFormRef.clear();
+          customFormRef.clear();
           // dirty trick to make sure data is actually there
           this._viewDestroyTimeout = window.setTimeout(() => {
             this._loadCustomSection((this.section as any).customSection);
@@ -125,7 +137,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     if (componentToRender) {
       const factory: ComponentFactory<any> =
         this._componentFactoryResolver.resolveComponentFactory(componentToRender as any);
-      const ref = exists<any>(this.customFormRef).createComponent(factory);
+      const ref = exists<any>(this.customFormRef()).createComponent(factory);
 
       // NOTE: important that this is set only if we actually have a value
       // otherwise the default fallback will be overwritten

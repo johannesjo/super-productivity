@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
 import { DropboxApiService } from '../dropbox-api.service';
@@ -19,6 +19,10 @@ import { updateGlobalConfigSection } from '../../../../features/config/store/glo
 
 @Injectable()
 export class DropboxEffects {
+  private _actions$ = inject(Actions);
+  private _dropboxApiService = inject(DropboxApiService);
+  private _globalConfigService = inject(GlobalConfigService);
+
   updateTokensFromDialog$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -77,10 +81,4 @@ export class DropboxEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _dropboxApiService: DropboxApiService,
-    private _globalConfigService: GlobalConfigService,
-  ) {}
 }

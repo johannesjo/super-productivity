@@ -76,10 +76,7 @@ export const sendJiraRequest = ({
 };
 
 // TODO simplify and do encoding in frontend service
-export const setupRequestHeadersForImages = (
-  jiraCfg: JiraCfg,
-  wonkyCookie?: string,
-): void => {
+export const setupRequestHeadersForImages = (jiraCfg: JiraCfg): void => {
   const { host, protocol } = parseHostAndPort(jiraCfg);
 
   // TODO export to util fn
@@ -91,18 +88,10 @@ export const setupRequestHeadersForImages = (
     urls: [`${protocol}://${host}/*`],
   };
 
-  if (jiraCfg.isWonkyCookieMode && !wonkyCookie) {
-    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-      callback({ cancel: true });
-    });
-  }
-
   // thankfully only the last attached listener will be used
   // @see: https://electronjs.org/docs/api/web-request
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    if (wonkyCookie && jiraCfg.isWonkyCookieMode) {
-      details.requestHeaders.Cookie = wonkyCookie;
-    } else if (jiraCfg.usePAT) {
+    if (jiraCfg.usePAT) {
       details.requestHeaders.authorization = `Bearer ${jiraCfg.password}`;
     } else {
       details.requestHeaders.authorization = `Basic ${encoded}`;

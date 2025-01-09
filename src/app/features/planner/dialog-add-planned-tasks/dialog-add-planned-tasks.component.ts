@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { PlannerActions } from '../store/planner.actions';
 import { select, Store } from '@ngrx/store';
@@ -26,14 +32,51 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { MatIcon } from '@angular/material/icon';
+import { PlannerTaskComponent } from '../planner-task/planner-task.component';
+import { PlannerRepeatProjectionComponent } from '../planner-repeat-projection/planner-repeat-projection.component';
+import { AddTaskInlineComponent } from '../add-task-inline/add-task-inline.component';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
+import { PlannerCalendarEventComponent } from '../planner-calendar-event/planner-calendar-event.component';
+import { MatButton } from '@angular/material/button';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-add-planned-tasks',
   templateUrl: './dialog-add-planned-tasks.component.html',
   styleUrl: './dialog-add-planned-tasks.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatIcon,
+    PlannerTaskComponent,
+    PlannerRepeatProjectionComponent,
+    AddTaskInlineComponent,
+    NgClass,
+    PlannerCalendarEventComponent,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    DatePipe,
+    MsToStringPipe,
+    RoundDurationPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogAddPlannedTasksComponent {
+  private _matDialogRef =
+    inject<MatDialogRef<DialogAddPlannedTasksComponent>>(MatDialogRef);
+  private _plannerService = inject(PlannerService);
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _reminderService = inject(ReminderService);
+  private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+
   T: typeof T = T;
   day$ = this._plannerService.plannerDayForAllDueToday$.pipe();
   protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
@@ -53,16 +96,9 @@ export class DialogAddPlannedTasksComponent {
     map((tasks) => tasks.filter((task) => !!task)),
   );
 
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogAddPlannedTasksComponent>,
-    private _plannerService: PlannerService,
-    private _store: Store,
-    private _dateService: DateService,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _reminderService: ReminderService,
-    private _addTasksForTomorrowService: AddTasksForTomorrowService,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+
     // prevent close since it does not reappear
     _matDialogRef.disableClose = true;
   }

@@ -1,0 +1,21 @@
+
+### Bug Fixes
+
+* don't reopen last selected task on reload
+* github api requests not working anymore
+* No issueProviderId or type given #3771
+* today's notes not being sortable
+* warnings
+### Features
+
+* also connect keyboard controls
+* hide edit tags from context menu
+* improve styling for new tag edit
+* integrate week into daily summary review
+* make tags actually editable
+* migrate bookmarks drag and drop to cdk drag and drop
+* outline most basic tag input component for side panel
+* polish new tag edit component
+* reduce number of dev logs
+* remove dragula dependency completely
+* replace dragula with cdk drop for notes

@@ -1,7 +1,7 @@
 <div class="task-list-wrapper">
   <section class="add-task-bar-wrapper">
+    @if (workContextService.estimateRemainingToday$|async; as estimateTotal) {
     <div
-      *ngIf="workContextService.estimateRemainingToday$|async as estimateTotal"
       @expand
       class="estimate-total"
     >
@@ -14,6 +14,7 @@
         ></mat-icon>
       </div>
     </div>
+    }
 
     <add-task-bar [isDisableAutoFocus]="true"></add-task-bar>
 

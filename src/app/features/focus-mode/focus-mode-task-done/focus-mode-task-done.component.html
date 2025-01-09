@@ -20,21 +20,21 @@
     {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
   </button>
 
+  @if (!(currentTask$|async)) {
   <button
-    *ngIf="!(currentTask$|async)"
     mat-raised-button
     color="primary"
     (click)="startNextFocusSession()"
   >
     {{T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION|translate}}
   </button>
-
+  } @if ((currentTask$|async)) {
   <button
-    *ngIf="(currentTask$|async)"
     mat-raised-button
     color="primary"
     (click)="continueWithFocusSession()"
   >
     {{T.F.FOCUS_MODE.CONTINUE_FOCUS_SESSION|translate}}
   </button>
+  }
 </div>

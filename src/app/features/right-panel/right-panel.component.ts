@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  OnDestroy,
+} from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -7,6 +13,11 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
 import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
 import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
+import { BetterDrawerContainerComponent } from '../../ui/better-drawer/better-drawer-container/better-drawer-container.component';
+import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
+import { NotesComponent } from '../note/notes/notes.component';
+import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'right-panel',
@@ -18,10 +29,20 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
     slideInFromTopAni,
     slideInFromRightAni,
   ],
+  imports: [
+    BetterDrawerContainerComponent,
+    IssuePanelComponent,
+    NotesComponent,
+    TaskDetailPanelComponent,
+    AsyncPipe,
+  ],
 })
 export class RightPanelComponent implements OnDestroy {
+  taskService = inject(TaskService);
+  layoutService = inject(LayoutService);
+
   // NOTE: used for debugging
-  @Input() isAlwaysOver: boolean = false;
+  readonly isAlwaysOver = input<boolean>(false);
 
   // to still display its data when panel is closing
   selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks | null> =
@@ -67,10 +88,7 @@ export class RightPanelComponent implements OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(
-    public taskService: TaskService,
-    public layoutService: LayoutService,
-  ) {
+  constructor() {
     this._subs.add(
       this.isOpen$.subscribe((isOpen) => {
         if (!isOpen) {

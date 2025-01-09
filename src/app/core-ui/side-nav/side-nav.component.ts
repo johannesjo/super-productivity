@@ -4,10 +4,10 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  inject,
   OnDestroy,
-  QueryList,
-  ViewChild,
-  ViewChildren,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -24,7 +24,12 @@ import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { FocusKeyManager } from '@angular/cdk/a11y';
-import { MatMenuItem } from '@angular/material/menu';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { LS } from '../../core/persistence/storage-keys.const';
@@ -34,7 +39,7 @@ import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
 import { Store } from '@ngrx/store';
 import {
@@ -43,6 +48,14 @@ import {
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { updateProject } from '../../features/project/store/project.actions';
+import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'side-nav',
@@ -50,15 +63,42 @@ import { updateProject } from '../../features/project/store/project.actions';
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
+  imports: [
+    SideNavItemComponent,
+    MatMenuItem,
+    RouterLink,
+    RouterLinkActive,
+    MatIcon,
+    MatIconButton,
+    MatTooltip,
+    ContextMenuComponent,
+    CdkDropList,
+    CdkDrag,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    TranslatePipe,
+    AsyncPipe,
+  ],
 })
 export class SideNavComponent implements OnDestroy {
-  @ViewChildren('menuEntry') navEntries?: QueryList<MatMenuItem>;
+  readonly tagService = inject(TagService);
+  readonly projectService = inject(ProjectService);
+  readonly workContextService = inject(WorkContextService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _layoutService = inject(LayoutService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _shepherdService = inject(ShepherdService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _store = inject(Store);
+
+  readonly navEntries = viewChildren<MatMenuItem>('menuEntry');
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
   keyboardFocusTimeout?: number;
-  @ViewChild('projectExpandBtn', { read: ElementRef }) projectExpandBtn?: ElementRef;
+  readonly projectExpandBtn = viewChild('projectExpandBtn', { read: ElementRef });
   isProjectsExpanded: boolean = this.fetchProjectListState();
   isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isProjectsExpanded,
@@ -76,7 +116,7 @@ export class SideNavComponent implements OnDestroy {
     ),
   );
 
-  @ViewChild('tagExpandBtn', { read: ElementRef }) tagExpandBtn?: ElementRef;
+  readonly tagExpandBtn = viewChild('tagExpandBtn', { read: ElementRef });
   isTagsExpanded: boolean = this.fetchTagListState();
   isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     this.isTagsExpanded,
@@ -103,17 +143,7 @@ export class SideNavComponent implements OnDestroy {
     return this._globalConfigService.cfg?.misc.isUseMinimalNav ? 'minimal-nav' : '';
   }
 
-  constructor(
-    public readonly tagService: TagService,
-    public readonly projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    private readonly _matDialog: MatDialog,
-    private readonly _layoutService: LayoutService,
-    private readonly _taskService: TaskService,
-    private readonly _shepherdService: ShepherdService,
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _store: Store,
-  ) {
+  constructor() {
     this._subs.add(
       this.workContextService.activeWorkContextId$.subscribe(
         (id) => (this.activeWorkContextId = id),
@@ -122,9 +152,10 @@ export class SideNavComponent implements OnDestroy {
 
     this._subs.add(
       this._layoutService.isShowSideNav$.subscribe((isShow) => {
-        if (this.navEntries && isShow) {
+        const navEntries = this.navEntries();
+        if (navEntries && isShow) {
           this.keyManager = new FocusKeyManager<MatMenuItem>(
-            this.navEntries,
+            navEntries,
           ).withVerticalOrientation(true);
           window.clearTimeout(this.keyboardFocusTimeout);
           this.keyboardFocusTimeout = window.setTimeout(() => {
@@ -189,9 +220,9 @@ export class SideNavComponent implements OnDestroy {
   }
 
   checkFocusProject(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.projectExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
-        return value._getHostElement() === this.projectExpandBtn?.nativeElement;
+    if (ev.key === 'ArrowLeft' && this.projectExpandBtn()?.nativeElement) {
+      const targetIndex = this.navEntries().findIndex((value) => {
+        return value._getHostElement() === this.projectExpandBtn()?.nativeElement;
       });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
@@ -216,9 +247,9 @@ export class SideNavComponent implements OnDestroy {
   }
 
   checkFocusTag(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.tagExpandBtn?.nativeElement) {
-      const targetIndex = this.navEntries?.toArray().findIndex((value) => {
-        return value._getHostElement() === this.tagExpandBtn?.nativeElement;
+    if (ev.key === 'ArrowLeft' && this.tagExpandBtn()?.nativeElement) {
+      const targetIndex = this.navEntries().findIndex((value) => {
+        return value._getHostElement() === this.tagExpandBtn()?.nativeElement;
       });
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);

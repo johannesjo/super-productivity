@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { OpenProjectApiService } from '../../open-project-api.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
@@ -12,30 +18,89 @@ import {
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../../jira/jira.const';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import { DateService } from 'src/app/core/date/date.service';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { OpenProjectCfg } from '../../open-project.model';
 import { formatOpenProjectWorkPackageSubjectForSnack } from '../../format-open-project-work-package-subject.util';
-import { concatMap, first } from 'rxjs/operators';
+import { concatMap, map, shareReplay, switchMap, takeUntil } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
-import { assertTruthy } from '../../../../../../util/assert-truthy';
-import { UiModule } from '../../../../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { TaskService } from '../../../../../tasks/task.service';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatError,
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+} from '@angular/material/form-field';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+import { InputDurationDirective } from '../../../../../../ui/duration/input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'dialog-open-project-track-time',
   templateUrl: './dialog-open-project-track-time.component.html',
   styleUrls: ['./dialog-open-project-track-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   animations: [expandFadeAnimation],
-  imports: [UiModule, FormsModule, NgForOf, AsyncPipe, NgIf],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatIcon,
+    MatDialogContent,
+    MatFormField,
+    MatSuffix,
+    MatMenuTrigger,
+    MatTooltip,
+    TranslatePipe,
+    InputDurationDirective,
+    MatInput,
+    MatIconButton,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MsToStringPipe,
+    MatCheckbox,
+    CdkTextareaAutosize,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatDialogTitle,
+    MatLabel,
+    MatError,
+    MatButton,
+  ],
 })
-export class DialogOpenProjectTrackTimeComponent {
+export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogOpenProjectTrackTimeComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _store = inject(Store);
+  private _issueProviderService = inject(IssueProviderService);
+  private _taskService = inject(TaskService);
+  data = inject<{
+    workPackage: OpenProjectWorkPackage;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   timeSpent: number;
   started: string;
@@ -53,7 +118,29 @@ export class DialogOpenProjectTrackTimeComponent {
   timeSpentLoggedDelta: number;
 
   activityId: number = 1;
-  activities$ = this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId)).pipe(
+
+  private _onDestroy$ = new Subject();
+
+  private _issueProviderIdOnce$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
+
+  private _cfgOnce$: Observable<OpenProjectCfg> = this._issueProviderIdOnce$.pipe(
+    switchMap((issueProviderId) =>
+      this._issueProviderService.getCfgOnce$(issueProviderId, 'OPEN_PROJECT'),
+    ),
+    takeUntil(this._onDestroy$),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+
+  activities$ = this._cfgOnce$.pipe(
     concatMap((cfg) => {
       return this._openProjectApiService.getActivitiesForTrackTime$(
         this.workPackage.id,
@@ -61,44 +148,32 @@ export class DialogOpenProjectTrackTimeComponent {
       );
     }),
   );
-  private _subs = new Subscription();
 
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _matDialogRef: MatDialogRef<DialogOpenProjectTrackTimeComponent>,
-    private _snackService: SnackService,
-    private _store: Store,
-    private _issueProviderService: IssueProviderService,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      workPackage: OpenProjectWorkPackage;
-      task: Task;
-    },
-    private _dateService: DateService,
-  ) {
+  constructor() {
+    this._issueProviderIdOnce$.subscribe((v) => console.log(`_issueProviderIdOnce$`, v));
+
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
     this.started = this._convertTimestamp(this.data.task.created);
     this.comment = this.data.task.parentId ? this.data.task.title : '';
-    this.timeLoggedForWorkPackage = parseOpenProjectDuration(
-      assertTruthy(this.workPackage.spentTime),
-    );
+
+    this.timeLoggedForWorkPackage = parseOpenProjectDuration(this.workPackage.spentTime);
     this.timeSpentToday = this.data.task.timeSpentOnDay[this._dateService.todayStr()];
     this.timeSpentLoggedDelta = Math.max(
       0,
       this.data.task.timeSpent - this.timeLoggedForWorkPackage,
     );
 
-    this._subs.add(
-      this._getCfgOnce$(assertTruthy(this.data.task.issueProviderId))
-        .pipe(first())
-        .subscribe((cfg) => {
-          if (cfg.timeTrackingDialogDefaultTime) {
-            this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
-            this.started = this._fillInStarted(cfg.timeTrackingDialogDefaultTime);
-          }
-        }),
-    );
+    this._cfgOnce$.subscribe((cfg) => {
+      if (cfg.timeTrackingDialogDefaultTime) {
+        this.timeSpent = this.getTimeToLogForMode(cfg.timeTrackingDialogDefaultTime);
+        this.started = this._fillInStarted(cfg.timeTrackingDialogDefaultTime);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this._onDestroy$.next();
   }
 
   close(): void {
@@ -106,21 +181,24 @@ export class DialogOpenProjectTrackTimeComponent {
   }
 
   async postTime(): Promise<void> {
-    if (
-      this.workPackage.id &&
-      this.started &&
-      this.timeSpent &&
-      this.data.task.issueProviderId
-    ) {
-      const cfg = await this._getCfgOnce$(this.data.task.issueProviderId)
-        .pipe(first())
-        .toPromise();
+    console.log({
+      wp: this.workPackage,
+      started: this.started,
+      timeSpent: this.timeSpent,
+      comment: this.comment,
+      activityId: this.activityId,
+      ipid: this.data.task.issueProviderId,
+    });
 
+    const ipId = await this._issueProviderIdOnce$.toPromise();
+
+    if (this.workPackage.id && this.started && this.timeSpent && ipId) {
+      const cfg = await this._cfgOnce$.toPromise();
       if (this.defaultTimeCheckboxContent?.isChecked === true) {
         this._store.dispatch(
           IssueProviderActions.updateIssueProvider({
             issueProvider: {
-              id: this.data.task.issueProviderId,
+              id: ipId,
               changes: {
                 timeTrackingDialogDefaultTime: this.defaultTimeCheckboxContent.value,
               },
@@ -137,6 +215,7 @@ export class DialogOpenProjectTrackTimeComponent {
           activityId: this.activityId,
           cfg,
         })
+        .pipe(takeUntil(this._onDestroy$))
         .subscribe((res) => {
           this._snackService.open({
             type: 'SUCCESS',
@@ -189,9 +268,5 @@ export class DialogOpenProjectTrackTimeComponent {
     } else {
       return this._convertTimestamp(this.data.task.created);
     }
-  }
-
-  private _getCfgOnce$(issueProviderId: string): Observable<OpenProjectCfg> {
-    return this._issueProviderService.getCfgOnce$(issueProviderId, 'OPEN_PROJECT');
   }
 }

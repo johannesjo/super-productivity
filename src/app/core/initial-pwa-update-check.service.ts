@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { IS_ELECTRON } from '../app.constants';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
@@ -11,6 +11,9 @@ import { TranslateService } from '@ngx-translate/core';
   providedIn: 'root',
 })
 export class InitialPwaUpdateCheckService {
+  private _swUpdate = inject(SwUpdate);
+  private _translateService = inject(TranslateService);
+
   // NOTE: check currently triggered by sync effect
   afterInitialUpdateCheck$: Observable<void> =
     !IS_ELECTRON && this._swUpdate.isEnabled && isOnline()
@@ -31,9 +34,4 @@ export class InitialPwaUpdateCheckService {
           }),
         )
       : of(undefined);
-
-  constructor(
-    private _swUpdate: SwUpdate,
-    private _translateService: TranslateService,
-  ) {}
 }

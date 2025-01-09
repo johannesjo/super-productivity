@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { combineLatest, EMPTY, from, Observable } from 'rxjs';
 import { SimpleMetrics } from './metric.model';
 import { delay, map, switchMap, take } from 'rxjs/operators';
@@ -13,6 +13,11 @@ import { WorkContextService } from '../work-context/work-context.service';
   providedIn: 'root',
 })
 export class ProjectMetricsService {
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _worklogService = inject(WorklogService);
+  private _workContextService = inject(WorkContextService);
+
   simpleMetrics$: Observable<SimpleMetrics> =
     this._workContextService.activeWorkContextTypeAndId$.pipe(
       // wait for current projectId to settle in :(
@@ -33,11 +38,4 @@ export class ProjectMetricsService {
           : EMPTY;
       }),
     );
-
-  constructor(
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _worklogService: WorklogService,
-    private _workContextService: WorkContextService,
-  ) {}
 }

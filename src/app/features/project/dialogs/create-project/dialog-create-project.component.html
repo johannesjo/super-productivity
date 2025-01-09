@@ -1,10 +1,13 @@
 <h1 mat-dialog-title>
-  <span *ngIf="projectData.id">{{T.F.PROJECT.D_CREATE.EDIT|translate}}</span>
-  <span *ngIf="!projectData.id">{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
+  @if (projectData.id) {
+  <span>{{T.F.PROJECT.D_CREATE.EDIT|translate}}</span>
+  } @if (!projectData.id) {
+  <span>{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
+  }
 </h1>
 
 <form
-  (ngSubmit)="submit()"
+  (ngSubmit)="$event.preventDefault(); submit()"
   [formGroup]="formTheme"
 >
   <mat-dialog-content>

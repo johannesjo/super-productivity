@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FieldWrapper, FormlyFieldConfig } from '@ngx-formly/core';
+import { FieldWrapper, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { expandAnimation } from '../animations/expand.ani';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'formly-collapsible',
@@ -12,6 +14,7 @@ import { expandAnimation } from '../animations/expand.ani';
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.isExpanded]': 'isExpanded()',
   },
+  imports: [MatIcon, FormlyModule, TranslatePipe],
 })
 export class FormlyCollapsibleComponent extends FieldWrapper {
   isExpanded = signal(false);

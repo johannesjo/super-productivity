@@ -41,10 +41,8 @@
   </ng-container>
 </better-simple-drawer>
 
-<div
-  class="fab-wrapper FAB-BTN"
-  *ngIf="!isPanelOpen"
->
+@if (!isPanelOpen) {
+<div class="fab-wrapper FAB-BTN">
   <button
     mat-fab
     class="show-xs-only"
@@ -53,7 +51,6 @@
   >
     <mat-icon>add</mat-icon>
   </button>
-
   <button
     mat-fab
     color="primary"
@@ -63,3 +60,4 @@
     <mat-icon>playlist_add</mat-icon>
   </button>
 </div>
+}

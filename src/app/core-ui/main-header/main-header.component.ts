@@ -2,10 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   OnInit,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -25,10 +26,21 @@ import { SimpleCounterService } from '../../features/simple-counter/simple-count
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatRipple } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
+import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
+import { AsyncPipe } from '@angular/common';
+import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../../features/tag/tag/tag.component';
+import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 
 @Component({
   selector: 'main-header',
@@ -36,14 +48,47 @@ import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
+  imports: [
+    MatIconButton,
+    MatIcon,
+    MatRipple,
+    RouterLink,
+    MatTooltip,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    WorkContextMenuComponent,
+    MatMiniFabButton,
+    AsyncPipe,
+    MsToMinuteClockStringPipe,
+    TranslatePipe,
+    TagComponent,
+    SimpleCounterButtonComponent,
+  ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
+  readonly projectService = inject(ProjectService);
+  readonly workContextService = inject(WorkContextService);
+  readonly bookmarkService = inject(BookmarkService);
+  readonly taskService = inject(TaskService);
+  readonly pomodoroService = inject(PomodoroService);
+  readonly layoutService = inject(LayoutService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  readonly syncProviderService = inject(SyncProviderService);
+  readonly globalConfigService = inject(GlobalConfigService);
+  private readonly _tagService = inject(TagService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _snackService = inject(SnackService);
+  private readonly _router = inject(Router);
+  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _configService = inject(GlobalConfigService);
+
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
   isShowSimpleCounterBtnsMobile: boolean = false;
 
-  @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
+  readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
   currentTaskContext$: Observable<Project | Tag | null> =
     this.taskService.currentTaskParentOrCurrent$.pipe(
@@ -79,41 +124,20 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    public readonly bookmarkService: BookmarkService,
-    public readonly taskService: TaskService,
-    public readonly pomodoroService: PomodoroService,
-    public readonly layoutService: LayoutService,
-    public readonly simpleCounterService: SimpleCounterService,
-    public readonly syncProviderService: SyncProviderService,
-    public readonly globalConfigService: GlobalConfigService,
-    private readonly _tagService: TagService,
-    private readonly _renderer: Renderer2,
-    private readonly _snackService: SnackService,
-    private readonly _router: Router,
-    private readonly _focusModeService: FocusModeService,
-    private readonly _configService: GlobalConfigService,
-  ) {}
-
   ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
   ngOnInit(): void {
     this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-      if (this.circleSvg) {
+      const circleSvg = this.circleSvg();
+      if (circleSvg) {
         let progress = progressIN || 1;
         if (progress > 1) {
           progress = 1;
         }
         const dashOffset = this.circumference * -1 * progress;
-        this._renderer.setStyle(
-          this.circleSvg.nativeElement,
-          'stroke-dashoffset',
-          dashOffset,
-        );
+        this._renderer.setStyle(circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
       }
     });
   }

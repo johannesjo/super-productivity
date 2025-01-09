@@ -1,16 +1,17 @@
-import { NgModule } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { LocalBackupService } from './local-backup.service';
 import { IS_ELECTRON } from '../../app.constants';
-import { EffectsModule } from '@ngrx/effects';
-import { LocalBackupEffects } from './local-backup.effects';
 import { IS_ANDROID_BACKUP_READY } from '../../features/android/android-interface';
 
 @NgModule({
+  // TODO check if this is instantiated correctly
   providers: [LocalBackupService],
-  imports: [EffectsModule.forFeature([LocalBackupEffects])],
+  imports: [],
 })
 export class LocalBackupModule {
-  constructor(private _localBackupService: LocalBackupService) {
+  private _localBackupService = inject(LocalBackupService);
+
+  constructor() {
     if (IS_ELECTRON || IS_ANDROID_BACKUP_READY) {
       this._localBackupService.init();
     }

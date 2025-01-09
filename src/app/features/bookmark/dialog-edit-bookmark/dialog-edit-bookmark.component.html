@@ -1,13 +1,12 @@
+@if (bookmarkCopy) {
 <form
   #form="ngForm"
-  (submit)="submit()"
-  *ngIf="bookmarkCopy"
+  (submit)="$event.preventDefault();submit()"
 >
   <h1 mat-dialog-title>
     {{ (bookmarkCopy.id ? (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :
     (T.F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK)) |translate }}
   </h1>
-
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
@@ -30,7 +29,6 @@
           type="text"
         />
       </mat-form-field>
-
       <mat-form-field>
         <mat-label>{{(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)}}</mat-label>
         <mat-select
@@ -38,14 +36,11 @@
           name="type"
           required="true"
         >
-          <mat-option
-            *ngFor="let type of types; trackBy: trackByIndex"
-            [value]="type.type"
-            >{{ (type.title|translate) }}
-          </mat-option>
+          @for (type of types; track trackByIndex($index, type)) {
+          <mat-option [value]="type.type">{{ (type.title|translate) }} </mat-option>
+          }
         </mat-select>
       </mat-form-field>
-
       <div class="custom-icon-wrapper">
         <mat-form-field>
           <mat-label>{{(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)}}</mat-label>
@@ -61,19 +56,17 @@
             #auto="matAutocomplete"
             [autoActiveFirstOption]="true"
           >
-            <mat-option
-              *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
-              [value]="icon"
-            >
+            @for (icon of (filteredIcons$|async); track trackByIndex($index, icon)) {
+            <mat-option [value]="icon">
               <mat-icon>{{icon}}</mat-icon>
               <span>{{icon}}</span>
             </mat-option>
+            }
           </mat-autocomplete>
         </mat-form-field>
       </div>
     </div>
   </mat-dialog-content>
-
   <mat-dialog-actions align="end">
     <button
       (click)="close()"
@@ -83,7 +76,6 @@
     >
       {{T.G.CANCEL|translate}}
     </button>
-
     <button
       [disabled]="!form.valid"
       color="primary"
@@ -95,3 +87,4 @@
     </button>
   </mat-dialog-actions>
 </form>
+}

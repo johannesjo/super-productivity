@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   cancelFocusSession,
@@ -45,6 +45,12 @@ const SESSION_DONE_SOUND = 'positive.ogg';
 
 @Injectable()
 export class FocusModeEffects {
+  private _store = inject(Store);
+  private _actions$ = inject(Actions);
+  private _idleService = inject(IdleService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _taskService = inject(TaskService);
+
   private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
   private _sessionDuration$ = this._store.select(selectFocusSessionDuration);
   private _sessionProgress$ = this._store.select(selectFocusSessionProgress);
@@ -165,12 +171,4 @@ export class FocusModeEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _store: Store,
-    private _actions$: Actions,
-    private _idleService: IdleService,
-    private _globalConfigService: GlobalConfigService,
-    private _taskService: TaskService,
-  ) {}
 }

@@ -3,11 +3,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Inject,
-  ViewChild,
+  inject,
+  viewChild,
 } from '@angular/core';
-import { UiModule } from '../../../ui/ui.module';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import {
   Task,
   TaskCopy,
@@ -19,7 +22,7 @@ import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
 import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -37,23 +40,65 @@ import { PlannerService } from '../planner.service';
 import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { DateAdapter } from '@angular/material/core';
+import { DateAdapter, MatOption } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../tasks/util/is-task-today';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatFormField,
+  MatLabel,
+  MatPrefix,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'dialog-schedule-task',
-  standalone: true,
-  imports: [UiModule, CommonModule, FormsModule],
+  imports: [
+    FormsModule,
+    MatTooltip,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    TranslatePipe,
+    MatButton,
+    MatDialogActions,
+    MatCalendar,
+    MatInput,
+    MatLabel,
+    MatSuffix,
+    MatPrefix,
+  ],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation, fadeAnimation],
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
+  data = inject<{
+    task: Task;
+    targetDay?: string;
+  }>(MAT_DIALOG_DATA);
+  private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
+  private _cd = inject(ChangeDetectorRef);
+  private _store = inject(Store);
+  private _snackService = inject(SnackService);
+  private _datePipe = inject(DatePipe);
+  private _taskService = inject(TaskService);
+  private workContextService = inject(WorkContextService);
+  private _reminderService = inject(ReminderService);
+  private _plannerService = inject(PlannerService);
+  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+
   T: typeof T = T;
   minDate = new Date();
-  @ViewChild(MatCalendar, { static: true }) calendar!: MatCalendar<Date>;
+  readonly calendar = viewChild.required(MatCalendar);
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   task: TaskCopy = this.data.task;
@@ -70,20 +115,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
   private _timeCheckVal: string | null = null;
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task; targetDay?: string },
-    private _matDialogRef: MatDialogRef<DialogScheduleTaskComponent>,
-    private _cd: ChangeDetectorRef,
-    private _store: Store,
-    private _snackService: SnackService,
-    private _datePipe: DatePipe,
-    private _taskService: TaskService,
-    private workContextService: WorkContextService,
-    private _reminderService: ReminderService,
-    private _plannerService: PlannerService,
-    private readonly _dateAdapter: DateAdapter<unknown>,
-  ) {}
 
   async ngAfterViewInit(): Promise<void> {
     if (this.data.task.reminderId) {
@@ -125,7 +156,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedDate = dateStrToUtcDate(this.data.targetDay);
     }
 
-    this.calendar.activeDate = new Date(this.selectedDate || new Date());
+    this.calendar().activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();
 
     setTimeout(() => {
@@ -169,7 +200,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       if (
         this.selectedDate &&
         new Date(this.selectedDate).getTime() ===
-          new Date(this.calendar.activeDate).getTime()
+          new Date(this.calendar().activeDate).getTime()
       ) {
         this.submit();
       }
@@ -212,7 +243,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // we do the timeout is there to make sure this happens after our click handler
     setTimeout(() => {
       this.selectedDate = new Date(newDate);
-      this.calendar.activeDate = this.selectedDate;
+      this.calendar().activeDate = this.selectedDate;
     });
   }
 

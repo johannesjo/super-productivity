@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { JiraApiService } from '../../jira-api.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+} from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { JiraIssue } from '../../jira-issue/jira-issue.model';
 import { Task } from '../../../../../tasks/task.model';
@@ -12,11 +18,36 @@ import {
   JIRA_WORK_LOG_EXPORT_FORM_OPTIONS,
 } from '../../jira.const';
 import { JiraWorklogExportDefaultTime } from '../../jira.model';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { DateService } from 'src/app/core/date/date.service';
 import { IssueProviderService } from '../../../../issue-provider.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderActions } from '../../../../store/issue-provider.actions';
+import { TaskService } from '../../../../../tasks/task.service';
+import { first, map, switchMap } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import {
+  MatLabel,
+  MatFormField,
+  MatSuffix,
+  MatError,
+} from '@angular/material/form-field';
+import { InputDurationDirective } from '../../../../../../ui/duration/input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import {
+  MatMenuTrigger,
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+} from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -24,8 +55,46 @@ import { IssueProviderActions } from '../../../../store/issue-provider.actions';
   styleUrls: ['./dialog-jira-add-worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation],
+  imports: [
+    FormsModule,
+    MatDialogTitle,
+    MatIcon,
+    CdkScrollable,
+    MatDialogContent,
+    MatLabel,
+    MatFormField,
+    InputDurationDirective,
+    MatInput,
+    MatSuffix,
+    MatMenuTrigger,
+    MatTooltip,
+    MatIconButton,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatCheckbox,
+    MatError,
+    CdkTextareaAutosize,
+    MatDialogActions,
+    MatButton,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogJiraAddWorklogComponent implements OnDestroy {
+  private _jiraApiService = inject(JiraApiService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogJiraAddWorklogComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _store = inject(Store);
+  data = inject<{
+    issue: JiraIssue;
+    task: Task;
+  }>(MAT_DIALOG_DATA);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
   timeSpent: number;
   timeLogged: number;
@@ -42,21 +111,20 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   timeSpentToday: number;
   timeSpentLoggedDelta: number;
 
+  issueProviderId$: Observable<string> = this.data.task.issueProviderId
+    ? of(this.data.task.issueProviderId)
+    : this._taskService.getByIdOnce$(this.data.task.parentId as string).pipe(
+        map((parentTask) => {
+          if (!parentTask.issueProviderId) {
+            throw new Error('No issue provider id found');
+          }
+          return parentTask.issueProviderId;
+        }),
+      );
+
   private _subs = new Subscription();
 
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _matDialogRef: MatDialogRef<DialogJiraAddWorklogComponent>,
-    private _snackService: SnackService,
-    private _issueProviderService: IssueProviderService,
-    private _store: Store,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      issue: JiraIssue;
-      task: Task;
-    },
-    private _dateService: DateService,
-  ) {
+  constructor() {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
     this.timeLogged = this.issue.timespent * 1000;
@@ -66,8 +134,13 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
     this.timeSpentLoggedDelta = Math.max(0, this.data.task.timeSpent - this.timeLogged);
 
     this._subs.add(
-      this._issueProviderService
-        .getCfgOnce$(this.data.task.issueProviderId!, 'JIRA')
+      this.issueProviderId$
+        .pipe(
+          first(),
+          switchMap((issueProviderId) =>
+            this._issueProviderService.getCfgOnce$(issueProviderId, 'JIRA'),
+          ),
+        )
         .subscribe((cfg) => {
           if (cfg.worklogDialogDefaultTime) {
             this.timeSpent = this.getTimeToLogForMode(cfg.worklogDialogDefaultTime);
@@ -86,21 +159,17 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   }
 
   async submitWorklog(): Promise<void> {
-    if (
-      this.issue.id &&
-      this.started &&
-      this.timeSpent &&
-      this.data.task.issueProviderId
-    ) {
+    const issueProviderId = await this.issueProviderId$.pipe(first()).toPromise();
+    if (this.issue.id && this.started && this.timeSpent && issueProviderId) {
       const cfg = await this._issueProviderService
-        .getCfgOnce$(this.data.task.issueProviderId, 'JIRA')
+        .getCfgOnce$(issueProviderId, 'JIRA')
         .toPromise();
 
       if (this.defaultTimeCheckboxContent?.isChecked === true) {
         this._store.dispatch(
           IssueProviderActions.updateIssueProvider({
             issueProvider: {
-              id: this.data.task.issueProviderId,
+              id: issueProviderId,
               changes: {
                 worklogDialogDefaultTime: this.defaultTimeCheckboxContent.value,
               },

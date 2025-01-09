@@ -20,40 +20,24 @@
   (ngSubmit)="submit()"
 >
   <mat-dialog-content>
-    <help-section *ngIf="configFormSection?.help||configFormSection?.helpArr">
-      <div
-        *ngIf="configFormSection?.help"
-        [innerHtml]="configFormSection?.help|translate"
-      ></div>
-      <ng-container *ngIf="configFormSection?.helpArr">
-        <ng-container *ngFor="let helpSection of configFormSection?.helpArr; ">
-          <div
-            *ngIf="helpSection.h"
-            class="mat-caption"
-          >
-            {{ helpSection.h|translate }}
-          </div>
-          <p
-            *ngIf="helpSection.p"
-            [innerHTML]="helpSection.p|translate"
-          ></p>
-          <p
-            *ngIf="helpSection.p2"
-            [innerHTML]="helpSection.p2|translate"
-          ></p>
-          <p
-            *ngIf="helpSection.p3"
-            [innerHTML]="helpSection.p3|translate"
-          ></p>
-          <p
-            *ngIf="helpSection.p4"
-            [innerHTML]="helpSection.p4|translate"
-          ></p>
-        </ng-container>
-      </ng-container>
+    @if (configFormSection?.help||configFormSection?.helpArr) {
+    <help-section>
+      @if (configFormSection?.help) {
+      <div [innerHtml]="configFormSection?.help|translate"></div>
+      } @if (configFormSection?.helpArr) { @for (helpSection of
+      configFormSection?.helpArr; track helpSection) { @if (helpSection.h) {
+      <div class="mat-caption">{{ helpSection.h|translate }}</div>
+      } @if (helpSection.p) {
+      <p [innerHTML]="helpSection.p|translate"></p>
+      } @if (helpSection.p2) {
+      <p [innerHTML]="helpSection.p2|translate"></p>
+      } @if (helpSection.p3) {
+      <p [innerHTML]="helpSection.p3|translate"></p>
+      } @if (helpSection.p4) {
+      <p [innerHTML]="helpSection.p4|translate"></p>
+      } } }
     </help-section>
-
-    @if (isEdit) {
+    } @if (isEdit) {
     <div style="margin-bottom: 32px">
       <mat-slide-toggle
         [ngModel]="model.isEnabled"
@@ -74,8 +58,8 @@
       <p>
         <a
           target="_blank"
-          href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only"
-          >How to get the iCal url for Google Calendar?</a
+          href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only"
+          >How to get the iCal url for Google Calendar (view only)?</a
         >
       </p>
       <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
@@ -87,8 +71,8 @@
       <p>
         <a
           target="_blank"
-          href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only"
-          >How to get the iCal url for Outlook 365?</a
+          href="https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365"
+          >How to get the iCal url for Outlook 365 (ICS)?</a
         >
       </p>
       <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->

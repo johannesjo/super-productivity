@@ -12,8 +12,8 @@
     tabindex="-1"
   ></textarea>
 
+  @if (!isShowAsText) {
   <div
-    *ngIf="!isShowAsText"
     [class.isNoCols]="!options.cols?.length"
     class="wrapper-wrapper"
   >
@@ -28,19 +28,20 @@
       <mat-icon>add</mat-icon>
     </button>
     <mat-menu #addColMenu="matMenu">
+      @for (colOpt of colOpts; track $index) {
       <button
         (click)="addCol(colOpt.id)"
-        *ngFor="let colOpt of colOpts; trackBy: trackByIndex"
         mat-menu-item
       >
         {{colOpt.title|translate}}
       </button>
+      }
     </mat-menu>
-
     <div class="table-wrapper material-table _no-elevation">
       <table>
         <tr class="control-row">
-          <td *ngFor="let col of options.cols;let i = index; trackBy: trackByIndex">
+          @for (col of options.cols; track i; let i = $index) {
+          <td>
             <mat-select
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.cols[i]"
@@ -48,33 +49,32 @@
               matTooltipPosition="above"
             >
               <mat-option><em>remove</em></mat-option>
-              <mat-option
-                *ngFor="let colOpt of colOpts"
-                [value]="colOpt.id"
-              >
-                {{colOpt.title|translate}}
-              </mat-option>
+              @for (colOpt of colOpts; track colOpt) {
+              <mat-option [value]="colOpt.id"> {{colOpt.title|translate}} </mat-option>
+              }
             </mat-select>
           </td>
+          }
         </tr>
         <tr>
-          <th
-            *ngFor="let headlineCol of headlineCols; let i = index; trackBy: trackByIndex"
-            [ngClass]="options.cols[i]"
-          >
-            {{headlineCol}}
-          </th>
+          @for (headlineCol of headlineCols; track i; let i = $index) {
+          <th [ngClass]="options.cols[i]">{{headlineCol}}</th>
+          }
         </tr>
-        <tr *ngFor="let row of formattedRows;">
+        @for (row of formattedRows; track row) {
+        <tr>
+          @for (col of row; track col; let i = $index) {
           <td
-            *ngFor="let col of row; let i = index;"
             [innerHTML]="col"
             [ngClass]="options.cols[i]"
           ></td>
+          }
         </tr>
+        }
       </table>
     </div>
   </div>
+  }
 
   <collapsible
     [isInline]="true"
@@ -95,10 +95,8 @@
           </div>
         </div>
         <div class="col">
-          <mat-form-field
-            *ngIf="(isWorklogExport)"
-            class="md-block"
-          >
+          @if ((isWorklogExport())) {
+          <mat-form-field class="md-block">
             <label>{{T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY|translate}}</label>
             <input
               (change)="onOptionsChange()"
@@ -108,6 +106,7 @@
               type="text"
             />
           </mat-form-field>
+          }
         </div>
         <div class="col">
           <mat-form-field>
@@ -119,12 +118,11 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
+              @for (roundOption of roundTimeOptions; track $index) {
+              <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -138,12 +136,11 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
+              @for (roundOption of roundTimeOptions; track $index) {
+              <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -157,12 +154,11 @@
               <mat-option
                 ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
+              @for (roundOption of roundTimeOptions; track $index) {
+              <mat-option [value]="roundOption.id">
                 {{roundOption.title|translate}}
               </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -173,12 +169,11 @@
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.groupBy"
             >
-              <mat-option
-                *ngFor="let groupByOption of groupByOptions; trackBy: trackByIndex"
-                [value]="groupByOption.id"
-              >
+              @for (groupByOption of groupByOptions; track $index) {
+              <mat-option [value]="groupByOption.id">
                 {{groupByOption.title|translate}}
               </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -191,8 +186,8 @@
   align="end"
   mat-dialog-actions
 >
+  @if (isShowAsText) {
   <button
-    *ngIf="isShowAsText"
     color="primary"
     data-clipboard-action="copy"
     data-clipboard-target="#task-textarea"
@@ -202,6 +197,7 @@
     <mat-icon>content_paste</mat-icon>
     {{T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
+  }
 
   <a
     [simpleDownloadData]="txt"
@@ -213,13 +209,14 @@
     {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
   </a>
 
+  @if (isShowClose()) {
   <button
     (click)="onCloseClick()"
-    *ngIf="isShowClose"
     color="primary"
     mat-stroked-button
     type="button"
   >
     {{T.G.CLOSE|translate}}
   </button>
+  }
 </div>

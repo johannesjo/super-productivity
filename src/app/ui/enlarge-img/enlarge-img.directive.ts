@@ -1,12 +1,20 @@
-import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  Renderer2,
+} from '@angular/core';
 import { getCoords } from './get-coords';
 
 const LARGE_IMG_ID = 'enlarged-img';
 
-@Directive({
-  selector: '[enlargeImg]',
-})
+@Directive({ selector: '[enlargeImg]' })
 export class EnlargeImgDirective {
+  private _renderer = inject(Renderer2);
+  private _el = inject(ElementRef);
+
   imageEl: HTMLElement;
   newImageEl?: HTMLElement;
   lightboxParentEl: HTMLElement = document.body;
@@ -15,19 +23,16 @@ export class EnlargeImgDirective {
   zoomMode: number = 0;
   zoomMoveHandler?: (ev: MouseEvent) => void;
 
-  @Input() enlargeImg?: string;
+  readonly enlargeImg = input<string>();
 
-  constructor(
-    private _renderer: Renderer2,
-    private _el: ElementRef,
-  ) {
+  constructor() {
     this.imageEl = this._el.nativeElement;
   }
 
   @HostListener('click', ['$event']) onClick(): void {
     this.isImg = this.imageEl.tagName.toLowerCase() === 'img';
 
-    if (this.isImg || this.enlargeImg) {
+    if (this.isImg || this.enlargeImg()) {
       this._showImg();
     }
   }
@@ -65,7 +70,7 @@ export class EnlargeImgDirective {
   }
 
   private _showImg(): void {
-    const src = this.enlargeImg || (this.imageEl.getAttribute('src') as string);
+    const src = this.enlargeImg() || (this.imageEl.getAttribute('src') as string);
 
     const img = new Image();
     img.src = src;

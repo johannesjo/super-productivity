@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   hideNotesAndAddTaskPanel,
@@ -20,6 +20,10 @@ import { NavigationEnd, Router } from '@angular/router';
 
 @Injectable()
 export class LayoutEffects {
+  private actions$ = inject(Actions);
+  private layoutService = inject(LayoutService);
+  private router = inject(Router);
+
   hideNotesWhenTaskIsSelected$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setSelectedTask),
@@ -53,10 +57,4 @@ export class LayoutEffects {
       mapTo(setSelectedTask({ id: null })),
     ),
   );
-
-  constructor(
-    private actions$: Actions,
-    private layoutService: LayoutService,
-    private router: Router,
-  ) {}
 }

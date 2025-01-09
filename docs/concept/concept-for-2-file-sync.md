@@ -68,7 +68,7 @@ We also need to save any incomplete syncs, so that we can warn the user if closi
 - try to download new archive file
 - (reattempt once if checksum check still fails (remote update might not be completed yet???))
 - (if checksum check still fails, check once for new main file (via etag))
-- if any of the downloads fail show error message that sync couldnt be completed and ask if the user wants to try again
+- if any of the downloads fail show error message that sync couldn't be completed and ask if the user wants to try again
 - if checksum check still fails after successful download, show error message and ask if local data should be used instead and if remote data should be overwritten
 -
 

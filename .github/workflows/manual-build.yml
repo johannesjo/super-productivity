@@ -113,7 +113,7 @@ jobs:
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Test Unit
         run: npm run test

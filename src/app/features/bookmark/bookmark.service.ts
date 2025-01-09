@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   initialBookmarkState,
@@ -31,16 +31,14 @@ import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
   providedIn: 'root',
 })
 export class BookmarkService {
+  private _store$ = inject<Store<BookmarkState>>(Store);
+  private _matDialog = inject(MatDialog);
+  private _persistenceService = inject(PersistenceService);
+
   bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllBookmarks));
   isShowBookmarks$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowBookmarkBar),
   );
-
-  constructor(
-    private _store$: Store<BookmarkState>,
-    private _matDialog: MatDialog,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   async loadStateForProject(projectId: string): Promise<void> {
     const lsBookmarkState = await this._persistenceService.bookmark.load(projectId);

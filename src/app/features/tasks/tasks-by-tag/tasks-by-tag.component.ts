@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, Input } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { Task } from '../task.model';
 import { unique } from '../../../util/unique';
@@ -9,6 +9,10 @@ import { Store } from '@ngrx/store';
 import { selectAllTags } from '../../tag/store/tag.reducer';
 import { Tag } from '../../tag/tag.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 interface TagWithTimeSpent {
   id: string;
@@ -21,12 +25,16 @@ interface TagWithTimeSpent {
   templateUrl: './tasks-by-tag.component.html',
   styleUrls: ['./tasks-by-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncPipe, MsToStringPipe, TranslatePipe, TagComponent],
 })
 export class TasksByTagComponent {
+  private readonly _store = inject(Store);
+  private readonly _dateService = inject(DateService);
+
   T: typeof T = T;
-  @Input() dayStr: string = this._dateService.todayStr();
-  @Input() isForToday: boolean = true;
-  @Input() isShowYesterday: boolean = false;
+  readonly dayStr = input<string>(this._dateService.todayStr());
+  readonly isForToday = input<boolean>(true);
+  readonly isShowYesterday = input<boolean>(false);
   flatTasks: Task[] = [];
   todaysTasksTagIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   tagsWithTimeSpent$: Observable<TagWithTimeSpent[]> = this.todaysTasksTagIds$.pipe(
@@ -40,6 +48,8 @@ export class TasksByTagComponent {
     }),
   );
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('flatTasks') set flatTasksIn(tasks: Task[]) {
     this.flatTasks = tasks;
     const tagIds: string[] = unique(
@@ -47,11 +57,6 @@ export class TasksByTagComponent {
     );
     this.todaysTasksTagIds$.next(tagIds);
   }
-
-  constructor(
-    private readonly _store: Store,
-    private readonly _dateService: DateService,
-  ) {}
 
   trackById(i: number, item: Tag): string {
     return item.id;
@@ -69,8 +74,8 @@ export class TasksByTagComponent {
       timeSpentToday: this.flatTasks
         .filter((task) => task.tagIds.includes(tag.id))
         .reduce((acc, task) => {
-          let v: number = task.timeSpentOnDay[this.dayStr] || 0;
-          if (this.isShowYesterday && this.isForToday) {
+          let v: number = task.timeSpentOnDay[this.dayStr()] || 0;
+          if (this.isShowYesterday() && this.isForToday()) {
             v = v + (task.timeSpentOnDay[yesterdayDayStr] || 0);
           }
           return acc + v;

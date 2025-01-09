@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { first, switchMap, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
@@ -18,6 +18,11 @@ import {
 
 @Injectable()
 export class BookmarkEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _persistenceService = inject(PersistenceService);
+  private _workContextService = inject(WorkContextService);
+
   updateBookmarks$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -39,13 +44,6 @@ export class BookmarkEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
-  ) {}
 
   private _saveToLs(currentProjectId: string, bookmarkState: BookmarkState): void {
     if (currentProjectId) {

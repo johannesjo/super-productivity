@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnChanges,
   SimpleChanges,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
@@ -12,31 +14,65 @@ import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { TagComponentTag } from '../../tag/tag/tag.component';
+import { TagComponent, TagComponentTag } from '../../tag/tag/tag.component';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
+import { EnlargeImgDirective } from '../../../ui/enlarge-img/enlarge-img.directive';
+import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
+import { MarkdownComponent } from 'ngx-markdown';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'note',
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    EnlargeImgDirective,
+    LongPressDirective,
+    MarkdownComponent,
+    MatIconButton,
+    MatIcon,
+    TagComponent,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class NoteComponent implements OnChanges {
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _noteService = inject(NoteService);
+  private readonly _projectService = inject(ProjectService);
+  private readonly _workContextService = inject(WorkContextService);
+
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   note!: Note;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('note') set noteSet(v: Note) {
     this.note = v;
     this._note$.next(v);
   }
 
-  @Input() isFocus?: boolean;
+  readonly isFocus = input<boolean>();
 
-  @ViewChild('markdownEl') markdownEl?: HTMLElement;
+  readonly markdownEl = viewChild<HTMLElement>('markdownEl');
 
   isLongNote?: boolean;
   shortenedNote?: string;
@@ -75,13 +111,6 @@ export class NoteComponent implements OnChanges {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
-
-  constructor(
-    private readonly _matDialog: MatDialog,
-    private readonly _noteService: NoteService,
-    private readonly _projectService: ProjectService,
-    private readonly _workContextService: WorkContextService,
-  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.note) {

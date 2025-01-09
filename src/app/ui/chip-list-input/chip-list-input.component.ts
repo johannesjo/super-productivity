@@ -3,22 +3,36 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
+  input,
   OnDestroy,
-  Output,
-  ViewChild,
+  output,
+  viewChild,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import {
+  MatChipGrid,
+  MatChipInput,
+  MatChipInputEvent,
+  MatChipRemove,
+  MatChipRow,
+} from '@angular/material/chips';
 import { map, startWith } from 'rxjs/operators';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../t.const';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatOption } from '@angular/material/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
 
 const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
 
@@ -34,29 +48,53 @@ interface Suggestion {
   templateUrl: './chip-list-input.component.html',
   styleUrls: ['./chip-list-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatChipGrid,
+    MatChipRow,
+    MatIcon,
+    MatChipRemove,
+    MatTooltip,
+    MatIconButton,
+    FormsModule,
+    MatAutocompleteTrigger,
+    MatChipInput,
+    ReactiveFormsModule,
+    MatAutocomplete,
+    MatOption,
+    TranslatePipe,
+    AsyncPipe,
+  ],
 })
 export class ChipListInputComponent implements OnDestroy {
+  // TODO maybe use new api
+  // autoFocus = inject(new HostAttributeToken('autoFocus'));
+
   T: typeof T = T;
 
-  @Input() label?: string;
+  readonly label = input<string>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() additionalActionIcon?: string;
-  @Input() additionalActionTooltip?: string;
-  @Input() additionalActionTooltipUnToggle?: string;
-  @Input() toggledItems?: string[];
+  readonly additionalActionTooltip = input<string>();
+  readonly additionalActionTooltipUnToggle = input<string>();
+  readonly toggledItems = input<string[]>();
 
-  @Output() addItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() addNewItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() removeItem: EventEmitter<string> = new EventEmitter<string>();
-  @Output() additionalAction: EventEmitter<string> = new EventEmitter<string>();
-  @Output() ctrlEnterSubmit: EventEmitter<void> = new EventEmitter<void>();
+  readonly addItem = output<string>();
+  readonly addNewItem = output<string>();
+  readonly removeItem = output<string>();
+  readonly additionalAction = output<string>();
+  readonly ctrlEnterSubmit = output<void>();
 
   suggestionsIn: Suggestion[] = [];
   modelItems: Suggestion[] = [];
   inputCtrl: UntypedFormControl = new UntypedFormControl();
   separatorKeysCodes: number[] = DEFAULT_SEPARATOR_KEY_CODES;
   isAutoFocus = false;
-  @ViewChild('inputElRef', { static: true }) inputEl?: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', { static: true }) matAutocomplete?: MatAutocomplete;
+  readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputElRef');
+  readonly matAutocomplete = viewChild<MatAutocomplete>('autoElRef');
   private _modelIds: string[] = [];
 
   filteredSuggestions: Observable<Suggestion[]> = this.inputCtrl.valueChanges.pipe(
@@ -76,7 +114,7 @@ export class ChipListInputComponent implements OnDestroy {
     if (typeof autoFocus === 'string') {
       this.isAutoFocus = true;
       this._autoFocusTimeout = window.setTimeout(() => {
-        this.inputEl?.nativeElement.focus();
+        this.inputEl()?.nativeElement.focus();
         // NOTE: we need to wait a little for the tag dialog to be there
       }, 300);
     }
@@ -88,23 +126,28 @@ export class ChipListInputComponent implements OnDestroy {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set suggestions(val: Suggestion[]) {
     this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
     this._updateModelItems(this._modelIds);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(v: string[]) {
     this._modelIds = v;
     this._updateModelItems(v);
   }
 
   add(event: MatChipInputEvent): void {
-    if (!this.matAutocomplete) {
+    const matAutocomplete = this.matAutocomplete();
+    if (!matAutocomplete) {
       throw new Error('Auto complete undefined');
     }
 
-    if (!this.matAutocomplete.isOpen) {
-      const input = event.input;
+    if (!matAutocomplete.isOpen) {
+      const inp = event.input;
       const value = event.value;
 
       // Add our fruit
@@ -112,7 +155,7 @@ export class ChipListInputComponent implements OnDestroy {
         this._addByTitle(value.trim());
       }
 
-      input.value = '';
+      inp.value = '';
 
       this.inputCtrl.setValue(null);
     }
@@ -124,14 +167,16 @@ export class ChipListInputComponent implements OnDestroy {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this._add(event.option.value);
-    if (this.inputEl) {
-      this.inputEl.nativeElement.value = '';
+    const inputEl = this.inputEl();
+    if (inputEl) {
+      inputEl.nativeElement.value = '';
     }
     this.inputCtrl.setValue(null);
   }
 
   isToggled(id: string): boolean {
-    return !!this.toggledItems && this.toggledItems.includes(id);
+    const toggledItems = this.toggledItems();
+    return !!toggledItems && toggledItems.includes(id);
   }
 
   triggerCtrlEnterSubmit(ev: KeyboardEvent): void {
@@ -143,7 +188,7 @@ export class ChipListInputComponent implements OnDestroy {
     }
 
     if (ev.code === 'Enter' && ev.ctrlKey) {
-      this.ctrlEnterSubmit.next();
+      this.ctrlEnterSubmit.emit();
     }
   }
 

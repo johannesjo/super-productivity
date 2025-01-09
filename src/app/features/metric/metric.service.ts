@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   addMetric,
@@ -31,6 +31,9 @@ import { DateService } from 'src/app/core/date/date.service';
   providedIn: 'root',
 })
 export class MetricService {
+  private _store$ = inject<Store<MetricState>>(Store);
+  private _dateService = inject(DateService);
+
   // metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
   hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
   hasSimpleCounterData$: Observable<boolean> = this._store$.pipe(
@@ -44,13 +47,6 @@ export class MetricService {
   obstructionCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(
     select(selectObstructionCountsPieChartData),
   );
-
-  // productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
-
-  constructor(
-    private _store$: Store<MetricState>,
-    private _dateService: DateService,
-  ) {}
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
   //   if (!id) {

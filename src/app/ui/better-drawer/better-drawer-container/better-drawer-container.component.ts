@@ -3,12 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
+  inject,
   Input,
+  input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
   ViewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../../animations/fade.ani';
@@ -33,8 +34,12 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
 export class BetterDrawerContainerComponent
   implements OnInit, AfterContentInit, OnDestroy
 {
-  @Input() sideWidth: number = 0;
-  @Output() wasClosed: EventEmitter<void> = new EventEmitter<void>();
+  private _elementRef = inject(ElementRef);
+  private _domSanitizer = inject(DomSanitizer);
+  private _languageService = inject(LanguageService);
+
+  readonly sideWidth = input<number>(0);
+  readonly wasClosed = output<void>();
   contentEl$: ReplaySubject<HTMLElement> = new ReplaySubject<HTMLElement>(1);
   containerWidth$: Observable<number> = this.contentEl$.pipe(
     switchMap((el) => observeWidth(el)),
@@ -50,13 +55,10 @@ export class BetterDrawerContainerComponent
     distinctUntilChanged(),
   );
   sideStyle: SafeStyle = '';
+  private _isFirstRender: boolean = true;
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _elementRef: ElementRef,
-    private _domSanitizer: DomSanitizer,
-    private _languageService: LanguageService,
-  ) {
+  constructor() {
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
     });
@@ -70,12 +72,16 @@ export class BetterDrawerContainerComponent
     return this._isOver;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild('contentElRef', { read: ElementRef }) set setContentElRef(ref: ElementRef) {
     this.contentEl$.next(ref.nativeElement);
   }
 
   private _isOpen: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOpen(v: boolean) {
     this._isOpen = v;
     this._updateStyle();
@@ -83,6 +89,8 @@ export class BetterDrawerContainerComponent
 
   private _isOver: boolean = false;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isOver(v: boolean) {
     this._isOver = v;
     this._updateStyle();
@@ -141,7 +149,7 @@ export class BetterDrawerContainerComponent
   isRTL: boolean = false;
 
   private _getWidthRelatedStyles(): string {
-    const widthStyle = ` width: ${this.sideWidth}%;`,
+    const widthStyle = ` width: ${this.sideWidth()}%;`,
       margin = this.isRTL ? 'margin-left' : 'margin-right';
 
     return this.isOverGet
@@ -150,13 +158,17 @@ export class BetterDrawerContainerComponent
         : 'transform: translateX(100%);'
       : this.isOpenGet
         ? `${margin}: 0; ${widthStyle}`
-        : `${margin}: ${-1 * this.sideWidth}%; ${widthStyle}`;
+        : `${margin}: ${-1 * this.sideWidth()}%; ${widthStyle}`;
   }
 
   private _updateStyle(): void {
     this.sideStyle = this._domSanitizer.bypassSecurityTrustStyle(
-      this._getWidthRelatedStyles(),
+      this._getWidthRelatedStyles() + (this._isFirstRender ? ' transition: none;' : ''),
     );
+
+    setTimeout(() => {
+      this._isFirstRender = false;
+    });
   }
 
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;

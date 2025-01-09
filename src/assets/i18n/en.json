@@ -424,7 +424,7 @@
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
         "USER_NAME": "Email / Username",
-        "USE_PAT": "Use Personal Access Token instead of password",
+        "USE_PAT": "Use Personal Access Token instead (LEGACY)",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
       },
       "FORM_SECTION": {
@@ -548,6 +548,9 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing for preview",
         "ENABLE_PARSE": "Enable markdown parse"
+      },
+      "S": {
+        "NOTE_ADDED": "Note saved"
       }
     },
     "OPEN_PROJECT": {
@@ -1279,6 +1282,7 @@
     "EXAMPLE_VAL": "e.g. 32m",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile. <strong>Without the extension the features will not work!!</strong>",
     "HIDE": "Hide",
+    "ICON_INP_DESCRIPTION": "All utf-8 emojis are also supported!",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",

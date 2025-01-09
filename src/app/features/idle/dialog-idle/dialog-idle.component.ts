@@ -1,11 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Inject,
+  inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
@@ -23,14 +29,48 @@ import {
   SimpleCounterIdleBtn,
 } from './dialog-idle.model';
 import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-split.component';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'dialog-idle',
   templateUrl: './dialog-idle.component.html',
   styleUrls: ['./dialog-idle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    MatDialogContent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+
+    MatMiniFabButton,
+    MatCheckbox,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+
+    TranslatePipe,
+    SelectTaskComponent,
+    MsToStringPipe,
+  ],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
+  configService = inject(GlobalConfigService);
+  private _taskService = inject(TaskService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogIdleComponent, DialogIdleReturnData>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  data = inject<DialogIdlePassedData>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   lastCurrentTask$: Observable<Task> = this.data.lastCurrentTaskId
@@ -48,14 +88,10 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   private _subs = new Subscription();
 
-  constructor(
-    public configService: GlobalConfigService,
-    private _taskService: TaskService,
-    private _matDialogRef: MatDialogRef<DialogIdleComponent, DialogIdleReturnData>,
-    private _matDialog: MatDialog,
-    private _store: Store,
-    @Inject(MAT_DIALOG_DATA) public data: DialogIdlePassedData,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+    const data = this.data;
+
     this.simpleCounterToggleBtns = (
       data.enabledSimpleStopWatchCounters as SimpleCounter[]
     ).map(
@@ -106,6 +142,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         if (res) {
           this._matDialogRef.close({
+            isResetBreakTimer: this.isResetBreakTimer,
             trackItems: res.trackItems,
           });
         }
@@ -125,6 +162,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   skipTrack(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [],
       simpleCounterToggleBtnsWhenNoTrackItems: this.simpleCounterToggleBtns,
     });
@@ -132,6 +170,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   trackAsBreak(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [
         {
           type: 'BREAK',
@@ -144,11 +183,11 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   track(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [
         {
           type: 'TASK',
           time: 'IDLE_TIME',
-          isResetBreakTimer: this.isResetBreakTimer,
           simpleCounterToggleBtns: this.simpleCounterToggleBtns,
           ...(this.isCreate
             ? { title: this.newTaskTitle as string }

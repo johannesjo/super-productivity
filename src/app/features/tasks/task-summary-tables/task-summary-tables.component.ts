@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, Input } from '@angular/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,27 +11,58 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   mapToProjectWithTasks,
   ProjectWithTasks,
 } from './map-to-project-with-tasks.util';
 import { DateService } from 'src/app/core/date/date.service';
+import { MatIcon } from '@angular/material/icon';
+import { TaskSummaryTableComponent } from '../task-summary-table/task-summary-table.component';
+import { MatButton } from '@angular/material/button';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'task-summary-tables',
   templateUrl: './task-summary-tables.component.html',
   styleUrls: ['./task-summary-tables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatIcon,
+    TaskSummaryTableComponent,
+    MatButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    AsyncPipe,
+    MsToStringPipe,
+    TranslatePipe,
+  ],
 })
 export class TaskSummaryTablesComponent {
+  readonly workContextService = inject(WorkContextService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _worklogService = inject(WorklogService);
+  private readonly _projectService = inject(ProjectService);
+  private _dateService = inject(DateService);
+
   T: typeof T = T;
 
-  @Input() dayStr: string = this._dateService.todayStr();
+  readonly dayStr = input<string>(this._dateService.todayStr());
 
-  @Input() isForToday: boolean = true;
+  readonly isForToday = input<boolean>(true);
 
-  @Input() isShowYesterday: boolean = false;
+  readonly isShowYesterday = input<boolean>(false);
   flatTasks: Task[] = [];
   projectIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
@@ -53,16 +84,8 @@ export class TaskSummaryTablesComponent {
     }),
   );
 
-  constructor(
-    public readonly workContextService: WorkContextService,
-    private readonly _taskService: TaskService,
-    private readonly _translateService: TranslateService,
-    private readonly _matDialog: MatDialog,
-    private readonly _worklogService: WorklogService,
-    private readonly _projectService: ProjectService,
-    private _dateService: DateService,
-  ) {}
-
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('flatTasks') set flatTasksIn(v: Task[]) {
     this.flatTasks = v;
     const pids = unique(
@@ -88,13 +111,13 @@ export class TaskSummaryTablesComponent {
   }
 
   async roundTimeForTasks(
-    projectId: string,
+    projectId: string | null,
     roundTo: RoundTimeOption,
     isRoundUp: boolean = false,
   ): Promise<void> {
     const taskIds = this.flatTasks.map((task) => task.id);
     await this._taskService.roundTimeSpentForDayEverywhere({
-      day: this.dayStr,
+      day: this.dayStr(),
       taskIds,
       roundTo,
       isRoundUp,
@@ -103,20 +126,16 @@ export class TaskSummaryTablesComponent {
     this._worklogService.refreshWorklog();
   }
 
-  trackById(i: number, item: Project): string {
-    return item.id;
-  }
-
   private _mapToProjectWithTasks(
     project: Project | { id: string | null; title: string },
   ): ProjectWithTasks {
     let yesterdayStr: string | undefined;
-    if (this.isShowYesterday && this.isForToday) {
+    if (this.isShowYesterday() && this.isForToday()) {
       const t = new Date();
       t.setDate(t.getDate() - 1);
       yesterdayStr = this._dateService.todayStr(t);
     }
 
-    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr, yesterdayStr);
+    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr(), yesterdayStr);
   }
 }

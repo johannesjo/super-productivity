@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskService } from '../../tasks/task.service';
 import { TaskCopy } from '../../tasks/task.model';
@@ -12,6 +12,11 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
+  private _actions$ = inject(Actions);
+  private _taskService = inject(TaskService);
+  private _store = inject(Store);
+  private _persistenceService = inject(PersistenceService);
+
   readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
     issueId: null,
     issueProviderId: null,
@@ -40,13 +45,6 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _taskService: TaskService,
-    private _store: Store,
-    private _persistenceService: PersistenceService,
-  ) {}
 
   private async _unlinkProvider(issueProviderId: string): Promise<void> {
     const regularTasks = await this._taskService.allTasks$.pipe(first()).toPromise();

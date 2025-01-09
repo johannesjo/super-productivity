@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addTimeSpent,
@@ -29,6 +29,12 @@ import { showAddTaskBar } from '../../../core-ui/layout/store/layout.actions';
 
 @Injectable()
 export class AndroidEffects {
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _syncProviderService = inject(SyncProviderService);
+  private _translateService = inject(TranslateService);
+
   taskChangeNotification$: any = createEffect(
     () =>
       this._actions$.pipe(
@@ -109,13 +115,7 @@ export class AndroidEffects {
     androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
   );
 
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _globalConfigService: GlobalConfigService,
-    private _syncProviderService: SyncProviderService,
-    private _translateService: TranslateService,
-  ) {
+  constructor() {
     // wait for initial translation
     setTimeout(() => {
       androidInterface.updatePermanentNotification?.(

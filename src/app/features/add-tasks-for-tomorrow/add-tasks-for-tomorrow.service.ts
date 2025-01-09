@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TaskCopy, TaskPlanned } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { sortRepeatableTaskCfgs } from '../task-repeat-cfg/sort-repeatable-task-cfg';
@@ -18,6 +18,10 @@ import { TODAY_TAG } from '../tag/tag.const';
   providedIn: 'root',
 })
 export class AddTasksForTomorrowService {
+  private _plannerService = inject(PlannerService);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _store = inject(Store);
+
   // plannedForTomorrow: Observable<TaskPlanned[]> =
   //   this._taskService.getPlannedTasksForTomorrow$();
 
@@ -56,12 +60,6 @@ export class AddTasksForTomorrowService {
           : 0,
       ),
     );
-
-  constructor(
-    private _plannerService: PlannerService,
-    private _taskRepeatCfgService: TaskRepeatCfgService,
-    private _store: Store,
-  ) {}
 
   async addAllPlannedToDayAndCreateRepeatable(): Promise<void> {
     const dayData = await this._plannerService.plannerDayForAllDueTomorrow$

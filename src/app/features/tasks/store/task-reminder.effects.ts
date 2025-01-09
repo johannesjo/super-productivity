@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   deleteTask,
@@ -25,6 +25,11 @@ import { isToday } from '../../../util/is-today.util';
 
 @Injectable()
 export class TaskReminderEffects {
+  private _actions$ = inject(Actions);
+  private _reminderService = inject(ReminderService);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+
   addTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
       ofType(scheduleTask),
@@ -222,11 +227,4 @@ export class TaskReminderEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _reminderService: ReminderService,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-  ) {}
 }

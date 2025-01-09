@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AppDataComplete } from './sync.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -21,15 +21,15 @@ import { isLegacyAppData } from './is-legacy-app-data.util';
   providedIn: 'root',
 })
 export class DataImportService {
-  constructor(
-    private _persistenceService: PersistenceService,
-    private _snackService: SnackService,
-    private _reminderService: ReminderService,
-    private _imexMetaService: ImexMetaService,
-    private _dataInitService: DataInitService,
-    private _dataRepairService: DataRepairService,
-    private _translateService: TranslateService,
-  ) {
+  private _persistenceService = inject(PersistenceService);
+  private _snackService = inject(SnackService);
+  private _reminderService = inject(ReminderService);
+  private _imexMetaService = inject(ImexMetaService);
+  private _dataInitService = inject(DataInitService);
+  private _dataRepairService = inject(DataRepairService);
+  private _translateService = inject(TranslateService);
+
+  constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
   }
 

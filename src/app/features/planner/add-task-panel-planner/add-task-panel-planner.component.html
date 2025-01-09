@@ -19,9 +19,9 @@
 * schedule tasks need to be indicated
 -->
 
+@if (filteredTasks$|async; as allTasks) {
 <div
   class="tasks"
-  *ngIf="filteredTasks$|async as allTasks"
   cdkDropList
   cdkDropListSortingDisabled
   [cdkDropListData]="ADD_TASK_PANEL "
@@ -37,3 +37,4 @@
   <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>
   }
 </div>
+}

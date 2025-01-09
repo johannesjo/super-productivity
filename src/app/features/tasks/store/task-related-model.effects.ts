@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addTimeSpent,
@@ -26,6 +26,13 @@ import { T } from '../../../t.const';
 
 @Injectable()
 export class TaskRelatedModelEffects {
+  private _actions$ = inject(Actions);
+  private _reminderService = inject(ReminderService);
+  private _taskService = inject(TaskService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _persistenceService = inject(PersistenceService);
+  private _snackService = inject(SnackService);
+
   // EFFECTS ===> EXTERNAL
   // ---------------------
 
@@ -211,15 +218,6 @@ export class TaskRelatedModelEffects {
       }),
     ),
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _reminderService: ReminderService,
-    private _taskService: TaskService,
-    private _globalConfigService: GlobalConfigService,
-    private _persistenceService: PersistenceService,
-    private _snackService: SnackService,
-  ) {}
 
   private async _removeFromArchive(task: Task): Promise<unknown> {
     const taskIds = [task.id, ...task.subTaskIds];

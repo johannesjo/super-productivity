@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { UiModule } from '../../../ui/ui.module';
 import { T } from '../../../t.const';
 import {
   IssueIntegrationCfg,
@@ -9,20 +15,18 @@ import {
   IssueProviderKey,
   IssueProviderTypeMap,
 } from '../issue.model';
-import { IssueModule } from '../issue.module';
 import {
-  ICAL_TYPE,
   DEFAULT_ISSUE_PROVIDER_CFGS,
+  ICAL_TYPE,
   ISSUE_PROVIDER_DEFAULT_COMMON_CFG,
   ISSUE_PROVIDER_FORM_CFGS_MAP,
   ISSUE_PROVIDER_HUMANIZED,
 } from '../issue.const';
-import { FormGroup, FormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfigFormSection } from '../../config/global-config.model';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { IssueProviderActions } from '../store/issue-provider.actions';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
-import { JiraViewComponentsModule } from '../providers/jira/jira-view-components/jira-view-components.module';
+import { NgClass } from '@angular/common';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
 import { HelperClasses } from '../../../app.constants';
@@ -30,20 +34,34 @@ import { MatInputModule } from '@angular/material/input';
 import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { CalendarContextInfoTarget } from '../providers/calendar/calendar.model';
+import { IssueIconPipe } from '../issue-icon/issue-icon.pipe';
+import { JiraAdditionalCfgComponent } from '../providers/jira/jira-view-components/jira-cfg/jira-additional-cfg.component';
+import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormlyModule } from '@ngx-formly/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
-  standalone: true,
   imports: [
-    UiModule,
-    IssueModule,
-    NgIf,
-    NgForOf,
-    JiraViewComponentsModule,
     OpenProjectAdditionalCfgComponent,
     FormsModule,
     MatInputModule,
     NgClass,
+    IssueIconPipe,
+    JiraAdditionalCfgComponent,
+    ReactiveFormsModule,
+    MatDialogContent,
+    HelpSectionComponent,
+    TranslatePipe,
+    MatSlideToggle,
+    FormlyModule,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    MatDialogTitle,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

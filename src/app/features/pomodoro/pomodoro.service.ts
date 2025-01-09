@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { combineLatest, interval, merge, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../config/global-config.service';
 import {
@@ -39,6 +39,10 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
   providedIn: 'root',
 })
 export class PomodoroService {
+  private _configService = inject(GlobalConfigService);
+  private _store$ = inject<Store<any>>(Store);
+  private _actions$ = inject(Actions);
+
   onStop$: Observable<any> = this._actions$.pipe(ofType(stopPomodoro));
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(
@@ -146,11 +150,7 @@ export class PomodoroService {
     }),
   );
 
-  constructor(
-    private _configService: GlobalConfigService,
-    private _store$: Store<any>,
-    private _actions$: Actions,
-  ) {
+  constructor() {
     // NOTE: idle handling is not required, as unsetting the task auto triggers pause
     this.currentSessionTime$
       .pipe(

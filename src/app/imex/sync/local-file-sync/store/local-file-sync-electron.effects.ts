@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
@@ -10,6 +10,9 @@ import { IS_ELECTRON } from '../../../../app.constants';
 
 @Injectable()
 export class LocalFileSyncElectronEffects {
+  private _actions$ = inject(Actions);
+  private _localFileSyncElectronService = inject(LocalFileSyncElectronService);
+
   triggerTokenDialog$: Observable<unknown> | false =
     IS_ELECTRON &&
     createEffect(
@@ -28,9 +31,4 @@ export class LocalFileSyncElectronEffects {
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _actions$: Actions,
-    private _localFileSyncElectronService: LocalFileSyncElectronService,
-  ) {}
 }

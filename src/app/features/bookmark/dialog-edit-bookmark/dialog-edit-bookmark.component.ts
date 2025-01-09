@@ -1,12 +1,27 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { Bookmark, BookmarkCopy, BookmarkType } from '../bookmark.model';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { T } from '../../../t.const';
+import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -18,8 +33,32 @@ interface BookmarkSelectType {
   templateUrl: './dialog-edit-bookmark.component.html',
   styleUrls: ['./dialog-edit-bookmark.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MatIcon,
+    MatPrefix,
+    MatAutocomplete,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class DialogEditBookmarkComponent implements OnInit {
+  private _matDialogRef = inject<MatDialogRef<DialogEditBookmarkComponent>>(MatDialogRef);
+  data = inject<{
+    bookmark: Bookmark;
+  }>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
   types?: BookmarkSelectType[];
   bookmarkCopy?: BookmarkCopy;
@@ -34,11 +73,6 @@ export class DialogEditBookmarkComponent implements OnInit {
       );
     }),
   );
-
-  constructor(
-    private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { bookmark: Bookmark },
-  ) {}
 
   ngOnInit(): void {
     this.bookmarkCopy = { ...this.data.bookmark } as BookmarkCopy;

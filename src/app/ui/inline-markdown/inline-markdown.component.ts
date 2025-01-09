@@ -3,13 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
+  inject,
   Input,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild,
+  output,
+  viewChild,
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -20,6 +21,11 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { isMarkdownChecklist } from '../../features/markdown-checklist/is-markdown-checklist';
+import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -29,19 +35,32 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
+  imports: [
+    FormsModule,
+    MarkdownComponent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    AsyncPipe,
+  ],
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
-  @Input() isLock: boolean = false;
-  @Input() isShowControls: boolean = false;
-  @Input() isShowChecklistToggle: boolean = false;
+  private _cd = inject(ChangeDetectorRef);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _matDialog = inject(MatDialog);
 
-  @Output() changed: EventEmitter<string> = new EventEmitter();
-  @Output() focused: EventEmitter<Event> = new EventEmitter();
-  @Output() blurred: EventEmitter<Event> = new EventEmitter();
-  @Output() keyboardUnToggle: EventEmitter<Event> = new EventEmitter();
-  @ViewChild('wrapperEl', { static: true }) wrapperEl: ElementRef | undefined;
-  @ViewChild('textareaEl') textareaEl: ElementRef | undefined;
-  @ViewChild('previewEl') previewEl: MarkdownComponent | undefined;
+  readonly isLock = input<boolean>(false);
+  readonly isShowControls = input<boolean>(false);
+  readonly isShowChecklistToggle = input<boolean>(false);
+  readonly isDefaultText = input<boolean>(false);
+
+  readonly changed = output<string>();
+  readonly focused = output<Event>();
+  readonly blurred = output<Event>();
+  readonly keyboardUnToggle = output<Event>();
+  readonly wrapperEl = viewChild<ElementRef>('wrapperEl');
+  readonly textareaEl = viewChild<ElementRef>('textareaEl');
+  readonly previewEl = viewChild<MarkdownComponent>('previewEl');
 
   isHideOverflow: boolean = false;
   isChecklistMode: boolean = false;
@@ -54,11 +73,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   );
   private _hideOverFlowTimeout: number | undefined;
 
-  constructor(
-    private _cd: ChangeDetectorRef,
-    private _globalConfigService: GlobalConfigService,
-    private _matDialog: MatDialog,
-  ) {
+  constructor() {
     this.resizeParsedToFit();
   }
 
@@ -72,6 +87,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     return this._model;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(v: string | undefined) {
     this._model = v;
     this.modelCopy = v;
@@ -83,9 +100,14 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
 
     this.isChecklistMode =
-      this.isChecklistMode && this.isShowChecklistToggle && !!v && isMarkdownChecklist(v);
+      this.isChecklistMode &&
+      this.isShowChecklistToggle() &&
+      !!v &&
+      isMarkdownChecklist(v);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isFocus(val: boolean) {
     if (!this.isShowEdit && val) {
       this._toggleShowEdit();
@@ -93,7 +115,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.isLock) {
+    if (this.isLock()) {
       this._toggleShowEdit();
     } else {
       this.resizeParsedToFit();
@@ -139,34 +161,35 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   untoggleShowEdit(): void {
-    if (!this.isLock) {
+    if (!this.isLock()) {
       this.resizeParsedToFit();
       this.isShowEdit = false;
     }
-    if (!this.textareaEl) {
+    const textareaEl = this.textareaEl();
+    if (!textareaEl) {
       throw new Error('Textarea not visible');
     }
-    this.modelCopy = this.textareaEl.nativeElement.value;
+    this.modelCopy = textareaEl.nativeElement.value;
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
-      this.changed.emit(this.modelCopy);
+      this.changed.emit(this.modelCopy as string);
     }
   }
 
   resizeTextareaToFit(): void {
     this._hideOverflow();
-    if (!this.textareaEl) {
+    const textareaEl = this.textareaEl();
+    if (!textareaEl) {
       throw new Error('Textarea not visible');
     }
-    if (!this.wrapperEl) {
+    const wrapperEl = this.wrapperEl();
+    if (!wrapperEl) {
       throw new Error('Wrapper el not visible');
     }
-    this.textareaEl.nativeElement.style.height = 'auto';
-    this.textareaEl.nativeElement.style.height =
-      this.textareaEl.nativeElement.scrollHeight + 'px';
-    this.wrapperEl.nativeElement.style.height =
-      this.textareaEl.nativeElement.offsetHeight + 'px';
+    textareaEl.nativeElement.style.height = 'auto';
+    textareaEl.nativeElement.style.height = textareaEl.nativeElement.scrollHeight + 'px';
+    wrapperEl.nativeElement.style.height = textareaEl.nativeElement.offsetHeight + 'px';
   }
 
   openFullScreen(): void {
@@ -192,20 +215,22 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this._hideOverflow();
 
     setTimeout(() => {
-      if (!this.previewEl) {
-        if (this.textareaEl) {
+      const previewEl = this.previewEl();
+      if (!previewEl) {
+        if (this.textareaEl()) {
           this.resizeTextareaToFit();
         }
         return;
       }
-      if (!this.wrapperEl) {
+      const wrapperEl = this.wrapperEl();
+      if (!wrapperEl) {
         throw new Error('Wrapper el not visible');
       }
-      this.previewEl.element.nativeElement.style.height = 'auto';
+      previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
-      this.wrapperEl.nativeElement.style.height =
-        this.previewEl.element.nativeElement.offsetHeight + 'px';
-      this.previewEl.element.nativeElement.style.height = '';
+      wrapperEl.nativeElement.style.height =
+        previewEl.element.nativeElement.offsetHeight + 'px';
+      previewEl.element.nativeElement.style.height = '';
     });
   }
 
@@ -222,10 +247,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     ev.stopPropagation();
     this.isChecklistMode = true;
     this._toggleShowEdit();
-    if (this.modelCopy && isMarkdownChecklist(this.modelCopy)) {
-      this.modelCopy += '\n- [ ] ';
-    } else {
+
+    if (this.isDefaultText()) {
       this.modelCopy = '- [ ] ';
+    } else {
+      this.modelCopy += '\n- [ ] ';
     }
   }
 
@@ -233,11 +259,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this.isShowEdit = true;
     this.modelCopy = this.model || '';
     setTimeout(() => {
-      if (!this.textareaEl) {
+      const textareaEl = this.textareaEl();
+      if (!textareaEl) {
         throw new Error('Textarea not visible');
       }
-      this.textareaEl.nativeElement.value = this.modelCopy;
-      this.textareaEl.nativeElement.focus();
+      textareaEl.nativeElement.value = this.modelCopy;
+      textareaEl.nativeElement.focus();
       this.resizeTextareaToFit();
     });
   }
@@ -255,10 +282,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   private _makeLinksWorkForElectron(): void {
-    if (!this.wrapperEl) {
+    const wrapperEl = this.wrapperEl();
+    if (!wrapperEl) {
       throw new Error('Wrapper el not visible');
     }
-    this.wrapperEl.nativeElement.addEventListener('click', (ev: MouseEvent) => {
+    wrapperEl.nativeElement.addEventListener('click', (ev: MouseEvent) => {
       const target = ev.target as HTMLElement;
       if (target.tagName && target.tagName.toLowerCase() === 'a') {
         const href = target.getAttribute('href');
@@ -272,7 +300,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   private _handleCheckboxClick(targetEl: HTMLElement): void {
     const allCheckboxes =
-      this.previewEl?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
+      this.previewEl()?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
 
     const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
     if (checkIndex !== -1 && this._model) {

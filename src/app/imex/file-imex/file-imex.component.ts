@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { AppDataComplete } from '../sync/sync.model';
@@ -7,22 +13,25 @@ import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Router } from '@angular/router';
 import { privacyExport } from './privacy-export';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'file-imex',
   templateUrl: './file-imex.component.html',
   styleUrls: ['./file-imex.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class FileImexComponent {
-  @ViewChild('fileInput', { static: true }) fileInputRef?: ElementRef;
-  T: typeof T = T;
+  private _dataImportService = inject(DataImportService);
+  private _snackService = inject(SnackService);
+  private _router = inject(Router);
 
-  constructor(
-    private _dataImportService: DataImportService,
-    private _snackService: SnackService,
-    private _router: Router,
-  ) {}
+  readonly fileInputRef = viewChild<ElementRef>('fileInput');
+  T: typeof T = T;
 
   // NOTE: after promise done the file is NOT yet read
   async handleFileInput(ev: any): Promise<void> {
@@ -49,14 +58,15 @@ export class FileImexComponent {
         await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
       }
 
-      if (!this.fileInputRef) {
+      const fileInputRef = this.fileInputRef();
+      if (!fileInputRef) {
         throw new Error('No file input Ref element');
       }
 
       // clear input
-      this.fileInputRef.nativeElement.value = '';
-      this.fileInputRef.nativeElement.type = 'text';
-      this.fileInputRef.nativeElement.type = 'file';
+      fileInputRef.nativeElement.value = '';
+      fileInputRef.nativeElement.type = 'text';
+      fileInputRef.nativeElement.type = 'file';
     };
     reader.readAsText(file);
   }

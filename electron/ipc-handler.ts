@@ -32,6 +32,10 @@ export const initIpcInterfaces = (): void => {
   ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
   ipcMain.on(IPC.RELAUNCH, () => app.relaunch());
   ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
+  ipcMain.on(
+    IPC.SHOW_EMOJI_PANEL,
+    () => app.isEmojiPanelSupported() && app.showEmojiPanel(),
+  );
   ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
   ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
   ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));
@@ -71,12 +75,9 @@ export const initIpcInterfaces = (): void => {
     registerShowAppShortCuts(cfg);
   });
 
-  ipcMain.on(
-    IPC.JIRA_SETUP_IMG_HEADERS,
-    (ev, { jiraCfg, wonkyCookie }: { jiraCfg: JiraCfg; wonkyCookie?: string }) => {
-      setupRequestHeadersForImages(jiraCfg, wonkyCookie);
-    },
-  );
+  ipcMain.on(IPC.JIRA_SETUP_IMG_HEADERS, (ev, { jiraCfg }: { jiraCfg: JiraCfg }) => {
+    setupRequestHeadersForImages(jiraCfg);
+  });
 
   ipcMain.on(IPC.JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
     sendJiraRequest(request);

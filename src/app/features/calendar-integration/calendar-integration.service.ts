@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   catchError,
@@ -40,6 +40,10 @@ const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
   providedIn: 'root',
 })
 export class CalendarIntegrationService {
+  private _http = inject(HttpClient);
+  private _snackService = inject(SnackService);
+  private _store = inject(Store);
+
   icalEvents$: Observable<ScheduleCalendarMapEntry[]> = merge(
     // NOTE: we're using this rather than startWith since we want to use the freshest available cached value
     defer(() => of(this._getCalProviderFromCache())),
@@ -97,11 +101,7 @@ export class CalendarIntegrationService {
 
   public readonly skippedEventIds$ = new BehaviorSubject<string[]>([]);
 
-  constructor(
-    private _http: HttpClient,
-    private _snackService: SnackService,
-    private _store: Store,
-  ) {
+  constructor() {
     // console.log(
     //   localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY),
     //   localStorage.getItem(LS.CALENDER_EVENTS_SKIPPED_TODAY),

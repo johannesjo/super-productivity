@@ -1,13 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
+  inject,
+  input,
   Input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
-import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  UntypedFormControl,
+  UntypedFormGroup,
+} from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { HelperClasses } from 'src/app/app.constants';
@@ -29,24 +35,53 @@ import {
   OpenProjectTransitionConfig,
   OpenProjectTransitionOption,
 } from '../../open-project.model';
-import { UiModule } from '../../../../../../ui/ui.module';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatSlider } from '@angular/material/slider';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSelect } from '@angular/material/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'open-project-additional-cfg',
   templateUrl: './open-project-additional-cfg.component.html',
   styleUrls: ['./open-project-additional-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [UiModule, FormsModule, NgIf, AsyncPipe, MatSlider, NgForOf],
+  imports: [
+    FormsModule,
+    AsyncPipe,
+    MatSlider,
+    MatSlideToggle,
+    ReactiveFormsModule,
+    TranslatePipe,
+    MatFormField,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    MatOption,
+    MatProgressSpinner,
+    MatSelect,
+    MatCheckbox,
+    MatInput,
+    MatLabel,
+  ],
   animations: [expandAnimation],
 })
 export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
-  @Input() section?: ConfigFormSection<IssueProviderOpenProject>;
-  @Output() modelChange: EventEmitter<IssueProviderOpenProject> = new EventEmitter();
+  private _openProjectApiService = inject(OpenProjectApiService);
+  private _snackService = inject(SnackService);
+
+  readonly section = input<ConfigFormSection<IssueProviderOpenProject>>();
+  readonly modelChange = output<IssueProviderOpenProject>();
   T: typeof T = T;
   HelperClasses: typeof HelperClasses = HelperClasses;
   issueSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
@@ -75,11 +110,6 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _openProjectApiService: OpenProjectApiService,
-    private _snackService: SnackService,
-  ) {}
-
   private _cfg?: IssueProviderOpenProject;
 
   get cfg(): IssueProviderOpenProject {
@@ -87,6 +117,8 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set cfg(cfg: IssueProviderOpenProject) {
     const newCfg: IssueProviderOpenProject = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
@@ -122,7 +154,7 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fields = (this.section as ConfigFormSection<IssueProviderOpenProject>).items;
+    this.fields = (this.section() as ConfigFormSection<IssueProviderOpenProject>).items;
   }
 
   ngOnDestroy(): void {
@@ -158,7 +190,7 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   notifyModelChange(): void {
-    this.modelChange.emit(this._cfg);
+    this.modelChange.emit(this._cfg as IssueProviderOpenProject);
   }
 
   updateTransitionOptions(): void {
@@ -189,10 +221,6 @@ export class OpenProjectAdditionalCfgComponent implements OnInit, OnDestroy {
   displayIssueWith(issue?: OpenProjectWorkPackage): string | undefined {
     // NOTE: apparently issue can be undefined for displayWith
     return issue?.subject;
-  }
-
-  trackByIssueId(i: number, issue: OpenProjectWorkPackage): number {
-    return issue.id;
   }
 
   showSetProgressOption(key: any): boolean {

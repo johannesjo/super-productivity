@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   SyncProvider,
   SyncProviderServiceInterface,
@@ -15,6 +15,8 @@ import { createSha1Hash } from '../../../util/create-sha-1-hash';
   providedIn: 'root',
 })
 export class LocalFileSyncElectronService implements SyncProviderServiceInterface {
+  private _globalConfigService = inject(GlobalConfigService);
+
   id: SyncProvider = SyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
@@ -26,8 +28,6 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
     map((sync) => sync.localFileSync.syncFolderPath),
   );
   private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
-
-  constructor(private _globalConfigService: GlobalConfigService) {}
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,

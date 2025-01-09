@@ -1,16 +1,26 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { stringToMs } from '../string-to-ms.pipe';
+import { InputDurationDirective } from '../input-duration.directive';
+import { MatInput } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'input-duration-formly',
   templateUrl: './input-duration-formly.component.html',
   styleUrls: ['./input-duration-formly.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    InputDurationDirective,
+    MatInput,
+    FormsModule,
+    FormlyModule,
+    ReactiveFormsModule,
+  ],
 })
 export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
-  @ViewChild('inputEl', { static: true, read: ElementRef }) input!: ElementRef;
+  readonly input = viewChild.required('inputEl', { read: ElementRef });
 
   // @ViewChild(MatInput, {static: true}) formFieldControl?: MatInput;
   onInputValueChange(ev: Event): void {
@@ -29,10 +39,11 @@ export class InputDurationFormlyComponent extends FieldType<FormlyFieldConfig> {
 
   private _updateValue(val: string): void {
     this.formControl.setValue(val ? stringToMs(val) : null);
-    this.input.nativeElement.value = val;
+    this.input().nativeElement.value = val;
     setTimeout(() => {
-      if (this.input.nativeElement.value !== val) {
-        this.input.nativeElement.value = val;
+      const input = this.input();
+      if (input.nativeElement.value !== val) {
+        input.nativeElement.value = val;
       }
     });
   }

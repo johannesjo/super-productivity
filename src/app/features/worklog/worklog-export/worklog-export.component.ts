@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
-  Input,
+  inject,
+  input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -29,22 +29,66 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { createRows, formatRows, formatText } from './worklog-export.util';
+import { MatDialogActions, MatDialogContent } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { MatAnchor, MatButton, MatMiniFabButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { NgClass } from '@angular/common';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { SimpleDownloadDirective } from '../../../ui/simple-download/simple-download.directive';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'worklog-export',
   templateUrl: './worklog-export.component.html',
   styleUrls: ['./worklog-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatDialogContent,
+    FormsModule,
+    MatMiniFabButton,
+    MatMenuTrigger,
+    MatTooltip,
+    MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatSelect,
+    MatOption,
+    NgClass,
+    CollapsibleComponent,
+    MatSlideToggle,
+    MatFormField,
+    MatInput,
+    MatDialogActions,
+    MatButton,
+    MatAnchor,
+    SimpleDownloadDirective,
+    TranslatePipe,
+  ],
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
-  @Input() rangeStart?: Date;
-  @Input() rangeEnd?: Date;
-  @Input() isWorklogExport?: boolean;
-  @Input() isShowClose?: boolean;
-  @Input() projectId?: string | null;
+  private _snackService = inject(SnackService);
+  private _worklogService = inject(WorklogService);
+  private _workContextService = inject(WorkContextService);
+  private _changeDetectorRef = inject(ChangeDetectorRef);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+
+  readonly rangeStart = input<Date>();
+  readonly rangeEnd = input<Date>();
+  readonly isWorklogExport = input<boolean>();
+  readonly isShowClose = input<boolean>();
+  readonly projectId = input<string | null>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native
-  @Output() cancel: EventEmitter<void> = new EventEmitter();
+  readonly cancel = output<void>();
 
   T: typeof T = T;
   isShowAsText: boolean = false;
@@ -62,7 +106,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     { id: 'HOUR', title: T.F.WORKLOG.EXPORT.O.FULL_HOURS },
   ];
 
-  colOpts: { id: string; title: string }[] = [
+  colOpts: { id: WorklogColTypes; title: string }[] = [
     { id: 'DATE', title: T.F.WORKLOG.EXPORT.O.DATE },
     { id: 'START', title: T.F.WORKLOG.EXPORT.O.STARTED_WORKING },
     { id: 'END', title: T.F.WORKLOG.EXPORT.O.ENDED_WORKING },
@@ -91,25 +135,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private _snackService: SnackService,
-    private _worklogService: WorklogService,
-    private _workContextService: WorkContextService,
-    private _changeDetectorRef: ChangeDetectorRef,
-    private _projectService: ProjectService,
-    private _tagService: TagService,
-  ) {}
-
   ngOnInit(): void {
-    if (!this.rangeStart || !this.rangeEnd) {
+    const rangeStart = this.rangeStart();
+    const rangeEnd = this.rangeEnd();
+    if (!rangeStart || !rangeEnd) {
       throw new Error('Worklog: Invalid date range');
     }
     this.fileName =
-      'tasks' +
-      getWorklogStr(this.rangeStart) +
-      '-' +
-      getWorklogStr(this.rangeEnd) +
-      '.csv';
+      'tasks' + getWorklogStr(rangeStart) + '-' + getWorklogStr(rangeEnd) + '.csv';
 
     this._subs.add(
       this._workContextService.advancedCfg$
@@ -119,7 +152,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             this.options = {
               ...WORKLOG_EXPORT_DEFAULTS,
               ...advancedCfg.worklogExportSettings,
-              // NOTE: if we don't do this typescript(?) get's aggressive
+              // NOTE: if we don't do this typescript(?) gets aggressive
               cols: [
                 ...(advancedCfg.worklogExportSettings
                   ? [...advancedCfg.worklogExportSettings.cols]
@@ -139,10 +172,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._subs.add(
       combineLatest([
         this._worklogService.getTaskListForRange$(
-          this.rangeStart,
-          this.rangeEnd,
+          rangeStart,
+          rangeEnd,
           true,
-          this.projectId,
+          this.projectId(),
         ),
         this._workContextService.activeWorkContext$,
         this._projectService.list$,
@@ -220,9 +253,5 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   addCol(colOpt: WorklogColTypes): void {
     this.options.cols.push(colOpt);
-  }
-
-  trackByIndex(i: number, p: any): number {
-    return i;
   }
 }

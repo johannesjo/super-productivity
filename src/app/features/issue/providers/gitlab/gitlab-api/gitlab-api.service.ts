@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpClient,
   HttpEvent,
@@ -39,10 +39,8 @@ import { handleIssueProviderHttpError$ } from '../../../handle-issue-provider-ht
   providedIn: 'root',
 })
 export class GitlabApiService {
-  constructor(
-    private _snackService: SnackService,
-    private _http: HttpClient,
-  ) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
     console.log(this._issueApiLink(cfg, id));

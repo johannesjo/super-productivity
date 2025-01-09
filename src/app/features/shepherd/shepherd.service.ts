@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { first } from 'rxjs/operators';
 import { SHEPHERD_STEPS, TourId } from './shepherd-steps.const';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -14,17 +14,15 @@ import Step = Shepherd.Step;
   providedIn: 'root',
 })
 export class ShepherdService {
+  private layoutService = inject(LayoutService);
+  private taskService = inject(TaskService);
+  private actions$ = inject(Actions);
+  private globalConfigService = inject(GlobalConfigService);
+  private _router = inject(Router);
+  private workContextService = inject(WorkContextService);
+
   isActive = false;
   tour?: Shepherd.Tour;
-
-  constructor(
-    private layoutService: LayoutService,
-    private taskService: TaskService,
-    private actions$: Actions,
-    private globalConfigService: GlobalConfigService,
-    private _router: Router,
-    private workContextService: WorkContextService,
-  ) {}
 
   async init(): Promise<void> {
     this._initialize();

@@ -5,6 +5,14 @@
   --mat-menu-item-label-text-size: 14px;
 }
 
+* {
+  --mdc-chip-container-shape-radius: 4px !important;
+  --mdc-chip-elevated-container-color: transparent !important;
+  //--mdc-chip-outline-color: var(--mdc-chip-outline-color, var(--mat-sys-outline)) !important;
+  --mdc-chip-outline-color: rgba(125, 125, 125, 0.4) !important;
+  --mdc-chip-outline-width: 1px !important;
+}
+
 .mat-drawer.mat-drawer-side {
   // should be below notes panel
   z-index: 1 !important;
@@ -63,6 +71,7 @@ body .mat-mdc-dialog-surface {
   max-height: -webkit-fill-available;
   width: 100% !important;
   max-width: none !important;
+
   @include mq(xs) {
     margin: $s * 2;
     max-height: 95vh !important;
@@ -75,6 +84,15 @@ body .mat-mdc-dialog-surface {
   margin-bottom: $s * 2;
 }
 
+// needs to be global cause of cdk overlay
+// is used for select-task
+mat-option.isDone {
+  .mdc-list-item__primary-text {
+    text-decoration: line-through !important;
+    opacity: 0.4 !important;
+  }
+}
+
 // BUTTONS
 // -----------
 .mat-mdc-menu-item-text {
@@ -82,6 +100,10 @@ body .mat-mdc-dialog-surface {
   text-overflow: ellipsis !important;
   max-width: 100%;
   white-space: nowrap;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .mat-mdc-icon-button.mat-mdc-button-base {
@@ -103,17 +125,17 @@ body .mat-mdc-dialog-surface {
   }
 }
 
-.mat-mdc-menu-item-text {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 // ICONS
 // -----
+
 mat-icon,
 .mat-icon {
   vertical-align: middle;
+}
+
+.mat-icon.mat-icon {
+  // to make utf emojis look better
+  overflow: visible;
 }
 
 .mat-icon {
@@ -163,6 +185,7 @@ mat-icon.mat-icon[svgicon] {
 
 .cdk-drag-placeholder {
   cursor: grabbing;
+  opacity: 0.1;
 }
 
 .cdk-drop-list-dragging {
@@ -184,16 +207,11 @@ mat-icon.mat-icon[svgicon] {
 
 // MAT MENU
 .mat-mdc-menu-content {
-  padding-top: 0 !important;
   padding: 0 !important;
 }
 
 .mat-mdc-menu-item.quick-access {
   border: 1px solid red;
-}
-
-.cdk-drag-placeholder {
-  opacity: 0.1;
 }
 
 task.cdk-drag-preview .box {

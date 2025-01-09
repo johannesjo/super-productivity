@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Action, select, Store } from '@ngrx/store';
 import {
   selectAllTags,
@@ -23,12 +23,12 @@ import { DEFAULT_TAG } from './tag.const';
   providedIn: 'root',
 })
 export class TagService {
+  private _store$ = inject<Store<TagState>>(Store);
+
   tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
   tagsNoMyDayAndNoList$: Observable<Tag[]> = this._store$.pipe(
     select(selectAllTagsWithoutMyDayAndNoList),
   );
-
-  constructor(private _store$: Store<TagState>) {}
 
   getTagById$(id: string): Observable<Tag> {
     return this._store$.pipe(select(selectTagById, { id }));

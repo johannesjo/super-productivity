@@ -3,13 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
+  inject,
   OnDestroy,
-  Output,
-  ViewChild,
+  output,
+  viewChild,
 } from '@angular/core';
 import { T } from '../../t.const';
-import { UntypedFormControl } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   debounceTime,
@@ -20,7 +20,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { Router } from '@angular/router';
 import { DEFAULT_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
@@ -30,8 +29,20 @@ import { Task } from '../tasks/task.model';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { AnimationEvent } from '@angular/animations';
 import { SearchItem } from './search-bar.model';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
 import { NavigateToTaskService } from '../../core-ui/navigate-to-task/navigate-to-task.service';
+import { AsyncPipe } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { IssueIconPipe } from '../issue/issue-icon/issue-icon.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
+import { TagComponent } from '../tag/tag/tag.component';
 
 const MAX_RESULTS = 100;
 
@@ -41,13 +52,32 @@ const MAX_RESULTS = 100;
   styleUrls: ['./search-bar.component.scss'],
   animations: [blendInOutAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    AsyncPipe,
+    MatProgressSpinner,
+    MatIcon,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MatIconButton,
+    MatInput,
+    MatAutocomplete,
+    MatOption,
+    IssueIconPipe,
+    TranslatePipe,
+    TagComponent,
+  ],
 })
 export class SearchBarComponent implements AfterViewInit, OnDestroy {
-  @Output() blurred: EventEmitter<any> = new EventEmitter();
+  private _taskService = inject(TaskService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+  private _navigateToTaskService = inject(NavigateToTaskService);
 
-  @ViewChild('inputEl') inputEl!: ElementRef;
-  @ViewChild('searchForm') searchForm!: ElementRef;
-  @ViewChild(MatAutocompleteTrigger) autocomplete!: MatAutocompleteTrigger;
+  readonly blurred = output<any | void>();
+
+  readonly inputEl = viewChild.required<ElementRef>('inputEl');
+  readonly searchForm = viewChild.required<ElementRef>('searchForm');
+  readonly autocomplete = viewChild.required(MatAutocompleteTrigger);
 
   T: typeof T = T;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
@@ -69,14 +99,6 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
       ...this._mapTasksToSearchItems(true, archiveTasks, projects, tags),
     ]),
   );
-
-  constructor(
-    private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _tagService: TagService,
-    private _navigateToTaskService: NavigateToTaskService,
-    private _router: Router,
-  ) {}
 
   private _mapTasksToSearchItems(
     isArchiveTask: boolean,
@@ -142,9 +164,9 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
     );
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
-      this.inputEl.nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
+      this.inputEl().nativeElement.addEventListener('keydown', (ev: KeyboardEvent) => {
         if (ev.key === 'Escape') {
-          this.blurred.emit();
+          this.blurred.emit(undefined);
         } else if (
           ev.key === 'Enter' &&
           (!this.taskSuggestionsCtrl.value ||
@@ -175,24 +197,23 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private _shakeSearchForm(): void {
-    this.searchForm.nativeElement.classList.toggle('shake-form');
-    this.searchForm.nativeElement.onanimationend = () => {
-      this.searchForm.nativeElement.classList.toggle('shake-form');
+    this.searchForm().nativeElement.classList.toggle('shake-form');
+    this.searchForm().nativeElement.onanimationend = () => {
+      this.searchForm().nativeElement.classList.toggle('shake-form');
     };
   }
 
   onAnimationEvent(event: AnimationEvent): void {
     if (event.fromState) {
-      this.inputEl.nativeElement.focus();
+      this.inputEl().nativeElement.focus();
     }
   }
 
   navigateToItem(item: SearchItem): void {
     if (!item) return;
     this.isLoading$.next(true);
-    this._navigateToTaskService.navigate(item.id, item.isArchiveTask).then(() => {
-      this.blurred.emit();
-    });
+    this.blurred.emit(undefined);
+    this._navigateToTaskService.navigate(item.id, item.isArchiveTask).then(() => {});
   }
 
   getOptionText(item: SearchItem): string {

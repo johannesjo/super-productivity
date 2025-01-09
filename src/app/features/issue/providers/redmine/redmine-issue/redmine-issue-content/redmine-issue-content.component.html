@@ -25,15 +25,17 @@
         <td>{{issue?.priority.name}}</td>
       </tr>
 
-      <tr *ngIf="issue?.description">
+      @if (issue?.description) {
+      <tr>
         <th>{{T.F.REDMINE.ISSUE_CONTENT.DESCRIPTION|translate}}</th>
         <td>{{issue?.description}}</td>
       </tr>
+      }
     </table>
   </div>
 
+  @if (task()?.issueWasUpdated) {
   <div
-    *ngIf="task?.issueWasUpdated"
     @expand
     style="text-align: center"
   >
@@ -45,4 +47,5 @@
       {{T.F.REDMINE.ISSUE_CONTENT.MARK_AS_CHECKED|translate}}
     </button>
   </div>
+  }
 </ng-container>

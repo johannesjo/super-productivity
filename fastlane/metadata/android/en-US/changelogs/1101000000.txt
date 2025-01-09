@@ -1,0 +1,40 @@
+
+### Bug Fixes
+
+* add missing matPrefix and matSuffix
+* add missing provider
+* add task inline
+* also make open project transition work again #3779
+* error
+* error for open project when marking sub task as done #3779
+* error for open project when marking task as done #3779
+* error for search bar
+* error when navigating to daily summary
+* formly slider
+* git issue search not working anymore
+* idle dialog reset take a break checkmark not working as expected
+* issue panel error
+* make calendar agenda work again
+* make sub task focus work again
+* necessary directives not imported
+* prevent all forms from reloading the current page
+* side panel ani triggering initially
+* styling
+* tag edit remove not showing
+* task summary table
+### Features
+
+* delete content and checklist add if default #3814
+* don't delete content on add checklist item #3814
+* improve emoji styling a bit #3558
+* improve emoji support and add info #3558
+* improve google calendar url
+* improve integrated issue search cases #3819
+* improve note dialog experience and prevent error
+* improve office 365 help link
+* internationalize repeat instance created day label
+* make done options in select-task less prominent #3791
+* move add time spent for other day button up
+* remove bookmark button and bookmark from paste to phase out feature
+* update task with all repeat cfg value after first making it repeatable #3101
+* use mostly non-working fallback for jira on android to avoid error #3799

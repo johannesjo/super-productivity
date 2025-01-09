@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskService } from '../../../../tasks/task.service';
 import { concatMap, filter, map } from 'rxjs/operators';
@@ -15,6 +15,12 @@ import { assertTruthy } from '../../../../../util/assert-truthy';
 
 @Injectable()
 export class CaldavIssueEffects {
+  private readonly _actions$ = inject(Actions);
+  private readonly _caldavClientService = inject(CaldavClientService);
+  private readonly _issueService = inject(IssueService);
+  private readonly _issueProviderService = inject(IssueProviderService);
+  private readonly _taskService = inject(TaskService);
+
   // TODO only check if there are active issue tasks for current list
   checkForDoneTransition$: Observable<any> = createEffect(
     () =>
@@ -41,14 +47,6 @@ export class CaldavIssueEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _actions$: Actions,
-    private readonly _caldavClientService: CaldavClientService,
-    private readonly _issueService: IssueService,
-    private readonly _issueProviderService: IssueProviderService,
-    private readonly _taskService: TaskService,
-  ) {}
 
   private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
     return this._caldavClientService

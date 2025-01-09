@@ -73,6 +73,8 @@
 
 .scheduled {
   flex-grow: 1;
+  /* Additional styles if needed */
+  margin-top: 16px;
 }
 
 .normal-tasks-items,
@@ -85,11 +87,6 @@
   margin-bottom: 8px;
 }
 
-.scheduled {
-  /* Additional styles if needed */
-  margin-top: 16px;
-}
-
 .scheduled-item {
   display: flex;
   align-items: center;
@@ -97,8 +94,6 @@
 
   &.Task .time {
     cursor: pointer;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
     border-radius: 50%;
     background: #fff;
 
@@ -111,7 +106,6 @@
     text-align: center;
     border-radius: 50%;
     width: 40px;
-    line-height: 40px;
     height: 40px;
     min-width: 40px;
     margin-right: 4px;
@@ -138,6 +132,19 @@
       span {
         display: none;
       }
+    }
+  }
+
+  .time-time {
+    line-height: 1;
+    text-align: center;
+    white-space: wrap;
+    display: inline-block;
+    max-width: 30px;
+
+    ::ng-deep span {
+      text-align: center;
+      font-size: 9px;
     }
   }
 

@@ -1,0 +1,10 @@
+
+### Bug Fixes
+
+* build error
+### Features
+
+* **issue:** go back to classic way of doing jira requests as it is more reliable
+* **issue:** improve error handling for backlog import
+* **issue:** improve jira error handling
+* **issue:** make post requests work for jira api

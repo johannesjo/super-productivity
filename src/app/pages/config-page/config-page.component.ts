@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -25,16 +26,35 @@ import { versions } from '../../../environments/versions';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
-import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import {
+  MatButtonToggle,
+  MatButtonToggleChange,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import { getAppVersionStr } from '../../util/get-app-version-str';
+import { MatIcon } from '@angular/material/icon';
+import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
+import { ConfigSoundFormComponent } from '../../features/config/config-sound-form/config-sound-form.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'config-page',
   templateUrl: './config-page.component.html',
   styleUrls: ['./config-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatIcon,
+    ConfigSectionComponent,
+    ConfigSoundFormComponent,
+    TranslatePipe,
+  ],
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
+  private readonly _cd = inject(ChangeDetectorRef);
+  readonly configService = inject(GlobalConfigService);
+
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
   globalSyncProviderFormCfg: ConfigFormConfig;
@@ -47,14 +67,11 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    private readonly _cd: ChangeDetectorRef,
-    public readonly configService: GlobalConfigService,
-  ) {
+  constructor() {
     // somehow they are only unproblematic if assigned here
-    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
-    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG;
-    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG;
+    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.slice();
+    this.globalSyncProviderFormCfg = GLOBAL_SYNC_FORM_CONFIG.slice();
+    this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG.slice();
 
     // NOTE: needs special handling cause of the async stuff
     if (IS_ANDROID_WEB_VIEW) {

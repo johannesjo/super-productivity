@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectIsFocusOverlayShown } from './store/focus-mode.selectors';
@@ -9,11 +9,11 @@ import { hideFocusOverlay, showFocusOverlay } from './store/focus-mode.actions';
   providedIn: 'root',
 })
 export class FocusModeService {
+  private _store = inject(Store);
+
   isShowFocusOverlay$: Observable<boolean> = this._store.select(
     selectIsFocusOverlayShown,
   );
-
-  constructor(private _store: Store) {}
 
   showFocusOverlay(): void {
     this._store.dispatch(showFocusOverlay());

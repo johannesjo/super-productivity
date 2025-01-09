@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -38,6 +38,11 @@ const XS_MAX = 599;
   providedIn: 'root',
 })
 export class LayoutService {
+  private _store$ = inject<Store<LayoutState>>(Store);
+  private _router = inject(Router);
+  private _workContextService = inject(WorkContextService);
+  private _breakPointObserver = inject(BreakpointObserver);
+
   isScreenXs$: Observable<boolean> = this._breakPointObserver
     .observe([`(max-width: ${XS_MAX}px)`])
     .pipe(map((result) => result.matches));
@@ -85,12 +90,7 @@ export class LayoutService {
   );
   isShowIssuePanel$: Observable<boolean> = this._isShowIssuePanel$.pipe();
 
-  constructor(
-    private _store$: Store<LayoutState>,
-    private _router: Router,
-    private _workContextService: WorkContextService,
-    private _breakPointObserver: BreakpointObserver,
-  ) {
+  constructor() {
     this.isNavOver$
       .pipe(
         switchMap((isNavOver) =>

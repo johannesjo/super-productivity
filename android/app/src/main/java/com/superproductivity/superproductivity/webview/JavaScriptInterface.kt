@@ -395,8 +395,7 @@ class JavaScriptInterface(
                 val file: DocumentFile? = folder?.findFile(filePath)
                 if (file != null) {
                     activity.contentResolver.openInputStream(file.uri)?.reader()
-                }
-                else {
+                } else {
                     null
                 }
             } else {
@@ -412,7 +411,10 @@ class JavaScriptInterface(
         // Use a StringBuilder to rebuild the input file's content but replace the line returns with current OS's line returns
         val sb: String =
             if (reader == null) {
-                Log.d("SuperProductivity", "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added.")
+                Log.d(
+                    "SuperProductivity",
+                    "readFile warning: tried to open file, but file does not exist or we do not have permission! This may be normal if file does not exist yet, it will be created when some tasks will be added."
+                )
                 ""
             } else {
                 // Read input file
@@ -433,41 +435,41 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun writeFile(filePath: String, data: String) {
-            Log.d("SuperProductivity", "writeFile: trying to save to filePath: " + filePath)
-            // Get folder path
-            val sp = activity.getPreferences(Context.MODE_PRIVATE)
-            val folderPath = sp.getString("filesyncFolder", "") ?: ""
+        Log.d("SuperProductivity", "writeFile: trying to save to filePath: $filePath")
+        // Get folder path
+        val sp = activity.getPreferences(Context.MODE_PRIVATE)
+        val folderPath = sp.getString("filesyncFolder", "") ?: ""
 
-            // Scoped storage permission management for Android 10+, but also works for Android < 10
-            // Open file with write access, using DocumentFile URI
-            val folder = DocumentFile.fromTreeUri(activity, Uri.parse(folderPath))
-            var file = folder?.findFile(filePath)
-            Log.d("SuperProductivity", "writeFile: trying to save to: " + file)
+        // Scoped storage permission management for Android 10+, but also works for Android < 10
+        // Open file with write access, using DocumentFile URI
+        val folder = DocumentFile.fromTreeUri(activity, Uri.parse(folderPath))
+        var file = folder?.findFile(filePath)
+        Log.d("SuperProductivity", "writeFile: trying to save to: $file")
 
-            if (file != null && file.exists()) {
-                // File exists, attempt to delete it
-                val deleted = file.delete()
+        if (file != null && file.exists()) {
+            // File exists, attempt to delete it
+            val deleted = file.delete()
 
-                if (!deleted) {
-                    Log.e("SuperProductivity", "Failed to delete the existing file: $filePath")
-                    return
-                } else {
-                    Log.d("SuperProductivity", "File deleted: $filePath")
-                }
-            }
-
-            // File doesn't exist or was deleted successfully, so create it
-            file = folder?.createFile("text/plain", filePath)
-
-            if (file != null) {
-                Log.d("SuperProductivity", "File created successfully: ${file.uri}")
+            if (!deleted) {
+                Log.e("SuperProductivity", "Failed to delete the existing file: $filePath")
+                return
             } else {
-                Log.e("SuperProductivity", "Failed to create the file: $filePath")
+                Log.d("SuperProductivity", "File deleted: $filePath")
             }
-            // file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
-            // Open a writer to an OutputStream to the file without append mode (so we write from the start of the file)
-            Log.d("SuperProductivity", "writeFile: try to openOutputStream")
-            val writer: Writer =file?.openOutputStream(activity, append=false)!!.writer()
+        }
+
+        // File doesn't exist or was deleted successfully, so create it
+        file = folder?.createFile("application/json", filePath)
+
+        if (file != null) {
+            Log.d("SuperProductivity", "File created successfully: ${file.uri}")
+        } else {
+            Log.e("SuperProductivity", "Failed to create the file: $filePath")
+        }
+        // file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
+        // Open a writer to an OutputStream to the file without append mode (so we write from the start of the file)
+        Log.d("SuperProductivity", "writeFile: try to openOutputStream")
+        val writer: Writer = file?.openOutputStream(activity, append = false)!!.writer()
         try {
             Log.d("SuperProductivity", "writeFile: try to write data into file: $data")
             writer.write(data)
@@ -509,12 +511,21 @@ class JavaScriptInterface(
                 }
             } else {
                 // For older versions of Android, check if we have access to any folder
-                val permissionRead = ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
-                val permissionWrite = ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                val permissionRead = ContextCompat.checkSelfPermission(
+                    activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                val permissionWrite = ContextCompat.checkSelfPermission(
+                    activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
 
                 (permissionRead == PackageManager.PERMISSION_GRANTED) && (permissionWrite == PackageManager.PERMISSION_GRANTED)
             }
-        Log.d("SuperProductivity", "allowedFolderPath folderPath.isNotEmpty(): ${folderPath.isNotEmpty()} pathGranted: ${pathGranted.toString()}")
+        Log.d(
+            "SuperProductivity",
+            "allowedFolderPath folderPath.isNotEmpty(): ${folderPath.isNotEmpty()} pathGranted: ${pathGranted.toString()}"
+        )
         return if (folderPath.isNotEmpty() && pathGranted) {
             folderPath
         } else {
@@ -526,7 +537,10 @@ class JavaScriptInterface(
     @JavascriptInterface
     fun isGrantedFilePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val grantedPaths = activity.contentResolver.persistedUriPermissions.map { it.uri }
-        Log.d("SuperProductivity", "isGrantedFilePermission grantedPaths: " + grantedPaths.toString())
+        Log.d(
+            "SuperProductivity",
+            "isGrantedFilePermission grantedPaths: " + grantedPaths.toString()
+        )
         /*
         val sp = activity.getPreferences(Context.MODE_PRIVATE)
         val folderPath = sp.getString("filesyncFolder", "") ?: ""
@@ -592,9 +606,9 @@ class JavaScriptInterface(
         )
     }
 
-  fun callJavaScriptFunction(script: String) {
-    webView.post { webView.evaluateJavascript(script) { } }
-  }
+    fun callJavaScriptFunction(script: String) {
+        webView.post { webView.evaluateJavascript(script) { } }
+    }
 
     companion object {
         // TODO rename to WINDOW_PROPERTY

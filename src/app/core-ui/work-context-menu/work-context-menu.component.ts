@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -8,35 +8,37 @@ import { TagService } from '../../features/tag/tag.service';
 import { first } from 'rxjs/operators';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Router, RouterLink, RouterModule } from '@angular/router';
-import { Project } from '../../features/project/project.model';
-import { UiModule } from '../../ui/ui.module';
-import { NgIf } from '@angular/common';
+
 import { ProjectService } from '../../features/project/project.service';
+import { MatMenuItem } from '@angular/material/menu';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'work-context-menu',
   templateUrl: './work-context-menu.component.html',
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [RouterLink, UiModule, RouterModule, NgIf],
+  imports: [RouterLink, RouterModule, MatMenuItem, TranslatePipe, MatIcon],
 })
 export class WorkContextMenuComponent {
-  @Input() project!: Project;
+  private _matDialog = inject(MatDialog);
+  private _tagService = inject(TagService);
+  private _projectService = inject(ProjectService);
+  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
+
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() contextId!: string;
   T: typeof T = T;
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
   isForProject: boolean = true;
   base: string = 'project';
 
-  constructor(
-    private _matDialog: MatDialog,
-    private _tagService: TagService,
-    private _projectService: ProjectService,
-    private _workContextService: WorkContextService,
-    private _router: Router,
-  ) {}
-
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input('contextType') set contextTypeSet(v: WorkContextType) {
     this.isForProject = v === WorkContextType.PROJECT;
     this.base = this.isForProject ? 'project' : 'tag';

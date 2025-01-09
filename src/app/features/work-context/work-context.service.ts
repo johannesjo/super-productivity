@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
@@ -74,6 +74,15 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
   providedIn: 'root',
 })
 export class WorkContextService {
+  private _store$ = inject<Store<WorkContextState>>(Store);
+  private _actions$ = inject(Actions);
+  private _tagService = inject(TagService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _dateService = inject(DateService);
+  private _router = inject(Router);
+  private _translateService = inject(TranslateService);
+  private _persistenceService = inject(PersistenceService);
+
   // here because to avoid circular dependencies
   // should be treated as private
   _isAllDataLoaded$: Observable<boolean> = this._actions$.pipe(
@@ -318,16 +327,7 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  constructor(
-    private _store$: Store<WorkContextState>,
-    private _actions$: Actions,
-    private _tagService: TagService,
-    private _globalTrackingIntervalService: GlobalTrackingIntervalService,
-    private _dateService: DateService,
-    private _router: Router,
-    private _translateService: TranslateService,
-    private _persistenceService: PersistenceService,
-  ) {
+  constructor() {
     this.isToday$.subscribe((v) => (this.isToday = v));
 
     this.activeWorkContextTypeAndId$.subscribe((v) => {

@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../../tasks/task.model';
 import { GithubComment, GithubIssue } from '../github-issue.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { SortPipe } from '../../../../../../ui/pipes/sort.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'github-issue-content',
@@ -11,17 +18,33 @@ import { TaskService } from '../../../../../tasks/task.service';
   styleUrls: ['./github-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  imports: [
+    MatButton,
+    MatChipListbox,
+    MatChipOption,
+    MarkdownComponent,
+    MatIcon,
+    MatAnchor,
+    AsyncPipe,
+    DatePipe,
+    SortPipe,
+    TranslatePipe,
+    MarkdownPipe,
+  ],
 })
 export class GithubIssueContentComponent {
+  private readonly _taskService = inject(TaskService);
+
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() issue?: GithubIssue;
-  @Input() task?: TaskWithSubTasks;
+  readonly task = input<TaskWithSubTasks>();
 
   T: typeof T = T;
 
   isForceShowAllComments = false;
   isForceShowDescription = false;
-
-  constructor(private readonly _taskService: TaskService) {}
 
   lastComment(): GithubComment {
     // NOTE: when we ask for this we should have it
@@ -44,13 +67,14 @@ export class GithubIssueContentComponent {
   }
 
   hideUpdates(): void {
-    if (!this.task) {
+    const task = this.task();
+    if (!task) {
       throw new Error('No task');
     }
     if (!this.issue) {
       throw new Error('No issue');
     }
-    this._taskService.markIssueUpdatesAsRead(this.task.id);
+    this._taskService.markIssueUpdatesAsRead(task.id);
   }
 
   trackByIndex(i: number, p: any): number {

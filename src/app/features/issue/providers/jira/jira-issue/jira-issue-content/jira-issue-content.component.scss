@@ -1,4 +1,4 @@
-@import 'src/variables';
+@import '../../../../../../../variables';
 
 // table styled by ./src/styles/components/issue-table.scss
 
@@ -40,9 +40,6 @@
   .when {
     margin-left: $s;
     opacity: 0.6;
-  }
-
-  .name-and-comment-content {
   }
 }
 

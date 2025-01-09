@@ -3,13 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   output,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -30,6 +31,22 @@ import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
 import { toObservable } from '@angular/core/rxjs-interop';
+import {
+  MatAutocomplete,
+  MatAutocompleteOrigin,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatInput } from '@angular/material/input';
+import { MentionModule } from 'angular-mentions';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatOption } from '@angular/material/core';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { TagComponent } from '../../tag/tag/tag.component';
 
 @Component({
   selector: 'add-task-bar',
@@ -37,8 +54,31 @@ import { toObservable } from '@angular/core/rxjs-interop';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [blendInOutAnimation, slideAnimation, fadeAnimation],
+  imports: [
+    FormsModule,
+    MatAutocompleteOrigin,
+    MatProgressSpinner,
+    MatInput,
+    MatAutocompleteTrigger,
+    ReactiveFormsModule,
+    MentionModule,
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+    MatAutocomplete,
+    MatOption,
+    AsyncPipe,
+    TranslatePipe,
+    IssueIconPipe,
+    TagComponent,
+  ],
 })
 export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+  private _store = inject(Store);
+  private _addTaskBarService = inject(AddTaskBarService);
+
   tabindex = input<number>(0);
   isDoubleEnterMode = input<boolean>(false);
   isElevated = input<boolean>(false);
@@ -55,7 +95,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isSearchIssueProviders = signal(false);
   isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
 
-  @ViewChild('inputEl', { static: true }) inputEl?: ElementRef;
+  readonly inputEl = viewChild<ElementRef>('inputEl');
 
   T: typeof T = T;
 
@@ -93,13 +133,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
 
-  constructor(
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-    private _store: Store,
-    private _addTaskBarService: AddTaskBarService,
-  ) {}
-
   ngAfterViewInit(): void {
     this.isAddToBottom.set(!!this.planForDay() || this.isAddToBottom());
     if (!this.isDisableAutoFocus()) {
@@ -107,7 +140,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
 
     this._attachKeyDownHandlerTimeout = window.setTimeout(() => {
-      (this.inputEl as ElementRef).nativeElement.addEventListener(
+      (this.inputEl() as ElementRef).nativeElement.addEventListener(
         'keydown',
         (ev: KeyboardEvent) => {
           if (ev.key === 'Escape') {
@@ -132,8 +165,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       sessionStorage.setItem(SS.TODO_TMP, '');
       this.taskSuggestionsCtrl.setValue(savedTodo);
       this._saveTmpTodoTimeout = window.setTimeout(() => {
-        (this.inputEl as ElementRef).nativeElement.value = savedTodo;
-        (this.inputEl as ElementRef).nativeElement.select();
+        (this.inputEl() as ElementRef).nativeElement.value = savedTodo;
+        (this.inputEl() as ElementRef).nativeElement.select();
       });
     }
   }
@@ -174,15 +207,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         className.includes('shepherd-enabled');
     }
 
+    const inputEl = this.inputEl();
     if (!relatedTarget || (relatedTarget && !isUIelement)) {
-      sessionStorage.setItem(
-        SS.TODO_TMP,
-        (this.inputEl as ElementRef).nativeElement.value,
-      );
+      sessionStorage.setItem(SS.TODO_TMP, (inputEl as ElementRef).nativeElement.value);
     }
 
     if (relatedTarget && isUIelement) {
-      (this.inputEl as ElementRef).nativeElement.focus();
+      (inputEl as ElementRef).nativeElement.focus();
     } else {
       // we need to wait since otherwise addTask is not working
       window.clearTimeout(this._delayBlurTimeout);
@@ -269,14 +300,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _focusInput(): void {
     if (IS_ANDROID_WEB_VIEW) {
       document.body.focus();
-      (this.inputEl as ElementRef).nativeElement.focus();
+      (this.inputEl() as ElementRef).nativeElement.focus();
       this._autofocusTimeout = window.setTimeout(() => {
         document.body.focus();
-        (this.inputEl as ElementRef).nativeElement.focus();
+        (this.inputEl() as ElementRef).nativeElement.focus();
       }, 1000);
     } else {
       this._autofocusTimeout = window.setTimeout(() => {
-        (this.inputEl as ElementRef).nativeElement.focus();
+        (this.inputEl() as ElementRef).nativeElement.focus();
       });
     }
   }

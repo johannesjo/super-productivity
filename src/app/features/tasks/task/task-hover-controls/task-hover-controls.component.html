@@ -1,6 +1,6 @@
+@if (!task().isDone && !isCurrent() && !task().subTasks?.length) {
 <button
   (click)="parent.startTask()"
-  *ngIf="!task().isDone && !isCurrent() && !task().subTasks?.length"
   title="{{T.F.TASK.CMP.TRACK_TIME|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
   class="ico-btn start-task-btn"
   color=""
@@ -11,10 +11,9 @@
     svgIcon="play"
   ></mat-icon>
 </button>
-
+} @if (!task().isDone && isCurrent() && !task().subTasks?.length) {
 <button
   (click)="parent.pauseTask()"
-  *ngIf="!task().isDone && isCurrent() && !task().subTasks?.length"
   title="{{T.F.TASK.CMP.TRACK_TIME_STOP|translate}} {{kb.togglePlay?'['+kb.togglePlay+']':''}}"
   class="ico-btn"
   color="accent"
@@ -22,10 +21,9 @@
 >
   <mat-icon>pause</mat-icon>
 </button>
-
+} @if (isShowAddToToday()) {
 <button
   (click)="parent.addToMyDay()"
-  *ngIf="isShowAddToToday()"
   title="{{T.F.TASK.CMP.ADD_TO_MY_DAY|translate}} {{kb.moveToTodaysTasks?'['+kb.moveToTodaysTasks+']':''}}"
   class="ico-btn"
   color=""
@@ -33,10 +31,9 @@
 >
   <mat-icon>wb_sunny</mat-icon>
 </button>
-
+} @if (isShowRemoveFromToday()) {
 <button
   (click)="parent.removeFromMyDay()"
-  *ngIf="isShowRemoveFromToday()"
   [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY|translate"
   class="ico-btn"
   color=""
@@ -44,9 +41,8 @@
 >
   <mat-icon svgIcon="remove_today"></mat-icon>
 </button>
-
+} @if (!task().isDone) {
 <button
-  *ngIf="!task().isDone"
   (click)="parent.toggleTaskDone()"
   title="{{T.F.TASK.CMP.TOGGLE_DONE|translate}} {{kb.taskToggleDone?'['+kb.taskToggleDone+']':''}}"
   class="ico-btn task-done-btn"
@@ -55,21 +51,22 @@
 >
   <mat-icon>check</mat-icon>
 </button>
-
+} @if (!task().notes && (!task().issueId||task().issueType===ICAL_TYPE) && !isSelected())
+{
 <button
   (click)="parent.toggleShowDetailPanel()"
-  *ngIf="!task().notes && (!task().issueId||task().issueType===ICAL_TYPE) && !isSelected()"
   title="{{T.F.TASK.CMP.TOGGLE_DETAIL_PANEL|translate}} {{kb.taskToggleDetailPanelOpen?'['+kb.taskToggleDetailPanelOpen+']':''}}"
   class="ico-btn show-additional-info-btn"
   color=""
   mat-icon-button
 >
-  <mat-icon *ngIf="!task().issueWasUpdated">&#xe949;</mat-icon>
+  @if (!task().issueWasUpdated) {
+  <mat-icon>&#xe949;</mat-icon>
+  }
   <!--            <mat-icon *ngIf="!task().issueWasUpdated">toc</mat-icon>-->
   <!--            <mat-icon *ngIf="!task().issueWasUpdated">chevron_right</mat-icon>-->
-  <mat-icon
-    *ngIf="task().issueWasUpdated"
-    color="accent"
-    >update
-  </mat-icon>
+  @if (task().issueWasUpdated) {
+  <mat-icon color="accent">update </mat-icon>
+  }
 </button>
+}
