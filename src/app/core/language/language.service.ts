@@ -31,6 +31,12 @@ export class LanguageService {
   }
 
   setLng(lng: LanguageCode): void {
+    // check if lng is valid enum
+    if (!Object.values(LanguageCode).includes(lng)) {
+      console.error('Invalid language code', lng);
+      return;
+    }
+
     if (lng) {
       this._setFn(lng);
     } else {

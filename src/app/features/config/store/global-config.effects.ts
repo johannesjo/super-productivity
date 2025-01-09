@@ -98,7 +98,7 @@ export class GlobalConfigEffects {
         filter(({ sectionKey, sectionCfg }) => sectionCfg && (sectionCfg as any).lng),
         tap(({ sectionKey, sectionCfg }) => {
           // eslint-disable-next-line
-          this._languageService.setLng((sectionCfg as any)['lng']);
+          this._languageService.setLng(sectionCfg['lng']);
         }),
       ),
     { dispatch: false },
