@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Een synchronisatieconflict is opgetreden",
-      "SYNC_CONFLICT_MSG": "Graag controleren en kijken wat te doen"
+      "SYNC_CONFLICT_MSG": "Graag controleren en kijken wat te doen",
+      "SYNC_CONFLICT_TITLE": "Een synchronisatieconflict is opgetreden"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "App draait op de achtergrond om synchronisatie mogelijk te maken als dit is ingeschakeld",
@@ -118,12 +118,12 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "ADD_AS_TASK": "Als Taak toevoegen",
+        "FOCUS_TASK": "Focus Taak",
         "TXT": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)",
         "TXT_PAST": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)",
-        "ADD_AS_TASK": "Als Taak toevoegen",
-        "FOCUS_TASK": "Focus Taak"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Fout: {{errTxt}}"
@@ -132,6 +132,11 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "L_TEXT": "Tekst"
       }
     },
     "DROPBOX": {
@@ -157,16 +162,16 @@
       "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
       "FINISH_TASK_AND_SELECT_NEXT": "Taak afmaken en volgende selecteren",
       "GET_READY": "Maak je klaar voor je focus sessie!",
-      "GOGOGO": "Go, go, go!!!",
       "GO_TO_PROCRASTINATION": "Krijg hulp als je aan het uitstellen bent",
+      "GOGOGO": "Go, go, go!!!",
       "NEXT": "Volgende",
       "ON": "aan",
       "OPEN_ISSUE_IN_BROWSER": "Issue in Browser openen",
       "POMODORO_BACK": "Terug",
       "POMODORO_DISABLE": "Pomodoro uitschakelen",
       "POMODORO_INFO": "Focus sessies kunnen niet tegelijk gebruikt worden met pomodoro timer ingeschakeld.",
-      "PREP_STRETCH": "Doe wat lichte stretches",
       "PREP_SIT_UPRIGHT": "Zit (of sta) rechtop",
+      "PREP_STRETCH": "Doe wat lichte stretches",
       "SELECT_ANOTHER_TASK": "Selecteer een andere Taak",
       "SELECT_TASK": "Selecteer een Taak om op te focussen",
       "SET_FOCUS_SESSION_DURATION": "Selecteer een Focus Sessie duur",
@@ -181,11 +186,11 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. om wijzigingen zelf te filteren)",
         "HOST": "Host (bijv. https://try.gitea.io)",
-        "TOKEN": "Access Token",
         "REPO_FULL_NAME": "Gebruikersnaam of Organisatie naam/project",
         "REPO_FULL_NAME_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
         "SCOPE_ASSIGNED": "Aan mij toegewezen",
-        "SCOPE_CREATED": "Aangemaakt door mij"
+        "SCOPE_CREATED": "Aangemaakt door mij",
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "TITLE": "Gitea"
@@ -198,29 +203,6 @@
         "STATUS": "Status",
         "SUMMARY": "Samenvatting",
         "WRITE_A_COMMENT": "Schrijf een opmerking"
-      }
-    },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Configureer Redmine voor Project"
-      },
-      "FORM": {
-        "PROJECT_ID": "Project identificatie",
-        "PROJECT_ID_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
-        "HOST": "Host (e.g.: https://redmine.org)",
-        "SCOPE_ALL": "Allemaal",
-        "SCOPE_ASSIGNED": "Aan mij toegewezen",
-        "SCOPE_CREATED": "Aangemaakt door mij"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Auteur",
-        "STATUS": "Status",
-        "PRIORITY": "Prioriteit",
-        "DESCRIPTION": "Omschrijving",
-        "MARK_AS_CHECKED": "Markeer wijzigingen als gecontroleerd"
       }
     },
     "GITHUB": {
@@ -293,15 +275,10 @@
         "ERR_UNKNOWN": "GitLab: onbekende fout {{statusCode}} {{errorMsg}}"
       }
     },
-    "DOMINA_MODE": {
-      "FORM": {
-        "L_TEXT": "Tekst"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "Problemen",
-        "ISSUE_STR": "Kwestie"
+        "ISSUE_STR": "Kwestie",
+        "ISSUES_STR": "Problemen"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Verzoek is mislukt vanwege een netwerkfout aan de clientzijde",
@@ -326,8 +303,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Dialoog altijd openen",
-        "DONE": "Status voor het voltooien van de taak",
         "DO_NOT": "Overgang niet",
+        "DONE": "Status voor het voltooien van de taak",
         "ENABLE": "Schakel Jira-integratie in",
         "ENABLE_TRANSITIONS": "Schakel overgangsafhandeling in",
         "IN_PROGRESS": "Status voor starttaak",
@@ -385,8 +362,8 @@
         "ALLOW_SELF_SIGNED": "Zelfondertekend certificaat toestaan",
         "HOST": "Host (bijv .: http://my-host.de:1234)",
         "PASSWORD": "Token / wachtwoord",
-        "USER_NAME": "E-mail / gebruikersnaam",
         "USE_PAT": "Persoonlijke toegangstoken gebruiken in plaats van wachtwoord",
+        "USER_NAME": "E-mail / gebruikersnaam",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (alleen desktop-app)"
       },
       "FORM_SECTION": {
@@ -435,8 +412,8 @@
         "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
         "TIMED_OUT": "Jira: Time-out voor verzoek",
         "TRANSITION": "Jira: Stel probleem \"{{issueKey}}\" in op \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
         "TRANSITION_SUCCESS": "Jira: Stel probleem {{issueKey}} in op <strong>{{gekozenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
         "UNABLE_TO_REASSIGN": "Jira: Kan ticket niet opnieuw aan jezelf toewijzen, omdat je geen gebruikersnaam hebt opgegeven. Bezoek de instellingen."
       },
       "STEPPER": {
@@ -496,14 +473,14 @@
       "D_ADD": {
         "NOTE_LABEL": "Voer wat tekst in om op te slaan als notitie ..."
       },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Markering-parsering uitschakelen",
+        "ENABLE_PARSE": "Markering ontleden inschakelen"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Nieuwe notitie toevoegen",
         "DROP_TO_ADD": "Ga hierheen om een nieuwe notitie toe te voegen",
         "NO_NOTES": "Er zijn momenteel geen notities"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Markering-parsering uitschakelen",
-        "ENABLE_PARSE": "Markering ontleden inschakelen"
       }
     },
     "OPEN_PROJECT": {
@@ -536,11 +513,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Dialoogvenster voor tijdregistratie weergeven wanneer subtaken zijn voltooid",
         "PROJECT_ID": "Project-ID",
         "PROJECT_ID_DESCRIPTION": "Kan worden gevonden als onderdeel van de url, bij het bekijken van het project in de browser.",
-        "TOKEN": "Toegangstoken",
         "SCOPE": "strekking",
         "SCOPE_ALL": "Allemaal",
         "SCOPE_ASSIGNED": "Toegewezen aan mij",
-        "SCOPE_CREATED": "Gecreëerd door mij"
+        "SCOPE_CREATED": "Gecreëerd door mij",
+        "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om open OpenProject-werkpakketten weer te geven. Houd er rekening mee dat om dit in de browser te laten werken, u waarschijnlijk CORS moet configureren voor uw OpenProject-server, om toegang te verlenen vanaf app.super-productivity.com</p>",
@@ -555,8 +532,8 @@
         "TYPE": "Type"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "Werkpakketten",
-        "ISSUE_STR": "Werkpakket"
+        "ISSUE_STR": "Werkpakket",
+        "ISSUES_STR": "Werkpakketten"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: onbekende fout {{statusCode}} {{errorMsg}}. Is CORS correct geconfigureerd voor de server?",
@@ -569,8 +546,8 @@
       "ENJOY_YOURSELF": "Geniet ervan, breng jezelf in beweging, kom terug in:",
       "FINISH_SESSION_X": "Sessie <strong>{{nr}}</strong>is succesvol afgerond!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} is begonnen!",
         "BREAK_TIME": "Pomodoro: Tijd voor pauze {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Break {{nr}} is begonnen!",
         "NO_TASKS": "Je moet taken toevoegen voordat de Pomodoro-timer kan starten.",
         "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
       },
@@ -627,10 +604,10 @@
         "EDIT": "Project bewerken",
         "SETUP_CALDAV": "Stel Caldav-integratie in",
         "SETUP_GIT": "GitHub-integratie instellen",
+        "SETUP_GITEA_PROJECT": "Configureer Gitea Integratie",
         "SETUP_GITLAB": "GitLab-integratie instellen",
         "SETUP_JIRA": "Jira-integratie instellen",
         "SETUP_OPEN_PROJECT": "OpenProject-integratie instellen",
-        "SETUP_GITEA_PROJECT": "Configureer Gitea Integratie",
         "SETUP_REDMINE_PROJECT": "Configureer Redmine Integratie"
       },
       "FORM_BASIC": {
@@ -672,14 +649,50 @@
       "PAGE_TITLE": "Snelle geschiedenis",
       "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configureer Redmine voor Project"
+      },
+      "FORM": {
+        "HOST": "Host (e.g.: https://redmine.org)",
+        "PROJECT_ID": "Project identificatie",
+        "PROJECT_ID_DESCRIPTION": "Kan gevonden worden in deel van de URL, wanneer je het project open hebt in de Browser",
+        "SCOPE_ALL": "Allemaal",
+        "SCOPE_ASSIGNED": "Aan mij toegewezen",
+        "SCOPE_CREATED": "Aangemaakt door mij"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Auteur",
+        "DESCRIPTION": "Omschrijving",
+        "MARK_AS_CHECKED": "Markeer wijzigingen als gecontroleerd",
+        "PRIORITY": "Prioriteit",
+        "STATUS": "Status"
+      }
+    },
     "REMINDER": {
-      "S_REMINDER_ERR": "Fout voor herinneringsinterface",
       "COUNTDOWN_BANNER": {
-        "START_NOW": "Nu beginnen",
         "HIDE": "Verbergen",
+        "START_NOW": "Nu beginnen",
         "TXT": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken verschuldigd)"
-      }
+      },
+      "S_REMINDER_ERR": "Fout voor herinneringsinterface"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "vervolgd",
+      "D_INITIAL": {
+        "TEXT": "<p>Het idee van de tijdlijn is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de tijdlijn alleen de komende 30 dagen omvat.</p>",
+        "TITLE": "Tijdlijn"
+      },
+      "END": "Einde van het werk",
+      "LUNCH_BREAK": "Lunchpauze",
+      "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
+      "NOW": "nu",
+      "START": "werk start",
+      "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak"
     },
     "SEARCH_BAR": {
       "INFO": "Klik op het lijstpictogram om te zoeken naar gearchiveerde taken",
@@ -803,6 +816,17 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
+        "ADD_ISSUE_TASK": "Voeg probleem #{{issueNr}} van {{issueType}}toe",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Taak onderaan de achterstand toevoegen",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Taak onderaan lijst toevoegen",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Taak bovenaan de achterstand toevoegen",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Taak bovenaan lijst toevoegen",
+        "CREATE_TASK": "Maak een nieuwe taak",
+        "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
+        "START": "Druk nogmaals op Enter om te beginnen"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Voeg bijlage toe",
         "ADD_SUB_TASK": "Subtaak toevoegen",
@@ -816,17 +840,6 @@
         "SCHEDULE_TASK": "Taak plannen",
         "SUB_TASKS": "Subtaken ({{nr}})",
         "TIME": "Tijd"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
-        "ADD_ISSUE_TASK": "Voeg probleem #{{issueNr}} van {{issueType}}toe",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Taak onderaan de achterstand toevoegen",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Taak onderaan lijst toevoegen",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Taak bovenaan de achterstand toevoegen",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Taak bovenaan lijst toevoegen",
-        "CREATE_TASK": "Maak een nieuwe taak",
-        "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
-        "START": "Druk nogmaals op Enter om te beginnen"
       },
       "B": {
         "ADD_HALF_HOUR": "Voeg 1/2 uur toe",
@@ -853,26 +866,13 @@
         "REPEAT_EDIT": "Herhaal taakconfiguratie bewerken",
         "SCHEDULE": "Taak plannen",
         "SHOW_UPDATES": "Updates weergeven",
-        "TOGGLE_DETAIL_PANEL": "Extra informatie tonen / verbergen",
         "TOGGLE_ATTACHMENTS": "Bijlagen tonen / verbergen",
+        "TOGGLE_DETAIL_PANEL": "Extra informatie tonen / verbergen",
         "TOGGLE_DONE": "Markeren als gereed / ongedaan gemaakt",
         "TOGGLE_SUB_TASK_VISIBILITY": "Zichtbaarheid van subtaken in- / uitschakelen",
         "TRACK_TIME": "Begin met het bijhouden van de tijd",
         "TRACK_TIME_STOP": "Pauzeer de volgtijd",
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
-        "REMIND_AT": "Herinner bij",
-        "RO_10M": "10 minuten voordat het begint",
-        "RO_15M": "15 minuten voordat het begint",
-        "RO_1H": "1 uur voordat het begint",
-        "RO_30M": "30 minuten voordat het begint",
-        "RO_5M": "5 minuten voordat het begint",
-        "RO_START": "wanneer het begint",
-        "RO_NEVER": "Nooit",
-        "SCHEDULE": "Schema",
-        "UNSCHEDULE": "Ongepland"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
@@ -891,6 +891,19 @@
         "SNOOZE_ALL": "Snooze All",
         "START": "Begin",
         "SWITCH_CONTEXT_START": "Wissel van context en start"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
+        "REMIND_AT": "Herinner bij",
+        "RO_1H": "1 uur voordat het begint",
+        "RO_5M": "5 minuten voordat het begint",
+        "RO_10M": "10 minuten voordat het begint",
+        "RO_15M": "15 minuten voordat het begint",
+        "RO_30M": "30 minuten voordat het begint",
+        "RO_NEVER": "Nooit",
+        "RO_START": "wanneer het begint",
+        "SCHEDULE": "Schema",
+        "UNSCHEDULE": "Ongepland"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Voeg tijd toe voor een andere dag",
@@ -996,19 +1009,6 @@
         "TUESDAY": "dinsdag",
         "WEDNESDAY": "woensdag"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "vervolgd",
-      "D_INITIAL": {
-        "TEXT": "<p>Het idee van de tijdlijn is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de tijdlijn alleen de komende 30 dagen omvat.</p>",
-        "TITLE": "Tijdlijn"
-      },
-      "END": "Einde van het werk",
-      "NOW": "nu",
-      "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
-      "START": "werk start",
-      "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak",
-      "LUNCH_BREAK": "Lunchpauze"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1116,8 +1116,8 @@
     "LOGOUT": "Uitloggen",
     "MINUTES": "{{m}} minuten",
     "NEXT": "De volgende",
-    "NONE": "Geen",
     "NO_CON": "Je bent momenteel offline. Maak opnieuw verbinding met internet.",
+    "NONE": "Geen",
     "OK": "OK",
     "PREVIOUS": "Vorige",
     "REMOVE": "Verwijderen",
@@ -1163,9 +1163,9 @@
       "GLOBAL_TOGGLE_TASK_START": "Schakel tijdregistratie in voor de laatste actieve taak",
       "GO_TO_DAILY_AGENDA": "Ga naar Agenda",
       "GO_TO_FOCUS_MODE": "Ga naar Focus Mode",
+      "GO_TO_SCHEDULE": "Ga naar de tijdlijn",
       "GO_TO_SCHEDULED_VIEW": "Ga naar geplande taken",
       "GO_TO_SETTINGS": "Ga naar Instellingen",
-      "GO_TO_SCHEDULE": "Ga naar de tijdlijn",
       "GO_TO_WORK_VIEW": "Ga naar Work View",
       "HELP": "<p>Hier kunt u alle sneltoetsen configureren.</p> <p>Klik op de tekstinvoer en voer de gewenste toetsenbordcombinatie in. Druk op enter om op te slaan en op Escape om af te breken.</p> <p>Er zijn drie soorten sneltoetsen:</p> <ul> <li><strong>Wereldwijde snelkoppelingen:</strong> wanneer de app wordt uitgevoerd, wordt de actie vanuit elke andere app geactiveerd.</li> <li><strong>Sneltoetsen op applicatieniveau:</strong> wordt geactiveerd vanuit elk scherm van de applicatie, maar niet als u momenteel een tekstveld bewerkt.</li> <li><strong>Sneltoetsen op taakniveau:</strong> Ze worden alleen geactiveerd als u een taak via muis of toetsenbord hebt geselecteerd en activeren meestal een actie die specifiek betrekking heeft op die ene taak.</li> </ul>",
       "MOVE_TASK_DOWN": "Verplaats taak naar beneden in lijst",
@@ -1177,8 +1177,8 @@
       "SELECT_PREVIOUS_TASK": "Selecteer vorige taak",
       "SHOW_SEARCH_BAR": "Toon zoekbalk",
       "SYSTEM_SHORTCUTS": "Globale snelkoppelingen (systeembreed)",
-      "TASK_ADD_SUB_TASK": "Subtaak toevoegen",
       "TASK_ADD_ATTACHMENT": "Voeg bestand of link toe",
+      "TASK_ADD_SUB_TASK": "Subtaak toevoegen",
       "TASK_DELETE": "Taak verwijderen",
       "TASK_EDIT_TAGS": "Bewerk-tags",
       "TASK_EDIT_TITLE": "Titel bewerken",
@@ -1229,6 +1229,14 @@
       "LONGER_BREAK_DURATION": "Duur van langere pauzes",
       "TITLE": "Pomodoro Timer"
     },
+    "SCHEDULE": {
+      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Tijdlijn'</a>.",
+      "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
+      "L_WORK_END": "Einde van de werkdag",
+      "L_WORK_START": "Start van de werkdag",
+      "TITLE": "Tijdlijn",
+      "WORK_START_END_DESCRIPTION": "bijv. 17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "Taak gedaan geluid",
       "IS_INCREASE_DONE_PITCH": "Verhoog de toon voor elke uitgevoerde taak",
@@ -1246,14 +1254,6 @@
       "NOTIFICATION_TITLE": "Neem een pauze!",
       "SNOOZE_TIME": "Snoozetijd wanneer u wordt gevraagd om een pauze te nemen",
       "TITLE": "Pauzeherinnering"
-    },
-    "SCHEDULE": {
-      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Tijdlijn'</a>.",
-      "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
-      "L_WORK_END": "Einde van de werkdag",
-      "L_WORK_START": "Start van de werkdag",
-      "TITLE": "Tijdlijn",
-      "WORK_START_END_DESCRIPTION": "bijv. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1287,15 +1287,15 @@
     "METRICS": "Metrische gegevens",
     "NOTES": "Opmerkingen",
     "PROCRASTINATE": "Talmen",
-    "PROJECTS": "Projecten",
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Projectinstellingen",
+    "PROJECTS": "Projecten",
     "QUICK_HISTORY": "Snelle geschiedenis",
     "SETTINGS": "Instellingen",
     "SHOW_SEARCH_BAR": "Toon zoekbalk",
     "TAGS": "Tags",
-    "TASKS": "Taken",
     "TASK_LIST": "Takenlijst",
+    "TASKS": "Taken",
     "TOGGLE_SHOW_BOOKMARKS": "Bladwijzers tonen / verbergen",
     "TOGGLE_SHOW_NOTES": "Projectnotities tonen / verbergen",
     "TOGGLE_TRACK_TIME": "Start / stop volgtijd",
@@ -1315,15 +1315,15 @@
     "ESTIMATE_TOTAL": "Totale schatting:",
     "EXPORT_TASK_LIST": "Takenlijst exporteren",
     "NO_TASKS": "Er zijn geen taken voor deze dag",
+    "ROUND_5M": "Rond alle taken af op 5 minuten",
     "ROUND_15M": "Rond alle taken af op 15 minuten",
     "ROUND_30M": "Rond alle taken af op 30 minuten",
-    "ROUND_5M": "Rond alle taken af op 5 minuten",
     "ROUND_TIME_SPENT": "Rond tijd besteed af",
     "ROUND_TIME_SPENT_TITLE": "Rond tijd besteed aan alle taken alle. Wees voorzichtig! Je kunt dit niet ongedaan maken!",
     "ROUND_TIME_WARNING": "!!! Wees voorzichtig dit kan niet ongedaan worden gemaakt !!!",
+    "ROUND_UP_5M": "Rond alle taken af op 5 minuten",
     "ROUND_UP_15M": "Rond alle taken af naar 15 minuten",
     "ROUND_UP_30M": "Rond alle taken af op 30 minuten",
-    "ROUND_UP_5M": "Rond alle taken af op 5 minuten",
     "SAVE_AND_GO_HOME": "Opslaan en naar huis gaan",
     "START_END": "Begin het einde",
     "SUMMARY_FOR": "Dagelijks overzicht voor {{dayStr}}",
@@ -1351,7 +1351,6 @@
     "START_TASK": "Start de taak nu en verwijder de herinnering"
   },
   "THEMES": {
-    "SELECT_THEME": "Selecteer thema",
     "amber": "amber",
     "blue": "blauw",
     "blue-grey": "blauw grijs",
@@ -1365,6 +1364,7 @@
     "lime": "limoen",
     "pink": "roze",
     "purple": "Purper",
+    "SELECT_THEME": "Selecteer thema",
     "teal": "groenblauw",
     "yellow": "geel"
   },

@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "同期の競合が発生しました",
-      "SYNC_CONFLICT_MSG": "確認して何をするか決めてください。"
+      "SYNC_CONFLICT_MSG": "確認して何をするか決めてください。",
+      "SYNC_CONFLICT_TITLE": "同期の競合が発生しました"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "同期を有効にするためにバックグラウンドで実行されているアプリ",
@@ -118,12 +118,12 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "ADD_AS_TASK": "タスクとして追加",
+        "FOCUS_TASK": "フォーカスタスク",
         "TXT": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
         "TXT_PAST": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start} }</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
-        "ADD_AS_TASK": "タスクとして追加",
-        "FOCUS_TASK": "フォーカスタスク"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start} }</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "カレンダー プロバイダー エラー: {{errTxt}}"
@@ -162,9 +162,9 @@
       "ON": "オン",
       "POMODORO_DISABLE": "ポモドーロを無効にする",
       "POMODORO_INFO": "ポモドーロ タイマーが有効になっている場合、フォーカス セッションを併用することはできません。",
-      "PREP_STRETCH": "軽いストレッチをする",
-      "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
       "PREP_GET_MENTALLY_READY": "集中して生産的になるために精神的に準備する",
+      "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
+      "PREP_STRETCH": "軽いストレッチをする",
       "SELECT_ANOTHER_TASK": "別のタスクを選択",
       "SELECT_TASK": "集中するタスクを選択",
       "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
@@ -180,33 +180,16 @@
       "FORM": {
         "FILTER_USER": "ユーザー名 (例:自分で変更をフィルタリングする場合)",
         "HOST": "ホスト (例:https://try.gitea.io)",
-        "TOKEN": "アクセストークン",
         "REPO_FULL_NAME": "ユーザー名または組織名/プロジェクト名",
         "REPO_FULL_NAME_DESCRIPTION": "ブラウザでプロジェクトを表示するときに、URL の一部として見つかります。",
         "SCOPE": "範囲",
         "SCOPE_ALL": "全て",
         "SCOPE_ASSIGNED": "私に割り当てられた",
-        "SCOPE_CREATED": "私が作った"
+        "SCOPE_CREATED": "私が作った",
+        "TOKEN": "アクセストークン"
       },
       "FORM_SECTION": {
         "TITLE": "Gitea"
-      },
-      "ISSUE_CONTENT": {
-        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク"
-      }
-    },
-    "REDMINE": {
-      "FORM": {
-        "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示するときに、URL の一部として見つかります。",
-        "HOST": "ホスト (例: https://redmine.org)",
-        "API_KEY": "APIアクセスキー",
-        "SCOPE": "範囲",
-        "SCOPE_ALL": "全て",
-        "SCOPE_ASSIGNED": "私に割り当てられた",
-        "SCOPE_CREATED": "私が作った"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine"
       },
       "ISSUE_CONTENT": {
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク"
@@ -278,8 +261,8 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "課題",
-        "ISSUE_STR": "問題"
+        "ISSUE_STR": "問題",
+        "ISSUES_STR": "課題"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}：クライアント側のネットワークエラーが原因でリクエストが失敗しました",
@@ -304,8 +287,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "常にダイアログを開く",
-        "DONE": "タスク完了の状況",
         "DO_NOT": "移行しない",
+        "DONE": "タスク完了の状況",
         "ENABLE": "Jira連携を有効にする",
         "ENABLE_TRANSITIONS": "遷移処理を有効にする",
         "IN_PROGRESS": "開始タスクの状況",
@@ -363,8 +346,8 @@
         "ALLOW_SELF_SIGNED": "自己署名証明書を許可する",
         "HOST": "ホスト（例：http://my-host.de:1234）",
         "PASSWORD": "トークン/パスワード",
-        "USER_NAME": "電子メール/ユーザー名",
         "USE_PAT": "パスワードの代わりにパーソナルアクセストークンを使用する",
+        "USER_NAME": "電子メール/ユーザー名",
         "WONKY_COOKIE_MODE": "Wonky Cookieフォールバック認証（デスクトップアプリのみ）"
       },
       "FORM_SECTION": {
@@ -413,8 +396,8 @@
         "NO_VALID_TRANSITION": "Jira：有効な遷移が設定されていません",
         "TIMED_OUT": "Jira：リクエストがタイムアウトしました",
         "TRANSITION": "Jira：issue \"{{issueKey}}\"を \"{{name}}\"に設定",
-        "TRANSITIONS_LOADED": "Jira：トランジションがロードされました。それらを割り当てるために下記の選択を使用してください",
         "TRANSITION_SUCCESS": "Jira：課題 {{issueKey}} を <strong>に設定してください{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira：トランジションがロードされました。それらを割り当てるために下記の選択を使用してください",
         "UNABLE_TO_REASSIGN": "Jira：ユーザー名を指定しなかったので、自分にチケットを再割り当てすることができません。設定をご覧ください。"
       },
       "STEPPER": {
@@ -474,21 +457,21 @@
       "D_ADD": {
         "NOTE_LABEL": "メモとして保存するテキストを入力してください..."
       },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "マークダウン解析を無効にする",
+        "ENABLE_PARSE": "マークダウン解析を有効にする"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "新しいメモを追加",
         "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください",
         "NO_NOTES": "現在、メモはありません"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "マークダウン解析を無効にする",
-        "ENABLE_PARSE": "マークダウン解析を有効にする"
       }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "常にダイアログを開く",
-        "DONE": "タスク完了のステータス",
         "DO_NOT": "移行しない",
+        "DONE": "タスク完了のステータス",
         "ENABLE": "Openproject統合を有効にする"
       },
       "DIALOG_INITIAL": {
@@ -512,11 +495,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "サブタスクが完了したときにタイムトラッキングダイアログを表示する",
         "PROJECT_ID": "プロジェクトID",
         "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示すると、URLの一部として見つけることができます。",
-        "TOKEN": "アクセストークン",
         "SCOPE": "範囲",
         "SCOPE_ALL": "すべて",
         "SCOPE_ASSIGNED": "私に割り当てられた",
-        "SCOPE_CREATED": "自分で作成"
+        "SCOPE_CREATED": "自分で作成",
+        "TOKEN": "アクセストークン"
       },
       "FORM_SECTION": {
         "HELP": "<p>ここでは、開いているOpenProjectワークパッケージを一覧表示するようにSuperProductivityを構成できます。これがブラウザで機能するためには、おそらくOpenProjectサーバーのCORSを構成して、app.super-productivity.comからのアクセスを許可する必要があることに注意してください</p>",
@@ -531,8 +514,8 @@
         "TYPE": "タイプ"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "作業パッケージ",
-        "ISSUE_STR": "ワークパッケージ"
+        "ISSUE_STR": "ワークパッケージ",
+        "ISSUES_STR": "作業パッケージ"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject：不明なエラー {{statusCode}} {{errorMsg}}。 CORSはサーバー用に適切に構成されていますか？",
@@ -639,8 +622,38 @@
       "PAGE_TITLE": "クイックヒストリー",
       "WEEK_TITLE": "週 {{nr}} （{{timeSpent}}）"
     },
+    "REDMINE": {
+      "FORM": {
+        "API_KEY": "APIアクセスキー",
+        "HOST": "ホスト (例: https://redmine.org)",
+        "PROJECT_ID_DESCRIPTION": "ブラウザでプロジェクトを表示するときに、URL の一部として見つかります。",
+        "SCOPE": "範囲",
+        "SCOPE_ALL": "全て",
+        "SCOPE_ASSIGNED": "私に割り当てられた",
+        "SCOPE_CREATED": "私が作った"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク"
+      }
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "続く",
+      "D_INITIAL": {
+        "TEXT": "<p>タイムラインのアイデアは、計画されたタスクが時間の経過とともにどのように実行されるかをより正確に把握することです。これはタスクから自動的に生成され、2つの異なるものを区別します。計画された時間に表示される <strong>スケジュールされたタスク</strong>と、それらの固定イベントの周りを流れる <strong>通常のタスク</strong> です。すべてのタスクは、割り当てられた時間の見積もりを考慮します。</p><p>これに加えて、作業の開始時間と終了時間を指定することもできます。構成されている場合、通常のタスクはこれらの外に表示されることはありません。タイムラインには、今後30日間のみが含まれることに注意してください。</p>",
+        "TITLE": "タイムライン"
+      },
+      "END": "作業終了",
+      "LUNCH_BREAK": "昼休憩",
+      "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
+      "NOW": "今",
+      "START": "作業開始",
+      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測"
     },
     "SEARCH_BAR": {
       "INFO": "リストアイコンをクリックして、アーカイブされたタスクを検索します",
@@ -755,6 +768,17 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "既存のタスク「{{taskTitle}}」を追加",
+        "ADD_ISSUE_TASK": " {{issueType}}から課題番号{{issueNr}} を追加",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "バックログの最後にタスクを追加",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "リストの一番下にタスクを追加",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "バックログの先頭にタスクを追加",
+        "ADD_TASK_TO_TOP_OF_TODAY": "リストの一番上にタスクを追加",
+        "CREATE_TASK": "新しいタスクを作成する",
+        "EXAMPLE": "例：「Some task title + projectName #some-tag #some-other-tag 10m / 3h」",
+        "START": "もう一度Enterキーを押して開始します"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
         "ADD_SUB_TASK": "サブタスクを追加",
@@ -768,17 +792,6 @@
         "SCHEDULE_TASK": "タスクのスケジュール",
         "SUB_TASKS": "サブタスク（{{nr}}）",
         "TIME": "時間"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "既存のタスク「{{taskTitle}}」を追加",
-        "ADD_ISSUE_TASK": " {{issueType}}から課題番号{{issueNr}} を追加",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "バックログの最後にタスクを追加",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "リストの一番下にタスクを追加",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "バックログの先頭にタスクを追加",
-        "ADD_TASK_TO_TOP_OF_TODAY": "リストの一番上にタスクを追加",
-        "CREATE_TASK": "新しいタスクを作成する",
-        "EXAMPLE": "例：「Some task title + projectName #some-tag #some-other-tag 10m / 3h」",
-        "START": "もう一度Enterキーを押して開始します"
       },
       "B": {
         "ADD_HALF_HOUR": "30分追加する",
@@ -805,26 +818,13 @@
         "REPEAT_EDIT": "繰り返しタスク設定の編集",
         "SCHEDULE": "タスクのスケジュール",
         "SHOW_UPDATES": "更新を表示",
-        "TOGGLE_DETAIL_PANEL": "追加情報を表示/非表示",
         "TOGGLE_ATTACHMENTS": "添付ファイルの表示/非表示",
+        "TOGGLE_DETAIL_PANEL": "追加情報を表示/非表示",
         "TOGGLE_DONE": "完了/未完了としてマーク",
         "TOGGLE_SUB_TASK_VISIBILITY": "サブタスクの表示/非表示",
         "TRACK_TIME": "タイムトラッキングの開始",
         "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
         "UPDATE_ISSUE_DATA": "課題データを更新"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
-        "REMIND_AT": "で思い出させる",
-        "RO_10M": "開始の10分前",
-        "RO_15M": "開始の15分前",
-        "RO_1H": "開始の1時間前",
-        "RO_30M": "開始の30分前",
-        "RO_5M": "開始の5分前",
-        "RO_START": "それが始まるとき",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "スケジュール",
-        "UNSCHEDULE": "予定外"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "今日にすべて追加",
@@ -843,6 +843,19 @@
         "SNOOZE_ALL": "すべてスヌーズ",
         "START": "開始タスク",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
+        "REMIND_AT": "で思い出させる",
+        "RO_1H": "開始の1時間前",
+        "RO_5M": "開始の5分前",
+        "RO_10M": "開始の10分前",
+        "RO_15M": "開始の15分前",
+        "RO_30M": "開始の30分前",
+        "RO_NEVER": "Never",
+        "RO_START": "それが始まるとき",
+        "SCHEDULE": "スケジュール",
+        "UNSCHEDULE": "予定外"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "消費時間を他の日に追加",
@@ -915,19 +928,6 @@
         "TUESDAY": "火曜日",
         "WEDNESDAY": "水曜日"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "続く",
-      "D_INITIAL": {
-        "TEXT": "<p>タイムラインのアイデアは、計画されたタスクが時間の経過とともにどのように実行されるかをより正確に把握することです。これはタスクから自動的に生成され、2つの異なるものを区別します。計画された時間に表示される <strong>スケジュールされたタスク</strong>と、それらの固定イベントの周りを流れる <strong>通常のタスク</strong> です。すべてのタスクは、割り当てられた時間の見積もりを考慮します。</p><p>これに加えて、作業の開始時間と終了時間を指定することもできます。構成されている場合、通常のタスクはこれらの外に表示されることはありません。タイムラインには、今後30日間のみが含まれることに注意してください。</p>",
-        "TITLE": "タイムライン"
-      },
-      "END": "作業終了",
-      "NOW": "今",
-      "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
-      "START": "作業開始",
-      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
-      "LUNCH_BREAK": "昼休憩"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1035,8 +1035,8 @@
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
     "NEXT": "次",
-    "NONE": "無し",
     "NO_CON": "現在オフラインです。インターネットに再接続してください。",
+    "NONE": "無し",
     "OK": "OK",
     "PREVIOUS": "前",
     "REMOVE": "削除する",
@@ -1082,9 +1082,9 @@
       "GLOBAL_TOGGLE_TASK_START": "最後のアクティブタスクのタイムトラッキングを切り替えます",
       "GO_TO_DAILY_AGENDA": "アジェンダに移動",
       "GO_TO_FOCUS_MODE": "フォーカスモードに移動",
+      "GO_TO_SCHEDULE": "タイムラインに移動",
       "GO_TO_SCHEDULED_VIEW": "スケジュールされたタスクに移動",
       "GO_TO_SETTINGS": "設定に移動",
-      "GO_TO_SCHEDULE": "タイムラインに移動",
       "GO_TO_WORK_VIEW": "作業ビューに移動",
       "HELP": "<p>ここですべてのキーボードショートカットを設定できます。</p> <p>テキスト入力をクリックして、希望のキーボードの組み合わせを入力してください。保存するにはEnterキーを押し、中止するにはEscapeキーを押してください。</p> <p>3種類のショートカットがあります。</p> <ul> <li> <strong>グローバルショートカット：</strong> アプリが実行されているとき、他のすべてのアプリケーションからアクションが起動されます。 </li> <li> <strong>アプリケーションレベルのショートカット：</strong> アプリケーションのすべての画面から起動しますが、現在テキストフィールドを編集している場合はそうではありません。 </li> <li> <strong>タスクレベルのショートカット：</strong> マウスまたはキーボードでタスクを選択した場合にのみ起動され、通常そのタスクに関連したアクションを起動します。 </li> </ul>",
       "MOVE_TASK_DOWN": "リスト内のタスクを下に移動",
@@ -1096,8 +1096,8 @@
       "SELECT_PREVIOUS_TASK": "前のタスクを選択",
       "SHOW_SEARCH_BAR": "検索バーを表示する",
       "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
-      "TASK_ADD_SUB_TASK": "サブタスクを追加",
       "TASK_ADD_ATTACHMENT": "ファイルまたはリンクを添付",
+      "TASK_ADD_SUB_TASK": "サブタスクを追加",
       "TASK_DELETE": "タスクを削除",
       "TASK_EDIT_TAGS": "タグを編集",
       "TASK_EDIT_TITLE": "タイトルを編集",
@@ -1148,6 +1148,14 @@
       "LONGER_BREAK_DURATION": "長い休憩時間",
       "TITLE": "ポモドーロタイマー"
     },
+    "SCHEDULE": {
+      "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/schedule'>'タイムライン'</a>の下にあります。",
+      "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
+      "L_WORK_END": "就業日の終わり",
+      "L_WORK_START": "就業日開始",
+      "TITLE": "タイムライン",
+      "WORK_START_END_DESCRIPTION": "例えば17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "タスク完了音",
       "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
@@ -1165,14 +1173,6 @@
       "NOTIFICATION_TITLE": "休憩する！",
       "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
       "TITLE": "休憩リマインダー"
-    },
-    "SCHEDULE": {
-      "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/schedule'>'タイムライン'</a>の下にあります。",
-      "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
-      "L_WORK_END": "就業日の終わり",
-      "L_WORK_START": "就業日開始",
-      "TITLE": "タイムライン",
-      "WORK_START_END_DESCRIPTION": "例えば17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1206,15 +1206,15 @@
     "METRICS": "メトリック",
     "NOTES": "ノート",
     "PROCRASTINATE": "先延ばし",
-    "PROJECTS": "プロジェクト",
     "PROJECT_MENU": "プロジェクトメニュー",
     "PROJECT_SETTINGS": "プロジェクト設定",
+    "PROJECTS": "プロジェクト",
     "QUICK_HISTORY": "クイックヒストリー",
     "SETTINGS": "設定",
     "SHOW_SEARCH_BAR": "検索バーを表示する",
     "TAGS": "タグ",
-    "TASKS": "タスク",
     "TASK_LIST": "タスクリスト",
+    "TASKS": "タスク",
     "TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
     "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
     "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
@@ -1234,15 +1234,15 @@
     "ESTIMATE_TOTAL": "合計見積もり：",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
     "NO_TASKS": "この日は何もしていません",
+    "ROUND_5M": "すべてのタスクを5分に丸める",
     "ROUND_15M": "すべてのタスクを15分に丸める",
     "ROUND_30M": "すべてのタスクを30分に丸める",
-    "ROUND_5M": "すべてのタスクを5分に丸める",
     "ROUND_TIME_SPENT": "時間を丸める",
     "ROUND_TIME_SPENT_TITLE": "すべてのタスクにかかったラウンド時間。注意してください！これを元に戻すことはできません。",
     "ROUND_TIME_WARNING": "!!!元に戻せないので注意!!!",
+    "ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
     "ROUND_UP_15M": "すべてのタスクを15分に切り上げ",
     "ROUND_UP_30M": "すべてのタスクを30分に切り上げ",
-    "ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
     "SAVE_AND_GO_HOME": "保存して家に帰る",
     "START_END": "開始 - 終了",
     "SUMMARY_FOR": " {{dayStr}}の日別サマリー",
@@ -1270,7 +1270,6 @@
     "START_TASK": "今すぐタスクを開始してリマインダーを削除"
   },
   "THEMES": {
-    "SELECT_THEME": "テーマを選択",
     "amber": "アンバー",
     "blue": "青",
     "blue-grey": "ブルーグレー",
@@ -1284,6 +1283,7 @@
     "lime": "ライム",
     "pink": "ピンク",
     "purple": "紫",
+    "SELECT_THEME": "テーマを選択",
     "teal": "ティール",
     "yellow": "黄"
   },

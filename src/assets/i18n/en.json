@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "A sync conflict occurred",
-      "SYNC_CONFLICT_MSG": "Please check and decide what to do."
+      "SYNC_CONFLICT_MSG": "Please check and decide what to do.",
+      "SYNC_CONFLICT_TITLE": "A sync conflict occurred"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "App running in background to allow for syncing if enabled",
@@ -118,12 +118,12 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "ADD_AS_TASK": "Add as Task",
+        "FOCUS_TASK": "Focus Task",
         "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)",
         "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)",
-        "ADD_AS_TASK": "Add as Task",
-        "FOCUS_TASK": "Focus Task"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}"
@@ -132,6 +132,15 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Repeats the configured phrase every X when tracking time to a task.",
+        "L_INTERVAL": "Interval to repeat phrase",
+        "L_TEXT": "Text",
+        "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
+        "TITLE": "Domina Mode"
       }
     },
     "DROPBOX": {
@@ -157,17 +166,17 @@
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
       "GET_READY": "Get ready for your focus session!",
-      "GOGOGO": "Go, go, go!!!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
+      "GOGOGO": "Go, go, go!!!",
       "NEXT": "Next",
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
       "POMODORO_BACK": "Back",
       "POMODORO_DISABLE": "Disable Pomodoro",
       "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
-      "PREP_STRETCH": "Do some mild stretching",
-      "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
       "PREP_GET_MENTALLY_READY": "Get mentally ready to be focused and productive",
+      "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
+      "PREP_STRETCH": "Do some mild stretching",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
@@ -183,13 +192,13 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://try.gitea.io)",
-        "TOKEN": "Access Token",
         "REPO_FULL_NAME": "Username or Organization name/project",
         "REPO_FULL_NAME_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
         "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me"
+        "SCOPE_CREATED": "Created by me",
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open Gitea issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and import all open issues.</p><p>To get by usage limits and to access you can provide a an access token.",
@@ -210,44 +219,15 @@
         "ERR_UNKNOWN": "Gitea: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Setup Redmine for Project"
-      },
-      "FORM": {
-        "PROJECT_ID": "Project Identifier",
-        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-        "HOST": "Host (e.g.: https://redmine.org)",
-        "API_KEY": "API access key",
-        "SCOPE": "Scope",
-        "SCOPE_ALL": "All",
-        "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically import all open issues.</p>"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Author",
-        "STATUS": "Status",
-        "PRIORITY": "Priority",
-        "DESCRIPTION": "Description",
-        "MARK_AS_CHECKED": "Mark updates as checked"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
-      }
-    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup GitHub for Project"
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "IS_ASSIGNEE_FILTER": "Only import issues assigned to me to backlog",
         "REPO": "username/repositoryName",
-        "TOKEN": "Access Token",
-        "IS_ASSIGNEE_FILTER": "Only import issues assigned to me to backlog"
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
@@ -267,8 +247,8 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "CONFIG_ERROR": "GitHub: Error while mapping data. Is your repository name correct?"
+        "CONFIG_ERROR": "GitHub: Error while mapping data. Is your repository name correct?",
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
     "GITLAB": {
@@ -277,13 +257,15 @@
       },
       "DIALOG_SUBMIT_WORKLOG": {
         "PAST_DAY_INFO": "The prefilled duration contains untracked data from past days.",
-        "TITLE": "Submit Time Spent on Issues to GitLab",
         "T_ALREADY_TRACKED": "Already Tracked",
         "T_TITLE": "Title",
         "T_TO_BE_SUBMITTED": "To be submitted",
+        "TITLE": "Submit Time Spent on Issues to GitLab",
         "TOTAL_MSG": "You will submit <em>{{totalTimeToSubmit}}</em> work time for today in total to <em>{{nrOfTasksToSubmit}}</em> different issues."
       },
       "FORM": {
+        "FILTER": "Custom Filter",
+        "FILTER_DESCRIPTION": "See https://docs.gitlab.com/ee/api/issues.html#list-issues. Multiple can be combined by &",
         "FILTER_USER": "Filter username",
         "GITLAB_BASE_URL": "Custom GitLab base URL (optional)",
         "PROJECT": "user name/project",
@@ -298,9 +280,7 @@
         "SOURCE_PROJECT": "Project",
         "SUBMIT_TIMELOGS": "Submit timelogs to Gitlab",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Show Time Tracking Dialog after clicking on finish day",
-        "TOKEN": "Access Token",
-        "FILTER": "Custom Filter",
-        "FILTER_DESCRIPTION": "See https://docs.gitlab.com/ee/api/issues.html#list-issues. Multiple can be combined by &"
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p>",
@@ -321,24 +301,15 @@
         "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
       }
     },
-    "DOMINA_MODE": {
-      "FORM": {
-        "HELP": "Repeats the configured phrase every X when tracking time to a task.",
-        "L_INTERVAL": "Interval to repeat phrase",
-        "L_TEXT": "Text",
-        "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
-        "TITLE": "Domina Mode"
-      }
-    },
     "ISSUE": {
       "CROSS_ORIGIN_BROWSER_WARNING": "This integration will likely not work in your browser. Please download the Desktop or Android version of Super Productivity!",
-      "HOW_TO_GET_A_TOKEN": "How to get a token?",
-      "DEFAULT_PROJECT_LABEL": "Default Super Productivity Project",
-      "DEFAULT_PROJECT_DESCRIPTION": "Project assigned to tasks created from issues.",
       "DEFAULT": {
-        "ISSUES_STR": "issues",
-        "ISSUE_STR": "issue"
+        "ISSUE_STR": "issue",
+        "ISSUES_STR": "issues"
       },
+      "DEFAULT_PROJECT_DESCRIPTION": "Project assigned to tasks created from issues.",
+      "DEFAULT_PROJECT_LABEL": "Default Super Productivity Project",
+      "HOW_TO_GET_A_TOKEN": "How to get a token?",
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Error: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Request failed because of a client side network error",
@@ -363,8 +334,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
         "DO_NOT": "Don't transition",
+        "DONE": "Status for completing task",
         "ENABLE": "Enable Jira integration",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
         "IN_PROGRESS": "Status for starting task",
@@ -423,8 +394,8 @@
         "ALLOW_SELF_SIGNED": "Allow self signed certificate",
         "HOST": "Host (e.g.: http://my-host.de:1234)",
         "PASSWORD": "Token / Password",
-        "USER_NAME": "Email / Username",
         "USE_PAT": "Use Personal Access Token instead (LEGACY)",
+        "USER_NAME": "Email / Username",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
       },
       "FORM_SECTION": {
@@ -474,8 +445,8 @@
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -536,18 +507,18 @@
         "NOTE_LABEL": "Enter some text to save as note (you can use markdown)..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "View as unparsed text",
+        "VIEW_PARSED": "View as parsed (non editable) markdown",
         "VIEW_SPLIT": "View parsed and unparsed markdown in split view",
-        "VIEW_PARSED": "View as parsed (non editable) markdown"
+        "VIEW_TEXT_ONLY": "View as unparsed text"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Disable markdown parsing for preview",
+        "ENABLE_PARSE": "Enable markdown parse"
       },
       "NOTES_CMP": {
         "ADD_BTN": "Add new Note",
         "DROP_TO_ADD": "Drop here to add new note",
         "NO_NOTES": "There are currently no notes"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing for preview",
-        "ENABLE_PARSE": "Enable markdown parse"
       },
       "S": {
         "NOTE_ADDED": "Note saved"
@@ -556,15 +527,15 @@
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
         "DO_NOT": "Don't transition",
+        "DONE": "Status for completing task",
         "ENABLE": "Enable Openproject integration",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
         "IN_PROGRESS": "Status for starting task",
         "OPEN": "Status for pausing task",
         "PROGRESS_ON_SAVE": "Default progress on save",
-        "TRANSITION": "Transition Handling",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
+        "TRANSITION": "Transition Handling"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Setup OpenProject for Project"
@@ -596,11 +567,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
         "PROJECT_ID": "Project ID",
         "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
-        "TOKEN": "Access Token",
         "SCOPE": "Scope",
         "SCOPE_ALL": "All",
         "SCOPE_ASSIGNED": "Assigned to me",
-        "SCOPE_CREATED": "Created by me"
+        "SCOPE_CREATED": "Created by me",
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
@@ -615,8 +586,8 @@
         "TYPE": "Type"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "work packages",
-        "ISSUE_STR": "work package"
+        "ISSUE_STR": "work package",
+        "ISSUES_STR": "work packages"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
@@ -627,7 +598,6 @@
       }
     },
     "PLANNER": {
-      "NO_TASKS": "No tasks",
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Add to Today",
@@ -639,6 +609,8 @@
           "TITLE": "Plan Task for Day"
         }
       },
+      "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'",
+      "NO_TASKS": "No tasks",
       "PLAN_VIEW": {
         "NO_SCHEDULED_ITEMS": "No scheduled items"
       },
@@ -647,8 +619,7 @@
         "TASK_ALREADY_PLANNED": "Task is already planned for {{date}}",
         "TASK_PLANNED_FOR": "Task planned for <strong>{{date}}</strong>{{extra}}"
       },
-      "TASK_DRAWER": "Task Drawer",
-      "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'"
+      "TASK_DRAWER": "Task Drawer"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
@@ -656,15 +627,15 @@
       "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
         "BREAK_TIME": "Pomodoro: Time for break {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
         "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!",
+        "RESET": "Reset to first Pomodoro Session",
         "SESSION_SKIP": "Skip to end of current Pomodoro Session",
-        "RESET": "Reset to first Pomodoro Session"
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "SKIP_BREAK": "Skip break",
       "START_BREAK": "Start break"
@@ -687,9 +658,9 @@
         "L3": "What do they remind you of?",
         "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
         "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
-        "TITLE": "Curiosity",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Another very effective method is to record, what triggered your urge to procrastinate. For example I personally often have the urge to quickly jump to reddit or my favorite news site whenever my browser window comes into focus. Since I started writing down my triggers in a simple empty text document, I became aware of how ingrained this pattern was and it helped me to experiment with different counter measures.",
         "PROCRASTINATION_TRIGGERS_TITLE": "Writing down your procrastination triggers",
-        "PROCRASTINATION_TRIGGERS_TEXT": "Another very effective method is to record, what triggered your urge to procrastinate. For example I personally often have the urge to quickly jump to reddit or my favorite news site whenever my browser window comes into focus. Since I started writing down my triggers in a simple empty text document, I became aware of how ingrained this pattern was and it helped me to experiment with different counter measures."
+        "TITLE": "Curiosity"
       },
       "H1": "Cut yourself some slack!",
       "INTRO": {
@@ -719,10 +690,10 @@
         "EDIT": "Edit Project",
         "SETUP_CALDAV": "Setup Caldav Integration",
         "SETUP_GIT": "Setup GitHub Integration",
+        "SETUP_GITEA_PROJECT": "Setup Gitea Integration",
         "SETUP_GITLAB": "Setup GitLab Integration",
         "SETUP_JIRA": "Setup Jira Integration",
         "SETUP_OPEN_PROJECT": "Setup OpenProject Integration",
-        "SETUP_GITEA_PROJECT": "Setup Gitea Integration",
         "SETUP_REDMINE_PROJECT": "Setup Redmine Integration"
       },
       "D_DELETE": {
@@ -768,14 +739,58 @@
       "PAGE_TITLE": "Quick History",
       "WEEK_TITLE": "Week {{nr}} ({{timeSpent}})"
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Redmine for Project"
+      },
+      "FORM": {
+        "API_KEY": "API access key",
+        "HOST": "Host (e.g.: https://redmine.org)",
+        "PROJECT_ID": "Project Identifier",
+        "PROJECT_ID_DESCRIPTION": "Can be found as part of the url, when viewing the project in the Browser.",
+        "SCOPE": "Scope",
+        "SCOPE_ALL": "All",
+        "SCOPE_ASSIGNED": "Assigned to me",
+        "SCOPE_CREATED": "Created by me"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Here you can configure SuperProductivity to list open Redmine (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p><p>In addition you can automatically import all open issues.</p>",
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Author",
+        "DESCRIPTION": "Description",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "PRIORITY": "Priority",
+        "STATUS": "Status"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
+      }
+    },
     "REMINDER": {
-      "S_REMINDER_ERR": "Error for reminder interface",
       "COUNTDOWN_BANNER": {
-        "START_NOW": "Start now",
         "HIDE": "Hide",
+        "START_NOW": "Start now",
         "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other tasks are due)"
-      }
+      },
+      "S_REMINDER_ERR": "Error for reminder interface"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "continued",
+      "D_INITIAL": {
+        "TEXT": "<p>The Schedule should provide you with a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and requires only <strong>time estimates on them to work</strong>.</p><p>Two things are distinguished: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong>, which should flow around those fixed events.</p><p>If you provide a work start and end time (recommended) regular tasks will never show up outside of these boundaries.</p>",
+        "TITLE": "Schedule"
+      },
+      "END": "Work End",
+      "LUNCH_BREAK": "Lunch Break",
+      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "NOW": "Now",
+      "PLAN_END_DAY": "Plan at end of day",
+      "PLAN_START_DAY": "Plan at start of day",
+      "START": "Work Start",
+      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
     },
     "SEARCH_BAR": {
       "INFO": "Click on the list icon to search for archived tasks",
@@ -844,15 +859,15 @@
         "USE_REMOTE": "Keep remote"
       },
       "D_INCOMPLETE_SYNC": {
+        "BTN_CLOSE_APP": "Close App",
+        "BTN_DOWNLOAD_BACKUP": "Download Local Backup",
+        "BTN_FORCE_UPLOAD": "Force Upload Local",
         "T1": "Last sync was incomplete!",
         "T2": "Your archive data was not properly uploaded during last sync:",
         "T3": "You have 2 Options:",
         "T4": "1. Go to your other device and complete the sync there.",
         "T5": "2. Or you can overwrite the remote data with your local one. All remote changes will\n    be lost!",
-        "T6": "Creating a backup of the data you overwrite is recommended!!!",
-        "BTN_CLOSE_APP": "Close App",
-        "BTN_DOWNLOAD_BACKUP": "Download Local Backup",
-        "BTN_FORCE_UPLOAD": "Force Upload Local"
+        "T6": "Creating a backup of the data you overwrite is recommended!!!"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
@@ -867,10 +882,6 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Sync File Name"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FOLDER_PATH": "Sync folder path",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Needs file access permission"
-        },
         "L_ENABLE_COMPRESSION": "Enable Compression (faster data transfer)",
         "L_ENABLE_ENCRYPTION": "Enable end-to-end encryption (experimental) – Make your data inaccessible for your sync provider",
         "L_ENABLE_SYNCING": "Enable Syncing",
@@ -878,6 +889,10 @@
         "L_ENCRYPTION_PASSWORD": "Encryption Password (DO NOT FORGET)",
         "L_SYNC_INTERVAL": "Sync Interval",
         "L_SYNC_PROVIDER": "Sync Provider",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Needs file access permission",
+          "L_SYNC_FOLDER_PATH": "Sync folder path"
+        },
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Making it work in the browser:</strong> To make this work in the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
@@ -927,22 +942,6 @@
       }
     },
     "TASK": {
-      "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Add attachment",
-        "ADD_SUB_TASK": "Add Sub Task",
-        "ATTACHMENTS": "Attachments ({{nr}})",
-        "FROM_PARENT": "(from Parent)",
-        "LOCAL_ATTACHMENTS": "Local Attachments",
-        "NOTES": "Description",
-        "PARENT": "Parent",
-        "SCHEDULED_AT": "Scheduled at",
-        "REMINDER": "Reminder",
-        "REPEAT": "Repeat",
-        "SCHEDULE_TASK": "Schedule Task",
-        "SUB_TASKS": "Sub Tasks ({{nr}})",
-        "TIME": "Time",
-        "TITLE_PLACEHOLDER": "Enter a title"
-      },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
         "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
@@ -955,6 +954,22 @@
         "START": "Press enter one more time to start",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Toggle adding task to backlog / today's list'",
         "TOGGLE_ADD_TOP_OR_BOTTOM": "Toggle adding task to top & bottom of list"
+      },
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Add attachment",
+        "ADD_SUB_TASK": "Add Sub Task",
+        "ATTACHMENTS": "Attachments ({{nr}})",
+        "FROM_PARENT": "(from Parent)",
+        "LOCAL_ATTACHMENTS": "Local Attachments",
+        "NOTES": "Description",
+        "PARENT": "Parent",
+        "REMINDER": "Reminder",
+        "REPEAT": "Repeat",
+        "SCHEDULE_TASK": "Schedule Task",
+        "SCHEDULED_AT": "Scheduled at",
+        "SUB_TASKS": "Sub Tasks ({{nr}})",
+        "TIME": "Time",
+        "TITLE_PLACEHOLDER": "Enter a title"
       },
       "B": {
         "ADD_HALF_HOUR": "Add 1/2 hour",
@@ -984,8 +999,8 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
         "TRACK_TIME": "Start tracking time",
@@ -999,24 +1014,6 @@
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
         "MSG": "Do you want to create the new tags {{tagsTxt}}?",
         "OK": "Create tags"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "REMIND_AT": "Remind at",
-        "QA_NEXT_MONTH": "Schedule next Month",
-        "QA_NEXT_WEEK": "Schedule next Week",
-        "QA_REMOVE_TODAY": "Remove task from today",
-        "QA_TODAY": "Schedule Today",
-        "QA_TOMORROW": "Schedule Tomorrow",
-        "RO_10M": "10 minutes before it starts",
-        "RO_15M": "15 minutes before it starts",
-        "RO_1H": "1 hour before it starts",
-        "RO_30M": "30 minutes before it starts",
-        "RO_5M": "5 minutes before it starts",
-        "RO_START": "when it starts",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Remove"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
@@ -1036,6 +1033,24 @@
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "QA_NEXT_MONTH": "Schedule next Month",
+        "QA_NEXT_WEEK": "Schedule next Week",
+        "QA_REMOVE_TODAY": "Remove task from today",
+        "QA_TODAY": "Schedule Today",
+        "QA_TOMORROW": "Schedule Tomorrow",
+        "REMIND_AT": "Remind at",
+        "RO_1H": "1 hour before it starts",
+        "RO_5M": "5 minutes before it starts",
+        "RO_10M": "10 minutes before it starts",
+        "RO_15M": "15 minutes before it starts",
+        "RO_30M": "30 minutes before it starts",
+        "RO_NEVER": "Never",
+        "RO_START": "when it starts",
+        "SCHEDULE": "Schedule",
+        "UNSCHEDULE": "Remove"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
@@ -1091,26 +1106,26 @@
         "EVERY_X_MONTHLY_AND_TIME": "Every {{x}} months, {{timeStr}}",
         "EVERY_X_YEARLY": "Every {{x}} years",
         "EVERY_X_YEARLY_AND_TIME": "Every {{x}} years, {{timeStr}}",
-        "MONTHLY_CURRENT_DATE": "Monthly on {{dateDayStr}}th",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "Monthly on {{dateDayStr}}th, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Mon-Fri",
         "MONDAY_TO_FRIDAY_AND_TIME": "Mon-Fri, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Monthly on {{dateDayStr}}th",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Monthly on {{dateDayStr}}th, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Weekly on {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Weekly on {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Yearly on {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Yearly {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to move all of them to the project \"{{projectName}}\"?",
+        "OK": "Update all instances"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
         "OK": "Remove completely"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
-        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to update all of them with the new defaults or just future tasks?",
         "CANCEL": "Only future tasks",
-        "OK": "Update all instances"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to move all of them to the project \"{{projectName}}\"?",
+        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to update all of them with the new defaults or just future tasks?",
         "OK": "Update all instances"
       },
       "D_EDIT": {
@@ -1137,8 +1152,8 @@
         "ORDER_DESCRIPTION": "Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A lower value means a task will be created higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "Q_CUSTOM": "Custom repeat config",
         "Q_DAILY": "Every day",
-        "Q_MONTHLY_CURRENT_DATE": "Every month on the {{dateDayStr}}th",
         "Q_MONDAY_TO_FRIDAY": "Every monday to friday",
+        "Q_MONTHLY_CURRENT_DATE": "Every month on the {{dateDayStr}}th",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Every week on {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Every year on the {{dayAndMonthStr}}",
         "QUICK_SETTING": "Repeat Config",
@@ -1156,21 +1171,6 @@
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "continued",
-      "D_INITIAL": {
-        "TEXT": "<p>The Schedule should provide you with a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and requires only <strong>time estimates on them to work</strong>.</p><p>Two things are distinguished: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong>, which should flow around those fixed events.</p><p>If you provide a work start and end time (recommended) regular tasks will never show up outside of these boundaries.</p>",
-        "TITLE": "Schedule"
-      },
-      "END": "Work End",
-      "NOW": "Now",
-      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "PLAN_END_DAY": "Plan at end of day",
-      "PLAN_START_DAY": "Plan at start of day",
-      "START": "Work Start",
-      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
-      "LUNCH_BREAK": "Lunch Break"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1274,9 +1274,8 @@
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
-    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
-    "TRACKING_INTERVAL_DESCRIPTION": "Track time using this interval in milliseconds. You might want to change this to reduce disk writes. See issue #2355.",
     "DO_IT": "Do it!",
+    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
     "EXAMPLE_VAL": "e.g. 32m",
@@ -1287,8 +1286,8 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
-    "NONE": "None",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
+    "NONE": "None",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
@@ -1297,6 +1296,7 @@
     "SUBMIT": "Submit",
     "TITLE": "Title",
     "TODAY_TAG_TITLE": "Today",
+    "TRACKING_INTERVAL_DESCRIPTION": "Track time using this interval in milliseconds. You might want to change this to reduce disk writes. See issue #2355.",
     "UNDO": "Undo",
     "UPDATE": "Update",
     "WITHOUT_PROJECT": "Without Project",
@@ -1351,15 +1351,15 @@
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "Enter Focus Mode",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View and focus first task",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
-      "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TASK_TO_BOTTOM": "Move Task to the bottom of the List",
       "MOVE_TASK_TO_TOP": "Move Task to the top of the List",
+      "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Notes",
@@ -1368,8 +1368,8 @@
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_ADD_ATTACHMENT": "Attach file or link",
+      "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
@@ -1383,9 +1383,9 @@
       "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Show/Hide additional task info",
       "TASK_TOGGLE_DONE": "Toggle Done",
       "TITLE": "Keyboard Shortcuts",
-      "TOGGLE_ISSUE_PANEL": "Show/Hide Issue Panel",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
+      "TOGGLE_ISSUE_PANEL": "Show/Hide Issue Panel",
       "TOGGLE_PLAY": "Start/Stop Task",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
       "TRIGGER_SYNC": "Trigger sync (if configured)",
@@ -1422,8 +1422,6 @@
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
       "FIRST_DAY_OF_WEEK": "First day of the week",
-      "START_OF_NEXT_DAY": "Start time of the next day",
-      "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
@@ -1436,15 +1434,10 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Use minimal navigation bar (show only icons)",
+      "START_OF_NEXT_DAY": "Start time of the next day",
+      "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
-    },
-    "SHORT_SYNTAX": {
-      "TITLE": "Short Syntax",
-      "HELP": "<p>Here you can control short syntax options when creating a task</p>",
-      "IS_ENABLE_PROJECT": "Enable project short syntax (+<Project name>)",
-      "IS_ENABLE_TAG": "Enable tag short syntax (#<Tag>)",
-      "IS_ENABLE_DUE": "Enable due short syntax (@<Due time>)"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1462,9 +1455,28 @@
       "TITLE": "Pomodoro Timer"
     },
     "REMINDER": {
-      "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
+      "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
       "TITLE": "Reminders"
+    },
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
+      "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
+      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
+      "L_LUNCH_BREAK_END": "Lunch break end",
+      "L_LUNCH_BREAK_START": "Lunch break start",
+      "L_WORK_END": "Work Day End",
+      "L_WORK_START": "Work Day Start",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00",
+      "TITLE": "Schedule",
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+    },
+    "SHORT_SYNTAX": {
+      "HELP": "<p>Here you can control short syntax options when creating a task</p>",
+      "IS_ENABLE_DUE": "Enable due short syntax (@<Due time>)",
+      "IS_ENABLE_PROJECT": "Enable project short syntax (+<Project name>)",
+      "IS_ENABLE_TAG": "Enable tag short syntax (#<Tag>)",
+      "TITLE": "Short Syntax"
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
@@ -1475,12 +1487,12 @@
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Add motivational image",
+      "FULL_SCREEN_BLOCKER_DURATION": "Duration to display the fullscreen window (desktop only)",
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
       "IS_ENABLED": "Enable take a break reminder",
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
-      "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "IS_FULL_SCREEN_BLOCKER": "Display message in fullscreen window (desktop only)",
-      "FULL_SCREEN_BLOCKER_DURATION": "Duration to display the fullscreen window (desktop only)",
+      "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMGS": "Motivational images (use web urls)",
@@ -1488,27 +1500,15 @@
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
     },
-    "SCHEDULE": {
-      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
-      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
-      "L_WORK_END": "Work Day End",
-      "L_WORK_START": "Work Day Start",
-      "TITLE": "Schedule",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00",
-      "L_IS_LUNCH_BREAK_ENABLED": "Enable lunch break",
-      "L_LUNCH_BREAK_END": "Lunch break end",
-      "L_LUNCH_BREAK_START": "Lunch break start",
-      "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00"
-    },
     "TIME_TRACKING": {
       "HELP": "The time tracking reminder is a banner to show up in case you forgot to start time tracking.",
-      "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_DEFAULT_ESTIMATE": "Default time estimate for new tasks",
       "L_DEFAULT_ESTIMATE_SUB_TASKS": "Default time estimate for new sub tasks",
       "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Reminder Enabled",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
+      "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
       "TITLE": "Time Tracking"
     }
@@ -1544,36 +1544,36 @@
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
     "GO_TO_TASK_LIST": "Go to task list",
+    "HELP": "Help",
     "HM": {
       "CALENDARS": "Howto: Connect Calendars",
       "CONTRIBUTE": "Contribute",
       "GET_HELP_ONLINE": "Get help online",
       "KEYBOARD": "Howto: Advanced Keyboard",
+      "REDDIT_COMMUNITY": "Reddit Community",
       "REPORT_A_PROBLEM": "Report a problem",
       "START_WELCOME": "Start Welcome Tour",
-      "SYNC": "Howto: Configure Sync",
-      "REDDIT_COMMUNITY": "Reddit Community"
+      "SYNC": "Howto: Configure Sync"
     },
-    "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
-    "HELP": "Help",
     "METRICS": "Metrics",
+    "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
     "NOTES": "Notes",
     "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",
     "PLANNER": "Planner",
     "PROCRASTINATE": "Procrastinate",
-    "PROJECTS": "Projects",
     "PROJECT_MENU": "Project Menu",
     "PROJECT_SETTINGS": "Project Settings",
+    "PROJECTS": "Projects",
     "QUICK_HISTORY": "Quick History",
     "REPEAT_SCHEDULED": "Repeat/Scheduled",
     "SCHEDULE": "Schedule",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",
-    "TASKS": "Tasks",
     "TASK_LIST": "Task List",
-    "TOGGLE_SHOW_ISSUE_PANEL": "Show/Hide Issue Panel",
+    "TASKS": "Tasks",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Show/Hide Issue Panel",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "Trigger sync manually",
@@ -1595,15 +1595,15 @@
     "NO_TASKS": "There are no tasks for this day",
     "PLAN_TOMORROW": "Plan",
     "REVIEW_TASKS": "Review",
+    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
-    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_TIME_SPENT": "Round Time Spent",
     "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
     "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
+    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "SAVE_AND_GO_HOME": "Save and go home",
     "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
@@ -1629,16 +1629,15 @@
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED_TITLE": "Scheduled Tasks for Day",
-    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it right click (long press on mobile) on a task.",
     "NO_REPEATABLE_TASKS": "There are currently no repeated tasks. You can schedule a task by choosing \"Repeat Task\" in the task side panel. To open it click on the most right icon that appears when hovering a task (or just tap on the task on mobile).",
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it right click (long press on mobile) on a task.",
+    "NO_SCHEDULED_TITLE": "Scheduled Tasks for Day",
     "REPEATED_TASKS": "Repeated tasks",
     "SCHEDULED_TASKS": "Scheduled tasks",
     "SCHEDULED_TASKS_WITH_REMINDER": "Scheduled tasks with reminder",
     "START_TASK": "Start task and remove reminder"
   },
   "THEMES": {
-    "SELECT_THEME": "Select Theme",
     "amber": "amber",
     "blue": "blue",
     "blue-grey": "blue-grey",
@@ -1652,6 +1651,7 @@
     "lime": "lime",
     "pink": "pink",
     "purple": "purple",
+    "SELECT_THEME": "Select Theme",
     "teal": "teal",
     "yellow": "yellow"
   },
@@ -1673,18 +1673,18 @@
     "COMPLETED_TASKS": "Completed Tasks",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
-    "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
     "FINISH_DAY_FOR_TAG": "Finish Day for this Tag",
+    "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
     "NO_COMPLETED_TASKS": "There are currently no completed tasks",
     "NO_PLANNED_TASKS": "No planned tasks",
     "READY_TO_WORK": "Ready to work!",
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",
+    "TODAY_REMAINING": "Today remaining:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:",
-    "WORKING_TODAY_ARCHIVED": "Time worked today on archived tasks",
-    "TODAY_REMAINING": "Today remaining:"
+    "WORKING_TODAY_ARCHIVED": "Time worked today on archived tasks"
   }
 }

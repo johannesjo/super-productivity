@@ -179,8 +179,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Always open dialog",
-        "DONE": "Status for completing task",
         "DO_NOT": "Don't transition",
+        "DONE": "Status for completing task",
         "ENABLE": "Enable Jira integration",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
         "IN_PROGRESS": "Status for starting task",
@@ -272,8 +272,8 @@
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -330,13 +330,13 @@
       "D_ADD": {
         "NOTE_LABEL": "Enter some text to save as note..."
       },
-      "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note"
-      },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
+      },
+      "NOTES_CMP": {
+        "ADD_BTN": "Add new Note",
+        "DROP_TO_ADD": "Drop here to add new note"
       }
     },
     "POMODORO": {
@@ -345,8 +345,8 @@
       "ENJOY_YOURSELF": "Zrób sobie przerwę, poruszaj się trochę, wróć za:",
       "FINISH_SESSION_X": "Zakończyłeś sesję <strong>{{nr}}</strong> z powodzeniem!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Przerwa {{nr}} się zaczęła!",
         "BREAK_TIME": "Pomodoro: Czas na przerwę {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Przerwa {{nr}} się zaczęła!",
         "NO_TASKS": "Przed uruchomieniem minutnika Pomodoro należy dodać zadania.",
         "SESSION_X_START": "Pomodoro: Sesja {{nr}} się zaczęła!"
       },
@@ -436,6 +436,18 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Error for reminder interface"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "continued",
+      "D_INITIAL": {
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TITLE": "Schedule"
+      },
+      "END": "Work End",
+      "LUNCH_BREAK": "Przerwa na lunch",
+      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "NOW": "Now",
+      "START": "Work Start"
     },
     "SEARCH_BAR": {
       "INFO": "Click on the list icon to search for archived tasks",
@@ -547,6 +559,13 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
+        "CREATE_TASK": "Create new task",
+        "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
+        "START": "Press enter one more time to start"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
@@ -560,13 +579,6 @@
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
-        "CREATE_TASK": "Create new task",
-        "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
-        "START": "Press enter one more time to start"
       },
       "B": {
         "ADD_HALF_HOUR": "Add 1/2 hour",
@@ -593,26 +605,13 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "REMIND_AT": "Remind at",
-        "RO_10M": "10 minutes before it starts",
-        "RO_15M": "15 minutes before it starts",
-        "RO_1H": "1 hour before it starts",
-        "RO_30M": "30 minutes before it starts",
-        "RO_5M": "5 minutes before it starts",
-        "RO_START": "when it starts",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
@@ -630,6 +629,19 @@
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "REMIND_AT": "Remind at",
+        "RO_1H": "1 hour before it starts",
+        "RO_5M": "5 minutes before it starts",
+        "RO_10M": "10 minutes before it starts",
+        "RO_15M": "15 minutes before it starts",
+        "RO_30M": "30 minutes before it starts",
+        "RO_NEVER": "Never",
+        "RO_START": "when it starts",
+        "SCHEDULE": "Schedule",
+        "UNSCHEDULE": "Unschedule"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
@@ -695,18 +707,6 @@
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "continued",
-      "D_INITIAL": {
-        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
-        "TITLE": "Schedule"
-      },
-      "END": "Work End",
-      "NOW": "Now",
-      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "START": "Work Start",
-      "LUNCH_BREAK": "Przerwa na lunch"
     },
     "TIME_TRACKING": {
       "B": {
@@ -808,8 +808,8 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
-    "NONE": "None",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
+    "NONE": "None",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
@@ -855,9 +855,9 @@
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
+      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
-      "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_WORK_VIEW": "Go to Work View",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -869,8 +869,8 @@
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_ADD_ATTACHMENT": "Attach file or link",
+      "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
       "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
@@ -921,6 +921,14 @@
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
       "TITLE": "Pomodoro Timer"
     },
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
+      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
+      "L_WORK_END": "Work Day End",
+      "L_WORK_START": "Work Day Start",
+      "TITLE": "Schedule",
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "Dźwięk zrobionego zadania",
       "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację dla każdego wykonanego zadania",
@@ -937,14 +945,6 @@
       "MOTIVATIONAL_IMGS": "Motivational image (web url)",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
-    },
-    "SCHEDULE": {
-      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
-      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
-      "L_WORK_END": "Work Day End",
-      "L_WORK_START": "Work Day Start",
-      "TITLE": "Schedule",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -975,14 +975,14 @@
     "METRICS": "Metryki",
     "NOTES": "Notatki",
     "PROCRASTINATE": "Odwlekanie",
-    "PROJECTS": "Projekty",
     "PROJECT_MENU": "Menu projektu",
     "PROJECT_SETTINGS": "Ustawienia projektów",
+    "PROJECTS": "Projekty",
     "SETTINGS": "Ustawienia",
     "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania",
     "TAGS": "Tagi",
-    "TASKS": "Zadania",
     "TASK_LIST": "Lista zadań",
+    "TASKS": "Zadania",
     "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
     "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
     "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
@@ -1000,15 +1000,15 @@
     },
     "EXPORT_TASK_LIST": "Eksportuj listę Zadań",
     "NO_TASKS": "Nie ma żadnych zadań na dziś",
+    "ROUND_5M": "Zaokrągl czas zadań do 5 minut",
     "ROUND_15M": "Zaokrągl czas zadań do 15 minut",
     "ROUND_30M": "Zaokrągl czas zadań do 30 minut",
-    "ROUND_5M": "Zaokrągl czas zadań do 5 minut",
     "ROUND_TIME_SPENT": "Zaokrągl Spęczony Czas",
     "ROUND_TIME_SPENT_TITLE": "Zaokrągl czas dla wszystkich zadań. Bądź ostroży, bo tego nie zofniesz!",
     "ROUND_TIME_WARNING": "!!! Uważaj, bo tego nie da się odwrócić !!!",
+    "ROUND_UP_5M": "Zaokrągl czas zadań W GÓRĘ do 5 minut",
     "ROUND_UP_15M": "Zaokrągl czas zadań W GÓRĘ do 15 minut",
     "ROUND_UP_30M": "Zaokrągl czas zadań W GÓRĘ do 30 minut",
-    "ROUND_UP_5M": "Zaokrągl czas zadań W GÓRĘ do 5 minut",
     "SAVE_AND_GO_HOME": "Zapisz i idź do domu",
     "START_END": "Start – Koniec",
     "SUMMARY_FOR": "Dzienne Podsumiwanie {{dayStr}}",
@@ -1036,7 +1036,6 @@
     "START_TASK": "Ropoczni zadanie i wyłącz przypomnienie"
   },
   "THEMES": {
-    "SELECT_THEME": "Select Theme",
     "amber": "amber",
     "blue": "blue",
     "blue-grey": "blue-grey",
@@ -1050,6 +1049,7 @@
     "lime": "lime",
     "pink": "pink",
     "purple": "purple",
+    "SELECT_THEME": "Select Theme",
     "teal": "teal",
     "yellow": "yellow"
   },

@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Vyskytol sa konflikt synchronizácie",
-      "SYNC_CONFLICT_MSG": "Skontrolujte to a rozhodnite sa, čo máte robiť."
+      "SYNC_CONFLICT_MSG": "Skontrolujte to a rozhodnite sa, čo máte robiť.",
+      "SYNC_CONFLICT_TITLE": "Vyskytol sa konflikt synchronizácie"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "Aplikácia beží na pozadí, aby sa umožnila synchronizácia, ak je povolená",
@@ -180,8 +180,8 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "problémy",
-        "ISSUE_STR": "problém"
+        "ISSUE_STR": "problém",
+        "ISSUES_STR": "problémy"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Požiadavka zlyhala z dôvodu sieťovej chyby na strane klienta",
@@ -206,8 +206,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Vždy otvoriť dialóg",
-        "DONE": "Stav pre dokončenie úlohy",
         "DO_NOT": "Neprechádzať",
+        "DONE": "Stav pre dokončenie úlohy",
         "ENABLE": "Povoliť integráciu Jira ",
         "ENABLE_TRANSITIONS": "Povoliť spracovanie prechodu",
         "IN_PROGRESS": "Stav pre spustenie úlohy",
@@ -265,8 +265,8 @@
         "ALLOW_SELF_SIGNED": "Povolenie vlastnoručne podpísaného certifikátu",
         "HOST": "Hostiteľ (napr.: http://my-host.de:1234)",
         "PASSWORD": "Token / Heslo",
-        "USER_NAME": "Email / používateľské meno",
         "USE_PAT": "Používanie Osobného Prístupového Tokenu namiesto hesla",
+        "USER_NAME": "Email / používateľské meno",
         "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (iba aplikácia pre počítače)"
       },
       "FORM_SECTION": {
@@ -316,8 +316,8 @@
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -378,18 +378,18 @@
         "NOTE_LABEL": "Zadajte text, ktorý chcete uložiť ako poznámku (môžete použiť markdown)..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "Zobrazenie ako nesparsovaný text",
+        "VIEW_PARSED": "Zobrazenie ako sparsovaný (neupraviteľný) markdown",
         "VIEW_SPLIT": "Zobrazenie rozparsovaných a nerozparsovaných markdown v rozdelenom zobrazení",
-        "VIEW_PARSED": "Zobrazenie ako sparsovaný (neupraviteľný) markdown"
+        "VIEW_TEXT_ONLY": "Zobrazenie ako nesparsovaný text"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Zakázať parsovanie markdown pre náhľad",
+        "ENABLE_PARSE": "Povoliť parsovanie markdown"
       },
       "NOTES_CMP": {
         "ADD_BTN": "Pridať novú poznámku",
         "DROP_TO_ADD": "Tu môžete pridať novú poznámku",
         "NO_NOTES": "Momentálne nie sú k dispozícii žiadne poznámky"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Zakázať parsovanie markdown pre náhľad",
-        "ENABLE_PARSE": "Povoliť parsovanie markdown"
       }
     },
     "OPEN_PROJECT": {
@@ -414,11 +414,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zobrazenie dialógového okna sledovania času po dokončení čiastkových úloh",
         "PROJECT_ID": "ID projektu",
         "PROJECT_ID_DESCRIPTION": "Dá sa nájsť ako súčasť adresy URL pri prezeraní projektu v Prehliadači",
-        "TOKEN": "Access Token",
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všetko",
         "SCOPE_ASSIGNED": "Pridelené mne",
-        "SCOPE_CREATED": "Vytvorené mnou"
+        "SCOPE_CREATED": "Vytvorené mnou",
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
@@ -433,8 +433,8 @@
         "TYPE": "Typ"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "pracovné balíky",
-        "ISSUE_STR": "pracovný balík"
+        "ISSUE_STR": "pracovný balík",
+        "ISSUES_STR": "pracovné balíky"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Neznáma chyba {{statusCode}} {{errorMsg}}. Je CORS správne nakonfigurovaný pre server?",
@@ -543,6 +543,19 @@
     },
     "REMINDER": {
       "S_REMINDER_ERR": "Chyba pre rozhranie pripomienok"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "continued",
+      "D_INITIAL": {
+        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TITLE": "Časová os"
+      },
+      "END": "Ukončenie práce",
+      "LUNCH_BREAK": "Obedová prestávka",
+      "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
+      "NOW": "Teraz",
+      "START": "Začiatok práce",
+      "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy"
     },
     "SEARCH_BAR": {
       "INFO": "Kliknutím na ikonu zoznamu vyhľadáte archivované úlohy",
@@ -658,6 +671,17 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Pridať existujúcu úlohu \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Pridať problém #{{issueNr}} z {{issueType}}",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Pridať úlohu na koniec zoznamu nevybavených úloh",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Pridať úlohu na koniec zoznamu",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Pridať úlohu na začiatok zoznamu nevybavených úloh",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Pridať úlohu na začiatok zoznamu",
+        "CREATE_TASK": "Vytvoriť novú úlohu",
+        "EXAMPLE": "Príklad: \"Názov úlohy +názovProjektu #nejaký štítok #ďalší štítok 10m/3h\"",
+        "START": "Pre začatie stlačte enter ešte raz"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Pridať prílohu",
         "ADD_SUB_TASK": "Pridať podúlohu",
@@ -671,17 +695,6 @@
         "SCHEDULE_TASK": "Naplánovať úlohu",
         "SUB_TASKS": "Podúlohy ({{nr}})",
         "TIME": "Čas"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Pridať existujúcu úlohu \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Pridať problém #{{issueNr}} z {{issueType}}",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Pridať úlohu na koniec zoznamu nevybavených úloh",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Pridať úlohu na koniec zoznamu",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Pridať úlohu na začiatok zoznamu nevybavených úloh",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Pridať úlohu na začiatok zoznamu",
-        "CREATE_TASK": "Vytvoriť novú úlohu",
-        "EXAMPLE": "Príklad: \"Názov úlohy +názovProjektu #nejaký štítok #ďalší štítok 10m/3h\"",
-        "START": "Pre začatie stlačte enter ešte raz"
       },
       "B": {
         "ADD_HALF_HOUR": "Pridať 1/2 hodiny",
@@ -709,26 +722,13 @@
         "REPEAT_EDIT": "Upravte konfiguráciu opakovanej úlohy",
         "SCHEDULE": "Naplánovať úlohu",
         "SHOW_UPDATES": "Zobraziť aktualizácie",
-        "TOGGLE_DETAIL_PANEL": "Zobraziť/skryť ďalšie informácie",
         "TOGGLE_ATTACHMENTS": "Zobraziť/skryť prílohy",
+        "TOGGLE_DETAIL_PANEL": "Zobraziť/skryť ďalšie informácie",
         "TOGGLE_DONE": "Označiť ako hotové/nedokončené",
         "TOGGLE_SUB_TASK_VISIBILITY": "Prepnúť viditeľnosť podúloh",
         "TRACK_TIME": "Začať sledovanie času",
         "TRACK_TIME_STOP": "Pozastaviť sledovanie času",
         "UPDATE_ISSUE_DATA": "Aktualizujte údaje o probléme"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Presunúť úlohu do zoznamu nevybavených úloh, kým nebude naplánovaná",
-        "REMIND_AT": "Pripomenúť",
-        "RO_10M": "10 minút pred začiatkom",
-        "RO_15M": "15 minút pred začiatkom",
-        "RO_1H": "1 hodinu pred začiatkom",
-        "RO_30M": "30 minút pred začiatkom",
-        "RO_5M": "5 minút pred začiatkom",
-        "RO_START": "keď to začne",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "Naplánovať",
-        "UNSCHEDULE": "Zrušiť plán"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Pridať všetko k dnešnému dňu",
@@ -748,6 +748,19 @@
         "SNOOZE_ALL": "Odložiť všetko",
         "START": "Začať",
         "SWITCH_CONTEXT_START": "Prepnúť kontext a spustiť"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Presunúť úlohu do zoznamu nevybavených úloh, kým nebude naplánovaná",
+        "REMIND_AT": "Pripomenúť",
+        "RO_1H": "1 hodinu pred začiatkom",
+        "RO_5M": "5 minút pred začiatkom",
+        "RO_10M": "10 minút pred začiatkom",
+        "RO_15M": "15 minút pred začiatkom",
+        "RO_30M": "30 minút pred začiatkom",
+        "RO_NEVER": "Never",
+        "RO_START": "keď to začne",
+        "SCHEDULE": "Naplánovať",
+        "UNSCHEDULE": "Zrušiť plán"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
@@ -803,14 +816,18 @@
         "EVERY_X_MONTHLY_AND_TIME": "Every {{x}} months, {{timeStr}}",
         "EVERY_X_YEARLY": "Every {{x}} years",
         "EVERY_X_YEARLY_AND_TIME": "Every {{x}} years, {{timeStr}}",
-        "MONTHLY_CURRENT_DATE": "Monthly on {{dateDayStr}}th",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "Monthly on {{dateDayStr}}th, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Mon-Fri",
         "MONDAY_TO_FRIDAY_AND_TIME": "Mon-Fri, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Monthly on {{dateDayStr}}th",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Monthly on {{dateDayStr}}th, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Weekly on {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Weekly on {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Yearly on {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Yearly {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to move all of them to the project \"{{projectName}}\"?",
+        "OK": "Update all instances"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
@@ -818,10 +835,6 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to update all of them with the new defaults or just future tasks?",
-        "OK": "Update all instances"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "There are {{tasksNr}} instances created for this repeatable task. Do you want to move all of them to the project \"{{projectName}}\"?",
         "OK": "Update all instances"
       },
       "D_EDIT": {
@@ -848,8 +861,8 @@
         "ORDER_DESCRIPTION": "Creation order of repeatable tasks. Only affects repeatable tasks created at the same time. A lower value means a task will be created higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "Q_CUSTOM": "Vlastná konfigurácia opakovania",
         "Q_DAILY": "Každý deň",
-        "Q_MONTHLY_CURRENT_DATE": "Every month on the {{dateDayStr}}th",
         "Q_MONDAY_TO_FRIDAY": "Každý pondelok až piatok",
+        "Q_MONTHLY_CURRENT_DATE": "Every month on the {{dateDayStr}}th",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Every week on {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Every year on the {{dayAndMonthStr}}",
         "QUICK_SETTING": "Opakovať konfiguráciu",
@@ -867,19 +880,6 @@
         "TUESDAY": "Utorok",
         "WEDNESDAY": "Streda"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "continued",
-      "D_INITIAL": {
-        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
-        "TITLE": "Časová os"
-      },
-      "END": "Ukončenie práce",
-      "NOW": "Teraz",
-      "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
-      "START": "Začiatok práce",
-      "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
-      "LUNCH_BREAK": "Obedová prestávka"
     },
     "TIME_TRACKING": {
       "B": {
@@ -981,8 +981,8 @@
     "CLOSE": "Close",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
-    "DURATION_DESCRIPTION": "e.g. \"5h 6m\" which results in 5 hours in 6 minutes",
     "DO_IT": "Do it!",
+    "DURATION_DESCRIPTION": "e.g. \"5h 6m\" which results in 5 hours in 6 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
     "EXAMPLE_VAL": "click to edit",
@@ -991,8 +991,8 @@
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
     "NEXT": "Next",
-    "NONE": "None",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
+    "NONE": "None",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
@@ -1039,9 +1039,9 @@
       "GLOBAL_TOGGLE_TASK_START": "Prepnúť sledovanie času pre poslednú aktívnu úlohu",
       "GO_TO_DAILY_AGENDA": "Prejdite na Agenda",
       "GO_TO_FOCUS_MODE": "Prejdite do režimu zaostrenia",
+      "GO_TO_SCHEDULE": "Prejsť na časovú os",
       "GO_TO_SCHEDULED_VIEW": "Prejsť na naplánované úlohy",
       "GO_TO_SETTINGS": "Prejsť na Nastavenia",
-      "GO_TO_SCHEDULE": "Prejsť na časovú os",
       "GO_TO_WORK_VIEW": "Prejsť na pracovné zobrazenie",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Presunúť úlohu v zozname nadol",
@@ -1053,8 +1053,8 @@
       "SELECT_PREVIOUS_TASK": "Vybrať predchádzajúcu úlohu",
       "SHOW_SEARCH_BAR": "Zobraziť panel vyhľadávania",
       "SYSTEM_SHORTCUTS": "Globálne skratky (pre celý systém)",
-      "TASK_ADD_SUB_TASK": "Pridať podúlohu",
       "TASK_ADD_ATTACHMENT": "Priložiť súbor alebo odkaz",
+      "TASK_ADD_SUB_TASK": "Pridať podúlohu",
       "TASK_DELETE": "Odstrániť úlohu",
       "TASK_EDIT_TAGS": "Upraviť štítky",
       "TASK_EDIT_TITLE": "Upraviť názov",
@@ -1106,6 +1106,14 @@
       "LONGER_BREAK_DURATION": "Dĺžka dlhších prestávok",
       "TITLE": "Časovač Pomodoro"
     },
+    "SCHEDULE": {
+      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
+      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
+      "L_WORK_END": "Work Day End",
+      "L_WORK_START": "Work Day Start",
+      "TITLE": "Schedule",
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "Zvuk dokončenia úlohy",
       "IS_INCREASE_DONE_PITCH": "Zvýšiť výšku tónu za každú vykonanú úlohu",
@@ -1123,14 +1131,6 @@
       "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "TITLE": "Break Reminder"
-    },
-    "SCHEDULE": {
-      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
-      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
-      "L_WORK_END": "Work Day End",
-      "L_WORK_START": "Work Day Start",
-      "TITLE": "Schedule",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1165,15 +1165,15 @@
     "NOTES": "Poznámky",
     "NOTES_PANEL_INFO": "Poznámky je možné zobraziť len z časovej osi a bežného zobrazenia zoznamu úloh.",
     "PROCRASTINATE": "Prokrastinovať",
-    "PROJECTS": "Projekty",
     "PROJECT_MENU": "Ponuka projektu",
     "PROJECT_SETTINGS": "Nastavenia projektu",
+    "PROJECTS": "Projekty",
     "QUICK_HISTORY": "Rýchla história",
     "SETTINGS": "Nastavenia",
     "SHOW_SEARCH_BAR": "Zobrazenie panela vyhľadávania",
     "TAGS": "Štítky",
-    "TASKS": "Úlohy",
     "TASK_LIST": "Zoznam úloh",
+    "TASKS": "Úlohy",
     "TOGGLE_SHOW_BOOKMARKS": "Zobraziť/skryť záložky",
     "TOGGLE_SHOW_NOTES": "Zobraziť/skryť Poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Začať/pozastaviť sledovanie času",
@@ -1193,15 +1193,15 @@
     "ESTIMATE_TOTAL": "Total estimate:",
     "EXPORT_TASK_LIST": "Export Task List",
     "NO_TASKS": "There are no tasks for this day",
+    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
-    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_TIME_SPENT": "Round Time Spent",
     "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
     "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
+    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "SAVE_AND_GO_HOME": "Save and go home",
     "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
@@ -1226,14 +1226,13 @@
     "TOGGLE_DARK_MODE": "Prepínanie tmavého režimu"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it right click (long press on mobile) on a task.",
     "NO_REPEATABLE_TASKS": "There are currently no repeated tasks. You can schedule a task by choosing \"Repeat Task\" in the task side panel. To open it click on the most right icon that appears when hovering a task (or just tap on the task on mobile).",
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it right click (long press on mobile) on a task.",
     "REPEATED_TASKS": "Repeated tasks",
     "SCHEDULED_TASKS": "Scheduled tasks",
     "START_TASK": "Start task and remove reminder"
   },
   "THEMES": {
-    "SELECT_THEME": "Vyberte tému",
     "amber": "jantárová",
     "blue": "modrá",
     "blue-grey": "blue-grey",
@@ -1247,6 +1246,7 @@
     "lime": "lime",
     "pink": "ružová",
     "purple": "fialová",
+    "SELECT_THEME": "Vyberte tému",
     "teal": "teal",
     "yellow": "žltá"
   },
@@ -1268,9 +1268,9 @@
     "COMPLETED_TASKS": "Completed Tasks",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
-    "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
     "FINISH_DAY_FOR_TAG": "Finish Day for this Tag",
+    "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
     "NO_COMPLETED_TASKS": "There are currently no completed tasks",
     "NO_PLANNED_TASKS": "No planned tasks",

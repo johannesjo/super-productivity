@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Ein Synchronisationskonflikt ist aufgetreten!",
-      "SYNC_CONFLICT_MSG": "Bitte nachsehen und entscheiden, was zu tun ist"
+      "SYNC_CONFLICT_MSG": "Bitte nachsehen und entscheiden, was zu tun ist",
+      "SYNC_CONFLICT_TITLE": "Ein Synchronisationskonflikt ist aufgetreten!"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "App läuft, wenn aktiviert, im Hintergrund um Synchronisation zu ermöglichen",
@@ -118,12 +118,12 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "ADD_AS_TASK": "Als Aufgabe hinzufügen",
+        "FOCUS_TASK": "Fokusaufgabe",
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)",
         "TXT_PAST": "<strong>{{title}}</strong> startete um <strong>{{start}}</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestartet um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)",
-        "ADD_AS_TASK": "Als Aufgabe hinzufügen",
-        "FOCUS_TASK": "Fokusaufgabe"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestartet um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Fehler beim Kalender-Provider: {{errTxt}}"
@@ -132,6 +132,15 @@
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Wiederholt den konfigurierten Satz alle X mal, wenn die Zeit für eine Aufgabe erfasst wird.",
+        "L_INTERVAL": "Intervall zum Wiederholen einer Phrase",
+        "L_TEXT": "Text",
+        "L_TEXT_DESCRIPTION": "Beispiel: „Arbeite an $ {currentTaskTitle} !",
+        "TITLE": "Domina-Modus"
       }
     },
     "DROPBOX": {
@@ -157,17 +166,17 @@
       "CONTINUE_FOCUS_SESSION": "Fokussitzung fortsetzen",
       "FINISH_TASK_AND_SELECT_NEXT": "Beenden Sie die Aufgabe und wählen Sie „Weiter“.",
       "GET_READY": "Machen Sie sich bereit für Ihre Fokussitzung!",
-      "GOGOGO": "Los, los, los!!!",
       "GO_TO_PROCRASTINATION": "Holen Sie sich Hilfe, wenn Sie prokrastinieren",
+      "GOGOGO": "Los, los, los!!!",
       "NEXT": "Weiter",
       "ON": "An",
       "OPEN_ISSUE_IN_BROWSER": "Issue im Browser öffnen",
       "POMODORO_BACK": "Zurück",
       "POMODORO_DISABLE": "Pomodoro deaktivieren",
       "POMODORO_INFO": "Fokussitzungen können nicht zusammen mit aktiviertem Pomodoro-Timer verwendet werden.",
-      "PREP_STRETCH": "Machen Sie leichte Dehnübungen",
-      "PREP_SIT_UPRIGHT": "Sitzen (oder stehen) Sie aufrecht",
       "PREP_GET_MENTALLY_READY": "Machen Sie sich mental bereit, konzentriert und produktiv zu sein",
+      "PREP_SIT_UPRIGHT": "Sitzen (oder stehen) Sie aufrecht",
+      "PREP_STRETCH": "Machen Sie leichte Dehnübungen",
       "SELECT_ANOTHER_TASK": "Wählen Sie eine andere Aufgabe aus",
       "SELECT_TASK": "Wählen Sie die Aufgabe aus, auf die Sie sich konzentrieren möchten",
       "SET_FOCUS_SESSION_DURATION": "Legen Sie die Dauer der Fokussitzung fest",
@@ -183,13 +192,13 @@
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um selbst Änderungen herauszufiltern)",
         "HOST": "Host (z. B. : https://try.gitea.io)",
-        "TOKEN": "Zugangstoken",
         "REPO_FULL_NAME": "Benutzername oder Organisationsname/Projekt",
         "REPO_FULL_NAME_DESCRIPTION": "Kann als Teil der URL gefunden werden, wenn das Projekt im Browser angezeigt wird.",
         "SCOPE": "Umfang",
         "SCOPE_ALL": "Alle",
         "SCOPE_ASSIGNED": "Mir zugewiesen",
-        "SCOPE_CREATED": "Von mir erstellt"
+        "SCOPE_CREATED": "Von mir erstellt",
+        "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene Gitea-Issues für ein bestimmtes Repository im Aufgabenerstellungsfenster in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Issue sowie weitere Informationen dazu.</p><p> Darüber hinaus können Sie alle offenen Issues automatisch hinzufügen und importieren.</p><p> Um Nutzungsbeschränkungen zu umgehen und Zugriff zu erhalten, können Sie ein Zugriffstoken bereitstellen.",
@@ -210,44 +219,15 @@
         "ERR_UNKNOWN": "Gitea: Unbekannter Fehler {{statusCode}} {{errorMsg}}. API-Ratenlimit überschritten?"
       }
     },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Richten Sie Redmine für das Projekt ein"
-      },
-      "FORM": {
-        "PROJECT_ID": "Projekt-Identifier",
-        "PROJECT_ID_DESCRIPTION": "Kann als Teil der URL gefunden werden, wenn das Projekt im Browser angezeigt wird.",
-        "HOST": "Host (z. B.: https://redmine.org)",
-        "API_KEY": "API-Zugriffsschlüssel",
-        "SCOPE": "Umfang",
-        "SCOPE_ALL": "Alle",
-        "SCOPE_ASSIGNED": "Mir zugewiesen",
-        "SCOPE_CREATED": "Von mir erstellt"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene Redmine-Issus (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Aufgabenerstellungsfenster in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Issue sowie weitere Informationen dazu.</p><p> Darüber hinaus können Sie alle offenen Issues automatisch importieren.</p>"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Autor",
-        "STATUS": "Status",
-        "PRIORITY": "Priorität",
-        "DESCRIPTION": "Beschreibung",
-        "MARK_AS_CHECKED": "Markieren Sie Updates als überprüft"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Unbekannter Fehler {{statusCode}} {{errorMsg}}."
-      }
-    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Richten Sie GitHub für das Projekt ein"
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
+        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
-        "TOKEN": "Zugangstoken",
-        "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues"
+        "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GitHub-Issues für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Issues automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
@@ -267,8 +247,8 @@
         "WRITE_A_COMMENT": "Schreiben Sie einen Kommentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}. Wurde das Api-Anfrage-Limit überschritten?",
-        "CONFIG_ERROR": "GitHub: Fehler beim Zuordnen von Daten. Ist Ihr Repository-Name korrekt?"
+        "CONFIG_ERROR": "GitHub: Fehler beim Zuordnen von Daten. Ist Ihr Repository-Name korrekt?",
+        "ERR_UNKNOWN": "GitHub: Unbekannter Fehler {{statusCode}} {{errorMsg}}. Wurde das Api-Anfrage-Limit überschritten?"
       }
     },
     "GITLAB": {
@@ -277,13 +257,15 @@
       },
       "DIALOG_SUBMIT_WORKLOG": {
         "PAST_DAY_INFO": "Die vorab ausgefüllte Dauer enthält nicht erfasste Daten vergangener Tage.",
-        "TITLE": "Senden Sie die für Issues aufgewendete Zeit an GitLab",
         "T_ALREADY_TRACKED": "Bereits erfasst",
         "T_TITLE": "Titel",
         "T_TO_BE_SUBMITTED": "Noch einzureichen",
+        "TITLE": "Senden Sie die für Issues aufgewendete Zeit an GitLab",
         "TOTAL_MSG": "Sie werden <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
+        "FILTER": "Benutzerdefinierte Filter",
+        "FILTER_DESCRIPTION": "Siehe https://docs.gitlab.com/ee/api/issues.html#list-issues. Mehrere können durch \"&\" kombiniert werden",
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
         "GITLAB_BASE_URL": "Benutzerdefinierte GitLab-Basis-URL",
         "PROJECT": "Vollständiger Pfad oder Benutzername / Projekt",
@@ -297,9 +279,7 @@
         "SOURCE_PROJECT": "Projekt",
         "SUBMIT_TIMELOGS": "Senden Sie Timelogs an Gitlab",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Zeigen Sie den Zeiterfassungsdialog an, nachdem Sie auf „Tag beenden“ geklickt haben",
-        "TOKEN": "Zugangstoken",
-        "FILTER": "Benutzerdefinierte Filter",
-        "FILTER_DESCRIPTION": "Siehe https://docs.gitlab.com/ee/api/issues.html#list-issues. Mehrere können durch \"&\" kombiniert werden"
+        "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p> Hier können Sie SuperProductivity so konfigurieren, dass offene GitLab-Probleme (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Bereich zur Aufgabenerstellung in der täglichen Planungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Problem sowie weitere Informationen dazu. </p> <p> Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren. </p>",
@@ -320,21 +300,12 @@
         "ERR_UNKNOWN": "GitLab: Unbekannter Fehler {{statusCode}} {{errorMsg}}"
       }
     },
-    "DOMINA_MODE": {
-      "FORM": {
-        "HELP": "Wiederholt den konfigurierten Satz alle X mal, wenn die Zeit für eine Aufgabe erfasst wird.",
-        "L_INTERVAL": "Intervall zum Wiederholen einer Phrase",
-        "L_TEXT": "Text",
-        "L_TEXT_DESCRIPTION": "Beispiel: „Arbeite an $ {currentTaskTitle} !",
-        "TITLE": "Domina-Modus"
-      }
-    },
     "ISSUE": {
-      "HOW_TO_GET_A_TOKEN": "Wie bekomme ich einen Token?",
       "DEFAULT": {
-        "ISSUES_STR": "Probleme",
-        "ISSUE_STR": "Problem"
+        "ISSUE_STR": "Problem",
+        "ISSUES_STR": "Probleme"
       },
+      "HOW_TO_GET_A_TOKEN": "Wie bekomme ich einen Token?",
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Anfrage aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Nicht richtig konfiguriert",
@@ -358,8 +329,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Immer Dialog öffnen",
-        "DONE": "Status zum Abschließen der Aufgabe",
         "DO_NOT": "Kein Übergang",
+        "DONE": "Status zum Abschließen der Aufgabe",
         "ENABLE": "Aktivieren Sie die Jira-Integration",
         "ENABLE_TRANSITIONS": "Aktivieren Sie das Transition Handling",
         "IN_PROGRESS": "Status für Startaufgabe",
@@ -418,8 +389,8 @@
         "ALLOW_SELF_SIGNED": "Selbstsigniertes Zertifikat zulassen",
         "HOST": "Host (z. B .: http://my-host.de:1234)",
         "PASSWORD": "Token / Passwort",
-        "USER_NAME": "E-Mail / Benutzername",
         "USE_PAT": "Persönliches Zugriffstoken verwenden (LEGACY)",
+        "USER_NAME": "E-Mail / Benutzername",
         "WONKY_COOKIE_MODE": "Instabile Cookie Fallback-Authentifizierung (nur Desktop-App)"
       },
       "FORM_SECTION": {
@@ -469,8 +440,8 @@
         "NO_VALID_TRANSITION": "Jira: Kein gültiger Übergang konfiguriert",
         "TIMED_OUT": "Jira: Zeitüberschreitung bei der Anforderung",
         "TRANSITION": "Jira: Setzen Sie das Issue \"{{issueKey}}\" auf \"{{name}}\".",
-        "TRANSITIONS_LOADED": "Jira: Übergänge geladen. Verwenden Sie die unten stehenden Auswahlmöglichkeiten, um sie zuzuweisen",
         "TRANSITION_SUCCESS": "Jira: Setzen Sie das Issue {{issueKey}} auf <strong>{{chosenTransition}}</strong>.",
+        "TRANSITIONS_LOADED": "Jira: Übergänge geladen. Verwenden Sie die unten stehenden Auswahlmöglichkeiten, um sie zuzuweisen",
         "UNABLE_TO_REASSIGN": "Jira: Ticket kann nicht neu zugewiesen werden, da Sie keinen Benutzernamen angegeben haben. Bitte besuchen Sie die Einstellungen."
       },
       "STEPPER": {
@@ -531,32 +502,32 @@
         "NOTE_LABEL": "Geben Sie einen Text ein, um ihn als Notiz zu speichern ..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "Als ungeparsten Text anzeigen",
+        "VIEW_PARSED": "Als geparsten (nicht bearbeitbaren) Markdown anzeigen",
         "VIEW_SPLIT": "Geparsten und ungeparsten Markdown-Text in geteilter Ansicht anzeigen",
-        "VIEW_PARSED": "Als geparsten (nicht bearbeitbaren) Markdown anzeigen"
+        "VIEW_TEXT_ONLY": "Als ungeparsten Text anzeigen"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Deaktivieren Sie die Markdown-Formatierung",
+        "ENABLE_PARSE": "Markdown-Formatierung aktivieren"
       },
       "NOTES_CMP": {
         "ADD_BTN": "Neue Notiz hinzufügen",
         "DROP_TO_ADD": "Klicken Sie hier, um eine neue Notiz hinzuzufügen",
         "NO_NOTES": "Zurzeit sind keine Notizen vorhanden"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Deaktivieren Sie die Markdown-Formatierung",
-        "ENABLE_PARSE": "Markdown-Formatierung aktivieren"
       }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Dialog immer öffnen",
-        "DONE": "Status für den Abschluss der Aufgabe",
         "DO_NOT": "Kein Statusübergang",
+        "DONE": "Status für den Abschluss der Aufgabe",
         "ENABLE": "Aktivieren Sie die Openproject-Integration",
         "ENABLE_TRANSITIONS": "Aktivieren Sie die Übergangsbehandlung",
         "IN_PROGRESS": "Status für angefangene Aufgabe",
         "OPEN": "Status für die angehaltene Aufgabe",
         "PROGRESS_ON_SAVE": "Standardfortschritt beim Speichern",
-        "TRANSITION": "Übergangsbehandlung",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie das Issue aus, um die verfügbaren Übergänge zu laden"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie das Issue aus, um die verfügbaren Übergänge zu laden",
+        "TRANSITION": "Übergangsbehandlung"
       },
       "DIALOG_INITIAL": {
         "TITLE": "OpenProject für Projekt einrichten"
@@ -588,11 +559,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zeiterfassungsdialog anzeigen, wenn Unteraufgaben abgeschlossen sind",
         "PROJECT_ID": "Projekt-ID",
         "PROJECT_ID_DESCRIPTION": "Kann als Teil der URL gefunden werden, wenn das Projekt im Browser angezeigt wird.",
-        "TOKEN": "Zugangstoken",
         "SCOPE": "Bereich",
         "SCOPE_ALL": "Alles",
         "SCOPE_ASSIGNED": "Mir zugewiesen",
-        "SCOPE_CREATED": "Von mir erstellt"
+        "SCOPE_CREATED": "Von mir erstellt",
+        "TOKEN": "Zugangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier können Sie SuperProductivity konfigurieren, um offene OpenProject-Arbeitspakete aufzulisten. Bitte beachten Sie, dass Sie, damit dies im Browser funktioniert, wahrscheinlich CORS für Ihren OpenProject-Server konfigurieren müssen, um den Zugriff von app.super-productivity.com zu ermöglichen</p>",
@@ -607,8 +578,8 @@
         "TYPE": "Typ"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "Arbeitspakete",
-        "ISSUE_STR": "Arbeitspaket"
+        "ISSUE_STR": "Arbeitspaket",
+        "ISSUES_STR": "Arbeitspakete"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unbekannter Fehler {{statusCode}} {{errorMsg}}. Ist CORS für den Server richtig konfiguriert?",
@@ -624,15 +595,15 @@
       "ENJOY_YOURSELF": "Amüsieren Sie sich, bewegen Sie sich, kommen Sie zurück in:",
       "FINISH_SESSION_X": "Sie haben die Sitzung <strong>{{nr}}</strong>erfolgreich beendet!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Pause {{nr}} gestartet!",
         "BREAK_TIME": "Pomodoro: Zeit für eine Pause {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Pause {{nr}} gestartet!",
         "NO_TASKS": "Sie müssen Aufgaben hinzufügen, bevor der Pomodoro-Timer starten kann.",
         "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!",
+        "RESET": "Zurücksetzen auf die erste Pomodoro-Sitzung",
         "SESSION_SKIP": "Zum Ende der aktuellen Pomodoro-Sitzung springen",
-        "RESET": "Zurücksetzen auf die erste Pomodoro-Sitzung"
+        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
       },
       "SKIP_BREAK": "Pause überspringen",
       "START_BREAK": "Pause beginnen"
@@ -655,9 +626,9 @@
         "L3": "Woran erinnern sie Sie?",
         "L4": "Was passiert mit dem Gedanken des Aufschiebens, wenn Sie es beobachten? Wird es intensiver? Löst es sich auf? Lässt es andere Emotionen aufkommen?",
         "L5": "Wie verändern sich die Empfindungen in Ihrem Körper, während Sie sich weiterhin darauf konzentrieren?",
-        "TITLE": "Neugierde",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Eine weitere sehr effektive Methode besteht darin, aufzuzeichnen, was Ihren Drang zum Prokrastinieren ausgelöst hat. Ich persönlich verspüre zum Beispiel oft den Drang, schnell zu reddit oder meiner Lieblingsnachrichtenseite zu springen, wenn mein Browserfenster in den Fokus kommt. Seitdem ich begann, meine Auslöser in einem einfachen leeren Textdokument aufzuschreiben, wurde mir bewusst, wie tief verwurzelt dieses Muster war, und es half mir, mit verschiedenen Gegenmaßnahmen zu experimentieren.",
         "PROCRASTINATION_TRIGGERS_TITLE": "Schreiben Sie die Auslöser für Ihr Prokrastinieren auf",
-        "PROCRASTINATION_TRIGGERS_TEXT": "Eine weitere sehr effektive Methode besteht darin, aufzuzeichnen, was Ihren Drang zum Prokrastinieren ausgelöst hat. Ich persönlich verspüre zum Beispiel oft den Drang, schnell zu reddit oder meiner Lieblingsnachrichtenseite zu springen, wenn mein Browserfenster in den Fokus kommt. Seitdem ich begann, meine Auslöser in einem einfachen leeren Textdokument aufzuschreiben, wurde mir bewusst, wie tief verwurzelt dieses Muster war, und es half mir, mit verschiedenen Gegenmaßnahmen zu experimentieren."
+        "TITLE": "Neugierde"
       },
       "H1": "Seien Sie nicht so streng!",
       "INTRO": {
@@ -687,10 +658,10 @@
         "EDIT": "Projekt bearbeiten",
         "SETUP_CALDAV": "Richten Sie die Caldav-Integration ein",
         "SETUP_GIT": "Einrichten der GitHub-Integration",
+        "SETUP_GITEA_PROJECT": "Richten Sie die Gitea-Integration ein",
         "SETUP_GITLAB": "Einrichten der GitLab-Integration",
         "SETUP_JIRA": "Jira-Integration einrichten",
         "SETUP_OPEN_PROJECT": "OpenProject-Integration einrichten",
-        "SETUP_GITEA_PROJECT": "Richten Sie die Gitea-Integration ein",
         "SETUP_REDMINE_PROJECT": "Richten Sie die Redmine-Integration ein"
       },
       "FORM_BASIC": {
@@ -733,14 +704,56 @@
       "PAGE_TITLE": "Schnellverlauf",
       "WEEK_TITLE": "Woche {{nr}} ({{timeSpent}})"
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Richten Sie Redmine für das Projekt ein"
+      },
+      "FORM": {
+        "API_KEY": "API-Zugriffsschlüssel",
+        "HOST": "Host (z. B.: https://redmine.org)",
+        "PROJECT_ID": "Projekt-Identifier",
+        "PROJECT_ID_DESCRIPTION": "Kann als Teil der URL gefunden werden, wenn das Projekt im Browser angezeigt wird.",
+        "SCOPE": "Umfang",
+        "SCOPE_ALL": "Alle",
+        "SCOPE_ASSIGNED": "Mir zugewiesen",
+        "SCOPE_CREATED": "Von mir erstellt"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene Redmine-Issus (entweder die Online-Version oder eine selbst gehostete Instanz) für ein bestimmtes Projekt im Aufgabenerstellungsfenster in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Issue sowie weitere Informationen dazu.</p><p> Darüber hinaus können Sie alle offenen Issues automatisch importieren.</p>",
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Autor",
+        "DESCRIPTION": "Beschreibung",
+        "MARK_AS_CHECKED": "Markieren Sie Updates als überprüft",
+        "PRIORITY": "Priorität",
+        "STATUS": "Status"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Unbekannter Fehler {{statusCode}} {{errorMsg}}."
+      }
+    },
     "REMINDER": {
-      "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle",
       "COUNTDOWN_BANNER": {
-        "START_NOW": "Jetzt anfangen",
         "HIDE": "Verstecken",
+        "START_NOW": "Jetzt anfangen",
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Aufgaben sind fällig)"
-      }
+      },
+      "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "fortgesetzt",
+      "D_INITIAL": {
+        "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong>, die außerhalb dieser fixen Aufgaben angezeigt werden. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
+        "TITLE": "Zeitleiste"
+      },
+      "END": "Arbeitsende",
+      "LUNCH_BREAK": "Mittagspause",
+      "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
+      "NOW": "Jetzt",
+      "START": "Arbeitsbeginn",
+      "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe"
     },
     "SEARCH_BAR": {
       "INFO": "Klicken Sie auf das Listensymbol, um nach archivierten Aufgaben zu suchen",
@@ -815,9 +828,6 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Dateiname synchronisieren"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung"
-        },
         "L_ENABLE_COMPRESSION": "Komprimierung aktivieren (schnellere Datenübertragung)",
         "L_ENABLE_ENCRYPTION": "Ende-zu-Ende-Verschlüsselung aktivieren (experimentell) – Machen Sie Ihre Daten für Ihren Synchronisierungsanbieter unzugänglich",
         "L_ENABLE_SYNCING": "Synchronisierung aktivieren",
@@ -825,6 +835,9 @@
         "L_ENCRYPTION_PASSWORD": "Verschlüsselungspasswort (NICHT VERGESSEN)",
         "L_SYNC_INTERVAL": "Synchronisierungsintervall",
         "L_SYNC_PROVIDER": "Anbieter synchronisieren",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Benötigt Dateizugriffsberechtigung"
+        },
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<p><strong>Experimental!!</strong> <strong>Damit dies für Mobil oder den Browser funktioniert, müssen Sie Super Productivity für CORS-Anfragen bei Ihrer Nextcloud-Instanz auf die Whitelist setzen</strong>, dies kann negative Auswirkungen auf die Sicherheit haben! Bitte beziehen Sie sich <a href='https://github.com/nextcloud/server/issues/3131'>auf diesen Thread</a> für weitere Informationen. Ein Ansatz, um dies auch mobil zu ermöglichen, ist das Whitelisting \"https://app.super-productivity.com\" über die Nextcloud-App <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Benutzung auf eigene Gefahr!",
@@ -872,6 +885,19 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Vorhandene Aufgabe hinzufügen \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Problem #{{issueNr}} von {{issueType}} hinzufügen",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Aufgabe am Ende des Backlogs hinzufügen",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Aufgabe am Ende der Liste hinzufügen",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Aufgabe am Anfang des Backlogs hinzufügen",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Aufgabe am Anfang der Liste hinzufügen",
+        "CREATE_TASK": "Neue Aufgabe erstellen",
+        "EXAMPLE": "Beispiel: \"Aufgabentitel + Projektname #EinSchlüsselwort #EinAnderesSchlüssenwort 10m/3h\"",
+        "START": "Drücken Sie die Eingabetaste noch einmal, um zu beginnen",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "„Aufgabe zum Backlog/zur heutigen Liste hinzufügen“ umschalten.",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Umschalten zwischen Hinzufügen von Aufgaben am Anfang und Ende der Liste"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Anhang hinzufügen",
         "ADD_SUB_TASK": "Unteraufgabe hinzufügen",
@@ -885,19 +911,6 @@
         "SCHEDULE_TASK": "Aufgabe planen",
         "SUB_TASKS": "Unteraufgaben ({{nr}})",
         "TIME": "Zeit"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Vorhandene Aufgabe hinzufügen \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Problem #{{issueNr}} von {{issueType}} hinzufügen",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Aufgabe am Ende des Backlogs hinzufügen",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Aufgabe am Ende der Liste hinzufügen",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Aufgabe am Anfang des Backlogs hinzufügen",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Aufgabe am Anfang der Liste hinzufügen",
-        "CREATE_TASK": "Neue Aufgabe erstellen",
-        "EXAMPLE": "Beispiel: \"Aufgabentitel + Projektname #EinSchlüsselwort #EinAnderesSchlüssenwort 10m/3h\"",
-        "START": "Drücken Sie die Eingabetaste noch einmal, um zu beginnen",
-        "TOGGLE_ADD_TO_BACKLOG_TODAY": "„Aufgabe zum Backlog/zur heutigen Liste hinzufügen“ umschalten.",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "Umschalten zwischen Hinzufügen von Aufgaben am Anfang und Ende der Liste"
       },
       "B": {
         "ADD_HALF_HOUR": "Fügen Sie eine halbe Stunde hinzu",
@@ -925,8 +938,8 @@
         "REPEAT_EDIT": "Bearbeite Einstellung der wiederkehrenden Aufgabe",
         "SCHEDULE": "Aufgabe planen",
         "SHOW_UPDATES": "Updates anzeigen",
-        "TOGGLE_DETAIL_PANEL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_ATTACHMENTS": "Anhänge ein- / ausblenden",
+        "TOGGLE_DETAIL_PANEL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_DONE": "Als erledigt / unerledigt markieren",
         "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
         "TRACK_TIME": "Starten Sie die Erfassung der Zeit",
@@ -940,19 +953,6 @@
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
         "MSG": "Möchten Sie die neuen Tags {{tagsTxt}} erstellen?",
         "OK": "Tags erstellen "
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
-        "REMIND_AT": "Erinnern an",
-        "RO_10M": "10 Minuten bevor es losgeht",
-        "RO_15M": "15 Minuten bevor es losgeht",
-        "RO_1H": "1 Stunde bevor es losgeht",
-        "RO_30M": "30 Minuten bevor es losgeht",
-        "RO_5M": "5 Minuten bevor es losgeht",
-        "RO_START": "wenn es beginnt",
-        "RO_NEVER": "Nie",
-        "SCHEDULE": "Planen",
-        "UNSCHEDULE": "Planung entfernen"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
@@ -972,6 +972,19 @@
         "SNOOZE_ALL": "Alle schlummern lassen",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
+        "REMIND_AT": "Erinnern an",
+        "RO_1H": "1 Stunde bevor es losgeht",
+        "RO_5M": "5 Minuten bevor es losgeht",
+        "RO_10M": "10 Minuten bevor es losgeht",
+        "RO_15M": "15 Minuten bevor es losgeht",
+        "RO_30M": "30 Minuten bevor es losgeht",
+        "RO_NEVER": "Nie",
+        "RO_START": "wenn es beginnt",
+        "SCHEDULE": "Planen",
+        "UNSCHEDULE": "Planung entfernen"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Verbrachte Zeit für anderen Tag hinzufügen",
@@ -1027,27 +1040,27 @@
         "EVERY_X_MONTHLY_AND_TIME": "Alle {{x}} Monate, {{timeStr}}",
         "EVERY_X_YEARLY": "Alle {{x}} Jahre",
         "EVERY_X_YEARLY_AND_TIME": "Alle {{x}} Jahre, {{timeStr}}",
-        "MONTHLY_CURRENT_DATE": "Monatlich am {{dateDayStr}}.",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "Monatlich am {{dateDayStr}}., {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Mon-Fri",
         "MONDAY_TO_FRIDAY_AND_TIME": "Mon-Fri, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Monatlich am {{dateDayStr}}.",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Monatlich am {{dateDayStr}}., {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Wöchentlich am {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Wöchentlich am {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Jährlich am {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Jährlich {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederkehrende Aufgabe erstellt wurden. Möchten Sie sie alle zum Projekt \"{{projectName}}\" verschieben?",
+        "OK": "Alle Instanzen verschieben"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Durch das Entfernen der Wiederholungskonfiguration werden alle vorherigen Instanzen dieser Aufgabe in normale Aufgaben konvertiert. Sind Sie sicher, dass Sie fortfahren möchten",
         "OK": "Vollständig entfernen"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
-        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederkehrende Aufgabe erstellt wurden. Möchten Sie alle mit den neuen Vorgaben aktualisieren oder nur zukünftige Aufgaben?",
         "CANCEL": "Nur zukünftige Aufgaben",
+        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederkehrende Aufgabe erstellt wurden. Möchten Sie alle mit den neuen Vorgaben aktualisieren oder nur zukünftige Aufgaben?",
         "OK": "Alle Instanzen aktualisieren"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "Es gibt {{tasksNr}} Instanzen, die für diese wiederkehrende Aufgabe erstellt wurden. Möchten Sie sie alle zum Projekt \"{{projectName}}\" verschieben?",
-        "OK": "Alle Instanzen verschieben"
       },
       "D_EDIT": {
         "ADD": "Hinzufügen der Konfiguration für wiederkehrende Aufgaben",
@@ -1073,8 +1086,8 @@
         "ORDER_DESCRIPTION": "Erstellungsreihenfolge wiederkehrender Aufgaben. Betrifft nur wiederkehrende Aufgaben, die gleichzeitig erstellt wurden. Ein niedrigerer Wert bedeutet, dass eine Aufgabe weiter oben in der Liste erstellt wird, ein höherer Wert, dass sie weiter unten steht. Ein Wert größer als 0 bedeutet, dass Elemente am Ende normaler Aufgaben erstellt werden.",
         "Q_CUSTOM": "Benutzerdefinierte Wiederholungkonfiguration",
         "Q_DAILY": "Jeden Tag",
-        "Q_MONTHLY_CURRENT_DATE": "Jeden Monat am {{dateDayStr}}.",
         "Q_MONDAY_TO_FRIDAY": "Jeden Montag bis Freitag",
+        "Q_MONTHLY_CURRENT_DATE": "Jeden Monat am {{dateDayStr}}.",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Jede Woche am {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Jeder Jahr am {{dayAndMonthStr}}",
         "QUICK_SETTING": "Wiederholungskonfiguration",
@@ -1092,19 +1105,6 @@
         "TUESDAY": "Dienstag",
         "WEDNESDAY": "Mittwoch"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "fortgesetzt",
-      "D_INITIAL": {
-        "TEXT": "<p>Die Idee der Zeitleiste ist es, ein besseres Bild davon zu liefern, wie sich die geplanten Aufgaben im Laufe der Zeit entwickeln. Es wird automatisch aus Ihren Aufgaben generiert und unterscheidet zwei verschiedene Dinge: <strong>Geplante Aufgaben</strong>, die zum geplanten Zeitpunkt angezeigt werden, und <strong>reguläre Aufgaben</strong>, die außerhalb dieser fixen Aufgaben angezeigt werden. Alle Aufgaben berücksichtigen die Zeitschätzungen, die Sie ihnen zugewiesen haben.</p><p>Zusätzlich können Sie eine Arbeitsstart- und -endzeit angeben. Wenn konfiguriert, werden reguläre Aufgaben niemals außerhalb dieser angezeigt. Bitte beachten Sie, dass die Zeitleiste nur die kommenden 30 Tage enthält.</p>",
-        "TITLE": "Zeitleiste"
-      },
-      "END": "Arbeitsende",
-      "NOW": "Jetzt",
-      "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
-      "START": "Arbeitsbeginn",
-      "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
-      "LUNCH_BREAK": "Mittagspause"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1206,8 +1206,8 @@
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
-    "DURATION_DESCRIPTION": "z. B. \"5h 23m\" was in 5 Stunden und 23 Minuten resultiert",
     "DO_IT": "Tu es!",
+    "DURATION_DESCRIPTION": "z. B. \"5h 23m\" was in 5 Stunden und 23 Minuten resultiert",
     "EDIT": "Bearbeiten",
     "ENABLED": "Aktiviert",
     "EXAMPLE_VAL": "z.B. 32m",
@@ -1217,8 +1217,8 @@
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
     "NEXT": "Nächster",
-    "NONE": "Keiner",
     "NO_CON": "Sie sind derzeit offline. Bitte stellen Sie die Verbindung zum Internet wieder her.",
+    "NONE": "Keiner",
     "OK": "OK",
     "PREVIOUS": "Bisherige",
     "REMOVE": "Löschen",
@@ -1281,15 +1281,15 @@
       "GLOBAL_TOGGLE_TASK_START": "Schaltet die Zeiterfassung für die zuletzt aktive Aufgabe um",
       "GO_TO_DAILY_AGENDA": "Gehe zur Agenda",
       "GO_TO_FOCUS_MODE": "Wechseln Sie in den Fokusmodus",
+      "GO_TO_SCHEDULE": "Gehen Sie zur Zeitleiste",
       "GO_TO_SCHEDULED_VIEW": "Gehen Sie zu geplanten Aufgaben",
       "GO_TO_SETTINGS": "Gehen Sie zu den Einstellungen",
-      "GO_TO_SCHEDULE": "Gehen Sie zur Zeitleiste",
       "GO_TO_WORK_VIEW": "Gehen Sie zur Arbeitsansicht",
       "HELP": "<p>Hier können Sie alle Tastaturkürzel konfigurieren.</p> <p>Klicken Sie auf die Texteingabe und geben Sie die gewünschte Tastaturkombination ein. Drücken Sie die Eingabetaste, um zu speichern und die Escape-Taste, um den Vorgang abzubrechen.</p> <p>Es gibt drei Arten von Verknüpfungen:</p> <ul> <li> <strong>Globale Verknüpfungen:</strong> Wenn die App ausgeführt wird, wird die Aktion von jeder anderen Anwendung ausgelöst. </li> <li> <strong>Verknüpfungen auf Anwendungsebene:</strong> Wird von jedem Bildschirm der Anwendung ausgelöst, jedoch nicht, wenn Sie gerade ein Textfeld bearbeiten. </li> <li> <strong>Schnellzugriffe auf Aufgabenebene:</strong> Sie werden nur ausgelöst, wenn Sie eine Aufgabe mit der Maus oder der Tastatur ausgewählt haben und normalerweise eine Aktion auslösen, die sich speziell auf diese eine Aufgabe bezieht. </li> </ul>",
       "MOVE_TASK_DOWN": "Aufgabe in Liste nach unten verschieben",
-      "MOVE_TASK_UP": "Aufgabe in Liste nach oben verschieben",
       "MOVE_TASK_TO_BOTTOM": "Verschieben Sie die Aufgabe an das Ende der Liste",
       "MOVE_TASK_TO_TOP": "Verschieben Sie die Aufgabe an den Anfang der Liste",
+      "MOVE_TASK_UP": "Aufgabe in Liste nach oben verschieben",
       "MOVE_TO_BACKLOG": "Task in Task-Backlog verschieben",
       "MOVE_TO_TODAYS_TASKS": "Aufgabe in die Aufgabenliste von heute verschieben",
       "OPEN_PROJECT_NOTES": "Projektnotizen ein- oder ausblenden",
@@ -1297,8 +1297,8 @@
       "SELECT_PREVIOUS_TASK": "Vorherige Aufgabe auswählen",
       "SHOW_SEARCH_BAR": "Suchleiste anzeigen",
       "SYSTEM_SHORTCUTS": "Globale Verknüpfungen (systemweit)",
-      "TASK_ADD_SUB_TASK": "Unteraufgabe hinzufügen",
       "TASK_ADD_ATTACHMENT": "Datei oder Link anhängen",
+      "TASK_ADD_SUB_TASK": "Unteraufgabe hinzufügen",
       "TASK_DELETE": "Aufgabe löschen",
       "TASK_EDIT_TAGS": "Stichworte bearbeiten",
       "TASK_EDIT_TITLE": "Titel bearbeiten",
@@ -1322,8 +1322,6 @@
     "MISC": {
       "DEFAULT_PROJECT": "Standardprojekt für Aufgaben, wenn keines angegeben ist",
       "FIRST_DAY_OF_WEEK": "Erster Tag der Woche",
-      "START_OF_NEXT_DAY": "Startzeit des nächsten Tages",
-      "START_OF_NEXT_DAY_HINT": "Ab wann (in Stunden) der nächste Tag beginnen. Der Standardwert ist Mitternacht, also 0.",
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System -> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
@@ -1335,6 +1333,8 @@
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
+      "START_OF_NEXT_DAY": "Startzeit des nächsten Tages",
+      "START_OF_NEXT_DAY_HINT": "Ab wann (in Stunden) der nächste Tag beginnen. Der Standardwert ist Mitternacht, also 0.",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
       "TITLE": "Verschiedene Einstellungen"
     },
@@ -1354,9 +1354,17 @@
       "TITLE": "Pomodoro Timer"
     },
     "REMINDER": {
-      "IS_COUNTDOWN_BANNER_ENABLED": "Countdown-Banner anzeigen, bevor Erinnerungen fällig werden",
       "COUNTDOWN_DURATION": "Zeigen Sie Banner vor der eigentlichen Erinnerung an",
+      "IS_COUNTDOWN_BANNER_ENABLED": "Countdown-Banner anzeigen, bevor Erinnerungen fällig werden",
       "TITLE": "Erinnerungen"
+    },
+    "SCHEDULE": {
+      "HELP": "Die Schedule-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/schedule'>'Schedule'</a>.",
+      "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
+      "L_WORK_END": "Ende des Arbeitstages",
+      "L_WORK_START": "Beginn des Arbeitstages",
+      "TITLE": "Zeitleiste",
+      "WORK_START_END_DESCRIPTION": "z. B. 17:00"
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Erinnerungston für die Pause",
@@ -1367,26 +1375,18 @@
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Fügen Sie ein motivierendes Bild hinzu",
+      "FULL_SCREEN_BLOCKER_DURATION": "Dauer für die Anzeige des Vollbildfensters (nur Desktop)",
       "HELP": "<div> <p>Ermöglicht die Konfiguration einer wiederkehrenden Erinnerung, wenn Sie eine bestimmte Zeit ohne Pause gearbeitet haben.</p> <p>Sie können die angezeigte Nachricht ändern. ${duration} wird durch die ohne Unterbrechung verbrachte Zeit ersetzt.</p> </div>",
       "IS_ENABLED": "Aktivieren Sie die Erinnerungsfunktion für eine Pause",
       "IS_FOCUS_WINDOW": "App-Fenster fokussieren, wenn Erinnerung aktiv ist (nur Desktop)",
-      "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
       "IS_FULL_SCREEN_BLOCKER": "Meldung im Vollbildfenster anzeigen (nur Desktop)",
-      "FULL_SCREEN_BLOCKER_DURATION": "Dauer für die Anzeige des Vollbildfensters (nur Desktop)",
+      "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
       "MESSAGE": "'Mach eine Pause'-Nachricht",
       "MIN_WORKING_TIME": "Pausenbenachrichtigung senden, nachdem man X ohne eine gearbeitet hat",
       "MOTIVATIONAL_IMGS": "Motivationsbild (Web-URL)",
       "NOTIFICATION_TITLE": "Machen Sie eine Pause!",
       "SNOOZE_TIME": "Schlummern, wenn Sie aufgefordert werden, eine Pause einzulegen",
       "TITLE": "Pausenerinnerung"
-    },
-    "SCHEDULE": {
-      "HELP": "Die Schedule-Funktion soll Ihnen einen schnellen Überblick darüber geben, wie sich Ihre geplanten Aufgaben im Laufe der Zeit entwickeln. Sie finden es im Menü auf der linken Seite unter <a href='#/schedule'>'Schedule'</a>.",
-      "L_IS_WORK_START_END_ENABLED": "Beschränken Sie ungeplante Aufgaben auf bestimmte Arbeitszeiten",
-      "L_WORK_END": "Ende des Arbeitstages",
-      "L_WORK_START": "Beginn des Arbeitstages",
-      "TITLE": "Zeitleiste",
-      "WORK_START_END_DESCRIPTION": "z. B. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1418,6 +1418,7 @@
     "CREATE_TAG": "Stichwort erstellen",
     "DELETE_TAG": "Stichwort löschen",
     "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
+    "HELP": "Hilfe",
     "HM": {
       "CALENDARS": "Howto: Kalender verbinden",
       "CONTRIBUTE": "Beitragen",
@@ -1427,24 +1428,23 @@
       "START_WELCOME": "Willkommenstour starten",
       "SYNC": "Howto: Synchronisierung konfigurieren"
     },
-    "NO_TAG_INFO": "Derzeit sind keine Tags vorhanden. Sie können Tags hinzufügen, indem Sie beim Hinzufügen oder Bearbeiten von Aufgaben „#IhrNeuesTag“ eingeben.",
-    "HELP": "Hilfe",
     "METRICS": "Metriken",
+    "NO_TAG_INFO": "Derzeit sind keine Tags vorhanden. Sie können Tags hinzufügen, indem Sie beim Hinzufügen oder Bearbeiten von Aufgaben „#IhrNeuesTag“ eingeben.",
     "NOTES": "Anmerkungen",
     "NOTES_PANEL_INFO": "Notizen können nur von der Schedule und der normalen Aufgabenliste angezeigt werden.",
     "PLANNER": "Planer",
     "PROCRASTINATE": "Prokrastination",
-    "PROJECTS": "Projekte",
     "PROJECT_MENU": "Projektmenü",
     "PROJECT_SETTINGS": "Projekt Einstellungen",
+    "PROJECTS": "Projekte",
     "QUICK_HISTORY": "Schnellverlauf",
     "REPEAT_SCHEDULED": "Wiederkehrend",
     "SCHEDULE": "Stundenplan",
     "SETTINGS": "Einstellungen",
     "SHOW_SEARCH_BAR": "Suchleiste anzeigen",
     "TAGS": "Stichworte",
-    "TASKS": "Aufgaben",
     "TASK_LIST": "Aufgabenliste",
+    "TASKS": "Aufgaben",
     "TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
@@ -1464,15 +1464,15 @@
     "ESTIMATE_TOTAL": "Gesamtschätzung:",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
+    "ROUND_5M": "Runden auf 5 Minuten",
     "ROUND_15M": "Runden auf 15 Minuten",
     "ROUND_30M": "Runden auf 30 Minuten",
-    "ROUND_5M": "Runden auf 5 Minuten",
     "ROUND_TIME_SPENT": "Zeiten Runden",
     "ROUND_TIME_SPENT_TITLE": "Aufgewandte Zeit für alle Aufgaben runden. Achtung! Sie können dies nicht rückgängig machen!",
     "ROUND_TIME_WARNING": "!!! Achtung, kann nicht rückgängig gemacht werden !!!",
+    "ROUND_UP_5M": "Aufrunden auf 5 Minuten",
     "ROUND_UP_15M": "Aufrunden auf 15 Minuten",
     "ROUND_UP_30M": "Aufrunden auf 30 Minuten",
-    "ROUND_UP_5M": "Aufrunden auf 5 Minuten",
     "SAVE_AND_GO_HOME": "Speichern und nach Hause gehen",
     "SAVE_AND_GO_HOME_TOOLTIP": "Verschiebe alle erledigten Aufgaben ins Archiv (worklog) und synchronisiere optional alle Daten und schließe die App.",
     "START_END": "Start - Ende",
@@ -1498,14 +1498,13 @@
     "TOGGLE_DARK_MODE": "Schaltet den Dunklen Modus um"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "NO_REPEATABLE_TASKS": "Es gibt aktuell keine wiederkehrenden Aufgaben. Sie können eine Aufgabe planen indem Sie auf \"Aufgabe wiederholen\" im Aufgaben Seitenpanel klicken. Um sie zu öffnen klicken Sie auf das Symbol ganz rechts das erscheint, wenn man über eine Aufgabe fährt (oder tippen Sie auf die Aufgabe auf Mobilgeräten).",
+    "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "REPEATED_TASKS": "Wiederkehrende Aufgaben",
     "SCHEDULED_TASKS": "Geplante Aufgaben",
     "START_TASK": "Aufgabe jetzt starten und Erinnerung entfernen"
   },
   "THEMES": {
-    "SELECT_THEME": "Farbschema wählen",
     "amber": "Bernstein",
     "blue": "Blau",
     "blue-grey": "Blau-Grau",
@@ -1519,6 +1518,7 @@
     "lime": "Limette",
     "pink": "Rosa",
     "purple": "Lila",
+    "SELECT_THEME": "Farbschema wählen",
     "teal": "Blaugrün",
     "yellow": "Gelb"
   },
@@ -1540,9 +1540,9 @@
     "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
     "ESTIMATE_REMAINING": "Schätzung verbleibend:",
     "FINISH_DAY": "Tag beenden",
-    "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tag, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
     "FINISH_DAY_FOR_PROJECT": "Tag für dieses Projekt beenden",
     "FINISH_DAY_FOR_TAG": "Tag für dieses Schlüsselwort beenden",
+    "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tag, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
     "HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
     "NO_COMPLETED_TASKS": "Derzeit sind keine Aufgaben erledigt",
     "NO_PLANNED_TASKS": "Keine geplanten Aufgaben",

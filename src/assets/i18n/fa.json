@@ -118,6 +118,11 @@
         "UPDATE_SECTION": "تنظیمات برای <strong>{{sectionKey}}</strong> بروز رسانی شد"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "L_TEXT": "متن"
+      }
+    },
     "DROPBOX": {
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox: تولید توکن دسترسی از Auth Code امکان پذیر نیست",
@@ -137,8 +142,8 @@
       "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
       "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
       "GET_READY": "برای نشست تمرکز خود آماده شوید!",
-      "GOGOGO": "برو، برو، برو!!!",
       "GO_TO_PROCRASTINATION": "هنگام اهمال‌کاری، کمک بگیرید",
+      "GOGOGO": "برو، برو، برو!!!",
       "NEXT": "بعدی",
       "POMODORO_BACK": "بازگشت",
       "POMODORO_DISABLE": "غیرفعال کردن پومودورو",
@@ -146,9 +151,9 @@
     },
     "GITEA": {
       "FORM": {
-        "TOKEN": "توکن دسترسی",
         "SCOPE_ALL": "همه",
-        "SCOPE_CREATED": "ایجاد شده توسط من"
+        "SCOPE_CREATED": "ایجاد شده توسط من",
+        "TOKEN": "توکن دسترسی"
       },
       "ISSUE_CONTENT": {
         "AT": "در",
@@ -158,17 +163,6 @@
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "WRITE_A_COMMENT": "یک کامنت بنویسید"
-      }
-    },
-    "REDMINE": {
-      "FORM": {
-        "PROJECT_ID": "شناساگر پروژه",
-        "HOST": "(مثال: https://redmine.org) هاست",
-        "SCOPE_CREATED": "ایجاد شده توسط من"
-      },
-      "ISSUE_CONTENT": {
-        "STATUS": "وضعیت",
-        "DESCRIPTION": "توضیحات"
       }
     },
     "GITHUB": {
@@ -239,15 +233,10 @@
         "ERR_UNKNOWN": "GitLab: خطای ناشناخته {{statusCode}} {{errorMsg}}"
       }
     },
-    "DOMINA_MODE": {
-      "FORM": {
-        "L_TEXT": "متن"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "مسائل",
-        "ISSUE_STR": "موضوع"
+        "ISSUE_STR": "موضوع",
+        "ISSUES_STR": "مسائل"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: درخواست به دلیل خطای شبکه سمت سرویس گیرنده ناموفق بود",
@@ -272,8 +261,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "همیشه گفتگو را باز کن",
-        "DONE": "وضعیت کار انجام شده",
         "DO_NOT": "انتقال را انجام ندهید",
+        "DONE": "وضعیت کار انجام شده",
         "ENABLE": "فعال کردن ارتباط با جیرا",
         "ENABLE_TRANSITIONS": "مدیریت انتقال را فعال کنید",
         "IN_PROGRESS": "وضعیت کار شروع شده",
@@ -331,8 +320,8 @@
         "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
         "HOST": "آدرس جیرای شما (مثلا: http://my-jira.ir:1234)",
         "PASSWORD": "توکن / کلمه عبور",
-        "USER_NAME": "ایمیل / نام کاربری",
         "USE_PAT": "به جای گذرواژه از رمز دسترسی شخصی استفاده کنید",
+        "USER_NAME": "ایمیل / نام کاربری",
         "WONKY_COOKIE_MODE": "تأیید هویت کوکی Wonky Cookie (فقط برنامه دسک تاپ)"
       },
       "FORM_SECTION": {
@@ -381,8 +370,8 @@
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -442,14 +431,14 @@
       "D_ADD": {
         "NOTE_LABEL": "متنی برای دخیره به عنوان یادداشت وارد کنید..."
       },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Disable markdown parsing",
+        "ENABLE_PARSE": "Enable markdown parse"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "اضافه کردن کار جدید",
         "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید",
         "NO_NOTES": "در حال حاضر هیچ یادداشتی وجود ندارد"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing",
-        "ENABLE_PARSE": "Enable markdown parse"
       }
     },
     "OPEN_PROJECT": {
@@ -477,11 +466,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "نمایش گفتگوی ردیابی زمان پس از تکمیل وظایف فرعی",
         "PROJECT_ID": "شناسه پروژه",
         "PROJECT_ID_DESCRIPTION": "هنگام مشاهده پروژه در مرورگر ، می توانید آن را به عنوان بخشی از url پیدا کنید.",
-        "TOKEN": "نشانه دسترسی",
         "SCOPE": "محدوده",
         "SCOPE_ALL": "همه",
         "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
-        "SCOPE_CREATED": "ایجاد شده توسط من"
+        "SCOPE_CREATED": "ایجاد شده توسط من",
+        "TOKEN": "نشانه دسترسی"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را برای لیست بسته های کاری OpenProject باز شده پیکربندی کنید. لطفاً توجه داشته باشید که برای کارکردن در مرورگر ، احتمالاً باید CORS را برای سرور OpenProject خود پیکربندی کنید ، تا از app.super-productivity.com اجازه دسترسی داشته باشید</p>",
@@ -496,8 +485,8 @@
         "TYPE": "تایپ کنید"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "بسته های کاری",
-        "ISSUE_STR": "بسته کاری"
+        "ISSUE_STR": "بسته کاری",
+        "ISSUES_STR": "بسته های کاری"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟",
@@ -604,11 +593,35 @@
       "PAGE_TITLE": "تاریخچه سریع",
       "WEEK_TITLE": "هفته {{nr}} ({{timeSpent}})"
     },
+    "REDMINE": {
+      "FORM": {
+        "HOST": "(مثال: https://redmine.org) هاست",
+        "PROJECT_ID": "شناساگر پروژه",
+        "SCOPE_CREATED": "ایجاد شده توسط من"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "توضیحات",
+        "STATUS": "وضعیت"
+      }
+    },
     "REMINDER": {
-      "S_REMINDER_ERR": "خطا در رابط یادآوری",
       "COUNTDOWN_BANNER": {
         "HIDE": "مخفی کردن"
-      }
+      },
+      "S_REMINDER_ERR": "خطا در رابط یادآوری"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "ادامه داد",
+      "D_INITIAL": {
+        "TEXT": "<p>ایده جدول زمانی ارائه تصویر بهتری از نحوه انجام کارهای برنامه ریزی شده فرد در طول زمان است. این به طور خودکار از وظایف شما تولید می شود و دو چیز مختلف را از هم متمایز می کند: <strong>کارهای برنامه ریزی شده</strong>، که در زمان برنامه ریزی شده آنها نشان داده می شود و <strong>کارهای منظم</strong> که باید حول آن وقایع ثابت باشند. همه کارها تخمین زمانی را که به آنها اختصاص داده اید در نظر می گیرند.</p><p>علاوه بر این می توانید زمان شروع و پایان کار را نیز ارائه دهید. اگر کارهای منظم پیکربندی شده هرگز خارج از اینها نشان داده نشود. لطفاً توجه داشته باشید که این جدول زمانی فقط شامل 30 روز آینده است.</p>",
+        "TITLE": "جدول زمانی"
+      },
+      "END": "پایان کار",
+      "LUNCH_BREAK": "استراحت ناهار",
+      "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
+      "NOW": "اکنون",
+      "START": "شروع کار",
+      "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده"
     },
     "SEARCH_BAR": {
       "INFO": "برای جستجوی کارهای بایگانی شده روی نماد لیست کلیک کنید",
@@ -670,8 +683,8 @@
         "USE_REMOTE": "از راه دور استفاده کنید"
       },
       "D_INCOMPLETE_SYNC": {
-        "T3": "شما دو گزینه دارید:",
-        "BTN_CLOSE_APP": "بستن برنامه"
+        "BTN_CLOSE_APP": "بستن برنامه",
+        "T3": "شما دو گزینه دارید:"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی"
@@ -730,6 +743,17 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "افزودن کار موجود \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "شماره شماره{{issueNr}} را از {{issueType}}اضافه کنید",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "وظیفه را به قسمت عقب مانده اضافه کنید",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "اضافه کردن وظیفه به پایین لیست",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "اضافه کردن وظیفه به بالای مطالب عقب افتاده",
+        "ADD_TASK_TO_TOP_OF_TODAY": "اضافه کردن وظیفه به بالای لیست",
+        "CREATE_TASK": "ایجاد کار جدید",
+        "EXAMPLE": "مثال: \"برخی از عنوان های کار + پروژه نام # برخی از برچسب ها # برخی دیگر از برچسب ها 10m / 3h\"",
+        "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "اضافه کردن پیوست",
         "ADD_SUB_TASK": "اضافه کردن زیر کار",
@@ -743,17 +767,6 @@
         "SCHEDULE_TASK": "برنامه ریزی کار",
         "SUB_TASKS": "وظایف فرعی ({{nr}})",
         "TIME": "زمان"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "افزودن کار موجود \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "شماره شماره{{issueNr}} را از {{issueType}}اضافه کنید",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "وظیفه را به قسمت عقب مانده اضافه کنید",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "اضافه کردن وظیفه به پایین لیست",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "اضافه کردن وظیفه به بالای مطالب عقب افتاده",
-        "ADD_TASK_TO_TOP_OF_TODAY": "اضافه کردن وظیفه به بالای لیست",
-        "CREATE_TASK": "ایجاد کار جدید",
-        "EXAMPLE": "مثال: \"برخی از عنوان های کار + پروژه نام # برخی از برچسب ها # برخی دیگر از برچسب ها 10m / 3h\"",
-        "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید"
       },
       "B": {
         "ADD_HALF_HOUR": "نیم ساعت اضافه کن",
@@ -782,8 +795,8 @@
         "REPEAT_EDIT": "Edit repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
-        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
+        "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
         "TRACK_TIME": "Start tracking time",
@@ -792,19 +805,6 @@
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
         "OK": "ایجاد برچسب"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "REMIND_AT": "یادآوری در",
-        "RO_10M": "10 دقیقه قبل از شروع آن",
-        "RO_15M": "15 دقیقه قبل از شروع آن",
-        "RO_1H": "1 ساعت قبل از شروع آن",
-        "RO_30M": "30 دقیقه قبل از شروع آن",
-        "RO_5M": "5 دقیقه قبل از شروع آن",
-        "RO_START": "وقتی شروع می شود",
-        "RO_NEVER": "هرگز",
-        "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "همه را به امروز اضافه کنید",
@@ -823,6 +823,19 @@
         "SNOOZE_ALL": "تعویق همه",
         "START": "Start Task",
         "SWITCH_CONTEXT_START": "تغییر متن و شروع"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "REMIND_AT": "یادآوری در",
+        "RO_1H": "1 ساعت قبل از شروع آن",
+        "RO_5M": "5 دقیقه قبل از شروع آن",
+        "RO_10M": "10 دقیقه قبل از شروع آن",
+        "RO_15M": "15 دقیقه قبل از شروع آن",
+        "RO_30M": "30 دقیقه قبل از شروع آن",
+        "RO_NEVER": "هرگز",
+        "RO_START": "وقتی شروع می شود",
+        "SCHEDULE": "Schedule",
+        "UNSCHEDULE": "Unschedule"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Add time spent for other day",
@@ -911,19 +924,6 @@
         "TUESDAY": "سه شنبه",
         "WEDNESDAY": "چهارشنبه"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "ادامه داد",
-      "D_INITIAL": {
-        "TEXT": "<p>ایده جدول زمانی ارائه تصویر بهتری از نحوه انجام کارهای برنامه ریزی شده فرد در طول زمان است. این به طور خودکار از وظایف شما تولید می شود و دو چیز مختلف را از هم متمایز می کند: <strong>کارهای برنامه ریزی شده</strong>، که در زمان برنامه ریزی شده آنها نشان داده می شود و <strong>کارهای منظم</strong> که باید حول آن وقایع ثابت باشند. همه کارها تخمین زمانی را که به آنها اختصاص داده اید در نظر می گیرند.</p><p>علاوه بر این می توانید زمان شروع و پایان کار را نیز ارائه دهید. اگر کارهای منظم پیکربندی شده هرگز خارج از اینها نشان داده نشود. لطفاً توجه داشته باشید که این جدول زمانی فقط شامل 30 روز آینده است.</p>",
-        "TITLE": "جدول زمانی"
-      },
-      "END": "پایان کار",
-      "NOW": "اکنون",
-      "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
-      "START": "شروع کار",
-      "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده",
-      "LUNCH_BREAK": "استراحت ناهار"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1032,8 +1032,8 @@
     "LOGOUT": "خارج شدن",
     "MINUTES": "{{m}} دقیقه",
     "NEXT": "بعدی",
-    "NONE": "هیچ یک",
     "NO_CON": "شما در حال حاضر آفلاین هستید. لطفا دوباره به اینترنت وصل شوید.",
+    "NONE": "هیچ یک",
     "OK": "اوکی",
     "PREVIOUS": "قبلی",
     "REMOVE": "حذف",
@@ -1084,9 +1084,9 @@
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "رفتن به حالت تمرکز",
+      "GO_TO_SCHEDULE": "به جدول زمانی بروید",
       "GO_TO_SCHEDULED_VIEW": "رفتن به وظایف برنامه ریزی شده",
       "GO_TO_SETTINGS": "رفتن به تنظیمات",
-      "GO_TO_SCHEDULE": "به جدول زمانی بروید",
       "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -1098,8 +1098,8 @@
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
       "TASK_ADD_ATTACHMENT": "Attach file or link",
+      "TASK_ADD_SUB_TASK": "اضافه کردن کار فرعی",
       "TASK_DELETE": "حذف کار",
       "TASK_EDIT_TAGS": "برچسب ها را ویرایش کنید",
       "TASK_EDIT_TITLE": "ویرایش عنوان",
@@ -1158,6 +1158,15 @@
     "REMINDER": {
       "TITLE": "یادآوری‌ها"
     },
+    "SCHEDULE": {
+      "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/schedule'>'Schedule'</a>پیدا کنید.",
+      "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
+      "L_WORK_END": "پایان روز کار",
+      "L_WORK_START": "شروع روز کار",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰",
+      "TITLE": "جدول زمانی",
+      "WORK_START_END_DESCRIPTION": "به عنوان مثال، ساعت 17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "وظیفه تمام شد صدا",
       "IS_INCREASE_DONE_PITCH": "برای انجام هر کاری سطح صدا را افزایش دهید",
@@ -1175,15 +1184,6 @@
       "NOTIFICATION_TITLE": "استراحت کن!",
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
-    },
-    "SCHEDULE": {
-      "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/schedule'>'Schedule'</a>پیدا کنید.",
-      "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
-      "L_WORK_END": "پایان روز کار",
-      "L_WORK_START": "شروع روز کار",
-      "TITLE": "جدول زمانی",
-      "WORK_START_END_DESCRIPTION": "به عنوان مثال، ساعت 17:00",
-      "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰"
     }
   },
   "GLOBAL_SNACK": {
@@ -1215,24 +1215,24 @@
     "DELETE_PROJECT": "حذف پروژه",
     "DELETE_TAG": "برچسب را حذف کنید",
     "GO_TO_TASK_LIST": "به لیست کارها برو",
+    "HELP": "کمک",
     "HM": {
       "CONTRIBUTE": "مشارکت",
       "REPORT_A_PROBLEM": "گزارش یک مشکل",
       "START_WELCOME": "آغاز تور خوش‌آمدگویی"
     },
-    "HELP": "کمک",
     "METRICS": "معیارها",
     "NOTES": "یادداشت ها",
     "PROCRASTINATE": "به تعویق انداختن",
-    "PROJECTS": "پروژه ها",
     "PROJECT_MENU": "منوی پروژه",
     "PROJECT_SETTINGS": "تنظیمات پروژه",
+    "PROJECTS": "پروژه ها",
     "QUICK_HISTORY": "تاریخچه سریع",
     "SETTINGS": "تنظیمات",
     "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
     "TAGS": "برچسب ها",
-    "TASKS": "کارها",
     "TASK_LIST": "لیست کار",
+    "TASKS": "کارها",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
@@ -1252,15 +1252,15 @@
     "ESTIMATE_TOTAL": "برآورد کل:",
     "EXPORT_TASK_LIST": "خروجی‌گرفتن از لیست کارها",
     "NO_TASKS": "There are no tasks for this day",
+    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
-    "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_TIME_SPENT": "گردکردن زمان سپری‌شده",
     "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
     "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
+    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "SAVE_AND_GO_HOME": "ذخیره کن و به صفحه اصلی برو",
     "START_END": "شروع - پایان",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
@@ -1288,7 +1288,6 @@
     "START_TASK": "Start task now and remove reminder"
   },
   "THEMES": {
-    "SELECT_THEME": "انتخاب قالب",
     "amber": "کهربایی",
     "blue": "آبی",
     "blue-grey": "آبی خاکستری",
@@ -1302,6 +1301,7 @@
     "lime": "لیمویی",
     "pink": "صورتی",
     "purple": "بنفش",
+    "SELECT_THEME": "انتخاب قالب",
     "teal": "teal",
     "yellow": "زرد"
   },

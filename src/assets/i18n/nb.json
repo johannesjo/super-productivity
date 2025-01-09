@@ -149,8 +149,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Åpne alltid dialogboksen",
-        "DONE": "Status for å fullføre oppgaven",
         "DO_NOT": "Ikke overgang",
+        "DONE": "Status for å fullføre oppgaven",
         "ENABLE": "Aktiver Jira-integrering",
         "ENABLE_TRANSITIONS": "Aktiver overgangshåndtering",
         "IN_PROGRESS": "Status for startoppgave",
@@ -242,8 +242,8 @@
         "NO_VALID_TRANSITION": "Jira: Ingen gyldig overgang konfigurert",
         "TIMED_OUT": "Jira: Forespørsel ble tidsavbrutt",
         "TRANSITION": "Jira: Sett problemet \"{{issueKey}}\" til \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Overganger lastet. Bruk valgene nedenfor for å tildele dem",
         "TRANSITION_SUCCESS": "Jira: Sett problemet {{issueKey}} til <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Overganger lastet. Bruk valgene nedenfor for å tildele dem",
         "UNABLE_TO_REASSIGN": "Jira: Kunne ikke overføre billetten til deg selv, fordi du ikke spesifiserte et brukernavn. Vennligst besøk innstillingene."
       },
       "STEPPER": {
@@ -299,13 +299,13 @@
       "D_ADD": {
         "NOTE_LABEL": "Skriv inn litt tekst for å lagre som notat ..."
       },
-      "NOTES_CMP": {
-        "ADD_BTN": "Legg til en ny kommentar",
-        "DROP_TO_ADD": "Slipp her for å legge til et nytt notat"
-      },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Deaktiver analysering av markdown",
         "ENABLE_PARSE": "Aktiver markdown-analyse"
+      },
+      "NOTES_CMP": {
+        "ADD_BTN": "Legg til en ny kommentar",
+        "DROP_TO_ADD": "Slipp her for å legge til et nytt notat"
       }
     },
     "POMODORO": {
@@ -449,6 +449,13 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Legg til eksisterende oppgave \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Legg til utgave nr. {{issueNr}} fra {{issueType}}",
+        "CREATE_TASK": "Lag ny oppgave",
+        "EXAMPLE": "Eksempel: \"Noen oppgavetittel + prosjektnavn #en tag #en annen tag 10m / 3h\"",
+        "START": "Trykk enter en gang til for å starte"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Legg til vedlegg",
         "ADD_SUB_TASK": "Legg til underoppgave",
@@ -462,13 +469,6 @@
         "SCHEDULE_TASK": "Planlegg oppgave",
         "SUB_TASKS": "Underoppgaver ({{nr}})",
         "TIME": "Tid"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Legg til eksisterende oppgave \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Legg til utgave nr. {{issueNr}} fra {{issueType}}",
-        "CREATE_TASK": "Lag ny oppgave",
-        "EXAMPLE": "Eksempel: \"Noen oppgavetittel + prosjektnavn #en tag #en annen tag 10m / 3h\"",
-        "START": "Trykk enter en gang til for å starte"
       },
       "B": {
         "ADD_HALF_HOUR": "Tilsett 1/2 time",
@@ -495,18 +495,13 @@
         "REPEAT_EDIT": "Rediger konfigurasjon for gjentatt oppgave",
         "SCHEDULE": "Planlegg oppgaven",
         "SHOW_UPDATES": "Vis oppdateringer",
-        "TOGGLE_DETAIL_PANEL": "Vis / skjul tilleggsinformasjon",
         "TOGGLE_ATTACHMENTS": "Vis / skjul vedlegg",
+        "TOGGLE_DETAIL_PANEL": "Vis / skjul tilleggsinformasjon",
         "TOGGLE_DONE": "Merk som ferdig / angre",
         "TOGGLE_SUB_TASK_VISIBILITY": "Bytt synlighet av underoppgave",
         "TRACK_TIME": "Begynn å spore tid",
         "TRACK_TIME_STOP": "Sett sporingstid på pause",
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
-        "SCHEDULE": "Legg til planlagt",
-        "UNSCHEDULE": "Fjern fra planlagt"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
@@ -524,6 +519,11 @@
         "SNOOZE_ALL": "Utsett alle",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Bytt kontekst og start"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
+        "SCHEDULE": "Legg til planlagt",
+        "UNSCHEDULE": "Fjern fra planlagt"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Legg til tid brukt den andre dagen",
@@ -687,8 +687,8 @@
     "LOGOUT": "Logg ut",
     "MINUTES": "{{m}} minutter",
     "NEXT": "Neste",
-    "NONE": "Ingen",
     "NO_CON": "Du er for øyeblikket frakoblet. Koble til Internett på nytt.",
+    "NONE": "Ingen",
     "OK": "Ok",
     "PREVIOUS": "Tidligere",
     "REMOVE": "Ta vekk",
@@ -744,8 +744,8 @@
       "SELECT_NEXT_TASK": "Velg neste oppgave",
       "SELECT_PREVIOUS_TASK": "Velg forrige oppgave",
       "SYSTEM_SHORTCUTS": "Globale snarveier (hele systemet)",
-      "TASK_ADD_SUB_TASK": "Legg til underoppgave",
       "TASK_ADD_ATTACHMENT": "Legg ved fil eller lenke",
+      "TASK_ADD_SUB_TASK": "Legg til underoppgave",
       "TASK_DELETE": "Slett oppgave",
       "TASK_EDIT_TITLE": "Rediger tittel",
       "TASK_MOVE_TO_PROJECT": "Åpne flytt oppgave til prosjektmeny",
@@ -831,13 +831,13 @@
     "METRICS": "Beregninger",
     "NOTES": "Merknader",
     "PROCRASTINATE": "Utsette",
-    "PROJECTS": "Prosjekter",
     "PROJECT_MENU": "Prosjektmeny",
     "PROJECT_SETTINGS": "Prosjektinnstillinger",
+    "PROJECTS": "Prosjekter",
     "SETTINGS": "Innstillinger",
     "TAGS": "Merker",
-    "TASKS": "Oppgaver",
     "TASK_LIST": "Oppgaveliste",
+    "TASKS": "Oppgaver",
     "TOGGLE_SHOW_BOOKMARKS": "Vis / skjul bokmerker",
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
@@ -855,15 +855,15 @@
     },
     "EXPORT_TASK_LIST": "Eksporter oppgaveliste",
     "NO_TASKS": "Det er ingen oppgaver for denne dagen",
+    "ROUND_5M": "Avrund alle oppgavene til 5 minutter",
     "ROUND_15M": "Avrund alle oppgavene til 15 minutter",
     "ROUND_30M": "Avrund alle oppgavene til 30 minutter",
-    "ROUND_5M": "Avrund alle oppgavene til 5 minutter",
     "ROUND_TIME_SPENT": "Avrund tid brukt",
     "ROUND_TIME_SPENT_TITLE": "Avrund tid brukt på alle oppgaver. Vær forsiktig! Du kan ikke angre dette!",
     "ROUND_TIME_WARNING": "!!! Vær forsiktig, dette kan ikke angres !!!",
+    "ROUND_UP_5M": "Avrund opp alle oppgavene til 5 minutter",
     "ROUND_UP_15M": "Avrund opp alle oppgavene til 15 minutter",
     "ROUND_UP_30M": "Avrund opp alle oppgavene til 30 minutter",
-    "ROUND_UP_5M": "Avrund opp alle oppgavene til 5 minutter",
     "SAVE_AND_GO_HOME": "Lagre og dra hjem",
     "START_END": "Start - Slutt",
     "SUMMARY_FOR": "Daglig sammendrag for {{dayStr}}",
@@ -890,7 +890,6 @@
     "START_TASK": "Start oppgaven og fjern påminnelsen"
   },
   "THEMES": {
-    "SELECT_THEME": "Velg Tema",
     "amber": "rav",
     "blue": "blå",
     "blue-grey": "blågrå",
@@ -904,6 +903,7 @@
     "lime": "kalk",
     "pink": "rosa",
     "purple": "lilla",
+    "SELECT_THEME": "Velg Tema",
     "teal": "blågrønn",
     "yellow": "gul"
   },

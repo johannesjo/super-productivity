@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Konflik sinkronasi terjadi",
-      "SYNC_CONFLICT_MSG": "Mohon periksa dan lakukan apa yang harus dilakukan."
+      "SYNC_CONFLICT_MSG": "Mohon periksa dan lakukan apa yang harus dilakukan.",
+      "SYNC_CONFLICT_TITLE": "Konflik sinkronasi terjadi"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "Aplikasi berjalan di latar belakang untuk memungkinkan sinkronasi jika diaktifkan",
@@ -143,13 +143,13 @@
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
         "HOST": "Host (contoh: https://try.gitea.io)",
-        "TOKEN": "Akses Token",
         "REPO_FULL_NAME": "Nama pengguna atau nama/proyek Organisasi",
         "REPO_FULL_NAME_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
         "SCOPE": "Cakupan",
         "SCOPE_ALL": "Semua",
         "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
-        "SCOPE_CREATED": "Dibuat oleh saya"
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "TOKEN": "Akses Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar open Gitea issues untuk repositori tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke masalah tersebut serta informasi lebih lanjut tentangnya.</p> <p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua open issues ke backlog tugas Anda.</p><p>Untuk mencapai batas penggunaan dan untuk mengakses, Anda dapat memberikan token akses.</p>",
@@ -167,35 +167,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "Gitea: Error tidak diketahui {{statusCode}} {{errorMsg}}. Batas Tarif API terlampaui?"
-      }
-    },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Atur Redmine untuk Proyek"
-      },
-      "FORM": {
-        "PROJECT_ID": "Pengidentifikasi Proyek",
-        "PROJECT_ID_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
-        "HOST": "Host (contoh.: https://redmine.org)",
-        "API_KEY": "Akses kunci API",
-        "SCOPE": "Cakupan",
-        "SCOPE_ALL": "Semua",
-        "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
-        "SCOPE_CREATED": "Dibuat oleh saya"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk mencantumkan open Redmine issues (baik versi online atau yang dihosting sendiri) untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke issues tersebut serta informasi lebih lanjut tentangnya.</p><p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p>"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Penulis",
-        "STATUS": "Status",
-        "PRIORITY": "Prioritas",
-        "DESCRIPTION": "Deskripsi",
-        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Error tidak diketahui {{statusCode}} {{errorMsg}}."
       }
     },
     "GITHUB": {
@@ -264,8 +235,8 @@
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "issues",
-        "ISSUE_STR": "issue"
+        "ISSUE_STR": "issue",
+        "ISSUES_STR": "issues"
       },
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}: Permintaan gagal karena kesalahan jaringan sisi klien ",
@@ -290,8 +261,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Selalu buka dialog",
-        "DONE": "Status untuk menyelesaikan tugas",
         "DO_NOT": "Jangan bertransisi",
+        "DONE": "Status untuk menyelesaikan tugas",
         "ENABLE": "Aktifkan integrasi Jira",
         "ENABLE_TRANSITIONS": "Aktifkan Penanganan Transisi",
         "IN_PROGRESS": "Status untuk memulai tugas",
@@ -350,8 +321,8 @@
         "ALLOW_SELF_SIGNED": "Isi hanya waktu yang dihabiskan kemarin",
         "HOST": "Host (contoh: http://my-host.de:1234)",
         "PASSWORD": "Token / Kata sandi",
-        "USER_NAME": "Email / Nama pengguna",
         "USE_PAT": "Gunakan Token Akses Pribadi daripada kata sandi",
+        "USER_NAME": "Email / Nama pengguna",
         "WONKY_COOKIE_MODE": "Otentikasi Fallback Cookie Wonky (khusus aplikasi desktop)"
       },
       "FORM_SECTION": {
@@ -401,8 +372,8 @@
         "NO_VALID_TRANSITION": "Jira: Tidak ada transisi yang valid yang dikonfigurasi",
         "TIMED_OUT": "Jira: Waktu permintaan habis",
         "TRANSITION": "Jira: Atur issue \"{{issueKey}}\" untuk \"{{name}}\"",
-        "TRANSITIONS_LOADED": "Jira: Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya",
         "TRANSITION_SUCCESS": "Jira: Atur issue {{issueKey}} ke <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya",
         "UNABLE_TO_REASSIGN": "Jira: Tidak dapat menetapkan ulang tiket untuk Anda sendiri, karena Anda tidak menentukan nama pengguna. Silakan kunjungi pengaturan."
       },
       "STEPPER": {
@@ -463,32 +434,32 @@
         "NOTE_LABEL": "Masukkan beberapa teks untuk disimpan sebagai catatan (Anda dapat menggunakan Markdown)..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "Lihat sebagai teks yang belum diurai",
+        "VIEW_PARSED": "Lihat sebagai Markdown yang diuraikan (tidak dapat diedit)",
         "VIEW_SPLIT": "Lihat Markdown yang diuraikan dan tidak diuraikan dalam tampilan terpisah",
-        "VIEW_PARSED": "Lihat sebagai Markdown yang diuraikan (tidak dapat diedit)"
+        "VIEW_TEXT_ONLY": "Lihat sebagai teks yang belum diurai"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Nonaktifkan penguraian Markdown untuk pratinjau",
+        "ENABLE_PARSE": "Aktifkan penguraian Markdown"
       },
       "NOTES_CMP": {
         "ADD_BTN": "Tambah catatan baru",
         "DROP_TO_ADD": "Jatuhkan di sini untuk menambahkan catatan baru",
         "NO_NOTES": "Saat ini tidak ada catatan"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Nonaktifkan penguraian Markdown untuk pratinjau",
-        "ENABLE_PARSE": "Aktifkan penguraian Markdown"
       }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Selalu buka dialog",
-        "DONE": "Status untuk menyelesaikan tugas",
         "DO_NOT": "Jangan bertransisi",
+        "DONE": "Status untuk menyelesaikan tugas",
         "ENABLE": "Aktifkan integrasi Openproject",
         "ENABLE_TRANSITIONS": "Aktifkan Penanganan Transisi",
         "IN_PROGRESS": "Status untuk memulai tugas",
         "OPEN": "Status untuk menjeda tugas",
         "PROGRESS_ON_SAVE": "Kemajuan default saat disimpan",
-        "TRANSITION": "Penanganan Transisi",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Pilih masalah untuk memuat transisi yang tersedia"
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Pilih masalah untuk memuat transisi yang tersedia",
+        "TRANSITION": "Penanganan Transisi"
       },
       "DIALOG_INITIAL": {
         "TITLE": "Atur OpenProject untuk Proyek"
@@ -520,11 +491,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Tampilkan dialog pelacakan waktu ketika sub tugas selesai",
         "PROJECT_ID": "ID Proyek",
         "PROJECT_ID_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
-        "TOKEN": "Akses Token",
         "SCOPE": "Cakupan",
         "SCOPE_ALL": "Semua",
         "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
-        "SCOPE_CREATED": "Dibuat oleh saya"
+        "SCOPE_CREATED": "Dibuat oleh saya",
+        "TOKEN": "Akses Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk membuat daftar work packages OpenProject yang terbuka. Harap Perhatikan bahwa agar ini berfungsi di browser, Anda mungkin perlu mengonfigurasi CORS untuk server OpenProject Anda, untuk mengizinkan akses dari app.super-productivity.com</p>",
@@ -539,8 +510,8 @@
         "TYPE": "Tipe"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "work packages",
-        "ISSUE_STR": "work package"
+        "ISSUE_STR": "work package",
+        "ISSUES_STR": "work packages"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Error tidak diketahui {{statusCode}} {{errorMsg}}. Apakah CORS dikonfigurasi dengan benar untuk server?",
@@ -556,15 +527,15 @@
       "ENJOY_YOURSELF": "Nikmati diri Anda sendiri, buat diri Anda bergerak, kembali dalam:",
       "FINISH_SESSION_X": "Anda berhasil menyelesaikan sesi <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Istirahat {{nr}} dimulai!",
         "BREAK_TIME": "Pomodoro: Waktunya istirahat {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Istirahat {{nr}} dimulai!",
         "NO_TASKS": "Anda perlu menambahkan tugas sebelum timer Pomodoro dapat dimulai.",
         "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!"
       },
       "S": {
-        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!",
+        "RESET": "Akhiri sesi Pomodoro",
         "SESSION_SKIP": "Lewatkan sesi Pomodoro",
-        "RESET": "Akhiri sesi Pomodoro"
+        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!"
       },
       "SKIP_BREAK": "Lewatkan istirahat",
       "START_BREAK": "Mulai istirahat"
@@ -617,10 +588,10 @@
         "EDIT": "Ubah Proyek",
         "SETUP_CALDAV": "Atur Integrasi Caldav",
         "SETUP_GIT": "Atur Integrasi GitHub",
+        "SETUP_GITEA_PROJECT": "Atur Integrasi Gitea",
         "SETUP_GITLAB": "Atur Integrasi Gitlab",
         "SETUP_JIRA": "Atur Integrasi Jira",
         "SETUP_OPEN_PROJECT": "Atur Integrasi OpenProject",
-        "SETUP_GITEA_PROJECT": "Atur Integrasi Gitea",
         "SETUP_REDMINE_PROJECT": "Atur Integrasi Redmine"
       },
       "FORM_BASIC": {
@@ -662,8 +633,50 @@
       "PAGE_TITLE": "Riwayat Cepat",
       "WEEK_TITLE": "Minggu {{nr}} ({{timeSpent}})"
     },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Atur Redmine untuk Proyek"
+      },
+      "FORM": {
+        "API_KEY": "Akses kunci API",
+        "HOST": "Host (contoh.: https://redmine.org)",
+        "PROJECT_ID": "Pengidentifikasi Proyek",
+        "PROJECT_ID_DESCRIPTION": "Dapat ditemukan sebagai bagian dari url, saat melihat proyek di Browser.",
+        "SCOPE": "Cakupan",
+        "SCOPE_ALL": "Semua",
+        "SCOPE_ASSIGNED": "Ditugaskan kepada saya",
+        "SCOPE_CREATED": "Dibuat oleh saya"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Di sini Anda dapat mengonfigurasi SuperProductivity untuk mencantumkan open Redmine issues (baik versi online atau yang dihosting sendiri) untuk proyek tertentu di panel pembuatan tugas dalam tampilan perencanaan harian. Mereka akan dicantumkan sebagai saran dan akan memberikan tautan ke issues tersebut serta informasi lebih lanjut tentangnya.</p><p>Selain itu, Anda dapat secara otomatis menambahkan dan menyinkronkan semua masalah yang terbuka ke backlog tugas Anda.</p>",
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Penulis",
+        "DESCRIPTION": "Deskripsi",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
+        "PRIORITY": "Prioritas",
+        "STATUS": "Status"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Error tidak diketahui {{statusCode}} {{errorMsg}}."
+      }
+    },
     "REMINDER": {
       "S_REMINDER_ERR": "Kesalahan untuk antarmuka pengingat"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "lanjutan",
+      "D_INITIAL": {
+        "TEXT": "<p>Ide Schedule adalah untuk memberikan gambaran yang lebih baik tentang bagaimana tugas yang direncanakan seseorang bermain dari waktu ke waktu. Ini dibuat secara otomatis dari Tugas Anda dan membedakan dua hal yang berbeda: <strong>Tugas Terjadwal</strong>, yang ditampilkan pada waktu yang direncanakan dan <strong>Tugas Biasa</strong> yang harus mengalir di sekitar peristiwa tetap tersebut. Semua tugas mempertimbangkan perkiraan waktu yang telah Anda tetapkan untuk mereka.</p><p>Selain itu, Anda juga dapat memberikan waktu mulai dan selesai pekerjaan. Jika dikonfigurasi, tugas rutin tidak akan pernah muncul di luar ini. Harap dicatat bahwa schedule hanya mencakup 30 hari mendatang.</p>",
+        "TITLE": "Linimasa"
+      },
+      "END": "Pekerjaan selesai",
+      "LUNCH_BREAK": "Istirahat makan siang",
+      "NO_TASKS": "Saat ini tidak ada tugas. Silakan tambahkan beberapa tugas melalui Tombol + di bilah atas.",
+      "NOW": "Sekarang",
+      "START": "Pekerjaan dimulai",
+      "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan"
     },
     "SEARCH_BAR": {
       "INFO": "Klik ikon daftar untuk mencari tugas yang diarsipkan",
@@ -737,13 +750,13 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Sinkronisasi Nama File"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Memerlukan izin akses file"
-        },
         "L_ENABLE_COMPRESSION": "Aktifkan Kompresi (transfer data lebih cepat)",
         "L_ENABLE_SYNCING": "Aktifkan Sinkronasi",
         "L_SYNC_INTERVAL": "Interval Sinkronisasi",
         "L_SYNC_PROVIDER": "Penyedia Sinkronisasi",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Memerlukan izin akses file"
+        },
         "TITLE": "Sinkronisasi",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Membuatnya berfungsi di browser:</strong> Agar ini berfungsi di browser, Anda perlu memasukkan Super Productivity untuk permintaan CORS ke whitelist untuk instans Nextcloud Anda. Ini dapat memiliki implikasi keamanan negatif! Silahkan <a href='https://github.com/nextcloud/server/issues/3131'>lihat utas ini untuk informasi lebih lanjut</a>. Salah satu pendekatan untuk membuat ini berfungsi di seluler adalah memasukkannya ke whitelist \"https://app.super-productivity.com\" lewat nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Gunakan dengan risiko Anda sendiri!</p>",
@@ -788,6 +801,17 @@
       }
     },
     "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Tambahkan tugas yang ada \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Tambahkan issue #{{issueNr}} dari {{issueType}}",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Tambahkan tugas ke bagian bawah backlog",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Tambahkan tugas ke bagian bawah daftar",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Tambahkan tugas ke atas backlog",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Tambahkan tugas ke daftar teratas",
+        "CREATE_TASK": "Buat tugas baru",
+        "EXAMPLE": "Contoh: \"Beberapa judul tugas +namaProyek #tag #tag 10m/3h\"",
+        "START": "Tekan enter sekali lagi untuk memulai"
+      },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Tambahkan lampiran",
         "ADD_SUB_TASK": "Tambah subtugas",
@@ -801,17 +825,6 @@
         "SCHEDULE_TASK": "Jadwal tugas",
         "SUB_TASKS": "Subtugas ({{nr}})",
         "TIME": "Waktu"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Tambahkan tugas yang ada \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Tambahkan issue #{{issueNr}} dari {{issueType}}",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Tambahkan tugas ke bagian bawah backlog",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Tambahkan tugas ke bagian bawah daftar",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Tambahkan tugas ke atas backlog",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Tambahkan tugas ke daftar teratas",
-        "CREATE_TASK": "Buat tugas baru",
-        "EXAMPLE": "Contoh: \"Beberapa judul tugas +namaProyek #tag #tag 10m/3h\"",
-        "START": "Tekan enter sekali lagi untuk memulai"
       },
       "B": {
         "ADD_HALF_HOUR": "Tambah 1/2 jam",
@@ -839,26 +852,13 @@
         "REPEAT_EDIT": "Edit konfigurasi tugas berulang",
         "SCHEDULE": "Jadwalkan tugas",
         "SHOW_UPDATES": "Tampilkan pembaruan",
-        "TOGGLE_DETAIL_PANEL": "Tampilkan/Sembunyikan info tambahan",
         "TOGGLE_ATTACHMENTS": "Tampilkan/Sembunyikan lampiran",
+        "TOGGLE_DETAIL_PANEL": "Tampilkan/Sembunyikan info tambahan",
         "TOGGLE_DONE": "Tandai sebagai selesai/diurungkan",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alihkan visibilitas sub tugas",
         "TRACK_TIME": "Mulai waktu pelacakan",
         "TRACK_TIME_STOP": "Jeda waktu pelacakan",
         "UPDATE_ISSUE_DATA": "Perbarui data masalah"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "Pindahkan tugas ke backlog hingga dijadwalkan",
-        "REMIND_AT": "Ingatkan di",
-        "RO_10M": "10 menit sebelum dimulai",
-        "RO_15M": "15 menit sebelum dimulai",
-        "RO_1H": "1 jam sebelum dimulai",
-        "RO_30M": "30 menit sebelum dimulai",
-        "RO_5M": "5 menit sebelum dimulai",
-        "RO_START": "ketika itu dimulai",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "Jadwalkan",
-        "UNSCHEDULE": "Batalkan jadwal"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tambahkan semua ke hari ini",
@@ -878,6 +878,19 @@
         "SNOOZE_ALL": "Tunda semua",
         "START": "Mulai",
         "SWITCH_CONTEXT_START": "Beralih Konteks & Mulai"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Pindahkan tugas ke backlog hingga dijadwalkan",
+        "REMIND_AT": "Ingatkan di",
+        "RO_1H": "1 jam sebelum dimulai",
+        "RO_5M": "5 menit sebelum dimulai",
+        "RO_10M": "10 menit sebelum dimulai",
+        "RO_15M": "15 menit sebelum dimulai",
+        "RO_30M": "30 menit sebelum dimulai",
+        "RO_NEVER": "Never",
+        "RO_START": "ketika itu dimulai",
+        "SCHEDULE": "Jadwalkan",
+        "UNSCHEDULE": "Batalkan jadwal"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Tambahkan waktu yang dihabiskan untuk hari lain",
@@ -933,14 +946,18 @@
         "EVERY_X_MONTHLY_AND_TIME": "Setiap bulan {{x}}, {{timeStr}}",
         "EVERY_X_YEARLY": "Setiap tahun {{x}}",
         "EVERY_X_YEARLY_AND_TIME": "Setiap tahun {{x}}, {{timeStr}}",
-        "MONTHLY_CURRENT_DATE": "Bulanan pada {{dateDayStr}}",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "Bulanan pada {{dateDayStr}}, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Senin-Jumat",
         "MONDAY_TO_FRIDAY_AND_TIME": "Senin-Jumat, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Bulanan pada {{dateDayStr}}",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Bulanan pada {{dateDayStr}}, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Mingguan pada {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Mingguan pada {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Tahunan pada {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Tahunan {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Ada {{tasksNr}} instance yang dibuat untuk tugas berulang ini. Apakah Anda ingin memindahkan semuanya ke proyek \"{{projectName}}\"?",
+        "OK": "Perbarui semua instance"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Menghapus konfigurasi ulang akan mengonversi semua instance sebelumnya dari tugas ini menjadi tugas biasa saja. Apakah Anda yakin ingin melanjutkan?",
@@ -948,10 +965,6 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "Ada {{tasksNr}} instance yang dibuat untuk tugas berulang ini. Apakah Anda ingin memperbarui semuanya dengan default baru atau hanya tugas mendatang?",
-        "OK": "Perbarui semua instance"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "Ada {{tasksNr}} instance yang dibuat untuk tugas berulang ini. Apakah Anda ingin memindahkan semuanya ke proyek \"{{projectName}}\"?",
         "OK": "Perbarui semua instance"
       },
       "D_EDIT": {
@@ -978,8 +991,8 @@
         "ORDER_DESCRIPTION": "Urutan pembuatan tugas yang dapat diulang. Hanya memengaruhi tugas berulang yang dibuat pada waktu yang sama. Nilai yang lebih rendah berarti tugas akan dibuat lebih tinggi dari daftar, angka yang lebih tinggi akan lebih jauh ke bawah. Nilai yang lebih besar dari 0 berarti item dibuat di bagian bawah tugas normal.",
         "Q_CUSTOM": "Konfigurasi berulang khusus",
         "Q_DAILY": "Setiap hari",
-        "Q_MONTHLY_CURRENT_DATE": "Setiap bulan pada {{dateDayStr}}",
         "Q_MONDAY_TO_FRIDAY": "Setiap Senin sampai Jumat",
+        "Q_MONTHLY_CURRENT_DATE": "Setiap bulan pada {{dateDayStr}}",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Setiap minggu pada {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Setiap tahun pada {{dayAndMonthStr}}",
         "QUICK_SETTING": "Ulangi konfigurasi",
@@ -997,19 +1010,6 @@
         "TUESDAY": "Selasa",
         "WEDNESDAY": "Rabu"
       }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "lanjutan",
-      "D_INITIAL": {
-        "TEXT": "<p>Ide Schedule adalah untuk memberikan gambaran yang lebih baik tentang bagaimana tugas yang direncanakan seseorang bermain dari waktu ke waktu. Ini dibuat secara otomatis dari Tugas Anda dan membedakan dua hal yang berbeda: <strong>Tugas Terjadwal</strong>, yang ditampilkan pada waktu yang direncanakan dan <strong>Tugas Biasa</strong> yang harus mengalir di sekitar peristiwa tetap tersebut. Semua tugas mempertimbangkan perkiraan waktu yang telah Anda tetapkan untuk mereka.</p><p>Selain itu, Anda juga dapat memberikan waktu mulai dan selesai pekerjaan. Jika dikonfigurasi, tugas rutin tidak akan pernah muncul di luar ini. Harap dicatat bahwa schedule hanya mencakup 30 hari mendatang.</p>",
-        "TITLE": "Linimasa"
-      },
-      "END": "Pekerjaan selesai",
-      "NOW": "Sekarang",
-      "NO_TASKS": "Saat ini tidak ada tugas. Silakan tambahkan beberapa tugas melalui Tombol + di bilah atas.",
-      "START": "Pekerjaan dimulai",
-      "TASK_PROJECTION_INFO": "Proyeksi masa depan dari tugas berulang yang dijadwalkan",
-      "LUNCH_BREAK": "Istirahat makan siang"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1111,8 +1111,8 @@
     "CLOSE": "Tutup",
     "DELETE": "Hapus",
     "DISMISS": "Abaikan",
-    "DURATION_DESCRIPTION": "contoh. \"5h 23m\" yang menghasilkan 5 hours 23 minutes (satuan dalam bahasa Inggris)",
     "DO_IT": "Lakukan!",
+    "DURATION_DESCRIPTION": "contoh. \"5h 23m\" yang menghasilkan 5 hours 23 minutes (satuan dalam bahasa Inggris)",
     "EDIT": "Ubah",
     "ENABLED": "Aktifkan",
     "EXAMPLE_VAL": "Klik untuk ubah",
@@ -1121,8 +1121,8 @@
     "LOGOUT": "Keluar",
     "MINUTES": "{{m}} menit",
     "NEXT": "Selanjutnya",
-    "NONE": "Tidak ada",
     "NO_CON": "Anda sedang offline. Harap sambungkan kembali ke internet.",
+    "NONE": "Tidak ada",
     "OK": "Oke",
     "PREVIOUS": "Sebelumnya",
     "REMOVE": "Hapus",
@@ -1169,9 +1169,9 @@
       "GLOBAL_TOGGLE_TASK_START": "Alihkan pelacakan waktu untuk tugas aktif terakhir",
       "GO_TO_DAILY_AGENDA": "Buka Agenda",
       "GO_TO_FOCUS_MODE": "Pergi ke Mode Fokus",
+      "GO_TO_SCHEDULE": "Pergi ke Linimasa",
       "GO_TO_SCHEDULED_VIEW": "Buka Tugas terjadwal",
       "GO_TO_SETTINGS": "Pergi ke pengaturan",
-      "GO_TO_SCHEDULE": "Pergi ke Linimasa",
       "GO_TO_WORK_VIEW": "Pergi ke Tampilan Kerja",
       "HELP": "<p>Di sini Anda dapat mengonfigurasi semua pintasan keyboard.</p> <p>Klik input teks dan masukkan kombinasi keyboard yang diinginkan. Tekan enter untuk menyimpan dan Escape untuk membatalkan.</p> <p>Ada tiga jenis pintasan:</p> <ul> <li> <strong>Pintasan global:</strong> Saat aplikasi dijalankan, aplikasi akan memicu tindakan dari setiap aplikasi lain. </li> <li> <strong>Pintasan tingkat aplikasi:</strong> Akan dipicu dari setiap layar aplikasi, tetapi tidak jika Anda sedang mengedit bidang teks. </li> <li> <strong>Pintasan tingkat tugas:</strong> Pintasan ini hanya akan dipicu jika Anda telah memilih tugas melalui mouse atau keyboard dan biasanya memicu tindakan yang secara khusus terkait dengan satu tugas tersebut. </li> </ul><p>Anda dapat <strong>menekan Escape untuk menghapus pintasan.</strong>",
       "MOVE_TASK_DOWN": "Pindahkan Tugas ke bawah dalam Daftar",
@@ -1183,8 +1183,8 @@
       "SELECT_PREVIOUS_TASK": "Pilih Tugas sebelumnya",
       "SHOW_SEARCH_BAR": "Tampilkan bilah pencarian",
       "SYSTEM_SHORTCUTS": "Pintasan Global (seluruh sistem)",
-      "TASK_ADD_SUB_TASK": "Tambahkan sub Tugas",
       "TASK_ADD_ATTACHMENT": "Lampirkan file atau tautan",
+      "TASK_ADD_SUB_TASK": "Tambahkan sub Tugas",
       "TASK_DELETE": "Hapus Tugas",
       "TASK_EDIT_TAGS": "Ubah Tag",
       "TASK_EDIT_TITLE": "Ubah Judul",
@@ -1208,8 +1208,6 @@
     "MISC": {
       "DEFAULT_PROJECT": "Proyek default untuk digunakan untuk tugas jika tidak ada yang ditentukan",
       "FIRST_DAY_OF_WEEK": "Hari pertama dalam seminggu",
-      "START_OF_NEXT_DAY": "Waktu mulai hari berikutnya",
-      "START_OF_NEXT_DAY_HINT": "dari kapan (dalam jam) Anda ingin menghitung hari berikutnya telah dimulai. defaultnya adalah tengah malam yaitu 0.",
       "HELP": "<p><strong>Tidak melihat Pemberitahuan Desktop?</strong> Untuk windows, Anda mungkin ingin memeriksa Sistem > Pemberitahuan & tindakan dan memeriksa apakah pemberitahuan yang diperlukan telah diaktifkan.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Tambahkan tag hari ini secara otomatis untuk mengerjakan tugas",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tandai tugas induk sebagai selesai, ketika semua sub tugas selesai",
@@ -1221,6 +1219,8 @@
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
+      "START_OF_NEXT_DAY": "Waktu mulai hari berikutnya",
+      "START_OF_NEXT_DAY_HINT": "dari kapan (dalam jam) Anda ingin menghitung hari berikutnya telah dimulai. defaultnya adalah tengah malam yaitu 0.",
       "TASK_NOTES_TPL": "Templat deskripsi tugas",
       "TITLE": "Pengaturan Lain-lain"
     },
@@ -1239,6 +1239,14 @@
       "LONGER_BREAK_DURATION": "Durasi istirahat lebih lama",
       "TITLE": "Timer Pomodoro"
     },
+    "SCHEDULE": {
+      "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/schedule'>'Schedule'</a>. ",
+      "L_IS_WORK_START_END_ENABLED": "Batasi alur tugas yang tidak terjadwal ke waktu kerja tertentu",
+      "L_WORK_END": "Hari Kerja Berakhir",
+      "L_WORK_START": "Mulai Hari Kerja",
+      "TITLE": "Linimasa",
+      "WORK_START_END_DESCRIPTION": "contoh. 17:00"
+    },
     "SOUND": {
       "DONE_SOUND": "Suara tugas selesai",
       "IS_INCREASE_DONE_PITCH": "Tingkatkan nada untuk setiap tugas yang diselesaikan",
@@ -1255,14 +1263,6 @@
       "NOTIFICATION_TITLE": "Istirahat!",
       "SNOOZE_TIME": "Tunda waktu saat diminta untuk istirahat",
       "TITLE": "Pengingat istirahat"
-    },
-    "SCHEDULE": {
-      "HELP": "Fitur garis waktu akan memberi Anda gambaran singkat tentang bagaimana tugas yang Anda rencanakan berjalan dari waktu ke waktu. Anda dapat menemukannya di menu sebelah kiri di bawah <a href='#/schedule'>'Schedule'</a>. ",
-      "L_IS_WORK_START_END_ENABLED": "Batasi alur tugas yang tidak terjadwal ke waktu kerja tertentu",
-      "L_WORK_END": "Hari Kerja Berakhir",
-      "L_WORK_START": "Mulai Hari Kerja",
-      "TITLE": "Linimasa",
-      "WORK_START_END_DESCRIPTION": "contoh. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1297,15 +1297,15 @@
     "NOTES": "Catatan",
     "NOTES_PANEL_INFO": "Catatan hanya dapat ditampilkan dari garis waktu dan tampilan daftar tugas biasa.",
     "PROCRASTINATE": "Menunda",
-    "PROJECTS": "Proyek",
     "PROJECT_MENU": "Menu Proyek",
     "PROJECT_SETTINGS": "Pengaturan Proyek",
+    "PROJECTS": "Proyek",
     "QUICK_HISTORY": "Riwayat Cepat",
     "SETTINGS": "Pengaturan",
     "SHOW_SEARCH_BAR": "Tampilkan Bilah Pencarian",
     "TAGS": "Tag-tag",
-    "TASKS": "Tugas-tugas",
     "TASK_LIST": "Task List",
+    "TASKS": "Tugas-tugas",
     "TOGGLE_SHOW_BOOKMARKS": "Tampilkan/Sembunyikan Bookmark",
     "TOGGLE_SHOW_NOTES": "Tampilkan/Sembunyikan Catatan Proyek",
     "TOGGLE_TRACK_TIME": "Mulai/Hentikan waktu pelacakan",
@@ -1325,15 +1325,15 @@
     "ESTIMATE_TOTAL": "Total perkiraan:",
     "EXPORT_TASK_LIST": "Ekspor Daftar Tugas",
     "NO_TASKS": "Tidak ada tugas untuk hari ini",
+    "ROUND_5M": "Bulatkan semua tugas menjadi 5 menit",
     "ROUND_15M": "Bulatkan semua tugas menjadi 15 menit",
     "ROUND_30M": "Bulatkan semua tugas menjadi 30 menit",
-    "ROUND_5M": "Bulatkan semua tugas menjadi 5 menit",
     "ROUND_TIME_SPENT": "Waktu Putaran Dihabiskan",
     "ROUND_TIME_SPENT_TITLE": "Waktu putaran dihabiskan untuk semua tugas. Hati-hati! Anda tidak dapat membatalkan ini!",
     "ROUND_TIME_WARNING": "!!! Hati-hati ini tidak bisa dibatalkan !!!",
+    "ROUND_UP_5M": "Bulatkan semua tugas menjadi 5 menit",
     "ROUND_UP_15M": "Bulatkan semua tugas menjadi 15 menit",
     "ROUND_UP_30M": "Bulatkan semua tugas menjadi 30 menit",
-    "ROUND_UP_5M": "Bulatkan semua tugas menjadi 5 menit",
     "SAVE_AND_GO_HOME": "Simpan dan kembali",
     "SAVE_AND_GO_HOME_TOOLTIP": "Pindahkan semua tugas yang sudah selesai ke arsip (log kerja) dan sinkronkan semua data secara opsional dan tutup aplikasi.",
     "START_END": "Mulai – Akhir",
@@ -1358,14 +1358,13 @@
     "TOGGLE_DARK_MODE": "Alihkan Mode Gelap"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "Saat ini tidak ada tugas terjadwal. Anda dapat menjadwalkan tugas dengan memilih \"Jadwalkan Tugas\" di menu konteks tugas. Untuk membukanya klik kanan (tekan lama pada ponsel) pada tugas.",
     "NO_REPEATABLE_TASKS": "Saat ini tidak ada tugas yang berulang. Anda dapat menjadwalkan tugas dengan memilih \"Ulangi Tugas\" di panel samping tugas. Untuk membukanya, klik ikon paling kanan yang muncul saat mengarahkan tugas (atau cukup ketuk tugas di ponsel).",
+    "NO_SCHEDULED": "Saat ini tidak ada tugas terjadwal. Anda dapat menjadwalkan tugas dengan memilih \"Jadwalkan Tugas\" di menu konteks tugas. Untuk membukanya klik kanan (tekan lama pada ponsel) pada tugas.",
     "REPEATED_TASKS": "Tugas berulang",
     "SCHEDULED_TASKS": "Tugas yang dijadwalkan",
     "START_TASK": "Mulai tugas dan hapus pengingat"
   },
   "THEMES": {
-    "SELECT_THEME": "Pilih Tema",
     "amber": "amber",
     "blue": "biru",
     "blue-grey": "biru-abu-abu",
@@ -1379,6 +1378,7 @@
     "lime": "jeruk nipis",
     "pink": "merah muda",
     "purple": "ungu",
+    "SELECT_THEME": "Pilih Tema",
     "teal": "teal",
     "yellow": "kuning"
   },
@@ -1400,9 +1400,9 @@
     "COMPLETED_TASKS": "Tugas selesai",
     "ESTIMATE_REMAINING": "Perkiraan tersisa:",
     "FINISH_DAY": "Selesai Hari",
-    "FINISH_DAY_TOOLTIP": "Evaluasi hari Anda, pindahkan semua tugas yang sudah selesai ke arsip (opsional) dan/atau rencanakan hari berikutnya.",
     "FINISH_DAY_FOR_PROJECT": "Hari Selesai untuk Proyek ini",
     "FINISH_DAY_FOR_TAG": "Hari Selesai untuk Tag ini",
+    "FINISH_DAY_TOOLTIP": "Evaluasi hari Anda, pindahkan semua tugas yang sudah selesai ke arsip (opsional) dan/atau rencanakan hari berikutnya.",
     "HELP_PROCRASTINATION": "Bantu saya menunda-nunda!",
     "NO_COMPLETED_TASKS": "Saat ini tidak ada tugas yang diselesaikan",
     "NO_PLANNED_TASKS": "Tidak ada tugas yang direncanakan",
