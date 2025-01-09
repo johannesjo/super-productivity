@@ -1,6 +1,12 @@
 {
   "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "확인 후 조치 방법을 결정하세요.",
+      "SYNC_CONFLICT_TITLE": "동기화 충돌이 발생했습니다."
+    },
     "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "앱이 백그라운드에서 실행되어 동기화를 허용하는 경우 활성화된 경우",
+      "NO_ACTIVE_TASKS": "활성 작업 없음",
       "SYNCING": "동기화"
     }
   },

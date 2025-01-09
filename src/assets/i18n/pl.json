@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "Sprawdź i zdecyduj, co zrobić.",
+      "SYNC_CONFLICT_TITLE": "Wystąpił konflikt synchronizacji"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Aplikacja działająca w tle, aby umożliwić synchronizację, jeśli jest włączona",
+      "NO_ACTIVE_TASKS": "Brak aktywnych zadań",
+      "SYNCING": "Synchronizacja"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Zignoruj",

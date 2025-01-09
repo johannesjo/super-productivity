@@ -1,4 +1,15 @@
 {
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "Vennligst sjekk og avgjør hva du skal gjøre.",
+      "SYNC_CONFLICT_TITLE": "En synkroniseringskonflikt oppstod"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Appen kjører i bakgrunnen for å muliggjøre synkronisering hvis aktivert",
+      "NO_ACTIVE_TASKS": "Ingen aktive oppgaver",
+      "SYNCING": "Synkronisering"
+    }
+  },
   "APP": {
     "B_INSTALL": {
       "IGNORE": "Overse",

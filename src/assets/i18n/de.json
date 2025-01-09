@@ -2,12 +2,12 @@
   "ANDROID": {
     "NOTIFICATIONS": {
       "SYNC_CONFLICT_MSG": "Bitte nachsehen und entscheiden, was zu tun ist",
-      "SYNC_CONFLICT_TITLE": "Ein Synchronisationskonflikt ist aufgetreten!"
+      "SYNC_CONFLICT_TITLE": "Ein Synchronisationskonflikt ist aufgetreten"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
-      "INITIAL": "App läuft, wenn aktiviert, im Hintergrund um Synchronisation zu ermöglichen",
+      "INITIAL": "App läuft im Hintergrund, um Synchronisation zu ermöglichen, wenn aktiviert",
       "NO_ACTIVE_TASKS": "Keine aktiven Aufgaben",
-      "SYNCING": "Synchronisieren"
+      "SYNCING": "Synchronisierung"
     }
   },
   "APP": {
