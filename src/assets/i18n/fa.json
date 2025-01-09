@@ -94,10 +94,7 @@
         "CALDAV_RESOURCE": "نام منبع CalDav (تقویم)",
         "CALDAV_URL": "CalDav URL (URL پایه)",
         "CALDAV_USER": "نام کاربری CalDav شما",
-        "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید",
-        "IS_AUTO_IMPORT_ISSUES": "به طور خودکار موارد خاموش CalDav را به پرونده خود اضافه کنید",
-        "IS_AUTO_POLL": "وظایف وارد شده را به طور خودکار برای تغییرات نظرسنجی کنید",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "هنگام اضافه کردن کارهای جدید ، تالارهای CalDav ناقص را به عنوان پیشنهاد نشان دهید"
+        "IS_TRANSITION_ISSUES_ENABLED": "در پایان کار به طور خودکار تالارهای CalDav را تکمیل کنید"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را پیکربندی کنید تا لیست های انجام نشده CalDav را برای یک پروژه خاص در صفحه ایجاد کار در نمای برنامه ریزی روزانه لیست کنید. آنها به عنوان پیشنهادها لیست می شوند و پیوندی به این کار و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند.</p> <p>علاوه بر این شما می توانید به طور خودکار تمام موارد خاتمه یافته ناقص را به پرونده کار خود اضافه و همگام سازی کنید.</p>",
@@ -181,11 +178,7 @@
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
         "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
-        "TOKEN": "توکن دسترسی",
-        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت هاب را به بک لاگ اضافه کن",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "TOKEN_DESCRIPTION": "برای دسترسی به مخزن خصوصی مورد نیاز است"
+        "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -225,10 +218,7 @@
         "SOURCE_GLOBAL": "همه",
         "SOURCE_GROUP": "گروه",
         "SOURCE_PROJECT": "پروژه",
-        "TOKEN": "توکن دسترسی",
-        "IS_AUTO_IMPORT_ISSUES": "بطور خودکار مشکلات گزارش شده در گیت لاب را به بک لاگ اضافه کن",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Show issues from git as suggestions when adding new tasks"
+        "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
         "HELP": "<p> در اینجا می توانید SuperProductivity را تنظیم کنید تا لیست GitLab باز (یا نسخه آنلاین آن یا یک نمونه خود میزبان) را برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه ریزی روزانه تنظیم کنید. آنها به عنوان پیشنهادات ذکر شده اند و پیوندی به موضوع و همچنین اطلاعات بیشتر در مورد آن را ارائه می دهند. </p> <p> علاوه بر این می توانید به طور خودکار همه موارد باز را به بک گراند وظیفه خود اضافه کنید و همگام سازی کنید. </p>",
@@ -335,9 +325,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "تمام زمان صرف شده منهای زمان ثبت شده را پر کنید",
         "WORKLOG_DEFAULT_TIME_MODE": "مقدار زمان پیش‌فرض برای گفتگو",
         "WORKLOG_DEFAULT_TODAY": "فقط زمان صرف شده امروز را پر کنید",
-        "WORKLOG_DEFAULT_YESTERDAY": "فقط زمانی را که دیروز صرف کرده اید پر کنید",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify"
+        "WORKLOG_DEFAULT_YESTERDAY": "فقط زمانی را که دیروز صرف کرده اید پر کنید"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "اجازه گواهی خود امضا شده",
@@ -361,8 +349,7 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        },
-        "CREDENTIALS": "Credentials"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "مسئول",
@@ -404,12 +391,6 @@
         "LOGIN_SUCCESS": "Login successful!",
         "TEST_CREDENTIALS": "Test Credentials",
         "WELCOME_USER": "Welcome {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -469,8 +450,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
-      },
-      "EDIT_FULLSCREEN": "ویرایش در تمام صفحه"
+      }
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -501,10 +481,7 @@
         "SCOPE": "محدوده",
         "SCOPE_ALL": "همه",
         "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
-        "SCOPE_CREATED": "ایجاد شده توسط من",
-        "IS_AUTO_IMPORT_ISSUES": "به صورت خودکار بسته های کاری حل نشده از OpenProject را به backlog اضافه کنید",
-        "IS_AUTO_POLL": "بسته های کاری OpenProject وارد شده را برای تغییرات به طور خودکار نظرسنجی کنید",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "هنگام افزودن کارهای جدید ، بسته های کاری را به عنوان پیشنهاد نشان دهید"
+        "SCOPE_CREATED": "ایجاد شده توسط من"
       },
       "FORM_SECTION": {
         "HELP": "<p>در اینجا می توانید SuperProductivity را برای لیست بسته های کاری OpenProject باز شده پیکربندی کنید. لطفاً توجه داشته باشید که برای کارکردن در مرورگر ، احتمالاً باید CORS را برای سرور OpenProject خود پیکربندی کنید ، تا از app.super-productivity.com اجازه دسترسی داشته باشید</p>",
@@ -704,8 +681,7 @@
           "L_ACCESS_TOKEN": "Access Token (تولید شده از کد Auth)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید",
-          "L_IS_COMPRESS_DATA": "فشرده سازی داده ها"
+          "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید"
         },
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
@@ -715,12 +691,7 @@
           "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
           "L_BASE_URL": "آدرس پایگاه",
           "L_PASSWORD": "کلمه عبور",
-          "L_USER_NAME": "نام کاربری",
-          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "مسیر پرونده همگام سازی",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "مسیر مطلق به پرونده که باید برای همگام سازی استفاده شود (ایجاد می شود)."
+          "L_USER_NAME": "نام کاربری"
         }
       },
       "S": {
@@ -833,11 +804,7 @@
         "RO_START": "وقتی شروع می شود",
         "RO_NEVER": "هرگز",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule",
-        "CONFIRM_REPEAT_OK": "برنامه",
-        "CONFIRM_REPEAT_TXT": "شما سعی می کنید این کار مکرر را برای یک روز دیگر برنامه ریزی کنید. وظایف مکرر معمولاً در روزهای معین ایجاد می شوند و فقط در آن روز برنامه ریزی می شوند. آیا به هر حال می خواهید ادامه دهید؟",
-        "DATETIME_FOR": "تاریخ و زمان برای یادآوری",
-        "EDIT": "ویرایش یادآوری"
+        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "همه را به امروز اضافه کنید",
@@ -956,11 +923,7 @@
       "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
       "START": "شروع کار",
       "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده",
-      "LUNCH_BREAK": "استراحت ناهار",
-      "MENU_TITLE": "جدول زمانی",
-      "S": {
-        "CAL_PROVIDER_ERROR": "خط زمان خطای ارائه دهنده Cal: {{errTxt}}"
-      }
+      "LUNCH_BREAK": "استراحت ناهار"
     },
     "TIME_TRACKING": {
       "B": {
@@ -982,8 +945,7 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
         "SKIP": "رد شدن",
         "TASK": "کار",
-        "TRACK_TO": "تایین کنید:",
-        "TASK_BREAK": "کار+استراحت"
+        "TRACK_TO": "تایین کنید:"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>ایجاد کنید</em> و پیگیری کنید",
@@ -1048,26 +1010,6 @@
         "NO_DATA": "هیچ کاری در این هفته انجام نشده است.",
         "TITLE": "عنوان"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: تأیید هویت انجام نشد ، لطفاً دوباره وارد سیستم شوید!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: هنگام ایجاد پرونده همگام سازی خطایی رخ داد. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: نام فایل همگام سازی به روز شده است"
-      },
-      "S_API": {
-        "ERR": "خطای GoogleApi : {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: آیدی فایل مشخص نشده است",
-        "ERR_NO_FILE_NAME": "GoogleApi: نام فایل مشخص نشده است",
-        "SUCCESS_LOGIN": "GoogleApi: ورود موفق به سیستم"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1124,8 +1066,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
+      "TITLE": "Idle Handling"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -1198,9 +1139,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "الگوی شرح کار",
-      "TITLE": "Misc Settings",
-      "IS_AUTO_START_NEXT_TASK": "هنگام علامت گذاری جریان ، به عنوان انجام کار ، ردیابی کار بعدی را شروع کنید",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded"
+      "TITLE": "Misc Settings"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1223,8 +1162,7 @@
       "DONE_SOUND": "وظیفه تمام شد صدا",
       "IS_INCREASE_DONE_PITCH": "برای انجام هر کاری سطح صدا را افزایش دهید",
       "TITLE": "صدا",
-      "VOLUME": "جلد",
-      "IS_PLAY_DONE_SOUND": "وقتی کار به پایان رسید ، صدا را پخش کنید"
+      "VOLUME": "جلد"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1245,21 +1183,7 @@
       "L_WORK_START": "شروع روز کار",
       "TITLE": "جدول زمانی",
       "WORK_START_END_DESCRIPTION": "به عنوان مثال، ساعت 17:00",
-      "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰",
-      "CAL_PROVIDERS": "ارائه دهندگان تقویم (تجربی و اختیاری)",
-      "CAL_PROVIDERS_ADD": "منبع ical اضافه کنید",
-      "CAL_PROVIDERS_INFO": "می‌توانید به‌صورت اختیاری جدول زمانی را برای بارگیری و نمایش داده‌ها از iCal (مانند Google Calendar) پیکربندی کنید.",
-      "L_CAL_PATH": "مسیر URL/فایل برای تقویم ICAL (اختیاری)"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "در صورتی که فراموش نکنید ردیابی زمان را شروع کنید ، یک بنر را پیکربندی کنید تا در آن نشان داده شود.",
-      "L_IS_ENABLED": "فعال شده است",
-      "L_IS_SHOW_ON_MOBILE": "نمایش در برنامه تلفن همراه",
-      "L_MIN_TIME": "زمان انتظار قبل از نشان دادن بنر است",
-      "TITLE": "یادآوری ردیابی زمان"
-    },
-    "CALENDARS": {
-      "TITLE": "تقویم‌ها"
+      "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰"
     }
   },
   "GLOBAL_SNACK": {
@@ -1282,9 +1206,7 @@
     "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ...",
     "UNKNOWN": "بارگیری داده های از راه دور",
     "WEB_DAV_DOWNLOAD": "WebDAV: در حال بارگیری داده ها ...",
-    "WEB_DAV_UPLOAD": "WebDAV: در حال بارگذاری داده ها ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: بارگیری فایل ...",
-    "GDRIVE_UPLOAD": "Google Drive: بارگذاری پرونده ..."
+    "WEB_DAV_UPLOAD": "WebDAV: در حال بارگذاری داده ها ..."
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
@@ -1315,9 +1237,7 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "همگام سازی را به صورت دستی فعال کنید",
-    "WORKLOG": "گزارش کار",
-    "MANAGE_PROJECTS": "مدیریت پروژه ها",
-    "SCHEDULED": "برنامه ریزی شده"
+    "WORKLOG": "گزارش کار"
   },
   "PDS": {
     "BACK": "صبر کنید من چیزی را فراموش کردم!",
@@ -1347,11 +1267,7 @@
     "TASKS_COMPLETED": "کارهای تکمیل شده",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "زمان سپری‌شده/تخمین",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-    "WEEK": "Week",
-    "EVALUATION": "Evaluation",
-    "PLAN": "Plan",
-    "TASK_LIST": "Task List",
-    "TODAY": "امروز"
+    "WEEK": "Week"
   },
   "PM": {
     "TITLE": "معیارهای پروژه"
@@ -1415,34 +1331,5 @@
     "TIME_ESTIMATED": "تخمین زمان:",
     "WITHOUT_BREAK": "بدون استراحت:",
     "WORKING_TODAY": "کار امروز:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CLICK_TO_HIDE": "برای مخفی کردن پروژه از منو کلیک کنید",
-    "CLICK_TO_SHOW": "برای نمایش پروژه در منو کلیک کنید",
-    "DELETE_PROJECT": "Delete Project",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Delete"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
-    },
-    "EDIT_PROJECT": "ویرایش پروژه",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration پیکربندی شده است",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   }
 }

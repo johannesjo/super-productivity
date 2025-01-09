@@ -97,10 +97,7 @@
         "CALDAV_RESOURCE": "De naam van de CalDav-resource (de kalender)",
         "CALDAV_URL": "CalDav-URL (de basis-URL)",
         "CALDAV_USER": "Uw CalDav-gebruikersnaam",
-        "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch niet-voltooide CalDav-taken toe aan uw backlog",
-        "IS_AUTO_POLL": "Controleer geïmporteerde taken automatisch op wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Toon onvoltooide CalDav-taken als suggestie bij het toevoegen van nieuwe taken"
+        "IS_TRANSITION_ISSUES_ENABLED": "Voltooi automatisch CalDav-taken na voltooiing van de taak"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om niet-voltooide CalDav-taken voor een specifiek project weer te geven in het taakaanmaakpaneel in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar de taak en meer informatie erover.</p> <p>Bovendien kunt u automatisch alle niet-voltooide taken toevoegen aan en synchroniseren met uw backlog.</p>",
@@ -233,11 +230,7 @@
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
-        "TOKEN": "Toegangstoken",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
-        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-        "TOKEN_DESCRIPTION": "Vereist voor toegang tot privérepository"
+        "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om openstaande GitHub-problemen voor een specifieke repository weer te geven in het paneel voor het maken van taken in de dagelijkse planningsweergave. Ze worden vermeld als suggesties en bieden een link naar het probleem en meer informatie erover.</p> <p>Daarnaast kunt u automatisch alle openstaande problemen toevoegen en synchroniseren met uw backlog.</p>",
@@ -279,10 +272,7 @@
         "SOURCE_GLOBAL": "Allemaal",
         "SOURCE_GROUP": "Groep",
         "SOURCE_PROJECT": "project",
-        "TOKEN": "Toegangstoken",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitLab toe aan de backlog",
-        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken"
+        "TOKEN": "Toegangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p> Hier kunt u SuperProductivity configureren om open GitLab (ofwel de online versie of een zelf-gehoste instantie) problemen voor een specifiek project in het taakcreatiepaneel in de dagelijkse planningsweergave op te sommen. Ze worden vermeld als suggesties en bevatten een link naar het probleem en meer informatie erover. </p> <p> Daarnaast kunt u automatisch alle openstaande problemen toevoegen aan en synchroniseren met uw backlog. </p>",
@@ -389,9 +379,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vul alle bestede tijd min de geregistreerde tijd in",
         "WORKLOG_DEFAULT_TIME_MODE": "Standaard tijdwaarde voor dialoog",
         "WORKLOG_DEFAULT_TODAY": "Vul alleen de tijd in die vandaag is doorgebracht",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vul alleen de tijd in die gisteren is doorgebracht",
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch problemen toe aan de Jira-backlog",
-        "IS_AUTO_POLL_TICKETS": "Controleer geïmporteerde problemen automatisch op wijzigingen en stel ze op de hoogte"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vul alleen de tijd in die gisteren is doorgebracht"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Zelfondertekend certificaat toestaan",
@@ -415,8 +403,7 @@
           "P2_2": "<em>\"Open werklog-dialoogvenster wanneer subtaak is voltooid en niet voor taken met subtaken zelf\"</em> opent een werklog-dialoogvenster telkens wanneer u een subtaak van een Jira-probleem als voltooid markeert. Omdat u uw tijd al bijhoudt via de subtaken, wordt er geen dialoogvenster geopend zodra u de Jira-taak zelf als voltooid markeert.",
           "P2_3": "<em>\"Stuur updates automatisch naar worklog zonder dialoogvenster\"</em> doet wat het zegt. Omdat het markeren van een taak als meerdere keren uitgevoerd ertoe leidt dat de hele werktijd tweemaal wordt bijgehouden, wordt dit niet aanbevolen.",
           "P3_1": "Hier kunt u uw standaardovergangen opnieuw configureren. Jira maakt een brede configuratie mogelijk van overgangen die gewoonlijk in actie komen als verschillende kolommen op uw Jira agile board. We kunnen geen aannames maken over waar en wanneer u uw taken moet overzetten en u moet deze handmatig instellen."
-        },
-        "CREDENTIALS": "Inloggegevens"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Toegewezen aan",
@@ -458,12 +445,6 @@
         "LOGIN_SUCCESS": "Succesvol ingelogd!",
         "TEST_CREDENTIALS": "Test referenties",
         "WELCOME_USER": "Welkom {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Voeg automatisch onopgeloste problemen van GitHub toe aan de backlog",
-        "IS_AUTO_POLL": "Poll automatisch geïmporteerde git-problemen voor wijzigingen",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Toon problemen van git als suggesties bij het toevoegen van nieuwe taken",
-        "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen"
       }
     },
     "METRIC": {
@@ -523,8 +504,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Markering-parsering uitschakelen",
         "ENABLE_PARSE": "Markering ontleden inschakelen"
-      },
-      "EDIT_FULLSCREEN": "Bewerken in volledig scherm"
+      }
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -560,10 +540,7 @@
         "SCOPE": "strekking",
         "SCOPE_ALL": "Allemaal",
         "SCOPE_ASSIGNED": "Toegewezen aan mij",
-        "SCOPE_CREATED": "Gecreëerd door mij",
-        "IS_AUTO_IMPORT_ISSUES": "Automatisch onopgeloste werkpakketten van OpenProject toevoegen aan achterstand",
-        "IS_AUTO_POLL": "Geïmporteerde OpenProject-werkpakketten automatisch op wijzigingen controleren",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Werkpakketten weergeven als suggesties bij het toevoegen van nieuwe taken"
+        "SCOPE_CREATED": "Gecreëerd door mij"
       },
       "FORM_SECTION": {
         "HELP": "<p>Hier kunt u SuperProductivity configureren om open OpenProject-werkpakketten weer te geven. Houd er rekening mee dat om dit in de browser te laten werken, u waarschijnlijk CORS moet configureren voor uw OpenProject-server, om toegang te verlenen vanaf app.super-productivity.com</p>",
@@ -772,8 +749,7 @@
           "L_ACCESS_TOKEN": "Toegangstoken (gegenereerd op basis van Auth Code)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "Synchroniseer bestandsnaam",
-          "L_IS_COMPRESS_DATA": "Comprimeer gegevens"
+          "L_SYNC_FILE_NAME": "Synchroniseer bestandsnaam"
         },
         "L_ENABLE_COMPRESSION": "Compressie inschakelen (snellere data overdracht)",
         "L_ENABLE_ENCRYPTION": "End-to-end encryptie inschakelen (experiment) - Maak je data ontoegankelijk voor je sync provider",
@@ -786,12 +762,7 @@
           "CORS_INFO": "<strong>Experimenteel !!</strong> Om dit te laten werken, moet u CORS uitschakelen of beperken voor uw Nextcloud-instantie, wat negatieve gevolgen voor de veiligheid kan hebben! Raadpleeg <a href='https://github.com/nextcloud/server/issues/3131'>deze thread</a> voor meer informatie. Gebruik op eigen risico!",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Wachtwoord",
-          "L_USER_NAME": "Gebruikersnaam",
-          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Synchroniseer bestandspad",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absoluut pad naar het bestand dat moet worden gebruikt voor synchronisatie (wordt gemaakt)."
+          "L_USER_NAME": "Gebruikersnaam"
         }
       },
       "S": {
@@ -901,11 +872,7 @@
         "RO_START": "wanneer het begint",
         "RO_NEVER": "Nooit",
         "SCHEDULE": "Schema",
-        "UNSCHEDULE": "Ongepland",
-        "CONFIRM_REPEAT_OK": "Planning",
-        "CONFIRM_REPEAT_TXT": "U probeert deze herhaalde taak op een andere dag te plannen. Herhaalde taken zijn meestal bedoeld om op bepaalde dagen opnieuw te worden gemaakt en alleen op die dag te worden gepland. Wil je toch doorgaan?",
-        "DATETIME_FOR": "Datetime voor herinnering",
-        "EDIT": "Herinnering bewerken"
+        "UNSCHEDULE": "Ongepland"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
@@ -1041,11 +1008,7 @@
       "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
       "START": "werk start",
       "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak",
-      "LUNCH_BREAK": "Lunchpauze",
-      "MENU_TITLE": "Tijdlijn",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Tijdlijn Cal Provider-fout: {{errTxt}}"
-      }
+      "LUNCH_BREAK": "Lunchpauze"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1067,8 +1030,7 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Klik om NIET te volgen naar {{title}}",
         "SKIP": "Overslaan",
         "TASK": "Taak",
-        "TRACK_TO": "Track naar:",
-        "TASK_BREAK": "Taak + pauze"
+        "TRACK_TO": "Track naar:"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Maken</em> en volgen naar",
@@ -1133,26 +1095,6 @@
         "NO_DATA": "Nog geen taken deze week.",
         "TITLE": "Titel"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: kan niet worden geverifieerd, probeer opnieuw in te loggen!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: er is geen bestand gevonden met de naam <strong>\"{{fileName}}\"</strong> . <strong>Maak</strong> het als synchronisatiebestand op Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: gebruik je <strong>bestaand</strong> bestand <strong>\"{{fileName}}\"</strong> als synchronisatiebestand? Zo niet, wijzig dan de naam van het synchronisatiebestand."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Meerdere bestanden met de naam \"{{newFileName}}\" gevonden. Verwijder alle op één na of kies een andere naam.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: fout bij het maken van een synchronisatiebestand. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: bijgewerkte naam van synchronisatiebestand"
-      },
-      "S_API": {
-        "ERR": "GoogleApi-fout: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: geen bestands-ID opgegeven",
-        "ERR_NO_FILE_NAME": "GoogleApi: geen bestandsnaam opgegeven",
-        "SUCCESS_LOGIN": "GoogleApi: inloggen geslaagd"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1203,8 +1145,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Inactieve tijdafhandeling inschakelen",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Activeer alleen een inactieve tijdsvenster wanneer een huidige taak is geselecteerd",
       "MIN_IDLE_TIME": "Activeer inactief na X",
-      "TITLE": "Idle Handling",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Niet-gevolgde inactieve tijd resets nemen een pauzetimer"
+      "TITLE": "Idle Handling"
     },
     "IMEX": {
       "HELP": "<p>Hier kunt u al uw gegevens exporteren als een <strong>JSON</strong> voor back-ups, maar ook om deze in een andere context te gebruiken (u wilt bijvoorbeeld uw projecten in de browser exporteren en in de desktopversie importeren).</p> <p>De import verwacht dat geldige JSON wordt gekopieerd naar het tekstgebied. <strong>OPMERKING: zodra u op de importknop drukt, worden al uw huidige instellingen en gegevens overschreven!</strong></p>",
@@ -1272,9 +1213,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "TASK_NOTES_TPL": "Taak omschrijving template",
-      "TITLE": "Diverse instellingen",
-      "IS_AUTO_START_NEXT_TASK": "Begin met het volgen van de volgende taak wanneer u de stroom als voltooid markeert",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden"
+      "TITLE": "Diverse instellingen"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duur van korte pauzes",
@@ -1294,8 +1233,7 @@
       "DONE_SOUND": "Taak gedaan geluid",
       "IS_INCREASE_DONE_PITCH": "Verhoog de toon voor elke uitgevoerde taak",
       "TITLE": "Geluid",
-      "VOLUME": "Volume",
-      "IS_PLAY_DONE_SOUND": "Speel geluid af wanneer de taak is gemarkeerd als voltooid"
+      "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Hiermee kunt u een terugkerende herinnering configureren wanneer u een bepaalde tijd hebt gewerkt zonder een pauze te nemen.</p> <p>U kunt het weergegeven bericht wijzigen. $ {duration} wordt vervangen door de tijd die u zonder pauze doorbrengt.</p> </div>",
@@ -1315,18 +1253,7 @@
       "L_WORK_END": "Einde van de werkdag",
       "L_WORK_START": "Start van de werkdag",
       "TITLE": "Tijdlijn",
-      "WORK_START_END_DESCRIPTION": "bijv. 17:00",
-      "CAL_PROVIDERS": "Agenda-providers (experimenteel en optioneel)",
-      "CAL_PROVIDERS_ADD": "ical bron toevoegen",
-      "CAL_PROVIDERS_INFO": "U kunt optioneel de tijdlijn configureren om ook gegevens uit iCal (bijvoorbeeld Google Agenda) te laden en weer te geven.",
-      "L_CAL_PATH": "URL/bestandspad voor kalender ICAL (optioneel)"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Configureer een banner om te verschijnen voor het geval u bent vergeten de tijdregistratie te starten.",
-      "L_IS_ENABLED": "Ingeschakeld",
-      "L_IS_SHOW_ON_MOBILE": "Weergeven op mobiele app",
-      "L_MIN_TIME": "Tijd om te wachten voordat je Banner laat zien",
-      "TITLE": "Herinnering voor tijdregistratie"
+      "WORK_START_END_DESCRIPTION": "bijv. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1349,9 +1276,7 @@
     "JIRA_LOAD_ISSUE": "Jira: Probleemgegevens laden ...",
     "UNKNOWN": "Externe gegevens laden",
     "WEB_DAV_DOWNLOAD": "WebDAV: gegevens downloaden ...",
-    "WEB_DAV_UPLOAD": "WebDAV: gegevens uploaden ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: bestand downloaden ...",
-    "GDRIVE_UPLOAD": "Google Drive: bestand uploaden ..."
+    "WEB_DAV_UPLOAD": "WebDAV: gegevens uploaden ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
@@ -1375,9 +1300,7 @@
     "TOGGLE_SHOW_NOTES": "Projectnotities tonen / verbergen",
     "TOGGLE_TRACK_TIME": "Start / stop volgtijd",
     "TRIGGER_SYNC": "Synchronisatie handmatig activeren",
-    "WORKLOG": "Werklogboek",
-    "MANAGE_PROJECTS": "Beheer projecten",
-    "SCHEDULED": "Gepland"
+    "WORKLOG": "Werklogboek"
   },
   "PDS": {
     "BACK": "Wacht, ik ben iets vergeten!",
@@ -1407,11 +1330,7 @@
     "TASKS_COMPLETED": "Taken voltooid",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Bestede tijd / geschat",
     "TIME_SPENT_ESTIMATE_TITLE": "Bestede tijd: totale tijd die vandaag is besteed. Gearchiveerde taken niet inbegrepen. - Geschatte tijd: geschatte tijd voor taken waaraan vandaag is gewerkt minus de tijd die al op andere dagen met hen is doorgebracht.",
-    "WEEK": "Week",
-    "EVALUATION": "Evaluatie",
-    "PLAN": "Plan",
-    "TASK_LIST": "Takenlijst",
-    "TODAY": "Vandaag"
+    "WEEK": "Week"
   },
   "PM": {
     "TITLE": "Projectstatistieken"
@@ -1475,34 +1394,5 @@
     "TIME_ESTIMATED": "Geschatte tijd:",
     "WITHOUT_BREAK": "Zonder pauze:",
     "WORKING_TODAY": "Vandaag werken:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Gearchiveerde projecten",
-    "ARCHIVE_PROJECT": "Archiefproject",
-    "CLICK_TO_HIDE": "Klik om het project in het menu te verbergen",
-    "CLICK_TO_SHOW": "Klik om project in menu te tonen",
-    "DELETE_PROJECT": "Project verwijderen",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Weet u zeker dat u dit project wilt archiveren? Gearchiveerde projecten worden niet meer in het menu weergegeven en u hebt geen toegang tot hun gegevens zonder ze te herstellen. Het wordt aanbevolen dat u een back-up van uw gegevens maakt voordat u dit doet.",
-      "OK": "Archief"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Weet u zeker dat u dit project wilt verwijderen? Het wordt aanbevolen om een back-up van uw gegevens te maken voordat u dit doet.",
-      "OK": "Verwijderen"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Weet u zeker dat u dit project uit het archief wilt verwijderen?",
-      "OK": "Uit archief halen"
-    },
-    "EDIT_PROJECT": "Project bewerken",
-    "EXPORT_PROJECT": "Project exporteren",
-    "GITHUB_CONFIGURED": "GitHub-integratie geconfigureerd",
-    "GITLAB_CONFIGURED": "GitLab-integratie geconfigureerd",
-    "IMPORT_FROM_FILE": "Importeren uit bestand",
-    "JIRA_CONFIGURED": "Jira-integratie geconfigureerd",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject-integratie geconfigureerd",
-    "S_INVALID_JSON": "Ongeldige json voor projectbestand",
-    "TITLE": "Projectoverzicht",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   }
 }

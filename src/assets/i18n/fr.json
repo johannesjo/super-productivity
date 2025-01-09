@@ -97,10 +97,7 @@
         "CALDAV_RESOURCE": "Le nom de la ressource CalDav (le calendrier)",
         "CALDAV_URL": "URL CalDav (l'URL de base)",
         "CALDAV_USER": "Votre nom d'utilisateur CalDav",
-        "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche",
-        "IS_AUTO_IMPORT_ISSUES": "Ajoutez automatiquement les tâches CalDav incomplètes à votre backlog",
-        "IS_AUTO_POLL": "Interroger automatiquement les tâches importées pour les modifications",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Afficher les tâches CalDav incomplètes comme suggestion lors de l'ajout de nouvelles tâches"
+        "IS_TRANSITION_ISSUES_ENABLED": "Compléter automatiquement les tâches CalDav à la fin de la tâche"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tâches CalDav inachevées pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront listés comme des suggestions et fourniront un lien vers le todo ainsi que plus d'informations à ce sujet.</p> <p>En outre, vous pouvez automatiquement ajouter et synchroniser toutes les tâches inachevées dans votre backlog de tâches.</p>",
@@ -192,11 +189,7 @@
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Attribués à moi",
-        "SCOPE_CREATED": "Créé par moi",
-        "IS_AUTO_IMPORT_ISSUES": "Importer automatiquement les problèmes non résolus de Gitea.",
-        "IS_AUTO_POLL": "Interroger automatiquement les problèmes importés de Git pour détecter des changements.",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
-        "TOKEN_DESCRIPTION": "Nécessaire pour l'accès aux dépôts privés"
+        "SCOPE_CREATED": "Créé par moi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour lister les problèmes ouverts de Gitea pour un dépôt spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront listés comme suggestions et fourniront un lien vers le problème ainsi que plus d'informations à son sujet.</p> <p>En plus, vous pouvez automatiquement ajouter et importer tous les problèmes ouverts.</p><p>Pour contourner les limites d'utilisation et pour accéder, vous pouvez fournir un jeton d'accès.</p>",
@@ -229,10 +222,7 @@
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Assigné à moi-même",
-        "SCOPE_CREATED": "Créé par moi",
-        "IS_AUTO_POLL": "Surveiller automatiquement les modifications des tickets importés depuis Redmine",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Montrer les tickets Redmine comme suggestions à l'ajout de nouvelles tâches",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les problèmes ouverts depuis Redmine"
+        "SCOPE_CREATED": "Créé par moi"
       },
       "FORM_SECTION": {
         "TITLE": "Redmine",
@@ -257,11 +247,7 @@
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre",
         "TOKEN": "Jeton d'accès",
-        "IS_ASSIGNEE_FILTER": "Filtrer les problèmes qui m'ont été attribués",
-        "IS_AUTO_IMPORT_ISSUES": "Importer automatiquement les problèmes non résolus de GitHub.",
-        "IS_AUTO_POLL": "Interroger automatiquement les problèmes importés de Git pour détecter des changements.",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les problèmes de Git comme suggestions lors de l'ajout de nouvelles tâches.",
-        "TOKEN_DESCRIPTION": "Requis pour l'accès au référentiel privé"
+        "IS_ASSIGNEE_FILTER": "Filtrer les problèmes qui m'ont été attribués"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour lister les problèmes ouverts de GitHub pour un dépôt spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront listés comme suggestions et fourniront un lien vers le problème ainsi que plus d'informations à son sujet.</p> <p>De plus, vous pouvez importer automatiquement tous les problèmes ouverts.</p><p>Pour contourner les limites d'utilisation et pour accéder, vous pouvez fournir un jeton d'accès. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Plus d'informations sur ses portées sont disponibles ici</a>.</p>",
@@ -313,10 +299,7 @@
         "SUBMIT_TIMELOGS_DESCRIPTION": "Afficher la boîte de dialogue de suivi du temps après avoir cliqué sur \"terminer la journée\"",
         "TOKEN": "Jeton d'accès",
         "FILTER": "Filtre personnalisé",
-        "FILTER_DESCRIPTION": "Voir https://docs.gitlab.com/ee/api/issues.html#list-issues. Plusieurs peuvent être combinés avec le caractère &",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les Issues non résolus de GitLab au backlog",
-        "IS_AUTO_POLL": "Surveiller automatiquement les issues git importées pour avoir les modifications",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches"
+        "FILTER_DESCRIPTION": "Voir https://docs.gitlab.com/ee/api/issues.html#list-issues. Plusieurs peuvent être combinés avec le caractère &"
       },
       "FORM_SECTION": {
         "HELP": "<p> Ici, vous pouvez configurer SuperProductivity pour répertorier les problèmes ouverts de GitLab (que ce soit la version en ligne ou une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches dans la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet. </p> <p> En outre, vous pouvez automatiquement ajouter et synchroniser tous les problèmes ouverts à votre carnet de tâches. </p>",
@@ -432,9 +415,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Remplissez tout le temps passé moins le temps enregistré",
         "WORKLOG_DEFAULT_TIME_MODE": "Valeur de temps par défaut pour le dialogue",
         "WORKLOG_DEFAULT_TODAY": "Ne remplissez que le temps passé aujourd'hui",
-        "WORKLOG_DEFAULT_YESTERDAY": "Remplir uniquement le temps passé hier",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les tickets au backlog de Jira",
-        "IS_AUTO_POLL_TICKETS": "Surveiller periodiquement les modifications apportées aux tickets importés et m'en informer"
+        "WORKLOG_DEFAULT_YESTERDAY": "Remplir uniquement le temps passé hier"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Autoriser le certificat auto-signé",
@@ -458,8 +439,7 @@
           "P2_2": "<em>'Ouvrir la boîte de dialogue du temps de travail lorsque la sous-tâche est terminée et non pas pour les tâches avec sous-tâches'</em> ouvre une boîte pour le temps de travail chaque fois que vous marquez une sous-tâche d'un ticket Jira comme terminée. Comme vous suivez déjà votre temps via les sous-tâches, aucune boîte de dialogue ne s'ouvre lorsque vous indiquez que la tâche Jira est terminée.",
           "P2_3": "<em>\"Envoyer les mises à jour du temps de travail automatiquement sans boîte de dialogue\"</em> fait ce qu'il dit. Comme marquer une tâche plusieurs fois entraîne le suivi complet du temps de travail complet à deux reprises, ceci n'est pas recommandé.",
           "P3_1": "Ici, vous pouvez reconfigurer vos transitions par défaut. Jira permet une configuration étendue de transitions entrant généralement en action sous forme de colonnes différentes sur votre tableau agile Jira. Nous ne pouvons donc pas supposer où et quand transiter vos tâches et vous devez le définir manuellement."
-        },
-        "CREDENTIALS": "Identifiants"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Responsable",
@@ -502,12 +482,6 @@
         "LOGIN_SUCCESS": "Connexion réussie!",
         "TEST_CREDENTIALS": "Tester les identifiants",
         "WELCOME_USER": "Bienvenue {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement les issues non résolus de GitHub au backlog",
-        "IS_AUTO_POLL": "Surveiller periodiquement les issues git importés pour avoir les modifications",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Afficher les issues de git sous forme de suggestions lors de l'ajout de nouvelles tâches",
-        "REPO": "\"nom d'utilisateur / nom du repository\" pour le repository git que vous souhaitez suivre"
       }
     },
     "METRIC": {
@@ -572,8 +546,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Désactiver le markdown",
         "ENABLE_PARSE": "Activer le markdown"
-      },
-      "EDIT_FULLSCREEN": "Modifier en plein écran"
+      }
     },
     "OPEN_PROJECT": {
       "CFG_CMP": {
@@ -622,10 +595,7 @@
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Assigné à moi",
-        "SCOPE_CREATED": "Créé par moi",
-        "IS_AUTO_IMPORT_ISSUES": "Ajouter automatiquement des lots de travaux non résolus d'OpenProject au backlog",
-        "IS_AUTO_POLL": "Sondage automatique des packages de travail OpenProject importés pour les modifications",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Afficher les lots de travaux sous forme de suggestions lors de l'ajout de nouvelles tâches"
+        "SCOPE_CREATED": "Créé par moi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les packages de travail OpenProject ouverts. Veuillez noter que pour que cela fonctionne dans le navigateur, vous devez probablement configurer CORS pour votre serveur OpenProject, pour autoriser l'accès depuis app.super-productivity.com</p>",
@@ -890,14 +860,11 @@
           "L_ACCESS_TOKEN": "Jeton d'accès (généré à partir du code d'authentification)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation",
-          "L_IS_COMPRESS_DATA": "Compresser les données"
+          "L_SYNC_FILE_NAME": "Nom du fichier de synchronisation"
         },
         "LOCAL_FILE": {
           "L_SYNC_FOLDER_PATH": "Synchroniser le chemin du dossier",
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Nécessite une autorisation d'accès au fichier",
-          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Chemin absolu vers le fichier qui doit être utilisé pour la synchronisation (sera créé)."
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Nécessite une autorisation d'accès au fichier"
         },
         "L_ENABLE_COMPRESSION": "Activer la compression (transfert de données plus rapide)",
         "L_ENABLE_ENCRYPTION": "Activer le chiffrement de bout en bout (expérimental) - Rend vos données inacessibles à votre fournisseur de synchronisation",
@@ -912,8 +879,7 @@
           "L_BASE_URL": "URL de base",
           "L_PASSWORD": "Mot de passe",
           "L_SYNC_FOLDER_PATH": "Synchroniser le chemin du dossier",
-          "L_USER_NAME": "Nom d'utilisateur",
-          "L_SYNC_FILE_PATH": "Chemin du fichier de synchronisation"
+          "L_USER_NAME": "Nom d'utilisateur"
         }
       },
       "S": {
@@ -1045,11 +1011,7 @@
         "RO_START": "quand ça commence",
         "RO_NEVER": "Jamais",
         "SCHEDULE": "Planifier",
-        "UNSCHEDULE": "Dé-planifier",
-        "CONFIRM_REPEAT_OK": "Programme",
-        "CONFIRM_REPEAT_TXT": "Vous essayez de programmer cette tâche répétée à un autre jour. Les tâches répétées sont généralement destinées à être recréées à des jours spécifiés et planifiées uniquement ce jour-là. Voulez-vous continuer malgré tout ?",
-        "DATETIME_FOR": "Date et heure du rappel",
-        "EDIT": "Modifier le rappel"
+        "UNSCHEDULE": "Dé-planifier"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Ajouter tout à aujourd'hui",
@@ -1099,8 +1061,7 @@
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
-        "TASK_CREATED": "Tâche créée \"{{title}}\"",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Le déplacement des tâches de résolution vers un autre projet n'est pas autorisé"
+        "TASK_CREATED": "Tâche créée \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Sélectionner ou créer une tâche",
       "SUMMARY_TABLE": {
@@ -1204,11 +1165,7 @@
       "PLAN_START_DAY": "Planifier au début de la journée",
       "START": "Début des travaux",
       "TASK_PROJECTION_INFO": "Projection future d'une tâche répétable planifiée",
-      "LUNCH_BREAK": "Pause déjeuner",
-      "MENU_TITLE": "Chronologie",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Erreur du fournisseur d'appel dans la chronologie : {{errTxt}}"
-      }
+      "LUNCH_BREAK": "Pause déjeuner"
     },
     "TIME_TRACKING": {
       "B": {
@@ -1233,8 +1190,7 @@
         "SKIP": "Passer",
         "SPLIT_TIME": "Diviser le temps en plusieurs tâches et pauses",
         "TASK": "Tâche",
-        "TRACK_TO": "Ajouter à :",
-        "TASK_BREAK": "Pause de travail"
+        "TRACK_TO": "Ajouter à :"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Créer</em> et suivre vers",
@@ -1299,26 +1255,6 @@
         "NO_DATA": "Pas encore de tâche cette semaine.",
         "TITLE": "Titre"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi : Échec de l'authentification, essayez de vous reconnecter!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive : Aucun fichier nommé <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive : utiliser le <strong>fichier</strong> existant <strong>\"{{fileName}}\"</strong> comme fichier de synchronisation? Sinon, veuillez changer le nom du fichier de synchronisation."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Plusieurs fichiers portant le nom \"{{newFileName}}\" ont été trouvés. Veuillez les supprimer tous sauf un ou choisir un nom différent.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: erreur lors de la création du fichier de synchronisation. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: nom du fichier de synchronisation mis à jour"
-      },
-      "S_API": {
-        "ERR": "Erreur GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
-        "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
-        "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1374,11 +1310,7 @@
       "CHECK_UPDATES": "Vérifier les mises à jour distantes tous les X",
       "DEFAULT_PROJECT": "Projet par défaut pour les tâches de calendrier ajoutées",
       "HELP": "Vous pouvez intégrer des calendriers pour recevoir des rappels et les ajouter en tant que tâches dans Super Productivity. L'intégration fonctionne en utilisant le format iCal. Pour que cela fonctionne, vos calendriers doivent être accessibles soit sur Internet, soit via le système de fichiers.",
-      "SHOW_BANNER_THRESHOLD": "Afficher une notification \"X temps\" avant l'événement (vide si désactivé)",
-      "CAL_PROVIDERS_ADD": "Ajouter une source iCal de Calendrier",
-      "CAL_PROVIDERS_INFO": "Vous pouvez charger des données de calendrier au format iCal (ex : <a href=\"https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a> , <a href=\"https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365\">Outlook 365</a> ). Les données seront intégrées dans le planning et vous serez invité à créer des tâches pour les événements du calendrier, si elles sont dues.",
-      "ICON": "Icône pour la Programmation",
-      "TITLE": "Calendriers"
+      "SHOW_BANNER_THRESHOLD": "Afficher une notification \"X temps\" avant l'événement (vide si désactivé)"
     },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Masquer la fiche d'évaluation dans le résumé quotidien",
@@ -1395,8 +1327,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Activer la gestion du temps d'inactivité",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Déclenchez uniquement la boîte de dialogue d'inactivité lorsqu'une tâche en cours est sélectionnée",
       "MIN_IDLE_TIME": "Déclenchement d'inactivité après X",
-      "TITLE": "Gestion de l'inactivité",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Les réinitialisations du temps d'inactivité non suivi prennent une pause"
+      "TITLE": "Gestion de l'inactivité"
     },
     "IMEX": {
       "HELP": "<p>Ici, vous pouvez exporter toutes vos données sous forme de <strong>JSON</strong> pour les sauvegardes, mais également pour les utiliser dans un contexte différent (vous pouvez par exemple vouloir exporter vos projets dans le navigateur et les importer dans la version de bureau). ). </p> <p>L'importation nécessite la copie d'un fichier JSON valide dans la zone de texte. <strong>REMARQUE: une fois que vous avez cliqué sur le bouton d'importation, tous vos paramètres et données actuels seront écrasés!</strong></p>",
@@ -1478,9 +1409,7 @@
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Utiliser la barre minimale de navigation (affichage des icônes uniquement)",
       "TASK_NOTES_TPL": "Modèle de description de tâche",
-      "TITLE": "Réglages divers",
-      "IS_AUTO_START_NEXT_TASK": "Commencer le suivi de la tâche suivante lors du marquage du courant comme terminé",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé"
+      "TITLE": "Réglages divers"
     },
     "SHORT_SYNTAX": {
       "TITLE": "Syntaxe Courte",
@@ -1514,8 +1443,7 @@
       "DONE_SOUND": "Son pour tâche terminée",
       "IS_INCREASE_DONE_PITCH": "Augmentez la hauteur pour chaque tâche effectuée",
       "TITLE": "Du son",
-      "VOLUME": "Le volume",
-      "IS_PLAY_DONE_SOUND": "Jouer le son lorsque la tâche est marquée comme terminée"
+      "VOLUME": "Le volume"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Ajouter une image de motivation",
@@ -1542,11 +1470,7 @@
       "L_IS_LUNCH_BREAK_ENABLED": "Activer la pause déjeuner",
       "L_LUNCH_BREAK_END": "Fin de la pause déjeuner",
       "L_LUNCH_BREAK_START": "Début de la pause déjeuner",
-      "LUNCH_BREAK_START_END_DESCRIPTION": "ex : 13:00",
-      "CAL_PROVIDERS": "Fournisseurs de calendriers (expérimentaux et facultatifs)",
-      "CAL_PROVIDERS_ADD": "Ajouter une source ical",
-      "CAL_PROVIDERS_INFO": "Vous pouvez éventuellement configurer la chronologie pour charger et afficher également les données d'iCal (par exemple, Google Calendar).",
-      "L_CAL_PATH": "URL/chemin d'accès au calendrier ICAL (facultatif)"
+      "LUNCH_BREAK_START_END_DESCRIPTION": "ex : 13:00"
     },
     "TIME_TRACKING": {
       "HELP": "Le rappel de suivi du temps est une bannière qui s'affiche si vous oubliez de démarrer le suivi du temps.",
@@ -1559,13 +1483,6 @@
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Afficher le rappel de suivi sur l'application mobile",
       "L_TRACKING_REMINDER_MIN_TIME": "Temps d'attente avant d'afficher la bannière de rappel de suivi",
       "TITLE": "Suivi du Temps"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Configurez une bannière pour qu'elle s'affiche au cas où vous auriez oublié de démarrer le suivi du temps.",
-      "L_IS_ENABLED": "Activée",
-      "L_IS_SHOW_ON_MOBILE": "Afficher sur l'application mobile",
-      "L_MIN_TIME": "Il est temps d'attendre avant d'afficher la bannière",
-      "TITLE": "Rappel de suivi du temps"
     }
   },
   "GLOBAL_SNACK": {
@@ -1590,9 +1507,7 @@
     "SYNC": "Synchronisation des données...",
     "UNKNOWN": "Chargement des données à distance",
     "WEB_DAV_DOWNLOAD": "WebDAV: Téléchargement de données ...",
-    "WEB_DAV_UPLOAD": "WebDAV: Téléchargement de données ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Télécharger le fichier ...",
-    "GDRIVE_UPLOAD": "Google Drive: importer un fichier ..."
+    "WEB_DAV_UPLOAD": "WebDAV: Téléchargement de données ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
@@ -1634,9 +1549,7 @@
     "TOGGLE_SHOW_NOTES": "Afficher / masquer les notes de projet",
     "TOGGLE_TRACK_TIME": "Démarrer / Arrêter le suivi du temps",
     "TRIGGER_SYNC": "Déclencher la synchronisation manuellement",
-    "WORKLOG": "Journal de travail",
-    "MANAGE_PROJECTS": "Gérer les projets",
-    "SCHEDULED": "Prévu"
+    "WORKLOG": "Journal de travail"
   },
   "PDS": {
     "BACK": "Attends j'ai oublié quelque chose!",
@@ -1671,11 +1584,7 @@
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Temps passé / estimé",
     "TIME_SPENT_ESTIMATE_TITLE": "Temps passé: Temps total passé aujourd'hui. Tâches archivées non incluses. - Temps estimé: temps estimé pour les tâches effectuées aujourd'hui moins le temps déjà passé dessus les autres jours.",
     "TIME_SPENT_TODAY_BY_TAG": "Temps passé aujourd'hui par Balise",
-    "WEEK": "La semaine",
-    "EVALUATION": "évaluation",
-    "PLAN": "Plan",
-    "TASK_LIST": "Liste de tâches",
-    "TODAY": "Aujourd'hui"
+    "WEEK": "La semaine"
   },
   "PM": {
     "TITLE": "Données du projet"
@@ -1749,34 +1658,5 @@
     "WORKING_TODAY": "Travaillé aujourd'hui :",
     "WORKING_TODAY_ARCHIVED": "Temps travaillé aujourd'hui sur les tâches archivées",
     "TODAY_REMAINING": "Restant pour aujourd'hui :"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Projets archivés",
-    "ARCHIVE_PROJECT": "Archiver le projet",
-    "CLICK_TO_HIDE": "Cliquez pour masquer le projet du menu",
-    "CLICK_TO_SHOW": "Cliquez pour afficher le projet dans le menu",
-    "DELETE_PROJECT": "Supprimer le projet",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Êtes-vous sûr de vouloir archiver ce projet ? Les projets archivés ne seront plus affichés dans le menu et vous ne pourrez accéder à aucune de leurs données sans les restaurer. Il est recommandé de sauvegarder vos données avant de procéder.",
-      "OK": "Archiver"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Êtes-vous sûr de vouloir supprimer ce projet? Il est recommandé de sauvegarder vos données avant de procéder.",
-      "OK": "Supprimer"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Êtes-vous sûr de vouloir désarchiver ce projet?",
-      "OK": "Désarchiver"
-    },
-    "EDIT_PROJECT": "Modifier le projet",
-    "EXPORT_PROJECT": "Exporter le projet",
-    "GITHUB_CONFIGURED": "Intégration GitHub configurée",
-    "GITLAB_CONFIGURED": "Intégration GitLab configurée",
-    "IMPORT_FROM_FILE": "Importer depuis un fichier",
-    "JIRA_CONFIGURED": "Intégration Jira configurée",
-    "OPEN_PROJECT_CONFIGURED": "Intégration OpenProject configurée",
-    "S_INVALID_JSON": "JSON non valide pour le fichier de projet",
-    "TITLE": "Aperçu du projet",
-    "UN_ARCHIVE_PROJECT": "Désarchiver le projet"
   }
 }

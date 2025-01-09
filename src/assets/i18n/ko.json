@@ -91,10 +91,7 @@
         "CALDAV_RESOURCE": "CalDav 리소스의 이름 (캘린더)",
         "CALDAV_URL": "CalDav URL (기본 URL)",
         "CALDAV_USER": "CalDav 사용자 이름",
-        "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료",
-        "IS_AUTO_IMPORT_ISSUES": "완료되지 않은 CalDav 할 일을 백 로그에 자동으로 추가",
-        "IS_AUTO_POLL": "가져온 작업을 자동으로 폴링하여 변경 사항을 확인합니다.",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "새 작업을 추가 할 때 완료되지 않은 CalDav 할 일을 제안으로 표시"
+        "IS_TRANSITION_ISSUES_ENABLED": "작업 완료시 CalDav 할 일을 자동으로 완료"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기에서 일일 계획 보기의 작업 생성 패널에서 특정 프로젝트에 대해 완료되지 않은 CalDav 할 일을 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안 사항으로 나열되며 할 일에 대한 링크와 이에 대한 추가 정보를 제공합니다.</p> <p>또한 완료되지 않은 모든 할 일을 작업 백로그에 자동으로 추가하고 동기화할 수 있습니다.</p><p>모바일 및 웹의 nextcloud에서 작동하도록 하려면 nextcloud 앱 <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>를 통해 \"https://app.super-productivity.com\"을 허용 목록에 추가해야 할 수 있습니다.</p>",
@@ -155,11 +152,7 @@
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
-        "TOKEN": "액세스 토큰",
-        "IS_AUTO_IMPORT_ISSUES": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
-        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
-        "TOKEN_DESCRIPTION": "개인 저장소 액세스에 필요"
+        "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기서는 일일 계획 보기의 작업 만들기 패널에서 특정 리포지토리에 대한 열린 GitHub 문제를 나열하도록 SuperProductivity를 구성할 수 있습니다. 제안으로 나열 되며 문제에 대 한 링크 뿐만 아니라 그것에 대 한 자세한 정보를 제공 합니다.</p> <p>또한 자동으로 추가하고 작업 백로그에 열려있는 모든 문제를 동기화 할 수 있습니다.</p>",
@@ -198,10 +191,7 @@
         "SOURCE_GLOBAL": "모든",
         "SOURCE_GROUP": "그룹",
         "SOURCE_PROJECT": "계획",
-        "TOKEN": "액세스 토큰",
-        "IS_AUTO_IMPORT_ISSUES": "GitLab의 미해결 문제를 백 로그에 자동으로 추가합니다.",
-        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다."
+        "TOKEN": "액세스 토큰"
       },
       "FORM_SECTION": {
         "HELP": "<p> 일별 계획보기의 작업 생성 패널에서 특정 프로젝트에 대해 열린 GitLab (온라인 버전 또는 자체 호스팅 인스턴스) 문제를 나열하도록 SuperProductivity를 구성 할 수 있습니다. 제안으로 표시되며 문제에 대한 자세한 정보뿐만 아니라 문제에 대한 링크를 제공합니다. </p> <p> 또한 열려있는 모든 문제를 작업 백 로그에 자동으로 추가하고 동기화 할 수 있습니다. </p>",
@@ -303,9 +293,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "모든 소요 시간에서 기록 시간을 뺀 값을 입력하세요.",
         "WORKLOG_DEFAULT_TIME_MODE": "대화의 기본 시간 값",
         "WORKLOG_DEFAULT_TODAY": "오늘 보낸 시간만 채우세요",
-        "WORKLOG_DEFAULT_YESTERDAY": "어제 보낸 시간만 채우기",
-        "IS_AUTO_IMPORT_ISSUES": "Jira 백 로그에 자동으로 이슈 추가",
-        "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다."
+        "WORKLOG_DEFAULT_YESTERDAY": "어제 보낸 시간만 채우기"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "자체 서명 된 인증서 허용",
@@ -329,8 +317,7 @@
           "P2_2": "<em>'Jira 문제의 하위 작업을 완료로 표시 할 때마다'</em> 은 작업 로그 대화 상자를 열 때마다 하위 작업이 완료되면 작업 로그 열기 대화 상자가 열립니다. 하위 작업을 통해 시간을 이미 추적 했으므로 Jira 작업 자체를 완료로 표시하면 대화 상자가 열리지 않습니다.",
           "P2_3": "<em>'대화 상자없이 작업 로그에 자동으로 업데이트를 보냄'{</em> 은 (는) 말하는 것을 않습니다. 여러 번 완료된 작업을 표시하면 전체 작업 시간이 두 번 추적되기 때문에 권장하지 않습니다.",
           "P3_1": "여기서 기본 전환을 재구성 할 수 있습니다. Jira는 일반적으로 Jira 애자일 보드의 다른 컬럼으로 동작하는 다양한 전환을 가능하게합니다. 우리는 어디에서 언제 작업을 전환 할 것인지를 가정 할 수 없으며 수동으로 설정해야합니다."
-        },
-        "CREDENTIALS": "신임장"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "담당자",
@@ -371,12 +358,6 @@
         "LOGIN_SUCCESS": "성공적 로그인!",
         "TEST_CREDENTIALS": "자격증 명 테스트",
         "WELCOME_USER": "환영합니다,  {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "GitHub의 미해결 문제를 백 로그에 자동으로 추가합니다.",
-        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
-        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
       }
     },
     "METRIC": {
@@ -436,8 +417,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "마크 다운 구문 분석 사용 중지",
         "ENABLE_PARSE": "markdown 구문 분석 사용"
-      },
-      "EDIT_FULLSCREEN": "전체 화면으로 편집"
+      }
     },
     "OPEN_PROJECT": {
       "DIALOG_INITIAL": {
@@ -468,10 +448,7 @@
         "SCOPE": "범위",
         "SCOPE_ALL": "모든",
         "SCOPE_ASSIGNED": "나에게 할당됨",
-        "SCOPE_CREATED": "내가 만든",
-        "IS_AUTO_IMPORT_ISSUES": "OpenProject에서 백로그로 미해결 작업 패키지 자동 추가",
-        "IS_AUTO_POLL": "가져온 OpenProject 작업 패키지에서 변경 사항을 자동으로 폴링",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "새 작업을 추가할 때 작업 패키지를 제안으로 표시"
+        "SCOPE_CREATED": "내가 만든"
       },
       "FORM_SECTION": {
         "HELP": "<p>여기에서 열려 있는 OpenProject 작업 패키지를 나열하도록 SuperProductivity를 구성할 수 있습니다. 이것이 브라우저에서 작동하려면 app.super-productivity.com</p>에서 액세스를 허용하도록 OpenProject 서버에 대해 CORS를 구성해야 합니다.",
@@ -664,13 +641,10 @@
           "L_ACCESS_TOKEN": "액세스 토큰 (인증 코드에서 생성)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "파일 이름 동기화",
-          "L_IS_COMPRESS_DATA": "데이터 압축"
+          "L_SYNC_FILE_NAME": "파일 이름 동기화"
         },
         "LOCAL_FILE": {
-          "L_SYNC_FOLDER_PATH": "폴더 경로 동기화",
-          "L_SYNC_FILE_PATH": "동기화 파일 경로",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "동기화에 사용해야 하는 파일의 절대 경로(생성 예정)."
+          "L_SYNC_FOLDER_PATH": "폴더 경로 동기화"
         },
         "L_ENABLE_SYNCING": "동기화 활성화",
         "L_SYNC_INTERVAL": "동기화 간격",
@@ -680,8 +654,7 @@
           "CORS_INFO": "<strong>실험적 !!</strong> 이 작업을 수행하려면 Nextcloud 인스턴스에 대한 CORS를 비활성화하거나 제한해야합니다. 이는 보안에 부정적인 영향을 미칠 수 있습니다. 자세한 내용은 <a href='https://github.com/nextcloud/server/issues/3131'>이 스레드</a> 를 참조하십시오. 자신의 책임하에 사용하십시오!",
           "L_BASE_URL": "기본 URL",
           "L_PASSWORD": "암호",
-          "L_USER_NAME": "사용자 이름",
-          "L_SYNC_FILE_PATH": "동기화 파일 경로"
+          "L_USER_NAME": "사용자 이름"
         }
       },
       "S": {
@@ -789,11 +762,7 @@
         "RO_START": "시작될 때",
         "RO_NEVER": "Never",
         "SCHEDULE": "시간표",
-        "UNSCHEDULE": "일정 잡기",
-        "CONFIRM_REPEAT_OK": "시간표",
-        "CONFIRM_REPEAT_TXT": "이 반복 작업을 다른 날짜로 예약하려고 합니다. 반복되는 작업은 일반적으로 지정된 날짜에 다시 생성되고 해당 날짜에만 예약됩니다. 그래도 계속하시겠습니까?",
-        "DATETIME_FOR": "알림 시간",
-        "EDIT": "알림 수정"
+        "UNSCHEDULE": "일정 잡기"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "오늘 모두 추가",
@@ -896,11 +865,7 @@
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
       "START": "작업 시작",
       "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
-      "LUNCH_BREAK": "점심 휴식",
-      "MENU_TITLE": "타임 라인",
-      "S": {
-        "CAL_PROVIDER_ERROR": "타임라인 Cal Provider 오류: {{errTxt}}"
-      }
+      "LUNCH_BREAK": "점심 휴식"
     },
     "TIME_TRACKING": {
       "B": {
@@ -922,8 +887,7 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}}을(를) 추적하지 않으려면 클릭하십시오.",
         "SKIP": "버킷",
         "TASK": "태스크",
-        "TRACK_TO": "추적 대상 :",
-        "TASK_BREAK": "작업 나누기"
+        "TRACK_TO": "추적 대상 :"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em></em> 생성 및 추적",
@@ -988,26 +952,6 @@
         "NO_DATA": "이번 주에는 아직 할 일이 없습니다.",
         "TITLE": "제목"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi : 인증에 실패하여 다시 로그인하십시오!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google 드라이브 : <strong>\"{{fileName}}\"</strong> 이름의 파일이 없습니다. <strong>Google 드라이브의 동기화 파일로</strong> 파일을 만드시겠습니까?",
-        "USE_EXISTING_SYNC_FILE": "Google 드라이브 : <strong>기존</strong> 파일 <strong>\"{{fileName}}\"</strong> 을 동기화 파일로 사용 하시겠습니까? 그렇지 않은 경우 동기화 파일 이름을 변경하십시오."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "이름이 \"{{newFileName}}\"인 파일이 여러 개 있습니다. 하나만 제외하고 모두 삭제하거나 다른 이름을 선택하십시오.",
-        "SYNC_FILE_CREATION_ERROR": "Google 드라이브 : 동기화 파일을 만드는 동안 오류가 발생했습니다. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google 드라이브 : 업데이트 된 동기화 파일 이름"
-      },
-      "S_API": {
-        "ERR": "GoogleApi 오류 : {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi : 지정된 파일 ID가 없습니다.",
-        "ERR_NO_FILE_NAME": "GoogleApi : 파일 이름이 지정되지 않았습니다.",
-        "SUCCESS_LOGIN": "GoogleApi : 로그인 성공"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1060,8 +1004,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "유휴 시간 처리 사용",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "현재 작업이 선택되면 유휴 시간 대화 상자 만 트리거합니다.",
       "MIN_IDLE_TIME": "X 후에 유휴 트리거",
-      "TITLE": "유휴 처리",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "방해받지 않는 유휴 시간 재설정은 휴식 타이머를 취합니다."
+      "TITLE": "유휴 처리"
     },
     "IMEX": {
       "HELP": "<p>여기서 모든 데이터를 백업용 <strong>JSON</strong> 로 내보낼 수 있지만 다른 컨텍스트에서 사용할 수도 있습니다 (예 : 브라우저에서 프로젝트를 내보내고 데스크탑 버전으로 가져 오기를 원할 수 있습니다 ). </p> <p>가져 오기에서는 유효한 JSON이 텍스트 영역에 복사 될 것으로 예상합니다. <strong>참고 : 가져 오기 버튼을 누르면 모든 현재 설정과 데이터를 덮어 씁니다!</strong></p>",
@@ -1129,9 +1072,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
       "TASK_NOTES_TPL": "작업 설명 템플릿",
-      "TITLE": "기타 설정",
-      "IS_AUTO_START_NEXT_TASK": "전류를 완료로 표시 할 때 다음 작업 추적 시작",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림"
+      "TITLE": "기타 설정"
     },
     "POMODORO": {
       "BREAK_DURATION": "짧은 휴식 시간",
@@ -1151,8 +1092,7 @@
       "DONE_SOUND": "작업 완료 소리",
       "IS_INCREASE_DONE_PITCH": "모든 작업에 대한 피치 높이기",
       "TITLE": "소리",
-      "VOLUME": "음량",
-      "IS_PLAY_DONE_SOUND": "작업이 완료로 표시되면 소리 재생"
+      "VOLUME": "음량"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>중단하지 않고 지정된 시간 동안 작업 한 경우 다시 알림을 구성 할 수 있습니다.</p> <p>표시된 메시지를 수정할 수 있습니다. ${duration} 은 휴식 시간없이 바뀝니다.</p> </div>",
@@ -1172,18 +1112,7 @@
       "L_WORK_END": "근무일 종료",
       "L_WORK_START": "근무일 시작",
       "TITLE": "타임 라인",
-      "WORK_START_END_DESCRIPTION": "예 : 17:00",
-      "CAL_PROVIDERS": "캘린더 제공자(실험 및 선택사항)",
-      "CAL_PROVIDERS_ADD": "소스 추가",
-      "CAL_PROVIDERS_INFO": "iCal(예: Google 캘린더)의 데이터도 로드하고 표시하도록 타임라인을 선택적으로 구성할 수 있습니다.",
-      "L_CAL_PATH": "캘린더 ICAL의 URL/파일 경로(선택 사항)"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "시간 추적을 시작하는 것을 잊은 경우 표시 할 배너를 구성하십시오.",
-      "L_IS_ENABLED": "사용",
-      "L_IS_SHOW_ON_MOBILE": "모바일 앱에 표시",
-      "L_MIN_TIME": "배너를 표시하기 전에 기다려야하는 시간",
-      "TITLE": "시간 추적 알림"
+      "WORK_START_END_DESCRIPTION": "예 : 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1206,9 +1135,7 @@
     "JIRA_LOAD_ISSUE": "Jira : 이슈 데이터로드 중 ...",
     "UNKNOWN": "원격 데이터 로드",
     "WEB_DAV_DOWNLOAD": "WebDAV : 데이터 다운로드 중 ...",
-    "WEB_DAV_UPLOAD": "WebDAV : 데이터 업로드 중 ...",
-    "GDRIVE_DOWNLOAD": "Google 드라이브 : 파일 다운로드 ...",
-    "GDRIVE_UPLOAD": "Google 드라이브 : 파일 업로드 ..."
+    "WEB_DAV_UPLOAD": "WebDAV : 데이터 업로드 중 ..."
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
@@ -1232,9 +1159,7 @@
     "TOGGLE_SHOW_NOTES": "프로젝트 노트 표시 / 숨기기",
     "TOGGLE_TRACK_TIME": "추적 시작 / 중지 시간",
     "TRIGGER_SYNC": "수동으로 동기화 트리거",
-    "WORKLOG": "작업 로그",
-    "MANAGE_PROJECTS": "프로젝트 관리",
-    "SCHEDULED": "예정"
+    "WORKLOG": "작업 로그"
   },
   "PDS": {
     "BACK": "잠깐 내가 뭔가를 잊었 어!",
@@ -1264,11 +1189,7 @@
     "TASKS_COMPLETED": "완료된 작업",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "소요 시간 / 예상",
     "TIME_SPENT_ESTIMATE_TITLE": "소요 시간 : 오늘 보낸 총 시간. 아카이브 된 태스크는 포함되지 않습니다. - 예상 시간 : 오늘 작업 한 작업에 대한 예상 시간에서 다른 날에 이미 소비 한 시간을 뺀 시간입니다.",
-    "WEEK": "주",
-    "EVALUATION": "평가",
-    "PLAN": "계획",
-    "TASK_LIST": "작업 목록",
-    "TODAY": "오늘"
+    "WEEK": "주"
   },
   "PM": {
     "TITLE": "프로젝트 측정 항목"
@@ -1332,34 +1253,5 @@
     "TIME_ESTIMATED": "예상 시간 :",
     "WITHOUT_BREAK": "휴식없이 :",
     "WORKING_TODAY": "오늘은 일한다:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
-    "ARCHIVE_PROJECT": "프로젝트 아카이브",
-    "CLICK_TO_HIDE": "메뉴에서 프로젝트를 숨기려면 클릭하세요.",
-    "CLICK_TO_SHOW": "메뉴에 프로젝트를 표시하려면 클릭하세요.",
-    "DELETE_PROJECT": "프로젝트 삭제",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "아카이브"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
-      "OK": "삭제"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
-      "OK": "보관 취소"
-    },
-    "EDIT_PROJECT": "프로젝트 수정",
-    "EXPORT_PROJECT": "프로젝트 내보내기",
-    "GITHUB_CONFIGURED": "GitHub 통합 구성",
-    "GITLAB_CONFIGURED": "GitLab 통합 구성",
-    "IMPORT_FROM_FILE": "파일에서 가져 오기",
-    "JIRA_CONFIGURED": "Jira 통합 구성",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject 통합 구성됨",
-    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
-    "TITLE": "프로젝트 개요",
-    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
   }
 }

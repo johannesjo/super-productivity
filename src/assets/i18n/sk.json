@@ -97,10 +97,7 @@
         "CALDAV_RESOURCE": "Názov prostriedku CalDav (kalendár)",
         "CALDAV_URL": "CalDav URL (základná adresa URL)",
         "CALDAV_USER": "Vaše používateľské meno CalDav",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatické dokončenie úloh CalDav pri dokončení úlohy",
-        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nedokončených úloh CalDav do zoznamu nedokončených úloh",
-        "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných úlohách",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Zobrazenie nedokončených úloh CalDav ako návrh pri pridávaní nových úloh"
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatické dokončenie úloh CalDav pri dokončení úlohy"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p><p>To make it work for nextcloud on mobile and web, you might need to whitelist \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
@@ -160,10 +157,7 @@
         "SOURCE_GLOBAL": "Všetky",
         "SOURCE_GROUP": "Skupina",
         "SOURCE_PROJECT": "Projekt",
-        "TOKEN": "Prístupový token",
-        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených problémov zo služby GitLab do zoznamu nevyriešených problémov",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazenie problémov zo služby git ako návrhov pri pridávaní nových úloh"
+        "TOKEN": "Prístupový token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -265,9 +259,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vyplňte všetok strávený čas mínus zaznamenaný čas",
         "WORKLOG_DEFAULT_TIME_MODE": "Predvolená časová hodnota pre dialógové okno",
         "WORKLOG_DEFAULT_TODAY": "Vyplňte len čas strávený dnes",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vyplňte len čas strávený včera",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridávať problémy od Jira do nevybavených vecí",
-        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolujte zmeny v importovaných problémoch a informuje"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vyplňte len čas strávený včera"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Povolenie vlastnoručne podpísaného certifikátu",
@@ -291,8 +283,7 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        },
-        "CREDENTIALS": "Údaje"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Príjemca",
@@ -335,12 +326,6 @@
         "LOGIN_SUCCESS": "Prihlásenie bolo úspešné!",
         "TEST_CREDENTIALS": "Skúšobné údaje",
         "WELCOME_USER": "Vitajte {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky pridajte nevyriešené problémy z GitHubu do nevybavených úloh ",
-        "IS_AUTO_POLL": "Automaticky zisťovať zmeny v importovaných problémoch git",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovať problémy z git ako návrhy pri pridávaní nových úloh",
-        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -433,10 +418,7 @@
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všetko",
         "SCOPE_ASSIGNED": "Pridelené mne",
-        "SCOPE_CREATED": "Vytvorené mnou",
-        "IS_AUTO_IMPORT_ISSUES": "Automatické pridávanie nevyriešených pracovných balíkov z OpenProject do backlogu",
-        "IS_AUTO_POLL": "Automatické vyhľadávanie zmien v importovaných pracovných balíkoch OpenProject",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazovať pracovné balíky ako návrhy pri pridávaní nových úloh"
+        "SCOPE_CREATED": "Vytvorené mnou"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open OpenProject work packages. Please Note that for this to work in the browser you need to probably configure CORS for your OpenProject server, to allow access from app.super-productivity.com</p>",
@@ -637,12 +619,7 @@
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Základná URL adresa",
           "L_PASSWORD": "Heslo",
-          "L_USER_NAME": "Používateľské meno",
-          "L_SYNC_FILE_PATH": "Cesta k synchronizačnému súboru"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Cesta k synchronizovanému súboru",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolútna cesta k súboru, ktorý sa má použiť na synchronizáciu (vytvorí sa)."
+          "L_USER_NAME": "Používateľské meno"
         }
       },
       "S": {
@@ -751,11 +728,7 @@
         "RO_START": "keď to začne",
         "RO_NEVER": "Never",
         "SCHEDULE": "Naplánovať",
-        "UNSCHEDULE": "Zrušiť plán",
-        "CONFIRM_REPEAT_OK": "Naplánovať",
-        "CONFIRM_REPEAT_TXT": "Snažíte sa naplánovať túto opakovanú úlohu na iný deň. Opakované úlohy sú zvyčajne určené na opakované vytváranie v určených dňoch a plánujú sa len na tento deň. Chcete v tom aj tak pokračovať?",
-        "DATETIME_FOR": "Dátum pre pripomienku",
-        "EDIT": "Upraviť pripomienku"
+        "UNSCHEDULE": "Zrušiť plán"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Pridať všetko k dnešnému dňu",
@@ -906,11 +879,7 @@
       "NO_TASKS": "V súčasnosti nie sú k dispozícii žiadne úlohy. Prosím, pridajte nejaké úlohy pomocou tlačidla + v hornej lište.",
       "START": "Začiatok práce",
       "TASK_PROJECTION_INFO": "Budúca projekcia naplánovanej opakovateľnej úlohy",
-      "LUNCH_BREAK": "Obedová prestávka",
-      "MENU_TITLE": "Časová os",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Schedule Cal Provider Error: {{errTxt}}"
-      }
+      "LUNCH_BREAK": "Obedová prestávka"
     },
     "TIME_TRACKING": {
       "B": {
@@ -934,8 +903,7 @@
         "SKIP": "Preskočiť",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Úloha",
-        "TRACK_TO": "Track to",
-        "TASK_BREAK": "Task+Break"
+        "TRACK_TO": "Track to"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Vytvoriť</em> a sledovať na",
@@ -1000,38 +968,6 @@
         "NO_DATA": "No tasks this week yet.",
         "TITLE": "Title"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Nepodarilo sa overiť, skúste sa prihlásiť znova!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: Súbor s názvom <strong>\"{{fileName}}\"</strong> nebol nájdený. <strong>Vytvoriť</strong> to ako synchronizačný súbor na disku Google?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Použiť <strong>existujúci</strong> súbor <strong>\"{{fileName}}\"</strong> ako synchronizačný súbor? Ak nie, prosím zmeňte názov synchronizačného súboru."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Nájdených viacero súborov s názvom \"{{newFileName}}\". Odstráňte všetky okrem jedného alebo vyberte iný názov.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Chyba pri vytváraní synchronizačného súboru. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Aktualizovaný názov synchronizačného súboru"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Nie je zadané žiadne id súboru",
-        "ERR_NO_FILE_NAME": "GoogleApi: Nie je zadaný žiadny názov súboru",
-        "SUCCESS_LOGIN": "GoogleApi: Prihlásenie bolo úspešné"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Začíname",
-        "L2": "Úvodné video na youtube",
-        "L3": "Spýtajte sa",
-        "LETS_GO": "Poďme na to!!",
-        "MOBILE_INFO": "<strong>Swipe</strong> created tasks <strong>right, to mark them as done</strong>.\n    Swipe them left to schedule. Longpress them for more actions.",
-        "T1": "Great to see, that you decided to give this app a go! 🦄",
-        "T2": "If you're having trouble to find your way around here, there are several places you\n    can find help:",
-        "TITLE": "Vitajte v Super Productivity!"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1085,8 +1021,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
+      "TITLE": "Idle Handling"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -1155,9 +1090,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Rôzne nastavenia",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozorniť keď sa prekročí odhadovaný čas"
+      "TITLE": "Rôzne nastavenia"
     },
     "POMODORO": {
       "BREAK_DURATION": "Dĺžka krátkych prestávok",
@@ -1177,8 +1110,7 @@
       "DONE_SOUND": "Zvuk dokončenia úlohy",
       "IS_INCREASE_DONE_PITCH": "Zvýšiť výšku tónu za každú vykonanú úlohu",
       "TITLE": "Zvuk",
-      "VOLUME": "Volume",
-      "IS_PLAY_DONE_SOUND": "Prehrať zvuk, keď je úloha označená ako hotová"
+      "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1198,18 +1130,7 @@
       "L_WORK_END": "Work Day End",
       "L_WORK_START": "Work Day Start",
       "TITLE": "Schedule",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00",
-      "CAL_PROVIDERS": "Calendar providers (experimental and optional)",
-      "CAL_PROVIDERS_ADD": "Add ical source",
-      "CAL_PROVIDERS_INFO": "You can optionally configure the schedule to also load and display data from iCal (e.g. Google Calendar).",
-      "L_CAL_PATH": "Url/File path for calendar ICAL (optional)"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
-      "L_IS_ENABLED": "Enabled",
-      "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
-      "L_MIN_TIME": "Time to wait before showing Banner",
-      "TITLE": "Time Tracking Reminder"
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
     }
   },
   "GLOBAL_SNACK": {
@@ -1232,9 +1153,7 @@
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
-    "WEB_DAV_UPLOAD": "WebDAV: Uploading data...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file..."
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
   },
   "MH": {
     "ADD_NEW_TASK": "Pridať novú úlohu",
@@ -1259,9 +1178,7 @@
     "TOGGLE_SHOW_NOTES": "Zobraziť/skryť Poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Začať/pozastaviť sledovanie času",
     "TRIGGER_SYNC": "Ručné spustenie synchronizácie",
-    "WORKLOG": "Pracovný denník",
-    "MANAGE_PROJECTS": "Spravovať projekty",
-    "SCHEDULED": "Naplánované"
+    "WORKLOG": "Pracovný denník"
   },
   "PDS": {
     "BACK": "Wait I forgot something!",
@@ -1292,11 +1209,7 @@
     "TASKS_COMPLETED": "Tasks Completed",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-    "WEEK": "Týždeň",
-    "EVALUATION": "Evaluation",
-    "PLAN": "Plan",
-    "TASK_LIST": "Task List",
-    "TODAY": "Dnes"
+    "WEEK": "Týždeň"
   },
   "PM": {
     "TITLE": "Project Metrics"
@@ -1366,34 +1279,5 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archived Projects",
-    "ARCHIVE_PROJECT": "Archive Project",
-    "CLICK_TO_HIDE": "Click to hide project from menu",
-    "CLICK_TO_SHOW": "Click to show project in menu",
-    "DELETE_PROJECT": "Delete Project",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Are you sure you want to archive this project? Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them. It's recommended that you backup your data before you do this.",
-      "OK": "Archive"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Are you sure you want to delete this project? It's recommended to backup your data before you do this.",
-      "OK": "Odstrániť"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Are you sure you want to unarchive this project?",
-      "OK": "Unarchive"
-    },
-    "EDIT_PROJECT": "Upraviť projekt",
-    "EXPORT_PROJECT": "Export Project",
-    "GITHUB_CONFIGURED": "GitHub Integration Configured",
-    "GITLAB_CONFIGURED": "GitLab Integration Configured",
-    "IMPORT_FROM_FILE": "Import from file",
-    "JIRA_CONFIGURED": "Jira Integration Configured",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
-    "S_INVALID_JSON": "Invalid json for project file",
-    "TITLE": "Project Overview",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project"
   }
 }

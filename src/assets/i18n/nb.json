@@ -8,10 +8,7 @@
     "B_OFFLINE": "Du er koblet fra internett. Synkronisering og å be om data fra leverandører fungerer ikke.",
     "UPDATE_MAIN_MODEL": "Super Productivity har fått en stor oppdatering! Noen migrasjoner for dataene dine er påkrevd. Vær oppmerksom på at dette gjør dataene dine uforenlige med eldre versjoner av appen.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Ingen modelloppdatering valgt. Vær oppmerksom på at du må nedgradere til den siste versjonen, hvis du ikke vil utføre modelloppgraderingen.",
-    "UPDATE_WEB_APP": "Ny versjon tilgjengelig. Last inn ny versjon?",
-    "D_INITIAL": {
-      "TITLE": "Velkommen til v {{nr}}"
-    }
+    "UPDATE_WEB_APP": "Ny versjon tilgjengelig. Last inn ny versjon?"
   },
   "BL": {
     "NO_TASKS": "Det er for øyeblikket ingen oppgaver i backloggen"
@@ -88,35 +85,7 @@
         "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generert fra Auth Code",
         "AUTH_ERROR": "Dropbox: Ugyldig tilgangstoken gitt",
         "OFFLINE": "Dropbox: Kan ikke synkroniseres, fordi offline",
-        "SYNC_ERROR": "Dropbox: Feil under synkronisering",
-        "UNKNOWN_ERROR": "Dropbox: Ukjent feil: {{errorStr}}"
-      },
-      "C": {
-        "EMPTY_SYNC": "Du prøver å synkronisere et tomt dataobjekt. Er dette din aller første synkronisering av en (nesten) ubrukt app?",
-        "FORCE_IMPORT": "Importere eksterne data uansett?",
-        "FORCE_UPLOAD": "Last opp lokale data uansett?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Det oppsto en feil under opplasting av lokale data. Prøve å tvinge oppdateringen?",
-        "TRY_LOAD_REMOTE_AGAIN": "Prøv å laste inn data fra ekstern igjen?"
-      },
-      "D_CONFLICT": {
-        "LAST_CHANGE": "siste endring:",
-        "LAST_SYNC": "siste synkronisering:",
-        "LOCAL": "lokal",
-        "LOCAL_REMOTE": "lokal -> ekstern",
-        "REMOTE": "fjernkontroll",
-        "TEXT": "<p>Oppdatering fra Dropbox. Både lokale og eksterne data ser ut til å være endret.</p>",
-        "TITLE": "Dropbox: motstridende data",
-        "USE_LOCAL": "Bruk lokal",
-        "USE_REMOTE": "Bruk ekstern"
-      },
-      "FORM": {
-        "B_GENERATE_TOKEN": "Generer token",
-        "FOLLOW_LINK": "Vennligst åpne følgende lenke og kopier autentiseringskoden som er oppgitt der, inn i inndatafeltet.",
-        "L_ACCESS_TOKEN": "Access Token (generert fra Auth Code)",
-        "L_AUTH_CODE": "Autentiseringskode",
-        "L_ENABLE_SYNCING": "Aktiver Dropbox-synkronisering",
-        "L_SYNC_INTERVAL": "Synkroniseringsintervall",
-        "TITLE": "Synkroniser via Dropbox (anbefalt)"
+        "SYNC_ERROR": "Dropbox: Feil under synkronisering"
       }
     },
     "GITHUB": {
@@ -126,10 +95,7 @@
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. for å filtrere ut endringer selv)",
         "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
-        "TOKEN": "Tilgangstoken",
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
-        "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver"
+        "TOKEN": "Tilgangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne GitHub-problemer for et bestemt repo i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
@@ -146,19 +112,7 @@
         "WRITE_A_COMMENT": "Skriv en kommentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Ukjent feil {{statusCode}} {{errorMsg}}. Grensen for api-rate overskredet?",
-        "ERR_NETWORK": "GitHub: Forespørselen mislyktes på grunn av en nettverksfeil på klientsiden",
-        "ERR_NOT_CONFIGURED": "GitHub: Er ikke riktig konfigurert",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Importerte {{issuesLength}} nye problemer fra git til backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Importert problem \"{{issueText}}\" fra git til backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Utgaven \"{{issueText}}\" ser ut til å bli slettet eller lukket på git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: Ingen oppdatering nødvendig",
-        "ISSUE_UPDATE": "GitHub: Oppdaterte data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Oppdaterte data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: Oppgaver med manglende problemdata funnet. Laster om.",
-        "NEW_COMMENT": "GitHub: Ny kommentar til \"{{issueText}}\"",
-        "POLLING": "GitHub: Avstemningsendringer for problemer",
-        "SHOW_ISSUE_BTN": "Vis meg"
+        "ERR_UNKNOWN": "GitHub: Ukjent feil {{statusCode}} {{errorMsg}}. Grensen for api-rate overskredet?"
       }
     },
     "GITLAB": {
@@ -168,10 +122,7 @@
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. For å filtrere ut endringer selv)",
         "PROJECT": "Full sti eller brukernavn / prosjekt",
-        "TOKEN": "Tilgangstoken",
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitLab til backloggen",
-        "IS_AUTO_POLL": "Poll automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Vis problemer fra git som forslag når du legger til nye oppgaver"
+        "TOKEN": "Tilgangstoken"
       },
       "FORM_SECTION": {
         "HELP": "<p>Her kan du konfigurere SuperProductivity til å liste åpne GitLab-problemer (enten den online-versjonen eller en selvstyrt forekomst) for et bestemt prosjekt i oppgavelagerpanelet i den daglige planvisningen. De vil bli oppført som forslag og vil gi en lenke til problemet, samt mer informasjon om det.</p><p> I tillegg kan du automatisk legge til og synkronisere alle åpne problemer i oppgaven din.</p>",
@@ -188,19 +139,7 @@
         "WRITE_A_COMMENT": "Skriv en kommentar"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: Ukjent feil {{statusCode}} {{errorMsg}}",
-        "ERR_NETWORK": "GitLab: Forespørselen mislyktes på grunn av en nettverksfeil på klientsiden",
-        "ERR_NOT_CONFIGURED": "GitLab: Er ikke riktig konfigurert",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Importerte {{issuesLength}} nye problemer fra git til backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Importert problem \"{{issueText}}\" fra git til backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Utgaven \"{{issueText}}\" ser ut til å være slettet eller lukket på git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: Ingen oppdatering nødvendig",
-        "ISSUE_UPDATE": "GitLab: Oppdaterte data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Oppdaterte data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: Oppgaver med manglende problemdata funnet. Laster om.",
-        "NEW_COMMENT": "GitLab: Ny kommentar til \"{{issueText}}\"",
-        "POLLING": "GitLab: Henter endringer for problemer",
-        "SHOW_ISSUE_BTN": "Vis meg"
+        "ERR_UNKNOWN": "GitLab: Ukjent feil {{statusCode}} {{errorMsg}}"
       }
     },
     "JIRA": {
@@ -250,9 +189,7 @@
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Åpne dialogboksen for å sende arbeidsloggen til jira når underoppgaven er fullført",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Sjekk om det nåværende arbeidet med problemet er tildelt den nåværende brukeren",
         "IS_WORKLOG_ENABLED": "Åpne dialogboksen for å sende arbeidsloggen til Jira når oppgaven er fullført",
-        "SEARCH_JQL_QUERY": "JQL Query for å begrense søkeoppgaver",
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk til problemer i Jira-backloggen",
-        "IS_AUTO_POLL_TICKETS": "Sjekk importerte problemer for endringer automatisk og varsle"
+        "SEARCH_JQL_QUERY": "JQL Query for å begrense søkeoppgaver"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Tillat selvsignert sertifikat",
@@ -275,8 +212,7 @@
           "P2_2": "<em>&#39;Åpne arbeidslogg-dialogboksen når underoppgaven er ferdig og ikke for oppgaver med underoppgavene selv&#39;</em> åpner en arbeidslogg-dialog hver gang du merker en underoppgave for et Jira-problem som ferdig. Fordi du allerede sporer tiden din via underoppgavene, åpnes ingen dialog når du merker selve Jira-oppgaven.",
           "P2_3": "<em>&#39;Send oppdateringer til arbeidsloggen automatisk uten dialog&#39;</em> gjør hva det står. Fordi det å merke en oppgave som utført flere ganger fører til at hele arbeidet spores to ganger, anbefales ikke dette.",
           "P3_1": "Her kan du konfigurere standardovergangene dine på nytt. Jira muliggjør en bred konfigurasjon av overganger som vanligvis kommer til handling som forskjellige kolonner på Jira agile-tavle. Vi kan ikke gjøre antakelser om hvor og når du skal overføre oppgavene dine, og du må angi det manuelt."
-        },
-        "CREDENTIALS": "Legitimasjonserklæring"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Oppdragsgiver",
@@ -308,11 +244,7 @@
         "TRANSITION": "Jira: Sett problemet \"{{issueKey}}\" til \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Overganger lastet. Bruk valgene nedenfor for å tildele dem",
         "TRANSITION_SUCCESS": "Jira: Sett problemet {{issueKey}} til <strong>{{chosenTransition}}</strong>",
-        "UNABLE_TO_REASSIGN": "Jira: Kunne ikke overføre billetten til deg selv, fordi du ikke spesifiserte et brukernavn. Vennligst besøk innstillingene.",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Importerte {{issuesLength}} nye problemer fra Jira til backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Importert problem \"{{issueText}}\" fra Jira til backlog",
-        "ISSUE_UPDATE": "Jira: Oppdaterte data for \"{{issueText}}\"",
-        "POLLING": "Jira: Avstemningsendringer for problemer"
+        "UNABLE_TO_REASSIGN": "Jira: Kunne ikke overføre billetten til deg selv, fordi du ikke spesifiserte et brukernavn. Vennligst besøk innstillingene."
       },
       "STEPPER": {
         "CREDENTIALS": "Innloggingsdetaljer",
@@ -320,12 +252,6 @@
         "LOGIN_SUCCESS": "Vellykket innlogging!",
         "TEST_CREDENTIALS": "Test innlogging",
         "WELCOME_USER": "Velkommen {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Legg automatisk uløste problemer fra GitHub til backloggen",
-        "IS_AUTO_POLL": "Hent automatisk importerte gitproblemer for endringer",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Vis problemer fra git som forslag når du legger til nye oppgaver",
-        "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore"
       }
     },
     "METRIC": {
@@ -371,8 +297,7 @@
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Skriv inn litt tekst for å lagre som notat ...",
-        "DATETIME_LABEL": "Datetid for påminnelse (valgfritt)"
+        "NOTE_LABEL": "Skriv inn litt tekst for å lagre som notat ..."
       },
       "NOTES_CMP": {
         "ADD_BTN": "Legg til en ny kommentar",
@@ -381,26 +306,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Deaktiver analysering av markdown",
         "ENABLE_PARSE": "Aktiver markdown-analyse"
-      },
-      "EDIT_FULLSCREEN": "Rediger i fullskjerm",
-      "ADD_REMINDER": "Legg til påminnelse",
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "Du må oppgi en tittel",
-        "L_DATETIME": "Datotid for påminnelse",
-        "L_TITLE": "Tittel for varsling"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Slumre",
-        "TITLE": "Merk"
-      },
-      "EDIT_SCHEDULED": "Rediger påminnelse",
-      "REMOVE_REMINDER": "Fjern påminnelse",
-      "S": {
-        "ADDED_REMINDER": "Lagt til påminnelse for merknad",
-        "DELETED_REMINDER": "Slettet påminnelse for notat",
-        "UPDATED_REMINDER": "Oppdatert påminnelse for merknad"
-      },
-      "UPDATE_REMINDER": "Oppdateringspåminnelse"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Tilbake til arbeid!",
@@ -562,9 +468,7 @@
         "ADD_ISSUE_TASK": "Legg til utgave nr. {{issueNr}} fra {{issueType}}",
         "CREATE_TASK": "Lag ny oppgave",
         "EXAMPLE": "Eksempel: \"Noen oppgavetittel + prosjektnavn #en tag #en annen tag 10m / 3h\"",
-        "START": "Trykk enter en gang til for å starte",
-        "ADD_TASK": "Legg til oppgave",
-        "ADD_TASK_TO_BACKLOG": "Legg til oppgave i backloggen"
+        "START": "Trykk enter en gang til for å starte"
       },
       "B": {
         "ADD_HALF_HOUR": "Tilsett 1/2 time",
@@ -602,9 +506,7 @@
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
         "SCHEDULE": "Legg til planlagt",
-        "UNSCHEDULE": "Fjern fra planlagt",
-        "DATETIME_FOR": "Datotid for påminnelse",
-        "EDIT": "Rediger påminnelse"
+        "UNSCHEDULE": "Fjern fra planlagt"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
@@ -703,8 +605,7 @@
         "IDLE_FOR": "Du har vært inaktiv for:",
         "SKIP": "Hopp over",
         "TASK": "Oppgave",
-        "TRACK_TO": "Spor til",
-        "TASK_BREAK": "Oppgave + pause"
+        "TRACK_TO": "Spor til"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
@@ -766,67 +667,6 @@
         "NO_DATA": "Ingen oppgaver denne uken ennå.",
         "TITLE": "Tittel"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Kunne ikke autentisere, prøv å logge på igjen!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Disk: Ingen fil med navnet <strong>&quot;{{fileName}}&quot;</strong> ble funnet. <strong>Vil du opprette</strong> den som synkroniseringsfil på Google Disk?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Bruk <strong>eksisterende</strong> fil <strong>&quot;{{fileName}}&quot;</strong> som synkroniseringsfil? Hvis ikke, kan du endre synkroniseringsfilnavnet."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Flere filer med navnet \"{{newFileName}}\" funnet. Slett alle unntatt en, eller velg et annet navn.",
-        "DOWNLOADING_UPDATE": "Google Drive: Det er en ekstern oppdatering! Laster ned ...",
-        "ERROR": "Google Disk - Feil: {{errTxt}}",
-        "ERROR_INITIAL_IMPORT": "Google Disk: Feil under forsøk på å importere data i utgangspunktet",
-        "LOCAL_UP_TO_DATE": "Google Drive: Lokale data er allerede oppdatert",
-        "NO_UPDATE_REQUIRED": "Google Drive: Ingen oppdatering nødvendig",
-        "REMOTE_UP_TO_DATE": "Google Drive: Eksterne data er allerede oppdatert",
-        "SUCCESS_IMPORT": "Google Drive: Lagret sikkerhetskopi",
-        "SYNCING": "Google Drive: Synkronisering"
-      },
-      "S_API": {
-        "ERR": "GoogleApi-feil: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Ingen fil-ID er spesifisert",
-        "ERR_NO_FILE_NAME": "GoogleApi: Ingen filnavn er spesifisert",
-        "SUCCESS_LOGIN": "GoogleApi: Innlogging vellykket"
-      },
-      "D_CONFIRM_LOAD": {
-        "LAST_MOD": "siste modifikasjon:",
-        "LAST_SYNC": "siste synkronisering",
-        "LOCAL": "lokal",
-        "LOCAL_REMOTE": "lokal <=> ekstern",
-        "OVERWRITE_LOCAL": "Overskriv lokal",
-        "OVERWRITE_REMOTE": "Overskriv ekstern",
-        "REMOTE": "ekstern",
-        "TEXT": "<p>Oppdatering fra Google Drive Backup. Både lokale og eksterne data ser ut til å være endret. Vil du overskrive ikke-lagrede lokale endringer? <strong>All data vil gå tapt for alltid</strong>.</p>",
-        "TITLE": "Overskrive lokale data med GDrive Update?"
-      },
-      "D_CONFIRM_SAVE": {
-        "LAST_MOD": "siste modifikasjon:",
-        "LAST_SYNC": "siste synkronisering",
-        "LOCAL": "lokal",
-        "LOCAL_REMOTE": "lokal <=> ekstern",
-        "OVERWRITE_LOCAL": "Overskriv lokal",
-        "OVERWRITE_REMOTE": "Overskriv ekstern",
-        "REMOTE": "ekstern",
-        "TEXT": "<p>Det ser ut til å være noen endringer på Google Drive som du ikke har lokalt. Vil du overskrive dem uansett?</p>",
-        "TITLE": "Vil du overskrive ikke lagrede data på Google Disk?"
-      },
-      "SYNC_CFG": {
-        "AUTO_LOGIN": "Automatisk pålogging når du starter appen",
-        "AUTO_SYNC": "Automatisk synkronisering av data til ekstern",
-        "BACKUP_NOW": "Sikkerhetskopier nå",
-        "COMPRESS": "Komprimer data",
-        "ENABLE": "Aktiver synkronisering via Google Disk",
-        "LOAD_FROM": "Last fra GDrive",
-        "LOAD_ON_STARTUP": "Last inn eksterne data ved oppstart",
-        "NOTIFY": "Varsle når du synkroniserer",
-        "SYNC_FILE_NAME": "Synkroniser filnavn",
-        "SYNC_INTERVAL": "Synkroniseringsintervall",
-        "UPDATE_SYNC_FILE": "Oppdater synkroniseringsfil"
-      }
     }
   },
   "FILE_IMEX": {
@@ -875,8 +715,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Aktiver håndtering av inaktiv tid",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Bare utløs tomgangsdialog når en aktuell oppgave er valgt",
       "MIN_IDLE_TIME": "Utløser tomgang etter X",
-      "TITLE": "Tomgangshåndtering",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Usporet inaktiv tid tilbakestiller 'ta en pause'-timer"
+      "TITLE": "Tomgangshåndtering"
     },
     "IMEX": {
       "HELP": "<p>Her kan du eksportere alle dataene dine som en <strong>JSON</strong> for sikkerhetskopiering, men også for å bruke dem i en annen kontekst (f.eks. Vil du kanskje eksportere prosjektene dine i nettleseren og importere dem til desktopversjonen).</p><p> Importen forventer at gyldig JSON kopieres til tekstområdet. <strong>MERKNAD: Når du trykker på importknappen, overskrives alle dine nåværende innstillinger og data!</strong></p>",
@@ -934,10 +773,7 @@
       "IS_DARK_MODE": "Mørk modus",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
-      "TITLE": "Diverse innstillinger",
-      "IS_AUTO_START_NEXT_TASK": "Begynn å spore neste oppgave når du merker nåværende som ferdig",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Gi beskjed når tidsestimatet ble overskredet",
-      "IS_DISABLE_INITIAL_DIALOG": "Deaktiver innledende infodialog (du kan gå glipp av viktige oppdateringer!)"
+      "TITLE": "Diverse innstillinger"
     },
     "POMODORO": {
       "BREAK_DURATION": "Varighet av korte pauser",
@@ -957,8 +793,7 @@
       "DONE_SOUND": "Oppgavelyd",
       "IS_INCREASE_DONE_PITCH": "Øk tonehøyde for hver oppgave",
       "TITLE": "Lyd",
-      "VOLUME": "Volum",
-      "IS_PLAY_DONE_SOUND": "Spill lyd når oppgaven er merket som ferdig"
+      "VOLUME": "Volum"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div><p>Lar deg konfigurere en påminnelse som kommer igjen når du har jobbet i en spesifisert tid uten å ta en pause.</p><p> Du kan endre meldingen som vises. $ {duration} blir erstattet med tiden brukt uten pause.</p></div>",
@@ -969,17 +804,6 @@
       "MIN_WORKING_TIME": "Trigger ta en pause varsel etter X arbeider uten en",
       "MOTIVATIONAL_IMGS": "Motiverende bilde (nettadresse)",
       "TITLE": "Pausepåminnelse"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Konfigurer et banner for å vises i tilfelle du glemte å starte tidssporing.",
-      "L_IS_ENABLED": "Aktivert",
-      "L_IS_SHOW_ON_MOBILE": "Vis på mobilappen",
-      "L_MIN_TIME": "Tid til å vente før du viser Banner",
-      "TITLE": "Påminnelse om tidssporing"
-    },
-    "GOOGLE_DRIVE_SYNC": {
-      "HELP": "Her kan du konfigurere appen din til automatisk å synkronisere til og fra en enkelt Google Drive-fil. Alle data lagres ukryptert, så pass på at du ikke ved en feiltakelse deler denne filen med noen.",
-      "TITLE": "Synkroniser via Google Disk"
     }
   },
   "GLOBAL_SNACK": {
@@ -987,8 +811,7 @@
     "ERR_COMPRESSION": "Feil for kompresjonsgrensesnitt",
     "PERSISTENCE_DISALLOWED": "Data vil ikke vedvares permanent. Vær oppmerksom på at dette kan føre til tap av data !!",
     "RUNNING_X": "Kjører \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ble trykket, men åpne bokmerkesnarvei er bare tilgjengelig i prosjektsammenheng.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} ble trykket, men snarveien til åpne notater er bare tilgjengelig i prosjektsammenheng."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ble trykket, men åpne bokmerkesnarvei er bare tilgjengelig i prosjektsammenheng."
   },
   "GPB": {
     "ASSETS": "Laster inn ressurser ...",
@@ -997,9 +820,7 @@
     "DBX_META": "Dropbox: Få metadata om fil ...",
     "DBX_UPLOAD": "Dropbox: Last opp fil ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Last problemdata ...",
-    "JIRA_LOAD_ISSUE": "Jira: Last inn data ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Last ned fil ...",
-    "GDRIVE_UPLOAD": "Google Drive: Last opp fil ..."
+    "JIRA_LOAD_ISSUE": "Jira: Last inn data ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Legg til ny oppgave",
@@ -1020,9 +841,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Vis / skjul bokmerker",
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
-    "WORKLOG": "Arbeidslogg",
-    "MANAGE_PROJECTS": "Administrer prosjekter",
-    "SCHEDULED": "Planlagt"
+    "WORKLOG": "Arbeidslogg"
   },
   "PDS": {
     "BACK": "Vent, jeg glemte noe!",
@@ -1051,11 +870,7 @@
     "TASKS_COMPLETED": "Oppgaver fullført",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tid brukt / estimert",
     "TIME_SPENT_ESTIMATE_TITLE": "Tidsbruk: Total tid brukt i dag. Arkiverte oppgaver er ikke inkludert. - Beregnet tid: Anslått tid for oppgaver som jobbes med i dag minus tiden som allerede er brukt sammen med dem andre dager.",
-    "WEEK": "Uke",
-    "EVALUATION": "Evaluering",
-    "PLAN": "Plan",
-    "TASK_LIST": "Oppgaveliste",
-    "TODAY": "I dag"
+    "WEEK": "Uke"
   },
   "PM": {
     "TITLE": "Prosjektstatistikk"
@@ -1116,40 +931,5 @@
     "TIME_ESTIMATED": "Anslått tid:",
     "WITHOUT_BREAK": "Uten pause:",
     "WORKING_TODAY": "Jobber i dag:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arkiverte prosjekter",
-    "ARCHIVE_PROJECT": "Arkivprosjekt",
-    "DELETE_PROJECT": "Slett prosjekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Er du sikker på at du vil arkivere dette prosjektet? Arkiverte prosjekter vises ikke lenger i menyen, og du kan ikke få tilgang til dataene deres uten å gjenopprette dem. Det anbefales at du sikkerhetskopierer dataene dine før du gjør dette.",
-      "OK": "Arkiv"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Er du sikker på at du vil slette dette prosjektet? Det anbefales å sikkerhetskopiere dataene dine før du gjør dette.",
-      "OK": "Slett"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Er du sikker på at du vil fjerne arkivet for dette prosjektet?",
-      "OK": "Unarkiv"
-    },
-    "EDIT_PROJECT": "Rediger prosjekt",
-    "EXPORT_PROJECT": "Eksporter prosjekt",
-    "GITHUB_CONFIGURED": "GitHub-integrasjon konfigurert",
-    "GITLAB_CONFIGURED": "GitLab-integrasjon konfigurert",
-    "IMPORT_FROM_FILE": "Importer fra fil",
-    "JIRA_CONFIGURED": "Jira Integration konfigurert",
-    "S_INVALID_JSON": "Ugyldig json for prosjektfilen",
-    "TITLE": "Prosjektoversikt",
-    "UN_ARCHIVE_PROJECT": "Unarchive Project",
-    "CREATE_NEW": "Lag ny"
-  },
-  "S": {
-    "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under dataimporten. Faller tilbake til lokal sikkerhetskopi.",
-      "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldig data",
-      "IMPORTING": "Importerer data",
-      "SUCCESS_IMPORT": "Data importert"
-    }
   }
 }

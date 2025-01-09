@@ -8,10 +8,7 @@
     "B_OFFLINE": "Zostałeś odłączony od internetu. Synchronizacja nie będzie działać.",
     "UPDATE_MAIN_MODEL": "Super Productivity posiada ważną aktualizację! Wymagana jest migracja danych, która spowoduje że starsze wersje aplikacji nie będą mogły ich używać.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
-    "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?",
-    "D_INITIAL": {
-      "TITLE": "Witam w v{{nr}}"
-    }
+    "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?"
   },
   "BL": {
     "NO_TASKS": "Backlog nie zawiera zadań"
@@ -87,10 +84,7 @@
         "CALDAV_RESOURCE": "Nazwa zasobu CalDav do synchronizacji (kalendarz)",
         "CALDAV_URL": "CalDav URL (podstawowy URL)",
         "CALDAV_USER": "Twój użytkownik CalDav",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania",
-        "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania CalDav do backlogu",
-        "IS_AUTO_POLL": "Automatycznie odpytuj importowane zadania CalDav pod kątem zmian",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Pokaż niedokończone zadania CalDav jako sugestie podczas dodawania nowych zadań"
+        "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p>",
@@ -106,14 +100,7 @@
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
         "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server.",
-        "ERR_NETWORK": "CalDav: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "CalDav: Not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "calDav: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "CalDav: Imported issue \"{{issueText}}\" from to backlog",
-        "ISSUE_NO_UPDATE_REQUIRED": "CalDav: No update required.",
-        "ISSUE_UPDATE": "Caldav: Uodated data for \"{{issueText}}\"",
-        "POLLING": "Caldav: Polling changes for todos"
+        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server."
       }
     },
     "CONFIG": {
@@ -137,11 +124,7 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "REPO": "username/repositoryName",
-        "TOKEN": "Access Token",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "TOKEN_DESCRIPTION": "Required for private repository access"
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
@@ -158,19 +141,7 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?",
-        "ERR_NETWORK": "GitHub: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "GitHub: Is not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "GitHub: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitHub: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitHub: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitHub: No update required",
-        "ISSUE_UPDATE": "GitHub: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitHub: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitHub: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "GitHub: New comment for \"{{issueText}}\"",
-        "POLLING": "GitHub: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
       }
     },
     "GITLAB": {
@@ -181,10 +152,7 @@
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
         "PROJECT": "project ID or user name/project",
-        "TOKEN": "Access Token",
-        "IS_AUTO_IMPORT_ISSUES": "Automatycznie dodaj niezrobione zadania GitLab do backlogu",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Pokaż niedokończone zadania z git jako sugestie podczas dodawania nowych zadań"
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
@@ -201,19 +169,7 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}",
-        "ERR_NETWORK": "GitLab: Request failed because of a client side network error",
-        "ERR_NOT_CONFIGURED": "GitLab: Is not properly configured",
-        "IMPORTED_MULTIPLE_ISSUES": "GitLab: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "GitLab: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "GitLab: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_NO_UPDATE_REQUIRED": "GitLab: No update required",
-        "ISSUE_UPDATE": "GitLab: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "GitLab: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "GitLab: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "GitLab: New comment for \"{{issueText}}\"",
-        "POLLING": "GitLab: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
       }
     },
     "JIRA": {
@@ -263,9 +219,7 @@
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
         "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add issues to Jira backlog",
-        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify"
+        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Allow self signed certificate",
@@ -288,8 +242,7 @@
           "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
           "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
           "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
-        },
-        "CREDENTIALS": "Credentials"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Przypisany",
@@ -321,11 +274,7 @@
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings.",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
-        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
-        "POLLING": "Jira: Polling Changes for issues"
+        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
         "CREDENTIALS": "Credentials",
@@ -333,12 +282,6 @@
         "LOGIN_SUCCESS": "Login successful!",
         "TEST_CREDENTIALS": "Test Credentials",
         "WELCOME_USER": "Welcome {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved issues from GitHub to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
-        "REPO": "username/repositoryName"
       }
     },
     "METRIC": {
@@ -385,8 +328,7 @@
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Enter some text to save as note...",
-        "DATETIME_LABEL": "Datetime for reminder (optional)"
+        "NOTE_LABEL": "Enter some text to save as note..."
       },
       "NOTES_CMP": {
         "ADD_BTN": "Add new Note",
@@ -395,26 +337,7 @@
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
-      },
-      "EDIT_FULLSCREEN": "Edit in fullscreen",
-      "ADD_REMINDER": "Dodaj przypomnienie",
-      "D_ADD_REMINDER": {
-        "E_ENTER_TITLE": "You need to enter a title",
-        "L_DATETIME": "Datetime for reminder",
-        "L_TITLE": "Title for notification"
-      },
-      "D_VIEW_REMINDER": {
-        "SNOOZE": "Snooze",
-        "TITLE": "Note"
-      },
-      "EDIT_SCHEDULED": "Edit reminder",
-      "REMOVE_REMINDER": "Remove reminder",
-      "S": {
-        "ADDED_REMINDER": "Added reminder for note",
-        "DELETED_REMINDER": "Deleted reminder for note",
-        "UPDATED_REMINDER": "Updated reminder for note"
-      },
-      "UPDATE_REMINDER": "Update reminder"
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Wróć do pracy!",
@@ -574,14 +497,10 @@
       },
       "FORM": {
         "DROPBOX": {
-          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)",
-          "B_GENERATE_TOKEN": "Generate Token",
-          "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field.",
-          "L_AUTH_CODE": "Auth Code"
+          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
         },
         "GOOGLE": {
-          "L_SYNC_FILE_NAME": "Sync File Name",
-          "L_IS_COMPRESS_DATA": "Compress data"
+          "L_SYNC_FILE_NAME": "Sync File Name"
         },
         "L_ENABLE_SYNCING": "Enable Syncing",
         "L_SYNC_INTERVAL": "Sync Interval",
@@ -591,8 +510,7 @@
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
-          "L_USER_NAME": "Username",
-          "L_SYNC_FILE_PATH": "Sync File Path"
+          "L_USER_NAME": "Username"
         }
       },
       "S": {
@@ -602,8 +520,7 @@
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
-        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
-        "SUCCESS": "Data imported"
+        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
       }
     },
     "TAG": {
@@ -649,9 +566,7 @@
         "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
         "CREATE_TASK": "Create new task",
         "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
-        "START": "Press enter one more time to start",
-        "ADD_TASK": "Add task",
-        "ADD_TASK_TO_BACKLOG": "Add task to backlog"
+        "START": "Press enter one more time to start"
       },
       "B": {
         "ADD_HALF_HOUR": "Add 1/2 hour",
@@ -697,9 +612,7 @@
         "RO_START": "when it starts",
         "RO_NEVER": "Never",
         "SCHEDULE": "Schedule",
-        "UNSCHEDULE": "Unschedule",
-        "DATETIME_FOR": "Datetime for reminder",
-        "EDIT": "Edit Reminder"
+        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
@@ -793,8 +706,7 @@
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
-      "LUNCH_BREAK": "Przerwa na lunch",
-      "MENU_TITLE": "Schedule"
+      "LUNCH_BREAK": "Przerwa na lunch"
     },
     "TIME_TRACKING": {
       "B": {
@@ -811,8 +723,7 @@
         "IDLE_FOR": "Nie pracowałeś przez:",
         "SKIP": "Pomiń",
         "TASK": "Zadanie",
-        "TRACK_TO": "Przypisz do",
-        "TASK_BREAK": "Zadanie+Przerwa"
+        "TRACK_TO": "Przypisz do"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stwórz</em> i przypisz do",
@@ -877,26 +788,6 @@
         "NO_DATA": "No tasks this week yet.",
         "TITLE": "Title"
       }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Error while creating sync file. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Updated sync file name"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
-      }
     }
   },
   "FILE_IMEX": {
@@ -946,8 +837,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
       "MIN_IDLE_TIME": "Trigger idle after X",
-      "TITLE": "Idle Handling",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
+      "TITLE": "Idle Handling"
     },
     "IMEX": {
       "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
@@ -1014,10 +904,7 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Ustawienia różne",
-      "IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
-      "IS_DISABLE_INITIAL_DIALOG": "Disable initial info dialog (you might miss important updates!)"
+      "TITLE": "Ustawienia różne"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1038,8 +925,7 @@
       "DONE_SOUND": "Dźwięk zrobionego zadania",
       "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację dla każdego wykonanego zadania",
       "TITLE": "Dźwięk",
-      "VOLUME": "Głośność",
-      "IS_PLAY_DONE_SOUND": "Odtwórz dźwięk kiedy zadanie zostanie zrobione"
+      "VOLUME": "Głośność"
     },
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
@@ -1059,13 +945,6 @@
       "L_WORK_START": "Work Day Start",
       "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
-      "L_IS_ENABLED": "Enabled",
-      "L_IS_SHOW_ON_MOBILE": "Show on mobile app",
-      "L_MIN_TIME": "Time to wait before showing Banner",
-      "TITLE": "Time Tracking Reminder"
     }
   },
   "GLOBAL_SNACK": {
@@ -1073,8 +952,7 @@
     "ERR_COMPRESSION": "Błąd kompresji interfejsu",
     "PERSISTENCE_DISALLOWED": "Dane nie będą trzymane na stałe. Bądź świadom, że może to prowadzić do utraty danych!!",
     "RUNNING_X": "Uruchomiono \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": "{{keyCombo}} pressed, but open notes shortcut is only available when in project context."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -1086,9 +964,7 @@
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "Loading remote data",
     "WEB_DAV_DOWNLOAD": "WebDAV: Downloading data...",
-    "WEB_DAV_UPLOAD": "WebDAV: Uploading data...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Download file...",
-    "GDRIVE_UPLOAD": "Google Drive: Upload file..."
+    "WEB_DAV_UPLOAD": "WebDAV: Uploading data..."
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
@@ -1110,9 +986,7 @@
     "TOGGLE_SHOW_BOOKMARKS": "Pokaż/Ukryj Zakładki",
     "TOGGLE_SHOW_NOTES": "Pokaż/Ukryj Notatki Projektu",
     "TOGGLE_TRACK_TIME": "Start/Stop zliczania czasu",
-    "WORKLOG": "Czas pracy",
-    "MANAGE_PROJECTS": "Zarządzaj projektami",
-    "SCHEDULED": "Zaplanowane"
+    "WORKLOG": "Czas pracy"
   },
   "PDS": {
     "BACK": "Poczekaj! Zapomniałem czegoś...",
@@ -1141,11 +1015,7 @@
     "TASKS_COMPLETED": "Zadania ukończone",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Czas spędzony / Estymacja",
     "TIME_SPENT_ESTIMATE_TITLE": "Czas spędzony: Całkowity czas spędzony. Nie liczymy zadań zarchiwowanych. – Estymacja: Czas zaplanowany na wykonane zadania bez czasu pracy wykonanym w innych dniach.",
-    "WEEK": "Tydzień",
-    "EVALUATION": "Ocena",
-    "PLAN": "Plan",
-    "TASK_LIST": "Lista zadań",
-    "TODAY": "Dziś"
+    "WEEK": "Tydzień"
   },
   "PM": {
     "TITLE": "Metryki Projektu"
@@ -1209,32 +1079,5 @@
     "TIME_ESTIMATED": "Zaplanowany Czas:",
     "WITHOUT_BREAK": "Bez Przerwy:",
     "WORKING_TODAY": "Czas pracy:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Zarchiwizowane projekty",
-    "ARCHIVE_PROJECT": "Archiwizuj Projekt",
-    "DELETE_PROJECT": "Usuń Projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Jesteś pewien że chcesz zarchiwizować projekt? Nie bedzie się pojawiał na liście projektów dopóki nie zostanie przywrócony. Polecamy zrobić kopię zapasową przed wykonaniem akcji.",
-      "OK": "Zarchiwizuj"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Jesteś pewien że chcesz go usunąć? Polecamy najpierw zrobić kopię zapasową.",
-      "OK": "Usuń"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Jesteś pewien że chcesz przywrócić projekt?",
-      "OK": "Przywróć"
-    },
-    "EDIT_PROJECT": "Edytuj Projekt",
-    "EXPORT_PROJECT": "Wyeksportuj projekt",
-    "GITHUB_CONFIGURED": "Integracja z GitHub Skonfigutowana",
-    "GITLAB_CONFIGURED": "Integracja z GitLab Skonfigutowana",
-    "IMPORT_FROM_FILE": "Importuj z pliku",
-    "JIRA_CONFIGURED": "Integracja z Jira Skonfigutowana",
-    "S_INVALID_JSON": "Niepoprawny plik JSON projektu",
-    "TITLE": "Podgląd Projektu",
-    "UN_ARCHIVE_PROJECT": "Przywróć Projekt",
-    "CREATE_NEW": "Stwórz Nowy"
   }
 }
