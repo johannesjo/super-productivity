@@ -311,6 +311,7 @@
       "DEFAULT_PROJECT_LABEL": "Суперпродуктивний проект за замовчуванням",
       "HOW_TO_GET_A_TOKEN": "Як отримати токен?",
       "S": {
+        "ERR_GENERIC": "{{issueProviderName}} Помилка: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Запит не вдався через мережеву помилку на стороні клієнта",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Неправильно налаштовано",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Імпортовано {{nr}} нових {{issuesStr}}",

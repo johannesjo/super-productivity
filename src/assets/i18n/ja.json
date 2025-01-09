@@ -260,7 +260,8 @@
         "T_ALREADY_TRACKED": "すでに追跡済み",
         "T_TITLE": "タイトル",
         "T_TO_BE_SUBMITTED": "提出予定",
-        "TITLE": "Issueに費やした時間をGitLabに提出する"
+        "TITLE": "Issueに費やした時間をGitLabに提出する",
+        "TOTAL_MSG": "今日は合計で <em>{{totalTimeToSubmit}}</em> の作業時間を <em>{{nrOfTasksToSubmit}}</em> の異なる問題に送信します。"
       },
       "FORM": {
         "FILTER": "カスタムフィルター",
@@ -615,7 +616,8 @@
       },
       "S": {
         "REMOVED_PLAN_DATE": "タスク「{{taskTitle}}」の計画日が削除されました。",
-        "TASK_ALREADY_PLANNED": "タスクはすでに {{date}}で計画されている。"
+        "TASK_ALREADY_PLANNED": "タスクはすでに {{date}}で計画されている。",
+        "TASK_PLANNED_FOR": " <strong>{{date}}</strong>{{extra}}に予定されているタスク"
       },
       "TASK_DRAWER": "タスクドロワー"
     },
@@ -883,6 +885,7 @@
         "L_ENABLE_COMPRESSION": "圧縮を有効にする（データ転送の高速化）",
         "L_ENABLE_ENCRYPTION": "エンドツーエンドの暗号化を有効にする（実験的） - 同期プロバイダがデータにアクセスできないようにする。",
         "L_ENABLE_SYNCING": "同期を有効にする",
+        "L_ENCRYPTION_NOTES": "重要な注意: すべてが機能するには、次の同期の</strong> 前に、他のデバイスに同じパスワードを設定する必要があります <strong>。安全なパスワードを選択してください。また、このパスワードを忘れた場合、データにアクセスできなくなります <strong>。キーを持っているのはあなただけなので、回復は不可能です</strong>。暗号化はおそらくほとんどの攻撃者を阻止するのに十分なものですが、 <strong>保証はありません。</strong>",
         "L_ENCRYPTION_PASSWORD": "暗号化パスワード（忘れないこと）",
         "L_SYNC_INTERVAL": "同期間隔",
         "L_SYNC_PROVIDER": "同期プロバイダー",
@@ -1092,13 +1095,25 @@
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "カスタムリピート設定",
+        "CUSTOM_AND_TIME": "カスタム、 {{timeStr}}",
         "CUSTOM_WEEKLY": "{{daysStr}}",
         "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
         "DAILY": "毎日",
         "DAILY_AND_TIME": "毎日、 {{timeStr}}。",
+        "EVERY_X_DAILY": " {{x}} 日ごと",
+        "EVERY_X_DAILY_AND_TIME": " {{x}} 日ごとに、 {{timeStr}}",
+        "EVERY_X_MONTHLY": " {{x}} か月ごと",
+        "EVERY_X_MONTHLY_AND_TIME": " {{x}} か月ごとに、 {{timeStr}}",
+        "EVERY_X_YEARLY": " {{x}} 年ごと",
+        "EVERY_X_YEARLY_AND_TIME": " {{x}} 年ごとに、 {{timeStr}}",
         "MONDAY_TO_FRIDAY": "月～金",
+        "MONDAY_TO_FRIDAY_AND_TIME": "月曜〜金曜、 {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "毎月 {{dateDayStr}}日に",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "毎月 {{dateDayStr}}日、 {{timeStr}}日"
+        "MONTHLY_CURRENT_DATE_AND_TIME": "毎月 {{dateDayStr}}日、 {{timeStr}}日",
+        "WEEKLY_CURRENT_WEEKDAY": "毎週 {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "毎週 {{weekdayStr}}、 {{timeStr}}",
+        "YEARLY_CURRENT_DATE": " {{dayAndMonthStr}}の年間",
+        "YEARLY_CURRENT_DATE_AND_TIME": "年間 {{dayAndMonthStr}}、 {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "この反復可能なタスク用に {{tasksNr}} 個のインスタンスが作成されています。これらすべてをプロジェクト \"{{projectName}}\" に移動しますか？\"?",
@@ -1135,6 +1150,8 @@
         "NOTES": "デフォルト・ノート",
         "ORDER": "注文",
         "ORDER_DESCRIPTION": "繰り返し可能なタスクの作成順序。同時に作成された繰り返し可能なタスクにのみ影響します。値が小さいほど、タスクはリストの上位に作成され、数値が小さいほど、リストの下位に作成されます。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
+        "Q_CUSTOM": "カスタム繰り返し設定",
+        "Q_DAILY": "毎日",
         "Q_MONDAY_TO_FRIDAY": "毎週月曜日から金曜日",
         "Q_MONTHLY_CURRENT_DATE": "毎月 {{dateDayStr}}日に",
         "Q_WEEKLY_CURRENT_WEEKDAY": "毎週 {{weekdayStr}}日",
@@ -1293,6 +1310,7 @@
       "TITLE": "自動バックアップ"
     },
     "CALENDARS": {
+      "BROWSER_WARNING": "クロスオリジン制限 <b>のため、これは Super Productivity のブラウザ バージョンでは動作しない可能性があります。<br /> この機能を使用するには、 <a href=\"https://super-productivity.com/download/\">デスクトップ バージョン</a> をダウンロードしてください。</b>",
       "CAL_PATH": "ICalソースのURL",
       "CAL_PROVIDERS": "カレンダー・プロバイダー（実験的、オプション）",
       "CHECK_UPDATES": "リモートのアップデートを毎X回チェックする",
@@ -1449,6 +1467,7 @@
       "L_LUNCH_BREAK_START": "昼休み開始",
       "L_WORK_END": "就業日の終わり",
       "L_WORK_START": "就業日開始",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "例 13:00",
       "TITLE": "タイムライン",
       "WORK_START_END_DESCRIPTION": "例えば17:00"
     },
@@ -1554,6 +1573,7 @@
     "TASK_LIST": "タスクリスト",
     "TASKS": "タスク",
     "TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
+    "TOGGLE_SHOW_ISSUE_PANEL": "問題パネルの表示/非表示",
     "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
     "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
     "TRIGGER_SYNC": "手動で同期をトリガーする",

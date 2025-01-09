@@ -1,9 +1,12 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "لطفا بررسی کنید و تصمیم بگیرید که چه کاری انجام دهید.",
       "SYNC_CONFLICT_TITLE": "یک تضاد همگام سازی رخ داد"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "برنامه در حال اجرا در پس زمینه برای امکان همگام سازی در صورت فعال بودن",
+      "NO_ACTIVE_TASKS": "بدون کار فعال",
       "SYNCING": "در حال همگام سازی"
     }
   },
@@ -113,6 +116,19 @@
         "ISSUE_NOT_FOUND": "CalDav: به نظر می رسد Todo \"{{issueId}}\" در سرور حذف شده است."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "ADD_AS_TASK": "به عنوان وظیفه اضافه کنید",
+        "FOCUS_TASK": "تمرکز وظیفه",
+        "TXT": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!<br> (و {{nrOfOtherBanners}} رویداد دیگر در موعد مقرر)",
+        "TXT_PAST": "<strong>{{title}}</strong> در <strong>{{start}}</strong>شروع شد!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> در <strong>{{start}}</strong>شروع شد!<br> (و {{nrOfOtherBanners}} رویداد دیگر در موعد مقرر)"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "خطای ارائه دهنده تقویم: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": "تنظیمات برای <strong>{{sectionKey}}</strong> بروز رسانی شد"
@@ -120,7 +136,11 @@
     },
     "DOMINA_MODE": {
       "FORM": {
-        "L_TEXT": "متن"
+        "HELP": "هنگام پیگیری زمان انجام یک کار، عبارت پیکربندی شده را هر X تکرار می کند.",
+        "L_INTERVAL": "فاصله برای تکرار عبارت",
+        "L_TEXT": "متن",
+        "L_TEXT_DESCRIPTION": "به عنوان مثال: \"روی ${currentTaskTitle}کار کنید!\"",
+        "TITLE": "حالت Domina"
       }
     },
     "DROPBOX": {
@@ -130,7 +150,8 @@
         "AUTH_ERROR": "Dropbox: نشانه دسترسی نامعتبر ارائه شده است",
         "AUTH_ERROR_ACTION": "تغییر توکن",
         "OFFLINE": "Dropbox: همگام سازی امکان پذیر نیست ، زیرا آفلاین است",
-        "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی"
+        "SYNC_ERROR": "Dropbox: خطا هنگام همگام سازی",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: قادر به ایجاد چالش PKCE نیست."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
@@ -141,28 +162,61 @@
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
       "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
+      "CONGRATS": "برای تکمیل این جلسه تبریک می گویم!",
+      "CONTINUE_FOCUS_SESSION": "ادامه جلسه تمرکز",
+      "FINISH_TASK_AND_SELECT_NEXT": "کار را تمام کنید و next را انتخاب کنید",
       "GET_READY": "برای نشست تمرکز خود آماده شوید!",
       "GO_TO_PROCRASTINATION": "هنگام اهمال‌کاری، کمک بگیرید",
       "GOGOGO": "برو، برو، برو!!!",
       "NEXT": "بعدی",
+      "ON": "در",
+      "OPEN_ISSUE_IN_BROWSER": "موضوع را در مرورگر باز کنید",
       "POMODORO_BACK": "بازگشت",
       "POMODORO_DISABLE": "غیرفعال کردن پومودورو",
+      "POMODORO_INFO": "با فعال بودن تایمر pomodoro نمی توان از جلسات فوکوس استفاده کرد.",
+      "PREP_GET_MENTALLY_READY": "از نظر ذهنی آماده باشید تا متمرکز و سازنده باشید",
+      "PREP_SIT_UPRIGHT": "صاف بنشینید (یا بایستید).",
+      "PREP_STRETCH": "حرکات کششی ملایم انجام دهید",
+      "SELECT_ANOTHER_TASK": "وظیفه دیگری را انتخاب کنید",
+      "SELECT_TASK": "Task را برای تمرکز روی آن انتخاب کنید",
+      "SET_FOCUS_SESSION_DURATION": "مدت زمان جلسه تمرکز را تنظیم کنید",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "نمایش/پنهان کردن یادداشت‌ها و پیوست‌ها",
+      "START_FOCUS_SESSION": "شروع جلسه تمرکز",
+      "START_NEXT_FOCUS_SESSION": "جلسه تمرکز بعدی را شروع کنید",
       "WORKED_FOR": "شما کار کردید به مدت"
     },
     "GITEA": {
+      "DIALOG_INITIAL": {
+        "TITLE": "راه اندازی Gitea برای پروژه"
+      },
       "FORM": {
+        "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
+        "HOST": "میزبان (به عنوان مثال: https://try.gitea.io)",
+        "REPO_FULL_NAME": "نام کاربری یا نام سازمان/پروژه",
+        "REPO_FULL_NAME_DESCRIPTION": "را می توان به عنوان بخشی از آدرس اینترنتی، هنگام مشاهده پروژه در مرورگر یافت.",
+        "SCOPE": "دامنه",
         "SCOPE_ALL": "همه",
+        "SCOPE_ASSIGNED": "به من اختصاص داده است",
         "SCOPE_CREATED": "ایجاد شده توسط من",
         "TOKEN": "توکن دسترسی"
       },
+      "FORM_SECTION": {
+        "HELP": "<p>در اینجا می‌توانید SuperProductivity را پیکربندی کنید تا مشکلات باز Gitea را برای یک مخزن خاص در پانل ایجاد کار در نمای برنامه‌ریزی روزانه فهرست کند. آنها به عنوان پیشنهاد فهرست می شوند و پیوندی به موضوع و همچنین اطلاعات بیشتری در مورد آن ارائه می دهند.</p> <p>علاوه بر این، می‌توانید به‌طور خودکار همه مسائل باز را اضافه و وارد کنید.</p><p>برای دریافت محدودیت‌های استفاده و دسترسی، می‌توانید یک نشانه دسترسی ارائه کنید.",
+        "TITLE": "گیته"
+      },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "مأمور",
         "AT": "در",
         "DESCRIPTION": "توضیحات",
         "LABELS": "برچسب‌ها",
+        "MARK_AS_CHECKED": "به‌روزرسانی‌ها را علامت‌گذاری کنید",
         "PROJECT": "پروژه",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "WRITE_A_COMMENT": "یک کامنت بنویسید"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Gitea: خطای ناشناخته {{statusCode}} {{errorMsg}}. از حد Api Rate فراتر رفته است؟"
       }
     },
     "GITHUB": {
@@ -171,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "IS_ASSIGNEE_FILTER": "فقط مشکلاتی را وارد کنید که به من اختصاص داده شده است",
         "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
         "TOKEN": "توکن دسترسی"
       },
@@ -184,12 +239,15 @@
         "DESCRIPTION": "توضیحات",
         "LABELS": "برچسب ها",
         "LAST_COMMENT": "آخرین نظر",
+        "LOAD_ALL_COMMENTS": "همه {{nr}} نظرات را بارگیری کنید",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "بارگیری توضیحات و همه نظرات",
         "MARK_AS_CHECKED": "بروزرسانی ها به عنوان بررسی شده نشان شود.",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "WRITE_A_COMMENT": "دیدگاهتان را بنویسید"
       },
       "S": {
+        "CONFIG_ERROR": "GitHub: خطا در هنگام نقشه برداری داده ها. آیا نام مخزن شما صحیح است؟",
         "ERR_UNKNOWN": "GitHub: خطای ناشناخته{{errorMsg}} {{statusCode}} . محدودیت نرخ Api بیش از?"
       }
     },
@@ -198,12 +256,20 @@
         "TITLE": "راه اندازی گیت لاب برای پروژه"
       },
       "DIALOG_SUBMIT_WORKLOG": {
-        "T_TITLE": "عنوان"
+        "PAST_DAY_INFO": "مدت زمان از پیش پر شده حاوی داده های پیگیری نشده روزهای گذشته است.",
+        "T_ALREADY_TRACKED": "قبلا پیگیری شده است",
+        "T_TITLE": "عنوان",
+        "T_TO_BE_SUBMITTED": "ارسال شود",
+        "TITLE": "زمان صرف شده برای مسائل را به GitLab ارسال کنید",
+        "TOTAL_MSG": "شما در مجموع <em>{{totalTimeToSubmit}}</em> زمان کاری امروز را به <em>{{nrOfTasksToSubmit}}</em> مسائل مختلف ارسال خواهید کرد."
       },
       "FORM": {
+        "FILTER": "فیلتر سفارشی",
+        "FILTER_DESCRIPTION": "به https://docs.gitlab.com/ee/api/issues.html#list-issues مراجعه کنید. چندگانه را می توان با و ترکیب کرد",
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
         "GITLAB_BASE_URL": "URL پایه GitLab سفارشی",
         "PROJECT": "مسیر کامل یا نام کاربری / پروژه",
+        "PROJECT_HINT": "به عنوان مثال johannesjo/فوق بهره وری",
         "SCOPE": "محدوده",
         "SCOPE_ALL": "همه",
         "SCOPE_ASSIGNED": "به من اختصاص داده شده است",
@@ -212,6 +278,8 @@
         "SOURCE_GLOBAL": "همه",
         "SOURCE_GROUP": "گروه",
         "SOURCE_PROJECT": "پروژه",
+        "SUBMIT_TIMELOGS": "تایم لاگ ها را به Gitlab ارسال کنید",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "پس از کلیک بر روی روز پایان، گفتگوی ردیابی زمان را نشان دهید",
         "TOKEN": "توکن دسترسی"
       },
       "FORM_SECTION": {
@@ -234,11 +302,16 @@
       }
     },
     "ISSUE": {
+      "CROSS_ORIGIN_BROWSER_WARNING": "این ادغام احتمالاً در مرورگر شما کار نخواهد کرد. لطفا نسخه دسکتاپ یا اندروید Super Productivity را دانلود کنید!",
       "DEFAULT": {
         "ISSUE_STR": "موضوع",
         "ISSUES_STR": "مسائل"
       },
+      "DEFAULT_PROJECT_DESCRIPTION": "پروژه اختصاص داده شده به وظایف ایجاد شده از مسائل.",
+      "DEFAULT_PROJECT_LABEL": "پروژه پیش فرض بهره وری فوق العاده",
+      "HOW_TO_GET_A_TOKEN": "چگونه یک توکن دریافت کنیم؟",
       "S": {
+        "ERR_GENERIC": "{{issueProviderName}} خطا: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: درخواست به دلیل خطای شبکه سمت سرویس گیرنده ناموفق بود",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: به درستی پیکربندی نشده است",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} جدید {{issuesStr}} به عقب افتاده وارد شد",
@@ -271,7 +344,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
         "OPEN": "وضعیت کار متوقف شده",
         "SELECT_ISSUE_FOR_TRANSITIONS": "مشکل را برای بارگیری انتقال های موجود انتخاب کنید",
-        "STORY_POINTS": "Story Points"
+        "STORY_POINTS": "Story Points",
+        "TRANSITION": "انتقال"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> درحال حاضر به <strong>{{assignee}}</strong> ارجاع داده شده است. آیا میخواهید آن را به خودتان اختصاص بدهید?",
@@ -354,6 +428,7 @@
         "RELATED": "مرتبط",
         "STATUS": "وضعیت",
         "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "وظایف فرعی",
         "SUMMARY": "خلاصه",
         "WORKLOG": "گزارش کار",
         "WRITE_A_COMMENT": "یک نظر بنویسید"
@@ -431,6 +506,11 @@
       "D_ADD": {
         "NOTE_LABEL": "متنی برای دخیره به عنوان یادداشت وارد کنید..."
       },
+      "D_FULLSCREEN": {
+        "VIEW_PARSED": "مشاهده به عنوان علامت گذاری تجزیه شده (غیر قابل ویرایش).",
+        "VIEW_SPLIT": "مشاهده نشانه گذاری تجزیه شده و تجزیه نشده در نمای تقسیم شده",
+        "VIEW_TEXT_ONLY": "مشاهده به عنوان متن تجزیه نشده"
+      },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing",
         "ENABLE_PARSE": "Enable markdown parse"
@@ -439,9 +519,24 @@
         "ADD_BTN": "اضافه کردن کار جدید",
         "DROP_TO_ADD": "برای اضافه کردن کارجدید اینجا رها کنید",
         "NO_NOTES": "در حال حاضر هیچ یادداشتی وجود ندارد"
+      },
+      "S": {
+        "NOTE_ADDED": "یادداشت ذخیره شد"
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "همیشه گفتگو را باز کنید",
+        "DO_NOT": "انتقال نکنید",
+        "DONE": "وضعیت برای تکمیل کار",
+        "ENABLE": "ادغام Openproject را فعال کنید",
+        "ENABLE_TRANSITIONS": "فعال کردن Transition Handling",
+        "IN_PROGRESS": "وضعیت شروع کار",
+        "OPEN": "وضعیت توقف کار",
+        "PROGRESS_ON_SAVE": "پیشرفت پیش‌فرض در ذخیره",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "برای بارگیری انتقال های موجود، مسئله را انتخاب کنید",
+        "TRANSITION": "انتقال"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "راه اندازی OpenProject برای پروژه"
       },
@@ -456,7 +551,13 @@
         "TITLE": "OpenProject: ارسال کارنامه"
       },
       "DIALOG_TRANSITION": {
-        "CURRENT_STATUS": "وضعیت فعلی:"
+        "CHOOSE_STATUS": "وضعیت را برای اختصاص انتخاب کنید",
+        "CURRENT_ASSIGNEE": "مامور فعلی:",
+        "CURRENT_STATUS": "وضعیت فعلی:",
+        "PERCENTAGE_DONE": "پیشرفت:",
+        "TASK_NAME": "نام وظیفه:",
+        "TITLE": "OpenProject: به روز رسانی وضعیت",
+        "UPDATE_STATUS": "به روز رسانی وضعیت"
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (به عنوان مثال برای فیلتر کردن تغییرات توسط خودتان)",
@@ -490,8 +591,35 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟",
-        "POST_TIME_SUCCESS": "OpenProject: ورودی زمان برای {{issueTitle}}با موفقیت ایجاد شد"
+        "POST_TIME_SUCCESS": "OpenProject: ورودی زمان برای {{issueTitle}}با موفقیت ایجاد شد",
+        "TRANSITION": "OpenProject: مسئله \"{{issueKey}}\" را روی \"{{name}}\" تنظیم کنید",
+        "TRANSITION_SUCCESS": "OpenProject: شماره {{issueKey}} را روی <strong>{{chosenTransition}}</strong>تنظیم کنید ",
+        "TRANSITIONS_LOADED": "انتقال بارگذاری شد. از انتخاب های زیر برای اختصاص دادن آنها استفاده کنید"
       }
+    },
+    "PLANNER": {
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "به امروز اضافه کنید",
+          "TITLE": "کارهای برنامه ریزی شده را به Today اضافه کنید"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "این یادآوری را از کار حذف می کند! برای لغو Escape را فشار دهید.",
+          "REMOVE_PLAN_DATE": "تاریخ طرح را حذف کنید",
+          "TITLE": "برنامه ریزی کار برای روز"
+        }
+      },
+      "EDIT_REPEATED_TASK": "ویرایش کار تکراری \"{{taskName}}\"",
+      "NO_TASKS": "بدون وظایف",
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "هیچ مورد برنامه ریزی شده ای وجود ندارد"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "تاریخ طرح برای کار \"{{taskTitle}}\" حذف شد",
+        "TASK_ALREADY_PLANNED": "کار از قبل برای {{date}}برنامه ریزی شده است ",
+        "TASK_PLANNED_FOR": "کار برنامه ریزی شده برای <strong>{{date}}</strong>{{extra}}"
+      },
+      "TASK_DRAWER": "کشو وظیفه"
     },
     "POMODORO": {
       "BACK_TO_WORK": "بازگشت به کار!",
@@ -499,14 +627,18 @@
       "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
+        "BREAK_TIME": "پومودورو: زمان استراحت {{nr}}است!",
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
         "NO_TASKS": "قبل از شروع تایمر Pomodoro باید کارها را اضافه کنید.",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "S": {
+        "RESET": "بازنشانی به اولین جلسه پومودورو",
+        "SESSION_SKIP": "به پایان جلسه پومودورو بروید",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
-      "SKIP_BREAK": "ردشدن از استراحت"
+      "SKIP_BREAK": "ردشدن از استراحت",
+      "START_BREAK": "شروع به استراحت کنید"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "بازگشت به کار!",
@@ -526,9 +658,17 @@
         "L3": "تو رو یاد چی میندازه؟",
         "L4": "وقتیکه این موضوع رو درک می‌کنی چه اتفاقی برای فکر اهمال‌کاری که توی سرت اومده میفته؟ بیشترش میکنه؟ از بین میبرتش؟ باعث میشه احساسات دیگه‌ای پیدا کنی؟",
         "L5": "همینطوری که حواست به احساساتت هست، احساساتت چجوری توی بدن تو تغییر میکنن؟",
+        "PROCRASTINATION_TRIGGERS_TEXT": "یکی دیگر از روش های بسیار موثر این است که آنچه را که میل شما به به تعویق انداختن را برانگیخته است، ثبت کنید. به عنوان مثال، من شخصاً اغلب تمایل دارم هر زمان که پنجره مرورگر من مورد توجه قرار گرفت، به سرعت به reddit یا سایت خبری مورد علاقه‌ام بروم. از زمانی که شروع به نوشتن محرک های خود در یک سند متنی خالی ساده کردم، از ریشه این الگو آگاه شدم و به من کمک کرد تا اقدامات متقابل مختلفی را آزمایش کنم.",
+        "PROCRASTINATION_TRIGGERS_TITLE": "نوشتن محرک های به تعویق انداختن کار",
         "TITLE": "کنجکاوی"
       },
       "H1": "یکم خودتون رو شل کنید!",
+      "INTRO": {
+        "AVOIDING": "اجتناب از انجام وظیفه",
+        "FEAR": "ترس از شکست",
+        "STRESSED": "استرس از انجام ندادن کارها",
+        "TITLE": "مقدمه"
+      },
       "P1": "اول ازهمه، آروم باشید! گاهی برای همه پیش میاد. اگه کاری رو که باید بکنی نمی‌کنی، حداقل ازش لذت ببر! بعدش بخش پایین رو واسه پیدا کردن یه چیز به‌دردبخور بررسی کن.",
       "P2": "یادت باشه: اهمال‌کاری یه مشکل توی تنظیم احساساته نه توی مدیریت زمان.",
       "REFRAME": {
@@ -550,11 +690,17 @@
         "EDIT": "ویرایش پروژه",
         "SETUP_CALDAV": "ادغام Caldav را تنظیم کنید",
         "SETUP_GIT": "راه اندازی ارتباط با گیت",
+        "SETUP_GITEA_PROJECT": "راه اندازی Gitea Integration",
         "SETUP_GITLAB": "راه اندازی ارتباط با گیت لاب",
         "SETUP_JIRA": "راه اندازی ارتباط با جیرا",
-        "SETUP_OPEN_PROJECT": "راه اندازی OpenProject Integration"
+        "SETUP_OPEN_PROJECT": "راه اندازی OpenProject Integration",
+        "SETUP_REDMINE_PROJECT": "راه اندازی Redmine Integration"
+      },
+      "D_DELETE": {
+        "MSG": "آیا مطمئن هستید که می خواهید پروژه \"{{title}}\" را حذف کنید؟"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "پروژه Backlog را فعال کنید",
         "L_IS_HIDDEN_FROM_MENU": "پروژه را از منو مخفی کنید",
         "L_TITLE": "نام پروژه",
         "TITLE": "تنظیمات پایه"
@@ -594,19 +740,40 @@
       "WEEK_TITLE": "هفته {{nr}} ({{timeSpent}})"
     },
     "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Redmine را برای پروژه راه اندازی کنید"
+      },
       "FORM": {
+        "API_KEY": "کلید دسترسی به API",
         "HOST": "(مثال: https://redmine.org) هاست",
         "PROJECT_ID": "شناساگر پروژه",
+        "PROJECT_ID_DESCRIPTION": "را می توان به عنوان بخشی از آدرس اینترنتی، هنگام مشاهده پروژه در مرورگر یافت.",
+        "SCOPE": "دامنه",
+        "SCOPE_ALL": "همه",
+        "SCOPE_ASSIGNED": "به من اختصاص داده است",
         "SCOPE_CREATED": "ایجاد شده توسط من"
       },
+      "FORM_SECTION": {
+        "HELP": "<p>در اینجا می‌توانید SuperProductivity را برای فهرست کردن مشکلات Redmine باز (چه نسخه آنلاین یا یک نمونه خود میزبان) برای یک پروژه خاص در پانل ایجاد کار در نمای برنامه‌ریزی روزانه پیکربندی کنید. آنها به عنوان پیشنهاد فهرست می شوند و پیوندی به موضوع و همچنین اطلاعات بیشتری در مورد آن ارائه می دهند.</p><p>علاوه بر این، می‌توانید به‌طور خودکار همه مسائل باز را وارد کنید.</p>",
+        "TITLE": "Redmine"
+      },
       "ISSUE_CONTENT": {
+        "AUTHOR": "نویسنده",
         "DESCRIPTION": "توضیحات",
+        "MARK_AS_CHECKED": "به‌روزرسانی‌ها را علامت‌گذاری کنید",
+        "PRIORITY": "اولویت",
         "STATUS": "وضعیت"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: خطای ناشناخته {{statusCode}} {{errorMsg}}."
       }
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
-        "HIDE": "مخفی کردن"
+        "HIDE": "مخفی کردن",
+        "START_NOW": "همین الان شروع کن",
+        "TXT": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!<br> (و {{nrOfOtherBanners}} کار دیگر موعد مقرر)"
       },
       "S_REMINDER_ERR": "خطا در رابط یادآوری"
     },
@@ -620,6 +787,8 @@
       "LUNCH_BREAK": "استراحت ناهار",
       "NO_TASKS": "در حال حاضر هیچ وظیفه ای وجود ندارد. لطفاً برخی از کارها را از طریق دکمه + در نوار بالا اضافه کنید.",
       "NOW": "اکنون",
+      "PLAN_END_DAY": "در پایان روز برنامه ریزی کنید",
+      "PLAN_START_DAY": "در ابتدای روز برنامه ریزی کنید",
       "START": "شروع کار",
       "TASK_PROJECTION_INFO": "پیش بینی آینده یک کار تکراری برنامه ریزی شده"
     },
@@ -645,6 +814,7 @@
         "L_AUTO_COUNT_UP": "ماشه خودکار حساب برای",
         "L_AUTO_SWITCH_OFF": "ماشه خودکار را خاموش کنید",
         "L_AUTO_SWITCH_ON": "روشن کردن ماشه خودکار برای",
+        "L_COUNTDOWN_DURATION": "مدت زمان شمارش معکوس",
         "L_ICON": "آیکون",
         "L_ICON_ON": "نماد هنگام ضامن",
         "L_IS_ENABLED": "فعال شده است",
@@ -652,10 +822,15 @@
         "L_TYPE": "تایپ کنید",
         "TITLE": "پیشخوان های ساده",
         "TYPE_CLICK_COUNTER": "پیشخوان کلیک کنید",
+        "TYPE_REPEATED_COUNTDOWN": "شمارش معکوس مکرر",
         "TYPE_STOPWATCH": "کرنومتر"
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "اطلاعات شما فقط تا حدی آپلود شد. لطفاً بعداً دوباره امتحان کنید! در غیر این صورت نمی توانید داده های خود را با دستگاه های دیگر همگام سازی کنید.",
+        "POSSIBLE_LEGACY_DATA": "بهره وری فوق العاده با استفاده از دو فایل جداگانه به جای یک فایل، همگام سازی را بهبود بخشیده است و امکان انتقال داده بسیار کمتری را فراهم می کند. توصیه می‌شود همه موارد Super Productivity را به‌روزرسانی کنید و ابتدا داده‌ها را از نمونه برنامه‌ای که داده‌ها جدیدترین هستند، همگام‌سازی کنید. اگر این داده ها از دستگاه محلی شما است، لطفاً این هشدار را نادیده بگیرید و فقط با تأیید گفتگوی بعدی، آپلود آن را ادامه دهید."
+      },
       "C": {
         "EMPTY_SYNC": "شما در حال تلاش برای همگام سازی یک شی empty داده خالی هستید. آیا این اولین همگام سازی شما با یک برنامه (تقریبا) بکر است؟",
         "FORCE_IMPORT": "به هر حال داده از راه دور وارد می شود؟",
@@ -663,7 +838,8 @@
         "FORCE_UPLOAD_AFTER_ERROR": "هنگام بارگذاری داده های محلی شما خطایی روی داد. سعی کنید به زودی بروزرسانی کنید؟",
         "MIGRATE_LEGACY": "داده‌های قدیمی هنگام وارد کردن شناسایی شدند، آیا می‌خواهید آن‌ها را انتقال دهید؟",
         "NO_REMOTE_DATA": "داده ای از راه دور یافت نشد محلی در Remote بارگذاری شود؟",
-        "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟"
+        "TRY_LOAD_REMOTE_AGAIN": "سعی می کنید بار دیگر داده ها را از راه دور بارگیری کنید؟",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "بارگیری داده ها از راه دور امکان پذیر نیست. آیا می خواهید سعی کنید داده های راه دور را با داده های محلی خود بازنویسی کنید؟ تمام داده های راه دور در این فرآیند از بین خواهند رفت."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "لطفاً پیوند زیر را باز کرده و کد تأیید موجود را در قسمت ورودی زیر کپی کنید.",
@@ -684,10 +860,20 @@
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "بستن برنامه",
-        "T3": "شما دو گزینه دارید:"
+        "BTN_DOWNLOAD_BACKUP": "پشتیبان گیری محلی را دانلود کنید",
+        "BTN_FORCE_UPLOAD": "آپلود اجباری محلی",
+        "T1": "آخرین همگام سازی ناقص بود!",
+        "T2": "داده‌های بایگانی شما در آخرین همگام‌سازی به درستی آپلود نشده است:",
+        "T3": "شما دو گزینه دارید:",
+        "T4": "1. به دستگاه دیگر خود بروید و همگام سازی را در آنجا تکمیل کنید.",
+        "T5": "2. یا می توانید داده های راه دور را با داده های محلی خود بازنویسی کنید. همه تغییرات از راه دور انجام خواهد شد\n    گم شود!",
+        "T6": "ایجاد یک نسخه پشتیبان از اطلاعاتی که بازنویسی می کنید توصیه می شود!!!"
       },
       "D_PERMISSION": {
-        "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی"
+        "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی",
+        "PERM_FILE": "اجازه بدهید",
+        "TEXT": "<p>مجوز فایل شما برای همگام سازی محلی لغو شده است.</p>",
+        "TITLE": "همگام سازی: مجوز فایل محلی رد شد"
       },
       "FORM": {
         "DROPBOX": {
@@ -696,20 +882,33 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "نام پرونده همگام سازی کنید"
         },
+        "L_ENABLE_COMPRESSION": "فشرده سازی (انتقال سریعتر داده) را فعال کنید",
+        "L_ENABLE_ENCRYPTION": "رمزگذاری سرتاسر (تجربی) را فعال کنید - داده‌های خود را برای ارائه‌دهنده همگام‌سازی خود غیرقابل دسترس کنید",
         "L_ENABLE_SYNCING": "همگام سازی را فعال کنید",
+        "L_ENCRYPTION_NOTES": "نکات مهم: برای اینکه همه چیز کار کند، باید <strong>قبل از</strong> همگام سازی بعدی، همان رمز عبور را در دستگاه های دیگر خود تنظیم کنید. لطفا رمز عبور ایمن انتخاب کنید. لطفاً همچنین توجه داشته باشید که اگر این رمز عبور را فراموش کنید، <strong>نمی توانید به داده های خود دسترسی پیدا کنید. امکان بازیابی وجود ندارد</strong>، زیرا فقط شما کلید را در اختیار دارید. رمزگذاری احتمالاً به اندازه کافی خوب خواهد بود که اکثر مهاجمان را خنثی کند، اما <strong>هیچ تضمینی وجود ندارد.</strong>",
+        "L_ENCRYPTION_PASSWORD": "رمز رمزگذاری (فراموش نکنید)",
         "L_SYNC_INTERVAL": "فاصله همگام سازی",
         "L_SYNC_PROVIDER": "ارائه دهنده همگام سازی",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "به مجوز دسترسی به فایل نیاز دارد",
+          "L_SYNC_FOLDER_PATH": "همگام سازی مسیر پوشه"
+        },
         "TITLE": "همگام سازی",
         "WEB_DAV": {
           "CORS_INFO": "<strong>آزمایشی !!</strong> برای انجام این کار باید CORS را برای نمونه Nextcloud خود غیرفعال یا محدود کنید ، که این امر می تواند پیامدهای امنیتی منفی داشته باشد! لطفاً برای اطلاعات بیشتر <a href='https://github.com/nextcloud/server/issues/3131'>به این بخش مراجعه کنید</a> . با مسئولیت خود استفاده کنید!",
           "L_BASE_URL": "آدرس پایگاه",
           "L_PASSWORD": "کلمه عبور",
+          "L_SYNC_FOLDER_PATH": "همگام سازی مسیر پوشه",
           "L_USER_NAME": "نام کاربری"
         }
       },
       "S": {
+        "ALREADY_IN_SYNC": "قبلاً همگام شده است",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "بدون تغییر محلی - از قبل همگام شده است",
         "ERROR_FALLBACK_TO_BACKUP": "هنگام وارد کردن داده ها مشکلی پیش آمد. بازگشت به پشتیبان گیری محلی.",
         "ERROR_INVALID_DATA": "خطا هنگام همگام سازی داده نامعتبر است",
+        "ERROR_NO_REV": "بدون دور معتبر برای فایل راه دور",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "خطا هنگام همگام سازی. قادر به خواندن داده های راه دور نیست. شاید رمزگذاری را فعال کرده اید و رمز عبور محلی شما با رمزی که برای رمزگذاری داده های راه دور استفاده می شود مطابقت ندارد؟",
         "IMPORTING": "وارد کردن داده",
         "INCOMPLETE_CFG": "احراز هویت برای همگام سازی انجام نشد. لطفا پیکربندی خود را بررسی کنید!",
         "INITIAL_SYNC_ERROR": "همگام سازی اولیه انجام نشد",
@@ -752,7 +951,9 @@
         "ADD_TASK_TO_TOP_OF_TODAY": "اضافه کردن وظیفه به بالای لیست",
         "CREATE_TASK": "ایجاد کار جدید",
         "EXAMPLE": "مثال: \"برخی از عنوان های کار + پروژه نام # برخی از برچسب ها # برخی دیگر از برچسب ها 10m / 3h\"",
-        "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید"
+        "START": "جهت شروع یکبار دیگر دکمه اینتر را بزنید",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "اضافه کردن کار به بک لاگ / لیست امروز را تغییر دهید",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "اضافه کردن کار را به بالا و پایین لیست تغییر دهید"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "اضافه کردن پیوست",
@@ -765,8 +966,10 @@
         "REMINDER": "یادآور",
         "REPEAT": "تکرار",
         "SCHEDULE_TASK": "برنامه ریزی کار",
+        "SCHEDULED_AT": "برنامه ریزی شده در",
         "SUB_TASKS": "وظایف فرعی ({{nr}})",
-        "TIME": "زمان"
+        "TIME": "زمان",
+        "TITLE_PLACEHOLDER": "عنوانی را وارد کنید"
       },
       "B": {
         "ADD_HALF_HOUR": "نیم ساعت اضافه کن",
@@ -778,6 +981,7 @@
         "ADD_TO_PROJECT": "اضافه کردن به یک پروژه",
         "CONVERT_TO_PARENT_TASK": "تبدیل به کار اصلی",
         "DELETE": "Delete Task",
+        "DELETE_REPEAT_INSTANCE": "نمونه کار مکرر را حذف کنید",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
         "EDIT_SCHEDULED": "ویرایش یادآوری",
         "EDIT_TAGS": "برچسب ها را ویرایش کنید",
@@ -804,7 +1008,12 @@
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "آیا می خواهید تگ جدید {{tagsTxt}}را ایجاد کنید؟",
         "OK": "ایجاد برچسب"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "آیا می خواهید برچسب های جدید {{tagsTxt}}را ایجاد کنید؟",
+        "OK": "برچسب ها را ایجاد کنید"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "همه را به امروز اضافه کنید",
@@ -818,6 +1027,7 @@
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project",
         "FROM_TAG": "از برچسب: \"{{title}}\"",
+        "RESCHEDULE_EDIT": "ویرایش (زمان‌بندی مجدد)",
         "RESCHEDULE_UNTIL_TOMORROW": "تا فردا",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "تعویق همه",
@@ -826,6 +1036,11 @@
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "QA_NEXT_MONTH": "برنامه ماه آینده",
+        "QA_NEXT_WEEK": "هفته آینده برنامه ریزی کنید",
+        "QA_REMOVE_TODAY": "کار را از امروز حذف کنید",
+        "QA_TODAY": "برنامه امروز",
+        "QA_TOMORROW": "برای فردا برنامه ریزی کنید",
         "REMIND_AT": "یادآوری در",
         "RO_1H": "1 ساعت قبل از شروع آن",
         "RO_5M": "5 دقیقه قبل از شروع آن",
@@ -857,6 +1072,7 @@
         "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "نمی توان پروژه را از طریق نحو کوتاه برای کارهای تکرار شونده اختصاص داد!",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>کار اضافه شده{{title}}</strong> از <strong>{{contextTitle}}</strong> به لیست فعلی",
@@ -878,18 +1094,43 @@
     },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
+        "CUSTOM": "پیکربندی تکرار سفارشی",
+        "CUSTOM_AND_TIME": "سفارشی، {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}، {{timeStr}}",
         "DAILY": "هر روز",
+        "DAILY_AND_TIME": "هر روز، {{timeStr}}",
         "EVERY_X_DAILY": "روز {{x}} هر",
+        "EVERY_X_DAILY_AND_TIME": "هر {{x}} روز، {{timeStr}}",
         "EVERY_X_MONTHLY": "ماه {{x}} هر",
+        "EVERY_X_MONTHLY_AND_TIME": "هر {{x}} ماه، {{timeStr}}",
         "EVERY_X_YEARLY": "سال {{x}} هر",
-        "MONDAY_TO_FRIDAY": "دوشنبه - جمعه"
+        "EVERY_X_YEARLY_AND_TIME": "هر {{x}} سال، {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "دوشنبه - جمعه",
+        "MONDAY_TO_FRIDAY_AND_TIME": "دوشنبه-جمعه، {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "ماهانه در تاریخ {{dateDayStr}}",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "ماهانه در تاریخ {{dateDayStr}}، {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "هر هفته در {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "هر هفته در {{weekdayStr}}، {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "سالانه در {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "سالانه {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": " {{tasksNr}} نمونه برای این کار قابل تکرار ایجاد شده است. آیا می خواهید همه آنها را به پروژه \"{{projectName}}\" منتقل کنید؟",
+        "OK": "به روز رسانی تمام نمونه ها"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
         "OK": "Remove completely"
       },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "فقط وظایف آینده",
+        "MSG": " {{tasksNr}} نمونه برای این کار قابل تکرار ایجاد شده است. آیا می خواهید همه آنها را با پیش فرض های جدید به روز کنید یا فقط کارهای آینده؟",
+        "OK": "به روز رسانی تمام نمونه ها"
+      },
       "D_EDIT": {
         "ADD": "Add Repeat Task Config",
+        "ADVANCED_CFG": "پیکربندی پیشرفته",
         "EDIT": "Edit Repeat Task Config",
         "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
         "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
@@ -909,11 +1150,17 @@
         "NOTES": "یادداشت‌های پیش‌فرض",
         "ORDER": "سفارش",
         "ORDER_DESCRIPTION": "ترتیب ایجاد وظایف تکرار شونده فقط بر کارهای تکراری ایجاد شده در همان زمان تأثیر می گذارد. مقدار کمتر به این معنی است که یک کار بالاتر از لیست ایجاد می شود، یک عدد پایین تر که پایین تر خواهد بود. مقدار بزرگتر از 0 به این معنی است که موارد در انتهای کارهای عادی ایجاد می شوند.",
+        "Q_CUSTOM": "پیکربندی تکرار سفارشی",
         "Q_DAILY": "هر روز",
         "Q_MONDAY_TO_FRIDAY": "هر دوشنبه تا جمعه",
+        "Q_MONTHLY_CURRENT_DATE": "هر ماه در تاریخ {{dateDayStr}}",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "هر هفته در {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "هر سال در {{dayAndMonthStr}}",
+        "QUICK_SETTING": "پیکربندی را تکرار کنید",
         "REMIND_AT": "یادآوری در",
         "REMIND_AT_PLACEHOLDER": "زمان یادآوری را انتخاب کنید",
         "REPEAT_CYCLE": "چرخه‌ی تکرار",
+        "REPEAT_EVERY": "هر بار تکرار کنید",
         "SATURDAY": "شنبه",
         "START_DATE": "تاریخ شروع",
         "START_TIME": "زمان شروع برنامه ریزی شده",
@@ -935,15 +1182,18 @@
         "MSG": "شما برای {{time}}زمان پیگیری نکرده اید"
       },
       "D_IDLE": {
+        "ADD_ENTRY": "افزودن ورودی برای ردیابی",
         "BREAK": "استراحت",
         "CREATE_AND_TRACK": "<em>Create</em> and track to:",
         "IDLE_FOR": "شما به این میزان بیکار بودید:",
+        "RESET_BREAK_REMINDER_TIMER": "بازنشانی تایمر یادآور شکست",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "پرش",
         "SIMPLE_CONFIRM_COUNTER_OK": "مسیر",
         "SIMPLE_COUNTER_CONFIRM_TXT": "شما پرش را انتخاب کرده اید ، اما {{nr}} دکمه (های) شمارنده ساده را فعال کرده اید. آیا می خواهید زمان بیکاری را برای آنها پیگیری کنید؟",
         "SIMPLE_COUNTER_TOOLTIP": "برای ردیابی به {{title}}کلیک کنید",
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "برای عدم ردیابی به {{title}}کلیک کنید",
         "SKIP": "رد شدن",
+        "SPLIT_TIME": "زمان را به چند کار و استراحت تقسیم کنید",
         "TASK": "کار",
         "TRACK_TO": "تایین کنید:"
       },
@@ -1015,6 +1265,7 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "خروجی اطلاعات",
     "IMPORT_FROM_FILE": "وارد کردن از فایل",
+    "PRIVACY_EXPORT": "صادر کردن داده های ناشناس (برای ارسال به contact@super-productivity.com برای اشکال زدایی)",
     "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر"
   },
   "G": {
@@ -1024,10 +1275,13 @@
     "DELETE": "حذف",
     "DISMISS": "رد کردن",
     "DO_IT": "انجام بدهید!",
+    "DURATION_DESCRIPTION": "به عنوان مثال \"5h 23m\" که نتیجه آن 5 ساعت در 23 دقیقه است",
     "EDIT": "ویرایش",
     "ENABLED": "فعال شده است",
     "EXAMPLE_VAL": "برای ویرایش کلیک کنید",
     "EXTENSION_INFO": "لطفا برای ارتباط با جیرا و مدیریت زمان <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> افزونه گوگل کروم</a> را دانلود کنید. توجه این افزونه برای نسخه موبایل کروم کار نمی کند.",
+    "HIDE": "پنهان کردن",
+    "ICON_INP_DESCRIPTION": "تمام ایموجی های utf-8 نیز پشتیبانی می شوند!",
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
     "MINUTES": "{{m}} دقیقه",
@@ -1042,6 +1296,7 @@
     "SUBMIT": "ثبت",
     "TITLE": "عنوان",
     "TODAY_TAG_TITLE": "امروز",
+    "TRACKING_INTERVAL_DESCRIPTION": "زمان را با استفاده از این بازه بر حسب میلی ثانیه پیگیری کنید. ممکن است بخواهید برای کاهش نوشتن دیسک این مورد را تغییر دهید. شماره 2355 را ببینید.",
     "UNDO": "Undo",
     "UPDATE": "بروز رسانی",
     "WITHOUT_PROJECT": "بدون پروژه",
@@ -1054,11 +1309,23 @@
       "LOCATION_INFO": "نسخه پشتیبان تهیه شده در:",
       "TITLE": "پشتیبان گیری خودکار"
     },
+    "CALENDARS": {
+      "BROWSER_WARNING": "به دلیل محدودیت‌های متقاطع <b>این احتمالاً با نسخه مرورگر Super Productivity کار نخواهد کرد.<br /> لطفاً برای استفاده از این ویژگی <a href=\"https://super-productivity.com/download/\">نسخه دسکتاپ</a> را دانلود کنید!</b>",
+      "CAL_PATH": "آدرس منبع iCal",
+      "CAL_PROVIDERS": "ارائه دهندگان تقویم (تجربی و اختیاری)",
+      "CHECK_UPDATES": "هر X به‌روزرسانی‌های راه دور را بررسی کنید",
+      "DEFAULT_PROJECT": "پروژه پیش فرض برای وظایف تقویم اضافه شده",
+      "HELP": "می‌توانید تقویم‌ها را برای یادآوری ادغام کنید و آن‌ها را به‌عنوان وظایف در Super Productivity اضافه کنید. ادغام با استفاده از قالب iCal کار می کند. برای این کار، تقویم شما باید از طریق اینترنت یا از طریق سیستم فایل قابل دسترسی باشد.",
+      "SHOW_BANNER_THRESHOLD": "نمایش یک اعلان X قبل از رویداد (خالی برای غیرفعال)"
+    },
     "EVALUATION": {
       "IS_HIDE_EVALUATION_SHEET": "Hide evaluation sheet on daily summary",
       "TITLE": "ارزیابی ها و معیارها"
     },
     "FOCUS_MODE": {
+      "HELP": "حالت فوکوس یک صفحه بدون حواس پرتی را باز می کند تا به شما کمک کند روی کار فعلی خود تمرکز کنید.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "هنگام ردیابی، حالت فوکوس را همیشه باز کنید",
+      "L_SKIP_PREPARATION_SCREEN": "رد شدن از صفحه آماده سازی (کشش و غیره)",
       "TITLE": "حالت تمرکز"
     },
     "IDLE": {
@@ -1090,10 +1357,13 @@
       "GO_TO_WORK_VIEW": "رفتن به نمای کار",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
       "MOVE_TASK_DOWN": "Move Task down in List",
+      "MOVE_TASK_TO_BOTTOM": "Task را به انتهای لیست منتقل کنید",
+      "MOVE_TASK_TO_TOP": "وظیفه را به بالای لیست منتقل کنید",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
       "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
+      "SAVE_NOTE": "ذخیره یادداشت",
       "SELECT_NEXT_TASK": "انتخاب کار بعدی",
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
@@ -1106,6 +1376,7 @@
       "TASK_MOVE_TO_PROJECT": "وظیفه حرکت را به منوی پروژه باز کنید",
       "TASK_OPEN_CONTEXT_MENU": "منوی زمینه کار را باز کنید",
       "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_PLAN_FORDAY": "برای روز برنامه ریزی کنید",
       "TASK_SCHEDULE": "کار برنامه ریزی شده",
       "TASK_SHORTCUTS": "کارها",
       "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
@@ -1114,15 +1385,39 @@
       "TITLE": "میانبرهای صفحه کلید",
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
+      "TOGGLE_ISSUE_PANEL": "نمایش/پنهان کردن پنل مشکل",
       "TOGGLE_PLAY": "شروع/توقت کار",
       "TOGGLE_SIDE_NAV": "نمایش و تمرکز / مخفی کردن Sidenav",
+      "TRIGGER_SYNC": "همگام سازی راه اندازی (در صورت پیکربندی)",
       "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
       "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
       "ZOOM_OUT": "کوچک نمایی (فقط دسکتاپ)"
     },
     "LANG": {
+      "AR": "عربی",
+      "CZ": "کشور چک",
+      "DE": "دویچ",
+      "EN": "انگلیسی",
+      "ES": "اسپانیا",
+      "FA": "فارسی",
+      "FR": "فرانسه",
+      "HR": "هرواتسکی",
+      "ID": "اندونزیایی",
+      "IT": "ایتالیایی",
+      "JA": "日本語",
+      "KO": "한국어",
       "LABEL": "لطفاََ یک زبان را انتخاب کنید",
-      "TITLE": "زبان"
+      "NB": "نورسک بوکمال",
+      "NL": "هلند",
+      "PL": "لهستانی",
+      "PT": "پرتغالی ها",
+      "RU": "روسی",
+      "SK": "اسلواکی",
+      "TITLE": "زبان",
+      "TR": "ترکچه",
+      "UK": "اوکراین",
+      "ZH": "中文 (简体)",
+      "ZH_TW": "中文 (繁體)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "پروژه پیش فرض برای استفاده در کارها در صورت مشخص نبودن هیچ کدام",
@@ -1138,6 +1433,9 @@
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
+      "IS_USE_MINIMAL_SIDE_NAV": "استفاده از حداقل نوار پیمایش (فقط نشان دادن نمادها)",
+      "START_OF_NEXT_DAY": "ساعت شروع روز بعد",
+      "START_OF_NEXT_DAY_HINT": "از زمانی که (به ساعت) می خواهید روز بعد را بشمارید شروع شده است. پیش فرض نیمه شب است که 0 است.",
       "TASK_NOTES_TPL": "الگوی شرح کار",
       "TITLE": "Misc Settings"
     },
@@ -1148,6 +1446,7 @@
       "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
       "IS_ENABLED": "Enable pomodoro timer",
       "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
+      "IS_MANUAL_CONTINUE_BREAK": "شروع استراحت بعدی را به صورت دستی تأیید کنید",
       "IS_PLAY_SOUND": "Play sound when session is done",
       "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
       "IS_PLAY_TICK": "Play tick sound every second",
@@ -1156,27 +1455,43 @@
       "TITLE": "Pomodoro Timer"
     },
     "REMINDER": {
+      "COUNTDOWN_DURATION": "بنر X را قبل از یادآوری واقعی نشان دهید",
+      "IS_COUNTDOWN_BANNER_ENABLED": "نمایش بنر شمارش معکوس قبل از زمان یادآوری",
       "TITLE": "یادآوری‌ها"
     },
     "SCHEDULE": {
       "HELP": "ویژگی جدول زمانی باید مروری سریع درباره چگونگی انجام کارهای برنامه ریزی شده شما در طول زمان داشته باشد. می توانید آن را در فهرست سمت چپ در زیر <a href='#/schedule'>'Schedule'</a>پیدا کنید.",
+      "L_IS_LUNCH_BREAK_ENABLED": "استراحت ناهار را فعال کنید",
       "L_IS_WORK_START_END_ENABLED": "جریان کار بدون برنامه را به زمانهای خاص کار محدود کنید",
+      "L_LUNCH_BREAK_END": "پایان ناهار",
+      "L_LUNCH_BREAK_START": "شروع استراحت ناهار",
       "L_WORK_END": "پایان روز کار",
       "L_WORK_START": "شروع روز کار",
       "LUNCH_BREAK_START_END_DESCRIPTION": "مثلاََ ۱۳:۰۰",
       "TITLE": "جدول زمانی",
       "WORK_START_END_DESCRIPTION": "به عنوان مثال، ساعت 17:00"
     },
+    "SHORT_SYNTAX": {
+      "HELP": "<p>در اینجا می‌توانید هنگام ایجاد یک کار، گزینه‌های نحو کوتاه را کنترل کنید</p>",
+      "IS_ENABLE_DUE": "فعال کردن نحو کوتاه (@<Due time>)",
+      "IS_ENABLE_PROJECT": "سینتکس کوتاه پروژه را فعال کنید (+<Project name>)",
+      "IS_ENABLE_TAG": "سینتکس کوتاه برچسب را فعال کنید (#<Tag>)",
+      "TITLE": "نحو کوتاه"
+    },
     "SOUND": {
+      "BREAK_REMINDER_SOUND": "صدای یادآوری استراحت بگیرید",
       "DONE_SOUND": "وظیفه تمام شد صدا",
       "IS_INCREASE_DONE_PITCH": "برای انجام هر کاری سطح صدا را افزایش دهید",
       "TITLE": "صدا",
       "VOLUME": "جلد"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "تصویر انگیزشی اضافه کنید",
+      "FULL_SCREEN_BLOCKER_DURATION": "مدت زمان نمایش پنجره تمام صفحه (فقط رومیزی)",
       "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
       "IS_ENABLED": "Enable take a break reminder",
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
+      "IS_FULL_SCREEN_BLOCKER": "نمایش پیام در پنجره تمام صفحه (فقط رومیزی)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
@@ -1184,6 +1499,18 @@
       "NOTIFICATION_TITLE": "استراحت کن!",
       "SNOOZE_TIME": "زمان استراحت را به تعویق بیندازید",
       "TITLE": "یادآوری استراحت"
+    },
+    "TIME_TRACKING": {
+      "HELP": "یادآوری ردیابی زمان بنری است که در صورت فراموش کردن شروع ردیابی زمان نمایش داده می شود.",
+      "L_DEFAULT_ESTIMATE": "تخمین زمان پیش فرض برای کارهای جدید",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "تخمین زمان پیش‌فرض برای کارهای فرعی جدید",
+      "L_IS_AUTO_START_NEXT_TASK": "ردیابی کار بعدی را با علامت گذاری فعلی به عنوان انجام شده شروع کنید",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "زمانی که از تخمین زمان تجاوز شد اطلاع دهید",
+      "L_IS_TRACKING_REMINDER_ENABLED": "یادآوری ردیابی فعال شد",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "نمایش یادآوری ردیابی در برنامه تلفن همراه",
+      "L_TRACKING_INTERVAL": "فاصله ردیابی زمان (EXPERIMENTAL)",
+      "L_TRACKING_REMINDER_MIN_TIME": "زمان انتظار قبل از نمایش بنر یادآور ردیابی است",
+      "TITLE": "ردیابی زمان"
     }
   },
   "GLOBAL_SNACK": {
@@ -1191,6 +1518,7 @@
     "ERR_COMPRESSION": "خطایی برای رابط فشرده سازی",
     "FILE_DOWNLOADED": "{{fileName}} بارگیری شد",
     "FILE_DOWNLOADED_BTN": "پوشه را باز کنید",
+    "NAVIGATE_TO_TASK_ERR": "نمی توان روی کار تمرکز کرد. حذفش کردی؟",
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "PERSISTENCE_ERROR": "خطا هنگام درخواست تداوم داده: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
@@ -1204,6 +1532,7 @@
     "DBX_UPLOAD": "Dropbox: بارگذاری پرونده ...",
     "GITHUB_LOAD_ISSUE": "GitHub: بارگیری داده های شماره ...",
     "JIRA_LOAD_ISSUE": "جیرا: بارگیری داده های شماره ...",
+    "SYNC": "در حال همگام سازی داده ها...",
     "UNKNOWN": "بارگیری داده های از راه دور",
     "WEB_DAV_DOWNLOAD": "WebDAV: در حال بارگیری داده ها ...",
     "WEB_DAV_UPLOAD": "WebDAV: در حال بارگذاری داده ها ..."
@@ -1217,23 +1546,34 @@
     "GO_TO_TASK_LIST": "به لیست کارها برو",
     "HELP": "کمک",
     "HM": {
+      "CALENDARS": "نحوه انجام: تقویم ها را به هم متصل کنید",
       "CONTRIBUTE": "مشارکت",
+      "GET_HELP_ONLINE": "دریافت کمک آنلاین",
+      "KEYBOARD": "نحوه انجام: صفحه کلید پیشرفته",
+      "REDDIT_COMMUNITY": "انجمن Reddit",
       "REPORT_A_PROBLEM": "گزارش یک مشکل",
-      "START_WELCOME": "آغاز تور خوش‌آمدگویی"
+      "START_WELCOME": "آغاز تور خوش‌آمدگویی",
+      "SYNC": "نحوه انجام: همگام سازی را پیکربندی کنید"
     },
     "METRICS": "معیارها",
+    "NO_TAG_INFO": "در حال حاضر هیچ برچسبی وجود ندارد. هنگام افزودن یا ویرایش کارها، می‌توانید با وارد کردن «#yourTagName» برچسب اضافه کنید.",
     "NOTES": "یادداشت ها",
+    "NOTES_PANEL_INFO": "یادداشت‌ها را فقط می‌توان از برنامه زمان‌بندی و نمایش‌های فهرست کار معمولی نشان داد.",
+    "PLANNER": "برنامه ریز",
     "PROCRASTINATE": "به تعویق انداختن",
     "PROJECT_MENU": "منوی پروژه",
     "PROJECT_SETTINGS": "تنظیمات پروژه",
     "PROJECTS": "پروژه ها",
     "QUICK_HISTORY": "تاریخچه سریع",
+    "REPEAT_SCHEDULED": "تکرار/برنامه ریزی شده",
+    "SCHEDULE": "برنامه ریزی کنید",
     "SETTINGS": "تنظیمات",
     "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
     "TAGS": "برچسب ها",
     "TASK_LIST": "لیست کار",
     "TASKS": "کارها",
     "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
+    "TOGGLE_SHOW_ISSUE_PANEL": "نمایش/پنهان کردن پنل مشکل",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "همگام سازی را به صورت دستی فعال کنید",
@@ -1250,8 +1590,11 @@
       "OK": "Aye aye! Shutdown!"
     },
     "ESTIMATE_TOTAL": "برآورد کل:",
+    "EVALUATE_DAY": "ارزیابی کنید",
     "EXPORT_TASK_LIST": "خروجی‌گرفتن از لیست کارها",
     "NO_TASKS": "There are no tasks for this day",
+    "PLAN_TOMORROW": "برنامه ریزی کنید",
+    "REVIEW_TASKS": "مرور",
     "ROUND_5M": "Round all tasks to 5 minutes",
     "ROUND_15M": "Round all tasks to 15 minutes",
     "ROUND_30M": "Round all tasks to 30 minutes",
@@ -1262,11 +1605,13 @@
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
     "SAVE_AND_GO_HOME": "ذخیره کن و به صفحه اصلی برو",
+    "SAVE_AND_GO_HOME_TOOLTIP": "همه کارهای انجام شده را به بایگانی (ورک لاگ) منتقل کنید و به صورت اختیاری همه داده ها را همگام کنید و برنامه را ببندید.",
     "START_END": "شروع - پایان",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
     "TASKS_COMPLETED": "کارهای تکمیل شده",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "زمان سپری‌شده/تخمین",
     "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "TIME_SPENT_TODAY_BY_TAG": "زمان صرف شده امروز توسط برچسب",
     "WEEK": "Week"
   },
   "PM": {
@@ -1284,7 +1629,12 @@
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
   },
   "SCHEDULE": {
+    "NO_REPEATABLE_TASKS": "در حال حاضر هیچ کار تکراری وجود ندارد. می‌توانید با انتخاب «Repeat Task» در پانل سمت کار، یک کار را برنامه‌ریزی کنید. برای باز کردن آن، روی سمت راست‌ترین نمادی که هنگام نگه‌داشتن یک کار ظاهر می‌شود، کلیک کنید (یا فقط روی کار در تلفن همراه ضربه بزنید).",
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
+    "NO_SCHEDULED_TITLE": "وظایف برنامه ریزی شده برای روز",
+    "REPEATED_TASKS": "کارهای تکراری",
+    "SCHEDULED_TASKS": "وظایف برنامه ریزی شده",
+    "SCHEDULED_TASKS_WITH_REMINDER": "کارهای برنامه ریزی شده با یادآوری",
     "START_TASK": "Start task now and remove reminder"
   },
   "THEMES": {
@@ -1323,13 +1673,18 @@
     "COMPLETED_TASKS": "کارهای انجام شده",
     "ESTIMATE_REMAINING": "تخمین باقی مانده:",
     "FINISH_DAY": "پایان روز",
+    "FINISH_DAY_FOR_PROJECT": "روز پایان برای این پروژه",
+    "FINISH_DAY_FOR_TAG": "پایان روز برای این برچسب",
+    "FINISH_DAY_TOOLTIP": "روز خود را ارزیابی کنید، تمام کارهای انجام شده را به بایگانی (اختیاری) منتقل کنید و/یا روز بعد خود را برنامه ریزی کنید.",
     "HELP_PROCRASTINATION": "کمک، دارم اهمال‌کاری می‌کنم!",
     "NO_COMPLETED_TASKS": "هیچ کار کاملی وجود ندارد",
     "NO_PLANNED_TASKS": "کارهای برنامه ریزی نشده",
     "READY_TO_WORK": "آماده به کار!",
     "RESET_BREAK_TIMER": "تنظیم مجدد زمان بدون زمان استراحت",
     "TIME_ESTIMATED": "تخمین زمان:",
+    "TODAY_REMAINING": "باقی مانده امروز:",
     "WITHOUT_BREAK": "بدون استراحت:",
-    "WORKING_TODAY": "کار امروز:"
+    "WORKING_TODAY": "کار امروز:",
+    "WORKING_TODAY_ARCHIVED": "تایم امروز روی کارهای آرشیو شده کار کرد"
   }
 }
