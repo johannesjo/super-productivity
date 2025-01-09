@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 
 import { environment } from './environments/environment';
-import { IS_ELECTRON } from './app/app.constants';
+import { IS_ELECTRON, LanguageCode } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { ElectronAPI } from '../electron/electronAPI.d';
@@ -132,7 +132,15 @@ bootstrapApplication(AppComponent, {
       }),
       CdkDropListGroup,
     ),
-    { provide: LOCALE_ID, useValue: navigator.language },
+    {
+      provide: LOCALE_ID,
+      // useValue: 'en-US', // to simulate other language
+      useValue: Object.values(LanguageCode).includes(
+        (navigator.language.split('-')[0] || navigator.language) as LanguageCode,
+      )
+        ? navigator.language
+        : 'en-US',
+    },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),

@@ -31,15 +31,10 @@ export class LanguageService {
   }
 
   setLng(lng: LanguageCode): void {
-    // check if lng is valid enum
-    if (!Object.values(LanguageCode).includes(lng)) {
-      console.error('Invalid language code', lng);
-      return;
-    }
-
-    if (lng) {
+    if (lng && Object.values(LanguageCode).includes(lng)) {
       this._setFn(lng);
     } else {
+      console.error('Invalid language code', lng);
       this.setFromBrowserLngIfAutoSwitchLng();
     }
   }
