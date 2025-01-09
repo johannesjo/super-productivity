@@ -269,6 +269,7 @@
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
         "GITLAB_BASE_URL": "URL base GitLab personalizado",
         "PROJECT": "Caminho completo ou nome de usuário / projeto",
+        "PROJECT_HINT": "e.g. johannesjo/super-produtividade",
         "SCOPE": "escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuído a mim",
@@ -301,12 +302,16 @@
       }
     },
     "ISSUE": {
+      "CROSS_ORIGIN_BROWSER_WARNING": "É provável que esta integração não funcione no seu browser. Descarregue a versão para computador ou Android do Super Productivity!",
       "DEFAULT": {
         "ISSUE_STR": "Questão",
         "ISSUES_STR": "Problemas"
       },
+      "DEFAULT_PROJECT_DESCRIPTION": "Projeto atribuído a tarefas criadas a partir de problemas.",
+      "DEFAULT_PROJECT_LABEL": "Projeto de Super Produtividade por defeito",
       "HOW_TO_GET_A_TOKEN": "Como obter um token?",
       "S": {
+        "ERR_GENERIC": "{{issueProviderName}} Erro: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: O pedido falhou devido a um erro de rede do lado do cliente",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Não configurado corretamente",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Importado {{nr}} novo {{issuesStr}} para o backlog",
@@ -514,6 +519,9 @@
         "ADD_BTN": "Adicionar nova nota",
         "DROP_TO_ADD": "Solte aqui para adicionar nova nota",
         "NO_NOTES": "Atualmente não há notas"
+      },
+      "S": {
+        "NOTE_ADDED": "Nota guardada"
       }
     },
     "OPEN_PROJECT": {
@@ -601,14 +609,17 @@
           "TITLE": "Planejar tarefa para o dia"
         }
       },
+      "EDIT_REPEATED_TASK": "Editar tarefa repetida '{{taskName}}'",
       "NO_TASKS": "Nenhuma tarefa",
       "PLAN_VIEW": {
         "NO_SCHEDULED_ITEMS": "Nenhum item agendado"
       },
       "S": {
         "REMOVED_PLAN_DATE": "Data do plano removida para a tarefa ' {{taskTitle} }'",
+        "TASK_ALREADY_PLANNED": "A tarefa já está planeada para {{date}}",
         "TASK_PLANNED_FOR": "Tarefa planejada para {{date} }"
-      }
+      },
+      "TASK_DRAWER": "Gaveta de trabalho"
     },
     "POMODORO": {
       "BACK_TO_WORK": "Voltar ao trabalho!",
@@ -684,6 +695,9 @@
         "SETUP_JIRA": "Configurar integração com Jira ",
         "SETUP_OPEN_PROJECT": "Configurar integração com OpenProject",
         "SETUP_REDMINE_PROJECT": "Configurar Integração com Redmine"
+      },
+      "D_DELETE": {
+        "MSG": "Tem a certeza de que pretende apagar o projeto \"{{title}}\"?"
       },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "Habilitar Backlog do Projeto",
@@ -800,6 +814,7 @@
         "L_AUTO_COUNT_UP": "Contagem automática de disparos para",
         "L_AUTO_SWITCH_OFF": "Desligamento automático do gatilho por",
         "L_AUTO_SWITCH_ON": "O gatilho automático é ativado por",
+        "L_COUNTDOWN_DURATION": "Duração da contagem decrescente",
         "L_ICON": "Ícone",
         "L_ICON_ON": "Ícone quando alternado",
         "L_IS_ENABLED": "Ativado",
@@ -807,6 +822,7 @@
         "L_TYPE": "Tipo",
         "TITLE": "Contadores simples",
         "TYPE_CLICK_COUNTER": "Contador de cliques",
+        "TYPE_REPEATED_COUNTDOWN": "Contagem decrescente repetida",
         "TYPE_STOPWATCH": "Cronômetro"
       }
     },
@@ -1022,6 +1038,9 @@
         "MOVE_TO_BACKLOG": "Mova a tarefa para backlog até que seja agendada",
         "QA_NEXT_MONTH": "Agenda do próximo mês",
         "QA_NEXT_WEEK": "Agenda da próxima semana",
+        "QA_REMOVE_TODAY": "Remover tarefa de hoje",
+        "QA_TODAY": "Agendar hoje",
+        "QA_TOMORROW": "Horário de amanhã",
         "REMIND_AT": "Lembre-se em",
         "RO_1H": "1 hora antes de começar",
         "RO_5M": "5 minutos antes de começar",
@@ -1096,6 +1115,10 @@
         "YEARLY_CURRENT_DATE": "Anualmente em {{dayAndMonthStr} }",
         "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}"
       },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Existem {{tasksNr}} instâncias criadas para esta tarefa repetível. Pretende movê-las todas para o projeto \"{{projectName}}\"?",
+        "OK": "Atualizar todas as instâncias"
+      },
       "D_CONFIRM_REMOVE": {
         "MSG": "A remoção da configuração de repetição converterá todas as instâncias anteriores desta tarefa em apenas tarefas regulares. Tem certeza de que deseja continuar?",
         "OK": "Remover completamente"
@@ -1130,6 +1153,7 @@
         "Q_CUSTOM": "Configuração de repetição personalizada",
         "Q_DAILY": "Todos os dias",
         "Q_MONDAY_TO_FRIDAY": "De segunda a sexta",
+        "Q_MONTHLY_CURRENT_DATE": "Todos os meses, no dia {{dateDayStr}}",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Toda semana em {{weekdayStr} }",
         "Q_YEARLY_CURRENT_DATE": "Todos os anos em {{dayAndMonthStr} }",
         "QUICK_SETTING": "Repita a configuração",
@@ -1257,6 +1281,7 @@
     "EXAMPLE_VAL": "Clique para editar",
     "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
     "HIDE": "Esconder",
+    "ICON_INP_DESCRIPTION": "Todos os emojis utf-8 também são suportados!",
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
@@ -1271,6 +1296,7 @@
     "SUBMIT": "Enviar",
     "TITLE": "Título",
     "TODAY_TAG_TITLE": "Hoje",
+    "TRACKING_INTERVAL_DESCRIPTION": "Acompanhe o tempo utilizando este intervalo em milissegundos. Você pode querer mudar isso para reduzir as gravações em disco. Veja a edição #2355.",
     "UNDO": "Desfazer",
     "UPDATE": "Atualizar",
     "WITHOUT_PROJECT": "Sem Projeto",
@@ -1359,6 +1385,7 @@
       "TITLE": "Atalhos do teclado",
       "TOGGLE_BACKLOG": "Mostrar/ocultar tarefas do backlog",
       "TOGGLE_BOOKMARKS": "Mostrar/ocultar barra de favoritos",
+      "TOGGLE_ISSUE_PANEL": "Mostrar/ocultar painel de problemas",
       "TOGGLE_PLAY": "Começar/Parar Tarefa",
       "TOGGLE_SIDE_NAV": "Mostrar e focar / ocultar o Sidenav",
       "TRIGGER_SYNC": "Botão de sincronização (se configurado)",
@@ -1367,7 +1394,30 @@
       "ZOOM_OUT": "Diminuir o zoom (somente para computador)"
     },
     "LANG": {
-      "LABEL": "Selecione um idioma"
+      "AR": "عربى",
+      "CZ": "Checo",
+      "DE": "Alemão",
+      "EN": "Inglês",
+      "ES": "Espanhol",
+      "FA": "فارسی",
+      "FR": "francês",
+      "HR": "Hungria",
+      "ID": "Indonésio",
+      "IT": "Italiano",
+      "JA": "日本語",
+      "KO": "한국어",
+      "LABEL": "Selecione um idioma",
+      "NB": "Norsk Bokmål",
+      "NL": "Países Baixos",
+      "PL": "Polaco",
+      "PT": "Português",
+      "RU": "Russo",
+      "SK": "Eslovaco",
+      "TITLE": "Língua",
+      "TR": "Türkçe",
+      "UK": "Українська",
+      "ZH": "中文(简体)",
+      "ZH_TW": "中文(繁體)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
@@ -1405,6 +1455,8 @@
       "TITLE": "Configurações do Pomodoro"
     },
     "REMINDER": {
+      "COUNTDOWN_DURATION": "Mostrar o banner X antes do lembrete real",
+      "IS_COUNTDOWN_BANNER_ENABLED": "Mostrar uma faixa de contagem decrescente antes da data de vencimento dos lembretes",
       "TITLE": "Lembretes"
     },
     "SCHEDULE": {
@@ -1418,6 +1470,13 @@
       "LUNCH_BREAK_START_END_DESCRIPTION": "ex: 13:00",
       "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "por exemplo. 17:00"
+    },
+    "SHORT_SYNTAX": {
+      "HELP": "<p>Aqui pode controlar as opções de sintaxe curta ao criar uma tarefa</p>",
+      "IS_ENABLE_DUE": "Ativar a sintaxe curta devida (@<Due time>)",
+      "IS_ENABLE_PROJECT": "Ativar a sintaxe curta do projeto (+<Project name>)",
+      "IS_ENABLE_TAG": "Ativar a sintaxe curta da etiqueta (#<Tag>)",
+      "TITLE": "Sintaxe curta"
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Faça um lembrete sonoro de pausa",
@@ -1440,6 +1499,18 @@
       "NOTIFICATION_TITLE": "Dar um tempo!",
       "SNOOZE_TIME": "Tempo de soneca quando solicitado para fazer uma pausa",
       "TITLE": "Lembrete de Pausa"
+    },
+    "TIME_TRACKING": {
+      "HELP": "O lembrete de controlo de tempo é uma faixa que aparece no caso de se ter esquecido de iniciar o controlo de tempo.",
+      "L_DEFAULT_ESTIMATE": "Estimativa de tempo predefinida para novas tarefas",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "Estimativa de tempo predefinida para novas subtarefas",
+      "L_IS_AUTO_START_NEXT_TASK": "Iniciar o acompanhamento da tarefa seguinte ao marcar a atual como concluída",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando o tempo estimado foi excedido",
+      "L_IS_TRACKING_REMINDER_ENABLED": "Lembrete de rastreio ativado",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostrar lembrete de seguimento na aplicação móvel",
+      "L_TRACKING_INTERVAL": "Intervalo de controlo do tempo (EXPERIMENTAL)",
+      "L_TRACKING_REMINDER_MIN_TIME": "Tempo de espera antes de mostrar o lembrete de seguimento Banner",
+      "TITLE": "Controlo de tempo"
     }
   },
   "GLOBAL_SNACK": {
@@ -1447,6 +1518,7 @@
     "ERR_COMPRESSION": "Erro para interface de compactação",
     "FILE_DOWNLOADED": "{{fileName}} baixado",
     "FILE_DOWNLOADED_BTN": "Pasta aberta",
+    "NAVIGATE_TO_TASK_ERR": "Não foi possível focar a tarefa. Apagou-a?",
     "PERSISTENCE_DISALLOWED": "Os dados não serão mantidos permanentemente. Esteja ciente de que isso pode levar à perda de dados!",
     "PERSISTENCE_ERROR": "Erro ao solicitar a persistência de dados: {{err}}",
     "RUNNING_X": "Rodando \"{{str}}\".",
@@ -1469,22 +1541,32 @@
     "ADD_NEW_TASK": "Adicionar nova tarefa",
     "CREATE_PROJECT": "Criar Projeto",
     "CREATE_TAG": "Criar tag",
+    "DELETE_PROJECT": "Eliminar projeto",
     "DELETE_TAG": "Excluir tag",
     "GO_TO_TASK_LIST": "Ir para a lista de tarefas",
     "HELP": "Ajuda",
     "HM": {
+      "CALENDARS": "Como fazer: Ligar calendários",
       "CONTRIBUTE": "Contribuir",
       "GET_HELP_ONLINE": "Buscar ajuda online",
+      "KEYBOARD": "Como fazer: Teclado avançado",
       "REDDIT_COMMUNITY": "Comunidade no Reddit",
-      "REPORT_A_PROBLEM": "Reportar um problema"
+      "REPORT_A_PROBLEM": "Reportar um problema",
+      "START_WELCOME": "Iniciar a visita de boas-vindas",
+      "SYNC": "Como fazer: Configurar a sincronização"
     },
     "METRICS": "Métricas",
+    "NO_TAG_INFO": "Atualmente não existem etiquetas. Pode adicionar etiquetas introduzindo `#yourTagName` ao adicionar ou editar tarefas.",
     "NOTES": "Notas",
+    "NOTES_PANEL_INFO": "As notas só podem ser mostradas a partir da agenda e das vistas normais da lista de tarefas.",
+    "PLANNER": "Planeador",
     "PROCRASTINATE": "Procrastinar",
     "PROJECT_MENU": "Menu Projeto",
     "PROJECT_SETTINGS": "Configurações do projeto",
     "PROJECTS": "Projetos",
     "QUICK_HISTORY": "História Rápida",
+    "REPEAT_SCHEDULED": "Repetir/Programado",
+    "SCHEDULE": "Horário",
     "SETTINGS": "Configurações",
     "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
     "TAGS": "Tag",
@@ -1507,8 +1589,11 @@
       "OK": "Sim, sim! Desligar!"
     },
     "ESTIMATE_TOTAL": "Estimativa total:",
+    "EVALUATE_DAY": "Avaliar",
     "EXPORT_TASK_LIST": "Exportar lista de tarefas",
     "NO_TASKS": "Não há tarefas para este dia",
+    "PLAN_TOMORROW": "Plano",
+    "REVIEW_TASKS": "Revisão",
     "ROUND_5M": "Arredonde todas as tarefas para 5 minutos",
     "ROUND_15M": "Arredonde todas as tarefas para 15 minutos",
     "ROUND_30M": "Arredonde todas as tarefas para 30 minutos",
@@ -1519,11 +1604,13 @@
     "ROUND_UP_15M": "Arredonde todas as tarefas para 15 minutos",
     "ROUND_UP_30M": "Arredonde todas as tarefas para 30 minutos",
     "SAVE_AND_GO_HOME": "Salve e vá para inicio",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Mova todas as tarefas concluídas para o arquivo (registo de trabalho) e, opcionalmente, sincronize todos os dados e feche a aplicação.",
     "START_END": "Começar – Fim",
     "SUMMARY_FOR": "Resumo diário para {{dayStr}}",
     "TASKS_COMPLETED": "Tarefas concluídas",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo gasto / Estimado",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo gasto: Tempo total gasto hoje. Tarefas arquivadas não incluídas. – Tempo estimado: Tempo estimado para tarefas trabalhadas hoje menos o tempo já gasto com elas em outros dias.",
+    "TIME_SPENT_TODAY_BY_TAG": "Tempo gasto hoje por etiqueta",
     "WEEK": "Semana"
   },
   "PM": {
@@ -1543,8 +1630,10 @@
   "SCHEDULE": {
     "NO_REPEATABLE_TASKS": "No momento, não há tarefas recorrentes. Você pode agendar uma tarefa escolhendo \"Repetir Tarefa\" no menu de contexto da tarefa. Para abrí-lo clique nos 3 pontinhos à direita de uma tarefa.",
     "NO_SCHEDULED": "No momento, não há tarefas agendadas. Você pode agendar uma tarefa escolhendo \"Agendar Tarefa\" no menu de contexto da tarefa. Para abrí-lo, clique nos 3 pontinhos à direita de uma tarefa.",
+    "NO_SCHEDULED_TITLE": "Tarefas programadas para o dia",
     "REPEATED_TASKS": "Tarefas Recorrentes",
     "SCHEDULED_TASKS": "Tarefas Agendadas",
+    "SCHEDULED_TASKS_WITH_REMINDER": "Tarefas programadas com lembrete",
     "START_TASK": "Iniciar tarefa agora e remover lembrete"
   },
   "THEMES": {
@@ -1583,13 +1672,18 @@
     "COMPLETED_TASKS": "Tarefas concluídas",
     "ESTIMATE_REMAINING": "Estimativa restante:",
     "FINISH_DAY": "Encerrar o dia",
+    "FINISH_DAY_FOR_PROJECT": "Dia de conclusão deste projeto",
+    "FINISH_DAY_FOR_TAG": "Dia de conclusão para esta etiqueta",
+    "FINISH_DAY_TOOLTIP": "Avalie o seu dia, mova todas as tarefas concluídas para o arquivo (opcionalmente) e/ou planeie o seu dia seguinte.",
     "HELP_PROCRASTINATION": "Ajuda! Eu estou procrastinando!",
     "NO_COMPLETED_TASKS": "No momento, não há tarefas concluídas",
     "NO_PLANNED_TASKS": "Nenhuma tarefa planejada",
     "READY_TO_WORK": "Pronto para trabalhar!",
     "RESET_BREAK_TIMER": "Reiniciar sem temporizador de pause",
     "TIME_ESTIMATED": "Tempo estimado:",
+    "TODAY_REMAINING": "Hoje, resta:",
     "WITHOUT_BREAK": "Sem pausa:",
-    "WORKING_TODAY": "Trabalhando hoje:"
+    "WORKING_TODAY": "Trabalhando hoje:",
+    "WORKING_TODAY_ARCHIVED": "Tempo trabalhado hoje em tarefas arquivadas"
   }
 }

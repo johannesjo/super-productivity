@@ -240,6 +240,7 @@
         "LABELS": "Etiketler",
         "LAST_COMMENT": "Son yorum",
         "LOAD_ALL_COMMENTS": "{{nr}} yorumun tümünü yükle",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Açıklama ve tüm yorumları yükle",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
@@ -268,6 +269,7 @@
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "GITLAB_BASE_URL": "Özel GitLab temel URL'si",
         "PROJECT": "Proje ID veya kullanıcı adı/projesi",
+        "PROJECT_HINT": "örn. johannesjo/süper-üretkenlik",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Herşey",
         "SCOPE_ASSIGNED": "Beni görevlendirdi",
@@ -769,7 +771,9 @@
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Gizle",
-        "START_NOW": "Şimdi başla"
+        "START_NOW": "Şimdi başla",
+        "TXT": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
       },
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
@@ -1155,6 +1159,7 @@
         "QUICK_SETTING": "Yapılandırmayı Tekrarla",
         "REMIND_AT": "Şu saatte hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
+        "REPEAT_CYCLE": "Döngüyü tekrarla",
         "REPEAT_EVERY": "Yinelenme sıklığı",
         "SATURDAY": "Cumartesi",
         "START_DATE": "Başlangıç ​​tarihi",
@@ -1177,15 +1182,18 @@
         "MSG": "{{time}} süredir, süreyi takip etmiyorsunuz"
       },
       "D_IDLE": {
+        "ADD_ENTRY": "İzleme için giriş ekleyin",
         "BREAK": "Mola",
         "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin:",
         "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
+        "RESET_BREAK_REMINDER_TIMER": "Mola hatırlatma zamanlayıcısını sıfırla",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Atla",
         "SIMPLE_CONFIRM_COUNTER_OK": "İzle",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Atlamayı seçtiniz, ancak {{nr}} basit sayaç düğmesini etkinleştirdiniz. Onlara boşta kalma süresini izlemek istiyor musunuz?",
         "SIMPLE_COUNTER_TOOLTIP": " {{title}}'i takip etmek için tıklayın",
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}} TAKİP ETMEMEK için tıklayın",
         "SKIP": "Atla",
+        "SPLIT_TIME": "Zamanı çoklu görevlere ve molalara bölün",
         "TASK": "Görev",
         "TRACK_TO": "Takip et:"
       },
@@ -1257,6 +1265,7 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "Verileri Dışa Aktar",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
+    "PRIVACY_EXPORT": "Anonimleştirilmiş verileri dışa aktarın (hata ayıklama için contact@super-productivity.com adresine göndermek üzere)",
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
   },
   "G": {
@@ -1584,6 +1593,8 @@
     "EVALUATE_DAY": "Değerlendir",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
     "NO_TASKS": "Bugün için görev yok",
+    "PLAN_TOMORROW": "Plan",
+    "REVIEW_TASKS": "İnceleme",
     "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",

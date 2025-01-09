@@ -269,6 +269,7 @@
         "FILTER_USER": "Nom d'utilisateur (e.g. pour filtrer vos propres modifications)",
         "GITLAB_BASE_URL": "URL de base GitLab personnalisée",
         "PROJECT": "Chemin complet ou nom d'utilisateur / projet",
+        "PROJECT_HINT": "par exemple, johannesjo/super-productivité",
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Attribués à moi",
@@ -310,6 +311,7 @@
       "DEFAULT_PROJECT_LABEL": "Projet Super Productivity par défaut",
       "HOW_TO_GET_A_TOKEN": "Comment obtenir un jeton ?",
       "S": {
+        "ERR_GENERIC": "{{issueProviderName}} Erreur : {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: la demande a échoué en raison d'une erreur réseau côté client",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: pas correctement configuré",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} nouveau {{issuesStr}} importé dans le backlog",
@@ -517,6 +519,9 @@
         "ADD_BTN": "Ajouter une nouvelle note",
         "DROP_TO_ADD": "Déposer ici pour ajouter une nouvelle note",
         "NO_NOTES": "Il n'y a actuellement aucune note"
+      },
+      "S": {
+        "NOTE_ADDED": "Note sauvegardée"
       }
     },
     "OPEN_PROJECT": {
@@ -1276,6 +1281,7 @@
     "EXAMPLE_VAL": "cliquer pour modifier",
     "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> télécharger l'extension chrome</a> afin de permettre la communication avec l'Api Jira et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas sur mobile.",
     "HIDE": "Réduire",
+    "ICON_INP_DESCRIPTION": "Tous les emojis utf-8 sont également pris en charge !",
     "LOGIN": "S'identifier",
     "LOGOUT": "Se déconnecter",
     "MINUTES": "{{m}} minutes",
@@ -1388,8 +1394,30 @@
       "ZOOM_OUT": "Zoom arrière (bureau uniquement)"
     },
     "LANG": {
+      "AR": "عربى",
+      "CZ": "Tchèque",
+      "DE": "Deutsch",
+      "EN": "Anglais",
+      "ES": "Espagnol",
+      "FA": "فارسی",
+      "FR": "Français",
+      "HR": "Hrvatski",
+      "ID": "Indonésien",
+      "IT": "Italiano",
+      "JA": "日本語",
+      "KO": "한국어",
       "LABEL": "Merci de choisir une langue",
-      "TITLE": "Langue"
+      "NB": "Norsk Bokmål",
+      "NL": "Pays-Bas",
+      "PL": "Polonais",
+      "PT": "Português",
+      "RU": "Russie",
+      "SK": "Slovaque",
+      "TITLE": "Langue",
+      "TR": "Türkçe",
+      "UK": "Українська",
+      "ZH": "中文(简体)",
+      "ZH_TW": "中文(繁體)"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",
