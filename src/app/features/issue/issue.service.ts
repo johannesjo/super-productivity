@@ -45,6 +45,7 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
+import { TODAY_TAG } from '../tag/tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -424,22 +425,29 @@ export class IssueService {
     console.log({ title, additionalFromProviderIssueService });
 
     const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
+      const defaultProjectId = (
+        await this._issueProviderService
+          .getCfgOnce$(issueProviderId, issueProviderKey)
+          .toPromise()
+      ).defaultProjectId;
+
+      if (typeof this._workContextService.activeWorkContextId !== 'string') {
+        throw new Error('No active work context id');
+      }
+
       if (
         this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
         !isForceDefaultProject
       ) {
-        return { projectId: this._workContextService.activeWorkContextId as string };
+        return {
+          projectId: defaultProjectId || this._workContextService.activeWorkContextId,
+          tagIds: [TODAY_TAG.id],
+        };
       } else {
-        const defaultProjectId = (
-          await this._issueProviderService
-            .getCfgOnce$(issueProviderId, issueProviderKey)
-            .toPromise()
-        ).defaultProjectId;
-
         return {
           tagIds:
             this._workContextService.activeWorkContextType === WorkContextType.TAG
-              ? [this._workContextService.activeWorkContextId as string]
+              ? [this._workContextService.activeWorkContextId]
               : [],
           projectId: defaultProjectId,
         };
