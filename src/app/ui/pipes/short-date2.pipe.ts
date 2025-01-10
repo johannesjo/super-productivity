@@ -4,8 +4,8 @@ import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
 export class ShortDate2Pipe implements PipeTransform {
   private locale = inject(LOCALE_ID);
 
-  transform(value: number | null, ...args: unknown[]): string | null {
-    if (typeof value !== 'number') {
+  transform(value: number | string | null, ...args: unknown[]): string | null {
+    if (typeof value !== 'number' && typeof value !== 'string') {
       return null;
     }
 

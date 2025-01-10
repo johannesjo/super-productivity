@@ -12,7 +12,7 @@
     @if (task.repeatCfgId) {
     <div>
       @if (!isRepeatTaskCreatedToday) {
-      <div class="repeat-date-badge">{{ task.created|date:'d.M' }}</div>
+      <div class="repeat-date-badge">{{ task.created|shortDate2 }}</div>
       } @if (task.repeatCfgId) {
       <mat-icon
         [style.transform]="isCurrent ? 'scale(1.4)': ''"

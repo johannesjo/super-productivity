@@ -26,6 +26,7 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 
 @Component({
   selector: 'planner-day',
@@ -46,6 +47,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     RoundDurationPipe,
     ShortTime2Pipe,
     TranslatePipe,
+    ShortDate2Pipe,
   ],
 })
 export class PlannerDayComponent {
