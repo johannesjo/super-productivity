@@ -8,7 +8,7 @@ import { TaskService } from '../../../../../tasks/task.service';
 // @ts-ignore
 import j2m from 'jira2md';
 import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { devError } from '../../../../../../util/dev-error';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
@@ -21,6 +21,7 @@ import { JiraToMarkdownPipe } from '../../../../../../ui/pipes/jira-to-markdown.
 import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
 import { SortPipe } from '../../../../../../ui/pipes/sort.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { SnackService } from '../../../../../../core/snack/snack.service';
 
 interface JiraSubtaskWithUrl extends JiraSubtask {
   href: string;
@@ -50,6 +51,7 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
 })
 export class JiraIssueContentComponent {
   private readonly _taskService = inject(TaskService);
+  private readonly _snackService = inject(SnackService);
   private readonly _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
 
   description?: string;
@@ -75,15 +77,24 @@ export class JiraIssueContentComponent {
     switchMap(([task, issue]) =>
       issue.subtasks?.length
         ? forkJoin(
-            ...issue.subtasks.map((ist: any) => {
+            ...issue.subtasks.map((ist: JiraSubtask) => {
               return this._jiraCommonInterfacesService
-                .issueLink$(assertTruthy(ist.issueId), assertTruthy(task.issueProviderId))
+                .issueLink$(assertTruthy(ist.id), assertTruthy(task.issueProviderId))
                 .pipe(
                   map((issueUrl) => ({
                     ...ist,
                     href: issueUrl,
                   })),
                 );
+            }),
+          ).pipe(
+            catchError((e) => {
+              console.error(e);
+              this._snackService.open({
+                type: 'ERROR',
+                msg: 'Failed to load subtasks for Jira Issue',
+              });
+              return of(undefined);
             }),
           )
         : of(undefined),
