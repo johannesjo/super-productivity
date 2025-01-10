@@ -34,7 +34,11 @@ export class LanguageService {
     if (lng && Object.values(LanguageCode).includes(lng)) {
       this._setFn(lng);
     } else {
-      console.error('Invalid language code', lng);
+      if (lng) {
+        console.error('Invalid language code', lng);
+      } else {
+        console.warn('No language code provided');
+      }
       this.setFromBrowserLngIfAutoSwitchLng();
     }
   }
