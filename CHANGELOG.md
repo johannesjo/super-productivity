@@ -1,3 +1,32 @@
+## [11.1.2](https://github.com/johannesjo/super-productivity/compare/v11.1.1...v11.1.2) (2025-01-10)
+
+### Bug Fixes
+
+- add proper fallback for missing locales [#3842](https://github.com/johannesjo/super-productivity/issues/3842) ([3f1e0ca](https://github.com/johannesjo/super-productivity/commit/3f1e0ca8d05d54cbc3c09a7e59a8fb9bd0d3eb57))
+- also display value for RepeatedCountdownTimer on daily summary and quick history ([f72a2ce](https://github.com/johannesjo/super-productivity/commit/f72a2ce6968f2d73ca0249ba50fdbb689adfae74))
+- autofix data for problem [#3848](https://github.com/johannesjo/super-productivity/issues/3848) ([ed18621](https://github.com/johannesjo/super-productivity/commit/ed186212c3488b5ac1ca0d3f7c41f42fbd6280c1))
+- can't highlight text inside task textarea [#3724](https://github.com/johannesjo/super-productivity/issues/3724) ([c0b60bf](https://github.com/johannesjo/super-productivity/commit/c0b60bfdb01e7f173e1209abc2b4e162f8db6456))
+- cdk-overlay-container on android ([20a7de4](https://github.com/johannesjo/super-productivity/commit/20a7de4e1f4b03a8148f420d4cf1fbd96fd94c52))
+- error for jira sub tasks and improve error handling [#3836](https://github.com/johannesjo/super-productivity/issues/3836) [#3829](https://github.com/johannesjo/super-productivity/issues/3829) ([0c07666](https://github.com/johannesjo/super-productivity/commit/0c07666f9d90eaa34d57d2f8c961a854e594d9f8))
+- prevent actual error when deleting project [#3848](https://github.com/johannesjo/super-productivity/issues/3848) ([07c3222](https://github.com/johannesjo/super-productivity/commit/07c3222440c061bbb181718594e9b9a390e6dc33))
+- time position for repeatable on planner ([85ba271](https://github.com/johannesjo/super-productivity/commit/85ba271dda9b5c734c016b3681474e4c745b2dbe))
+
+### Features
+
+- always use defaultProjectId when available even when on other project list [#3850](https://github.com/johannesjo/super-productivity/issues/3850) ([9012f95](https://github.com/johannesjo/super-productivity/commit/9012f95d9a7477259759ce5a6c93555c25f3145b))
+- better handle case when current task is due [#3855](https://github.com/johannesjo/super-productivity/issues/3855) ([d9c75bf](https://github.com/johannesjo/super-productivity/commit/d9c75bf60ccd5761587d45b657f48ce0b13d1741))
+- **i18n:** add chatgpt translations ([77ad2f9](https://github.com/johannesjo/super-productivity/commit/77ad2f9c41f98ab5145965dd92b67978303d8ceb))
+- **i18n:** add deepl translations ([7731130](https://github.com/johannesjo/super-productivity/commit/7731130ea51a647ecb2289aa2ad957021501bd7e))
+- **i18n:** add google translate translations ([1577357](https://github.com/johannesjo/super-productivity/commit/15773571228fd969043d65177250697e964ed671))
+- **i18n:** add missing translations ([68e12b5](https://github.com/johannesjo/super-productivity/commit/68e12b53bcf25535f7bd46f80060ef03f3d068f5))
+- **i18n:** remove all unused translations ([103d7ff](https://github.com/johannesjo/super-productivity/commit/103d7ffecf2be4849ab46137c9a5093c6446fb18))
+- **i18n:** sort all translations alphabetically ([f73c8f0](https://github.com/johannesjo/super-productivity/commit/f73c8f09cf8da6eea4c3dc3728772597a19cd6e3))
+- improve internationalization of dates ([f050048](https://github.com/johannesjo/super-productivity/commit/f050048fc276fca526e7a0226c7d5aaa7a12d217))
+- improve language error handling and adjust test ([4a50cb3](https://github.com/johannesjo/super-productivity/commit/4a50cb35cfe98b129fa73b4044c212dd79457183))
+- prevent not listed languages from being activated [#3842](https://github.com/johannesjo/super-productivity/issues/3842) ([0f18d17](https://github.com/johannesjo/super-productivity/commit/0f18d17c4ef4bacc96ec47535045ddc97030e931))
+- show done tasks always last for select task suggestions ([55bd485](https://github.com/johannesjo/super-productivity/commit/55bd4852ef760133468db427bdcf8aa20e2b2971))
+- update translation ([748d1ee](https://github.com/johannesjo/super-productivity/commit/748d1ee0cf59de12cf19af4baac8911a896dee75))
+
 ## [11.1.1](https://github.com/johannesjo/super-productivity/compare/v11.1.0...v11.1.1) (2025-01-05)
 
 ### Bug Fixes
