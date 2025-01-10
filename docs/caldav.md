@@ -44,7 +44,14 @@ Super Productivity offers basic CalDAV integration for importing and syncing tas
 As [stated](https://github.com/johannesjo/super-productivity/issues/3017#issuecomment-2577469193) by the repository maintainer in Jan 2025:
 > "It's important to understand that this will always be limited since CalDAV is likely not completely mappable to the model of Super Productivity. First step for this would be a feasibility analysis to check what parts of the model can be mapped and which not. Next step would be making a concept how this all could work."
 
-Source: [Issue #3017 Comment](https://github.com/johannesjo/super-productivity/issues/3017#issuecomment-2577469193)
+### Developer Contributions Welcome
+If you have experience with CalDAV development and are interested in improving this integration, your help would be greatly appreciated. Key areas that need attention include:
+
+- Feasibility analysis of CalDAV-to-SP model mapping
+- Integration architecture design
+- Implementation of additional sync capabilities
+
+Feel free to reach out if you'd like to contribute.
 
 ## Related Issues
 [^2876]: [Import Multilevel Subtasks from CalDAV](https://github.com/johannesjo/super-productivity/issues/2876)
