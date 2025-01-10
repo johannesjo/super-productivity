@@ -42,12 +42,12 @@
                   {
                   <div class="simple-counter-item">
                     <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
-                    @if (sc.type==='ClickCounter') {
-                    <div class="count">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
-                    } @if (sc.type==='StopWatch') {
+                    @if (sc.type==='StopWatch') {
                     <div class="count">
                       {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
                     </div>
+                    } @else {
+                    <div class="count">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
                     }
                   </div>
                   }

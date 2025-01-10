@@ -59,18 +59,13 @@
                       class="simple-counter-item"
                     >
                       <mat-icon inline="true">{{ sc.iconOn || sc.icon }}</mat-icon>
-                      <div
-                        *ngIf="sc.type==='ClickCounter'"
-                        class="count"
-                      >
-                        {{ sc.countOnDay[day.value.dateStr] || 0 }}
-                      </div>
-                      <div
-                        *ngIf="sc.type==='StopWatch'"
-                        class="count"
-                      >
+                      @if(sc.type==='StopWatch') {
+                      <div class="count">
                         {{ sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString }}
                       </div>
+                      } @else {
+                      <div class="count">{{ sc.countOnDay[day.value.dateStr] || 0 }}</div>
+                      }
                     </div>
                   </div>
                 </div>
