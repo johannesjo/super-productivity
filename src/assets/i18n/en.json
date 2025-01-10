@@ -775,6 +775,7 @@
         "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other tasks are due)"
       },
+      "S_ACTIVE_TASK_DUE": "The task you are currently working on is now due!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SCHEDULE": {
