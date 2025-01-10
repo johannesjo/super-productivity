@@ -18,6 +18,11 @@
   z-index: 1 !important;
 }
 
+// on android this is not properly injected for unknown reasons
+.cdk-overlay-container {
+  z-index: 1000;
+}
+
 // DIALOGS
 // ----------
 .mat-mdc-dialog-title.mat-mdc-dialog-title,
