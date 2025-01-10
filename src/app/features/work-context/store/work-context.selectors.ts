@@ -75,6 +75,16 @@ export const selectActiveWorkContext = createSelector(
   },
 );
 
+const sortDoneLast = (a: Task, b: Task): number => {
+  if (a.isDone && !b.isDone) {
+    return 1;
+  }
+  if (!a.isDone && b.isDone) {
+    return -1;
+  }
+  return 0;
+};
+
 export const selectTrackableTasksForActiveContext = createSelector(
   selectActiveWorkContext,
   selectTaskEntities,
@@ -95,7 +105,7 @@ export const selectTrackableTasksForActiveContext = createSelector(
         trackableTasks.push(task);
       }
     });
-    return trackableTasks;
+    return trackableTasks.sort(sortDoneLast);
   },
 );
 
@@ -118,7 +128,7 @@ export const selectTrackableTasksActiveContextFirst = createSelector(
           (!!task.parentId || task.subTaskIds.length === 0) &&
           !activeContextIds.includes(task.id),
       );
-    return [...forActiveContext, ...otherTasks];
+    return [...forActiveContext, ...otherTasks].sort(sortDoneLast);
   },
 );
 
