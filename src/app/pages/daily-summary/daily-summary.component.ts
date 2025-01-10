@@ -40,7 +40,7 @@ import { shareReplayUntil } from '../../util/share-replay-until';
 import { DateService } from 'src/app/core/date/date.service';
 import { Action } from '@ngrx/store';
 import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
-import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatAnchor, MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
@@ -56,6 +56,8 @@ import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-
 import { RightPanelComponent } from '../../features/right-panel/right-panel.component';
 import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
 import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
+import { NoteComponent } from '../../features/note/note/note.component';
+import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -85,6 +87,9 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     RightPanelComponent,
     EvaluationSheetComponent,
     WorklogWeekComponent,
+    NoteComponent,
+    MatIconButton,
+    InlineMarkdownComponent,
   ],
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
@@ -103,8 +108,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   T: typeof T = T;
   _onDestroy$ = new Subject<void>();
-
-  cfg: any = {};
 
   readonly isIncludeYesterday: boolean;
   isTimeSheetExported: boolean = true;
@@ -128,6 +131,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }),
     shareReplayUntil(this._onDestroy$, 1),
   );
+
+  cfg$ = this.configService.cfg$;
 
   tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
     switchMap((dayStr) => this._getDailySummaryTasksFlat$(dayStr)),
@@ -303,6 +308,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   onTabIndexChange(i: number): void {
     this.selectedTabIndex = i;
+  }
+
+  updateDailySummaryTxt(ev: string): void {
+    this.configService.updateSection('dailySummaryNote', {
+      txt: ev.length === 0 ? undefined : ev,
+    });
   }
 
   private async _moveDoneToArchive(): Promise<void> {
