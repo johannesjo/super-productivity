@@ -51,11 +51,10 @@
        src="https://img.shields.io/badge/-MASTODON-%232B90D9?style=for-the-badge&logo=mastodon&logoColor=white"
        align="center">
 </a>
-<a href="https://twitter.com/intent/tweet?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
-  <img alt="tweet"
-       src="https://img.shields.io/twitter/url/https/github.com/ArmynC/ArminC-AutoExec.svg?style=flat-square&logo=twitter"
-       target="_blank"
-       align="center" />
+<a href="https://x.com/intent/post?text=Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com">
+  <img alt="Tweet"
+       src="https://img.shields.io/badge/TWEET-%23000000.svg?style=for-the-badge&logo=X"
+       align="center">
 </a>
 </p>
 
