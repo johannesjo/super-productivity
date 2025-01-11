@@ -252,6 +252,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       this.modelCopy = '- [ ] ';
     } else {
       this.modelCopy += '\n- [ ] ';
+      // cleanup string on add
+      this.modelCopy = this.modelCopy?.replace(/\n\n- \[/g, '\n- [').replace(/^\n/g, '');
     }
   }
 
