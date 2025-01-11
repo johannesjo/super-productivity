@@ -43,12 +43,12 @@ export class GlobalConfigEffects {
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
-        tap(({ sectionKey, sectionCfg }) => {
+        tap(({ sectionKey, sectionCfg, isSkipSnack }) => {
           const isPublicSection = sectionKey.charAt(0) !== '_';
           const isPublicPropUpdated = Object.keys(sectionCfg).find(
             (key) => key.charAt(0) !== '_',
           );
-          if (isPublicPropUpdated && isPublicSection) {
+          if (isPublicPropUpdated && isPublicSection && !isSkipSnack) {
             this._snackService.open({
               type: 'SUCCESS',
               msg: T.F.CONFIG.S.UPDATE_SECTION,

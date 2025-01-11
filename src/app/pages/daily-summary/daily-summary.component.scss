@@ -150,21 +150,19 @@ $summary-point-inner-margin: $s;
 }
 
 .tomorrows-note {
-  border-radius: $card-border-radius;
   display: inline-block;
   width: 500px;
   max-width: 100%;
 }
 
 .day-end-note {
-  margin-bottom: 40px;
-  margin-top: -8px;
+  margin-bottom: 48px;
+  //margin-top: -8px;
 
   &::ng-deep inline-markdown {
     max-width: 400px;
     text-align: left;
     margin: auto;
-    border-radius: $card-border-radius * 1;
 
     &.isFocused {
       border-color: transparent;
@@ -172,23 +170,23 @@ $summary-point-inner-margin: $s;
 
     .markdown-wrapper {
       min-height: 60px;
-      border-radius: $card-border-radius * 1;
       overflow: visible !important;
       transition: $transition-standard;
 
       @include lightTheme {
-        background: $light-theme-bg;
-        box-shadow: $whiteframe-shadow-1dp;
-        //border: 1px solid $light-theme-extra-border-color;
+        //background: $light-theme-bg;
+        //box-shadow: $whiteframe-shadow-1dp;
+        border: 1px solid $light-theme-extra-border-color;
       }
       @include darkTheme() {
-        border-radius: $card-border-radius;
-        background: $dark-theme-bg-lightest;
-        box-shadow: $whiteframe-shadow-1dp;
+        //background: $dark-theme-bg-lighter;
+        //box-shadow: $whiteframe-shadow-1dp;
+        border: 1px solid $dark-theme-extra-border-color;
       }
 
+      &,
       > * {
-        border-radius: $card-border-radius * 1;
+        border-radius: $card-border-radius * 2;
       }
     }
 

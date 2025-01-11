@@ -311,9 +311,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   updateDailySummaryTxt(ev: string): void {
-    this.configService.updateSection('dailySummaryNote', {
-      txt: ev.length === 0 ? undefined : ev,
-    });
+    this.configService.updateSection(
+      'dailySummaryNote',
+      {
+        txt: ev.length === 0 ? undefined : ev,
+      },
+      true,
+    );
   }
 
   private async _moveDoneToArchive(): Promise<void> {

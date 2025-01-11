@@ -7,5 +7,6 @@ export const updateGlobalConfigSection = createAction(
     sectionKey: GlobalConfigSectionKey;
     sectionCfg: Partial<GlobalSectionConfig>;
     isSkipLastActiveUpdate?: boolean;
+    isSkipSnack?: boolean;
   }>(),
 );

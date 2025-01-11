@@ -88,11 +88,13 @@ export class GlobalConfigService {
   updateSection(
     sectionKey: GlobalConfigSectionKey,
     sectionCfg: Partial<GlobalSectionConfig>,
+    isSkipSnack?: boolean,
   ): void {
     this._store.dispatch(
       updateGlobalConfigSection({
         sectionKey,
         sectionCfg,
+        isSkipSnack,
       }),
     );
   }
