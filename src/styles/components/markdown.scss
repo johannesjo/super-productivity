@@ -93,10 +93,20 @@
     margin-left: -28px;
     vertical-align: middle;
     padding-right: $s;
+    position: relative;
+    cursor: pointer;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      right: -12px;
+      left: -12px;
+      bottom: -4px;
+    }
   }
 
   .checkbox-wrapper {
-    cursor: pointer;
     display: block;
     list-style: none;
     padding-bottom: $s;

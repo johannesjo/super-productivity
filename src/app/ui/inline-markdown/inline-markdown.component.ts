@@ -146,8 +146,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   clickPreview($event: MouseEvent): void {
     if (($event.target as HTMLElement).tagName === 'A') {
-    } else if (($event.target as HTMLElement).classList.contains('checkbox-wrapper')) {
-      this._handleCheckboxClick($event.target as HTMLElement);
+      // } else if (($event.target as HTMLElement).classList.contains('checkbox-wrapper')) {
+      //   this._handleCheckboxClick($event.target as HTMLElement);
     } else if (
       $event?.target &&
       ($event.target as HTMLElement).classList.contains('checkbox')
