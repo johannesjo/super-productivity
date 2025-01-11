@@ -7,7 +7,6 @@ export type OpenProjectWorkPackageReduced = OpenProjectOriginalWorkPackageReduce
   Readonly<{
     // added
     // transformed
-    plannedAt: string | null;
     url: string;
     // removed
   }>;
