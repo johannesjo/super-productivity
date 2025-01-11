@@ -12,7 +12,7 @@ import {
   output,
   viewChild,
 } from '@angular/core';
-import { fadeAnimation } from '../animations/fade.ani';
+import { fadeInAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
 import { IS_ELECTRON } from '../../app.constants';
 import { Observable } from 'rxjs';
@@ -34,7 +34,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   templateUrl: './inline-markdown.component.html',
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation],
+  animations: [fadeInAnimation],
   imports: [
     FormsModule,
     MarkdownComponent,
