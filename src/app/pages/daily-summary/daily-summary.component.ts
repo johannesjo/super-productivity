@@ -321,11 +321,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this.selectedTabIndex = i;
   }
 
-  updateDailySummaryTxt(ev: string): void {
+  updateDailySummaryTxt(txt?: string, isForceShow = false): void {
     this.configService.updateSection(
       'dailySummaryNote',
       {
-        txt: ev.length === 0 ? undefined : ev,
+        txt: (!txt || txt.length === 0) && !isForceShow ? undefined : txt,
         lastUpdateDayStr: this._dateService.todayStr(),
       },
       true,

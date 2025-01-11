@@ -95,13 +95,21 @@
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
         (changed)="updateDailySummaryTxt($event)"
-        [model]="cfg?.dailySummaryNote?.txt"
-      ></inline-markdown>
+        [model]="cfg?.dailySummaryNote?.txt || ''"
+      >
+        <button
+          [matTooltip]="'Hide daily summary note'"
+          (click)="updateDailySummaryTxt(undefined)"
+          mat-icon-button
+        >
+          <mat-icon>visibility_off</mat-icon>
+        </button>
+      </inline-markdown>
       } @else {
       <button
         mat-icon-button
         style="opacity: 0.4"
-        (click)="updateDailySummaryTxt(' ')"
+        (click)="updateDailySummaryTxt('', true)"
         matTooltip="Click to add a custom text block to describe your day end routine."
       >
         <mat-icon>note_alt</mat-icon>
