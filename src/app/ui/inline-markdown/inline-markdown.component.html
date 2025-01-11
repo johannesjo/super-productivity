@@ -1,9 +1,11 @@
+@let isTurnOffMarkdownParsing = isTurnOffMarkdownParsing$|async;
+
 <div
   #wrapperEl
   [class.isHideOverflow]="isHideOverflow"
   class="markdown-wrapper"
 >
-  @if (isShowEdit || (isTurnOffMarkdownParsing$|async)) {
+  @if (isShowEdit || isTurnOffMarkdownParsing) {
   <textarea
     #textareaEl
     (blur)="untoggleShowEdit(); setBlur($event)"
@@ -19,7 +21,7 @@
   }
 
   <!--  (focus)="clickOrFocusPreview($event, true)"-->
-  @if (!(isTurnOffMarkdownParsing$|async)) {
+  @if (!isTurnOffMarkdownParsing) {
   <div
     #previewEl
     (click)="clickPreview($event)"
@@ -36,7 +38,7 @@
 <div class="controls">
   <ng-content> </ng-content>
 
-  @if(isShowChecklistToggle()){
+  @if(isShowChecklistToggle() && !isTurnOffMarkdownParsing){
   <!--  -->
   <button
     [matTooltip]="'Add checklist item'"

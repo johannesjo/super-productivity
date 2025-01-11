@@ -64,4 +64,7 @@ textarea {
   :host:hover & {
     opacity: 1;
   }
+  @include touchPrimaryDevice {
+    opacity: 0.5;
+  }
 }
