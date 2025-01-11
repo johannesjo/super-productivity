@@ -2,7 +2,7 @@
 
 ## GitHub Personal Access Token
 
-To generate a GitHub Personal Access Token:
+To generate a GitHub Personal Access Token (for GitLab see below):
 
 1. Navigate to GitHub's [Personal Access Tokens (Classic)](https://github.com/settings/tokens) page
    - Note: Fine-grained tokens are not currently supported
@@ -14,7 +14,7 @@ To generate a GitHub Personal Access Token:
 ## GitLab Personal Access Token
 For polling GitLab Issues, you need to provide an access token.   
 
-1. Go to User Settings / Access tokens (for GitHub see below)
+1. Go to User Settings / Access tokens
 2. Add a new token with the scope `api`
 
 ![Personal Token](https://github.com/user-attachments/assets/76fb204e-450a-4516-9d93-897ae2a32f6d)
