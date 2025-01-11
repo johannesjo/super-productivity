@@ -56,8 +56,9 @@ import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-
 import { RightPanelComponent } from '../../features/right-panel/right-panel.component';
 import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
 import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
-import { NoteComponent } from '../../features/note/note/note.component';
 import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
+import { unToggleCheckboxesInMarkdownTxt } from '../../util/untoggle-checkboxes-in-markdown-txt';
+import { expandAnimation } from '../../ui/animations/expand.ani';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -87,10 +88,10 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     RightPanelComponent,
     EvaluationSheetComponent,
     WorklogWeekComponent,
-    NoteComponent,
-    MatIconButton,
     InlineMarkdownComponent,
+    MatIconButton,
   ],
+  animations: [expandAnimation],
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
   readonly configService = inject(GlobalConfigService);
@@ -217,6 +218,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     this.isIncludeYesterday = Date.now() - todayStart.getTime() <= MAGIC_YESTERDAY_MARGIN;
+
+    if (
+      this.configService.cfg?.dailySummaryNote?.txt &&
+      this.configService.cfg?.dailySummaryNote?.lastUpdateDayStr !==
+        this._dateService.todayStr()
+    ) {
+      this.configService.updateSection('dailySummaryNote', {
+        txt: unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
+      });
+    }
   }
 
   ngOnInit(): void {
@@ -315,6 +326,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       'dailySummaryNote',
       {
         txt: ev.length === 0 ? undefined : ev,
+        lastUpdateDayStr: this._dateService.todayStr(),
       },
       true,
     );

@@ -91,6 +91,7 @@
     <div class="day-end-note">
       @if(typeof cfg?.dailySummaryNote?.txt === 'string') {
       <inline-markdown
+        [@expand]
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
         (changed)="updateDailySummaryTxt($event)"
@@ -101,7 +102,7 @@
         mat-icon-button
         style="opacity: 0.4"
         (click)="updateDailySummaryTxt(' ')"
-        matTooltip="Click to add a custom text block here to describe your day end routine"
+        matTooltip="Click to add a custom text block to describe your day end routine."
       >
         <mat-icon>note_alt</mat-icon>
       </button>

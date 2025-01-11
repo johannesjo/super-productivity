@@ -165,6 +165,7 @@ export type FocusModeConfig = Readonly<{
 
 export type DailySummaryNote = Readonly<{
   txt?: string;
+  lastUpdateDayStr?: string;
 }>;
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
