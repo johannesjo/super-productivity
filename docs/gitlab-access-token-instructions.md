@@ -1,4 +1,4 @@
-# How to generate an Access Token with Privileges
+# How to generate a GitLab Access Token with Privileges
 
 ## GitLab Personal Access Token
 
