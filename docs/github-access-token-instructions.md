@@ -1,5 +1,16 @@
 # How to generate an Access Token with Privileges
 
+## GitHub Personal Access Token
+
+To generate a GitHub Personal Access Token:
+
+1. Navigate to GitHub's [Personal Access Tokens (Classic)](https://github.com/settings/tokens) page
+   - Note: Fine-grained tokens are not currently supported
+2. Click "Generate new token (classic)"
+3. Select the `repo` scope to grant access to private repositories
+4. Click "Generate token" and securely store the token value
+
+
 ## GitLab Personal Access Token
 For polling GitLab Issues, you need to provide an access token.   
 
@@ -16,12 +27,3 @@ The scope is similar to the Personal Access token, but you also set a role. To l
 
 ![Project Token](https://github.com/user-attachments/assets/f008f114-3d3e-450d-9301-7825222f9812)
 
-## GitHub Personal Access Token
-
-To generate a GitHub Personal Access Token:
-
-1. Navigate to GitHub's [Personal Access Tokens (Classic)](https://github.com/settings/tokens) page
-   - Note: Fine-grained tokens are not currently supported
-2. Click "Generate new token (classic)"
-3. Select the `repo` scope to grant access to private repositories
-4. Click "Generate token" and securely store the token value
