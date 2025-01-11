@@ -16,7 +16,6 @@ export const mapOpenProjectIssueReduced = (
 ): OpenProjectWorkPackageReduced => {
   return {
     ...issue,
-    plannedAt: issue.startDate,
     url: `${cfg.host}/projects/${cfg.projectId}/work_packages/${issue.id}`,
   };
 };
