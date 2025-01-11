@@ -132,6 +132,8 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     });
   }
 
+  readonly oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
   getAddTaskData(
     issue: OpenProjectWorkPackageReduced,
   ): Partial<Task> & { title: string } {
@@ -144,6 +146,10 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       issuePoints: issue.storyPoints,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
+      plannedAt: issue.plannedAt
+        ? new Date(new Date(issue.plannedAt).setHours(7, 30, 0, 0)).getTime() +
+          this.oneDayInMilliseconds
+        : null, // Adjust plannedAt to 7 AM or set it to null if not present
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(parsedEstimate > 0 ? { timeEstimate: parsedEstimate } : {}),
     };

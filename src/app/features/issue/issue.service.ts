@@ -441,18 +441,12 @@ export class IssueService {
       }
     };
 
-    const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
-
     const taskData = {
       issueType: issueProviderKey,
       issueProviderId: issueProviderId,
       issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
-      plannedAt: issueDataReduced.plannedAt
-        ? new Date(new Date(issueDataReduced.plannedAt).setHours(6, 0, 0, 0)).getTime() +
-          oneDayInMilliseconds
-        : null, // Adjust plannedAt to 6 AM or set it to null if not present
       ...additionalFromProviderIssueService,
       // NOTE: if we were to add tags, this could be overwritten here
       ...(await getProjectOrTagId()),
