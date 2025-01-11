@@ -156,6 +156,55 @@ $summary-point-inner-margin: $s;
   max-width: 100%;
 }
 
+.day-end-note {
+  margin-bottom: 40px;
+  margin-top: -8px;
+
+  &::ng-deep inline-markdown {
+    max-width: 400px;
+    text-align: left;
+    margin: auto;
+    border-radius: $card-border-radius * 1;
+
+    &.isFocused {
+      border-color: transparent;
+    }
+
+    .markdown-wrapper {
+      min-height: 60px;
+      border-radius: $card-border-radius * 1;
+      overflow: visible !important;
+      transition: $transition-standard;
+
+      @include lightTheme {
+        background: $light-theme-bg;
+        box-shadow: $whiteframe-shadow-1dp;
+        //border: 1px solid $light-theme-extra-border-color;
+      }
+      @include darkTheme() {
+        border-radius: $card-border-radius;
+        background: $dark-theme-bg-lightest;
+        box-shadow: $whiteframe-shadow-1dp;
+      }
+
+      > * {
+        border-radius: $card-border-radius * 1;
+      }
+    }
+
+    &.isFocused .markdown-wrapper {
+      box-shadow: $whiteframe-shadow-3dp !important;
+      border-color: transparent;
+    }
+
+    .markdown-unparsed,
+    .markdown-parsed {
+      color: inherit;
+      background-color: inherit;
+    }
+  }
+}
+
 @keyframes success-animation-sun {
   0% {
     transform: scale(0) rotate(-180deg);

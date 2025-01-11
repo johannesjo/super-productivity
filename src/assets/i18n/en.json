@@ -227,7 +227,8 @@
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "IS_ASSIGNEE_FILTER": "Only import issues assigned to me to backlog",
         "REPO": "username/repositoryName",
-        "TOKEN": "Access Token"
+        "TOKEN": "Access Token",
+        "INVALID_TOKEN_MESSAGE": "is not a valid GitHub token. It must start with \"ghp_\"."
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",

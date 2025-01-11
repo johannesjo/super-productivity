@@ -1,13 +1,13 @@
-# How to generate an Access Token with Privileges
+# How to generate a GitLab Access Token with Privileges
 
-## GitLab Personal Access Token
-For polling GitLab Issues, you need to provide an access token.   
+## Personal Access Token
 
-1. Go to User Settings / Access tokens (for GitHub see below)
+For polling GitLab Issues, you need to provide an access token.
+
+1. Go to User Settings / Access tokens
 2. Add a new token with the scope `api`
 
 ![Personal Token](https://github.com/user-attachments/assets/76fb204e-450a-4516-9d93-897ae2a32f6d)
-
 
 ## Project Access Token
 If you self-host GitLab or have the Premium/Ultimate license, it's possible to get a Project Access Token, which is scoped to a project. 
@@ -18,3 +18,4 @@ The scope is similar to the Personal Access token, but you also set a role. To l
 
 For GitHub Personal Access Token instructions, please visit the following link:
 [GitHub Access Token Instructions](https://github.com/johannesjo/super-productivity/blob/master/docs/github-access-token-instructions.md)
+

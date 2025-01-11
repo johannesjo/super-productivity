@@ -1,3 +1,5 @@
+@let cfg = (cfg$|async);
+
 <div class="pyro">
   <div class="pyro-before"></div>
   <div class="pyro-after"></div>
@@ -84,6 +86,37 @@
         </div>
       </div>
       }
+    </div>
+
+    <div class="day-end-note">
+      @if(typeof cfg?.dailySummaryNote?.txt === 'string') {
+      <inline-markdown
+        [isShowControls]="true"
+        [isShowChecklistToggle]="true"
+        (changed)="updateDailySummaryTxt($event)"
+        [model]="cfg?.dailySummaryNote?.txt"
+      ></inline-markdown>
+      } @else {
+      <button
+        mat-icon-button
+        style="opacity: 0.4"
+        (click)="updateDailySummaryTxt(' ')"
+        matTooltip="Click to add a custom text block here to describe your day end routine"
+      >
+        <mat-icon>note_alt</mat-icon>
+      </button>
+      }
+      <!--      <inline-markdown-->
+      <!--        (blur)="isFocusNotes=false"-->
+      <!--        (blurred)="isFocusNotes=false"-->
+      <!--        (changed)="changeTaskNotes($event); isFocusNotes=false"-->
+      <!--        (keyboardUnToggle)="focusItem(noteWrapperElRef)"-->
+      <!--        [isFocus]="isFocusNotes"-->
+      <!--        [isShowControls]="true"-->
+      <!--        [isShowChecklistToggle]="true"-->
+      <!--        [isDefaultText]="!task.notes"-->
+      <!--        [model]="task.notes|| defaultTaskNotes"-->
+      <!--      ></inline-markdown>-->
     </div>
 
     <mat-tab-group

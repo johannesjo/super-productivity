@@ -27,7 +27,6 @@ import { MatIcon } from '@angular/material/icon';
 import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
-import { DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
@@ -43,7 +42,6 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
     TagListComponent,
     InlineInputComponent,
     TaskContextMenuComponent,
-    DatePipe,
     MsToStringPipe,
     IssueIconPipe,
     ShortDate2Pipe,

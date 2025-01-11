@@ -163,6 +163,10 @@ export type FocusModeConfig = Readonly<{
   isSkipPreparation: boolean;
 }>;
 
+export type DailySummaryNote = Readonly<{
+  txt?: string;
+}>;
+
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
   lang: LanguageConfig;
@@ -183,6 +187,7 @@ export type GlobalConfigState = Readonly<{
   focusMode: FocusModeConfig;
 
   sync: SyncConfig;
+  dailySummaryNote?: DailySummaryNote;
 
   [MODEL_VERSION_KEY]?: number;
 }>;
@@ -195,6 +200,7 @@ export type GlobalSectionConfig =
   | KeyboardConfig
   | ScheduleConfig
   | ReminderConfig
+  | DailySummaryNote
   | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
