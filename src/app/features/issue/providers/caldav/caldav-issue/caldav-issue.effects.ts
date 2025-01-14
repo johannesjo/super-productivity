@@ -26,7 +26,9 @@ export class CaldavIssueEffects {
     () =>
       this._actions$.pipe(
         ofType(updateTask),
-        filter(({ task }): boolean => 'isDone' in task.changes),
+        filter(
+          ({ task }): boolean => 'isDone' in task.changes || 'title' in task.changes,
+        ),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         filter((task: Task) => task && task.issueType === CALDAV_TYPE),
         concatMap((task: Task) => {
@@ -50,7 +52,7 @@ export class CaldavIssueEffects {
 
   private _handleTransitionForIssue$(caldavCfg: CaldavCfg, task: Task): Observable<any> {
     return this._caldavClientService
-      .updateCompletedState$(caldavCfg, assertTruthy(task.issueId), task.isDone)
+      .updateState$(caldavCfg, assertTruthy(task.issueId), task.isDone, task.title)
       .pipe(concatMap(() => this._issueService.refreshIssueTask(task, true)));
   }
 }
