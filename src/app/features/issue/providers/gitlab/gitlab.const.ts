@@ -21,6 +21,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   scope: 'all',
   filter: null,
   isEnableTimeTracking: false,
+  search_scope: 'project',
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -141,6 +142,20 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
         templateOptions: {
           label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
           description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
+        },
+      },
+      {
+        key: 'search_scope',
+        type: 'select',
+        defaultValue: 'project',
+        templateOptions: {
+          required: true,
+          label: T.F.GITLAB.FORM.SEARCH_SCOPE,
+          options: [
+            { value: 'project', label: T.F.GITLAB.FORM.SEARCH_SCOPE_PROJECT },
+            { value: 'group', label: T.F.GITLAB.FORM.SEARCH_SCOPE_GROUP },
+            { value: 'instance', label: T.F.GITLAB.FORM.SEARCH_SCOPE_INSTANCE },
+          ],
         },
       },
     ],

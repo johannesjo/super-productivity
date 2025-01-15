@@ -80,7 +80,7 @@ export class GitlabApiService {
   //   // const PARAMS_COUNT = 59; // Can't send more than 59 issue id For some reason it returns 502 bad gateway
   //   return this._sendIssuePaginatedRequest$(
   //     {
-  //       url: `${this._apiLink(cfg)}/issues?${queryParams}${this.getScopeParam(
+  //       url: `${this._autoScopedApiLink(cfg)}/issues?${queryParams}${this.getScopeParam(
   //         cfg,
   //       )}${this.getCustomFilterParam(cfg)}`,
   //     },
@@ -119,7 +119,7 @@ export class GitlabApiService {
     }
     return this._sendIssuePaginatedRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
+        url: `${this._autoScopedApiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
           cfg,
         )}&order_by=updated_at${this.getCustomFilterParam(cfg)}`,
       },
@@ -143,7 +143,7 @@ export class GitlabApiService {
   getProjectIssues$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
     return this._sendIssuePaginatedRequest$(
       {
-        url: `${this._apiLink(
+        url: `${this._autoScopedApiLink(
           cfg,
         )}/issues?state=opened&order_by=updated_at&${this.getScopeParam(
           cfg,
@@ -166,11 +166,9 @@ export class GitlabApiService {
     total_time_spent: null | number;
   }*/
 
-    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
-
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues/${projectIssueId}/add_spent_time`,
+        url: `${this._issueApiLink(cfg, issueId)}/add_spent_time`,
         method: 'POST',
         data: {
           duration: duration,
@@ -190,10 +188,9 @@ export class GitlabApiService {
     time_estimate: null | number;
     total_time_spent: null | number;
   }> {
-    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
     return this._sendRawRequest$(
       {
-        url: `${this._apiLink(cfg)}/issues/${projectIssueId}/time_stats`,
+        url: `${this._issueApiLink(cfg, issueId)}/time_stats`,
       },
       cfg,
     ).pipe(map((res) => (res as any).body));
@@ -326,11 +323,33 @@ export class GitlabApiService {
 
   private _issueApiLink(cfg: GitlabCfg, issueId: string): string {
     console.log(issueId);
-    const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
-    return `${this._apiLink(cfg)}/issues/${projectIssueId}`;
+    const { project, projectIssueId } = getPartsFromGitlabIssueId(issueId);
+    return `${this._baseApiLink(cfg)}/${this._projectUrl(project)}/issues/${projectIssueId}`;
   }
 
-  private _apiLink(cfg: GitlabCfg): string {
+  private _autoScopedApiLink(cfg: GitlabCfg): string {
+    let apiURL: string = this._baseApiLink(cfg);
+
+    if (cfg.search_scope == 'group') {
+      const groupURL = assertTruthy(cfg.project)
+        .toString()
+        .split(/\//gi)
+        .slice(0, -1)
+        .join('%2F');
+      apiURL += 'groups/' + groupURL;
+    } else if (cfg.search_scope == 'project' || cfg.search_scope === null) {
+      apiURL += this._projectUrl(cfg.project);
+    }
+
+    return apiURL;
+  }
+
+  private _projectUrl(project: string): string {
+    const projectURL = assertTruthy(project).toString().replace(/\//gi, '%2F');
+    return 'projects/' + projectURL;
+  }
+
+  private _baseApiLink(cfg: GitlabCfg): string {
     let apiURL: string = '';
 
     if (cfg.gitlabBaseUrl) {
@@ -342,8 +361,6 @@ export class GitlabApiService {
       apiURL = GITLAB_API_BASE_URL + '/';
     }
 
-    const projectURL = assertTruthy(cfg.project).toString().replace(/\//gi, '%2F');
-    apiURL += 'projects/' + projectURL;
     return apiURL;
   }
 }

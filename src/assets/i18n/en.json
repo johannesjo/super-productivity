@@ -281,7 +281,11 @@
         "SOURCE_PROJECT": "Project",
         "SUBMIT_TIMELOGS": "Submit timelogs to Gitlab",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Show Time Tracking Dialog after clicking on finish day",
-        "TOKEN": "Access Token"
+        "TOKEN": "Access Token",
+        "SEARCH_SCOPE": "Search Scope",
+        "SEARCH_SCOPE_INSTANCE": "Instance",
+        "SEARCH_SCOPE_GROUP": "Group",
+        "SEARCH_SCOPE_PROJECT": "Project"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p>",
