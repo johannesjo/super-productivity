@@ -353,7 +353,7 @@ export class GitlabApiService {
     const projectURL = assertTruthy(project).toString().replace(/\//gi, '%2F');
     return 'projects/' + projectURL;
   }
-  
+
   private _baseLink(cfg: GitlabCfg): string {
     let baseURL: string = GITLAB_BASE_URL;
 
