@@ -12,7 +12,7 @@ import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab.model';
 import { GitlabOriginalComment, GitlabOriginalIssue } from './gitlab-api-responses';
-import { GITLAB_API_BASE_URL } from '../gitlab.const';
+import { GITLAB_BASE_URL } from '../gitlab.const';
 import { T } from 'src/app/t.const';
 import {
   catchError,
@@ -56,6 +56,11 @@ export class GitlabApiService {
         return this.getIssueWithComments$(issue, cfg);
       }),
     );
+  }
+
+  getIssuelink$(id: string, cfg: GitlabCfg): string {
+    const { project, projectIssueId } = getPartsFromGitlabIssueId(id);
+    return `${this._baseLink(cfg)}${project}/issues/${projectIssueId}`;
   }
 
   private getScopeParam(cfg: GitlabCfg): string {
@@ -348,19 +353,21 @@ export class GitlabApiService {
     const projectURL = assertTruthy(project).toString().replace(/\//gi, '%2F');
     return 'projects/' + projectURL;
   }
-
-  private _baseApiLink(cfg: GitlabCfg): string {
-    let apiURL: string = '';
+  
+  private _baseLink(cfg: GitlabCfg): string {
+    let baseURL: string = GITLAB_BASE_URL;
 
     if (cfg.gitlabBaseUrl) {
       const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
         ? cfg.gitlabBaseUrl
         : `${cfg.gitlabBaseUrl}/`;
-      apiURL = fixedUrl + 'api/v4/';
-    } else {
-      apiURL = GITLAB_API_BASE_URL + '/';
+      baseURL = fixedUrl;
     }
 
-    return apiURL;
+    return baseURL;
+  }
+
+  private _baseApiLink(cfg: GitlabCfg): string {
+    return this._baseLink(cfg) + 'api/v4/';
   }
 }
