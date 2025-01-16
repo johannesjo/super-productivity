@@ -38,7 +38,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: string, issueProviderId: string): Observable<string> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => {
-        return this._gitlabApiService.getIssuelink$(issueId, cfg)
+        return this._gitlabApiService.getIssuelink$(issueId, cfg);
       }),
     );
   }
