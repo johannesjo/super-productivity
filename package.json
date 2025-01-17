@@ -169,7 +169,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "dragula": "^3.7.3",
-    "electron": "^33.2.1",
+    "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
