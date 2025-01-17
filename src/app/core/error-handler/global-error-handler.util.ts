@@ -161,7 +161,7 @@ export const getSimpleMeta = (): string => {
   const n = window.navigator;
   return `META: SP${getAppVersionStr()} __ ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
     n.language
-  } – ${n.platform} – ${n.userAgent}`;
+  } – ${n.platform} – UA:${n.userAgent}`;
 };
 
 export const isHandledError = (err: unknown): boolean => {
