@@ -31,5 +31,6 @@ export interface Banner {
   action3?: BannerAction;
   isHideDismissBtn?: boolean;
   progress$?: Observable<number>;
+  hideWhen$?: Observable<unknown>;
   img?: string;
 }
