@@ -134,6 +134,8 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
       newCfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
     } else {
       // CLEANUP keys that we're not using
+      // needs to made writeable first
+      newCfg.transitionConfig = { ...newCfg.transitionConfig };
       Object.keys(newCfg.transitionConfig).forEach((key: string) => {
         if (!(key in DEFAULT_JIRA_CFG.transitionConfig)) {
           delete (newCfg.transitionConfig as any)[key];
