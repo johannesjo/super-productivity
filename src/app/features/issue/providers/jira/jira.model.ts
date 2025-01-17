@@ -12,7 +12,7 @@ export enum JiraWorklogExportDefaultTime {
 
 export interface JiraTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
-  OPEN: JiraTransitionOption;
+  // OPEN: JiraTransitionOption;
   IN_PROGRESS: JiraTransitionOption;
   DONE: JiraTransitionOption;
 }

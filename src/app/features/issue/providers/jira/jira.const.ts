@@ -37,7 +37,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
   availableTransitions: [],
   transitionConfig: {
-    OPEN: 'DO_NOT',
+    // OPEN: 'DO_NOT',
     IN_PROGRESS: 'ALWAYS_ASK',
     DONE: 'ALWAYS_ASK',
   },
