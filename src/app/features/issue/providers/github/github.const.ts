@@ -7,7 +7,6 @@ import {
 } from '../../../config/global-config.model';
 import { IssueProviderGithub } from '../../issue.model';
 import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
-import { FormlyFieldConfig } from '@ngx-formly/core';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   isEnabled: false,
@@ -49,8 +48,7 @@ export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGithub>[]
     validators: {
       token: {
         expression: (c: { value: string | undefined }) => c.value?.startsWith('ghp_'),
-        message: (error: any, field: FormlyFieldConfig) =>
-          `${field.formControl?.value} ${T.F.GITHUB.FORM.INVALID_TOKEN_MESSAGE}`,
+        message: T.F.GITHUB.FORM.INVALID_TOKEN_MESSAGE,
       },
     },
   },
