@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Banner, BannerId } from './banner.model';
-import { Observable, ReplaySubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class BannerService {
@@ -12,6 +12,19 @@ export class BannerService {
   );
 
   constructor() {
+    this.activeBanner$
+      .pipe(
+        switchMap(
+          (activeBanner) =>
+            activeBanner?.hideWhen$?.pipe(
+              tap(() => {
+                this.dismiss(activeBanner.id);
+              }),
+            ) || EMPTY,
+        ),
+      )
+      .subscribe();
+
     // FOR DEBUGGING
     // this.open({
     //   id: 'JIRA_UNBLOCK',
@@ -84,6 +97,7 @@ export class BannerService {
 
   dismiss(bannerId: BannerId): void {
     const bannerIndex = this._banners.findIndex((bannerIN) => bannerIN.id === bannerId);
+    // console.log('BannerService -> dismissing Banner', bannerId);
     if (bannerIndex > -1) {
       // NOTE splice mutates
       this._banners.splice(bannerIndex, 1);

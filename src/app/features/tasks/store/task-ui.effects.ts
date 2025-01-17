@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { addTask, deleteTask, undoDeleteTask, updateTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
@@ -167,6 +167,9 @@ export class TaskUiEffects {
             timeEstimate: currentTask.timeSpent + (30 * 60000),
           }),
       },
+      hideWhen$: this._taskService.currentTaskId$.pipe(
+        filter((id) => id !== currentTask.id),
+      ),
     });
   }
 }
