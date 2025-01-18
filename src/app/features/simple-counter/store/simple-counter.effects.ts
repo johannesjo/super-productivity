@@ -15,7 +15,10 @@ import {
   upsertSimpleCounter,
 } from './simple-counter.actions';
 import { map, mergeMap, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { selectSimpleCounterFeatureState } from './simple-counter.reducer';
+import {
+  selectSimpleCounterById,
+  selectSimpleCounterFeatureState,
+} from './simple-counter.reducer';
 import { SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { SimpleCounterService } from '../simple-counter.service';
@@ -23,6 +26,8 @@ import { EMPTY, Observable } from 'rxjs';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { DateService } from 'src/app/core/date/date.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -33,6 +38,8 @@ export class SimpleCounterEffects {
   private _persistenceService = inject(PersistenceService);
   private _simpleCounterService = inject(SimpleCounterService);
   private _snackService = inject(SnackService);
+
+  successFullCountersMap: { [key: string]: boolean } = {};
 
   updateSimpleCountersStorage$: Observable<unknown> = createEffect(
     () =>
@@ -79,7 +86,7 @@ export class SimpleCounterEffects {
     ),
   );
 
-  successSnack$: Observable<unknown> = createEffect(
+  updateCfgSuccessSnack$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateAllSimpleCounters),
@@ -90,6 +97,34 @@ export class SimpleCounterEffects {
             translateParams: { sectionKey: 'Simple Counters' },
           }),
         ),
+      ),
+    { dispatch: false },
+  );
+
+  streakSuccessSnack$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(increaseSimpleCounterCounterToday),
+        switchMap((a) =>
+          this._store$.pipe(select(selectSimpleCounterById, { id: a.id })),
+        ),
+        tap((sc) => {
+          if (
+            sc &&
+            !this.successFullCountersMap[sc.id] &&
+            sc.isTrackStreaks &&
+            sc.countOnDay[getWorklogStr()] >= sc.streakMinValue
+          ) {
+            const streakDuration = getSimpleCounterStreakDuration(sc);
+            this._snackService.open({
+              type: 'SUCCESS',
+              // msg: T.F.CONFIG.S.UPDATE_SECTION,
+              msg: `🎉 You successfully reached your goal for "${sc.title}" for today! 🎉 Current streak duration: <strong>${streakDuration}</strong>`,
+              translateParams: { sectionKey: 'Simple Counters' },
+            });
+            this.successFullCountersMap[sc.id] = true;
+          }
+        }),
       ),
     { dispatch: false },
   );
