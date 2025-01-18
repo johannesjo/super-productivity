@@ -38,6 +38,8 @@ export const logAdvancedStacktrace = (
 ): Promise<unknown> =>
   _getStacktraceThrottled(origErr)
     .then((stack) => {
+      document.getElementById('error-fetching-info-wrapper')?.remove();
+
       if (additionalLogFn) {
         additionalLogFn(stack);
       }
@@ -87,6 +89,11 @@ export const createErrorAlert = (
     <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
     <pre style="line-height: 1.3;">${errEscaped}</pre>
+
+    <div id="error-fetching-info-wrapper">
+      <div>Trying to load more info...</div>
+      <div class="spinner"></div>
+    </div>
 
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
