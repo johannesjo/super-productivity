@@ -22,6 +22,9 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   // dynamic
   countOnDay: {},
   isOn: false,
+  isTrackStreaks: true,
+  streakMinValue: 1,
+  streakWeekDays: [0, 1, 2, 3, 4, 5, 6],
 };
 
 export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [

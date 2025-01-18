@@ -7,6 +7,7 @@ import {
 import { T } from '../../../t.const';
 import { EMPTY_SIMPLE_COUNTER } from '../../simple-counter/simple-counter.const';
 import { nanoid } from 'nanoid';
+import { FormlyFieldConfig } from '@ngx-formly/core/lib/models/fieldconfig';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   title: T.F.SIMPLE_COUNTER.FORM.TITLE,
@@ -90,6 +91,48 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               isAllowSeconds: false,
               label: T.F.SIMPLE_COUNTER.FORM.L_COUNTDOWN_DURATION,
               description: T.G.DURATION_DESCRIPTION,
+            },
+          },
+          {
+            type: 'checkbox',
+            key: 'isTrackStreaks',
+            templateOptions: {
+              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
+              label: 'Track Streaks',
+            },
+          },
+          {
+            type: 'input',
+            key: 'streakMinValue',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) =>
+                fCfg.model.type === SimpleCounterType.StopWatch ||
+                !fCfg.model.isTrackStreaks,
+            },
+            templateOptions: {
+              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
+              label: 'Min value for successful streak',
+              type: 'number',
+              min: 1,
+              required: true,
+              getInitialValue: () => 1,
+            },
+          },
+          {
+            type: 'duration',
+            key: 'streakMinValue',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) =>
+                fCfg.model.type !== SimpleCounterType.StopWatch ||
+                !fCfg.model.isTrackStreaks,
+            },
+            templateOptions: {
+              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
+              label: 'Min value for successful streak D',
+              min: 60 * 1000,
+              required: true,
+              description: T.G.DURATION_DESCRIPTION,
+              getInitialValue: () => 10 * 60 * 1000,
             },
           },
         ],
