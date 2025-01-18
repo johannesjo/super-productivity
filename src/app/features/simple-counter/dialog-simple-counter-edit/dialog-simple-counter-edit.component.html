@@ -7,10 +7,10 @@
       @if (data.simpleCounter.type === SimpleCounterType.ClickCounter ||
       data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder) {
       <mat-form-field>
+        <mat-label>{{T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate}}</mat-label>
         <input
           (ngModelChange)="onModelChange($event)"
           [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
           matInput
           name="count"
           type="number"
@@ -20,10 +20,10 @@
       <!---->
       @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
       <mat-form-field>
+        <mat-label>{{T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate}}</mat-label>
         <input
           (ngModelChange)="onModelChange($event)"
           [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
           inputDuration="optional"
           matInput
           name="count"
@@ -35,10 +35,22 @@
     </div>
 
     <!---->
-    @if(data.simpleCounter.isTrackStreaks) {
+    @if (data.simpleCounter.isTrackStreaks) {
     <section style="text-align: center; margin-top: 16px">
       <div>Current Streak</div>
-      <div><strong>{{currentStreak()}} Days</strong></div>
+      <div><strong>{{ currentStreak() }} Days</strong></div>
+    </section>
+
+    <section style="text-align: center; margin-top: 16px">
+      <div>Daily Goal</div>
+      <div>
+        <strong
+          >@if (data.simpleCounter.type === SimpleCounterType.StopWatch) { {{
+          data.simpleCounter.streakMinValue|durationToString }}
+          <!---->
+          } @else { {{ data.simpleCounter.streakMinValue }} }</strong
+        >
+      </div>
     </section>
     }
     <!---->

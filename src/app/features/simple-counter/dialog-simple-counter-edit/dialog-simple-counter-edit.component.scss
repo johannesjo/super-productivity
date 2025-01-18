@@ -1,5 +1,16 @@
 @import '../../../../variables';
 
+:host {
+  .chart-wrapper {
+    @include mq(xs) {
+      min-width: 500px;
+    }
+    @include mq(sm) {
+      min-width: 740px;
+    }
+  }
+}
+
 :host-context([dir='rtl']) {
   direction: rtl;
 }

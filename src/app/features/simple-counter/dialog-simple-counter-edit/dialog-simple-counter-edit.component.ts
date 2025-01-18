@@ -11,8 +11,12 @@ import { SimpleCounterCopy, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { FormsModule } from '@angular/forms';
-import { MatFormField, MatPrefix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import {
+  MatFormField,
+  MatFormFieldModule,
+  MatPrefix,
+} from '@angular/material/form-field';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -21,6 +25,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
+import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pipe';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -40,6 +45,9 @@ import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-dur
     MatButton,
     TranslatePipe,
     BaseChartDirective,
+    MatFormFieldModule,
+    MatInputModule,
+    DurationToStringPipe,
   ],
 })
 export class DialogSimpleCounterEditComponent {

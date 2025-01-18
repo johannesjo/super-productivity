@@ -111,7 +111,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
             templateOptions: {
               // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-              label: 'Min value for successful streak',
+              label: 'Daily goal for successful streak',
               type: 'number',
               min: 1,
               required: true,
@@ -128,7 +128,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
             templateOptions: {
               // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-              label: 'Min value for successful streak D',
+              label: 'Daily goal for successful streak',
               min: 60 * 1000,
               required: true,
               description: T.G.DURATION_DESCRIPTION,
