@@ -30,6 +30,25 @@
       </mat-form-field>
       }
     </div>
+
+    @if (stats()) {
+
+    <section style="margin-top: 16px">
+      <div class="chart-wrapper">
+        <div class="inner-chart-wrapper">
+          <canvas
+            [type]="'line'"
+            [data]="stats()"
+            [labels]="stats()?.labels"
+            [options]="lineChartOptions"
+            [legend]="true"
+            baseChart
+          >
+          </canvas>
+        </div>
+      </div>
+    </section>
+    }
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
