@@ -20,6 +20,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
+import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -70,6 +71,10 @@ export class DialogSimpleCounterEditComponent {
       ],
     };
     return chartData;
+  });
+
+  currentStreak = computed(() => {
+    return getSimpleCounterStreakDuration(this.data.simpleCounter);
   });
 
   T: typeof T = T;

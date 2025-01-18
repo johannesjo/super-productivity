@@ -1,5 +1,6 @@
 <form (submit)="$event.preventDefault();submit()">
-  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>
+  <!--  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>-->
+  <h1 mat-dialog-title>{{ data.simpleCounter.title }}</h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
@@ -15,7 +16,9 @@
           type="number"
         />
       </mat-form-field>
-      } @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
+      }
+      <!---->
+      @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
       <mat-form-field>
         <input
           (ngModelChange)="onModelChange($event)"
@@ -31,8 +34,16 @@
       }
     </div>
 
-    @if (stats()) {
+    <!---->
+    @if(data.simpleCounter.isTrackStreaks) {
+    <section style="text-align: center; margin-top: 16px">
+      <div>Current Streak</div>
+      <div><strong>{{currentStreak()}} Days</strong></div>
+    </section>
+    }
+    <!---->
 
+    @if (stats()) {
     <section style="margin-top: 16px">
       <div class="chart-wrapper">
         <div class="inner-chart-wrapper">
