@@ -12,7 +12,7 @@
     @if (!sc.isOn) {
     <mat-icon>{{ sc.icon }}</mat-icon>
     } @if (sc.isOn) {
-    <mat-icon>{{ sc.iconOn || sc.icon }}</mat-icon>
+    <mat-icon>{{ sc.icon }}</mat-icon>
     }
   </button>
   @if (sc.countOnDay[todayStr]) {

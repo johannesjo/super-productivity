@@ -95,10 +95,10 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     this.simpleCounterToggleBtns = (
       data.enabledSimpleStopWatchCounters as SimpleCounter[]
     ).map(
-      ({ id, icon, iconOn, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
+      ({ id, icon, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
         ({
           id,
-          icon: iconOn || icon,
+          icon: icon,
           title,
           isTrackTo: isOn,
           isWasEnabledBefore: isOn,

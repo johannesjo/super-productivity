@@ -45,8 +45,6 @@ const _migrateSimpleCounterEntity = (simpleCounter: SimpleCounter): SimpleCounte
     return {
       ...cpy,
       countOnDay,
-      triggerOnActions: [],
-      triggerOffActions: [],
     };
   }
 

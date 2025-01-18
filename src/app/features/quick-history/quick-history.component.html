@@ -58,7 +58,7 @@
                       *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"
                       class="simple-counter-item"
                     >
-                      <mat-icon inline="true">{{ sc.iconOn || sc.icon }}</mat-icon>
+                      <mat-icon inline="true">{{ sc.icon }}</mat-icon>
                       @if(sc.type==='StopWatch') {
                       <div class="count">
                         {{ sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString }}
