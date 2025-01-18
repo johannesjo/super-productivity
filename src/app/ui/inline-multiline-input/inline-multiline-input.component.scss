@@ -5,7 +5,16 @@
   display: block;
 }
 
-:host textarea {
+:host > textarea {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+:host > div,
+:host > textarea {
   line-height: inherit;
   font-size: inherit;
   letter-spacing: inherit;
@@ -23,6 +32,13 @@
   resize: none;
   width: 100%;
   overflow: hidden;
+  //border: 1px solid red !important;
+}
+
+:host > div {
+  //border: 2px dashed greenyellow !important;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 :host textarea:focus {
