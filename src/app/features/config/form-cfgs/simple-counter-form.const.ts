@@ -102,8 +102,8 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
           },
           {
-            type: 'input',
             key: 'streakMinValue',
+            type: 'input',
             expressions: {
               hide: (fCfg: FormlyFieldConfig) =>
                 fCfg.model.type === SimpleCounterType.StopWatch ||
@@ -119,8 +119,8 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
           },
           {
-            type: 'duration',
             key: 'streakMinValue',
+            type: 'duration',
             expressions: {
               hide: (fCfg: FormlyFieldConfig) =>
                 fCfg.model.type !== SimpleCounterType.StopWatch ||
@@ -133,6 +133,26 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               required: true,
               description: T.G.DURATION_DESCRIPTION,
               getInitialValue: () => 10 * 60 * 1000,
+            },
+          },
+          {
+            key: 'streakWeekDays',
+            type: 'multicheckbox',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) => !fCfg.model.isTrackStreaks,
+            },
+            templateOptions: {
+              label: 'Weekdays to check for streak',
+              required: true,
+              options: [
+                { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },
+                { label: T.F.TASK_REPEAT.F.TUESDAY, value: 2 },
+                { label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3 },
+                { label: T.F.TASK_REPEAT.F.THURSDAY, value: 4 },
+                { label: T.F.TASK_REPEAT.F.FRIDAY, value: 5 },
+                { label: T.F.TASK_REPEAT.F.SATURDAY, value: 6 },
+                { label: T.F.TASK_REPEAT.F.SUNDAY, value: 0 },
+              ],
             },
           },
         ],
