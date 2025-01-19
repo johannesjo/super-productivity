@@ -26,6 +26,7 @@ import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { IS_MOUSE_PRIMARY } from 'src/app/util/is-mouse-primary';
 
 @Component({
   selector: 'simple-counter-button',
@@ -63,6 +64,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       sc?.countOnDay[this.todayStr()] >= sc?.streakMinValue
     );
   });
+  IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
 
   private _subs = new Subscription();
   private _resetCountdown$ = new Subject();

@@ -9,7 +9,7 @@
     class="main-btn stopwatch"
     mat-mini-fab
   >
-    @if(isSuccess()) {
+    @if(isSuccess() && IS_MOUSE_PRIMARY) {
     <mat-icon>check</mat-icon>
     } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
@@ -28,7 +28,7 @@
     color=""
     mat-mini-fab
   >
-    @if(isSuccess()) {
+    @if(isSuccess() && IS_MOUSE_PRIMARY) {
     <mat-icon>check</mat-icon>
     } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
@@ -48,7 +48,7 @@
     class="main-btn repeated-countdown"
     mat-mini-fab
   >
-    @if(isSuccess()) {
+    @if(isSuccess() && IS_MOUSE_PRIMARY) {
     <mat-icon>check</mat-icon>
     } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
