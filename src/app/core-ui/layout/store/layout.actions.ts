@@ -23,3 +23,7 @@ export const hideNotesAndAddTaskPanel = createAction('[Layout] Hide Notes');
 export const toggleIssuePanel = createAction('[Layout] Toggle IssuePanel');
 
 export const hideIssuePanel = createAction('[Layout] Hide IssuePanel');
+
+export const showCelebrate = createAction('[Layout] Show Celebrate');
+export const hideCelebrate = createAction('[Layout] Hide Celebrate');
+export const toggleCelebrate = createAction('[Layout] Toggle Celebrate');

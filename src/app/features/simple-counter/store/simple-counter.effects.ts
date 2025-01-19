@@ -28,6 +28,10 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
+import {
+  hideCelebrate,
+  showCelebrate,
+} from '../../../core-ui/layout/store/layout.actions';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -116,14 +120,21 @@ export class SimpleCounterEffects {
             sc.countOnDay[getWorklogStr()] >= sc.streakMinValue
           ) {
             const streakDuration = getSimpleCounterStreakDuration(sc);
+            const DURATION = 5000;
             this._snackService.open({
               type: 'SUCCESS',
+              config: { duration: DURATION },
               // msg: T.F.CONFIG.S.UPDATE_SECTION,
               // eslint-disable-next-line max-len
               msg: `🎉 You successfully reached your goal for <strong>${sc.title}</strong> for today! 🎉 <br />🔥 Current streak duration: <strong>${streakDuration}</strong>`,
               translateParams: { sectionKey: 'Simple Counters' },
             });
             this.successFullCountersMap[sc.id] = true;
+            this._store$.dispatch(showCelebrate());
+            // TODO this needs to be more robust than using a timeout
+            window.setTimeout(() => {
+              this._store$.dispatch(hideCelebrate());
+            }, DURATION);
           }
         }),
       ),

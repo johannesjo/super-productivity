@@ -1,13 +1,16 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
+  hideCelebrate,
   hideIssuePanel,
   hideNotesAndAddTaskPanel,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
+  showCelebrate,
   showSearchBar,
   toggleAddTaskBar,
+  toggleCelebrate,
   toggleIssuePanel,
   toggleSearchBar,
   toggleShowNotes,
@@ -18,6 +21,7 @@ import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
+  selectIsShowCelebrate,
   selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowSearchBar,
@@ -52,6 +56,9 @@ export class LayoutService {
   );
   isShowSearchBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSearchBar),
+  );
+  isShowCelebrate$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowCelebrate),
   );
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
@@ -156,5 +163,17 @@ export class LayoutService {
 
   hideAddTaskPanel(): void {
     this._store$.dispatch(hideIssuePanel());
+  }
+
+  showCelebrate(): void {
+    this._store$.dispatch(showCelebrate());
+  }
+
+  hideCelebrate(): void {
+    this._store$.dispatch(hideCelebrate());
+  }
+
+  toggleCelebrate(): void {
+    this._store$.dispatch(toggleCelebrate());
   }
 }
