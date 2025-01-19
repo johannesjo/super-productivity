@@ -476,7 +476,7 @@
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
-        "SIMPLE_COUNTERS": "Simple Counters",
+        "SIMPLE_COUNTERS": "Simple Counters & Habit Tracking",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
@@ -807,22 +807,18 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Count",
-        "TITLE": "Edit Simple Counter"
+        "L_COUNTER": "Count for Today"
       },
       "FORM": {
-        "ADD_NEW": "Add simple counter",
-        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "ADD_NEW": "Add simple counter/ habit",
+        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it. By enabling 'Track Streaks' you can use these for habit tracking.",
         "L_COUNTDOWN_DURATION": "Countdown duration",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
         "L_TYPE": "Type",
-        "TITLE": "Simple Counters",
+        "TITLE": "Simple Counters & Habit Tracking",
         "TYPE_CLICK_COUNTER": "Click Counter",
         "TYPE_REPEATED_COUNTDOWN": "Repeated Countdown",
         "TYPE_STOPWATCH": "Stopwatch"
