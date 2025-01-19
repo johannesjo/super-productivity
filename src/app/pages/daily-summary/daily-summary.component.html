@@ -16,7 +16,7 @@
         routerLink="/active/tasks"
       >
         <mat-icon>chevron_left</mat-icon>
-        {{T.PDS.BACK|translate}}
+        {{ T.PDS.BACK|translate }}
         <!--<mat-icon>playlist_play</mat-icon>-->
       </a>
     </div>
@@ -26,14 +26,14 @@
       @if (isForToday) {
       <span [innerHTML]="T.PDS.CELEBRATE|translate"></span>
       } @if (!isForToday) {
-      <span>{{T.PDS.SUMMARY_FOR|translate:{dayStr: dayStr} }}</span>
+      <span>{{ T.PDS.SUMMARY_FOR|translate:{ dayStr: dayStr } }}</span>
       }
     </h1>
     <div class="daily-summary-summary">
       <div class="summary-point">
         <mat-icon>schedule</mat-icon>
         <div class="summary-text">
-          {{T.PDS.START_END|translate}}
+          {{ T.PDS.START_END|translate }}
           <div class="summary-val">
             <inline-input
               (changed)="updateWorkStart($event)"
@@ -54,7 +54,7 @@
       <div class="summary-point">
         <mat-icon>check</mat-icon>
         <div class="summary-text">
-          {{T.PDS.TASKS_COMPLETED|translate}}
+          {{ T.PDS.TASKS_COMPLETED|translate }}
           <div class="summary-val">
             <span [innerHtml]="(nrOfDoneTasks$|async)"></span> /
             <span [innerHtml]="(totalNrOfTasks$|async)"></span>
@@ -67,10 +67,10 @@
       >
         <mat-icon>timer</mat-icon>
         <div class="summary-text">
-          {{T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate}}
+          {{ T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL|translate }}
           <div class="summary-val">
-            {{timeWorked$|async|msToClockString}} /
-            {{estimatedOnTasksWorkedOn$|async|msToClockString}}
+            {{ timeWorked$|async|msToClockString }} / {{
+            estimatedOnTasksWorkedOn$|async|msToClockString }}
           </div>
         </div>
       </div>
@@ -79,17 +79,28 @@
       <div class="summary-point">
         <mat-icon>free_breakfast</mat-icon>
         <div class="summary-text">
-          {{T.PDS.BREAK_LABEL|translate}}
+          {{ T.PDS.BREAK_LABEL|translate }}
           <div class="summary-val">
-            {{breakNr$|async}} / {{breakTime$|async|msToClockString}}
+            {{ breakNr$|async }} / {{ breakTime$|async|msToClockString }}
           </div>
         </div>
       </div>
       }
     </div>
 
+    @if (simpleCounterSummaryItems()?.length) {
+    <div class="simple-counter-summary">
+      @for (simpleCounter of simpleCounterSummaryItems(); track simpleCounter.id) {
+      <simple-counter-summary-item
+        [dayStr]="dayStr"
+        [simpleCounter]="simpleCounter"
+      ></simple-counter-summary-item>
+      }
+    </div>
+    }
+
     <div class="day-end-note">
-      @if(typeof cfg?.dailySummaryNote?.txt === 'string') {
+      @if (typeof cfg?.dailySummaryNote?.txt === 'string') {
       <inline-markdown
         [@expand]
         [isShowControls]="true"
@@ -145,8 +156,8 @@
             [isShowYesterday]="isForToday && isIncludeYesterday"
           ></task-summary-tables>
           } @else {
-          <p>{{T.PDS.NO_TASKS|translate}}</p>
-          } @if (tasks?.length;) {
+          <p>{{ T.PDS.NO_TASKS|translate }}</p>
+          } @if (tasks?.length; ) {
           <tasks-by-tag
             [dayStr]="dayStr"
             [flatTasks]="tasks"
@@ -156,7 +167,7 @@
           }
           <section style="margin-top: 48px">
             <h3 style="font-weight: bold; margin-bottom: 4px">
-              {{T.PDS.WEEK|translate}}
+              {{ T.PDS.WEEK|translate }}
             </h3>
             @if (isForToday) {
             <worklog-week></worklog-week>
@@ -201,7 +212,7 @@
           mat-flat-button
         >
           <mat-icon>wb_sunny</mat-icon>
-          {{T.PDS.SAVE_AND_GO_HOME|translate}}
+          {{ T.PDS.SAVE_AND_GO_HOME|translate }}
         </button>
         } @if (!isForToday) {
         <button
@@ -210,7 +221,7 @@
           mat-flat-button
         >
           <mat-icon>wb_sunny</mat-icon>
-          {{T.PDS.CLEAR_ALL_CONTINUE|translate}}
+          {{ T.PDS.CLEAR_ALL_CONTINUE|translate }}
         </button>
         }
       </div>

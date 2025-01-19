@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   inject,
   OnDestroy,
   OnInit,
+  Signal,
 } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -59,6 +61,13 @@ import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklo
 import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
 import { unToggleCheckboxesInMarkdownTxt } from '../../util/untoggle-checkboxes-in-markdown-txt';
 import { expandAnimation } from '../../ui/animations/expand.ani';
+import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { getSimpleCounterStreakDuration } from '../../features/simple-counter/get-simple-counter-streak-duration';
+import {
+  SimpleCounterSummaryItem,
+  SimpleCounterSummaryItemComponent,
+} from './simple-counter-summary-item/simple-counter-summary-item.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -90,6 +99,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     WorklogWeekComponent,
     InlineMarkdownComponent,
     MatIconButton,
+    SimpleCounterSummaryItemComponent,
   ],
   animations: [expandAnimation],
 })
@@ -105,6 +115,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _syncProviderService = inject(SyncProviderService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
+  private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
 
   T: typeof T = T;
@@ -134,6 +145,18 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   cfg$ = this.configService.cfg$;
+
+  private _enabledSimpleCounters = toSignal(
+    this._simpleCounterService.enabledSimpleCounters$,
+    { initialValue: [] },
+  );
+
+  simpleCounterSummaryItems: Signal<SimpleCounterSummaryItem[]> = computed(() => {
+    return this._enabledSimpleCounters().map((sc) => ({
+      ...sc,
+      streakDuration: getSimpleCounterStreakDuration(sc),
+    }));
+  });
 
   tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
     switchMap((dayStr) => this._getDailySummaryTasksFlat$(dayStr)),

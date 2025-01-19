@@ -119,7 +119,8 @@ export class SimpleCounterEffects {
             this._snackService.open({
               type: 'SUCCESS',
               // msg: T.F.CONFIG.S.UPDATE_SECTION,
-              msg: `🎉 You successfully reached your goal for "${sc.title}" for today! 🎉 Current streak duration: <strong>${streakDuration}</strong>`,
+              // eslint-disable-next-line max-len
+              msg: `🎉 You successfully reached your goal for <strong>${sc.title}</strong> for today! 🎉 <br />🔥 Current streak duration: <strong>${streakDuration}</strong>`,
               translateParams: { sectionKey: 'Simple Counters' },
             });
             this.successFullCountersMap[sc.id] = true;

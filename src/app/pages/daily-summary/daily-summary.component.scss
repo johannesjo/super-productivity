@@ -105,6 +105,14 @@ $summary-point-inner-margin: $s;
   }
 }
 
+.simple-counter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: $s * 6;
+  margin-top: -1 * $s;
+}
+
 .daily-summary-actions {
   margin-top: 30px;
 
