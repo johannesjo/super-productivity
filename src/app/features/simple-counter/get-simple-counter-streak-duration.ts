@@ -13,15 +13,30 @@ export const getSimpleCounterStreakDuration = (
 
   let streak = 0;
   const date = new Date();
+  // set date to last weekday set in streakWeekDays
+  setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
 
   while (countOnDay[getWorklogStr(date)] >= simpleCounter.streakMinValue) {
-    // while (
-    //   countOnDay[getWorklogStr(date)] >= simpleCounter.streakMinValue &&
-    //   simpleCounter.streakWeekDays.includes(date.getDay())
-    // ) {
     streak++;
     date.setDate(date.getDate() - 1);
+    setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
   }
 
   return streak;
+};
+
+const setDayToLastConsideredWeekday = (
+  date: Date,
+  streakWeekDays: Record<number, boolean>,
+): void => {
+  let i = 0;
+  while (!streakWeekDays[date.getDay()]) {
+    date.setDate(date.getDate() - 1);
+    i++;
+    // fail-safe to avoid infinite loop when all values are false
+    if (i > 7) {
+      break;
+    }
+  }
+  return undefined;
 };
