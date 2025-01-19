@@ -23,4 +23,29 @@
   button {
     font-size: 20px;
   }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: globalErrorAlertSpin 1s linear infinite;
+    margin: auto;
+  }
+}
+
+#error-fetching-info-wrapper {
+  border: 1px solid black;
+  padding: 16px;
+  margin: 16px;
+}
+
+@keyframes globalErrorAlertSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -9,7 +9,7 @@
     "GitHub",
     "Time Tracking"
   ],
-  "homepage": "http://super-productivity.com",
+  "homepage": "https://super-productivity.com",
   "repository": {
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
@@ -158,7 +158,7 @@
     "@typescript-eslint/utils": "^7.18.0",
     "angular-material-css-vars": "^8.0.0",
     "angular-mentions": "^1.5.0",
-    "axios": "^1.7.8",
+    "axios": "^1.7.9",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
     "chromedriver": "^131.0.5",
@@ -169,7 +169,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "dragula": "^3.7.3",
-    "electron": "^33.2.1",
+    "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",

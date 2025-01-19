@@ -43,9 +43,10 @@
     @for (opt of transitionConfigOpts; track opt.key) {
     <div>
       <mat-form-field>
-        @if (opt.key==='OPEN') {
-        <label> {{ T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate }} </label>
-        } @if (opt.key==='IN_PROGRESS') {
+        <!--        @if (opt.key==='OPEN') {-->
+        <!--        <label> {{ T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate }} </label>-->
+        <!--        } -->
+        @if (opt.key==='IN_PROGRESS') {
         <label> {{ T.F.OPEN_PROJECT.CFG_CMP.IN_PROGRESS|translate }} </label>
         } @if (opt.key==='DONE') {
         <label> {{ T.F.OPEN_PROJECT.CFG_CMP.DONE|translate }} </label>

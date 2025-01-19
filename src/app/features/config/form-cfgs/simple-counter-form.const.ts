@@ -72,17 +72,6 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
           },
           {
-            type: 'icon',
-            key: 'iconOn',
-            hideExpression: (model: any) => {
-              return model.type !== SimpleCounterType.StopWatch;
-            },
-            templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
-              description: T.G.ICON_INP_DESCRIPTION,
-            },
-          },
-          {
             key: 'countdownDuration',
             type: 'duration',
             hideExpression: (model: any) => {
@@ -103,52 +92,6 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               description: T.G.DURATION_DESCRIPTION,
             },
           },
-          // TODO maybe migrate to new auto simple counter type later
-          // {
-          //   key: 'triggerOnActions',
-          //   type: 'select',
-          //   hideExpression: (model: any) => {
-          //     return model.type !== SimpleCounterType.ClickCounter;
-          //   },
-          //   templateOptions: {
-          //     label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_COUNT_UP,
-          //     multiple: true,
-          //     options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-          //       label: actionStr,
-          //       value: actionStr,
-          //     })),
-          //   },
-          // },
-          // {
-          //   key: 'triggerOnActions',
-          //   type: 'select',
-          //   hideExpression: (model: any) => {
-          //     return model.type !== SimpleCounterType.StopWatch;
-          //   },
-          //   templateOptions: {
-          //     label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_ON,
-          //     multiple: true,
-          //     options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-          //       label: actionStr,
-          //       value: actionStr,
-          //     })),
-          //   },
-          // },
-          // {
-          //   key: 'triggerOffActions',
-          //   type: 'select',
-          //   hideExpression: (model: any) => {
-          //     return model.type !== SimpleCounterType.StopWatch;
-          //   },
-          //   templateOptions: {
-          //     label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_OFF,
-          //     multiple: true,
-          //     options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-          //       label: actionStr,
-          //       value: actionStr,
-          //     })),
-          //   },
-          // },
         ],
       },
     },

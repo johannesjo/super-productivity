@@ -230,8 +230,6 @@ export class TakeABreakService {
   > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
   constructor() {
-    this._tick$.subscribe((v) => console.log(`_tick$`, v));
-
     this._triggerReset$
       .pipe(
         withLatestFrom(this._configService.takeABreak$),

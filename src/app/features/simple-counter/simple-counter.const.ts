@@ -17,12 +17,7 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   title: '',
   isEnabled: false,
   icon: null,
-  iconOn: undefined,
   type: SimpleCounterType.ClickCounter,
-
-  // adv cfg
-  triggerOnActions: [],
-  triggerOffActions: [],
 
   // dynamic
   countOnDay: {},
@@ -35,8 +30,7 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     id: 'STANDING_DESK_ID',
     title: 'Standing Desk Timer',
     type: SimpleCounterType.StopWatch,
-    icon: 'airline_seat_recline_normal',
-    iconOn: 'directions_walk',
+    icon: 'directions_walk',
   },
   {
     ...EMPTY_SIMPLE_COUNTER,

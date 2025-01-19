@@ -14,13 +14,9 @@ export interface SimpleCounterCfgFields {
   title: string;
   isEnabled: boolean;
   icon: string | null;
-  iconOn?: string;
   type: SimpleCounterType;
 
   // adv cfg
-  triggerOnActions: string[];
-  triggerOffActions?: string[];
-
   // repeated countdown reminder
   countdownDuration?: number;
 }

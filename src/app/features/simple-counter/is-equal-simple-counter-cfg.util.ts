@@ -5,10 +5,8 @@ const FIELDS_TO_COMPARE: (keyof SimpleCounterCfgFields)[] = [
   'title',
   'isEnabled',
   'icon',
-  'iconOn',
   'type',
-  'triggerOnActions',
-  'triggerOffActions',
+  'countdownDuration',
 ];
 
 export const isEqualSimpleCounterCfg = (a: any, b: any): boolean => {

@@ -26,10 +26,6 @@ export class InlineMultilineInputComponent {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set resetToLastExternalValueTrigger(value: unknown) {
-    // console.log({
-    //   tmp: this.tmpValue,
-    //   last: this.lastExternalValue,
-    // });
     // never update while editing
     if (!this.isFocused && this.tmpValue !== this.lastExternalValue) {
       // NOTE: this works because set value is called after this, for non-short syntax only changes
@@ -43,8 +39,6 @@ export class InlineMultilineInputComponent {
   @Input() set value(value: string) {
     this.tmpValue = value;
     this.lastExternalValue = value;
-    this._setTxtHeight();
-    // console.log('setValue', value);
   }
 
   lastExternalValue?: string;
@@ -58,28 +52,10 @@ export class InlineMultilineInputComponent {
     wasChanged: boolean;
   }>();
 
-  // @HostBinding('tabindex') tabindex = '1';
-  // isEditMode: boolean = false;
-  // @HostListener('focus') hostElFocus(): void {
-  //   this.isFocused = true;
-  //   this.isEditMode = true;
-  //   setTimeout(() => {
-  //     this.textarea.nativeElement.focus();
-  //   });
-  // }
-  // @HostListener('click') hostElClick(): void {
-  //   this.isFocused = true;
-  //   this.isEditMode = true;
-  //   setTimeout(() => {
-  //     this.textarea.nativeElement.focus();
-  //   });
-  // }
-
   constructor() {}
 
   focused(): void {
     this.isFocused = true;
-    this._setTxtHeight();
     try {
       window.setTimeout(() => {
         const el = this.textarea().nativeElement;
@@ -119,10 +95,6 @@ export class InlineMultilineInputComponent {
     }
   }
 
-  onInput(ev: Event): void {
-    this._setTxtHeight();
-  }
-
   updateTmpValue(value: string): void {
     this.tmpValue = value;
   }
@@ -137,36 +109,9 @@ export class InlineMultilineInputComponent {
       newVal: cleanVal,
       wasChanged: cleanVal !== this.lastExternalValue,
     });
-    // console.log(
-    //   'submit',
-    //   this.tmpValue,
-    //   'wasChanged',
-    //   cleanVal !== this.lastExternalValue,
-    // );
-
-    // android needs the delay for the linebreaks to be removed
-    setTimeout(() => {
-      this._setTxtHeight();
-    });
   }
 
   private _cleanValue(value: string = ''): string {
     return value?.replace(/\r\n|\n|\r/g, '').trim();
-  }
-
-  private _setTxtHeight(): void {
-    try {
-      // reset height
-      const textarea = this.textarea();
-      textarea.nativeElement.style.height = 'auto';
-      textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
-    } catch (e) {
-      setTimeout(() => {
-        // reset height
-        const textarea = this.textarea();
-        textarea.nativeElement.style.height = 'auto';
-        textarea.nativeElement.style.height = textarea.nativeElement.scrollHeight + 'px';
-      });
-    }
   }
 }

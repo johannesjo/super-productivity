@@ -10,10 +10,10 @@
   (blur)="blurred()"
   (focus)="focused()"
   (ngModelChange)="updateTmpValue($event)"
-  (input)="onInput($event)"
   (mousedown)="$event.stopPropagation()"
   (textInput)="onTextInput($event)"
   (keydown)="handleKeyDown($event)"
 ></textarea>
 
+<div>{{tmpValue}}</div>
 <!--} @else { {{tmpValue}} }-->

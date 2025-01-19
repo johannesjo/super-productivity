@@ -261,12 +261,15 @@ export class CaldavClientService {
     );
   }
 
-  updateCompletedState$(
+  updateState$(
     caldavCfg: CaldavCfg,
     issueId: string,
     completed: boolean,
+    summary: string,
   ): Observable<any> {
-    return from(this._updateCompletedState(caldavCfg, issueId, completed)).pipe(
+    return from(
+      this._updateTask(caldavCfg, issueId, { completed: completed, summary: summary }),
+    ).pipe(
       catchError((err) => throwError({ [HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err })),
     );
   }
@@ -355,10 +358,10 @@ export class CaldavClientService {
     return CaldavClientService._mapTask(task[0]);
   }
 
-  private async _updateCompletedState(
+  private async _updateTask(
     cfg: CaldavCfg,
     uid: string,
-    completed: boolean,
+    updates: { completed: boolean; summary: string },
   ): Promise<any> {
     const cal = await this._getCalendar(cfg);
 
@@ -398,17 +401,27 @@ export class CaldavClientService {
       return;
     }
 
-    const oldCompleted = !!todo.getFirstPropertyValue('completed');
+    const now = ICAL.Time.now();
+    let changeObserved = false;
 
-    if (completed === oldCompleted) {
-      return;
+    const oldCompleted = !!todo.getFirstPropertyValue('completed');
+    if (updates.completed !== oldCompleted) {
+      if (updates.completed) {
+        todo.updatePropertyWithValue('completed', now);
+      } else {
+        todo.removeProperty('completed');
+      }
+      changeObserved = true;
     }
 
-    const now = ICAL.Time.now();
-    if (completed) {
-      todo.updatePropertyWithValue('completed', now);
-    } else {
-      todo.removeProperty('completed');
+    const oldSummary = todo.getFirstPropertyValue('summary');
+    if (updates.summary !== oldSummary) {
+      todo.updatePropertyWithValue('summary', updates.summary);
+      changeObserved = true;
+    }
+
+    if (!changeObserved) {
+      return;
     }
     todo.updatePropertyWithValue('last-modified', now);
     todo.updatePropertyWithValue('dtstamp', now);
