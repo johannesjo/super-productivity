@@ -8,10 +8,7 @@ import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.mo
 import { GitlabCfg } from './gitlab.model';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import {
-  GITLAB_INITIAL_POLL_DELAY,
-  GITLAB_POLL_INTERVAL,
-} from './gitlab.const';
+import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
 
