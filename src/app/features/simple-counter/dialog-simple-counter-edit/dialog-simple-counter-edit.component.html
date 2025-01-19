@@ -3,50 +3,19 @@
   <h1 mat-dialog-title>{{ data.simpleCounter.title }}</h1>
 
   <mat-dialog-content>
-    <div class="form-wrapper">
-      @if (data.simpleCounter.type === SimpleCounterType.ClickCounter ||
-      data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder) {
-      <mat-form-field>
-        <mat-label>{{T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate}}</mat-label>
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          matInput
-          name="count"
-          type="number"
-        />
-      </mat-form-field>
-      }
-      <!---->
-      @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
-      <mat-form-field>
-        <mat-label>{{T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate}}</mat-label>
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          inputDuration="optional"
-          matInput
-          name="count"
-          type="text"
-        />
-        <mat-icon matPrefix>timer</mat-icon>
-      </mat-form-field>
-      }
-    </div>
-
     <!---->
     @if (data.simpleCounter.isTrackStreaks) {
-    <section style="text-align: center; margin-top: 16px">
+    <section style="text-align: center; margin-bottom: 16px">
       <div>Current Streak</div>
       <div><strong>{{ currentStreak() }} Days</strong></div>
     </section>
 
-    <section style="text-align: center; margin-top: 16px">
+    <section style="text-align: center; margin-bottom: 16px">
       <div>Daily Goal</div>
       <div>
         <strong
           >@if (data.simpleCounter.type === SimpleCounterType.StopWatch) { {{
-          data.simpleCounter.streakMinValue|durationToString }}
+          data.simpleCounter.streakMinValue|msToString }}
           <!---->
           } @else { {{ data.simpleCounter.streakMinValue }} }</strong
         >
@@ -56,7 +25,7 @@
     <!---->
 
     @if (stats()) {
-    <section style="margin-top: 16px">
+    <section style="margin-bottom: 32px">
       <div class="chart-wrapper">
         <div class="inner-chart-wrapper">
           <canvas
@@ -72,6 +41,37 @@
       </div>
     </section>
     }
+
+    <div class="form-wrapper">
+      @if (data.simpleCounter.type === SimpleCounterType.ClickCounter ||
+      data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder) {
+      <mat-form-field>
+        <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate }}</mat-label>
+        <input
+          (ngModelChange)="onModelChange($event)"
+          [ngModel]="val"
+          matInput
+          name="count"
+          type="number"
+        />
+      </mat-form-field>
+      }
+      <!---->
+      @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
+      <mat-form-field>
+        <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate }}</mat-label>
+        <input
+          (ngModelChange)="onModelChange($event)"
+          [ngModel]="val"
+          inputDuration="optional"
+          matInput
+          name="count"
+          type="text"
+        />
+        <mat-icon matPrefix>timer</mat-icon>
+      </mat-form-field>
+      }
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

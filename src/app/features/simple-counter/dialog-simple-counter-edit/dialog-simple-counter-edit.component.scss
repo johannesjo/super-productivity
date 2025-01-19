@@ -9,6 +9,10 @@
       min-width: 740px;
     }
   }
+
+  .inner-chart-wrapper {
+    min-height: 170px;
+  }
 }
 
 :host-context([dir='rtl']) {

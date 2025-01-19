@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  LOCALE_ID,
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -26,6 +32,7 @@ import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pipe';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -48,6 +55,7 @@ import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pi
     MatFormFieldModule,
     MatInputModule,
     DurationToStringPipe,
+    MsToStringPipe,
   ],
 })
 export class DialogSimpleCounterEditComponent {
@@ -55,6 +63,7 @@ export class DialogSimpleCounterEditComponent {
     inject<MatDialogRef<DialogSimpleCounterEditComponent>>(MatDialogRef);
   private _simpleCounterService = inject(SimpleCounterService);
   private _dateService = inject(DateService);
+  private _locale = inject(LOCALE_ID);
 
   data = inject<{
     simpleCounter: SimpleCounterCopy;
@@ -63,12 +72,20 @@ export class DialogSimpleCounterEditComponent {
   stats = computed(() => {
     const countOnDay = this.data.simpleCounter.countOnDay;
     const labels = Object.keys(countOnDay);
+
     const data =
       this.data.simpleCounter.type === SimpleCounterType.StopWatch
         ? labels.map((date) => Math.round(countOnDay[date] / 60000))
         : labels.map((date) => countOnDay[date]);
+
     const chartData: LineChartData = {
-      labels,
+      labels: labels.map(
+        (date) =>
+          `${new Date(date).toLocaleDateString(this._locale, {
+            month: 'numeric',
+            day: 'numeric',
+          })}`,
+      ),
       datasets: [
         {
           data,
@@ -96,6 +113,7 @@ export class DialogSimpleCounterEditComponent {
     string
   >['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       y: {
         ticks: {
