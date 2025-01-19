@@ -3,6 +3,7 @@ import { isMigrateModel } from '../../util/model-version';
 import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION } from '../../core/model-version';
+import { EMPTY_SIMPLE_COUNTER } from './simple-counter.const';
 
 export const migrateSimpleCounterState = (
   simpleCounterState: SimpleCounterState,
@@ -43,8 +44,22 @@ const _migrateSimpleCounterEntity = (simpleCounter: SimpleCounter): SimpleCounte
     delete (cpy as any).isPauseWhenTimeTrackingIsPaused;
 
     return {
+      ...EMPTY_SIMPLE_COUNTER,
       ...cpy,
       countOnDay,
+    };
+  }
+
+  if (!simpleCounter.hasOwnProperty('streakWeekDays')) {
+    const cpy = { ...simpleCounter };
+    delete (cpy as any).triggerOnActions;
+    delete (cpy as any).triggerOffActions;
+    delete (cpy as any).iconOn;
+
+    return {
+      ...EMPTY_SIMPLE_COUNTER,
+      ...cpy,
+      isTrackStreaks: cpy.isTrackStreaks || false,
     };
   }
 
