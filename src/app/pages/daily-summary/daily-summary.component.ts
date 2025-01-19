@@ -68,6 +68,7 @@ import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
+import { PyroComponent } from '../../ui/pyro/pyro/pyro.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -100,6 +101,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     InlineMarkdownComponent,
     MatIconButton,
     SimpleCounterSummaryItemComponent,
+    PyroComponent,
   ],
   animations: [expandAnimation],
 })

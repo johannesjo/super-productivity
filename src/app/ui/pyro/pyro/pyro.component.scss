@@ -1,4 +1,6 @@
-@import '../../variables';
+@use 'sass:math';
+
+@import '../../../../variables';
 
 $particles: 30;
 $width: 500;
@@ -31,6 +33,9 @@ More info: https://sass-lang.com/d/function-units
   $box-shadow2:
     $box-shadow2,
     0 0 #fff;
+}
+
+:host {
 }
 
 .pyro {
