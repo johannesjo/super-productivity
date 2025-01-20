@@ -807,6 +807,9 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Current Streak",
+        "DAILY_GOAL": "Daily Goal",
+        "DAYS": "Days",
         "L_COUNTER": "Count for Today"
       },
       "FORM": {

@@ -6,12 +6,16 @@
     <!---->
     @if (data.simpleCounter.isTrackStreaks) {
     <section style="text-align: center; margin-bottom: 16px">
-      <div>Current Streak</div>
-      <div><strong>{{ currentStreak() }} Days</strong></div>
+      <div>{{T.F.SIMPLE_COUNTER.D_EDIT.CURRENT_STREAK|translate}}</div>
+      <div>
+        <strong
+          >{{ currentStreak() }} {{T.F.SIMPLE_COUNTER.D_EDIT.DAYS|translate}}</strong
+        >
+      </div>
     </section>
 
     <section style="text-align: center; margin-bottom: 16px">
-      <div>Daily Goal</div>
+      <div>{{T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL|translate}}</div>
       <div>
         <strong
           >@if (data.simpleCounter.type === SimpleCounterType.StopWatch) { {{
