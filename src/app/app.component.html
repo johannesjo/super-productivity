@@ -65,8 +65,8 @@
   <global-progress-bar></global-progress-bar>
   <div class="app-loading">
     <div class="productivity-tip">
-      <h2 id="heading">{{productivityTipTitle}}</h2>
-      <p id="text">{{productivityTipText}}</p>
+      <h2 id="heading">{{ productivityTipTitle }}</h2>
+      <p id="text">{{ productivityTipText }}</p>
     </div>
     <div class="spinner">
       <div class="double-bounce1"></div>
@@ -97,8 +97,5 @@
 </div>
 }
 <!-- -->
-@if(layoutService.isShowCelebrate$|async) {
-<celebrate></celebrate>
-}
 
 <shepherd></shepherd>

@@ -57,8 +57,6 @@ import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
-import { PyroComponent } from './ui/pyro/pyro/pyro.component';
-import { CelebrateComponent } from './ui/celebrate/celebrate.component';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -91,8 +89,6 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     FocusModeOverlayComponent,
     ShepherdComponent,
     AsyncPipe,
-    PyroComponent,
-    CelebrateComponent,
   ],
 })
 export class AppComponent implements OnDestroy {

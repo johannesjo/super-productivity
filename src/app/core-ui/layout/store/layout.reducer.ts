@@ -1,14 +1,11 @@
 import {
   hideAddTaskBar,
-  hideCelebrate,
   hideNotesAndAddTaskPanel,
   hideSearchBar,
   hideSideNav,
   showAddTaskBar,
-  showCelebrate,
   showSearchBar,
   toggleAddTaskBar,
-  toggleCelebrate,
   toggleIssuePanel,
   toggleSearchBar,
   toggleShowNotes,
@@ -118,13 +115,6 @@ const _reducer = createReducer<LayoutState>(
     ...state,
     isShowIssuePanel: !state.isShowIssuePanel,
     isShowNotes: false,
-  })),
-
-  on(showCelebrate, (state) => ({ ...state, isShowCelebrate: true })),
-  on(hideCelebrate, (state) => ({ ...state, isShowCelebrate: false })),
-  on(toggleCelebrate, (state) => ({
-    ...state,
-    isShowCelebrate: !state.isShowCelebrate,
   })),
 );
 
