@@ -98,8 +98,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             type: 'checkbox',
             key: 'isTrackStreaks',
             templateOptions: {
-              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-              label: 'Track Streaks',
+              label: T.F.SIMPLE_COUNTER.FORM.L_TRACK_STREAKS,
             },
           },
           {
@@ -111,8 +110,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
                 !fCfg.model.isTrackStreaks,
             },
             templateOptions: {
-              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-              label: 'Daily goal for successful streak',
+              label: T.F.SIMPLE_COUNTER.FORM.L_DAILY_GOAL,
               type: 'number',
               min: 1,
               required: true,
@@ -128,8 +126,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
                 !fCfg.model.isTrackStreaks,
             },
             templateOptions: {
-              // label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-              label: 'Daily goal for successful streak',
+              label: T.F.SIMPLE_COUNTER.FORM.L_DAILY_GOAL,
               min: 60 * 1000,
               required: true,
               description: T.G.DURATION_DESCRIPTION,
@@ -143,7 +140,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
               hide: (fCfg: FormlyFieldConfig) => !fCfg.model.isTrackStreaks,
             },
             templateOptions: {
-              label: 'Weekdays to check for streak',
+              label: T.F.SIMPLE_COUNTER.FORM.L_WEEKDAYS,
               required: true,
               options: [
                 { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },

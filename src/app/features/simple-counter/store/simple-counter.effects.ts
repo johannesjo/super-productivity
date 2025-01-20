@@ -29,6 +29,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -39,6 +40,7 @@ export class SimpleCounterEffects {
   private _persistenceService = inject(PersistenceService);
   private _simpleCounterService = inject(SimpleCounterService);
   private _snackService = inject(SnackService);
+  private _translateService = inject(TranslateService);
 
   successFullCountersMap: { [key: string]: boolean } = {};
 
@@ -113,6 +115,9 @@ export class SimpleCounterEffects {
           if (sc && !this.successFullCountersMap[sc.id] && sc.isTrackStreaks) {
             if (sc.countOnDay[getWorklogStr()] >= sc.streakMinValue) {
               const streakDuration = getSimpleCounterStreakDuration(sc);
+              // eslint-disable-next-line max-len
+              const msg = `<strong>${sc.title}</strong> <br />${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_1)}<br /> ${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_2)} <strong>${streakDuration}🔥</strong>`;
+
               const DURATION = 4000;
               this._snackService.open({
                 type: 'SUCCESS',
@@ -124,10 +129,7 @@ export class SimpleCounterEffects {
                   horizontalPosition: 'center',
                   verticalPosition: 'top',
                 },
-                // msg: T.F.CONFIG.S.UPDATE_SECTION,
-                // eslint-disable-next-line max-len
-                msg: `<strong>${sc.title}</strong> <br />You reached your goal for today!<br /> Current streak duration: <strong>${streakDuration}🔥</strong>`,
-                translateParams: { sectionKey: 'Simple Counters' },
+                msg,
               });
               this.successFullCountersMap[sc.id] = true;
               this._celebrate();
