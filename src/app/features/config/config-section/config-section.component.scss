@@ -64,6 +64,12 @@ $this-panel-padding-left-right: 12px;
   margin-top: $s * 4;
 }
 
+:host ::ng-deep .footer {
+  margin: auto;
+  margin-top: $s * 2;
+  text-align: center;
+}
+
 @keyframes help-ico-animation {
   0% {
     transform: scale(0);

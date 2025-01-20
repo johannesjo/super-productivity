@@ -18,6 +18,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
     {
       key: 'counters',
       type: 'repeat',
+      className: 'simple-counters',
       templateOptions: {
         addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
         getInitialValue: () => ({
@@ -29,17 +30,17 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
       fieldArray: {
         fieldGroup: [
           {
-            type: 'checkbox',
-            key: 'isEnabled',
-            templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-            },
-          },
-          {
             type: 'input',
             key: 'title',
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+            },
+          },
+          {
+            type: 'checkbox',
+            key: 'isEnabled',
+            templateOptions: {
+              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
             },
           },
           {
