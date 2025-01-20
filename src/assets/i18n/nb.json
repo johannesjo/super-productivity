@@ -805,15 +805,11 @@
         "OK": "Gjør det!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Telle",
-        "TITLE": "Rediger enkel teller"
+        "L_COUNTER": "Telle"
       },
       "FORM": {
         "ADD_NEW": "Legg til enkel teller",
         "HELP": "Her kan du konfigurere enkle knapper som vises øverst til høyre. De kan enten være tidtakere eller bare en enkel teller, som telles opp, ved å klikke på den.",
-        "L_AUTO_COUNT_UP": "Automatisk utløsertelling opp for",
-        "L_AUTO_SWITCH_OFF": "Automatisk utkobling for",
-        "L_AUTO_SWITCH_ON": "Automatisk utløserbryter på for",
         "L_COUNTDOWN_DURATION": "Nedtellingens varighet",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon når det er slått på",

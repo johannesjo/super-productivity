@@ -805,15 +805,11 @@
         "OK": "Fais le!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Compter",
-        "TITLE": "Modifier le compteur simple"
+        "L_COUNTER": "Compter"
       },
       "FORM": {
         "ADD_NEW": "Ajouter un compteur simple",
         "HELP": "Ici, vous pouvez configurer des boutons simples qui apparaîtront en haut à droite. Il peut s'agir de minuteries ou simplement d'un simple compteur, qui est compté, en cliquant dessus.",
-        "L_AUTO_COUNT_UP": "Décompte de déclenchement automatique pour",
-        "L_AUTO_SWITCH_OFF": "Déclenchement automatique pour",
-        "L_AUTO_SWITCH_ON": "Interrupteur de déclenchement automatique sur",
         "L_COUNTDOWN_DURATION": "Durée du compte à rebours",
         "L_ICON": "Icône",
         "L_ICON_ON": "Icône lorsque basculé",

@@ -805,15 +805,11 @@
         "OK": "해!"
       },
       "D_EDIT": {
-        "L_COUNTER": "카운트",
-        "TITLE": "간단한 카운터 편집"
+        "L_COUNTER": "카운트"
       },
       "FORM": {
         "ADD_NEW": "간단한 카운터 추가",
         "HELP": "여기 오른쪽 상단에 나타나는 간단한 버튼을 구성 할 수 있습니다. 타이머 또는 간단한 카운터가 될 수 있습니다. 카운터를 클릭하면 계산됩니다.",
-        "L_AUTO_COUNT_UP": "자동 트리거 카운트 업",
-        "L_AUTO_SWITCH_OFF": "에 대한 자동 트리거 스위치 끄기",
-        "L_AUTO_SWITCH_ON": "에 대한 자동 트리거 스위치",
         "L_COUNTDOWN_DURATION": "카운트다운 기간",
         "L_ICON": "아이콘",
         "L_ICON_ON": "전환시 아이콘",

@@ -225,10 +225,10 @@
       },
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
+        "INVALID_TOKEN_MESSAGE": "non è un token di Github valido. Deve iniziare con \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtra issue assegnate a me",
         "REPO": "username/repositoryName",
-        "TOKEN": "Token di accesso",
-        "INVALID_TOKEN_MESSAGE": "non è un token di Github valido. Deve iniziare con \"ghp_\"."
+        "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione attività nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti alle attività arretrate.</p>",
@@ -807,15 +807,11 @@
         "OK": "Fallo!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contare",
-        "TITLE": "Modifica contatore semplice"
+        "L_COUNTER": "Contare"
       },
       "FORM": {
         "ADD_NEW": "Aggiungi un semplice contatore",
         "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
-        "L_AUTO_COUNT_UP": "Conto alla rovescia del trigger automatico per",
-        "L_AUTO_SWITCH_OFF": "Spegnimento automatico disattivato per",
-        "L_AUTO_SWITCH_ON": "Accensione automatica attivata per",
         "L_COUNTDOWN_DURATION": "Durata conto alla rovescia",
         "L_ICON": "Icona",
         "L_ICON_ON": "Icona quando attivato",

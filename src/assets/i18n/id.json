@@ -805,15 +805,11 @@
         "OK": "Lakukan!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Hitung",
-        "TITLE": "Ubah Penghitung Sederhana"
+        "L_COUNTER": "Hitung"
       },
       "FORM": {
         "ADD_NEW": "Tambah Penghitung Sederhana",
         "HELP": "Di sini Anda dapat mengonfigurasi tombol sederhana yang akan muncul di kanan atas. Mereka bisa berupa penghitung waktu atau hanya penghitung sederhana, yang dihitung, dengan mengkliknya.",
-        "L_AUTO_COUNT_UP": "Pemicu otomatis menghitung untuk",
-        "L_AUTO_SWITCH_OFF": "Pemicu otomatis mati untuk",
-        "L_AUTO_SWITCH_ON": "Saklar pemicu otomatis aktif untuk",
         "L_COUNTDOWN_DURATION": "Durasi hitung mundur",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon saat diaktifkan",

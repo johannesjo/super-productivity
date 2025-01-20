@@ -805,15 +805,11 @@
         "OK": "Da, izbriši!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Broj",
-        "TITLE": "Uredi jednostavni brojač"
+        "L_COUNTER": "Broj"
       },
       "FORM": {
         "ADD_NEW": "Dodaj jednostavni brojač",
         "HELP": "Ovdje možeš konfigurirati jednostavne gumbe koji će se pojaviti u gornjem desnom kutu. To mogu biti mjerači vremena ili jednostavno običan brojač koji broji kad se pritisne.",
-        "L_AUTO_COUNT_UP": "Automatsko brojenje za",
-        "L_AUTO_SWITCH_OFF": "Automatsko isključivanje za",
-        "L_AUTO_SWITCH_ON": "Automatsko uključivanje za",
         "L_COUNTDOWN_DURATION": "Countdown dire",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona kad je uključeno",

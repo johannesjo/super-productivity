@@ -805,15 +805,11 @@
         "OK": "¡Hazlo!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contar",
-        "TITLE": "Editar contador simple"
+        "L_COUNTER": "Contar"
       },
       "FORM": {
         "ADD_NEW": "Agregar contador simple",
         "HELP": "Aquí puede configurar botones simples que aparecerán en la esquina superior derecha. Pueden ser temporizadores o simplemente un contador simple, que se cuenta, haciendo clic en él.",
-        "L_AUTO_COUNT_UP": "El gatillo automático cuenta para",
-        "L_AUTO_SWITCH_OFF": "Disparador automático apagado para",
-        "L_AUTO_SWITCH_ON": "Encendido automático para",
         "L_COUNTDOWN_DURATION": "Duración de la cuenta atrás",
         "L_ICON": "Icono",
         "L_ICON_ON": "Icono cuando se alterna",

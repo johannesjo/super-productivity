@@ -805,15 +805,11 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Count",
-        "TITLE": "Edit Simple Counter"
+        "L_COUNTER": "Count"
       },
       "FORM": {
         "ADD_NEW": "Add simple counter",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
         "L_COUNTDOWN_DURATION": "Czas trwania odliczania",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",

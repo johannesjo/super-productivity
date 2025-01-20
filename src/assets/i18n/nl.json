@@ -805,15 +805,11 @@
         "OK": "Doe het!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Tel",
-        "TITLE": "Eenvoudige teller bewerken"
+        "L_COUNTER": "Tel"
       },
       "FORM": {
         "ADD_NEW": "Voeg een eenvoudige teller toe",
         "HELP": "Hier kunt u eenvoudige knoppen configureren die rechtsboven verschijnen. Het kunnen timers zijn of gewoon een simpele teller, die wordt opgeteld door erop te klikken.",
-        "L_AUTO_COUNT_UP": "Auto trigger telt op voor",
-        "L_AUTO_SWITCH_OFF": "Automatische trigger-uitschakeling voor",
-        "L_AUTO_SWITCH_ON": "Automatische trigger-schakelaar voor",
         "L_COUNTDOWN_DURATION": "Duur aftellen",
         "L_ICON": "Icoon",
         "L_ICON_ON": "Icoon wanneer geschakeld",

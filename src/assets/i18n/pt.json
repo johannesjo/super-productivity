@@ -805,15 +805,11 @@
         "OK": "Faça!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contagem",
-        "TITLE": "Editar contador simples"
+        "L_COUNTER": "Contagem"
       },
       "FORM": {
         "ADD_NEW": "Adicionar contador simples",
         "HELP": "Aqui você pode configurar botões simples que aparecerão no canto superior direito. Eles podem ser temporizadores ou apenas um contador simples, que é contado, clicando nele.",
-        "L_AUTO_COUNT_UP": "Contagem automática de disparos para",
-        "L_AUTO_SWITCH_OFF": "Desligamento automático do gatilho por",
-        "L_AUTO_SWITCH_ON": "O gatilho automático é ativado por",
         "L_COUNTDOWN_DURATION": "Duração da contagem decrescente",
         "L_ICON": "Ícone",
         "L_ICON_ON": "Ícone quando alternado",

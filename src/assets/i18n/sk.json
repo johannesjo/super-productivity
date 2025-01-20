@@ -805,15 +805,11 @@
         "OK": "Urob to!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Počet",
-        "TITLE": "Upraviť jednoduché počítadlo"
+        "L_COUNTER": "Počet"
       },
       "FORM": {
         "ADD_NEW": "Pridať jednoduché počítadlo",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
         "L_COUNTDOWN_DURATION": "Trvanie odpočítavania",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona pri prepnutí",

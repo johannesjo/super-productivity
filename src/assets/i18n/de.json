@@ -805,15 +805,11 @@
         "OK": "Tu es!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Anzahl",
-        "TITLE": "Einfachen Zähler bearbeiten"
+        "L_COUNTER": "Anzahl"
       },
       "FORM": {
         "ADD_NEW": "Fügen Sie einen einfachen Zähler hinzu",
         "HELP": "Hier können Sie einfache Schaltflächen konfigurieren, die oben rechts angezeigt werden. Sie können entweder Timer oder nur ein einfacher Zähler sein, der durch Klicken hochgezählt wird.",
-        "L_AUTO_COUNT_UP": "Auto Trigger hochzählen für",
-        "L_AUTO_SWITCH_OFF": "Auto Trigger ausschalten für",
-        "L_AUTO_SWITCH_ON": "Auto Trigger einschalten für",
         "L_COUNTDOWN_DURATION": "Dauer des Countdowns",
         "L_ICON": "Symbol",
         "L_ICON_ON": "Symbol beim Umschalten",
