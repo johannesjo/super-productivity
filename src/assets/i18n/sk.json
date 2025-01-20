@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
+        "INVALID_TOKEN_MESSAGE": "Nie je platný token GitHub. Musí začínať na \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Do nevybavených záležitostí importovať len tie, ktoré mi boli pridelené",
         "REPO": "meno používateľa/názov úložiska",
         "TOKEN": "Prístupový token"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}<\\/strong> začína o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> začína na <strong>{{start}}</strong>!<br> (a {{nrOfOtherBanners}} ďalšie úlohy sú splatné)"
       },
+      "S_ACTIVE_TASK_DUE": "Úloha, na ktorej práve pracujete, je teraz splatná!<br/> ({{title}})",
       "S_REMINDER_ERR": "Chyba pre rozhranie pripomienok"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Urob to!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Aktuálny pruh",
+        "DAILY_GOAL": "Denný cieľ",
+        "DAYS": "Dní",
         "L_COUNTER": "Počet"
       },
       "FORM": {
         "ADD_NEW": "Pridať jednoduché počítadlo",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
         "L_COUNTDOWN_DURATION": "Trvanie odpočítavania",
+        "L_DAILY_GOAL": "Denný cieľ pre úspešnú sériu",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona pri prepnutí",
         "L_IS_ENABLED": "Povolené",
         "L_TITLE": "Názov",
+        "L_TRACK_STREAKS": "Traťové pruhy",
         "L_TYPE": "Typ",
+        "L_WEEKDAYS": "Pracovné dni na kontrolu pruhov",
         "TITLE": "Jednoduché počítadlá",
         "TYPE_CLICK_COUNTER": "Počítadlo kliknutí",
         "TYPE_REPEATED_COUNTDOWN": "Opakované odpočítavanie",
         "TYPE_STOPWATCH": "Stopky"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Dosiahli ste svoj dnešný cieľ!",
+        "GOAL_REACHED_2": "Aktuálne trvanie pruhu:"
       }
     },
     "SYNC": {

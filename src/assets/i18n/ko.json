@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "사용자 이름 (예 : 혼자서 변경 사항을 필터링)",
+        "INVALID_TOKEN_MESSAGE": "유효한 GitHub 토큰이 아닙니다. \"ghp_\"로 시작해야 합니다.",
         "IS_ASSIGNEE_FILTER": "나에게 할당된 이슈만 백로그에 가져오기",
         "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\"",
         "TOKEN": "액세스 토큰"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong> 가 <strong>{{start}}</strong>에서 시작합니다!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> 는 <strong>에서 시작 {{start}}</strong>!<br> (및 {{nrOfOtherBanners}} 개의 다른 작업 마감일)"
       },
+      "S_ACTIVE_TASK_DUE": "현재 작업 중인 작업의 마감일이 되었습니다!<br/> ({{title}})",
       "S_REMINDER_ERR": "알림 인터페이스 오류"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "해!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "현재 행진",
+        "DAILY_GOAL": "일일 목표",
+        "DAYS": "일수",
         "L_COUNTER": "카운트"
       },
       "FORM": {
         "ADD_NEW": "간단한 카운터 추가",
         "HELP": "여기 오른쪽 상단에 나타나는 간단한 버튼을 구성 할 수 있습니다. 타이머 또는 간단한 카운터가 될 수 있습니다. 카운터를 클릭하면 계산됩니다.",
         "L_COUNTDOWN_DURATION": "카운트다운 기간",
+        "L_DAILY_GOAL": "성공적인 연승을 위한 일일 목표",
         "L_ICON": "아이콘",
         "L_ICON_ON": "전환시 아이콘",
         "L_IS_ENABLED": "사용",
         "L_TITLE": "제목",
+        "L_TRACK_STREAKS": "트랙 스트라이크",
         "L_TYPE": "유형",
+        "L_WEEKDAYS": "평일 연속 확인",
         "TITLE": "간단한 카운터",
         "TYPE_CLICK_COUNTER": "카운터 클릭",
         "TYPE_REPEATED_COUNTDOWN": "반복 카운트다운",
         "TYPE_STOPWATCH": "스톱워치"
+      },
+      "S": {
+        "GOAL_REACHED_1": "오늘의 목표를 달성했습니다!",
+        "GOAL_REACHED_2": "현재 연속 기간입니다:"
       }
     },
     "SYNC": {

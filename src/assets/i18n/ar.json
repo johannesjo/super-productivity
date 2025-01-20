@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
+        "INVALID_TOKEN_MESSAGE": "ليست رمز GitHub صالحًا. يجب أن يبدأ بـ \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "قم بفلترة المشاكل المفروزة لي",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه",
         "TOKEN": "رمز الوصول"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong> يبدأ عند <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> يبدأ في <strong>{{start}}</strong>!<br> (و {{nrOfOtherBanners}} مهمة أخرى مستحقة)"
       },
+      "S_ACTIVE_TASK_DUE": "المهمة التي تعمل عليها حاليًا أصبحت الآن مستحقة التسليم!<br/> ({{title}})",
       "S_REMINDER_ERR": "خطأ في واجهة التذكير"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "افعلها!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "السلسلة الحالية",
+        "DAILY_GOAL": "الهدف اليومي",
+        "DAYS": "أيام",
         "L_COUNTER": "عد"
       },
       "FORM": {
         "ADD_NEW": "إضافة عداد بسيط",
         "HELP": "هنا يمكنك تكوين الأزرار البسيطة التي ستظهر في أعلى اليمين. يمكن أن تكون إما مؤقتات أو مجرد عداد بسيط ، يتم حسابه ، من خلال النقر عليه.",
         "L_COUNTDOWN_DURATION": "مدة العد التنازلي",
+        "L_DAILY_GOAL": "الهدف اليومي لسلسلة النجاحات",
         "L_ICON": "أيقونة",
         "L_ICON_ON": "رمز عند التبديل",
         "L_IS_ENABLED": "تمكين",
         "L_TITLE": "عنوان",
+        "L_TRACK_STREAKS": "تتبع الخطوط",
         "L_TYPE": "نوع",
+        "L_WEEKDAYS": "أيام الأسبوع للتحقق من الخط",
         "TITLE": "عدادات بسيطة",
         "TYPE_CLICK_COUNTER": "انقر فوق العداد",
         "TYPE_REPEATED_COUNTDOWN": "العد التنازلي المتكرر",
         "TYPE_STOPWATCH": "ساعة التوقيف"
+      },
+      "S": {
+        "GOAL_REACHED_1": "لقد وصلت إلى هدفك اليوم!",
+        "GOAL_REACHED_2": "مدة السلسلة الحالية:"
       }
     },
     "SYNC": {

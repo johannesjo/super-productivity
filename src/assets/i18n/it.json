@@ -807,21 +807,31 @@
         "OK": "Fallo!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Მიმდინარე სტრიქონი",
+        "DAILY_GOAL": "Ყოველდღიური მიზანი",
+        "DAYS": "Დღეები",
         "L_COUNTER": "Contare"
       },
       "FORM": {
         "ADD_NEW": "Aggiungi un semplice contatore",
         "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
         "L_COUNTDOWN_DURATION": "Durata conto alla rovescia",
+        "L_DAILY_GOAL": "Ყოველდღიური გოლი წარმატებული სერიისთვის",
         "L_ICON": "Icona",
         "L_ICON_ON": "Icona quando attivato",
         "L_IS_ENABLED": "Abilitato",
         "L_TITLE": "Titolo",
+        "L_TRACK_STREAKS": "Სიმღერა ზოლები",
         "L_TYPE": "genere",
+        "L_WEEKDAYS": "Კვირის დღეები ზოლის შესამოწმებლად",
         "TITLE": "Contatori semplici",
         "TYPE_CLICK_COUNTER": "Fai clic su Contatore",
         "TYPE_REPEATED_COUNTDOWN": "Conto alla rovescia ripetuto",
         "TYPE_STOPWATCH": "Cronometro"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Თქვენ მიაღწიეთ დღევანდელ მიზანს!",
+        "GOAL_REACHED_2": "Მიმდინარე სერიების ხანგრძლივობა: "
       }
     },
     "SYNC": {

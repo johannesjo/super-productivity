@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. for å filtrere ut endringer selv)",
+        "INVALID_TOKEN_MESSAGE": "Ikke et gyldig GitHub-token. Det må begynne med \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importer kun saker som er tildelt meg til etterslep",
         "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
         "TOKEN": "Tilgangstoken"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}<\\/strong> starter kl <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starter ved <strong>{{start}}</strong>!<br> (og {{nrOfOtherBanners}} andre oppgaver skal utføres)"
       },
+      "S_ACTIVE_TASK_DUE": "Oppgaven du jobber med for øyeblikket, er nå forfalt!<br/> ({{title}})",
       "S_REMINDER_ERR": "Feil for påminnelsesgrensesnitt"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Gjør det!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Nåværende strek",
+        "DAILY_GOAL": "Daglig mål",
+        "DAYS": "Dager",
         "L_COUNTER": "Telle"
       },
       "FORM": {
         "ADD_NEW": "Legg til enkel teller",
         "HELP": "Her kan du konfigurere enkle knapper som vises øverst til høyre. De kan enten være tidtakere eller bare en enkel teller, som telles opp, ved å klikke på den.",
         "L_COUNTDOWN_DURATION": "Nedtellingens varighet",
+        "L_DAILY_GOAL": "Daglig mål for en vellykket streak",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon når det er slått på",
         "L_IS_ENABLED": "Aktivert",
         "L_TITLE": "Tittel",
+        "L_TRACK_STREAKS": "Sporstreker",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Ukedager for å sjekke for strek",
         "TITLE": "Enkle tellere",
         "TYPE_CLICK_COUNTER": "Klikk på teller",
         "TYPE_REPEATED_COUNTDOWN": "Gjentatt nedtelling",
         "TYPE_STOPWATCH": "Stoppeklokke"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Du har nådd målet ditt for i dag!",
+        "GOAL_REACHED_2": "Nåværende streks varighet:"
       }
     },
     "SYNC": {

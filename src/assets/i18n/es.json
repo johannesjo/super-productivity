@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
+        "INVALID_TOKEN_MESSAGE": "No es un token válido de GitHub. Debe empezar por \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtrar problemas asignados a mí",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
         "TOKEN": "Token de acceso"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong> comienza en <strong>{{start}} ¡</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> comienza en <strong>{{start}} ¡</strong>!<br> (y {{nrOfOtherBanners}} vencen otras tareas)"
       },
+      "S_ACTIVE_TASK_DUE": "La tarea en la que estás trabajando ya ha vencido.<br/> ({{title}})",
       "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "¡Hazlo!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Racha actual",
+        "DAILY_GOAL": "Objetivo diario",
+        "DAYS": "Días",
         "L_COUNTER": "Contar"
       },
       "FORM": {
         "ADD_NEW": "Agregar contador simple",
         "HELP": "Aquí puede configurar botones simples que aparecerán en la esquina superior derecha. Pueden ser temporizadores o simplemente un contador simple, que se cuenta, haciendo clic en él.",
         "L_COUNTDOWN_DURATION": "Duración de la cuenta atrás",
+        "L_DAILY_GOAL": "Objetivo diario para una racha exitosa",
         "L_ICON": "Icono",
         "L_ICON_ON": "Icono cuando se alterna",
         "L_IS_ENABLED": "Habilitado",
         "L_TITLE": "Título",
+        "L_TRACK_STREAKS": "Rachas de pista",
         "L_TYPE": "Tipo",
+        "L_WEEKDAYS": "Días laborables para comprobar si hay rachas",
         "TITLE": "Contadores simples",
         "TYPE_CLICK_COUNTER": "Contador de clics",
         "TYPE_REPEATED_COUNTDOWN": "Cuenta atrás repetida",
         "TYPE_STOPWATCH": "Cronógrafo"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Has alcanzado tu objetivo de hoy.",
+        "GOAL_REACHED_2": "Duración de la racha actual:"
       }
     },
     "SYNC": {

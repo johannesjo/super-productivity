@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
+        "INVALID_TOKEN_MESSAGE": "Bukan token GitHub yang valid. Harus dimulai dengan \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Hanya masalah impor yang ditugaskan kepada saya untuk ditumpuk",
         "REPO": "username/repositoryName",
         "TOKEN": "Akses Token"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}<\\/strong> dimulai pada <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> dimulai dari <strong>{{start}}</strong>!<br> (dan {{nrOfOtherBanners}} tugas-tugas lain yang harus diselesaikan)"
       },
+      "S_ACTIVE_TASK_DUE": "Tugas yang sedang Anda kerjakan sekarang sudah jatuh tempo!<br/> ({{title}})",
       "S_REMINDER_ERR": "Kesalahan untuk antarmuka pengingat"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Lakukan!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Streak saat ini",
+        "DAILY_GOAL": "Sasaran Harian",
+        "DAYS": "Hari",
         "L_COUNTER": "Hitung"
       },
       "FORM": {
         "ADD_NEW": "Tambah Penghitung Sederhana",
         "HELP": "Di sini Anda dapat mengonfigurasi tombol sederhana yang akan muncul di kanan atas. Mereka bisa berupa penghitung waktu atau hanya penghitung sederhana, yang dihitung, dengan mengkliknya.",
         "L_COUNTDOWN_DURATION": "Durasi hitung mundur",
+        "L_DAILY_GOAL": "Target harian untuk meraih kesuksesan beruntun",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon saat diaktifkan",
         "L_IS_ENABLED": "Diaktifkan",
         "L_TITLE": "Judul",
+        "L_TRACK_STREAKS": "Lacak Jejak",
         "L_TYPE": "Tipe",
+        "L_WEEKDAYS": "Hari kerja untuk memeriksa streak",
         "TITLE": "Penghitung Sederhana",
         "TYPE_CLICK_COUNTER": "Klik penghitung",
         "TYPE_REPEATED_COUNTDOWN": "Hitung Mundur Berulang",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Anda telah mencapai tujuan Anda hari ini!",
+        "GOAL_REACHED_2": "Durasi beruntun saat ini:"
       }
     },
     "SYNC": {

@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin değişiklikleri kendiniz filtrelemek için)",
+        "INVALID_TOKEN_MESSAGE": "Geçerli bir GitHub belirteci değil. \"ghp_\" ile başlamalıdır.",
         "IS_ASSIGNEE_FILTER": "Yalnızca bana atanan sorunları birikmiş iş listesine aktar",
         "REPO": "kullanıcı adı/depoAdı",
         "TOKEN": "Erişim Simgesi"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
       },
+      "S_ACTIVE_TASK_DUE": "Şu anda üzerinde çalıştığınız görevin süresi doldu!<br/> ({{title}})",
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Yap!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Güncel Seri",
+        "DAILY_GOAL": "Günlük Hedef",
+        "DAYS": "Gün",
         "L_COUNTER": "Sayım"
       },
       "FORM": {
         "ADD_NEW": "Basit sayaç ekle",
         "HELP": "Burada sağ üstte görünecek basit düğmeleri yapılandırabilirsiniz. Ya zamanlayıcılar ya da sadece sayılan basit bir sayaç olabilirler.",
         "L_COUNTDOWN_DURATION": "Geri sayım süresi",
+        "L_DAILY_GOAL": "Başarılı bir seri için günlük hedef",
         "L_ICON": "İkon",
         "L_ICON_ON": "Değiştirildiğinde simge",
         "L_IS_ENABLED": "Etkin",
         "L_TITLE": "Başlık",
+        "L_TRACK_STREAKS": "Pist Çizgileri",
         "L_TYPE": "Tip",
+        "L_WEEKDAYS": "Çizgiyi kontrol etmek için hafta içi günler",
         "TITLE": "Basit Sayaçlar",
         "TYPE_CLICK_COUNTER": "Tıklama Sayacı",
         "TYPE_REPEATED_COUNTDOWN": "Tekrarlanan Geri Sayım",
         "TYPE_STOPWATCH": "Kronometre"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Bugünkü hedefinize ulaştınız!",
+        "GOAL_REACHED_2": "Mevcut seri süresi:"
       }
     },
     "SYNC": {

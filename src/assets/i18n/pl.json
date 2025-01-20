@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "INVALID_TOKEN_MESSAGE": "Nieprawidłowy token GitHub. Musi zaczynać się od \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importuj tylko sprawy przypisane do mnie do zaległości",
         "REPO": "username/repositoryName",
         "TOKEN": "Access Token"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}<\\/strong> zaczyna się o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> zaczyna się od <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} inne zadania są wymagalne)"
       },
+      "S_ACTIVE_TASK_DUE": "Zadanie, nad którym obecnie pracujesz, jest już gotowe!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Aktualna passa",
+        "DAILY_GOAL": "Cel dzienny",
+        "DAYS": "Dni",
         "L_COUNTER": "Count"
       },
       "FORM": {
         "ADD_NEW": "Add simple counter",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
         "L_COUNTDOWN_DURATION": "Czas trwania odliczania",
+        "L_DAILY_GOAL": "Codzienny cel dla udanej passy",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
+        "L_TRACK_STREAKS": "Track Streaks",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Dni powszednie, aby sprawdzić smugę",
         "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
         "TYPE_REPEATED_COUNTDOWN": "Powtarzane odliczanie",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Osiągnąłeś swój dzisiejszy cel!",
+        "GOAL_REACHED_2": "Aktualny czas trwania passy:"
       }
     },
     "SYNC": {

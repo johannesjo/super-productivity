@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
+        "INVALID_TOKEN_MESSAGE": "Não é um token válido do GitHub. Ele deve começar com \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim",
         "REPO": "username/repositoryName",
         "TOKEN": "Token de acesso"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
         "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
       },
+      "S_ACTIVE_TASK_DUE": "A tarefa em que está a trabalhar atualmente já tem prazo de validade!<br/> ({{title}})",
       "S_REMINDER_ERR": "Erro na interface do lembrete"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Faça!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Sequência atual",
+        "DAILY_GOAL": "Objetivo diário",
+        "DAYS": "Dias",
         "L_COUNTER": "Contagem"
       },
       "FORM": {
         "ADD_NEW": "Adicionar contador simples",
         "HELP": "Aqui você pode configurar botões simples que aparecerão no canto superior direito. Eles podem ser temporizadores ou apenas um contador simples, que é contado, clicando nele.",
         "L_COUNTDOWN_DURATION": "Duração da contagem decrescente",
+        "L_DAILY_GOAL": "Objetivo diário para uma série de sucesso",
         "L_ICON": "Ícone",
         "L_ICON_ON": "Ícone quando alternado",
         "L_IS_ENABLED": "Ativado",
         "L_TITLE": "Título",
+        "L_TRACK_STREAKS": "Rastrear raias",
         "L_TYPE": "Tipo",
+        "L_WEEKDAYS": "Dias da semana para verificar a existência de raias",
         "TITLE": "Contadores simples",
         "TYPE_CLICK_COUNTER": "Contador de cliques",
         "TYPE_REPEATED_COUNTDOWN": "Contagem decrescente repetida",
         "TYPE_STOPWATCH": "Cronômetro"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Atingiu o seu objetivo para hoje!",
+        "GOAL_REACHED_2": "Duração atual da série:"
       }
     },
     "SYNC": {

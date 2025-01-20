@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
+        "INVALID_TOKEN_MESSAGE": "Kein gültiges GitHub-Token. Er muss mit \"ghp_\" beginnen.",
         "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
         "TOKEN": "Zugangstoken"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Aufgaben sind fällig)"
       },
+      "S_ACTIVE_TASK_DUE": "Die Aufgabe, an der Sie gerade arbeiten, ist jetzt fällig!<br/> ({{title}})",
       "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Tu es!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Aktuelle Serie",
+        "DAILY_GOAL": "Tägliches Ziel",
+        "DAYS": "Tage",
         "L_COUNTER": "Anzahl"
       },
       "FORM": {
         "ADD_NEW": "Fügen Sie einen einfachen Zähler hinzu",
         "HELP": "Hier können Sie einfache Schaltflächen konfigurieren, die oben rechts angezeigt werden. Sie können entweder Timer oder nur ein einfacher Zähler sein, der durch Klicken hochgezählt wird.",
         "L_COUNTDOWN_DURATION": "Dauer des Countdowns",
+        "L_DAILY_GOAL": "Tägliches Ziel für eine Erfolgssträhne",
         "L_ICON": "Symbol",
         "L_ICON_ON": "Symbol beim Umschalten",
         "L_IS_ENABLED": "aktiviert",
         "L_TITLE": "Titel",
+        "L_TRACK_STREAKS": "Streifzüge",
         "L_TYPE": "Typ",
+        "L_WEEKDAYS": "Wochentage für die Streifenkontrolle",
         "TITLE": "Einfache Zähler",
         "TYPE_CLICK_COUNTER": "Klick-Zähler",
         "TYPE_REPEATED_COUNTDOWN": "Wiederholter Countdown",
         "TYPE_STOPWATCH": "Stoppuhr"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Sie haben Ihr Ziel für heute erreicht!",
+        "GOAL_REACHED_2": "Dauer des aktuellen Streifens:"
       }
     },
     "SYNC": {

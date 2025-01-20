@@ -225,6 +225,7 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
+        "INVALID_TOKEN_MESSAGE": "Geen geldig GitHub token. Het moet beginnen met \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importeer alleen problemen die aan mij zijn toegewezen naar de achterstand",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
         "TOKEN": "Toegangstoken"
@@ -775,6 +776,7 @@
         "TXT": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken verschuldigd)"
       },
+      "S_ACTIVE_TASK_DUE": "De taak waaraan je momenteel werkt is nu af!<br/> ({{title}})",
       "S_REMINDER_ERR": "Fout voor herinneringsinterface"
     },
     "SCHEDULE": {
@@ -805,21 +807,31 @@
         "OK": "Doe het!"
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "Huidige streak",
+        "DAILY_GOAL": "Dagelijks doel",
+        "DAYS": "Dagen",
         "L_COUNTER": "Tel"
       },
       "FORM": {
         "ADD_NEW": "Voeg een eenvoudige teller toe",
         "HELP": "Hier kunt u eenvoudige knoppen configureren die rechtsboven verschijnen. Het kunnen timers zijn of gewoon een simpele teller, die wordt opgeteld door erop te klikken.",
         "L_COUNTDOWN_DURATION": "Duur aftellen",
+        "L_DAILY_GOAL": "Dagelijks doel voor succesvolle streak",
         "L_ICON": "Icoon",
         "L_ICON_ON": "Icoon wanneer geschakeld",
         "L_IS_ENABLED": "Ingeschakeld",
         "L_TITLE": "Titel",
+        "L_TRACK_STREAKS": "Baanstrepen",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Weekdagen om te controleren op strepen",
         "TITLE": "Eenvoudige tellers",
         "TYPE_CLICK_COUNTER": "Klik op teller",
         "TYPE_REPEATED_COUNTDOWN": "Herhaald aftellen",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Je hebt je doel voor vandaag bereikt!",
+        "GOAL_REACHED_2": "Huidige streak duur:"
       }
     },
     "SYNC": {
