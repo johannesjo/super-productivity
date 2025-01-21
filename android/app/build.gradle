@@ -18,8 +18,8 @@ android {
     defaultConfig {
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 24
-        targetSdkVersion 34
-        compileSdk 34
+        targetSdkVersion 35
+        compileSdk 35
         versionCode 11_01_02_0000
         versionName "11.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
