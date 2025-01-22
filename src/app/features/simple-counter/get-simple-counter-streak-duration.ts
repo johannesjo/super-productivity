@@ -5,16 +5,20 @@ export const getSimpleCounterStreakDuration = (
   simpleCounter: SimpleCounterCopy,
 ): number => {
   const countOnDay = simpleCounter.countOnDay;
-  const today = getWorklogStr();
-  const todayCount = countOnDay[today];
-  if (!todayCount) {
-    return 0;
-  }
 
   let streak = 0;
   const date = new Date();
   // set date to last weekday set in streakWeekDays
   setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
+
+  if (
+    getWorklogStr(date) === getWorklogStr(new Date()) &&
+    (!countOnDay[getWorklogStr(date)] ||
+      countOnDay[getWorklogStr(date)] < simpleCounter.streakMinValue)
+  ) {
+    date.setDate(date.getDate() - 1);
+    setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
+  }
 
   while (countOnDay[getWorklogStr(date)] >= simpleCounter.streakMinValue) {
     streak++;
