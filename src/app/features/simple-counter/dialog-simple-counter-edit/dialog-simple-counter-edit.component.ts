@@ -33,6 +33,7 @@ import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { sortWorklogDates } from '../../../util/sortWorklogDates';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -71,7 +72,8 @@ export class DialogSimpleCounterEditComponent {
 
   stats = computed(() => {
     const countOnDay = this.data.simpleCounter.countOnDay;
-    const labels = Object.keys(countOnDay);
+    let labels = sortWorklogDates(Object.keys(countOnDay));
+    labels = labels.slice(-28);
 
     const data =
       this.data.simpleCounter.type === SimpleCounterType.StopWatch
