@@ -73,6 +73,8 @@ export class DialogSimpleCounterEditComponent {
   stats = computed(() => {
     const countOnDay = this.data.simpleCounter.countOnDay;
     let labels = sortWorklogDates(Object.keys(countOnDay));
+    labels = this._fillMissingDates(labels);
+
     labels = labels.slice(-28);
 
     const data =
@@ -143,5 +145,18 @@ export class DialogSimpleCounterEditComponent {
 
   close(): void {
     this._matDialogRef.close();
+  }
+
+  private _fillMissingDates(dates: string[]): string[] {
+    const startDate = new Date(dates[0]);
+    const endDate = new Date(dates[dates.length - 1]);
+
+    const filledDates: string[] = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      filledDates.push(dateStr);
+    }
+
+    return filledDates;
   }
 }
