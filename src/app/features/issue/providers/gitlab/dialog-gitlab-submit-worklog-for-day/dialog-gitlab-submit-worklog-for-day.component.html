@@ -3,7 +3,7 @@
     class="dialog-header-icon"
     svgIcon="gitlab"
   ></mat-icon>
-  <span>{{T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.TITLE|translate}}</span>
+  <span>{{ T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.TITLE|translate }}</span>
 </h1>
 
 <mat-dialog-content>
@@ -18,7 +18,7 @@
   </div>
   }
 
-  <h3>For gitlab project: <strong>{{(issueProviderCfg$|async)?.project}}</strong></h3>
+  <h3>For gitlab project: <strong>{{ (issueProviderCfg$|async)?.project }}</strong></h3>
 
   <div class="table-wrapper">
     <table
@@ -31,13 +31,13 @@
           *matHeaderCellDef
           mat-header-cell
         >
-          {{T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_TITLE|translate}} Title
+          {{ T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_TITLE|translate }} Title
         </th>
         <td
           *matCellDef="let tmpTask"
           mat-cell
         >
-          <div class="task-title">{{tmpTask.title}}</div>
+          <div class="task-title">{{ tmpTask.title }}</div>
         </td>
       </ng-container>
 
@@ -46,13 +46,13 @@
           *matHeaderCellDef
           mat-header-cell
         >
-          {{T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_ALREADY_TRACKED|translate}}
+          {{ T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_ALREADY_TRACKED|translate }}
         </th>
         <td
           *matCellDef="let tmpTask"
           mat-cell
         >
-          {{tmpTask.timeTrackedAlreadyRemote|msToClockString}}
+          {{ tmpTask.timeTrackedAlreadyRemote|msToClockString }}
         </td>
       </ng-container>
 
@@ -61,7 +61,7 @@
           *matHeaderCellDef
           mat-header-cell
         >
-          {{T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_TO_BE_SUBMITTED|translate}}
+          {{ T.F.GITLAB.DIALOG_SUBMIT_WORKLOG.T_TO_BE_SUBMITTED|translate }}
         </th>
         <td
           *matCellDef="let tmpTask"
@@ -109,7 +109,7 @@
     mat-button
     type="button"
   >
-    {{T.G.CANCEL|translate}}
+    {{ T.G.CANCEL|translate }}
   </button>
 
   <button
@@ -122,6 +122,6 @@
       class="dialog-header-icon"
       svgIcon="gitlab"
     ></mat-icon>
-    {{T.G.SUBMIT|translate}}
+    {{ T.G.SUBMIT|translate }}
   </button>
 </mat-dialog-actions>
