@@ -23,20 +23,6 @@ export class CompressionService {
     this._w.addEventListener('error', this._handleError.bind(this));
   }
 
-  async compress(strToHandle: string): Promise<string> {
-    return this._promisifyWorker({
-      type: 'COMPRESS',
-      strToHandle,
-    });
-  }
-
-  async decompress(strToHandle: string): Promise<string> {
-    return this._promisifyWorker({
-      type: 'DECOMPRESS',
-      strToHandle,
-    });
-  }
-
   async compressUTF16(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'COMPRESS_UTF16',
