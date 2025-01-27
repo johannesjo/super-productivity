@@ -31,7 +31,6 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
-import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { sortWorklogDates } from '../../../util/sortWorklogDates';
 
@@ -55,7 +54,6 @@ import { sortWorklogDates } from '../../../util/sortWorklogDates';
     BaseChartDirective,
     MatFormFieldModule,
     MatInputModule,
-    DurationToStringPipe,
     MsToStringPipe,
   ],
 })
@@ -149,7 +147,8 @@ export class DialogSimpleCounterEditComponent {
 
   private _fillMissingDates(dates: string[]): string[] {
     const startDate = new Date(dates[0]);
-    const endDate = new Date(dates[dates.length - 1]);
+    // const endDate = new Date(dates[dates.length - 1]);
+    const endDate = new Date();
 
     const filledDates: string[] = [];
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
