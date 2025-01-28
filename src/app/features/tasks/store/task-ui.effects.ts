@@ -11,6 +11,7 @@ import { select, Store } from '@ngrx/store';
 import {
   distinctUntilChanged,
   filter,
+  first,
   map,
   skip,
   switchMap,
@@ -165,9 +166,10 @@ export class TaskUiEffects {
             targetProjectId !== this._workContextService.activeWorkContextId,
         ),
         switchMap(({ targetProjectId, task }) =>
-          this._store$
-            .select(selectProjectById, { id: targetProjectId })
-            .pipe(map((project) => ({ project, task }))),
+          this._store$.select(selectProjectById, { id: targetProjectId }).pipe(
+            first(),
+            map((project) => ({ project, task })),
+          ),
         ),
         tap(({ project, task }) =>
           this._snackService.open({
@@ -201,9 +203,10 @@ export class TaskUiEffects {
               ),
         ),
         switchMap(({ task }) =>
-          this._store$
-            .select(selectProjectById, { id: task.projectId as string })
-            .pipe(map((project) => ({ project, task }))),
+          this._store$.select(selectProjectById, { id: task.projectId as string }).pipe(
+            first(),
+            map((project) => ({ project, task })),
+          ),
         ),
         tap(({ project, task }) =>
           this._snackService.open({
