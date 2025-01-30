@@ -84,7 +84,7 @@ describe('getSimpleCounterStreakDuration()', () => {
   ];
 
   T2.forEach((sc: SimpleCounterCopy) => {
-    it('should return 2 if streak', () => {
+    it('should return 1 if streak', () => {
       expect(getSimpleCounterStreakDuration(sc)).toBe(1);
     });
   });
@@ -200,6 +200,78 @@ describe('getSimpleCounterStreakDuration()', () => {
   T4.forEach((sc: SimpleCounterCopy) => {
     it('should return 14 if streak', () => {
       expect(getSimpleCounterStreakDuration(sc)).toBe(14);
+    });
+  });
+
+  //
+  const T5: Partial<SimpleCounterCopy>[] = [
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 1,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+      },
+    },
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr()]: 1,
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 2,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+        ...{ [new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).getDay()]: false },
+      },
+    },
+  ];
+
+  T5.forEach((sc: SimpleCounterCopy) => {
+    it('should start counting at yesterday not today', () => {
+      expect(getSimpleCounterStreakDuration(sc)).toBe(13);
     });
   });
 });

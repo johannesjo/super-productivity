@@ -31,8 +31,8 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
-import { DurationToStringPipe } from '../../../ui/duration/duration-to-string.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { sortWorklogDates } from '../../../util/sortWorklogDates';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -54,7 +54,6 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
     BaseChartDirective,
     MatFormFieldModule,
     MatInputModule,
-    DurationToStringPipe,
     MsToStringPipe,
   ],
 })
@@ -71,7 +70,10 @@ export class DialogSimpleCounterEditComponent {
 
   stats = computed(() => {
     const countOnDay = this.data.simpleCounter.countOnDay;
-    const labels = Object.keys(countOnDay);
+    let labels = sortWorklogDates(Object.keys(countOnDay));
+    labels = this._fillMissingDates(labels);
+
+    labels = labels.slice(-28);
 
     const data =
       this.data.simpleCounter.type === SimpleCounterType.StopWatch
@@ -79,17 +81,24 @@ export class DialogSimpleCounterEditComponent {
         : labels.map((date) => countOnDay[date]);
 
     const chartData: LineChartData = {
-      labels: labels.map(
-        (date) =>
-          `${new Date(date).toLocaleDateString(this._locale, {
-            month: 'numeric',
-            day: 'numeric',
-          })}`,
-      ),
+      labels: labels.map((dateStr) => {
+        const d = new Date(dateStr);
+        const isStreakDay = this.data.simpleCounter.streakWeekDays[d.getDay()];
+        const isStreakFulfilled =
+          countOnDay[dateStr] >= this.data.simpleCounter.streakMinValue;
+
+        return `${d.toLocaleDateString(this._locale, {
+          month: 'numeric',
+          day: 'numeric',
+        })}${isStreakDay ? (isStreakFulfilled ? '🔥' : '❌') : ''}`;
+      }),
       datasets: [
         {
           data,
-          label: 'Count',
+          label:
+            this.data.simpleCounter.type === SimpleCounterType.StopWatch
+              ? 'Duration'
+              : 'Count',
           fill: false,
           borderColor: '#4bc0c0',
         },
@@ -134,5 +143,19 @@ export class DialogSimpleCounterEditComponent {
 
   close(): void {
     this._matDialogRef.close();
+  }
+
+  private _fillMissingDates(dates: string[]): string[] {
+    const startDate = new Date(dates[0]);
+    // const endDate = new Date(dates[dates.length - 1]);
+    const endDate = new Date();
+
+    const filledDates: string[] = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      filledDates.push(dateStr);
+    }
+
+    return filledDates;
   }
 }

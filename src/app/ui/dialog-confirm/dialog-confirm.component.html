@@ -9,10 +9,12 @@
   <div class="wrap-buttons">
     <button
       tabindex="1"
+      #cancelButton
       (click)="close(false)"
       class="btn btn-primary"
       mat-button
       type="button"
+      (keydown.ArrowRight)="focusNextButton(confirmButton)"
     >
       <mat-icon>close</mat-icon>
       {{(data.cancelTxt || T.G.CANCEL)|translate}}
@@ -20,12 +22,14 @@
 
     <button
       tabindex="2"
+      #confirmButton
       (click)="close(true)"
       e2e="confirmBtn"
       class="btn btn-primary submit-button"
       color="primary"
       type="button"
       mat-stroked-button
+      (keydown.ArrowLeft)="focusNextButton(cancelButton)"
     >
       <mat-icon>check</mat-icon>
       {{(data.okTxt || T.G.OK)|translate}}

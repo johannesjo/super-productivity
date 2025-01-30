@@ -266,7 +266,7 @@
       },
       "FORM": {
         "FILTER": "Filtro Personalizzato",
-        "FILTER_DESCRIPTION": "Vedi https://docs.gitlab.com/ee/api/issues.html#list-issues. I filtri multipli possono essere combinati con  &",
+        "FILTER_DESCRIPTION": "Vedi https://docs.gitlab.com/ee/api/issues.html#list-issues. I filtri multipli possono essere combinati con &",
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
         "GITLAB_BASE_URL": "URL di base GitLab personalizzato",
         "PROJECT": "Percorso completo o nome utente / progetto",
@@ -409,7 +409,7 @@
           "P1_2": "Devi anche specificare una query JQL che è usata dai suggerimenti per aggiungere attività a Jira. Se hai bisogno di aiuto vai a questo indirizzo <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Puoi anche configurare se vuoi aggiungere automaticamente negli arretrati (es. ogni volta che visiti la vista di pianificazione) nuove attività specificate in una query JQL personalizzata.",
           "P1_4": "Un'altra opzione è di \"Controllare se il ticket corrente è assegnato ad un altro utente\". Se abilitato e stai iniziando, un controllo satà fatto per controllare se sei assegnato a quel ticket su Jira, se non lo sei appparirà una finestra nella quale puoi scegliere di assegnarti quel ticket.",
-          "P2_1": "Ci sono diverse opzioni per determinare quando e come vuoi sottomettere un registro di lavoro. Abilitare  <em>'Apri una finestra per aggiungere un registro di lavoro a Jira quando l'attività è completata'</em> apre una finestra per aggiungere il registro di lavoro ogni volta che segni un'attività Jira come completata. Quindi ricorda che i registri di lavoro saranno aggiunti in cima a tutto ciò che è stato tracciato fino a quel momento. Quindi se vuoi segnare un'attività come completata per la seconda volta, potresti non voler sottomettere il tempo lavorato complessivamente per l'attività un'altra volta.",
+          "P2_1": "Ci sono diverse opzioni per determinare quando e come vuoi sottomettere un registro di lavoro. Abilitare <em>'Apri una finestra per aggiungere un registro di lavoro a Jira quando l'attività è completata'</em> apre una finestra per aggiungere il registro di lavoro ogni volta che segni un'attività Jira come completata. Quindi ricorda che i registri di lavoro saranno aggiunti in cima a tutto ciò che è stato tracciato fino a quel momento. Quindi se vuoi segnare un'attività come completata per la seconda volta, potresti non voler sottomettere il tempo lavorato complessivamente per l'attività un'altra volta.",
           "P2_2": "<em>'Apri una finestra del registro di lavoro quando una sotto-attività è completata e non per attività con sotto-attività'</em> apre una finestra del registro di lavoro ogni volta che segni una sotto-attività di un issue Jira come completato. Dal momento che tracci già il tempo tramite le sotto-attività, nessuna finestra viene aperta quando segni l'attività Jira stesso come completata.",
           "P2_3": "<em>'Invia automaticamente gli aggiornamenti al registro di lavoro senza aprire finestre'</em> fa ciò che dice. Dato che segnare un'attività come completata spesso porta il tempo totale di lavoro a venir conteggiato due volte, non è consigliato.",
           "P3_1": "Qui puoi riconfigurare le tue transizioni di default. Jira rende disponibili molte transizioni, spesso attivate come diverse colonne sulla tua board agile di Jira, non possiamo assumere dove e quando trasportare tue attività, quindi devi farlo manualmente."
@@ -1617,7 +1617,7 @@
     "START_END": "Inizio – Fine",
     "SUMMARY_FOR": "Riepilogo giornaliero per {{dayStr}}",
     "TASKS_COMPLETED": "Attività completate",
-    "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato /  stimato",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Tempo impiegato / stimato",
     "TIME_SPENT_ESTIMATE_TITLE": "Tempo Impiegato: Tempo totale impiegato oggi. Attività archiviate non incluse. – Tempo stimato: Tempo stimato per le attività fatte oggi meno il tempo già speso in queste attività negli altri giorni.",
     "TIME_SPENT_TODAY_BY_TAG": "Tempo speso oggi per Etichetta",
     "WEEK": "Settimana"
