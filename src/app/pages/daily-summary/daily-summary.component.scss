@@ -111,6 +111,10 @@ $summary-point-inner-margin: $s;
   justify-content: center;
   margin-bottom: $s * 6;
   margin-top: -1 * $s;
+
+  simple-counter-summary-item {
+    flex-basis: 140px;
+  }
 }
 
 .daily-summary-actions {
