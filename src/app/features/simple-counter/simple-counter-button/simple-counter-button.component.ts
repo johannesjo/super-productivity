@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -26,13 +25,16 @@ import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
-import { IS_MOUSE_PRIMARY } from 'src/app/util/is-mouse-primary';
 
 @Component({
   selector: 'simple-counter-button',
   templateUrl: './simple-counter-button.component.html',
   styleUrls: ['./simple-counter-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.isSuccess]': 'isSuccess()',
+  },
   imports: [
     MatMiniFabButton,
     LongPressDirective,
@@ -47,7 +49,6 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _dateService = inject(DateService);
   private _bannerService = inject(BannerService);
-  private _cd = inject(ChangeDetectorRef);
   private _todayStr$ = this._globalTrackingIntervalService.todayDateStr$;
 
   T: typeof T = T;
@@ -64,7 +65,6 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       sc?.countOnDay[this.todayStr()] >= sc?.streakMinValue
     );
   });
-  IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
 
   private _subs = new Subscription();
   private _resetCountdown$ = new Subject();

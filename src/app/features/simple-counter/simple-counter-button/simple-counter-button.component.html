@@ -1,6 +1,6 @@
 @if (simpleCounter(); as sc) {
 <div class="wrapper">
-  @if (sc.type===SimpleCounterType.StopWatch) {
+  @if (sc.type === SimpleCounterType.StopWatch) {
   <button
     (click)="toggleStopwatch()"
     (contextmenu)="edit($event)"
@@ -9,17 +9,16 @@
     class="main-btn stopwatch"
     mat-mini-fab
   >
-    @if(isSuccess() && IS_MOUSE_PRIMARY) {
-    <mat-icon>check</mat-icon>
-    } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
+    @if (isSuccess()) {
+    <mat-icon class="check-ico">check</mat-icon>
     }
   </button>
   @if (sc.countOnDay[todayStr()]) {
   <div class="label">{{ sc.countOnDay[todayStr()]|msToMinuteClockString }}</div>
   } }
   <!----->
-  @if (sc.type===SimpleCounterType.ClickCounter) {
+  @if (sc.type === SimpleCounterType.ClickCounter) {
   <button
     (click)="toggleCounter()"
     (contextmenu)="edit($event)"
@@ -28,17 +27,16 @@
     color=""
     mat-mini-fab
   >
-    @if(isSuccess() && IS_MOUSE_PRIMARY) {
-    <mat-icon>check</mat-icon>
-    } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
+    @if (isSuccess()) {
+    <mat-icon class="check-ico">check</mat-icon>
     }
   </button>
   @if (sc.countOnDay[todayStr()]) {
   <div class="label">{{ sc.countOnDay[todayStr()] }}</div>
   } }
   <!----->
-  @if (sc.type===SimpleCounterType.RepeatedCountdownReminder) {
+  @if (sc.type === SimpleCounterType.RepeatedCountdownReminder) {
   <button
     (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
     (contextmenu)="edit($event)"
@@ -48,10 +46,9 @@
     class="main-btn repeated-countdown"
     mat-mini-fab
   >
-    @if(isSuccess() && IS_MOUSE_PRIMARY) {
-    <mat-icon>check</mat-icon>
-    } @else {
     <mat-icon>{{ sc.icon }}</mat-icon>
+    @if (isSuccess()) {
+    <mat-icon class="check-ico">check</mat-icon>
     }
   </button>
   @if (sc.isOn && (countdownTime$|async); as countdownTime) {
