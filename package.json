@@ -190,7 +190,7 @@
     "jasmine-spec-reporter": "~7.0.0",
     "jira2md": "git+https://github.com/johannesjo/J2M.git",
     "karma": "~6.4.2",
-    "karma-chrome-launcher": "~3.1.1",
+    "karma-chrome-launcher": "~3.2.0",
     "karma-cli": "^2.0.0",
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~5.1.0",
