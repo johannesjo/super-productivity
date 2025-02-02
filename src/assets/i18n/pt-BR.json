@@ -50,6 +50,7 @@
         "EDIT_ATTACHMENT": "Editar anexo",
         "LABELS": {
           "FILE": "Caminho do arquivo",
+          "IMG": "Imagem",
           "LINK": "Url"
         },
         "SELECT_TYPE": "Selecione um tipo",
@@ -561,11 +562,190 @@
       },
       "FORM": {
         "FILTER_USER": "Filtrar nome de usuário",
-        "HOST": "Servidor de (por exemplo: https://www.openproject.org/)"
+        "HOST": "Servidor de (por exemplo: https://www.openproject.org/)",
+        "IS_SHOW_TIME_TRACKING_DIALOG": "Mostrar caixa de diálogo de controle de tempo para relatar ao OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requer que o módulo de controle de tempo seja habilitado para o projeto OpenProject",
+        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostrar caixa de diálogo de controle de tempo quando as subtarefas forem concluídas",
+        "PROJECT_ID": "ID do projeto",
+        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da URL, ao visualizar o projeto no navegador.",
+        "SCOPE": "Escopo",
+        "SCOPE_ALL": "Todos",
+        "SCOPE_ASSIGNED": "Atribuído a mim",
+        "SCOPE_CREATED": "Criado por mim",
+        "TOKEN": "Token de acesso"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Aqui você pode configurar o SuperProductivity para listar pacotes de trabalho abertos do OpenProject. Observe que para que isso funcione no navegador, você provavelmente precisa configurar o CORS para seu servidor OpenProject, para permitir acesso de app.super-productivity.com</p>",
+        "TITLE": "Projeto aberto"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Responsável",
+        "DESCRIPTION": "Descrição",
+        "MARK_AS_CHECKED": "Marcar atualizações como verificadas",
+        "STATUS": "Status",
+        "SUMMARY": "Resumo",
+        "TYPE": "Tipo"
+      },
+      "ISSUE_STRINGS": {
+        "ISSUE_STR": "pacote de trabalho",
+        "ISSUES_STR": "pacotes de trabalho"
+      },
+      "S": {
+        "ERR_UNKNOWN": "OpenProject: Erro desconhecido {{statusCode}} {{errorMsg}}. O CORS está configurado corretamente para o servidor?",
+        "POST_TIME_SUCCESS": "OpenProject: Entrada de tempo criada com sucesso para {{issueTitle}}",
+        "TRANSITION": "OpenProject: Defina o problema \" {{issueKey}}\" como \" {{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject: Defina o problema {{issueKey}} como <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Transições carregadas. Use as seleções abaixo para atribuí-las"
       }
     },
+    "PLANNER": {
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Adicionar a Hoje",
+          "TITLE": "Adicionar tarefas planejadas para Hoje"
+        },
+        "PLAN_FOR_DAY": {
+          "REMINDER_WARNING": "Isso removerá o lembrete da tarefa! Pressione Escape para cancelar.",
+          "REMOVE_PLAN_DATE": "Remover data do planenjamento",
+          "TITLE": "Planejar tarefa para o dia"
+        }
+      },
+      "EDIT_REPEATED_TASK": "Editar tarefa repetida ' {{taskName}}'",
+      "NO_TASKS": "Nenhuma tarefa",
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "Nenhum item agendado"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "Data do planejamento removida para a tarefa ' {{taskTitle}}'",
+        "TASK_ALREADY_PLANNED": "A tarefa já está planejada para {{date}}",
+        "TASK_PLANNED_FOR": "Tarefa planejada para <strong>{{date}}</strong> {{extra}}"
+      },
+      "TASK_DRAWER": "Gaveta de tarefas"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "De volta ao trabalho!",
+      "BREAK_IS_DONE": "Seu intervalo acabou!",
+      "ENJOY_YOURSELF": "Divirta-se, movimente-se e volte:",
+      "FINISH_SESSION_X": "Você concluiu com sucesso a sessão <strong>{{nr}}</strong> !",
+      "NOTIFICATION": {
+        "BREAK_TIME": "Pomodoro: Hora do intervalo {{nr}}!",
+        "BREAK_X_START": "Pomodoro: Intervalo {{nr}} iniciado!",
+        "NO_TASKS": "Você precisa adicionar tarefas antes que o cronômetro Pomodoro possa iniciar.",
+        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
+      },
+      "S": {
+        "RESET": "Redefinir para a primeira sessão Pomodoro",
+        "SESSION_SKIP": "Pular para o final da sessão atual do Pomodoro",
+        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
+      },
+      "SKIP_BREAK": "Pular intervalo",
+      "START_BREAK": "Começar o intervalo"
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "De volta ao trabalho!",
+      "COMP": {
+        "INTRO": "Pessoas com altos níveis de procrastinação geralmente têm baixa autocompaixão. Então pratique! Isso melhora seu sentimento de autoestima, promove emoções positivas e pode ajudar você a superar a procrastinação, é claro. Tente um pequeno exercício:",
+        "L1": "Sente-se um pouco e alongue-se, se quiser, acalme-se um pouco",
+        "L2": "Tente ouvir os pensamentos e sentimentos que surgem",
+        "L3": "Você está respondendo a si mesmo da mesma forma que responderia a um amigo?",
+        "L4": "Se a resposta for não, imagine seu amigo na sua situação. O que você diria a ele? O que você faria por ele?",
+        "OUTRO": "Mais exercícios <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">podem ser encontrados aqui</a> ou no <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a> .",
+        "TITLE": "Autocompaixão"
+      },
+      "CUR": {
+        "INTRO": "A procrastinação não é interessante? Não parece fazer sentido algum fazê-la, já que não é do seu interesse a longo prazo. Mas ainda assim todo mundo faz. Ajuda muito a explorar e obter um melhor entendimento sobre como funciona para você pessoalmente! Algumas perguntas básicas para se fazer podem ser:",
+        "L1": "Que sentimentos estão provocando sua tentação de procrastinar?",
+        "L2": "Onde você os sente no seu corpo?",
+        "L3": "O que elas lembram você?",
+        "L4": "O que acontece com o pensamento de procrastinar conforme você o observa? Ele se intensifica? Dissipa? Faz com que outras emoções surjam?",
+        "L5": "Como as sensações em seu corpo estão mudando à medida que você continua a concentrar sua atenção nelas?",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Outro método muito eficaz é registrar o que desencadeou sua vontade de procrastinar. Por exemplo, eu pessoalmente frequentemente tenho a vontade de pular rapidamente para o Reddit ou meu site de notícias favorito sempre que a janela do meu navegador entra em foco. Desde que comecei a escrever meus gatilhos em um simples documento de texto vazio, tomei consciência de quão arraigado esse padrão era e isso me ajudou a experimentar diferentes contramedidas.",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Anote seus gatilhos de procrastinação",
+        "TITLE": "Curiosidade"
+      },
+      "H1": "Dê uma folga para você mesmo!",
+      "INTRO": {
+        "AVOIDING": "Evitando a tarefa",
+        "FEAR": "Medo do fracasso",
+        "STRESSED": "Estressado por não conseguir fazer as coisas",
+        "TITLE": "Introdução"
+      },
+      "P1": "Primeiro de tudo: Relaxe! Todo mundo procrastina de vez em quando. E se você não está fazendo o que deveria, você deveria pelo menos aproveitar!",
+      "P2": "Lembre-se: <b>a procrastinação é um problema de regulação emocional, não um problema de gerenciamento de tempo.</b> Isso significa que se culpar não é a solução, é parte do problema. Deixe isso penetrar e então confira as outras abas aqui para mais ajuda.",
+      "REFRAME": {
+        "INTRO": "Pense no que pode haver de positivo na tarefa, apesar de suas falhas.",
+        "TITLE": "Reenquadramento",
+        "TL1": "O que pode ser interessante nisso?",
+        "TL2": "O que você ganha se concluí-lo?",
+        "TL3": "Como você se sentirá se concluí-lo?"
+      },
+      "SPLIT_UP": {
+        "INTRO": "Divida a tarefa em quantas partes pequenas você puder.",
+        "OUTRO": "Pronto? Então pense nisso. Qual seria – estritamente teórica – a primeira coisa que você faria <i>se</i> começasse a trabalhar na tarefa? Pense nisso...",
+        "TITLE": "Divida!"
+      }
+    },
+    "PROJECT": {
+      "D_CREATE": {
+        "CREATE": "Criar Projeto",
+        "EDIT": "Editar Projeto",
+        "SETUP_CALDAV": "Configurar integração Caldav",
+        "SETUP_GIT": "Configurar integração com o GitHub",
+        "SETUP_GITEA_PROJECT": "Configurar integração com o Gitea",
+        "SETUP_GITLAB": "Configurar integração com o GitLab",
+        "SETUP_JIRA": "Configurar integração do Jira",
+        "SETUP_OPEN_PROJECT": "Configurar integração do OpenProject",
+        "SETUP_REDMINE_PROJECT": "Configurar integração Redmine"
+      },
+      "D_DELETE": {
+        "MSG": "Tem certeza de que deseja excluir o projeto \" {{title}}\"?"
+      },
+      "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Habilitar Pendências do Projeto",
+        "L_IS_HIDDEN_FROM_MENU": "Ocultar projeto do menu",
+        "L_TITLE": "Nome do Projeto",
+        "TITLE": "Configurações básicas"
+      },
+      "FORM_THEME": {
+        "D_IS_DARK_THEME": "Não será usado se o sistema suportar o modo escuro global.",
+        "HELP": "Configurações de tema para seu projeto.",
+        "L_BACKGROUND_IMAGE_DARK": "Url da imagem de fundo (tema escuro)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Url da imagem de fundo (tema claro)",
+        "L_COLOR_ACCENT": "Cor de destaque",
+        "L_COLOR_PRIMARY": "Cor primária",
+        "L_COLOR_WARN": "Cor de aviso/erro",
+        "L_HUE_ACCENT": "Limite para texto escuro em fundo de cor de destaque",
+        "L_HUE_PRIMARY": "Limite para texto escuro em fundo de cor primária",
+        "L_HUE_WARN": "Limite para texto escuro em fundo de cor de aviso",
+        "L_IS_AUTO_CONTRAST": "Definir cores de texto automaticamente para melhor legibilidade",
+        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Desativar gradiente de fundo colorido",
+        "L_IS_REDUCED_THEME": "Use interface de usuário reduzida (sem caixas ao redor das tarefas)",
+        "L_THEME_COLOR": "Cor do tema",
+        "L_TITLE": "Título",
+        "TITLE": "Tema"
+      },
+      "S": {
+        "ARCHIVED": "Projeto arquivado",
+        "CREATED": "Projeto criado <strong>{{title}}</strong> . Você pode selecioná-lo no menu no canto superior esquerdo.",
+        "DELETED": "Projeto Excluído",
+        "E_EXISTS": "O projeto \" {{title}}\" já existe",
+        "E_INVALID_FILE": "Dados inválidos para arquivo de projeto",
+        "ISSUE_PROVIDER_UPDATED": "Configurações de projeto atualizadas para <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Projeto não arquivado",
+        "UPDATED": "Configurações do projeto atualizadas"
+      }
+    },
+    "QUICK_HISTORY": {
+      "NO_DATA": "Não há dados para o ano atual",
+      "PAGE_TITLE": "História rápida",
+      "WEEK_TITLE": "Semana {{nr}} ( {{timeSpent}})"
+    },
     "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurar o Redmine para o projeto"
+      },
       "FORM": {
+        "API_KEY": "Chave de acesso API",
         "HOST": "Servidor (por exemplo: https://redmine.org)",
         "PROJECT_ID": "Identificador do Projeto",
         "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da URL, ao visualizar o projeto no navegador.",
