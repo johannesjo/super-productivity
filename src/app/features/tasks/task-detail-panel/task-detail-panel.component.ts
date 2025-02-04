@@ -9,6 +9,7 @@ import {
   input,
   LOCALE_ID,
   OnDestroy,
+  OnInit,
   viewChild,
   viewChildren,
 } from '@angular/core';
@@ -124,7 +125,7 @@ interface IssueDataAndType {
     IssueIconPipe,
   ],
 })
-export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
+export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   attachmentService = inject(TaskAttachmentService);
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
@@ -403,6 +404,14 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     this.isDragOver = false;
   }
 
+  @HostListener('window:popstate') onBack(): void {
+    this.collapseParent();
+  }
+
+  ngOnInit(): void {
+    window.history.pushState({ taskDetailPanel: true }, '');
+  }
+
   ngAfterViewInit(): void {
     this.taskService.taskDetailPanelTargetPanel$
       .pipe(
@@ -429,6 +438,10 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (window.history.state.taskDetailPanel) {
+      window.history.back();
+    }
+
     this._onDestroy$.next();
     this._onDestroy$.complete();
     window.clearTimeout(this._focusTimeout);
