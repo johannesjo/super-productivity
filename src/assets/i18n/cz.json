@@ -786,9 +786,6 @@
       "FORM": {
         "ADD_NEW": "Přidat jednoduchý čítač",
         "HELP": "Zde můžete konfigurovat jednoduchá tlačítka, která se objeví v pravém horním rohu. Mohou to být buď časovače nebo jednoduchý čítač, který se zvyšuje stisknutím.",
-        "L_AUTO_COUNT_UP": "Automatické spouštění připočítávání pro",
-        "L_AUTO_SWITCH_OFF": "Automatické vypnutí pro",
-        "L_AUTO_SWITCH_ON": "Automatické zapnutí pro",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona při přepnutí",
         "L_IS_ENABLED": "Povoleno",
@@ -796,7 +793,10 @@
         "L_TYPE": "Typ",
         "TITLE": "Jednoduché čítače",
         "TYPE_CLICK_COUNTER": "Klikací čítač",
-        "TYPE_STOPWATCH": "Stopky"
+        "TYPE_STOPWATCH": "Stopky",
+        "L_AUTO_COUNT_UP": "Automatické spouštění připočítávání pro",
+        "L_AUTO_SWITCH_OFF": "Automatické vypnutí pro",
+        "L_AUTO_SWITCH_ON": "Automatické zapnutí pro"
       }
     },
     "SYNC": {
