@@ -75,6 +75,17 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isAddToBottom',
+      type: 'select',
+      templateOptions: {
+        label: T.GCF.MISC.IS_ADD_TO_BOTTOM,
+        options: [
+          { label: T.GCF.MISC.ADD_TO_TOP, value: false },
+          { label: T.GCF.MISC.ADD_TO_BOTTOM, value: true },
+        ],
+      },
+    },
+    {
       key: 'defaultProjectId',
       type: 'project-select',
       templateOptions: {
