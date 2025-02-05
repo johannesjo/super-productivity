@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
 import { T } from '../../t.const';
 
@@ -25,12 +25,27 @@ export class CompressionService {
 
   async compressUTF16(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
-      type: 'COMPRESS_UTF16',
+      type: 'COMPRESS',
       strToHandle,
     });
+    // return strFromU8(compressSync(strToU8(strToHandle)), true);
   }
 
   async decompressUTF16(strToHandle: string): Promise<string> {
+    return this._promisifyWorker({
+      type: 'DECOMPRESS',
+      strToHandle,
+    }).catch((err) => {
+      console.error(err);
+      // TODO remove this fallback
+      return this.decompressUTF16Legacy(strToHandle);
+    });
+    // const decompressed = decompressSync(strToU8(strToHandle, true));
+    // const origText = strFromU8(decompressed);
+    // return origText;
+  }
+
+  async decompressUTF16Legacy(strToHandle: string): Promise<string> {
     return this._promisifyWorker({
       type: 'DECOMPRESS_UTF16',
       strToHandle,

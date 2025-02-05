@@ -178,6 +178,7 @@
     "eslint-plugin-jsdoc": "50.6.0",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "^5.2.1",
+    "fflate": "^0.8.2",
     "file-saver": "^2.0.2",
     "glob": "^9.3.5",
     "hammerjs": "^2.0.8",
