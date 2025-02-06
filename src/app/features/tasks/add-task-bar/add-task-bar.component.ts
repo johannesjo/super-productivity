@@ -21,7 +21,7 @@ import { ShortSyntaxTag } from './short-syntax-to-tags';
 import { slideAnimation } from '../../../ui/animations/slide.ani';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { SS } from '../../../core/persistence/storage-keys.const';
+import { LS, SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
@@ -90,7 +90,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   isLoading = signal(false);
   doubleEnterCount = signal(0);
-  isAddToBottom = signal(false);
+  isAddToBottom = signal(
+    JSON.parse(localStorage.getItem(LS.IS_ADD_TO_BOTTOM) || 'false'),
+  );
   isAddToBacklog = signal(false);
   isSearchIssueProviders = signal(false);
   isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
@@ -132,6 +134,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _autofocusTimeout?: number;
   private _attachKeyDownHandlerTimeout?: number;
   private _saveTmpTodoTimeout?: number;
+
+  toggleIsAddToBottom(): void {
+    this.isAddToBottom.set(!this.isAddToBottom());
+    localStorage.setItem(LS.IS_ADD_TO_BOTTOM, JSON.stringify(this.isAddToBottom()));
+  }
 
   ngAfterViewInit(): void {
     this.isAddToBottom.set(!!this.planForDay() || this.isAddToBottom());
