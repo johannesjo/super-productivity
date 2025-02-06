@@ -47,7 +47,6 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
-import { GlobalConfigService } from '../../config/global-config.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -79,7 +78,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
   private _addTaskBarService = inject(AddTaskBarService);
-  private _globalConfigService = inject(GlobalConfigService);
 
   tabindex = input<number>(0);
   isDoubleEnterMode = input<boolean>(false);
@@ -92,7 +90,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   isLoading = signal(false);
   doubleEnterCount = signal(0);
-  isAddToBottom = signal(this._globalConfigService.cfg?.misc.isAddToBottom);
+  isAddToBottom = signal(false);
   isAddToBacklog = signal(false);
   isSearchIssueProviders = signal(false);
   isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
