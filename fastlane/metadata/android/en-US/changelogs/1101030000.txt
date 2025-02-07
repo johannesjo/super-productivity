@@ -1,0 +1,78 @@
+
+### Bug Fixes
+
+* also allow to move repeatable tasks to other project from context menu #3929
+* compression by downgrading lz-string
+* endless snacks
+* gitlab issue tracking submit dialog opening #3902
+* **issuePanel:** sort items by start time correctly
+* placeholder position for multiline-input
+* **simpleCounter:** today not always displayed on simple counter dialog
+* **taskDetailPanel:** prevent back when open
+* textarea height not always being full height #3893
+* throwing error on arrow left #3917
+* tpl errors
+* validation msg #3885
+### Features
+
+* add better animation for day finish
+* add info about the mew issue provider location #3770
+* add new setting of default position of new tasks
+* add super simple version of daily summary note feature
+* also add browser language to simple meta
+* also remember last task list mode on keyboard combo
+* auto hide time estimate exceeded banner when tracking to task is stopped
+* change txt
+* delay celebration animation at day end
+* disable not implemented transition option for Jira and OpenProject #3900
+* further improve daily summary note
+* further improve daily summary note 2
+* **i18n:** add missing translations
+* **i18n:** it adjustments
+* **i18n:** remove unused
+* improve checkbox add for markdown
+* improve edit mode switch
+* improve error handling so more people actually post the additional error info
+* increase model version to account for new compression mode
+* limit clickable markdown checkbox area to checkbox itself
+* only show undone tasks nr in side nav
+* polish daily summary note and skip snack for updates
+* polish day finish ani
+* remove legacy migration
+* remove project archiving code
+* remove validity check for missing reminders as it is not a big problem
+* save last used new task position in localStorage
+* show markdown controls on touch devices
+* **simpleCounter:** add basic config for streak tracking
+* **simpleCounter:** add chart to simple counter edit dialog
+* **simpleCounter:** add cool success animation
+* **simpleCounter:** add migration script
+* **simpleCounter:** add missing translations for dialog
+* **simpleCounter:** add translations
+* **simpleCounter:** also change icon when min value was reached for the day
+* **simpleCounter:** also show current streak duration
+* **simpleCounter:** also show current streak duration in edit modal
+* **simpleCounter:** count streak from yesterday, if not enough for today yet
+* **simpleCounter:** fill in missing days in graph
+* **simpleCounter:** improve
+* **simpleCounter:** improve celebration
+* **simpleCounter:** improve dialog
+* **simpleCounter:** improve streak indication in dialog
+* **simpleCounter:** improve styling for buttons
+* **simpleCounter:** integrate simple counters into daily summary
+* **simpleCounter:** make simple counter items the same size
+* **simpleCounter:** make weekdays configurable
+* **simpleCounter:** make weekdays configurable and consider streak days
+* **simpleCounter:** new confetti via component
+* **simpleCounter:** only show checkmarks for mouse primary devices
+* **simpleCounter:** outline model
+* **simpleCounter:** polish simple counter form
+* **simpleCounter:** remove iconOn and simplify model
+* **simpleCounter:** rename feature
+* **simpleCounter:** sort data in dialog and limit to 28 entries
+* **ui:** add keyboard navigation for confirmation dialog box focusing the next button with left,right arrow keys
+* update meta str
+* use fflate for compression instead
+### Reverts
+
+* Revert "feat: add new setting of default position of new tasks"
