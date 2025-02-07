@@ -154,7 +154,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
             this.blurred.emit();
             this.activatedIssueTask$.next(null);
           } else if (ev.key === '1' && ev.ctrlKey) {
-            this.isAddToBottom.set(!this.isAddToBottom());
+            this.toggleIsAddToBottom();
             ev.preventDefault();
           } else if (ev.key === '2' && ev.ctrlKey) {
             this.isSearchIssueProviders.set(!this.isSearchIssueProviders());
