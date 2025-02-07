@@ -8,7 +8,8 @@ export enum MODEL_VERSION {
   // issueProvider model
   PROJECT = 7.0,
   ISSUE_PROVIDER = 1.1,
-  GLOBAL_CONFIG = 3.51,
+  // counted up to account for new compression
+  GLOBAL_CONFIG = 4,
   METRIC = 1.0,
   SIMPLE_COUNTER = 2.1,
   NOTE = 1.0,
