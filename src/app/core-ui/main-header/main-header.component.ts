@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
-import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
@@ -41,6 +40,9 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
+import { LongPressDirective } from '../../ui/longpress/longpress.directive';
 
 @Component({
   selector: 'main-header',
@@ -64,12 +66,13 @@ import { SimpleCounterButtonComponent } from '../../features/simple-counter/simp
     TranslatePipe,
     TagComponent,
     SimpleCounterButtonComponent,
+    LongPressDirective,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly projectService = inject(ProjectService);
+  readonly matDialog = inject(MatDialog);
   readonly workContextService = inject(WorkContextService);
-  readonly bookmarkService = inject(BookmarkService);
   readonly taskService = inject(TaskService);
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
@@ -152,6 +155,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON });
       }
     });
+  }
+
+  setupSync(): void {
+    this.matDialog.open(DialogSyncInitialCfgComponent);
   }
 
   isCounterRunning(counters: SimpleCounter[]): boolean {

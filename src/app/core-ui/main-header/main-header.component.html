@@ -57,15 +57,19 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    @if ((syncProviderService.isEnabled$|async)) {
+    @let isSyncEnabled = syncProviderService.isEnabled$|async;
     <button
       matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
-      (click)="sync()"
+      (click)="isSyncEnabled ? sync() : setupSync()"
+      (longPress)="setupSync()"
       mat-icon-button
     >
+      @if(isSyncEnabled) {
       <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
+      } @else {
+      <mat-icon>sync_disabled</mat-icon>
+      }
     </button>
-    }
 
     <!--    @if ((workContextService.isActiveWorkContextProject$|async)) {-->
     <!--    <button-->

@@ -1,0 +1,9 @@
+@import '../../../../variables';
+
+:host {
+  form {
+    @include mq(xs) {
+      width: 500px;
+    }
+  }
+}
