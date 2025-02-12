@@ -132,12 +132,14 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   dismiss(task: TaskWithReminderData): void {
-    this._taskService.update(task.id, {
-      reminderId: null,
-      plannedAt: null,
-    });
-    this._reminderService.removeReminder(task.reminderData.id);
-    this._removeFromList(task.reminderId as string);
+    if (task.projectId || task.parentId || task.tagIds.length > 0) {
+      this._taskService.update(task.id, {
+        reminderId: null,
+        plannedAt: null,
+      });
+      this._reminderService.removeReminder(task.reminderData.id);
+      this._removeFromList(task.reminderId as string);
+    }
   }
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number): void {
@@ -248,7 +250,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this.isDisableControls = true;
     const tasks = await this.tasks$.pipe(first()).toPromise();
     tasks.forEach((task) => {
-      this.dismiss(task);
+      if (task.projectId || task.parentId || task.tagIds.length > 0) {
+        this.dismiss(task);
+      }
     });
     this._close();
   }

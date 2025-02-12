@@ -23,6 +23,7 @@
       @if (isMultiple) {
       <div class="actions">
         <button
+          [disabled]="!(task.projectId || task.parentId || task.tagIds.length > 0)"
           (click)="dismiss(task)"
           [title]="T.G.DISMISS|translate"
           class="hide-xs"
@@ -82,6 +83,7 @@
             {{T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW|translate}}
           </button>
           <button
+            [disabled]="!(task.projectId || task.parentId || task.tagIds.length > 0)"
             (click)="dismiss(task)"
             mat-menu-item
           >
