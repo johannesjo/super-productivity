@@ -194,13 +194,14 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(addTask),
-        filter(({ task }) =>
-          !!task.projectId &&
-          this._workContextService.activeWorkContextType === WorkContextType.PROJECT
-            ? task.projectId !== this._workContextService.activeWorkContextId
-            : !task.tagIds.includes(
-                this._workContextService.activeWorkContextId as string,
-              ),
+        filter(
+          ({ task }) =>
+            !!task.projectId &&
+            (this._workContextService.activeWorkContextType === WorkContextType.PROJECT
+              ? task.projectId !== this._workContextService.activeWorkContextId
+              : !task.tagIds.includes(
+                  this._workContextService.activeWorkContextId as string,
+                )),
         ),
         switchMap(({ task }) =>
           this._store$.select(selectProjectById, { id: task.projectId as string }).pipe(
