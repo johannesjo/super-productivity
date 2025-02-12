@@ -28,7 +28,8 @@
   margin: $s;
   margin-top: $s * 3;
   margin-bottom: $s * 3;
-  border-radius: 8px;
+  border-radius: 4px;
+  padding: 4px;
 
   ::ng-deep textarea {
     text-align: center;
