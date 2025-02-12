@@ -29,14 +29,15 @@
   margin-top: $s * 3;
   margin-bottom: $s * 3;
   border-radius: 4px;
-  padding: 4px;
+  //padding: 4px;
 
   ::ng-deep textarea {
     text-align: center;
   }
 
   &.is-focused {
-    outline: 2px solid $c-accent;
+    // add extra outline on focus
+    outline: 1px solid $c-accent;
   }
 
   :host.isShowNotes & {

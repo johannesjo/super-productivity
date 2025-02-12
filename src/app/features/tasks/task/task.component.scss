@@ -333,11 +333,6 @@
   }
 }
 
-// TASK TITLE
-.task-title.task-title {
-  @include taskTitle;
-}
-
 @mixin timeWrapperMinimalStyles() {
   &:after {
     content: '';

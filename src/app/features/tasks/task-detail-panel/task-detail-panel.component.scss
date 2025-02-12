@@ -73,7 +73,6 @@ progress-bar {
 }
 
 .task-title.task-title {
-  @include taskTitle;
   font-weight: bold;
   transform-origin: top center;
   padding: $s;
