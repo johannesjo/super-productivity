@@ -204,7 +204,7 @@ export class IssueService {
     });
 
     const allExistingIssueIds: string[] | number[] =
-      await this._taskService.getAllIssueIdsForProject(issueProviderId, providerKey);
+      await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
 
     const potentialIssuesToAdd = await (
       this.ISSUE_SERVICE_MAP[providerKey] as any
