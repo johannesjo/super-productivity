@@ -11,6 +11,7 @@ import {
   shareReplay,
   switchMap,
   take,
+  tap,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import {
@@ -69,6 +70,23 @@ export class SyncProviderService {
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
   private _globalProgressBarService = inject(GlobalProgressBarService);
+
+  private _currentProviderLastSync$ = new BehaviorSubject(0);
+
+  // NOTE: not really reliable for all cases, but likely good enough for what we need
+  isCurrentProviderInSync$ = combineLatest([
+    this._currentProviderLastSync$,
+    this._persistenceLocalService.lastSnyModelChange$,
+  ]).pipe(
+    tap((v) => console.log('xxx', v)),
+    map(([lastSync, lastModelChange]) => lastSync === lastModelChange),
+  );
+
+  constructor() {
+    this.isCurrentProviderInSync$.subscribe((v) =>
+      console.log(`isCurrentProviderInSync$`, v),
+    );
+  }
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
@@ -778,6 +796,7 @@ export class SyncProviderService {
           ? localSyncMeta[cp.id].revTaskArchive
           : revTaskArchive,
     };
+    this._currentProviderLastSync$.next(lastSync);
     await this._persistenceLocalService.save({
       ...localSyncMeta,
       [cp.id]: localSyncMetaForProvider,

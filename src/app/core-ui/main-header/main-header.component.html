@@ -66,7 +66,9 @@
     >
       @if(isSyncEnabled) {
       <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
-      } @else {
+      @if(syncProviderService.isCurrentProviderInSync$|async) {
+      <mat-icon class="sync-success-check-ico">check</mat-icon>
+      } } @else {
       <mat-icon>sync_disabled</mat-icon>
       }
     </button>

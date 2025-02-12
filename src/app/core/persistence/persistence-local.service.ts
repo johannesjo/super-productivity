@@ -1,9 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { DB, LS } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { SyncProvider } from 'src/app/imex/sync/sync-provider.model';
 import { environment } from 'src/environments/environment';
+import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   [SyncProvider.Dropbox]: {
@@ -23,6 +24,7 @@ const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   providedIn: 'root',
 })
 export class PersistenceLocalService {
+  lastSnyModelChange$ = new BehaviorSubject(0);
   private _databaseService = inject(DatabaseService);
 
   async save(data: LocalSyncMetaModel): Promise<unknown> {
@@ -64,6 +66,7 @@ export class PersistenceLocalService {
       ((await this._databaseService.load(
         DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
         // get legacy value if non here
+        // TODO remove legacy value
       )) as string) || localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
     return this._parseTS(r);
   }
@@ -75,6 +78,7 @@ export class PersistenceLocalService {
   }
 
   async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
+    this.lastSnyModelChange$.next(lastSyncModelChange);
     return await this._databaseService.save(
       DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
       lastSyncModelChange,
