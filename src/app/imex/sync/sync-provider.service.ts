@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
@@ -11,7 +11,6 @@ import {
   shareReplay,
   switchMap,
   take,
-  tap,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import {
@@ -77,16 +76,7 @@ export class SyncProviderService {
   isCurrentProviderInSync$ = combineLatest([
     this._currentProviderLastSync$,
     this._persistenceLocalService.lastSnyModelChange$,
-  ]).pipe(
-    tap((v) => console.log('xxx', v)),
-    map(([lastSync, lastModelChange]) => lastSync === lastModelChange),
-  );
-
-  constructor() {
-    this.isCurrentProviderInSync$.subscribe((v) =>
-      console.log(`isCurrentProviderInSync$`, v),
-    );
-  }
+  ]).pipe(map(([lastSync, lastModelChange]) => lastSync === lastModelChange));
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
