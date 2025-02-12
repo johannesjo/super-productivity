@@ -72,7 +72,7 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
 import { MatButton } from '@angular/material/button';
@@ -105,7 +105,7 @@ interface IssueDataAndType {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
   imports: [
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     TaskDetailItemComponent,
     MatIcon,
     TaskListComponent,

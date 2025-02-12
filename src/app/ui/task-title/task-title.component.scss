@@ -20,6 +20,7 @@
   //z-index: $z-task-title;
   z-index: 4;
   border: 1px solid transparent;
+  transition: $transition-leave;
 
   @include darkTheme() {
     caret-color: #ffffff;
@@ -30,6 +31,7 @@
   }
 
   &.is-focused {
+    transition: $transition-enter;
     //z-index: $z-task-title-focus !important;
     z-index: 32 !important;
     border: 1px solid $c-accent;
@@ -57,13 +59,11 @@
   bottom: 0;
   top: 0;
   cursor: text;
-  transition: $transition-leave;
 
   &:focus {
     user-select: text;
     -webkit-user-select: text; /* Safari */
     outline: none;
-    transition: $transition-enter;
     // NOTE: needed to overwrite color for current task
     color: $light-theme-text-color;
 

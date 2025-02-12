@@ -1,9 +1,9 @@
 @if (taskService.currentTask$|async; as task) {
-<inline-multiline-input
+<task-title
   (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
   [value]="task.title"
   class="task-title"
-></inline-multiline-input>
+></task-title>
 <div class="progress-wrapper">
   <progress-circle [progress]="sessionProgress$|async"></progress-circle>
   <div class="progress-label-wrapper">

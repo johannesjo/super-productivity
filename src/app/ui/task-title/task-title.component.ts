@@ -12,13 +12,13 @@ import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'inline-multiline-input',
+  selector: 'task-title',
   imports: [ReactiveFormsModule, FormsModule, TranslateModule],
-  templateUrl: './inline-multiline-input.component.html',
-  styleUrl: './inline-multiline-input.component.scss',
+  templateUrl: './task-title.component.html',
+  styleUrl: './task-title.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InlineMultilineInputComponent {
+export class TaskTitleComponent {
   T: typeof T = T;
   @HostBinding('class.is-focused') isFocused = false;
 

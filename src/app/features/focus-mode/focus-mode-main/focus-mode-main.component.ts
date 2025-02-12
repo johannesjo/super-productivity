@@ -26,7 +26,7 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 import { MatIconAnchor, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -47,7 +47,7 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation],
   imports: [
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     ProgressCircleComponent,
     MatIconButton,
     MatTooltip,

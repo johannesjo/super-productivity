@@ -120,14 +120,14 @@
         </div>
         }
 
-        <inline-multiline-input
+        <task-title
           [resetToLastExternalValueTrigger]="t"
           [style.pointer-events]="IS_TOUCH_PRIMARY && (t.title.length) ? 'none' : 'auto'"
           #taskTitleEditEl
           (valueEdited)="updateTaskTitleIfChanged($event)"
           [value]="t.title"
           class="task-title"
-        ></inline-multiline-input>
+        ></task-title>
 
         <tag-list
           [task]="t"

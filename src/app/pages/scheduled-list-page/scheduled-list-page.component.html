@@ -21,11 +21,11 @@
           <div class="repeat-task-cfg-content">
             <div class="task-info">
               <div class="title">
-                <inline-multiline-input
+                <task-title
                   (valueEdited)="updateRepeatableTitleIfChanged($event.wasChanged, $event.newVal, taskRepeatCfg)"
                   [value]="taskRepeatCfg.title"
                   class="task-title"
-                ></inline-multiline-input>
+                ></task-title>
                 <tag-list
                   [isShowProjectTagAlways]="true"
                   [task]="taskRepeatCfg"
