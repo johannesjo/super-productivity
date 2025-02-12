@@ -6,7 +6,8 @@
 
   @if (task$|async; as task) {
   <div class="for-task">
-    <div>for task "<em>{{task?.title}}</em>"</div>
+    <div class="label">for task</div>
+    <div>"<em>{{task?.title}}</em>"</div>
   </div>
   <div style="text-align: center; margin-bottom: 8px">
     <button
