@@ -105,11 +105,17 @@ progress-circle {
 
   simple-counter-button.isHiddenWithoutFocus {
     @include mousePrimaryDevice {
-      display: none;
+      transition: all $transition-leave;
+      //visibility: hidden;
+      opacity: 0;
+      transform: translateY(-10px);
     }
 
     :host:hover & {
-      display: block;
+      transition: all $transition-enter;
+      //visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -122,11 +128,17 @@ progress-circle {
   align-items: center;
 
   @include mousePrimaryDevice {
-    visibility: hidden;
+    transition: all $transition-leave;
+    //visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
   }
 
   :host:hover & {
-    visibility: visible;
+    transition: all $transition-enter;
+    //visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   // to fix weird a + mat-icon behavior
