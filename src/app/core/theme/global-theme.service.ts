@@ -126,22 +126,22 @@ export class GlobalThemeService {
       ['keep_filled', 'assets/icons/keep-filled.svg'],
     ];
 
-    // icons.forEach(([name, path]) => {
-    //   this._matIconRegistry.addSvgIcon(
-    //     name,
-    //     this._domSanitizer.bypassSecurityTrustResourceUrl(path),
-    //   );
-    // });
+    // todo test if can be removed with airplane mode and wifi without internet
+    icons.forEach(([name, path]) => {
+      this._matIconRegistry.addSvgIcon(
+        name,
+        this._domSanitizer.bypassSecurityTrustResourceUrl(path),
+      );
+    });
 
     this.preloadIcons(icons);
   }
 
   preloadIcons(icons: [string, string][]): Promise<void[]> {
     // Map each icon name to a promise that fetches and registers the icon.
-    const iconPromises = icons.map(([iconName, path]) => {
+    const iconPromises = icons.map(([iconName, url]) => {
       // Construct the URL for the SVG file.
       // Adjust the path if your SVGs are located elsewhere.
-      const url = `/${path}`;
       return this._http
         .get(url, { responseType: 'text' })
         .toPromise()
