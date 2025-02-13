@@ -28,7 +28,7 @@ import { FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import { MatIconAnchor, MatIconButton } from '@angular/material/button';
+import { MatIconAnchor, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
@@ -39,13 +39,14 @@ import { T } from '../../../t.const';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counter-button/simple-counter-button.component';
 import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-attachment-list/task-attachment-list.component';
+import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 
 @Component({
   selector: 'focus-mode-main',
   templateUrl: './focus-mode-main.component.html',
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation],
+  animations: [expandAnimation, fadeAnimation, slideInOutFromBottomAni],
   imports: [
     TaskTitleComponent,
     ProgressCircleComponent,
@@ -60,6 +61,7 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
     TranslatePipe,
     IssueIconPipe,
     SimpleCounterButtonComponent,
+    MatMiniFabButton,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {

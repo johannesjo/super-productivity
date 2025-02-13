@@ -74,9 +74,23 @@
 </section>
 @if (isShowNotes) {
 <div
-  class="notes-and-attachments"
+  style="height: 100px"
   @expand
+></div>
+
+<div
+  class="notes-and-attachments"
+  @slideInOutFromBottom
 >
+  <button
+    (click)="isShowNotes=false"
+    class="hide-notes-btn"
+    color=""
+    mat-mini-fab
+  >
+    <mat-icon>expand_less</mat-icon>
+  </button>
+
   <div class="notes-panel">
     <inline-markdown
       (blur)="isFocusNotes=false"
