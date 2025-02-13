@@ -57,18 +57,33 @@
       <mat-icon>search</mat-icon>
     </button>
 
+    @let isOnline = isOnline$|async;
+    <!-- -->
     @let isSyncEnabled = syncProviderService.isEnabled$|async;
+
     <button
+      class="sync-btn"
       matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
       (click)="isSyncEnabled ? sync() : setupSync()"
       (longPress)="setupSync()"
       mat-icon-button
     >
-      @if(isSyncEnabled) {
+      @if (isSyncEnabled) {
+      <!-- -->
+      @if(isOnline) {
+      <!-- -->
       <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
-      @if(syncProviderService.isCurrentProviderInSync$|async) {
+      @let isInSync = syncProviderService.isCurrentProviderInSync$|async;
+      <!-- -->
+      @if (isInSync) {
       <mat-icon class="sync-success-check-ico">check</mat-icon>
-      } } @else {
+      }
+      <!-- -->
+      } @else {
+      <mat-icon>wifi_off</mat-icon>
+      }
+      <!-- -->
+      } @else {
       <mat-icon>sync_disabled</mat-icon>
       }
     </button>

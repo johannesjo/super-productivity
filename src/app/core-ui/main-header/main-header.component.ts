@@ -43,6 +43,7 @@ import { SimpleCounterButtonComponent } from '../../features/simple-counter/simp
 import { MatDialog } from '@angular/material/dialog';
 import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { LongPressDirective } from '../../ui/longpress/longpress.directive';
+import { isOnline$ } from '../../util/is-online';
 
 @Component({
   selector: 'main-header',
@@ -172,4 +173,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   get kb(): KeyboardConfig {
     return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
+
+  protected readonly isOnline$ = isOnline$;
 }
