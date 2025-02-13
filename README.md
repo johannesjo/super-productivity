@@ -59,7 +59,15 @@
 </p>
 
 <p align="center" style="text-align: center;">
-<a href="https://snapcraft.io/superproductivity"        target="_blank">
+  
+<a href='https://flathub.org/apps/com.super_productivity.SuperProductivity' target="_blank">
+  <img alt='Get it on Flathub'
+       src='https://flathub.org/api/badge?locale=en'
+       align="center"
+       height="50" />
+  </a>
+  
+<a href="https://snapcraft.io/superproductivity" target="_blank">
   <img alt="Get it from the Snap Store"
        src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg"
        align="center"
