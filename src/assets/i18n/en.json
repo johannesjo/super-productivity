@@ -877,6 +877,10 @@
         "T5": "2. Or you can overwrite the remote data with your local one. All remote changes will\n    be lost!",
         "T6": "Creating a backup of the data you overwrite is recommended!!!"
       },
+      "D_INITIAL_CFG": {
+        "TITLE": "Configure Sync",
+        "SAVE_AND_ENABLE": "Save & Enable Sync"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
         "PERM_FILE": "Give permission",
@@ -1588,7 +1592,7 @@
     "TOGGLE_SHOW_ISSUE_PANEL": "Show/Hide Issue Panel",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "TRIGGER_SYNC": "Trigger sync manually",
+    "TRIGGER_SYNC": "Sync!",
     "WORKLOG": "Worklog"
   },
   "PDS": {

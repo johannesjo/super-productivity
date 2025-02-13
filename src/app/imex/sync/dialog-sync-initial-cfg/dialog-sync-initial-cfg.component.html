@@ -1,5 +1,5 @@
 <!--<h1 mat-dialog-title>{{T.F.SYNC.D_CONFLICT.TITLE|translate}}</h1>-->
-<h1 mat-dialog-title>Configure Sync</h1>
+<h1 mat-dialog-title>{{T.F.SYNC.D_INITIAL_CFG.TITLE|translate}}</h1>
 
 <mat-dialog-content>
   <form [formGroup]="form">
@@ -29,7 +29,8 @@
       mat-stroked-button
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+
+      {{T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE|translate}}
     </button>
   </div>
 </mat-dialog-actions>
