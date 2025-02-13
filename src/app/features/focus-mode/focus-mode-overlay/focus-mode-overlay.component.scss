@@ -52,11 +52,15 @@ main {
   height: 56px;
   z-index: 3;
   @include mousePrimaryDevice {
-    visibility: hidden;
+    transition: opacity $transition-leave;
+    //visibility: hidden;
+    opacity: 0;
   }
 
   :host:hover & {
-    visibility: visible;
+    transition: opacity $transition-enter;
+    //visibility: visible;
+    opacity: 1;
   }
 
   mat-icon {
