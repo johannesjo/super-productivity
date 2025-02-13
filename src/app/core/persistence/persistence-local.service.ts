@@ -27,6 +27,11 @@ export class PersistenceLocalService {
   lastSnyModelChange$ = new BehaviorSubject(0);
   private _databaseService = inject(DatabaseService);
 
+  constructor() {
+    // update val initially
+    this.loadLastSyncModelChange().then((val) => this.lastSnyModelChange$.next(val));
+  }
+
   async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);
   }

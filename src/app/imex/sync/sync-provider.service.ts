@@ -196,6 +196,10 @@ export class SyncProviderService {
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;
 
+    if (this._currentProviderLastSync$.getValue() !== lastSync) {
+      this._currentProviderLastSync$.next(lastSync);
+    }
+
     // PRE CHECK 1
     // check if remote data & file revision changed
     // --------------------------------------------
