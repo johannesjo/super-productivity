@@ -76,7 +76,7 @@ export class SyncProviderService {
   isCurrentProviderInSync$ = combineLatest([
     this._currentProviderLastSync$,
     this._persistenceLocalService.lastSnyModelChange$,
-  ]).pipe(map(([lastSync, lastModelChange]) => lastSync === lastModelChange));
+  ]).pipe(map(([lastSync, lastModelChange]) => lastSync && lastSync === lastModelChange));
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
