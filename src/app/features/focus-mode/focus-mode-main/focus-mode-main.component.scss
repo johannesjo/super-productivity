@@ -50,6 +50,12 @@
       margin-bottom: $s * 2;
     }
   }
+  @media (max-width: 499px) {
+    font-size: 24px;
+  }
+  //@media (max-height: 400px) {
+  //    font-size: 24px;
+  //}
 }
 
 .progress-wrapper {
@@ -72,6 +78,11 @@ progress-circle {
       width: 120px;
       height: 120px;
     }
+  }
+
+  @media (max-height: 500px) {
+    width: 90px;
+    height: 90px;
   }
 }
 
