@@ -50,7 +50,7 @@ main {
   right: $s;
   width: 56px;
   height: 56px;
-  z-index: 3;
+  z-index: 5;
   @include mousePrimaryDevice {
     transition: opacity $transition-leave;
     //visibility: hidden;
