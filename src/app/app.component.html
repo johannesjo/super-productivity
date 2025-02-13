@@ -33,7 +33,7 @@
     [opened]="(layoutService.isShowSideNav$|async)"
     position="start"
   >
-    <side-nav #sideNavElRef></side-nav>
+    <side-nav></side-nav>
     @if (workContextService.isActiveWorkContextProject$|async) { }
   </mat-sidenav>
   <mat-sidenav-content>

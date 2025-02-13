@@ -5,8 +5,6 @@ import {
   HostListener,
   inject,
   OnDestroy,
-  viewChild,
-  ViewContainerRef,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -15,7 +13,6 @@ import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON, LanguageCode } from './app.constants';
-import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -101,7 +98,6 @@ export class AppComponent implements OnDestroy {
   private _uiHelperService = inject(UiHelperService);
   private _languageService = inject(LanguageService);
   private _androidService = inject(AndroidService);
-  private _bookmarkService = inject(BookmarkService);
   private _startTrackingReminderService = inject(TrackingReminderService);
   private _activatedRoute = inject(ActivatedRoute);
   readonly syncTriggerService = inject(SyncTriggerService);
@@ -115,9 +111,6 @@ export class AppComponent implements OnDestroy {
   productivityTipText: string = productivityTip && productivityTip[1];
 
   @HostBinding('@.disabled') isDisableAnimations = false;
-
-  readonly notesElRef = viewChild('notesElRef', { read: ViewContainerRef });
-  readonly sideNavElRef = viewChild('sideNavElRef', { read: ViewContainerRef });
 
   isRTL: boolean = false;
 
