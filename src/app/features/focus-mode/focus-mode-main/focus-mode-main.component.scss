@@ -178,13 +178,23 @@ progress-circle {
   max-width: $component-max-width;
   min-height: 60px;
   max-height: 50vh;
+  display: flex;
 
   inline-markdown {
     max-height: 100%;
-    overflow-y: auto;
+    width: 100%;
     @include noteStyle;
+    display: flex;
+
+    ::ng-deep .markdown-wrapper {
+      width: 100%;
+      overflow: auto;
+      height: auto !important;
+      min-height: 80px;
+    }
 
     ::ng-deep textarea {
+      width: 100%;
       background: inherit;
       color: inherit;
       border: none;
