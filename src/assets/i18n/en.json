@@ -1286,6 +1286,7 @@
   },
   "G": {
     "ADD": "Add",
+    "ADVANCED_CFG": "Advanced Config",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",

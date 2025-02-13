@@ -1307,6 +1307,7 @@ const T = {
   },
   G: {
     ADD: 'G.ADD',
+    ADVANCED_CFG: 'G.ADVANCED_CFG',
     CANCEL: 'G.CANCEL',
     CLOSE: 'G.CLOSE',
     DELETE: 'G.DELETE',
