@@ -40,16 +40,6 @@
     outline: 1px solid $c-accent;
   }
 
-  :host.isShowNotes & {
-    margin-top: $s * 7;
-  }
-
-  @media (max-height: 799px) and (max-width: 499px) {
-    :host.isShowNotes & {
-      font-size: 24px;
-      margin-bottom: $s * 2;
-    }
-  }
   @media (max-width: 499px) {
     font-size: 24px;
     margin-bottom: $s * 2;
@@ -80,12 +70,6 @@ progress-circle {
     width: 220px;
     height: 220px;
   }
-  @media (max-height: 799px) and (max-width: 499px) {
-    :host.isShowNotes & {
-      width: 120px;
-      height: 120px;
-    }
-  }
 
   @media (max-height: 500px) {
     width: 90px;
@@ -103,10 +87,6 @@ progress-circle {
   .focus-time {
     font-size: 24px;
     font-weight: bold;
-
-    :host.isShowNotes & {
-      font-size: 20px;
-    }
   }
 
   .task-times {
@@ -184,33 +164,25 @@ progress-circle {
 .notes-and-attachments {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   width: 100%;
+  position: absolute;
+  bottom: 0;
 }
 
 .notes-panel {
   border-radius: 4px;
   margin: auto;
   padding: $s * 2;
-  width: auto;
   width: 100%;
   flex-grow: 1;
   max-width: $component-max-width;
-  overflow: hidden;
   min-height: 60px;
+  max-height: 50vh;
 
   inline-markdown {
     max-height: 100%;
     overflow-y: auto;
     @include noteStyle;
-    text-align: right;
-
-    ::ng-deep .markdown-wrapper {
-      text-align: left;
-      max-height: 100%;
-      height: 300px !important;
-      height: 100% !important;
-    }
 
     ::ng-deep textarea {
       background: inherit;
@@ -271,4 +243,12 @@ progress-circle {
   font-weight: bold;
   display: flex;
   z-index: 31;
+}
+
+.hide-notes-btn {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
 }
