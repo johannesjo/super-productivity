@@ -52,10 +52,17 @@
   }
   @media (max-width: 499px) {
     font-size: 24px;
+    margin-bottom: $s * 2;
   }
-  //@media (max-height: 400px) {
-  //    font-size: 24px;
-  //}
+
+  @media (max-height: 250px) {
+    font-size: 18px;
+    margin-bottom: $s;
+  }
+
+  @media (max-width: 333px) {
+    font-size: 18px;
+  }
 }
 
 .progress-wrapper {
@@ -113,6 +120,8 @@ progress-circle {
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
+  // needs to be higher than task title
+  z-index: 4;
 
   simple-counter-button.isHiddenWithoutFocus {
     @include mousePrimaryDevice {
