@@ -79,6 +79,10 @@ export const focusModeReducer = createReducer<State>(
   on(hideFocusOverlay, (state) => ({
     ...state,
     isFocusOverlayShown: false,
+    focusSessionActivePage:
+      state.focusSessionActivePage === FocusModePage.SessionDone
+        ? FocusModePage.TaskSelection
+        : state.focusSessionActivePage,
   })),
   on(cancelFocusSession, (state) => ({
     ...state,
