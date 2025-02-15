@@ -29,6 +29,11 @@ export const selectFocusSessionTimeToGo = createSelector(
   (state) => state.focusSessionTimeToGo,
 );
 
+export const selectFocusSessionTimeElapsed = createSelector(
+  selectFocusModeState,
+  (state) => state.focusSessionTimeElapsed,
+);
+
 export const selectFocusSessionActivePage = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionActivePage,

@@ -6,7 +6,10 @@ import {
   selectCurrentTask,
   selectLastCurrentTask,
 } from '../../tasks/store/task.selectors';
-import { selectLastFocusSessionDuration } from '../store/focus-mode.selectors';
+import {
+  selectFocusModeMode,
+  selectFocusSessionTimeElapsed,
+} from '../store/focus-mode.selectors';
 import { map, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { T } from 'src/app/t.const';
@@ -26,6 +29,7 @@ import confetti from 'canvas-confetti';
 export class FocusModeTaskDoneComponent implements AfterViewInit {
   private _store = inject(Store);
 
+  mode$ = this._store.select(selectFocusModeMode);
   currentTask$ = this._store.select(selectCurrentTask);
   lastCurrentTask$ = this._store.select(selectLastCurrentTask);
   taskTitle$ = this.lastCurrentTask$.pipe(
@@ -36,7 +40,7 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
     ),
     take(1),
   );
-  lastSessionDuration$ = this._store.select(selectLastFocusSessionDuration);
+  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
   T: typeof T = T;
 
   ngAfterViewInit(): void {

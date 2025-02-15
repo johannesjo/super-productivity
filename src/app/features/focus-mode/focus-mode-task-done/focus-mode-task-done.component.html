@@ -7,7 +7,7 @@
 
 <div class="msg">
   {{T.F.FOCUS_MODE.WORKED_FOR|translate}}
-  <em>{{lastSessionDuration$|async|msToString}}</em> {{T.F.FOCUS_MODE.ON|translate}}
+  <em>{{timeElapsed$|async|msToString:true}}</em> {{T.F.FOCUS_MODE.ON|translate}}
   "<em>{{taskTitle$|async}}</em>"
 </div>
 

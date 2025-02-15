@@ -10,6 +10,7 @@ import {
   selectFocusModeMode,
   selectFocusSessionActivePage,
   selectFocusSessionProgress,
+  selectFocusSessionTimeElapsed,
   selectFocusSessionTimeToGo,
   selectIsFocusSessionRunning,
 } from '../store/focus-mode.selectors';
@@ -142,12 +143,18 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   closeOverlay(): void {
     if (this.isFocusSessionRunning()) {
+      const isCountTimeUp = this.selectedMode() === FocusModeMode.Flowtime;
+
       this.bannerService.open({
         id: BannerId.FocusMode,
         ico: 'center_focus_strong',
         msg: 'Focus Session is running',
-        timer$: this._store.select(selectFocusSessionTimeToGo),
-        progress$: this._store.select(selectFocusSessionProgress),
+        timer$: isCountTimeUp
+          ? this._store.select(selectFocusSessionTimeElapsed)
+          : this._store.select(selectFocusSessionTimeToGo),
+        progress$: isCountTimeUp
+          ? undefined
+          : this._store.select(selectFocusSessionProgress),
         action2: {
           label: 'To Focus Overlay',
           fn: () => {

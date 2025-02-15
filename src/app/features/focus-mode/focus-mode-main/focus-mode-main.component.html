@@ -12,7 +12,8 @@
       title="Focus time"
     >
       <!--        {{focusModeTimeToGo / 60000}}min-->
-      {{ (timeToGo$|async|msToMinuteClockString) }}
+      @if(isCountTimeDown$|async) { {{ (timeToGo$|async|msToMinuteClockString) }} } @else
+      { {{ (timeElapsed$|async|msToMinuteClockString) }} }
     </div>
     <!--      <div class="task-times">-->
     <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
