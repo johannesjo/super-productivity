@@ -25,7 +25,11 @@
   @fade
   class="backdrop"
 ></div>
-} @if (!(focusModeService.isShowFocusOverlay$|async)) {
+}
+<!-- -->
+@if (isShowFocusOverlay$|async) {
+<focus-mode-overlay @warp></focus-mode-overlay>
+} @else {
 <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
   <mat-sidenav
     (closedStart)="layoutService.hideSideNav()"
@@ -57,9 +61,9 @@
     <global-progress-bar></global-progress-bar>
   </mat-sidenav-content>
 </mat-sidenav-container>
-} @if (focusModeService.isShowFocusOverlay$|async) {
-<focus-mode-overlay @warp></focus-mode-overlay>
-} } @if (!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) ||
+}
+<!-- -->
+} @if (!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) ||
 (imexMetaService.isDataImportInProgress$|async)) {
 <div class="loading-full-page-wrapper">
   <global-progress-bar></global-progress-bar>
