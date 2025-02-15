@@ -2,9 +2,9 @@
   (submit)="$event.preventDefault();onSubmit($event)"
   novalidate
 >
+  @if(selectedMode() !== FocusModeMode.Flowtime) {
   <h1>{{T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION|translate}}</h1>
-
-  @if (task$|async; as task) {
+  } @if (task$|async; as task) {
   <div class="for-task">
     <div class="label">for task</div>
     <div>"<em>{{task?.title}}</em>"</div>
@@ -19,13 +19,15 @@
       {{T.F.FOCUS_MODE.SELECT_ANOTHER_TASK|translate}}
     </button>
   </div>
-  }
+  } @if(selectedMode() !== FocusModeMode.Flowtime) {
+
   <input-duration-slider
     [model]="sessionDuration$|async"
     (modelChange)="onFocusModeDurationChanged($event)"
   ></input-duration-slider>
-
+  }
   <button
+    style="margin-top: 16px"
     type="submit"
     color="primary"
     mat-raised-button
