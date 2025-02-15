@@ -18,8 +18,7 @@
   <button
     class="close-btn"
     mat-icon-button
-    [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
-    (click)="cancelFocusSession()"
+    (click)="closeOverlay()"
   >
     <mat-icon>close</mat-icon>
   </button>
@@ -46,8 +45,7 @@
 <button
   class="close-btn"
   mat-icon-button
-  [matTooltip]="T.F.FOCUS_MODE.CANCEL_FOCUS_SESSION|translate"
-  (click)="cancelFocusSession()"
+  (click)="closeOverlay()"
 >
   <mat-icon>close</mat-icon>
 </button>

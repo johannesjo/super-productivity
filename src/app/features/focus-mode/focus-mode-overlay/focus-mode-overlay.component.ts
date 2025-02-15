@@ -1,16 +1,22 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { Router } from '@angular/router';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { FocusModePage } from '../focus-mode.const';
 import { Store } from '@ngrx/store';
-import { selectFocusSessionActivePage } from '../store/focus-mode.selectors';
+import {
+  selectFocusSessionActivePage,
+  selectFocusSessionProgress,
+  selectFocusSessionTimeToGo,
+  selectIsFocusSessionRunning,
+} from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
+  hideFocusOverlay,
   setFocusSessionActivePage,
+  showFocusOverlay,
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
@@ -28,6 +34,8 @@ import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-t
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ProcrastinationComponent } from '../../procrastination/procrastination.component';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -53,9 +61,9 @@ import { ProcrastinationComponent } from '../../procrastination/procrastination.
 })
 export class FocusModeOverlayComponent implements OnDestroy {
   readonly taskService = inject(TaskService);
+  readonly bannerService = inject(BannerService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
-  private readonly _router = inject(Router);
 
   FocusModePage: typeof FocusModePage = FocusModePage;
 
@@ -80,13 +88,21 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   constructor() {
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
-
-    this.taskService.currentTask$
+    combineLatest([
+      this._store.select(selectIsFocusSessionRunning),
+      this.taskService.currentTask$,
+    ])
       .pipe(first(), takeUntil(this._onDestroy$))
-      .subscribe((task) => {
+      .subscribe(([isSessionRunning, task]) => {
         if (!task) {
           this._store.dispatch(
             setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+          );
+        } else if (isSessionRunning) {
+          this._store.dispatch(
+            setFocusSessionActivePage({
+              focusActivePage: FocusModePage.Main,
+            }),
           );
         } else {
           this._store.dispatch(
@@ -109,6 +125,29 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   back(): void {
     window.history.back();
+  }
+
+  closeOverlay(): void {
+    this.bannerService.open({
+      id: BannerId.FocusMode,
+      ico: 'center_focus_strong',
+      msg: 'Focus Session is running',
+      timer$: this._store.select(selectFocusSessionTimeToGo),
+      progress$: this._store.select(selectFocusSessionProgress),
+      action2: {
+        label: 'To Focus Screen',
+        fn: () => {
+          this._store.dispatch(showFocusOverlay());
+        },
+      },
+      action: {
+        label: 'Cancel',
+        fn: () => {
+          this._store.dispatch(cancelFocusSession());
+        },
+      },
+    });
+    this._store.dispatch(hideFocusOverlay());
   }
 
   cancelFocusSession(): void {
