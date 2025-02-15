@@ -20,6 +20,7 @@ import {
   mapTo,
   pairwise,
   scan,
+  startWith,
   switchMap,
   switchMapTo,
   tap,
@@ -88,6 +89,8 @@ export class FocusModeEffects {
               }),
             )
           : merge(this._tick$).pipe(
+              // first val is negative otherwise
+              startWith(500),
               scan((acc, value) => {
                 return value < 0 ? acc - value : value;
               }),
