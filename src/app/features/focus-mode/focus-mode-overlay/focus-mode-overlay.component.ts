@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { Store } from '@ngrx/store';
 import {
+  selectFocusModeMode,
   selectFocusSessionActivePage,
   selectFocusSessionProgress,
   selectFocusSessionTimeToGo,
@@ -15,6 +16,7 @@ import {
 import {
   cancelFocusSession,
   hideFocusOverlay,
+  setFocusModeMode,
   setFocusSessionActivePage,
   showFocusOverlay,
 } from '../store/focus-mode.actions';
@@ -30,12 +32,13 @@ import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-sele
 import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
 import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
 import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ProcrastinationComponent } from '../../procrastination/procrastination.component';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -56,6 +59,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
     AsyncPipe,
     TranslatePipe,
     ProcrastinationComponent,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    NgTemplateOutlet,
   ],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
@@ -65,7 +71,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
   private readonly _store = inject(Store);
 
   FocusModePage: typeof FocusModePage = FocusModePage;
+  FocusModeMode: typeof FocusModeMode = FocusModeMode;
 
+  selectedMode = toSignal(this._store.select(selectFocusModeMode), {
+    initialValue: undefined,
+  });
   activePage = toSignal(this._store.select(selectFocusSessionActivePage), {
     initialValue: undefined,
   });
@@ -94,7 +104,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
 
-    combineLatest([this.taskService.currentTask$])
+    this.taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
         if (this.activePage() === FocusModePage.SessionDone) {
@@ -157,6 +167,10 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   cancelFocusSession(): void {
     this._store.dispatch(cancelFocusSession());
+  }
+
+  selectMode(mode: FocusModeMode): void {
+    this._store.dispatch(setFocusModeMode({ mode }));
   }
 
   deactivatePomodoro(): void {

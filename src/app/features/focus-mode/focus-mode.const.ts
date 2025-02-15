@@ -7,3 +7,9 @@ export enum FocusModePage {
   Break = 'Break',
   ProcrastinationHelp = 'ProcrastinationHelp',
 }
+
+export enum FocusModeMode {
+  'Flowtime' = 'Flowtime',
+  'Pomodoro' = 'Pomodoro',
+  'Countdown' = 'Countdown',
+}

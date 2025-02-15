@@ -7,6 +7,10 @@ export const selectIsFocusSessionRunning = createSelector(
   selectFocusModeState,
   (state) => state.isFocusSessionRunning,
 );
+export const selectFocusModeMode = createSelector(
+  selectFocusModeState,
+  (state) => state.mode,
+);
 export const selectFocusSessionDuration = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionDuration,

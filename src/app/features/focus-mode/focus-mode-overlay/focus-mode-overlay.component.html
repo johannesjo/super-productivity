@@ -4,7 +4,7 @@
 <header>
   <banner></banner>
 </header>
-@if ( activePage()) {
+@if (activePage()) {
 <main>
   @if (activePage() === FocusModePage.ProcrastinationHelp) {
   <button
@@ -23,6 +23,19 @@
     <mat-icon>close</mat-icon>
   </button>
   }
+
+  <ng-template #selectModeTpl>
+    <mat-button-toggle-group
+      class="focus-mode-select-mode"
+      [value]="selectedMode()"
+      (change)="selectMode($event.value)"
+    >
+      <mat-button-toggle [value]="FocusModeMode.Flowtime">Flowtime</mat-button-toggle>
+      <mat-button-toggle [value]="FocusModeMode.Pomodoro">Pomodoro</mat-button-toggle>
+      <mat-button-toggle [value]="FocusModeMode.Countdown">Countdown</mat-button-toggle>
+    </mat-button-toggle-group>
+  </ng-template>
+
   <!-- -->
   @switch (activePage()) {
   <!-- -->
@@ -34,9 +47,17 @@
     <procrastination></procrastination>
   </div>
   } @case (FocusModePage.TaskSelection) {
-  <focus-mode-task-selection @warpIn></focus-mode-task-selection>
+  <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
+  <focus-mode-task-selection
+    style="margin-bottom: auto; margin-top: -32px"
+    @warpIn
+  ></focus-mode-task-selection>
   } @case (FocusModePage.DurationSelection) {
-  <focus-mode-duration-selection @warpIn></focus-mode-duration-selection>
+  <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
+  <focus-mode-duration-selection
+    style="margin-bottom: auto; margin-top: -32px"
+    @warpIn
+  ></focus-mode-duration-selection>
   } @case (FocusModePage.Preparation) {
   <focus-mode-preparation @warpIn></focus-mode-preparation>
   } @case (FocusModePage.Main) {
@@ -54,7 +75,7 @@
   <mat-icon>close</mat-icon>
 </button>
 <div class="pomodoro-info-wrapper">
-  <div class="pomodoro-info-msg">{{T.F.FOCUS_MODE.POMODORO_INFO|translate}}</div>
+  <div class="pomodoro-info-msg">{{ T.F.FOCUS_MODE.POMODORO_INFO|translate }}</div>
   <div style="text-align: center">
     <button
       mat-stroked-button
@@ -62,14 +83,14 @@
       (click)="deactivatePomodoro()"
     >
       <mat-icon>alarm_off</mat-icon>
-      {{T.F.FOCUS_MODE.POMODORO_DISABLE|translate}}
+      {{ T.F.FOCUS_MODE.POMODORO_DISABLE|translate }}
     </button>
     <button
       mat-stroked-button
       (click)="cancelFocusSession()"
     >
       <mat-icon>arrow_back</mat-icon>
-      {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
+      {{ T.F.FOCUS_MODE.BACK_TO_PLANNING|translate }}
     </button>
   </div>
 </div>

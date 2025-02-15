@@ -3,13 +3,14 @@ import {
   cancelFocusSession,
   focusSessionDone,
   hideFocusOverlay,
+  setFocusModeMode,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   setFocusSessionTimeToGo,
   showFocusOverlay,
   startFocusSession,
 } from './focus-mode.actions';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 
 const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
 const USE_REMAINING_SESSION_TIME_THRESHOLD = 60 * 1000;
@@ -21,6 +22,7 @@ export interface State {
   focusSessionDuration: number;
   focusSessionTimeToGo: number;
   focusSessionActivePage: FocusModePage;
+  mode: FocusModeMode;
   lastFocusSessionDuration: number;
 }
 
@@ -31,6 +33,8 @@ export const initialState: State = {
   lastFocusSessionDuration: 0,
   focusSessionTimeToGo: 0,
   focusSessionActivePage: FocusModePage.TaskSelection,
+  // TODO get from LS if available
+  mode: FocusModeMode.Flowtime,
 };
 
 export const focusModeReducer = createReducer<State>(
@@ -39,6 +43,10 @@ export const focusModeReducer = createReducer<State>(
   on(setFocusSessionActivePage, (state, { focusActivePage: focusSessionActivePage }) => ({
     ...state,
     focusSessionActivePage,
+  })),
+  on(setFocusModeMode, (state, { mode }) => ({
+    ...state,
+    mode,
   })),
   on(setFocusSessionDuration, (state, { focusSessionDuration }) => ({
     ...state,
