@@ -26,7 +26,6 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -44,6 +43,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { LongPressDirective } from '../../ui/longpress/longpress.directive';
 import { isOnline$ } from '../../util/is-online';
+import { Store } from '@ngrx/store';
+import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 
 @Component({
   selector: 'main-header',
@@ -84,7 +85,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   private readonly _renderer = inject(Renderer2);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
-  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _store = inject(Store);
   private readonly _configService = inject(GlobalConfigService);
 
   T: typeof T = T;
@@ -167,7 +168,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   enableFocusMode(): void {
-    this._focusModeService.showFocusOverlay();
+    this._store.dispatch(showFocusOverlay());
   }
 
   get kb(): KeyboardConfig {
