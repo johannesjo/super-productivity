@@ -11,6 +11,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 
 @Component({
   selector: 'banner',
@@ -18,7 +19,14 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [bannerAnimation, fadeAnimation],
-  imports: [MatProgressBar, MatIcon, MatButton, AsyncPipe, TranslatePipe],
+  imports: [
+    MatProgressBar,
+    MatIcon,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+    MsToMinuteClockStringPipe,
+  ],
 })
 export class BannerComponent {
   bannerService = inject(BannerService);
@@ -51,4 +59,6 @@ export class BannerComponent {
     this.dismiss(bannerId);
     bannerAction.fn();
   }
+
+  protected readonly timer = timer;
 }

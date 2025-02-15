@@ -22,10 +22,18 @@
       } @if (banner.svgIco) {
       <mat-icon [svgIcon]="banner.svgIco"></mat-icon>
       }
+      <!-- -->
+      @if(banner.timer$) {
+      <div class="message">
+        <strong>{{banner.timer$|async|msToMinuteClockString}}</strong> –
+        {{banner.msg|translate:banner.translateParams}}
+      </div>
+      } @else {
       <div
         [innerHTML]="banner.msg|translate:banner.translateParams"
         class="message"
       ></div>
+      }
     </div>
     <div class="buttons">
       @if (!banner.action2 && !banner.isHideDismissBtn) {
