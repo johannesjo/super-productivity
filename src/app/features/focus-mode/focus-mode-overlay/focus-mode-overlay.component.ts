@@ -87,13 +87,19 @@ export class FocusModeOverlayComponent implements OnDestroy {
   };
 
   constructor() {
+    this.bannerService.dismiss(BannerId.FocusMode);
+
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
+
     combineLatest([
       this._store.select(selectIsFocusSessionRunning),
       this.taskService.currentTask$,
     ])
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe(([isSessionRunning, task]) => {
+        if (this.activePage() === FocusModePage.SessionDone) {
+          return;
+        }
         if (!task) {
           this._store.dispatch(
             setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
@@ -132,7 +138,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
       timer$: this._store.select(selectFocusSessionTimeToGo),
       progress$: this._store.select(selectFocusSessionProgress),
       action2: {
-        label: 'To Focus Screen',
+        label: 'To Focus Overlay',
         fn: () => {
           this._store.dispatch(showFocusOverlay());
         },

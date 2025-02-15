@@ -63,6 +63,7 @@ export const focusModeReducer = createReducer<State>(
   on(focusSessionDone, (state) => ({
     ...state,
     isFocusSessionRunning: false,
+    isFocusOverlayShown: true,
     lastFocusSessionDuration: state.focusSessionDuration,
     focusSessionDuration:
       state.focusSessionTimeToGo >= USE_REMAINING_SESSION_TIME_THRESHOLD
