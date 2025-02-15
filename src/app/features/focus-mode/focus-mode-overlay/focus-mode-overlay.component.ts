@@ -25,7 +25,6 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
 import { BannerComponent } from '../../../core/banner/banner/banner.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
 import { FocusModeTaskSelectionComponent } from '../focus-mode-task-selection/focus-mode-task-selection.component';
 import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-selection/focus-mode-duration-selection.component';
 import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
@@ -36,6 +35,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ProcrastinationComponent } from '../../procrastination/procrastination.component';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -47,7 +47,6 @@ import { BannerId } from '../../../core/banner/banner.model';
     BannerComponent,
     MatIconButton,
     MatIcon,
-    MatTooltip,
     FocusModeTaskSelectionComponent,
     FocusModeDurationSelectionComponent,
     FocusModePreparationComponent,
@@ -67,19 +66,20 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   FocusModePage: typeof FocusModePage = FocusModePage;
 
-  activePage$ = this._store.select(selectFocusSessionActivePage);
+  activePage = toSignal(this._store.select(selectFocusSessionActivePage), {
+    initialValue: undefined,
+  });
 
   isPomodoroEnabled$: Observable<boolean> = this._store.select(selectIsPomodoroEnabled);
 
-  activatePage?: FocusModePage;
   T: typeof T = T;
 
   private _onDestroy$ = new Subject<void>();
   private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {
     if (ev.key === 'Escape') {
       if (
-        this.activatePage === FocusModePage.TaskSelection ||
-        this.activatePage === FocusModePage.DurationSelection
+        this.activePage() === FocusModePage.TaskSelection ||
+        this.activePage() === FocusModePage.DurationSelection
       ) {
         this.cancelFocusSession();
       }
@@ -112,9 +112,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
           );
         }
       });
-    this.activePage$.pipe(takeUntil(this._onDestroy$)).subscribe((activePage) => {
-      this.activatePage = activePage;
-    });
   }
 
   ngOnDestroy(): void {
