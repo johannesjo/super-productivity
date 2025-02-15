@@ -4,9 +4,9 @@
 <header>
   <banner></banner>
 </header>
-@if ((activePage$|async); as activePage) {
+@if ( activePage()) {
 <main>
-  @if (activePage === FocusModePage.ProcrastinationHelp) {
+  @if (activePage() === FocusModePage.ProcrastinationHelp) {
   <button
     class="close-btn"
     mat-icon-button
@@ -14,7 +14,7 @@
   >
     <mat-icon>close</mat-icon>
   </button>
-  } @if (activePage !== FocusModePage.ProcrastinationHelp) {
+  } @if (activePage() !== FocusModePage.ProcrastinationHelp) {
   <button
     class="close-btn"
     mat-icon-button
@@ -22,7 +22,11 @@
   >
     <mat-icon>close</mat-icon>
   </button>
-  } @switch (activatePage) { @case (FocusModePage.ProcrastinationHelp) {
+  }
+  <!-- -->
+  @switch (activePage()) {
+  <!-- -->
+  @case (FocusModePage.ProcrastinationHelp) {
   <div
     class="scroll-container"
     @warpIn
