@@ -69,6 +69,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
   activePage = toSignal(this._store.select(selectFocusSessionActivePage), {
     initialValue: undefined,
   });
+  isFocusSessionRunning = toSignal(this._store.select(selectIsFocusSessionRunning), {
+    initialValue: undefined,
+  });
 
   isPomodoroEnabled$: Observable<boolean> = this._store.select(selectIsPomodoroEnabled);
 
@@ -91,12 +94,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
 
-    combineLatest([
-      this._store.select(selectIsFocusSessionRunning),
-      this.taskService.currentTask$,
-    ])
+    combineLatest([this.taskService.currentTask$])
       .pipe(first(), takeUntil(this._onDestroy$))
-      .subscribe(([isSessionRunning, task]) => {
+      .subscribe((task) => {
         if (this.activePage() === FocusModePage.SessionDone) {
           return;
         }
@@ -104,7 +104,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
           this._store.dispatch(
             setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
           );
-        } else if (isSessionRunning) {
+        } else if (this.isFocusSessionRunning()) {
           this._store.dispatch(
             setFocusSessionActivePage({
               focusActivePage: FocusModePage.Main,
@@ -131,25 +131,27 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   closeOverlay(): void {
-    this.bannerService.open({
-      id: BannerId.FocusMode,
-      ico: 'center_focus_strong',
-      msg: 'Focus Session is running',
-      timer$: this._store.select(selectFocusSessionTimeToGo),
-      progress$: this._store.select(selectFocusSessionProgress),
-      action2: {
-        label: 'To Focus Overlay',
-        fn: () => {
-          this._store.dispatch(showFocusOverlay());
+    if (this.isFocusSessionRunning()) {
+      this.bannerService.open({
+        id: BannerId.FocusMode,
+        ico: 'center_focus_strong',
+        msg: 'Focus Session is running',
+        timer$: this._store.select(selectFocusSessionTimeToGo),
+        progress$: this._store.select(selectFocusSessionProgress),
+        action2: {
+          label: 'To Focus Overlay',
+          fn: () => {
+            this._store.dispatch(showFocusOverlay());
+          },
         },
-      },
-      action: {
-        label: 'Cancel',
-        fn: () => {
-          this._store.dispatch(cancelFocusSession());
+        action: {
+          label: 'Cancel',
+          fn: () => {
+            this._store.dispatch(cancelFocusSession());
+          },
         },
-      },
-    });
+      });
+    }
     this._store.dispatch(hideFocusOverlay());
   }
 
