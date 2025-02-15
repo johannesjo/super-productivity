@@ -11,20 +11,22 @@ import { TaskCopy } from '../../tasks/task.model';
 import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, switchMap, take, takeUntil } from 'rxjs/operators';
+import { first, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
+  selectFocusModeMode,
   selectFocusSessionProgress,
+  selectFocusSessionTimeElapsed,
   selectFocusSessionTimeToGo,
 } from '../store/focus-mode.selectors';
 import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { updateTask } from '../../tasks/store/task.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -73,6 +75,10 @@ export class FocusModeMainComponent implements OnDestroy {
   private readonly _store = inject(Store);
 
   timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
+  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
+  mode$ = this._store.select(selectFocusModeMode);
+  isCountTimeDown$ = this.mode$.pipe(map((mode) => mode !== FocusModeMode.Flowtime));
+
   sessionProgress$ = this._store.select(selectFocusSessionProgress);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
