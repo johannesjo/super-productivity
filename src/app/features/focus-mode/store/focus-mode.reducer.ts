@@ -12,6 +12,7 @@ import {
   startFocusSession,
 } from './focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
 const USE_REMAINING_SESSION_TIME_THRESHOLD = 60 * 1000;
@@ -28,6 +29,8 @@ export interface State {
   lastFocusSessionDuration: number;
 }
 
+const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
+
 export const initialState: State = {
   isFocusOverlayShown: false,
   isFocusSessionRunning: false,
@@ -36,8 +39,9 @@ export const initialState: State = {
   focusSessionTimeToGo: 0,
   focusSessionTimeElapsed: 0,
   focusSessionActivePage: FocusModePage.TaskSelection,
-  // TODO get from LS if available
-  mode: FocusModeMode.Flowtime,
+  mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
+    ? (focusModeModeFromLS as any)
+    : FocusModeMode.Flowtime,
 };
 
 export const focusModeReducer = createReducer<State>(

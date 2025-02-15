@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   cancelFocusSession,
   focusSessionDone,
+  setFocusModeMode,
   setFocusSessionActivePage,
   setFocusSessionTimeElapsed,
   setFocusSessionTimeToGo,
@@ -39,6 +40,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { IdleService } from '../../idle/idle.service';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 const TICK_DURATION = 500;
 const SESSION_DONE_SOUND = 'positive.ogg';
@@ -191,4 +193,15 @@ export class FocusModeEffects {
         ),
       { dispatch: false },
     );
+
+  modeToLS$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(setFocusModeMode),
+        tap(({ mode }) => {
+          localStorage.setItem(LS.FOCUS_MODE_MODE, mode);
+        }),
+      ),
+    { dispatch: false },
+  );
 }
