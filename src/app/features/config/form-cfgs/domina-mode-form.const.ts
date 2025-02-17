@@ -4,6 +4,7 @@ import { T } from '../../../t.const';
 import { speak } from '../../../util/speak';
 import {getAvailableVoices} from '../../domina-mode/getAvailableVoices'
 
+
 export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
   title: T.F.DOMINA_MODE.FORM.TITLE,
   key: 'dominaMode',
@@ -68,7 +69,7 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
         onInit: (field) => {
           let voices: SpeechSynthesisVoice[] = getAvailableVoices() || [];
           voices = getAvailableVoices();
-          console.log(voices);
+          //console.log(voices);
 
           if(field.templateOptions){
             field.templateOptions.options = voices.map(voiceName=>({
