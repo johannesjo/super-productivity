@@ -1,7 +1,7 @@
 import { GlobalConfigState } from './global-config.model';
 import { DEFAULT_PROJECT_ID } from '../project/project.const';
 import { TRACKING_INTERVAL } from 'src/app/app.constants';
-
+import {getAvailableVoices} from 'src/app/features/domina-mode/getAvailableVoices'
 const minute = 60 * 1000;
 
 export const DEFAULT_DAY_START = '9:00';
@@ -61,6 +61,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     interval: 5 * minute,
     volume: 75,
     text: 'Your current task is: ${currentTaskTitle}',
+    voice: getAvailableVoices[0],
   },
   focusMode: {
     isAlwaysUseFocusMode: false,

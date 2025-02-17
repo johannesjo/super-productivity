@@ -2,6 +2,7 @@
 import { ConfigFormSection, DominaModeConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { speak } from '../../../util/speak';
+import {getAvailableVoices} from '../../domina-mode/getAvailableVoices'
 
 export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
   title: T.F.DOMINA_MODE.FORM.TITLE,
@@ -55,5 +56,23 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
         },
       },
     },
+    {
+      key:'voice',
+      type:'select',
+      templateOptions: {
+        label: 'Voice',
+        placeholder: 'Select a voice',
+        required: true,
+        options: []
+      },
+      hooks: {
+        onInit:(field)=>{
+          console.log("test");
+
+
+        }
+      }
+
+    }
   ],
 };
