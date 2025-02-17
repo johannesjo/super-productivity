@@ -61,8 +61,8 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
       key:'voice',
       type:'select',
       templateOptions:{
-        label:"test",
-        description:"do the thing",
+        label:"Select a Voice",
+        description:"Choose a voice",
         required:false,
       },
       hooks: {
