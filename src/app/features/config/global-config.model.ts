@@ -156,7 +156,7 @@ export type DominaModeConfig = Readonly<{
   text: string;
   interval: number;
   volume: number;
-  voice: SpeechSynthesisVoice;
+  voice: string;
 
 }>;
 

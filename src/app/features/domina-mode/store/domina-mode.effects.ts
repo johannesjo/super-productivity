@@ -26,7 +26,7 @@ export class DominaModeEffects {
                     if (txt.length <= 1) {
                       txt = currentTask.title;
                     }
-                    speak(txt, cfg.volume);
+                    speak(txt, cfg.volume,cfg.voice);
                   }
                 }),
               )
