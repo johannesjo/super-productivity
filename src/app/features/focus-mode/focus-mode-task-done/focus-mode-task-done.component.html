@@ -3,12 +3,16 @@
   <div class="pyro-after"></div>
 </div>
 
-<h1>{{T.F.FOCUS_MODE.CONGRATS|translate}}</h1>
+<!--<h1>{{T.F.FOCUS_MODE.CONGRATS|translate}}</h1>-->
+<h1>Focus Session Completed!</h1>
 
 <div class="msg">
-  {{T.F.FOCUS_MODE.WORKED_FOR|translate}}
-  <em>{{timeElapsed$|async|msToString:true}}</em> {{T.F.FOCUS_MODE.ON|translate}}
-  "<em>{{taskTitle$|async}}</em>"
+  <div class="worked-for-label">{{T.F.FOCUS_MODE.WORKED_FOR|translate}}</div>
+  <div class="worked-for-value">{{6213000|msToString:true}}</div>
+  <!--  <div class="worked-for-value">{{timeElapsed$|async|msToString:true}}</div>-->
+
+  <div class="task-title-label">{{T.F.FOCUS_MODE.ON|translate}}</div>
+  <div class="task-title">{{taskTitle$|async}}</div>
 </div>
 
 <div class="btn-wrapper">

@@ -5,8 +5,33 @@
 }
 
 .msg {
-  font-size: 20px;
   margin-bottom: $s * 3;
+  padding: $s * 2;
+}
+
+.task-title-label,
+.worked-for-label {
+  font-size: 14px;
+}
+
+.worked-for-value {
+  font-size: 20px;
+  font-weight: bold;
+  margin: auto;
+  margin-top: $s * 2;
+  margin-bottom: $s * 2;
+  //display: inline-block;
+  //border: 3px solid $c-primary;
+  //border-radius: 50%;
+  //min-width: 90px;
+  //height: 90px;
+  //line-height: 90px;
+  padding: 0 $s;
+}
+
+.task-title {
+  margin-top: $s;
+  font-size: 18px;
 }
 
 .btn-wrapper {
@@ -14,5 +39,6 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: $s * 4;
   gap: $s;
 }
