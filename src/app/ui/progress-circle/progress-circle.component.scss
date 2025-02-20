@@ -22,5 +22,5 @@
   animation: progress 1s ease-out forwards;
   stroke-dashoffset: 0;
   stroke-dasharray: 0, 100;
-  transition: stroke-dashoffset 1s;
+  transition: all 1s;
 }

@@ -10,7 +10,7 @@
   @if (isCountTimeDown) {
   <progress-circle [progress]="sessionProgress$|async"></progress-circle>
   } @else {
-  <progress-circle type=""></progress-circle>
+  <progress-circle [autoRotationDuration]="60000"></progress-circle>
   }
   <div class="progress-label-wrapper">
     <div
