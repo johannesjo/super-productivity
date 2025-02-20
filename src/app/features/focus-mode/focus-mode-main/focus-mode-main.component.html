@@ -1,3 +1,5 @@
+@let isCountTimeDown = isCountTimeDown$|async;
+<!-- -->
 @if (taskService.currentTask$|async; as task) {
 <task-title
   (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
@@ -5,15 +7,19 @@
   class="task-title"
 ></task-title>
 <div class="progress-wrapper">
+  @if (isCountTimeDown) {
   <progress-circle [progress]="sessionProgress$|async"></progress-circle>
+  } @else {
+  <progress-circle type=""></progress-circle>
+  }
   <div class="progress-label-wrapper">
     <div
       class="focus-time"
       title="Focus time"
     >
       <!--        {{focusModeTimeToGo / 60000}}min-->
-      @if(isCountTimeDown$|async) { {{ (timeToGo$|async|msToMinuteClockString) }} } @else
-      { {{ (timeElapsed$|async|msToMinuteClockString) }} }
+      @if(isCountTimeDown) { {{ (timeToGo$|async|msToMinuteClockString) }} } @else { {{
+      (timeElapsed$|async|msToMinuteClockString) }} }
     </div>
     <!--      <div class="task-times">-->
     <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
