@@ -159,7 +159,7 @@
     "angular-mentions": "^1.5.0",
     "axios": "^1.7.9",
     "canvas-confetti": "^1.9.3",
-    "chai": "^5.1.2",
+    "chai": "^5.2.0",
     "chart.js": "^4.4.7",
     "chromedriver": "^131.0.5",
     "chrono-node": "^2.7.8",
