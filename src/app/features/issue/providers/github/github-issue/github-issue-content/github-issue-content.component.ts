@@ -49,19 +49,19 @@ export class GithubIssueContentComponent {
   lastComment(): GithubComment {
     // NOTE: when we ask for this we should have it
     return (this.issue?.comments &&
-      this.issue.comments[this.issue.comments.length - 1]) as GithubComment;
+      this.issue.comments[this.issue.comments?.length - 1]) as GithubComment;
   }
 
   isCollapsedIssueSummary(): boolean {
     if (this.issue) {
-      return this.isCollapsedIssueComments() && this.issue.body.length > 200;
+      return this.isCollapsedIssueComments() && this.issue.body?.length > 200;
     }
     return false;
   }
 
   isCollapsedIssueComments(): boolean {
     if (this.issue) {
-      return !this.isForceShowAllComments && this.issue.comments.length > 2;
+      return !this.isForceShowAllComments && this.issue.comments?.length > 2;
     }
     return false;
   }
