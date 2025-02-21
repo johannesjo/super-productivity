@@ -37,7 +37,6 @@
     "buildFrontend:stage:es6": "npm run prebuild && cross-env BROWSERSLIST_ENV='modern' ng build --configuration stage && npm run removeWOFF1",
     "buildFrontend:stageWeb": "npm run prebuild && ng build --configuration stageWeb",
     "buildFrontend:stageWeb:unminified": "npm run prebuild && ng build --configuration stageWeb --optimization=false --aot=false",
-    "buildSchema": "cd tools/schematics && npm run build && cd ../../ && npm i file:./tools/schematics --legacy-peer-deps",
     "dist": "npm run buildAllElectron:prod && electron-builder",
     "dist:android": "npm run buildFrontend:stageWeb:unminified && npm run sync:android && npm run assemble:android:stage && echo 'Staging Android APK generated at android/app/build/outputs/apk/debug/'",
     "dist:android:prod": "npm run buildFrontend:prodWeb && npm run sync:android && npm run assemble:android:prod && echo 'Production Android APK generated at android/app/build/outputs/apk/release/'",
