@@ -6,8 +6,8 @@
   [readonly]="to.readonly"
   matNativeControl
 >
-  <option [ngValue]="false">{{T.G.NONE | translate}}</option>
-  @for (opt of projectService.list$|async; track trackById($index, opt)) {
-  <option [ngValue]="opt.id">{{ opt.title }}</option>
+  <option [ngValue]="false">{{ T.G.NONE | translate }}</option>
+  @for (opt of projectService.list$ | async; track trackById($index, opt)) {
+    <option [ngValue]="opt.id">{{ opt.title }}</option>
   }
 </select>

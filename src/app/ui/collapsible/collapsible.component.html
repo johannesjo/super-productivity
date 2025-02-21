@@ -1,25 +1,26 @@
 <div
-  (click)="toggleExpand();"
+  (click)="toggleExpand()"
   class="collapsible-header"
 >
   @if (isIconBefore()) {
-  <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
-  } @if (icon) {
-  <mat-icon class="collapsible-additional-icon">{{icon}} </mat-icon>
+    <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
+  }
+  @if (icon) {
+    <mat-icon class="collapsible-additional-icon">{{ icon }} </mat-icon>
   }
 
-  <div class="collapsible-title">{{title()}}</div>
+  <div class="collapsible-title">{{ title() }}</div>
 
   @if (!isIconBefore()) {
-  <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
+    <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
   }
 </div>
 
 @if (isExpanded) {
-<div
-  [@expand]
-  class="collapsible-panel ani-expand-collapse"
->
-  <ng-content></ng-content>
-</div>
+  <div
+    [@expand]
+    class="collapsible-panel ani-expand-collapse"
+  >
+    <ng-content></ng-content>
+  </div>
 }

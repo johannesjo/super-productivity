@@ -1,104 +1,111 @@
-@if (isShowUi$|async) { @if ((globalThemeService.backgroundImg$|async); as bgImage) {
-<div
-  [style.background]="'url(' + bgImage + ')'"
-  class="bg-image"
-></div>
-}
-<!--TODO move inside page container somehow -->
-@if (layoutService.isShowAddTaskBar$|async) {
-<add-task-bar
-  (blurred)="layoutService.hideAddTaskBar()"
-  [isElevated]="true"
-  class="global"
-></add-task-bar>
-} @if ((layoutService.isShowAddTaskBar$|async)) {
-<div
-  (click)="layoutService.hideAddTaskBar()"
-  @fade
-  class="backdrop"
-></div>
-} @if (layoutService.isShowSearchBar$|async) {
-<search-bar (blurred)="layoutService.hideSearchBar()"></search-bar>
-} @if ((layoutService.isShowSearchBar$|async)) {
-<div
-  (click)="layoutService.hideSearchBar()"
-  @fade
-  class="backdrop"
-></div>
-}
-<!-- -->
-@if (isShowFocusOverlay$|async) {
-<focus-mode-overlay @warp></focus-mode-overlay>
-} @else {
-<mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
-  <mat-sidenav
-    (closedStart)="layoutService.hideSideNav()"
-    [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-    [opened]="(layoutService.isShowSideNav$|async)"
-    position="start"
-  >
-    <side-nav></side-nav>
-    @if (workContextService.isActiveWorkContextProject$|async) { }
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <header
-      [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
-      class="header-wrapper"
-    >
-      <main-header></main-header>
-      @if ((workContextService.isActiveWorkContextProject$|async)) {
-      <bookmark-bar></bookmark-bar>
-      }
-      <banner></banner>
-    </header>
+@if (isShowUi$ | async) {
+  @if (globalThemeService.backgroundImg$ | async; as bgImage) {
     <div
-      #routeWrapper
-      [@warpRoute]="getPage(o)"
-      class="route-wrapper"
-    >
-      <router-outlet #o="outlet"></router-outlet>
-    </div>
-    <global-progress-bar></global-progress-bar>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+      [style.background]="'url(' + bgImage + ')'"
+      class="bg-image"
+    ></div>
+  }
+  <!--TODO move inside page container somehow -->
+  @if (layoutService.isShowAddTaskBar$ | async) {
+    <add-task-bar
+      (blurred)="layoutService.hideAddTaskBar()"
+      [isElevated]="true"
+      class="global"
+    ></add-task-bar>
+  }
+  @if (layoutService.isShowAddTaskBar$ | async) {
+    <div
+      (click)="layoutService.hideAddTaskBar()"
+      @fade
+      class="backdrop"
+    ></div>
+  }
+  @if (layoutService.isShowSearchBar$ | async) {
+    <search-bar (blurred)="layoutService.hideSearchBar()"></search-bar>
+  }
+  @if (layoutService.isShowSearchBar$ | async) {
+    <div
+      (click)="layoutService.hideSearchBar()"
+      @fade
+      class="backdrop"
+    ></div>
+  }
+  <!-- -->
+  @if (isShowFocusOverlay$ | async) {
+    <focus-mode-overlay @warp></focus-mode-overlay>
+  } @else {
+    <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
+      <mat-sidenav
+        (closedStart)="layoutService.hideSideNav()"
+        [mode]="(layoutService.isNavOver$ | async) ? 'over' : 'side'"
+        [opened]="layoutService.isShowSideNav$ | async"
+        position="start"
+      >
+        <side-nav></side-nav>
+        @if (workContextService.isActiveWorkContextProject$ | async) {}
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <header
+          [class.isNotScrolled]="!(layoutService.isScrolled$ | async)"
+          class="header-wrapper"
+        >
+          <main-header></main-header>
+          @if (workContextService.isActiveWorkContextProject$ | async) {
+            <bookmark-bar></bookmark-bar>
+          }
+          <banner></banner>
+        </header>
+        <div
+          #routeWrapper
+          [@warpRoute]="getPage(o)"
+          class="route-wrapper"
+        >
+          <router-outlet #o="outlet"></router-outlet>
+        </div>
+        <global-progress-bar></global-progress-bar>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  }
+  <!-- -->
 }
-<!-- -->
-} @if (!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) ||
-(imexMetaService.isDataImportInProgress$|async)) {
-<div class="loading-full-page-wrapper">
-  <global-progress-bar></global-progress-bar>
-  <div class="app-loading">
-    <div class="productivity-tip">
-      <h2 id="heading">{{ productivityTipTitle }}</h2>
-      <p id="text">{{ productivityTipText }}</p>
+@if (
+  !(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$ | async) ||
+  (imexMetaService.isDataImportInProgress$ | async)
+) {
+  <div class="loading-full-page-wrapper">
+    <global-progress-bar></global-progress-bar>
+    <div class="app-loading">
+      <div class="productivity-tip">
+        <h2 id="heading">{{ productivityTipTitle }}</h2>
+        <p id="text">{{ productivityTipText }}</p>
+      </div>
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <svg
+        class="logo"
+        viewBox="0 0 64 64"
+      >
+        <path
+          d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+          id="path3395"
+          style="
+            fill: #000000;
+            fill-opacity: 1;
+            fill-rule: evenodd;
+            stroke: none;
+            stroke-width: 1.46761858;
+            stroke-linecap: butt;
+            stroke-linejoin: bevel;
+            stroke-miterlimit: 13.80000019;
+            stroke-dasharray: none;
+            stroke-opacity: 1;
+          "
+        />
+      </svg>
     </div>
-    <div class="spinner">
-      <div class="double-bounce1"></div>
-      <div class="double-bounce2"></div>
-    </div>
-    <svg
-      class="logo"
-      viewBox="0 0 64 64"
-    >
-      <path
-        d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
-        id="path3395"
-        style="
-          fill: #000000;
-          fill-opacity: 1;
-          fill-rule: evenodd;
-          stroke: none;
-          stroke-width: 1.46761858;
-          stroke-linecap: butt;
-          stroke-linejoin: bevel;
-          stroke-miterlimit: 13.80000019;
-          stroke-dasharray: none;
-          stroke-opacity: 1;
-        "
-      />
-    </svg>
   </div>
-</div>
 }
 <!-- -->
 

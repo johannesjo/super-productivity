@@ -1,5 +1,5 @@
 <!--<h1 mat-dialog-title>{{T.F.SYNC.D_CONFLICT.TITLE|translate}}</h1>-->
-<h1 mat-dialog-title>{{T.F.SYNC.D_INITIAL_CFG.TITLE|translate}}</h1>
+<h1 mat-dialog-title>{{ T.F.SYNC.D_INITIAL_CFG.TITLE | translate }}</h1>
 
 <mat-dialog-content>
   <form [formGroup]="form">
@@ -20,7 +20,7 @@
       color="primary"
       mat-button
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
     <button
       [disabled]="!form.valid"
@@ -30,7 +30,7 @@
     >
       <mat-icon>save</mat-icon>
 
-      {{T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE|translate}}
+      {{ T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE | translate }}
     </button>
   </div>
 </mat-dialog-actions>

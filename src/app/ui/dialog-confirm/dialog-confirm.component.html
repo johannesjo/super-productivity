@@ -1,6 +1,6 @@
 <mat-dialog-content>
   <div
-    [innerHtml]="data.message|translate:data.translateParams"
+    [innerHtml]="data.message | translate: data.translateParams"
     class="content"
   ></div>
 </mat-dialog-content>
@@ -17,7 +17,7 @@
       (keydown.ArrowRight)="focusNextButton(confirmButton)"
     >
       <mat-icon>close</mat-icon>
-      {{(data.cancelTxt || T.G.CANCEL)|translate}}
+      {{ data.cancelTxt || T.G.CANCEL | translate }}
     </button>
 
     <button
@@ -32,7 +32,7 @@
       (keydown.ArrowLeft)="focusNextButton(cancelButton)"
     >
       <mat-icon>check</mat-icon>
-      {{(data.okTxt || T.G.OK)|translate}}
+      {{ data.okTxt || T.G.OK | translate }}
     </button>
   </div>
 </mat-dialog-actions>

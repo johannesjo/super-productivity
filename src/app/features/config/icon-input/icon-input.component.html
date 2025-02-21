@@ -18,20 +18,20 @@
   (optionSelected)="onIconSelect($event.option.value)"
   [autoActiveFirstOption]="false"
 >
-  @for (icon of (filteredIcons); track trackByIndex($index, icon)) {
-  <mat-option [value]="icon">
-    <mat-icon>{{icon}}</mat-icon>
-    <span>{{icon}}</span>
-  </mat-option>
+  @for (icon of filteredIcons; track trackByIndex($index, icon)) {
+    <mat-option [value]="icon">
+      <mat-icon>{{ icon }}</mat-icon>
+      <span>{{ icon }}</span>
+    </mat-option>
   }
 </mat-autocomplete>
 
-@if(IS_ELECTRON && !isLinux){
-<mat-icon
-  matSuffix
-  type="button"
-  [matTooltip]="'Open system emoji picker if any'"
-  (click)="openEmojiPicker()"
-  >add_reaction</mat-icon
->
+@if (IS_ELECTRON && !isLinux) {
+  <mat-icon
+    matSuffix
+    type="button"
+    [matTooltip]="'Open system emoji picker if any'"
+    (click)="openEmojiPicker()"
+    >add_reaction</mat-icon
+  >
 }

@@ -3,21 +3,21 @@
   class="list-wrapper"
 >
   @for (innerField of field.fieldGroup; track trackByFn(i, innerField); let i = $index) {
-  <div class="row">
-    <formly-field
-      [field]="innerField"
-      class="field"
-    ></formly-field>
-    <button
-      (click)="removeItem(i)"
-      color="warn"
-      mat-mini-fab
-      type="button"
-      class="remove-btn"
-    >
-      <mat-icon>delete_forever</mat-icon>
-    </button>
-  </div>
+    <div class="row">
+      <formly-field
+        [field]="innerField"
+        class="field"
+      ></formly-field>
+      <button
+        (click)="removeItem(i)"
+        color="warn"
+        mat-mini-fab
+        type="button"
+        class="remove-btn"
+      >
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </div>
   }
 </div>
 
@@ -28,6 +28,6 @@
     type="button"
   >
     <mat-icon>add</mat-icon>
-    {{ to.addText | translate}}
+    {{ to.addText | translate }}
   </button>
 </div>

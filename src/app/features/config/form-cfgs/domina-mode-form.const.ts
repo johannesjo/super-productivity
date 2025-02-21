@@ -2,8 +2,7 @@
 import { ConfigFormSection, DominaModeConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { speak } from '../../../util/speak';
-import {getAvailableVoices} from '../../domina-mode/getAvailableVoices'
-
+import { getAvailableVoices } from '../../domina-mode/getAvailableVoices';
 
 export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
   title: T.F.DOMINA_MODE.FORM.TITLE,
@@ -53,17 +52,17 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
           if (txt.length <= 1) {
             txt = 'No text configured for domina mode';
           }
-          speak(txt, model.volume,model.voice);
+          speak(txt, model.volume, model.voice);
         },
       },
     },
     {
-      key:'voice',
-      type:'select',
-      templateOptions:{
-        label:"Select a Voice",
-        description:"Choose a voice",
-        required:false,
+      key: 'voice',
+      type: 'select',
+      templateOptions: {
+        label: 'Select a Voice',
+        description: 'Choose a voice',
+        required: false,
       },
       hooks: {
         onInit: (field) => {
@@ -71,17 +70,14 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
           voices = getAvailableVoices();
           //console.log(voices);
 
-          if(field.templateOptions){
-            field.templateOptions.options = voices.map(voiceName=>({
-              label:voiceName.name,
+          if (field.templateOptions) {
+            field.templateOptions.options = voices.map((voiceName) => ({
+              label: voiceName.name,
               value: voiceName.voiceURI,
-
-            }))
+            }));
           }
-
-        }
-      }
-
-    }
+        },
+      },
+    },
   ],
 };

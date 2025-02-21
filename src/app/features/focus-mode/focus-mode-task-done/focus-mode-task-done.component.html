@@ -7,12 +7,12 @@
 <h1>Focus Session Completed!</h1>
 
 <div class="msg">
-  <div class="worked-for-label">{{T.F.FOCUS_MODE.WORKED_FOR|translate}}</div>
-  <div class="worked-for-value">{{6213000|msToString:true}}</div>
+  <div class="worked-for-label">{{ T.F.FOCUS_MODE.WORKED_FOR | translate }}</div>
+  <div class="worked-for-value">{{ 6213000 | msToString: true }}</div>
   <!--  <div class="worked-for-value">{{timeElapsed$|async|msToString:true}}</div>-->
 
-  <div class="task-title-label">{{T.F.FOCUS_MODE.ON|translate}}</div>
-  <div class="task-title">{{taskTitle$|async}}</div>
+  <div class="task-title-label">{{ T.F.FOCUS_MODE.ON | translate }}</div>
+  <div class="task-title">{{ taskTitle$ | async }}</div>
 </div>
 
 <div class="btn-wrapper">
@@ -21,24 +21,25 @@
     color="primary"
     (click)="closeFocusOverlay()"
   >
-    {{T.F.FOCUS_MODE.BACK_TO_PLANNING|translate}}
+    {{ T.F.FOCUS_MODE.BACK_TO_PLANNING | translate }}
   </button>
 
-  @if (!(currentTask$|async)) {
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="startNextFocusSession()"
-  >
-    {{T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION|translate}}
-  </button>
-  } @if ((currentTask$|async)) {
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="continueWithFocusSession()"
-  >
-    {{T.F.FOCUS_MODE.CONTINUE_FOCUS_SESSION|translate}}
-  </button>
+  @if (!(currentTask$ | async)) {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="startNextFocusSession()"
+    >
+      {{ T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION | translate }}
+    </button>
+  }
+  @if (currentTask$ | async) {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="continueWithFocusSession()"
+    >
+      {{ T.F.FOCUS_MODE.CONTINUE_FOCUS_SESSION | translate }}
+    </button>
   }
 </div>

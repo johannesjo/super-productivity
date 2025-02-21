@@ -10,7 +10,7 @@
 
 <button
   #routeBtn
-  [routerLink]="[type() ==='TAG' ? 'tag' :'project', workContext().id, 'tasks']"
+  [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext().id, 'tasks']"
   routerLinkActive="isActiveRoute"
   mat-menu-item
 >

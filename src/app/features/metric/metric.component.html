@@ -1,156 +1,165 @@
 <div class="wrapper">
-  @if (projectMetricsService.simpleMetrics$|async; as sm) {
-  <section
-    class="basic-stats"
-    [@fade]
-  >
-    <h1
-      class="mat-h1"
-      style="text-align: center"
+  @if (projectMetricsService.simpleMetrics$ | async; as sm) {
+    <section
+      class="basic-stats"
+      [@fade]
     >
-      {{ T.PM.TITLE|translate }}
-    </h1>
-    <!--  <h2>Basic Metrics</h2>-->
-    <p><i>{{ sm.start }} – {{ sm.end }}</i></p>
-    <div class="material-table">
-      <table>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.TIME_SPENT|translate }}</th>
-          <td>{{ sm.timeSpent|msToString }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.TIME_ESTIMATED|translate }}</th>
-          <td>{{ sm.timeEstimate|msToString }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.TASKS_DONE_CREATED|translate }}</th>
-          <td>{{ sm.nrOfCompletedTasks }} / {{ sm.nrOfAllTasks }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.DAYS_WORKED|translate }}</th>
-          <td>{{ sm.daysWorked }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.AVG_TASKS_PER_DAY_WORKED|translate }}</th>
-          <td>{{ sm.avgTasksPerDay|number:'1.0-1' }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.AVG_BREAKS_PER_DAY|translate }}</th>
-          <td>{{ sm.avgBreakNr|number:'1.0-1' }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_DAY|translate }}</th>
-          <td>{{ sm.avgTimeSpentOnDay|msToString }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate }}</th>
-          <td>{{ sm.avgTimeSpentOnTask|msToString }}</td>
-        </tr>
-        <tr>
-          <th>
-            {{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK|translate }}
-            <br />{{ T.F.METRIC.CMP.COUNTING_SUBTASKS|translate }}
-          </th>
-          <td>{{ sm.avgTimeSpentOnTaskIncludingSubTasks|msToString }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_ON_BREAKS|translate }}</th>
-          <td>{{ sm.avgBreakTime|msToString }}</td>
-        </tr>
-      </table>
-    </div>
-  </section>
-  } @if (!(metricService.hasData$|async)) {
-  <p style="margin-top: 32px">{{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET|translate }}</p>
-  } @if ((metricService.hasData$|async)) {
-  <section class="metric-metrics">
-    <h1>{{ T.F.METRIC.CMP.GLOBAL_METRICS|translate }}</h1>
-    <section class="pie-charts">
-      @if ((metricService.improvementCountsPieChartData$|async); as improvementCounts) {
-      <section>
-        <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT|translate }}</h3>
-        <canvas
-          [type]="pieChartType"
-          [data]="improvementCounts"
-          [legend]="(improvementCounts?.datasets[0].data.length < 12)"
-          [options]="pieChartOptions"
-          baseChart
-        >
-        </canvas>
-      </section>
-      } @if ((metricService.obstructionCountsPieChartData$|async); as obstructionCounts) {
-      <section>
-        <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT|translate }}</h3>
-        <canvas
-          [type]="pieChartType"
-          [data]="obstructionCounts"
-          [legend]="(obstructionCounts?.datasets[0].data.length < 12)"
-          [options]="pieChartOptions"
-          baseChart
-        >
-        </canvas>
-      </section>
-      }
+      <h1
+        class="mat-h1"
+        style="text-align: center"
+      >
+        {{ T.PM.TITLE | translate }}
+      </h1>
+      <!--  <h2>Basic Metrics</h2>-->
+      <p>
+        <i>{{ sm.start }} – {{ sm.end }}</i>
+      </p>
+      <div class="material-table">
+        <table>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.TIME_SPENT | translate }}</th>
+            <td>{{ sm.timeSpent | msToString }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.TIME_ESTIMATED | translate }}</th>
+            <td>{{ sm.timeEstimate | msToString }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.TASKS_DONE_CREATED | translate }}</th>
+            <td>{{ sm.nrOfCompletedTasks }} / {{ sm.nrOfAllTasks }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.DAYS_WORKED | translate }}</th>
+            <td>{{ sm.daysWorked }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.AVG_TASKS_PER_DAY_WORKED | translate }}</th>
+            <td>{{ sm.avgTasksPerDay | number: '1.0-1' }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.AVG_BREAKS_PER_DAY | translate }}</th>
+            <td>{{ sm.avgBreakNr | number: '1.0-1' }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_DAY | translate }}</th>
+            <td>{{ sm.avgTimeSpentOnDay | msToString }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK | translate }}</th>
+            <td>{{ sm.avgTimeSpentOnTask | msToString }}</td>
+          </tr>
+          <tr>
+            <th>
+              {{ T.F.METRIC.CMP.AVG_TIME_SPENT_PER_TASK | translate }}
+              <br />{{ T.F.METRIC.CMP.COUNTING_SUBTASKS | translate }}
+            </th>
+            <td>{{ sm.avgTimeSpentOnTaskIncludingSubTasks | msToString }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.F.METRIC.CMP.AVG_TIME_SPENT_ON_BREAKS | translate }}</th>
+            <td>{{ sm.avgBreakTime | msToString }}</td>
+          </tr>
+        </table>
+      </div>
     </section>
-    <section class="line-charts">
-      @if ((productivityHappiness$|async); as productivityHappiness) {
-      <section>
-        <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME|translate }}</h3>
-        <div class="chart-wrapper">
-          <div class="inner-chart-wrapper">
+  }
+  @if (!(metricService.hasData$ | async)) {
+    <p style="margin-top: 32px">
+      {{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET | translate }}
+    </p>
+  }
+  @if (metricService.hasData$ | async) {
+    <section class="metric-metrics">
+      <h1>{{ T.F.METRIC.CMP.GLOBAL_METRICS | translate }}</h1>
+      <section class="pie-charts">
+        @if (metricService.improvementCountsPieChartData$ | async; as improvementCounts) {
+          <section>
+            <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT | translate }}</h3>
             <canvas
-              [type]="lineChartType"
-              [data]="productivityHappiness"
-              [legend]="true"
-              [options]="lineChartOptions"
-              baseChart
-            ></canvas>
-          </div>
-        </div>
-      </section>
-      }
-    </section>
-  </section>
-  } @if ((metricService.hasData$|async)) {
-  <section class="metric-metrics">
-    <h2>{{ T.F.METRIC.CMP.SIMPLE_COUNTERS|translate }}</h2>
-    <section class="line-charts">
-      @if ((simpleClickCounterData$|async); as simpleCounterClickData) {
-      <section>
-        <h3>{{ T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME|translate }}</h3>
-        <div class="chart-wrapper">
-          <div class="inner-chart-wrapper">
-            <canvas
-              [type]="lineChartType"
-              [data]="simpleCounterClickData"
-              [labels]="simpleCounterClickData.labels"
-              [options]="lineChartOptions"
-              [legend]="true"
+              [type]="pieChartType"
+              [data]="improvementCounts"
+              [legend]="improvementCounts?.datasets[0].data.length < 12"
+              [options]="pieChartOptions"
               baseChart
             >
             </canvas>
-          </div>
-        </div>
-      </section>
-      } @if ((simpleCounterStopWatchData$|async); as simpleCounterStopWatchData) {
-      <section>
-        <h3>{{ T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME|translate }}</h3>
-        <div class="chart-wrapper">
-          <div class="inner-chart-wrapper">
+          </section>
+        }
+        @if (metricService.obstructionCountsPieChartData$ | async; as obstructionCounts) {
+          <section>
+            <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT | translate }}</h3>
             <canvas
-              [type]="lineChartType"
-              [data]="simpleCounterStopWatchData"
-              [labels]="simpleCounterStopWatchData.labels"
-              [options]="lineChartOptions"
-              [legend]="true"
+              [type]="pieChartType"
+              [data]="obstructionCounts"
+              [legend]="obstructionCounts?.datasets[0].data.length < 12"
+              [options]="pieChartOptions"
               baseChart
             >
             </canvas>
-          </div>
-        </div>
+          </section>
+        }
       </section>
-      }
+      <section class="line-charts">
+        @if (productivityHappiness$ | async; as productivityHappiness) {
+          <section>
+            <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME | translate }}</h3>
+            <div class="chart-wrapper">
+              <div class="inner-chart-wrapper">
+                <canvas
+                  [type]="lineChartType"
+                  [data]="productivityHappiness"
+                  [legend]="true"
+                  [options]="lineChartOptions"
+                  baseChart
+                ></canvas>
+              </div>
+            </div>
+          </section>
+        }
+      </section>
     </section>
-  </section>
+  }
+  @if (metricService.hasData$ | async) {
+    <section class="metric-metrics">
+      <h2>{{ T.F.METRIC.CMP.SIMPLE_COUNTERS | translate }}</h2>
+      <section class="line-charts">
+        @if (simpleClickCounterData$ | async; as simpleCounterClickData) {
+          <section>
+            <h3>{{ T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME | translate }}</h3>
+            <div class="chart-wrapper">
+              <div class="inner-chart-wrapper">
+                <canvas
+                  [type]="lineChartType"
+                  [data]="simpleCounterClickData"
+                  [labels]="simpleCounterClickData.labels"
+                  [options]="lineChartOptions"
+                  [legend]="true"
+                  baseChart
+                >
+                </canvas>
+              </div>
+            </div>
+          </section>
+        }
+        @if (simpleCounterStopWatchData$ | async; as simpleCounterStopWatchData) {
+          <section>
+            <h3>{{ T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME | translate }}</h3>
+            <div class="chart-wrapper">
+              <div class="inner-chart-wrapper">
+                <canvas
+                  [type]="lineChartType"
+                  [data]="simpleCounterStopWatchData"
+                  [labels]="simpleCounterStopWatchData.labels"
+                  [options]="lineChartOptions"
+                  [legend]="true"
+                  baseChart
+                >
+                </canvas>
+              </div>
+            </div>
+          </section>
+        }
+      </section>
+    </section>
   }
 </div>

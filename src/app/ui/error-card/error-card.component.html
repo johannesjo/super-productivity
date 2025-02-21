@@ -3,7 +3,9 @@
     <div class="wrap">
       <mat-icon color="warn">error</mat-icon>
       @if (actionAdvice()) {
-      <div><strong>{{actionAdvice()}}</strong></div>
+        <div>
+          <strong>{{ actionAdvice() }}</strong>
+        </div>
       }
       <pre class="error-txt"><code>{{ errorTxt() }}</code></pre>
     </div>

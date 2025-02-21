@@ -1,22 +1,23 @@
 <div
   class="content"
-  [class.split-view]="viewMode==='SPLIT'"
+  [class.split-view]="viewMode === 'SPLIT'"
 >
-  @if (viewMode==='TEXT_ONLY' || viewMode==='SPLIT') {
-  <textarea
-    #textareaEl
-    [(ngModel)]="data.content"
-    (keydown)="keydownHandler($event)"
-    (ngModelChange)="ngModelChange($event)"
-    rows="1"
-    tabindex="3"
-  ></textarea>
-  } @if (viewMode==='PARSED' || viewMode==='SPLIT') {
-  <div
-    markdown
-    [data]="data.content"
-    class="markdown-preview markdown"
-  ></div>
+  @if (viewMode === 'TEXT_ONLY' || viewMode === 'SPLIT') {
+    <textarea
+      #textareaEl
+      [(ngModel)]="data.content"
+      (keydown)="keydownHandler($event)"
+      (ngModelChange)="ngModelChange($event)"
+      rows="1"
+      tabindex="3"
+    ></textarea>
+  }
+  @if (viewMode === 'PARSED' || viewMode === 'SPLIT') {
+    <div
+      markdown
+      [data]="data.content"
+      class="markdown-preview markdown"
+    ></div>
   }
 </div>
 
@@ -28,18 +29,18 @@
     >
       <mat-button-toggle
         value="TEXT_ONLY"
-        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_TEXT_ONLY|translate"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_TEXT_ONLY | translate"
         ><mat-icon>notes</mat-icon></mat-button-toggle
       >
       <mat-button-toggle
         value="SPLIT"
         class="hide-xs"
-        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_SPLIT|translate"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_SPLIT | translate"
         ><mat-icon>vertical_split</mat-icon></mat-button-toggle
       >
       <mat-button-toggle
         value="PARSED"
-        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_PARSED|translate"
+        [matTooltip]="T.F.NOTE.D_FULLSCREEN.VIEW_PARSED | translate"
         ><mat-icon>photo</mat-icon></mat-button-toggle
       >
     </mat-button-toggle-group>
@@ -50,7 +51,7 @@
     mat-button
   >
     <mat-icon>close</mat-icon>
-    {{(T.G.CANCEL)|translate}}
+    {{ T.G.CANCEL | translate }}
   </button>
 
   <button
@@ -60,6 +61,6 @@
     mat-stroked-button
   >
     <mat-icon>save</mat-icon>
-    {{(T.G.SAVE)|translate}}
+    {{ T.G.SAVE | translate }}
   </button>
 </div>

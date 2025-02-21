@@ -1,10 +1,10 @@
 <mat-dialog-content>
   <!--  <h1>XXX {{(task$|async)?.id}}</h1>-->
-  @if (task$|async; as task) {
-  <task-detail-panel
-    [task]="task"
-    [isDialogMode]="true"
-  ></task-detail-panel>
+  @if (task$ | async; as task) {
+    <task-detail-panel
+      [task]="task"
+      [isDialogMode]="true"
+    ></task-detail-panel>
   }
 </mat-dialog-content>
 

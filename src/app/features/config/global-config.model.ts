@@ -157,7 +157,6 @@ export type DominaModeConfig = Readonly<{
   interval: number;
   volume: number;
   voice: string;
-
 }>;
 
 export type FocusModeConfig = Readonly<{

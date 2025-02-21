@@ -5,10 +5,10 @@
   class="search-form mat-elevation-z4"
 >
   <div class="input-wrapper">
-    @if ((isLoading$|async)) {
-    <div class="spinner">
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
+    @if (isLoading$ | async) {
+      <div class="spinner">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
     }
     <mat-icon class="search-icon">search</mat-icon>
     <input
@@ -17,7 +17,7 @@
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
-      [placeholder]="(T.F.SEARCH_BAR.PLACEHOLDER|translate)"
+      [placeholder]="T.F.SEARCH_BAR.PLACEHOLDER | translate"
       matInput
     />
 
@@ -33,8 +33,10 @@
 
   <div class="info-bar">
     <div class="info-text">
-      {{ (!tooManyResults ? T.F.SEARCH_BAR.INFO :
-      T.F.SEARCH_BAR.TOO_MANY_RESULTS)|translate }}
+      {{
+        (!tooManyResults ? T.F.SEARCH_BAR.INFO : T.F.SEARCH_BAR.TOO_MANY_RESULTS)
+          | translate
+      }}
     </div>
   </div>
 
@@ -44,22 +46,23 @@
     autoActiveFirstOption
     [displayWith]="getOptionText"
   >
-    @for (item of (filteredIssueSuggestions$|async); track trackByFn($index, item)) {
-    <mat-option
-      (click)="navigateToItem(item)"
-      class="search-mat-option"
-      [value]="item"
-    >
-      @if (item.ctx) {
-      <tag [tag]="item.ctx"></tag>
-      }
-      <span>{{ item?.titleHighlighted || item?.title }}</span>
-      @if (item.issueType) {
-      <mat-icon [svgIcon]="item.issueType|issueIcon"></mat-icon>
-      } @if (item.isArchiveTask) {
-      <mat-icon>archive</mat-icon>
-      }
-    </mat-option>
+    @for (item of filteredIssueSuggestions$ | async; track trackByFn($index, item)) {
+      <mat-option
+        (click)="navigateToItem(item)"
+        class="search-mat-option"
+        [value]="item"
+      >
+        @if (item.ctx) {
+          <tag [tag]="item.ctx"></tag>
+        }
+        <span>{{ item?.titleHighlighted || item?.title }}</span>
+        @if (item.issueType) {
+          <mat-icon [svgIcon]="item.issueType | issueIcon"></mat-icon>
+        }
+        @if (item.isArchiveTask) {
+          <mat-icon>archive</mat-icon>
+        }
+      </mat-option>
     }
   </mat-autocomplete>
 </form>
