@@ -21,6 +21,7 @@ export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   scope: 'all',
   filter: null,
   isEnableTimeTracking: false,
+  search_scope: 'project',
 };
 
 // NOTE: we need a high limit because git has low usage limits :(
@@ -29,8 +30,6 @@ export const GITLAB_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 8000;
 
 // export const GITLAB_POLL_INTERVAL = 15 * 1000;
 export const GITLAB_BASE_URL = 'https://gitlab.com/';
-
-export const GITLAB_API_BASE_URL = `${GITLAB_BASE_URL}api/v4`;
 
 export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
 
@@ -141,6 +140,20 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
         templateOptions: {
           label: T.F.GITLAB.FORM.SUBMIT_TIMELOGS,
           description: T.F.GITLAB.FORM.SUBMIT_TIMELOGS_DESCRIPTION,
+        },
+      },
+      {
+        key: 'search_scope',
+        type: 'select',
+        defaultValue: 'project',
+        templateOptions: {
+          required: true,
+          label: T.F.GITLAB.FORM.SEARCH_SCOPE,
+          options: [
+            { value: 'project', label: T.F.GITLAB.FORM.SEARCH_SCOPE_PROJECT },
+            { value: 'group', label: T.F.GITLAB.FORM.SEARCH_SCOPE_GROUP },
+            { value: 'instance', label: T.F.GITLAB.FORM.SEARCH_SCOPE_INSTANCE },
+          ],
         },
       },
     ],

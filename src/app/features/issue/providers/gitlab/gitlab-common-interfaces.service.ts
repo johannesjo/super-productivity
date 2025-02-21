@@ -8,11 +8,7 @@ import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.mo
 import { GitlabCfg } from './gitlab.model';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import {
-  GITLAB_BASE_URL,
-  GITLAB_INITIAL_POLL_DELAY,
-  GITLAB_POLL_INTERVAL,
-} from './gitlab.const';
+import { GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
 
@@ -39,15 +35,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   issueLink$(issueId: string, issueProviderId: string): Observable<string> {
     return this._getCfgOnce$(issueProviderId).pipe(
       map((cfg) => {
-        const project: string = cfg.project;
-        if (cfg.gitlabBaseUrl) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
-            ? cfg.gitlabBaseUrl
-            : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${project}/issues/${issueId}`;
-        } else {
-          return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
-        }
+        return this._gitlabApiService.getIssuelink$(issueId, cfg);
       }),
     );
   }
