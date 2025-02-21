@@ -773,8 +773,8 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Esconder",
         "START_NOW": "Iniciar agora",
-        "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
+        "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
       },
       "S_ACTIVE_TASK_DUE": "A tarefa em que está a trabalhar atualmente já tem prazo de validade!<br/> ({{title}})",
       "S_REMINDER_ERR": "Erro na interface do lembrete"

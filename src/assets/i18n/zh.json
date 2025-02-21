@@ -634,7 +634,7 @@
         "SETUP_REDMINE_PROJECT": "关联 Redmine"
       },
       "D_DELETE": {
-        "MSG": "您确定要删除项目“ {{title} }”吗？"
+        "MSG": "您确定要删除项目“ {{title}}”吗？"
       },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "启用项目待办",

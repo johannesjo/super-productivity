@@ -120,10 +120,10 @@
       "BANNER": {
         "ADD_AS_TASK": "Ajouter une Tâche",
         "FOCUS_TASK": "Tâche de concentration",
-        "TXT": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)",
-        "TXT_PAST": "<strong>{{title} }</strong> a commencé à <strong>{{start} }</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title} }</strong> a commencé à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)"
+        "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)",
+        "TXT_PAST": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Erreur du fournisseur de calendrier : {{errTxt} }"
@@ -773,8 +773,8 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Réduire",
         "START_NOW": "Commencer maintenant",
-        "TXT": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> commence à <strong>{{start} }</strong> !<br> (et {{nrOfOtherBanners} } autres tâches sont dues)"
+        "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres tâches sont dues)"
       },
       "S_ACTIVE_TASK_DUE": "La tâche sur laquelle vous travaillez actuellement est arrivée à échéance !<br/> ({{title}})",
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"

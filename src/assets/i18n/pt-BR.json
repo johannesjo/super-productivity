@@ -120,10 +120,10 @@
       "BANNER": {
         "ADD_AS_TASK": "Adicionar como tarefa",
         "FOCUS_TASK": "Tarefa de foco",
-        "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)",
-        "TXT_PAST": "<strong>{{title} }</strong> iniciado em <strong>{{start} }</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title} }</strong> iniciado em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)"
+        "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)",
+        "TXT_PAST": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Erro do provedor de calendário: {{errTxt} }"
@@ -773,10 +773,10 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Esconder",
         "START_NOW": "Comece agora",
-        "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão atrasados)"
+        "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão atrasados)"
       },
-      "S_ACTIVE_TASK_DUE": "A tarefa na qual você está trabalhando atualmente está atrasada!<br/> ( {{title} })",
+      "S_ACTIVE_TASK_DUE": "A tarefa na qual você está trabalhando atualmente está atrasada!<br/> ( {{title}})",
       "S_REMINDER_ERR": "Erro na interface de lembrete"
     },
     "SCHEDULE": {
