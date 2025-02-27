@@ -47,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
+import { TaskCopy } from '../task.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -85,6 +86,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isHideTagTitles = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   planForDay = input<string | undefined>(undefined);
+  readonly additionalFields = input<Partial<TaskCopy>>();
+
   blurred = output<void>();
   done = output<void>();
 
@@ -254,7 +257,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this._lastAddedTaskId = this._taskService.add(
           newTaskStr,
           this.isAddToBacklog(),
-          {},
+          {
+            ...this.additionalFields(),
+          },
           this.isAddToBottom(),
         );
       } else if (this.doubleEnterCount() > 0) {
@@ -272,6 +277,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           item,
           this.isAddToBacklog(),
         );
+
+      const additionalFields = this.additionalFields();
+      if (additionalFields && this._lastAddedTaskId) {
+        const { tagIds, ...otherAdditionalFields } = additionalFields;
+        this._taskService.update(this._lastAddedTaskId, otherAdditionalFields);
+        if (tagIds) {
+          const task = await this._taskService
+            .getByIdOnce$(this._lastAddedTaskId)
+            .toPromise();
+          this._taskService.updateTags(task, [...task.tagIds, ...tagIds]);
+        }
+      }
     }
 
     const planForDay = this.planForDay();

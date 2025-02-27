@@ -1,3 +1,5 @@
+@import '../../../../variables';
+
 :host {
   display: block;
   overflow: auto;
@@ -7,10 +9,22 @@
     margin-bottom: 8px;
     margin-right: 4px;
   }
+
+  add-task-inline {
+    min-height: 80px;
+    display: block;
+  }
 }
 
 .task-items {
   overflow: auto;
   max-height: 100%;
   padding: 0 8px;
+  min-height: 60px;
+}
+
+.empty {
+  text-align: center;
+  font-style: italic;
+  line-height: $planner-item-height;
 }

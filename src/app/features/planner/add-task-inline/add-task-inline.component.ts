@@ -5,6 +5,7 @@ import { AddTaskBarComponent } from '../../tasks/add-task-bar/add-task-bar.compo
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { TaskCopy } from '../../tasks/task.model';
 
 @Component({
   selector: 'add-task-inline',
@@ -17,6 +18,7 @@ export class AddTaskInlineComponent {
   T: typeof T = T;
 
   readonly planForDay = input<string>();
+  readonly additionalFields = input<Partial<TaskCopy>>();
 
   isShowAddTask = false;
 }
