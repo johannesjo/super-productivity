@@ -55,3 +55,62 @@ export const NO_LIST_TAG: Tag = {
       : {}) as Partial<WorkContextThemeCfg>),
   },
 };
+
+// TODO translate
+export const URGENT_TAG: Tag = {
+  color: null,
+  created: Date.now(),
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'emergency',
+  title: 'urgent',
+  id: 'EM_URGENT',
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: '#c618e1',
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: false,
+  },
+};
+
+export const NOT_URGENT_TAG: Tag = {
+  color: null,
+  created: Date.now(),
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: 'not-urgent',
+  id: 'EM_NOT_URGENT',
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: DEFAULT_TODAY_TAG_COLOR,
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: false,
+  },
+};
+
+export const IMPORTANT_TAG: Tag = {
+  color: null,
+  created: Date.now(),
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  icon: 'priority_high',
+  title: 'important',
+  id: 'EM_IMPORTANT',
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: '#e11826',
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: false,
+  },
+};
+
+export const NOT_IMPORTANT_TAG: Tag = {
+  color: null,
+  created: Date.now(),
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: 'not-important',
+  id: 'EM_NOT_IMPORTANT',
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    primary: DEFAULT_TODAY_TAG_COLOR,
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: false,
+  },
+};

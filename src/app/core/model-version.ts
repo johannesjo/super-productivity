@@ -13,7 +13,8 @@ export enum MODEL_VERSION {
   METRIC = 1.0,
   SIMPLE_COUNTER = 2.1,
   NOTE = 1.0,
-  TAG = 1.0,
+  // new default tags for boards feature
+  TAG = 1.1,
   TASK_REPEAT = 1.43,
 
   // eslint-disable-next-line @typescript-eslint/naming-convention

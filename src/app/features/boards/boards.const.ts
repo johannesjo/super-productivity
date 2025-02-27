@@ -1,4 +1,10 @@
 import { BoardCfg } from './boards.model';
+import {
+  IMPORTANT_TAG,
+  NOT_IMPORTANT_TAG,
+  NOT_URGENT_TAG,
+  URGENT_TAG,
+} from '../tag/tag.const';
 
 // TODO translate strings
 export const DEFAULT_BOARDS: BoardCfg[] = [
@@ -11,22 +17,22 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'URGENT_AND_IMPORTANT',
         title: 'Urgent & Important',
-        tagIds: [],
+        tagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
       },
       {
         id: 'NOT_URGENT_AND_IMPORTANT',
         title: 'Not Urgent & Important',
-        tagIds: [],
+        tagIds: [IMPORTANT_TAG.id, NOT_URGENT_TAG.id],
       },
       {
         id: 'URGENT_AND_NOT_IMPORTANT',
         title: 'Urgent & Not Important',
-        tagIds: [],
+        tagIds: [URGENT_TAG.id, NOT_IMPORTANT_TAG.id],
       },
       {
         id: 'NOT_URGENT_AND_NOT_IMPORTANT',
         title: 'Not Urgent & Not Important',
-        tagIds: [],
+        tagIds: [NOT_URGENT_TAG.id, NOT_IMPORTANT_TAG.id],
       },
     ],
   },
