@@ -5,6 +5,10 @@ export interface BoardSrcCfg {
   filterTaskState?: number[];
 }
 
+export interface BoarFieldsToRemove {
+  tagIds?: string[];
+}
+
 export interface BoardPanelCfg extends BoardSrcCfg {
   id: string;
   title: string;

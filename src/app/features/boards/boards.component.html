@@ -1,10 +1,14 @@
 <mat-tab-group
   mat-stretch-tabs="false"
   dynamicHeight="true"
+  cdkScrollable
 >
   @for (board of boards(); track board.id) {
     <mat-tab [label]="board.title">
-      <board [boardCfg]="board"></board>
+      <board
+        [boardCfg]="board"
+        cdkDropListGroup
+      ></board>
     </mat-tab>
   }
 

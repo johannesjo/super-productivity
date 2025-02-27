@@ -6,6 +6,9 @@
         <mat-icon>more_vert</mat-icon>
       </button>
     </header>
-    <board-task-list [panelCfg]="panel"></board-task-list>
+    <board-task-list
+      [panelCfg]="panel"
+      [fieldsToRemove]="fieldsToRemove()"
+    ></board-task-list>
   </div>
 }

@@ -1,6 +1,10 @@
+<!--[cdkDropListData]="panelCfg()"-->
+
 <div
   class="task-items"
   cdkDropList
+  [cdkDropListData]="panelCfg()"
+  (cdkDropListDropped)="drop($event)"
 >
   @for (task of tasks(); track task.id) {
     <planner-task

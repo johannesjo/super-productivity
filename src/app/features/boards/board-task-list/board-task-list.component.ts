@@ -5,14 +5,16 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
-import { BoardPanelCfg } from '../boards.model';
+import { BoardPanelCfg, BoarFieldsToRemove } from '../boards.model';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AddTaskInlineComponent } from '../../planner/add-task-inline/add-task-inline.component';
 import { T } from '../../../t.const';
+import { TaskCopy } from '../../tasks/task.model';
+import { TaskService } from '../../tasks/task.service';
 
 @Component({
   selector: 'board-task-list',
@@ -23,10 +25,11 @@ import { T } from '../../../t.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardTaskListComponent {
-  // tasks = input.required<TaskCopy[]>();
   panelCfg = input.required<BoardPanelCfg>();
+  fieldsToRemove = input.required<BoarFieldsToRemove>();
 
   store = inject(Store);
+  taskService = inject(TaskService);
 
   allTasks$ = this.store.select(selectAllTasks);
   allTasks = toSignal(this.allTasks$, {
@@ -51,4 +54,22 @@ export class BoardTaskListComponent {
     });
   });
   protected readonly T = T;
+
+  drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): void {
+    const panelCfg = ev.container.data;
+    const task = ev.item.data;
+    const fieldsToRemove = this.fieldsToRemove();
+    let newTagIds: string[] = [];
+    if (fieldsToRemove.tagIds?.length) {
+      newTagIds = task.tagIds.filter((tagId) => !fieldsToRemove.tagIds!.includes(tagId));
+    }
+    if (panelCfg.tagIds) {
+      newTagIds = newTagIds.concat(panelCfg.tagIds);
+    }
+
+    this.taskService.updateTags(task, newTagIds);
+    // const allTasks = this.tasks();
+
+    console.log(ev, panelCfg, task);
+  }
 }
