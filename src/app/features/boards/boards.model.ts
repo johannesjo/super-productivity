@@ -12,6 +12,7 @@ export interface BoarFieldsToRemove {
 export interface BoardPanelCfg extends BoardSrcCfg {
   id: string;
   title: string;
+  taskIds: string[];
 }
 
 export interface BoardCfg {

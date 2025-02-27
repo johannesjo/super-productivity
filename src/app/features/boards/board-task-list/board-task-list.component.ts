@@ -25,6 +25,8 @@ import { TaskService } from '../../tasks/task.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardTaskListComponent {
+  T = T;
+
   panelCfg = input.required<BoardPanelCfg>();
   fieldsToRemove = input.required<BoarFieldsToRemove>();
 
@@ -46,14 +48,27 @@ export class BoardTaskListComponent {
 
   tasks = computed(() => {
     const panelCfg = this.panelCfg();
-    return this.allTasks().filter((task) => {
+    const orderedTasks: TaskCopy[] = [];
+    const nonOrderedTasks: TaskCopy[] = [];
+
+    const allFilteredTasks = this.allTasks().filter((task) => {
       if (panelCfg.tagIds?.length) {
         return panelCfg.tagIds!.every((tagId) => task.tagIds.includes(tagId));
       }
       return false;
     });
+
+    allFilteredTasks.forEach((task) => {
+      const index = panelCfg.taskIds.indexOf(task.id);
+      if (index > -1) {
+        orderedTasks[index] = task;
+      } else {
+        nonOrderedTasks.push(task);
+      }
+    });
+
+    return [...orderedTasks, ...nonOrderedTasks];
   });
-  protected readonly T = T;
 
   drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): void {
     const panelCfg = ev.container.data;
