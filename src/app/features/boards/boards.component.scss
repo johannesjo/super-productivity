@@ -1,31 +1,5 @@
 @import '../../../variables.scss';
 
-.grid {
-  --grid-rows: 1;
-  display: grid;
-  grid-template-columns: repeat(var(--grid-cols), 1fr);
-  //grid-template-rows: repeat(var(--grid-rows), 1fr);
-  grid-auto-rows: 1fr;
-  gap: 16px;
-  padding: 16px;
-  max-height: 100%;
-}
-
-.grid-item {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  overflow: auto;
-}
-
-:host planner-task {
-  margin-bottom: 8px;
-}
-
-.task-items {
-  gap: 16px;
-}
-
 :host {
   ::ng-deep {
     //.mat-mdc-tab-header {

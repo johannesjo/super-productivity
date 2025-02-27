@@ -1,0 +1,12 @@
+<div
+  class="task-items"
+  cdkDropList
+>
+  @for (task of tasks(); track task.id) {
+    <planner-task
+      cdkDrag
+      [cdkDragData]="task"
+      [task]="task"
+    ></planner-task>
+  }
+</div>

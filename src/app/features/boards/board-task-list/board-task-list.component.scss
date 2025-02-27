@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  overflow: auto;
+  max-height: 100%;
+
+  planner-task {
+    margin-bottom: 8px;
+    margin-right: 4px;
+  }
+}
+
+.task-items {
+  overflow: auto;
+  max-height: 100%;
+  padding: 0 8px;
+}
