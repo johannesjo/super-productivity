@@ -60,6 +60,7 @@ import {
 import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -84,6 +85,9 @@ export class PersistenceService {
   );
   planner: PersistenceBaseModel<PlannerState> = this._cmBase<PlannerState>(
     BASE_MODEL_CFGS.planner,
+  );
+  boards: PersistenceBaseModel<BoardsState> = this._cmBase<BoardsState>(
+    BASE_MODEL_CFGS.boards,
   );
 
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<

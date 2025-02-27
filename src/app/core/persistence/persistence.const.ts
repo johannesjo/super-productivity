@@ -62,12 +62,14 @@ import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
 import { issueProviderReducer } from '../../features/issue/store/issue-provider.reducer';
 import { migrateIssueProviderState } from '../../features/issue/migrate-issue-providers';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
 
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
   globalConfig: PersistenceBaseModelCfg<GlobalConfigState>;
   reminders: PersistenceBaseModelCfg<Reminder[]>;
   planner: PersistenceBaseModelCfg<PlannerState>;
+  boards: PersistenceBaseModelCfg<BoardsState>;
 }
 
 interface PersistenceEntityModelCfgs {
@@ -109,6 +111,12 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     modelVersion: MODEL_VERSION.___NOT_USED_YET___,
     // no migrations needed yet
     migrateFn: (s: PlannerState): PlannerState => s,
+  },
+  boards: {
+    appDataKey: 'boards',
+    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    // no migrations needed yet
+    migrateFn: (s: BoardsState): BoardsState => s,
   },
 };
 

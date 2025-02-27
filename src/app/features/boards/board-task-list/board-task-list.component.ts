@@ -16,6 +16,7 @@ import { T } from '../../../t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { BoardsActions } from '../store/boards.actions';
+import { moveItemInArray } from '../../../util/move-item-in-array';
 
 @Component({
   selector: 'board-task-list',
@@ -73,9 +74,13 @@ export class BoardTaskListComponent {
   drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): void {
     const panelCfg = ev.container.data;
     const task = ev.item.data;
-    const taskIds = this.tasks().map((t) => t.id);
-    taskIds.splice(ev.currentIndex, 0, task.id);
+    const prevTaskIds = this.tasks().map((t) => t.id);
 
+    const taskIds = prevTaskIds.includes(task.id)
+      ? // move in array
+        moveItemInArray(prevTaskIds, ev.previousIndex, ev.currentIndex)
+      : // NOTE: original array is mutated and splice does not return a new array
+        prevTaskIds.splice(ev.currentIndex, 0, task.id) && prevTaskIds;
     console.log(ev);
     console.log(taskIds);
 
