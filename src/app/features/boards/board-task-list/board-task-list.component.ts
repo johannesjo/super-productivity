@@ -36,7 +36,7 @@ export class BoardTaskListComponent {
   additionalTaskFields = computed(() => {
     const panelCfg = this.panelCfg();
     return {
-      tagIds: panelCfg.tagIds,
+      ...(panelCfg.tagIds ? { tagIds: panelCfg.tagIds } : {}),
       ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
     };
   });

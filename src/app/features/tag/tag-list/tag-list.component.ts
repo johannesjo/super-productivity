@@ -46,12 +46,13 @@ export class TagListComponent {
   tagIds = computed<string[]>(() => this.task().tagIds || []);
   tags = computed<Tag[]>(() => {
     const tagsToHide = this.tagsToHide() || [];
-    const tagIdsFiltered: string[] = this.tagIds().filter(
-      (id) =>
-        id !== this.workContext()?.activeId &&
-        id !== NO_LIST_TAG.id &&
-        !tagsToHide.includes(id),
-    );
+    const tagIdsFiltered: string[] =
+      tagsToHide.length > 0
+        ? this.tagIds().filter((id) => !tagsToHide.includes(id))
+        : this.tagIds().filter(
+            (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
+          );
+
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
     const projectId = this.projectId();
     const project = projectId && (this.projectState()?.entities[projectId] as Project);
