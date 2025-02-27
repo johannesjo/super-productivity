@@ -1,6 +1,10 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { hideFocusOverlay, setFocusSessionActivePage } from '../store/focus-mode.actions';
+import {
+  cancelFocusSession,
+  hideFocusOverlay,
+  setFocusSessionActivePage,
+} from '../store/focus-mode.actions';
 import { FocusModePage } from '../focus-mode.const';
 import {
   selectCurrentTask,
@@ -60,8 +64,9 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
     });
   }
 
-  closeFocusOverlay(): void {
+  cancelAndCloseFocusOverlay(): void {
     this._store.dispatch(hideFocusOverlay());
+    this._store.dispatch(cancelFocusSession());
   }
 
   startNextFocusSession(): void {

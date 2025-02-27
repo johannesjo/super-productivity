@@ -88,7 +88,10 @@ export class FocusModeEffects {
                 return value < 0 ? acc + value : value;
               }),
             )
-          : merge(this._tick$).pipe(
+          : merge(
+              this._tick$,
+              this._actions$.pipe(ofType(cancelFocusSession), mapTo(0)),
+            ).pipe(
               // first val is negative otherwise
               startWith(500),
               scan((acc, value) => {

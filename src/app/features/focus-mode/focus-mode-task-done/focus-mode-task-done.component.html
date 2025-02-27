@@ -8,8 +8,7 @@
 
 <div class="msg">
   <div class="worked-for-label">{{ T.F.FOCUS_MODE.WORKED_FOR | translate }}</div>
-  <div class="worked-for-value">{{ 6213000 | msToString: true }}</div>
-  <!--  <div class="worked-for-value">{{timeElapsed$|async|msToString:true}}</div>-->
+  <div class="worked-for-value">{{ timeElapsed$ | async | msToString: true }}</div>
 
   <div class="task-title-label">{{ T.F.FOCUS_MODE.ON | translate }}</div>
   <div class="task-title">{{ taskTitle$ | async }}</div>
@@ -19,7 +18,7 @@
   <button
     mat-stroked-button
     color="primary"
-    (click)="closeFocusOverlay()"
+    (click)="cancelAndCloseFocusOverlay()"
   >
     {{ T.F.FOCUS_MODE.BACK_TO_PLANNING | translate }}
   </button>

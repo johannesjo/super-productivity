@@ -80,7 +80,8 @@ export const focusModeReducer = createReducer<State>(
     isFocusSessionRunning: true,
     focusSessionTimeToGo: 0,
     focusSessionActivePage: FocusModePage.Main,
-    focusSessionTimeElapsed: 0,
+    // NOTE: not resetting since, we might want to continue
+    // focusSessionTimeElapsed: 0,
     focusSessionDuration:
       state.focusSessionDuration > 0
         ? state.focusSessionDuration
