@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Tag } from '../tag.model';
-import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -31,9 +30,10 @@ import { TagComponent } from '../tag/tag.component';
 export class TagListComponent {
   private readonly _store = inject(Store);
   private readonly _workContextService = inject(WorkContextService);
-  private readonly _matDialog = inject(MatDialog);
 
   task = input.required<Task>();
+
+  tagsToHide = input<string[]>();
 
   isShowProjectTagAlways = input(false);
   isShowProjectTagNever = input(false);
@@ -45,8 +45,12 @@ export class TagListComponent {
 
   tagIds = computed<string[]>(() => this.task().tagIds || []);
   tags = computed<Tag[]>(() => {
+    const tagsToHide = this.tagsToHide() || [];
     const tagIdsFiltered: string[] = this.tagIds().filter(
-      (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
+      (id) =>
+        id !== this.workContext()?.activeId &&
+        id !== NO_LIST_TAG.id &&
+        !tagsToHide.includes(id),
     );
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
     const projectId = this.projectId();
