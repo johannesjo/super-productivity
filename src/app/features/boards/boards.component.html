@@ -1,0 +1,121 @@
+<mat-tab-group
+  mat-stretch-tabs="false"
+  dynamicHeight="true"
+>
+  <mat-tab label="Eisenhower Matrix">
+    <div
+      class="grid"
+      style="--grid-cols: 2; --grid-rows: 2"
+    >
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+
+      <div>4</div>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Kanban">
+    <div
+      class="grid"
+      style="--grid-cols: 3"
+    >
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+
+      <div class="grid-item">
+        <div
+          class="task-items"
+          cdkDropList
+        >
+          @for (task of tasks(); track task.id) {
+            <planner-task
+              cdkDrag
+              [cdkDragData]="task"
+              [task]="task"
+            ></planner-task>
+          }
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab label="Third">Content 3</mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-header-item">
+        <mat-icon>add_circle</mat-icon>
+      </div>
+    </ng-template>
+
+    <ng-template matTabContent></ng-template>
+  </mat-tab>
+</mat-tab-group>

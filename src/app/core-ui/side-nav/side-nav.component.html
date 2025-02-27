@@ -30,6 +30,18 @@
     <mat-icon>edit_calendar</mat-icon>
     <span class="text">{{ T.MH.PLANNER | translate }}</span>
   </button>
+
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="boards"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>grid_view</mat-icon>
+    <!--    <span class="text">{{ T.MH.PLANNER | translate }}</span>-->
+    <span class="text">Boards</span>
+  </button>
 </section>
 
 @if (nonHiddenProjects$ | async; as projectList) {

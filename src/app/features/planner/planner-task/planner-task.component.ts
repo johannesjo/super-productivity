@@ -57,7 +57,8 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input({ required: true }) task!: TaskCopy;
-  readonly day = input<string>();
+  // TODO remove
+  readonly day = input<string | undefined>();
 
   isRepeatTaskCreatedToday = false;
 
