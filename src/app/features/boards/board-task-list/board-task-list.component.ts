@@ -15,6 +15,7 @@ import { AddTaskInlineComponent } from '../../planner/add-task-inline/add-task-i
 import { T } from '../../../t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
+import { BoardsActions } from '../store/boards.actions';
 
 @Component({
   selector: 'board-task-list',
@@ -66,13 +67,18 @@ export class BoardTaskListComponent {
         nonOrderedTasks.push(task);
       }
     });
-
-    return [...orderedTasks, ...nonOrderedTasks];
+    return [...orderedTasks, ...nonOrderedTasks].filter((t) => !!t);
   });
 
   drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): void {
     const panelCfg = ev.container.data;
     const task = ev.item.data;
+    const taskIds = this.tasks().map((t) => t.id);
+    taskIds.splice(ev.currentIndex, 0, task.id);
+
+    console.log(ev);
+    console.log(taskIds);
+
     const fieldsToRemove = this.fieldsToRemove();
     let newTagIds: string[] = [];
     if (fieldsToRemove.tagIds?.length) {
@@ -83,8 +89,11 @@ export class BoardTaskListComponent {
     }
 
     this.taskService.updateTags(task, newTagIds);
-    // const allTasks = this.tasks();
-
-    console.log(ev, panelCfg, task);
+    this.store.dispatch(
+      BoardsActions.updatePanelCfgTaskIds({
+        panelId: panelCfg.id,
+        taskIds,
+      }),
+    );
   }
 }
