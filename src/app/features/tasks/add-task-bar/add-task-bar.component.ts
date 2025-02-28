@@ -89,6 +89,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   tagsToRemove = input<string[]>();
   additionalFields = input<Partial<TaskCopy>>();
   isSkipAddingCurrentTag = input<boolean>(false);
+  taskIdsToExclude = input<string[]>();
 
   blurred = output<void>();
   done = output<void>();
@@ -108,11 +109,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
-  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
-    this._addTaskBarService.getFilteredIssueSuggestions$(
+  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> = this._addTaskBarService
+    .getFilteredIssueSuggestions$(
       this.taskSuggestionsCtrl,
       this.isSearchIssueProviders$,
       this.isLoading,
+    )
+    .pipe(
+      map((suggestions) => {
+        const taskIdsToExclude = this.taskIdsToExclude() || [];
+        return suggestions.filter((s) => {
+          if (s.taskId) {
+            return !taskIdsToExclude.includes(s.taskId);
+          }
+          return true;
+        });
+      }),
     );
 
   activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> =
