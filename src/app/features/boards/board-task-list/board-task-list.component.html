@@ -17,7 +17,7 @@
       cdkDrag
       [cdkDragData]="task"
       [task]="task"
-      [tagsToHide]="panelCfg().includedTagIds"
+      [tagsToHide]="panelCfg().includedTagIds || []"
     ></planner-task>
   }
 

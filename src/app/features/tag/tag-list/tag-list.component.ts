@@ -35,6 +35,7 @@ export class TagListComponent {
 
   tagsToHide = input<string[]>();
 
+  isShowCurrentContextTag = input(false);
   isShowProjectTagAlways = input(false);
   isShowProjectTagNever = input(false);
   workContext = toSignal(this._workContextService.activeWorkContextTypeAndId$);
@@ -45,13 +46,14 @@ export class TagListComponent {
 
   tagIds = computed<string[]>(() => this.task().tagIds || []);
   tags = computed<Tag[]>(() => {
-    const tagsToHide = this.tagsToHide() || [];
-    const tagIdsFiltered: string[] =
-      tagsToHide.length > 0
+    const tagsToHide = this.tagsToHide();
+    const tagIdsFiltered: string[] = !!tagsToHide
+      ? tagsToHide.length > 0
         ? this.tagIds().filter((id) => !tagsToHide.includes(id))
-        : this.tagIds().filter(
-            (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
-          );
+        : this.tagIds()
+      : this.tagIds().filter(
+          (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
+        );
 
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
     const projectId = this.projectId();
