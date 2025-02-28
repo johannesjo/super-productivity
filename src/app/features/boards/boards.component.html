@@ -6,7 +6,7 @@
   [selectedIndex]="selectedTabIndex()"
 >
   @for (board of boards(); track board.id) {
-    <mat-tab [label]="board.title">
+    <mat-tab [label]="board.title | translate">
       <board
         [boardCfg]="board"
         cdkDropListGroup

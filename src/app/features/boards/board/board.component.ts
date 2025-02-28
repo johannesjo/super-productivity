@@ -21,11 +21,12 @@ import {
   IN_PROGRESS_TAG,
   URGENT_TAG,
 } from '../../tag/tag.const';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'board',
   standalone: true,
-  imports: [BoardTaskListComponent, MatIconButton, MatIcon, MatButton],
+  imports: [BoardTaskListComponent, MatIconButton, MatIcon, MatButton, TranslatePipe],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +37,7 @@ import {
 })
 export class BoardComponent {
   store = inject(Store);
+  translateService = inject(TranslateService);
 
   boardCfg = input.required<BoardCfg>();
 
@@ -55,11 +57,18 @@ export class BoardComponent {
       missingTagIds.forEach((tagId) => {
         const defaultTags = [IMPORTANT_TAG, URGENT_TAG, IN_PROGRESS_TAG];
 
-        const tag = defaultTags.find((tagInner) => tagInner.id === tagId) || {
-          ...DEFAULT_TAG,
-          id: tagId,
-          title: `some-tag-${tagId}`,
-        };
+        const defaultTag = defaultTags.find((tagInner) => tagInner.id === tagId);
+
+        const tag = defaultTag
+          ? {
+              ...defaultTag,
+              title: this.translateService.instant(defaultTag.title),
+            }
+          : {
+              ...DEFAULT_TAG,
+              id: tagId,
+              title: `some-tag-${tagId}`,
+            };
 
         this.store.dispatch(addTag({ tag }));
       });

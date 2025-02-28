@@ -2,7 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { Tag, TagCopy, TagState } from './tag.model';
-import { IMPORTANT_TAG, TODAY_TAG, URGENT_TAG } from './tag.const';
+import { TODAY_TAG } from './tag.const';
 import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateTagState = (tagState: TagState): TagState => {
@@ -18,11 +18,7 @@ export const migrateTagState = (tagState: TagState): TagState => {
     // tagEntities[key] = _addNewIssueFields(tagEntities[key] as TagCopy);
   });
 
-  return _addDefaultTagsIfNecessary({
-    ...tagState,
-    entities: tagEntities,
-    [MODEL_VERSION_KEY]: MODEL_VERSION.TAG,
-  });
+  return { ...tagState, entities: tagEntities, [MODEL_VERSION_KEY]: MODEL_VERSION.TAG };
 };
 
 const _addBackgroundImageForDarkTheme = (tag: Tag): Tag => {
@@ -36,26 +32,5 @@ const _addBackgroundImageForDarkTheme = (tag: Tag): Tag => {
         backgroundImageDark: TODAY_TAG.theme.backgroundImageDark,
       },
     };
-  }
-};
-
-const _addDefaultTagsIfNecessary = (tagState: TagState): TagState => {
-  if (tagState.entities[URGENT_TAG.id]) {
-    return tagState;
-  } else {
-    const tagToAdd: Tag[] = [IMPORTANT_TAG, URGENT_TAG].filter(
-      (tag) => !tagState.entities[tag.id],
-    );
-
-    return tagToAdd.reduce<TagState>((acc, tag) => {
-      return {
-        ...acc,
-        entities: {
-          ...acc.entities,
-          [tag.id]: tag,
-        },
-        ids: [...acc.ids, tag.id] as string[],
-      };
-    }, tagState);
   }
 };

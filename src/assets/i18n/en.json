@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "DONE": "Done",
+        "IMPORTANT": "Important",
+        "IN_PROGRESS": "In Progress",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Not Urgent & Important",
+        "NOT_URGENT_NOT_IMPORTANT": "Not Urgent & Not Important",
+        "TO_DO": "To Do",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent & Important",
+        "URGENT_NOT_IMPORTANT": "Urgent & Not Important"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Add Bookmark",

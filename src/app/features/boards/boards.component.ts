@@ -15,6 +15,7 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllBoards } from './store/boards.selectors';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'boards',
@@ -28,6 +29,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
     BoardComponent,
     CdkScrollable,
     CdkDropListGroup,
+    TranslatePipe,
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss',
