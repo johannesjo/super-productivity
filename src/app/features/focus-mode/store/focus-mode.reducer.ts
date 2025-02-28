@@ -25,6 +25,7 @@ export interface State {
   isFocusSessionRunning: boolean;
   focusSessionDuration: number;
   focusSessionTimeElapsed: number;
+  lastSessionTotalDuration: number;
   focusSessionActivePage: FocusModePage;
   mode: FocusModeMode;
 }
@@ -36,6 +37,7 @@ export const initialState: State = {
   isFocusSessionRunning: false,
   focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
   focusSessionTimeElapsed: 0,
+  lastSessionTotalDuration: 0,
   focusSessionActivePage: FocusModePage.TaskSelection,
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as any)
@@ -67,6 +69,7 @@ export const focusModeReducer = createReducer<State>(
     ...state,
     isFocusSessionRunning: true,
     focusSessionActivePage: FocusModePage.Main,
+    lastSessionTotalDuration: 0,
     // NOTE: not resetting since, we might want to continue
     // focusSessionTimeElapsed: 0,
     focusSessionDuration:
@@ -83,6 +86,8 @@ export const focusModeReducer = createReducer<State>(
       ...(isResetPlannedSessionDuration
         ? {
             focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
+            lastSessionTotalDuration: state.focusSessionTimeElapsed,
+            focusSessionTimeElapsed: 0,
           }
         : {}),
       focusSessionActivePage: FocusModePage.SessionDone,

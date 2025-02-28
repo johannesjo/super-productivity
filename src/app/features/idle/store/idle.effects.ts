@@ -333,11 +333,11 @@ export class IdleEffects {
     ),
   );
 
-  constructor() {
-    window.setTimeout(() => {
-      this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-    }, 8700);
-  }
+  // constructor() {
+  //   window.setTimeout(() => {
+  //     this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
+  //   }, 8700);
+  // }
 
   private _initIdlePoll(initialIdleTime: number): void {
     const idleStart = Date.now();

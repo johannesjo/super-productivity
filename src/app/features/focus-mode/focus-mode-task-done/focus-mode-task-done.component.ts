@@ -12,7 +12,7 @@ import {
 } from '../../tasks/store/task.selectors';
 import {
   selectFocusModeMode,
-  selectFocusSessionTimeElapsed,
+  selectLastSessionTotalDurationOrTimeElapsedFallback,
 } from '../store/focus-mode.selectors';
 import { map, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -44,7 +44,9 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
     ),
     take(1),
   );
-  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
+  lastSessionTotalDuration$ = this._store.select(
+    selectLastSessionTotalDurationOrTimeElapsedFallback,
+  );
   T: typeof T = T;
 
   ngAfterViewInit(): void {
