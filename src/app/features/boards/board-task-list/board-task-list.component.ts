@@ -45,7 +45,7 @@ export class BoardTaskListComponent {
     const panelCfg = this.panelCfg();
     return {
       ...(panelCfg.includedTagIds ? { tagIds: panelCfg.includedTagIds } : {}),
-      ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
+      // ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
       ...(panelCfg.isDoneOnly ? { isDone: true } : {}),
       ...(panelCfg.isUnDoneOnly ? { isDone: false } : {}),
     };

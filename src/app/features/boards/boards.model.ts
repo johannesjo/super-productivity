@@ -1,12 +1,9 @@
 export interface BoardSrcCfg {
-  projectId?: string;
-  includedTagIds?: string[];
-  excludedTagIds?: string[];
+  // projectId?: string;
+  includedTagIds: string[];
+  excludedTagIds: string[];
   isDoneOnly?: boolean;
   isUnDoneOnly?: boolean;
-
-  filterDone?: boolean;
-  filterTaskState?: number[];
 }
 
 export interface BoarFieldsToRemove {

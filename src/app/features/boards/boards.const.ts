@@ -14,6 +14,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         id: 'URGENT_AND_IMPORTANT',
         title: T.F.BOARDS.DEFAULT.URGENT_IMPORTANT,
         includedTagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
+        excludedTagIds: [],
         taskIds: [],
       },
       {
@@ -33,6 +34,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'NOT_URGENT_AND_NOT_IMPORTANT',
         title: T.F.BOARDS.DEFAULT.NOT_URGENT_NOT_IMPORTANT,
+        includedTagIds: [],
         excludedTagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
         taskIds: [],
       },
@@ -48,6 +50,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         id: 'TODO',
         title: T.F.BOARDS.DEFAULT.TO_DO,
         isUnDoneOnly: true,
+        includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
       },
@@ -56,15 +59,25 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         title: T.F.BOARDS.DEFAULT.IN_PROGRESS,
         isUnDoneOnly: true,
         includedTagIds: [IN_PROGRESS_TAG.id],
+        excludedTagIds: [],
         taskIds: [],
       },
       {
         id: 'DONE',
         title: T.F.BOARDS.DEFAULT.DONE,
         isDoneOnly: true,
+        includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
       },
     ],
   },
 ];
+
+export const DEFAULT_BOARD_CFG: BoardCfg = {
+  id: '',
+  cols: 1,
+  rows: 1,
+  panels: [],
+  title: '',
+};

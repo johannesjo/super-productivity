@@ -21,6 +21,11 @@
       </div>
     </ng-template>
 
-    <ng-template matTabContent></ng-template>
+    <ng-template matTabContent>
+      <div class="board-add-wrapper">
+        <h2>Add new board</h2>
+        <board-edit [boardCfg]="DEFAULT_BOARD_CFG"></board-edit>
+      </div>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>

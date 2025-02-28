@@ -16,6 +16,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllBoards } from './store/boards.selectors';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { TranslatePipe } from '@ngx-translate/core';
+import { BoardEditComponent } from './board-edit/board-edit.component';
+import { DEFAULT_BOARD_CFG } from './boards.const';
 
 @Component({
   selector: 'boards',
@@ -30,6 +32,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     CdkScrollable,
     CdkDropListGroup,
     TranslatePipe,
+    BoardEditComponent,
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss',
@@ -41,6 +44,8 @@ export class BoardsComponent {
 
   boards = toSignal(this.store.select(selectAllBoards));
   protected readonly T = T;
+
+  DEFAULT_BOARD_CFG = DEFAULT_BOARD_CFG;
 
   constructor() {
     effect(() => {
