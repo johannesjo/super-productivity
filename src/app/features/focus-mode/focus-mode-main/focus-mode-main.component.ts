@@ -11,7 +11,7 @@ import { TaskCopy } from '../../tasks/task.model';
 import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { first, map, switchMap, take, takeUntil, throttleTime } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
@@ -98,6 +98,14 @@ export class FocusModeMainComponent implements OnDestroy {
         : of(null);
     }),
     take(1),
+  );
+
+  autoRationProgress$: Observable<number> = this.timeElapsed$.pipe(
+    map((timeElapsed) => {
+      const percentOfFullMinute = (timeElapsed % 60000) / 60000;
+      return percentOfFullMinute * 100;
+    }),
+    throttleTime(900),
   );
 
   private _onDestroy$ = new Subject<void>();

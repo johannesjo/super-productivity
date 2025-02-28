@@ -12,7 +12,7 @@
         [progress]="focusModeService.sessionProgress$ | async"
       ></progress-circle>
     } @else {
-      <progress-circle [autoRotationDuration]="60000"></progress-circle>
+      <progress-circle [progress]="autoRationProgress$ | async"></progress-circle>
     }
     <div class="progress-label-wrapper">
       <div
