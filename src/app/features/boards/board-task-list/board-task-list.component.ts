@@ -18,6 +18,7 @@ import { TaskService } from '../../tasks/task.service';
 import { BoardsActions } from '../store/boards.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { unique } from '../../../util/unique';
+import { updateTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'board-task-list',
@@ -45,6 +46,8 @@ export class BoardTaskListComponent {
     return {
       ...(panelCfg.includedTagIds ? { tagIds: panelCfg.includedTagIds } : {}),
       ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
+      ...(panelCfg.isDoneOnly ? { isDone: true } : {}),
+      ...(panelCfg.isUnDoneOnly ? { isDone: false } : {}),
     };
   });
 
@@ -64,6 +67,14 @@ export class BoardTaskListComponent {
         isTaskIncluded =
           isTaskIncluded &&
           !panelCfg.excludedTagIds.some((tagId) => task.tagIds.includes(tagId));
+      }
+
+      if (panelCfg.isDoneOnly) {
+        isTaskIncluded = isTaskIncluded && task.isDone;
+      }
+
+      if (panelCfg.isUnDoneOnly) {
+        isTaskIncluded = isTaskIncluded && !task.isDone;
       }
 
       return isTaskIncluded;
@@ -104,6 +115,16 @@ export class BoardTaskListComponent {
     console.log(newTagIds);
 
     this.taskService.updateTags(task, unique(newTagIds));
+    if (panelCfg.isDoneOnly) {
+      this.store.dispatch(
+        updateTask({ task: { id: task.id, changes: { isDone: true } } }),
+      );
+    } else if (panelCfg.isUnDoneOnly) {
+      this.store.dispatch(
+        updateTask({ task: { id: task.id, changes: { isDone: false } } }),
+      );
+    }
+
     this.store.dispatch(
       BoardsActions.updatePanelCfgTaskIds({
         panelId: panelCfg.id,

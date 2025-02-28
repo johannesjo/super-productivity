@@ -1,5 +1,5 @@
 import { BoardCfg } from './boards.model';
-import { IMPORTANT_TAG, URGENT_TAG } from '../tag/tag.const';
+import { IMPORTANT_TAG, IN_PROGRESS_TAG, URGENT_TAG } from '../tag/tag.const';
 
 // TODO translate strings
 export const DEFAULT_BOARDS: BoardCfg[] = [
@@ -46,20 +46,22 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'TODO',
         title: 'To Do',
-        // TODO add all task state stuff
-        includedTagIds: [],
+        isUnDoneOnly: true,
+        excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
       },
       {
         id: 'DOING',
         title: 'Doing',
-        includedTagIds: [],
+        isUnDoneOnly: true,
+        includedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
       },
       {
         id: 'DONE',
         title: 'Done',
-        includedTagIds: [],
+        isDoneOnly: true,
+        excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
       },
     ],

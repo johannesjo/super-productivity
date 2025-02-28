@@ -86,3 +86,16 @@ export const IMPORTANT_TAG: Tag = {
     isDisableBackgroundGradient: false,
   },
 };
+
+export const IN_PROGRESS_TAG: Tag = {
+  color: null,
+  created: Date.now(),
+  ...WORK_CONTEXT_DEFAULT_COMMON,
+  title: 'in-progress',
+  id: 'KANBAN_IN_PROGRESS',
+  theme: {
+    ...WORK_CONTEXT_DEFAULT_THEME,
+    backgroundImageDark: '',
+    isDisableBackgroundGradient: false,
+  },
+};

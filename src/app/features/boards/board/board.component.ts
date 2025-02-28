@@ -15,7 +15,12 @@ import { Store } from '@ngrx/store';
 import { selectAllTagIds } from '../../tag/store/tag.reducer';
 import { unique } from '../../../util/unique';
 import { addTag } from '../../tag/store/tag.actions';
-import { DEFAULT_TAG, IMPORTANT_TAG, URGENT_TAG } from '../../tag/tag.const';
+import {
+  DEFAULT_TAG,
+  IMPORTANT_TAG,
+  IN_PROGRESS_TAG,
+  URGENT_TAG,
+} from '../../tag/tag.const';
 
 @Component({
   selector: 'board',
@@ -48,7 +53,7 @@ export class BoardComponent {
     const missingTagIds = this.missingTagIds();
     if (missingTagIds.length) {
       missingTagIds.forEach((tagId) => {
-        const defaultTags = [IMPORTANT_TAG, URGENT_TAG];
+        const defaultTags = [IMPORTANT_TAG, URGENT_TAG, IN_PROGRESS_TAG];
 
         const tag = defaultTags.find((tagInner) => tagInner.id === tagId) || {
           ...DEFAULT_TAG,
