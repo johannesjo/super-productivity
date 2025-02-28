@@ -8,7 +8,9 @@
   ></task-title>
   <div class="progress-wrapper">
     @if (isCountTimeDown) {
-      <progress-circle [progress]="sessionProgress$ | async"></progress-circle>
+      <progress-circle
+        [progress]="focusModeService.sessionProgress$ | async"
+      ></progress-circle>
     } @else {
       <progress-circle [autoRotationDuration]="60000"></progress-circle>
     }
@@ -19,7 +21,7 @@
       >
         <!--        {{focusModeTimeToGo / 60000}}min-->
         @if (isCountTimeDown) {
-          {{ timeToGo$ | async | msToMinuteClockString }}
+          {{ focusModeService.timeToGo$ | async | msToMinuteClockString }}
         } @else {
           {{ timeElapsed$ | async | msToMinuteClockString }}
         }

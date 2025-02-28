@@ -18,9 +18,7 @@ import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
   selectFocusModeMode,
-  selectFocusSessionProgress,
   selectFocusSessionTimeElapsed,
-  selectFocusSessionTimeToGo,
 } from '../store/focus-mode.selectors';
 import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { updateTask } from '../../tasks/store/task.actions';
@@ -42,6 +40,7 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counter-button/simple-counter-button.component';
 import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-attachment-list/task-attachment-list.component';
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
+import { FocusModeService } from '../focus-mode.service';
 
 @Component({
   selector: 'focus-mode-main',
@@ -74,12 +73,11 @@ export class FocusModeMainComponent implements OnDestroy {
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
 
-  timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
+  focusModeService = inject(FocusModeService);
+
   timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
   mode$ = this._store.select(selectFocusModeMode);
   isCountTimeDown$ = this.mode$.pipe(map((mode) => mode !== FocusModeMode.Flowtime));
-
-  sessionProgress$ = this._store.select(selectFocusSessionProgress);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -165,7 +163,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   finishCurrentTask(): void {
-    this._store.dispatch(focusSessionDone());
+    this._store.dispatch(focusSessionDone({}));
     this._store.dispatch(
       updateTask({
         task: {

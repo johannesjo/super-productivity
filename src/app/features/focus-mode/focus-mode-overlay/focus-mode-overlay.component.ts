@@ -9,9 +9,7 @@ import { Store } from '@ngrx/store';
 import {
   selectFocusModeMode,
   selectFocusSessionActivePage,
-  selectFocusSessionProgress,
   selectFocusSessionTimeElapsed,
-  selectFocusSessionTimeToGo,
   selectIsFocusSessionRunning,
 } from '../store/focus-mode.selectors';
 import {
@@ -40,6 +38,7 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { FocusModeService } from '../focus-mode.service';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -68,6 +67,8 @@ import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-
 export class FocusModeOverlayComponent implements OnDestroy {
   readonly taskService = inject(TaskService);
   readonly bannerService = inject(BannerService);
+  readonly focusModeService = inject(FocusModeService);
+
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
 
@@ -151,10 +152,8 @@ export class FocusModeOverlayComponent implements OnDestroy {
         msg: 'Focus Session is running',
         timer$: isCountTimeUp
           ? this._store.select(selectFocusSessionTimeElapsed)
-          : this._store.select(selectFocusSessionTimeToGo),
-        progress$: isCountTimeUp
-          ? undefined
-          : this._store.select(selectFocusSessionProgress),
+          : this.focusModeService.timeToGo$,
+        progress$: isCountTimeUp ? undefined : this.focusModeService.sessionProgress$,
         action2: {
           label: 'To Focus Overlay',
           fn: () => {

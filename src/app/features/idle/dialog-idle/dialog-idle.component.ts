@@ -144,6 +144,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
           this._matDialogRef.close({
             isResetBreakTimer: this.isResetBreakTimer,
             trackItems: res.trackItems,
+            wasFocusSessionRunning: this.data.wasFocusSessionRunning,
           });
         }
       });
@@ -165,12 +166,14 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
       isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [],
       simpleCounterToggleBtnsWhenNoTrackItems: this.simpleCounterToggleBtns,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
     });
   }
 
   trackAsBreak(): void {
     this._matDialogRef.close({
       isResetBreakTimer: this.isResetBreakTimer,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
       trackItems: [
         {
           type: 'BREAK',
@@ -184,6 +187,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
   track(): void {
     this._matDialogRef.close({
       isResetBreakTimer: this.isResetBreakTimer,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
       trackItems: [
         {
           type: 'TASK',

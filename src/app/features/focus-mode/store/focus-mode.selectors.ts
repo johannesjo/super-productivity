@@ -15,18 +15,9 @@ export const selectFocusSessionDuration = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionDuration,
 );
-export const selectLastFocusSessionDuration = createSelector(
-  selectFocusModeState,
-  (state) => state.lastFocusSessionDuration,
-);
 export const selectIsFocusOverlayShown = createSelector(
   selectFocusModeState,
   (state) => state.isFocusOverlayShown,
-);
-
-export const selectFocusSessionTimeToGo = createSelector(
-  selectFocusModeState,
-  (state) => state.focusSessionTimeToGo,
 );
 
 export const selectFocusSessionTimeElapsed = createSelector(
@@ -37,11 +28,4 @@ export const selectFocusSessionTimeElapsed = createSelector(
 export const selectFocusSessionActivePage = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionActivePage,
-);
-
-export const selectFocusSessionProgress = createSelector(
-  selectFocusModeState,
-  (state) =>
-    ((state.focusSessionDuration - state.focusSessionTimeToGo) * 100) /
-    state.focusSessionDuration,
 );
