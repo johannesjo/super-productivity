@@ -86,7 +86,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isHideTagTitles = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   planForDay = input<string | undefined>(undefined);
-  readonly additionalFields = input<Partial<TaskCopy>>();
+  tagsToRemove = input<string[]>();
+  additionalFields = input<Partial<TaskCopy>>();
+  isSkipAddingCurrentTag = input<boolean>(false);
 
   blurred = output<void>();
   done = output<void>();
@@ -276,17 +278,28 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
           item,
           this.isAddToBacklog(),
+          !this.isSkipAddingCurrentTag(),
         );
 
       const additionalFields = this.additionalFields();
-      if (additionalFields && this._lastAddedTaskId) {
-        const { tagIds, ...otherAdditionalFields } = additionalFields;
+      const tagsToRemove = this.tagsToRemove();
+
+      if (this._lastAddedTaskId && (additionalFields || tagsToRemove)) {
+        const { tagIds, ...otherAdditionalFields } = additionalFields || { tagIds: [] };
+
         this._taskService.update(this._lastAddedTaskId, otherAdditionalFields);
-        if (tagIds) {
+        if (tagIds || tagsToRemove) {
           const task = await this._taskService
             .getByIdOnce$(this._lastAddedTaskId)
             .toPromise();
-          this._taskService.updateTags(task, [...task.tagIds, ...tagIds]);
+          console.log(additionalFields, tagsToRemove, task);
+
+          this._taskService.updateTags(
+            task,
+            [...task.tagIds, ...(tagIds || [])].filter(
+              (tagId) => !tagsToRemove || !tagsToRemove.includes(tagId),
+            ),
+          );
         }
       }
     }

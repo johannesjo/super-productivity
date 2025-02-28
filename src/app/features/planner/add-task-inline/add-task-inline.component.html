@@ -16,6 +16,8 @@
     (blurred)="isShowAddTask = false"
     (done)="isShowAddTask = false"
     [planForDay]="planForDay()"
+    [isSkipAddingCurrentTag]="isSkipAddingCurrentTag()"
     [additionalFields]="additionalFields()"
+    [tagsToRemove]="tagsToRemove()"
   ></add-task-bar>
 }

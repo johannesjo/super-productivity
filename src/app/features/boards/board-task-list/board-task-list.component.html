@@ -1,5 +1,9 @@
 <!--[cdkDropListData]="panelCfg()"-->
-<add-task-inline [additionalFields]="additionalTaskFields()"></add-task-inline>
+<add-task-inline
+  [additionalFields]="additionalTaskFields()"
+  [tagsToRemove]="panelCfg().excludedTagIds"
+  [isSkipAddingCurrentTag]="true"
+></add-task-inline>
 
 <div
   class="task-items"

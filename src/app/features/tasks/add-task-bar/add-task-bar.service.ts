@@ -162,14 +162,19 @@ export class AddTaskBarService {
   async addTaskFromExistingTaskOrIssue(
     item: AddTaskSuggestion,
     isAddToBacklog: boolean,
+    isAddToCurrentTag: boolean,
   ): Promise<string | undefined> {
     if (item.taskId && item.isFromOtherContextAndTagOnlySearch) {
-      const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
-      this._taskService.updateTags(task, [
-        ...task.tagIds,
-        this._workContextService.activeWorkContextId as string,
-      ]);
-
+      if (
+        isAddToCurrentTag &&
+        this._workContextService.activeWorkContextType === WorkContextType.TAG
+      ) {
+        const task = await this._taskService.getByIdOnce$(item.taskId).toPromise();
+        this._taskService.updateTags(task, [
+          ...task.tagIds,
+          this._workContextService.activeWorkContextId as string,
+        ]);
+      }
       this._snackService.open({
         ico: 'playlist_add',
         msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
