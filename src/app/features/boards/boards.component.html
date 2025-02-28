@@ -2,6 +2,8 @@
   mat-stretch-tabs="false"
   dynamicHeight="true"
   cdkScrollable
+  (selectedIndexChange)="selectedTabIndex.set($event)"
+  [selectedIndex]="selectedTabIndex()"
 >
   @for (board of boards(); track board.id) {
     <mat-tab [label]="board.title">
