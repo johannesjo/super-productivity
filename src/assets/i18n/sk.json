@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Hotovo",
+        "EISENHAUER_MATRIX": "Eisenhauerova matica",
+        "IMPORTANT": "Dôležité",
+        "IN_PROGRESS": "Prebieha",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Nie je urgentné a dôležité",
+        "NOT_URGENT_NOT_IMPORTANT": "Nie je urgentné a nie je dôležité",
+        "TO_DO": "Na zozname úloh",
+        "URGENT": "Urgentné",
+        "URGENT_IMPORTANT": "Urgentné a dôležité",
+        "URGENT_NOT_IMPORTANT": "Urgentné a nie je dôležité"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Pridať záložku",
@@ -877,6 +892,10 @@
         "T5": "2. Alebo môžete vzdialené údaje prepísať svojimi miestnymi údajmi. Všetky vzdialené zmeny sa\n    stratia!",
         "T6": "Odporúča sa vytvoriť zálohu prepísaných údajov!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Uložiť a povoliť synchronizáciu",
+        "TITLE": "Nastaviť synchronizáciu"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Zakázať synchronizáciu",
         "PERM_FILE": "Dajte povolenie",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Cannot assign project via short syntax for repeatable tasks!",
+        "CREATED_FOR_PROJECT": "Presunul úlohu \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Prejsť na projekt",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_PROJECT": "Presunul úlohu \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Prejsť na projekt",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Pridať",
+    "ADVANCED_CFG": "Pokročilé nastavenia",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",

@@ -60,7 +60,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       },
       {
         id: 'DONE',
-        title: 'Done',
+        title: T.F.BOARDS.DEFAULT.DONE,
         isDoneOnly: true,
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],

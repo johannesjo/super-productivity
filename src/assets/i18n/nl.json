@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Klaar",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "IMPORTANT": "Belangrijk",
+        "IN_PROGRESS": "Bezig",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Niet Urgent & Belangrijk",
+        "NOT_URGENT_NOT_IMPORTANT": "Niet Urgent & Niet Belangrijk",
+        "TO_DO": "Te Doen",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent & Belangrijk",
+        "URGENT_NOT_IMPORTANT": "Urgent & Niet Belangrijk"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Voeg bladwijzer toe",
@@ -877,6 +892,10 @@
         "T5": "2. Of je kunt de gegevens op afstand overschrijven met je lokale gegevens. Alle wijzigingen op afstand\n    verloren gaan!",
         "T6": "Het maken van een back-up van de gegevens die je overschrijft wordt aanbevolen!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Opslaan & Synchronisatie Inschakelen",
+        "TITLE": "Synchronisatie Configureren"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Synchronisatie uitschakelen",
         "PERM_FILE": "Geef permissies",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Kan project niet toewijzen via korte syntaxis voor herhaalbare taken!",
+        "CREATED_FOR_PROJECT": "Taak \"{{taskTitle}}\" verplaatst naar project \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ga naar Project",
         "DELETED": "Taak \"{{title}}\" verwijderd",
         "FOUND_MOVE_FROM_BACKLOG": "Taak <strong>{{title}}</strong> verplaatst van backlog naar de takenlijst van vandaag",
         "FOUND_MOVE_FROM_OTHER_LIST": "Taak <strong>{{title}}</strong> van <strong>{{contextTitle}}</strong> toegevoegd aan huidige lijst",
         "FOUND_RESTORE_FROM_ARCHIVE": "Herstelde taak <strong>{{title}}</strong> gerelateerd aan probleem uit archief",
         "LAST_TAG_DELETION_WARNING": "U probeert de laatste tag van een niet-projecttaak te verwijderen. Dit mag niet!",
+        "MOVED_TO_PROJECT": "Taak \"{{taskTitle}}\" verplaatst naar project \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ga naar Project",
         "REMINDER_ADDED": "Geplande taak \"{{title}}\"",
         "REMINDER_DELETED": "Herinnering voor taak verwijderd",
         "REMINDER_UPDATED": "Herinnering voor taak \"{{title}}\" bijgewerkt",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Voeg  toe",
+    "ADVANCED_CFG": "Geavanceerde Configuratie",
     "CANCEL": "annuleren",
     "CLOSE": "Sluiten",
     "DELETE": "Verwijderen",

@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Hecho",
+        "EISENHAUER_MATRIX": "Matriz de Eisenhauer",
+        "IMPORTANT": "Importante",
+        "IN_PROGRESS": "EN PROGRESO",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "No Urgente y Importante",
+        "NOT_URGENT_NOT_IMPORTANT": "No Urgente y No Importante",
+        "TO_DO": "Por hacer",
+        "URGENT": "Urgente",
+        "URGENT_IMPORTANT": "Urgente e Importante",
+        "URGENT_NOT_IMPORTANT": "Urgente y No Importante"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Agregar marcador",
@@ -877,6 +892,10 @@
         "T5": "2. O puedes sobrescribir los datos remotos con los locales. Todos los cambios remotos\n    se perderán.",
         "T6": "¡¡¡Se recomienda crear una copia de seguridad de los datos que sobrescriba!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Guardar y Habilitar Sincronización",
+        "TITLE": "Configurar Sincronización"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deshabilitar sincronización",
         "PERM_FILE": "Dar permiso",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "No se puede asignar un proyecto mediante la sintaxis corta para tareas repetibles.",
+        "CREATED_FOR_PROJECT": "Movida la tarea \"{{taskTitle}}\" al proyecto \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ir al proyecto",
         "DELETED": "Tarea eliminada \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Se movió la tarea existente <strong>{{title}}</strong> a la lista de tareas de hoy",
         "FOUND_MOVE_FROM_OTHER_LIST": "Se agregó la tarea <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> a la lista actual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarea restaurada <strong>{{title}}</strong> relacionada con el problema desde el archivo",
         "LAST_TAG_DELETION_WARNING": "Estás intentando eliminar la última etiqueta de una tarea que no es de proyecto. ¡Esto no esta permitido!",
+        "MOVED_TO_PROJECT": "Movida la tarea \"{{taskTitle}}\" al proyecto \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ir al proyecto",
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
         "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Agregar",
+    "ADVANCED_CFG": "Configuración avanzada",
     "CANCEL": "Cancelar",
     "CLOSE": "Cerrar",
     "DELETE": "Borrar",

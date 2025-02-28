@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Selesai",
+        "EISENHAUER_MATRIX": "Matriks Eisenhauer",
+        "IMPORTANT": "Penting",
+        "IN_PROGRESS": "Sedang berlangsung",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Tidak Mendesak & Penting",
+        "NOT_URGENT_NOT_IMPORTANT": "Tidak Mendesak & Tidak Penting",
+        "TO_DO": "Tugas yang Harus Dilakukan",
+        "URGENT": "Mendesak",
+        "URGENT_IMPORTANT": "Mendesak & Penting",
+        "URGENT_NOT_IMPORTANT": "Mendesak & Tidak Penting"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Tambah Bookmark",
@@ -877,6 +892,10 @@
         "T5": "2. Atau Anda dapat menimpa data jarak jauh dengan data lokal. Semua perubahan jarak jauh akan\n    akan hilang!",
         "T6": "Disarankan untuk membuat cadangan data yang Anda timpa!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Simpan & Aktifkan Sinkronisasi",
+        "TITLE": "Konfigurasi Sinkronisasi"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Nonaktifkan sinkronisasi",
         "PERM_FILE": "Berikan izin",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Tidak dapat menetapkan proyek melalui sintaks pendek untuk tugas yang dapat diulang!",
+        "CREATED_FOR_PROJECT": "Pindahkan tugas \"{{taskTitle}}\" ke proyek \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Pergi ke Proyek",
         "DELETED": "Tugas \"{{title}}\" dihapus",
         "FOUND_MOVE_FROM_BACKLOG": "Memindahkan tugas <strong>{{title}}</strong> dari backlog ke daftar tugas hari ini",
         "FOUND_MOVE_FROM_OTHER_LIST": "Menambahkan tugas <strong>{{title}}</strong> dari <strong>{{contextTitle}}</strong> ke daftar terbaru",
         "FOUND_RESTORE_FROM_ARCHIVE": "Memulihkan tugas <strong>{{title}}</strong> yang terkait dengan masalah dari arsip",
         "LAST_TAG_DELETION_WARNING": "Anda mencoba menghapus tag terakhir dari tugas non-proyek. Ini tidak diperbolehkan!",
+        "MOVED_TO_PROJECT": "Pindahkan tugas \"{{taskTitle}}\" ke proyek \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Pergi ke Proyek",
         "REMINDER_ADDED": "Tugas \"{{title}}\" terjadwal",
         "REMINDER_DELETED": "Pengingat yang dihapus untuk tugas",
         "REMINDER_UPDATED": "Pengingat yang diperbarui untuk tugas \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Menambahkan",
+    "ADVANCED_CFG": "Konfigurasi Lanjutan",
     "CANCEL": "Batal",
     "CLOSE": "Tutup",
     "DELETE": "Hapus",

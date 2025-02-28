@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Ferdig",
+        "EISENHAUER_MATRIX": "Eisenhauer-matrise",
+        "IMPORTANT": "Viktig",
+        "IN_PROGRESS": "Under arbeid",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Ikke haster & Viktig",
+        "NOT_URGENT_NOT_IMPORTANT": "Ikke haster & Ikke viktig",
+        "TO_DO": "Å gjøre",
+        "URGENT": "Haster",
+        "URGENT_IMPORTANT": "Haster & Viktig",
+        "URGENT_NOT_IMPORTANT": "Haster & Ikke viktig"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Legg til bokmerke",
@@ -877,6 +892,10 @@
         "T5": "2. Eller du kan overskrive de eksterne dataene med dine lokale. Alle eksterne endringer vil\n    gå tapt!",
         "T6": "Det anbefales å ta en sikkerhetskopi av dataene du overskriver!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Lagre & Aktiver synkronisering",
+        "TITLE": "Konfigurer synkronisering"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deaktiver synkronisering",
         "PERM_FILE": "Gi tillatelse",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Kan ikke tilordne prosjekt via kort syntaks for repeterbare oppgaver!",
+        "CREATED_FOR_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Gå til prosjekt",
         "DELETED": "Slettet oppgave \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Flyttet oppgave <strong>{{title}}</strong> fra backlog til dagens oppgaveliste",
         "FOUND_MOVE_FROM_OTHER_LIST": "Lagt til oppgave <strong>{{title}}</strong> fra <strong>{{contextTitle}}</strong> til gjeldende liste",
         "FOUND_RESTORE_FROM_ARCHIVE": "Gjenopprettet oppgave <strong>{{title}}</strong> relatert til utgave fra arkivet",
         "LAST_TAG_DELETION_WARNING": "Du prøver å fjerne den siste taggen for en ikke-prosjektoppgave. Dette er ikke tillatt!",
+        "MOVED_TO_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Gå til prosjekt",
         "REMINDER_ADDED": "Planlagt oppgave \"{{title}}\"",
         "REMINDER_DELETED": "Slettet påminnelse for oppgaven",
         "REMINDER_UPDATED": "Oppdatert påminnelse for oppgaven \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "ADD",
+    "ADVANCED_CFG": "Avansert konfigurasjon",
     "CANCEL": "Avbryt",
     "CLOSE": "Lukk",
     "DELETE": "Slett",

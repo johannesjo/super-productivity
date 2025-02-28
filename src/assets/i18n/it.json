@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Მზადაა",
+        "EISENHAUER_MATRIX": "Ეიზენჰაუერის მატრიცა",
+        "IMPORTANT": "Მნიშვნელოვანია",
+        "IN_PROGRESS": "Მიმდინარე",
+        "KANBAN": "Კანბანი",
+        "NOT_URGENT_IMPORTANT": "Არ არის გადაუდებელი და მნიშვნელოვანი",
+        "NOT_URGENT_NOT_IMPORTANT": "Არ არის გადაუდებელი და უმნიშვნელოა",
+        "TO_DO": "Უნდა გააკეთოს",
+        "URGENT": "Სასწრაფო",
+        "URGENT_IMPORTANT": "Გადაუდებელი და მნიშვნელოვანი",
+        "URGENT_NOT_IMPORTANT": "Გადაუდებელი და უმნიშვნელოა"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Aggiungi segnalibro",
@@ -877,6 +892,10 @@
         "T5": "2. Oppure puoi sovrascrivere i dati remoti con questi dati locali. Tutti i cambiamenti remoti saranno\npersi!",
         "T6": "E' consigliata la creazione di un backup dei dati che sovrascrivi!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Შენახვა & ჩართვა სინქრონიზაცია",
+        "TITLE": "Სინქრონიზაციის კონფიგურაცია"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disabilita sincronizzazione",
         "PERM_FILE": "Dai i permessi",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossibile assegnare il progetto tramite la sintassi breve per le attività ripetibili!",
+        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Პროექტში გადასვლა",
         "DELETED": "Attività \"{{title}} eliminata\"",
         "FOUND_MOVE_FROM_BACKLOG": "Attività <strong>{{title}}</strong> spostata dagli arretrati alla lista delle attività di oggi",
         "FOUND_MOVE_FROM_OTHER_LIST": "Attività <strong>{{title}}</strong> aggiunta da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
         "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
+        "MOVED_TO_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Პროექტში გადასვლა",
         "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per attività",
         "REMINDER_UPDATED": "Aggiornato promemoria per attività \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Aggiungi",
+    "ADVANCED_CFG": "Მოწინავე კონფიგურაცია",
     "CANCEL": "Annulla",
     "CLOSE": "Chiudi",
     "DELETE": "Cancella",

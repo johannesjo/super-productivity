@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "انجام",
+        "EISENHAUER_MATRIX": "ماتریس آیزنهاور",
+        "IMPORTANT": "مهم",
+        "IN_PROGRESS": "در حال انجام",
+        "KANBAN": "کانبان",
+        "NOT_URGENT_IMPORTANT": "فوری و مهم نیست",
+        "NOT_URGENT_NOT_IMPORTANT": "فوری نیست و مهم نیست",
+        "TO_DO": "انجام دادن",
+        "URGENT": "فوری",
+        "URGENT_IMPORTANT": "فوری و مهم",
+        "URGENT_NOT_IMPORTANT": "فوری و غیر مهم"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "اضافه کردن نشانک",
@@ -877,6 +892,10 @@
         "T5": "2. یا می توانید داده های راه دور را با داده های محلی خود بازنویسی کنید. همه تغییرات از راه دور انجام خواهد شد\n    گم شود!",
         "T6": "ایجاد یک نسخه پشتیبان از اطلاعاتی که بازنویسی می کنید توصیه می شود!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "ذخیره و فعال کردن همگام سازی",
+        "TITLE": "پیکربندی همگام سازی"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی",
         "PERM_FILE": "اجازه بدهید",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "نمی توان پروژه را از طریق نحو کوتاه برای کارهای تکرار شونده اختصاص داد!",
+        "CREATED_FOR_PROJECT": "وظیفه \"{{taskTitle}}\" به پروژه \"{{projectTitle}}\" منتقل شد",
+        "CREATED_FOR_PROJECT_ACTION": "رفتن به پروژه",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>کار اضافه شده{{title}}</strong> از <strong>{{contextTitle}}</strong> به لیست فعلی",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "شما در حال تلاش برای حذف آخرین برچسب یک کار غیر پروژه هستید. این مجاز نیست!",
+        "MOVED_TO_PROJECT": "وظیفه \"{{taskTitle}}\" به پروژه \"{{projectTitle}}\" منتقل شد",
+        "MOVED_TO_PROJECT_ACTION": "رفتن به پروژه",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "اضافه کردن",
+    "ADVANCED_CFG": "پیکربندی پیشرفته",
     "CANCEL": "لغو",
     "CLOSE": "بستن",
     "DELETE": "حذف",

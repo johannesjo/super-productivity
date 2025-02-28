@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "完成です",
+        "EISENHAUER_MATRIX": "アイゼンハウアーマトリックス",
+        "IMPORTANT": "大事な",
+        "IN_PROGRESS": "進行中で",
+        "KANBAN": "カンバン",
+        "NOT_URGENT_IMPORTANT": "緊急性がなく、重要ではありません",
+        "NOT_URGENT_NOT_IMPORTANT": "緊急ではない、重要ではない",
+        "TO_DO": "やるべきこと",
+        "URGENT": "緊急",
+        "URGENT_IMPORTANT": "緊急かつ重要",
+        "URGENT_NOT_IMPORTANT": "緊急 & 重要ではない"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "ブックマークを追加",
@@ -877,6 +892,10 @@
         "T5": "2.または、リモートのデータをローカルのデータで上書きすることもできます。リモートの変更はすべて\n    は失われます！",
         "T6": "上書きしたデータのバックアップを作成することをお勧めします！"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Sync の保存と有効化",
+        "TITLE": "Sync の設定"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "同期を無効にする",
         "PERM_FILE": "許可を与える",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクの短い構文でプロジェクトを割り当てられない！",
+        "CREATED_FOR_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
+        "CREATED_FOR_PROJECT_ACTION": "プロジェクトに移動",
         "DELETED": "削除されたタスク \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "既存のタスク <strong>{{title}}</strong> を今日のタスクリストに移動しました",
         "FOUND_MOVE_FROM_OTHER_LIST": "タスク <strong>{{title}}</strong> を <strong>{{contextTitle}}</strong> から現在のリストに追加しました",
         "FOUND_RESTORE_FROM_ARCHIVE": "アーカイブからの発行に関連する復元されたタスク <strong>{{title}}</strong> ",
         "LAST_TAG_DELETION_WARNING": "非プロジェクトタスクの最後のタグを削除しようとしています。これは許可されていません！",
+        "MOVED_TO_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
+        "MOVED_TO_PROJECT_ACTION": "プロジェクトに移動",
         "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
         "REMINDER_DELETED": "タスクの通知を削除しました",
         "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "追加",
+    "ADVANCED_CFG": "詳細設定",
     "CANCEL": "キャンセル",
     "CLOSE": "閉じる",
     "DELETE": "削除",

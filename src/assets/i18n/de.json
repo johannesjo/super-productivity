@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Erledigt",
+        "EISENHAUER_MATRIX": "Eisenhower-Matrix",
+        "IMPORTANT": "Wichtig",
+        "IN_PROGRESS": "In Bearbeitung",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Nicht dringend & wichtig",
+        "NOT_URGENT_NOT_IMPORTANT": "Nicht dringend & nicht wichtig",
+        "TO_DO": "Zu erledigen",
+        "URGENT": "Dringend",
+        "URGENT_IMPORTANT": "Dringend & wichtig",
+        "URGENT_NOT_IMPORTANT": "Dringend & nicht wichtig"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Lesezeichen hinzufügen",
@@ -877,6 +892,10 @@
         "T5": "2. Oder Sie können die entfernten Daten mit Ihren lokalen Daten überschreiben. Alle entfernten Änderungen werden\n    verloren gehen!",
         "T6": "Es wird empfohlen, eine Sicherungskopie der überschriebenen Daten zu erstellen!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Speichern & Synchronisierung aktivieren",
+        "TITLE": "Synchronisierung konfigurieren"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Synchronisierung deaktivieren",
         "PERM_FILE": "Erlaubnis erteilen",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Projektzuweisung über Kurzsyntax für wiederkehrende Aufgaben nicht möglich!",
+        "CREATED_FOR_PROJECT": "Aufgabe \"{{taskTitle}}\" in Projekt \"{{projectTitle}}\" verschoben",
+        "CREATED_FOR_PROJECT_ACTION": "Gehe zu Projekt",
         "DELETED": "\"{{title}}\" wurde gelöscht",
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
         "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Stichwort einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
+        "MOVED_TO_PROJECT": "Aufgabe \"{{taskTitle}}\" in Projekt \"{{projectTitle}}\" verschoben",
+        "MOVED_TO_PROJECT_ACTION": "Gehe zu Projekt",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Hinzufügen",
+    "ADVANCED_CFG": "Erweiterte Konfiguration",
     "CANCEL": "Abbrechen",
     "CLOSE": "Schließen",
     "DELETE": "Löschen",

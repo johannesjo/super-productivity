@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Terminé",
+        "EISENHAUER_MATRIX": "Matrice Eisenhauer",
+        "IMPORTANT": "Important",
+        "IN_PROGRESS": "En cours",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Pas urgent et important",
+        "NOT_URGENT_NOT_IMPORTANT": "Pas urgent et pas important",
+        "TO_DO": "À faire",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent et important",
+        "URGENT_NOT_IMPORTANT": "Urgent et pas important"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Ajouter un marque-page",
@@ -877,6 +892,10 @@
         "T5": "2. Sinon, vous pouvez écraser les données distantes avec vos données locales. Tous les changements distants seront perdus !",
         "T6": "La création d'une sauvegarde des données que vous écrasez est recommandée !!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Enregistrer et activer la synchronisation",
+        "TITLE": "Configurer la synchronisation"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Désactiver la synchronisation",
         "PERM_FILE": "Donner l'autorisation",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossible d'attribuer le projet via une courte syntaxe pour les tâches répétées !",
+        "CREATED_FOR_PROJECT": "Tâche \"{{taskTitle}}\" déplacée vers le projet \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Aller au projet",
         "DELETED": "Tâche supprimée \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Déplacement de la tâche existante <strong>{{title}}</strong> vers la liste des tâches du jour",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tâche <strong>{{title}}</strong> ajoutée de <strong>{{contextTitle}}</strong> à la liste actuelle",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche <strong>{{title}}</strong> restaurée en lien avec le ticket de l'archive",
         "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis!",
+        "MOVED_TO_PROJECT": "Tâche \"{{taskTitle}}\" déplacée vers le projet \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Aller au projet",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Ajouter",
+    "ADVANCED_CFG": "Configuration avancée",
     "CANCEL": "annuler",
     "CLOSE": "Fermer",
     "DELETE": "Effacer",

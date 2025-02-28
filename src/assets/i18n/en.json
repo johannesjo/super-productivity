@@ -63,8 +63,8 @@
     },
     "BOARDS": {
       "DEFAULT": {
-        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
         "DONE": "Done",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
         "IMPORTANT": "Important",
         "IN_PROGRESS": "In Progress",
         "KANBAN": "Kanban",
@@ -176,6 +176,7 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Back to Planning",
+      "CANCEL_FOCUS_SESSION": "",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
@@ -892,8 +893,8 @@
         "T6": "Creating a backup of the data you overwrite is recommended!!!"
       },
       "D_INITIAL_CFG": {
-        "TITLE": "Configure Sync",
-        "SAVE_AND_ENABLE": "Save & Enable Sync"
+        "SAVE_AND_ENABLE": "Save & Enable Sync",
+        "TITLE": "Configure Sync"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",

@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "منجز",
+        "EISENHAUER_MATRIX": "مصفوفة أيزنهاور",
+        "IMPORTANT": "مهم",
+        "IN_PROGRESS": "قيد التنفيذ",
+        "KANBAN": "كانبان",
+        "NOT_URGENT_IMPORTANT": "غير عاجل ومهم",
+        "NOT_URGENT_NOT_IMPORTANT": "غير عاجل وغير مهم",
+        "TO_DO": "للقيام بذلك",
+        "URGENT": "مستعجل",
+        "URGENT_IMPORTANT": "عاجل ومهم",
+        "URGENT_NOT_IMPORTANT": "عاجل وغير مهم"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "اضافة للمفضلة",
@@ -877,6 +892,10 @@
         "T5": "2. أو يمكنك استبدال البيانات البعيدة بالبيانات المحلية. ستضيع جميع التغييرات التي أجريتها عن بُعد!",
         "T6": "من المستحسن إنشاء نسخة احتياطية للبيانات التي تقوم بكتابتها فوقها!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "حفظ وتمكين المزامنة",
+        "TITLE": "تكوين المزامنة"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "تعطيل المزامنة",
         "PERM_FILE": "اعطاء الإذن",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "لا يمكن تعيين المشروع عبر بناء جملة قصير للمهام القابلة للتكرار!",
+        "CREATED_FOR_PROJECT": "تم نقل المهمة \"{{taskTitle}}\" إلى المشروع \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "انتقل إلى Project",
         "DELETED": "المهمة المحذوفة \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "نقل المهمة الحالية <strong>{{title}}</strong> إلى قائمة مهام اليوم",
         "FOUND_MOVE_FROM_OTHER_LIST": "تمت إضافة المهمة <strong>{{title}}</strong> من <strong>{{contextTitle}}</strong> إلى القائمة الحالية",
         "FOUND_RESTORE_FROM_ARCHIVE": "المهمة المستعادة <strong>{{title}}</strong> المتعلقة بالمشكلة من الأرشيف",
         "LAST_TAG_DELETION_WARNING": "أنت تحاول إزالة العلامة الأخيرة لمهمة غير مشروع. هذا غير مسموح به!",
+        "MOVED_TO_PROJECT": "تم نقل المهمة \"{{taskTitle}}\" إلى المشروع \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "انتقل إلى Project",
         "REMINDER_ADDED": "المهمة المجدولة \"{{title}}\"",
         "REMINDER_DELETED": "تذكير محذوف للمهمة",
         "REMINDER_UPDATED": "تذكير محدث للمهمة \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "يضيف",
+    "ADVANCED_CFG": "التكوين المتقدم",
     "CANCEL": "إلغاء",
     "CLOSE": "قريب",
     "DELETE": "حذف",
