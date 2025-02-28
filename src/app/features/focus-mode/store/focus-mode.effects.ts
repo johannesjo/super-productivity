@@ -74,8 +74,6 @@ export class FocusModeEffects {
 
   setElapsedTime$ = createEffect(() => {
     return this._focusModeService.currentSessionTime$.pipe(
-      tap((v) => console.log('currentSessionTime', v)),
-
       withLatestFrom(
         this._store.select(selectFocusModeMode),
         this._focusModeService.timeToGo$,
