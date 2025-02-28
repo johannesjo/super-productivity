@@ -1,6 +1,8 @@
 export interface BoardSrcCfg {
   projectId?: string;
-  tagIds?: string[];
+  includedTagIds?: string[];
+  excludedTagIds?: string[];
+
   filterDone?: boolean;
   filterTaskState?: number[];
 }

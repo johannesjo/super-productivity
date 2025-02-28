@@ -1,14 +1,27 @@
-@for (panel of boardCfg().panels; track panel.id) {
-  <div class="panel">
-    <header>
-      <div class="title">{{ panel.title }}</div>
-      <button mat-icon-button>
-        <mat-icon>more_vert</mat-icon>
-      </button>
-    </header>
-    <board-task-list
-      [panelCfg]="panel"
-      [fieldsToRemove]="fieldsToRemove()"
-    ></board-task-list>
+@if (missingTagIds().length) {
+  <div class="missing-tags-msg-wrapper">
+    <div class="msg">
+      There are {{ missingTagIds().length }} missing tags, required for this board to
+      work.
+    </div>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="createTags()"
+    >
+      Create Tags!
+    </button>
   </div>
+} @else {
+  @for (panel of boardCfg().panels; track panel.id) {
+    <div class="panel">
+      <header>
+        <div class="title">{{ panel.title }}</div>
+        <button mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </header>
+      <board-task-list [panelCfg]="panel"></board-task-list>
+    </div>
+  }
 }

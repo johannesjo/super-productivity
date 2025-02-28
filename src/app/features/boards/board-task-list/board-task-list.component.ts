@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
-import { BoardPanelCfg, BoarFieldsToRemove } from '../boards.model';
+import { BoardPanelCfg } from '../boards.model';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -17,6 +17,7 @@ import { TaskCopy } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { BoardsActions } from '../store/boards.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
+import { unique } from '../../../util/unique';
 
 @Component({
   selector: 'board-task-list',
@@ -30,7 +31,6 @@ export class BoardTaskListComponent {
   T = T;
 
   panelCfg = input.required<BoardPanelCfg>();
-  fieldsToRemove = input.required<BoarFieldsToRemove>();
 
   store = inject(Store);
   taskService = inject(TaskService);
@@ -43,7 +43,7 @@ export class BoardTaskListComponent {
   additionalTaskFields = computed(() => {
     const panelCfg = this.panelCfg();
     return {
-      ...(panelCfg.tagIds ? { tagIds: panelCfg.tagIds } : {}),
+      ...(panelCfg.includedTagIds ? { tagIds: panelCfg.includedTagIds } : {}),
       ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
     };
   });
@@ -54,10 +54,19 @@ export class BoardTaskListComponent {
     const nonOrderedTasks: TaskCopy[] = [];
 
     const allFilteredTasks = this.allTasks().filter((task) => {
-      if (panelCfg.tagIds?.length) {
-        return panelCfg.tagIds!.every((tagId) => task.tagIds.includes(tagId));
+      let isTaskIncluded = true;
+      if (panelCfg.includedTagIds?.length) {
+        isTaskIncluded = panelCfg.includedTagIds.every((tagId) =>
+          task.tagIds.includes(tagId),
+        );
       }
-      return false;
+      if (panelCfg.excludedTagIds?.length) {
+        isTaskIncluded =
+          isTaskIncluded &&
+          !panelCfg.excludedTagIds.some((tagId) => task.tagIds.includes(tagId));
+      }
+
+      return isTaskIncluded;
     });
 
     allFilteredTasks.forEach((task) => {
@@ -82,18 +91,19 @@ export class BoardTaskListComponent {
       : // NOTE: original array is mutated and splice does not return a new array
         prevTaskIds.splice(ev.currentIndex, 0, task.id) && prevTaskIds;
     console.log(ev);
-    console.log(taskIds);
 
-    const fieldsToRemove = this.fieldsToRemove();
-    let newTagIds: string[] = [];
-    if (fieldsToRemove.tagIds?.length) {
-      newTagIds = task.tagIds.filter((tagId) => !fieldsToRemove.tagIds!.includes(tagId));
-    }
-    if (panelCfg.tagIds) {
-      newTagIds = newTagIds.concat(panelCfg.tagIds);
-    }
+    let newTagIds: string[] = task.tagIds;
+    console.log({ panelCfg });
 
-    this.taskService.updateTags(task, newTagIds);
+    if (panelCfg.includedTagIds?.length) {
+      newTagIds = newTagIds.concat(panelCfg.includedTagIds);
+    }
+    if (panelCfg.excludedTagIds?.length) {
+      newTagIds = newTagIds.filter((tagId) => !panelCfg.excludedTagIds!.includes(tagId));
+    }
+    console.log(newTagIds);
+
+    this.taskService.updateTags(task, unique(newTagIds));
     this.store.dispatch(
       BoardsActions.updatePanelCfgTaskIds({
         panelId: panelCfg.id,

@@ -1,4 +1,5 @@
 <!--[cdkDropListData]="panelCfg()"-->
+<add-task-inline [additionalFields]="additionalTaskFields()"></add-task-inline>
 
 <div
   class="task-items"
@@ -11,13 +12,11 @@
       cdkDrag
       [cdkDragData]="task"
       [task]="task"
-      [tagsToHide]="panelCfg().tagIds"
+      [tagsToHide]="panelCfg().includedTagIds"
     ></planner-task>
   }
 
   <!--  @if (tasks().length === 0) {-->
   <!--    <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>-->
   <!--  }-->
-
-  <add-task-inline [additionalFields]="additionalTaskFields()"></add-task-inline>
 </div>

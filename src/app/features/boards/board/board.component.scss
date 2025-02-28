@@ -9,6 +9,7 @@
   gap: 16px;
   padding: 16px;
   max-height: 100%;
+  position: relative;
 
   .title {
     font-size: 14px;
@@ -33,5 +34,16 @@
 
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
+  }
+}
+
+.missing-tags-msg-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .msg {
+    margin-bottom: 16px;
   }
 }

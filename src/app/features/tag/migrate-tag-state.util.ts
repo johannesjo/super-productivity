@@ -2,13 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { Tag, TagCopy, TagState } from './tag.model';
-import {
-  IMPORTANT_TAG,
-  NOT_IMPORTANT_TAG,
-  NOT_URGENT_TAG,
-  TODAY_TAG,
-  URGENT_TAG,
-} from './tag.const';
+import { IMPORTANT_TAG, TODAY_TAG, URGENT_TAG } from './tag.const';
 import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateTagState = (tagState: TagState): TagState => {
@@ -49,12 +43,9 @@ const _addDefaultTagsIfNecessary = (tagState: TagState): TagState => {
   if (tagState.entities[URGENT_TAG.id]) {
     return tagState;
   } else {
-    const tagToAdd: Tag[] = [
-      IMPORTANT_TAG,
-      URGENT_TAG,
-      NOT_IMPORTANT_TAG,
-      NOT_URGENT_TAG,
-    ].filter((tag) => !tagState.entities[tag.id]);
+    const tagToAdd: Tag[] = [IMPORTANT_TAG, URGENT_TAG].filter(
+      (tag) => !tagState.entities[tag.id],
+    );
 
     return tagToAdd.reduce<TagState>((acc, tag) => {
       return {
