@@ -1590,6 +1590,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
+    "BOARDS": "Boards",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
