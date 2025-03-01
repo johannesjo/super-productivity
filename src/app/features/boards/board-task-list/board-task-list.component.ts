@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
-import { BoardPanelCfg } from '../boards.model';
+import { BoardPanelCfg, BoardPanelCfgTaskDoneState } from '../boards.model';
 import { Store } from '@ngrx/store';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -46,8 +46,12 @@ export class BoardTaskListComponent {
     return {
       ...(panelCfg.includedTagIds ? { tagIds: panelCfg.includedTagIds } : {}),
       // ...(panelCfg.projectId ? { projectId: panelCfg.projectId } : {}),
-      ...(panelCfg.isDoneOnly ? { isDone: true } : {}),
-      ...(panelCfg.isUnDoneOnly ? { isDone: false } : {}),
+      ...(panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done
+        ? { isDone: true }
+        : {}),
+      ...(panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone
+        ? { isDone: false }
+        : {}),
     };
   });
 
@@ -69,11 +73,11 @@ export class BoardTaskListComponent {
           !panelCfg.excludedTagIds.some((tagId) => task.tagIds.includes(tagId));
       }
 
-      if (panelCfg.isDoneOnly) {
+      if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done) {
         isTaskIncluded = isTaskIncluded && task.isDone;
       }
 
-      if (panelCfg.isUnDoneOnly) {
+      if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone) {
         isTaskIncluded = isTaskIncluded && !task.isDone;
       }
 
@@ -113,11 +117,11 @@ export class BoardTaskListComponent {
     console.log({ ev, newTagIds, panelCfg, taskIds });
 
     this.taskService.updateTags(task, unique(newTagIds));
-    if (panelCfg.isDoneOnly) {
+    if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done) {
       this.store.dispatch(
         updateTask({ task: { id: task.id, changes: { isDone: true } } }),
       );
-    } else if (panelCfg.isUnDoneOnly) {
+    } else if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone) {
       this.store.dispatch(
         updateTask({ task: { id: task.id, changes: { isDone: false } } }),
       );

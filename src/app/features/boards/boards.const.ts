@@ -1,4 +1,4 @@
-import { BoardCfg } from './boards.model';
+import { BoardCfg, BoardPanelCfgTaskDoneState } from './boards.model';
 import { IMPORTANT_TAG, IN_PROGRESS_TAG, URGENT_TAG } from '../tag/tag.const';
 import { T } from '../../t.const';
 
@@ -15,6 +15,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
         excludedTagIds: [],
         taskIds: [],
+        taskDoneState: BoardPanelCfgTaskDoneState.All,
       },
       {
         id: 'NOT_URGENT_AND_IMPORTANT',
@@ -22,6 +23,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [IMPORTANT_TAG.id],
         excludedTagIds: [URGENT_TAG.id],
         taskIds: [],
+        taskDoneState: BoardPanelCfgTaskDoneState.All,
       },
       {
         id: 'URGENT_AND_NOT_IMPORTANT',
@@ -29,6 +31,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [URGENT_TAG.id],
         excludedTagIds: [IMPORTANT_TAG.id],
         taskIds: [],
+        taskDoneState: BoardPanelCfgTaskDoneState.All,
       },
       {
         id: 'NOT_URGENT_AND_NOT_IMPORTANT',
@@ -36,6 +39,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [],
         excludedTagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
         taskIds: [],
+        taskDoneState: BoardPanelCfgTaskDoneState.All,
       },
     ],
   },
@@ -47,7 +51,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'TODO',
         title: T.F.BOARDS.DEFAULT.TO_DO,
-        isUnDoneOnly: true,
+        taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
@@ -55,7 +59,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'IN_PROGRESS',
         title: T.F.BOARDS.DEFAULT.IN_PROGRESS,
-        isUnDoneOnly: true,
+        taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         includedTagIds: [IN_PROGRESS_TAG.id],
         excludedTagIds: [],
         taskIds: [],
@@ -63,7 +67,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
       {
         id: 'DONE',
         title: T.F.BOARDS.DEFAULT.DONE,
-        isDoneOnly: true,
+        taskDoneState: BoardPanelCfgTaskDoneState.Done,
         includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],

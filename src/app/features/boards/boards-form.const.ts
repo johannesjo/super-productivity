@@ -1,13 +1,12 @@
 import { LimitedFormlyFieldConfig } from '../config/global-config.model';
-import { BoardCfg, BoardPanelCfg } from './boards.model';
+import { BoardCfg, BoardPanelCfg, BoardPanelCfgTaskDoneState } from './boards.model';
 import { nanoid } from 'nanoid';
 
 const getNewPanel = (): BoardPanelCfg => ({
   id: nanoid(),
   title: '',
-  isDoneOnly: false,
-  isUnDoneOnly: false,
   taskIds: [],
+  taskDoneState: BoardPanelCfgTaskDoneState.All,
   excludedTagIds: [],
   includedTagIds: [],
 });
@@ -64,6 +63,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           },
           templateOptions: {
             label: 'Required Tags',
+            // description: 'Added to task when moved to this panel',
             // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
           },
         },
@@ -76,34 +76,50 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           },
           templateOptions: {
             label: 'Excluded Tags',
+            // description: 'Removed from task when moved to this panel',
             // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
           },
         },
         {
-          type: 'checkbox',
-          key: 'isDoneOnly',
-          expressions: {
-            hide: 'model.isUnDoneOnly',
-          },
-          templateOptions: {
-            getInitialValue: () => false,
-            label: 'Limit to done tasks',
-            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
-          },
-        },
-        // TODO check why not working properly
-        {
-          type: 'checkbox',
-          key: 'isUnDoneOnly',
-          expressions: {
-            hide: 'model.isDoneOnly',
-          },
-          templateOptions: {
-            getInitialValue: () => false,
-            label: 'Limit to undone tasks',
-            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+          key: 'taskDoneState',
+          type: 'radio',
+          props: {
+            label: 'Task Done State',
+            required: true,
+            defaultValue: BoardPanelCfgTaskDoneState.All,
+            options: [
+              { value: BoardPanelCfgTaskDoneState.All, label: 'All' },
+              { value: BoardPanelCfgTaskDoneState.Done, label: 'Done' },
+              { value: BoardPanelCfgTaskDoneState.UnDone, label: 'Undone' },
+            ],
           },
         },
+
+        // {
+        //   type: 'checkbox',
+        //   key: 'isDoneOnly',
+        //   expressions: {
+        //     hide: 'model.isUnDoneOnly',
+        //   },
+        //   templateOptions: {
+        //     getInitialValue: () => false,
+        //     label: 'Limit to done tasks',
+        //     // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+        //   },
+        // },
+        // // TODO check why not working properly
+        // {
+        //   type: 'checkbox',
+        //   key: 'isUnDoneOnly',
+        //   expressions: {
+        //     hide: 'model.isDoneOnly',
+        //   },
+        //   templateOptions: {
+        //     getInitialValue: () => false,
+        //     label: 'Limit to undone tasks',
+        //     // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+        //   },
+        // },
       ],
     },
   },

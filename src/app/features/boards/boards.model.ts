@@ -1,9 +1,14 @@
+export enum BoardPanelCfgTaskDoneState {
+  All = 1,
+  Done = 2,
+  UnDone = 3,
+}
+
 export interface BoardSrcCfg {
   // projectId?: string;
   includedTagIds: string[];
   excludedTagIds: string[];
-  isDoneOnly?: boolean;
-  isUnDoneOnly?: boolean;
+  taskDoneState: BoardPanelCfgTaskDoneState;
 }
 
 export interface BoarFieldsToRemove {
