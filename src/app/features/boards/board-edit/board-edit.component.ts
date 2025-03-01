@@ -5,6 +5,7 @@ import {
   input,
   model,
   OnInit,
+  output,
   signal,
 } from '@angular/core';
 import { FormlyModule } from '@ngx-formly/core';
@@ -42,6 +43,7 @@ export class BoardEditComponent implements OnInit {
   boardCfg = model.required<BoardCfg>();
   isEdit = signal(false);
   isHideBtns = input<boolean>(false);
+  afterSave = output<void>();
 
   form: UntypedFormGroup = new UntypedFormGroup({});
 
@@ -69,8 +71,10 @@ export class BoardEditComponent implements OnInit {
         this.store.dispatch(
           BoardsActions.updateBoard({ id: this.boardCfg().id, updates: this.boardCfg() }),
         );
+        this.afterSave.emit();
       } else {
         this.store.dispatch(BoardsActions.addBoard({ board: this.boardCfg() }));
+        this.afterSave.emit();
       }
     }
   }
