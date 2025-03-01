@@ -1,6 +1,7 @@
 import { LimitedFormlyFieldConfig } from '../config/global-config.model';
 import { BoardCfg, BoardPanelCfg, BoardPanelCfgTaskDoneState } from './boards.model';
 import { nanoid } from 'nanoid';
+import { T } from '../../t.const';
 
 const getNewPanel = (): BoardPanelCfg => ({
   id: nanoid(),
@@ -16,8 +17,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
     key: 'title',
     type: 'input',
     templateOptions: {
-      // label: T.F.GITEA.FORM.HOST,
-      label: 'Title',
+      label: T.G.TITLE,
       type: 'text',
       required: true,
     },
@@ -26,20 +26,19 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
     key: 'cols',
     type: 'input',
     templateOptions: {
-      // label: T.F.GITEA.FORM.TOKEN,
-      label: 'Columns',
+      label: T.F.BOARDS.FORM.COLUMNS,
       required: true,
       type: 'number',
     },
   },
 
+  // ---------- Panels ----------
   {
     key: 'panels',
     type: 'repeat',
     className: 'simple-counters',
     templateOptions: {
-      // addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
-      addText: 'Add new panel',
+      addText: T.F.BOARDS.FORM.ADD_NEW_PANEL,
       getInitialValue: getNewPanel,
     },
     fieldArray: {
@@ -48,9 +47,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           type: 'input',
           key: 'title',
           templateOptions: {
-            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
-            // TODO global translation G.TITLE
-            label: 'Title',
+            label: T.G.TITLE,
             required: true,
           },
         },
@@ -62,9 +59,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
             'props.excludedTagIds': 'model.excludedTagIds',
           },
           templateOptions: {
-            label: 'Required Tags',
-            // description: 'Added to task when moved to this panel',
-            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+            label: T.F.BOARDS.FORM.TAGS_REQUIRED,
           },
         },
         {
@@ -75,51 +70,32 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
             'props.excludedTagIds': 'model.includedTagIds',
           },
           templateOptions: {
-            label: 'Excluded Tags',
-            // description: 'Removed from task when moved to this panel',
-            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+            label: T.F.BOARDS.FORM.TAGS_EXCLUDED,
           },
         },
         {
           key: 'taskDoneState',
           type: 'radio',
           props: {
-            label: 'Task Done State',
+            label: T.F.BOARDS.FORM.TASK_DONE_STATE,
             required: true,
             defaultValue: BoardPanelCfgTaskDoneState.All,
             options: [
-              { value: BoardPanelCfgTaskDoneState.All, label: 'All' },
-              { value: BoardPanelCfgTaskDoneState.Done, label: 'Done' },
-              { value: BoardPanelCfgTaskDoneState.UnDone, label: 'Undone' },
+              {
+                value: BoardPanelCfgTaskDoneState.All,
+                label: T.F.BOARDS.FORM.TASK_DONE_STATE_ALL,
+              },
+              {
+                value: BoardPanelCfgTaskDoneState.Done,
+                label: T.F.BOARDS.FORM.TASK_DONE_STATE_DONE,
+              },
+              {
+                value: BoardPanelCfgTaskDoneState.UnDone,
+                label: T.F.BOARDS.FORM.TASK_DONE_STATE_UNDONE,
+              },
             ],
           },
         },
-
-        // {
-        //   type: 'checkbox',
-        //   key: 'isDoneOnly',
-        //   expressions: {
-        //     hide: 'model.isUnDoneOnly',
-        //   },
-        //   templateOptions: {
-        //     getInitialValue: () => false,
-        //     label: 'Limit to done tasks',
-        //     // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
-        //   },
-        // },
-        // // TODO check why not working properly
-        // {
-        //   type: 'checkbox',
-        //   key: 'isUnDoneOnly',
-        //   expressions: {
-        //     hide: 'model.isDoneOnly',
-        //   },
-        //   templateOptions: {
-        //     getInitialValue: () => false,
-        //     label: 'Limit to undone tasks',
-        //     // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
-        //   },
-        // },
       ],
     },
   },

@@ -74,6 +74,25 @@
         "URGENT": "Urgent",
         "URGENT_IMPORTANT": "Urgent & Important",
         "URGENT_NOT_IMPORTANT": "Urgent & Not Important"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Add new Panel",
+        "COLUMNS": "Columns",
+        "TAGS_EXCLUDED": "Excluded Tags",
+        "TAGS_REQUIRED": "Required Tags",
+        "TASK_DONE_STATE": "Task Done State",
+        "TASK_DONE_STATE_ALL": "All",
+        "TASK_DONE_STATE_DONE": "Done",
+        "TASK_DONE_STATE_UNDONE": "Undone"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Add new board",
+        "CONFIRM_DELETE": "Do you really want to delete this board?",
+        "EDIT_BOARD": "Edit board",
+        "MISSING_TAGS_MSG": "There are {{nr}} missing tags required for this board to work",
+        "MISSING_TAGS_BTN": "Create missing tags",
+        "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it.",
+        "NO_PANELS_BTN": "Configure Board"
       }
     },
     "BOOKMARK": {

@@ -1,29 +1,27 @@
 @if (missingTagIds().length) {
   <div class="missing-tags-msg-wrapper">
     <div class="msg">
-      There are {{ missingTagIds().length }} missing tags, required for this board to
-      work.
+      {{ T.F.BOARDS.V.MISSING_TAGS_MSG | translate: { nr: missingTagIds().length } }}
     </div>
     <button
       mat-raised-button
       color="primary"
       (click)="createTags()"
     >
-      Create Tags!
+      {{ T.F.BOARDS.V.MISSING_TAGS_BTN | translate }}
     </button>
   </div>
 } @else {
   @if (boardCfg().panels.length === 0) {
     <div class="empty-board-msg">
-      <!--TODO translate-->
-      <div class="msg">This board has no panels configured. Add some panels to it.</div>
+      <div class="msg">{{ T.F.BOARDS.V.NO_PANELS_MSG | translate }}</div>
       <button
         color="primary"
         mat-raised-button
         (click)="editBoard()"
       >
         <mat-icon>edit</mat-icon>
-        Configure Board
+        {{ T.F.BOARDS.V.NO_PANELS_BTN | translate }}
       </button>
     </div>
   }

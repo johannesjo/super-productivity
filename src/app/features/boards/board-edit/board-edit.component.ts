@@ -17,23 +17,14 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
-import { MatMenuItem } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 import { BoardsActions } from '../store/boards.actions';
 import { DEFAULT_BOARD_CFG } from '../boards.const';
-import { MatDialogActions } from '@angular/material/dialog';
 
 @Component({
   selector: 'board-edit',
   standalone: true,
-  imports: [
-    FormlyModule,
-    MatButton,
-    MatIcon,
-    TranslatePipe,
-    MatMenuItem,
-    MatDialogActions,
-  ],
+  imports: [FormlyModule, MatButton, MatIcon, TranslatePipe],
   templateUrl: './board-edit.component.html',
   styleUrl: './board-edit.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

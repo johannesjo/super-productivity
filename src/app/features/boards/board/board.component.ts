@@ -24,6 +24,7 @@ import {
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoardEditComponent } from '../dialog-board-edit/dialog-board-edit.component';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'board',
@@ -84,4 +85,6 @@ export class BoardComponent {
       },
     });
   }
+
+  protected readonly T = T;
 }

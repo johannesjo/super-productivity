@@ -23,7 +23,7 @@
 
     <ng-template matTabContent>
       <div class="board-add-wrapper">
-        <h2>Add new board</h2>
+        <h2>{{ T.F.BOARDS.V.ADD_NEW_BOARD | translate }}</h2>
         <board-edit
           [boardCfg]="DEFAULT_BOARD_CFG"
           (afterSave)="goToLastIndex()"
