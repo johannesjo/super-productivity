@@ -20,7 +20,28 @@ export const boardsReducer = createReducer(
   // ------------
   on(loadAllData, (state, { appDataComplete }) => appDataComplete.boards),
 
-  on(BoardsActions.loadBoards, (state) => state),
+  on(BoardsActions.addBoard, (state, { board }) => {
+    return {
+      ...state,
+      boardCfgs: [...state.boardCfgs, board],
+    };
+  }),
+
+  on(BoardsActions.updateBoard, (state, { id, updates }) => {
+    return {
+      ...state,
+      boardCfgs: state.boardCfgs.map((cfg) =>
+        cfg.id === id ? { ...cfg, ...updates } : cfg,
+      ),
+    };
+  }),
+
+  on(BoardsActions.removeBoard, (state, { id }) => {
+    return {
+      ...state,
+      boardCfgs: state.boardCfgs.filter((cfg) => cfg.id !== id),
+    };
+  }),
 
   // on(BoardsActions.updatePanelCfg, (state, { panelCfg: panelCfgUpdate }) => {
   //   let panelCfgToUpdate;

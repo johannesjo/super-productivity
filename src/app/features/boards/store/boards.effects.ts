@@ -16,7 +16,13 @@ export class BoardsEffects {
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(BoardsActions.updatePanelCfgTaskIds, BoardsActions.updatePanelCfg),
+        ofType(
+          BoardsActions.addBoard,
+          BoardsActions.updateBoard,
+          BoardsActions.removeBoard,
+          BoardsActions.updatePanelCfgTaskIds,
+          BoardsActions.updatePanelCfg,
+        ),
         switchMap(() => this.saveToLs$()),
       ),
     { dispatch: false },
