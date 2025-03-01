@@ -34,7 +34,6 @@ import { DialogBoardEditComponent } from '../dialog-board-edit/dialog-board-edit
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[style.--cols]': 'missingTagIds().length === 0 && boardCfg().cols',
-    '[style.--rows]': 'missingTagIds().length === 0 && boardCfg().rows',
   },
 })
 export class BoardComponent {

@@ -1,10 +1,8 @@
 @import '../../../../variables';
 
 :host {
-  --grid-rows: 1;
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
-  grid-template-rows: repeat(var(--rows), 1fr);
   grid-auto-rows: 1fr;
   gap: 16px;
   padding: 16px;

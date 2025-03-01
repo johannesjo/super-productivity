@@ -19,7 +19,6 @@ export interface BoardPanelCfg extends BoardSrcCfg {
 export interface BoardCfg {
   id: string;
   title: string;
-  cols?: number;
-  rows?: number;
+  cols: number;
   panels: BoardPanelCfg[];
 }

@@ -8,7 +8,6 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
     id: 'EISENHOWER_MATRIX',
     title: T.F.BOARDS.DEFAULT.EISENHAUER_MATRIX,
     cols: 2,
-    rows: 2,
     panels: [
       {
         id: 'URGENT_AND_IMPORTANT',
@@ -44,7 +43,6 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
     id: 'KANBAN_DEFAULT',
     title: T.F.BOARDS.DEFAULT.KANBAN,
     cols: 3,
-    rows: 1,
     panels: [
       {
         id: 'TODO',
@@ -77,7 +75,6 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
 export const DEFAULT_BOARD_CFG: BoardCfg = {
   id: '',
   cols: 1,
-  rows: 1,
   panels: [],
   title: '',
 };

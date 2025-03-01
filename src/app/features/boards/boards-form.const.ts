@@ -33,16 +33,6 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
       type: 'number',
     },
   },
-  {
-    key: 'rows',
-    type: 'input',
-    templateOptions: {
-      // label: T.F.GITEA.FORM.TOKEN,
-      label: 'Rows',
-      required: true,
-      type: 'number',
-    },
-  },
 
   {
     key: 'panels',
