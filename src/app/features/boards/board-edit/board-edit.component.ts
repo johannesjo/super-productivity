@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  input,
   model,
   OnInit,
   signal,
@@ -18,11 +19,20 @@ import { T } from '../../../t.const';
 import { MatMenuItem } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 import { BoardsActions } from '../store/boards.actions';
+import { DEFAULT_BOARD_CFG } from '../boards.const';
+import { MatDialogActions } from '@angular/material/dialog';
 
 @Component({
   selector: 'board-edit',
   standalone: true,
-  imports: [FormlyModule, MatButton, MatIcon, TranslatePipe, MatMenuItem],
+  imports: [
+    FormlyModule,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+    MatMenuItem,
+    MatDialogActions,
+  ],
   templateUrl: './board-edit.component.html',
   styleUrl: './board-edit.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +41,7 @@ export class BoardEditComponent implements OnInit {
   store = inject(Store);
   boardCfg = model.required<BoardCfg>();
   isEdit = signal(false);
+  isHideBtns = input<boolean>(false);
 
   form: UntypedFormGroup = new UntypedFormGroup({});
 
@@ -42,13 +53,17 @@ export class BoardEditComponent implements OnInit {
     } else {
       this.boardCfg.set({ ...this.boardCfg(), id: nanoid() });
     }
+
+    // be safe with legacy data (only required for my current SP config)
+    this.boardCfg.set({
+      ...DEFAULT_BOARD_CFG,
+      ...this.boardCfg(),
+    });
   }
 
   protected readonly T = T;
 
   save(): void {
-    console.log(this.form.valid, this.isEdit());
-
     if (this.form.valid) {
       if (this.isEdit()) {
         this.store.dispatch(

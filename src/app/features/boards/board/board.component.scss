@@ -37,6 +37,7 @@
   }
 }
 
+.empty-board-msg,
 .missing-tags-msg-wrapper {
   display: flex;
   flex-direction: column;
@@ -45,5 +46,18 @@
 
   .msg {
     margin-bottom: 16px;
+  }
+}
+
+header {
+  @include mousePrimaryDevice() {
+    button {
+      opacity: 0;
+    }
+    &:hover {
+      button {
+        opacity: 1;
+      }
+    }
   }
 }

@@ -22,6 +22,8 @@ import {
   URGENT_TAG,
 } from '../../tag/tag.const';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogBoardEditComponent } from '../dialog-board-edit/dialog-board-edit.component';
 
 @Component({
   selector: 'board',
@@ -36,12 +38,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   },
 })
 export class BoardComponent {
-  store = inject(Store);
-  translateService = inject(TranslateService);
+  private _store = inject(Store);
+  private _translateService = inject(TranslateService);
+  private _matDialog = inject(MatDialog);
 
   boardCfg = input.required<BoardCfg>();
 
-  allExistingTagIds = toSignal(this.store.select(selectAllTagIds), { initialValue: [] });
+  allExistingTagIds = toSignal(this._store.select(selectAllTagIds), { initialValue: [] });
 
   missingTagIds = computed(() => {
     const allExistingTagIds: string[] = this.allExistingTagIds() as string[];
@@ -62,7 +65,7 @@ export class BoardComponent {
         const tag = defaultTag
           ? {
               ...defaultTag,
-              title: this.translateService.instant(defaultTag.title),
+              title: this._translateService.instant(defaultTag.title),
             }
           : {
               ...DEFAULT_TAG,
@@ -70,8 +73,16 @@ export class BoardComponent {
               title: `some-tag-${tagId}`,
             };
 
-        this.store.dispatch(addTag({ tag }));
+        this._store.dispatch(addTag({ tag }));
       });
     }
+  }
+
+  editBoard(): void {
+    this._matDialog.open(DialogBoardEditComponent, {
+      data: {
+        board: this.boardCfg(),
+      },
+    });
   }
 }

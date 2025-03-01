@@ -13,13 +13,35 @@
     </button>
   </div>
 } @else {
+  @if (boardCfg().panels.length === 0) {
+    <div class="empty-board-msg">
+      <!--TODO translate-->
+      <div class="msg">This board has no panels configured. Add some panels to it.</div>
+      <button
+        color="primary"
+        mat-raised-button
+        (click)="editBoard()"
+      >
+        <mat-icon>edit</mat-icon>
+        Configure Board
+      </button>
+    </div>
+  }
+
   @for (panel of boardCfg().panels; track panel.id) {
     <div class="panel">
       <header>
         <div class="title">{{ panel.title | translate }}</div>
-        <button mat-icon-button>
-          <mat-icon>more_vert</mat-icon>
+        <button
+          mat-icon-button
+          (click)="editBoard()"
+        >
+          <mat-icon>edit</mat-icon>
         </button>
+
+        <!--        <button mat-icon-button>-->
+        <!--          <mat-icon>more_vert</mat-icon>-->
+        <!--        </button>-->
       </header>
       <board-task-list [panelCfg]="panel"></board-task-list>
     </div>
