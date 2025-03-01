@@ -34,7 +34,6 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 import { deleteTask, updateTask } from '../../tasks/store/task.actions';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
@@ -312,24 +311,15 @@ export class ScheduleEventComponent implements OnInit {
     );
   }
 
-  scheduleTask(): void {
-    let day: Date | undefined;
-    if (this.se.dayOfMonth) {
-      day = new Date();
-      if (this.se.dayOfMonth < day.getDate()) {
-        day.setMonth(day.getMonth() + 1);
-      }
-      day.setDate(this.se.dayOfMonth);
-    }
-
-    this._matDialog.open(DialogScheduleTaskComponent, {
-      // we focus inside dialog instead
-      autoFocus: false,
-      data: {
-        task: this.task,
-      },
-    });
-  }
+  // scheduleTask(): void {
+  //   this._matDialog.open(DialogScheduleTaskComponent, {
+  //     // we focus inside dialog instead
+  //     autoFocus: false,
+  //     data: {
+  //       task: this.task,
+  //     },
+  //   });
+  // }
 
   private _getIcoType():
     | 'REPEAT'

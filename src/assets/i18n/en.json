@@ -61,6 +61,40 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Done",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "IMPORTANT": "Important",
+        "IN_PROGRESS": "In Progress",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Not Urgent & Important",
+        "NOT_URGENT_NOT_IMPORTANT": "Not Urgent & Not Important",
+        "TO_DO": "To Do",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent & Important",
+        "URGENT_NOT_IMPORTANT": "Urgent & Not Important"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Add new Panel",
+        "COLUMNS": "Columns",
+        "TAGS_EXCLUDED": "Excluded Tags",
+        "TAGS_REQUIRED": "Required Tags",
+        "TASK_DONE_STATE": "Task Done State",
+        "TASK_DONE_STATE_ALL": "All",
+        "TASK_DONE_STATE_DONE": "Done",
+        "TASK_DONE_STATE_UNDONE": "Undone"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Add new board",
+        "CONFIRM_DELETE": "Do you really want to delete this board?",
+        "EDIT_BOARD": "Edit board",
+        "MISSING_TAGS_MSG": "There are {{nr}} missing tags required for this board to work",
+        "MISSING_TAGS_BTN": "Create missing tags",
+        "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it.",
+        "NO_PANELS_BTN": "Configure Board"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Add Bookmark",
@@ -161,6 +195,7 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Back to Planning",
+      "CANCEL_FOCUS_SESSION": "",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
@@ -877,8 +912,8 @@
         "T6": "Creating a backup of the data you overwrite is recommended!!!"
       },
       "D_INITIAL_CFG": {
-        "TITLE": "Configure Sync",
-        "SAVE_AND_ENABLE": "Save & Enable Sync"
+        "SAVE_AND_ENABLE": "Save & Enable Sync",
+        "TITLE": "Configure Sync"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",

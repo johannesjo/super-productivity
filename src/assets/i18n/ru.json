@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Готово",
+        "EISENHAUER_MATRIX": "Матрица Эйзенхауэра",
+        "IMPORTANT": "Важно",
+        "IN_PROGRESS": "В процессе",
+        "KANBAN": "Канбан",
+        "NOT_URGENT_IMPORTANT": "Не срочно и важно",
+        "NOT_URGENT_NOT_IMPORTANT": "Не срочно и не важно",
+        "TO_DO": "Сделать",
+        "URGENT": "Срочно",
+        "URGENT_IMPORTANT": "Срочно и важно",
+        "URGENT_NOT_IMPORTANT": "Срочно и не важно"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Добавить закладку",
@@ -877,6 +892,10 @@
         "T5": "2. Или же вы можете перезаписать удаленные данные своими локальными. Все удаленные изменения будут\nпотеряны!",
         "T6": "Рекомендуется создать резервную копию данных, которые вы перезаписываете!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Сохранить и включить синхронизацию",
+        "TITLE": "Настроить синхронизацию"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Отключить синхронизацию",
         "PERM_FILE": "Предоставить разрешение",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Невозможно назначить проект с помощью краткого синтаксиса для повторяющихся задач!",
+        "CREATED_FOR_PROJECT": "Перемещена задача \"{{taskTitle}}\" в проект \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Перейти к проекту",
         "DELETED": "Удалена задача \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Существующее задание <strong>{{title}}</strong> перемещено в текущий список заданий",
         "FOUND_MOVE_FROM_OTHER_LIST": "Задача <strong>{{title}}</strong> из <strong>{{contextTitle}}</strong> добавлена в текущий список",
         "FOUND_RESTORE_FROM_ARCHIVE": "Задача <strong>{{title}}</strong> связана с задачей из архива восстановлена",
         "LAST_TAG_DELETION_WARNING": "Вы пытаетесь удалить последний тег непроектной задачи. Это не разрешено!",
+        "MOVED_TO_PROJECT": "Перемещена задача \"{{taskTitle}}\" в проект \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Перейти к проекту",
         "REMINDER_ADDED": "Запланирована задача \"{{title}}\"",
         "REMINDER_DELETED": "Удалено напоминание для задания",
         "REMINDER_UPDATED": "Обновлено напоминание для задачи \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Добавить",
+    "ADVANCED_CFG": "Расширенная настройка",
     "CANCEL": "Отменить",
     "CLOSE": "Закрыть",
     "DELETE": "Удалить",

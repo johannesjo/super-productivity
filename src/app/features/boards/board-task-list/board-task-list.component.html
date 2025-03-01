@@ -1,0 +1,44 @@
+<!--[cdkDropListData]="panelCfg()"-->
+<add-task-inline
+  [additionalFields]="additionalTaskFields()"
+  [tagsToRemove]="panelCfg().excludedTagIds"
+  [isSkipAddingCurrentTag]="true"
+  [taskIdsToExclude]="panelCfg().taskIds"
+  (afterTaskAdd)="afterTaskAdd($event)"
+></add-task-inline>
+
+<div
+  class="task-items"
+  cdkDropList
+  [cdkDropListData]="panelCfg()"
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (task of tasks(); track task.id) {
+    <planner-task
+      cdkDrag
+      [cdkDragData]="task"
+      [task]="task"
+      [tagsToHide]="panelCfg().includedTagIds || []"
+    >
+      @if (
+        ((plannerService.plannedTaskDayMap$ | async) || {})[task.id];
+        as plannedAtDay
+      ) {
+        <button
+          (click)="scheduleTask(task, $event)"
+          [title]="T.F.TASK.CMP.SCHEDULE | translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>today</mat-icon>
+          <div class="time-badge">{{ plannedAtDay | localDateStr }}</div>
+        </button>
+      }
+    </planner-task>
+  }
+
+  <!--  @if (tasks().length === 0) {-->
+  <!--    <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>-->
+  <!--  }-->
+</div>

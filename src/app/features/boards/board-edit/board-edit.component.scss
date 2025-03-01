@@ -1,0 +1,15 @@
+.btn-wrapper {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+:host ::ng-deep {
+  repeat-section-type {
+    //border: 1px solid red !important;
+
+    .footer {
+      margin-top: 8px;
+    }
+  }
+}

@@ -1,0 +1,72 @@
+@import '../../../../variables';
+
+:host {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-auto-rows: 1fr;
+  gap: 16px;
+  padding: 16px;
+  max-height: 100%;
+  position: relative;
+  overflow: auto;
+
+  @include mq(xs, max) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .title {
+    font-size: 14px;
+    margin-right: auto;
+  }
+
+  header {
+    padding: 4px 16px;
+    padding-right: 4px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.panel {
+  //border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid $light-theme-extra-border-color;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  min-width: 230px;
+
+  @include mq(xs, max) {
+    min-height: 300px;
+  }
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
+}
+
+.empty-board-msg,
+.missing-tags-msg-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .msg {
+    margin-bottom: 16px;
+  }
+}
+
+header {
+  @include mousePrimaryDevice() {
+    button {
+      opacity: 0;
+    }
+    &:hover {
+      button {
+        opacity: 1;
+      }
+    }
+  }
+}

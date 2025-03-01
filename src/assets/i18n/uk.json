@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Зробити",
+        "EISENHAUER_MATRIX": "Матриця Ейзенхауера",
+        "IMPORTANT": "Важливий",
+        "IN_PROGRESS": "В процесі",
+        "KANBAN": "Канбан",
+        "NOT_URGENT_IMPORTANT": "Не терміново і не важливо",
+        "NOT_URGENT_NOT_IMPORTANT": "Не терміново і не важливо",
+        "TO_DO": "Що робити",
+        "URGENT": "Терміново",
+        "URGENT_IMPORTANT": "Терміново та важливо",
+        "URGENT_NOT_IMPORTANT": "Терміново і не важливо"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Додати закладку",
@@ -877,6 +892,10 @@
         "T5": "2. Або ви можете перезаписати віддалені дані вашими локальними. Всі віддалені зміни\n    будуть втрачені!",
         "T6": "Рекомендується створити резервну копію даних, які ви перезаписуєте!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Зберегти та увімкнути синхронізацію",
+        "TITLE": "Налаштуйте синхронізацію"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Вимкнути синхронізацію",
         "PERM_FILE": "Надати дозвіл",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Неможливо призначити проект через короткий синтаксис для повторюваних завдань!",
+        "CREATED_FOR_PROJECT": "Перенесено завдання \"{{taskTitle}}\" на проект \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Перейти до проекту",
         "DELETED": "Видалено завдання \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Переміщено завдання <strong>{{title}}</strong> з беклогу до Сьогодні",
         "FOUND_MOVE_FROM_OTHER_LIST": "Додано завдання <strong>{{title}}</strong> з <strong>{{contextTitle}}</strong> до поточного списку",
         "FOUND_RESTORE_FROM_ARCHIVE": "Відновлено завдання <strong>{{title}}</strong>, пов'язане з проблемою, з архіву",
         "LAST_TAG_DELETION_WARNING": "Ви намагаєтесь видалити останній тег завдання, яке не належить до проекту. Це не дозволено!",
+        "MOVED_TO_PROJECT": "Перенесено завдання \"{{taskTitle}}\" на проект \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Перейти до проекту",
         "REMINDER_ADDED": "Заплановано завдання \"{{title}}\"",
         "REMINDER_DELETED": "Видалено нагадування для завдання",
         "REMINDER_UPDATED": "Оновлено нагадування для завдання \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Додати",
+    "ADVANCED_CFG": "Розширена конфігурація",
     "CANCEL": "Скасувати",
     "CLOSE": "Закрити",
     "DELETE": "Видалити",

@@ -47,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
+import { TaskCopy } from '../task.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -85,6 +86,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isHideTagTitles = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   planForDay = input<string | undefined>(undefined);
+  tagsToRemove = input<string[]>();
+  additionalFields = input<Partial<TaskCopy>>();
+  isSkipAddingCurrentTag = input<boolean>(false);
+  taskIdsToExclude = input<string[]>();
+
+  afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
   blurred = output<void>();
   done = output<void>();
 
@@ -97,17 +104,28 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isSearchIssueProviders = signal(false);
   isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
 
-  readonly inputEl = viewChild<ElementRef>('inputEl');
+  inputEl = viewChild<ElementRef>('inputEl');
 
   T: typeof T = T;
 
   taskSuggestionsCtrl: UntypedFormControl = new UntypedFormControl();
 
-  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> =
-    this._addTaskBarService.getFilteredIssueSuggestions$(
+  filteredIssueSuggestions$: Observable<AddTaskSuggestion[]> = this._addTaskBarService
+    .getFilteredIssueSuggestions$(
       this.taskSuggestionsCtrl,
       this.isSearchIssueProviders$,
       this.isLoading,
+    )
+    .pipe(
+      map((suggestions) => {
+        const taskIdsToExclude = this.taskIdsToExclude() || [];
+        return suggestions.filter((s) => {
+          if (s.taskId) {
+            return !taskIdsToExclude.includes(s.taskId);
+          }
+          return true;
+        });
+      }),
     );
 
   activatedIssueTask$: BehaviorSubject<AddTaskSuggestion | null> =
@@ -254,7 +272,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this._lastAddedTaskId = this._taskService.add(
           newTaskStr,
           this.isAddToBacklog(),
-          {},
+          {
+            ...this.additionalFields(),
+          },
           this.isAddToBottom(),
         );
       } else if (this.doubleEnterCount() > 0) {
@@ -271,7 +291,36 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
           item,
           this.isAddToBacklog(),
+          !this.isSkipAddingCurrentTag(),
         );
+
+      const additionalFields = this.additionalFields();
+      const tagsToRemove = this.tagsToRemove();
+
+      if (this._lastAddedTaskId && (additionalFields || tagsToRemove)) {
+        const { tagIds, ...otherAdditionalFields } = additionalFields || { tagIds: [] };
+
+        this._taskService.update(this._lastAddedTaskId, otherAdditionalFields);
+        if (tagIds || tagsToRemove) {
+          const task = await this._taskService
+            .getByIdOnce$(this._lastAddedTaskId)
+            .toPromise();
+          console.log(additionalFields, tagsToRemove, task);
+
+          this._taskService.updateTags(
+            task,
+            [...task.tagIds, ...(tagIds || [])].filter(
+              (tagId) => !tagsToRemove || !tagsToRemove.includes(tagId),
+            ),
+          );
+        }
+      }
+    }
+    if (this._lastAddedTaskId) {
+      this.afterTaskAdd.emit({
+        taskId: this._lastAddedTaskId,
+        isAddToBottom: this.isAddToBottom(),
+      });
     }
 
     const planForDay = this.planForDay();

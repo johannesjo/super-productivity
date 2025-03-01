@@ -16,6 +16,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { plannerInitialState } from '../../features/planner/store/planner.reducer';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
+import { initialBoardsState } from '../../features/boards/store/boards.reducer';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
@@ -33,6 +34,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   reminders: [],
   planner: plannerInitialState,
   issueProvider: issueProviderInitialState,
+  boards: initialBoardsState,
 
   task: initialTaskState,
   tag: initialTagState,

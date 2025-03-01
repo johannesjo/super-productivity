@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Gotowe",
+        "EISENHAUER_MATRIX": "Macierz Eisenhowera",
+        "IMPORTANT": "Ważne",
+        "IN_PROGRESS": "W trakcie realizacji",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Niepilne i Ważne",
+        "NOT_URGENT_NOT_IMPORTANT": "Niepilne i Nieważne",
+        "TO_DO": "Do zrobienia",
+        "URGENT": "Pilne",
+        "URGENT_IMPORTANT": "Pilne i Ważne",
+        "URGENT_NOT_IMPORTANT": "Pilne i Nieważne"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Dodaj Zakładkę",
@@ -877,6 +892,10 @@
         "T5": "2. Można też nadpisać dane zdalne danymi lokalnymi. Wszystkie zdalne zmiany\n    zostaną utracone!",
         "T6": "Zaleca się utworzenie kopii zapasowej nadpisywanych danych!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Zapisz i Włącz synchronizację",
+        "TITLE": "Skonfiguruj synchronizację"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Wyłącz synchronizację",
         "PERM_FILE": "Zezwolenie",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nie można przypisać projektu za pomocą krótkiej składni dla powtarzalnych zadań!",
+        "CREATED_FOR_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Przejdź do projektu",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Przejdź do projektu",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Dodaj",
+    "ADVANCED_CFG": "Zaawansowana konfiguracja",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",

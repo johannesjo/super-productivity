@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "TAMAM",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrisi",
+        "IMPORTANT": "Önemli",
+        "IN_PROGRESS": "Devam ediyor",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Acelesi Yok & Önemli",
+        "NOT_URGENT_NOT_IMPORTANT": "Acelesi Yok & Önemsiz",
+        "TO_DO": "Yapılacaklar",
+        "URGENT": "Acelesi Var",
+        "URGENT_IMPORTANT": "Acelesi Var & Önemli",
+        "URGENT_NOT_IMPORTANT": "Acelesi Var & Önemsiz"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Yer imini ekle",
@@ -877,6 +892,10 @@
         "T5": "2. Veya uzak verileri yerel verilerinizle üzerine yazabilirsiniz. Tüm uzak değişiklikler\n   kaybolacaktır!",
         "T6": "Üzerine yazdığınız verilerin bir yedeğini oluşturmanız önerilir!!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Kaydet & Senkronizasyonu Etkinleştir",
+        "TITLE": "Senkronizasyonu Yapılandır"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Senkronizasyonu devre dışı bırak",
         "PERM_FILE": "İzin ver",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Tekrarlanabilir görevler için kısa sözdizimi yoluyla proje atanamıyor!",
+        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "CREATED_FOR_PROJECT_ACTION": "Projeye Git",
         "DELETED": "\"{{title}}\" görevi silindi",
         "FOUND_MOVE_FROM_BACKLOG": " <strong>{{title}}</strong> görevini bugünkü görev listesine taşıdı",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
         "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}</strong> görevi geri yüklendi",
         "LAST_TAG_DELETION_WARNING": "Proje dışı bir görevin son etiketini kaldırmaya çalışıyorsunuz. Buna izin verilmiyor!",
+        "MOVED_TO_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "MOVED_TO_PROJECT_ACTION": "Projeye Git",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Ekle",
+    "ADVANCED_CFG": "Gelişmiş yapılandırma",
     "CANCEL": "İptal",
     "CLOSE": "Kapat",
     "DELETE": "Sil",

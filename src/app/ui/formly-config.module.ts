@@ -18,6 +18,7 @@ import { IconInputComponent } from '../features/config/icon-input/icon-input.com
 import { SelectProjectComponent } from '../features/config/select-project/select-project.component';
 import { RepeatSectionTypeComponent } from '../features/config/repeat-section-type/repeat-section-type.component';
 import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
+import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 
 @NgModule({
   imports: [
@@ -55,6 +56,13 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
         {
           name: 'project-select',
           component: SelectProjectComponent,
+          // technically no input, but as the properties get us what we need...
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
+          name: 'tag-select',
+          component: FormlyTagSelectionComponent,
           // technically no input, but as the properties get us what we need...
           extends: 'input',
           wrappers: ['form-field'],

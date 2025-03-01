@@ -61,6 +61,21 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Fè",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "IMPORTANT": "Enpòtan",
+        "IN_PROGRESS": "Nan Pwogrè",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Pa Ijan ak enpòtan",
+        "NOT_URGENT_NOT_IMPORTANT": "Pa ijan - Pa enpòtan",
+        "TO_DO": "Fè",
+        "URGENT": "Dijans",
+        "URGENT_IMPORTANT": "Ijan ak enpòtan",
+        "URGENT_NOT_IMPORTANT": "Ijan - Pa enpòtan"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Dodaj straničnik",
@@ -877,6 +892,10 @@
         "T5": "2. Oswa ou ka ranplase done yo aleka ak youn lokal ou a. Tout chanjman aleka pral\n    dwe pèdi!",
         "T6": "Kreye yon backup nan done ou recouvrir yo rekòmande !!!"
       },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Sove - Pèmèt Senk",
+        "TITLE": "Configure Sync"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deaktiviraj sinkronizaciju",
         "PERM_FILE": "Daj dozvole",
@@ -1081,11 +1100,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nije moguće dodijeliti projekt putem kratke sintakse za ponavljajuće zadatke!",
+        "CREATED_FOR_PROJECT": "Deplase \"{{taskTitle}}\" pou pwojè \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ale nan Pwojè",
         "DELETED": "Izbrisan je zadatak „{{title}}”",
         "FOUND_MOVE_FROM_BACKLOG": "Zadatak <strong>{{title}}</strong> je premješten iz odlagališta u popis današnjih zadataka",
         "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan iz <strong>{{contextTitle}}</strong> u trenutačni popis",
         "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljeni zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
         "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadnju oznaku zadatka koji nije projekt. To nije dozvoljeno!",
+        "MOVED_TO_PROJECT": "Deplase \"{{taskTitle}}\" pou pwojè \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ale nan Pwojè",
         "REMINDER_ADDED": "Terminirani zadatak „{{title}}”",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak „{{title}}”",
@@ -1278,6 +1301,7 @@
   },
   "G": {
     "ADD": "Ajoute",
+    "ADVANCED_CFG": "Avanse Config",
     "CANCEL": "Odustani",
     "CLOSE": "Zatvori",
     "DELETE": "Izbriši",

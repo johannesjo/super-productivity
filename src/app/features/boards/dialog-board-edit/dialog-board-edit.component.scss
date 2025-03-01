@@ -1,0 +1,9 @@
+@import '../../../../variables';
+
+:host {
+  mat-dialog-content {
+    @include mq('sm') {
+      min-width: 800px;
+    }
+  }
+}

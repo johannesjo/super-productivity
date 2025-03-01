@@ -98,6 +98,8 @@ import { OpenProjectEffects } from '../features/issue/providers/open-project/ope
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
 import { LocalBackupService } from '../imex/local-backup/local-backup.service';
+import { boardsFeature } from '../features/boards/store/boards.reducer';
+import { BoardsEffects } from '../features/boards/store/boards.effects';
 
 @NgModule({
   declarations: [],
@@ -170,6 +172,9 @@ import { LocalBackupService } from '../imex/local-backup/local-backup.service';
 
     StoreModule.forFeature(WORK_CONTEXT_FEATURE_NAME, workContextReducer),
     EffectsModule.forFeature([WorkContextEffects]),
+
+    StoreModule.forFeature(boardsFeature),
+    EffectsModule.forFeature([BoardsEffects]),
 
     // EFFECTS ONLY
     EffectsModule.forFeature([...(IS_ANDROID_WEB_VIEW ? [AndroidEffects] : [])]),

@@ -1,0 +1,34 @@
+<mat-tab-group
+  mat-stretch-tabs="false"
+  dynamicHeight="true"
+  cdkScrollable
+  (selectedIndexChange)="selectedTabIndex.set($event)"
+  [selectedIndex]="selectedTabIndex()"
+>
+  @for (board of boards(); track board.id) {
+    <mat-tab [label]="board.title | translate">
+      <board
+        [boardCfg]="board"
+        cdkDropListGroup
+      ></board>
+    </mat-tab>
+  }
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-header-item">
+        <mat-icon>add_circle</mat-icon>
+      </div>
+    </ng-template>
+
+    <ng-template matTabContent>
+      <div class="board-add-wrapper">
+        <h2>{{ T.F.BOARDS.V.ADD_NEW_BOARD | translate }}</h2>
+        <board-edit
+          [boardCfg]="DEFAULT_BOARD_CFG"
+          (afterSave)="goToLastIndex()"
+        ></board-edit>
+      </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

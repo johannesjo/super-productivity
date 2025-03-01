@@ -18,6 +18,7 @@ import { TODAY_TAG } from './features/tag/tag.const';
 import { QuickHistoryComponent } from './features/quick-history/quick-history.component';
 import { PlannerComponent } from './features/planner/planner.component';
 import { ScheduleComponent } from './features/schedule/schedule/schedule.component';
+import { BoardsComponent } from './features/boards/boards.component';
 
 export const APP_ROUTES: Routes = [
   {
@@ -42,6 +43,12 @@ export const APP_ROUTES: Routes = [
     path: 'schedule',
     component: ScheduleComponent,
     data: { page: 'schedule' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
+  {
+    path: 'boards',
+    component: BoardsComponent,
+    data: { page: 'boards' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {

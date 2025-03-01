@@ -13,6 +13,10 @@ import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-c
 import { ProjectState } from '../features/project/project.model';
 import { BookmarkState } from '../features/bookmark/bookmark.model';
 import { NoteState } from '../features/note/note.model';
+import {
+  BOARDS_FEATURE_NAME,
+  BoardsState,
+} from '../features/boards/store/boards.reducer';
 
 export interface RootState {
   [TASK_FEATURE_NAME]: TaskState;
@@ -23,4 +27,5 @@ export interface RootState {
   [BOOKMARK_FEATURE_NAME]: BookmarkState;
   [LAYOUT_FEATURE_NAME]: LayoutState;
   [CONFIG_FEATURE_NAME]: GlobalConfigState;
+  [BOARDS_FEATURE_NAME]: BoardsState;
 }
