@@ -94,13 +94,17 @@ export class TagEditComponent {
     { initialValue: [] },
   );
 
+  allExcludedTagIds = computed<string[]>(() => [
+    ...this.tagIds(),
+    ...(this.excludedTagIds() || []),
+  ]);
   filteredSuggestions = computed(() => {
     const val = this.inputVal();
-    const excludedTagIds = [...this.tagIds(), ...(this.excludedTagIds() || [])];
+    const allExcludedTagIds = this.allExcludedTagIds();
 
     if (!val) {
       return this.tagSuggestions().filter(
-        (suggestion) => !excludedTagIds.includes(suggestion.id),
+        (suggestion) => !allExcludedTagIds.includes(suggestion.id),
       );
     }
     const filterValue = val.toLowerCase();
@@ -108,7 +112,7 @@ export class TagEditComponent {
     return this.tagSuggestions().filter(
       (suggestion) =>
         suggestion.title.toLowerCase().indexOf(filterValue) === 0 &&
-        !excludedTagIds.includes(suggestion.id),
+        !allExcludedTagIds.includes(suggestion.id),
     );
   });
 
@@ -190,7 +194,9 @@ export class TagEditComponent {
   private _addByTitle(v: string): void {
     const existing = this._getExistingSuggestionByTitle(v);
     if (existing) {
-      this._add(existing.id);
+      if (!this.allExcludedTagIds().includes(existing.id)) {
+        this._add(existing.id);
+      }
     } else {
       this._createNewTag(v);
     }
