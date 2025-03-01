@@ -27,6 +27,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { MatDialog } from '@angular/material/dialog';
+import { fastArrayCompare } from '../../../util/fast-array-compare';
 
 @Component({
   selector: 'board-task-list',
@@ -127,26 +128,29 @@ export class BoardTaskListComponent {
         prevTaskIds.splice(ev.currentIndex, 0, task.id) && prevTaskIds;
 
     let newTagIds: string[] = task.tagIds;
-
     if (panelCfg.includedTagIds?.length) {
       newTagIds = newTagIds.concat(panelCfg.includedTagIds);
     }
     if (panelCfg.excludedTagIds?.length) {
       newTagIds = newTagIds.filter((tagId) => !panelCfg.excludedTagIds!.includes(tagId));
     }
-    console.log({ ev, newTagIds, panelCfg, taskIds });
 
-    this.taskService.updateTags(task, unique(newTagIds));
-    if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done) {
+    // conditional updates
+    if (!fastArrayCompare(task.tagIds, newTagIds)) {
+      this.taskService.updateTags(task, unique(newTagIds));
+    }
+    if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done && !task.isDone) {
       this.store.dispatch(
         updateTask({ task: { id: task.id, changes: { isDone: true } } }),
       );
-    } else if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone) {
+    } else if (
+      panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone &&
+      task.isDone
+    ) {
       this.store.dispatch(
         updateTask({ task: { id: task.id, changes: { isDone: false } } }),
       );
     }
-
     this.store.dispatch(
       BoardsActions.updatePanelCfgTaskIds({
         panelId: panelCfg.id,
