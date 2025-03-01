@@ -93,7 +93,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           type: 'checkbox',
           key: 'isDoneOnly',
           expressions: {
-            hide: 'model.isUndoneOnly',
+            hide: 'model.isUnDoneOnly',
           },
           templateOptions: {
             getInitialValue: () => false,
@@ -104,7 +104,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
         // TODO check why not working properly
         {
           type: 'checkbox',
-          key: 'isUndoneOnly',
+          key: 'isUnDoneOnly',
           expressions: {
             hide: 'model.isDoneOnly',
           },

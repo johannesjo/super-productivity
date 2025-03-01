@@ -101,10 +101,8 @@ export class BoardTaskListComponent {
         moveItemInArray(prevTaskIds, ev.previousIndex, ev.currentIndex)
       : // NOTE: original array is mutated and splice does not return a new array
         prevTaskIds.splice(ev.currentIndex, 0, task.id) && prevTaskIds;
-    console.log(ev);
 
     let newTagIds: string[] = task.tagIds;
-    console.log({ panelCfg });
 
     if (panelCfg.includedTagIds?.length) {
       newTagIds = newTagIds.concat(panelCfg.includedTagIds);
@@ -112,7 +110,7 @@ export class BoardTaskListComponent {
     if (panelCfg.excludedTagIds?.length) {
       newTagIds = newTagIds.filter((tagId) => !panelCfg.excludedTagIds!.includes(tagId));
     }
-    console.log(newTagIds);
+    console.log({ ev, newTagIds, panelCfg, taskIds });
 
     this.taskService.updateTags(task, unique(newTagIds));
     if (panelCfg.isDoneOnly) {
