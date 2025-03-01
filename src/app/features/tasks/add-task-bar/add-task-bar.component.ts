@@ -91,6 +91,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isSkipAddingCurrentTag = input<boolean>(false);
   taskIdsToExclude = input<string[]>();
 
+  afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
   blurred = output<void>();
   done = output<void>();
 
@@ -103,7 +104,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   isSearchIssueProviders = signal(false);
   isSearchIssueProviders$ = toObservable(this.isSearchIssueProviders);
 
-  readonly inputEl = viewChild<ElementRef>('inputEl');
+  inputEl = viewChild<ElementRef>('inputEl');
 
   T: typeof T = T;
 
@@ -314,6 +315,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           );
         }
       }
+    }
+    if (this._lastAddedTaskId) {
+      this.afterTaskAdd.emit({
+        taskId: this._lastAddedTaskId,
+        isAddToBottom: this.isAddToBottom(),
+      });
     }
 
     const planForDay = this.planForDay();

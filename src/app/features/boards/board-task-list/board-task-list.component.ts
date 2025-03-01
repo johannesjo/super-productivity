@@ -134,4 +134,22 @@ export class BoardTaskListComponent {
       }),
     );
   }
+
+  afterTaskAdd({
+    taskId,
+    isAddToBottom,
+  }: {
+    taskId: string;
+    isAddToBottom: boolean;
+  }): void {
+    const panelCfg = this.panelCfg();
+    this.store.dispatch(
+      BoardsActions.updatePanelCfgTaskIds({
+        panelId: panelCfg.id,
+        taskIds: isAddToBottom
+          ? [...panelCfg.taskIds, taskId]
+          : [taskId, ...panelCfg.taskIds],
+      }),
+    );
+  }
 }

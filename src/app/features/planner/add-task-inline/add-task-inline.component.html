@@ -15,6 +15,7 @@
     [isHideTagTitles]="true"
     (blurred)="isShowAddTask = false"
     (done)="isShowAddTask = false"
+    (afterTaskAdd)="afterTaskAdd.emit($event)"
     [planForDay]="planForDay()"
     [isSkipAddingCurrentTag]="isSkipAddingCurrentTag()"
     [taskIdsToExclude]="taskIdsToExclude()"

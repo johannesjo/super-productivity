@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { T } from 'src/app/t.const';
 import { AddTaskBarComponent } from '../../tasks/add-task-bar/add-task-bar.component';
@@ -22,6 +22,7 @@ export class AddTaskInlineComponent {
   readonly tagsToRemove = input<string[]>();
   readonly taskIdsToExclude = input<string[]>();
   readonly isSkipAddingCurrentTag = input<boolean>(false);
+  readonly afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
 
   isShowAddTask = false;
 }

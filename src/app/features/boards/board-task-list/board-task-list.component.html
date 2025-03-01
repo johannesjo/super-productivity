@@ -4,6 +4,7 @@
   [tagsToRemove]="panelCfg().excludedTagIds"
   [isSkipAddingCurrentTag]="true"
   [taskIdsToExclude]="panelCfg().taskIds"
+  (afterTaskAdd)="afterTaskAdd($event)"
 ></add-task-inline>
 
 <div
