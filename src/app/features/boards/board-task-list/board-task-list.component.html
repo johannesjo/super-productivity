@@ -19,7 +19,23 @@
       [cdkDragData]="task"
       [task]="task"
       [tagsToHide]="panelCfg().includedTagIds || []"
-    ></planner-task>
+    >
+      @if (
+        ((plannerService.plannedTaskDayMap$ | async) || {})[task.id];
+        as plannedAtDay
+      ) {
+        <button
+          (click)="scheduleTask(task, $event)"
+          [title]="T.F.TASK.CMP.SCHEDULE | translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>today</mat-icon>
+          <div class="time-badge">{{ plannedAtDay | localDateStr }}</div>
+        </button>
+      }
+    </planner-task>
   }
 
   <!--  @if (tasks().length === 0) {-->

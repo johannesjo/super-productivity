@@ -19,11 +19,29 @@ import { BoardsActions } from '../store/boards.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { unique } from '../../../util/unique';
 import { updateTask } from '../../tasks/store/task.actions';
+import { AsyncPipe } from '@angular/common';
+import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
+import { PlannerService } from '../../planner/planner.service';
+import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'board-task-list',
   standalone: true,
-  imports: [CdkDrag, PlannerTaskComponent, CdkDropList, AddTaskInlineComponent],
+  imports: [
+    CdkDrag,
+    PlannerTaskComponent,
+    CdkDropList,
+    AddTaskInlineComponent,
+    AsyncPipe,
+    LocalDateStrPipe,
+    MatIcon,
+    MatIconButton,
+    TranslatePipe,
+  ],
   templateUrl: './board-task-list.component.html',
   styleUrl: './board-task-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +53,8 @@ export class BoardTaskListComponent {
 
   store = inject(Store);
   taskService = inject(TaskService);
+  plannerService = inject(PlannerService);
+  _matDialog = inject(MatDialog);
 
   allTasks$ = this.store.select(selectAllTasks);
   allTasks = toSignal(this.allTasks$, {
@@ -151,5 +171,14 @@ export class BoardTaskListComponent {
           : [taskId, ...panelCfg.taskIds],
       }),
     );
+  }
+
+  scheduleTask(task: TaskCopy, ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this._matDialog.open(DialogScheduleTaskComponent, {
+      restoreFocus: true,
+      data: { task },
+    });
   }
 }
