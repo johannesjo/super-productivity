@@ -67,6 +67,11 @@ export const selectAllTagsWithoutMyDayAndNoList = createSelector(
     tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== NO_LIST_TAG.id),
 );
 
+export const selectAllTagsWithoutNoList = createSelector(
+  selectAllTags,
+  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== NO_LIST_TAG.id),
+);
+
 export const selectTagById = createSelector(
   selectTagFeatureState,
   (state: TagState, props: { id: string }): Tag => {

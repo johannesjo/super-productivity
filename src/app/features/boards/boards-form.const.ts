@@ -66,12 +66,37 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           },
         },
         {
+          type: 'tag-select',
+          key: 'includedTagIds',
+          expressions: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'props.excludedTagIds': 'model.excludedTagIds',
+          },
+          templateOptions: {
+            label: 'Required Tags',
+            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+          },
+        },
+        {
+          type: 'tag-select',
+          key: 'excludedTagIds',
+          expressions: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'props.excludedTagIds': 'model.includedTagIds',
+          },
+          templateOptions: {
+            label: 'Excluded Tags',
+            // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+          },
+        },
+        {
           type: 'checkbox',
           key: 'isDoneOnly',
+          expressions: {
+            hide: 'model.isUndoneOnly',
+          },
           templateOptions: {
-            expressions: {
-              hide: 'model.isUndoneOnly',
-            },
+            getInitialValue: () => false,
             label: 'Limit to done tasks',
             // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
           },
@@ -84,6 +109,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
             hide: 'model.isDoneOnly',
           },
           templateOptions: {
+            getInitialValue: () => false,
             label: 'Limit to undone tasks',
             // label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
           },
