@@ -8,6 +8,11 @@
   padding: 16px;
   max-height: 100%;
   position: relative;
+  overflow: auto;
+
+  @include mq(xs, max) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 
   .title {
     font-size: 14px;
@@ -29,6 +34,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 200px;
+  min-width: 230px;
+
+  @include mq(xs, max) {
+    min-height: 300px;
+  }
 
   @include darkTheme() {
     border-color: $dark-theme-extra-border-color;
