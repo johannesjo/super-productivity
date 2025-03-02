@@ -125,7 +125,7 @@ export class ScheduleEventComponent implements OnInit {
       this.se.type === SVEType.ScheduledTask
     ) {
       this.task = this.se.data as TaskCopy;
-      this._projectId$.next(this.task.projectId);
+      this._projectId$.next(this.task.projectId || null);
 
       if (
         (this.se.type === SVEType.Task || this.se.type === SVEType.TaskPlannedForDay) &&

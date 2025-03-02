@@ -53,19 +53,19 @@ export interface IssueTaskTimeTracked {
 
 export interface IssueFieldsForTask {
   // NOTE: keep in mind that the issueId is not unique (especially for github)
-  issueId: string | null;
-  issueProviderId: string | null;
-  issueType: IssueProviderKey | null;
-  issueWasUpdated: boolean | null;
-  issueLastUpdated: number | null;
-  issueAttachmentNr: number | null;
-  issueTimeTracked: IssueTaskTimeTracked | null;
-  issuePoints: number | null;
+  issueId?: string;
+  issueProviderId?: string;
+  issueType?: IssueProviderKey;
+  issueWasUpdated?: boolean;
+  issueLastUpdated?: number;
+  issueAttachmentNr?: number;
+  issueTimeTracked?: IssueTaskTimeTracked;
+  issuePoints?: number;
 }
 
 export interface TaskCopy extends IssueFieldsForTask {
   id: string;
-  projectId: string | null;
+  projectId?: string;
   title: string;
 
   subTaskIds: string[];
@@ -75,15 +75,15 @@ export interface TaskCopy extends IssueFieldsForTask {
 
   created: number;
   isDone: boolean;
-  doneOn: number | null;
-  plannedAt: number | null;
+  doneOn?: number;
+  plannedAt?: number;
   // remindCfg: TaskReminderOptionId;
 
   notes: string;
 
-  parentId: string | null;
-  reminderId: string | null;
-  repeatCfgId: string | null;
+  parentId?: string;
+  reminderId?: string;
+  repeatCfgId?: string;
   // NOTE: only main tasks have tagIds set
   tagIds: string[];
 
@@ -124,8 +124,8 @@ export interface TaskWithPlannedDay extends Task {
 }
 
 export interface TaskWithoutReminder extends Task {
-  reminderId: null;
-  plannedAt: null;
+  reminderId: undefined;
+  plannedAt: undefined;
 }
 
 export interface TaskWithPlannedForDayIndication extends TaskWithoutReminder {
@@ -138,34 +138,19 @@ export interface TaskWithSubTasks extends Task {
 
 export const DEFAULT_TASK: Task = {
   id: '',
-  projectId: null,
   subTaskIds: [],
   timeSpentOnDay: {},
   timeSpent: 0,
   timeEstimate: 0,
   isDone: false,
-  doneOn: null,
   title: '',
   notes: '',
   tagIds: [],
-  parentId: null,
-  reminderId: null,
   created: Date.now(),
-  repeatCfgId: null,
-  plannedAt: null,
 
   _showSubTasksMode: ShowSubTasksMode.Show,
 
   attachments: [],
-
-  issueId: null,
-  issueProviderId: null,
-  issuePoints: null,
-  issueType: null,
-  issueAttachmentNr: null,
-  issueLastUpdated: null,
-  issueWasUpdated: null,
-  issueTimeTracked: null,
 };
 
 export interface TaskState extends EntityState<Task> {

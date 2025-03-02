@@ -135,7 +135,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
+    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
   );
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(

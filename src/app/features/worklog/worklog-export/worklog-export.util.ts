@@ -123,7 +123,7 @@ const handleDateGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const skipTask = (task: WorklogTask, groupBy: WorklogGrouping): boolean => {
   return (
-    (groupBy === WorklogGrouping.PARENT && task.parentId !== null) ||
+    (groupBy === WorklogGrouping.PARENT && !!task.parentId) ||
     (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0)
   );
 };
@@ -183,11 +183,10 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
   const titlesWithSub = [task.title];
-  const parentTask =
-    task.parentId !== null
-      ? // NOTE: we use 'ERR' to still throw an error for invalid data
-        (data.tasks.find((t) => t.id === task.parentId) as WorklogTask) || 'ERR'
-      : undefined;
+  const parentTask = task.parentId
+    ? // NOTE: we use 'ERR' to still throw an error for invalid data
+      (data.tasks.find((t) => t.id === task.parentId) as WorklogTask) || 'ERR'
+    : undefined;
 
   const titles = parentTask ? [parentTask.title] : [task.title];
 

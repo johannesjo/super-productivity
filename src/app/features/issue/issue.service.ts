@@ -449,7 +449,7 @@ export class IssueService {
             this._workContextService.activeWorkContextType === WorkContextType.TAG
               ? [this._workContextService.activeWorkContextId]
               : [],
-          projectId: defaultProjectId,
+          projectId: defaultProjectId || undefined,
         };
       }
     };

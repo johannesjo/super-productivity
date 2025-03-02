@@ -34,7 +34,6 @@ export const migrateTaskArchiveState = (taskArchiveState: TaskArchive): TaskArch
 };
 
 const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy => {
-  task = _addNewIssueFields(task);
   task = _makeNullAndArraysConsistent(task);
   task = _replaceLegacyGitType(task);
   task = _addTagIds(task);
@@ -44,7 +43,18 @@ const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy =
   task = _updateIssueCalendarToIcal(task);
   task = _removeLegacyGitLabIssueData(task);
   task = _removeLegacyData(task);
+  task = _removeNullFields(task);
   return task;
+};
+
+const _removeNullFields = (task: Task): Task => {
+  const taskCopy = { ...task };
+  Object.keys(taskCopy).forEach((key) => {
+    if (taskCopy[key] === null) {
+      delete taskCopy[key];
+    }
+  });
+  return taskCopy;
 };
 
 const _removeLegacyData = (task: Task): Task => {
@@ -58,13 +68,13 @@ const _removeLegacyGitLabIssueData = (task: Task): Task => {
     (typeof task.issueId !== 'string' || !task.issueId.includes('#'))
     ? {
         ...task,
-        issueId: null,
-        issueType: null,
-        issueWasUpdated: null,
-        issueLastUpdated: null,
-        issueAttachmentNr: null,
-        issuePoints: null,
-        issueTimeTracked: null,
+        issueId: undefined,
+        issueType: undefined,
+        issueWasUpdated: undefined,
+        issueLastUpdated: undefined,
+        issueAttachmentNr: undefined,
+        issuePoints: undefined,
+        issueTimeTracked: undefined,
       }
     : task;
 };
@@ -108,32 +118,6 @@ const _addTagIds = (task: Task): Task => {
       };
 };
 
-const _addNewIssueFields = (task: Task): Task => {
-  if (!task.hasOwnProperty('issueLastUpdated')) {
-    return task.issueId !== null
-      ? {
-          // NOTE: we intentionally leave it as is, to allow for an update
-          // issueAttachmentNr: null,
-          // issueLastUpdated: Date.now(),
-          // issueWasUpdated: false,
-          ...task,
-        }
-      : {
-          // @ts-ignore
-          issueAttachmentNr: null,
-          // @ts-ignore
-          issueLastUpdated: null,
-          // @ts-ignore
-          issueWasUpdated: null,
-          // @ts-ignore
-          issueProviderId: null,
-          ...task,
-        };
-  } else {
-    return task;
-  }
-};
-
 const _replaceLegacyGitType = (task: Task): Task => {
   const issueType = task.issueType as string;
   return issueType === LEGACY_GITHUB_TYPE ? { ...task, issueType: GITHUB_TYPE } : task;
@@ -156,12 +140,6 @@ const _makeNullAndArraysConsistent = (task: Task): Task => {
   return {
     ...task,
 
-    projectId: task.projectId ?? null,
-    doneOn: task.doneOn ?? null,
-    parentId: task.parentId ?? null,
-    reminderId: task.reminderId ?? null,
-    repeatCfgId: task.repeatCfgId ?? null,
-
     tagIds: task.tagIds ?? [],
     subTaskIds: task.subTaskIds ?? [],
     attachments: task.attachments ?? [],
@@ -169,14 +147,6 @@ const _makeNullAndArraysConsistent = (task: Task): Task => {
     notes: task.notes ?? '',
 
     isDone: task.isDone ?? false,
-
-    issueId: task.issueId ?? null,
-    issueType: task.issueType ?? null,
-    issueWasUpdated: task.issueWasUpdated ?? null,
-    issueLastUpdated: task.issueLastUpdated ?? null,
-    issueAttachmentNr: task.issueAttachmentNr ?? null,
-    issuePoints: task.issuePoints ?? null,
-    issueTimeTracked: task.issueTimeTracked ?? null,
   };
 };
 

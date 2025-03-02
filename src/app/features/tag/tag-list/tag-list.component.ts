@@ -70,15 +70,15 @@ export class TagListComponent {
     return (tagsI as Tag[]) || [];
   });
 
-  projectId = computed<string | null>(() => {
+  projectId = computed<string | undefined>(() => {
     if (this.isShowProjectTagNever()) {
-      return null;
+      return undefined;
     } else if (
       this.isShowProjectTagAlways() ||
       this.workContext()?.activeType === WorkContextType.TAG
     ) {
       return this.task().projectId;
     }
-    return null;
+    return undefined;
   });
 }

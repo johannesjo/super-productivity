@@ -1051,7 +1051,10 @@ export class TaskService {
       title: title as string,
       id: nanoid(),
 
-      projectId: workContextType === WorkContextType.PROJECT ? workContextId : null,
+      ...(workContextType === WorkContextType.PROJECT
+        ? { projectId: workContextId }
+        : {}),
+
       tagIds:
         workContextType === WorkContextType.TAG && !additional.parentId
           ? [workContextId]

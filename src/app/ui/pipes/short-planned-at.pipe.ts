@@ -7,7 +7,7 @@ export class ShortPlannedAtPipe implements PipeTransform {
   private _shortTime2Pipe = inject(ShortTime2Pipe);
   private locale = inject(LOCALE_ID);
 
-  transform(value: number | null, ...args: unknown[]): string | null {
+  transform(value?: number | null, ...args: unknown[]): string | null {
     if (typeof value !== 'number') {
       return null;
     }

@@ -2,7 +2,7 @@
 
 export enum MODEL_VERSION {
   // remove legacy data
-  TASK = 4.2,
+  TASK = 4.21,
   // needs to be always the same as TASK !!!
   TASK_ARCHIVE = MODEL_VERSION.TASK,
   // issueProvider model

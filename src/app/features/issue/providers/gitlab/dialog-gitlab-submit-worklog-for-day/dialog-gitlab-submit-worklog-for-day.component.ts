@@ -102,7 +102,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       id: t.id,
       issueId: assertTruthy(t.issueId),
       title: t.title,
-      issueTimeTracked: t.issueTimeTracked,
+      issueTimeTracked: t.issueTimeTracked || null,
       timeSpentOnDay: t.timeSpentOnDay,
       timeTrackedAlreadyRemote: 0,
       isPastTrackedData: !!Object.keys(t.timeSpentOnDay).find(

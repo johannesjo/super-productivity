@@ -5,7 +5,7 @@ import { WeeksInMonth } from '../../util/get-week-in-month-model';
 export interface WorklogDataForDay {
   timeSpent: number;
   task: Task;
-  parentId: string | null;
+  parentId?: string;
   isNoRestore: boolean;
 }
 

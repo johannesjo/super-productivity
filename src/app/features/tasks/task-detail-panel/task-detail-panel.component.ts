@@ -89,8 +89,8 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 interface IssueAndType {
-  id: string | number | null;
-  type: IssueProviderKey | null;
+  id?: string | number;
+  type?: IssueProviderKey;
 }
 
 interface IssueDataAndType {
@@ -356,15 +356,15 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     if (!prev || prev.reminderId !== newVal.reminderId) {
-      this.reminderId$.next(newVal.reminderId);
+      this.reminderId$.next(newVal.reminderId || null);
     }
 
     if (!prev || prev.repeatCfgId !== newVal.repeatCfgId) {
-      this.repeatCfgId$.next(newVal.repeatCfgId);
+      this.repeatCfgId$.next(newVal.repeatCfgId || null);
     }
 
     if (!prev || prev.parentId !== newVal.parentId) {
-      this.parentId$.next(newVal.parentId);
+      this.parentId$.next(newVal.parentId || null);
     }
 
     // panel states

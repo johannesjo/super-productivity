@@ -96,8 +96,8 @@ export class ReminderModule {
             });
             this._reminderService.removeReminder(oldest.id);
             this._taskService.update(oldest.relatedId, {
-              reminderId: null,
-              plannedAt: null,
+              reminderId: undefined,
+              plannedAt: undefined,
             });
           } else {
             this._matDialog

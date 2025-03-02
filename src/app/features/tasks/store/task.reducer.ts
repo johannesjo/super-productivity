@@ -129,7 +129,7 @@ export const taskReducer = createReducer<TaskState>(
         ...taskAdapter.updateOne(
           {
             id: taskToStartId,
-            changes: { isDone: false, doneOn: null },
+            changes: { isDone: false, doneOn: undefined },
           },
           state,
         ),
@@ -477,7 +477,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id: task.id,
         changes: {
-          parentId: null,
+          parentId: undefined,
           tagIds: [...par.tagIds],
         },
       },
@@ -563,7 +563,7 @@ export const taskReducer = createReducer<TaskState>(
     const updatedTask = {
       ...task,
       isDone: false,
-      doneOn: null,
+      doneOn: undefined,
     };
     return taskAdapter.addMany([updatedTask, ...subTasks], state);
   }),
@@ -761,7 +761,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id,
         changes: {
-          plannedAt: null,
+          plannedAt: undefined,
         },
       },
       state,

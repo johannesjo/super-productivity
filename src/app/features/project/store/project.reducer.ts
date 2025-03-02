@@ -646,7 +646,7 @@ export const projectReducer = createReducer<ProjectState>(
     const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
     const projectIds = unique<string>(
       tasks
-        .map((t: Task) => t.projectId)
+        .map((t: Task) => t.projectId || null)
         .filter((pid: string | null) => !!pid) as string[],
     );
     const updates: Update<Project>[] = projectIds.map((pid: string) => ({
