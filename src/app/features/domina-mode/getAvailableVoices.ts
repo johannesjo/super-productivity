@@ -1,10 +1,15 @@
 export const getAvailableVoices = (): SpeechSynthesisVoice[] => {
   const synth = window.speechSynthesis;
+  if (!synth) {
+    console.warn('window.speechSynthesis not available');
+    return [];
+  }
+
   return synth.getVoices();
 };
 
 export const getDefaultVoice = (): string => {
-  const voices = window.speechSynthesis.getVoices();
+  const voices = getAvailableVoices();
   if (voices.length === 0) {
     return 'null';
   }
