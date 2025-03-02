@@ -4,6 +4,7 @@ import { GITHUB_TYPE, ICAL_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/model-version';
 import { MODEL_VERSION } from '../../core/model-version';
+import { omit } from '../../util/omit';
 
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
@@ -42,7 +43,14 @@ const _taskEntityMigrations = (task: TaskCopy, taskState: TaskState): TaskCopy =
   task = _updateTimeEstimate(task, taskState);
   task = _updateIssueCalendarToIcal(task);
   task = _removeLegacyGitLabIssueData(task);
+  task = _removeLegacyData(task);
   return task;
+};
+
+const _removeLegacyData = (task: Task): Task => {
+  return task.hasOwnProperty('issueData')
+    ? (omit(task, 'issueData' as any) as Task)
+    : task;
 };
 
 const _removeLegacyGitLabIssueData = (task: Task): Task => {
