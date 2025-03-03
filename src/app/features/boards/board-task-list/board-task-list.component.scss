@@ -1,6 +1,7 @@
 @import '../../../../variables';
 
 :host {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: auto;
