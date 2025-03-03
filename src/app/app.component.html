@@ -39,6 +39,7 @@
         (closedStart)="layoutService.hideSideNav()"
         [mode]="(layoutService.isNavOver$ | async) ? 'over' : 'side'"
         [opened]="layoutService.isShowSideNav$ | async"
+        [disableClose]="layoutService.isNavAlwaysVisible$ | async"
         position="start"
       >
         <side-nav></side-nav>
