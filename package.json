@@ -168,7 +168,6 @@
     "core-js": "^3.39.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "dragula": "^3.7.3",
     "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
     "eslint": "^8.57.1",
@@ -223,11 +222,6 @@
     "zone.js": "~0.15.0"
   },
   "overrides": {
-    "ng2-dragula": {
-      "@angular/common": "$@angular/common",
-      "@angular/core": "$@angular/core",
-      "@angular/animations": "$@angular/animations"
-    },
     "angular-mentions": {
       "@angular/common": "$@angular/common"
     },
