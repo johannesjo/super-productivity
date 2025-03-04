@@ -8,12 +8,14 @@ import { MatInput } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'select-project',
   templateUrl: './select-project.component.html',
   styleUrls: ['./select-project.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     MatInput,
     FormsModule,
@@ -21,6 +23,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     FormlyModule,
     AsyncPipe,
     TranslatePipe,
+    MatSelect,
+    MatOption,
   ],
 })
 export class SelectProjectComponent extends FieldType<FormlyFieldConfig> {

@@ -4,11 +4,19 @@ export enum BoardPanelCfgTaskDoneState {
   UnDone = 3,
 }
 
+export enum BoardPanelCfgScheduledState {
+  All = 1,
+  Scheduled = 2,
+  NotScheduled = 3,
+}
+
 export interface BoardSrcCfg {
   // projectId?: string;
   includedTagIds: string[];
   excludedTagIds: string[];
+  projectId?: string;
   taskDoneState: BoardPanelCfgTaskDoneState;
+  scheduledState: BoardPanelCfgScheduledState;
 }
 
 export interface BoarFieldsToRemove {

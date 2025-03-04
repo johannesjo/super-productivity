@@ -36,6 +36,7 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
   templateUrl: './planner-task.component.html',
   styleUrl: './planner-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     MatIcon,
     LongPressIOSDirective,

@@ -13,6 +13,7 @@ import { TaskCopy } from '../../tasks/task.model';
   templateUrl: './add-task-inline.component.html',
   styleUrl: './add-task-inline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class AddTaskInlineComponent {
   T: typeof T = T;
