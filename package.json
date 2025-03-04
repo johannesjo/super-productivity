@@ -119,7 +119,7 @@
     "@angular/language-service": "^19.1.3",
     "@angular/material": "^19.1.1",
     "@angular/material-moment-adapter": "^19.1.1",
-    "@angular/platform-browser": "^19.1.3",
+    "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.1.3",
     "@angular/platform-server": "^19.1.3",
     "@angular/router": "^19.1.3",
