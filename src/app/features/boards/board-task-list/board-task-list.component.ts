@@ -42,6 +42,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { first, take } from 'rxjs/operators';
 import { PlannerActions } from '../../planner/store/planner.actions';
+import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 
 @Component({
   selector: 'board-task-list',
@@ -56,6 +57,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
     MatIcon,
     MatIconButton,
     TranslatePipe,
+    ShortPlannedAtPipe,
   ],
   templateUrl: './board-task-list.component.html',
   styleUrl: './board-task-list.component.scss',
