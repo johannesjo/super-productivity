@@ -20,10 +20,22 @@
       [task]="task"
       [tagsToHide]="panelCfg().includedTagIds || []"
     >
-      @if (
-        ((plannerService.plannedTaskDayMap$ | async) || {})[task.id];
-        as plannedAtDay
-      ) {
+      @if (task.reminderId) {
+        <button
+          (click)="scheduleTask(task, $event)"
+          [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>alarm</mat-icon>
+          <div
+            class="time-badge"
+            [innerHTML]="task.plannedAt | shortPlannedAt"
+          ></div>
+        </button>
+      }
+      @if (plannedTaskDayMap()[task.id]) {
         <button
           (click)="scheduleTask(task, $event)"
           [title]="T.F.TASK.CMP.SCHEDULE | translate"
@@ -32,7 +44,7 @@
           mat-icon-button
         >
           <mat-icon>today</mat-icon>
-          <div class="time-badge">{{ plannedAtDay | localDateStr }}</div>
+          <div class="time-badge">{{ plannedTaskDayMap()[task.id] | localDateStr }}</div>
         </button>
       }
     </planner-task>
