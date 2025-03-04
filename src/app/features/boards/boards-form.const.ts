@@ -1,5 +1,10 @@
 import { LimitedFormlyFieldConfig } from '../config/global-config.model';
-import { BoardCfg, BoardPanelCfg, BoardPanelCfgTaskDoneState } from './boards.model';
+import {
+  BoardCfg,
+  BoardPanelCfg,
+  BoardPanelCfgScheduledState,
+  BoardPanelCfgTaskDoneState,
+} from './boards.model';
 import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
 
@@ -7,9 +12,12 @@ const getNewPanel = (): BoardPanelCfg => ({
   id: nanoid(),
   title: '',
   taskIds: [],
+
   taskDoneState: BoardPanelCfgTaskDoneState.All,
   excludedTagIds: [],
   includedTagIds: [],
+  scheduledState: BoardPanelCfgScheduledState.All,
+  projectId: '',
 });
 
 export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
@@ -94,6 +102,44 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
                 label: T.F.BOARDS.FORM.TASK_DONE_STATE_UNDONE,
               },
             ],
+          },
+        },
+        {
+          key: 'scheduledState',
+          type: 'radio',
+          props: {
+            // label: T.F.BOARDS.FORM.TASK_DONE_STATE,
+            label: 'Scheduled State',
+            required: true,
+            defaultValue: BoardPanelCfgScheduledState.All,
+            options: [
+              {
+                value: BoardPanelCfgScheduledState.All,
+                // label: T.F.BOARDS.FORM.TASK_DONE_STATE_ALL,
+                label: 'All',
+              },
+              {
+                value: BoardPanelCfgScheduledState.Scheduled,
+                // label: T.F.BOARDS.FORM.TASK_DONE_STATE_DONE,
+                label: 'Scheduled',
+              },
+              {
+                value: BoardPanelCfgScheduledState.NotScheduled,
+                // label: T.F.BOARDS.FORM.TASK_DONE_STATE_UNDONE,
+                label: 'Not Scheduled',
+              },
+            ],
+          },
+        },
+        {
+          key: 'projectId',
+          type: 'project-select',
+          props: {
+            // label: T.GCF.MISC.DEFAULT_PROJECT,
+            label: 'Project',
+            defaultValue: '',
+            // nullLabel: T.F,
+            nullLabel: 'All Projects',
           },
         },
       ],

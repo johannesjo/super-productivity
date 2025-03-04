@@ -1,4 +1,8 @@
-import { BoardCfg, BoardPanelCfgTaskDoneState } from './boards.model';
+import {
+  BoardCfg,
+  BoardPanelCfgScheduledState,
+  BoardPanelCfgTaskDoneState,
+} from './boards.model';
 import { IMPORTANT_TAG, IN_PROGRESS_TAG, URGENT_TAG } from '../tag/tag.const';
 import { T } from '../../t.const';
 
@@ -16,6 +20,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [],
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
       {
         id: 'NOT_URGENT_AND_IMPORTANT',
@@ -24,6 +29,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [URGENT_TAG.id],
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
       {
         id: 'URGENT_AND_NOT_IMPORTANT',
@@ -32,6 +38,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IMPORTANT_TAG.id],
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
       {
         id: 'NOT_URGENT_AND_NOT_IMPORTANT',
@@ -40,6 +47,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IMPORTANT_TAG.id, URGENT_TAG.id],
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
     ],
   },
@@ -55,6 +63,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
       {
         id: 'IN_PROGRESS',
@@ -63,6 +72,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [IN_PROGRESS_TAG.id],
         excludedTagIds: [],
         taskIds: [],
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
       {
         id: 'DONE',
@@ -71,6 +81,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         includedTagIds: [],
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
+        scheduledState: BoardPanelCfgScheduledState.All,
       },
     ],
   },
