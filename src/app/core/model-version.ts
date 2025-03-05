@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
 export enum MODEL_VERSION {
-  // remove legacy data
-  TASK = 4.21,
+  // moving from null to undefined to save data
+  TASK = 5,
   // needs to be always the same as TASK !!!
   TASK_ARCHIVE = MODEL_VERSION.TASK,
   // issueProvider model
