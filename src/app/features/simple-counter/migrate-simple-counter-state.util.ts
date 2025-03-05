@@ -1,5 +1,5 @@
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { SimpleCounter, SimpleCounterState } from './simple-counter.model';
 import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION } from '../../core/model-version';

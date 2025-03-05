@@ -1,6 +1,6 @@
 import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,

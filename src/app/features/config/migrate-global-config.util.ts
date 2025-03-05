@@ -7,7 +7,7 @@ import {
 } from './global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { SyncProvider } from '../../imex/sync/sync-provider.model';
 import { MODEL_VERSION } from '../../core/model-version';
 

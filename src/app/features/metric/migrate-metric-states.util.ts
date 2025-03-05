@@ -1,4 +1,4 @@
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { MetricState } from './metric.model';
 import { ObstructionState } from './obstruction/obstruction.model';
 import { ImprovementState } from './improvement/improvement.model';
