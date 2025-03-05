@@ -119,6 +119,10 @@ export class BoardTaskListComponent {
           !panelCfg.excludedTagIds.some((tagId) => task.tagIds.includes(tagId));
       }
 
+      if (panelCfg.isParentTasksOnly) {
+        isTaskIncluded = isTaskIncluded && !task.parentId;
+      }
+
       if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done) {
         isTaskIncluded = isTaskIncluded && task.isDone;
       }
@@ -131,8 +135,6 @@ export class BoardTaskListComponent {
         // TODO check parentId case thoroughly
         isTaskIncluded = isTaskIncluded && task.projectId === panelCfg.projectId;
       }
-
-      console.log(task.plannedAt, task);
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled) {
         isTaskIncluded = isTaskIncluded && (task.plannedAt || plannedTaskDayMap[task.id]);
