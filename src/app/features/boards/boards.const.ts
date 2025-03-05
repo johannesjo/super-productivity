@@ -6,7 +6,6 @@ import {
 import { IMPORTANT_TAG, IN_PROGRESS_TAG, URGENT_TAG } from '../tag/tag.const';
 import { T } from '../../t.const';
 
-// TODO translate strings
 export const DEFAULT_BOARDS: BoardCfg[] = [
   {
     id: 'EISENHOWER_MATRIX',
