@@ -29,7 +29,6 @@ import { Store } from '@ngrx/store';
   selector: 'side-nav-item',
   imports: [
     RouterLink,
-
     RouterModule,
     WorkContextMenuComponent,
     ContextMenuComponent,
@@ -42,6 +41,7 @@ import { Store } from '@ngrx/store';
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'g-multi-btn-wrapper' },
+  standalone: true,
 })
 export class SideNavItemComponent {
   private readonly _store = inject(Store);

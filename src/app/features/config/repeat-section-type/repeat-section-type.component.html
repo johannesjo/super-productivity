@@ -9,14 +9,49 @@
         class="field"
       ></formly-field>
       <button
-        (click)="removeItem(i)"
-        color="warn"
+        #triggerBtn
         mat-mini-fab
+        color=""
         type="button"
         class="remove-btn"
       >
-        <mat-icon>delete_forever</mat-icon>
+        <mat-icon>more_vert</mat-icon>
       </button>
+
+      <context-menu
+        [contextMenu]="contextMenu"
+        [rightClickTriggerEl]="triggerBtn"
+        [leftClickTriggerEl]="triggerBtn"
+      ></context-menu>
+
+      <ng-template #contextMenu>
+        @if (i > 0) {
+          <button
+            mat-menu-item
+            (click)="moveItem(i, i - 1)"
+          >
+            <mat-icon>arrow_backward</mat-icon>
+            {{ T.G.MOVE_BACKWARD | translate }}
+          </button>
+        }
+        @if (i < field.fieldGroup.length - 1) {
+          <button
+            mat-menu-item
+            (click)="moveItem(i, i + 1)"
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            {{ T.G.MOVE_FORWARD | translate }}
+          </button>
+        }
+        <button
+          mat-menu-item
+          class="color-warn-i"
+          (click)="removeItem(i)"
+        >
+          <mat-icon class="color-warn-i">delete_forever</mat-icon>
+          {{ T.G.DELETE | translate }}
+        </button>
+      </ng-template>
     </div>
   }
 </div>
