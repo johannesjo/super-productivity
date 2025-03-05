@@ -21,6 +21,7 @@ import { NgTemplateOutlet } from '@angular/common';
   templateUrl: './context-menu.component.html',
   styleUrl: './context-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class ContextMenuComponent implements OnInit {
   leftClickTriggerEl = input<HTMLElement | MatMenuItem | MatIconButton | undefined>();

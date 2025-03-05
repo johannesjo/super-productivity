@@ -1360,6 +1360,8 @@ const T = {
     NEXT: 'G.NEXT',
     NO_CON: 'G.NO_CON',
     NONE: 'G.NONE',
+    MOVE_BACKWARD: 'G.MOVE_BACKWARD',
+    MOVE_FORWARD: 'G.MOVE_FORWARD',
     OK: 'G.OK',
     PREVIOUS: 'G.PREVIOUS',
     REMOVE: 'G.REMOVE',

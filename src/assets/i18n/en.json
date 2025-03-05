@@ -1339,6 +1339,8 @@
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
+    "MOVE_BACKWARD": "Move Backward",
+    "MOVE_FORWARD": "Move Forward",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
