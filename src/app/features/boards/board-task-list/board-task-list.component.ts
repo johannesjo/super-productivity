@@ -31,7 +31,6 @@ import {
   unScheduleTask,
   updateTask,
 } from '../../tasks/store/task.actions';
-import { AsyncPipe } from '@angular/common';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -52,7 +51,6 @@ import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
     PlannerTaskComponent,
     CdkDropList,
     AddTaskInlineComponent,
-    AsyncPipe,
     LocalDateStrPipe,
     MatIcon,
     MatIconButton,

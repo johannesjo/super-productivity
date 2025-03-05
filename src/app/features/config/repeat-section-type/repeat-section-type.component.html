@@ -34,7 +34,7 @@
             {{ T.G.MOVE_BACKWARD | translate }}
           </button>
         }
-        @if (i < field.fieldGroup.length - 1) {
+        @if (i < field.fieldGroup?.length - 1) {
           <button
             mat-menu-item
             (click)="moveItem(i, i + 1)"
