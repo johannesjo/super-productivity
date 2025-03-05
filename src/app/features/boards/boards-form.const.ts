@@ -17,6 +17,7 @@ const getNewPanel = (): BoardPanelCfg => ({
   excludedTagIds: [],
   includedTagIds: [],
   scheduledState: BoardPanelCfgScheduledState.All,
+  isParentTasksOnly: false,
   projectId: '',
 });
 
@@ -140,6 +141,15 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
             defaultValue: '',
             // nullLabel: T.F,
             nullLabel: 'All Projects',
+          },
+        },
+        {
+          key: 'isParentTasksOnly',
+          type: 'checkbox',
+          props: {
+            // label: T.GCF.MISC.DEFAULT_PROJECT,
+            label: 'Only parent tasks',
+            defaultValue: false,
           },
         },
       ],

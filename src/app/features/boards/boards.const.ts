@@ -21,6 +21,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
       {
         id: 'NOT_URGENT_AND_IMPORTANT',
@@ -30,6 +31,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
       {
         id: 'URGENT_AND_NOT_IMPORTANT',
@@ -39,6 +41,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
       {
         id: 'NOT_URGENT_AND_NOT_IMPORTANT',
@@ -48,6 +51,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.All,
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
     ],
   },
@@ -64,6 +68,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
       {
         id: 'IN_PROGRESS',
@@ -73,6 +78,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
       {
         id: 'DONE',
@@ -82,6 +88,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
+        isParentTasksOnly: false,
       },
     ],
   },
