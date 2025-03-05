@@ -13,6 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation],
   imports: [FormlyModule, MatMiniFabButton, MatIcon, MatButton, TranslatePipe],
+  standalone: true,
 })
 export class RepeatSectionTypeComponent extends FieldArrayType {
   T: typeof T = T;
