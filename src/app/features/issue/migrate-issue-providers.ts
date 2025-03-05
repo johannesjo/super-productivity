@@ -1,5 +1,5 @@
 import { IssueProvider, IssueProviderState } from './issue.model';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { MODEL_VERSION } from '../../core/model-version';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { Dictionary } from '@ngrx/entity';

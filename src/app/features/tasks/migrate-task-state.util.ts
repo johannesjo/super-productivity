@@ -2,7 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 import { Task, TaskArchive, TaskCopy, TaskState } from './task.model';
 import { GITHUB_TYPE, ICAL_TYPE } from '../issue/issue.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { MODEL_VERSION } from '../../core/model-version';
 import { omit } from '../../util/omit';
 
