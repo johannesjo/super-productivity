@@ -7,10 +7,12 @@
 >
   @for (board of boards(); track board.id) {
     <mat-tab [label]="board.title | translate">
-      <board
-        [boardCfg]="board"
-        cdkDropListGroup
-      ></board>
+      <ng-template matTabContent>
+        <board
+          [boardCfg]="board"
+          cdkDropListGroup
+        ></board>
+      </ng-template>
     </mat-tab>
   }
 
