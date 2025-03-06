@@ -60,6 +60,9 @@ export interface ElectronAPI {
 
   isSnap(): boolean;
 
+  // Add this method to control the main window fullscreen state
+  setFullScreenMainWin(isFullScreen: boolean): void;
+
   // SEND
   // ----
   reloadMainWin(): void;

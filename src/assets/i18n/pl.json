@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Rozpoczęcie śledzenia następnego zadania po oznaczeniu bieżącego jako wykonanego",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Powiadomienie o przekroczeniu szacowanego czasu",
       "L_IS_TRACKING_REMINDER_ENABLED": "Przypomnienie o śledzeniu włączone",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Skup się na oknie aplikacji na pełnym ekranie, gdy przypomnienie o śledzeniu jest aktywne (tylko na komputerze)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Wyświetlanie przypomnienia o śledzeniu w aplikacji mobilnej",
       "L_TRACKING_INTERVAL": "Interwał śledzenia czasu (EKSPERYMENTALNY)",
       "L_TRACKING_REMINDER_MIN_TIME": "Czas oczekiwania przed wyświetleniem banera przypominającego o śledzeniu",

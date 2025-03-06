@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Spustenie sledovania ďalšej úlohy po označení aktuálnej ako hotovej",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozorniť na prekročenie odhadovaného času",
       "L_IS_TRACKING_REMINDER_ENABLED": "Zapnuté pripomínanie sledovania",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Zamerajte sa na okno aplikácie na celú obrazovku, keď je aktívne pripomenutie sledovania (iba pre stolné počítače)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Zobrazenie pripomenutia sledovania v mobilnej aplikácii",
       "L_TRACKING_INTERVAL": "Interval sledovania času (EXPERIMENTÁLNE)",
       "L_TRACKING_REMINDER_MIN_TIME": "Čas čakania pred zobrazením upozornenia na sledovanie Banner",

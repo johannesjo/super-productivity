@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Şu anki görevi tamamlanmış olarak işaretlerken bir sonraki görevi izlemeye başla",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman tahmini aşıldığında bildir",
       "L_IS_TRACKING_REMINDER_ENABLED": "İzleme Hatırlatıcısı Etkin",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "İzleme hatırlatıcı aktifken uygulama penceresine tam ekran olarak odaklan (yalnızca masaüstü)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Zaman izleyiciyi mobil uygulamada göster",
       "L_TRACKING_INTERVAL": "Zaman izleme aralığı (DENEYSEL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Banner göstermeden önce bekleme süresi",

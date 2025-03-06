@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Kòmanse swiv pwochen travay lè make aktyèl kòm fè",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifye lè estimasyon tan yo te depase",
       "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Rapèl Pèmèt",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Usredotočite se na prozor aplikacije na cijelom zaslonu kada je podsjetnik za praćenje aktivan (samo za stolna računala)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Montre rapèl swiv sou aplikasyon mobil",
       "L_TRACKING_INTERVAL": "Entèval pou swiv tan (ESPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tan pou tann anvan ou montre Bannè rapèl Suivi",

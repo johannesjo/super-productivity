@@ -1,6 +1,14 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell } from 'electron';
+import {
+  app,
+  dialog,
+  globalShortcut,
+  ipcMain,
+  IpcMainEvent,
+  shell,
+  BrowserWindow,
+} from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -89,6 +97,16 @@ export const initIpcInterfaces = (): void => {
   });
 
   ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);
+
+  ipcMain.on(IPC.SET_FULLSCREEN_MAIN_WIN, (event, isFullScreen) => {
+    const mainWindow = BrowserWindow.getAllWindows()[0];
+    if (mainWindow) {
+      mainWindow.setFullScreen(isFullScreen);
+      // Disable minimize/maximize buttons when in fullscreen mode
+      mainWindow.setMinimizable(!isFullScreen);
+      mainWindow.setMaximizable(!isFullScreen);
+    }
+  });
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function registerShowAppShortCuts(cfg: KeyboardConfig): void {

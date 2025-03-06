@@ -1539,8 +1539,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Démarrer le suivi de la prochaine tâche quand la tâche courante est marquée comme terminée",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier lorsque le temps estimé a été dépassé",
       "L_IS_TRACKING_REMINDER_ENABLED": "Rappel de suivi activé",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Concentrez-vous sur la fenêtre de l'application en plein écran lorsque le rappel de suivi est actif (bureau uniquement)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Afficher le rappel de suivi sur l'application mobile",
-      "L_TRACKING_INTERVAL": "Intervalle de suivi du temps (EXPÉRIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Temps d'attente avant d'afficher la bannière de rappel de suivi",
       "TITLE": "Suivi du Temps"
     }

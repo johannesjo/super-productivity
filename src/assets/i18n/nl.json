@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Volgende taak beginnen volgen wanneer huidige taak als gedaan wordt gemarkeerd",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Informeer wanneer de geschatte tijd is overschreden",
       "L_IS_TRACKING_REMINDER_ENABLED": "Traceerherinnering ingeschakeld",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Focus op het volledige scherm app-venster wanneer de tracking herinnering actief is (alleen desktop)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Traceerherinnering weergeven op mobiele app",
       "L_TRACKING_INTERVAL": "Tijd tracking interval (EXPERIMENTEEL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Wachttijd voordat traceerherinnering wordt weergegeven Banner",

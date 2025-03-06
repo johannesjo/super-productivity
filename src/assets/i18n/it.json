@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Iniziare a tracciare l'attività successiva quando si contrassegna l'attività corrente come completata",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifica quando il tempo stimato viene superato",
       "L_IS_TRACKING_REMINDER_ENABLED": "Promemoria tracciamento abilitato",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Concentrati sulla finestra dell'app a schermo intero quando il promemoria di monitoraggio è attivo (solo desktop)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostra promemoria tracciamento su app mobile",
       "L_TRACKING_INTERVAL": "Intervallo di monitoraggio del tempo (SPERIMENTALE)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tempo di attesa prima di mostrare il banner di promemoria tracciamento",

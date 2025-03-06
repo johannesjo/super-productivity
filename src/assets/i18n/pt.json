@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Iniciar o acompanhamento da tarefa seguinte ao marcar a atual como concluída",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando o tempo estimado foi excedido",
       "L_IS_TRACKING_REMINDER_ENABLED": "Lembrete de rastreio ativado",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Focar na janela do aplicativo em tela cheia quando o lembrete de rastreamento estiver ativo (somente desktop)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostrar lembrete de seguimento na aplicação móvel",
       "L_TRACKING_INTERVAL": "Intervalo de controlo do tempo (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tempo de espera antes de mostrar o lembrete de seguimento Banner",

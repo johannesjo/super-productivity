@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Start sporing av neste oppgave når du markerer den nåværende som utført",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Varsle når tidsestimatet ble overskredet",
       "L_IS_TRACKING_REMINDER_ENABLED": "Påminnelse om sporing aktivert",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Fokuser på fullskjerm app-vinduet når sporingspåminnelsen er aktiv (kun skrivebord)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Vis påminnelse om sporing i mobilappen",
       "L_TRACKING_INTERVAL": "Tidssporingsintervall (EKSPERIMENTELT)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tid til å vente før sporingspåminnelse vises Banner",

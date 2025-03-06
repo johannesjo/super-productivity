@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "Beginn der Verfolgung der nächsten Aufgabe, wenn die aktuelle als erledigt markiert wird",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigung, wenn die geschätzte Zeit überschritten wurde",
       "L_IS_TRACKING_REMINDER_ENABLED": "Verfolgungserinnerung Aktiviert",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Fokusieren Sie das Vollbild-App-Fenster, wenn die Tracking-Erinnerung aktiv ist (nur Desktop)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Tracking-Erinnerung in der mobilen App anzeigen",
       "L_TRACKING_INTERVAL": "Zeiterfassungsintervall (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Wartezeit bis zur Anzeige des Tracking-Erinnerungsbanners",
@@ -1646,9 +1647,7 @@
     "TIME_SPENT_TODAY_BY_TAG": "Heute verbrachte Zeit nach #Tag",
     "WEEK": "Woche"
   },
-  "PM": {
-    "TITLE": "Projektmetriken"
-  },
+  "PM": {},
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
     "ISSUE_INTEGRATION": "Problemintegration",

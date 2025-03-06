@@ -10,6 +10,7 @@ import {
   shareReplay,
   switchMap,
   withLatestFrom,
+  take,
 } from 'rxjs/operators';
 import { realTimer$ } from '../../util/real-timer';
 import { BannerService } from '../../core/banner/banner.service';
@@ -24,6 +25,8 @@ import { TimeTrackingConfig } from '../config/global-config.model';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { DateService } from 'src/app/core/date/date.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
+import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
+import { IS_ELECTRON } from '../../app.constants';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +40,12 @@ export class TrackingReminderService {
   private _translateService = inject(TranslateService);
   private _dateService = inject(DateService);
   private _takeABreakService = inject(TakeABreakService);
+  private _uiHelperService = inject(UiHelperService);
+
+  // New property to track fullscreen state
+  private _isFullscreenActive = false;
+  // New property to track window focus state
+  private _isWindowFocused = false;
 
   _cfg$: Observable<TimeTrackingConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.timeTracking),
@@ -81,10 +90,19 @@ export class TrackingReminderService {
     this._hideTrigger$.subscribe((v) => {
       this._hideBanner();
     });
+
+    // Add window focus event listeners
+    if (IS_ELECTRON) {
+      window.addEventListener('focus', () => (this._isWindowFocused = true));
+      window.addEventListener('blur', () => (this._isWindowFocused = false));
+      // Initial focus check
+      this._isWindowFocused = document.hasFocus();
+    }
   }
 
   private _hideBanner(): void {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
+    this._restoreWindowState();
   }
 
   private _triggerBanner(duration: number): void {
@@ -93,21 +111,42 @@ export class TrackingReminderService {
       return;
     }
 
-    const durationStr = msToString(duration);
-    this._bannerService.open({
-      id: BannerId.StartTrackingReminder,
-      ico: 'timer',
-      msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {
-        time: durationStr,
-      }),
-      action: {
-        label: T.F.TIME_TRACKING.B_TTR.ADD_TO_TASK,
-        fn: () => this._openDialog(),
-      },
-      action2: {
-        label: T.G.DISMISS,
-        fn: () => this._dismissBanner(),
-      },
+    // Get the current config to check if forced mode is enabled
+    this._cfg$.pipe(take(1)).subscribe((cfg) => {
+      if (IS_ELECTRON && cfg.isFullScreenTrackingReminder) {
+        // Only flash frame if window is not already focused
+        if (!this._isWindowFocused) {
+          window.ea.flashFrame();
+
+          // Force focus the app window only if no dialog is open and window is not already focused
+          if (this._matDialog.openDialogs.length === 0) {
+            this._uiHelperService.focusApp();
+          }
+        }
+
+        // We need to set fullscreen on the main window
+        if (window.ea.setFullScreenMainWin && !this._isFullscreenActive) {
+          window.ea.setFullScreenMainWin(true);
+          this._isFullscreenActive = true;
+        }
+      }
+
+      const durationStr = msToString(duration);
+      this._bannerService.open({
+        id: BannerId.StartTrackingReminder,
+        ico: 'timer',
+        msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {
+          time: durationStr,
+        }),
+        action: {
+          label: T.F.TIME_TRACKING.B_TTR.ADD_TO_TASK,
+          fn: () => this._openDialog(),
+        },
+        action2: {
+          label: T.G.DISMISS,
+          fn: () => this._dismissBanner(),
+        },
+      });
     });
   }
 
@@ -128,6 +167,9 @@ export class TrackingReminderService {
         ]): Promise<void> => {
           this._manualReset$.next();
           const timeSpent = remindCounter;
+
+          // Restore window state after dialog closes
+          this._restoreWindowState();
 
           if (task) {
             this._takeABreakService.otherNoBreakTIme$.next(timeSpent);
@@ -151,6 +193,19 @@ export class TrackingReminderService {
 
   private _dismissBanner(): void {
     this._bannerService.dismiss(BannerId.StartTrackingReminder);
+    this._restoreWindowState();
     this._manualReset$.next();
+  }
+
+  // Restore window to its original state
+  private _restoreWindowState(): void {
+    this._cfg$.pipe(take(1)).subscribe((cfg) => {
+      if (IS_ELECTRON && this._isFullscreenActive && cfg.isFullScreenTrackingReminder) {
+        this._isFullscreenActive = false;
+        if (window.ea.setFullScreenMainWin) {
+          window.ea.setFullScreenMainWin(false);
+        }
+      }
+    });
   }
 }

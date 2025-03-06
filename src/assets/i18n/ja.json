@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "現在のタスクに完了マークを付けると、次のタスクのトラッキングを開始",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超過した場合に通知",
       "L_IS_TRACKING_REMINDER_ENABLED": "トラッキング・リマインダー有効",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "トラッキングリマインダーがアクティブなときにフルスクリーンアプリウィンドウにフォーカスする（デスクトップのみ）",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "モバイルアプリにトラッキングリマインダーを表示",
       "L_TRACKING_INTERVAL": "時間追跡間隔（実験的）",
       "L_TRACKING_REMINDER_MIN_TIME": "追跡リマインダーを表示するまでの待ち時間 バナー",

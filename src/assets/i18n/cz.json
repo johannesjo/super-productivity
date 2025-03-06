@@ -1401,6 +1401,7 @@
     "TRACKING_REMINDER": {
       "HELP": "Nakonfigurujte banner, který se zobrazí, pokud jste zapomněli spustit sledování času.",
       "L_IS_ENABLED": "Povoleno",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "Zaměřte se na okno aplikace na celou obrazovku, když je aktivní připomenutí sledování (pouze pro stolní počítače)",
       "L_IS_SHOW_ON_MOBILE": "Zobrazit v mobilní aplikaci",
       "L_MIN_TIME": "Čas čekání před zobrazením banneru",
       "TITLE": "Připomenutí sledování času"

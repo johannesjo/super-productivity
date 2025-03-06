@@ -1539,6 +1539,7 @@
       "L_IS_AUTO_START_NEXT_TASK": "현재 작업을 완료로 표시하면 다음 작업 추적 시작",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간 초과 시 알림",
       "L_IS_TRACKING_REMINDER_ENABLED": "추적 알림 사용",
+      "L_IS_FULL_SCREEN_TRACKING_REMINDER": "추적 알림이 활성화된 경우 전체 화면 앱 창에 포커스 (데스크톱 전용)",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "모바일 앱에 추적 알림 표시",
       "L_TRACKING_INTERVAL": "시간 추적 간격(실험적)",
       "L_TRACKING_REMINDER_MIN_TIME": "추적 알림 배너가 표시되기까지 기다릴 시간",
