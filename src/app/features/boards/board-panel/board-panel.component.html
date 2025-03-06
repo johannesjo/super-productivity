@@ -1,3 +1,24 @@
+<header>
+  <div class="title">{{ panelCfg().title | translate }}</div>
+  <div
+    class="tasks-total-estimate"
+    style="margin-right: auto"
+    [title]="tasks().length"
+  >
+    ({{ totalEstimate() | msToString }})
+  </div>
+  <button
+    mat-icon-button
+    (click)="editBoard.emit()"
+  >
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <!--        <button mat-icon-button>-->
+  <!--          <mat-icon>more_vert</mat-icon>-->
+  <!--        </button>-->
+</header>
+
 <!--[cdkDropListData]="panelCfg()"-->
 <add-task-inline
   [additionalFields]="additionalTaskFields()"

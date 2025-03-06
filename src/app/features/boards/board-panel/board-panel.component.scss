@@ -19,6 +19,39 @@
   }
 }
 
+header {
+  padding: 4px 16px;
+  padding-right: 4px;
+  display: flex;
+  align-items: center;
+
+  @include mousePrimaryDevice() {
+    button {
+      opacity: 0;
+    }
+    &:hover {
+      button {
+        opacity: 1;
+      }
+    }
+  }
+
+  button {
+    margin-left: auto;
+  }
+
+  .title {
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  .tasks-total-estimate {
+    margin-right: auto;
+    font-style: italic;
+    opacity: 0.8;
+  }
+}
+
 .task-items {
   overflow: auto;
   padding: 0 8px;

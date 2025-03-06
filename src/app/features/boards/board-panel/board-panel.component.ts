@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   input,
+  output,
 } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
@@ -42,9 +43,10 @@ import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { first, take } from 'rxjs/operators';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
-  selector: 'board-task-list',
+  selector: 'board-panel',
   standalone: true,
   imports: [
     CdkDrag,
@@ -56,15 +58,17 @@ import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
     MatIconButton,
     TranslatePipe,
     ShortPlannedAtPipe,
+    MsToStringPipe,
   ],
-  templateUrl: './board-task-list.component.html',
-  styleUrl: './board-task-list.component.scss',
+  templateUrl: './board-panel.component.html',
+  styleUrl: './board-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardTaskListComponent {
+export class BoardPanelComponent {
   T = T;
 
   panelCfg = input.required<BoardPanelCfg>();
+  editBoard = output<void>();
 
   store = inject(Store);
   taskService = inject(TaskService);
@@ -78,6 +82,10 @@ export class BoardTaskListComponent {
   plannedTaskDayMap = toSignal(this.plannerService.plannedTaskDayMap$, {
     initialValue: {},
   });
+
+  totalEstimate = computed(() =>
+    this.tasks().reduce((acc, task) => acc + (task.timeEstimate || 0), 0),
+  );
 
   additionalTaskFields = computed(() => {
     const panelCfg = this.panelCfg();
