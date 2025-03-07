@@ -27,11 +27,9 @@
   }
 
   @for (panel of boardCfg().panels; track panel.id) {
-    <div class="panel">
-      <board-panel
-        [panelCfg]="panel"
-        (editBoard)="editBoard()"
-      ></board-panel>
-    </div>
+    <board-panel
+      [panelCfg]="panel"
+      (editBoard)="editBoard()"
+    ></board-panel>
   }
 }
