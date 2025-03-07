@@ -74,6 +74,27 @@
         "URGENT": "긴급한",
         "URGENT_IMPORTANT": "긴급하고 중요한",
         "URGENT_NOT_IMPORTANT": "긴급하고 중요하지 않음"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "새 패널 추가",
+        "COLUMNS": "열",
+        "TAGS_EXCLUDED": "제외된 태그",
+        "TAGS_REQUIRED": "필수 태그",
+        "TASK_DONE_STATE": "작업 완료 상태",
+        "TASK_DONE_STATE_ALL": "모두",
+        "TASK_DONE_STATE_DONE": "수행",
+        "TASK_DONE_STATE_UNDONE": "취소할"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "새 보드 추가",
+        "CONFIRM_DELETE": "이 게시판을 삭제하시겠습니까?",
+        "CREATE_NEW_TAG_BTN": "태그 만들기",
+        "CREATE_NEW_TAG_MSG": "이 보드가 작동하려면 1개의 새 태그를 만들어야 합니다.",
+        "CREATE_NEW_TAGS_BTN": "태그 만들기",
+        "CREATE_NEW_TAGS_MSG": " 이 보드가 작동하려면{{nr}} 새 태그를 만들어야 합니다",
+        "EDIT_BOARD": "게시판 편집",
+        "NO_PANELS_BTN": "보드 구성",
+        "NO_PANELS_MSG": "이 보드에는 패널이 구성되어 있지 않습니다. 여기에 몇 개의 패널을 추가합니다."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "포커스 세션이 실행 중입니다.",
+        "TO_FOCUS_OVERLAY": "오버레이에 초점을 맞추려면"
+      },
       "BACK_TO_PLANNING": "계획으로 돌아가기",
       "CANCEL_FOCUS_SESSION": "포커스 세션 취소",
       "CONGRATS": "이 세션을 완료해 주셔서 축하드립니다!",
       "CONTINUE_FOCUS_SESSION": "포커스 세션 계속하기",
+      "COUNTDOWN": "카운트다운",
       "FINISH_TASK_AND_SELECT_NEXT": "작업 완료 후 다음 선택",
+      "FLOWTIME": "플로우 타임",
+      "FOR_TASK": "작업용",
       "GET_READY": "집중 세션을 준비하세요!",
       "GO_TO_PROCRASTINATION": "미루는 일이 있을 때 도움 받기",
       "GOGOGO": "가자, 가자, 가자!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "가벼운 스트레칭하기",
       "SELECT_ANOTHER_TASK": "다른 작업 선택",
       "SELECT_TASK": "집중할 작업 선택",
+      "SESSION_COMPLETED": "포커스 세션 완료!",
       "SET_FOCUS_SESSION_DURATION": "포커스 세션 기간 설정",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "작업 노트 및 첨부 파일 표시/숨기기",
       "START_FOCUS_SESSION": "포커스 세션 시작",
@@ -1317,6 +1346,8 @@
     "LOGIN": "로그인",
     "LOGOUT": "로그 아웃",
     "MINUTES": "{{m}} 분",
+    "MOVE_BACKWARD": "뒤로 이동",
+    "MOVE_FORWARD": "앞으로 나아가기",
     "NEXT": "다음",
     "NO_CON": "현재 오프라인 상태입니다. 인터넷에 다시 연결하십시오.",
     "NONE": "없음",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
+    "BOARDS": "보드",
     "CREATE_PROJECT": "프로젝트 만들기",
     "CREATE_TAG": "태그 생성",
     "DELETE_PROJECT": "프로젝트 삭제",

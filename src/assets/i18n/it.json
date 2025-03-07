@@ -74,6 +74,27 @@
         "URGENT": "Სასწრაფო",
         "URGENT_IMPORTANT": "Გადაუდებელი და მნიშვნელოვანი",
         "URGENT_NOT_IMPORTANT": "Გადაუდებელი და უმნიშვნელოა"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Ახალი პანელის დამატება",
+        "COLUMNS": "Სვეტები",
+        "TAGS_EXCLUDED": "Გამორიცხული ტეგები",
+        "TAGS_REQUIRED": "Საჭირო ტეგები",
+        "TASK_DONE_STATE": "Დავალება შესრულებულია",
+        "TASK_DONE_STATE_ALL": "Ყველა",
+        "TASK_DONE_STATE_DONE": "Მზადაა",
+        "TASK_DONE_STATE_UNDONE": "Გაუქმება"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Ახალი დაფის დამატება",
+        "CONFIRM_DELETE": "Ნამდვილად გსურთ ამ დაფის წაშლა?",
+        "CREATE_NEW_TAG_BTN": "Ჭდის შექმნა",
+        "CREATE_NEW_TAG_MSG": "1 ახალი ტეგი უნდა შეიქმნას ამ დაფის მუშაობისთვის",
+        "CREATE_NEW_TAGS_BTN": "Ტეგების შექმნა",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} საჭიროა ახალი ტეგების შექმნა ამ დაფის მუშაობისთვის",
+        "EDIT_BOARD": "Დაფის რედაქტირება",
+        "NO_PANELS_BTN": "Დაფის კონფიგურაცია",
+        "NO_PANELS_MSG": "Ამ დაფას არ აქვს კონფიგურირებული პანელები. დაამატეთ რამდენიმე პანელი."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Ფოკუს სესია მიმდინარეობს",
+        "TO_FOCUS_OVERLAY": "Გადახურვაზე ფოკუსირება"
+      },
       "BACK_TO_PLANNING": "Torna alla pianificazione",
       "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
       "CONGRATS": "Congratulazione per avere completato questa sessione!",
       "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
+      "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Termina attività e seleziona la prossima",
+      "FLOWTIME": "Ნაკადის დრო",
+      "FOR_TASK": "დავალებისთვის",
       "GET_READY": "Preparati per la tua prossima sessione!",
       "GO_TO_PROCRASTINATION": "Ottieni aiuto quando stai procastinando",
       "GOGOGO": "Vai, vai, vai!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Fai un po' di stretching",
       "SELECT_ANOTHER_TASK": "Seleziona un'altra attività",
       "SELECT_TASK": "Seleziona l'attività su cui concentrarti",
+      "SESSION_COMPLETED": "Ფოკუს სესია დასრულდა!",
       "SET_FOCUS_SESSION_DURATION": "Imposta la durata della Sessione Concentrazione",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostra/nascondi note e allegati dell'attività",
       "START_FOCUS_SESSION": "Avvia Sessione Concentrazione",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minuti",
+    "MOVE_BACKWARD": "Უკან გადატანა",
+    "MOVE_FORWARD": "Იმოძრავეთ წინ",
     "NEXT": "Prossimo",
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "NONE": "Nessuna",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuova attività",
+    "BOARDS": "Დაფები",
     "CREATE_PROJECT": "Crea progetto",
     "CREATE_TAG": "Crea etichetta",
     "DELETE_PROJECT": "Elimina progetto",

@@ -74,6 +74,27 @@
         "URGENT": "緊急",
         "URGENT_IMPORTANT": "緊急かつ重要",
         "URGENT_NOT_IMPORTANT": "緊急 & 重要ではない"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "新しいパネルを追加",
+        "COLUMNS": "列",
+        "TAGS_EXCLUDED": "除外されたタグ",
+        "TAGS_REQUIRED": "必須タグ",
+        "TASK_DONE_STATE": "タスク完了状態",
+        "TASK_DONE_STATE_ALL": "すべての",
+        "TASK_DONE_STATE_DONE": "完成です",
+        "TASK_DONE_STATE_UNDONE": "取り消す"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "新しいボードを追加",
+        "CONFIRM_DELETE": "このボードを削除してもよろしいですか?",
+        "CREATE_NEW_TAG_BTN": "タグを作成",
+        "CREATE_NEW_TAG_MSG": "このボードを機能させるには、新しいタグを1つ作成する必要があります",
+        "CREATE_NEW_TAGS_BTN": "タグの作成",
+        "CREATE_NEW_TAGS_MSG": "このボードを機能させるには、{{nr}} 新しいタグを作成する必要があります",
+        "EDIT_BOARD": "編集ボード",
+        "NO_PANELS_BTN": "ボードの構成",
+        "NO_PANELS_MSG": "このボードにはパネルが設定されていません。それにいくつかのパネルを追加します。"
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "フォーカスセッションが進行中です",
+        "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
+      },
       "BACK_TO_PLANNING": "計画に戻る",
       "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
+      "COUNTDOWN": "カウントダウン",
       "FINISH_TASK_AND_SELECT_NEXT": "タスクを終了して次を選択",
+      "FLOWTIME": "フロータイム",
+      "FOR_TASK": "タスク用",
       "GET_READY": "集中セッションの準備をしましょう!",
       "GO_TO_PROCRASTINATION": "先延ばしにするときは助けを求める",
       "GOGOGO": "行け、行け、行け！",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "軽いストレッチをする",
       "SELECT_ANOTHER_TASK": "別のタスクを選択",
       "SELECT_TASK": "集中するタスクを選択",
+      "SESSION_COMPLETED": "フォーカスセッションが完了しました!",
       "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
       "START_FOCUS_SESSION": "フォーカスセッションを開始",
@@ -1317,6 +1346,8 @@
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
+    "MOVE_BACKWARD": "後方に移動",
+    "MOVE_FORWARD": "前進",
     "NEXT": "次",
     "NO_CON": "現在オフラインです。インターネットに再接続してください。",
     "NONE": "無し",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
+    "BOARDS": "ポート",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
     "DELETE_PROJECT": "プロジェクトの削除",

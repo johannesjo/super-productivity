@@ -74,6 +74,27 @@
         "URGENT": "فوری",
         "URGENT_IMPORTANT": "فوری و مهم",
         "URGENT_NOT_IMPORTANT": "فوری و غیر مهم"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "پنل جدید اضافه کنید",
+        "COLUMNS": "ستون",
+        "TAGS_EXCLUDED": "برچسب های مستثنی شده",
+        "TAGS_REQUIRED": "برچسب های مورد نیاز",
+        "TASK_DONE_STATE": "حالت انجام وظیفه",
+        "TASK_DONE_STATE_ALL": "همه",
+        "TASK_DONE_STATE_DONE": "انجام",
+        "TASK_DONE_STATE_UNDONE": "لغو"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "تخته جدید اضافه کنید",
+        "CONFIRM_DELETE": "آیا واقعا می خواهید این برد را حذف کنید؟",
+        "CREATE_NEW_TAG_BTN": "ایجاد تگ",
+        "CREATE_NEW_TAG_MSG": "1 برچسب جدید باید ایجاد شود تا این برد کار کند",
+        "CREATE_NEW_TAGS_BTN": "ایجاد برچسب ها",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} تگ های جدید باید ایجاد شود تا این برد کار کند",
+        "EDIT_BOARD": "صفحه ویرایش",
+        "NO_PANELS_BTN": "پیکربندی برد",
+        "NO_PANELS_MSG": "این برد هیچ پنل پیکربندی ندارد. چند پنل به آن اضافه کنید."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "جلسه تمرکز در حال اجرا است",
+        "TO_FOCUS_OVERLAY": "برای فوکوس همپوشانی"
+      },
       "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
       "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
       "CONGRATS": "برای تکمیل این جلسه تبریک می گویم!",
       "CONTINUE_FOCUS_SESSION": "ادامه جلسه تمرکز",
+      "COUNTDOWN": "شمارش معکوس",
       "FINISH_TASK_AND_SELECT_NEXT": "کار را تمام کنید و next را انتخاب کنید",
+      "FLOWTIME": "زمان جریان",
+      "FOR_TASK": "برای کار",
       "GET_READY": "برای نشست تمرکز خود آماده شوید!",
       "GO_TO_PROCRASTINATION": "هنگام اهمال‌کاری، کمک بگیرید",
       "GOGOGO": "برو، برو، برو!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "حرکات کششی ملایم انجام دهید",
       "SELECT_ANOTHER_TASK": "وظیفه دیگری را انتخاب کنید",
       "SELECT_TASK": "Task را برای تمرکز روی آن انتخاب کنید",
+      "SESSION_COMPLETED": "جلسه تمرکز به پایان رسید!",
       "SET_FOCUS_SESSION_DURATION": "مدت زمان جلسه تمرکز را تنظیم کنید",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "نمایش/پنهان کردن یادداشت‌ها و پیوست‌ها",
       "START_FOCUS_SESSION": "شروع جلسه تمرکز",
@@ -1317,6 +1346,8 @@
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
     "MINUTES": "{{m}} دقیقه",
+    "MOVE_BACKWARD": "حرکت به عقب",
+    "MOVE_FORWARD": "حرکت به جلو",
     "NEXT": "بعدی",
     "NO_CON": "شما در حال حاضر آفلاین هستید. لطفا دوباره به اینترنت وصل شوید.",
     "NONE": "هیچ یک",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
+    "BOARDS": "تابلوهای",
     "CREATE_PROJECT": "ایجاد پروژه",
     "CREATE_TAG": "ایجاد برچسب",
     "DELETE_PROJECT": "حذف پروژه",
