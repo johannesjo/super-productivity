@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { ConfigFormSection, FocusModeConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 
@@ -7,13 +6,6 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
   key: 'focusMode',
   help: T.GCF.FOCUS_MODE.HELP,
   items: [
-    // {
-    //   key: 'isDarkMode',
-    //   type: 'checkbox',
-    //   templateOptions: {
-    //     label: T.GCF.FOCUS_MODE.IS_DARK_MODE,
-    //   },
-    // },
     {
       key: 'isAlwaysUseFocusMode',
       type: 'checkbox',

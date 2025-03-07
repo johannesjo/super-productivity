@@ -7,7 +7,7 @@
   }
   @if (task$ | async; as task) {
     <div class="for-task">
-      <div class="label">for task</div>
+      <div class="label">{{ T.F.FOCUS_MODE.FOR_TASK | translate }}</div>
       <div>
         "<em>{{ task?.title }}</em
         >"

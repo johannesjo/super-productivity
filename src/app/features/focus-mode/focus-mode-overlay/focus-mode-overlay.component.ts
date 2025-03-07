@@ -149,19 +149,19 @@ export class FocusModeOverlayComponent implements OnDestroy {
       this.bannerService.open({
         id: BannerId.FocusMode,
         ico: 'center_focus_strong',
-        msg: 'Focus Session is running',
+        msg: T.F.FOCUS_MODE.B.SESSION_RUNNING,
         timer$: isCountTimeUp
           ? this._store.select(selectFocusSessionTimeElapsed)
           : this.focusModeService.timeToGo$,
         progress$: isCountTimeUp ? undefined : this.focusModeService.sessionProgress$,
         action2: {
-          label: 'To Focus Overlay',
+          label: T.F.FOCUS_MODE.B.TO_FOCUS_OVERLAY,
           fn: () => {
             this._store.dispatch(showFocusOverlay());
           },
         },
         action: {
-          label: 'Cancel',
+          label: T.G.CANCEL,
           fn: () => {
             this._store.dispatch(cancelFocusSession());
           },

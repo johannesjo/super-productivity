@@ -196,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Focus Session is running",
+        "TO_FOCUS_OVERLAY": "To Focus Overlay"
+      },
       "BACK_TO_PLANNING": "Back to Planning",
       "CANCEL_FOCUS_SESSION": "",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
+      "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "for task",
       "GET_READY": "Get ready for your focus session!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
       "GOGOGO": "Go, go, go!!!",
@@ -215,6 +222,7 @@
       "PREP_STRETCH": "Do some mild stretching",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
+      "SESSION_COMPLETED": "Focus Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "START_FOCUS_SESSION": "Start Focus Session",
