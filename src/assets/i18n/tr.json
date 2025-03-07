@@ -74,6 +74,27 @@
         "URGENT": "Acelesi Var",
         "URGENT_IMPORTANT": "Acelesi Var & Önemli",
         "URGENT_NOT_IMPORTANT": "Acelesi Var & Önemsiz"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Yeni Panel Ekle",
+        "COLUMNS": "Sütunlar",
+        "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
+        "TAGS_REQUIRED": "Gerekli Etiketler",
+        "TASK_DONE_STATE": "Görev Tamamlandı Durumu",
+        "TASK_DONE_STATE_ALL": "Hepsi",
+        "TASK_DONE_STATE_DONE": "TAMAM",
+        "TASK_DONE_STATE_UNDONE": "Tamamlanmadı"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Yeni tahta ekle",
+        "CONFIRM_DELETE": "Bu tahtayı gerçekten silmek istiyor musunuz?",
+        "CREATE_NEW_TAG_BTN": "Etiket oluştur",
+        "CREATE_NEW_TAG_MSG": "Bu tahtanın çalışması için 1 yeni etiket oluşturulması gerekiyor",
+        "CREATE_NEW_TAGS_BTN": "Etiketler Oluştur",
+        "CREATE_NEW_TAGS_MSG": "Bu tahtanın çalışması için {{nr}} yeni etiket oluşturulması gerekiyor",
+        "EDIT_BOARD": "Tahtayı Düzenle",
+        "NO_PANELS_BTN": "Tahtayı Yapılandır",
+        "NO_PANELS_MSG": "Bu tahtada yapılandırılmış panel yok. Buna bazı paneller ekleyin."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Odak Oturumu çalışıyor",
+        "TO_FOCUS_OVERLAY": "Odak Kapatma"
+      },
       "BACK_TO_PLANNING": "Planlamaya Geri Dön",
       "CANCEL_FOCUS_SESSION": "Odaklanma Oturumunu İptal Et",
       "CONGRATS": "Bu oturumu tamamladığınız için tebrikler!",
       "CONTINUE_FOCUS_SESSION": "Odaklanma Oturumuna Devam Et",
+      "COUNTDOWN": "Geri sayım",
       "FINISH_TASK_AND_SELECT_NEXT": "Görevi bitirin ve sonrakini seçin",
+      "FLOWTIME": "Akış Zamanı",
+      "FOR_TASK": "görev için",
       "GET_READY": "Odaklanma oturumunuza hazır olun!!!",
       "GO_TO_PROCRASTINATION": "Ertelediğinizde yardım alın",
       "GOGOGO": "Hadi hadi hadi!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Hafifçe esneme hareketleri yapın",
       "SELECT_ANOTHER_TASK": "Başka bir Görev seç",
       "SELECT_TASK": "Odaklanmak için Görevi seçin",
+      "SESSION_COMPLETED": "Odak Oturumu Tamamlandı!",
       "SET_FOCUS_SESSION_DURATION": "Odaklanma Oturumu Süresini Ayarlayın",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Görev notlarını ve eklerini göster/gizle",
       "START_FOCUS_SESSION": "Odaklanma Oturumunu Başlat",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
+    "MOVE_BACKWARD": "Geri Hareket Et",
+    "MOVE_FORWARD": "İleri Hareket Et",
     "NEXT": "Sonraki",
     "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
     "NONE": "Yok",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
+    "BOARDS": "Tahtalar",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_PROJECT": "Projeyi Sil",

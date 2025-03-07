@@ -88,13 +88,13 @@
       "V": {
         "ADD_NEW_BOARD": "Add new board",
         "CONFIRM_DELETE": "Do you really want to delete this board?",
-        "CREATE_NEW_TAG_MSG": "1 new tag needs to be created for this board to work",
         "CREATE_NEW_TAG_BTN": "Create Tag",
-        "CREATE_NEW_TAGS_MSG": "{{nr}} new tags needs to be created for this board to work",
+        "CREATE_NEW_TAG_MSG": "1 new tag needs to be created for this board to work",
         "CREATE_NEW_TAGS_BTN": "Create Tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} new tags needs to be created for this board to work",
         "EDIT_BOARD": "Edit board",
-        "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it.",
-        "NO_PANELS_BTN": "Configure Board"
+        "NO_PANELS_BTN": "Configure Board",
+        "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it."
       }
     },
     "BOOKMARK": {
@@ -1346,11 +1346,11 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Move Backward",
+    "MOVE_FORWARD": "Move Forward",
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
-    "MOVE_BACKWARD": "Move Backward",
-    "MOVE_FORWARD": "Move Forward",
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
