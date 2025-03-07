@@ -60,8 +60,6 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   }
 
   onSubmit($event: SubmitEvent): void {
-    console.log('task selected', this.selectedTask);
-
     $event.preventDefault();
     if (this.selectedTask) {
       const focusActivePage =

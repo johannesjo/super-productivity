@@ -31,11 +31,13 @@
           [value]="selectedMode()"
           (change)="selectMode($event.value)"
         >
-          <mat-button-toggle [value]="FocusModeMode.Flowtime">Flowtime</mat-button-toggle>
+          <mat-button-toggle [value]="FocusModeMode.Flowtime">{{
+            T.F.FOCUS_MODE.FLOWTIME | translate
+          }}</mat-button-toggle>
           <!--      <mat-button-toggle [value]="FocusModeMode.Pomodoro">Pomodoro</mat-button-toggle>-->
-          <mat-button-toggle [value]="FocusModeMode.Countdown"
-            >Countdown</mat-button-toggle
-          >
+          <mat-button-toggle [value]="FocusModeMode.Countdown">{{
+            T.F.FOCUS_MODE.COUNTDOWN | translate
+          }}</mat-button-toggle>
         </mat-button-toggle-group>
       </ng-template>
 

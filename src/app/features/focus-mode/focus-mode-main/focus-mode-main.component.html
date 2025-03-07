@@ -19,16 +19,12 @@
         class="focus-time"
         title="Focus time"
       >
-        <!--        {{focusModeTimeToGo / 60000}}min-->
         @if (isCountTimeDown) {
           {{ focusModeService.timeToGo$ | async | msToMinuteClockString }}
         } @else {
           {{ timeElapsed$ | async | msToMinuteClockString }}
         }
       </div>
-      <!--      <div class="task-times">-->
-      <!--        {{task.timeSpent|msToString}}/{{task.timeEstimate|msToString}}-->
-      <!--      </div>-->
     </div>
   </div>
   @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
