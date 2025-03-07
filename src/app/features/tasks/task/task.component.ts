@@ -223,6 +223,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
+    ev.preventDefault();
     this.focusSelf();
     this._attachmentService.createFromDrop(ev, this.task().id);
     ev.stopPropagation();
