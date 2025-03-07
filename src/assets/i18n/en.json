@@ -88,9 +88,11 @@
       "V": {
         "ADD_NEW_BOARD": "Add new board",
         "CONFIRM_DELETE": "Do you really want to delete this board?",
+        "CREATE_NEW_TAG_MSG": "1 new tag needs to be created for this board to work",
+        "CREATE_NEW_TAG_BTN": "Create Tag",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} new tags needs to be created for this board to work",
+        "CREATE_NEW_TAGS_BTN": "Create Tags",
         "EDIT_BOARD": "Edit board",
-        "MISSING_TAGS_MSG": "There are {{nr}} missing tags required for this board to work",
-        "MISSING_TAGS_BTN": "Create missing tags",
         "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it.",
         "NO_PANELS_BTN": "Configure Board"
       }
