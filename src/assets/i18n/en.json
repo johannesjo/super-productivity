@@ -1058,6 +1058,7 @@
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
+        "TOGGLE_TAGS": "Toggle Tags",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",

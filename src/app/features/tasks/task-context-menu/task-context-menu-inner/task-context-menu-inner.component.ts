@@ -67,6 +67,8 @@ import { ICAL_TYPE } from '../../../issue/issue.const';
 import { PlannerService } from '../../../planner/planner.service';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TagService } from '../../../tag/tag.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -102,6 +104,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private readonly _store = inject(Store);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
   private readonly _plannerService = inject(PlannerService);
+  private readonly _tagService = inject(TagService);
 
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
@@ -137,6 +140,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
   );
+  toggleTagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
   //   take(1),
@@ -350,6 +354,15 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   onTagsUpdated(tagIds: string[]): void {
     this._taskService.updateTags(this.task, tagIds);
+  }
+
+  toggleTag(tagId: string): void {
+    const task = this.task;
+    const tagIds = task.tagIds.includes(tagId)
+      ? task.tagIds.filter((id) => id !== tagId)
+      : [...task.tagIds, tagId];
+
+    this.onTagsUpdated(tagIds);
   }
 
   // TODO move to service
