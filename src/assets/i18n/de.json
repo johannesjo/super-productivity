@@ -1602,7 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
-    "BOARDS": "Bretter",
+    "BOARDS": "Boards",
     "CREATE_PROJECT": "Projekt erstellen",
     "CREATE_TAG": "Stichwort erstellen",
     "DELETE_PROJECT": "Projekt löschen",
