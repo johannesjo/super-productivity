@@ -1,6 +1,11 @@
 @import '../../../../variables';
 
 :host {
+  //border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid $light-theme-extra-border-color;
+  border-radius: 8px;
+  min-height: 200px;
+  min-width: 280px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -8,6 +13,14 @@
   max-height: 100%;
   // space for outline
   padding: 1px;
+
+  @include mq(xs, max) {
+    min-height: 300px;
+  }
+
+  @include darkTheme() {
+    border-color: $dark-theme-extra-border-color;
+  }
 
   planner-task {
     margin-bottom: 8px;
@@ -52,6 +65,7 @@ header {
   }
 
   .tasks-total-estimate {
+    white-space: nowrap;
     margin-left: auto;
     margin-right: 4px;
     //margin-right: auto;

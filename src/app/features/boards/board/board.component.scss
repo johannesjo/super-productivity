@@ -16,25 +16,6 @@
   }
 }
 
-.panel {
-  //border: 1px solid rgba(255, 255, 255, 0.2);
-  border: 1px solid $light-theme-extra-border-color;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
-  min-width: 230px;
-
-  @include mq(xs, max) {
-    min-height: 300px;
-  }
-
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-  }
-}
-
 .empty-board-msg,
 .missing-tags-msg-wrapper {
   display: flex;
