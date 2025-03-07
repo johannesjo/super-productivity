@@ -74,6 +74,27 @@
         "URGENT": "Dijans",
         "URGENT_IMPORTANT": "Ijan ak enpòtan",
         "URGENT_NOT_IMPORTANT": "Ijan - Pa enpòtan"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Ajoute nouvo Panèl",
+        "COLUMNS": "Kolòn",
+        "TAGS_EXCLUDED": "Eskli Tags",
+        "TAGS_REQUIRED": "Etikèt obligatwa yo",
+        "TASK_DONE_STATE": "Eta Travay",
+        "TASK_DONE_STATE_ALL": "Tout",
+        "TASK_DONE_STATE_DONE": "Fè",
+        "TASK_DONE_STATE_UNDONE": "Defèt"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Ajoute nouvo tablo",
+        "CONFIRM_DELETE": "Èske ou reyèlman vle efase tablo sa a?",
+        "CREATE_NEW_TAG_BTN": "Kreye Tag",
+        "CREATE_NEW_TAG_MSG": "1 nouvo tag bezwen yo dwe kreye pou tablo sa a nan travay",
+        "CREATE_NEW_TAGS_BTN": "Kreye tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nouvo Tags bezwen kreye pou tablo sa a nan travay",
+        "EDIT_BOARD": "Tablo editè",
+        "NO_PANELS_BTN": "Komite konfigirasyon",
+        "NO_PANELS_MSG": "Tablo sa a pa gen okenn panno konfigirasyon. Ajoute kèk panno nan li."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesyon konsantre ap kouri",
+        "TO_FOCUS_OVERLAY": "Konsantre sou sipriz"
+      },
       "BACK_TO_PLANNING": "Natrag na planiranje",
       "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa",
       "CONGRATS": "Čestitamo na obavljanju ove sesije!",
       "CONTINUE_FOCUS_SESSION": "Nastavi sesiju fokusa",
+      "COUNTDOWN": "Dekont",
       "FINISH_TASK_AND_SELECT_NEXT": "Završi zadatak i odaberi sljedeći",
+      "FLOWTIME": "Koule",
+      "FOR_TASK": "pou travay",
       "GET_READY": "Pripremi se za tvoju sesiju fokusa!!!",
       "GO_TO_PROCRASTINATION": "Dobij pomoć kad odugovlačiš",
       "GOGOGO": "Kreni!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Malo se protegni",
       "SELECT_ANOTHER_TASK": "Odaberi jedan drugi zadatak",
       "SELECT_TASK": "Odaberi zadatak na koji se želiš fokusirati",
+      "SESSION_COMPLETED": "Konsantre Sesyon ranpli!",
       "SET_FOCUS_SESSION_DURATION": "Postavi trajanje sesije fokusa",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Prikaži/Sakrij bilješke zadataka i priloge",
       "START_FOCUS_SESSION": "Pokreni sesiju fokusa",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Prijava",
     "LOGOUT": "Odjava",
     "MINUTES": "{{m}} min",
+    "MOVE_BACKWARD": "Deplase Backward",
+    "MOVE_FORWARD": "Avanse pou pi devan",
     "NEXT": "Dalje",
     "NO_CON": "Trenutačno nemaš vezu s internetom. Ponovo se poveži s internetom.",
     "NONE": "Ništa",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj novi zadatak",
+    "BOARDS": "Ankadreman yo",
     "CREATE_PROJECT": "Stvori projekt",
     "CREATE_TAG": "Stvori oznaku",
     "DELETE_PROJECT": "Efase pwojè",

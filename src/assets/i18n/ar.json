@@ -74,6 +74,27 @@
         "URGENT": "مستعجل",
         "URGENT_IMPORTANT": "عاجل ومهم",
         "URGENT_NOT_IMPORTANT": "عاجل وغير مهم"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "إضافة لوحة جديدة",
+        "COLUMNS": "الاعمده",
+        "TAGS_EXCLUDED": "العلامات المستبعدة",
+        "TAGS_REQUIRED": "العلامات المطلوبة",
+        "TASK_DONE_STATE": "حالة إنجاز المهمة",
+        "TASK_DONE_STATE_ALL": "كل",
+        "TASK_DONE_STATE_DONE": "منجز",
+        "TASK_DONE_STATE_UNDONE": "التراجع عن"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "إضافة لوحة جديدة",
+        "CONFIRM_DELETE": "هل تريد حقا حذف هذه اللوحة؟",
+        "CREATE_NEW_TAG_BTN": "إنشاء علامة",
+        "CREATE_NEW_TAG_MSG": "1 يجب إنشاء علامة جديدة حتى تعمل هذه اللوحة",
+        "CREATE_NEW_TAGS_BTN": "إنشاء العلامات",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} يجب إنشاء علامات جديدة حتى تعمل هذه اللوحة",
+        "EDIT_BOARD": "تحرير اللوحة",
+        "NO_PANELS_BTN": "تكوين اللوحة",
+        "NO_PANELS_MSG": "لا تحتوي هذه اللوحة على لوحات مهيأة. أضف بعض اللوحات إليه."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "جلسة التركيز قيد التشغيل",
+        "TO_FOCUS_OVERLAY": "لتراكب التركيز"
+      },
       "BACK_TO_PLANNING": "الرجوع الى التخطيط",
       "CANCEL_FOCUS_SESSION": "مغادرة جلسة التركيز",
       "CONGRATS": "!هنيئا لك على إكمال هذه الجلسة!",
       "CONTINUE_FOCUS_SESSION": "ألإستمرار في وضع التركيز",
+      "COUNTDOWN": "العد التنازلي",
       "FINISH_TASK_AND_SELECT_NEXT": "إنهاء المهمة و تحديد التالي",
+      "FLOWTIME": "وقت التدفق",
+      "FOR_TASK": "للمهمة",
       "GET_READY": "قم بالإستعداد لجلسة التركيز",
       "GO_TO_PROCRASTINATION": "إحصل لنفسك على المساعدة في حالة التأجيل",
       "GOGOGO": "!هيا, هيا, هياااااا!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "قم بتحريك جسدك قليلا",
       "SELECT_ANOTHER_TASK": "إختر مهمة أخرى",
       "SELECT_TASK": "إختر مهمة للتركيز عليها",
+      "SESSION_COMPLETED": "اكتملت جلسة التركيز!",
       "SET_FOCUS_SESSION_DURATION": "قم بإعداد وقت جلسة التركيز",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "أظهر / أخفي ملاحظات و مرفقات المهمة",
       "START_FOCUS_SESSION": "إبدأ جلسة التركيز",
@@ -1317,6 +1346,8 @@
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "الخروج",
     "MINUTES": "{{m}} دقيقة",
+    "MOVE_BACKWARD": "التحرك للخلف",
+    "MOVE_FORWARD": "المضي قدما",
     "NEXT": "التالى",
     "NO_CON": "أنت غير متصل حاليًا. يرجى إعادة الاتصال بالإنترنت.",
     "NONE": "لا شيء",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "إضافة مهمة جديدة",
+    "BOARDS": "المجالس",
     "CREATE_PROJECT": "إنشاء مشروع",
     "CREATE_TAG": "إنشاء علامة",
     "DELETE_PROJECT": "حذف المشروع",
