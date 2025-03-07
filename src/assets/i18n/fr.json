@@ -74,6 +74,27 @@
         "URGENT": "Urgent",
         "URGENT_IMPORTANT": "Urgent et important",
         "URGENT_NOT_IMPORTANT": "Urgent et pas important"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Ajouter un nouveau panneau",
+        "COLUMNS": "Colonnes",
+        "TAGS_EXCLUDED": "Tags exclus",
+        "TAGS_REQUIRED": "Tags requis",
+        "TASK_DONE_STATE": "État de la tâche terminée",
+        "TASK_DONE_STATE_ALL": "Tout",
+        "TASK_DONE_STATE_DONE": "Terminé",
+        "TASK_DONE_STATE_UNDONE": "Défait"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Ajouter un nouveau tableau",
+        "CONFIRM_DELETE": "Voulez-vous vraiment supprimer ce tableau ?",
+        "CREATE_NEW_TAG_BTN": "Créer un tag",
+        "CREATE_NEW_TAG_MSG": "1 nouveau tag doit être créé pour que ce tableau fonctionne",
+        "CREATE_NEW_TAGS_BTN": "Créer des tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nouveaux tags doivent être créés pour que ce tableau fonctionne",
+        "EDIT_BOARD": "Modifier le tableau",
+        "NO_PANELS_BTN": "Configurer le tableau",
+        "NO_PANELS_MSG": "Ce tableau n'a pas de panneaux configurés. Ajoutez-y des panneaux."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "La session de concentration est en cours",
+        "TO_FOCUS_OVERLAY": "Pour superposition de concentration"
+      },
       "BACK_TO_PLANNING": "Retour à la planification",
       "CANCEL_FOCUS_SESSION": "Annuler la session de concentration",
       "CONGRATS": "Félicitations pour avoir terminé cette session !",
       "CONTINUE_FOCUS_SESSION": "Continuer la session de concentration",
+      "COUNTDOWN": "Compte à rebours",
       "FINISH_TASK_AND_SELECT_NEXT": "Terminer la tâche et sélectionner la suivante",
+      "FLOWTIME": "Temps de flux",
+      "FOR_TASK": "pour la tâche",
       "GET_READY": "Préparez-vous pour votre session de concentration !!!",
       "GO_TO_PROCRASTINATION": "Obtenir de l'aide en cas de procrastination",
       "GOGOGO": "Allez! Allez! Allez!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Faire quelques étirements légers",
       "SELECT_ANOTHER_TASK": "Sélectionner une autre tâche",
       "SELECT_TASK": "Sélectionner une tâche sur laquelle se concentrer",
+      "SESSION_COMPLETED": "Session de concentration terminée !",
       "SET_FOCUS_SESSION_DURATION": "Définir la durée de la session de concentration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Afficher/masquer les notes et pièces jointes de la tâche",
       "START_FOCUS_SESSION": "Débuter la session de concentration",
@@ -1317,6 +1346,8 @@
     "LOGIN": "S'identifier",
     "LOGOUT": "Se déconnecter",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Reculer",
+    "MOVE_FORWARD": "Avancer",
     "NEXT": "Suivant",
     "NO_CON": "Vous êtes actuellement hors ligne. Veuillez vous reconnecter à Internet.",
     "NONE": "Aucun",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
+    "BOARDS": "Tableaux",
     "CREATE_PROJECT": "Créer un projet",
     "CREATE_TAG": "Créer une balise",
     "DELETE_PROJECT": "Supprimer le projet",

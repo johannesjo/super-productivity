@@ -74,6 +74,27 @@
         "URGENT": "Urgente",
         "URGENT_IMPORTANT": "Urgente & Importante",
         "URGENT_NOT_IMPORTANT": "Urgente & Não Importante"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Adicionar novo Painel",
+        "COLUMNS": "Colunas",
+        "TAGS_EXCLUDED": "Tags Excluídas",
+        "TAGS_REQUIRED": "Tags Obrigatórias",
+        "TASK_DONE_STATE": "Estado da Tarefa Concluída",
+        "TASK_DONE_STATE_ALL": "Todos",
+        "TASK_DONE_STATE_DONE": "Concluído",
+        "TASK_DONE_STATE_UNDONE": "Não concluído"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Adicionar novo quadro",
+        "CONFIRM_DELETE": "Tem certeza de que deseja excluir este quadro?",
+        "CREATE_NEW_TAG_BTN": "Criar Tag",
+        "CREATE_NEW_TAG_MSG": "1 nova tag precisa ser criada para que este quadro funcione",
+        "CREATE_NEW_TAGS_BTN": "Criar Tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} novas tags precisam ser criadas para que este quadro funcione",
+        "EDIT_BOARD": "Editar quadro",
+        "NO_PANELS_BTN": "Configurar Quadro",
+        "NO_PANELS_MSG": "Este quadro não tem painéis configurados. Adicione alguns painéis a ele."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "A Sessão de Foco está em execução",
+        "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
+      },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
       "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco",
       "CONGRATS": "Parabéns por completar essa sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
+      "COUNTDOWN": "Contagem regressiva",
       "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarefa e selecionar a próxima",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "para a tarefa",
       "GET_READY": "Prepare-se para sua sessão de foco!",
       "GO_TO_PROCRASTINATION": "Busque ajuda quando procrastinar",
       "GOGOGO": "Vamos, vamos, vamos!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Faça alguns suaves alongamentos ",
       "SELECT_ANOTHER_TASK": "Selecione outra tarefa",
       "SELECT_TASK": "Selecione a tarefa que irá focar",
+      "SESSION_COMPLETED": "Sessão de Foco Concluída!",
       "SET_FOCUS_SESSION_DURATION": "Definir duração de sessão",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas e anexos da tarefa",
       "START_FOCUS_SESSION": "Iniciar Sessão de Foco",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
+    "MOVE_BACKWARD": "Mover para Trás",
+    "MOVE_FORWARD": "Mover para Frente",
     "NEXT": "Próximo",
     "NO_CON": "Você está atualmente offline. Reconecte-se à Internet.",
     "NONE": "Nenhum",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",
+    "BOARDS": "Placas",
     "CREATE_PROJECT": "Criar Projeto",
     "CREATE_TAG": "Criar tag",
     "DELETE_PROJECT": "Eliminar projeto",

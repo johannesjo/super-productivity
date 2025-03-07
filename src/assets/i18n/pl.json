@@ -74,6 +74,27 @@
         "URGENT": "Pilne",
         "URGENT_IMPORTANT": "Pilne i Ważne",
         "URGENT_NOT_IMPORTANT": "Pilne i Nieważne"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Dodaj nowy panel",
+        "COLUMNS": "Kolumny",
+        "TAGS_EXCLUDED": "Wykluczone tagi",
+        "TAGS_REQUIRED": "Wymagane tagi",
+        "TASK_DONE_STATE": "Stan zadania zakończonego",
+        "TASK_DONE_STATE_ALL": "Wszystkie",
+        "TASK_DONE_STATE_DONE": "Gotowe",
+        "TASK_DONE_STATE_UNDONE": "Niezrobione"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Dodaj nową tablicę",
+        "CONFIRM_DELETE": "Czy na pewno chcesz usunąć tę tablicę?",
+        "CREATE_NEW_TAG_BTN": "Utwórz tag",
+        "CREATE_NEW_TAG_MSG": "1 nowy tag musi zostać utworzony, aby ta tablica działała",
+        "CREATE_NEW_TAGS_BTN": "Utwórz tagi",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nowe tagi muszą zostać utworzone, aby ta tablica działała",
+        "EDIT_BOARD": "Edytuj tablicę",
+        "NO_PANELS_BTN": "Skonfiguruj tablicę",
+        "NO_PANELS_MSG": "Ta tablica nie ma skonfigurowanych paneli. Dodaj do niej kilka paneli."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesja skupienia trwa",
+        "TO_FOCUS_OVERLAY": "Do nakładki skupienia"
+      },
       "BACK_TO_PLANNING": "Powrót do planowania",
       "CANCEL_FOCUS_SESSION": "Anuluj sesję fokusową",
       "CONGRATS": "Gratulacje za ukończenie tej sesji!",
       "CONTINUE_FOCUS_SESSION": "Kontynuacja sesji fokusowej",
+      "COUNTDOWN": "Odmierzanie czasu",
       "FINISH_TASK_AND_SELECT_NEXT": "Zakończ zadanie i wybierz następny",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "dla zadania",
       "GET_READY": "Przygotuj się na sesję skupienia!",
       "GO_TO_PROCRASTINATION": "Uzyskaj pomoc, gdy zwlekasz",
       "GOGOGO": "Dalej, dalej, dalej!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Wykonaj lekkie rozciąganie",
       "SELECT_ANOTHER_TASK": "Wybierz inne zadanie",
       "SELECT_TASK": "Wybierz zadanie, na którym chcesz się skupić",
+      "SESSION_COMPLETED": "Sesja skupienia zakończona!",
       "SET_FOCUS_SESSION_DURATION": "Ustaw czas trwania sesji skupienia",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Wyświetlanie/ukrywanie notatek i załączników do zadań",
       "START_FOCUS_SESSION": "Rozpoczęcie sesji skupienia",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Przesuń wstecz",
+    "MOVE_FORWARD": "Przesuń do przodu",
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
+    "BOARDS": "Tablice",
     "CREATE_PROJECT": "Stwórz Projekt",
     "CREATE_TAG": "Stwórz Tag",
     "DELETE_PROJECT": "Usuń projekt",

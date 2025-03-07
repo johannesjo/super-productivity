@@ -74,6 +74,27 @@
         "URGENT": "Urgent",
         "URGENT_IMPORTANT": "Urgent & Belangrijk",
         "URGENT_NOT_IMPORTANT": "Urgent & Niet Belangrijk"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Voeg nieuw paneel toe",
+        "COLUMNS": "Kolommen",
+        "TAGS_EXCLUDED": "Uitsluit Tags",
+        "TAGS_REQUIRED": "Vereiste Tags",
+        "TASK_DONE_STATE": "Taak Voltooid Status",
+        "TASK_DONE_STATE_ALL": "Alles",
+        "TASK_DONE_STATE_DONE": "Klaar",
+        "TASK_DONE_STATE_UNDONE": "Ongedaan"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Voeg nieuw bord toe",
+        "CONFIRM_DELETE": "Wilt u dit bord echt verwijderen?",
+        "CREATE_NEW_TAG_BTN": "Tag Aanmaken",
+        "CREATE_NEW_TAG_MSG": "Er moet 1 nieuwe tag worden aangemaakt voor dit bord om te werken",
+        "CREATE_NEW_TAGS_BTN": "Tags Aanmaken",
+        "CREATE_NEW_TAGS_MSG": "Er moeten {{nr}} nieuwe tags worden aangemaakt voor dit bord om te werken",
+        "EDIT_BOARD": "Bord bewerken",
+        "NO_PANELS_BTN": "Bord Configureren",
+        "NO_PANELS_MSG": "Dit bord heeft geen geconfigureerde panelen. Voeg enkele panelen toe."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Focussessie is aan het draaien",
+        "TO_FOCUS_OVERLAY": "Naar Focus Overlay"
+      },
       "BACK_TO_PLANNING": "Terug naar Planning",
       "CANCEL_FOCUS_SESSION": "Focus Sessie Annuleren",
       "CONGRATS": "Gefeliciteerd met het afronden van deze sessie!",
       "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
+      "COUNTDOWN": "Aftelling",
       "FINISH_TASK_AND_SELECT_NEXT": "Taak afmaken en volgende selecteren",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "voor taak",
       "GET_READY": "Maak je klaar voor je focus sessie!",
       "GO_TO_PROCRASTINATION": "Krijg hulp als je aan het uitstellen bent",
       "GOGOGO": "Go, go, go!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Doe wat lichte stretches",
       "SELECT_ANOTHER_TASK": "Selecteer een andere Taak",
       "SELECT_TASK": "Selecteer een Taak om op te focussen",
+      "SESSION_COMPLETED": "Focussessie Voltooid!",
       "SET_FOCUS_SESSION_DURATION": "Selecteer een Focus Sessie duur",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Taaknotities en bijlagen tonen/verbergen",
       "START_FOCUS_SESSION": "Start Focus Sessie",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
     "MINUTES": "{{m}} minuten",
+    "MOVE_BACKWARD": "Terug Bewegen",
+    "MOVE_FORWARD": "Vooruit Bewegen",
     "NEXT": "De volgende",
     "NO_CON": "Je bent momenteel offline. Maak opnieuw verbinding met internet.",
     "NONE": "Geen",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
+    "BOARDS": "Borden",
     "CREATE_PROJECT": "Project maken",
     "CREATE_TAG": "Tag maken",
     "DELETE_PROJECT": "Project verwijderen",

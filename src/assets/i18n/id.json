@@ -74,6 +74,27 @@
         "URGENT": "Mendesak",
         "URGENT_IMPORTANT": "Mendesak & Penting",
         "URGENT_NOT_IMPORTANT": "Mendesak & Tidak Penting"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Tambahkan Panel baru",
+        "COLUMNS": "Kolom",
+        "TAGS_EXCLUDED": "Tag yang Dikecualikan",
+        "TAGS_REQUIRED": "Tag yang Diperlukan",
+        "TASK_DONE_STATE": "Status Tugas Selesai",
+        "TASK_DONE_STATE_ALL": "Semua",
+        "TASK_DONE_STATE_DONE": "Selesai",
+        "TASK_DONE_STATE_UNDONE": "Belum Selesai"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Tambahkan papan baru",
+        "CONFIRM_DELETE": "Apakah Anda benar-benar ingin menghapus papan ini?",
+        "CREATE_NEW_TAG_BTN": "Buat tag",
+        "CREATE_NEW_TAG_MSG": "1 tag baru perlu dibuat agar papan ini berfungsi",
+        "CREATE_NEW_TAGS_BTN": "Buat tag",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} tag baru perlu dibuat agar papan ini berfungsi",
+        "EDIT_BOARD": "Edit papan",
+        "NO_PANELS_BTN": "Konfigurasi Papan",
+        "NO_PANELS_MSG": "Papan ini tidak memiliki panel yang dikonfigurasi. Tambahkan beberapa panel."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesi Fokus sedang berjalan",
+        "TO_FOCUS_OVERLAY": "Untuk Overlay Fokus"
+      },
       "BACK_TO_PLANNING": "Kembali ke Perencanaan",
       "CANCEL_FOCUS_SESSION": "Membatalkan Sesi Fokus",
       "CONGRATS": "Selamat karena telah menyelesaikan sesi ini!",
       "CONTINUE_FOCUS_SESSION": "Lanjutkan Sesi Fokus",
+      "COUNTDOWN": "Hitung mundur",
       "FINISH_TASK_AND_SELECT_NEXT": "Selesaikan tugas dan pilih berikutnya",
+      "FLOWTIME": "Waktu Aliran",
+      "FOR_TASK": "untuk tugas",
       "GET_READY": "Bersiaplah untuk sesi fokus Anda!",
       "GO_TO_PROCRASTINATION": "Dapatkan bantuan, ketika menunda-nunda",
       "GOGOGO": "Ayo, ayo, ayo !!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Lakukan peregangan ringan",
       "SELECT_ANOTHER_TASK": "Pilih Tugas lain",
       "SELECT_TASK": "Pilih Tugas yang akan difokuskan",
+      "SESSION_COMPLETED": "Sesi Fokus Selesai!",
       "SET_FOCUS_SESSION_DURATION": "Mengatur Durasi Sesi Fokus",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Menampilkan/menyembunyikan catatan tugas dan lampiran",
       "START_FOCUS_SESSION": "Mulai Sesi Fokus",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Keluar",
     "MINUTES": "{{m}} menit",
+    "MOVE_BACKWARD": "Pindah Mundur",
+    "MOVE_FORWARD": "Pindah Maju",
     "NEXT": "Selanjutnya",
     "NO_CON": "Anda sedang offline. Harap sambungkan kembali ke internet.",
     "NONE": "Tidak ada",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Tambah Tugas Baru",
+    "BOARDS": "Papan",
     "CREATE_PROJECT": "Buat Proyek",
     "CREATE_TAG": "Buat Tag",
     "DELETE_PROJECT": "Menghapus Proyek",

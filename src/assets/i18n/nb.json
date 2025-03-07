@@ -74,6 +74,27 @@
         "URGENT": "Haster",
         "URGENT_IMPORTANT": "Haster & Viktig",
         "URGENT_NOT_IMPORTANT": "Haster & Ikke viktig"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Legg til ny panel",
+        "COLUMNS": "Kolonner",
+        "TAGS_EXCLUDED": "Ekskluderte merker",
+        "TAGS_REQUIRED": "Obligatoriske merker",
+        "TASK_DONE_STATE": "Oppgave fullført tilstand",
+        "TASK_DONE_STATE_ALL": "Alle",
+        "TASK_DONE_STATE_DONE": "Ferdig",
+        "TASK_DONE_STATE_UNDONE": "Ikke gjort"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Legg til ny tavle",
+        "CONFIRM_DELETE": "Vil du virkelig slette denne tavlen?",
+        "CREATE_NEW_TAG_BTN": "Opprett merke",
+        "CREATE_NEW_TAG_MSG": "1 nytt merke må opprettes for at denne tavlen skal fungere",
+        "CREATE_NEW_TAGS_BTN": "Opprett merker",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nye merker må opprettes for at denne tavlen skal fungere",
+        "EDIT_BOARD": "Rediger tavle",
+        "NO_PANELS_BTN": "Konfigurer tavle",
+        "NO_PANELS_MSG": "Denne tavlen har ingen konfigurerte paneler. Legg til noen paneler."
       }
     },
     "BOOKMARK": {
@@ -175,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Fokusøkt pågår",
+        "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
+      },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
       "CANCEL_FOCUS_SESSION": "Avlys fokusøkten",
       "CONGRATS": "Gratulerer med å ha fullført denne økten!",
       "CONTINUE_FOCUS_SESSION": "Fortsett fokusøkten",
+      "COUNTDOWN": "Nedtelling",
       "FINISH_TASK_AND_SELECT_NEXT": "Fullfør oppgaven og velg neste",
+      "FLOWTIME": "Flytstid",
+      "FOR_TASK": "for oppgave",
       "GET_READY": "Gjør deg klar for fokusøkten!",
       "GO_TO_PROCRASTINATION": "Få hjelp når du utsetter ting",
       "GOGOGO": "Gå, gå, gå!!!",
@@ -194,6 +222,7 @@
       "PREP_STRETCH": "Gjør noen milde uttøyninger",
       "SELECT_ANOTHER_TASK": "Velg en annen oppgave",
       "SELECT_TASK": "Velg oppgave å fokusere på",
+      "SESSION_COMPLETED": "Fokusøkt fullført!",
       "SET_FOCUS_SESSION_DURATION": "Angi fokusøktens varighet",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
       "START_FOCUS_SESSION": "Start fokusøkten",
@@ -1317,6 +1346,8 @@
     "LOGIN": "Logg Inn",
     "LOGOUT": "Logg ut",
     "MINUTES": "{{m}} minutter",
+    "MOVE_BACKWARD": "Flytt bakover",
+    "MOVE_FORWARD": "Flytt fremover",
     "NEXT": "Neste",
     "NO_CON": "Du er for øyeblikket frakoblet. Koble til Internett på nytt.",
     "NONE": "Ingen",
@@ -1571,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Legg til ny oppgave",
+    "BOARDS": "Brett",
     "CREATE_PROJECT": "Lag prosjekt",
     "CREATE_TAG": "Opprett tag",
     "DELETE_PROJECT": "Slett prosjekt",
