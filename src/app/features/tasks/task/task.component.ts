@@ -10,6 +10,7 @@ import {
   input,
   OnDestroy,
   Renderer2,
+  signal,
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
@@ -83,6 +84,7 @@ import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pi
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagService } from '../../tag/tag.service';
+import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 
 @Component({
   selector: 'task',
@@ -122,6 +124,7 @@ import { TagService } from '../../tag/tag.service';
     SubTaskTotalTimeSpentPipe,
     TagListComponent,
     ShortPlannedAtPipe,
+    TagToggleMenuListComponent,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
@@ -176,8 +179,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   readonly projectMenuTrigger = viewChild('projectMenuTriggerEl', {
     read: MatMenuTrigger,
   });
-  readonly tagMenuTrigger = viewChild('tagMenuTriggerEl', {
-    read: MatMenuTrigger,
+  readonly tagToggleMenuList = viewChild('tagToggleMenuList', {
+    read: TagToggleMenuListComponent,
   });
   readonly taskContextMenu = viewChild('taskContextMenu', {
     read: TaskContextMenuComponent,
@@ -192,8 +195,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
     ),
   );
-
-  toggleTagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
 
   parentTask = toSignal(
     this._task$.pipe(
@@ -417,9 +418,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  isTagMenuVisible = signal(false);
+
   async editTags(): Promise<void> {
-    this.tagMenuTrigger()?.openMenu();
-    console.log('OPEN', this.tagMenuTrigger());
+    this.isTagMenuVisible.set(true);
+    setTimeout(() => {
+      this.tagToggleMenuList()?.openMenu();
+    });
 
     // this._matDialog
     //   .open(DialogEditTagsForTaskComponent, {
@@ -446,10 +451,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   removeFromMyDay(): void {
     this.onTagsUpdated(this.task().tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
-  }
-
-  convertToMainTask(): void {
-    this._taskService.convertToMainTask(this.task());
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {

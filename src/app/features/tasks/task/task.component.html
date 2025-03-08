@@ -45,11 +45,6 @@
     [matMenuTriggerFor]="projectMenu"
     style="visibility: hidden"
   ></div>
-  <div
-    #tagMenuTriggerEl
-    [matMenuTriggerFor]="tagMenu"
-    style="visibility: hidden"
-  ></div>
 
   <div class="box"></div>
 
@@ -353,32 +348,11 @@
   </ng-template>
 </mat-menu>
 
-<mat-menu
-  #tagMenu="matMenu"
-  (closed)="focusSelf()"
->
-  <ng-template matMenuContent>
-    @for (tag of toggleTagList(); track $index) {
-      <button
-        (click)="toggleTag(tag.id)"
-        mat-menu-item
-      >
-        @if (t.tagIds.includes(tag.id)) {
-          <mat-icon>check_box</mat-icon>
-        } @else {
-          <mat-icon>check_box_outline_blank</mat-icon>
-        }
-        <mat-icon
-          [style.color]="tag.color || tag.theme.primary"
-          class="tag-ico"
-          >{{ tag.icon || 'label' }}</mat-icon
-        >
-        {{ tag.title }}
-      </button>
-    }
-    <!--    <button mat-menu-item>-->
-    <!--      <mat-icon>add</mat-icon>-->
-    <!--      {{ T.G.ADD | translate }}-->
-    <!--    </button>-->
-  </ng-template>
-</mat-menu>
+@if (isTagMenuVisible()) {
+  <tag-toggle-menu-list
+    #tagToggleMenuList
+    [task]="t"
+    (toggleTag)="toggleTag($event)"
+    (afterClose)="isTagMenuVisible.set(false); focusSelf()"
+  ></tag-toggle-menu-list>
+}
