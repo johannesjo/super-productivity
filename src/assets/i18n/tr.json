@@ -68,12 +68,12 @@
         "IMPORTANT": "Önemli",
         "IN_PROGRESS": "Devam ediyor",
         "KANBAN": "Kanban",
-        "NOT_URGENT_IMPORTANT": "Acelesi Yok & Önemli",
-        "NOT_URGENT_NOT_IMPORTANT": "Acelesi Yok & Önemsiz",
+        "NOT_URGENT_IMPORTANT": "Acil değil & Önemli",
+        "NOT_URGENT_NOT_IMPORTANT": "Acil değil & Önemsiz",
         "TO_DO": "Yapılacaklar",
-        "URGENT": "Acelesi Var",
-        "URGENT_IMPORTANT": "Acelesi Var & Önemli",
-        "URGENT_NOT_IMPORTANT": "Acelesi Var & Önemsiz"
+        "URGENT": "Acil",
+        "URGENT_IMPORTANT": "Acil & Önemli",
+        "URGENT_NOT_IMPORTANT": "Acil & Önemsiz"
       },
       "FORM": {
         "ADD_NEW_PANEL": "Yeni Panel Ekle",
@@ -86,15 +86,15 @@
         "TASK_DONE_STATE_UNDONE": "Tamamlanmadı"
       },
       "V": {
-        "ADD_NEW_BOARD": "Yeni tahta ekle",
-        "CONFIRM_DELETE": "Bu tahtayı gerçekten silmek istiyor musunuz?",
+        "ADD_NEW_BOARD": "Yeni pano ekle",
+        "CONFIRM_DELETE": "Bu panoyu gerçekten silmek istiyor musunuz?",
         "CREATE_NEW_TAG_BTN": "Etiket oluştur",
-        "CREATE_NEW_TAG_MSG": "Bu tahtanın çalışması için 1 yeni etiket oluşturulması gerekiyor",
+        "CREATE_NEW_TAG_MSG": "Bu panonun çalışması için 1 yeni etiket oluşturulması gerekiyor",
         "CREATE_NEW_TAGS_BTN": "Etiketler Oluştur",
-        "CREATE_NEW_TAGS_MSG": "Bu tahtanın çalışması için {{nr}} yeni etiket oluşturulması gerekiyor",
-        "EDIT_BOARD": "Tahtayı Düzenle",
-        "NO_PANELS_BTN": "Tahtayı Yapılandır",
-        "NO_PANELS_MSG": "Bu tahtada yapılandırılmış panel yok. Buna bazı paneller ekleyin."
+        "CREATE_NEW_TAGS_MSG": "Bu panonun çalışması için {{nr}} yeni etiket oluşturulması gerekiyor",
+        "EDIT_BOARD": "Panoyı Düzenle",
+        "NO_PANELS_BTN": "Panoyı Yapılandır",
+        "NO_PANELS_MSG": "Bu panoda yapılandırılmış panel yok. Buna bazı paneller ekleyin."
       }
     },
     "BOOKMARK": {
@@ -198,7 +198,7 @@
     "FOCUS_MODE": {
       "B": {
         "SESSION_RUNNING": "Odak Oturumu çalışıyor",
-        "TO_FOCUS_OVERLAY": "Odak Kapatma"
+        "TO_FOCUS_OVERLAY": "Odak Katmanı"
       },
       "BACK_TO_PLANNING": "Planlamaya Geri Dön",
       "CANCEL_FOCUS_SESSION": "Odaklanma Oturumunu İptal Et",
@@ -1222,7 +1222,7 @@
         "REPEAT_CYCLE": "Döngüyü tekrarla",
         "REPEAT_EVERY": "Yinelenme sıklığı",
         "SATURDAY": "Cumartesi",
-        "START_DATE": "Başlangıç ​​tarihi",
+        "START_DATE": "Başlangıç tarihi",
         "START_TIME": "Planlanan başlangıç zamanı",
         "START_TIME_DESCRIPTION": "Örneğin. 15:00. Tüm gün süren bir görev için boş bırakın",
         "SUNDAY": "Pazar",
@@ -1602,7 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
-    "BOARDS": "Tahtalar",
+    "BOARDS": "Panolar",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_PROJECT": "Projeyi Sil",
