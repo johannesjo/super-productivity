@@ -1,16 +1,40 @@
-<mat-dialog-content>
-  <div
-    [innerHtml]="data.message | translate: data.translateParams"
-    class="content"
-  ></div>
-  <mat-form-field>
-    <mat-label>{{ data.placeholder }}</mat-label>
-    <input
-      [(ngModel)]="txtVal"
-      matInput
-      type="text"
-    />
-  </mat-form-field>
+<mat-dialog-content [class.isNoMsg]="!data.message">
+  @if (data.message) {
+    <div
+      [innerHtml]="data.message | translate: data.translateParams"
+      class="content"
+    ></div>
+  }
+  <!--  <form-->
+  <!--    #formEl-->
+  <!--    (submit)="formEl.checkValidity() && close(true)"-->
+  <!--  >-->
+  <!--    <mat-form-field>-->
+  <!--      <mat-label>{{ data.placeholder }}</mat-label>-->
+  <!--      <input-->
+  <!--        [(ngModel)]="txtVal"-->
+  <!--        matInput-->
+  <!--        required="true"-->
+  <!--        type="text"-->
+  <!--      />-->
+  <!--    </mat-form-field>-->
+  <!--  </form>-->
+
+  <form
+    #formEl="ngForm"
+    (ngSubmit)="formEl.valid && close(true)"
+  >
+    <mat-form-field>
+      <mat-label>{{ data.placeholder | translate }}</mat-label>
+      <input
+        [(ngModel)]="txtVal"
+        name="txtVal"
+        matInput
+        required
+        type="text"
+      />
+    </mat-form-field>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
