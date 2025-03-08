@@ -388,9 +388,12 @@
         {{ tag.title }}
       </button>
     }
-    <!--    <button mat-menu-item>-->
-    <!--      <mat-icon>add</mat-icon>-->
-    <!--      {{ T.G.ADD | translate }}-->
-    <!--    </button>-->
+    <button
+      mat-menu-item
+      (click)="openAddNewTag()"
+    >
+      <mat-icon>add</mat-icon>
+      {{ T.F.TAG.TTL.ADD_NEW_TAG | translate }}
+    </button>
   </ng-template>
 </mat-menu>

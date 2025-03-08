@@ -69,6 +69,7 @@ import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
+import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -363,6 +364,25 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       : [...task.tagIds, tagId];
 
     this.onTagsUpdated(tagIds);
+  }
+
+  openAddNewTag(): void {
+    this._matDialog
+      .open(DialogPromptComponent, {
+        data: {
+          placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
+        },
+      })
+      .afterClosed()
+      .subscribe((val) => {
+        if (val) {
+          const t = this.task;
+          const newTagId = this._tagService.addTag({
+            title: val,
+          });
+          this._taskService.updateTags(t, [...t.tagIds, newTagId]);
+        }
+      });
   }
 
   // TODO move to service
