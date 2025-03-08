@@ -1006,6 +1006,9 @@ const T = {
         L_TITLE: 'F.TAG.FORM_BASIC.L_TITLE',
         TITLE: 'F.TAG.FORM_BASIC.TITLE',
       },
+      TTL: {
+        ADD_NEW_TAG: 'F.TAG.TTL.ADD_NEW_TAG',
+      },
       S: {
         UPDATED: 'F.TAG.S.UPDATED',
       },

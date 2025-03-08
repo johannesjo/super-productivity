@@ -993,6 +993,9 @@
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"
       },
+      "TTL": {
+        "ADD_NEW_TAG": "Add new Tag"
+      },
       "S": {
         "UPDATED": "Tag Settings were updated"
       }
