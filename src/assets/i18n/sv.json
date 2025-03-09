@@ -314,7 +314,44 @@
     "PROJECT": {
       "D_CREATE": {
         "CREATE": "Skapa projekt",
-        "EDIT": "Redigera projekt"
+        "EDIT": "Redigera projekt",
+        "SETUP_CALDAV": "Konfigurera CalDav-integrering",
+        "SETUP_GIT": "Konfigurera GitHub-integrering",
+        "SETUP_GITEA_PROJECT": "Konfigurera Gitea-integrering",
+        "SETUP_GITLAB": "Konfigurera GitLab-integrering",
+        "SETUP_JIRA": "Konfigurera Jira-integrering",
+        "SETUP_OPEN_PROJECT": "Konfigurera OpenProject-integrering",
+        "SETUP_REDMINE_PROJECT": "Konfigurera Redmine-integrering"
+      },
+      "D_DELETE": {
+        "MSG": "Är du säker på att du vill radera projektet \"{{title}}\"?"
+      },
+      "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Dölj projektet i menyn",
+        "L_TITLE": "Projektnamn",
+        "TITLE": "Grundläggande inställningar"
+      },
+      "FORM_THEME": {
+        "D_IS_DARK_THEME": "Kommer ej användas om ditt system har stöd för globalt mörkt läge.",
+        "HELP": "Temainställningar för ditt projekt.",
+        "L_BACKGROUND_IMAGE_DARK": "URL för bakgrundsbild (mörkt tema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "URL för bakgrundsbild (ljust tema)",
+        "L_THEME_COLOR": "Temafärg",
+        "L_TITLE": "Titel",
+        "TITLE": "Tema"
+      },
+      "S": {
+        "ARCHIVED": "Arkiverat projekt",
+        "DELETED": "Raderat projekt",
+        "E_EXISTS": "Projektet \"{{title}}\" existerar redan",
+        "ISSUE_PROVIDER_UPDATED": "Uppdaterade projektinställningar för <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Icke arkiverat projekt",
+        "UPDATED": "Uppdaterade projektinställningar"
+      }
+    },
+    "REDMINE": {
+      "FORM": {
+        "PROJECT_ID": "Projektidentifikator"
       }
     }
   }
