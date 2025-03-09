@@ -22,7 +22,7 @@
     "NO_TASKS": "Det finns för närvarande inga eftersläpande uppgifter"
   },
   "CONFIRM": {
-    "AUTO_FIX": "Din data verkar vara skadad (\"{{validityError}}\"). Vill du försöka reparera den automatiskt? Detta kan leda till partiell dataförlust.",
+    "AUTO_FIX": "Dina data verkar vara skadade (\"{{validityError}}\"). Vill du försöka reparera dem automatiskt? Detta kan leda till partiell dataförlust.",
     "DELETE_STRAY_BACKUP": "Vill du radera säkerhetskopian för att slippa se denna dialog?",
     "RESTORE_STRAY_BACKUP": "Under den senaste synkroniseringen kan det ha uppstått ett fel. Vill du återställa från den senaste säkerhetskopian?"
   },
@@ -250,6 +250,10 @@
       }
     },
     "JIRA": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Öppna alltid dialogrutan",
+        "ENABLE": "Aktivera Jira-integrering"
+      },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "OK": "Gör det!"
       },
@@ -323,6 +327,11 @@
       "CMP": {
         "COUNTING_SUBTASKS": "(räknar deluppgifter)",
         "DAYS_WORKED": "Arbetade dagar",
+        "IMPROVEMENT_SELECTION_COUNT": "Antal gånger en förbättringsfaktor valdes",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Humör och produktivitet över tid",
+        "OBSTRUCTION_SELECTION_COUNT": "Antal gånger en hindrande faktor valdes",
+        "SIMPLE_COUNTERS": "Enkla räknare & vaneloggning",
+        "TASKS_DONE_CREATED": "Uppgifter (avklarade/skapade)",
         "TIME_ESTIMATED": "Anslagen tid",
         "TIME_SPENT": "Använd tid"
       },
@@ -330,13 +339,22 @@
         "DISABLE_REPEAT_EVERY_DAY": "Inaktivera daglig upprepning",
         "ENABLE_REPEAT_EVERY_DAY": "Upprepa varje dag",
         "HELP_H1": "Varför ska jag bry mig?",
+        "HELP_P1": "Dags för lite självutvärdering! Dina svar här sparas och erbjuder dig, i mätningsavdelningen, lite statistik över hur du arbetar. Dessutom kommer förslagen för imorgon dyka upp över din lista med uppgifter nästa dag.",
         "IMPROVEMENTS": "Vad förbättrade din produktivitet?",
         "IMPROVEMENTS_TOMORROW": "Vad skulle du kunna göra för att förbättra den imorgon?",
         "MOOD": "Hur mår du?",
         "MOOD_HINT": "1: Förfärligt - 10: Fantastiskt",
+        "NOTES": "Anteckningar för imorgon",
         "OBSTRUCTIONS": "Vad hindrade din produktivitet?",
         "PRODUCTIVITY": "Hur effektivt arbetade du?",
         "PRODUCTIVITY_HINT": "1: Har inte ens börjat – 10: Enormt effektivt"
+      }
+    },
+    "NOTE": {
+      "NOTES_CMP": {
+        "ADD_BTN": "Lägg till ny anteckning",
+        "DROP_TO_ADD": "Släpp här för att lägga till ny anteckning",
+        "NO_NOTES": "Det finns för närvarande inga anteckningar"
       }
     },
     "OPEN_PROJECT": {
@@ -489,7 +507,38 @@
       },
       "ADDITIONAL_INFO": {
         "ADD_SUB_TASK": "Lägg till underuppgift"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Lägg till underuppgift",
+        "CONVERT_TO_PARENT_TASK": "Konvertera till huvuduppgift",
+        "DELETE": "Radera uppgift",
+        "EDIT_SCHEDULED": "Planera om",
+        "EDIT_TASK_TITLE": "Redigera titel",
+        "MARK_DONE": "Markera som klar",
+        "OPEN_ISSUE": "Öppna i webbläsare",
+        "REPEAT_EDIT": "Redigera konfiguration för återkommande uppgifter",
+        "SCHEDULE": "Planera uppgiften",
+        "SHOW_UPDATES": "Visa uppdateringar",
+        "TOGGLE_ATTACHMENTS": "Visa/dölj bilagor",
+        "TOGGLE_DETAIL_PANEL": "Visa/dölj ytterligare information",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Byt synlighet för underuppgift"
+      }
+    },
+    "WORKLOG": {
+      "CMP": {
+        "TASKS": "Uppgifter",
+        "TOTAL_TIME": "Total använd tid:",
+        "WEEK_NR": "Vecka {{nr}}",
+        "WORKED": "Arbetad"
       }
     }
+  },
+  "GCF": {
+    "EVALUATION": {
+      "TITLE": "Utvärdering & mätvärden"
+    }
+  },
+  "PM": {
+    "TITLE": "Projektstatistik"
   }
 }
