@@ -55,6 +55,7 @@
     },
     "BOOKMARK": {
       "BAR": {
+        "ADD": "Lägg till bokmärke",
         "EDIT": "Redigera bokmärken"
       },
       "DIALOG_EDIT": {
@@ -67,7 +68,11 @@
           "LINK": "URL"
         },
         "SELECT_ICON": "Välj en ikon",
-        "SELECT_TYPE": "Välj en typ"
+        "SELECT_TYPE": "Välj en typ",
+        "TYPES": {
+          "FILE": "Fil (öppnad av systemets standardapp)",
+          "IMG": "Bild (visad som miniatyr)"
+        }
       }
     },
     "CALDAV": {
@@ -77,7 +82,8 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Beskrivning",
         "LABELS": "Kategorier",
-        "STATUS": "Status"
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning"
       }
     },
     "CALENDARS": {
@@ -101,6 +107,42 @@
       "POMODORO_BACK": "Tillbaka",
       "POMODORO_DISABLE": "Inaktivera Pomodoro",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt"
+    },
+    "JIRA": {
+      "DIALOG_WORKLOG": {
+        "STARTED": "Startad",
+        "TIME_SPENT": "Använd tid"
+      },
+      "FORM_ADV": {
+        "WORKLOG_DEFAULT_ALL_TIME": "Fyll i all tid som har lagts på uppgiften",
+        "WORKLOG_DEFAULT_TODAY": "Fyll bara i tid använd idag",
+        "WORKLOG_DEFAULT_YESTERDAY": "Fyll bara i tiden du använde igår"
+      },
+      "FORM_CRED": {
+        "USER_NAME": "E-post / användarnamn"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "Avancerad konfiguration",
+        "HELP_ARR": {
+          "H1": "Grundläggande konfiguration",
+          "H2": "Inställningar för arbetslogg"
+        }
+      },
+      "ISSUE_CONTENT": {
+        "CHANGED": "ändrad",
+        "COMMENTS": "Kommentarer",
+        "COMPONENTS": "Komponenter",
+        "DESCRIPTION": "Beskrivning",
+        "LIST_OF_CHANGES": "Lista över ändringar"
+      },
+      "STEPPER": {
+        "CREDENTIALS": "Inloggningsuppgifter"
+      }
+    },
+    "METRIC": {
+      "BANNER": {
+        "CHECK": "Jag gjorde det!"
+      }
     }
   }
 }
