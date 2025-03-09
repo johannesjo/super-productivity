@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Para superposición de enfoque"
       },
       "BACK_TO_PLANNING": "Volver a la planificación",
-      "CANCEL_FOCUS_SESSION": "Cancelar sesión de enfoque",
       "CONGRATS": "¡Felicidades por completar esta sesión!",
       "CONTINUE_FOCUS_SESSION": "Continuar sesión de enfoque",
       "COUNTDOWN": "Cuenta atrás",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas y adjuntos de la tarea",
       "START_FOCUS_SESSION": "Iniciar sesión de enfoque",
       "START_NEXT_FOCUS_SESSION": "Iniciar la siguiente sesión de enfoque",
-      "WORKED_FOR": "Trabajaste durante"
+      "WORKED_FOR": "Trabajaste durante",
+      "CANCEL_FOCUS_SESSION": "Cancelar sesión de enfoque"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "برای فوکوس همپوشانی"
       },
       "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
-      "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
       "CONGRATS": "برای تکمیل این جلسه تبریک می گویم!",
       "CONTINUE_FOCUS_SESSION": "ادامه جلسه تمرکز",
       "COUNTDOWN": "شمارش معکوس",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "نمایش/پنهان کردن یادداشت‌ها و پیوست‌ها",
       "START_FOCUS_SESSION": "شروع جلسه تمرکز",
       "START_NEXT_FOCUS_SESSION": "جلسه تمرکز بعدی را شروع کنید",
-      "WORKED_FOR": "شما کار کردید به مدت"
+      "WORKED_FOR": "شما کار کردید به مدت",
+      "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

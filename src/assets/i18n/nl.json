@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Naar Focus Overlay"
       },
       "BACK_TO_PLANNING": "Terug naar Planning",
-      "CANCEL_FOCUS_SESSION": "Focus Sessie Annuleren",
       "CONGRATS": "Gefeliciteerd met het afronden van deze sessie!",
       "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
       "COUNTDOWN": "Aftelling",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Taaknotities en bijlagen tonen/verbergen",
       "START_FOCUS_SESSION": "Start Focus Sessie",
       "START_NEXT_FOCUS_SESSION": "Start volgende Focus Sessie",
-      "WORKED_FOR": "Je hebt gewerkt voor"
+      "WORKED_FOR": "Je hebt gewerkt voor",
+      "CANCEL_FOCUS_SESSION": "Focus Sessie Annuleren"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

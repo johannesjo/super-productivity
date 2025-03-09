@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
       },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
-      "CANCEL_FOCUS_SESSION": "Avlys fokusøkten",
       "CONGRATS": "Gratulerer med å ha fullført denne økten!",
       "CONTINUE_FOCUS_SESSION": "Fortsett fokusøkten",
       "COUNTDOWN": "Nedtelling",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
       "START_FOCUS_SESSION": "Start fokusøkten",
       "START_NEXT_FOCUS_SESSION": "Start neste fokusøkt",
-      "WORKED_FOR": "Du jobbet for"
+      "WORKED_FOR": "Du jobbet for",
+      "CANCEL_FOCUS_SESSION": "Avlys fokusøkten"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

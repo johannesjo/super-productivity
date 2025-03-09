@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
       },
       "BACK_TO_PLANNING": "計画に戻る",
-      "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
       "COUNTDOWN": "カウントダウン",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
       "START_FOCUS_SESSION": "フォーカスセッションを開始",
       "START_NEXT_FOCUS_SESSION": "次のフォーカスセッションを開始",
-      "WORKED_FOR": "あなたが働いていたのは"
+      "WORKED_FOR": "あなたが働いていたのは",
+      "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

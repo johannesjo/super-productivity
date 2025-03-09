@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Konsantre sou sipriz"
       },
       "BACK_TO_PLANNING": "Natrag na planiranje",
-      "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa",
       "CONGRATS": "Čestitamo na obavljanju ove sesije!",
       "CONTINUE_FOCUS_SESSION": "Nastavi sesiju fokusa",
       "COUNTDOWN": "Dekont",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Prikaži/Sakrij bilješke zadataka i priloge",
       "START_FOCUS_SESSION": "Pokreni sesiju fokusa",
       "START_NEXT_FOCUS_SESSION": "Pokreni sljedeću sesiju fokusa",
-      "WORKED_FOR": "Radio/la si"
+      "WORKED_FOR": "Radio/la si",
+      "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

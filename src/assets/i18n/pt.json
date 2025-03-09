@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
       },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
-      "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco",
       "CONGRATS": "Parabéns por completar essa sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
       "COUNTDOWN": "Contagem regressiva",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas e anexos da tarefa",
       "START_FOCUS_SESSION": "Iniciar Sessão de Foco",
       "START_NEXT_FOCUS_SESSION": "Iniciar próxima Sessão de Foco",
-      "WORKED_FOR": "Você trabalhou por"
+      "WORKED_FOR": "Você trabalhou por",
+      "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

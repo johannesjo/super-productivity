@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Do nakładki skupienia"
       },
       "BACK_TO_PLANNING": "Powrót do planowania",
-      "CANCEL_FOCUS_SESSION": "Anuluj sesję fokusową",
       "CONGRATS": "Gratulacje za ukończenie tej sesji!",
       "CONTINUE_FOCUS_SESSION": "Kontynuacja sesji fokusowej",
       "COUNTDOWN": "Odmierzanie czasu",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Wyświetlanie/ukrywanie notatek i załączników do zadań",
       "START_FOCUS_SESSION": "Rozpoczęcie sesji skupienia",
       "START_NEXT_FOCUS_SESSION": "Rozpoczęcie następnej sesji fokusowej",
-      "WORKED_FOR": "Pracowałeś dla"
+      "WORKED_FOR": "Pracowałeś dla",
+      "CANCEL_FOCUS_SESSION": "Anuluj sesję fokusową"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

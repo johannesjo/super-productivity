@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "لتراكب التركيز"
       },
       "BACK_TO_PLANNING": "الرجوع الى التخطيط",
-      "CANCEL_FOCUS_SESSION": "مغادرة جلسة التركيز",
       "CONGRATS": "!هنيئا لك على إكمال هذه الجلسة!",
       "CONTINUE_FOCUS_SESSION": "ألإستمرار في وضع التركيز",
       "COUNTDOWN": "العد التنازلي",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "أظهر / أخفي ملاحظات و مرفقات المهمة",
       "START_FOCUS_SESSION": "إبدأ جلسة التركيز",
       "START_NEXT_FOCUS_SESSION": "إبدأ جلسة التركيز التالية",
-      "WORKED_FOR": "قمت بالفعل بالعمل ل"
+      "WORKED_FOR": "قمت بالفعل بالعمل ل",
+      "CANCEL_FOCUS_SESSION": "مغادرة جلسة التركيز"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
