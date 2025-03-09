@@ -1,8 +1,9 @@
-@let shortSyntaxTags = (shortSyntaxTags$|async); @let activatedIssueTask =
-(activatedIssueTask$|async); @let inputVal = (inputVal$|async)||'';
+@let shortSyntaxTags = shortSyntaxTags$ | async;
+@let activatedIssueTask = activatedIssueTask$ | async;
+@let inputVal = (inputVal$ | async) || '';
 
 <form
-  (submit)="$event.preventDefault();addTask()"
+  (submit)="$event.preventDefault(); addTask()"
   @blendInOut
   [class.isElevated]="isElevated()"
   [class.mat-elevation-z3]="!isElevated()"
@@ -12,10 +13,10 @@
   #origin="matAutocompleteOrigin"
 >
   <div class="input-wrapper">
-    @if ((isLoading())) {
-    <div class="spinner">
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
+    @if (isLoading()) {
+      <div class="spinner">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
     }
 
     <input
@@ -25,108 +26,132 @@
       [formControl]="taskSuggestionsCtrl"
       [matAutocomplete]="autoEl"
       [matAutocompleteConnectedTo]="origin"
-      [mentionConfig]="mentionConfig$|async"
+      [mentionConfig]="mentionConfig$ | async"
       spellcheck="false"
-      [placeholder]="(doubleEnterCount() > 0)
-         ? (T.F.TASK.ADD_TASK_BAR.START|translate)
-         : isAddToBottom()
-           ? isAddToBacklog()
-            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_BACKLOG|translate)
-            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_TODAY|translate)
-           : isAddToBacklog()
-            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_BACKLOG|translate)
-            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_TODAY|translate)"
+      [placeholder]="
+        doubleEnterCount() > 0
+          ? (T.F.TASK.ADD_TASK_BAR.START | translate)
+          : isAddToBottom()
+            ? isAddToBacklog()
+              ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_BACKLOG | translate)
+              : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_TODAY | translate)
+            : isAddToBacklog()
+              ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_BACKLOG | translate)
+              : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_TODAY | translate)
+      "
       matInput
     />
 
     <div class="button-controls">
       @if (taskSuggestionsCtrl?.value?.length) {
-      <div class="separator-box">
-        <button
-          class="switch-add-to-btn"
-          (mousedown)="addTask()"
-          type="submit"
-          mat-icon-button
-        >
-          @if(activatedIssueTask){
-          <mat-icon>add_box</mat-icon>
-          }@else {
-          <mat-icon>add</mat-icon>
-          }
-        </button>
-      </div>
+        <div class="separator-box">
+          <button
+            class="switch-add-to-btn"
+            (mousedown)="addTask()"
+            type="submit"
+            mat-icon-button
+          >
+            @if (activatedIssueTask) {
+              <mat-icon>add_box</mat-icon>
+            } @else {
+              <mat-icon>add</mat-icon>
+            }
+          </button>
+        </div>
       }
 
       <button
-        (click)="isAddToBottom.set(!isAddToBottom())"
-        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TOP_OR_BOTTOM|translate"
+        (click)="toggleIsAddToBottom()"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TOP_OR_BOTTOM | translate"
         matTooltipPosition="above"
         class="switch-add-to-bot-btn"
         mat-icon-button
         type="button"
       >
-        @if(isAddToBottom()){
-        <mat-icon>vertical_align_bottom</mat-icon>
-        }@else {
-        <mat-icon>vertical_align_top</mat-icon>
+        @if (isAddToBottom()) {
+          <mat-icon>vertical_align_bottom</mat-icon>
+        } @else {
+          <mat-icon>vertical_align_top</mat-icon>
         }
       </button>
 
-      @if (isSearchIssueProvidersAvailable$|async) {
-      <button
-        (click)="isSearchIssueProviders.set(!isSearchIssueProviders())"
-        [matTooltip]="'Toggle searching issue providers'"
-        matTooltipPosition="above"
-        class="switch-add-to-btn"
-        mat-icon-button
-        type="button"
-      >
-        @if(isSearchIssueProviders()){
-        <mat-icon>youtube_searched_for</mat-icon>
-        }@else {
-        <mat-icon>search_off</mat-icon>
-        }
-      </button>
-      } @if (isAddToBacklogAvailable$|async) {
-      <button
-        (click)="isAddToBacklog.set(!isAddToBacklog())"
-        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY|translate"
-        matTooltipPosition="above"
-        class="switch-add-to-btn"
-        mat-icon-button
-        type="button"
-      >
-        @if(isAddToBacklog()){
-        <mat-icon>arrow_downward</mat-icon>
-        }@else {
-        <mat-icon>arrow_upward</mat-icon>
-        }
-      </button>
+      @if (isSearchIssueProvidersAvailable$ | async) {
+        <button
+          (click)="isSearchIssueProviders.set(!isSearchIssueProviders())"
+          [matTooltip]="'Toggle searching issue providers'"
+          matTooltipPosition="above"
+          class="switch-add-to-btn"
+          mat-icon-button
+          type="button"
+        >
+          @if (isSearchIssueProviders()) {
+            <mat-icon>youtube_searched_for</mat-icon>
+          } @else {
+            <mat-icon>search_off</mat-icon>
+          }
+        </button>
+      }
+      @if (isAddToBacklogAvailable$ | async) {
+        <button
+          (click)="isAddToBacklog.set(!isAddToBacklog())"
+          [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY | translate"
+          matTooltipPosition="above"
+          class="switch-add-to-btn"
+          mat-icon-button
+          type="button"
+        >
+          @if (isAddToBacklog()) {
+            <mat-icon>arrow_downward</mat-icon>
+          } @else {
+            <mat-icon>arrow_upward</mat-icon>
+          }
+        </button>
       }
     </div>
   </div>
 
   <div class="info-bar">
-    @if (inputVal?.length > 0) { @if (!activatedIssueTask && !shortSyntaxTags?.length) {
-    <div class="info-text">{{ T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate }}</div>
-    } @if (activatedIssueTask) { @if (activatedIssueTask?.issueType) {
-    <div class="info-text add-existing">
-      <mat-icon>playlist_add</mat-icon>
-      {{ T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
-      activatedIssueTask.issueType, issueNr: activatedIssueTask.taskIssueId ||
-      activatedIssueTask.issueData?.id } }}
-    </div>
-    } @if (activatedIssueTask.issueType=== undefined) {
-    <div class="info-text add-existing">
-      <mat-icon>playlist_add</mat-icon>
-      {{ T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: { taskTitle:
-      activatedIssueTask.title } }}
-    </div>
-    } } @if (!activatedIssueTask && shortSyntaxTags?.length) { @for (shortSyntaxTag of
-    (shortSyntaxTags); track shortSyntaxTag.title || shortSyntaxTag) {
-    <tag [tag]="shortSyntaxTag"></tag>
-    } } } @if (inputVal.length === 0) {
-    <div class="info-text">{{ T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate }}</div>
+    @if (inputVal?.length > 0) {
+      @if (!activatedIssueTask && !shortSyntaxTags?.length) {
+        <div class="info-text">{{ T.F.TASK.ADD_TASK_BAR.CREATE_TASK | translate }}</div>
+      }
+      @if (activatedIssueTask) {
+        @if (activatedIssueTask?.issueType) {
+          <div class="info-text add-existing">
+            <mat-icon>playlist_add</mat-icon>
+            {{
+              T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK
+                | translate
+                  : {
+                      issueType: activatedIssueTask.issueType,
+                      issueNr:
+                        activatedIssueTask.taskIssueId ||
+                        activatedIssueTask.issueData?.id,
+                    }
+            }}
+          </div>
+        }
+        @if (activatedIssueTask.issueType === undefined) {
+          <div class="info-text add-existing">
+            <mat-icon>playlist_add</mat-icon>
+            {{
+              T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
+                | translate: { taskTitle: activatedIssueTask.title }
+            }}
+          </div>
+        }
+      }
+      @if (!activatedIssueTask && shortSyntaxTags?.length) {
+        @for (
+          shortSyntaxTag of shortSyntaxTags;
+          track shortSyntaxTag.title || shortSyntaxTag
+        ) {
+          <tag [tag]="shortSyntaxTag"></tag>
+        }
+      }
+    }
+    @if (inputVal.length === 0) {
+      <div class="info-text">{{ T.F.TASK.ADD_TASK_BAR.EXAMPLE | translate }}</div>
     }
   </div>
 
@@ -138,21 +163,25 @@
     (optionSelected)="addTask()"
     [displayWith]="displayWith"
   >
-    @for (item of (filteredIssueSuggestions$|async); track item.taskId || (item.issueData
-    && item.issueData.id)) {
-    <mat-option [value]="item">
-      @if (item.issueType) {
-      <mat-icon [svgIcon]="item.issueType|issueIcon"></mat-icon>
-      } @if (!item.issueType && !item.ctx) {
-      <mat-icon>library_books</mat-icon>
-      } @if (item.ctx) {
-      <tag
-        [tag]="item.ctx"
-        [isHideTitle]="isHideTagTitles()"
-      ></tag>
-      }
-      <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
-    </mat-option>
+    @for (
+      item of filteredIssueSuggestions$ | async;
+      track item.taskId || (item.issueData && item.issueData.id)
+    ) {
+      <mat-option [value]="item">
+        @if (item.issueType) {
+          <mat-icon [svgIcon]="item.issueType | issueIcon"></mat-icon>
+        }
+        @if (!item.issueType && !item.ctx) {
+          <mat-icon>library_books</mat-icon>
+        }
+        @if (item.ctx) {
+          <tag
+            [tag]="item.ctx"
+            [isHideTitle]="isHideTagTitles()"
+          ></tag>
+        }
+        <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
+      </mat-option>
     }
   </mat-autocomplete>
 </form>

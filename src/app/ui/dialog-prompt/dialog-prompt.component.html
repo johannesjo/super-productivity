@@ -1,10 +1,10 @@
 <mat-dialog-content>
   <div
-    [innerHtml]="data.message|translate:data.translateParams"
+    [innerHtml]="data.message | translate: data.translateParams"
     class="content"
   ></div>
   <mat-form-field>
-    <mat-label>{{data.placeholder}}</mat-label>
+    <mat-label>{{ data.placeholder }}</mat-label>
     <input
       [(ngModel)]="txtVal"
       matInput
@@ -22,7 +22,7 @@
       type="button"
     >
       <mat-icon>close</mat-icon>
-      {{(data.cancelTxt || T.G.CANCEL)|translate}}
+      {{ data.cancelTxt || T.G.CANCEL | translate }}
     </button>
 
     <button
@@ -32,7 +32,7 @@
       mat-stroked-button
     >
       <mat-icon>check</mat-icon>
-      {{(data.saveTxt || T.G.SAVE)|translate}}
+      {{ data.saveTxt || T.G.SAVE | translate }}
     </button>
   </div>
 </mat-dialog-actions>

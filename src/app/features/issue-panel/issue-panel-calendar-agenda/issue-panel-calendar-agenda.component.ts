@@ -139,6 +139,11 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       [] as { dayStr: string; itemsForDay: SearchResultItem<'ICAL'>[] }[],
     );
 
+    // sort by start time
+    agenda.forEach((day) => {
+      day.itemsForDay.sort((a, b) => (a.issueData.start > b.issueData.start ? 1 : -1));
+    });
+
     this.agendaItems.set(agenda.sort((a, b) => (a.dayStr > b.dayStr ? 1 : -1)));
   }
 }

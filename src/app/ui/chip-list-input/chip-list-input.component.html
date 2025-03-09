@@ -2,30 +2,36 @@
   <mat-label>{{ label() }}</mat-label>
   <mat-chip-grid #chipListElRef>
     @for (modelItem of modelItems; track modelItem.id) {
-    <mat-chip-row
-      (removed)="remove(modelItem.id)"
-      [removable]="true"
-    >
-      {{ modelItem.title }}
-
-      <mat-icon
-        [matTooltip]="T.G.REMOVE|translate"
-        matChipRemove
-        >cancel
-      </mat-icon>
-
-      @if (additionalActionIcon) {
-      <button
-        (click)="additionalAction.emit(modelItem.id)"
-        [class.isToggled]="isToggled(modelItem.id)"
-        [matTooltip]="isToggled(modelItem.id) ?  additionalActionTooltipUnToggle(): additionalActionTooltip()"
-        class="additional"
-        mat-icon-button
+      <mat-chip-row
+        (removed)="remove(modelItem.id)"
+        [removable]="true"
       >
-        <mat-icon style="transform: rotate(45deg)">{{ additionalActionIcon }}</mat-icon>
-      </button>
-      }
-    </mat-chip-row>
+        {{ modelItem.title }}
+
+        <mat-icon
+          [matTooltip]="T.G.REMOVE | translate"
+          matChipRemove
+          >cancel
+        </mat-icon>
+
+        @if (additionalActionIcon) {
+          <button
+            (click)="additionalAction.emit(modelItem.id)"
+            [class.isToggled]="isToggled(modelItem.id)"
+            [matTooltip]="
+              isToggled(modelItem.id)
+                ? additionalActionTooltipUnToggle()
+                : additionalActionTooltip()
+            "
+            class="additional"
+            mat-icon-button
+          >
+            <mat-icon style="transform: rotate(45deg)">{{
+              additionalActionIcon
+            }}</mat-icon>
+          </button>
+        }
+      </mat-chip-row>
     }
     <input
       #inputElRef
@@ -44,7 +50,7 @@
     (optionSelected)="selected($event)"
   >
     @for (suggestion of filteredSuggestions | async; track suggestion.id) {
-    <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
+      <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
     }
   </mat-autocomplete>
 </mat-form-field>

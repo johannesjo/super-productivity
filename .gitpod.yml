@@ -1,17 +1,17 @@
 vscode:
   extensions:
-    - coenraads.bracket-pair-colorizer-2 
+    - coenraads.bracket-pair-colorizer-2
     - pustelto.bracketeer
     - formulahendry.auto-close-tag
     - dbaeumer.vscode-eslint
     - mhutchie.git-graph
 
-tasks:  
+tasks:
   - name: config, build, dev
     before: |
       export ANY_CONST_ENVS="can be defined here" && 
       export LIKE_THIS=*
-    init: yarn     
+    init: yarn
     command: yarn ng serve
 
 # Ports to expose on workspace startup

@@ -118,12 +118,12 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
         id: task.id,
         title: task.title.toLowerCase(),
         taskNotes: task.notes.toLowerCase(),
-        projectId: task.projectId,
-        parentId: task.parentId,
+        projectId: task.projectId || null,
+        parentId: task.parentId || null,
         tagId,
         timeSpentOnDay: task.timeSpentOnDay,
         created: task.created,
-        issueType: task.issueType,
+        issueType: task.issueType || null,
         ctx: this._getContextIcon(task, projects, tags, tagId),
         isArchiveTask,
       };
@@ -147,7 +147,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
 
     return {
       ...context,
-      icon: (context as Tag).icon || (task.projectId && 'list'),
+      icon: (context as Tag).icon || (task.projectId && 'list') || null,
     };
   }
 

@@ -9,6 +9,7 @@ import {
   input,
   LOCALE_ID,
   OnDestroy,
+  OnInit,
   viewChild,
   viewChildren,
 } from '@angular/core';
@@ -71,7 +72,7 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
 import { MatButton } from '@angular/material/button';
@@ -88,8 +89,8 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 
 interface IssueAndType {
-  id: string | number | null;
-  type: IssueProviderKey | null;
+  id?: string | number;
+  type?: IssueProviderKey;
 }
 
 interface IssueDataAndType {
@@ -104,7 +105,7 @@ interface IssueDataAndType {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeInOnlyAnimation, fadeAnimation, swirlAnimation],
   imports: [
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     TaskDetailItemComponent,
     MatIcon,
     TaskListComponent,
@@ -124,7 +125,7 @@ interface IssueDataAndType {
     IssueIconPipe,
   ],
 })
-export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
+export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   attachmentService = inject(TaskAttachmentService);
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
@@ -355,15 +356,15 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     if (!prev || prev.reminderId !== newVal.reminderId) {
-      this.reminderId$.next(newVal.reminderId);
+      this.reminderId$.next(newVal.reminderId || null);
     }
 
     if (!prev || prev.repeatCfgId !== newVal.repeatCfgId) {
-      this.repeatCfgId$.next(newVal.repeatCfgId);
+      this.repeatCfgId$.next(newVal.repeatCfgId || null);
     }
 
     if (!prev || prev.parentId !== newVal.parentId) {
-      this.parentId$.next(newVal.parentId);
+      this.parentId$.next(newVal.parentId || null);
     }
 
     // panel states
@@ -403,6 +404,14 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
     this.isDragOver = false;
   }
 
+  @HostListener('window:popstate') onBack(): void {
+    this.collapseParent();
+  }
+
+  ngOnInit(): void {
+    window.history.pushState({ taskDetailPanel: true }, '');
+  }
+
   ngAfterViewInit(): void {
     this.taskService.taskDetailPanelTargetPanel$
       .pipe(
@@ -429,6 +438,10 @@ export class TaskDetailPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (window.history.state.taskDetailPanel) {
+      window.history.back();
+    }
+
     this._onDestroy$.next();
     this._onDestroy$.complete();
     window.clearTimeout(this._focusTimeout);

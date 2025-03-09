@@ -77,8 +77,8 @@ const _removeMissingReminderIds = (data: AppDataComplete): AppDataComplete => {
     if (t.reminderId && !data.reminders.find((r) => r.id === t.reminderId)) {
       data.task.entities[id] = {
         ...t,
-        reminderId: null,
-        plannedAt: null,
+        reminderId: undefined,
+        plannedAt: undefined,
       };
     }
   });
@@ -283,7 +283,7 @@ const _removeNonExistentProjectIdsFromTasks = (
     const t = task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
       console.log('Delete missing project id from task ' + t.projectId);
-      t.projectId = null;
+      delete t.projectId;
     }
   });
 
@@ -291,7 +291,7 @@ const _removeNonExistentProjectIdsFromTasks = (
     const t = taskArchive.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
       console.log('Delete missing project id from archive task ' + t.projectId);
-      t.projectId = null;
+      delete t.projectId;
     }
   });
 

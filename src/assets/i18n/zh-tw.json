@@ -1,0 +1,126 @@
+{
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "請檢查並決定該怎麼做。",
+      "SYNC_CONFLICT_TITLE": "發生同步衝突"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "如果開啟，應用程式將會在背景運行以允許同步",
+      "NO_ACTIVE_TASKS": "沒有活動任務",
+      "SYNCING": "正在同步中"
+    }
+  },
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "忽略",
+      "INSTALL": "安裝"
+    },
+    "UPDATE_WEB_APP": "有新版本可用。下載新版本？"
+  },
+  "F": {
+    "GITEA": {
+      "ISSUE_CONTENT": {
+        "STATUS": "狀況",
+        "SUMMARY": "紀要",
+        "WRITE_A_COMMENT": "寫評論"
+      }
+    },
+    "GITHUB": {
+      "FORM_SECTION": {
+        "TITLE": "GitHub"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "受讓人",
+        "AT": "在",
+        "DESCRIPTION": "描述",
+        "LABELS": "標籤",
+        "STATUS": "地位",
+        "SUMMARY": "概括",
+        "WRITE_A_COMMENT": "寫評論"
+      }
+    },
+    "GITLAB": {
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_ALREADY_TRACKED": "已追蹤",
+        "T_TITLE": "標題",
+        "T_TO_BE_SUBMITTED": "待提交"
+      },
+      "FORM": {
+        "FILTER": "自訂過濾器",
+        "SCOPE": "範圍",
+        "SCOPE_ALL": "全部",
+        "SOURCE": "來源",
+        "SOURCE_GLOBAL": "全部",
+        "SOURCE_GROUP": "組",
+        "SOURCE_PROJECT": "項目"
+      },
+      "FORM_SECTION": {
+        "TITLE": "GitLab"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人",
+        "AT": "代理人",
+        "DESCRIPTION": "描述",
+        "LABELS": "標籤",
+        "PROJECT": "項目",
+        "STATUS": "狀態",
+        "SUMMARY": "總結"
+      }
+    },
+    "ISSUE": {
+      "DEFAULT": {
+        "ISSUE_STR": "問題",
+        "ISSUES_STR": "問題"
+      },
+      "DEFAULT_PROJECT_LABEL": "預設Super Productivity項目",
+      "HOW_TO_GET_A_TOKEN": "如何取得令牌？",
+      "S": {
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName} }：無需更新"
+      }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_UNBLOCK": "解除封鎖"
+      },
+      "CFG_CMP": {
+        "ENABLE_TRANSITIONS": "啟用轉換處理",
+        "IN_PROGRESS": "啟動任務的狀態",
+        "LOAD_SUGGESTIONS": "加載建議"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "OK": "做吧！"
+      },
+      "DIALOG_TRANSITION": {
+        "CURRENT_STATUS": "目前狀態：",
+        "TASK_NAME": "任務名稱：",
+        "TITLE": "Jira：更新狀態",
+        "UPDATE_STATUS": "更新狀態"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "目前記錄的時間： ",
+        "INVALID_DATE": "輸入的值不是日期！",
+        "SAVE_WORKLOG": "保存工作紀錄",
+        "STARTED": "已開始",
+        "TIME_SPENT": "花費的時間",
+        "TIME_SPENT_TOOLTIP": "加不同時間"
+      },
+      "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "允許自簽名憑證",
+        "PASSWORD": "令牌/密碼"
+      }
+    },
+    "PROCRASTINATION": {
+      "INTRO": {
+        "AVOIDING": "逃避任務",
+        "FEAR": "害怕失敗",
+        "STRESSED": "因無法完成任務而感到壓力",
+        "TITLE": "簡介"
+      }
+    },
+    "PROJECT": {
+      "D_DELETE": {
+        "MSG": "您確定要刪除項目「 {{title}}\" 嗎？"
+      }
+    }
+  }
+}

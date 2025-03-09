@@ -1,9 +1,13 @@
 import { createAction, props } from '@ngrx/store';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 
 export const setFocusSessionActivePage = createAction(
   '[FocusMode] Set Focus Active Page',
   props<{ focusActivePage: FocusModePage }>(),
+);
+export const setFocusModeMode = createAction(
+  '[FocusMode] Set Focus Mode Mode',
+  props<{ mode: FocusModeMode }>(),
 );
 
 export const setFocusSessionDuration = createAction(
@@ -11,14 +15,22 @@ export const setFocusSessionDuration = createAction(
   props<{ focusSessionDuration: number }>(),
 );
 
-export const setFocusSessionTimeToGo = createAction(
+export const setFocusSessionTimeElapsed = createAction(
   '[FocusMode] Set focus session elapsed time',
-  props<{ focusSessionTimeToGo: number }>(),
+  props<{ focusSessionTimeElapsed: number }>(),
 );
 export const startFocusSession = createAction('[FocusMode] Start focus session');
 export const cancelFocusSession = createAction('[FocusMode] Cancel Focus Session');
+export const pauseFocusSession = createAction('[FocusMode] Pause Focus Session');
+export const unPauseFocusSession = createAction(
+  '[FocusMode] UnPause Focus Session',
+  props<{ idleTimeToAdd?: number }>(),
+);
 
-export const focusSessionDone = createAction('[FocusMode] Focus session done');
+export const focusSessionDone = createAction(
+  '[FocusMode] Focus session done',
+  props<{ isResetPlannedSessionDuration?: boolean }>(),
+);
 
 export const showFocusOverlay = createAction('[FocusMode] Show Focus Overlay');
 export const hideFocusOverlay = createAction('[FocusMode] Hide Focus Overlay');

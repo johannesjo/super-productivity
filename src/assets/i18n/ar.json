@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "منجز",
+        "EISENHAUER_MATRIX": "مصفوفة أيزنهاور",
+        "IMPORTANT": "مهم",
+        "IN_PROGRESS": "قيد التنفيذ",
+        "KANBAN": "كانبان",
+        "NOT_URGENT_IMPORTANT": "غير عاجل ومهم",
+        "NOT_URGENT_NOT_IMPORTANT": "غير عاجل وغير مهم",
+        "TO_DO": "للقيام بذلك",
+        "URGENT": "مستعجل",
+        "URGENT_IMPORTANT": "عاجل ومهم",
+        "URGENT_NOT_IMPORTANT": "عاجل وغير مهم"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "إضافة لوحة جديدة",
+        "COLUMNS": "الاعمده",
+        "TAGS_EXCLUDED": "العلامات المستبعدة",
+        "TAGS_REQUIRED": "العلامات المطلوبة",
+        "TASK_DONE_STATE": "حالة إنجاز المهمة",
+        "TASK_DONE_STATE_ALL": "كل",
+        "TASK_DONE_STATE_DONE": "منجز",
+        "TASK_DONE_STATE_UNDONE": "التراجع عن"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "إضافة لوحة جديدة",
+        "CONFIRM_DELETE": "هل تريد حقا حذف هذه اللوحة؟",
+        "CREATE_NEW_TAG_BTN": "إنشاء علامة",
+        "CREATE_NEW_TAG_MSG": "1 يجب إنشاء علامة جديدة حتى تعمل هذه اللوحة",
+        "CREATE_NEW_TAGS_BTN": "إنشاء العلامات",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} يجب إنشاء علامات جديدة حتى تعمل هذه اللوحة",
+        "EDIT_BOARD": "تحرير اللوحة",
+        "NO_PANELS_BTN": "تكوين اللوحة",
+        "NO_PANELS_MSG": "لا تحتوي هذه اللوحة على لوحات مهيأة. أضف بعض اللوحات إليه."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "اضافة للمفضلة",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "جلسة التركيز قيد التشغيل",
+        "TO_FOCUS_OVERLAY": "لتراكب التركيز"
+      },
       "BACK_TO_PLANNING": "الرجوع الى التخطيط",
       "CANCEL_FOCUS_SESSION": "مغادرة جلسة التركيز",
       "CONGRATS": "!هنيئا لك على إكمال هذه الجلسة!",
       "CONTINUE_FOCUS_SESSION": "ألإستمرار في وضع التركيز",
+      "COUNTDOWN": "العد التنازلي",
       "FINISH_TASK_AND_SELECT_NEXT": "إنهاء المهمة و تحديد التالي",
+      "FLOWTIME": "وقت التدفق",
+      "FOR_TASK": "للمهمة",
       "GET_READY": "قم بالإستعداد لجلسة التركيز",
       "GO_TO_PROCRASTINATION": "إحصل لنفسك على المساعدة في حالة التأجيل",
       "GOGOGO": "!هيا, هيا, هياااااا!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "قم بتحريك جسدك قليلا",
       "SELECT_ANOTHER_TASK": "إختر مهمة أخرى",
       "SELECT_TASK": "إختر مهمة للتركيز عليها",
+      "SESSION_COMPLETED": "اكتملت جلسة التركيز!",
       "SET_FOCUS_SESSION_DURATION": "قم بإعداد وقت جلسة التركيز",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "أظهر / أخفي ملاحظات و مرفقات المهمة",
       "START_FOCUS_SESSION": "إبدأ جلسة التركيز",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "اسم المستخدم (مثل تصفية التغييرات بنفسك)",
+        "INVALID_TOKEN_MESSAGE": "ليست رمز GitHub صالحًا. يجب أن يبدأ بـ \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "قم بفلترة المشاكل المفروزة لي",
         "REPO": "\"اسم المستخدم / repositoryName\" لمستودع git الذي تريد تتبعه",
         "TOKEN": "رمز الوصول"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> يبدأ عند <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> يبدأ في <strong>{{start}}</strong>!<br> (و {{nrOfOtherBanners}} مهمة أخرى مستحقة)"
       },
+      "S_ACTIVE_TASK_DUE": "المهمة التي تعمل عليها حاليًا أصبحت الآن مستحقة التسليم!<br/> ({{title}})",
       "S_REMINDER_ERR": "خطأ في واجهة التذكير"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "افعلها!"
       },
       "D_EDIT": {
-        "L_COUNTER": "عد",
-        "TITLE": "تحرير عداد بسيط"
+        "CURRENT_STREAK": "السلسلة الحالية",
+        "DAILY_GOAL": "الهدف اليومي",
+        "DAYS": "أيام",
+        "L_COUNTER": "عد"
       },
       "FORM": {
         "ADD_NEW": "إضافة عداد بسيط",
         "HELP": "هنا يمكنك تكوين الأزرار البسيطة التي ستظهر في أعلى اليمين. يمكن أن تكون إما مؤقتات أو مجرد عداد بسيط ، يتم حسابه ، من خلال النقر عليه.",
-        "L_AUTO_COUNT_UP": "الزناد التلقائي العد حتى ل",
-        "L_AUTO_SWITCH_OFF": "الزناد التلقائي لإيقاف",
-        "L_AUTO_SWITCH_ON": "تشغيل الزناد التلقائي لل",
         "L_COUNTDOWN_DURATION": "مدة العد التنازلي",
+        "L_DAILY_GOAL": "الهدف اليومي لسلسلة النجاحات",
         "L_ICON": "أيقونة",
         "L_ICON_ON": "رمز عند التبديل",
         "L_IS_ENABLED": "تمكين",
         "L_TITLE": "عنوان",
+        "L_TRACK_STREAKS": "تتبع الخطوط",
         "L_TYPE": "نوع",
+        "L_WEEKDAYS": "أيام الأسبوع للتحقق من الخط",
         "TITLE": "عدادات بسيطة",
         "TYPE_CLICK_COUNTER": "انقر فوق العداد",
         "TYPE_REPEATED_COUNTDOWN": "العد التنازلي المتكرر",
         "TYPE_STOPWATCH": "ساعة التوقيف"
+      },
+      "S": {
+        "GOAL_REACHED_1": "لقد وصلت إلى هدفك اليوم!",
+        "GOAL_REACHED_2": "مدة السلسلة الحالية:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. انتقل إلى جهازك الآخر وأكمل عملية المزامنة هناك.",
         "T5": "2. أو يمكنك استبدال البيانات البعيدة بالبيانات المحلية. ستضيع جميع التغييرات التي أجريتها عن بُعد!",
         "T6": "من المستحسن إنشاء نسخة احتياطية للبيانات التي تقوم بكتابتها فوقها!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "حفظ وتمكين المزامنة",
+        "TITLE": "تكوين المزامنة"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "تعطيل المزامنة",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "لا يمكن تعيين المشروع عبر بناء جملة قصير للمهام القابلة للتكرار!",
+        "CREATED_FOR_PROJECT": "تم نقل المهمة \"{{taskTitle}}\" إلى المشروع \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "انتقل إلى Project",
         "DELETED": "المهمة المحذوفة \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "نقل المهمة الحالية <strong>{{title}}</strong> إلى قائمة مهام اليوم",
         "FOUND_MOVE_FROM_OTHER_LIST": "تمت إضافة المهمة <strong>{{title}}</strong> من <strong>{{contextTitle}}</strong> إلى القائمة الحالية",
         "FOUND_RESTORE_FROM_ARCHIVE": "المهمة المستعادة <strong>{{title}}</strong> المتعلقة بالمشكلة من الأرشيف",
         "LAST_TAG_DELETION_WARNING": "أنت تحاول إزالة العلامة الأخيرة لمهمة غير مشروع. هذا غير مسموح به!",
+        "MOVED_TO_PROJECT": "تم نقل المهمة \"{{taskTitle}}\" إلى المشروع \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "انتقل إلى Project",
         "REMINDER_ADDED": "المهمة المجدولة \"{{title}}\"",
         "REMINDER_DELETED": "تذكير محذوف للمهمة",
         "REMINDER_UPDATED": "تذكير محدث للمهمة \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "يضيف",
+    "ADVANCED_CFG": "التكوين المتقدم",
     "CANCEL": "إلغاء",
     "CLOSE": "قريب",
     "DELETE": "حذف",
@@ -1285,6 +1346,8 @@
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "الخروج",
     "MINUTES": "{{m}} دقيقة",
+    "MOVE_BACKWARD": "التحرك للخلف",
+    "MOVE_FORWARD": "المضي قدما",
     "NEXT": "التالى",
     "NO_CON": "أنت غير متصل حاليًا. يرجى إعادة الاتصال بالإنترنت.",
     "NONE": "لا شيء",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "إضافة مهمة جديدة",
+    "BOARDS": "المجالس",
     "CREATE_PROJECT": "إنشاء مشروع",
     "CREATE_TAG": "إنشاء علامة",
     "DELETE_PROJECT": "حذف المشروع",

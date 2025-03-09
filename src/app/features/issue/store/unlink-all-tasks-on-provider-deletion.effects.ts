@@ -18,14 +18,14 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
   private _persistenceService = inject(PersistenceService);
 
   readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
-    issueId: null,
-    issueProviderId: null,
-    issueType: null,
-    issueWasUpdated: null,
-    issueLastUpdated: null,
-    issueAttachmentNr: null,
-    issueTimeTracked: null,
-    issuePoints: null,
+    issueId: undefined,
+    issueProviderId: undefined,
+    issueType: undefined,
+    issueWasUpdated: undefined,
+    issueLastUpdated: undefined,
+    issueAttachmentNr: undefined,
+    issueTimeTracked: undefined,
+    issuePoints: undefined,
   } as const;
 
   unlinkAllTasksOnProviderDeletion$: Observable<unknown> = createEffect(

@@ -27,21 +27,21 @@
 <!--</collapsible>-->
 
 <div
-  (click)="toggle();"
+  (click)="toggle()"
   class="collapsible-header sub-section-heading"
 >
   <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
 
-  <div class="collapsible-title">{{(to.label||'')|translate}}</div>
+  <div class="collapsible-title">{{ to.label || '' | translate }}</div>
 </div>
 
 @if (isExpanded()) {
-<div
-  class="collapsible-panel ani-expand-collapse"
-  [@expand]
->
-  @for (field of field.fieldGroup; track field.id) {
-  <formly-field [field]="field"></formly-field>
-  }
-</div>
+  <div
+    class="collapsible-panel ani-expand-collapse"
+    [@expand]
+  >
+    @for (field of field.fieldGroup; track field.id) {
+      <formly-field [field]="field"></formly-field>
+    }
+  </div>
 }

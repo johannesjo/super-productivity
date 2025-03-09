@@ -1,11 +1,11 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "发生了一个同步冲突。",
-      "SYNC_CONFLICT_MSG": "请检查并决定该怎么做。"
+      "SYNC_CONFLICT_MSG": "请检查并决定该怎么做。",
+      "SYNC_CONFLICT_TITLE": "发生了一个同步冲突。"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
-      "INITIAL": "应用程序在后台运行时允许同步(如果启用)",
+      "INITIAL": "如果开启，应用程式将会在背景运行以允许同步",
       "NO_ACTIVE_TASKS": "没有活动任务",
       "SYNCING": "正在同步中"
     }
@@ -129,6 +129,15 @@
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong> 的设置"
       }
     },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "在记录任务时间时，每隔 X 时间重复配置的短语。",
+        "L_INTERVAL": "重复短语的间隔时间",
+        "L_TEXT": "短语内容",
+        "L_TEXT_DESCRIPTION": "例如：\"处理 ${currentTaskTitle}！\"",
+        "TITLE": "Domina 模式"
+      }
+    },
     "DROPBOX": {
       "S": {
         "ACCESS_TOKEN_ERROR": "Dropbox：无法从身份验证代码生成访问令牌",
@@ -152,17 +161,17 @@
       "CONTINUE_FOCUS_SESSION": "继续聚焦会话",
       "FINISH_TASK_AND_SELECT_NEXT": "完成聚焦会话，选择下一个",
       "GET_READY": "准备好进行您的聚焦会话!",
-      "GOGOGO": "开始吧!!!",
       "GO_TO_PROCRASTINATION": "当您正在拖延时，请点击寻求帮助",
+      "GOGOGO": "开始吧!!!",
       "NEXT": "下一步",
       "ON": "开始",
       "OPEN_ISSUE_IN_BROWSER": "在浏览器中打开问题",
       "POMODORO_BACK": "返回",
       "POMODORO_DISABLE": "禁用番茄钟",
       "POMODORO_INFO": "聚焦会话不能与番茄计时器一起使用。",
-      "PREP_STRETCH": "做一些轻微的拉伸运动",
-      "PREP_SIT_UPRIGHT": "请坐直(站好)",
       "PREP_GET_MENTALLY_READY": "请做好精神上的准备，集中精力，提高效率",
+      "PREP_SIT_UPRIGHT": "请坐直(站好)",
+      "PREP_STRETCH": "做一些轻微的拉伸运动",
       "SELECT_ANOTHER_TASK": "选择其他任务",
       "SELECT_TASK": "选择要进行聚焦会话的任务",
       "SET_FOCUS_SESSION_DURATION": "设置聚焦会话的持续时间",
@@ -170,6 +179,13 @@
       "START_FOCUS_SESSION": "开始聚焦会话",
       "START_NEXT_FOCUS_SESSION": "开始下一个聚焦会话",
       "WORKED_FOR": "您正在进行"
+    },
+    "GITEA": {
+      "ISSUE_CONTENT": {
+        "STATUS": "状况",
+        "SUMMARY": "纪要",
+        "WRITE_A_COMMENT": "写评论"
+      }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
@@ -196,7 +212,7 @@
         "MARK_AS_CHECKED": "将更新标记为已选中",
         "STATUS": "状态",
         "SUMMARY": "总结",
-        "WRITE_A_COMMENT": "评论"
+        "WRITE_A_COMMENT": "写评论"
       },
       "S": {
         "ERR_UNKNOWN": "GitHub：未知错误 {{statusCode}} {{errorMsg}}"
@@ -206,16 +222,22 @@
       "DIALOG_INITIAL": {
         "TITLE": "为项目设置 GitLab"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_ALREADY_TRACKED": "已追踪",
+        "T_TITLE": "标题",
+        "T_TO_BE_SUBMITTED": "待提交"
+      },
       "FORM": {
+        "FILTER": "自定义过滤器",
         "FILTER_USER": "用户名（例如，自行过滤掉该用户做出的更改）",
         "GITLAB_BASE_URL": "自定义GitLab基本URL",
         "PROJECT": "GitLab 完整路径或用户名/repo",
         "SCOPE": "范围",
-        "SCOPE_ALL": "所有",
+        "SCOPE_ALL": "全部",
         "SCOPE_ASSIGNED": "分配给我",
         "SCOPE_CREATED": "由我创建",
-        "SOURCE": "资源",
-        "SOURCE_GLOBAL": "所有",
+        "SOURCE": "來源",
+        "SOURCE_GLOBAL": "全部",
         "SOURCE_GROUP": "组",
         "SOURCE_PROJECT": "项目",
         "TOKEN": "访问令牌",
@@ -228,7 +250,7 @@
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "代理人 Assignee",
+        "ASSIGNEE": "代理人",
         "AT": "在",
         "DESCRIPTION": "描述",
         "LABELS": "标签",
@@ -242,20 +264,13 @@
         "ERR_UNKNOWN": "GitLab：未知错误 {{statusCode}} {{errorMsg}}"
       }
     },
-    "DOMINA_MODE": {
-      "FORM": {
-        "HELP": "在记录任务时间时，每隔 X 时间重复配置的短语。",
-        "L_INTERVAL": "重复短语的间隔时间",
-        "L_TEXT": "短语内容",
-        "L_TEXT_DESCRIPTION": "例如：\"处理 ${currentTaskTitle}！\"",
-        "TITLE": "Domina 模式"
-      }
-    },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "问题",
-        "ISSUE_STR": "问题"
+        "ISSUE_STR": "问题",
+        "ISSUES_STR": "问题"
       },
+      "DEFAULT_PROJECT_LABEL": "预设Super Productivity项目",
+      "HOW_TO_GET_A_TOKEN": "如何取得令牌？",
       "S": {
         "ERR_NETWORK": "{{issueProviderName}}：请求失败，因为客户端网络错误",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}：未正确配置",
@@ -279,8 +294,8 @@
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "始终打开对话框",
-        "DONE": "已完成任务的状态",
         "DO_NOT": "禁用转换",
+        "DONE": "已完成任务的状态",
         "ENABLE": "启用Jira",
         "ENABLE_TRANSITIONS": "启用过渡处理",
         "IN_PROGRESS": "启动任务的状态",
@@ -340,8 +355,8 @@
         "ALLOW_SELF_SIGNED": "允许自签名证书",
         "HOST": "主机地址（例如：http://my-host.de:1234）",
         "PASSWORD": "令牌/密码",
-        "USER_NAME": "电子邮件/用户名",
         "USE_PAT": "使用个人访问令牌而不是密码",
+        "USER_NAME": "电子邮件/用户名",
         "WONKY_COOKIE_MODE": "Wonky Cookie后备身份验证（仅桌面应用程序）"
       },
       "FORM_SECTION": {
@@ -390,8 +405,8 @@
         "NO_VALID_TRANSITION": "Jira：未配置有效转换",
         "TIMED_OUT": "Jira：请求超时",
         "TRANSITION": "Jira：将 Issue “{{issueKey}}”设置为“{{name}}”",
-        "TRANSITIONS_LOADED": "Jira：加载过渡。使用下面的选项分配它们",
         "TRANSITION_SUCCESS": "Jira：将 Issue  {{issueKey}} 设置为 <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira：加载过渡。使用下面的选项分配它们",
         "UNABLE_TO_REASSIGN": "Jira：无法为自己重新分配票证，因为您没有指定用户名。请访问设置。"
       },
       "STEPPER": {
@@ -458,18 +473,18 @@
         "NOTE_LABEL": "请输入提醒的内容..."
       },
       "D_FULLSCREEN": {
-        "VIEW_TEXT_ONLY": "展示未转换的文本",
+        "VIEW_PARSED": "展示转换后的(不可编辑)markdown文本",
         "VIEW_SPLIT": "分屏展示转换前和转换后的markdown文本",
-        "VIEW_PARSED": "展示转换后的(不可编辑)markdown文本"
+        "VIEW_TEXT_ONLY": "展示未转换的文本"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "禁用 Markdown",
+        "ENABLE_PARSE": "启用 Markdown"
       },
       "NOTES_CMP": {
         "ADD_BTN": "添加新笔记",
         "DROP_TO_ADD": "拖动到此处以添加新笔记",
         "NO_NOTES": "目前没有笔记"
-      },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "禁用 Markdown",
-        "ENABLE_PARSE": "启用 Markdown"
       }
     },
     "OPEN_PROJECT": {
@@ -494,11 +509,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "子任务完成时显示时间跟踪对话框",
         "PROJECT_ID": "项目编号",
         "PROJECT_ID_DESCRIPTION": "在浏览器中查看项目时，可以作为 url 的一部分找到。",
-        "TOKEN": "访问令牌",
         "SCOPE": "范围",
         "SCOPE_ALL": "所有",
         "SCOPE_ASSIGNED": "分配给我",
         "SCOPE_CREATED": "由我创建",
+        "TOKEN": "访问令牌",
         "IS_AUTO_IMPORT_ISSUES": "自动将 OpenProject 中未解决的工作包添加到 backlog",
         "IS_AUTO_POLL": "自动轮询导入的 OpenProject 工作包的更改",
         "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "添加新任务时将工作包显示为建议"
@@ -516,8 +531,8 @@
         "TYPE": "类型"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "工作包",
-        "ISSUE_STR": "工作包"
+        "ISSUE_STR": "工作包",
+        "ISSUES_STR": "工作包"
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject：未知错误 {{statusCode}} {{errorMsg}}。是否为服务器正确配置了 CORS？",
@@ -525,7 +540,6 @@
       }
     },
     "PLANNER": {
-      "NO_TASKS": "没有任务",
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "添加到今天",
@@ -537,6 +551,7 @@
           "TITLE": "为一天计划任务"
         }
       },
+      "NO_TASKS": "没有任务",
       "PLAN_VIEW": {
         "NO_SCHEDULED_ITEMS": "没有计划项目"
       },
@@ -551,15 +566,15 @@
       "ENJOY_YOURSELF": "放松一会再继续吧！",
       "FINISH_SESSION_X": "您已成功完成会话 <strong>{{nr}}</strong>！",
       "NOTIFICATION": {
-        "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
         "BREAK_TIME": "番茄钟：休息 {{nr}} 的时间到了！",
+        "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
         "NO_TASKS": "您需要在番茄钟计时器启动之前添加任务。",
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "S": {
-        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！",
+        "RESET": "终止番茄钟会话",
         "SESSION_SKIP": "跳过当前番茄钟会话",
-        "RESET": "终止番茄钟会话"
+        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "SKIP_BREAK": "跳过休息",
       "START_BREAK": "开始休息"
@@ -612,11 +627,14 @@
         "EDIT": "编辑项目",
         "SETUP_CALDAV": "关联 Caldav",
         "SETUP_GIT": "关联 GitHub",
+        "SETUP_GITEA_PROJECT": "关联 Gitea",
         "SETUP_GITLAB": "关联 GitLab",
         "SETUP_JIRA": "关联 Jira",
         "SETUP_OPEN_PROJECT": "关联 OpenProject",
-        "SETUP_GITEA_PROJECT": "关联 Gitea",
         "SETUP_REDMINE_PROJECT": "关联 Redmine"
+      },
+      "D_DELETE": {
+        "MSG": "您确定要删除项目“ {{title}}”吗？"
       },
       "FORM_BASIC": {
         "L_ENABLE_BACKLOG": "启用项目待办",
@@ -659,12 +677,29 @@
       "WEEK_TITLE": "第 {{nr}} 周 ({{timeSpent}})"
     },
     "REMINDER": {
-      "S_REMINDER_ERR": "提醒界面出错",
       "COUNTDOWN_BANNER": {
-        "START_NOW": "立即开始",
         "HIDE": "隐藏",
+        "START_NOW": "立即开始",
         "TXT": "<strong>{{title}}</strong> 将于 <strong>{{start}}</strong> 开始！",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> 将于 <strong>{{start}}</strong> 开始！<br> （以及另外 {{nrOfOtherBanners}} 个任务到期）"
+      },
+      "S_REMINDER_ERR": "提醒界面出错"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "继续",
+      "D_INITIAL": {
+        "TEXT": "<p>时间轴的想法是提供一个更好的画面，说明一个人的计划任务如何随着时间的流逝而发展。它是根据您的任务自动生成的，可以区分两个不同的事物： <strong>计划任务</strong>（在计划的时间显示）和 <strong>常规任务</strong> ，这些任务应围绕这些固定事件运行。所有任务都将考虑您分配给他们的时间估计。</p><p>除此之外，您还可以提供工作的开始和结束时间。如果已配置，则常规任务将永远不会显示在这些任务之外。请注意，时间轴仅包括即将到来的30天。</p>",
+        "TITLE": "时间线"
+      },
+      "END": "工作结束",
+      "LUNCH_BREAK": "午休",
+      "NO_TASKS": "当前没有任务。请通过顶部栏中的+按钮添加一些任务。",
+      "NOW": "现在",
+      "START": "工作开始",
+      "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测",
+      "MENU_TITLE": "时间线",
+      "S": {
+        "CAL_PROVIDER_ERROR": "时间线校准提供程序错误： {{errTxt}}"
       }
     },
     "SEARCH_BAR": {
@@ -686,9 +721,6 @@
       "FORM": {
         "ADD_NEW": "添加简单的计数器",
         "HELP": "您可以在此处配置简单的按钮，这些按钮将显示在右上方。通过单击它们，它们可以是计时器，也可以是简单的计数器。",
-        "L_AUTO_COUNT_UP": "自动触发计数",
-        "L_AUTO_SWITCH_OFF": "自动触发关闭",
-        "L_AUTO_SWITCH_ON": "自动触发开关打开",
         "L_ICON": "图标",
         "L_ICON_ON": "切换后的图标",
         "L_IS_ENABLED": "启用",
@@ -696,7 +728,10 @@
         "L_TYPE": "类型",
         "TITLE": "简单计数器",
         "TYPE_CLICK_COUNTER": "点击计数器",
-        "TYPE_STOPWATCH": "秒表"
+        "TYPE_STOPWATCH": "秒表",
+        "L_AUTO_COUNT_UP": "自动触发计数",
+        "L_AUTO_SWITCH_OFF": "自动触发关闭",
+        "L_AUTO_SWITCH_ON": "自动触发开关打开"
       }
     },
     "SYNC": {
@@ -738,16 +773,16 @@
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "同步文件名"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限",
-          "L_SYNC_FILE_PATH": "同步文件路径",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
-        },
         "L_ENABLE_COMPRESSION": "启用压缩（加快传输速度）",
         "L_ENABLE_ENCRYPTION": "启用端对端加密（实验性功能）——使你的数据无法被同步提供者访问",
         "L_ENABLE_SYNCING": "启用同步",
         "L_SYNC_INTERVAL": "同步间隔",
         "L_SYNC_PROVIDER": "同步提供者",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "需要文件访问权限",
+          "L_SYNC_FILE_PATH": "同步文件路径",
+          "L_SYNC_FILE_PATH_DESCRIPTION": "应该用于同步的文件的绝对路径（将被创建）。"
+        },
         "TITLE": "同步",
         "WEB_DAV": {
           "CORS_INFO": "<strong>实验！！</strong> 为了完成这项工作，您需要为Nextcloud实例禁用或限制CORS，这可能会对安全性造成负面影响！请 <a href='https://github.com/nextcloud/server/issues/3131'>参考该线程</a> 以获取更多信息。使用风险自负！",
@@ -793,22 +828,6 @@
       }
     },
     "TASK": {
-      "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "添加附件",
-        "ADD_SUB_TASK": "添加子任务",
-        "ATTACHMENTS": "附件 {{nr}}",
-        "FROM_PARENT": "（来自父任务）",
-        "LOCAL_ATTACHMENTS": "本地附件",
-        "NOTES": "笔记",
-        "PARENT": "父任务",
-        "SCHEDULED_AT": "计划时间",
-        "REMINDER": "提醒",
-        "REPEAT": "重复",
-        "SCHEDULE_TASK": "安排任务",
-        "SUB_TASKS": "子任务（{{nr}}）",
-        "TIME": "时间",
-        "TITLE_PLACEHOLDER": "输入标题"
-      },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "添加现有任务“{{taskTitle}}”",
         "ADD_ISSUE_TASK": "从 {{issueType}}添加问题＃{{issueNr}} ",
@@ -821,6 +840,22 @@
         "START": "再次按回车键开始",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "切换将任务添加到待办/今天列表",
         "TOGGLE_ADD_TOP_OR_BOTTOM": "切换将任务添加到列表的顶部或底部"
+      },
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "添加附件",
+        "ADD_SUB_TASK": "添加子任务",
+        "ATTACHMENTS": "附件 {{nr}}",
+        "FROM_PARENT": "（来自父任务）",
+        "LOCAL_ATTACHMENTS": "本地附件",
+        "NOTES": "笔记",
+        "PARENT": "父任务",
+        "REMINDER": "提醒",
+        "REPEAT": "重复",
+        "SCHEDULE_TASK": "安排任务",
+        "SCHEDULED_AT": "计划时间",
+        "SUB_TASKS": "子任务（{{nr}}）",
+        "TIME": "时间",
+        "TITLE_PLACEHOLDER": "输入标题"
       },
       "B": {
         "ADD_HALF_HOUR": "增加半小时",
@@ -848,30 +883,13 @@
         "REPEAT_EDIT": "编辑重复任务",
         "SCHEDULE": "安排任务",
         "SHOW_UPDATES": "显示更新",
-        "TOGGLE_DETAIL_PANEL": "显示/隐藏其他信息",
         "TOGGLE_ATTACHMENTS": "显示/隐藏附件",
+        "TOGGLE_DETAIL_PANEL": "显示/隐藏其他信息",
         "TOGGLE_DONE": "标记为已完成/未完成",
         "TOGGLE_SUB_TASK_VISIBILITY": "切换子任务可见性",
         "TRACK_TIME": "开始记录时间",
         "TRACK_TIME_STOP": "暂停记录时间",
         "UPDATE_ISSUE_DATA": "更新 Issue 数据"
-      },
-      "D_SCHEDULE_TASK": {
-        "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
-        "REMIND_AT": "提醒在",
-        "RO_10M": "开始前10分钟",
-        "RO_15M": "开始前15分钟",
-        "RO_1H": "开始前1小时",
-        "RO_30M": "开始前30分钟",
-        "RO_5M": "开始前5分钟",
-        "RO_START": "当它开始的时候",
-        "RO_NEVER": "Never",
-        "SCHEDULE": "计划时间",
-        "UNSCHEDULE": "取消计划",
-        "CONFIRM_REPEAT_OK": "时间表",
-        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
-        "DATETIME_FOR": "提醒的日期时间",
-        "EDIT": "编辑提醒"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
@@ -891,6 +909,23 @@
         "SNOOZE_ALL": "全部暂停",
         "START": "开始任务",
         "SWITCH_CONTEXT_START": "切换内容上下文并开始"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "在计划时间到来后将任务移至待办事项",
+        "REMIND_AT": "提醒在",
+        "RO_1H": "开始前1小时",
+        "RO_5M": "开始前5分钟",
+        "RO_10M": "开始前10分钟",
+        "RO_15M": "开始前15分钟",
+        "RO_30M": "开始前30分钟",
+        "RO_NEVER": "Never",
+        "RO_START": "当它开始的时候",
+        "SCHEDULE": "计划时间",
+        "UNSCHEDULE": "取消计划",
+        "CONFIRM_REPEAT_OK": "时间表",
+        "CONFIRM_REPEAT_TXT": "您正在尝试将此重复任务安排到另一天。重复的任务通常意味着在指定的日期重新创建并且只安排在当天。您仍要继续吗？",
+        "DATETIME_FOR": "提醒的日期时间",
+        "EDIT": "编辑提醒"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "添加已花费的时间",
@@ -947,14 +982,18 @@
         "EVERY_X_MONTHLY_AND_TIME": "每 {{x}} 月, {{timeStr}}",
         "EVERY_X_YEARLY": "每 {{x}} 年",
         "EVERY_X_YEARLY_AND_TIME": "每 {{x}} 年, {{timeStr}}",
-        "MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "每月 {{dateDayStr}}日, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "周一-周五",
         "MONDAY_TO_FRIDAY_AND_TIME": "周一-周五, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "每月 {{dateDayStr}}日, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "每周 {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "每年 {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要将他们全部移动到项目 \"{{projectName}}\" 吗?",
+        "OK": "更新所有实例"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务，是否继续？",
@@ -962,10 +1001,6 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要使用新的默认值更新所有的实例还是仅更新未来创建的任务?",
-        "OK": "更新所有实例"
-      },
-      "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "当前重复任务已有 {{tasksNr}} 个已创建的实例，您想要将他们全部移动到项目 \"{{projectName}}\" 吗?",
         "OK": "更新所有实例"
       },
       "D_EDIT": {
@@ -992,8 +1027,8 @@
         "ORDER_DESCRIPTION": "可重复任务的创建顺序。仅影响同时创建的可重复任务。较低的值意味着任务将在列表的更高位置创建，较低的数字将进一步向下。大于 0 的值表示在正常任务的底部创建项目。",
         "Q_CUSTOM": "自定义重复设置",
         "Q_DAILY": "每天",
-        "Q_MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
         "Q_MONDAY_TO_FRIDAY": "每周一到周五",
+        "Q_MONTHLY_CURRENT_DATE": "每月 {{dateDayStr}}日",
         "Q_WEEKLY_CURRENT_WEEKDAY": "每周 {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "每年 {{dayAndMonthStr}}",
         "QUICK_SETTING": "重复设置",
@@ -1010,23 +1045,6 @@
         "TITLE": "任务标题",
         "TUESDAY": "星期二",
         "WEDNESDAY": "星期三"
-      }
-    },
-    "SCHEDULE": {
-      "CONTINUED": "继续",
-      "D_INITIAL": {
-        "TEXT": "<p>时间轴的想法是提供一个更好的画面，说明一个人的计划任务如何随着时间的流逝而发展。它是根据您的任务自动生成的，可以区分两个不同的事物： <strong>计划任务</strong>（在计划的时间显示）和 <strong>常规任务</strong> ，这些任务应围绕这些固定事件运行。所有任务都将考虑您分配给他们的时间估计。</p><p>除此之外，您还可以提供工作的开始和结束时间。如果已配置，则常规任务将永远不会显示在这些任务之外。请注意，时间轴仅包括即将到来的30天。</p>",
-        "TITLE": "时间线"
-      },
-      "END": "工作结束",
-      "NOW": "现在",
-      "NO_TASKS": "当前没有任务。请通过顶部栏中的+按钮添加一些任务。",
-      "START": "工作开始",
-      "TASK_PROJECTION_INFO": "计划的可重复任务的未来预测",
-      "LUNCH_BREAK": "午休",
-      "MENU_TITLE": "时间线",
-      "S": {
-        "CAL_PROVIDER_ERROR": "时间线校准提供程序错误： {{errTxt}}"
       }
     },
     "TIME_TRACKING": {
@@ -1116,6 +1134,18 @@
         "TITLE": "标题"
       }
     },
+    "WELCOME": {
+      "D_WELCOME": {
+        "L1": "入门指引",
+        "L2": "youtube指引视频",
+        "L3": "发起提问",
+        "LETS_GO": "让我们开始吧！！",
+        "MOBILE_INFO": "<strong>向右滑动</strong>已创建的任务，<strong>可将他们设为完成</strong>。\n    向左滑动来计划任务。长按选择更多操作",
+        "T1": "很高兴看到您决定尝试本应用程序！ 🦄",
+        "T2": "如果您在使用时遇到问题，您可以在下列位置找到帮助：",
+        "TITLE": "欢迎使用 Super Productivity！"
+      }
+    },
     "GOOGLE": {
       "BANNER": {
         "AUTH_FAIL": "GoogleApi：无法验证，请尝试重新登录！"
@@ -1135,18 +1165,6 @@
         "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
         "SUCCESS_LOGIN": "GoogleApi：登录成功"
       }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "入门指引",
-        "L2": "youtube指引视频",
-        "L3": "发起提问",
-        "LETS_GO": "让我们开始吧！！",
-        "MOBILE_INFO": "<strong>向右滑动</strong>已创建的任务，<strong>可将他们设为完成</strong>。\n    向左滑动来计划任务。长按选择更多操作",
-        "T1": "很高兴看到您决定尝试本应用程序！ 🦄",
-        "T2": "如果您在使用时遇到问题，您可以在下列位置找到帮助：",
-        "TITLE": "欢迎使用 Super Productivity！"
-      }
     }
   },
   "FILE_IMEX": {
@@ -1160,8 +1178,8 @@
     "CLOSE": "关闭",
     "DELETE": "删除",
     "DISMISS": "取消",
-    "DURATION_DESCRIPTION": "例如 \"5h 23m\" 表示5小时23分钟",
     "DO_IT": "开始吧！",
+    "DURATION_DESCRIPTION": "例如 \"5h 23m\" 表示5小时23分钟",
     "EDIT": "编辑",
     "ENABLED": "启用",
     "EXAMPLE_VAL": "点击编辑",
@@ -1171,8 +1189,8 @@
     "LOGOUT": "登出",
     "MINUTES": "{{m}} 分钟",
     "NEXT": "下一个",
-    "NONE": "没有",
     "NO_CON": "您目前离线。请重新连接到互联网。",
+    "NONE": "没有",
     "OK": "好",
     "PREVIOUS": "上一个",
     "REMOVE": "删除",
@@ -1231,15 +1249,15 @@
       "GLOBAL_TOGGLE_TASK_START": "切换上次活动任务进行时间记录",
       "GO_TO_DAILY_AGENDA": "转到议程",
       "GO_TO_FOCUS_MODE": "进入专注模式",
+      "GO_TO_SCHEDULE": "转到时间轴",
       "GO_TO_SCHEDULED_VIEW": "转到计划的任务",
       "GO_TO_SETTINGS": "前往设置",
-      "GO_TO_SCHEDULE": "转到时间轴",
       "GO_TO_WORK_VIEW": "转到工作视图",
       "HELP": "<p>您可以在此处配置所有键盘快捷键。</p> <p>单击文本输入并输入所需的键盘组合。按Enter键保存，Escape退出。</p> <p>有三种类型的快捷方式：</p> <ul> <li> <strong>全局快捷方式：</strong> 当应用程序运行时，它将触发其他所有应用程序的操作。 </li> <li> <strong>应用程序级快捷方式：</strong> 将从应用程序的每个屏幕触发，但如果您当前正在编辑文本字段则不会。 </li> <li> <strong>任务级快捷方式：</strong> 只有通过鼠标或键盘选择任务并且通常会触发与该任务特定相关的操作时，它们才会触发。 </li> </ul>",
       "MOVE_TASK_DOWN": "在列表中向下移动任务",
-      "MOVE_TASK_UP": "在列表中向上移动任务",
       "MOVE_TASK_TO_BOTTOM": "将任务移至列表底部",
       "MOVE_TASK_TO_TOP": "将任务移至列表顶部",
+      "MOVE_TASK_UP": "在列表中向上移动任务",
       "MOVE_TO_BACKLOG": "将任务移动到任务待办事项",
       "MOVE_TO_TODAYS_TASKS": "将任务移动到今天的任务列表",
       "OPEN_PROJECT_NOTES": "显示/隐藏项目笔记",
@@ -1247,8 +1265,8 @@
       "SELECT_PREVIOUS_TASK": "选择上一个任务",
       "SHOW_SEARCH_BAR": "显示搜索栏",
       "SYSTEM_SHORTCUTS": "全局快捷方式（全系统）",
-      "TASK_ADD_SUB_TASK": "添加子任务",
       "TASK_ADD_ATTACHMENT": "附加文件或链接",
+      "TASK_ADD_SUB_TASK": "添加子任务",
       "TASK_DELETE": "删除任务",
       "TASK_EDIT_TAGS": "编辑标签",
       "TASK_EDIT_TITLE": "编辑标题",
@@ -1272,8 +1290,6 @@
     "MISC": {
       "DEFAULT_PROJECT": "如果未指定，则用于任务的默认项目",
       "FIRST_DAY_OF_WEEK": "一周的第一天",
-      "START_OF_NEXT_DAY": "第二天开始时间",
-      "START_OF_NEXT_DAY_HINT": "您想要开始计算第二天的时间（以小时为单位）。 默认为午夜，即 0。",
       "HELP": "<p><strong>没有看到桌面通知？</strong>对于Windows，您可能需要检查 系统>通知和操作 ，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动添加今日标签以处理任务",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
@@ -1285,6 +1301,8 @@
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任务栏/状态菜单中显示当前任务（仅限桌面）",
       "IS_TURN_OFF_MARKDOWN": "停止在任务备注中解析Markdown",
+      "START_OF_NEXT_DAY": "第二天开始时间",
+      "START_OF_NEXT_DAY_HINT": "您想要开始计算第二天的时间（以小时为单位）。 默认为午夜，即 0。",
       "TASK_NOTES_TPL": "任务描述模板",
       "TITLE": "其他设置",
       "IS_AUTO_START_NEXT_TASK": "将当前标记为已完成时，开始记录下一个任务",
@@ -1306,31 +1324,9 @@
       "TITLE": "番茄钟"
     },
     "REMINDER": {
-      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前显示倒计时横幅",
       "COUNTDOWN_DURATION": "在实际提醒前 X 时间显示横幅",
+      "IS_COUNTDOWN_BANNER_ENABLED": "在提醒到期前显示倒计时横幅",
       "TITLE": "提醒"
-    },
-    "SOUND": {
-      "DONE_SOUND": "任务完成声音",
-      "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
-      "TITLE": "声音",
-      "VOLUME": "音量",
-      "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音"
-    },
-    "TAKE_A_BREAK": {
-      "ADD_NEW_IMG": "添加励志图片",
-      "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
-      "IS_ENABLED": "启用休息提醒",
-      "IS_FOCUS_WINDOW": "有提醒时激活本应用窗口（仅限桌面）",
-      "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
-      "IS_FULL_SCREEN_BLOCKER": "在全屏窗口中显示消息（仅限桌面）",
-      "FULL_SCREEN_BLOCKER_DURATION": "全屏窗口显示时长（仅限桌面）",
-      "MESSAGE": "休息一下",
-      "MIN_WORKING_TIME": "触发休息提醒的工作时长",
-      "MOTIVATIONAL_IMGS": "励志图片（网址）",
-      "NOTIFICATION_TITLE": "休息一下！",
-      "SNOOZE_TIME": "提示休息时暂停时间",
-      "TITLE": "休息提醒"
     },
     "SCHEDULE": {
       "HELP": "时间轴功能应为您提供有关计划任务如何随时间推移进行快速浏览的概述。您可以在 <a href='#/schedule'>'时间轴'</a>下的左侧菜单中找到它。",
@@ -1343,6 +1339,28 @@
       "CAL_PROVIDERS_ADD": "添加 ical 源",
       "CAL_PROVIDERS_INFO": "您可以选择将时间线配置为还从 iCal（例如 Google 日历）加载和显示数据。",
       "L_CAL_PATH": "日历 ICAL 的 URL/文件路径（可选）"
+    },
+    "SOUND": {
+      "DONE_SOUND": "任务完成声音",
+      "IS_INCREASE_DONE_PITCH": "为完成的每项任务增加音调",
+      "TITLE": "声音",
+      "VOLUME": "音量",
+      "IS_PLAY_DONE_SOUND": "任务标记为完成时播放声音"
+    },
+    "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "添加励志图片",
+      "FULL_SCREEN_BLOCKER_DURATION": "全屏窗口显示时长（仅限桌面）",
+      "HELP": "<div><p>允许您在工作了指定的时间而不休息时配置重复提醒。</p> <p>您可以修改显示的消息。 ${duration}将被替换为连续工作时长。</p></div>",
+      "IS_ENABLED": "启用休息提醒",
+      "IS_FOCUS_WINDOW": "有提醒时激活本应用窗口（仅限桌面）",
+      "IS_FULL_SCREEN_BLOCKER": "在全屏窗口中显示消息（仅限桌面）",
+      "IS_LOCK_SCREEN": "休息时间到时锁定屏幕（仅限桌面）",
+      "MESSAGE": "休息一下",
+      "MIN_WORKING_TIME": "触发休息提醒的工作时长",
+      "MOTIVATIONAL_IMGS": "励志图片（网址）",
+      "NOTIFICATION_TITLE": "休息一下！",
+      "SNOOZE_TIME": "提示休息时暂停时间",
+      "TITLE": "休息提醒"
     },
     "TIME_TRACKING": {
       "HELP": "配置横幅以在您忘记开始时间记录的情况下显示。",
@@ -1386,6 +1404,7 @@
     "CREATE_TAG": "创建标签",
     "DELETE_TAG": "删除标签",
     "GO_TO_TASK_LIST": "转到任务列表",
+    "HELP": "帮助",
     "HM": {
       "CALENDARS": "教程：连接日历",
       "GET_HELP_ONLINE": "在线帮助",
@@ -1393,22 +1412,21 @@
       "REPORT_A_PROBLEM": "报告问题",
       "SYNC": "教程：配置同步"
     },
-    "NO_TAG_INFO": "目前没有任何标签。可以通过在新增/编辑任务时输入\"#标签名\"来添加标签",
-    "HELP": "帮助",
     "METRICS": "评估",
+    "NO_TAG_INFO": "目前没有任何标签。可以通过在新增/编辑任务时输入\"#标签名\"来添加标签",
     "NOTES": "笔记",
     "NOTES_PANEL_INFO": "笔记仅在时间线和一般任务列表中展示。",
     "PLANNER": "计划",
     "PROCRASTINATE": "拖延",
-    "PROJECTS": "项目",
     "PROJECT_MENU": "项目菜单",
     "PROJECT_SETTINGS": "项目设置",
+    "PROJECTS": "项目",
     "QUICK_HISTORY": "快速历史",
     "SETTINGS": "设置",
     "SHOW_SEARCH_BAR": "显示搜索栏",
     "TAGS": "标签",
-    "TASKS": "任务",
     "TASK_LIST": "任务列表",
+    "TASKS": "任务",
     "TOGGLE_SHOW_BOOKMARKS": "显示/隐藏书签",
     "TOGGLE_SHOW_NOTES": "显示/隐藏项目笔记",
     "TOGGLE_TRACK_TIME": "开始/停止记录时间",
@@ -1430,15 +1448,15 @@
     "ESTIMATE_TOTAL": "总估计数：",
     "EXPORT_TASK_LIST": "导出任务列表",
     "NO_TASKS": "今天没有任务",
+    "ROUND_5M": "将所有任务舍入到5分钟",
     "ROUND_15M": "将所有任务舍入到15分钟",
     "ROUND_30M": "将所有任务舍入到30分钟",
-    "ROUND_5M": "将所有任务舍入到5分钟",
     "ROUND_TIME_SPENT": "对花费的时间取整",
     "ROUND_TIME_SPENT_TITLE": "对花在所有任务上的时间取整。小心！你不能撤消这个操作！",
     "ROUND_TIME_WARNING": "！小心这不能撤消！",
+    "ROUND_UP_5M": "将所有任务向上取整为5分钟",
     "ROUND_UP_15M": "将所有任务向上取整为15分钟",
     "ROUND_UP_30M": "将所有任务向上取整为30分钟",
-    "ROUND_UP_5M": "将所有任务向上取整为5分钟",
     "SAVE_AND_GO_HOME": "保存并返回主界面",
     "SAVE_AND_GO_HOME_TOOLTIP": "移动所有已完成任务到归档（工作日志）并同步所有数据（可选），之后关闭应用",
     "START_END": "开始 - 结束",
@@ -1467,14 +1485,13 @@
     "TOGGLE_DARK_MODE": "切换深色模式"
   },
   "SCHEDULE": {
-    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请右键点击任务（移动端长按任务）。",
     "NO_REPEATABLE_TASKS": "目前没有重复的任务。您可以在任务侧边栏选择\"重复\"来规划任务。要打开它，请单击在任务最右侧的\"显示/隐藏其他信息\"按钮 (移动端只需单击任务).",
+    "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请右键点击任务（移动端长按任务）。",
     "REPEATED_TASKS": "重复任务",
     "SCHEDULED_TASKS": "计划任务",
     "START_TASK": "立即开始任务并删除提醒"
   },
   "THEMES": {
-    "SELECT_THEME": "选择主题",
     "amber": "琥珀色",
     "blue": "蓝色",
     "blue-grey": "蓝灰色",
@@ -1488,6 +1505,7 @@
     "lime": "酸橙",
     "pink": "粉",
     "purple": "紫色",
+    "SELECT_THEME": "选择主题",
     "teal": "茶色",
     "yellow": "黄色"
   },
@@ -1509,9 +1527,9 @@
     "COMPLETED_TASKS": "完成的任务",
     "ESTIMATE_REMAINING": "预估剩余时间：",
     "FINISH_DAY": "完成本日",
-    "FINISH_DAY_TOOLTIP": "评估你今天的工作，归档所有已完成的任务（可选）并计划明天的工作。",
     "FINISH_DAY_FOR_PROJECT": "完成当前项目本日工作",
     "FINISH_DAY_FOR_TAG": "完成当前标签本日工作",
+    "FINISH_DAY_TOOLTIP": "评估你今天的工作，归档所有已完成的任务（可选）并计划明天的工作。",
     "HELP_PROCRASTINATION": "帮帮我！我在拖延！",
     "NO_COMPLETED_TASKS": "目前还没有完成的任务",
     "NO_PLANNED_TASKS": "没有计划的任务",

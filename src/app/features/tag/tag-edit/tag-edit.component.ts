@@ -27,10 +27,11 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../../t.const';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TaskCopy } from '../../tasks/task.model';
 import { TagComponent } from '../tag/tag.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { switchMap } from 'rxjs/operators';
 
 interface Suggestion {
   id: string;
@@ -67,8 +68,11 @@ export class TagEditComponent {
   private _tagService = inject(TagService);
   private _taskService = inject(TaskService);
 
-  task = input.required<TaskCopy>();
+  task = input<TaskCopy>();
+  isShowMyDayTag = input<boolean>(false);
   tagIds = input.required<string[]>();
+  excludedTagIds = input<string[]>();
+  tagUpdate = output<string[]>();
 
   escapePress = output<void>();
 
@@ -79,18 +83,36 @@ export class TagEditComponent {
   readonly matAutocomplete = viewChild<MatAutocomplete>('autoElRef');
 
   inputVal = toSignal<string>(this.inputCtrl.valueChanges);
-  tagSuggestions = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
+  tagSuggestions = toSignal(
+    toObservable(this.isShowMyDayTag).pipe(
+      switchMap((isShowMyDay) =>
+        isShowMyDay
+          ? this._tagService.tagsNoNoList$
+          : this._tagService.tagsNoMyDayAndNoList$,
+      ),
+    ),
+    { initialValue: [] },
+  );
 
+  allExcludedTagIds = computed<string[]>(() => [
+    ...this.tagIds(),
+    ...(this.excludedTagIds() || []),
+  ]);
   filteredSuggestions = computed(() => {
     const val = this.inputVal();
+    const allExcludedTagIds = this.allExcludedTagIds();
+
     if (!val) {
-      return this.tagSuggestions();
+      return this.tagSuggestions().filter(
+        (suggestion) => !allExcludedTagIds.includes(suggestion.id),
+      );
     }
     const filterValue = val.toLowerCase();
+
     return this.tagSuggestions().filter(
       (suggestion) =>
         suggestion.title.toLowerCase().indexOf(filterValue) === 0 &&
-        !this.tagIds().includes(suggestion.id),
+        !allExcludedTagIds.includes(suggestion.id),
     );
   });
 
@@ -151,7 +173,11 @@ export class TagEditComponent {
   }
 
   private _updateModel(v: string[]): void {
-    this._taskService.updateTags(this.task(), v);
+    this.tagUpdate.emit(v);
+    const task = this.task();
+    if (task) {
+      this._taskService.updateTags(task, v);
+    }
   }
 
   private _getExistingSuggestionByTitle(v: string): Suggestion | undefined {
@@ -168,7 +194,9 @@ export class TagEditComponent {
   private _addByTitle(v: string): void {
     const existing = this._getExistingSuggestionByTitle(v);
     if (existing) {
-      this._add(existing.id);
+      if (!this.allExcludedTagIds().includes(existing.id)) {
+        this._add(existing.id);
+      }
     } else {
       this._createNewTag(v);
     }

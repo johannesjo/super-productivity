@@ -1,107 +1,107 @@
 <div class="page-settings page-wrapper">
   @if (globalCfg) {
-  <div>
-    <div class="section-wrapper component-wrapper">
-      <h1 class="mat-h1">{{T.PS.GLOBAL_SETTINGS|translate}}</h1>
-      <div
-        class="dark-mode-select"
-        style="display: flex"
-      >
-        <h3 style="margin-bottom: 0">Dark Mode</h3>
-        <div style="display: flex">
-          <mat-button-toggle-group
-            name="darkMode"
-            aria-label="darkMode"
-            [value]="globalCfg?.misc.darkMode"
-            (change)="updateDarkMode($event)"
-          >
-            <mat-button-toggle value="system">
-              <mat-icon>computer</mat-icon>
-              System
-            </mat-button-toggle>
-            <mat-button-toggle value="dark">
-              <mat-icon>dark_mode</mat-icon>
-              Dark
-            </mat-button-toggle>
-            <mat-button-toggle value="light">
-              <mat-icon>light_mode</mat-icon>
-              Light
-            </mat-button-toggle>
-          </mat-button-toggle-group>
+    <div>
+      <div class="section-wrapper component-wrapper">
+        <h1 class="mat-h1">{{ T.PS.GLOBAL_SETTINGS | translate }}</h1>
+        <div
+          class="dark-mode-select"
+          style="display: flex"
+        >
+          <h3 style="margin-bottom: 0">Dark Mode</h3>
+          <div style="display: flex">
+            <mat-button-toggle-group
+              name="darkMode"
+              aria-label="darkMode"
+              [value]="globalCfg?.misc.darkMode"
+              (change)="updateDarkMode($event)"
+            >
+              <mat-button-toggle value="system">
+                <mat-icon>computer</mat-icon>
+                System
+              </mat-button-toggle>
+              <mat-button-toggle value="dark">
+                <mat-icon>dark_mode</mat-icon>
+                Dark
+              </mat-button-toggle>
+              <mat-button-toggle value="light">
+                <mat-icon>light_mode</mat-icon>
+                Light
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
         </div>
-      </div>
-      @for (section of globalConfigFormCfg; track section.key) {
-      <section class="config-section section-{{section.key}}">
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
-      }
-      <section class="config-section">
-        <config-sound-form
-          [cfg]="getGlobalCfgSection('sound')"
-          (save)="saveGlobalCfg($event)"
-        ></config-sound-form>
-      </section>
-      <div class="tour-productivityHelper">
+        @for (section of globalConfigFormCfg; track section.key) {
+          <section class="config-section section-{{ section.key }}">
+            <config-section
+              (save)="saveGlobalCfg($event)"
+              [cfg]="getGlobalCfgSection(section.key)"
+              [section]="section"
+            ></config-section>
+          </section>
+        }
+        <section class="config-section">
+          <config-sound-form
+            [cfg]="getGlobalCfgSection('sound')"
+            (save)="saveGlobalCfg($event)"
+          ></config-sound-form>
+        </section>
+        <div class="tour-productivityHelper">
+          <h2
+            class="mat-h2"
+            style="margin-top: 32px"
+          >
+            {{ T.PS.PRODUCTIVITY_HELPER | translate }}
+          </h2>
+          @for (section of globalProductivityConfigFormCfg; track section.key) {
+            <section class="config-section">
+              <config-section
+                (save)="saveGlobalCfg($event)"
+                [cfg]="getGlobalCfgSection(section.key)"
+                [section]="section"
+              ></config-section>
+            </section>
+          }
+        </div>
         <h2
           class="mat-h2"
           style="margin-top: 32px"
         >
-          {{T.PS.PRODUCTIVITY_HELPER|translate}}
+          {{ T.PS.SYNC_EXPORT | translate }}
         </h2>
-        @for (section of globalProductivityConfigFormCfg; track section.key) {
-        <section class="config-section">
-          <config-section
-            (save)="saveGlobalCfg($event)"
-            [cfg]="getGlobalCfgSection(section.key)"
-            [section]="section"
-          ></config-section>
-        </section>
+        @for (section of globalSyncProviderFormCfg; track section.key) {
+          <section class="config-section tour-syncSection">
+            <config-section
+              (save)="saveGlobalCfg($event)"
+              [cfg]="getGlobalCfgSection(section.key)"
+              [section]="section"
+            ></config-section>
+          </section>
         }
       </div>
-      <h2
-        class="mat-h2"
-        style="margin-top: 32px"
-      >
-        {{T.PS.SYNC_EXPORT|translate}}
-      </h2>
-      @for (section of globalSyncProviderFormCfg; track section.key) {
-      <section class="config-section tour-syncSection">
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
-      }
     </div>
-  </div>
   }
 </div>
 
 <footer
   class="version-footer"
-  title="Rev {{versions?.revision}} {{versions?.branch}} {{versions?.version}}"
+  title="Rev {{ versions?.revision }} {{ versions?.branch }} {{ versions?.version }}"
 >
   Super Productivity
   <a
     href="https://github.com/johannesjo/super-productivity/blob/master/CHANGELOG.md"
     target="_blank"
-    >{{appVersion}}</a
+    >{{ appVersion }}</a
   >
   –
   <a
     href="https://super-productivity.com/private-policy"
     target="_blank"
-    >{{T.PS.PRIVACY_POLICY|translate}}</a
+    >{{ T.PS.PRIVACY_POLICY | translate }}</a
   >
   –
   <a
     href="https://github.com/johannesjo/super-productivity/discussions/new"
     target="_blank"
-    >{{T.PS.PROVIDE_FEEDBACK|translate}}</a
+    >{{ T.PS.PROVIDE_FEEDBACK | translate }}</a
   >
 </footer>

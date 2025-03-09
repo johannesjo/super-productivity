@@ -59,10 +59,17 @@ export const selectTagFeatureState = createFeatureSelector<TagState>(TAG_FEATURE
 export const { selectIds, selectEntities, selectAll, selectTotal } =
   tagAdapter.getSelectors();
 export const selectAllTags = createSelector(selectTagFeatureState, selectAll);
+export const selectAllTagIds = createSelector(selectTagFeatureState, selectIds);
+
 export const selectAllTagsWithoutMyDayAndNoList = createSelector(
   selectAllTags,
   (tags: Tag[]): Tag[] =>
     tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== NO_LIST_TAG.id),
+);
+
+export const selectAllTagsWithoutNoList = createSelector(
+  selectAllTags,
+  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== NO_LIST_TAG.id),
 );
 
 export const selectTagById = createSelector(

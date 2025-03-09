@@ -37,7 +37,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
   availableTransitions: [],
   transitionConfig: {
-    OPEN: 'DO_NOT',
+    // OPEN: 'DO_NOT',
     IN_PROGRESS: 'ALWAYS_ASK',
     DONE: 'ALWAYS_ASK',
   },
@@ -187,8 +187,7 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
 
     {
       type: 'collapsible',
-      // todo translate
-      props: { label: 'Advanced Config' },
+      props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
         // {
         //   key: 'isAllowSelfSignedCertificate',

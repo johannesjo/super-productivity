@@ -138,14 +138,14 @@ function _cleanupIssueDataFromOrphanedIssueTasks(data: AppDataComplete): string[
       console.log('Cleaning up issue data for orphaned issue task', task);
       console.log(JSON.stringify(task));
 
-      task.issueId = null;
-      task.issueProviderId = null;
-      task.issueType = null;
-      task.issueWasUpdated = null;
-      task.issueLastUpdated = null;
-      task.issueAttachmentNr = null;
-      task.issueTimeTracked = null;
-      task.issuePoints = null;
+      task.issueId = undefined;
+      task.issueProviderId = undefined;
+      task.issueType = undefined;
+      task.issueWasUpdated = undefined;
+      task.issueLastUpdated = undefined;
+      task.issueAttachmentNr = undefined;
+      task.issueTimeTracked = undefined;
+      task.issuePoints = undefined;
     }
   };
 

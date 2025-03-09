@@ -67,7 +67,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE } from '../../issue/issue.const';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -104,7 +104,7 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
     MatMenuTrigger,
     LongPressIOSDirective,
     MatIconButton,
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     TaskHoverControlsComponent,
     ProgressBarComponent,
     MatMiniFabButton,
@@ -168,7 +168,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
   isFirstLineHover: boolean = false;
 
-  readonly taskTitleEditEl = viewChild<InlineMultilineInputComponent>('taskTitleEditEl');
+  readonly taskTitleEditEl = viewChild<TaskTitleComponent>('taskTitleEditEl');
   readonly blockLeftElRef = viewChild<ElementRef>('blockLeftEl');
   readonly blockRightElRef = viewChild<ElementRef>('blockRightEl');
   readonly innerWrapperElRef = viewChild<ElementRef>('innerWrapperEl');
@@ -185,7 +185,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this._task$.pipe(
       map((t) => t.projectId),
       distinctUntilChanged(),
-      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
+      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
     ),
   );
 

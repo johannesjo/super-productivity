@@ -143,13 +143,13 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
 
     return {
       title: formatOpenProjectWorkPackageSubject(issue),
-      issuePoints: issue.storyPoints,
+      issuePoints: issue.storyPoints || undefined,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
       plannedAt: issue.startDate
         ? new Date(new Date(issue.startDate).setHours(7, 30, 0, 0)).getTime() +
           this.oneDayInMilliseconds
-        : null, // Adjust plannedAt to 7 AM or set it to null if not present
+        : undefined, // Adjust plannedAt to 7 AM or set it to null if not present
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(parsedEstimate > 0 ? { timeEstimate: parsedEstimate } : {}),
     };

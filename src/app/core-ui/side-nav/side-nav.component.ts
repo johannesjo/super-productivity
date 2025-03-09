@@ -222,8 +222,12 @@ export class SideNavComponent implements OnDestroy {
   checkFocusProject(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.projectExpandBtn()?.nativeElement) {
       const targetIndex = this.navEntries().findIndex((value) => {
-        return value._getHostElement() === this.projectExpandBtn()?.nativeElement;
+        return (
+          typeof value._getHostElement === 'function' &&
+          value._getHostElement() === this.projectExpandBtn()?.nativeElement
+        );
       });
+
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
       }
@@ -249,8 +253,12 @@ export class SideNavComponent implements OnDestroy {
   checkFocusTag(ev: KeyboardEvent): void {
     if (ev.key === 'ArrowLeft' && this.tagExpandBtn()?.nativeElement) {
       const targetIndex = this.navEntries().findIndex((value) => {
-        return value._getHostElement() === this.tagExpandBtn()?.nativeElement;
+        return (
+          typeof value._getHostElement === 'function' &&
+          value._getHostElement() === this.tagExpandBtn()?.nativeElement
+        );
       });
+
       if (targetIndex) {
         this.keyManager?.setActiveItem(targetIndex);
       }

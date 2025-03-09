@@ -5,8 +5,6 @@ import {
   HostListener,
   inject,
   OnDestroy,
-  viewChild,
-  ViewContainerRef,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -15,7 +13,6 @@ import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON, LanguageCode } from './app.constants';
-import { BookmarkService } from './features/bookmark/bookmark.service';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -38,7 +35,6 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
 import { map, skip, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
-import { FocusModeService } from './features/focus-mode/focus-mode.service';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
@@ -57,6 +53,8 @@ import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
+import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
+import { Store } from '@ngrx/store';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -101,23 +99,19 @@ export class AppComponent implements OnDestroy {
   private _uiHelperService = inject(UiHelperService);
   private _languageService = inject(LanguageService);
   private _androidService = inject(AndroidService);
-  private _bookmarkService = inject(BookmarkService);
   private _startTrackingReminderService = inject(TrackingReminderService);
   private _activatedRoute = inject(ActivatedRoute);
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexMetaService);
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
-  readonly focusModeService = inject(FocusModeService);
   readonly globalThemeService = inject(GlobalThemeService);
+  readonly _store = inject(Store);
 
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
   @HostBinding('@.disabled') isDisableAnimations = false;
-
-  readonly notesElRef = viewChild('notesElRef', { read: ViewContainerRef });
-  readonly sideNavElRef = viewChild('sideNavElRef', { read: ViewContainerRef });
 
   isRTL: boolean = false;
 
@@ -129,6 +123,10 @@ export class AppComponent implements OnDestroy {
       ([afterInitialIsReady, isDataImportInProgress]) =>
         afterInitialIsReady && !isDataImportInProgress,
     ),
+  );
+
+  isShowFocusOverlay$: Observable<boolean> = this._store.select(
+    selectIsFocusOverlayShown,
   );
 
   private _subs: Subscription = new Subscription();

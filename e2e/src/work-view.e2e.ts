@@ -106,7 +106,7 @@ module.exports = {
         .sendKeysToActiveEl(browser.Keys.BACK_SPACE)
         .waitForElementNotPresent(TASK + ':nth-child(2)')
 
-        .assert.valueContains(TASK_TEXTAREA + ':nth-child(1)', '1 test task hihi')
+        .assert.valueContains(TASK_TEXTAREA, '1 test task hihi')
         .end(),
 
   'should focus previous subtask when marking last subtask done': (browser: NBrowser) =>

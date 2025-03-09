@@ -255,9 +255,9 @@ export class TaskRelatedModelEffects {
     const newArchive = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
         ...task,
-        reminderId: null,
+        reminderId: undefined,
         isDone: true,
-        plannedAt: null,
+        plannedAt: undefined,
         doneOn:
           task.isDone && task.doneOn
             ? task.doneOn

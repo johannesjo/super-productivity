@@ -1,16 +1,20 @@
 <form
   #form="ngForm"
-  (submit)="$event.preventDefault();submit()"
+  (submit)="$event.preventDefault(); submit()"
 >
   <h1 mat-dialog-title>
-    {{ (attachmentCopy.id ? (T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT) :
-    (T.F.ATTACHMENT.DIALOG_EDIT.ADD_ATTACHMENT)) |translate }}
+    {{
+      (attachmentCopy.id
+        ? T.F.ATTACHMENT.DIALOG_EDIT.EDIT_ATTACHMENT
+        : T.F.ATTACHMENT.DIALOG_EDIT.ADD_ATTACHMENT
+      ) | translate
+    }}
   </h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
-        <mat-label>{{mapTypeToLabel(attachmentCopy.type)|translate}}</mat-label>
+        <mat-label>{{ mapTypeToLabel(attachmentCopy.type) | translate }}</mat-label>
         <input
           [(ngModel)]="attachmentCopy.path"
           matInput
@@ -20,7 +24,7 @@
         />
       </mat-form-field>
       <mat-form-field>
-        <mat-label>{{(T.G.TITLE|translate)}}</mat-label>
+        <mat-label>{{ T.G.TITLE | translate }}</mat-label>
         <input
           [(ngModel)]="attachmentCopy.title"
           autofocus="autofocus"
@@ -31,14 +35,14 @@
       </mat-form-field>
 
       <mat-form-field>
-        <mat-label>{{(T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE|translate)}}</mat-label>
+        <mat-label>{{ T.F.ATTACHMENT.DIALOG_EDIT.SELECT_TYPE | translate }}</mat-label>
         <mat-select
           [(ngModel)]="attachmentCopy.type"
           name="type"
           required="true"
         >
           @for (type of types; track trackByIndex($index, type)) {
-          <mat-option [value]="type.type">{{ (type.title|translate) }} </mat-option>
+            <mat-option [value]="type.type">{{ type.title | translate }} </mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -52,7 +56,7 @@
       mat-button
       type="button"
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
 
     <button
@@ -62,7 +66,7 @@
       type="submit"
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+      {{ T.G.SAVE | translate }}
     </button>
   </mat-dialog-actions>
 </form>

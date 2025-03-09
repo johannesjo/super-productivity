@@ -6,44 +6,44 @@
   <!--  >-->
   <!--    <mat-icon>history</mat-icon>-->
   <!--  </button>-->
-  @if(isShowRemoveFromToday()){
-  <button
-    mat-icon-button
-    (click)="quickAccessBtnClick(0)"
-    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_REMOVE_TODAY|translate)"
-  >
-    <mat-icon svgIcon="remove_today"></mat-icon>
-  </button>
+  @if (isShowRemoveFromToday()) {
+    <button
+      mat-icon-button
+      (click)="quickAccessBtnClick(0)"
+      [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_REMOVE_TODAY | translate"
+    >
+      <mat-icon svgIcon="remove_today"></mat-icon>
+    </button>
   }
   <!-- -->
-  @if(isShowAddToToday()){
-  <button
-    mat-icon-button
-    (click)="quickAccessBtnClick(1)"
-    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TODAY|translate)"
-  >
-    <mat-icon>wb_sunny</mat-icon>
-  </button>
+  @if (isShowAddToToday()) {
+    <button
+      mat-icon-button
+      (click)="quickAccessBtnClick(1)"
+      [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TODAY | translate"
+    >
+      <mat-icon>wb_sunny</mat-icon>
+    </button>
   }
 
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(2)"
-    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW|translate)"
+    [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW | translate"
   >
     <mat-icon svgIcon="tomorrow"></mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(3)"
-    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK|translate)"
+    [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK | translate"
   >
     <mat-icon svgIcon="next_week"></mat-icon>
   </button>
   <button
     mat-icon-button
     (click)="quickAccessBtnClick(4)"
-    [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"
+    [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH | translate"
   >
     <mat-icon>bedtime</mat-icon>
   </button>
@@ -58,12 +58,12 @@
 ></mat-calendar>
 
 @if (isShowEnterMsg) {
-<div
-  class="press-enter-msg"
-  @fade
->
-  {{ T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN|translate }}
-</div>
+  <div
+    class="press-enter-msg"
+    @fade
+  >
+    {{ T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN | translate }}
+  </div>
 }
 
 <div class="form-ctrl-wrapper">
@@ -79,31 +79,31 @@
       (keydown)="onTimeKeyDown($event)"
     />
     @if (selectedTime) {
-    <mat-icon
-      style="cursor: pointer"
-      matSuffix
-      (click)="onTimeClear($event)"
-      >close
-    </mat-icon>
+      <mat-icon
+        style="cursor: pointer"
+        matSuffix
+        (click)="onTimeClear($event)"
+        >close
+      </mat-icon>
     }
   </mat-form-field>
 
   @if (selectedTime) {
-  <mat-form-field [@expandFade]>
-    <mat-icon matPrefix>alarm</mat-icon>
-    <mat-label>{{ (T.F.TASK.D_SCHEDULE_TASK.REMIND_AT|translate) }}</mat-label>
-    <mat-select
-      [(ngModel)]="selectedReminderCfgId"
-      name="type"
-      required="true"
-    >
-      @for (remindOption of remindAvailableOptions; track remindOption.value) {
-      <mat-option [value]="remindOption.value">
-        {{ (remindOption.label|translate) }}
-      </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field [@expandFade]>
+      <mat-icon matPrefix>alarm</mat-icon>
+      <mat-label>{{ T.F.TASK.D_SCHEDULE_TASK.REMIND_AT | translate }}</mat-label>
+      <mat-select
+        [(ngModel)]="selectedReminderCfgId"
+        name="type"
+        required="true"
+      >
+        @for (remindOption of remindAvailableOptions; track remindOption.value) {
+          <mat-option [value]="remindOption.value">
+            {{ remindOption.label | translate }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   }
 </div>
 
@@ -114,20 +114,21 @@
     type="button"
     (click)="close()"
   >
-    {{ T.G.CANCEL|translate }}
+    {{ T.G.CANCEL | translate }}
   </button>
   @if (data.task.plannedAt || (plannedDayForTask && plannedDayForTask !== todayStr)) {
-  <button
-    (click)="remove()"
-    color="warn"
-    mat-stroked-button
-  >
-    @if (selectedTime) {
-    <mat-icon>alarm_off</mat-icon>
-    } @else {
-    <mat-icon>event_busy</mat-icon>
-    } {{ T.F.TASK.D_SCHEDULE_TASK.UNSCHEDULE|translate }}
-  </button>
+    <button
+      (click)="remove()"
+      color="warn"
+      mat-stroked-button
+    >
+      @if (selectedTime) {
+        <mat-icon>alarm_off</mat-icon>
+      } @else {
+        <mat-icon>event_busy</mat-icon>
+      }
+      {{ T.F.TASK.D_SCHEDULE_TASK.UNSCHEDULE | translate }}
+    </button>
   }
 
   <button
@@ -136,9 +137,10 @@
     (click)="submit()"
   >
     @if (selectedTime) {
-    <mat-icon>alarm</mat-icon>
+      <mat-icon>alarm</mat-icon>
     } @else {
-    <mat-icon>today</mat-icon>
-    } {{ T.F.TASK.D_SCHEDULE_TASK.SCHEDULE|translate }}
+      <mat-icon>today</mat-icon>
+    }
+    {{ T.F.TASK.D_SCHEDULE_TASK.SCHEDULE | translate }}
   </button>
 </mat-dialog-actions>

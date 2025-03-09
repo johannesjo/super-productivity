@@ -1,38 +1,46 @@
 @let nrOfPlannerItemsForTomorrow =
-(addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$|async);
+  addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$ | async;
 <!---->
-@let plannedForToday = (addTasksForTomorrowService.allPlannedForTodayNotOnToday$|async);
+@let plannedForToday = addTasksForTomorrowService.allPlannedForTodayNotOnToday$ | async;
 <!---->
 
-@if (workContextService.isToday &&(isAlwaysShowIfAny() ||
-(workContextService.activeWorkContext$|async)?.taskIds.length ===0) && plannedForToday) {
-<div class="wrap-add-planned">
-  @if (plannedForToday?.length) {
-  <button
-    (click)="addTasksForTomorrowService.movePlannedTasksToToday(plannedForToday)"
-    class="add-scheduled"
-    color=""
-    mat-stroked-button
-    tabindex="1"
-  >
-    <mat-icon>playlist_add</mat-icon>
-    {{ T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{ nr: plannedForToday.length } }}
-  </button>
-  }
-  <!---->
-  @if (plannedForToday.length === 0 && nrOfPlannerItemsForTomorrow) {
-  <!---->
-  @if (nrOfPlannerItemsForTomorrow) {
-  <button
-    class="add-scheduled"
-    (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
-    color=""
-    mat-stroked-button
-    tabindex="1"
-  >
-    <mat-icon>playlist_add</mat-icon>
-    {{ T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr: nrOfPlannerItemsForTomorrow } }}
-  </button>
-  } }
-</div>
+@if (
+  workContextService.isToday &&
+  (isAlwaysShowIfAny() ||
+    (workContextService.activeWorkContext$ | async)?.taskIds.length === 0) &&
+  plannedForToday
+) {
+  <div class="wrap-add-planned">
+    @if (plannedForToday?.length) {
+      <button
+        (click)="addTasksForTomorrowService.movePlannedTasksToToday(plannedForToday)"
+        class="add-scheduled"
+        color=""
+        mat-stroked-button
+        tabindex="1"
+      >
+        <mat-icon>playlist_add</mat-icon>
+        {{ T.WW.ADD_SCHEDULED_FOR_TODAY | translate: { nr: plannedForToday.length } }}
+      </button>
+    }
+    <!---->
+    @if (plannedForToday.length === 0 && nrOfPlannerItemsForTomorrow) {
+      <!---->
+      @if (nrOfPlannerItemsForTomorrow) {
+        <button
+          class="add-scheduled"
+          (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
+          color=""
+          mat-stroked-button
+          tabindex="1"
+        >
+          <mat-icon>playlist_add</mat-icon>
+          {{
+            T.WW.ADD_SCHEDULED_FOR_TOMORROW
+              | translate: { nr: nrOfPlannerItemsForTomorrow }
+          }}
+        </button>
+      }
+    }
+  </div>
 }

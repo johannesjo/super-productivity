@@ -1,12 +1,12 @@
 <section class="main">
-  @if ((workContextService.mainWorkContext$|async); as mainContext) {
-  <side-nav-item
-    #menuEntry
-    [type]="WorkContextType.TAG"
-    [defaultIcon]="mainContext.icon"
-    [workContext]="mainContext"
-    [activeWorkContextId]="activeWorkContextId"
-  ></side-nav-item>
+  @if (workContextService.mainWorkContext$ | async; as mainContext) {
+    <side-nav-item
+      #menuEntry
+      [type]="WorkContextType.TAG"
+      [defaultIcon]="mainContext.icon"
+      [workContext]="mainContext"
+      [activeWorkContextId]="activeWorkContextId"
+    ></side-nav-item>
   }
 
   <button
@@ -17,7 +17,7 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon svgIcon="early_on"></mat-icon>
-    <span class="text">{{ T.MH.SCHEDULE|translate }}</span>
+    <span class="text">{{ T.MH.SCHEDULE | translate }}</span>
   </button>
 
   <button
@@ -28,132 +28,146 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>edit_calendar</mat-icon>
-    <span class="text">{{ T.MH.PLANNER|translate }}</span>
+    <span class="text">{{ T.MH.PLANNER | translate }}</span>
+  </button>
+
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
+    routerLink="boards"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>grid_view</mat-icon>
+    <span class="text">{{ T.MH.BOARDS | translate }}</span>
   </button>
 </section>
 
-@if (nonHiddenProjects$|async; as projectList) {
-<section class="projects tour-projects">
-  <div class="g-multi-btn-wrapper">
+@if (nonHiddenProjects$ | async; as projectList) {
+  <section class="projects tour-projects">
+    <div class="g-multi-btn-wrapper">
+      <button
+        #menuEntry
+        #projectExpandBtn
+        (click)="toggleExpandProjects()"
+        (keydown)="toggleExpandProjectsLeftRight($event)"
+        [class.isExpanded]="isProjectsExpanded"
+        class="expand-btn"
+        mat-menu-item
+      >
+        <mat-icon>expand_more</mat-icon>
+        <span class="title">{{ T.MH.PROJECTS | translate }}</span>
+      </button>
+      <!--    <button-->
+      <!--      #projectVisibilityBtn-->
+      <!--      mat-icon-button-->
+      <!--      class="additional-btn"-->
+      <!--    >-->
+      <!--      <mat-icon>visibility</mat-icon>-->
+      <!--    </button>-->
+      <button
+        [style.display]="projectList.length ? '' : 'none'"
+        class="additional-btn"
+        #projectExpandBtn2
+        mat-icon-button
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <button
+        (click)="addProject()"
+        class="additional-btn"
+        mat-icon-button
+        [matTooltip]="T.MH.CREATE_PROJECT | translate"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <!--  [leftClickTriggerEl]="projectVisibilityBtn"-->
+    <context-menu
+      [contextMenu]="contextMenu"
+      [leftClickTriggerEl]="projectExpandBtn2"
+      [rightClickTriggerEl]="projectExpandBtn"
+    ></context-menu>
+    <ng-template #contextMenu>
+      @for (project of allProjects$ | async; track project.id) {
+        <button
+          mat-menu-item
+          (click)="toggleProjectVisibility(project)"
+        >
+          @if (!project.isHiddenFromMenu) {
+            <mat-icon>visibility</mat-icon>
+          }
+          @if (project.isHiddenFromMenu) {
+            <mat-icon>visibility_off</mat-icon>
+          }
+          {{ project.title }}
+        </button>
+      }
+    </ng-template>
+    <div
+      [@standardList]="projectList?.length"
+      cdkDropList
+      (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
+    >
+      @for (project of projectList; track project.id) {
+        <side-nav-item
+          #menuEntry
+          cdkDrag
+          [cdkDragData]="project"
+          [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
+          (keydown)="checkFocusProject($event)"
+          [workContext]="project"
+          [type]="WorkContextType.PROJECT"
+          [defaultIcon]="'folder_special'"
+          [activeWorkContextId]="activeWorkContextId"
+        ></side-nav-item>
+      }
+    </div>
+  </section>
+}
+@if (tagList$ | async; as tagList) {
+  <section class="tags">
     <button
       #menuEntry
-      #projectExpandBtn
-      (click)="toggleExpandProjects()"
-      (keydown)="toggleExpandProjectsLeftRight($event)"
-      [class.isExpanded]="isProjectsExpanded"
+      #tagExpandBtn
+      (click)="toggleExpandTags()"
+      (keydown)="toggleExpandTagsLeftRight($event)"
+      [class.isExpanded]="isTagsExpanded"
       class="expand-btn"
       mat-menu-item
     >
+      <span class="title">{{ T.MH.TAGS | translate }}</span>
       <mat-icon>expand_more</mat-icon>
-      <span class="title">{{ T.MH.PROJECTS|translate }}</span>
     </button>
-    <!--    <button-->
-    <!--      #projectVisibilityBtn-->
-    <!--      mat-icon-button-->
-    <!--      class="additional-btn"-->
-    <!--    >-->
-    <!--      <mat-icon>visibility</mat-icon>-->
-    <!--    </button>-->
-    <button
-      [style.display]="projectList.length ? '' : 'none'"
-      class="additional-btn"
-      #projectExpandBtn2
-      mat-icon-button
+    <div
+      [@standardList]="tagList?.length"
+      cdkDropList
+      (cdkDropListDropped)="dropOnTagList(tagList, $event)"
     >
-      <mat-icon>more_vert</mat-icon>
-    </button>
-    <button
-      (click)="addProject()"
-      class="additional-btn"
-      mat-icon-button
-      [matTooltip]="T.MH.CREATE_PROJECT|translate"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
-  <!--  [leftClickTriggerEl]="projectVisibilityBtn"-->
-  <context-menu
-    [contextMenu]="contextMenu"
-    [leftClickTriggerEl]="projectExpandBtn2"
-    [rightClickTriggerEl]="projectExpandBtn"
-  ></context-menu>
-  <ng-template #contextMenu>
-    @for (project of (allProjects$|async); track project.id) {
-    <button
-      mat-menu-item
-      (click)="toggleProjectVisibility(project)"
-    >
-      @if (!project.isHiddenFromMenu) {
-      <mat-icon>visibility</mat-icon>
-      } @if (project.isHiddenFromMenu) {
-      <mat-icon>visibility_off</mat-icon>
-      } {{ project.title }}
-    </button>
+      @for (tag of tagList; track tag.id) {
+        <side-nav-item
+          #menuEntry
+          cdkDrag
+          [cdkDragData]="tag"
+          [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
+          (keydown)="checkFocusTag($event)"
+          [workContext]="tag"
+          [type]="WorkContextType.TAG"
+          [defaultIcon]="'style'"
+          [activeWorkContextId]="activeWorkContextId"
+        ></side-nav-item>
+      }
+    </div>
+    @if (!tagList.length && isTagsExpanded) {
+      <div class="no-tags-info">{{ T.MH.NO_TAG_INFO | translate }}</div>
     }
-  </ng-template>
-  <div
-    [@standardList]="projectList?.length"
-    cdkDropList
-    (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
-  >
-    @for (project of projectList; track project.id) {
-    <side-nav-item
-      #menuEntry
-      cdkDrag
-      [cdkDragData]="project"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
-      (keydown)="checkFocusProject($event)"
-      [workContext]="project"
-      [type]="WorkContextType.PROJECT"
-      [defaultIcon]="'folder_special'"
-      [activeWorkContextId]="activeWorkContextId"
-    ></side-nav-item>
-    }
-  </div>
-</section>
-} @if ((tagList$|async); as tagList) {
-<section class="tags">
-  <button
-    #menuEntry
-    #tagExpandBtn
-    (click)="toggleExpandTags()"
-    (keydown)="toggleExpandTagsLeftRight($event)"
-    [class.isExpanded]="isTagsExpanded"
-    class="expand-btn"
-    mat-menu-item
-  >
-    <span class="title">{{ T.MH.TAGS|translate }}</span>
-    <mat-icon>expand_more</mat-icon>
-  </button>
-  <div
-    [@standardList]="tagList?.length"
-    cdkDropList
-    (cdkDropListDropped)="dropOnTagList(tagList, $event)"
-  >
-    @for (tag of tagList; track tag.id) {
-    <side-nav-item
-      #menuEntry
-      cdkDrag
-      [cdkDragData]="tag"
-      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
-      (keydown)="checkFocusTag($event)"
-      [workContext]="tag"
-      [type]="WorkContextType.TAG"
-      [defaultIcon]="'style'"
-      [activeWorkContextId]="activeWorkContextId"
-    ></side-nav-item>
-    }
-  </div>
-  @if (!tagList.length && isTagsExpanded) {
-  <div class="no-tags-info">{{ T.MH.NO_TAG_INFO|translate }}</div>
-  }
-  <!--  <button (click)="addTag()"-->
-  <!--          *ngIf="isTagsExpanded"-->
-  <!--   #menuEntry mat-menu-item>-->
-  <!--    <mat-icon>add</mat-icon>-->
-  <!--    {{T.MH.CREATE_TAG|translate}}-->
-  <!--  </button>-->
-</section>
+    <!--  <button (click)="addTag()"-->
+    <!--          *ngIf="isTagsExpanded"-->
+    <!--   #menuEntry mat-menu-item>-->
+    <!--    <mat-icon>add</mat-icon>-->
+    <!--    {{T.MH.CREATE_TAG|translate}}-->
+    <!--  </button>-->
+  </section>
 }
 
 <!--<section class="other-task-level-section">-->
@@ -168,7 +182,7 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon svgIcon="repeat"></mat-icon>
-    <span class="text">{{ T.MH.REPEAT_SCHEDULED|translate }}</span>
+    <span class="text">{{ T.MH.REPEAT_SCHEDULED | translate }}</span>
   </button>
   <button
     #menuEntry
@@ -177,7 +191,7 @@
     mat-menu-item
   >
     <mat-icon>help_center</mat-icon>
-    <span class="text">{{ T.MH.HELP|translate }}</span>
+    <span class="text">{{ T.MH.HELP | translate }}</span>
   </button>
 
   <mat-menu #helpMenu="matMenu">
@@ -188,7 +202,7 @@
         target="_blank"
       >
         <mat-icon>help_center</mat-icon>
-        <span class="text">{{ T.MH.HM.GET_HELP_ONLINE|translate }}</span>
+        <span class="text">{{ T.MH.HM.GET_HELP_ONLINE | translate }}</span>
       </a>
 
       <a
@@ -198,7 +212,7 @@
         target="_blank"
       >
         <mat-icon>bug_report</mat-icon>
-        <span class="text">{{ T.MH.HM.REPORT_A_PROBLEM|translate }}</span>
+        <span class="text">{{ T.MH.HM.REPORT_A_PROBLEM | translate }}</span>
       </a>
 
       <a
@@ -207,7 +221,7 @@
         target="_blank"
       >
         <mat-icon>volunteer_activism</mat-icon>
-        <span class="text">{{ T.MH.HM.CONTRIBUTE|translate }}</span>
+        <span class="text">{{ T.MH.HM.CONTRIBUTE | translate }}</span>
       </a>
 
       <a
@@ -216,7 +230,7 @@
         target="_blank"
       >
         <mat-icon>forum</mat-icon>
-        <span class="text">{{ T.MH.HM.REDDIT_COMMUNITY|translate }}</span>
+        <span class="text">{{ T.MH.HM.REDDIT_COMMUNITY | translate }}</span>
       </a>
 
       <button
@@ -224,30 +238,30 @@
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{ T.MH.HM.START_WELCOME|translate }}</span>
+        <span class="text">{{ T.MH.HM.START_WELCOME | translate }}</span>
       </button>
       @if (IS_MOUSE_PRIMARY) {
-      <button
-        (click)="startTour(TourId.KeyboardNav)"
-        mat-menu-item
-      >
-        <mat-icon>directions</mat-icon>
-        <span class="text">{{ T.MH.HM.KEYBOARD|translate }}</span>
-      </button>
+        <button
+          (click)="startTour(TourId.KeyboardNav)"
+          mat-menu-item
+        >
+          <mat-icon>directions</mat-icon>
+          <span class="text">{{ T.MH.HM.KEYBOARD | translate }}</span>
+        </button>
       }
       <button
         (click)="startTour(TourId.Sync)"
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{ T.MH.HM.SYNC|translate }}</span>
+        <span class="text">{{ T.MH.HM.SYNC | translate }}</span>
       </button>
       <button
         (click)="startTour(TourId.IssueProviders)"
         mat-menu-item
       >
         <mat-icon>directions</mat-icon>
-        <span class="text">{{ T.MH.HM.CALENDARS|translate }}</span>
+        <span class="text">{{ T.MH.HM.CALENDARS | translate }}</span>
       </button>
     </ng-template>
   </mat-menu>
@@ -260,7 +274,7 @@
     routerLinkActive="isActiveRoute"
   >
     <mat-icon>settings</mat-icon>
-    <span class="text">{{ T.MH.SETTINGS|translate }}</span>
+    <span class="text">{{ T.MH.SETTINGS | translate }}</span>
   </button>
 </section>
 

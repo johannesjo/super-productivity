@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AppDataComplete } from './sync.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -12,8 +12,6 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TranslateService } from '@ngx-translate/core';
 import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
 import { get, set } from 'object-path';
-import { migrateLegacyAppData } from './migrate-legacy-app-data.util';
-import { isLegacyAppData } from './is-legacy-app-data.util';
 
 // TODO some of this can be done in a background script
 
@@ -67,33 +65,12 @@ export class DataImportService {
       await this._persistenceService.saveBackup();
     }
 
-    let migratedData;
-    if (isLegacyAppData(data)) {
-      if (confirm(this._translateService.instant(T.F.SYNC.C.MIGRATE_LEGACY))) {
-        try {
-          migratedData = migrateLegacyAppData(data);
-        } catch (e) {
-          console.error(e);
-          console.error('Unable to migrate data');
-          migratedData = data;
-        }
-      } else {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: T.F.SYNC.S.ERROR_INVALID_DATA,
-        });
-        return;
-      }
-    } else {
-      migratedData = data;
-    }
-
-    if (isValidAppData(migratedData)) {
-      console.log('isValidAppData', true, migratedData);
+    if (isValidAppData(data)) {
+      console.log('isValidAppData', true, data);
       try {
         const mergedData = isOmitLocalFields
-          ? await this._mergeWithLocalOmittedFields(migratedData)
-          : migratedData;
+          ? await this._mergeWithLocalOmittedFields(data)
+          : data;
 
         // clear database to have a clean one and delete legacy stuff
         await this._persistenceService.clearDatabaseExceptBackupAndLocalOnlyModel();
@@ -114,16 +91,16 @@ export class DataImportService {
         });
         this._imexMetaService.setDataImportInProgress(false);
       }
-    } else if (this._dataRepairService.isRepairPossibleAndConfirmed(migratedData)) {
-      const fixedData = this._dataRepairService.repairData(migratedData);
+    } else if (this._dataRepairService.isRepairPossibleAndConfirmed(data)) {
+      const fixedData = this._dataRepairService.repairData(data);
       await this.importCompleteSyncData(fixedData, {
         isBackupReload,
         isSkipStrayBackupCheck: true,
       });
     } else {
-      console.log('isValidAppData', false, migratedData);
+      console.log('isValidAppData', false, data);
       this._snackService.open({ type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA });
-      console.error(migratedData);
+      console.error(data);
       this._imexMetaService.setDataImportInProgress(false);
     }
   }

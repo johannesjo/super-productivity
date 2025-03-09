@@ -1,47 +1,49 @@
 @if (isHideDone() || isHideAll()) {
-<div
-  @expandFadeFast
-  class="done-task-box"
->
-  <button
-    (click)="expandDoneTasks()"
-    class="expand-tasks-btn"
-    mat-button
+  <div
+    @expandFadeFast
+    class="done-task-box"
   >
-    <!--TODO translate -->
-    <em
-      >+ {{ isHideDone() ? doneTasksLength() + ' done ' : allTasksLength() }} sub
-      tasks</em
+    <button
+      (click)="expandDoneTasks()"
+      class="expand-tasks-btn"
+      mat-button
     >
-    <mat-icon>expand_more</mat-icon>
-  </button>
-</div>
+      <!--TODO translate -->
+      <em
+        >+ {{ isHideDone() ? doneTasksLength() + ' done ' : allTasksLength() }} sub
+        tasks</em
+      >
+      <mat-icon>expand_more</mat-icon>
+    </button>
+  </div>
 }
 
 <div
   #listEl
   cdkDropList
   #dropList="cdkDropList"
-  [cdkDropListConnectedTo]="dropListService.dropLists|async"
+  [cdkDropListConnectedTo]="dropListService.dropLists | async"
   [cdkDropListEnterPredicate]="enterPredicate"
   [cdkDropListData]="dropModelDataForList()"
   (cdkDropListDropped)="drop(filteredTasks(), $event)"
-  [@taskList]="(dropListService.isBlockAniAfterDrop$|async) ? 'BLOCK' : filteredTasks()?.length"
+  [@taskList]="
+    (dropListService.isBlockAniAfterDrop$ | async) ? 'BLOCK' : filteredTasks()?.length
+  "
   [attr.data-id]="listModelId()"
   class="task-list-inner"
 >
   @for (task of filteredTasks(); track trackByFn(i, task); let i = $index) {
-  <task
-    [isInSubTaskList]="isSubTaskList()"
-    [isBacklog]="isBacklog()"
-    [task]="task"
-    cdkDrag
-    [cdkDragData]="task"
-  >
-  </task>
+    <task
+      [isInSubTaskList]="isSubTaskList()"
+      [isBacklog]="isBacklog()"
+      [task]="task"
+      cdkDrag
+      [cdkDragData]="task"
+    >
+    </task>
   }
 </div>
 
 @if (noTasksMsg() && !allTasksLength()) {
-<div class="no-tasks">{{ noTasksMsg() }}</div>
+  <div class="no-tasks">{{ noTasksMsg() }}</div>
 }

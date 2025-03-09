@@ -14,13 +14,12 @@ export interface SimpleCounterCfgFields {
   title: string;
   isEnabled: boolean;
   icon: string | null;
-  iconOn?: string;
   type: SimpleCounterType;
+  isTrackStreaks: boolean;
+  streakMinValue: number;
+  streakWeekDays: { [key: number]: boolean };
 
   // adv cfg
-  triggerOnActions: string[];
-  triggerOffActions?: string[];
-
   // repeated countdown reminder
   countdownDuration?: number;
 }

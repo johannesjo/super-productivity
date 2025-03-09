@@ -402,6 +402,17 @@ simple-counter-button {
   }
 }
 
+.sync-success-check-ico {
+  position: absolute;
+  font-size: 10px;
+  height: 10px;
+  line-height: 10px;
+  left: 50%;
+  top: 50%;
+  font-weight: bold;
+  transform: translate(-50%, -50%);
+}
+
 .spin {
   animation: spin 1.5s linear infinite;
 }

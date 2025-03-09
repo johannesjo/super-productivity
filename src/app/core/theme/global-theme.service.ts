@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
 import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
@@ -19,6 +19,7 @@ import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary'
 import { ChartConfiguration } from 'chart.js';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -31,6 +32,7 @@ export class GlobalThemeService {
   private _chartThemeService = inject(NgChartThemeService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _imexMetaService = inject(ImexMetaService);
+  private _http = inject(HttpClient);
 
   isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(
     switchMap((cfg) => {
@@ -101,7 +103,7 @@ export class GlobalThemeService {
   }
 
   private _initIcons(): void {
-    const icons = [
+    const icons: [string, string][] = [
       ['sp', 'assets/icons/sp.svg'],
       ['play', 'assets/icons/play.svg'],
       ['github', 'assets/icons/github.svg'],
@@ -124,12 +126,39 @@ export class GlobalThemeService {
       ['keep_filled', 'assets/icons/keep-filled.svg'],
     ];
 
+    // todo test if can be removed with airplane mode and wifi without internet
     icons.forEach(([name, path]) => {
       this._matIconRegistry.addSvgIcon(
         name,
         this._domSanitizer.bypassSecurityTrustResourceUrl(path),
       );
     });
+
+    this.preloadIcons(icons);
+  }
+
+  preloadIcons(icons: [string, string][]): Promise<void[]> {
+    // Map each icon name to a promise that fetches and registers the icon.
+    const iconPromises = icons.map(([iconName, url]) => {
+      // Construct the URL for the SVG file.
+      // Adjust the path if your SVGs are located elsewhere.
+      return this._http
+        .get(url, { responseType: 'text' })
+        .toPromise()
+        .then((svg) => {
+          // Register the fetched SVG as an inline icon.
+          this._matIconRegistry.addSvgIconLiteral(
+            iconName,
+            this._domSanitizer.bypassSecurityTrustHtml(svg),
+          );
+        })
+        .catch((error) => {
+          console.error(`Error loading icon: ${iconName} from ${url}`, error);
+        });
+    });
+
+    // Return a promise that resolves when all icons have been processed.
+    return Promise.all(iconPromises);
   }
 
   private _initThemeWatchers(): void {

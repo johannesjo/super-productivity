@@ -1,20 +1,25 @@
 <div
   (click)="!data.actionStr && close()"
-  [class.error]="data.type==='ERROR'"
-  [class.success]="data.type==='SUCCESS'"
+  [class.error]="data.type === 'ERROR'"
+  [class.success]="data.type === 'SUCCESS'"
   class="wrapper"
 >
-  @if (!data.ico) { @if (data.type==='SUCCESS') {
-  <mat-icon class="snack-icon">check_circle </mat-icon>
-  } @if (data.type==='ERROR') {
-  <mat-icon class="snack-icon">error </mat-icon>
-  } } @if (data.ico) {
-  <mat-icon class="snack-icon">{{data.ico}}</mat-icon>
-  } @if (data.svgIco) {
-  <mat-icon
-    [svgIcon]="data.svgIco"
-    class="snack-icon"
-  ></mat-icon>
+  @if (!data.ico) {
+    @if (data.type === 'SUCCESS') {
+      <mat-icon class="snack-icon">check_circle </mat-icon>
+    }
+    @if (data.type === 'ERROR') {
+      <mat-icon class="snack-icon">error </mat-icon>
+    }
+  }
+  @if (data.ico) {
+    <mat-icon class="snack-icon">{{ data.ico }}</mat-icon>
+  }
+  @if (data.svgIco) {
+    <mat-icon
+      [svgIcon]="data.svgIco"
+      class="snack-icon"
+    ></mat-icon>
   }
 
   <span
@@ -24,25 +29,26 @@
 
   <div class="button-wrapper">
     @if (data.actionStr) {
-    <button
-      (click)="actionClick()"
-      class="action"
-      color="accent"
-      mat-button
-    >
-      {{data.actionStr|translate}}
-    </button>
+      <button
+        (click)="actionClick()"
+        class="action"
+        color="accent"
+        mat-button
+      >
+        {{ data.actionStr | translate }}
+      </button>
     }
   </div>
 
   @if (!data.actionStr) {
-  <button
-    class="close-btn"
-    mat-icon-button
-  >
-    <mat-icon>close</mat-icon>
-  </button>
-  } @if (data.promise||data.showWhile$||data.isSpinner) {
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <button
+      class="close-btn"
+      mat-icon-button
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+  @if (data.promise || data.showWhile$ || data.isSpinner) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   }
 </div>

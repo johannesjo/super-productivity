@@ -1,10 +1,10 @@
-<form (submit)="$event.preventDefault();track()">
+<form (submit)="$event.preventDefault(); track()">
   <div
     class="dialog-content"
     mat-dialog-content
   >
-    <p>{{T.F.TIME_TRACKING.D_TRACKING_REMINDER.UNTRACKED_TIME|translate}}</p>
-    <div class="time">{{data.remindCounter$|async|msToString:true}}</div>
+    <p>{{ T.F.TIME_TRACKING.D_TRACKING_REMINDER.UNTRACKED_TIME | translate }}</p>
+    <div class="time">{{ data.remindCounter$ | async | msToString: true }}</div>
 
     <select-task
       (taskChange)="onTaskChange($event)"
@@ -15,11 +15,12 @@
 
     <div class="track-to-label">
       @if (!isCreate) {
-      <span>{{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TRACK_TO|translate}}</span>
-      } @if (isCreate) {
-      <span
-        [innerHTML]="T.F.TIME_TRACKING.D_TRACKING_REMINDER.CREATE_AND_TRACK|translate"
-      ></span>
+        <span>{{ T.F.TIME_TRACKING.D_TRACKING_REMINDER.TRACK_TO | translate }}</span>
+      }
+      @if (isCreate) {
+        <span
+          [innerHTML]="T.F.TIME_TRACKING.D_TRACKING_REMINDER.CREATE_AND_TRACK | translate"
+        ></span>
       }
     </div>
   </div>
@@ -35,20 +36,22 @@
       type="button"
     >
       <mat-icon>close</mat-icon>
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
 
     <button
-      [disabled]="!(selectedTask||newTaskTitle)"
+      [disabled]="!(selectedTask || newTaskTitle)"
       color="primary"
       mat-stroked-button
       type="submit"
     >
       @if (!isCreate) {
-      <mat-icon>track_changes</mat-icon>
-      } @if (isCreate) {
-      <mat-icon>add</mat-icon>
-      } {{T.F.TIME_TRACKING.D_TRACKING_REMINDER.TASK|translate}}
+        <mat-icon>track_changes</mat-icon>
+      }
+      @if (isCreate) {
+        <mat-icon>add</mat-icon>
+      }
+      {{ T.F.TIME_TRACKING.D_TRACKING_REMINDER.TASK | translate }}
     </button>
   </div>
 </form>

@@ -1,4 +1,4 @@
-@let isTurnOffMarkdownParsing = isTurnOffMarkdownParsing$|async;
+@let isTurnOffMarkdownParsing = isTurnOffMarkdownParsing$ | async;
 
 <div
   #wrapperEl
@@ -6,54 +6,54 @@
   class="markdown-wrapper"
 >
   @if (isShowEdit || isTurnOffMarkdownParsing) {
-  <textarea
-    #textareaEl
-    (blur)="untoggleShowEdit(); setBlur($event)"
-    (focus)="setFocus($event)"
-    (input)="resizeTextareaToFit()"
-    (keydown)="keypressHandler($event)"
-    (keypress)="keypressHandler($event)"
-    [@fadeIn]
-    [ngModel]="modelCopy"
-    class="mat-body-2 markdown-unparsed"
-    rows="1"
-  ></textarea>
+    <textarea
+      #textareaEl
+      (blur)="untoggleShowEdit(); setBlur($event)"
+      (focus)="setFocus($event)"
+      (input)="resizeTextareaToFit()"
+      (keydown)="keypressHandler($event)"
+      (keypress)="keypressHandler($event)"
+      [@fadeIn]
+      [ngModel]="modelCopy"
+      class="mat-body-2 markdown-unparsed"
+      rows="1"
+    ></textarea>
   }
 
   <!--  (focus)="clickOrFocusPreview($event, true)"-->
   @if (!isTurnOffMarkdownParsing) {
-  <div
-    #previewEl
-    (click)="clickPreview($event)"
-    [data]="model"
-    [hidden]="isShowEdit"
-    class="mat-body-2 markdown-parsed markdown"
-    markdown
-    tabindex="0"
-  ></div>
+    <div
+      #previewEl
+      (click)="clickPreview($event)"
+      [data]="model"
+      [hidden]="isShowEdit"
+      class="mat-body-2 markdown-parsed markdown"
+      markdown
+      tabindex="0"
+    ></div>
   }
 </div>
 
 @if (isShowControls()) {
-<div class="controls">
-  <ng-content> </ng-content>
+  <div class="controls">
+    <ng-content> </ng-content>
 
-  @if(isShowChecklistToggle() && !isTurnOffMarkdownParsing){
-  <!--  -->
-  <button
-    [matTooltip]="'Add checklist item'"
-    (click)="toggleChecklistMode($event)"
-    mat-icon-button
-  >
-    <mat-icon>checklist</mat-icon>
-  </button>
-  }
-  <button
-    [matTooltip]="'Open in fullscreen'"
-    (click)="openFullScreen()"
-    mat-icon-button
-  >
-    <mat-icon>fullscreen</mat-icon>
-  </button>
-</div>
+    @if (isShowChecklistToggle() && !isTurnOffMarkdownParsing) {
+      <!--  -->
+      <button
+        [matTooltip]="'Add checklist item'"
+        (click)="toggleChecklistMode($event)"
+        mat-icon-button
+      >
+        <mat-icon>checklist</mat-icon>
+      </button>
+    }
+    <button
+      [matTooltip]="'Open in fullscreen'"
+      (click)="openFullScreen()"
+      mat-icon-button
+    >
+      <mat-icon>fullscreen</mat-icon>
+    </button>
+  </div>
 }

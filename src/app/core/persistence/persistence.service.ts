@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { AllowedDBKeys, DB, DB_LEGACY_PROJECT_PREFIX } from './storage-keys.const';
+import { inject, Injectable } from '@angular/core';
+import { AllowedDBKeys, DB } from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
   ArchiveTask,
@@ -14,13 +14,8 @@ import {
 } from '../../imex/sync/sync.model';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { DatabaseService } from './database.service';
-import {
-  ExportedProject,
-  ProjectArchive,
-  ProjectArchivedRelatedData,
-} from '../../features/project/project-archive.model';
+import { ProjectArchivedRelatedData } from '../../features/project/project-archive.model';
 import { Project, ProjectState } from '../../features/project/project.model';
-import { CompressionService } from '../compression/compression.service';
 import {
   PersistenceBaseEntityModel,
   PersistenceBaseModel,
@@ -65,6 +60,7 @@ import {
 import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -73,7 +69,6 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 })
 export class PersistenceService {
   private _databaseService = inject(DatabaseService);
-  private _compressionService = inject(CompressionService);
   private _persistenceLocalService = inject(PersistenceLocalService);
   private _store = inject<Store<any>>(Store);
 
@@ -90,6 +85,9 @@ export class PersistenceService {
   );
   planner: PersistenceBaseModel<PlannerState> = this._cmBase<PlannerState>(
     BASE_MODEL_CFGS.planner,
+  );
+  boards: PersistenceBaseModel<BoardsState> = this._cmBase<BoardsState>(
+    BASE_MODEL_CFGS.boards,
   );
 
   project: PersistenceBaseEntityModel<ProjectState, Project> = this._cmBaseEntity<
@@ -171,93 +169,6 @@ export class PersistenceService {
     }
   }
 
-  // PROJECT ARCHIVING
-  // -----------------
-  async loadProjectArchive(): Promise<ProjectArchive> {
-    return await this._loadFromDb({
-      dbKey: 'archivedProjects',
-    });
-  }
-
-  async saveProjectArchive(
-    data: ProjectArchive,
-    isDataImport: boolean = false,
-  ): Promise<unknown> {
-    return await this._saveToDb({
-      dbKey: 'archivedProjects',
-      data,
-      isDataImport,
-      isSyncModelChange: true,
-    });
-  }
-
-  async loadArchivedProject(projectId: string): Promise<ProjectArchivedRelatedData> {
-    const archive = await this._loadFromDb({
-      dbKey: 'project',
-      projectId,
-    });
-    const projectDataCompressed = archive[projectId];
-    const decompressed = await this._compressionService.decompress(projectDataCompressed);
-    const parsed = JSON.parse(decompressed);
-    console.log(
-      `Decompressed project, size before: ${projectDataCompressed.length}, size after: ${decompressed.length}`,
-      parsed,
-    );
-    return parsed;
-  }
-
-  async removeArchivedProject(projectId: string): Promise<void> {
-    const archive = await this._loadFromDb({
-      dbKey: 'archivedProjects',
-    });
-    delete archive[projectId];
-    await this.saveProjectArchive(archive);
-  }
-
-  async saveArchivedProject(
-    projectId: string,
-    archivedProject: ProjectArchivedRelatedData,
-  ): Promise<unknown> {
-    const current = (await this.loadProjectArchive()) || {};
-    const jsonStr = JSON.stringify(archivedProject);
-    const compressedData = await this._compressionService.compress(jsonStr);
-    console.log(
-      `Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`,
-      archivedProject,
-    );
-    return this.saveProjectArchive({
-      ...current,
-      [projectId]: compressedData,
-    });
-  }
-
-  async loadCompleteProject(projectId: string): Promise<ExportedProject> {
-    const allProjects = await this.project.loadState();
-    if (!allProjects.entities[projectId]) {
-      throw new Error('Project not found');
-    }
-    return {
-      ...(allProjects.entities[projectId] as Project),
-      relatedModels: await this.loadAllRelatedModelDataForProject(projectId),
-    };
-  }
-
-  async loadAllRelatedModelDataForProject(
-    projectId: string,
-  ): Promise<ProjectArchivedRelatedData> {
-    const forProjectsData = await Promise.all(
-      this._projectModels.map(async (modelCfg) => {
-        return {
-          [modelCfg.appDataKey]: await modelCfg.load(projectId),
-        };
-      }),
-    );
-    const projectData = Object.assign({}, ...forProjectsData);
-    return {
-      ...projectData,
-    };
-  }
-
   async removeCompleteRelatedDataForProject(projectId: string): Promise<void> {
     await Promise.all(
       this._projectModels.map((modelCfg) => {
@@ -275,18 +186,6 @@ export class PersistenceService {
         return modelCfg.save(projectId, data[modelCfg.appDataKey], {});
       }),
     );
-  }
-
-  async archiveProject(projectId: string): Promise<void> {
-    const projectData = await this.loadAllRelatedModelDataForProject(projectId);
-    await this.saveArchivedProject(projectId, projectData);
-    await this.removeCompleteRelatedDataForProject(projectId);
-  }
-
-  async unarchiveProject(projectId: string): Promise<void> {
-    const projectData = await this.loadArchivedProject(projectId);
-    await this.restoreCompleteRelatedDataForProject(projectId, projectData);
-    await this.removeArchivedProject(projectId);
   }
 
   // BACKUP AND SYNC RELATED
@@ -578,20 +477,6 @@ export class PersistenceService {
       }
     });
     return await Promise.all(promises);
-  }
-
-  private _makeLegacyProjectKey(
-    projectId: string,
-    subKey: string,
-    additional?: string,
-  ): string {
-    return (
-      DB_LEGACY_PROJECT_PREFIX +
-      projectId +
-      '_' +
-      subKey +
-      (additional ? '_' + additional : '')
-    );
   }
 
   // DATA STORAGE INTERFACE

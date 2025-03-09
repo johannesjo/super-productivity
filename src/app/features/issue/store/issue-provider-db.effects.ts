@@ -35,7 +35,7 @@ export class IssueProviderDbEffects {
 
           IssueProviderActions.clearIssueProviders,
         ),
-        switchMap(() => this.saveToLs$(false)),
+        switchMap(() => this.saveToLs$(true)),
       ),
     { dispatch: false },
   );

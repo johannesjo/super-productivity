@@ -205,6 +205,7 @@ mat-icon.mat-icon[svgicon] {
 
 .cdk-drop-list-receiving {
   outline: 1px dashed $c-primary;
+  border-color: $c-primary;
   border-radius: 6px;
   cursor: grabbing;
   //border: 2px solid green;

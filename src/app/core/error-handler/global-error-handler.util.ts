@@ -38,6 +38,8 @@ export const logAdvancedStacktrace = (
 ): Promise<unknown> =>
   _getStacktraceThrottled(origErr)
     .then((stack) => {
+      document.getElementById('error-fetching-info-wrapper')?.remove();
+
       if (additionalLogFn) {
         additionalLogFn(stack);
       }
@@ -73,7 +75,7 @@ export const createErrorAlert = (
   if (isWasErrorAlertCreated) {
     return;
   }
-  // it seems for whatever reasons, sometimes we get tags in our error which break the html
+  // it seems for whatever reason, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
   const githubUrl = getGithubErrorUrl(errEscaped, stackTrace);
 
@@ -87,6 +89,11 @@ export const createErrorAlert = (
     <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
     <pre style="line-height: 1.3;">${errEscaped}</pre>
+
+    <div id="error-fetching-info-wrapper">
+      <div>Trying to load more info...</div>
+      <div class="spinner"></div>
+    </div>
 
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
@@ -161,7 +168,7 @@ export const getSimpleMeta = (): string => {
   const n = window.navigator;
   return `META: SP${getAppVersionStr()} __ ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
     n.language
-  } – ${n.platform} – ${n.userAgent}`;
+  } – ${n.platform} – ${n.language} – UA:${n.userAgent}`;
 };
 
 export const isHandledError = (err: unknown): boolean => {

@@ -5,7 +5,6 @@ import { Subject } from 'rxjs';
   selector: 'base',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
 })
 export class BaseComponent implements OnDestroy {
   protected onDestroy$ = new Subject<void>();

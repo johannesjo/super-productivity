@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   ElementRef,
   inject,
-  Input,
+  input,
+  OnDestroy,
   Renderer2,
   viewChild,
 } from '@angular/core';
@@ -14,26 +16,36 @@ import {
   styleUrls: ['./progress-circle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProgressCircleComponent {
+export class ProgressCircleComponent implements OnDestroy {
   private readonly _renderer = inject(Renderer2);
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
-  @Input() set progress(progressIN: number) {
-    const progressCircle = this.progressCircle();
-    if (progressCircle) {
-      let progress = progressIN || 0;
-      if (progress > 100) {
-        progress = 100;
-      }
-
-      this._renderer.setStyle(
-        progressCircle.nativeElement,
-        'stroke-dasharray',
-        `${progress} ,100`,
-      );
-    }
-  }
+  progress = input<number>(0);
 
   readonly progressCircle = viewChild<ElementRef>('progressCircle');
+
+  private _timeOutCancelFn?: () => void;
+
+  constructor() {
+    effect(() => {
+      const progressCircle = this.progressCircle();
+      if (progressCircle) {
+        let progress = this.progress() || 0;
+        if (progress > 100) {
+          progress = 100;
+        }
+
+        this._renderer.setStyle(
+          progressCircle.nativeElement,
+          'stroke-dasharray',
+          `${progress} ,100`,
+        );
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this._timeOutCancelFn) {
+      this._timeOutCancelFn();
+    }
+  }
 }

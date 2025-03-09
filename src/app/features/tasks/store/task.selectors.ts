@@ -162,13 +162,15 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
 // );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
-export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) =>
-  tasks.filter((task) => task.reminderId),
-);
 
 export const selectAllTasksWithSubTasks = createSelector(
   selectAllTasks,
   mapSubTasksToTasks,
+);
+
+export const selectAllDoneIds = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): string[] => tasks.filter((t) => t.isDone).map((t) => t.id),
 );
 
 // DYNAMIC SELECTORS

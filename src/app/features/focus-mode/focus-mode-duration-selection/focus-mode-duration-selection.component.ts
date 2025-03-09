@@ -6,13 +6,16 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
+import {
+  selectFocusModeMode,
+  selectFocusSessionDuration,
+} from '../store/focus-mode.selectors';
 import {
   setFocusSessionActivePage,
   setFocusSessionDuration,
   startFocusSession,
 } from '../store/focus-mode.actions';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { Observable, Subject } from 'rxjs';
 import { FocusModeConfig } from '../../config/global-config.model';
@@ -24,6 +27,7 @@ import { InputDurationSliderComponent } from '../../../ui/duration/input-duratio
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -48,6 +52,9 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   focusTimeout = 0;
   cfg$: Observable<FocusModeConfig> = this._store.select(selectFocusModeConfig);
   cfg?: FocusModeConfig;
+  selectedMode = toSignal(this._store.select(selectFocusModeMode), {
+    initialValue: undefined,
+  });
   private _onDestroy$ = new Subject<void>();
 
   constructor() {
@@ -57,8 +64,8 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
       const el = document.querySelector('input');
-      (el as HTMLElement).focus();
-      (el as any).select();
+      (el as HTMLElement)?.focus();
+      (el as any)?.select();
     }, 200);
   }
 
@@ -72,8 +79,8 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
     this.updatedFocusModeDuration = duration;
   }
 
-  onSubmit($event: SubmitEvent): void {
-    $event.preventDefault();
+  onSubmit($event?: SubmitEvent): void {
+    $event?.preventDefault();
     if (this.updatedFocusModeDuration) {
       this._store.dispatch(
         setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
@@ -96,4 +103,6 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
       setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
     );
   }
+
+  protected readonly FocusModeMode = FocusModeMode;
 }

@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Gotowe",
+        "EISENHAUER_MATRIX": "Macierz Eisenhowera",
+        "IMPORTANT": "Ważne",
+        "IN_PROGRESS": "W trakcie realizacji",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Niepilne i Ważne",
+        "NOT_URGENT_NOT_IMPORTANT": "Niepilne i Nieważne",
+        "TO_DO": "Do zrobienia",
+        "URGENT": "Pilne",
+        "URGENT_IMPORTANT": "Pilne i Ważne",
+        "URGENT_NOT_IMPORTANT": "Pilne i Nieważne"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Dodaj nowy panel",
+        "COLUMNS": "Kolumny",
+        "TAGS_EXCLUDED": "Wykluczone tagi",
+        "TAGS_REQUIRED": "Wymagane tagi",
+        "TASK_DONE_STATE": "Stan zadania zakończonego",
+        "TASK_DONE_STATE_ALL": "Wszystkie",
+        "TASK_DONE_STATE_DONE": "Gotowe",
+        "TASK_DONE_STATE_UNDONE": "Niezrobione"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Dodaj nową tablicę",
+        "CONFIRM_DELETE": "Czy na pewno chcesz usunąć tę tablicę?",
+        "CREATE_NEW_TAG_BTN": "Utwórz tag",
+        "CREATE_NEW_TAG_MSG": "1 nowy tag musi zostać utworzony, aby ta tablica działała",
+        "CREATE_NEW_TAGS_BTN": "Utwórz tagi",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nowe tagi muszą zostać utworzone, aby ta tablica działała",
+        "EDIT_BOARD": "Edytuj tablicę",
+        "NO_PANELS_BTN": "Skonfiguruj tablicę",
+        "NO_PANELS_MSG": "Ta tablica nie ma skonfigurowanych paneli. Dodaj do niej kilka paneli."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Dodaj Zakładkę",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesja skupienia trwa",
+        "TO_FOCUS_OVERLAY": "Do nakładki skupienia"
+      },
       "BACK_TO_PLANNING": "Powrót do planowania",
       "CANCEL_FOCUS_SESSION": "Anuluj sesję fokusową",
       "CONGRATS": "Gratulacje za ukończenie tej sesji!",
       "CONTINUE_FOCUS_SESSION": "Kontynuacja sesji fokusowej",
+      "COUNTDOWN": "Odmierzanie czasu",
       "FINISH_TASK_AND_SELECT_NEXT": "Zakończ zadanie i wybierz następny",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "dla zadania",
       "GET_READY": "Przygotuj się na sesję skupienia!",
       "GO_TO_PROCRASTINATION": "Uzyskaj pomoc, gdy zwlekasz",
       "GOGOGO": "Dalej, dalej, dalej!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Wykonaj lekkie rozciąganie",
       "SELECT_ANOTHER_TASK": "Wybierz inne zadanie",
       "SELECT_TASK": "Wybierz zadanie, na którym chcesz się skupić",
+      "SESSION_COMPLETED": "Sesja skupienia zakończona!",
       "SET_FOCUS_SESSION_DURATION": "Ustaw czas trwania sesji skupienia",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Wyświetlanie/ukrywanie notatek i załączników do zadań",
       "START_FOCUS_SESSION": "Rozpoczęcie sesji skupienia",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "INVALID_TOKEN_MESSAGE": "Nieprawidłowy token GitHub. Musi zaczynać się od \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importuj tylko sprawy przypisane do mnie do zaległości",
         "REPO": "username/repositoryName",
         "TOKEN": "Access Token"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}<\\/strong> zaczyna się o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> zaczyna się od <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} inne zadania są wymagalne)"
       },
+      "S_ACTIVE_TASK_DUE": "Zadanie, nad którym obecnie pracujesz, jest już gotowe!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Count",
-        "TITLE": "Edit Simple Counter"
+        "CURRENT_STREAK": "Aktualna passa",
+        "DAILY_GOAL": "Cel dzienny",
+        "DAYS": "Dni",
+        "L_COUNTER": "Count"
       },
       "FORM": {
         "ADD_NEW": "Add simple counter",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
         "L_COUNTDOWN_DURATION": "Czas trwania odliczania",
+        "L_DAILY_GOAL": "Codzienny cel dla udanej passy",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
+        "L_TRACK_STREAKS": "Track Streaks",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Dni powszednie, aby sprawdzić smugę",
         "TITLE": "Simple Counters",
         "TYPE_CLICK_COUNTER": "Click Counter",
         "TYPE_REPEATED_COUNTDOWN": "Powtarzane odliczanie",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Osiągnąłeś swój dzisiejszy cel!",
+        "GOAL_REACHED_2": "Aktualny czas trwania passy:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Przejdź do drugiego urządzenia i dokończ synchronizację.",
         "T5": "2. Można też nadpisać dane zdalne danymi lokalnymi. Wszystkie zdalne zmiany\n    zostaną utracone!",
         "T6": "Zaleca się utworzenie kopii zapasowej nadpisywanych danych!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Zapisz i Włącz synchronizację",
+        "TITLE": "Skonfiguruj synchronizację"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Wyłącz synchronizację",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nie można przypisać projektu za pomocą krótkiej składni dla powtarzalnych zadań!",
+        "CREATED_FOR_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Przejdź do projektu",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Przejdź do projektu",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Dodaj",
+    "ADVANCED_CFG": "Zaawansowana konfiguracja",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Przesuń wstecz",
+    "MOVE_FORWARD": "Przesuń do przodu",
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
+    "BOARDS": "Tablice",
     "CREATE_PROJECT": "Stwórz Projekt",
     "CREATE_TAG": "Stwórz Tag",
     "DELETE_PROJECT": "Usuń projekt",

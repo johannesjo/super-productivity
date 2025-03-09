@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Concluído",
+        "EISENHAUER_MATRIX": "Matriz de Eisenhauer",
+        "IMPORTANT": "Importante",
+        "IN_PROGRESS": "Em progresso",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Não Urgente & Importante",
+        "NOT_URGENT_NOT_IMPORTANT": "Não Urgente & Não Importante",
+        "TO_DO": "A Fazer",
+        "URGENT": "Urgente",
+        "URGENT_IMPORTANT": "Urgente & Importante",
+        "URGENT_NOT_IMPORTANT": "Urgente & Não Importante"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Adicionar novo Painel",
+        "COLUMNS": "Colunas",
+        "TAGS_EXCLUDED": "Tags Excluídas",
+        "TAGS_REQUIRED": "Tags Obrigatórias",
+        "TASK_DONE_STATE": "Estado da Tarefa Concluída",
+        "TASK_DONE_STATE_ALL": "Todos",
+        "TASK_DONE_STATE_DONE": "Concluído",
+        "TASK_DONE_STATE_UNDONE": "Não concluído"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Adicionar novo quadro",
+        "CONFIRM_DELETE": "Tem certeza de que deseja excluir este quadro?",
+        "CREATE_NEW_TAG_BTN": "Criar Tag",
+        "CREATE_NEW_TAG_MSG": "1 nova tag precisa ser criada para que este quadro funcione",
+        "CREATE_NEW_TAGS_BTN": "Criar Tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} novas tags precisam ser criadas para que este quadro funcione",
+        "EDIT_BOARD": "Editar quadro",
+        "NO_PANELS_BTN": "Configurar Quadro",
+        "NO_PANELS_MSG": "Este quadro não tem painéis configurados. Adicione alguns painéis a ele."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Adicionar marcador",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "A Sessão de Foco está em execução",
+        "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
+      },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
       "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco",
       "CONGRATS": "Parabéns por completar essa sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
+      "COUNTDOWN": "Contagem regressiva",
       "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarefa e selecionar a próxima",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "para a tarefa",
       "GET_READY": "Prepare-se para sua sessão de foco!",
       "GO_TO_PROCRASTINATION": "Busque ajuda quando procrastinar",
       "GOGOGO": "Vamos, vamos, vamos!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Faça alguns suaves alongamentos ",
       "SELECT_ANOTHER_TASK": "Selecione outra tarefa",
       "SELECT_TASK": "Selecione a tarefa que irá focar",
+      "SESSION_COMPLETED": "Sessão de Foco Concluída!",
       "SET_FOCUS_SESSION_DURATION": "Definir duração de sessão",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas e anexos da tarefa",
       "START_FOCUS_SESSION": "Iniciar Sessão de Foco",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nome de usuário (ex.: para filtrar as alterações sozinho)",
+        "INVALID_TOKEN_MESSAGE": "Não é um token válido do GitHub. Ele deve começar com \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtrar problemas atribuídos a mim",
         "REPO": "username/repositoryName",
         "TOKEN": "Token de acesso"
@@ -772,9 +817,10 @@
       "COUNTDOWN_BANNER": {
         "HIDE": "Esconder",
         "START_NOW": "Iniciar agora",
-        "TXT": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title} }</strong> começa em <strong>{{start} }</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
+        "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
       },
+      "S_ACTIVE_TASK_DUE": "A tarefa em que está a trabalhar atualmente já tem prazo de validade!<br/> ({{title}})",
       "S_REMINDER_ERR": "Erro na interface do lembrete"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Faça!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contagem",
-        "TITLE": "Editar contador simples"
+        "CURRENT_STREAK": "Sequência atual",
+        "DAILY_GOAL": "Objetivo diário",
+        "DAYS": "Dias",
+        "L_COUNTER": "Contagem"
       },
       "FORM": {
         "ADD_NEW": "Adicionar contador simples",
         "HELP": "Aqui você pode configurar botões simples que aparecerão no canto superior direito. Eles podem ser temporizadores ou apenas um contador simples, que é contado, clicando nele.",
-        "L_AUTO_COUNT_UP": "Contagem automática de disparos para",
-        "L_AUTO_SWITCH_OFF": "Desligamento automático do gatilho por",
-        "L_AUTO_SWITCH_ON": "O gatilho automático é ativado por",
         "L_COUNTDOWN_DURATION": "Duração da contagem decrescente",
+        "L_DAILY_GOAL": "Objetivo diário para uma série de sucesso",
         "L_ICON": "Ícone",
         "L_ICON_ON": "Ícone quando alternado",
         "L_IS_ENABLED": "Ativado",
         "L_TITLE": "Título",
+        "L_TRACK_STREAKS": "Rastrear raias",
         "L_TYPE": "Tipo",
+        "L_WEEKDAYS": "Dias da semana para verificar a existência de raias",
         "TITLE": "Contadores simples",
         "TYPE_CLICK_COUNTER": "Contador de cliques",
         "TYPE_REPEATED_COUNTDOWN": "Contagem decrescente repetida",
         "TYPE_STOPWATCH": "Cronômetro"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Atingiu o seu objetivo para hoje!",
+        "GOAL_REACHED_2": "Duração atual da série:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Vá para o outro dispositivo e conclua a sincronização lá.",
         "T5": "2. Ou você pode sobrescrever os dados remotos com os locais. Todas as alterações remotas serão\nesteja perdido!",
         "T6": "É recomendável criar um backup dos dados que você sobrescreveu!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Salvar & Ativar Sincronização",
+        "TITLE": "Configurar Sincronização"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Desabilitar sincronização",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Não é possível atribuir projeto via sintaxe curta para tarefas repetíveis!",
+        "CREATED_FOR_PROJECT": "Movida a tarefa \"{{taskTitle}}\" para o projeto \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ir para o Projeto",
         "DELETED": "Tarefa excluída \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Tarefa <strong>{{title}}</strong> movida do backlog para a lista de tarefas de hoje",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tarefa adicionada <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> para a lista atual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarefa <strong>{{title}}</strong> relacionada ao problema restaurada do arquivo",
         "LAST_TAG_DELETION_WARNING": "Você está tentando remover a última tag de uma tarefa que não é do projeto. Isso não é permitido!",
+        "MOVED_TO_PROJECT": "Movida a tarefa \"{{taskTitle}}\" para o projeto \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ir para o Projeto",
         "REMINDER_ADDED": "Tarefa agendada \"{{title}}\"",
         "REMINDER_DELETED": "Lembrete excluído da tarefa",
         "REMINDER_UPDATED": "Lembrete atualizado para a tarefa \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Adicionar",
+    "ADVANCED_CFG": "Configuração Avançada",
     "CANCEL": "Cancelar",
     "CLOSE": "Fechar",
     "DELETE": "Excluir",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
+    "MOVE_BACKWARD": "Mover para Trás",
+    "MOVE_FORWARD": "Mover para Frente",
     "NEXT": "Próximo",
     "NO_CON": "Você está atualmente offline. Reconecte-se à Internet.",
     "NONE": "Nenhum",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",
+    "BOARDS": "Placas",
     "CREATE_PROJECT": "Criar Projeto",
     "CREATE_TAG": "Criar tag",
     "DELETE_PROJECT": "Eliminar projeto",

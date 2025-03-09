@@ -1,10 +1,14 @@
+import confetti from 'canvas-confetti';
+
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   inject,
   OnDestroy,
   OnInit,
+  Signal,
 } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -59,6 +63,13 @@ import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklo
 import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
 import { unToggleCheckboxesInMarkdownTxt } from '../../util/untoggle-checkboxes-in-markdown-txt';
 import { expandAnimation } from '../../ui/animations/expand.ani';
+import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { getSimpleCounterStreakDuration } from '../../features/simple-counter/get-simple-counter-streak-duration';
+import {
+  SimpleCounterSummaryItem,
+  SimpleCounterSummaryItemComponent,
+} from './simple-counter-summary-item/simple-counter-summary-item.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -90,6 +101,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     WorklogWeekComponent,
     InlineMarkdownComponent,
     MatIconButton,
+    SimpleCounterSummaryItemComponent,
   ],
   animations: [expandAnimation],
 })
@@ -105,6 +117,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _syncProviderService = inject(SyncProviderService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
+  private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
 
   T: typeof T = T;
@@ -134,6 +147,18 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   cfg$ = this.configService.cfg$;
+
+  private _enabledSimpleCounters = toSignal(
+    this._simpleCounterService.enabledSimpleCounters$,
+    { initialValue: [] },
+  );
+
+  simpleCounterSummaryItems: Signal<SimpleCounterSummaryItem[]> = computed(() => {
+    return this._enabledSimpleCounters().map((sc) => ({
+      ...sc,
+      streakDuration: getSimpleCounterStreakDuration(sc),
+    }));
+  });
 
   tasksWorkedOnOrDoneOrRepeatableFlat$: Observable<Task[]> = this.dayStr$.pipe(
     switchMap((dayStr) => this._getDailySummaryTasksFlat$(dayStr)),
@@ -212,6 +237,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   actionsToExecuteBeforeFinishDay: Action[] = [{ type: 'FINISH_DAY' }];
 
   private _successAnimationTimeout?: number;
+  private _startCelebrationTimeout?: number;
+  private _celebrationIntervalId?: number;
 
   constructor() {
     this._taskService.setSelectedId(null);
@@ -250,15 +277,19 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
           this.dayStr = s.params.dayStr;
         }
       });
+
+    this._startCelebrationTimeout = window.setTimeout(() => {
+      this._celebrate();
+    }, 750);
   }
 
   ngOnDestroy(): void {
     this._onDestroy$.next();
     this._onDestroy$.complete();
     // should not happen, but just in case
-    if (this._successAnimationTimeout) {
-      window.clearTimeout(this._successAnimationTimeout);
-    }
+    window.clearTimeout(this._successAnimationTimeout);
+    window.clearTimeout(this._startCelebrationTimeout);
+    window.clearInterval(this._celebrationIntervalId);
   }
 
   onEvaluationSave(): void {
@@ -482,5 +513,36 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     return combineLatest([todayTasks, archiveTasks]).pipe(
       map(([t1, t2]) => t1.concat(t2)),
     );
+  }
+
+  private _celebrate(): void {
+    const duration = 4 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 20, spread: 720, ticks: 600, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number): number =>
+      // eslint-disable-next-line no-mixed-operators
+      Math.random() * (max - min) + min;
+
+    this._celebrationIntervalId = window.setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return window.clearInterval(this._celebrationIntervalId);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      // since particles fall down, start a bit higher than random
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+      });
+    }, 250);
   }
 }

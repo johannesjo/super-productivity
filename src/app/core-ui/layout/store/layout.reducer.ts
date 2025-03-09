@@ -28,6 +28,7 @@ export interface LayoutState {
   isShowIssuePanel: boolean;
   isShowSearchBar: boolean;
   isShowSideNav: boolean;
+  isShowCelebrate: boolean;
 }
 
 const _initialLayoutState: LayoutState = {
@@ -37,6 +38,7 @@ const _initialLayoutState: LayoutState = {
   isShowSearchBar: false,
   isShowNotes: false,
   isShowIssuePanel: false,
+  isShowCelebrate: false,
 };
 
 export const selectLayoutFeatureState =
@@ -65,6 +67,11 @@ export const selectIsShowIssuePanel = createSelector(
 export const selectIsShowSearchBar = createSelector(
   selectLayoutFeatureState,
   (state) => state.isShowSearchBar,
+);
+
+export const selectIsShowCelebrate = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowCelebrate,
 );
 
 const _reducer = createReducer<LayoutState>(

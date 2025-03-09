@@ -1,26 +1,26 @@
-<h1 mat-dialog-title>{{T.F.SYNC.D_CONFLICT.TITLE|translate}}</h1>
+<h1 mat-dialog-title>{{ T.F.SYNC.D_CONFLICT.TITLE | translate }}</h1>
 
 <mat-dialog-content>
-  <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT|translate"></div>
+  <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT | translate"></div>
 
   <table>
     <tr [class.isHighlight]="isHighlightRemote">
-      <td>{{T.F.SYNC.D_CONFLICT.REMOTE|translate}}</td>
-      <td>{{T.F.SYNC.D_CONFLICT.LAST_CHANGE|translate}}</td>
-      <td>{{remoteDate|date:'shortDate'}}</td>
-      <td>{{remoteTime|date:'shortTime'}}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
+      <td>{{ remoteDate | date: 'shortDate' }}</td>
+      <td>{{ remoteTime | date: 'shortTime' }}</td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
-      <td>{{T.F.SYNC.D_CONFLICT.LOCAL|translate}}</td>
-      <td>{{T.F.SYNC.D_CONFLICT.LAST_CHANGE|translate}}</td>
-      <td>{{localDate|date:'shortDate'}}</td>
-      <td>{{localTime|date:'shortTime'}}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
+      <td>{{ localDate | date: 'shortDate' }}</td>
+      <td>{{ localTime | date: 'shortTime' }}</td>
     </tr>
     <tr>
-      <td>{{T.F.SYNC.D_CONFLICT.LOCAL_REMOTE|translate}}</td>
-      <td>{{T.F.SYNC.D_CONFLICT.LAST_SYNC|translate}}</td>
-      <td>{{lastDate|date:'shortDate'}}</td>
-      <td>{{lastTime|date:'shortTime'}}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
+      <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNC | translate }}</td>
+      <td>{{ lastDate | date: 'shortDate' }}</td>
+      <td>{{ lastTime | date: 'shortTime' }}</td>
     </tr>
   </table>
 </mat-dialog-content>
@@ -32,7 +32,7 @@
       color="primary"
       mat-button
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
     <button
       (click)="close('USE_REMOTE')"
@@ -40,7 +40,7 @@
       mat-stroked-button
     >
       <mat-icon>file_download</mat-icon>
-      {{T.F.SYNC.D_CONFLICT.USE_REMOTE|translate}}
+      {{ T.F.SYNC.D_CONFLICT.USE_REMOTE | translate }}
     </button>
     <button
       (click)="close('USE_LOCAL')"
@@ -48,7 +48,7 @@
       mat-stroked-button
     >
       <mat-icon>file_upload</mat-icon>
-      {{T.F.SYNC.D_CONFLICT.USE_LOCAL|translate}}
+      {{ T.F.SYNC.D_CONFLICT.USE_LOCAL | translate }}
     </button>
   </div>
 </mat-dialog-actions>

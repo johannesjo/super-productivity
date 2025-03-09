@@ -16,7 +16,7 @@ import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
 import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { InlineMultilineInputComponent } from '../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../ui/task-title/task-title.component';
 import { MatRipple } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
@@ -34,7 +34,7 @@ import { PlannerTaskComponent } from '../../features/planner/planner-task/planne
   imports: [
     MatCard,
     MatCardContent,
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     MatRipple,
     MatIcon,
     FullPageSpinnerComponent,

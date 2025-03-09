@@ -10,7 +10,7 @@
   }
 }
 
-:host::ng-deep .sub-section-heading {
+:host::ng-deep .sub-section-heading:not(.collapsible-header) {
   margin-top: $s * 3 !important;
   margin-bottom: $s;
 }

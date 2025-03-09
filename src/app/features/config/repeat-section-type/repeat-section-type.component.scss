@@ -1,17 +1,27 @@
 @import '../../../../variables';
 
+:host ::ng-deep {
+  .mat-mdc-form-field {
+    margin-bottom: 4px;
+  }
+}
+
 .row {
   display: flex;
   margin-bottom: $s * 3;
-  border: 4px solid $light-theme-extra-border-color;
-  padding: $s * 2;
+  border: 1px solid $light-theme-extra-border-color;
+  padding: 8px;
   box-shadow: $whiteframe-shadow-2dp;
-  border-radius: 4px;
+  border-radius: 8px;
   position: relative;
 
   @include darkTheme() {
     background: $dark-theme-bg-slightly-lighter;
     border-color: $dark-theme-extra-border-color;
+  }
+
+  @include mq(component) {
+    margin-bottom: 0;
   }
 }
 
@@ -21,6 +31,14 @@
 
 .remove-btn {
   position: absolute;
-  right: $s;
-  top: $s;
+  right: -6px;
+  top: -6px;
+}
+
+.list-wrapper {
+  @include mq(component) {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px;
+  }
 }

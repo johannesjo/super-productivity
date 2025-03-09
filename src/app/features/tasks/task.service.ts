@@ -956,11 +956,27 @@ export class TaskService {
   async getAllIssueIdsForProject(
     projectId: string,
     issueProviderKey: IssueProviderKey,
-  ): Promise<string[] | number[]> {
+  ): Promise<string[]> {
     const allTasks = await this.getAllTasksForProject(projectId);
     return allTasks
       .filter((task) => task.issueType === issueProviderKey)
-      .map((task) => task.issueId) as string[] | number[];
+      .map((task) => task.issueId) as string[];
+  }
+
+  async getAllIssueIdsForProviderEverywhere(issueProviderId: string): Promise<string[]> {
+    const allTasks = await this.getAllTasksEverywhere();
+    return allTasks
+      .filter((task) => task.issueProviderId === issueProviderId)
+      .map((task) => task.issueId) as string[];
+  }
+
+  async getAllTasksEverywhere(): Promise<Task[]> {
+    const allTasks = await this._allTasks$.pipe(first()).toPromise();
+    const archiveTaskState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState();
+    const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
+    const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
+    return [...allTasks, ...archiveTasks] as Task[];
   }
 
   async checkForTaskWithIssueEverywhere(
@@ -1035,7 +1051,10 @@ export class TaskService {
       title: title as string,
       id: nanoid(),
 
-      projectId: workContextType === WorkContextType.PROJECT ? workContextId : null,
+      ...(workContextType === WorkContextType.PROJECT
+        ? { projectId: workContextId }
+        : {}),
+
       tagIds:
         workContextType === WorkContextType.TAG && !additional.parentId
           ? [workContextId]

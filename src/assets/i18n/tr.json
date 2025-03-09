@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "TAMAM",
+        "EISENHAUER_MATRIX": "Eisenhauer Matrisi",
+        "IMPORTANT": "Önemli",
+        "IN_PROGRESS": "Devam ediyor",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Acelesi Yok & Önemli",
+        "NOT_URGENT_NOT_IMPORTANT": "Acelesi Yok & Önemsiz",
+        "TO_DO": "Yapılacaklar",
+        "URGENT": "Acelesi Var",
+        "URGENT_IMPORTANT": "Acelesi Var & Önemli",
+        "URGENT_NOT_IMPORTANT": "Acelesi Var & Önemsiz"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Yeni Panel Ekle",
+        "COLUMNS": "Sütunlar",
+        "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
+        "TAGS_REQUIRED": "Gerekli Etiketler",
+        "TASK_DONE_STATE": "Görev Tamamlandı Durumu",
+        "TASK_DONE_STATE_ALL": "Hepsi",
+        "TASK_DONE_STATE_DONE": "TAMAM",
+        "TASK_DONE_STATE_UNDONE": "Tamamlanmadı"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Yeni tahta ekle",
+        "CONFIRM_DELETE": "Bu tahtayı gerçekten silmek istiyor musunuz?",
+        "CREATE_NEW_TAG_BTN": "Etiket oluştur",
+        "CREATE_NEW_TAG_MSG": "Bu tahtanın çalışması için 1 yeni etiket oluşturulması gerekiyor",
+        "CREATE_NEW_TAGS_BTN": "Etiketler Oluştur",
+        "CREATE_NEW_TAGS_MSG": "Bu tahtanın çalışması için {{nr}} yeni etiket oluşturulması gerekiyor",
+        "EDIT_BOARD": "Tahtayı Düzenle",
+        "NO_PANELS_BTN": "Tahtayı Yapılandır",
+        "NO_PANELS_MSG": "Bu tahtada yapılandırılmış panel yok. Buna bazı paneller ekleyin."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Yer imini ekle",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Odak Oturumu çalışıyor",
+        "TO_FOCUS_OVERLAY": "Odak Kapatma"
+      },
       "BACK_TO_PLANNING": "Planlamaya Geri Dön",
       "CANCEL_FOCUS_SESSION": "Odaklanma Oturumunu İptal Et",
       "CONGRATS": "Bu oturumu tamamladığınız için tebrikler!",
       "CONTINUE_FOCUS_SESSION": "Odaklanma Oturumuna Devam Et",
+      "COUNTDOWN": "Geri sayım",
       "FINISH_TASK_AND_SELECT_NEXT": "Görevi bitirin ve sonrakini seçin",
+      "FLOWTIME": "Akış Zamanı",
+      "FOR_TASK": "görev için",
       "GET_READY": "Odaklanma oturumunuza hazır olun!!!",
       "GO_TO_PROCRASTINATION": "Ertelediğinizde yardım alın",
       "GOGOGO": "Hadi hadi hadi!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Hafifçe esneme hareketleri yapın",
       "SELECT_ANOTHER_TASK": "Başka bir Görev seç",
       "SELECT_TASK": "Odaklanmak için Görevi seçin",
+      "SESSION_COMPLETED": "Odak Oturumu Tamamlandı!",
       "SET_FOCUS_SESSION_DURATION": "Odaklanma Oturumu Süresini Ayarlayın",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Görev notlarını ve eklerini göster/gizle",
       "START_FOCUS_SESSION": "Odaklanma Oturumunu Başlat",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin değişiklikleri kendiniz filtrelemek için)",
+        "INVALID_TOKEN_MESSAGE": "Geçerli bir GitHub belirteci değil. \"ghp_\" ile başlamalıdır.",
         "IS_ASSIGNEE_FILTER": "Yalnızca bana atanan sorunları birikmiş iş listesine aktar",
         "REPO": "kullanıcı adı/depoAdı",
         "TOKEN": "Erişim Simgesi"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
       },
+      "S_ACTIVE_TASK_DUE": "Şu anda üzerinde çalıştığınız görevin süresi doldu!<br/> ({{title}})",
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Yap!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Sayım",
-        "TITLE": "Basit Sayacı Düzenle"
+        "CURRENT_STREAK": "Güncel Seri",
+        "DAILY_GOAL": "Günlük Hedef",
+        "DAYS": "Gün",
+        "L_COUNTER": "Sayım"
       },
       "FORM": {
         "ADD_NEW": "Basit sayaç ekle",
         "HELP": "Burada sağ üstte görünecek basit düğmeleri yapılandırabilirsiniz. Ya zamanlayıcılar ya da sadece sayılan basit bir sayaç olabilirler.",
-        "L_AUTO_COUNT_UP": "İçin otomatik tetikleme sayımı",
-        "L_AUTO_SWITCH_OFF": "İçin otomatik tetik kapatılması",
-        "L_AUTO_SWITCH_ON": "İçin otomatik tetik anahtarı açılması",
         "L_COUNTDOWN_DURATION": "Geri sayım süresi",
+        "L_DAILY_GOAL": "Başarılı bir seri için günlük hedef",
         "L_ICON": "İkon",
         "L_ICON_ON": "Değiştirildiğinde simge",
         "L_IS_ENABLED": "Etkin",
         "L_TITLE": "Başlık",
+        "L_TRACK_STREAKS": "Pist Çizgileri",
         "L_TYPE": "Tip",
+        "L_WEEKDAYS": "Çizgiyi kontrol etmek için hafta içi günler",
         "TITLE": "Basit Sayaçlar",
         "TYPE_CLICK_COUNTER": "Tıklama Sayacı",
         "TYPE_REPEATED_COUNTDOWN": "Tekrarlanan Geri Sayım",
         "TYPE_STOPWATCH": "Kronometre"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Bugünkü hedefinize ulaştınız!",
+        "GOAL_REACHED_2": "Mevcut seri süresi:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Diğer cihazınıza gidin ve senkronizasyonu orada tamamlayın.",
         "T5": "2. Veya uzak verileri yerel verilerinizle üzerine yazabilirsiniz. Tüm uzak değişiklikler\n   kaybolacaktır!",
         "T6": "Üzerine yazdığınız verilerin bir yedeğini oluşturmanız önerilir!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Kaydet & Senkronizasyonu Etkinleştir",
+        "TITLE": "Senkronizasyonu Yapılandır"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Senkronizasyonu devre dışı bırak",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Tekrarlanabilir görevler için kısa sözdizimi yoluyla proje atanamıyor!",
+        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "CREATED_FOR_PROJECT_ACTION": "Projeye Git",
         "DELETED": "\"{{title}}\" görevi silindi",
         "FOUND_MOVE_FROM_BACKLOG": " <strong>{{title}}</strong> görevini bugünkü görev listesine taşıdı",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
         "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}</strong> görevi geri yüklendi",
         "LAST_TAG_DELETION_WARNING": "Proje dışı bir görevin son etiketini kaldırmaya çalışıyorsunuz. Buna izin verilmiyor!",
+        "MOVED_TO_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "MOVED_TO_PROJECT_ACTION": "Projeye Git",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Ekle",
+    "ADVANCED_CFG": "Gelişmiş yapılandırma",
     "CANCEL": "İptal",
     "CLOSE": "Kapat",
     "DELETE": "Sil",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
+    "MOVE_BACKWARD": "Geri Hareket Et",
+    "MOVE_FORWARD": "İleri Hareket Et",
     "NEXT": "Sonraki",
     "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
     "NONE": "Yok",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
+    "BOARDS": "Tahtalar",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_PROJECT": "Projeyi Sil",

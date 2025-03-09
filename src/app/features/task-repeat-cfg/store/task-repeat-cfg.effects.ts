@@ -130,7 +130,7 @@ export class TaskRepeatCfgEffects {
           updateTask({
             task: {
               id: task.id,
-              changes: { repeatCfgId: null },
+              changes: { repeatCfgId: undefined },
             },
           }),
         ),

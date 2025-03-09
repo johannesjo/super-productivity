@@ -17,16 +17,15 @@ export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   title: '',
   isEnabled: false,
   icon: null,
-  iconOn: undefined,
   type: SimpleCounterType.ClickCounter,
-
-  // adv cfg
-  triggerOnActions: [],
-  triggerOffActions: [],
 
   // dynamic
   countOnDay: {},
   isOn: false,
+  isTrackStreaks: true,
+  streakMinValue: 1,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  streakWeekDays: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: false, 0: false },
 };
 
 export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
@@ -35,8 +34,9 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     id: 'STANDING_DESK_ID',
     title: 'Standing Desk Timer',
     type: SimpleCounterType.StopWatch,
-    icon: 'airline_seat_recline_normal',
-    iconOn: 'directions_walk',
+    icon: 'directions_walk',
+    isTrackStreaks: true,
+    streakMinValue: 30 * 60 * 1000,
   },
   {
     ...EMPTY_SIMPLE_COUNTER,
@@ -44,6 +44,8 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     title: 'Coffee Counter',
     type: SimpleCounterType.ClickCounter,
     icon: 'free_breakfast',
+    isTrackStreaks: false,
+    streakMinValue: 2,
   },
   {
     ...EMPTY_SIMPLE_COUNTER,
@@ -52,6 +54,8 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     type: SimpleCounterType.RepeatedCountdownReminder,
     icon: 'fitness_center',
     countdownDuration: 30 * 60 * 1000,
+    isTrackStreaks: true,
+    streakMinValue: 8,
   },
 ];
 

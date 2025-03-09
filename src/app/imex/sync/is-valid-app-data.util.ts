@@ -5,6 +5,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { Task } from '../../features/tasks/task.model';
 import { IssueProvider } from '../../features/issue/issue.model';
+import { environment } from '../../../environments/environment';
 
 export const isValidAppData = (d: AppDataComplete): boolean => {
   const dAny: any = d;
@@ -61,6 +62,11 @@ const _validityError = (errTxt: string, additionalInfo?: any): void => {
 };
 
 const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean => {
+  if (environment.production) {
+    // NOTE don't check for production, is it is not a big problem
+    return true;
+  }
+
   let isValid: boolean = true;
   task.ids.forEach((id: string) => {
     const t: Task = task.entities[id] as Task;

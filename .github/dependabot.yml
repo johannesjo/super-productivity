@@ -9,11 +9,11 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'monthly'
-#  - package-ecosystem: "npm" # See documentation for possible values
-#    directory: "/tools/schematics/" # Location of package manifests
-#    schedule:
-#      interval: "monthly"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule: 
+  #  - package-ecosystem: "npm" # See documentation for possible values
+  #    directory: "/tools/schematics/" # Location of package manifests
+  #    schedule:
+  #      interval: "monthly"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
       interval: monthly

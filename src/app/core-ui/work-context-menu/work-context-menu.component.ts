@@ -20,6 +20,7 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./work-context-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterModule, MatMenuItem, TranslatePipe, MatIcon],
+  standalone: true,
 })
 export class WorkContextMenuComponent {
   private _matDialog = inject(MatDialog);

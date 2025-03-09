@@ -176,7 +176,6 @@
 }
 
 .task-title {
-  @include taskTitle;
   // to account for the task titles inner padding
   margin-top: -8px;
 }

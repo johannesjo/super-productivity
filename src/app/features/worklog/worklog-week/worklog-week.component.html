@@ -1,126 +1,154 @@
 <!--<pre><code>{{(worklogService.currentWeek$|async|json)}}</code></pre>-->
 
-@if ((worklogService.currentWeek$|async); as currentWeek) {
-<div>
-  <div class="days">
-    <div
-      *ngFor="let day of currentWeek?.ent|keyvalue:sortDays trackBy: trackByDay; let i = index;"
-      class="day"
-    >
-      <div class="material-table">
-        <div
-          (click)="visibility[i]=!visibility[i];"
-          class="caption"
-          mat-ripple
-        >
-          <div>
-            @if (visibility[i]) {
-            <span [@fade]>{{T.F.WORKLOG.WEEK.TITLE|translate}}</span>
-            }
-          </div>
-          <div class="center-box">
-            <div class="title">
-              <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-              @if (!visibility[i]) {
-              <div
-                [@expandFade]
-                class="icon-indicator-bar"
-              >
-                <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
-                &nbsp;
-                <mat-icon>list</mat-icon>
-                <strong>{{day.value.logEntries.length}}</strong>
-                @if (day.value.workStart) {
-                <em
-                  ><span class="spacer"></span
-                  >{{day.value.workStart|momentFormat:'HH:mm'}} -
-                  {{day.value.workEnd|momentFormat:'HH:mm'}}</em
-                >
-                }
-                <div class="simple-counter-items">
-                  @for (sc of simpleCounterService.enabledSimpleCounters$|async; track sc)
-                  {
-                  <div class="simple-counter-item">
-                    <mat-icon inline="true">{{sc.iconOn || sc.icon}}</mat-icon>
-                    @if (sc.type==='StopWatch') {
-                    <div class="count">
-                      {{sc.countOnDay[day.value.dateStr] || 0|msToMinuteClockString}}
-                    </div>
-                    } @else {
-                    <div class="count">{{sc.countOnDay[day.value.dateStr] || 0}}</div>
+@if (worklogService.currentWeek$ | async; as currentWeek) {
+  <div>
+    <div class="days">
+      <div
+        *ngFor="
+          let day of currentWeek?.ent | keyvalue: sortDays;
+          trackBy: trackByDay;
+          let i = index
+        "
+        class="day"
+      >
+        <div class="material-table">
+          <div
+            (click)="visibility[i] = !visibility[i]"
+            class="caption"
+            mat-ripple
+          >
+            <div>
+              @if (visibility[i]) {
+                <span [@fade]>{{ T.F.WORKLOG.WEEK.TITLE | translate }}</span>
+              }
+            </div>
+            <div class="center-box">
+              <div class="title">
+                <h3 class="mat-h3">{{ day.value.dayStr }} {{ day.key }}.</h3>
+                @if (!visibility[i]) {
+                  <div
+                    [@expandFade]
+                    class="icon-indicator-bar"
+                  >
+                    <strong>∑ {{ day.value.timeSpent | msToClockString }}</strong>
+                    &nbsp;
+                    <mat-icon>list</mat-icon>
+                    <strong>{{ day.value.logEntries.length }}</strong>
+                    @if (day.value.workStart) {
+                      <em
+                        ><span class="spacer"></span
+                        >{{ day.value.workStart | momentFormat: 'HH:mm' }} -
+                        {{ day.value.workEnd | momentFormat: 'HH:mm' }}</em
+                      >
                     }
+                    <div class="simple-counter-items">
+                      @for (
+                        sc of simpleCounterService.enabledSimpleCounters$ | async;
+                        track sc
+                      ) {
+                        <div class="simple-counter-item">
+                          <mat-icon inline="true">{{ sc.icon }}</mat-icon>
+                          @if (sc.type === 'StopWatch') {
+                            <div class="count">
+                              {{
+                                sc.countOnDay[day.value.dateStr] || 0
+                                  | msToMinuteClockString
+                              }}
+                            </div>
+                          } @else {
+                            <div class="count">
+                              {{ sc.countOnDay[day.value.dateStr] || 0 }}
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
                   </div>
-                  }
-                </div>
+                }
               </div>
+            </div>
+            <div class="with-icon">
+              @if (visibility[i]) {
+                <mat-icon [@fade]>timer </mat-icon>
               }
             </div>
           </div>
-          <div class="with-icon">
-            @if (visibility[i]) {
-            <mat-icon [@fade]>timer </mat-icon>
-            }
-          </div>
-        </div>
-        @if (visibility[i]) {
-        <table
-          [@expandFade]
-          class="task-summary-table"
-        >
-          @for (logEntry of day.value.logEntries; track trackByLogEntry($index, logEntry))
-          {
-          <tr>
-            <td
-              [class.isSubTask]="logEntry.task.parentId"
-              class="title"
-              colspan
+          @if (visibility[i]) {
+            <table
+              [@expandFade]
+              class="task-summary-table"
             >
-              <span class="task-title">{{logEntry.task.title}}</span>
-            </td>
-            <td class="worked">
-              @if (logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0) {
-              <span
-                >∑
-                {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</span
-              >
-              } @if (!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length) {
-              <inline-input
-                (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)"
-                [displayValue]="logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString"
-                [type]="'duration'"
-                [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
-              >
-              </inline-input>
+              @for (
+                logEntry of day.value.logEntries;
+                track trackByLogEntry($index, logEntry)
+              ) {
+                <tr>
+                  <td
+                    [class.isSubTask]="logEntry.task.parentId"
+                    class="title"
+                    colspan
+                  >
+                    <span class="task-title">{{ logEntry.task.title }}</span>
+                  </td>
+                  <td class="worked">
+                    @if (
+                      logEntry.task.subTaskIds && logEntry.task.subTaskIds.length > 0
+                    ) {
+                      <span
+                        >∑
+                        {{
+                          logEntry.task.timeSpentOnDay[day.value.dateStr]
+                            | msToClockString
+                        }}</span
+                      >
+                    }
+                    @if (!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length) {
+                      <inline-input
+                        (changed)="
+                          updateTimeSpentTodayForTask(
+                            logEntry.task,
+                            day.value.dateStr,
+                            $event
+                          )
+                        "
+                        [displayValue]="
+                          logEntry.task.timeSpentOnDay[day.value.dateStr]
+                            | msToClockString
+                        "
+                        [type]="'duration'"
+                        [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
+                      >
+                      </inline-input>
+                    }
+                  </td>
+                </tr>
               }
-            </td>
-          </tr>
+            </table>
           }
-        </table>
-        }
-        <!--        <div class="simple-counter-items">-->
-        <!--          <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"-->
-        <!--               class="simple-counter-item">-->
-        <!--            <mat-icon>{{sc.icon}}</mat-icon>-->
-        <!--            <div class="count"-->
-        <!--                 *ngIf="sc.type==='ClickCounter'">{{sc.countOnDay[day.value.dateStr]}}</div>-->
-        <!--            <div class="count"-->
-        <!--                 *ngIf="sc.type==='StopWatch'">{{sc.countOnDay[day.value.dateStr]|msToMinuteClockString}}</div>-->
-        <!--          </div>-->
-        <!--        </div>-->
+          <!--        <div class="simple-counter-items">-->
+          <!--          <div *ngFor="let sc of simpleCounterService.enabledSimpleCounters$|async"-->
+          <!--               class="simple-counter-item">-->
+          <!--            <mat-icon>{{sc.icon}}</mat-icon>-->
+          <!--            <div class="count"-->
+          <!--                 *ngIf="sc.type==='ClickCounter'">{{sc.countOnDay[day.value.dateStr]}}</div>-->
+          <!--            <div class="count"-->
+          <!--                 *ngIf="sc.type==='StopWatch'">{{sc.countOnDay[day.value.dateStr]|msToMinuteClockString}}</div>-->
+          <!--          </div>-->
+          <!--        </div>-->
+        </div>
       </div>
     </div>
+    <div style="text-align: center; margin-top: 12px">
+      <button
+        (click)="exportData()"
+        color=""
+        mat-button
+      >
+        <mat-icon>call_made</mat-icon>
+        {{ T.F.WORKLOG.WEEK.EXPORT | translate }}
+      </button>
+    </div>
   </div>
-  <div style="text-align: center; margin-top: 12px">
-    <button
-      (click)="exportData()"
-      color=""
-      mat-button
-    >
-      <mat-icon>call_made</mat-icon>
-      {{T.F.WORKLOG.WEEK.EXPORT|translate}}
-    </button>
-  </div>
-</div>
 } @else {
-<div class="no-data">{{T.F.WORKLOG.WEEK.NO_DATA|translate}}</div>
+  <div class="no-data">{{ T.F.WORKLOG.WEEK.NO_DATA | translate }}</div>
 }

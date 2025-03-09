@@ -19,6 +19,7 @@ import { selectCalendarProviders } from '../../issue/store/issue-provider.select
 import { IssueProviderCalendar } from '../../issue/issue.model';
 import { IssueService } from '../../issue/issue.service';
 import { isToday } from '../../../util/is-today.util';
+import { TaskService } from '../../tasks/task.service';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -27,6 +28,7 @@ export class CalendarIntegrationEffects {
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _bannerService = inject(BannerService);
+  private _taskService = inject(TaskService);
   private _datePipe = inject(DatePipe);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _navigateToTaskService = inject(NavigateToTaskService);
@@ -62,10 +64,14 @@ export class CalendarIntegrationEffects {
                 ),
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
-                    tap(() => {
+                    tap(async () => {
                       if (calProvider.isAutoImportForCurrentDay) {
+                        const allIssueIds =
+                          await this._taskService.getAllIssueIdsForProviderEverywhere(
+                            calProvider.id,
+                          );
                         allEventsToday.forEach((calEv) => {
-                          if (isToday(calEv.start)) {
+                          if (isToday(calEv.start) && !allIssueIds.includes(calEv.id)) {
                             this._issueService.addTaskFromIssue({
                               issueProviderKey: 'ICAL',
                               issueProviderId: calProvider.id,

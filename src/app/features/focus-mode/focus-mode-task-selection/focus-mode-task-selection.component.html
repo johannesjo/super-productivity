@@ -1,12 +1,12 @@
 <form
-  (submit)="$event.preventDefault();onSubmit($event)"
+  (submit)="$event.preventDefault(); onSubmit($event)"
   novalidate
 >
-  <h1>{{T.F.FOCUS_MODE.SELECT_TASK|translate}}</h1>
+  <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
   <select-task
     (taskChange)="onTaskChange($event)"
-    [initialTask]="initialTask$|async"
+    [initialTask]="initialTask$ | async"
     [isIncludeDoneTasks]="false"
   >
   </select-task>
@@ -17,6 +17,6 @@
     color="primary"
     mat-raised-button
   >
-    {{T.F.FOCUS_MODE.NEXT|translate}}
+    {{ T.F.FOCUS_MODE.NEXT | translate }}
   </button>
 </form>

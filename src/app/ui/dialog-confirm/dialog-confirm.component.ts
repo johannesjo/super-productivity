@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, ViewChild } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -18,6 +18,8 @@ import { TranslatePipe } from '@ngx-translate/core';
   imports: [MatDialogContent, MatDialogActions, MatButton, MatIcon, TranslatePipe],
 })
 export class DialogConfirmComponent {
+  @ViewChild('cancelButton', { read: MatButton }) cancelButton!: MatButton;
+  @ViewChild('confirmButton', { read: MatButton }) confirmButton!: MatButton;
   private _matDialogRef = inject<MatDialogRef<DialogConfirmComponent>>(MatDialogRef);
   data = inject(MAT_DIALOG_DATA);
 
@@ -25,5 +27,12 @@ export class DialogConfirmComponent {
 
   close(res: any): void {
     this._matDialogRef.close(res);
+  }
+
+  focusNextButton(nextButton: MatButton): void {
+    const buttonElement = nextButton._elementRef.nativeElement;
+    if (buttonElement) {
+      buttonElement.focus();
+    }
   }
 }

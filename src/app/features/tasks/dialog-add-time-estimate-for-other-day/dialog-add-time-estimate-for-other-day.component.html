@@ -1,24 +1,26 @@
 <div class="dialog-help-wrapper">
-  <h1 mat-dialog-title>{{T.F.TASK.D_TIME_FOR_DAY.TITLE|translate}}</h1>
+  <h1 mat-dialog-title>{{ T.F.TASK.D_TIME_FOR_DAY.TITLE | translate }}</h1>
 
   <form
-    (submit)="$event.preventDefault();submit()"
+    (submit)="$event.preventDefault(); submit()"
     name="addForAnotherDayForm"
   >
     <mat-dialog-content>
       <help-section>
         <div
-          [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate"
+          [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP | translate"
           class="side-info"
         ></div>
       </help-section>
 
       <h3 class="mat-caption">
-        {{T.F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR|translate:{ date:
-        (newEntry.date|date:'dd-MM-yyyy') || '' } }}
+        {{
+          T.F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR
+            | translate: { date: (newEntry.date | date: 'dd-MM-yyyy') || '' }
+        }}
       </h3>
       <mat-form-field>
-        <mat-label>{{T.F.TASK.D_TIME_FOR_DAY.DATE|translate}}</mat-label>
+        <mat-label>{{ T.F.TASK.D_TIME_FOR_DAY.DATE | translate }}</mat-label>
         <input
           [(ngModel)]="newEntry.date"
           [matDatepicker]="myDatepicker"
@@ -27,7 +29,7 @@
           required
           type="text"
         />
-        <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
+        <mat-error>{{ T.V.E_DATETIME | translate }}</mat-error>
         <mat-datepicker-toggle
           [for]="myDatepicker"
           matPrefix
@@ -38,7 +40,7 @@
       <div class="wrap-time">
         <input-duration-slider
           [(model)]="newEntry.timeSpent"
-          [label]="T.F.TASK.D_TIME_FOR_DAY.TINE_SPENT|translate"
+          [label]="T.F.TASK.D_TIME_FOR_DAY.TINE_SPENT | translate"
         >
         </input-duration-slider>
       </div>
@@ -51,7 +53,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
 
       <button
@@ -60,7 +62,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{T.G.SAVE|translate}}
+        {{ T.G.SAVE | translate }}
       </button>
     </mat-dialog-actions>
   </form>

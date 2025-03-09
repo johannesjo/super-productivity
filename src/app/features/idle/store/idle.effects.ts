@@ -45,6 +45,12 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { DateService } from 'src/app/core/date/date.service';
 import { ipcIdleTime$ } from '../../../core/ipc-events';
+import { selectIsFocusSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
+import {
+  focusSessionDone,
+  showFocusOverlay,
+  unPauseFocusSession,
+} from '../../focus-mode/store/focus-mode.actions';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -68,6 +74,7 @@ export class IdleEffects {
   // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
   // TODO check if this works as expected
   private _electronIdleTime$: Observable<number> = IS_ELECTRON ? ipcIdleTime$ : EMPTY;
+  private _isFocusSessionRunning$ = this._store.select(selectIsFocusSessionRunning);
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? this._electronIdleTime$
@@ -118,8 +125,9 @@ export class IdleEffects {
       withLatestFrom(
         this._store.select(selectIdleTime),
         this._simpleCounterService.enabledSimpleStopWatchCounters$,
+        this._isFocusSessionRunning$,
       ),
-      map(([, idleTime, enabledSimpleStopWatchCounters]) => {
+      map(([, idleTime, enabledSimpleStopWatchCounters, isFocusSessionRunning]) => {
         // ALL IDLE SIDE EFFECTS
         // ---------------------
         if (IS_ELECTRON) {
@@ -152,7 +160,11 @@ export class IdleEffects {
 
         // this._openDialog(enabledSimpleStopWatchCounters, lastCurrentTaskId);
         // finally open dialog
-        return openIdleDialog({ enabledSimpleStopWatchCounters, lastCurrentTaskId });
+        return openIdleDialog({
+          enabledSimpleStopWatchCounters,
+          lastCurrentTaskId,
+          wasFocusSessionRunning: isFocusSessionRunning,
+        });
       }),
     ),
   );
@@ -163,22 +175,24 @@ export class IdleEffects {
       filter(() => !this._isDialogOpen),
       tap(() => (this._isDialogOpen = true)),
       // use exhaustMap to prevent opening up multiple dialogs
-      exhaustMap(({ enabledSimpleStopWatchCounters, lastCurrentTaskId }) =>
-        this._matDialog
-          .open<
-            DialogIdleComponent,
-            DialogIdlePassedData,
-            DialogIdleReturnData | undefined
-          >(DialogIdleComponent, {
-            restoreFocus: true,
-            disableClose: true,
-            closeOnNavigation: false,
-            data: {
-              lastCurrentTaskId,
-              enabledSimpleStopWatchCounters,
-            },
-          })
-          .afterClosed(),
+      exhaustMap(
+        ({ enabledSimpleStopWatchCounters, lastCurrentTaskId, wasFocusSessionRunning }) =>
+          this._matDialog
+            .open<
+              DialogIdleComponent,
+              DialogIdlePassedData,
+              DialogIdleReturnData | undefined
+            >(DialogIdleComponent, {
+              restoreFocus: true,
+              disableClose: true,
+              closeOnNavigation: false,
+              data: {
+                lastCurrentTaskId,
+                enabledSimpleStopWatchCounters,
+                wasFocusSessionRunning,
+              },
+            })
+            .afterClosed(),
       ),
       tap((dialogRes) => {
         if (!dialogRes) {
@@ -191,6 +205,7 @@ export class IdleEffects {
         idleDialogResult({
           ...dialogRes,
           idleTime,
+          // TODO
         }),
       ),
       tap(() => (this._isDialogOpen = false)),
@@ -205,6 +220,7 @@ export class IdleEffects {
           trackItems,
           simpleCounterToggleBtnsWhenNoTrackItems,
           idleTime,
+          wasFocusSessionRunning,
           isResetBreakTimer,
         }) => {
           this._cancelIdlePoll();
@@ -215,6 +231,15 @@ export class IdleEffects {
           }
 
           if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
+            if (wasFocusSessionRunning) {
+              this._store.dispatch(
+                focusSessionDone({
+                  isResetPlannedSessionDuration: true,
+                }),
+              );
+              this._store.dispatch(showFocusOverlay());
+            }
+
             const activatedItemNr = simpleCounterToggleBtnsWhenNoTrackItems.filter(
               (btn) => btn.isTrackTo,
             ).length;
@@ -247,7 +272,6 @@ export class IdleEffects {
             return;
           }
 
-          // TODO remove TASK_AND_BREAK case completely
           const itemsWithMappedIdleTime = trackItems.map((trackItem) => ({
             ...trackItem,
             time: trackItem.time === 'IDLE_TIME' ? idleTime : trackItem.time,
@@ -268,6 +292,17 @@ export class IdleEffects {
                 item.time,
               );
             });
+            if (wasFocusSessionRunning) {
+              this._store.dispatch(
+                focusSessionDone({
+                  isResetPlannedSessionDuration: true,
+                }),
+              );
+              this._store.dispatch(showFocusOverlay());
+            }
+          } else if (wasFocusSessionRunning) {
+            this._store.dispatch(unPauseFocusSession({ idleTimeToAdd: idleTime }));
+            this._store.dispatch(showFocusOverlay());
           }
 
           const taskItems = itemsWithMappedIdleTime.filter(
@@ -301,7 +336,7 @@ export class IdleEffects {
   // constructor() {
   //   window.setTimeout(() => {
   //     this._store.dispatch(triggerIdle({ idleTime: 60 * 1000 }));
-  //   }, 2700);
+  //   }, 8700);
   // }
 
   private _initIdlePoll(initialIdleTime: number): void {

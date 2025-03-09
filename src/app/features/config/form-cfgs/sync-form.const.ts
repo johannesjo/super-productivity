@@ -18,51 +18,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         label: T.F.SYNC.FORM.L_ENABLE_SYNCING,
       },
     },
-    {
-      key: 'isCompressionEnabled',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
-      },
-    },
-    {
-      key: 'isEncryptionEnabled',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.F.SYNC.FORM.L_ENABLE_ENCRYPTION,
-      },
-    },
-    {
-      hideExpression: (model: any) => !model.isEncryptionEnabled,
-      type: 'tpl',
-      className: `tpl`,
-      templateOptions: {
-        tag: 'div',
-        text: T.F.SYNC.FORM.L_ENCRYPTION_NOTES,
-      },
-    },
-    {
-      hideExpression: (model: any) => !model.isEncryptionEnabled,
-      key: 'encryptionPassword',
-      type: 'input',
-      templateOptions: {
-        required: true,
-        type: 'password',
-        label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
-      },
-    },
-    {
-      key: 'syncInterval',
-      type: 'duration',
-      // NOTE: we don't hide because model updates don't seem to work properly for this
-      // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
-      templateOptions: {
-        required: true,
-        isAllowSeconds: true,
-        label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
-        description: T.G.DURATION_DESCRIPTION,
-      },
-    },
+
     {
       key: 'syncProvider',
       type: 'select',
@@ -223,6 +179,60 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+          },
+        },
+      ],
+    },
+
+    {
+      key: 'syncInterval',
+      type: 'duration',
+      // NOTE: we don't hide because model updates don't seem to work properly for this
+      // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
+      templateOptions: {
+        required: true,
+        isAllowSeconds: true,
+        label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
+        description: T.G.DURATION_DESCRIPTION,
+      },
+    },
+
+    // COMMON SETTINGS
+    {
+      type: 'collapsible',
+      props: { label: T.G.ADVANCED_CFG },
+      fieldGroup: [
+        {
+          key: 'isCompressionEnabled',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
+          },
+        },
+        {
+          key: 'isEncryptionEnabled',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.SYNC.FORM.L_ENABLE_ENCRYPTION,
+          },
+        },
+        {
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          type: 'tpl',
+          className: `tpl`,
+          templateOptions: {
+            tag: 'div',
+            text: T.F.SYNC.FORM.L_ENCRYPTION_NOTES,
+          },
+        },
+        {
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          key: 'encryptionPassword',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            type: 'password',
+            label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
           },
         },
       ],

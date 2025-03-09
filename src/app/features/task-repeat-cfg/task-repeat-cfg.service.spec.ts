@@ -82,7 +82,7 @@ describe('TaskRepeatCfgService', () => {
             id: 'taskID',
             created: 24 * 60 * 60 * 1000,
             repeatCfgId: TRID,
-            projectId: null,
+            projectId: undefined,
             tagIds: [],
           } as Partial<TaskCopy> as any,
         ]),

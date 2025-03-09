@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { T } from 'src/app/t.const';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { DateService } from '../../../../../core/date/date.service';
 import { IssueTaskTimeTracked, Task, TimeSpentOnDay } from '../../../../tasks/task.model';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -10,9 +16,29 @@ import { throttle } from 'helpful-decorators';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderService } from '../../../issue-provider.service';
-import { msToString } from '../../../../../ui/duration/ms-to-string.pipe';
+import { msToString, MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
 import { updateTask } from '../../../../tasks/store/task.actions';
 import { assertTruthy } from '../../../../../util/assert-truthy';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
+import { MsToClockStringPipe } from '../../../../../ui/duration/ms-to-clock-string.pipe';
+import { MatTooltip } from '@angular/material/tooltip';
+import { InlineInputComponent } from '../../../../../ui/inline-input/inline-input.component';
+import { MatButton } from '@angular/material/button';
 
 interface TmpTask {
   id: string;
@@ -30,7 +56,30 @@ interface TmpTask {
   templateUrl: './dialog-gitlab-submit-worklog-for-day.component.html',
   styleUrls: ['./dialog-gitlab-submit-worklog-for-day.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  imports: [
+    MatDialogContent,
+    MatDialogTitle,
+    MatIcon,
+    MatProgressSpinner,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderCellDef,
+    MatCellDef,
+    TranslatePipe,
+    AsyncPipe,
+    MsToClockStringPipe,
+    MatTooltip,
+    InlineInputComponent,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatHeaderRow,
+    MatRow,
+    MatDialogActions,
+    MatButton,
+    MsToStringPipe,
+  ],
 })
 export class DialogGitlabSubmitWorklogForDayComponent {
   readonly data = inject<{
@@ -53,7 +102,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       id: t.id,
       issueId: assertTruthy(t.issueId),
       title: t.title,
-      issueTimeTracked: t.issueTimeTracked,
+      issueTimeTracked: t.issueTimeTracked || null,
       timeSpentOnDay: t.timeSpentOnDay,
       timeTrackedAlreadyRemote: 0,
       isPastTrackedData: !!Object.keys(t.timeSpentOnDay).find(

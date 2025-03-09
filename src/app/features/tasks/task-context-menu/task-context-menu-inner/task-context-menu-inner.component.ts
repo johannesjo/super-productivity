@@ -60,13 +60,13 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
-import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { isToday } from '../../../../util/is-today.util';
 import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { PlannerService } from '../../../planner/planner.service';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
+import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -100,7 +100,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   readonly workContextService = inject(WorkContextService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
-  private readonly _focusModeService = inject(FocusModeService);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
   private readonly _plannerService = inject(PlannerService);
 
@@ -136,7 +135,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
+    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
   );
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
@@ -231,7 +230,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   goToFocusMode(): void {
     this._taskService.setSelectedId(this.task.id);
-    this._focusModeService.showFocusOverlay();
+    this._store.dispatch(showFocusOverlay());
   }
 
   scheduleTask(): void {

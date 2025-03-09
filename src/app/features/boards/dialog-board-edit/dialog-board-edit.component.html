@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>{{ T.F.BOARDS.V.EDIT_BOARD | translate }}</h2>
+<mat-dialog-content>
+  @if (data.board) {
+    <board-edit
+      #boarEditCmp
+      [isHideBtns]="true"
+      [boardCfg]="data.board"
+    ></board-edit>
+  }
+  <!--  <pre>{{ data.board | json }}</pre>-->
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    (click)="close()"
+    color="primary"
+    mat-button
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+
+  <button
+    (click)="removeBoard()"
+    mat-button
+    color="warn"
+  >
+    <mat-icon>delete_forever</mat-icon>
+    {{ T.G.DELETE | translate }}
+  </button>
+
+  <button
+    [disabled]="!boarEditCmp()?.form.valid"
+    (click)="save()"
+    class="btn btn-primary submit-button"
+    color="primary"
+    mat-raised-button
+    type="submit"
+  >
+    <mat-icon>save</mat-icon>
+    {{ T.G.SAVE | translate }}
+  </button>
+</mat-dialog-actions>
