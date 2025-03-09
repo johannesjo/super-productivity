@@ -285,14 +285,26 @@
       }
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Tillbaka till arbetet!"
+      "BACK_TO_WORK": "Tillbaka till arbetet!",
+      "SKIP_BREAK": "Hoppa över rasten",
+      "START_BREAK": "Börja rasten"
     },
     "PROCRASTINATION": {
+      "BACK_TO_WORK": "Tillbaka till arbetet!",
+      "COMP": {
+        "INTRO": "Människor som ofta prokrastinerar",
+        "L2": "Försök att lyssna på tankarna och känslorna som uppstår",
+        "TITLE": "Självmedkänsla"
+      },
       "CUR": {
+        "L3": "Vad påminner de dig om?",
         "TITLE": "Nyfikenhet"
       },
+      "H1": "Var inte så sträng mot dig själv!",
       "INTRO": {
+        "AVOIDING": "Att undvika uppgiften",
         "FEAR": "Rädsla att misslyckas",
+        "STRESSED": "Stressad över att inte få saker gjorda",
         "TITLE": "Introduktion"
       },
       "SPLIT_UP": {
