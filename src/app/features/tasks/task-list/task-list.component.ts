@@ -277,6 +277,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     }
 
     this._taskService.showSubTasks(pid);
-    this._taskService.focusTask(pid);
+    // note this might be executed from the task detail panel, where this is not possible
+    this._taskService.focusTaskIfPossible(pid);
   }
 }

@@ -347,3 +347,12 @@
     }
   </ng-template>
 </mat-menu>
+
+@if (isTagMenuVisible()) {
+  <tag-toggle-menu-list
+    #tagToggleMenuList
+    [task]="t"
+    (toggleTag)="toggleTag($event)"
+    (afterClose)="isTagMenuVisible.set(false); focusSelf()"
+  ></tag-toggle-menu-list>
+}

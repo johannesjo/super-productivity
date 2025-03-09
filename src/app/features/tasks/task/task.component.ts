@@ -10,6 +10,7 @@ import {
   input,
   OnDestroy,
   Renderer2,
+  signal,
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
@@ -48,7 +49,6 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { DialogEditTagsForTaskComponent } from '../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { throttle } from 'helpful-decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
@@ -83,6 +83,8 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
+import { TagService } from '../../tag/tag.service';
+import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 
 @Component({
   selector: 'task',
@@ -122,6 +124,7 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
     SubTaskTotalTimeSpentPipe,
     TagListComponent,
     ShortPlannedAtPipe,
+    TagToggleMenuListComponent,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
@@ -133,6 +136,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _elementRef = inject(ElementRef);
   private readonly _renderer = inject(Renderer2);
   private readonly _projectService = inject(ProjectService);
+  private readonly _tagService = inject(TagService);
   readonly plannerService = inject(PlannerService);
   readonly workContextService = inject(WorkContextService);
 
@@ -174,6 +178,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   readonly innerWrapperElRef = viewChild<ElementRef>('innerWrapperEl');
   readonly projectMenuTrigger = viewChild('projectMenuTriggerEl', {
     read: MatMenuTrigger,
+  });
+  readonly tagToggleMenuList = viewChild('tagToggleMenuList', {
+    read: TagToggleMenuListComponent,
   });
   readonly taskContextMenu = viewChild('taskContextMenu', {
     read: TaskContextMenuComponent,
@@ -223,6 +230,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
+    ev.preventDefault();
     this.focusSelf();
     this._attachmentService.createFromDrop(ev, this.task().id);
     ev.stopPropagation();
@@ -410,15 +418,31 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  isTagMenuVisible = signal(false);
+
   async editTags(): Promise<void> {
-    this._matDialog
-      .open(DialogEditTagsForTaskComponent, {
-        data: {
-          task: this.task(),
-        },
-      })
-      .afterClosed()
-      .subscribe(() => this.focusSelf());
+    this.isTagMenuVisible.set(true);
+    setTimeout(() => {
+      this.tagToggleMenuList()?.openMenu();
+    });
+
+    // this._matDialog
+    //   .open(DialogEditTagsForTaskComponent, {
+    //     data: {
+    //       task: this.task(),
+    //     },
+    //   })
+    //   .afterClosed()
+    //   .subscribe(() => this.focusSelf());
+  }
+
+  toggleTag(tagId: string): void {
+    const task = this.task();
+    const tagIds = task.tagIds.includes(tagId)
+      ? task.tagIds.filter((id) => id !== tagId)
+      : [...task.tagIds, tagId];
+
+    this.onTagsUpdated(tagIds);
   }
 
   addToMyDay(): void {
@@ -427,10 +451,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   removeFromMyDay(): void {
     this.onTagsUpdated(this.task().tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
-  }
-
-  convertToMainTask(): void {
-    this._taskService.convertToMainTask(this.task());
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
