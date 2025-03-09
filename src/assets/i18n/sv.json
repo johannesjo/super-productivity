@@ -42,7 +42,11 @@
           "IMG": "Bild",
           "LINK": "URL"
         },
-        "SELECT_TYPE": "Välj en typ"
+        "SELECT_TYPE": "Välj en typ",
+        "TYPES": {
+          "IMG": "Bild (visas som miniatyr)",
+          "LINK": "Länk (öppnas i webbläsare)"
+        }
       }
     },
     "BOARDS": {
@@ -61,7 +65,9 @@
     "BOOKMARK": {
       "BAR": {
         "ADD": "Lägg till bokmärke",
-        "EDIT": "Redigera bokmärken"
+        "DROP": "Släpp här för att lägga till ett bokmärke",
+        "EDIT": "Redigera bokmärken",
+        "NO_BOOKMARKS": "Du har inga projektbokmärken. Lägg till ett med dra-och-släpp eller genom att klicka på plusknappen."
       },
       "DIALOG_EDIT": {
         "ADD_BOOKMARK": "Lägg till bokmärke",
@@ -109,7 +115,8 @@
       "BANNER": {
         "ADD_AS_TASK": "Lägg till som uppgift",
         "FOCUS_TASK": "Fokusuppgift",
-        "TXT": "<strong>{{title}}</strong> börjar vid <strong>{{start}}</strong>!"
+        "TXT": "<strong>{{title}}</strong> börjar vid <strong>{{start}}</strong>!",
+        "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!"
       }
     },
     "DOMINA_MODE": {
