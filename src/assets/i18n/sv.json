@@ -87,6 +87,8 @@
       },
       "FORM": {
         "CALDAV_PASSWORD": "Ditt CalDav-lösenord",
+        "CALDAV_RESOURCE": "Namnet på CalDav-resursen (kalendern)",
+        "CALDAV_URL": "CalDav-URL (grund-URL:en)",
         "CALDAV_USER": "Ditt CalDav-användarnamn"
       },
       "FORM_SECTION": {
@@ -97,12 +99,17 @@
         "LABELS": "Kategorier",
         "STATUS": "Status",
         "SUMMARY": "Sammanfattning"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: Kunde inte hitta kalendern \"{{calendarName}}\"",
+        "CALENDAR_READ_ONLY": "CalDav: Kalendern \"{{calendarName}}\" är skrivskyddad"
       }
     },
     "CALENDARS": {
       "BANNER": {
         "ADD_AS_TASK": "Lägg till som uppgift",
-        "FOCUS_TASK": "Fokusuppgift"
+        "FOCUS_TASK": "Fokusuppgift",
+        "TXT": "<strong>{{title}}</strong> börjar vid <strong>{{start}}</strong>!"
       }
     },
     "DOMINA_MODE": {
