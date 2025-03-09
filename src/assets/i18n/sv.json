@@ -5,11 +5,13 @@
       "SYNC_CONFLICT_TITLE": "En synkroniseringskonflikt uppstod"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
-      "NO_ACTIVE_TASKS": "Inga aktiva uppgifter"
+      "NO_ACTIVE_TASKS": "Inga aktiva uppgifter",
+      "SYNCING": "Synkronisering"
     }
   },
   "APP": {
     "B_INSTALL": {
+      "IGNORE": "Ignorera",
       "INSTALL": "Installera",
       "MSG": "Vill du installera Super Productivity som en PWA?"
     },
@@ -17,6 +19,9 @@
   },
   "BL": {
     "NO_TASKS": "Det finns för närvarande inga eftersläpande uppgifter"
+  },
+  "CONFIRM": {
+    "DELETE_STRAY_BACKUP": "Vill du radera säkerhetskopian för att slippa se denna dialog?"
   },
   "DATETIME_INPUT": {
     "IN": "om {{time}}",
@@ -71,11 +76,19 @@
         "SELECT_TYPE": "Välj en typ",
         "TYPES": {
           "FILE": "Fil (öppnad av systemets standardapp)",
-          "IMG": "Bild (visad som miniatyr)"
+          "IMG": "Bild (visad som miniatyr)",
+          "LINK": "Länk (öppnas i webbläsare)"
         }
       }
     },
     "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera CalDav för projektet"
+      },
+      "FORM": {
+        "CALDAV_PASSWORD": "Ditt CalDav-lösenord",
+        "CALDAV_USER": "Ditt CalDav-användarnamn"
+      },
       "FORM_SECTION": {
         "TITLE": "CalDav"
       },
@@ -98,6 +111,7 @@
       }
     },
     "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Tillbaka till Planering",
       "COUNTDOWN": "Nedräkning",
       "FINISH_TASK_AND_SELECT_NEXT": "Slutför uppgiften och välj nästa",
       "FOR_TASK": "för uppgift",
@@ -108,7 +122,70 @@
       "POMODORO_DISABLE": "Inaktivera Pomodoro",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt"
     },
+    "GITEA": {
+      "FORM": {
+        "SCOPE_ALL": "Alla",
+        "SCOPE_ASSIGNED": "Ålagda mig",
+        "SCOPE_CREATED": "Skapade av mig"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "PROJECT": "Projekt",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera GitHub för projektet"
+      },
+      "FORM_SECTION": {
+        "TITLE": "GitHub"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
+    "GITLAB": {
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "Titel"
+      },
+      "FORM": {
+        "SCOPE_ALL": "Alla",
+        "SOURCE": "Källa",
+        "SOURCE_GLOBAL": "Alla",
+        "SOURCE_GROUP": "Grupp",
+        "SOURCE_PROJECT": "Projekt"
+      },
+      "FORM_SECTION": {
+        "TITLE": "GitLab"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "PROJECT": "Projekt",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
     "JIRA": {
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "OK": "Gör det!"
+      },
+      "DIALOG_TRANSITION": {
+        "TASK_NAME": "Uppgiftens namn:",
+        "UPDATE_STATUS": "Uppdatera status"
+      },
       "DIALOG_WORKLOG": {
         "STARTED": "Startad",
         "TIME_SPENT": "Använd tid"
@@ -133,15 +210,78 @@
         "COMMENTS": "Kommentarer",
         "COMPONENTS": "Komponenter",
         "DESCRIPTION": "Beskrivning",
-        "LIST_OF_CHANGES": "Lista över ändringar"
+        "LIST_OF_CHANGES": "Lista över ändringar",
+        "RELATED": "Relaterad",
+        "STATUS": "Status",
+        "SUB_TASKS": "Deluppgifter",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
       },
       "STEPPER": {
-        "CREDENTIALS": "Inloggningsuppgifter"
+        "CREDENTIALS": "Inloggningsuppgifter",
+        "WELCOME_USER": "Välkommen {{user}}!"
       }
     },
     "METRIC": {
       "BANNER": {
         "CHECK": "Jag gjorde det!"
+      },
+      "CMP": {
+        "COUNTING_SUBTASKS": "(räknar deluppgifter)"
+      },
+      "EVAL_FORM": {
+        "PRODUCTIVITY": "Hur effektivt arbetade du?",
+        "PRODUCTIVITY_HINT": "1: Har inte ens börjat – 10: Enormt effektivt"
+      }
+    },
+    "OPEN_PROJECT": {
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Aktivitet",
+        "STARTED": "Startad",
+        "TIME_SPENT": "Använd tid"
+      },
+      "DIALOG_TRANSITION": {
+        "TASK_NAME": "Uppgiftsnamn:",
+        "UPDATE_STATUS": "Uppdatera status"
+      },
+      "FORM": {
+        "FILTER_USER": "Filtrera användarnamn",
+        "PROJECT_ID": "Projekt-ID",
+        "SCOPE_ALL": "Alla"
+      },
+      "ISSUE_CONTENT": {
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "TYPE": "Typ"
+      }
+    },
+    "PLANNER": {
+      "D": {
+        "PLAN_FOR_DAY": {
+          "REMOVE_PLAN_DATE": "Ta bort planeringsdatum"
+        }
+      },
+      "NO_TASKS": "Inga uppgifter"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "Tillbaka till arbetet!"
+    },
+    "PROCRASTINATION": {
+      "CUR": {
+        "TITLE": "Nyfikenhet"
+      },
+      "INTRO": {
+        "FEAR": "Rädsla att misslyckas",
+        "TITLE": "Introduktion"
+      },
+      "SPLIT_UP": {
+        "TITLE": "Dela upp den!"
+      }
+    },
+    "PROJECT": {
+      "D_CREATE": {
+        "CREATE": "Skapa projekt",
+        "EDIT": "Redigera projekt"
       }
     }
   }
