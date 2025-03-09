@@ -38,6 +38,7 @@ export type TimeTrackingConfig = Readonly<{
   isAutoStartNextTask: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTrackingReminderEnabled: boolean;
+  isFullScreenTrackingReminder: boolean;
   isTrackingReminderShowOnMobile: boolean;
   trackingReminderMinTime: number;
 }>;

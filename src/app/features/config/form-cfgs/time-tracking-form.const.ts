@@ -47,6 +47,13 @@ export const TIME_TRACKING_FORM_CFG: ConfigFormSection<TimeTrackingConfig> = {
       },
     },
     {
+      key: 'isFullScreenTrackingReminder',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TIME_TRACKING.L_IS_FULL_SCREEN_TRACKING_REMINDER,
+      },
+    },
+    {
       key: 'isTrackingReminderShowOnMobile',
       type: 'checkbox',
       hideExpression: (model) => !model.isTrackingReminderEnabled,
