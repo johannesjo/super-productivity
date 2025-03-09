@@ -274,10 +274,12 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
       const parsedDateResult = parsedDateArr[0];
       const start = parsedDateResult.start;
       let plannedAt = start.date().getTime();
+      let hasPlannedTime = true;
       // If user doesn't explicitly enter time, set the scheduled date
       // to 9:00:00 of the given day
 
       if (!start.isCertain('hour')) {
+        hasPlannedTime = false;
         plannedAt = start.date().setHours(9, 0, 0, 0);
       }
       const inputDate = parsedDateResult.text;
@@ -285,6 +287,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
         plannedAt,
         // Strip out the short syntax for scheduled date and given date
         title: task.title.replace(`@${inputDate}`, ''),
+        ...(hasPlannedTime ? {} : { hasPlannedTime: false }),
       };
     }
 
