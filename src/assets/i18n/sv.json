@@ -5,6 +5,7 @@
       "SYNC_CONFLICT_TITLE": "En synkroniseringskonflikt uppstod"
     },
     "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Appen kör i bakgrunden för att möjliggöra synkronisering om sådan är aktiverad",
       "NO_ACTIVE_TASKS": "Inga aktiva uppgifter",
       "SYNCING": "Synkronisering"
     }
@@ -272,10 +273,16 @@
     "PLANNER": {
       "D": {
         "PLAN_FOR_DAY": {
-          "REMOVE_PLAN_DATE": "Ta bort planeringsdatum"
+          "REMOVE_PLAN_DATE": "Ta bort planeringsdatum",
+          "TITLE": "Planera dagens uppgifter"
         }
       },
-      "NO_TASKS": "Inga uppgifter"
+      "EDIT_REPEATED_TASK": "Redigera den upprepade uppgiften '{{taskName}}'",
+      "NO_TASKS": "Inga uppgifter",
+      "S": {
+        "REMOVED_PLAN_DATE": "Tog bort planeringsdatum för uppgiften '{{taskTitle}}'",
+        "TASK_ALREADY_PLANNED": "Uppgiften är redan planerad till {{date}}."
+      }
     },
     "POMODORO": {
       "BACK_TO_WORK": "Tillbaka till arbetet!"
