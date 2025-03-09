@@ -60,6 +60,7 @@
         "DONE": "Klar",
         "EISENHAUER_MATRIX": "Eisenhauer-matris",
         "IMPORTANT": "Viktigt",
+        "IN_PROGRESS": "Pågående",
         "KANBAN": "Kanban",
         "NOT_URGENT_IMPORTANT": "Ej brådskande & Viktiga",
         "NOT_URGENT_NOT_IMPORTANT": "Ej brådskande & Ej viktiga",
@@ -74,6 +75,8 @@
         "TASK_DONE_STATE_DONE": "Klar"
       },
       "V": {
+        "ADD_NEW_BOARD": "Lägg till ny tavla",
+        "CONFIRM_DELETE": "Vill du verkligen radera denna tavla?",
         "EDIT_BOARD": "Redigera tavla",
         "NO_PANELS_BTN": "Konfigurera tavla",
         "NO_PANELS_MSG": "Denna tavla har inga konfigurerade paneler. Lägg till några paneler på den."
@@ -225,7 +228,8 @@
         "SOURCE": "Källa",
         "SOURCE_GLOBAL": "Alla",
         "SOURCE_GROUP": "Grupp",
-        "SOURCE_PROJECT": "Projekt"
+        "SOURCE_PROJECT": "Projekt",
+        "SUBMIT_TIMELOGS": "Skicka in tidsloggar till GitLab"
       },
       "FORM_SECTION": {
         "TITLE": "GitLab"
@@ -252,7 +256,8 @@
     "JIRA": {
       "CFG_CMP": {
         "ALWAYS_ASK": "Öppna alltid dialogrutan",
-        "ENABLE": "Aktivera Jira-integrering"
+        "ENABLE": "Aktivera Jira-integrering",
+        "LOAD_SUGGESTIONS": "Ladda förslag"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "OK": "Gör det!"
