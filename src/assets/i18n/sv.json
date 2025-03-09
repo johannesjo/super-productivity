@@ -22,7 +22,9 @@
     "NO_TASKS": "Det finns för närvarande inga eftersläpande uppgifter"
   },
   "CONFIRM": {
-    "DELETE_STRAY_BACKUP": "Vill du radera säkerhetskopian för att slippa se denna dialog?"
+    "AUTO_FIX": "Din data verkar vara skadad (\"{{validityError}}\"). Vill du försöka reparera den automatiskt? Detta kan leda till partiell dataförlust.",
+    "DELETE_STRAY_BACKUP": "Vill du radera säkerhetskopian för att slippa se denna dialog?",
+    "RESTORE_STRAY_BACKUP": "Under den senaste synkroniseringen kan det ha uppstått ett fel. Vill du återställa från den senaste säkerhetskopian?"
   },
   "DATETIME_INPUT": {
     "IN": "om {{time}}",
@@ -38,6 +40,8 @@
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Lägg till bilaga",
+        "EDIT_ATTACHMENT": "Redigera bilaga",
         "LABELS": {
           "FILE": "Filsökväg",
           "IMG": "Bild",
@@ -45,6 +49,7 @@
         },
         "SELECT_TYPE": "Välj en typ",
         "TYPES": {
+          "FILE": "Fil (öppnad av systemets standardapp)",
           "IMG": "Bild (visas som miniatyr)",
           "LINK": "Länk (öppnas i webbläsare)"
         }
@@ -53,14 +58,25 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Klar",
+        "EISENHAUER_MATRIX": "Eisenhauer-matris",
         "IMPORTANT": "Viktigt",
-        "KANBAN": "Kanban"
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Ej brådskande & Viktiga",
+        "NOT_URGENT_NOT_IMPORTANT": "Ej brådskande & Ej viktiga",
+        "URGENT": "Brådskande",
+        "URGENT_IMPORTANT": "Brådskande & Viktiga",
+        "URGENT_NOT_IMPORTANT": "Brådskande & Ej viktiga"
       },
       "FORM": {
         "ADD_NEW_PANEL": "Lägg till ny panel",
         "COLUMNS": "Kolumner",
         "TASK_DONE_STATE_ALL": "Alla",
         "TASK_DONE_STATE_DONE": "Klar"
+      },
+      "V": {
+        "EDIT_BOARD": "Redigera tavla",
+        "NO_PANELS_BTN": "Konfigurera tavla",
+        "NO_PANELS_MSG": "Denna tavla har inga konfigurerade paneler. Lägg till några paneler på den."
       }
     },
     "BOOKMARK": {
@@ -82,6 +98,7 @@
         "SELECT_ICON": "Välj en ikon",
         "SELECT_TYPE": "Välj en typ",
         "TYPES": {
+          "COMMAND": "Kommando (anpassat skalkommando)",
           "FILE": "Fil (öppnad av systemets standardapp)",
           "IMG": "Bild (visad som miniatyr)",
           "LINK": "Länk (öppnas i webbläsare)"
@@ -99,6 +116,7 @@
         "CALDAV_USER": "Ditt CalDav-användarnamn"
       },
       "FORM_SECTION": {
+        "HELP": "<p>Här kan du konfigurera SuperProductivity till att lista icke slutförda CalDav-uppgifter för ett specifikt projekt på panelen för uppgiftsskapande i den dagliga planeringsvyn. De kommer att listas som förslag och kommer att länka till uppgiften samt mer information om den.</p> <p>Dessutom kan du automatiskt lägga till och synkronisera alla icke slutförda uppgifter med din lista med eftersläpande uppgifter.</p><p>För att det ska fungera med Nextcloud i webbappen kan du behöva vitlista \"https://app.super-productivity.com\" via Nextcloud-appen <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -120,9 +138,17 @@
         "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!"
       }
     },
+    "CONFIG": {
+      "S": {
+        "UPDATE_SECTION": "Uppdaterade inställningar för <strong>{{sectionKey}}</strong>"
+      }
+    },
     "DOMINA_MODE": {
       "FORM": {
-        "L_TEXT": "Text"
+        "HELP": "Upprepar den konfigurerade frasen varje X när du loggar tid för en uppgift.",
+        "L_INTERVAL": "Intervall för att upprepa frasen",
+        "L_TEXT": "Text",
+        "L_TEXT_DESCRIPTION": "T.ex.: \"Jobba med ${currentTaskTitle}!\""
       }
     },
     "FOCUS_MODE": {
@@ -135,10 +161,19 @@
       "ON": "på",
       "POMODORO_BACK": "Tillbaka",
       "POMODORO_DISABLE": "Inaktivera Pomodoro",
-      "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt"
+      "PREP_GET_MENTALLY_READY": "Gör dig mentalt redo för att vara fokuserad och produktiv",
+      "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt",
+      "PREP_STRETCH": "Gör lite mild stretching",
+      "SELECT_ANOTHER_TASK": "Välj en annan uppgift",
+      "SELECT_TASK": "Välj uppgift att fokusera på",
+      "WORKED_FOR": "Du jobbade i"
     },
     "GITEA": {
       "FORM": {
+        "FILTER_USER": "Användarnamn (t.ex. för att filtrera ut ändringar du själv har gjort)",
+        "HOST": "Värd (t.ex. https://try.gitea.io)",
+        "REPO_FULL_NAME": "Användarnamn eller organisationsnamn/projekt",
+        "REPO_FULL_NAME_DESCRIPTION": "Kan finnas som del av URL:en när projektet visas i webbläsaren",
         "SCOPE_ALL": "Alla",
         "SCOPE_ASSIGNED": "Ålagda mig",
         "SCOPE_CREATED": "Skapade av mig"
@@ -165,16 +200,27 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Beskrivning",
         "LABELS": "Etiketter",
+        "LAST_COMMENT": "Senaste kommentar",
+        "LOAD_ALL_COMMENTS": "Läs in alla {{nr}} kommentarer",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Läs in beskrivning och alla kommentarer",
+        "MARK_AS_CHECKED": "Markera uppdateringar som avbockade",
         "STATUS": "Status",
         "SUMMARY": "Sammanfattning",
         "WRITE_A_COMMENT": "Skriv en kommentar"
       }
     },
     "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera GitLab för projektet"
+      },
       "DIALOG_SUBMIT_WORKLOG": {
         "T_TITLE": "Titel"
       },
       "FORM": {
+        "FILTER": "Anpassat filter",
+        "FILTER_DESCRIPTION": "Se https://docs.gitlab.com/ee/api/issues.html#list-issues. Flera kan kombineras med &.",
+        "FILTER_USER": "Filtrera användarnamn",
+        "PROJECT_HINT": "t.ex. johannesjo/super-productivity",
         "SCOPE_ALL": "Alla",
         "SOURCE": "Källa",
         "SOURCE_GLOBAL": "Alla",
@@ -193,24 +239,51 @@
         "WRITE_A_COMMENT": "Skriv en kommentar"
       }
     },
+    "ISSUE": {
+      "S": {
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" verkar vara raderad eller stängd",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Ingen uppdatering nödvändig",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Uppdaterade data för {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Uppdaterade data för \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Uppdaterade data för \"{{issueTitle}}\"",
+        "NEW_COMMENT": "{{issueProviderName}}: Ny kommentar till \"{{issueTitle}}\""
+      }
+    },
     "JIRA": {
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "OK": "Gör det!"
       },
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera Jira för projektet"
+      },
       "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Välj status du vill tilldela",
+        "CURRENT_STATUS": "Nuvarande status:",
         "TASK_NAME": "Uppgiftens namn:",
+        "TITLE": "Jira: Uppdatera status",
         "UPDATE_STATUS": "Uppdatera status"
       },
       "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Använd alltid all tid som lagts på uppgiften som standard"
+        },
+        "INVALID_DATE": "Det angivna värdet är inte ett datum!",
+        "SAVE_WORKLOG": "Spara arbetsloggen",
         "STARTED": "Startad",
-        "TIME_SPENT": "Använd tid"
+        "SUBMIT_WORKLOG_FOR": "Skicka in en arbetslogg till Jira för",
+        "TIME_SPENT": "Använd tid",
+        "TIME_SPENT_TOOLTIP": "Lägg till olika tider",
+        "TITLE": "Jira: Skicka in arbetslogg"
       },
       "FORM_ADV": {
         "WORKLOG_DEFAULT_ALL_TIME": "Fyll i all tid som har lagts på uppgiften",
+        "WORKLOG_DEFAULT_TIME_MODE": "Standardtidsvärde för dialogrutan",
         "WORKLOG_DEFAULT_TODAY": "Fyll bara i tid använd idag",
         "WORKLOG_DEFAULT_YESTERDAY": "Fyll bara i tiden du använde igår"
       },
       "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Tillåt självsignerat certifikat",
+        "HOST": "Värd (t.ex.: http://my-host.de:1234)",
         "USER_NAME": "E-post / användarnamn"
       },
       "FORM_SECTION": {
@@ -232,8 +305,14 @@
         "SUMMARY": "Sammanfattning",
         "WRITE_A_COMMENT": "Skriv en kommentar"
       },
+      "S": {
+        "INVALID_RESPONSE": "Jira: Svaret innehöll ogiltig data",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Uppdaterade data för \"{{issueText}}\""
+      },
       "STEPPER": {
         "CREDENTIALS": "Inloggningsuppgifter",
+        "DONE": "Du är klar nu.",
+        "LOGIN_SUCCESS": "Inloggning lyckades!",
         "WELCOME_USER": "Välkommen {{user}}!"
       }
     },
@@ -242,25 +321,48 @@
         "CHECK": "Jag gjorde det!"
       },
       "CMP": {
-        "COUNTING_SUBTASKS": "(räknar deluppgifter)"
+        "COUNTING_SUBTASKS": "(räknar deluppgifter)",
+        "DAYS_WORKED": "Arbetade dagar",
+        "TIME_ESTIMATED": "Anslagen tid",
+        "TIME_SPENT": "Använd tid"
       },
       "EVAL_FORM": {
+        "DISABLE_REPEAT_EVERY_DAY": "Inaktivera daglig upprepning",
+        "ENABLE_REPEAT_EVERY_DAY": "Upprepa varje dag",
+        "HELP_H1": "Varför ska jag bry mig?",
+        "IMPROVEMENTS": "Vad förbättrade din produktivitet?",
+        "IMPROVEMENTS_TOMORROW": "Vad skulle du kunna göra för att förbättra den imorgon?",
+        "MOOD": "Hur mår du?",
+        "MOOD_HINT": "1: Förfärligt - 10: Fantastiskt",
+        "OBSTRUCTIONS": "Vad hindrade din produktivitet?",
         "PRODUCTIVITY": "Hur effektivt arbetade du?",
         "PRODUCTIVITY_HINT": "1: Har inte ens börjat – 10: Enormt effektivt"
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Öppna alltid dialogruta",
+        "TRANSITION": "Hantering av övergångar"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera OpenProjet för projektet"
+      },
       "DIALOG_TRACK_TIME": {
         "ACTIVITY": "Aktivitet",
+        "CURRENTLY_LOGGED": "För närvarande loggad tid:",
+        "INVALID_DATE": "Det angivna värdet är inte ett datum!",
         "STARTED": "Startad",
         "TIME_SPENT": "Använd tid"
       },
       "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Välj status som ska tilldelas",
+        "CURRENT_STATUS": "Nuvarande status:",
         "TASK_NAME": "Uppgiftsnamn:",
         "UPDATE_STATUS": "Uppdatera status"
       },
       "FORM": {
         "FILTER_USER": "Filtrera användarnamn",
+        "HOST": "Värd (t.ex.: https://www.openproject.org/)",
         "PROJECT_ID": "Projekt-ID",
         "SCOPE_ALL": "Alla"
       },
