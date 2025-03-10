@@ -610,6 +610,49 @@
         "TASK": "Uppgift"
       }
     },
+    "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "MONDAY_TO_FRIDAY": "mån-fre",
+        "MONDAY_TO_FRIDAY_AND_TIME": "mån-fre, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Veckovis på {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Veckovis på {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Årligen den {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Årligen den {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_REMOVE": {
+        "OK": "Radera helt"
+      },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "Bara framtida uppgifter"
+      },
+      "D_EDIT": {
+        "ADVANCED_CFG": "Avancerad konfiguration"
+      },
+      "F": {
+        "C_DAY": "Dag",
+        "C_MONTH": "Månad",
+        "C_WEEK": "Vecka",
+        "C_YEAR": "År",
+        "FRIDAY": "fredag",
+        "MONDAY": "måndag",
+        "Q_DAILY": "Varje dag",
+        "Q_MONDAY_TO_FRIDAY": "Varje måndag till fredag",
+        "SATURDAY": "lördag",
+        "SUNDAY": "söndag",
+        "THURSDAY": "torsdag",
+        "TUESDAY": "tisdag",
+        "WEDNESDAY": "onsdag"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "Det har jag redan gjort"
+      },
+      "D_IDLE": {
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Hoppa över",
+        "SKIP": "Hoppa över"
+      }
+    },
     "WORKLOG": {
       "CMP": {
         "TASKS": "Uppgifter",
