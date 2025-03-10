@@ -622,6 +622,21 @@
   "GCF": {
     "EVALUATION": {
       "TITLE": "Utvärdering & mätvärden"
+    },
+    "MISC": {
+      "IS_DISABLE_ANIMATIONS": "Inaktivera alla animationer",
+      "TITLE": "Diverse inställningar"
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "Varaktighet för korta raster",
+      "IS_PLAY_SOUND_AFTER_BREAK": "Spela upp ljud när rasten är slut",
+      "LONGER_BREAK_DURATION": "Varaktighet för längre raster"
+    },
+    "SCHEDULE": {
+      "L_WORK_END": "Arbetsdagens slut",
+      "L_WORK_START": "Arbetsdagens början",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "t.ex. 13:00",
+      "WORK_START_END_DESCRIPTION": "t.ex. 17:00"
     }
   },
   "GPB": {
@@ -656,5 +671,18 @@
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globala inställningar"
+  },
+  "THEMES": {
+    "blue": "blått",
+    "blue-grey": "blågrått",
+    "green": "grönt",
+    "indigo": "indigo",
+    "light-blue": "ljusblått",
+    "light-green": "ljusgrönt",
+    "lime": "lime",
+    "pink": "rosa",
+    "purple": "lila",
+    "SELECT_THEME": "Välj färgtema",
+    "yellow": "gult"
   }
 }
