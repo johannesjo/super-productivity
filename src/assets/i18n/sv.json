@@ -620,10 +620,24 @@
     }
   },
   "GCF": {
+    "AUTO_BACKUPS": {
+      "LOCATION_INFO": "Säkerhetskopior sparas i:"
+    },
+    "CALENDARS": {
+      "CAL_PATH": "iCal-källans URL"
+    },
     "EVALUATION": {
       "TITLE": "Utvärdering & mätvärden"
     },
+    "IMEX": {
+      "TITLE": "Importera/exportera"
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "Lägg till ny anteckning",
+      "ADD_NEW_TASK": "Lägg till ny uppgift"
+    },
     "MISC": {
+      "FIRST_DAY_OF_WEEK": "Veckans första dag",
       "IS_DISABLE_ANIMATIONS": "Inaktivera alla animationer",
       "TITLE": "Diverse inställningar"
     },
@@ -637,6 +651,14 @@
       "L_WORK_START": "Arbetsdagens början",
       "LUNCH_BREAK_START_END_DESCRIPTION": "t.ex. 13:00",
       "WORK_START_END_DESCRIPTION": "t.ex. 17:00"
+    },
+    "SOUND": {
+      "TITLE": "Ljud",
+      "VOLUME": "Volym"
+    },
+    "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Lägg till motiverande bild",
+      "NOTIFICATION_TITLE": "Ta en rast!"
     }
   },
   "GPB": {
