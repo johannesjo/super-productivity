@@ -624,7 +624,37 @@
       "TITLE": "Utvärdering & mätvärden"
     }
   },
+  "GPB": {
+    "WEB_DAV_DOWNLOAD": "WebDAV: Laddar ned data...",
+    "WEB_DAV_UPLOAD": "WebDAV: Laddar upp data..."
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Lägg till ny uppgift",
+    "CREATE_PROJECT": "Skapa projekt",
+    "DELETE_PROJECT": "Radera projekt",
+    "HELP": "Hjälp",
+    "HM": {
+      "CONTRIBUTE": "Bidra",
+      "REPORT_A_PROBLEM": "Rapportera ett problem"
+    },
+    "PROJECT_MENU": "Projektmeny",
+    "PROJECT_SETTINGS": "Projektinställningar",
+    "PROJECTS": "Projekt",
+    "SETTINGS": "Inställningar",
+    "TASKS": "Uppgifter",
+    "WORKLOG": "Arbetslogg"
+  },
+  "PDS": {
+    "BACK": "Vänta, jag glömde något!",
+    "EVALUATE_DAY": "Utvärdera",
+    "SAVE_AND_GO_HOME": "Spara och gå hem",
+    "TASKS_COMPLETED": "Uppgift slutförd",
+    "WEEK": "Vecka"
+  },
   "PM": {
     "TITLE": "Projektstatistik"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Globala inställningar"
   }
 }
