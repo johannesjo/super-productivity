@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Na prekrytie zamerania"
       },
       "BACK_TO_PLANNING": "Späť na plánovanie",
-      "CANCEL_FOCUS_SESSION": "Zrušenie Focus Session",
       "CONGRATS": "Gratulujeme k dokončeniu tejto relácie!",
       "CONTINUE_FOCUS_SESSION": "Pokračovanie sústredenia",
       "COUNTDOWN": "Odpočítavanie",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Zobrazenie/skrytie poznámok k úlohám a príloh",
       "START_FOCUS_SESSION": "Začiatok Focus Session",
       "START_NEXT_FOCUS_SESSION": "Začatie ďalšieho Focus Session",
-      "WORKED_FOR": "Pracovali ste pre"
+      "WORKED_FOR": "Pracovali ste pre",
+      "CANCEL_FOCUS_SESSION": "Zrušenie Focus Session"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

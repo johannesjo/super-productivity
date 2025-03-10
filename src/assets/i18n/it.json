@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Გადახურვაზე ფოკუსირება"
       },
       "BACK_TO_PLANNING": "Torna alla pianificazione",
-      "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
       "CONGRATS": "Congratulazione per avere completato questa sessione!",
       "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
       "COUNTDOWN": "Countdown",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostra/nascondi note e allegati dell'attività",
       "START_FOCUS_SESSION": "Avvia Sessione Concentrazione",
       "START_NEXT_FOCUS_SESSION": "Avvia la prossima Sessione Concentrazione",
-      "WORKED_FOR": "Hai lavorato per"
+      "WORKED_FOR": "Hai lavorato per",
+      "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
