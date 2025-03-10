@@ -303,6 +303,7 @@
         }
       },
       "ISSUE_CONTENT": {
+        "ATTACHMENTS": "Bilagor",
         "CHANGED": "ändrad",
         "COMMENTS": "Kommentarer",
         "COMPONENTS": "Komponenter",
@@ -390,6 +391,7 @@
         "SCOPE_ALL": "Alla"
       },
       "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
         "STATUS": "Status",
         "SUMMARY": "Sammanfattning",
         "TYPE": "Typ"
@@ -476,7 +478,38 @@
     },
     "REDMINE": {
       "FORM": {
-        "PROJECT_ID": "Projektidentifikator"
+        "PROJECT_ID": "Projektidentifikator",
+        "SCOPE_ALL": "Alla"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Författare",
+        "DESCRIPTION": "Beskrivning",
+        "PRIORITY": "Prioritet",
+        "STATUS": "Status"
+      }
+    },
+    "REMINDER": {
+      "COUNTDOWN_BANNER": {
+        "HIDE": "Dölj",
+        "START_NOW": "Börja nu"
+      }
+    },
+    "SCHEDULE": {
+      "LUNCH_BREAK": "Lunchrast",
+      "NOW": "Nu"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "OK": "Gör det!"
+      },
+      "D_EDIT": {
+        "DAYS": "Dagar"
+      },
+      "FORM": {
+        "L_ICON": "Ikon",
+        "L_IS_ENABLED": "Aktiverad",
+        "L_TITLE": "Titel",
+        "L_TYPE": "Typ"
       }
     },
     "SYNC": {
