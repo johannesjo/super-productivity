@@ -509,16 +509,24 @@
         "L_ICON": "Ikon",
         "L_IS_ENABLED": "Aktiverad",
         "L_TITLE": "Titel",
-        "L_TYPE": "Typ"
+        "L_TYPE": "Typ",
+        "TYPE_STOPWATCH": "Tidtagningsur"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Du har uppnått ditt mål för idag!"
       }
     },
     "SYNC": {
+      "D_INCOMPLETE_SYNC": {
+        "T3": "Du har två alternativ:"
+      },
       "FORM": {
         "LOCAL_FILE": {
           "L_SYNC_FOLDER_PATH": "Sökväg till synkroniseringsmapp"
         },
         "TITLE": "Synkronisera",
         "WEB_DAV": {
+          "L_PASSWORD": "Lösenord",
           "L_USER_NAME": "Användarnamn"
         }
       },
@@ -544,7 +552,17 @@
         "CREATE_TASK": "Skapa ny uppgift"
       },
       "ADDITIONAL_INFO": {
-        "ADD_SUB_TASK": "Lägg till underuppgift"
+        "ADD_ATTACHMENT": "Lägg till bilaga",
+        "ADD_SUB_TASK": "Lägg till underuppgift",
+        "ATTACHMENTS": "Bilagor ({{nr}})",
+        "NOTES": "Beskrivning",
+        "REMINDER": "Påminnelse",
+        "REPEAT": "Upprepa",
+        "TIME": "Tid",
+        "TITLE_PLACEHOLDER": "Ange en titel"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "Lägg till ½ timme"
       },
       "CMP": {
         "ADD_SUB_TASK": "Lägg till underuppgift",
@@ -560,6 +578,11 @@
         "TOGGLE_ATTACHMENTS": "Visa/dölj bilagor",
         "TOGGLE_DETAIL_PANEL": "Visa/dölj ytterligare information",
         "TOGGLE_SUB_TASK_VISIBILITY": "Byt synlighet för underuppgift"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "Avvisa påminnelse",
+        "DISMISS_ALL": "Avvisa alla",
+        "DONE": "Klar"
       }
     },
     "WORKLOG": {
