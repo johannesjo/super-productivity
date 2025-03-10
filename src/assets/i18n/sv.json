@@ -583,6 +583,31 @@
         "DISMISS": "Avvisa påminnelse",
         "DISMISS_ALL": "Avvisa alla",
         "DONE": "Klar"
+      },
+      "D_SCHEDULE_TASK": {
+        "RO_NEVER": "Aldrig",
+        "RO_START": "när den börjar"
+      },
+      "D_TIME": {
+        "TIME_SPENT": "Använd tid"
+      },
+      "D_TIME_FOR_DAY": {
+        "TINE_SPENT": "Använd tid"
+      },
+      "S": {
+        "CREATED_FOR_PROJECT_ACTION": "Gå till projekt",
+        "DELETED": "Raderade uppgiften \"{{title}}\"",
+        "MOVED_TO_PROJECT": "Flyttade uppgiften \"{{taskTitle}}\" till projektet \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Gå till projekt",
+        "REMINDER_DELETED": "Raderade påminnelse för uppgift",
+        "REMINDER_UPDATED": "Uppdaterade påminnelse för uppgiften \"{{title}}\"",
+        "TASK_CREATED": "Skapade uppgiften \"{{title}}\""
+      },
+      "SELECT_OR_CREATE": "Välj eller skapa uppgift",
+      "SUMMARY_TABLE": {
+        "SPENT_TODAY": "Använd idag",
+        "SPENT_TOTAL": "Använd totalt",
+        "TASK": "Uppgift"
       }
     },
     "WORKLOG": {
