@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Hotovo",
-        "EISENHAUER_MATRIX": "Eisenhauerova matica",
+        "EISENHAUER_MATRIX": "Eisenhowerova matica",
         "IMPORTANT": "Dôležité",
         "IN_PROGRESS": "Prebieha",
         "KANBAN": "Kanban",

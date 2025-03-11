@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "TAMAM",
-        "EISENHAUER_MATRIX": "Eisenhauer Matrisi",
+        "EISENHAUER_MATRIX": "Eisenhower Matrisi",
         "IMPORTANT": "Önemli",
         "IN_PROGRESS": "Devam ediyor",
         "KANBAN": "Kanban",

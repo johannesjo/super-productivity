@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Hecho",
-        "EISENHAUER_MATRIX": "Matriz de Eisenhauer",
+        "EISENHAUER_MATRIX": "Matriz de Eisenhower",
         "IMPORTANT": "Importante",
         "IN_PROGRESS": "EN PROGRESO",
         "KANBAN": "Kanban",

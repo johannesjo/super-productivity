@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Selesai",
-        "EISENHAUER_MATRIX": "Matriks Eisenhauer",
+        "EISENHAUER_MATRIX": "Matriks Eisenhower",
         "IMPORTANT": "Penting",
         "IN_PROGRESS": "Sedang berlangsung",
         "KANBAN": "Kanban",

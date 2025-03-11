@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Done",
-        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "EISENHAUER_MATRIX": "Eisenhower Matrix",
         "IMPORTANT": "Important",
         "IN_PROGRESS": "In Progress",
         "KANBAN": "Kanban",
