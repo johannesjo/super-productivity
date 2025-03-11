@@ -63,38 +63,38 @@
     },
     "BOARDS": {
       "DEFAULT": {
-        "DONE": "Მზადაა",
-        "EISENHAUER_MATRIX": "Ეიზენჰაუერის მატრიცა",
-        "IMPORTANT": "Მნიშვნელოვანია",
-        "IN_PROGRESS": "Მიმდინარე",
-        "KANBAN": "Კანბანი",
-        "NOT_URGENT_IMPORTANT": "Არ არის გადაუდებელი და მნიშვნელოვანი",
-        "NOT_URGENT_NOT_IMPORTANT": "Არ არის გადაუდებელი და უმნიშვნელოა",
-        "TO_DO": "Უნდა გააკეთოს",
-        "URGENT": "Სასწრაფო",
-        "URGENT_IMPORTANT": "Გადაუდებელი და მნიშვნელოვანი",
-        "URGENT_NOT_IMPORTANT": "Გადაუდებელი და უმნიშვნელოა"
+        "DONE": "Fatto",
+        "EISENHAUER_MATRIX": "Matrice di Eisenhower",
+        "IMPORTANT": "Importante",
+        "IN_PROGRESS": "In corso",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Non urgente & Importante",
+        "NOT_URGENT_NOT_IMPORTANT": "Non urgente & Non importante",
+        "TO_DO": "Da fare",
+        "URGENT": "Urgente",
+        "URGENT_IMPORTANT": "Urgente & Importante",
+        "URGENT_NOT_IMPORTANT": "Urgente & Non importante"
       },
       "FORM": {
-        "ADD_NEW_PANEL": "Ახალი პანელის დამატება",
-        "COLUMNS": "Სვეტები",
-        "TAGS_EXCLUDED": "Გამორიცხული ტეგები",
-        "TAGS_REQUIRED": "Საჭირო ტეგები",
-        "TASK_DONE_STATE": "Დავალება შესრულებულია",
-        "TASK_DONE_STATE_ALL": "Ყველა",
-        "TASK_DONE_STATE_DONE": "Მზადაა",
-        "TASK_DONE_STATE_UNDONE": "Გაუქმება"
+        "ADD_NEW_PANEL": "Aggiungi nuovo pannello",
+        "COLUMNS": "Colonne",
+        "TAGS_EXCLUDED": "Etichette escluse",
+        "TAGS_REQUIRED": "Etichette richieste",
+        "TASK_DONE_STATE": "Stato delle attività completate",
+        "TASK_DONE_STATE_ALL": "Tutte",
+        "TASK_DONE_STATE_DONE": "Completate",
+        "TASK_DONE_STATE_UNDONE": "Non completate"
       },
       "V": {
-        "ADD_NEW_BOARD": "Ახალი დაფის დამატება",
-        "CONFIRM_DELETE": "Ნამდვილად გსურთ ამ დაფის წაშლა?",
-        "CREATE_NEW_TAG_BTN": "Ჭდის შექმნა",
-        "CREATE_NEW_TAG_MSG": "1 ახალი ტეგი უნდა შეიქმნას ამ დაფის მუშაობისთვის",
-        "CREATE_NEW_TAGS_BTN": "Ტეგების შექმნა",
-        "CREATE_NEW_TAGS_MSG": "{{nr}} საჭიროა ახალი ტეგების შექმნა ამ დაფის მუშაობისთვის",
-        "EDIT_BOARD": "Დაფის რედაქტირება",
-        "NO_PANELS_BTN": "Დაფის კონფიგურაცია",
-        "NO_PANELS_MSG": "Ამ დაფას არ აქვს კონფიგურირებული პანელები. დაამატეთ რამდენიმე პანელი."
+        "ADD_NEW_BOARD": "Aggiungi nuova scheda",
+        "CONFIRM_DELETE": "Vuoi eliminare questa scheda?",
+        "CREATE_NEW_TAG_BTN": "Crea etichetta",
+        "CREATE_NEW_TAG_MSG": "E' necessario creare 1 nuova etichetta per far funzionare questa scheda",
+        "CREATE_NEW_TAGS_BTN": "Crea etichette",
+        "CREATE_NEW_TAGS_MSG": "E' necessario creare {{nr}} nuove etichette per far funzionare questa scheda",
+        "EDIT_BOARD": "Modifica scheda",
+        "NO_PANELS_BTN": "Configura scheda",
+        "NO_PANELS_MSG": "Questa scheda non ha pannelli configurati. Aggiungici dei pannelli."
       }
     },
     "BOOKMARK": {
@@ -197,17 +197,17 @@
     },
     "FOCUS_MODE": {
       "B": {
-        "SESSION_RUNNING": "Ფოკუს სესია მიმდინარეობს",
-        "TO_FOCUS_OVERLAY": "Გადახურვაზე ფოკუსირება"
+        "SESSION_RUNNING": "E' in corso la Sessione Concentrazione",
+        "TO_FOCUS_OVERLAY": "Per sovrapporre la Concentrazione"
       },
       "BACK_TO_PLANNING": "Torna alla pianificazione",
       "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
-      "CONGRATS": "Congratulazione per avere completato questa sessione!",
+      "CONGRATS": "Congratulazioni per avere completato questa sessione!",
       "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
-      "COUNTDOWN": "Countdown",
+      "COUNTDOWN": "Conto alla rovescia",
       "FINISH_TASK_AND_SELECT_NEXT": "Termina attività e seleziona la prossima",
-      "FLOWTIME": "Ნაკადის დრო",
-      "FOR_TASK": "დავალებისთვის",
+      "FLOWTIME": "Flusso di tempo",
+      "FOR_TASK": "per attività",
       "GET_READY": "Preparati per la tua prossima sessione!",
       "GO_TO_PROCRASTINATION": "Ottieni aiuto quando stai procastinando",
       "GOGOGO": "Vai, vai, vai!",
@@ -222,7 +222,7 @@
       "PREP_STRETCH": "Fai un po' di stretching",
       "SELECT_ANOTHER_TASK": "Seleziona un'altra attività",
       "SELECT_TASK": "Seleziona l'attività su cui concentrarti",
-      "SESSION_COMPLETED": "Ფოკუს სესია დასრულდა!",
+      "SESSION_COMPLETED": "Sessione Concentrazione Completata!",
       "SET_FOCUS_SESSION_DURATION": "Imposta la durata della Sessione Concentrazione",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostra/nascondi note e allegati dell'attività",
       "START_FOCUS_SESSION": "Avvia Sessione Concentrazione",
@@ -860,22 +860,22 @@
         "ADD_NEW": "Aggiungi un semplice contatore",
         "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
         "L_COUNTDOWN_DURATION": "Durata conto alla rovescia",
-        "L_DAILY_GOAL": "Ყოველდღიური გოლი წარმატებული სერიისთვის",
+        "L_DAILY_GOAL": "Obiettivo giornaliero per una scia di successi",
         "L_ICON": "Icona",
         "L_ICON_ON": "Icona quando attivato",
         "L_IS_ENABLED": "Abilitato",
         "L_TITLE": "Titolo",
-        "L_TRACK_STREAKS": "Სიმღერა ზოლები",
+        "L_TRACK_STREAKS": "Traccia la scia",
         "L_TYPE": "genere",
-        "L_WEEKDAYS": "Კვირის დღეები ზოლის შესამოწმებლად",
+        "L_WEEKDAYS": "Giorni della settimana per la scia",
         "TITLE": "Contatori semplici",
         "TYPE_CLICK_COUNTER": "Fai clic su Contatore",
         "TYPE_REPEATED_COUNTDOWN": "Conto alla rovescia ripetuto",
         "TYPE_STOPWATCH": "Cronometro"
       },
       "S": {
-        "GOAL_REACHED_1": "Თქვენ მიაღწიეთ დღევანდელ მიზანს!",
-        "GOAL_REACHED_2": "Მიმდინარე სერიების ხანგრძლივობა: "
+        "GOAL_REACHED_1": "Oggi hai raggiunto il tuo obiettivo!",
+        "GOAL_REACHED_2": "Durata scia attuale: "
       }
     },
     "SYNC": {
@@ -922,8 +922,8 @@
         "T6": "E' consigliata la creazione di un backup dei dati che sovrascrivi!!!"
       },
       "D_INITIAL_CFG": {
-        "SAVE_AND_ENABLE": "Შენახვა & ჩართვა სინქრონიზაცია",
-        "TITLE": "Სინქრონიზაციის კონფიგურაცია"
+        "SAVE_AND_ENABLE": "Salva e Abilita Sincronizzazione",
+        "TITLE": "Configura Sincronizzazione"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disabilita sincronizzazione",
@@ -993,6 +993,9 @@
         "L_TITLE": "Nome dell'etichetta",
         "TITLE": "Impostazioni base"
       },
+      "TTL": {
+        "ADD_NEW_TAG": "🔴 Aggiungi nuova etichetta"
+      },
       "S": {
         "UPDATED": "Impostazioni dell'etichetta aggiornate"
       }
@@ -1006,7 +1009,7 @@
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Aggiungi attività in cima agli arretrati",
         "ADD_TASK_TO_TOP_OF_TODAY": "Aggiungi attività in cima alla lista",
         "CREATE_TASK": "Crea nuova attività",
-        "EXAMPLE": "Esempio: \"Qualche titolo di attività + nomeProgetto #some-tag #some altro tag 10m / 3h\"",
+        "EXAMPLE": "Esempio: \"Qualche titolo di attività + nomeProgetto #etichetta1 #etichetta2 10m / 3h\"",
         "START": "Premi ancora invio per iniziare",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Attiva/disattiva l'aggiunta di attività negli arretrati / lista di oggi",
         "TOGGLE_ADD_TOP_OR_BOTTOM": "Attiva/disattiva l'aggiunta di attività alla lista sopra & sotto"
@@ -1058,18 +1061,19 @@
         "TOGGLE_ATTACHMENTS": "Mostra/nascondi allegati",
         "TOGGLE_DETAIL_PANEL": "Mostra/nascondi informazioni aggiuntive",
         "TOGGLE_DONE": "Segna come completato/non completato",
+        "TOGGLE_TAGS": "🔴 Mostra/nascondi etichette",
         "TOGGLE_SUB_TASK_VISIBILITY": "Cambia visibilità sotto-attività",
         "TRACK_TIME": "Inizia a tracciare il tempo",
         "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
-        "MSG": "Vuoi creare il nuovo tag {{tagsTxt}}?",
-        "OK": "Crea tag"
+        "MSG": "Vuoi creare la nuova etichetta {{tagsTxt}}?",
+        "OK": "Crea etichetta"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Vuoi creare i nuovi tag {{tagsTxt}}?",
-        "OK": "Crea tag"
+        "MSG": "Vuoi creare le nuove etichette {{tagsTxt}}?",
+        "OK": "Crea etichette"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Aggiungi tutto a oggi",
@@ -1130,14 +1134,14 @@
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossibile assegnare il progetto tramite la sintassi breve per le attività ripetibili!",
         "CREATED_FOR_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
-        "CREATED_FOR_PROJECT_ACTION": "Პროექტში გადასვლა",
+        "CREATED_FOR_PROJECT_ACTION": "Vai al Progetto",
         "DELETED": "Attività \"{{title}} eliminata\"",
         "FOUND_MOVE_FROM_BACKLOG": "Attività <strong>{{title}}</strong> spostata dagli arretrati alla lista delle attività di oggi",
         "FOUND_MOVE_FROM_OTHER_LIST": "Attività <strong>{{title}}</strong> aggiunta da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
-        "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
+        "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultima etichetta di un'attività non di progetto. Questo non è permesso!",
         "MOVED_TO_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
-        "MOVED_TO_PROJECT_ACTION": "Პროექტში გადასვლა",
+        "MOVED_TO_PROJECT_ACTION": "Vai al Progetto",
         "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per attività",
         "REMINDER_UPDATED": "Aggiornato promemoria per attività \"{{title}}\"",
@@ -1299,7 +1303,7 @@
           "PARENT_TASK_TITLES_ONLY": "Titoli solo delle attività padre",
           "PROJECTS": "Nomi dei progetti",
           "STARTED_WORKING": "Iniziato a lavorare",
-          "TAGS": "tag",
+          "TAGS": "etichetta",
           "TASK_SUBTASK": "Attività/Sotto-attività",
           "TIME_AS_CLOCK": "Tempo di orologio (es 5:23)",
           "TIME_AS_MILLISECONDS": "Tempo in millisecondi",
@@ -1330,7 +1334,7 @@
   },
   "G": {
     "ADD": "Aggiungi",
-    "ADVANCED_CFG": "Მოწინავე კონფიგურაცია",
+    "ADVANCED_CFG": "Configurazione Avanzata",
     "CANCEL": "Annulla",
     "CLOSE": "Chiudi",
     "DELETE": "Cancella",
@@ -1346,8 +1350,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minuti",
-    "MOVE_BACKWARD": "Უკან გადატანა",
-    "MOVE_FORWARD": "Იმოძრავეთ წინ",
+    "MOVE_BACKWARD": "Muovi Indietro",
+    "MOVE_FORWARD": "Muovi Avanti",
     "NEXT": "Prossimo",
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "NONE": "Nessuna",
@@ -1432,9 +1436,9 @@
       "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
       "SYSTEM_SHORTCUTS": "Scorciatoie globali (a livello di sistema)",
       "TASK_ADD_ATTACHMENT": "Allega file o link",
-      "TASK_ADD_SUB_TASK": "Aggiungi sotto-task",
-      "TASK_DELETE": "Cancella task",
-      "TASK_EDIT_TAGS": "Modificare i tag",
+      "TASK_ADD_SUB_TASK": "Aggiungi sotto-attività",
+      "TASK_DELETE": "Cancella attività",
+      "TASK_EDIT_TAGS": "Modificare le etichette",
       "TASK_EDIT_TITLE": "Modifica titolo",
       "TASK_MOVE_TO_PROJECT": "Apri sposta attività nel menu progetto",
       "TASK_OPEN_CONTEXT_MENU": "Apri il menu contestuale dell'attività",
@@ -1452,9 +1456,9 @@
       "TOGGLE_PLAY": "Inizia/Interrompi attività",
       "TOGGLE_SIDE_NAV": "Mostra & metti a fuoco / Nascondi Sidenav",
       "TRIGGER_SYNC": "Esegui sincronizzazione (se configurata)",
-      "ZOOM_DEFAULT": "Zoom default (solo Desktop)",
-      "ZOOM_IN": "Zoom in (solo Desktop)",
-      "ZOOM_OUT": "Zoom out (solo Desktop)"
+      "ZOOM_DEFAULT": "Ingrandimento predefinito (solo Desktop)",
+      "ZOOM_IN": "Ingrandimento (solo Desktop)",
+      "ZOOM_OUT": "Rimpicciolimento (solo Desktop)"
     },
     "LANG": {
       "AR": "عربى",
@@ -1486,7 +1490,7 @@
       "DEFAULT_PROJECT": "Progetto predefinito da utilizzare per le attività se non ne viene specificato nessuno",
       "FIRST_DAY_OF_WEEK": "Primo giorno della settimana",
       "HELP": "<p><strong>Non vedi le notifiche desktop?</strong>Per Windows controlla Sistema > Notifiche & azioni e controlla se le notifiche richieste sono abilitate.</p>",
-      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Aggiungi automaticamente il tag oggi alle attività lavorate",
+      "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Aggiungi automaticamente l'etichetta Oggi alle attività lavorate",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Segna l'attività padre come completata, quando tutti le sotto-attività sono completate",
       "IS_CONFIRM_BEFORE_EXIT": "Conferma prima di uscire dall'applicazione",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Conferma prima di uscire dall'app senza prima terminare il giorno",
@@ -1602,7 +1606,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuova attività",
-    "BOARDS": "Დაფები",
+    "BOARDS": "Schede",
     "CREATE_PROJECT": "Crea progetto",
     "CREATE_TAG": "Crea etichetta",
     "DELETE_PROJECT": "Elimina progetto",
@@ -1620,7 +1624,7 @@
       "SYNC": "Howto: Configura Sincronizzazione"
     },
     "METRICS": "Metriche",
-    "NO_TAG_INFO": "Non ci sono tag. Puoi aggiungere tag inserendo `#nomeTag` mentre aggiungi o modifichi le attività.",
+    "NO_TAG_INFO": "Non ci sono etichette. Puoi aggiungere etichette inserendo `#nomeEtichetta` mentre aggiungi o modifichi le attività.",
     "NOTES": "Note",
     "NOTES_PANEL_INFO": "Le note possono solo essere visualizzate dalla vista di pianificazione e dalla lista attività.",
     "PLANNER": "Pianificatore",
@@ -1738,7 +1742,7 @@
     "ESTIMATE_REMAINING": "Stima il rimanente:",
     "FINISH_DAY": "Termina giorno",
     "FINISH_DAY_FOR_PROJECT": "Termina giorno per questo progetto",
-    "FINISH_DAY_FOR_TAG": "Termina giorno per questo tag",
+    "FINISH_DAY_FOR_TAG": "Termina giorno per questa etichetta",
     "FINISH_DAY_TOOLTIP": "Valuta la tua giornata, sposta tutte le attività fatte in archivio (opzionale) e/o pianifica la tua prossima giornata.",
     "HELP_PROCRASTINATION": "Aiuto sto procastinando!",
     "NO_COMPLETED_TASKS": "Non ci sono attività completate",
