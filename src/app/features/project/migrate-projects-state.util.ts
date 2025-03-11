@@ -2,7 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 import { Project, ProjectState } from './project.model';
 import { DEFAULT_PROJECT } from './project.const';
 import { MODEL_VERSION_KEY, THEME_COLOR_MAP } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { MODEL_VERSION } from '../../core/model-version';

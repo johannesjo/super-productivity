@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Selesai",
+        "EISENHAUER_MATRIX": "Matriks Eisenhower",
+        "IMPORTANT": "Penting",
+        "IN_PROGRESS": "Sedang berlangsung",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Tidak Mendesak & Penting",
+        "NOT_URGENT_NOT_IMPORTANT": "Tidak Mendesak & Tidak Penting",
+        "TO_DO": "Tugas yang Harus Dilakukan",
+        "URGENT": "Mendesak",
+        "URGENT_IMPORTANT": "Mendesak & Penting",
+        "URGENT_NOT_IMPORTANT": "Mendesak & Tidak Penting"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Tambahkan Panel baru",
+        "COLUMNS": "Kolom",
+        "TAGS_EXCLUDED": "Tag yang Dikecualikan",
+        "TAGS_REQUIRED": "Tag yang Diperlukan",
+        "TASK_DONE_STATE": "Status Tugas Selesai",
+        "TASK_DONE_STATE_ALL": "Semua",
+        "TASK_DONE_STATE_DONE": "Selesai",
+        "TASK_DONE_STATE_UNDONE": "Belum Selesai"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Tambahkan papan baru",
+        "CONFIRM_DELETE": "Apakah Anda benar-benar ingin menghapus papan ini?",
+        "CREATE_NEW_TAG_BTN": "Buat tag",
+        "CREATE_NEW_TAG_MSG": "1 tag baru perlu dibuat agar papan ini berfungsi",
+        "CREATE_NEW_TAGS_BTN": "Buat tag",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} tag baru perlu dibuat agar papan ini berfungsi",
+        "EDIT_BOARD": "Edit papan",
+        "NO_PANELS_BTN": "Konfigurasi Papan",
+        "NO_PANELS_MSG": "Papan ini tidak memiliki panel yang dikonfigurasi. Tambahkan beberapa panel."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Tambah Bookmark",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesi Fokus sedang berjalan",
+        "TO_FOCUS_OVERLAY": "Untuk Overlay Fokus"
+      },
       "BACK_TO_PLANNING": "Kembali ke Perencanaan",
       "CANCEL_FOCUS_SESSION": "Membatalkan Sesi Fokus",
       "CONGRATS": "Selamat karena telah menyelesaikan sesi ini!",
       "CONTINUE_FOCUS_SESSION": "Lanjutkan Sesi Fokus",
+      "COUNTDOWN": "Hitung mundur",
       "FINISH_TASK_AND_SELECT_NEXT": "Selesaikan tugas dan pilih berikutnya",
+      "FLOWTIME": "Waktu Aliran",
+      "FOR_TASK": "untuk tugas",
       "GET_READY": "Bersiaplah untuk sesi fokus Anda!",
       "GO_TO_PROCRASTINATION": "Dapatkan bantuan, ketika menunda-nunda",
       "GOGOGO": "Ayo, ayo, ayo !!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Lakukan peregangan ringan",
       "SELECT_ANOTHER_TASK": "Pilih Tugas lain",
       "SELECT_TASK": "Pilih Tugas yang akan difokuskan",
+      "SESSION_COMPLETED": "Sesi Fokus Selesai!",
       "SET_FOCUS_SESSION_DURATION": "Mengatur Durasi Sesi Fokus",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Menampilkan/menyembunyikan catatan tugas dan lampiran",
       "START_FOCUS_SESSION": "Mulai Sesi Fokus",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nama pengguna (misalnya untuk memfilter perubahan sendiri)",
+        "INVALID_TOKEN_MESSAGE": "Bukan token GitHub yang valid. Harus dimulai dengan \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Hanya masalah impor yang ditugaskan kepada saya untuk ditumpuk",
         "REPO": "username/repositoryName",
         "TOKEN": "Akses Token"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}<\\/strong> dimulai pada <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> dimulai dari <strong>{{start}}</strong>!<br> (dan {{nrOfOtherBanners}} tugas-tugas lain yang harus diselesaikan)"
       },
+      "S_ACTIVE_TASK_DUE": "Tugas yang sedang Anda kerjakan sekarang sudah jatuh tempo!<br/> ({{title}})",
       "S_REMINDER_ERR": "Kesalahan untuk antarmuka pengingat"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Lakukan!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Hitung",
-        "TITLE": "Ubah Penghitung Sederhana"
+        "CURRENT_STREAK": "Streak saat ini",
+        "DAILY_GOAL": "Sasaran Harian",
+        "DAYS": "Hari",
+        "L_COUNTER": "Hitung"
       },
       "FORM": {
         "ADD_NEW": "Tambah Penghitung Sederhana",
         "HELP": "Di sini Anda dapat mengonfigurasi tombol sederhana yang akan muncul di kanan atas. Mereka bisa berupa penghitung waktu atau hanya penghitung sederhana, yang dihitung, dengan mengkliknya.",
-        "L_AUTO_COUNT_UP": "Pemicu otomatis menghitung untuk",
-        "L_AUTO_SWITCH_OFF": "Pemicu otomatis mati untuk",
-        "L_AUTO_SWITCH_ON": "Saklar pemicu otomatis aktif untuk",
         "L_COUNTDOWN_DURATION": "Durasi hitung mundur",
+        "L_DAILY_GOAL": "Target harian untuk meraih kesuksesan beruntun",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon saat diaktifkan",
         "L_IS_ENABLED": "Diaktifkan",
         "L_TITLE": "Judul",
+        "L_TRACK_STREAKS": "Lacak Jejak",
         "L_TYPE": "Tipe",
+        "L_WEEKDAYS": "Hari kerja untuk memeriksa streak",
         "TITLE": "Penghitung Sederhana",
         "TYPE_CLICK_COUNTER": "Klik penghitung",
         "TYPE_REPEATED_COUNTDOWN": "Hitung Mundur Berulang",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Anda telah mencapai tujuan Anda hari ini!",
+        "GOAL_REACHED_2": "Durasi beruntun saat ini:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Buka perangkat Anda yang lain dan selesaikan sinkronisasi di sana.",
         "T5": "2. Atau Anda dapat menimpa data jarak jauh dengan data lokal. Semua perubahan jarak jauh akan\n    akan hilang!",
         "T6": "Disarankan untuk membuat cadangan data yang Anda timpa!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Simpan & Aktifkan Sinkronisasi",
+        "TITLE": "Konfigurasi Sinkronisasi"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Nonaktifkan sinkronisasi",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Tidak dapat menetapkan proyek melalui sintaks pendek untuk tugas yang dapat diulang!",
+        "CREATED_FOR_PROJECT": "Pindahkan tugas \"{{taskTitle}}\" ke proyek \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Pergi ke Proyek",
         "DELETED": "Tugas \"{{title}}\" dihapus",
         "FOUND_MOVE_FROM_BACKLOG": "Memindahkan tugas <strong>{{title}}</strong> dari backlog ke daftar tugas hari ini",
         "FOUND_MOVE_FROM_OTHER_LIST": "Menambahkan tugas <strong>{{title}}</strong> dari <strong>{{contextTitle}}</strong> ke daftar terbaru",
         "FOUND_RESTORE_FROM_ARCHIVE": "Memulihkan tugas <strong>{{title}}</strong> yang terkait dengan masalah dari arsip",
         "LAST_TAG_DELETION_WARNING": "Anda mencoba menghapus tag terakhir dari tugas non-proyek. Ini tidak diperbolehkan!",
+        "MOVED_TO_PROJECT": "Pindahkan tugas \"{{taskTitle}}\" ke proyek \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Pergi ke Proyek",
         "REMINDER_ADDED": "Tugas \"{{title}}\" terjadwal",
         "REMINDER_DELETED": "Pengingat yang dihapus untuk tugas",
         "REMINDER_UPDATED": "Pengingat yang diperbarui untuk tugas \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Menambahkan",
+    "ADVANCED_CFG": "Konfigurasi Lanjutan",
     "CANCEL": "Batal",
     "CLOSE": "Tutup",
     "DELETE": "Hapus",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Keluar",
     "MINUTES": "{{m}} menit",
+    "MOVE_BACKWARD": "Pindah Mundur",
+    "MOVE_FORWARD": "Pindah Maju",
     "NEXT": "Selanjutnya",
     "NO_CON": "Anda sedang offline. Harap sambungkan kembali ke internet.",
     "NONE": "Tidak ada",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Tambah Tugas Baru",
+    "BOARDS": "Papan",
     "CREATE_PROJECT": "Buat Proyek",
     "CREATE_TAG": "Buat Tag",
     "DELETE_PROJECT": "Menghapus Proyek",

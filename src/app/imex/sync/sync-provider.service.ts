@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
 import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
@@ -69,6 +69,14 @@ export class SyncProviderService {
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
   private _globalProgressBarService = inject(GlobalProgressBarService);
+
+  private _currentProviderLastSync$ = new BehaviorSubject(0);
+
+  // NOTE: not really reliable for all cases, but likely good enough for what we need
+  isCurrentProviderInSync$ = combineLatest([
+    this._currentProviderLastSync$,
+    this._persistenceLocalService.lastSnyModelChange$,
+  ]).pipe(map(([lastSync, lastModelChange]) => lastSync && lastSync === lastModelChange));
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
@@ -187,6 +195,10 @@ export class SyncProviderService {
     const localSyncMeta = await this._persistenceLocalService.load();
     const lastSync = localSyncMeta[cp.id].lastSync;
     const localRev = localSyncMeta[cp.id].rev;
+
+    if (this._currentProviderLastSync$.getValue() !== lastSync) {
+      this._currentProviderLastSync$.next(lastSync);
+    }
 
     // PRE CHECK 1
     // check if remote data & file revision changed
@@ -778,6 +790,7 @@ export class SyncProviderService {
           ? localSyncMeta[cp.id].revTaskArchive
           : revTaskArchive,
     };
+    this._currentProviderLastSync$.next(lastSync);
     await this._persistenceLocalService.save({
       ...localSyncMeta,
       [cp.id]: localSyncMetaForProvider,

@@ -1,19 +1,25 @@
 @if (!isShowAddTask) {
-<div
-  style="text-align: center"
-  (click)="isShowAddTask = true"
->
-  <button mat-button>
-    <mat-icon>add</mat-icon>
-    {{ T.G.ADD|translate }}
-  </button>
-</div>
-} @if (isShowAddTask) {
-<add-task-bar
-  [isElevated]="true "
-  [isHideTagTitles]="true "
-  (blurred)="isShowAddTask = false"
-  (done)="isShowAddTask = false"
-  [planForDay]="planForDay()"
-></add-task-bar>
+  <div
+    style="text-align: center"
+    (click)="isShowAddTask = true"
+  >
+    <button mat-button>
+      <mat-icon>add</mat-icon>
+      {{ T.G.ADD | translate }}
+    </button>
+  </div>
+}
+@if (isShowAddTask) {
+  <add-task-bar
+    [isElevated]="true"
+    [isHideTagTitles]="true"
+    (blurred)="isShowAddTask = false"
+    (done)="isShowAddTask = false"
+    (afterTaskAdd)="afterTaskAdd.emit($event)"
+    [planForDay]="planForDay()"
+    [isSkipAddingCurrentTag]="isSkipAddingCurrentTag()"
+    [taskIdsToExclude]="taskIdsToExclude()"
+    [additionalFields]="additionalFields()"
+    [tagsToRemove]="tagsToRemove()"
+  ></add-task-bar>
 }

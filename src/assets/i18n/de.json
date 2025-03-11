@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Erledigt",
+        "EISENHAUER_MATRIX": "Eisenhower-Matrix",
+        "IMPORTANT": "Wichtig",
+        "IN_PROGRESS": "In Bearbeitung",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Nicht dringend & wichtig",
+        "NOT_URGENT_NOT_IMPORTANT": "Nicht dringend & nicht wichtig",
+        "TO_DO": "Zu erledigen",
+        "URGENT": "Dringend",
+        "URGENT_IMPORTANT": "Dringend & wichtig",
+        "URGENT_NOT_IMPORTANT": "Dringend & nicht wichtig"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Neues Panel hinzufügen",
+        "COLUMNS": "Spalten",
+        "TAGS_EXCLUDED": "Ausgeschlossene Tags",
+        "TAGS_REQUIRED": "Erforderliche Tags",
+        "TASK_DONE_STATE": "Aufgabenstatus erledigt",
+        "TASK_DONE_STATE_ALL": "Alle",
+        "TASK_DONE_STATE_DONE": "Erledigt",
+        "TASK_DONE_STATE_UNDONE": "Unerledigt"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Neues Board hinzufügen",
+        "CONFIRM_DELETE": "Möchten Sie dieses Board wirklich löschen?",
+        "CREATE_NEW_TAG_BTN": "Tag erstellen",
+        "CREATE_NEW_TAG_MSG": "1 neuer Tag muss erstellt werden, damit dieses Board funktioniert",
+        "CREATE_NEW_TAGS_BTN": "Tags erstellen",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} neue Tags müssen erstellt werden, damit dieses Board funktioniert",
+        "EDIT_BOARD": "Board bearbeiten",
+        "NO_PANELS_BTN": "Board konfigurieren",
+        "NO_PANELS_MSG": "Dieses Board hat keine konfigurierten Panels. Fügen Sie einige Panels hinzu."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Lesezeichen hinzufügen",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Fokussierungssitzung läuft",
+        "TO_FOCUS_OVERLAY": "Zur Fokussierungsüberlagerung"
+      },
       "BACK_TO_PLANNING": "Zurück zur Planung",
       "CANCEL_FOCUS_SESSION": "Fokussitzung abbrechen",
       "CONGRATS": "Herzlichen Glückwunsch zum Abschluss dieser Sitzung!",
       "CONTINUE_FOCUS_SESSION": "Fokussitzung fortsetzen",
+      "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Beenden Sie die Aufgabe und wählen Sie „Weiter“.",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "für Aufgabe",
       "GET_READY": "Machen Sie sich bereit für Ihre Fokussitzung!",
       "GO_TO_PROCRASTINATION": "Holen Sie sich Hilfe, wenn Sie prokrastinieren",
       "GOGOGO": "Los, los, los!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Machen Sie leichte Dehnübungen",
       "SELECT_ANOTHER_TASK": "Wählen Sie eine andere Aufgabe aus",
       "SELECT_TASK": "Wählen Sie die Aufgabe aus, auf die Sie sich konzentrieren möchten",
+      "SESSION_COMPLETED": "Fokussierungssitzung abgeschlossen!",
       "SET_FOCUS_SESSION_DURATION": "Legen Sie die Dauer der Fokussitzung fest",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Aufgabennotizen und Anhänge ein-/ausblenden",
       "START_FOCUS_SESSION": "Starten Sie die Fokussitzung",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Benutzername (z. B. um Änderungen selbst herauszufiltern)",
+        "INVALID_TOKEN_MESSAGE": "Kein gültiges GitHub-Token. Er muss mit \"ghp_\" beginnen.",
         "IS_ASSIGNEE_FILTER": "Filtert die mir zugewiesenen Issues",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten",
         "TOKEN": "Zugangstoken"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Aufgaben sind fällig)"
       },
+      "S_ACTIVE_TASK_DUE": "Die Aufgabe, an der Sie gerade arbeiten, ist jetzt fällig!<br/> ({{title}})",
       "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Tu es!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Anzahl",
-        "TITLE": "Einfachen Zähler bearbeiten"
+        "CURRENT_STREAK": "Aktuelle Serie",
+        "DAILY_GOAL": "Tägliches Ziel",
+        "DAYS": "Tage",
+        "L_COUNTER": "Anzahl"
       },
       "FORM": {
         "ADD_NEW": "Fügen Sie einen einfachen Zähler hinzu",
         "HELP": "Hier können Sie einfache Schaltflächen konfigurieren, die oben rechts angezeigt werden. Sie können entweder Timer oder nur ein einfacher Zähler sein, der durch Klicken hochgezählt wird.",
-        "L_AUTO_COUNT_UP": "Auto Trigger hochzählen für",
-        "L_AUTO_SWITCH_OFF": "Auto Trigger ausschalten für",
-        "L_AUTO_SWITCH_ON": "Auto Trigger einschalten für",
         "L_COUNTDOWN_DURATION": "Dauer des Countdowns",
+        "L_DAILY_GOAL": "Tägliches Ziel für eine Erfolgssträhne",
         "L_ICON": "Symbol",
         "L_ICON_ON": "Symbol beim Umschalten",
         "L_IS_ENABLED": "aktiviert",
         "L_TITLE": "Titel",
+        "L_TRACK_STREAKS": "Streifzüge",
         "L_TYPE": "Typ",
+        "L_WEEKDAYS": "Wochentage für die Streifenkontrolle",
         "TITLE": "Einfache Zähler",
         "TYPE_CLICK_COUNTER": "Klick-Zähler",
         "TYPE_REPEATED_COUNTDOWN": "Wiederholter Countdown",
         "TYPE_STOPWATCH": "Stoppuhr"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Sie haben Ihr Ziel für heute erreicht!",
+        "GOAL_REACHED_2": "Dauer des aktuellen Streifens:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Gehen Sie zu Ihrem anderen Gerät und schließen Sie dort die Synchronisierung ab.",
         "T5": "2. Oder Sie können die entfernten Daten mit Ihren lokalen Daten überschreiben. Alle entfernten Änderungen werden\n    verloren gehen!",
         "T6": "Es wird empfohlen, eine Sicherungskopie der überschriebenen Daten zu erstellen!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Speichern & Synchronisierung aktivieren",
+        "TITLE": "Synchronisierung konfigurieren"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Synchronisierung deaktivieren",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Projektzuweisung über Kurzsyntax für wiederkehrende Aufgaben nicht möglich!",
+        "CREATED_FOR_PROJECT": "Aufgabe \"{{taskTitle}}\" in Projekt \"{{projectTitle}}\" verschoben",
+        "CREATED_FOR_PROJECT_ACTION": "Gehe zu Projekt",
         "DELETED": "\"{{title}}\" wurde gelöscht",
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
         "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Stichwort einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
+        "MOVED_TO_PROJECT": "Aufgabe \"{{taskTitle}}\" in Projekt \"{{projectTitle}}\" verschoben",
+        "MOVED_TO_PROJECT_ACTION": "Gehe zu Projekt",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Hinzufügen",
+    "ADVANCED_CFG": "Erweiterte Konfiguration",
     "CANCEL": "Abbrechen",
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
+    "MOVE_BACKWARD": "Rückwärts bewegen",
+    "MOVE_FORWARD": "Vorwärts bewegen",
     "NEXT": "Nächster",
     "NO_CON": "Sie sind derzeit offline. Bitte stellen Sie die Verbindung zum Internet wieder her.",
     "NONE": "Keiner",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
+    "BOARDS": "Boards",
     "CREATE_PROJECT": "Projekt erstellen",
     "CREATE_TAG": "Stichwort erstellen",
     "DELETE_PROJECT": "Projekt löschen",

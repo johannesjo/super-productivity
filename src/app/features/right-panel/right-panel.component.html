@@ -1,7 +1,7 @@
 <better-drawer-container
   (wasClosed)="close()"
-  [isOpen]="isOpen$|async"
-  [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$|async)"
+  [isOpen]="isOpen$ | async"
+  [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$ | async)"
   [sideWidth]="40"
 >
   <ng-container better-drawer-content>
@@ -9,19 +9,21 @@
   </ng-container>
 
   <ng-container better-drawer-side>
-    @let panelContent = panelContent$ |async;
+    @let panelContent = panelContent$ | async;
     <div class="right-panel">
       @if (panelContent === 'ADD_TASK_PANEL') {
-      <issue-panel [@slideInFromRight]></issue-panel>
-      } @if (panelContent === 'NOTES') {
-      <notes [@slideInFromRight]></notes>
-      } @if (selectedTaskWithDelayForNone$|async; as selectedTaskWithDelayForNone) {
-      <task-detail-panel
-        [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$|async)"
-        [@taskDetailPanelTaskChange]=" selectedTaskWithDelayForNone?.id"
-        [@.disabled]="isDisableTaskPanelAni"
-        [task]="selectedTaskWithDelayForNone"
-      ></task-detail-panel>
+        <issue-panel [@slideInFromRight]></issue-panel>
+      }
+      @if (panelContent === 'NOTES') {
+        <notes [@slideInFromRight]></notes>
+      }
+      @if (selectedTaskWithDelayForNone$ | async; as selectedTaskWithDelayForNone) {
+        <task-detail-panel
+          [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$ | async)"
+          [@taskDetailPanelTaskChange]="selectedTaskWithDelayForNone?.id"
+          [@.disabled]="isDisableTaskPanelAni"
+          [task]="selectedTaskWithDelayForNone"
+        ></task-detail-panel>
       }
     </div>
   </ng-container>

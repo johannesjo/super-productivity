@@ -13,7 +13,7 @@ import { Project } from '../../features/project/project.model';
 import { Action, ActionReducer } from '@ngrx/store/src/models';
 
 export interface UndoTaskDeleteState {
-  projectId: string | null;
+  projectId?: string;
   taskIdsForProjectBacklog?: string[];
   taskIdsForProject?: string[];
 
@@ -143,7 +143,7 @@ const _createTaskDeleteState = (
 
   // SUB TASK CASE
   // Note: should work independent as sub tasks dont show up in tag or project lists
-  if (task.parentId !== null) {
+  if (task.parentId) {
     return {
       projectId: task.projectId,
       parentTaskId: task.parentId,

@@ -162,7 +162,7 @@ export class TaskReminderEffects {
         return updateTask({
           task: {
             id,
-            changes: { reminderId: null, plannedAt: null },
+            changes: { reminderId: undefined, plannedAt: undefined },
           },
         });
       }),

@@ -1,8 +1,9 @@
 <h1 mat-dialog-title>
   @if (projectData.id) {
-  <span>{{T.F.PROJECT.D_CREATE.EDIT|translate}}</span>
-  } @if (!projectData.id) {
-  <span>{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
+    <span>{{ T.F.PROJECT.D_CREATE.EDIT | translate }}</span>
+  }
+  @if (!projectData.id) {
+    <span>{{ T.F.PROJECT.D_CREATE.CREATE | translate }}</span>
   }
 </h1>
 
@@ -30,7 +31,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
       <button
         [disabled]="!formBasic.valid"
@@ -39,7 +40,7 @@
         mat-stroked-button
         type="submit"
       >
-        {{T.G.SAVE|translate}}
+        {{ T.G.SAVE | translate }}
       </button>
     </div>
   </mat-dialog-actions>

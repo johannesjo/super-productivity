@@ -11,24 +11,24 @@ import { TaskCopy } from '../../tasks/task.model';
 import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, switchMap, take, takeUntil } from 'rxjs/operators';
+import { first, map, switchMap, take, takeUntil, throttleTime } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
-  selectFocusSessionProgress,
-  selectFocusSessionTimeToGo,
+  selectFocusModeMode,
+  selectFocusSessionTimeElapsed,
 } from '../store/focus-mode.selectors';
 import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { updateTask } from '../../tasks/store/task.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
-import { InlineMultilineInputComponent } from '../../../ui/inline-multiline-input/inline-multiline-input.component';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import { MatIconAnchor, MatIconButton } from '@angular/material/button';
+import { MatIconAnchor, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
@@ -39,15 +39,17 @@ import { T } from '../../../t.const';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counter-button/simple-counter-button.component';
 import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-attachment-list/task-attachment-list.component';
+import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
+import { FocusModeService } from '../focus-mode.service';
 
 @Component({
   selector: 'focus-mode-main',
   templateUrl: './focus-mode-main.component.html',
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation],
+  animations: [expandAnimation, fadeAnimation, slideInOutFromBottomAni],
   imports: [
-    InlineMultilineInputComponent,
+    TaskTitleComponent,
     ProgressCircleComponent,
     MatIconButton,
     MatTooltip,
@@ -60,6 +62,7 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
     TranslatePipe,
     IssueIconPipe,
     SimpleCounterButtonComponent,
+    MatMiniFabButton,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {
@@ -70,8 +73,11 @@ export class FocusModeMainComponent implements OnDestroy {
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
 
-  timeToGo$ = this._store.select(selectFocusSessionTimeToGo);
-  sessionProgress$ = this._store.select(selectFocusSessionProgress);
+  focusModeService = inject(FocusModeService);
+
+  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
+  mode$ = this._store.select(selectFocusModeMode);
+  isCountTimeDown$ = this.mode$.pipe(map((mode) => mode !== FocusModeMode.Flowtime));
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -92,6 +98,14 @@ export class FocusModeMainComponent implements OnDestroy {
         : of(null);
     }),
     take(1),
+  );
+
+  autoRationProgress$: Observable<number> = this.timeElapsed$.pipe(
+    map((timeElapsed) => {
+      const percentOfFullMinute = (timeElapsed % 60000) / 60000;
+      return percentOfFullMinute * 100;
+    }),
+    throttleTime(900),
   );
 
   private _onDestroy$ = new Subject<void>();
@@ -157,7 +171,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   finishCurrentTask(): void {
-    this._store.dispatch(focusSessionDone());
+    this._store.dispatch(focusSessionDone({}));
     this._store.dispatch(
       updateTask({
         task: {

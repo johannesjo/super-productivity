@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   HostBinding,
+  inject,
   input,
   viewChild,
 } from '@angular/core';
@@ -19,12 +21,14 @@ import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuItem } from '@angular/material/menu';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'side-nav-item',
   imports: [
     RouterLink,
-
     RouterModule,
     WorkContextMenuComponent,
     ContextMenuComponent,
@@ -37,12 +41,23 @@ import { MatMenuItem } from '@angular/material/menu';
   styleUrl: './side-nav-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'g-multi-btn-wrapper' },
+  standalone: true,
 })
 export class SideNavItemComponent {
+  private readonly _store = inject(Store);
+
   workContext = input.required<WorkContextCommon>();
   type = input.required<WorkContextType>();
   defaultIcon = input.required<string>();
   activeWorkContextId = input.required<string>();
+
+  allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });
+  nrOfOpenTasks = computed<number>(() => {
+    // const allUndoneTasks
+    const allUndoneTaskIds = this.allUndoneTaskIds();
+    return this.workContext().taskIds.filter((tid) => !allUndoneTaskIds.includes(tid))
+      .length;
+  });
 
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 

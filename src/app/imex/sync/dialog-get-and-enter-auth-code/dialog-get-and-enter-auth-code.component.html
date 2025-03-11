@@ -1,9 +1,9 @@
 <h1 mat-dialog-title>
-  {{T.F.SYNC.D_AUTH_CODE.TITLE|translate:{provider: data.providerName} }}
+  {{ T.F.SYNC.D_AUTH_CODE.TITLE | translate: { provider: data.providerName } }}
 </h1>
 
 <mat-dialog-content>
-  <p>{{T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK|translate}}</p>
+  <p>{{ T.F.SYNC.D_AUTH_CODE.FOLLOW_LINK | translate }}</p>
   <a
     mat-button
     color="primary"
@@ -12,12 +12,12 @@
     [href]="data.url"
   >
     <mat-icon>open_in_new</mat-icon>
-    {{ T.F.SYNC.D_AUTH_CODE.GET_AUTH_CODE|translate }}</a
+    {{ T.F.SYNC.D_AUTH_CODE.GET_AUTH_CODE | translate }}</a
   >
   <br />
   <br />
   <mat-form-field>
-    <mat-label>{{T.F.SYNC.D_AUTH_CODE.L_AUTH_CODE|translate}}</mat-label>
+    <mat-label>{{ T.F.SYNC.D_AUTH_CODE.L_AUTH_CODE | translate }}</mat-label>
     <mat-icon matPrefix>vpn_key</mat-icon>
     <input
       matInput
@@ -33,7 +33,7 @@
       color="primary"
       mat-button
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
     <button
       (click)="close(token)"
@@ -42,7 +42,7 @@
       mat-stroked-button
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+      {{ T.G.SAVE | translate }}
     </button>
   </div>
 </mat-dialog-actions>

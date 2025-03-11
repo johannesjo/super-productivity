@@ -3,77 +3,80 @@
   class="attachments"
 >
   @for (attachment of attachments(); track trackByFn(i, attachment); let i = $index) {
-  <li
-    class="attachment"
-    draggable="false"
-  >
-    <!-- NOTE: view link exists twice, both for mobile and for clicks before animation is done -->
-    <a
-      [class.isImage]="attachment.type==='IMG' && !isError[i]"
-      [href]="attachment.path"
-      [type]="isError[i] ? 'LINK': attachment.type"
-      class="attachment-link mat-elevation-z3"
+    <li
+      class="attachment"
       draggable="false"
-      target="_blank"
-      taskAttachmentLink
     >
-      @if (attachment.type!=='IMG' || isError[i]) { @if (attachment.icon) {
-      <mat-icon>{{attachment.icon}} </mat-icon>
-      }
-      <div class="title">{{attachment.title || attachment.path}}</div>
-      } @if (attachment.type==='IMG' && !isError[i]) {
-      <img
-        (error)="isError[i]=true"
-        [enlargeImg]="attachment.originalImgPath"
-        [src]="attachment.originalImgPath||attachment.path"
-      />
-      }
-    </a>
-    @if (!isDisableControls()) {
-    <div class="controls border-color-primary">
+      <!-- NOTE: view link exists twice, both for mobile and for clicks before animation is done -->
       <a
-        class="view-btn"
-        mat-flat-button
-        [class.isImage]="attachment.type==='IMG' && !isError[i]"
+        [class.isImage]="attachment.type === 'IMG' && !isError[i]"
         [href]="attachment.path"
-        [type]="isError[i] ? 'LINK': attachment.type"
+        [type]="isError[i] ? 'LINK' : attachment.type"
+        class="attachment-link mat-elevation-z3"
         draggable="false"
         target="_blank"
         taskAttachmentLink
       >
-        @if (attachment.type==='IMG') {
-        <mat-icon>search</mat-icon>
-        } @if (attachment.type!=='IMG') {
-        <mat-icon>open_in_new</mat-icon>
+        @if (attachment.type !== 'IMG' || isError[i]) {
+          @if (attachment.icon) {
+            <mat-icon>{{ attachment.icon }} </mat-icon>
+          }
+          <div class="title">{{ attachment.title || attachment.path }}</div>
+        }
+        @if (attachment.type === 'IMG' && !isError[i]) {
+          <img
+            (error)="isError[i] = true"
+            [enlargeImg]="attachment.originalImgPath"
+            [src]="attachment.originalImgPath || attachment.path"
+          />
         }
       </a>
-      @if (attachment.type!=='IMG') {
-      <button
-        (click)="copy(attachment)"
-        class="copy-btn"
-        mat-flat-button
-      >
-        <mat-icon>content_copy</mat-icon>
-      </button>
+      @if (!isDisableControls()) {
+        <div class="controls border-color-primary">
+          <a
+            class="view-btn"
+            mat-flat-button
+            [class.isImage]="attachment.type === 'IMG' && !isError[i]"
+            [href]="attachment.path"
+            [type]="isError[i] ? 'LINK' : attachment.type"
+            draggable="false"
+            target="_blank"
+            taskAttachmentLink
+          >
+            @if (attachment.type === 'IMG') {
+              <mat-icon>search</mat-icon>
+            }
+            @if (attachment.type !== 'IMG') {
+              <mat-icon>open_in_new</mat-icon>
+            }
+          </a>
+          @if (attachment.type !== 'IMG') {
+            <button
+              (click)="copy(attachment)"
+              class="copy-btn"
+              mat-flat-button
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          }
+          <button
+            (click)="openEditDialog(attachment)"
+            class="edit-btn"
+            mat-flat-button
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          @if (attachment.id) {
+            <button
+              (click)="remove(attachment.id)"
+              class="trash-btn"
+              mat-flat-button
+            >
+              <mat-icon color="warn">delete_forever</mat-icon>
+            </button>
+          }
+        </div>
       }
-      <button
-        (click)="openEditDialog(attachment)"
-        class="edit-btn"
-        mat-flat-button
-      >
-        <mat-icon>edit</mat-icon>
-      </button>
-      @if(attachment.id){
-      <button
-        (click)="remove(attachment.id)"
-        class="trash-btn"
-        mat-flat-button
-      >
-        <mat-icon color="warn">delete_forever</mat-icon>
-      </button>
-      }
-    </div>
-    }
-  </li>
+    </li>
   }
 </ul>

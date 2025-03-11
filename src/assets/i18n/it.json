@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Მზადაა",
+        "EISENHAUER_MATRIX": "Ეიზენჰაუერის მატრიცა",
+        "IMPORTANT": "Მნიშვნელოვანია",
+        "IN_PROGRESS": "Მიმდინარე",
+        "KANBAN": "Კანბანი",
+        "NOT_URGENT_IMPORTANT": "Არ არის გადაუდებელი და მნიშვნელოვანი",
+        "NOT_URGENT_NOT_IMPORTANT": "Არ არის გადაუდებელი და უმნიშვნელოა",
+        "TO_DO": "Უნდა გააკეთოს",
+        "URGENT": "Სასწრაფო",
+        "URGENT_IMPORTANT": "Გადაუდებელი და მნიშვნელოვანი",
+        "URGENT_NOT_IMPORTANT": "Გადაუდებელი და უმნიშვნელოა"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Ახალი პანელის დამატება",
+        "COLUMNS": "Სვეტები",
+        "TAGS_EXCLUDED": "Გამორიცხული ტეგები",
+        "TAGS_REQUIRED": "Საჭირო ტეგები",
+        "TASK_DONE_STATE": "Დავალება შესრულებულია",
+        "TASK_DONE_STATE_ALL": "Ყველა",
+        "TASK_DONE_STATE_DONE": "Მზადაა",
+        "TASK_DONE_STATE_UNDONE": "Გაუქმება"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Ახალი დაფის დამატება",
+        "CONFIRM_DELETE": "Ნამდვილად გსურთ ამ დაფის წაშლა?",
+        "CREATE_NEW_TAG_BTN": "Ჭდის შექმნა",
+        "CREATE_NEW_TAG_MSG": "1 ახალი ტეგი უნდა შეიქმნას ამ დაფის მუშაობისთვის",
+        "CREATE_NEW_TAGS_BTN": "Ტეგების შექმნა",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} საჭიროა ახალი ტეგების შექმნა ამ დაფის მუშაობისთვის",
+        "EDIT_BOARD": "Დაფის რედაქტირება",
+        "NO_PANELS_BTN": "Დაფის კონფიგურაცია",
+        "NO_PANELS_MSG": "Ამ დაფას არ აქვს კონფიგურირებული პანელები. დაამატეთ რამდენიმე პანელი."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Aggiungi segnalibro",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Ფოკუს სესია მიმდინარეობს",
+        "TO_FOCUS_OVERLAY": "Გადახურვაზე ფოკუსირება"
+      },
       "BACK_TO_PLANNING": "Torna alla pianificazione",
       "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
       "CONGRATS": "Congratulazione per avere completato questa sessione!",
       "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
+      "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Termina attività e seleziona la prossima",
+      "FLOWTIME": "Ნაკადის დრო",
+      "FOR_TASK": "დავალებისთვის",
       "GET_READY": "Preparati per la tua prossima sessione!",
       "GO_TO_PROCRASTINATION": "Ottieni aiuto quando stai procastinando",
       "GOGOGO": "Vai, vai, vai!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Fai un po' di stretching",
       "SELECT_ANOTHER_TASK": "Seleziona un'altra attività",
       "SELECT_TASK": "Seleziona l'attività su cui concentrarti",
+      "SESSION_COMPLETED": "Ფოკუს სესია დასრულდა!",
       "SET_FOCUS_SESSION_DURATION": "Imposta la durata della Sessione Concentrazione",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostra/nascondi note e allegati dell'attività",
       "START_FOCUS_SESSION": "Avvia Sessione Concentrazione",
@@ -225,10 +269,10 @@
       },
       "FORM": {
         "FILTER_USER": "Nome utente (es. per filtrare le modifiche fatte da te)",
+        "INVALID_TOKEN_MESSAGE": "non è un token di Github valido. Deve iniziare con \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtra issue assegnate a me",
         "REPO": "username/repositoryName",
-        "TOKEN": "Token di accesso",
-        "INVALID_TOKEN_MESSAGE": "non è un token di Github valido. Deve iniziare con \"ghp_\"."
+        "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui puoi configurare SuperProductivity per aggiungere la lista degli issue di una specifica repository nel pannello di creazione attività nella vista pianificazione giornaliera. Saranno mostrati come suggerimenti e forniranno un link all'issue ed alcune informazioni su di esso.</p> <p>Inoltre puoi aggiungere e sincronizzare automaticamente tutti gli issue aperti alle attività arretrate.</p>",
@@ -807,25 +851,31 @@
         "OK": "Fallo!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contare",
-        "TITLE": "Modifica contatore semplice"
+        "CURRENT_STREAK": "Მიმდინარე სტრიქონი",
+        "DAILY_GOAL": "Ყოველდღიური მიზანი",
+        "DAYS": "Დღეები",
+        "L_COUNTER": "Contare"
       },
       "FORM": {
         "ADD_NEW": "Aggiungi un semplice contatore",
         "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
-        "L_AUTO_COUNT_UP": "Conto alla rovescia del trigger automatico per",
-        "L_AUTO_SWITCH_OFF": "Spegnimento automatico disattivato per",
-        "L_AUTO_SWITCH_ON": "Accensione automatica attivata per",
         "L_COUNTDOWN_DURATION": "Durata conto alla rovescia",
+        "L_DAILY_GOAL": "Ყოველდღიური გოლი წარმატებული სერიისთვის",
         "L_ICON": "Icona",
         "L_ICON_ON": "Icona quando attivato",
         "L_IS_ENABLED": "Abilitato",
         "L_TITLE": "Titolo",
+        "L_TRACK_STREAKS": "Სიმღერა ზოლები",
         "L_TYPE": "genere",
+        "L_WEEKDAYS": "Კვირის დღეები ზოლის შესამოწმებლად",
         "TITLE": "Contatori semplici",
         "TYPE_CLICK_COUNTER": "Fai clic su Contatore",
         "TYPE_REPEATED_COUNTDOWN": "Conto alla rovescia ripetuto",
         "TYPE_STOPWATCH": "Cronometro"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Თქვენ მიაღწიეთ დღევანდელ მიზანს!",
+        "GOAL_REACHED_2": "Მიმდინარე სერიების ხანგრძლივობა: "
       }
     },
     "SYNC": {
@@ -870,6 +920,10 @@
         "T4": "1. Apri il tuo dispositivo e completa lì la sincronizzazione.",
         "T5": "2. Oppure puoi sovrascrivere i dati remoti con questi dati locali. Tutti i cambiamenti remoti saranno\npersi!",
         "T6": "E' consigliata la creazione di un backup dei dati che sovrascrivi!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Შენახვა & ჩართვა სინქრონიზაცია",
+        "TITLE": "Სინქრონიზაციის კონფიგურაცია"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disabilita sincronizzazione",
@@ -1075,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossibile assegnare il progetto tramite la sintassi breve per le attività ripetibili!",
+        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Პროექტში გადასვლა",
         "DELETED": "Attività \"{{title}} eliminata\"",
         "FOUND_MOVE_FROM_BACKLOG": "Attività <strong>{{title}}</strong> spostata dagli arretrati alla lista delle attività di oggi",
         "FOUND_MOVE_FROM_OTHER_LIST": "Attività <strong>{{title}}</strong> aggiunta da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
         "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
+        "MOVED_TO_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Პროექტში გადასვლა",
         "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
         "REMINDER_DELETED": "Cancellato promemoria per attività",
         "REMINDER_UPDATED": "Aggiornato promemoria per attività \"{{title}}\"",
@@ -1272,6 +1330,7 @@
   },
   "G": {
     "ADD": "Aggiungi",
+    "ADVANCED_CFG": "Მოწინავე კონფიგურაცია",
     "CANCEL": "Annulla",
     "CLOSE": "Chiudi",
     "DELETE": "Cancella",
@@ -1287,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minuti",
+    "MOVE_BACKWARD": "Უკან გადატანა",
+    "MOVE_FORWARD": "Იმოძრავეთ წინ",
     "NEXT": "Prossimo",
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "NONE": "Nessuna",
@@ -1541,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuova attività",
+    "BOARDS": "Დაფები",
     "CREATE_PROJECT": "Crea progetto",
     "CREATE_TAG": "Crea etichetta",
     "DELETE_PROJECT": "Elimina progetto",

@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
-import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
@@ -27,7 +26,6 @@ import { SimpleCounter } from '../../features/simple-counter/simple-counter.mode
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { FocusModeService } from '../../features/focus-mode/focus-mode.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -41,6 +39,12 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
+import { LongPressDirective } from '../../ui/longpress/longpress.directive';
+import { isOnline$ } from '../../util/is-online';
+import { Store } from '@ngrx/store';
+import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 
 @Component({
   selector: 'main-header',
@@ -64,12 +68,13 @@ import { SimpleCounterButtonComponent } from '../../features/simple-counter/simp
     TranslatePipe,
     TagComponent,
     SimpleCounterButtonComponent,
+    LongPressDirective,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly projectService = inject(ProjectService);
+  readonly matDialog = inject(MatDialog);
   readonly workContextService = inject(WorkContextService);
-  readonly bookmarkService = inject(BookmarkService);
   readonly taskService = inject(TaskService);
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
@@ -80,7 +85,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   private readonly _renderer = inject(Renderer2);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
-  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _store = inject(Store);
   private readonly _configService = inject(GlobalConfigService);
 
   T: typeof T = T;
@@ -154,15 +159,21 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  setupSync(): void {
+    this.matDialog.open(DialogSyncInitialCfgComponent);
+  }
+
   isCounterRunning(counters: SimpleCounter[]): boolean {
     return !!(counters && counters.find((counter) => counter.isOn));
   }
 
   enableFocusMode(): void {
-    this._focusModeService.showFocusOverlay();
+    this._store.dispatch(showFocusOverlay());
   }
 
   get kb(): KeyboardConfig {
     return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
+
+  protected readonly isOnline$ = isOnline$;
 }

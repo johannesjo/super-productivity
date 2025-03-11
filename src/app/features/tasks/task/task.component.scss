@@ -333,11 +333,6 @@
   }
 }
 
-// TASK TITLE
-.task-title.task-title {
-  @include taskTitle;
-}
-
 @mixin timeWrapperMinimalStyles() {
   &:after {
     content: '';
@@ -877,4 +872,14 @@ $min-badge-size: $s * 2.25;
     min-width: 40px;
     margin-right: -29px !important;
   }
+}
+
+.tag-ico {
+  font-size: 20px;
+  line-height: 20px;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
 }

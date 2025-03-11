@@ -1,19 +1,19 @@
 <div class="task-list-wrapper">
   <section class="add-task-bar-wrapper">
-    @if (workContextService.estimateRemainingToday$|async; as estimateTotal) {
-    <div
-      @expand
-      class="estimate-total"
-    >
-      <div class="label">{{T.PDS.ESTIMATE_TOTAL|translate}}</div>
-      <div class="no-wrap">
-        ~<strong class="time-val">{{estimateTotal|msToString}}</strong>
-        <mat-icon
-          style="margin-left: 2px"
-          svgIcon="estimate_remaining"
-        ></mat-icon>
+    @if (workContextService.estimateRemainingToday$ | async; as estimateTotal) {
+      <div
+        @expand
+        class="estimate-total"
+      >
+        <div class="label">{{ T.PDS.ESTIMATE_TOTAL | translate }}</div>
+        <div class="no-wrap">
+          ~<strong class="time-val">{{ estimateTotal | msToString }}</strong>
+          <mat-icon
+            style="margin-left: 2px"
+            svgIcon="estimate_remaining"
+          ></mat-icon>
+        </div>
       </div>
-    </div>
     }
 
     <add-task-bar [isDisableAutoFocus]="true"></add-task-bar>
@@ -25,7 +25,7 @@
   </section>
 
   <task-list
-    [tasks]="workContextService.undoneTasks$|async"
+    [tasks]="workContextService.undoneTasks$ | async"
     listId="PARENT"
     listModelId="UNDONE"
   ></task-list>

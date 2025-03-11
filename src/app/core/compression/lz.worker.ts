@@ -1,12 +1,14 @@
 /// <reference lib="webworker" />
 import LZString from 'lz-string';
+import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
 
 const handleData = (msgData: any): string | null => {
   switch (msgData.type) {
     case 'COMPRESS':
-      return LZString.compress(msgData.strToHandle);
+      return strFromU8(compressSync(strToU8(msgData.strToHandle)), true);
     case 'DECOMPRESS':
-      return LZString.decompress(msgData.strToHandle);
+      const decompressed = decompressSync(strToU8(msgData.strToHandle, true));
+      return strFromU8(decompressed);
     case 'COMPRESS_UTF16':
       // eslint-disable-next-line
       return LZString['compressToUTF16'](msgData.strToHandle);

@@ -10,11 +10,11 @@
 
 <button
   #routeBtn
-  [routerLink]="[type() ==='TAG' ? 'tag' :'project', workContext().id, 'tasks']"
+  [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext().id, 'tasks']"
   routerLinkActive="isActiveRoute"
   mat-menu-item
 >
-  <span class="badge">{{ workContext().taskIds.length }}</span>
+  <span class="badge">{{ nrOfOpenTasks() }}</span>
   <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
   <span class="text">{{ workContext().title }}</span>
 </button>

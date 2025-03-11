@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -53,6 +53,7 @@ export class LayoutService {
   isShowSearchBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSearchBar),
   );
+
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
     .pipe(map((result) => result.matches));

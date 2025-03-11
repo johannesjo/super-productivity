@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Ferdig",
+        "EISENHAUER_MATRIX": "Eisenhower-matrise",
+        "IMPORTANT": "Viktig",
+        "IN_PROGRESS": "Under arbeid",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Ikke haster & Viktig",
+        "NOT_URGENT_NOT_IMPORTANT": "Ikke haster & Ikke viktig",
+        "TO_DO": "Å gjøre",
+        "URGENT": "Haster",
+        "URGENT_IMPORTANT": "Haster & Viktig",
+        "URGENT_NOT_IMPORTANT": "Haster & Ikke viktig"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Legg til ny panel",
+        "COLUMNS": "Kolonner",
+        "TAGS_EXCLUDED": "Ekskluderte merker",
+        "TAGS_REQUIRED": "Obligatoriske merker",
+        "TASK_DONE_STATE": "Oppgave fullført tilstand",
+        "TASK_DONE_STATE_ALL": "Alle",
+        "TASK_DONE_STATE_DONE": "Ferdig",
+        "TASK_DONE_STATE_UNDONE": "Ikke gjort"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Legg til ny tavle",
+        "CONFIRM_DELETE": "Vil du virkelig slette denne tavlen?",
+        "CREATE_NEW_TAG_BTN": "Opprett merke",
+        "CREATE_NEW_TAG_MSG": "1 nytt merke må opprettes for at denne tavlen skal fungere",
+        "CREATE_NEW_TAGS_BTN": "Opprett merker",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nye merker må opprettes for at denne tavlen skal fungere",
+        "EDIT_BOARD": "Rediger tavle",
+        "NO_PANELS_BTN": "Konfigurer tavle",
+        "NO_PANELS_MSG": "Denne tavlen har ingen konfigurerte paneler. Legg til noen paneler."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Legg til bokmerke",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Fokusøkt pågår",
+        "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
+      },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
       "CANCEL_FOCUS_SESSION": "Avlys fokusøkten",
       "CONGRATS": "Gratulerer med å ha fullført denne økten!",
       "CONTINUE_FOCUS_SESSION": "Fortsett fokusøkten",
+      "COUNTDOWN": "Nedtelling",
       "FINISH_TASK_AND_SELECT_NEXT": "Fullfør oppgaven og velg neste",
+      "FLOWTIME": "Flytstid",
+      "FOR_TASK": "for oppgave",
       "GET_READY": "Gjør deg klar for fokusøkten!",
       "GO_TO_PROCRASTINATION": "Få hjelp når du utsetter ting",
       "GOGOGO": "Gå, gå, gå!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Gjør noen milde uttøyninger",
       "SELECT_ANOTHER_TASK": "Velg en annen oppgave",
       "SELECT_TASK": "Velg oppgave å fokusere på",
+      "SESSION_COMPLETED": "Fokusøkt fullført!",
       "SET_FOCUS_SESSION_DURATION": "Angi fokusøktens varighet",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
       "START_FOCUS_SESSION": "Start fokusøkten",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Brukernavn (f.eks. for å filtrere ut endringer selv)",
+        "INVALID_TOKEN_MESSAGE": "Ikke et gyldig GitHub-token. Det må begynne med \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importer kun saker som er tildelt meg til etterslep",
         "REPO": "\"brukernavn / repositoryName\" for git-depotet du vil spore",
         "TOKEN": "Tilgangstoken"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}<\\/strong> starter kl <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starter ved <strong>{{start}}</strong>!<br> (og {{nrOfOtherBanners}} andre oppgaver skal utføres)"
       },
+      "S_ACTIVE_TASK_DUE": "Oppgaven du jobber med for øyeblikket, er nå forfalt!<br/> ({{title}})",
       "S_REMINDER_ERR": "Feil for påminnelsesgrensesnitt"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Gjør det!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Telle",
-        "TITLE": "Rediger enkel teller"
+        "CURRENT_STREAK": "Nåværende strek",
+        "DAILY_GOAL": "Daglig mål",
+        "DAYS": "Dager",
+        "L_COUNTER": "Telle"
       },
       "FORM": {
         "ADD_NEW": "Legg til enkel teller",
         "HELP": "Her kan du konfigurere enkle knapper som vises øverst til høyre. De kan enten være tidtakere eller bare en enkel teller, som telles opp, ved å klikke på den.",
-        "L_AUTO_COUNT_UP": "Automatisk utløsertelling opp for",
-        "L_AUTO_SWITCH_OFF": "Automatisk utkobling for",
-        "L_AUTO_SWITCH_ON": "Automatisk utløserbryter på for",
         "L_COUNTDOWN_DURATION": "Nedtellingens varighet",
+        "L_DAILY_GOAL": "Daglig mål for en vellykket streak",
         "L_ICON": "Ikon",
         "L_ICON_ON": "Ikon når det er slått på",
         "L_IS_ENABLED": "Aktivert",
         "L_TITLE": "Tittel",
+        "L_TRACK_STREAKS": "Sporstreker",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Ukedager for å sjekke for strek",
         "TITLE": "Enkle tellere",
         "TYPE_CLICK_COUNTER": "Klikk på teller",
         "TYPE_REPEATED_COUNTDOWN": "Gjentatt nedtelling",
         "TYPE_STOPWATCH": "Stoppeklokke"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Du har nådd målet ditt for i dag!",
+        "GOAL_REACHED_2": "Nåværende streks varighet:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Gå til den andre enheten og fullfør synkroniseringen der.",
         "T5": "2. Eller du kan overskrive de eksterne dataene med dine lokale. Alle eksterne endringer vil\n    gå tapt!",
         "T6": "Det anbefales å ta en sikkerhetskopi av dataene du overskriver!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Lagre & Aktiver synkronisering",
+        "TITLE": "Konfigurer synkronisering"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deaktiver synkronisering",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Kan ikke tilordne prosjekt via kort syntaks for repeterbare oppgaver!",
+        "CREATED_FOR_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Gå til prosjekt",
         "DELETED": "Slettet oppgave \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Flyttet oppgave <strong>{{title}}</strong> fra backlog til dagens oppgaveliste",
         "FOUND_MOVE_FROM_OTHER_LIST": "Lagt til oppgave <strong>{{title}}</strong> fra <strong>{{contextTitle}}</strong> til gjeldende liste",
         "FOUND_RESTORE_FROM_ARCHIVE": "Gjenopprettet oppgave <strong>{{title}}</strong> relatert til utgave fra arkivet",
         "LAST_TAG_DELETION_WARNING": "Du prøver å fjerne den siste taggen for en ikke-prosjektoppgave. Dette er ikke tillatt!",
+        "MOVED_TO_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Gå til prosjekt",
         "REMINDER_ADDED": "Planlagt oppgave \"{{title}}\"",
         "REMINDER_DELETED": "Slettet påminnelse for oppgaven",
         "REMINDER_UPDATED": "Oppdatert påminnelse for oppgaven \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "ADD",
+    "ADVANCED_CFG": "Avansert konfigurasjon",
     "CANCEL": "Avbryt",
     "CLOSE": "Lukk",
     "DELETE": "Slett",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Logg Inn",
     "LOGOUT": "Logg ut",
     "MINUTES": "{{m}} minutter",
+    "MOVE_BACKWARD": "Flytt bakover",
+    "MOVE_FORWARD": "Flytt fremover",
     "NEXT": "Neste",
     "NO_CON": "Du er for øyeblikket frakoblet. Koble til Internett på nytt.",
     "NONE": "Ingen",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Legg til ny oppgave",
+    "BOARDS": "Brett",
     "CREATE_PROJECT": "Lag prosjekt",
     "CREATE_TAG": "Opprett tag",
     "DELETE_PROJECT": "Slett prosjekt",

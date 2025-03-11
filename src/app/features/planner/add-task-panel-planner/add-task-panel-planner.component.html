@@ -19,22 +19,23 @@
 * schedule tasks need to be indicated
 -->
 
-@if (filteredTasks$|async; as allTasks) {
-<div
-  class="tasks"
-  cdkDropList
-  cdkDropListSortingDisabled
-  [cdkDropListData]="ADD_TASK_PANEL "
-  (cdkDropListDropped)="drop($event)"
->
-  @for (task of allTasks; track task.id) {
-  <planner-task
-    cdkDrag
-    [cdkDragData]="task"
-    [task]="task"
-  ></planner-task>
-  } @if (allTasks.length === 0) {
-  <div class="empty">{{ T.F.PLANNER.NO_TASKS|translate }}</div>
-  }
-</div>
+@if (filteredTasks$ | async; as allTasks) {
+  <div
+    class="tasks"
+    cdkDropList
+    cdkDropListSortingDisabled
+    [cdkDropListData]="ADD_TASK_PANEL"
+    (cdkDropListDropped)="drop($event)"
+  >
+    @for (task of allTasks; track task.id) {
+      <planner-task
+        cdkDrag
+        [cdkDragData]="task"
+        [task]="task"
+      ></planner-task>
+    }
+    @if (allTasks.length === 0) {
+      <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>
+    }
+  </div>
 }

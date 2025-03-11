@@ -591,21 +591,21 @@ describe('dataRepair()', () => {
           id: 'orphanedTask',
           title: 'orphanedTask',
           projectId: 'TEST_ID_PROJECT',
-          parentId: null,
+          parentId: undefined,
         },
         {
           ...DEFAULT_TASK,
           id: 'orphanedTaskOtherProject',
           title: 'orphanedTaskOtherProject',
           projectId: 'TEST_ID_PROJECT_OTHER',
-          parentId: null,
+          parentId: undefined,
         },
         {
           ...DEFAULT_TASK,
           id: 'regularTaskOtherProject',
           title: 'regularTaskOtherProject',
           projectId: 'TEST_ID_PROJECT_OTHER',
-          parentId: null,
+          parentId: undefined,
         },
       ]),
     } as any;
@@ -675,7 +675,7 @@ describe('dataRepair()', () => {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
-          parentId: null,
+          parentId: undefined,
           subTaskIds: ['subTaskUnarchived'],
           projectId: FAKE_PROJECT_ID,
         },
@@ -717,7 +717,7 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'parent',
             title: 'parent',
-            parentId: null,
+            parentId: undefined,
             subTaskIds: ['subTaskUnarchived', 'subTaskArchived'],
             projectId: FAKE_PROJECT_ID,
           },
@@ -763,7 +763,7 @@ describe('dataRepair()', () => {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
-          parentId: null,
+          parentId: undefined,
           subTaskIds: ['subTaskArchived'],
           projectId: FAKE_PROJECT_ID,
         },
@@ -796,7 +796,7 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'parent',
             title: 'parent',
-            parentId: null,
+            parentId: undefined,
             subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
             projectId: FAKE_PROJECT_ID,
           },
@@ -830,21 +830,21 @@ describe('dataRepair()', () => {
           ...DEFAULT_TASK,
           id: 'subTask1',
           title: 'subTask1',
-          projectId: null,
+          projectId: undefined,
           parentId: 'parent',
         },
         {
           ...DEFAULT_TASK,
           id: 'subTask2',
           title: 'subTask2',
-          projectId: null,
+          projectId: undefined,
           parentId: 'parent',
         },
         {
           ...DEFAULT_TASK,
           id: 'parent',
           title: 'parent',
-          parentId: null,
+          parentId: undefined,
           projectId: 'p1',
           subTaskIds: ['subTask1', 'subTask2'],
         },
@@ -881,7 +881,7 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'parent',
             title: 'parent',
-            parentId: null,
+            parentId: undefined,
             subTaskIds: ['subTask1', 'subTask2'],
             projectId: 'p1',
           },
@@ -915,7 +915,6 @@ describe('dataRepair()', () => {
         entities: {
           TEST: {
             ...taskState.entities.TEST,
-            projectId: null,
           },
         },
       },
@@ -947,7 +946,6 @@ describe('dataRepair()', () => {
         entities: {
           TEST: {
             ...taskArchiveState.entities.TEST,
-            projectId: null,
           },
         },
       },
@@ -1020,7 +1018,6 @@ describe('dataRepair()', () => {
         entities: {
           TEST: {
             ...taskRepeatCfgState.entities.TEST,
-            projectId: null,
           },
         },
       },
@@ -1149,7 +1146,7 @@ describe('dataRepair()', () => {
         {
           ...DEFAULT_TASK,
           id: 't2',
-          projectId: null,
+          projectId: undefined,
         },
       ]),
     } as any;
@@ -1204,7 +1201,7 @@ describe('dataRepair()', () => {
         {
           ...DEFAULT_TASK,
           id: 't2',
-          projectId: null,
+          projectId: undefined,
         },
       ]),
     } as any;
@@ -1546,8 +1543,8 @@ describe('dataRepair()', () => {
           },
           TEST2: {
             ...taskState.entities.TEST2,
-            reminderId: null,
-            plannedAt: null,
+            reminderId: undefined,
+            plannedAt: undefined,
           },
         },
       },

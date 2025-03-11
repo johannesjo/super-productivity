@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Fè",
+        "EISENHAUER_MATRIX": "Eisenhower Matrix",
+        "IMPORTANT": "Enpòtan",
+        "IN_PROGRESS": "Nan Pwogrè",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Pa Ijan ak enpòtan",
+        "NOT_URGENT_NOT_IMPORTANT": "Pa ijan - Pa enpòtan",
+        "TO_DO": "Fè",
+        "URGENT": "Dijans",
+        "URGENT_IMPORTANT": "Ijan ak enpòtan",
+        "URGENT_NOT_IMPORTANT": "Ijan - Pa enpòtan"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Ajoute nouvo Panèl",
+        "COLUMNS": "Kolòn",
+        "TAGS_EXCLUDED": "Eskli Tags",
+        "TAGS_REQUIRED": "Etikèt obligatwa yo",
+        "TASK_DONE_STATE": "Eta Travay",
+        "TASK_DONE_STATE_ALL": "Tout",
+        "TASK_DONE_STATE_DONE": "Fè",
+        "TASK_DONE_STATE_UNDONE": "Defèt"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Ajoute nouvo tablo",
+        "CONFIRM_DELETE": "Èske ou reyèlman vle efase tablo sa a?",
+        "CREATE_NEW_TAG_BTN": "Kreye Tag",
+        "CREATE_NEW_TAG_MSG": "1 nouvo tag bezwen yo dwe kreye pou tablo sa a nan travay",
+        "CREATE_NEW_TAGS_BTN": "Kreye tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} nouvo Tags bezwen kreye pou tablo sa a nan travay",
+        "EDIT_BOARD": "Tablo editè",
+        "NO_PANELS_BTN": "Komite konfigirasyon",
+        "NO_PANELS_MSG": "Tablo sa a pa gen okenn panno konfigirasyon. Ajoute kèk panno nan li."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Dodaj straničnik",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Sesyon konsantre ap kouri",
+        "TO_FOCUS_OVERLAY": "Konsantre sou sipriz"
+      },
       "BACK_TO_PLANNING": "Natrag na planiranje",
       "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa",
       "CONGRATS": "Čestitamo na obavljanju ove sesije!",
       "CONTINUE_FOCUS_SESSION": "Nastavi sesiju fokusa",
+      "COUNTDOWN": "Dekont",
       "FINISH_TASK_AND_SELECT_NEXT": "Završi zadatak i odaberi sljedeći",
+      "FLOWTIME": "Koule",
+      "FOR_TASK": "pou travay",
       "GET_READY": "Pripremi se za tvoju sesiju fokusa!!!",
       "GO_TO_PROCRASTINATION": "Dobij pomoć kad odugovlačiš",
       "GOGOGO": "Kreni!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Malo se protegni",
       "SELECT_ANOTHER_TASK": "Odaberi jedan drugi zadatak",
       "SELECT_TASK": "Odaberi zadatak na koji se želiš fokusirati",
+      "SESSION_COMPLETED": "Konsantre Sesyon ranpli!",
       "SET_FOCUS_SESSION_DURATION": "Postavi trajanje sesije fokusa",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Prikaži/Sakrij bilješke zadataka i priloge",
       "START_FOCUS_SESSION": "Pokreni sesiju fokusa",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Korisničko ime (npr. za izdvajanje vlastitih promjena)",
+        "INVALID_TOKEN_MESSAGE": "Pa yon siy GitHub valab. Li dwe kòmanse ak \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtar za meni dodijelenje zadatke",
         "REPO": "„korisničko ime/ime repozitorija” za git repozitorij koji želiš pratiti",
         "TOKEN": "Token za pristup"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> počinje <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} drugih zadataka u tijeku)"
       },
+      "S_ACTIVE_TASK_DUE": "Travay ou ap travay kounye a se kounye a dwe!<br/> ({{title}})",
       "S_REMINDER_ERR": "Greška za sučelje podsjetnika"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Da, izbriši!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Broj",
-        "TITLE": "Uredi jednostavni brojač"
+        "CURRENT_STREAK": "Kouran tras",
+        "DAILY_GOAL": "Objektif chak jou",
+        "DAYS": "Jou",
+        "L_COUNTER": "Broj"
       },
       "FORM": {
         "ADD_NEW": "Dodaj jednostavni brojač",
         "HELP": "Ovdje možeš konfigurirati jednostavne gumbe koji će se pojaviti u gornjem desnom kutu. To mogu biti mjerači vremena ili jednostavno običan brojač koji broji kad se pritisne.",
-        "L_AUTO_COUNT_UP": "Automatsko brojenje za",
-        "L_AUTO_SWITCH_OFF": "Automatsko isključivanje za",
-        "L_AUTO_SWITCH_ON": "Automatsko uključivanje za",
         "L_COUNTDOWN_DURATION": "Countdown dire",
+        "L_DAILY_GOAL": "Objektif chak jou pou yon seri siksè",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona kad je uključeno",
         "L_IS_ENABLED": "Aktivirano",
         "L_TITLE": "Naslov",
+        "L_TRACK_STREAKS": "Track Streaks",
         "L_TYPE": "Vrsta",
+        "L_WEEKDAYS": "Jou lasemèn pou tcheke si gen tras",
         "TITLE": "Jednostavni brojač",
         "TYPE_CLICK_COUNTER": "Brojač",
         "TYPE_REPEATED_COUNTDOWN": "Repete Countdown",
         "TYPE_STOPWATCH": "Štoperica"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Ou rive nan objektif ou pou jodi a!",
+        "GOAL_REACHED_2": "Dire aktyèl la: "
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Ale nan lòt aparèy ou a epi ranpli senkronizasyon an.",
         "T5": "2. Oswa ou ka ranplase done yo aleka ak youn lokal ou a. Tout chanjman aleka pral\n    dwe pèdi!",
         "T6": "Kreye yon backup nan done ou recouvrir yo rekòmande !!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Sove - Pèmèt Senk",
+        "TITLE": "Configure Sync"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deaktiviraj sinkronizaciju",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nije moguće dodijeliti projekt putem kratke sintakse za ponavljajuće zadatke!",
+        "CREATED_FOR_PROJECT": "Deplase \"{{taskTitle}}\" pou pwojè \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ale nan Pwojè",
         "DELETED": "Izbrisan je zadatak „{{title}}”",
         "FOUND_MOVE_FROM_BACKLOG": "Zadatak <strong>{{title}}</strong> je premješten iz odlagališta u popis današnjih zadataka",
         "FOUND_MOVE_FROM_OTHER_LIST": "Zadatak <strong>{{title}}</strong> je dodan iz <strong>{{contextTitle}}</strong> u trenutačni popis",
         "FOUND_RESTORE_FROM_ARCHIVE": "Obnovljeni zadatak <strong>{{title}}</strong> je povezan s problemom iz arhive",
         "LAST_TAG_DELETION_WARNING": "Pokušavaš ukloniti zadnju oznaku zadatka koji nije projekt. To nije dozvoljeno!",
+        "MOVED_TO_PROJECT": "Deplase \"{{taskTitle}}\" pou pwojè \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ale nan Pwojè",
         "REMINDER_ADDED": "Terminirani zadatak „{{title}}”",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak „{{title}}”",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Ajoute",
+    "ADVANCED_CFG": "Avanse Config",
     "CANCEL": "Odustani",
     "CLOSE": "Zatvori",
     "DELETE": "Izbriši",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Prijava",
     "LOGOUT": "Odjava",
     "MINUTES": "{{m}} min",
+    "MOVE_BACKWARD": "Deplase Backward",
+    "MOVE_FORWARD": "Avanse pou pi devan",
     "NEXT": "Dalje",
     "NO_CON": "Trenutačno nemaš vezu s internetom. Ponovo se poveži s internetom.",
     "NONE": "Ništa",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj novi zadatak",
+    "BOARDS": "Ankadreman yo",
     "CREATE_PROJECT": "Stvori projekt",
     "CREATE_TAG": "Stvori oznaku",
     "DELETE_PROJECT": "Efase pwojè",

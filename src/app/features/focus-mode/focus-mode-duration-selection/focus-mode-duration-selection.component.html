@@ -1,34 +1,41 @@
 <form
-  (submit)="$event.preventDefault();onSubmit($event)"
+  (submit)="$event.preventDefault(); onSubmit($event)"
   novalidate
 >
-  <h1>{{T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION|translate}}</h1>
-
-  @if (task$|async; as task) {
-  <div class="for-task">
-    <div>for task "<em>{{task?.title}}</em>"</div>
-  </div>
-  <div style="text-align: center; margin-bottom: 8px">
-    <button
-      mat-stroked-button
-      type="button"
-      (click)="selectDifferentTask()"
-    >
-      <!--      <mat-icon>arrow_back_ios</mat-icon>-->
-      {{T.F.FOCUS_MODE.SELECT_ANOTHER_TASK|translate}}
-    </button>
-  </div>
+  @if (selectedMode() !== FocusModeMode.Flowtime) {
+    <h1>{{ T.F.FOCUS_MODE.SET_FOCUS_SESSION_DURATION | translate }}</h1>
   }
-  <input-duration-slider
-    [model]="sessionDuration$|async"
-    (modelChange)="onFocusModeDurationChanged($event)"
-  ></input-duration-slider>
-
+  @if (task$ | async; as task) {
+    <div class="for-task">
+      <div class="label">{{ T.F.FOCUS_MODE.FOR_TASK | translate }}</div>
+      <div>
+        "<em>{{ task?.title }}</em
+        >"
+      </div>
+    </div>
+    <div style="text-align: center; margin-bottom: 8px">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="selectDifferentTask()"
+      >
+        <!--      <mat-icon>arrow_back_ios</mat-icon>-->
+        {{ T.F.FOCUS_MODE.SELECT_ANOTHER_TASK | translate }}
+      </button>
+    </div>
+  }
+  @if (selectedMode() !== FocusModeMode.Flowtime) {
+    <input-duration-slider
+      [model]="sessionDuration$ | async"
+      (modelChange)="onFocusModeDurationChanged($event)"
+    ></input-duration-slider>
+  }
   <button
+    style="margin-top: 16px"
     type="submit"
     color="primary"
     mat-raised-button
   >
-    {{T.F.FOCUS_MODE.START_FOCUS_SESSION|translate}}
+    {{ T.F.FOCUS_MODE.START_FOCUS_SESSION | translate }}
   </button>
 </form>

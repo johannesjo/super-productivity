@@ -75,7 +75,7 @@ export const createErrorAlert = (
   if (isWasErrorAlertCreated) {
     return;
   }
-  // it seems for whatever reasons, sometimes we get tags in our error which break the html
+  // it seems for whatever reason, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
   const githubUrl = getGithubErrorUrl(errEscaped, stackTrace);
 
@@ -168,7 +168,7 @@ export const getSimpleMeta = (): string => {
   const n = window.navigator;
   return `META: SP${getAppVersionStr()} __ ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
     n.language
-  } – ${n.platform} – UA:${n.userAgent}`;
+  } – ${n.platform} – ${n.language} – UA:${n.userAgent}`;
 };
 
 export const isHandledError = (err: unknown): boolean => {

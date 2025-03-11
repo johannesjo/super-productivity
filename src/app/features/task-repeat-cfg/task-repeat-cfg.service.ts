@@ -254,7 +254,7 @@ export class TaskRepeatCfgService {
         additional: {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate,
-          projectId: taskRepeatCfg.projectId,
+          projectId: taskRepeatCfg.projectId || undefined,
           tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
           notes: taskRepeatCfg.notes || '',
         },

@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Done",
+        "EISENHAUER_MATRIX": "Eisenhower Matrix",
+        "IMPORTANT": "Important",
+        "IN_PROGRESS": "In Progress",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Not Urgent & Important",
+        "NOT_URGENT_NOT_IMPORTANT": "Not Urgent & Not Important",
+        "TO_DO": "To Do",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent & Important",
+        "URGENT_NOT_IMPORTANT": "Urgent & Not Important"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Add new Panel",
+        "COLUMNS": "Columns",
+        "TAGS_EXCLUDED": "Excluded Tags",
+        "TAGS_REQUIRED": "Required Tags",
+        "TASK_DONE_STATE": "Task Done State",
+        "TASK_DONE_STATE_ALL": "All",
+        "TASK_DONE_STATE_DONE": "Done",
+        "TASK_DONE_STATE_UNDONE": "Undone"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Add new board",
+        "CONFIRM_DELETE": "Do you really want to delete this board?",
+        "CREATE_NEW_TAG_BTN": "Create Tag",
+        "CREATE_NEW_TAG_MSG": "1 new tag needs to be created for this board to work",
+        "CREATE_NEW_TAGS_BTN": "Create Tags",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} new tags needs to be created for this board to work",
+        "EDIT_BOARD": "Edit board",
+        "NO_PANELS_BTN": "Configure Board",
+        "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Add Bookmark",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Focus Session is running",
+        "TO_FOCUS_OVERLAY": "To Focus Overlay"
+      },
       "BACK_TO_PLANNING": "Back to Planning",
-      "CANCEL_FOCUS_SESSION": "Cancel Focus Session",
+      "CANCEL_FOCUS_SESSION": "",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
+      "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "for task",
       "GET_READY": "Get ready for your focus session!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
       "GOGOGO": "Go, go, go!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Do some mild stretching",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
+      "SESSION_COMPLETED": "Focus Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "START_FOCUS_SESSION": "Start Focus Session",
@@ -225,10 +269,10 @@
       },
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "INVALID_TOKEN_MESSAGE": "Not a valid GitHub token. It must start with \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Only import issues assigned to me to backlog",
         "REPO": "username/repositoryName",
-        "TOKEN": "Access Token",
-        "INVALID_TOKEN_MESSAGE": "Not a valid GitHub token. It must start with \"ghp_\"."
+        "TOKEN": "Access Token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically import all open issues.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
@@ -476,7 +520,7 @@
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
-        "SIMPLE_COUNTERS": "Simple Counters",
+        "SIMPLE_COUNTERS": "Simple Counters & Habit Tracking",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
@@ -807,25 +851,31 @@
         "OK": "Do it!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Count",
-        "TITLE": "Edit Simple Counter"
+        "CURRENT_STREAK": "Current Streak",
+        "DAILY_GOAL": "Daily Goal",
+        "DAYS": "Days",
+        "L_COUNTER": "Count for Today"
       },
       "FORM": {
-        "ADD_NEW": "Add simple counter",
-        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
+        "ADD_NEW": "Add simple counter/ habit",
+        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it. By enabling 'Track Streaks' you can use these for habit tracking.",
         "L_COUNTDOWN_DURATION": "Countdown duration",
+        "L_DAILY_GOAL": "Daily goal for successful streak",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
         "L_TITLE": "Title",
+        "L_TRACK_STREAKS": "Track Streaks",
         "L_TYPE": "Type",
-        "TITLE": "Simple Counters",
+        "L_WEEKDAYS": "Weekdays to check for streak",
+        "TITLE": "Simple Counters & Habit Tracking",
         "TYPE_CLICK_COUNTER": "Click Counter",
         "TYPE_REPEATED_COUNTDOWN": "Repeated Countdown",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "You reached your goal for today!",
+        "GOAL_REACHED_2": "Current streak duration: "
       }
     },
     "SYNC": {
@@ -870,6 +920,10 @@
         "T4": "1. Go to your other device and complete the sync there.",
         "T5": "2. Or you can overwrite the remote data with your local one. All remote changes will\n    be lost!",
         "T6": "Creating a backup of the data you overwrite is recommended!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Save & Enable Sync",
+        "TITLE": "Configure Sync"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
@@ -939,6 +993,9 @@
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"
       },
+      "TTL": {
+        "ADD_NEW_TAG": "Add new Tag"
+      },
       "S": {
         "UPDATED": "Tag Settings were updated"
       }
@@ -1004,6 +1061,7 @@
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
+        "TOGGLE_TAGS": "Toggle Tags",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
@@ -1075,11 +1133,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Cannot assign project via short syntax for repeatable tasks!",
+        "CREATED_FOR_PROJECT": "Moved task \"{{taskTitle}}\" to project \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Go to Project",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_PROJECT": "Moved task \"{{taskTitle}}\" to project \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Go to Project",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1272,6 +1334,7 @@
   },
   "G": {
     "ADD": "Add",
+    "ADVANCED_CFG": "Advanced Config",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
@@ -1287,6 +1350,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Move Backward",
+    "MOVE_FORWARD": "Move Forward",
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
@@ -1541,6 +1606,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
+    "BOARDS": "Boards",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
@@ -1578,7 +1644,7 @@
     "TOGGLE_SHOW_ISSUE_PANEL": "Show/Hide Issue Panel",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-    "TRIGGER_SYNC": "Trigger sync manually",
+    "TRIGGER_SYNC": "Sync!",
     "WORKLOG": "Worklog"
   },
   "PDS": {

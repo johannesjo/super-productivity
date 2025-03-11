@@ -26,6 +26,27 @@
     position: relative;
     z-index: 2;
     transform: translateY(-2px);
+
+    :host(.isSuccess) & {
+      opacity: 0.25;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .check-ico {
+    //color: $c-primary;
+    opacity: 1 !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -64%);
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    //font-weight: bold;
+    z-index: 3;
   }
 }
 

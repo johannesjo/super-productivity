@@ -1,46 +1,52 @@
 <div class="ico-wrapper">
   @switch (icoType) {
-  <!-- -->
-  @case ('REPEAT') {
-  <mat-icon
-    svgIcon="repeat"
-    class="ico"
-    inline="true"
-  ></mat-icon>
-  } @case ('PLANNED_FOR_DAY') {
-  <div class="day-of-month">{{ se.dayOfMonth }}</div>
-  } @case ('SCHEDULED_TASK') {
-  <mat-icon
-    class="ico"
-    inline="true"
-    >alarm
-  </mat-icon>
-  } @case ('FLOW') {
-  <!--<div class="fake-ico">~</div>-->
-  <mat-icon
-    class="ico"
-    inline="true"
-    >wb_sunny
-  </mat-icon>
-  } @case ('LUNCH_BREAK') {
-  <mat-icon
-    class="ico"
-    inline="true"
-    >restaurant
-  </mat-icon>
-  } @case ('CAL_PROJECTION') {
-  <mat-icon>{{ $any(se.data)?.icon || 'event' }}</mat-icon>
-  <mat-icon>add</mat-icon>
-  }
-  <!--- --->
-  @default { }
-  <!--- --->
+    <!-- -->
+    @case ('REPEAT') {
+      <mat-icon
+        svgIcon="repeat"
+        class="ico"
+        inline="true"
+      ></mat-icon>
+    }
+    @case ('PLANNED_FOR_DAY') {
+      <div class="day-of-month">{{ se.dayOfMonth }}</div>
+    }
+    @case ('SCHEDULED_TASK') {
+      <mat-icon
+        class="ico"
+        inline="true"
+        >alarm
+      </mat-icon>
+    }
+    @case ('FLOW') {
+      <!--<div class="fake-ico">~</div>-->
+      <mat-icon
+        class="ico"
+        inline="true"
+        >wb_sunny
+      </mat-icon>
+    }
+    @case ('LUNCH_BREAK') {
+      <mat-icon
+        class="ico"
+        inline="true"
+        >restaurant
+      </mat-icon>
+    }
+    @case ('CAL_PROJECTION') {
+      <mat-icon>{{ $any(se.data)?.icon || 'event' }}</mat-icon>
+      <mat-icon>add</mat-icon>
+    }
+    <!--- --->
+    @default {}
+    <!--- --->
   }
   <!--- -->
 
-  @if (se.type === SVEType.ScheduledTask || se.type === SVEType.ScheduledRepeatProjection)
-  {
-  <div class="time-badge">{{ scheduledClockStr }}</div>
+  @if (
+    se.type === SVEType.ScheduledTask || se.type === SVEType.ScheduledRepeatProjection
+  ) {
+    <div class="time-badge">{{ scheduledClockStr }}</div>
   }
 </div>
 <!-- -->
@@ -51,16 +57,22 @@
   <!--  {{se.id}} __ {{se.data?.id}} __-->
   <!-- -->
 
-  @if (se.type === SVEType.SplitTaskContinuedLast || se.type ===
-  SVEType.SplitTaskContinued || se.type === SVEType.RepeatProjectionSplitContinued ||
-  se.type === SVEType.RepeatProjectionSplitContinuedLast) { ...
-  <!-- -->
-  } @else { {{ title }} }
+  @if (
+    se.type === SVEType.SplitTaskContinuedLast ||
+    se.type === SVEType.SplitTaskContinued ||
+    se.type === SVEType.RepeatProjectionSplitContinued ||
+    se.type === SVEType.RepeatProjectionSplitContinuedLast
+  ) {
+    ...
+    <!-- -->
+  } @else {
+    {{ title }}
+  }
 </div>
 
 @if (task) {
-<task-context-menu
-  #taskContextMenu
-  [task]="task"
-></task-context-menu>
+  <task-context-menu
+    #taskContextMenu
+    [task]="task"
+  ></task-context-menu>
 }

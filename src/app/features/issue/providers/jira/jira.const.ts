@@ -187,8 +187,7 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
 
     {
       type: 'collapsible',
-      // todo translate
-      props: { label: 'Advanced Config' },
+      props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
         // {
         //   key: 'isAllowSelfSignedCertificate',

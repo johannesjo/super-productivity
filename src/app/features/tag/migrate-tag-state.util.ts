@@ -1,6 +1,6 @@
 import { Dictionary } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
-import { isMigrateModel } from '../../util/model-version';
+import { isMigrateModel } from '../../util/is-migrate-model';
 import { Tag, TagCopy, TagState } from './tag.model';
 import { TODAY_TAG } from './tag.const';
 import { MODEL_VERSION } from '../../core/model-version';

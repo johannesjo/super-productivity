@@ -28,25 +28,30 @@
   margin: $s;
   margin-top: $s * 3;
   margin-bottom: $s * 3;
-  border-radius: 8px;
+  border-radius: 4px;
+  //padding: 4px;
 
   ::ng-deep textarea {
     text-align: center;
   }
 
   &.is-focused {
-    outline: 2px solid $c-accent;
+    // add extra outline on focus
+    outline: 1px solid $c-accent;
   }
 
-  :host.isShowNotes & {
-    margin-top: $s * 7;
+  @media (max-width: 499px) {
+    font-size: 24px;
+    margin-bottom: $s * 2;
   }
 
-  @media (max-height: 799px) and (max-width: 499px) {
-    :host.isShowNotes & {
-      font-size: 24px;
-      margin-bottom: $s * 2;
-    }
+  @media (max-height: 250px) {
+    font-size: 18px;
+    margin-bottom: $s;
+  }
+
+  @media (max-width: 333px) {
+    font-size: 18px;
   }
 }
 
@@ -65,11 +70,10 @@ progress-circle {
     width: 220px;
     height: 220px;
   }
-  @media (max-height: 799px) and (max-width: 499px) {
-    :host.isShowNotes & {
-      width: 120px;
-      height: 120px;
-    }
+
+  @media (max-height: 500px) {
+    width: 90px;
+    height: 90px;
   }
 }
 
@@ -83,14 +87,6 @@ progress-circle {
   .focus-time {
     font-size: 24px;
     font-weight: bold;
-
-    :host.isShowNotes & {
-      font-size: 20px;
-    }
-  }
-
-  .task-times {
-    font-size: 12px;
   }
 }
 
@@ -100,14 +96,22 @@ progress-circle {
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
+  // needs to be higher than task title
+  z-index: 4;
 
   simple-counter-button.isHiddenWithoutFocus {
     @include mousePrimaryDevice {
-      display: none;
+      transition: all $transition-leave;
+      //visibility: hidden;
+      opacity: 0;
+      transform: translateY(-10px);
     }
 
     :host:hover & {
-      display: block;
+      transition: all $transition-enter;
+      //visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -120,11 +124,17 @@ progress-circle {
   align-items: center;
 
   @include mousePrimaryDevice {
-    visibility: hidden;
+    transition: all $transition-leave;
+    //visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
   }
 
   :host:hover & {
-    visibility: visible;
+    transition: all $transition-enter;
+    //visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   // to fix weird a + mat-icon behavior
@@ -150,35 +160,41 @@ progress-circle {
 .notes-and-attachments {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   width: 100%;
+  position: absolute;
+  bottom: 0;
 }
 
 .notes-panel {
   border-radius: 4px;
   margin: auto;
   padding: $s * 2;
-  width: auto;
   width: 100%;
   flex-grow: 1;
   max-width: $component-max-width;
-  overflow: hidden;
   min-height: 60px;
+  max-height: 50vh;
+  display: flex;
 
   inline-markdown {
     max-height: 100%;
-    overflow-y: auto;
+    width: 100%;
     @include noteStyle;
-    text-align: right;
+    display: flex;
 
     ::ng-deep .markdown-wrapper {
-      text-align: left;
-      max-height: 100%;
-      height: 300px !important;
-      height: 100% !important;
+      width: 100%;
+      overflow: auto;
+      height: auto !important;
+    }
+
+    ::ng-deep .markdown-parsed,
+    ::ng-deep textarea {
+      min-height: 60px;
     }
 
     ::ng-deep textarea {
+      width: 100%;
       background: inherit;
       color: inherit;
       border: none;
@@ -186,7 +202,7 @@ progress-circle {
       word-wrap: break-word;
       display: block;
       resize: none;
-      min-height: inherit;
+      min-height: 60px;
       overflow: auto;
       padding: $s $s * 2;
 
@@ -237,4 +253,12 @@ progress-circle {
   font-weight: bold;
   display: flex;
   z-index: 31;
+}
+
+.hide-notes-btn {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
 }

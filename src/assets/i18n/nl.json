@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Klaar",
+        "EISENHAUER_MATRIX": "Eisenhower Matrix",
+        "IMPORTANT": "Belangrijk",
+        "IN_PROGRESS": "Bezig",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Niet Urgent & Belangrijk",
+        "NOT_URGENT_NOT_IMPORTANT": "Niet Urgent & Niet Belangrijk",
+        "TO_DO": "Te Doen",
+        "URGENT": "Urgent",
+        "URGENT_IMPORTANT": "Urgent & Belangrijk",
+        "URGENT_NOT_IMPORTANT": "Urgent & Niet Belangrijk"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Voeg nieuw paneel toe",
+        "COLUMNS": "Kolommen",
+        "TAGS_EXCLUDED": "Uitsluit Tags",
+        "TAGS_REQUIRED": "Vereiste Tags",
+        "TASK_DONE_STATE": "Taak Voltooid Status",
+        "TASK_DONE_STATE_ALL": "Alles",
+        "TASK_DONE_STATE_DONE": "Klaar",
+        "TASK_DONE_STATE_UNDONE": "Ongedaan"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Voeg nieuw bord toe",
+        "CONFIRM_DELETE": "Wilt u dit bord echt verwijderen?",
+        "CREATE_NEW_TAG_BTN": "Tag Aanmaken",
+        "CREATE_NEW_TAG_MSG": "Er moet 1 nieuwe tag worden aangemaakt voor dit bord om te werken",
+        "CREATE_NEW_TAGS_BTN": "Tags Aanmaken",
+        "CREATE_NEW_TAGS_MSG": "Er moeten {{nr}} nieuwe tags worden aangemaakt voor dit bord om te werken",
+        "EDIT_BOARD": "Bord bewerken",
+        "NO_PANELS_BTN": "Bord Configureren",
+        "NO_PANELS_MSG": "Dit bord heeft geen geconfigureerde panelen. Voeg enkele panelen toe."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Voeg bladwijzer toe",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Focussessie is aan het draaien",
+        "TO_FOCUS_OVERLAY": "Naar Focus Overlay"
+      },
       "BACK_TO_PLANNING": "Terug naar Planning",
       "CANCEL_FOCUS_SESSION": "Focus Sessie Annuleren",
       "CONGRATS": "Gefeliciteerd met het afronden van deze sessie!",
       "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
+      "COUNTDOWN": "Aftelling",
       "FINISH_TASK_AND_SELECT_NEXT": "Taak afmaken en volgende selecteren",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "voor taak",
       "GET_READY": "Maak je klaar voor je focus sessie!",
       "GO_TO_PROCRASTINATION": "Krijg hulp als je aan het uitstellen bent",
       "GOGOGO": "Go, go, go!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Doe wat lichte stretches",
       "SELECT_ANOTHER_TASK": "Selecteer een andere Taak",
       "SELECT_TASK": "Selecteer een Taak om op te focussen",
+      "SESSION_COMPLETED": "Focussessie Voltooid!",
       "SET_FOCUS_SESSION_DURATION": "Selecteer een Focus Sessie duur",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Taaknotities en bijlagen tonen/verbergen",
       "START_FOCUS_SESSION": "Start Focus Sessie",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Gebruikersnaam (bijv. Om wijzigingen zelf uit te filteren)",
+        "INVALID_TOKEN_MESSAGE": "Geen geldig GitHub token. Het moet beginnen met \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importeer alleen problemen die aan mij zijn toegewezen naar de achterstand",
         "REPO": "\"gebruikersnaam/repositoryName\" voor de git repository die je wilt volgen",
         "TOKEN": "Toegangstoken"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> start om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken verschuldigd)"
       },
+      "S_ACTIVE_TASK_DUE": "De taak waaraan je momenteel werkt is nu af!<br/> ({{title}})",
       "S_REMINDER_ERR": "Fout voor herinneringsinterface"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Doe het!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Tel",
-        "TITLE": "Eenvoudige teller bewerken"
+        "CURRENT_STREAK": "Huidige streak",
+        "DAILY_GOAL": "Dagelijks doel",
+        "DAYS": "Dagen",
+        "L_COUNTER": "Tel"
       },
       "FORM": {
         "ADD_NEW": "Voeg een eenvoudige teller toe",
         "HELP": "Hier kunt u eenvoudige knoppen configureren die rechtsboven verschijnen. Het kunnen timers zijn of gewoon een simpele teller, die wordt opgeteld door erop te klikken.",
-        "L_AUTO_COUNT_UP": "Auto trigger telt op voor",
-        "L_AUTO_SWITCH_OFF": "Automatische trigger-uitschakeling voor",
-        "L_AUTO_SWITCH_ON": "Automatische trigger-schakelaar voor",
         "L_COUNTDOWN_DURATION": "Duur aftellen",
+        "L_DAILY_GOAL": "Dagelijks doel voor succesvolle streak",
         "L_ICON": "Icoon",
         "L_ICON_ON": "Icoon wanneer geschakeld",
         "L_IS_ENABLED": "Ingeschakeld",
         "L_TITLE": "Titel",
+        "L_TRACK_STREAKS": "Baanstrepen",
         "L_TYPE": "Type",
+        "L_WEEKDAYS": "Weekdagen om te controleren op strepen",
         "TITLE": "Eenvoudige tellers",
         "TYPE_CLICK_COUNTER": "Klik op teller",
         "TYPE_REPEATED_COUNTDOWN": "Herhaald aftellen",
         "TYPE_STOPWATCH": "Stopwatch"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Je hebt je doel voor vandaag bereikt!",
+        "GOAL_REACHED_2": "Huidige streak duur:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Ga naar je andere apparaat en voltooi daar de synchronisatie.",
         "T5": "2. Of je kunt de gegevens op afstand overschrijven met je lokale gegevens. Alle wijzigingen op afstand\n    verloren gaan!",
         "T6": "Het maken van een back-up van de gegevens die je overschrijft wordt aanbevolen!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Opslaan & Synchronisatie Inschakelen",
+        "TITLE": "Synchronisatie Configureren"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Synchronisatie uitschakelen",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Kan project niet toewijzen via korte syntaxis voor herhaalbare taken!",
+        "CREATED_FOR_PROJECT": "Taak \"{{taskTitle}}\" verplaatst naar project \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ga naar Project",
         "DELETED": "Taak \"{{title}}\" verwijderd",
         "FOUND_MOVE_FROM_BACKLOG": "Taak <strong>{{title}}</strong> verplaatst van backlog naar de takenlijst van vandaag",
         "FOUND_MOVE_FROM_OTHER_LIST": "Taak <strong>{{title}}</strong> van <strong>{{contextTitle}}</strong> toegevoegd aan huidige lijst",
         "FOUND_RESTORE_FROM_ARCHIVE": "Herstelde taak <strong>{{title}}</strong> gerelateerd aan probleem uit archief",
         "LAST_TAG_DELETION_WARNING": "U probeert de laatste tag van een niet-projecttaak te verwijderen. Dit mag niet!",
+        "MOVED_TO_PROJECT": "Taak \"{{taskTitle}}\" verplaatst naar project \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ga naar Project",
         "REMINDER_ADDED": "Geplande taak \"{{title}}\"",
         "REMINDER_DELETED": "Herinnering voor taak verwijderd",
         "REMINDER_UPDATED": "Herinnering voor taak \"{{title}}\" bijgewerkt",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Voeg  toe",
+    "ADVANCED_CFG": "Geavanceerde Configuratie",
     "CANCEL": "annuleren",
     "CLOSE": "Sluiten",
     "DELETE": "Verwijderen",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
     "MINUTES": "{{m}} minuten",
+    "MOVE_BACKWARD": "Terug Bewegen",
+    "MOVE_FORWARD": "Vooruit Bewegen",
     "NEXT": "De volgende",
     "NO_CON": "Je bent momenteel offline. Maak opnieuw verbinding met internet.",
     "NONE": "Geen",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
+    "BOARDS": "Borden",
     "CREATE_PROJECT": "Project maken",
     "CREATE_TAG": "Tag maken",
     "DELETE_PROJECT": "Project verwijderen",

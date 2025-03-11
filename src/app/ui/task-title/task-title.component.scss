@@ -1,0 +1,107 @@
+@import '../../../variables';
+//@import '../../../tasks/task/task.component.mixins';
+
+// TODO rename to task title component
+
+:host {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  outline: none;
+  margin-left: 1px;
+  background: inherit;
+  overflow: visible;
+  // needed for z-index to work
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  caret-color: #000000;
+  border-radius: 4px;
+  //z-index: $z-task-title;
+  z-index: 4;
+  border: 1px solid transparent;
+  transition: $transition-leave;
+
+  @include darkTheme() {
+    caret-color: #ffffff;
+  }
+
+  &:focus {
+    outline: none !important;
+  }
+
+  &.is-focused {
+    transition: $transition-enter;
+    //z-index: $z-task-title-focus !important;
+    z-index: 32 !important;
+    border: 1px solid $c-accent;
+    @include inlineEditElevation();
+    box-shadow: $whiteframe-shadow-4dp;
+  }
+}
+
+:host > div {
+  position: relative;
+  width: 100%;
+}
+:host,
+:host > div > textarea {
+  padding: 3px 3px 3px 5px;
+}
+:host > div > textarea {
+  appearance: none;
+  //background: rgba(0, 0, 0, 0.5);
+  border: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: text;
+
+  &:focus {
+    user-select: text;
+    -webkit-user-select: text; /* Safari */
+    outline: none;
+    // NOTE: needed to overwrite color for current task
+    color: $light-theme-text-color;
+
+    @include darkTheme() {
+      color: #fff;
+    }
+  }
+}
+
+:host > div > textarea,
+:host > div > span {
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-family: inherit;
+  border-radius: inherit;
+  outline: none;
+  color: inherit;
+  margin: 0;
+  max-width: 100%;
+  display: block;
+  appearance: none;
+  background: transparent;
+  resize: none;
+  width: 100%;
+  overflow: hidden;
+  min-height: 20px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  white-space-collapse: preserve;
+  border: none;
+  text-wrap-mode: wrap;
+  text-indent: 0;
+}
+
+:host > div > span {
+  visibility: hidden;
+  opacity: 0.4;
+  outline: 1px solid orange;
+  pointer-events: none;
+  display: block;
+}

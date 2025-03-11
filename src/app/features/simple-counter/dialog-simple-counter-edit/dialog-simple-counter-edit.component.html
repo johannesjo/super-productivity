@@ -1,33 +1,84 @@
-<form (submit)="$event.preventDefault();submit()">
-  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>
+<form (submit)="$event.preventDefault(); submit()">
+  <!--  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>-->
+  <h1 mat-dialog-title>{{ data.simpleCounter.title }}</h1>
 
   <mat-dialog-content>
+    <!---->
+    @if (data.simpleCounter.isTrackStreaks) {
+      <section style="text-align: center; margin-bottom: 16px">
+        <div>{{ T.F.SIMPLE_COUNTER.D_EDIT.CURRENT_STREAK | translate }}</div>
+        <div>
+          <strong
+            >{{ currentStreak() }}
+            {{ T.F.SIMPLE_COUNTER.D_EDIT.DAYS | translate }}</strong
+          >
+        </div>
+      </section>
+
+      <section style="text-align: center; margin-bottom: 16px">
+        <div>{{ T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL | translate }}</div>
+        <div>
+          <strong>
+            @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
+              {{ data.simpleCounter.streakMinValue | msToString }}
+              <!---->
+            } @else {
+              {{ data.simpleCounter.streakMinValue }}
+            }
+          </strong>
+        </div>
+      </section>
+    }
+    <!---->
+
+    @if (stats()) {
+      <section style="margin-bottom: 32px">
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas
+              [type]="'line'"
+              [data]="stats()"
+              [labels]="stats()?.labels"
+              [options]="lineChartOptions"
+              [legend]="true"
+              baseChart
+            >
+            </canvas>
+          </div>
+        </div>
+      </section>
+    }
+
     <div class="form-wrapper">
-      @if (data.simpleCounter.type === SimpleCounterType.ClickCounter ||
-      data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder) {
-      <mat-form-field>
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-          matInput
-          name="count"
-          type="number"
-        />
-      </mat-form-field>
-      } @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
-      <mat-form-field>
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-          inputDuration="optional"
-          matInput
-          name="count"
-          type="text"
-        />
-        <mat-icon matPrefix>timer</mat-icon>
-      </mat-form-field>
+      @if (
+        data.simpleCounter.type === SimpleCounterType.ClickCounter ||
+        data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder
+      ) {
+        <mat-form-field>
+          <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+          <input
+            (ngModelChange)="onModelChange($event)"
+            [ngModel]="val"
+            matInput
+            name="count"
+            type="number"
+          />
+        </mat-form-field>
+      }
+      <!---->
+      @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
+        <mat-form-field>
+          <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+          <input
+            (ngModelChange)="onModelChange($event)"
+            [ngModel]="val"
+            inputDuration="optional"
+            matInput
+            name="count"
+            type="text"
+          />
+          <mat-icon matPrefix>timer</mat-icon>
+        </mat-form-field>
       }
     </div>
   </mat-dialog-content>
@@ -41,7 +92,7 @@
         mat-button
         type="button"
       >
-        {{ T.G.CANCEL|translate }}
+        {{ T.G.CANCEL | translate }}
       </button>
       <button
         class="btn btn-primary submit-button"
@@ -50,7 +101,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{ T.G.SAVE|translate }}
+        {{ T.G.SAVE | translate }}
       </button>
     </div>
   </mat-dialog-actions>

@@ -1,48 +1,50 @@
-@let activeWorkContextTypeAndId = workContextService.activeWorkContextTypeAndId$|async;
+@let activeWorkContextTypeAndId = workContextService.activeWorkContextTypeAndId$ | async;
 
 <!--<div class="wrapper ">-->
 <div class="wrapper">
-  @if (!(layoutService.isNavAlwaysVisible$|async)) {
-  <button
-    (click)="layoutService.toggleSideNav()"
-    class="burger-trigger tour-burgerTrigger"
-    mat-icon-button
-  >
-    <mat-icon>menu</mat-icon>
-  </button>
+  @if (!(layoutService.isNavAlwaysVisible$ | async)) {
+    <button
+      (click)="layoutService.toggleSideNav()"
+      class="burger-trigger tour-burgerTrigger"
+      mat-icon-button
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
   }
   <!---->
   @if (activeWorkContextTypeAndId) {
-  <div
-    [matTooltip]="T.MH.GO_TO_TASK_LIST|translate"
-    class="current-work-context-title"
-    mat-ripple
-    routerLink="/active/tasks"
-  >
-    {{ workContextService.activeWorkContextTitle$|async }}
-  </div>
-  <button
-    [mat-menu-trigger-for]="activeWorkContextMenu"
-    [matTooltip]="T.MH.PROJECT_MENU|translate"
-    class="project-settings-btn hide-xxxs"
-    mat-icon-button
-  >
-    <mat-icon>more_vert</mat-icon>
-  </button>
-  <mat-menu #activeWorkContextMenu="matMenu">
-    <ng-template matMenuContent>
-      <work-context-menu
-        [contextId]="activeWorkContextTypeAndId.activeId"
-        [contextType]="activeWorkContextTypeAndId.activeType"
-      ></work-context-menu>
-    </ng-template>
-  </mat-menu>
+    <div
+      [matTooltip]="T.MH.GO_TO_TASK_LIST | translate"
+      class="current-work-context-title"
+      mat-ripple
+      routerLink="/active/tasks"
+    >
+      {{ workContextService.activeWorkContextTitle$ | async }}
+    </div>
+    <button
+      [mat-menu-trigger-for]="activeWorkContextMenu"
+      [matTooltip]="T.MH.PROJECT_MENU | translate"
+      class="project-settings-btn hide-xxxs"
+      mat-icon-button
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #activeWorkContextMenu="matMenu">
+      <ng-template matMenuContent>
+        <work-context-menu
+          [contextId]="activeWorkContextTypeAndId.activeId"
+          [contextType]="activeWorkContextTypeAndId.activeType"
+        ></work-context-menu>
+      </ng-template>
+    </mat-menu>
   }
 
   <nav class="action-nav">
     <button
       (click)="layoutService.showAddTaskBar()"
-      matTooltip="{{T.MH.ADD_NEW_TASK|translate}} {{kb.addNewTask?'['+kb.addNewTask+']':''}}"
+      matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+        kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+      }}"
       class="hide-xs tour-addBtn"
       mat-icon-button
     >
@@ -51,21 +53,44 @@
 
     <button
       (click)="layoutService.showSearchBar()"
-      matTooltip="{{T.MH.SHOW_SEARCH_BAR|translate}} {{kb.showSearchBar?'['+kb.showSearchBar+']':''}}"
+      matTooltip="{{ T.MH.SHOW_SEARCH_BAR | translate }} {{
+        kb.showSearchBar ? '[' + kb.showSearchBar + ']' : ''
+      }}"
       mat-icon-button
     >
       <mat-icon>search</mat-icon>
     </button>
 
-    @if ((syncProviderService.isEnabled$|async)) {
+    @let isOnline = isOnline$ | async;
+    <!-- -->
+    @let isSyncEnabled = syncProviderService.isEnabled$ | async;
+
     <button
-      matTooltip="{{T.MH.TRIGGER_SYNC|translate}}"
-      (click)="sync()"
+      class="sync-btn"
+      matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
+      (click)="isSyncEnabled ? sync() : setupSync()"
+      (longPress)="setupSync()"
       mat-icon-button
     >
-      <mat-icon [class.spin]="(syncProviderService.isSyncing$|async)">sync</mat-icon>
+      @if (isSyncEnabled) {
+        <!-- -->
+        @if (isOnline) {
+          <!-- -->
+          <mat-icon [class.spin]="syncProviderService.isSyncing$ | async">sync</mat-icon>
+          @let isInSync = syncProviderService.isCurrentProviderInSync$ | async;
+          <!-- -->
+          @if (isInSync) {
+            <mat-icon class="sync-success-check-ico">check</mat-icon>
+          }
+          <!-- -->
+        } @else {
+          <mat-icon>wifi_off</mat-icon>
+        }
+        <!-- -->
+      } @else {
+        <mat-icon>sync_disabled</mat-icon>
+      }
     </button>
-    }
 
     <!--    @if ((workContextService.isActiveWorkContextProject$|async)) {-->
     <!--    <button-->
@@ -88,58 +113,68 @@
     <!--      </mat-icon>-->
     <!--    </button>-->
 
-    @if (!(globalConfigService.cfg$|async)?.focusMode?.isAlwaysUseFocusMode) {
-    <button
-      mat-icon-button
-      matTooltip="Enter focus mode {{kb.goToFocusMode?'['+kb.goToFocusMode+']':''}}"
-      class="hide-xxs"
-      (click)="enableFocusMode()"
-    >
-      <mat-icon>center_focus_strong</mat-icon>
-    </button>
+    @if (!(globalConfigService.cfg$ | async)?.focusMode?.isAlwaysUseFocusMode) {
+      <button
+        mat-icon-button
+        matTooltip="Enter focus mode {{
+          kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
+        }}"
+        class="hide-xxs"
+        (click)="enableFocusMode()"
+      >
+        <mat-icon>center_focus_strong</mat-icon>
+      </button>
     }
 
     <div class="play-btn-wrapper">
-      @if ((taskService.currentTask$|async); as currentTask) {
-      <div
-        @fade
-        class="current-task-title"
-      >
-        <div class="title">{{ currentTask.title }}</div>
-        @if ((currentTaskContext$|async); as currentTaskContext) {
-        <tag
-          @expandFadeHorizontal
-          [tag]="currentTaskContext"
-          class="project"
-        ></tag>
-        }
-      </div>
-      } @if ((taskService.currentTaskId$|async)) {
-      <div class="pulse-circle"></div>
+      @if (taskService.currentTask$ | async; as currentTask) {
+        <div
+          @fade
+          class="current-task-title"
+        >
+          <div class="title">{{ currentTask.title }}</div>
+          @if (currentTaskContext$ | async; as currentTaskContext) {
+            <tag
+              @expandFadeHorizontal
+              [tag]="currentTaskContext"
+              class="project"
+            ></tag>
+          }
+        </div>
+      }
+      @if (taskService.currentTaskId$ | async) {
+        <div class="pulse-circle"></div>
       }
 
       <button
         (click)="taskService.toggleStartTask()"
-        [color]="(taskService.currentTaskId$|async)? 'accent': 'primary'"
-        matTooltip="{{T.MH.TOGGLE_TRACK_TIME|translate}}"
-        [matTooltipPosition]="(pomodoroService.isEnabled$|async)? 'left': 'below'"
+        [color]="(taskService.currentTaskId$ | async) ? 'accent' : 'primary'"
+        matTooltip="{{ T.MH.TOGGLE_TRACK_TIME | translate }}"
+        [matTooltipPosition]="(pomodoroService.isEnabled$ | async) ? 'left' : 'below'"
         class="play-btn tour-playBtn mat-elevation-z3"
         mat-mini-fab
       >
-        @if ((pomodoroService.isEnabled$|async)) { @if ((pomodoroService.isBreak$|async))
-        {
-        <mat-icon>free_breakfast</mat-icon>
-        } @if (!(pomodoroService.isBreak$|async)) { @if
-        (!(taskService.currentTaskId$|async)) {
-        <mat-icon>play_arrow</mat-icon>
-        } @if ((taskService.currentTaskId$|async)) {
-        <mat-icon>pause</mat-icon>
-        } } } @if (!(pomodoroService.isEnabled$|async)) { @if
-        (!(taskService.currentTaskId$|async)) {
-        <mat-icon>play_arrow</mat-icon>
-        } @if ((taskService.currentTaskId$|async)) {
-        <mat-icon>pause</mat-icon>
-        } }
+        @if (pomodoroService.isEnabled$ | async) {
+          @if (pomodoroService.isBreak$ | async) {
+            <mat-icon>free_breakfast</mat-icon>
+          }
+          @if (!(pomodoroService.isBreak$ | async)) {
+            @if (!(taskService.currentTaskId$ | async)) {
+              <mat-icon>play_arrow</mat-icon>
+            }
+            @if (taskService.currentTaskId$ | async) {
+              <mat-icon>pause</mat-icon>
+            }
+          }
+        }
+        @if (!(pomodoroService.isEnabled$ | async)) {
+          @if (!(taskService.currentTaskId$ | async)) {
+            <mat-icon>play_arrow</mat-icon>
+          }
+          @if (taskService.currentTaskId$ | async) {
+            <mat-icon>pause</mat-icon>
+          }
+        }
 
         <svg
           class="circle-svg"
@@ -161,86 +196,96 @@
         </svg>
       </button>
 
-      @if ((pomodoroService.cfg$|async)?.isEnabled) {
-      <div class="pomodoro-label">
-        {{ (pomodoroService.currentSessionTime$|async|msToMinuteClockString) }}
-      </div>
-      <div class="pomodoro-controls">
-        <button
-          (click)="pomodoroService.finishPomodoroSession()"
-          [matTooltip]="T.F.POMODORO.S.SESSION_SKIP|translate"
-          matTooltipPosition="left"
-          class="pomodoro-btn"
-          color=""
-          mat-mini-fab
-        >
-          <mat-icon>skip_next</mat-icon>
-        </button>
-        <button
-          (click)="pomodoroService.stop()"
-          [matTooltip]="T.F.POMODORO.S.RESET|translate"
-          matTooltipPosition="left"
-          class="pomodoro-btn"
-          color=""
-          mat-mini-fab
-        >
-          <mat-icon>restart_alt</mat-icon>
-        </button>
-      </div>
+      @if ((pomodoroService.cfg$ | async)?.isEnabled) {
+        <div class="pomodoro-label">
+          {{ pomodoroService.currentSessionTime$ | async | msToMinuteClockString }}
+        </div>
+        <div class="pomodoro-controls">
+          <button
+            (click)="pomodoroService.finishPomodoroSession()"
+            [matTooltip]="T.F.POMODORO.S.SESSION_SKIP | translate"
+            matTooltipPosition="left"
+            class="pomodoro-btn"
+            color=""
+            mat-mini-fab
+          >
+            <mat-icon>skip_next</mat-icon>
+          </button>
+          <button
+            (click)="pomodoroService.stop()"
+            [matTooltip]="T.F.POMODORO.S.RESET | translate"
+            matTooltipPosition="left"
+            class="pomodoro-btn"
+            color=""
+            mat-mini-fab
+          >
+            <mat-icon>restart_alt</mat-icon>
+          </button>
+        </div>
       }
     </div>
 
-    @if ((simpleCounterService.enabledSimpleCounters$|async); as enabledSimpleCounters) {
-    @if (enabledSimpleCounters.length) {
-    <div class="simple-counter-buttons-outer-wrapper">
-      <button
-        (click)="isShowSimpleCounterBtnsMobile=!isShowSimpleCounterBtnsMobile"
-        class="simple-counter-mobile-trigger show-xs-only"
-        [color]="isCounterRunning(enabledSimpleCounters) ? 'accent':''"
-        mat-mini-fab
-      >
-        @if (!isShowSimpleCounterBtnsMobile) {
-        <mat-icon>timer</mat-icon>
-        } @if (isShowSimpleCounterBtnsMobile) {
-        <mat-icon>close</mat-icon>
-        }
-      </button>
-      <div
-        class="simple-counter-buttons"
-        [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
-      >
-        @for (simpleCounter of enabledSimpleCounters; track trackById($index,
-        simpleCounter)) {
-        <simple-counter-button
-          [matTooltip]="simpleCounter.title"
-          [simpleCounter]="simpleCounter"
-        ></simple-counter-button>
-        }
-      </div>
-    </div>
-    } }
+    @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
+      @if (enabledSimpleCounters.length) {
+        <div class="simple-counter-buttons-outer-wrapper">
+          <button
+            (click)="isShowSimpleCounterBtnsMobile = !isShowSimpleCounterBtnsMobile"
+            class="simple-counter-mobile-trigger show-xs-only"
+            [color]="isCounterRunning(enabledSimpleCounters) ? 'accent' : ''"
+            mat-mini-fab
+          >
+            @if (!isShowSimpleCounterBtnsMobile) {
+              <mat-icon>timer</mat-icon>
+            }
+            @if (isShowSimpleCounterBtnsMobile) {
+              <mat-icon>close</mat-icon>
+            }
+          </button>
+          <div
+            class="simple-counter-buttons"
+            [class.isVisibleMobile]="isShowSimpleCounterBtnsMobile"
+          >
+            @for (
+              simpleCounter of enabledSimpleCounters;
+              track trackById($index, simpleCounter)
+            ) {
+              <simple-counter-button
+                [matTooltip]="simpleCounter.title"
+                [simpleCounter]="simpleCounter"
+              ></simple-counter-button>
+            }
+          </div>
+        </div>
+      }
+    }
 
     <button
       class="toggle-notes-btn tour-issuePanelTrigger e2e-toggle-issue-provider-panel"
-      [disabled]="!(isRouteWithSidePanel$|async)"
-      [class.isActive]="(layoutService.isShowIssuePanel$|async)"
-      [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"
+      [disabled]="!(isRouteWithSidePanel$ | async)"
+      [class.isActive]="layoutService.isShowIssuePanel$ | async"
+      [class.isRouteWithRightPanel]="isRouteWithRightPanel$ | async"
       (click)="layoutService.toggleAddTaskPanel()"
       mat-icon-button
-      matTooltip="{{T.MH.TOGGLE_SHOW_ISSUE_PANEL|translate}} {{kb.toggleIssuePanel?'['+kb.toggleIssuePanel+']':''}}"
+      matTooltip="{{ T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate }} {{
+        kb.toggleIssuePanel ? '[' + kb.toggleIssuePanel + ']' : ''
+      }}"
     >
       <mat-icon class="note-ico">playlist_add</mat-icon>
     </button>
 
     <button
       class="toggle-notes-btn e2e-toggle-notes-btn"
-      [title]="!(isRouteWithSidePanel$|async) ? (T.MH.NOTES_PANEL_INFO|translate) : ''"
-      [disabled]="!(isRouteWithSidePanel$|async)"
-      [class.isActive]="(layoutService.isShowNotes$|async)"
-      [class.isRouteWithRightPanel]="(isRouteWithRightPanel$|async)"
+      [title]="
+        !(isRouteWithSidePanel$ | async) ? (T.MH.NOTES_PANEL_INFO | translate) : ''
+      "
+      [disabled]="!(isRouteWithSidePanel$ | async)"
+      [class.isActive]="layoutService.isShowNotes$ | async"
+      [class.isRouteWithRightPanel]="isRouteWithRightPanel$ | async"
       (click)="layoutService.toggleNotes()"
       mat-icon-button
-      matTooltip="{{T.MH.TOGGLE_SHOW_NOTES|translate}} {{kb.openProjectNotes?'['+kb.openProjectNotes+']':''}}"
+      matTooltip="{{ T.MH.TOGGLE_SHOW_NOTES | translate }} {{
+        kb.openProjectNotes ? '[' + kb.openProjectNotes + ']' : ''
+      }}"
     >
       <mat-icon class="note-ico">comment</mat-icon>
     </button>

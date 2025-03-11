@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Hecho",
+        "EISENHAUER_MATRIX": "Matriz de Eisenhower",
+        "IMPORTANT": "Importante",
+        "IN_PROGRESS": "EN PROGRESO",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "No Urgente y Importante",
+        "NOT_URGENT_NOT_IMPORTANT": "No Urgente y No Importante",
+        "TO_DO": "Por hacer",
+        "URGENT": "Urgente",
+        "URGENT_IMPORTANT": "Urgente e Importante",
+        "URGENT_NOT_IMPORTANT": "Urgente y No Importante"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Agregar nuevo panel",
+        "COLUMNS": "Columnas",
+        "TAGS_EXCLUDED": "Etiquetas excluidas",
+        "TAGS_REQUIRED": "Etiquetas requeridas",
+        "TASK_DONE_STATE": "Estado de tarea completada",
+        "TASK_DONE_STATE_ALL": "Todos",
+        "TASK_DONE_STATE_DONE": "Hecho",
+        "TASK_DONE_STATE_UNDONE": "No hecho"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Agregar nuevo tablero",
+        "CONFIRM_DELETE": "¿Realmente quieres eliminar este tablero?",
+        "CREATE_NEW_TAG_BTN": "Crear Etiqueta",
+        "CREATE_NEW_TAG_MSG": "Se necesita crear 1 nueva etiqueta para que este tablero funcione",
+        "CREATE_NEW_TAGS_BTN": "Crear etiquetas",
+        "CREATE_NEW_TAGS_MSG": "Se necesitan crear {{nr}} nuevas etiquetas para que este tablero funcione",
+        "EDIT_BOARD": "Editar tablero",
+        "NO_PANELS_BTN": "Configurar tablero",
+        "NO_PANELS_MSG": "Este tablero no tiene paneles configurados. Agrega algunos paneles."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Agregar marcador",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "La sesión de enfoque está en curso",
+        "TO_FOCUS_OVERLAY": "Para superposición de enfoque"
+      },
       "BACK_TO_PLANNING": "Volver a la planificación",
       "CANCEL_FOCUS_SESSION": "Cancelar sesión de enfoque",
       "CONGRATS": "¡Felicidades por completar esta sesión!",
       "CONTINUE_FOCUS_SESSION": "Continuar sesión de enfoque",
+      "COUNTDOWN": "Cuenta atrás",
       "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarea y seleccionar la siguiente",
+      "FLOWTIME": "Tiempo de flujo",
+      "FOR_TASK": "para la tarea",
       "GET_READY": "¡Prepárate para tu sesión de enfoque!",
       "GO_TO_PROCRASTINATION": "Busca ayuda cuando procrastines",
       "GOGOGO": "¡Vamos, vamos, vamos!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Haz algunos estiramientos suaves",
       "SELECT_ANOTHER_TASK": "Selecciona otra tarea",
       "SELECT_TASK": "Selecciona la tarea en la que concentrarte",
+      "SESSION_COMPLETED": "¡Sesión de enfoque completada!",
       "SET_FOCUS_SESSION_DURATION": "Establecer la duración de la sesión de enfoque",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas y adjuntos de la tarea",
       "START_FOCUS_SESSION": "Iniciar sesión de enfoque",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar los cambios por ti mismo)",
+        "INVALID_TOKEN_MESSAGE": "No es un token válido de GitHub. Debe empezar por \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Filtrar problemas asignados a mí",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea seguir",
         "TOKEN": "Token de acceso"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> comienza en <strong>{{start}} ¡</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> comienza en <strong>{{start}} ¡</strong>!<br> (y {{nrOfOtherBanners}} vencen otras tareas)"
       },
+      "S_ACTIVE_TASK_DUE": "La tarea en la que estás trabajando ya ha vencido.<br/> ({{title}})",
       "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "¡Hazlo!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Contar",
-        "TITLE": "Editar contador simple"
+        "CURRENT_STREAK": "Racha actual",
+        "DAILY_GOAL": "Objetivo diario",
+        "DAYS": "Días",
+        "L_COUNTER": "Contar"
       },
       "FORM": {
         "ADD_NEW": "Agregar contador simple",
         "HELP": "Aquí puede configurar botones simples que aparecerán en la esquina superior derecha. Pueden ser temporizadores o simplemente un contador simple, que se cuenta, haciendo clic en él.",
-        "L_AUTO_COUNT_UP": "El gatillo automático cuenta para",
-        "L_AUTO_SWITCH_OFF": "Disparador automático apagado para",
-        "L_AUTO_SWITCH_ON": "Encendido automático para",
         "L_COUNTDOWN_DURATION": "Duración de la cuenta atrás",
+        "L_DAILY_GOAL": "Objetivo diario para una racha exitosa",
         "L_ICON": "Icono",
         "L_ICON_ON": "Icono cuando se alterna",
         "L_IS_ENABLED": "Habilitado",
         "L_TITLE": "Título",
+        "L_TRACK_STREAKS": "Rachas de pista",
         "L_TYPE": "Tipo",
+        "L_WEEKDAYS": "Días laborables para comprobar si hay rachas",
         "TITLE": "Contadores simples",
         "TYPE_CLICK_COUNTER": "Contador de clics",
         "TYPE_REPEATED_COUNTDOWN": "Cuenta atrás repetida",
         "TYPE_STOPWATCH": "Cronógrafo"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Has alcanzado tu objetivo de hoy.",
+        "GOAL_REACHED_2": "Duración de la racha actual:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Ve a tu otro dispositivo y completa la sincronización allí.",
         "T5": "2. O puedes sobrescribir los datos remotos con los locales. Todos los cambios remotos\n    se perderán.",
         "T6": "¡¡¡Se recomienda crear una copia de seguridad de los datos que sobrescriba!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Guardar y Habilitar Sincronización",
+        "TITLE": "Configurar Sincronización"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deshabilitar sincronización",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "No se puede asignar un proyecto mediante la sintaxis corta para tareas repetibles.",
+        "CREATED_FOR_PROJECT": "Movida la tarea \"{{taskTitle}}\" al proyecto \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Ir al proyecto",
         "DELETED": "Tarea eliminada \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Se movió la tarea existente <strong>{{title}}</strong> a la lista de tareas de hoy",
         "FOUND_MOVE_FROM_OTHER_LIST": "Se agregó la tarea <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> a la lista actual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarea restaurada <strong>{{title}}</strong> relacionada con el problema desde el archivo",
         "LAST_TAG_DELETION_WARNING": "Estás intentando eliminar la última etiqueta de una tarea que no es de proyecto. ¡Esto no esta permitido!",
+        "MOVED_TO_PROJECT": "Movida la tarea \"{{taskTitle}}\" al proyecto \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Ir al proyecto",
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
         "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Agregar",
+    "ADVANCED_CFG": "Configuración avanzada",
     "CANCEL": "Cancelar",
     "CLOSE": "Cerrar",
     "DELETE": "Borrar",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Iniciar sesión",
     "LOGOUT": "Cerrar sesión",
     "MINUTES": "{{m}} minutos",
+    "MOVE_BACKWARD": "Mover hacia atrás",
+    "MOVE_FORWARD": "Mover hacia adelante",
     "NEXT": "Siguiente",
     "NO_CON": "Actualmente estás desconectado. Por favor, vuelva a conectarse a internet.",
     "NONE": "Ninguna",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
+    "BOARDS": "Tableros",
     "CREATE_PROJECT": "Crear proyecto",
     "CREATE_TAG": "Crear etiqueta",
     "DELETE_PROJECT": "Eliminar proyecto",

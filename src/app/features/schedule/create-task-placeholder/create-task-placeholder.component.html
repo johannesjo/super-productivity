@@ -3,21 +3,21 @@
   (click)="isForDayMode.set(!isForDayMode())"
 >
   @if (!isForDayMode()) {
-  <mat-icon>alarm</mat-icon>
-  <span [innerHTML]="plannedAt()|shortTime2"></span>
-  <!---->
+    <mat-icon>alarm</mat-icon>
+    <span [innerHTML]="plannedAt() | shortTime2"></span>
+    <!---->
   } @else {
-  <mat-icon>today</mat-icon>
-  <span>{{ date()|date:'shortDate' }} </span>
-  <!---->
+    <mat-icon>today</mat-icon>
+    <span>{{ date() | date: 'shortDate' }} </span>
+    <!---->
   }
 </div>
 
 @if (!isEditMode()) {
-<div class="msg">
-  <mat-icon>add</mat-icon>
-  click to create task
-</div>
+  <div class="msg">
+    <mat-icon>add</mat-icon>
+    click to create task
+  </div>
 }
 
 <textarea

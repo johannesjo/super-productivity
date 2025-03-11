@@ -3,6 +3,7 @@ import { Action, select, Store } from '@ngrx/store';
 import {
   selectAllTags,
   selectAllTagsWithoutMyDayAndNoList,
+  selectAllTagsWithoutNoList,
   selectTagById,
   selectTagsByIds,
 } from './store/tag.reducer';
@@ -28,6 +29,9 @@ export class TagService {
   tags$: Observable<Tag[]> = this._store$.pipe(select(selectAllTags));
   tagsNoMyDayAndNoList$: Observable<Tag[]> = this._store$.pipe(
     select(selectAllTagsWithoutMyDayAndNoList),
+  );
+  tagsNoNoList$: Observable<Tag[]> = this._store$.pipe(
+    select(selectAllTagsWithoutNoList),
   );
 
   getTagById$(id: string): Observable<Tag> {

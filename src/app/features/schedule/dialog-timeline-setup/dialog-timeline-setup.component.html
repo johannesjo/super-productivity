@@ -1,29 +1,30 @@
 <h1 mat-dialog-title>
   <mat-icon>calendar_view_week</mat-icon>
-  <span style="margin-left: 8px">{{ T.F.SCHEDULE.D_INITIAL.TITLE|translate }}</span>
+  <span style="margin-left: 8px">{{ T.F.SCHEDULE.D_INITIAL.TITLE | translate }}</span>
 </h1>
 
 <form
-  (submit)="$event.preventDefault();saveAndClose()"
+  (submit)="$event.preventDefault(); saveAndClose()"
   [formGroup]="formGroup"
 >
   <mat-dialog-content>
     @if (data?.isInfoShownInitially) {
-    <div
-      class="text"
-      [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
-    ></div>
-    } @if (!data?.isInfoShownInitially) {
-    <help-section>
       <div
-        [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT|translate"
-        class="side-info"
+        class="text"
+        [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT | translate"
       ></div>
-    </help-section>
+    }
+    @if (!data?.isInfoShownInitially) {
+      <help-section>
+        <div
+          [innerHTML]="T.F.SCHEDULE.D_INITIAL.TEXT | translate"
+          class="side-info"
+        ></div>
+      </help-section>
     }
 
     <formly-form
-      (modelChange)="timelineCfg=$event"
+      (modelChange)="timelineCfg = $event"
       [fields]="formConfig"
       [form]="formGroup"
       [model]="timelineCfg"
@@ -38,7 +39,7 @@
       mat-button
       type="button"
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
 
     <button
@@ -48,7 +49,7 @@
       type="submit"
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+      {{ T.G.SAVE | translate }}
     </button>
   </mat-dialog-actions>
 </form>

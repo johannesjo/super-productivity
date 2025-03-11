@@ -14,12 +14,14 @@ import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
 
 export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
   planner: PlannerState;
+  boards: BoardsState;
   note: NoteState;
   issueProvider: IssueProviderState;
 

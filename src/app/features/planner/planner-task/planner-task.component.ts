@@ -36,6 +36,7 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
   templateUrl: './planner-task.component.html',
   styleUrl: './planner-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     MatIcon,
     LongPressIOSDirective,
@@ -57,7 +58,10 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input({ required: true }) task!: TaskCopy;
-  readonly day = input<string>();
+
+  // TODO remove
+  readonly day = input<string | undefined>();
+  readonly tagsToHide = input<string[]>();
 
   isRepeatTaskCreatedToday = false;
 

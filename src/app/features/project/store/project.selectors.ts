@@ -45,7 +45,7 @@ export const selectProjectById = createSelector(
   (state: ProjectState, props: { id: string }): Project => {
     const p = state.entities[props.id];
     if (!props.id) {
-      throw new Error('No project id given');
+      throw new Error(`No project id given – ${props.id}`);
     }
     if (!p) {
       throw new Error(`Project ${props.id} not found`);

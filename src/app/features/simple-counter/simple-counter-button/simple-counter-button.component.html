@@ -1,67 +1,64 @@
 @if (simpleCounter(); as sc) {
-<div class="wrapper">
-  @if (sc.type===SimpleCounterType.StopWatch) {
-  <button
-    (click)="toggleStopwatch()"
-    (contextmenu)="edit($event)"
-    (longPress)="edit()"
-    [color]="sc.isOn? 'accent': ''"
-    class="main-btn stopwatch"
-    mat-mini-fab
-  >
-    @if (!sc.isOn) {
-    <mat-icon>{{ sc.icon }}</mat-icon>
-    } @if (sc.isOn) {
-    <mat-icon>{{ sc.icon }}</mat-icon>
+  <div class="wrapper">
+    @if (sc.type === SimpleCounterType.StopWatch) {
+      <button
+        (click)="toggleStopwatch()"
+        (contextmenu)="edit($event)"
+        (longPress)="edit()"
+        [color]="sc.isOn ? 'accent' : ''"
+        class="main-btn stopwatch"
+        mat-mini-fab
+      >
+        <mat-icon>{{ sc.icon }}</mat-icon>
+        @if (isSuccess()) {
+          <mat-icon class="check-ico">check</mat-icon>
+        }
+      </button>
+      @if (sc.countOnDay[todayStr()]) {
+        <div class="label">{{ sc.countOnDay[todayStr()] | msToMinuteClockString }}</div>
+      }
     }
-  </button>
-  @if (sc.countOnDay[todayStr]) {
-  <div class="label">{{ sc.countOnDay[todayStr]|msToMinuteClockString }}</div>
-  } } @if (sc.type===SimpleCounterType.ClickCounter) {
-  <button
-    (click)="toggleCounter()"
-    (contextmenu)="edit($event)"
-    (longPress)="edit()"
-    class="main-btn"
-    color=""
-    mat-mini-fab
-  >
-    <mat-icon>{{ sc.icon }}</mat-icon>
-  </button>
-  @if (sc.countOnDay[todayStr]) {
-  <div class="label">{{ sc.countOnDay[todayStr] }}</div>
-  } } @if (sc.type===SimpleCounterType.RepeatedCountdownReminder) {
-  <button
-    (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
-    (contextmenu)="edit($event)"
-    (longPress)="edit()"
-    [color]="(sc.isOn && !isTimeUp())? 'accent': ''"
-    [class.isTimeUp]="isTimeUp()"
-    class="main-btn repeated-countdown"
-    mat-mini-fab
-  >
-    <mat-icon>{{ sc.icon }}</mat-icon>
-  </button>
-  @if (sc.isOn && (countdownTime$|async); as countdownTime) {
-  <div class="extra-label">{{ countdownTime|msToMinuteClockString }}</div>
-  } @if (sc.countOnDay[todayStr] || isTimeUp()) {
-  <div class="label">{{ isTimeUp() ? "+" : sc.countOnDay[todayStr] }}</div>
-  } }
-  <!--  <div class="controls">-->
-  <!--    <button (click)="edit()"-->
-  <!--            class="btn"-->
-  <!--            color=""-->
-  <!--            [title]="T.G.EDIT|translate"-->
-  <!--            mat-mini-fab>-->
-  <!--      <mat-icon>edit</mat-icon>-->
-  <!--    </button>-->
-  <!--    &lt;!&ndash;    <button (click)="reset()"&ndash;&gt;-->
-  <!--    &lt;!&ndash;            class="btn"&ndash;&gt;-->
-  <!--    &lt;!&ndash;            color=""&ndash;&gt;-->
-  <!--    &lt;!&ndash;            [title]="T.G.RESET|translate"&ndash;&gt;-->
-  <!--    &lt;!&ndash;            mat-mini-fab>&ndash;&gt;-->
-  <!--    &lt;!&ndash;      <mat-icon>undo</mat-icon>&ndash;&gt;-->
-  <!--    &lt;!&ndash;    </button>&ndash;&gt;-->
-  <!--  </div>-->
-</div>
+    <!----->
+    @if (sc.type === SimpleCounterType.ClickCounter) {
+      <button
+        (click)="toggleCounter()"
+        (contextmenu)="edit($event)"
+        (longPress)="edit()"
+        class="main-btn"
+        color=""
+        mat-mini-fab
+      >
+        <mat-icon>{{ sc.icon }}</mat-icon>
+        @if (isSuccess()) {
+          <mat-icon class="check-ico">check</mat-icon>
+        }
+      </button>
+      @if (sc.countOnDay[todayStr()]) {
+        <div class="label">{{ sc.countOnDay[todayStr()] }}</div>
+      }
+    }
+    <!----->
+    @if (sc.type === SimpleCounterType.RepeatedCountdownReminder) {
+      <button
+        (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
+        (contextmenu)="edit($event)"
+        (longPress)="edit()"
+        [color]="sc.isOn && !isTimeUp() ? 'accent' : ''"
+        [class.isTimeUp]="isTimeUp()"
+        class="main-btn repeated-countdown"
+        mat-mini-fab
+      >
+        <mat-icon>{{ sc.icon }}</mat-icon>
+        @if (isSuccess()) {
+          <mat-icon class="check-ico">check</mat-icon>
+        }
+      </button>
+      @if (sc.isOn && (countdownTime$ | async); as countdownTime) {
+        <div class="extra-label">{{ countdownTime | msToMinuteClockString }}</div>
+      }
+      @if (sc.countOnDay[todayStr()] || isTimeUp()) {
+        <div class="label">{{ isTimeUp() ? '+' : sc.countOnDay[todayStr()] }}</div>
+      }
+    }
+  </div>
 }

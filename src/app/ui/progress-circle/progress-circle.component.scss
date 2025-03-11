@@ -12,15 +12,15 @@
 .circle-bg {
   fill: none;
   stroke: rgba(127, 127, 127, 0.2);
-  stroke-width: 3.8;
+  stroke-width: 2.8;
 }
 
 .progress-circle {
   fill: none;
-  stroke-width: 2.8;
+  stroke-width: 3;
   stroke-linecap: round;
   animation: progress 1s ease-out forwards;
   stroke-dashoffset: 0;
   stroke-dasharray: 0, 100;
-  transition: stroke-dashoffset 1s;
+  transition: all 1s;
 }

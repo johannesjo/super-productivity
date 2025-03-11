@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Hotovo",
+        "EISENHAUER_MATRIX": "Eisenhowerova matica",
+        "IMPORTANT": "Dôležité",
+        "IN_PROGRESS": "Prebieha",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Nie je urgentné a dôležité",
+        "NOT_URGENT_NOT_IMPORTANT": "Nie je urgentné a nie je dôležité",
+        "TO_DO": "Na zozname úloh",
+        "URGENT": "Urgentné",
+        "URGENT_IMPORTANT": "Urgentné a dôležité",
+        "URGENT_NOT_IMPORTANT": "Urgentné a nie je dôležité"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Pridať nový panel",
+        "COLUMNS": "Stĺpce",
+        "TAGS_EXCLUDED": "Vylúčené značky",
+        "TAGS_REQUIRED": "Povinné značky",
+        "TASK_DONE_STATE": "Stav úlohy hotovo",
+        "TASK_DONE_STATE_ALL": "Všetko",
+        "TASK_DONE_STATE_DONE": "Hotovo",
+        "TASK_DONE_STATE_UNDONE": "Nezrealizované"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Pridať novú tabuľu",
+        "CONFIRM_DELETE": "Naozaj chcete odstrániť túto tabuľu?",
+        "CREATE_NEW_TAG_BTN": "Vytvoriť značku",
+        "CREATE_NEW_TAG_MSG": "Pre túto tabuľu je potrebné vytvoriť 1 novú značku, aby fungovala",
+        "CREATE_NEW_TAGS_BTN": "Vytvoriť značky",
+        "CREATE_NEW_TAGS_MSG": "Pre túto tabuľu je potrebné vytvoriť {{nr}} nové značky, aby fungovala",
+        "EDIT_BOARD": "Upraviť tabuľu",
+        "NO_PANELS_BTN": "Konfigurovať tabuľu",
+        "NO_PANELS_MSG": "Táto tabuľa nemá nakonfigurované panely. Pridajte niektoré panely."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "Pridať záložku",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Relácia zamerania prebieha",
+        "TO_FOCUS_OVERLAY": "Na prekrytie zamerania"
+      },
       "BACK_TO_PLANNING": "Späť na plánovanie",
       "CANCEL_FOCUS_SESSION": "Zrušenie Focus Session",
       "CONGRATS": "Gratulujeme k dokončeniu tejto relácie!",
       "CONTINUE_FOCUS_SESSION": "Pokračovanie sústredenia",
+      "COUNTDOWN": "Odpočítavanie",
       "FINISH_TASK_AND_SELECT_NEXT": "Ukončite úlohu a vyberte možnosť ďalšie",
+      "FLOWTIME": "Flowtime",
+      "FOR_TASK": "pre úlohu",
       "GET_READY": "Pripravte sa na sústredenie!",
       "GO_TO_PROCRASTINATION": "Pri odkladaní vyhľadajte pomoc",
       "GOGOGO": "Choď, choď, choď!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "Vykonajte mierny strečing",
       "SELECT_ANOTHER_TASK": "Výber inej úlohy",
       "SELECT_TASK": "Vyberte úlohu, na ktorú sa chcete zamerať",
+      "SESSION_COMPLETED": "Relácia zamerania dokončená!",
       "SET_FOCUS_SESSION_DURATION": "Nastavenie trvania relácie Focus",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Zobrazenie/skrytie poznámok k úlohám a príloh",
       "START_FOCUS_SESSION": "Začiatok Focus Session",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "Používateľské meno (napr. na odfiltrovanie vlastných zmien)",
+        "INVALID_TOKEN_MESSAGE": "Nie je platný token GitHub. Musí začínať na \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Do nevybavených záležitostí importovať len tie, ktoré mi boli pridelené",
         "REPO": "meno používateľa/názov úložiska",
         "TOKEN": "Prístupový token"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}<\\/strong> začína o <strong>{{start}}<\\/strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> začína na <strong>{{start}}</strong>!<br> (a {{nrOfOtherBanners}} ďalšie úlohy sú splatné)"
       },
+      "S_ACTIVE_TASK_DUE": "Úloha, na ktorej práve pracujete, je teraz splatná!<br/> ({{title}})",
       "S_REMINDER_ERR": "Chyba pre rozhranie pripomienok"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "Urob to!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Počet",
-        "TITLE": "Upraviť jednoduché počítadlo"
+        "CURRENT_STREAK": "Aktuálny pruh",
+        "DAILY_GOAL": "Denný cieľ",
+        "DAYS": "Dní",
+        "L_COUNTER": "Počet"
       },
       "FORM": {
         "ADD_NEW": "Pridať jednoduché počítadlo",
         "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
-        "L_AUTO_COUNT_UP": "Auto trigger count up for",
-        "L_AUTO_SWITCH_OFF": "Auto trigger switch off for",
-        "L_AUTO_SWITCH_ON": "Auto trigger switch on for",
         "L_COUNTDOWN_DURATION": "Trvanie odpočítavania",
+        "L_DAILY_GOAL": "Denný cieľ pre úspešnú sériu",
         "L_ICON": "Ikona",
         "L_ICON_ON": "Ikona pri prepnutí",
         "L_IS_ENABLED": "Povolené",
         "L_TITLE": "Názov",
+        "L_TRACK_STREAKS": "Traťové pruhy",
         "L_TYPE": "Typ",
+        "L_WEEKDAYS": "Pracovné dni na kontrolu pruhov",
         "TITLE": "Jednoduché počítadlá",
         "TYPE_CLICK_COUNTER": "Počítadlo kliknutí",
         "TYPE_REPEATED_COUNTDOWN": "Opakované odpočítavanie",
         "TYPE_STOPWATCH": "Stopky"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Dosiahli ste svoj dnešný cieľ!",
+        "GOAL_REACHED_2": "Aktuálne trvanie pruhu:"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. Prejdite do druhého zariadenia a dokončite synchronizáciu tam.",
         "T5": "2. Alebo môžete vzdialené údaje prepísať svojimi miestnymi údajmi. Všetky vzdialené zmeny sa\n    stratia!",
         "T6": "Odporúča sa vytvoriť zálohu prepísaných údajov!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Uložiť a povoliť synchronizáciu",
+        "TITLE": "Nastaviť synchronizáciu"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Zakázať synchronizáciu",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Cannot assign project via short syntax for repeatable tasks!",
+        "CREATED_FOR_PROJECT": "Presunul úlohu \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT_ACTION": "Prejsť na projekt",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_PROJECT": "Presunul úlohu \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Prejsť na projekt",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "Pridať",
+    "ADVANCED_CFG": "Pokročilé nastavenia",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
@@ -1285,6 +1346,8 @@
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
+    "MOVE_BACKWARD": "Posunúť späť",
+    "MOVE_FORWARD": "Posunúť dopredu",
     "NEXT": "Next",
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Pridať novú úlohu",
+    "BOARDS": "Tabule",
     "CREATE_PROJECT": "Vytvoriť Projekt",
     "CREATE_TAG": "Vytvoriť štítok",
     "DELETE_PROJECT": "Odstrániť projekt",

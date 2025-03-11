@@ -50,13 +50,17 @@ main {
   right: $s;
   width: 56px;
   height: 56px;
-  z-index: 3;
+  z-index: 5;
   @include mousePrimaryDevice {
-    visibility: hidden;
+    transition: opacity $transition-leave;
+    //visibility: hidden;
+    opacity: 0;
   }
 
   :host:hover & {
-    visibility: visible;
+    transition: opacity $transition-enter;
+    //visibility: visible;
+    opacity: 1;
   }
 
   mat-icon {
@@ -78,4 +82,15 @@ main {
 .pomodoro-info-msg {
   font-size: 20px;
   margin-bottom: 16px;
+}
+
+.focus-mode-select-mode {
+  margin-bottom: auto;
+  margin-top: 16px;
+}
+
+focus-mode-task-selection,
+focus-mode-duration-selection {
+  margin-bottom: auto;
+  margin-top: -32px;
 }

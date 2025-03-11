@@ -1,0 +1,21 @@
+<mat-icon>{{ simpleCounter().icon }}</mat-icon>
+
+<div class="title">{{ simpleCounter().title }}</div>
+
+<div class="value-wrapper">
+  @if (simpleCounter().type === 'StopWatch') {
+    <mat-icon>timer</mat-icon>
+    <div class="summary-val">{{ simpleCounter().countOnDay[dayStr()] | msToString }}</div>
+  } @else {
+    <mat-icon>adjust</mat-icon>
+    <div class="summary-val">{{ simpleCounter().countOnDay[dayStr()] || 0 }}</div>
+  }
+</div>
+
+@if (simpleCounter().streakDuration) {
+  <div class="value-wrapper">
+    <!--    <mat-icon>local_fire_department</mat-icon>-->
+    <div class="emoji">🔥</div>
+    <div class="summary-val">{{ simpleCounter().streakDuration }}</div>
+  </div>
+}

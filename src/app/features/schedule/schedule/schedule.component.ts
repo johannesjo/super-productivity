@@ -59,6 +59,7 @@ import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatFabButton } from '@angular/material/button';
 
 // const DAYS_TO_SHOW = 5;
 const D_HOURS = 24;
@@ -78,6 +79,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     MatIcon,
     TranslatePipe,
     MatTooltip,
+    MatFabButton,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',

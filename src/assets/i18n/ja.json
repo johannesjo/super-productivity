@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "完成です",
+        "EISENHAUER_MATRIX": "アイゼンハウアーマトリックス",
+        "IMPORTANT": "大事な",
+        "IN_PROGRESS": "進行中で",
+        "KANBAN": "カンバン",
+        "NOT_URGENT_IMPORTANT": "緊急性がなく、重要ではありません",
+        "NOT_URGENT_NOT_IMPORTANT": "緊急ではない、重要ではない",
+        "TO_DO": "やるべきこと",
+        "URGENT": "緊急",
+        "URGENT_IMPORTANT": "緊急かつ重要",
+        "URGENT_NOT_IMPORTANT": "緊急 & 重要ではない"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "新しいパネルを追加",
+        "COLUMNS": "列",
+        "TAGS_EXCLUDED": "除外されたタグ",
+        "TAGS_REQUIRED": "必須タグ",
+        "TASK_DONE_STATE": "タスク完了状態",
+        "TASK_DONE_STATE_ALL": "すべての",
+        "TASK_DONE_STATE_DONE": "完成です",
+        "TASK_DONE_STATE_UNDONE": "取り消す"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "新しいボードを追加",
+        "CONFIRM_DELETE": "このボードを削除してもよろしいですか?",
+        "CREATE_NEW_TAG_BTN": "タグを作成",
+        "CREATE_NEW_TAG_MSG": "このボードを機能させるには、新しいタグを1つ作成する必要があります",
+        "CREATE_NEW_TAGS_BTN": "タグの作成",
+        "CREATE_NEW_TAGS_MSG": "このボードを機能させるには、{{nr}} 新しいタグを作成する必要があります",
+        "EDIT_BOARD": "編集ボード",
+        "NO_PANELS_BTN": "ボードの構成",
+        "NO_PANELS_MSG": "このボードにはパネルが設定されていません。それにいくつかのパネルを追加します。"
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "ブックマークを追加",
@@ -123,7 +159,7 @@
         "TXT": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
         "TXT_PAST": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start} }</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "カレンダー プロバイダー エラー: {{errTxt}}"
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "フォーカスセッションが進行中です",
+        "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
+      },
       "BACK_TO_PLANNING": "計画に戻る",
       "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
+      "COUNTDOWN": "カウントダウン",
       "FINISH_TASK_AND_SELECT_NEXT": "タスクを終了して次を選択",
+      "FLOWTIME": "フロータイム",
+      "FOR_TASK": "タスク用",
       "GET_READY": "集中セッションの準備をしましょう!",
       "GO_TO_PROCRASTINATION": "先延ばしにするときは助けを求める",
       "GOGOGO": "行け、行け、行け！",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "軽いストレッチをする",
       "SELECT_ANOTHER_TASK": "別のタスクを選択",
       "SELECT_TASK": "集中するタスクを選択",
+      "SESSION_COMPLETED": "フォーカスセッションが完了しました!",
       "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
       "START_FOCUS_SESSION": "フォーカスセッションを開始",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
+        "INVALID_TOKEN_MESSAGE": "有効な GitHub トークンではありません。ghp_\" で始まる必要があります。",
         "IS_ASSIGNEE_FILTER": "私に割り当てられた課題のみをバックログにインポートする",
         "REPO": "username/repositoryName",
         "TOKEN": "アクセストークン"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> は <strong>から始まる {{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> は <strong>から始まる {{start}}</strong>!<br> (そして {{nrOfOtherBanners}} 他のタスクの期限)"
       },
+      "S_ACTIVE_TASK_DUE": "現在取り組んでいるタスクの期限が迫っています！<br/> ({{title}})",
       "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "やれ！"
       },
       "D_EDIT": {
-        "L_COUNTER": "カウント",
-        "TITLE": "シンプルカウンターの編集"
+        "CURRENT_STREAK": "現在のストリーク",
+        "DAILY_GOAL": "日々の目標",
+        "DAYS": "日",
+        "L_COUNTER": "カウント"
       },
       "FORM": {
         "ADD_NEW": "シンプルなカウンターを追加",
         "HELP": "ここで、右上に表示されるシンプルなボタンを設定できます。タイマー、またはクリックするだけでカウントアップされる単純なカウンターのいずれかです。",
-        "L_AUTO_COUNT_UP": "自動トリガーカウントアップ",
-        "L_AUTO_SWITCH_OFF": "自動トリガースイッチオフ",
-        "L_AUTO_SWITCH_ON": "自動トリガースイッチがオン",
         "L_COUNTDOWN_DURATION": "カウントダウン時間",
+        "L_DAILY_GOAL": "連勝のための日々の目標",
         "L_ICON": "アイコン",
         "L_ICON_ON": "切り替え時のアイコン",
         "L_IS_ENABLED": "有効",
         "L_TITLE": "タイトル",
+        "L_TRACK_STREAKS": "トラックストリーク",
         "L_TYPE": "タイプ",
+        "L_WEEKDAYS": "平日の連休チェック",
         "TITLE": "シンプルなカウンター",
         "TYPE_CLICK_COUNTER": "カウンターをクリック",
         "TYPE_REPEATED_COUNTDOWN": "繰り返しカウントダウン",
         "TYPE_STOPWATCH": "ストップウォッチ"
+      },
+      "S": {
+        "GOAL_REACHED_1": "今日の目標は達成した！",
+        "GOAL_REACHED_2": "現在の連勝期間"
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1.他のデバイスに移動し、そこで同期を完了します。",
         "T5": "2.または、リモートのデータをローカルのデータで上書きすることもできます。リモートの変更はすべて\n    は失われます！",
         "T6": "上書きしたデータのバックアップを作成することをお勧めします！"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Sync の保存と有効化",
+        "TITLE": "Sync の設定"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "同期を無効にする",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクの短い構文でプロジェクトを割り当てられない！",
+        "CREATED_FOR_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
+        "CREATED_FOR_PROJECT_ACTION": "プロジェクトに移動",
         "DELETED": "削除されたタスク \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "既存のタスク <strong>{{title}}</strong> を今日のタスクリストに移動しました",
         "FOUND_MOVE_FROM_OTHER_LIST": "タスク <strong>{{title}}</strong> を <strong>{{contextTitle}}</strong> から現在のリストに追加しました",
         "FOUND_RESTORE_FROM_ARCHIVE": "アーカイブからの発行に関連する復元されたタスク <strong>{{title}}</strong> ",
         "LAST_TAG_DELETION_WARNING": "非プロジェクトタスクの最後のタグを削除しようとしています。これは許可されていません！",
+        "MOVED_TO_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
+        "MOVED_TO_PROJECT_ACTION": "プロジェクトに移動",
         "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
         "REMINDER_DELETED": "タスクの通知を削除しました",
         "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "追加",
+    "ADVANCED_CFG": "詳細設定",
     "CANCEL": "キャンセル",
     "CLOSE": "閉じる",
     "DELETE": "削除",
@@ -1285,6 +1346,8 @@
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
+    "MOVE_BACKWARD": "後方に移動",
+    "MOVE_FORWARD": "前進",
     "NEXT": "次",
     "NO_CON": "現在オフラインです。インターネットに再接続してください。",
     "NONE": "無し",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
+    "BOARDS": "ポート",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
     "DELETE_PROJECT": "プロジェクトの削除",

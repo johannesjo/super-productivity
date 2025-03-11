@@ -103,64 +103,6 @@ $sub-task-c-bg-dark-done: $dark2;
   }
 }
 
-@mixin taskTitle() {
-  flex-grow: 1;
-  text-align: start;
-  outline: none;
-  border: none;
-  margin-left: 2px;
-  background: inherit;
-  position: relative;
-  overflow: visible;
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-  caret-color: #000000;
-  z-index: $z-task-title;
-
-  @include darkTheme() {
-    caret-color: #ffffff;
-  }
-
-  &.is-focused {
-    z-index: $z-task-title-focus !important;
-  }
-  ::ng-deep textarea,
-  ::ng-deep div {
-    min-height: 20px;
-    border: 1px solid transparent;
-    line-height: 1.5;
-    padding: 3px 0 3px 5px;
-  }
-
-  ::ng-deep textarea {
-    cursor: text;
-    transition: $transition-leave;
-
-    &:focus {
-      user-select: text;
-      -webkit-user-select: text; /* Safari */
-
-      // the magic number is 15/14 so we scale to whole pixels
-      //transform: scale(1.071428571);
-      transition: $transition-enter;
-      outline: none;
-      outline: 1px solid $c-accent;
-
-      // NOTE: needed to overwrite color for current task
-      color: $light-theme-text-color;
-      @include inlineEditElevation();
-      //
-      @include mq(xs, max) {
-        transform: scale(1);
-      }
-
-      @include darkTheme() {
-        color: #fff;
-      }
-    }
-  }
-}
-
 %standardTaskOpacityChange {
   @include standardTaskOpacityChange;
 }

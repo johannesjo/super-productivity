@@ -25,6 +25,11 @@ form {
 .for-task {
   font-size: 18px;
   margin-bottom: $s;
+
+  .label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
 }
 
 input-duration-slider {

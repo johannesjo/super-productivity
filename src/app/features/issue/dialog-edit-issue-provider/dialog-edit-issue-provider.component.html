@@ -7,7 +7,7 @@
 <h1 mat-dialog-title>
   <mat-icon
     class="dialog-header-icon"
-    [svgIcon]="(issueProviderKey)|issueIcon"
+    [svgIcon]="issueProviderKey | issueIcon"
   ></mat-icon>
   <!-- TODO improve title -->
 
@@ -20,95 +20,108 @@
   (ngSubmit)="submit()"
 >
   <mat-dialog-content>
-    @if (configFormSection?.help||configFormSection?.helpArr) {
-    <help-section>
-      @if (configFormSection?.help) {
-      <div [innerHtml]="configFormSection?.help|translate"></div>
-      } @if (configFormSection?.helpArr) { @for (helpSection of
-      configFormSection?.helpArr; track helpSection) { @if (helpSection.h) {
-      <div class="mat-caption">{{ helpSection.h|translate }}</div>
-      } @if (helpSection.p) {
-      <p [innerHTML]="helpSection.p|translate"></p>
-      } @if (helpSection.p2) {
-      <p [innerHTML]="helpSection.p2|translate"></p>
-      } @if (helpSection.p3) {
-      <p [innerHTML]="helpSection.p3|translate"></p>
-      } @if (helpSection.p4) {
-      <p [innerHTML]="helpSection.p4|translate"></p>
-      } } }
-    </help-section>
-    } @if (isEdit) {
-    <div style="margin-bottom: 32px">
-      <mat-slide-toggle
-        [ngModel]="model.isEnabled"
-        (ngModelChange)="changeEnabled($event)"
-        [ngModelOptions]="{standalone: true}"
-      >
-        {{ T.G.ENABLED|translate }}
-      </mat-slide-toggle>
-    </div>
+    @if (configFormSection?.help || configFormSection?.helpArr) {
+      <help-section>
+        @if (configFormSection?.help) {
+          <div [innerHtml]="configFormSection?.help | translate"></div>
+        }
+        @if (configFormSection?.helpArr) {
+          @for (helpSection of configFormSection?.helpArr; track helpSection) {
+            @if (helpSection.h) {
+              <div class="mat-caption">{{ helpSection.h | translate }}</div>
+            }
+            @if (helpSection.p) {
+              <p [innerHTML]="helpSection.p | translate"></p>
+            }
+            @if (helpSection.p2) {
+              <p [innerHTML]="helpSection.p2 | translate"></p>
+            }
+            @if (helpSection.p3) {
+              <p [innerHTML]="helpSection.p3 | translate"></p>
+            }
+            @if (helpSection.p4) {
+              <p [innerHTML]="helpSection.p4 | translate"></p>
+            }
+          }
+        }
+      </help-section>
+    }
+    @if (isEdit) {
+      <div style="margin-bottom: 32px">
+        <mat-slide-toggle
+          [ngModel]="model.isEnabled"
+          (ngModelChange)="changeEnabled($event)"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          {{ T.G.ENABLED | translate }}
+        </mat-slide-toggle>
+      </div>
     }
     <!-- -->
     @if (model.isEnabled) {
-    <!-- -->
-    @if (issueProviderKey === ICAL_TYPE) {
-    <!-- -->
-    @if(d.calendarContextInfoTarget === 'GOOGLE'){
-    <div class="tpl">
-      <p>
-        <a
-          target="_blank"
-          href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only"
-          >How to get the iCal url for Google Calendar (view only)?</a
-        >
-      </p>
-      <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
-    </div>
-    }
-    <!-- -->
-    @if(d.calendarContextInfoTarget === 'OUTLOOK365'){
-    <div class="tpl">
-      <p>
-        <a
-          target="_blank"
-          href="https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365"
-          >How to get the iCal url for Outlook 365 (ICS)?</a
-        >
-      </p>
-      <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
-    </div>
-    } }
-    <!-- -->
-    @if (issueProviderKey === 'JIRA') {
-    <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
-      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>
-    </div>
-    }
+      <!-- -->
+      @if (issueProviderKey === ICAL_TYPE) {
+        <!-- -->
+        @if (d.calendarContextInfoTarget === 'GOOGLE') {
+          <div class="tpl">
+            <p>
+              <a
+                target="_blank"
+                href="https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only"
+                >How to get the iCal url for Google Calendar (view only)?</a
+              >
+            </p>
+            <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
+          </div>
+        }
+        <!-- -->
+        @if (d.calendarContextInfoTarget === 'OUTLOOK365') {
+          <div class="tpl">
+            <p>
+              <a
+                target="_blank"
+                href="https://support.pushpay.com/s/article/How-do-I-get-an-iCal-link-from-Office-365"
+                >How to get the iCal url for Outlook 365 (ICS)?</a
+              >
+            </p>
+            <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
+          </div>
+        }
+      }
+      <!-- -->
+      @if (issueProviderKey === 'JIRA') {
+        <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
+          <p [innerHTML]="T.G.EXTENSION_INFO | translate"></p>
+        </div>
+      }
 
-    <formly-form
-      [model]="model"
-      (modelChange)="formlyModelChange($event)"
-      [fields]="fields"
-      [form]="form"
-    ></formly-form>
+      <formly-form
+        [model]="model"
+        (modelChange)="formlyModelChange($event)"
+        [fields]="fields"
+        [form]="form"
+      ></formly-form>
 
-    @switch (issueProviderKey) {
-    <!-- -->
-    @case ("JIRA") {
-    <jira-additonal-cfg
-      [section]="configFormSection"
-      [cfg]="model"
-      (modelChange)="customCfgCmpSave($event)"
-    ></jira-additonal-cfg>
-    <!-- -->
-    } @case ("OPEN_PROJECT") {
-    <open-project-additional-cfg
-      [section]="configFormSection"
-      [cfg]="model"
-      (modelChange)="customCfgCmpSave($event)"
-    ></open-project-additional-cfg>
-    <!-- -->
-    } } }
+      @switch (issueProviderKey) {
+        <!-- -->
+        @case ('JIRA') {
+          <jira-additonal-cfg
+            [section]="configFormSection"
+            [cfg]="model"
+            (modelChange)="customCfgCmpSave($event)"
+          ></jira-additonal-cfg>
+          <!-- -->
+        }
+        @case ('OPEN_PROJECT') {
+          <open-project-additional-cfg
+            [section]="configFormSection"
+            [cfg]="model"
+            (modelChange)="customCfgCmpSave($event)"
+          ></open-project-additional-cfg>
+          <!-- -->
+        }
+      }
+    }
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
@@ -118,39 +131,39 @@
       mat-button
       type="button"
     >
-      {{ T.G.CANCEL|translate }}
+      {{ T.G.CANCEL | translate }}
     </button>
 
     @if (isEdit) {
-    <button
-      (click)="remove()"
-      color="warn"
-      mat-button
-      type="button"
-    >
-      <mat-icon>delete_forever</mat-icon>
-      {{ T.G.DELETE|translate }}
-    </button>
+      <button
+        (click)="remove()"
+        color="warn"
+        mat-button
+        type="button"
+      >
+        <mat-icon>delete_forever</mat-icon>
+        {{ T.G.DELETE | translate }}
+      </button>
     } @else {
-    <!-- -->
-    @if (isConnectionWorks()) {
-    <div class="success-info">
-      <mat-icon>check</mat-icon>
-    </div>
-    } @else {
-    <button
-      (click)="testConnection()"
-      mat-button
-      color="primary"
-      type="button"
-      [disabled]="form.invalid"
-    >
-      <mat-icon>online_prediction</mat-icon>
-      Test
-      <!--      {{ T.G.DELETE|translate }}-->
-    </button>
-    }
-    <!-- -->
+      <!-- -->
+      @if (isConnectionWorks()) {
+        <div class="success-info">
+          <mat-icon>check</mat-icon>
+        </div>
+      } @else {
+        <button
+          (click)="testConnection()"
+          mat-button
+          color="primary"
+          type="button"
+          [disabled]="form.invalid"
+        >
+          <mat-icon>online_prediction</mat-icon>
+          Test
+          <!--      {{ T.G.DELETE|translate }}-->
+        </button>
+      }
+      <!-- -->
     }
     <button
       color="primary"
@@ -159,7 +172,7 @@
       [disabled]="form.invalid"
     >
       <mat-icon>save</mat-icon>
-      {{ T.G.SAVE|translate }}
+      {{ T.G.SAVE | translate }}
     </button>
   </mat-dialog-actions>
 </form>

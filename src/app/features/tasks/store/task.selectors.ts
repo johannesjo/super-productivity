@@ -168,6 +168,11 @@ export const selectAllTasksWithSubTasks = createSelector(
   mapSubTasksToTasks,
 );
 
+export const selectAllDoneIds = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): string[] => tasks.filter((t) => t.isDone).map((t) => t.id),
+);
+
 // DYNAMIC SELECTORS
 // -----------------
 export const selectTaskById = createSelector(

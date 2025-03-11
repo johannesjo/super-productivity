@@ -61,6 +61,42 @@
         }
       }
     },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "انجام",
+        "EISENHAUER_MATRIX": "ماتریس آیزنهاور",
+        "IMPORTANT": "مهم",
+        "IN_PROGRESS": "در حال انجام",
+        "KANBAN": "کانبان",
+        "NOT_URGENT_IMPORTANT": "فوری و مهم نیست",
+        "NOT_URGENT_NOT_IMPORTANT": "فوری نیست و مهم نیست",
+        "TO_DO": "انجام دادن",
+        "URGENT": "فوری",
+        "URGENT_IMPORTANT": "فوری و مهم",
+        "URGENT_NOT_IMPORTANT": "فوری و غیر مهم"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "پنل جدید اضافه کنید",
+        "COLUMNS": "ستون",
+        "TAGS_EXCLUDED": "برچسب های مستثنی شده",
+        "TAGS_REQUIRED": "برچسب های مورد نیاز",
+        "TASK_DONE_STATE": "حالت انجام وظیفه",
+        "TASK_DONE_STATE_ALL": "همه",
+        "TASK_DONE_STATE_DONE": "انجام",
+        "TASK_DONE_STATE_UNDONE": "لغو"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "تخته جدید اضافه کنید",
+        "CONFIRM_DELETE": "آیا واقعا می خواهید این برد را حذف کنید؟",
+        "CREATE_NEW_TAG_BTN": "ایجاد تگ",
+        "CREATE_NEW_TAG_MSG": "1 برچسب جدید باید ایجاد شود تا این برد کار کند",
+        "CREATE_NEW_TAGS_BTN": "ایجاد برچسب ها",
+        "CREATE_NEW_TAGS_MSG": "{{nr}} تگ های جدید باید ایجاد شود تا این برد کار کند",
+        "EDIT_BOARD": "صفحه ویرایش",
+        "NO_PANELS_BTN": "پیکربندی برد",
+        "NO_PANELS_MSG": "این برد هیچ پنل پیکربندی ندارد. چند پنل به آن اضافه کنید."
+      }
+    },
     "BOOKMARK": {
       "BAR": {
         "ADD": "اضافه کردن نشانک",
@@ -160,11 +196,18 @@
       }
     },
     "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "جلسه تمرکز در حال اجرا است",
+        "TO_FOCUS_OVERLAY": "برای فوکوس همپوشانی"
+      },
       "BACK_TO_PLANNING": "بازگشت به برنامه‌ریزی",
       "CANCEL_FOCUS_SESSION": "لغو نشست تمرکز",
       "CONGRATS": "برای تکمیل این جلسه تبریک می گویم!",
       "CONTINUE_FOCUS_SESSION": "ادامه جلسه تمرکز",
+      "COUNTDOWN": "شمارش معکوس",
       "FINISH_TASK_AND_SELECT_NEXT": "کار را تمام کنید و next را انتخاب کنید",
+      "FLOWTIME": "زمان جریان",
+      "FOR_TASK": "برای کار",
       "GET_READY": "برای نشست تمرکز خود آماده شوید!",
       "GO_TO_PROCRASTINATION": "هنگام اهمال‌کاری، کمک بگیرید",
       "GOGOGO": "برو، برو، برو!!!",
@@ -179,6 +222,7 @@
       "PREP_STRETCH": "حرکات کششی ملایم انجام دهید",
       "SELECT_ANOTHER_TASK": "وظیفه دیگری را انتخاب کنید",
       "SELECT_TASK": "Task را برای تمرکز روی آن انتخاب کنید",
+      "SESSION_COMPLETED": "جلسه تمرکز به پایان رسید!",
       "SET_FOCUS_SESSION_DURATION": "مدت زمان جلسه تمرکز را تنظیم کنید",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "نمایش/پنهان کردن یادداشت‌ها و پیوست‌ها",
       "START_FOCUS_SESSION": "شروع جلسه تمرکز",
@@ -225,6 +269,7 @@
       },
       "FORM": {
         "FILTER_USER": "نام کاربری (مثلا برای فیلتر کردن تغییراتی که خودتان انجام دادید)",
+        "INVALID_TOKEN_MESSAGE": "یک توکن GitHub معتبر نیست. باید با \"ghp_\" شروع شود.",
         "IS_ASSIGNEE_FILTER": "فقط مشکلاتی را وارد کنید که به من اختصاص داده شده است",
         "REPO": "\"نام کاربری / مخزن نام\" برای مخزن git مورد نظر برای پیگیری",
         "TOKEN": "توکن دسترسی"
@@ -775,6 +820,7 @@
         "TXT": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> از <strong>{{start}}</strong>شروع می‌شود!<br> (و {{nrOfOtherBanners}} کار دیگر موعد مقرر)"
       },
+      "S_ACTIVE_TASK_DUE": "وظیفه ای که در حال حاضر روی آن کار می کنید اکنون به پایان رسیده است!<br/> ({{title}})",
       "S_REMINDER_ERR": "خطا در رابط یادآوری"
     },
     "SCHEDULE": {
@@ -805,25 +851,31 @@
         "OK": "انجام دهید!"
       },
       "D_EDIT": {
-        "L_COUNTER": "شمردن",
-        "TITLE": "شمارنده ساده را ویرایش کنید"
+        "CURRENT_STREAK": "رگه فعلی",
+        "DAILY_GOAL": "هدف روزانه",
+        "DAYS": "روزها",
+        "L_COUNTER": "شمردن"
       },
       "FORM": {
         "ADD_NEW": "پیشخوان ساده اضافه کنید",
         "HELP": "در اینجا می توانید دکمه های ساده ای را تنظیم کنید که در بالا سمت راست ظاهر می شود. با کلیک بر روی آن ، آنها می توانند تایمر باشند یا فقط یک پیشخوان ساده ، که شمارش شده است.",
-        "L_AUTO_COUNT_UP": "ماشه خودکار حساب برای",
-        "L_AUTO_SWITCH_OFF": "ماشه خودکار را خاموش کنید",
-        "L_AUTO_SWITCH_ON": "روشن کردن ماشه خودکار برای",
         "L_COUNTDOWN_DURATION": "مدت زمان شمارش معکوس",
+        "L_DAILY_GOAL": "هدف روزانه برای موفقیت آمیز بودن",
         "L_ICON": "آیکون",
         "L_ICON_ON": "نماد هنگام ضامن",
         "L_IS_ENABLED": "فعال شده است",
         "L_TITLE": "عنوان",
+        "L_TRACK_STREAKS": "مسیرهای ردیابی",
         "L_TYPE": "تایپ کنید",
+        "L_WEEKDAYS": "روزهای هفته برای بررسی رگه",
         "TITLE": "پیشخوان های ساده",
         "TYPE_CLICK_COUNTER": "پیشخوان کلیک کنید",
         "TYPE_REPEATED_COUNTDOWN": "شمارش معکوس مکرر",
         "TYPE_STOPWATCH": "کرنومتر"
+      },
+      "S": {
+        "GOAL_REACHED_1": "به هدف امروزت رسیدی!",
+        "GOAL_REACHED_2": "مدت رگه فعلی: "
       }
     },
     "SYNC": {
@@ -868,6 +920,10 @@
         "T4": "1. به دستگاه دیگر خود بروید و همگام سازی را در آنجا تکمیل کنید.",
         "T5": "2. یا می توانید داده های راه دور را با داده های محلی خود بازنویسی کنید. همه تغییرات از راه دور انجام خواهد شد\n    گم شود!",
         "T6": "ایجاد یک نسخه پشتیبان از اطلاعاتی که بازنویسی می کنید توصیه می شود!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "ذخیره و فعال کردن همگام سازی",
+        "TITLE": "پیکربندی همگام سازی"
       },
       "D_PERMISSION": {
         "DISABLE_SYNC": "غیرفعال کردن همگام‌سازی",
@@ -1073,11 +1129,15 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "نمی توان پروژه را از طریق نحو کوتاه برای کارهای تکرار شونده اختصاص داد!",
+        "CREATED_FOR_PROJECT": "وظیفه \"{{taskTitle}}\" به پروژه \"{{projectTitle}}\" منتقل شد",
+        "CREATED_FOR_PROJECT_ACTION": "رفتن به پروژه",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>کار اضافه شده{{title}}</strong> از <strong>{{contextTitle}}</strong> به لیست فعلی",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "شما در حال تلاش برای حذف آخرین برچسب یک کار غیر پروژه هستید. این مجاز نیست!",
+        "MOVED_TO_PROJECT": "وظیفه \"{{taskTitle}}\" به پروژه \"{{projectTitle}}\" منتقل شد",
+        "MOVED_TO_PROJECT_ACTION": "رفتن به پروژه",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -1270,6 +1330,7 @@
   },
   "G": {
     "ADD": "اضافه کردن",
+    "ADVANCED_CFG": "پیکربندی پیشرفته",
     "CANCEL": "لغو",
     "CLOSE": "بستن",
     "DELETE": "حذف",
@@ -1285,6 +1346,8 @@
     "LOGIN": "وارد شدن",
     "LOGOUT": "خارج شدن",
     "MINUTES": "{{m}} دقیقه",
+    "MOVE_BACKWARD": "حرکت به عقب",
+    "MOVE_FORWARD": "حرکت به جلو",
     "NEXT": "بعدی",
     "NO_CON": "شما در حال حاضر آفلاین هستید. لطفا دوباره به اینترنت وصل شوید.",
     "NONE": "هیچ یک",
@@ -1539,6 +1602,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "اضافه کردن کار جدید",
+    "BOARDS": "تابلوهای",
     "CREATE_PROJECT": "ایجاد پروژه",
     "CREATE_TAG": "ایجاد برچسب",
     "DELETE_PROJECT": "حذف پروژه",

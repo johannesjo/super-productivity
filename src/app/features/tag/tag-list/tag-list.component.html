@@ -1,10 +1,10 @@
-@if ((tags()?.length > 0)) {
-<div class="tags-container">
-  <div class="tags">
-    @for (tag of tags(); track tag.id) {
-    <!-- -->
-    <tag [tag]="tag"></tag>
-    }
+@if (tags()?.length > 0) {
+  <div class="tags-container">
+    <div class="tags">
+      @for (tag of tags(); track tag.id) {
+        <!-- -->
+        <tag [tag]="tag"></tag>
+      }
+    </div>
   </div>
-</div>
 }

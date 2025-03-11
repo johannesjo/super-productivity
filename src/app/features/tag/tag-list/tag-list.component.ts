@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Tag } from '../tag.model';
-import { MatDialog } from '@angular/material/dialog';
 import { Task } from '../../tasks/task.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -31,10 +30,12 @@ import { TagComponent } from '../tag/tag.component';
 export class TagListComponent {
   private readonly _store = inject(Store);
   private readonly _workContextService = inject(WorkContextService);
-  private readonly _matDialog = inject(MatDialog);
 
   task = input.required<Task>();
 
+  tagsToHide = input<string[]>();
+
+  isShowCurrentContextTag = input(false);
   isShowProjectTagAlways = input(false);
   isShowProjectTagNever = input(false);
   workContext = toSignal(this._workContextService.activeWorkContextTypeAndId$);
@@ -45,9 +46,15 @@ export class TagListComponent {
 
   tagIds = computed<string[]>(() => this.task().tagIds || []);
   tags = computed<Tag[]>(() => {
-    const tagIdsFiltered: string[] = this.tagIds().filter(
-      (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
-    );
+    const tagsToHide = this.tagsToHide();
+    const tagIdsFiltered: string[] = !!tagsToHide
+      ? tagsToHide.length > 0
+        ? this.tagIds().filter((id) => !tagsToHide.includes(id))
+        : this.tagIds()
+      : this.tagIds().filter(
+          (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
+        );
+
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
     const projectId = this.projectId();
     const project = projectId && (this.projectState()?.entities[projectId] as Project);
@@ -63,15 +70,15 @@ export class TagListComponent {
     return (tagsI as Tag[]) || [];
   });
 
-  projectId = computed<string | null>(() => {
+  projectId = computed<string | undefined>(() => {
     if (this.isShowProjectTagNever()) {
-      return null;
+      return undefined;
     } else if (
       this.isShowProjectTagAlways() ||
       this.workContext()?.activeType === WorkContextType.TAG
     ) {
       return this.task().projectId;
     }
-    return null;
+    return undefined;
   });
 }
