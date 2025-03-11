@@ -64,7 +64,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "Fè",
-        "EISENHAUER_MATRIX": "Eisenhauer Matrix",
+        "EISENHAUER_MATRIX": "Eisenhower Matrix",
         "IMPORTANT": "Enpòtan",
         "IN_PROGRESS": "Nan Pwogrè",
         "KANBAN": "Kanban",
