@@ -31,11 +31,19 @@
 >
   <!---->
   @for (note of notes; track note.id) {
-    <div cdkDrag>
+    <div
+      cdkDrag
+      [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+    >
       <note
         [isFocus]="isElementWasAdded && $index === 0"
         [note]="note"
-      ></note>
+      >
+        <div
+          class="drag-handle"
+          cdkDragHandle
+        ></div>
+      </note>
     </div>
   }
   <!---->
