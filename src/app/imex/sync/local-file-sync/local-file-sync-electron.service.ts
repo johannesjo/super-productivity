@@ -141,6 +141,11 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   }
 
   private async _pickDirectory(): Promise<void> {
+    if (!IS_ELECTRON) {
+      alert('Error: Not in Electron context');
+      return;
+    }
+
     const dir = await window.ea.pickDirectory();
     if (dir) {
       this._globalConfigService.updateSection('sync', {
