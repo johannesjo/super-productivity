@@ -25,6 +25,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       #      - name: Build with Gradle
       #        run: ./gradlew build
+      - name: Setup android-sdk
+        uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: true #make accepting the android sdk license verbose
 
       - name: Get npm cache directory
         id: npm-cache-dir
