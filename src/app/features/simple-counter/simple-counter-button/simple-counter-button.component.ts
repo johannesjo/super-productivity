@@ -55,14 +55,14 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
 
   todayStr = toSignal(this._todayStr$, { initialValue: this._dateService.todayStr() });
-  simpleCounter = input<SimpleCounter>();
+  simpleCounter = input.required<SimpleCounter>();
   isTimeUp = signal<boolean>(false);
   isSuccess = computed(() => {
     const sc = this.simpleCounter();
     return (
       sc?.isTrackStreaks &&
       sc?.countOnDay[this.todayStr()] &&
-      sc?.countOnDay[this.todayStr()] >= sc?.streakMinValue
+      sc?.countOnDay[this.todayStr()] >= (sc.streakMinValue || 0)
     );
   });
 
