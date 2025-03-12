@@ -1,14 +1,14 @@
 name: Create android Play Store APK
 on:
   push:
-    branches: [test/git-actions]
+    branches: [master, release/*, test/git-actions]
     tags:
       - v*
   workflow_dispatch:
     inputs: {}
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
