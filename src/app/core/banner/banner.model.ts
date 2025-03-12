@@ -13,7 +13,18 @@ export enum BannerId {
   SimpleCounterCountdownComplete = 'SimpleCounterCountdownComplete',
 }
 
-export type BannerType = 'ERROR';
+export const BANNER_SORT_PRIO_MAP = {
+  [BannerId.TakeABreak]: 6,
+  [BannerId.CalendarEvent]: 5,
+  [BannerId.SimpleCounterCountdownComplete]: 5,
+  [BannerId.ReminderCountdown]: 4,
+  [BannerId.JiraUnblock]: 4,
+  [BannerId.TimeEstimateExceeded]: 3,
+  [BannerId.StartTrackingReminder]: 2,
+  [BannerId.FocusMode]: 1,
+  [BannerId.Offline]: 0,
+  [BannerId.InstallWebApp]: 0,
+} as const;
 
 export interface BannerAction {
   label: string;
@@ -25,7 +36,6 @@ export interface Banner {
   msg: string;
   ico?: string;
   svgIco?: string;
-  type?: BannerType;
   translateParams?: { [key: string]: string | number };
   action?: BannerAction;
   action2?: BannerAction;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Banner, BannerId } from './banner.model';
+import { Banner, BANNER_SORT_PRIO_MAP, BannerId } from './banner.model';
 import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
@@ -8,7 +8,12 @@ export class BannerService {
   private _banners: Banner[] = [];
   private _banners$: ReplaySubject<Banner[]> = new ReplaySubject(1);
   activeBanner$: Observable<Banner | null> = this._banners$.pipe(
-    map((banners) => (banners && banners.length && banners[0]) || null),
+    map((banners) => {
+      const sorted = banners.sort((a, b) => {
+        return BANNER_SORT_PRIO_MAP[b.id] - BANNER_SORT_PRIO_MAP[a.id];
+      });
+      return (sorted.length && sorted[0]) || null;
+    }),
   );
 
   constructor() {
@@ -27,62 +32,84 @@ export class BannerService {
 
     // FOR DEBUGGING
     // this.open({
-    //   id: 'JIRA_UNBLOCK',
+    //   id: BannerId.JiraUnblock,
     //   msg: 'Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!',
     //   svgIco: 'jira',
     //   action: {
     //     label: 'Unblock',
-    //     fn: () => {
-    //     }
-    //   }
-    // });
-    //
-    // this.open({
-    //   id: 'TAKE_A_BREAK',
-    //   ico: 'free_breakfast',
-    //   msg: 'You should take a break',
-    //   action: {
-    //     label: 'I already did',
-    //     fn: () => {
-    //     }
-    //   },
-    //   action2: {
-    //     label: 'Snooze 15m',
-    //     fn: () => {
-    //     }
+    //     fn: () => {},
     //   },
     // });
     //
+    // setTimeout(() => {
+    //   this.open({
+    //     id: BannerId.TakeABreak,
+    //     ico: 'free_breakfast',
+    //     msg: 'You should take a break',
+    //     action: {
+    //       label: 'I already did',
+    //       fn: () => {},
+    //     },
+    //     action2: {
+    //       label: 'Snooze 15m',
+    //       fn: () => {},
+    //     },
+    //   });
+    //
+    //   this.open({
+    //     id: BannerId.TakeABreak,
+    //     msg: 'Take a break',
+    //     ico: 'cloud_off',
+    //     action: {
+    //       label: 'Login',
+    //       fn: () => {},
+    //     },
+    //   });
+    // }, 7000);
+    //
+    // setTimeout(() => {
+    //   this.open({
+    //     id: BannerId.FocusMode,
+    //     type: 'ERROR',
+    //     ico: 'error',
+    //     msg: 'ERROR: ' + 'Something broke',
+    //     action: {
+    //       label: 'Report',
+    //       fn: () =>
+    //         window.open('https://github.com/johannesjo/super-productivity/issues/new'),
+    //     },
+    //     action2: {
+    //       label: 'Reload App',
+    //       fn: () => window.location.reload(),
+    //     },
+    //     action3: {
+    //       label: 'Dismiss',
+    //       fn: () => {},
+    //     },
+    //   });
+    // }, 2000);
+    //
     // this.open({
-    //   msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+    //   id: BannerId.Offline,
+    //   msg: 'Offline',
     //   ico: 'cloud_off',
-    //   id: 'GOOGLE_LOGIN',
     //   action: {
-    //     label: 'Login',
-    //     fn: () => {
-    //     }
-    //   }
+    //     label: 'Oh no',
+    //     fn: () => {},
+    //   },
     // });
     //
-    // this.open({
-    //   id: 'GLOBAL_ERROR',
-    //   type: 'ERROR',
-    //   ico: 'error',
-    //   msg: 'ERROR: ' + 'Something broke',
-    //   action: {
-    //     label: 'Report',
-    //     fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
-    //   },
-    //   action2: {
-    //     label: 'Reload App',
-    //     fn: () => window.location.reload()
-    //   },
-    //   action3: {
-    //     label: 'Dismiss',
-    //     fn: () => {
-    //     }
-    //   }
-    // });
+    // setTimeout(() => {
+    //   this.open({
+    //     id: BannerId.ReminderCountdown,
+    //     msg: 'Reminder Countdown',
+    //     ico: 'reminder',
+    //     action: {
+    //       label: 'Yeah',
+    //       fn: () => {},
+    //     },
+    //   });
+    // }, 4000);
   }
 
   open(banner: Banner): void {
