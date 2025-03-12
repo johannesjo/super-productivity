@@ -5,8 +5,8 @@ export enum MODEL_VERSION {
   TASK = 5,
   // needs to be always the same as TASK !!!
   TASK_ARCHIVE = MODEL_VERSION.TASK,
-  // issueProvider model
-  PROJECT = 7.0,
+  // remove bookmark model
+  PROJECT = 8.0,
   ISSUE_PROVIDER = 1.1,
   // counted up to account for new compression
   GLOBAL_CONFIG = 4,
