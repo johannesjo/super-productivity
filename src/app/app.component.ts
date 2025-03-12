@@ -47,7 +47,6 @@ import {
 import { Dir } from '@angular/cdk/bidi';
 import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
-import { BookmarkBarComponent } from './features/bookmark/bookmark-bar/bookmark-bar.component';
 import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
@@ -80,7 +79,6 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     SideNavComponent,
     MatSidenavContent,
     MainHeaderComponent,
-    BookmarkBarComponent,
     BannerComponent,
     RouterOutlet,
     GlobalProgressBarComponent,

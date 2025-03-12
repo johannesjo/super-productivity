@@ -10,7 +10,6 @@ import { SimpleCounterState } from '../../features/simple-counter/simple-counter
 import { ProjectArchive } from '../../features/project/project-archive.model';
 import { SyncProvider } from './sync-provider.model';
 import { ProjectState } from '../../features/project/project.model';
-import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
@@ -36,9 +35,7 @@ export interface AppBaseWithoutLastSyncModelChange {
   taskRepeatCfg: TaskRepeatCfgState;
 }
 
-export interface AppMainFileNoRevsData
-  extends AppBaseWithoutLastSyncModelChange,
-    AppDataForProjects {
+export interface AppMainFileNoRevsData extends AppBaseWithoutLastSyncModelChange {
   lastLocalSyncModelChange: number | null;
 }
 
@@ -79,14 +76,7 @@ export type AppBaseDataEntityLikeStates =
   | TaskArchive
   | SimpleCounterState;
 
-// NOTE: [key:string] always refers to projectId
-export interface AppDataForProjects {
-  bookmark: {
-    [key: string]: BookmarkState;
-  };
-}
-
-export interface AppDataComplete extends AppBaseData, AppDataForProjects {
+export interface AppDataComplete extends AppBaseData {
   lastLocalSyncModelChange: number | null;
   lastArchiveUpdate: number | null;
 }

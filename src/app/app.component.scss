@@ -66,11 +66,6 @@ main-header {
   z-index: $z-main-header;
 }
 
-bookmark-bar {
-  position: relative;
-  z-index: $z-bookmarks;
-}
-
 .right-panel {
   min-width: 300px;
   width: 40vw;

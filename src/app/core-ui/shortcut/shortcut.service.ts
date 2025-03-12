@@ -1,4 +1,4 @@
-import { Injectable, NgZone, inject } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -7,14 +7,12 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
-import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
-import { T } from '../../t.const';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncProviderService } from '../../imex/sync/sync-provider.service';
@@ -34,7 +32,6 @@ export class ShortcutService {
   private _snackService = inject(SnackService);
   private _activatedRoute = inject(ActivatedRoute);
   private _uiHelperService = inject(UiHelperService);
-  private _bookmarkService = inject(BookmarkService);
   private _translateService = inject(TranslateService);
   private _syncProviderService = inject(SyncProviderService);
   private _ngZone = inject(NgZone);
@@ -170,18 +167,6 @@ export class ShortcutService {
       ev.preventDefault();
       if (await this._syncProviderService.isEnabled$.pipe(first()).toPromise()) {
         this._syncProviderService.sync();
-      }
-    } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
-      ev.preventDefault();
-      if (this._workContextService.activeWorkContextType === WorkContextType.PROJECT) {
-        this._bookmarkService.toggleBookmarks();
-      } else {
-        this._snackService.open({
-          msg: this._translateService.instant(
-            T.GLOBAL_SNACK.SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG,
-            { keyCombo: keys.toggleBookmarks },
-          ),
-        });
       }
     } else if (
       checkKeyCombo(ev, 'Ctrl+Shift+*') &&

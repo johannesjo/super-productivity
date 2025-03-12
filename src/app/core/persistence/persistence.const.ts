@@ -1,8 +1,4 @@
-import {
-  PersistenceBaseModelCfg,
-  PersistenceEntityModelCfg,
-  PersistenceProjectModelCfg,
-} from './persistence.model';
+import { PersistenceBaseModelCfg, PersistenceEntityModelCfg } from './persistence.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
 import { Reminder } from '../../features/reminder/reminder.model';
@@ -52,7 +48,6 @@ import {
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
-import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
 import { MODEL_VERSION } from '../model-version';
 import { migrateSimpleCounterState } from '../../features/simple-counter/migrate-simple-counter-state.util';
 import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
@@ -88,10 +83,6 @@ interface PersistenceEntityModelCfgs {
   task: PersistenceEntityModelCfg<TaskState, Task>;
   taskArchive: PersistenceEntityModelCfg<TaskArchive, ArchiveTask>;
   taskRepeatCfg: PersistenceEntityModelCfg<TaskRepeatCfgState, TaskRepeatCfg>;
-}
-
-interface PersistenceProjectModelCfgs {
-  bookmark: PersistenceProjectModelCfg<BookmarkState, Bookmark>;
 }
 
 export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
@@ -196,16 +187,3 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
 export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
   ENTITY_MODEL_CFGS,
 ).map(([, entry]) => entry.appDataKey);
-
-export const PROJECT_MODEL_CFGS: PersistenceProjectModelCfgs = {
-  bookmark: {
-    appDataKey: 'bookmark',
-  },
-};
-
-export const MIGRATABLE_MODEL_CFGS: {
-  [key: string]: PersistenceBaseModelCfg<any> | PersistenceEntityModelCfg<any, any>;
-} = {
-  ...BASE_MODEL_CFGS,
-  ...ENTITY_MODEL_CFGS,
-};

@@ -1,26 +1,19 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Project } from './project.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
 import { Actions, ofType } from '@ngrx/effects';
-import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators';
-import { isValidProjectExport } from './util/is-valid-project-export';
-import { SnackService } from '../../core/snack/snack.service';
-import { T } from '../../t.const';
+import { catchError, shareReplay, switchMap, take } from 'rxjs/operators';
 import { BreakNr, BreakTime, WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
-import { ExportedProject } from './project-archive.model';
 import {
   addProject,
   archiveProject,
   deleteProject,
-  loadProjectRelatedDataSuccess,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToRegularListAuto,
-  toggleHideFromMenu,
   unarchiveProject,
   updateProject,
   updateProjectOrder,
@@ -43,8 +36,6 @@ import { getTaskById } from '../tasks/store/task.reducer.util';
   providedIn: 'root',
 })
 export class ProjectService {
-  private readonly _persistenceService = inject(PersistenceService);
-  private readonly _snackService = inject(SnackService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _actions$ = inject(Actions);
@@ -59,23 +50,6 @@ export class ProjectService {
         activeType === WorkContextType.PROJECT ? this.getByIdLive$(activeId) : of(null),
       ),
       shareReplay(1),
-    );
-
-  /* @deprecated  todo fix */
-  isRelatedDataLoadedForCurrentProject$: Observable<boolean> =
-    this._workContextService.isActiveWorkContextProject$.pipe(
-      switchMap((isProject) =>
-        isProject
-          ? this._workContextService.activeWorkContextIdIfProject$.pipe(
-              switchMap((activeId) =>
-                this._actions$.pipe(
-                  ofType(loadProjectRelatedDataSuccess.type),
-                  map(({ payload: { projectId } }) => projectId === activeId),
-                ),
-              ),
-            )
-          : of(false),
-      ),
     );
 
   onMoveToBacklog$: Observable<any> = this._actions$.pipe(
@@ -175,10 +149,6 @@ export class ProjectService {
     this._store$.dispatch(deleteProject({ project, allTaskIds }));
   }
 
-  toggleHideFromMenu(projectId: string): void {
-    this._store$.dispatch(toggleHideFromMenu({ id: projectId }));
-  }
-
   update(projectId: string, changedFields: Partial<Project>): void {
     this._store$.dispatch(
       updateProject({
@@ -206,29 +176,5 @@ export class ProjectService {
 
   updateOrder(ids: string[]): void {
     this._store$.dispatch(updateProjectOrder({ ids }));
-  }
-
-  // DB INTERFACE
-  async importCompleteProject(data: ExportedProject): Promise<any> {
-    console.log(data);
-    const { relatedModels, ...project } = data;
-    if (isValidProjectExport(data)) {
-      const state = await this._persistenceService.project.loadState();
-      if (state.entities[project.id]) {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: T.F.PROJECT.S.E_EXISTS,
-          translateParams: { title: project.title },
-        });
-      } else {
-        await this._persistenceService.restoreCompleteRelatedDataForProject(
-          project.id,
-          relatedModels,
-        );
-        this.upsert(project);
-      }
-    } else {
-      this._snackService.open({ type: 'ERROR', msg: T.F.PROJECT.S.E_INVALID_FILE });
-    }
   }
 }

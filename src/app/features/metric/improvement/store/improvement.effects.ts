@@ -20,8 +20,8 @@ import {
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectUnusedImprovementIds } from '../../store/metric.selectors';
 import { ImprovementState } from '../improvement.model';
-import { loadProjectRelatedDataSuccess } from '../../../project/store/project.actions';
 import { DateService } from 'src/app/core/date/date.service';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
 @Injectable()
 export class ImprovementEffects {
@@ -48,18 +48,20 @@ export class ImprovementEffects {
     { dispatch: false },
   );
 
+  // TODO check
   clearImprovements$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(loadProjectRelatedDataSuccess.type),
+      ofType(loadAllData.type),
       withLatestFrom(this._store$.select(selectImprovementHideDay)),
       filter(([, hideDay]) => hideDay !== this._dateService.todayStr()),
       map(() => clearHiddenImprovements()),
     ),
   );
 
+  // TODO check
   clearUnusedImprovements$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(loadProjectRelatedDataSuccess.type),
+      ofType(loadAllData.type),
       withLatestFrom(this._store$.select(selectUnusedImprovementIds)),
       map(([a, unusedIds]) => deleteImprovements({ ids: unusedIds })),
     ),

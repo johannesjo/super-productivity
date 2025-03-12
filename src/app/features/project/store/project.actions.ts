@@ -4,11 +4,6 @@ import { Project } from '../project.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 import { DropListModelSource } from '../../tasks/task.model';
 
-export const loadProjectRelatedDataSuccess = createAction(
-  '[Project] Load Project related Data Success',
-  props<{ projectId: string }>(),
-);
-
 export const setCurrentProject = createAction(
   '[Project] SetCurrentProject',
   props<any>(),
