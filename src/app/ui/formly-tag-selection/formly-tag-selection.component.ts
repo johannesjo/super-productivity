@@ -4,12 +4,11 @@ import { FieldType } from '@ngx-formly/material';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { T } from 'src/app/t.const';
 import { TagEditComponent } from '../../features/tag/tag-edit/tag-edit.component';
-import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'formly-tag-selection',
   standalone: true,
-  imports: [FormsModule, FormlyModule, ReactiveFormsModule, TagEditComponent, JsonPipe],
+  imports: [FormsModule, FormlyModule, ReactiveFormsModule, TagEditComponent],
   templateUrl: './formly-tag-selection.component.html',
   styleUrl: './formly-tag-selection.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
