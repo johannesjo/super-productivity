@@ -113,7 +113,7 @@ export class SimpleCounterEffects {
         ),
         tap((sc) => {
           if (sc && !this.successFullCountersMap[sc.id] && sc.isTrackStreaks) {
-            if (sc.countOnDay[getWorklogStr()] >= sc.streakMinValue) {
+            if (sc.countOnDay[getWorklogStr()] >= (sc.streakMinValue || 0)) {
               const streakDuration = getSimpleCounterStreakDuration(sc);
               // eslint-disable-next-line max-len
               const msg = `<strong>${sc.title}</strong> <br />${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_1)}<br /> ${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_2)} <strong>${streakDuration}🔥</strong>`;

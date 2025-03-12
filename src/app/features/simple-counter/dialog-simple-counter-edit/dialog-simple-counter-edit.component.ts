@@ -83,9 +83,9 @@ export class DialogSimpleCounterEditComponent {
     const chartData: LineChartData = {
       labels: labels.map((dateStr) => {
         const d = new Date(dateStr);
-        const isStreakDay = this.data.simpleCounter.streakWeekDays[d.getDay()];
+        const isStreakDay = this.data.simpleCounter.streakWeekDays?.[d.getDay()];
         const isStreakFulfilled =
-          countOnDay[dateStr] >= this.data.simpleCounter.streakMinValue;
+          countOnDay[dateStr] >= (this.data.simpleCounter.streakMinValue || 0);
 
         return `${d.toLocaleDateString(this._locale, {
           month: 'numeric',

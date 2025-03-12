@@ -6,6 +6,10 @@ export const getSimpleCounterStreakDuration = (
 ): number => {
   const countOnDay = simpleCounter.countOnDay;
 
+  if (!simpleCounter.streakWeekDays || !simpleCounter.streakMinValue) {
+    return 0;
+  }
+
   let streak = 0;
   const date = new Date();
   // set date to last weekday set in streakWeekDays
