@@ -97,7 +97,7 @@
        alt='F-Droid Badge'
        height="50" />
 </a>
-<a href='http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/fork-maintainers/iceraven-browser/releases'>
+<a href='http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/johannesjo/super-productivity/releases'>
   <img src='https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png'
        align="center"
        alt='Obtanium Badge'
