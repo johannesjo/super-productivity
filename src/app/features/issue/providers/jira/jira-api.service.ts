@@ -98,7 +98,12 @@ export class JiraApiService {
       : this._chromeExtensionInterfaceService.onReady$.pipe(
           mapTo(true),
           shareReplay(1),
-          timeoutWith(500, throwError('Jira: Extension not installed or not ready')),
+          timeoutWith(
+            500,
+            throwError({
+              [HANDLED_ERROR_PROP_STR]: 'Jira: Extension not installed or not ready',
+            }),
+          ),
         );
 
   constructor() {
