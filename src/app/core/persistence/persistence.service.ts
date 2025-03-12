@@ -7,22 +7,15 @@ import {
   TaskArchive,
   TaskState,
 } from '../../features/tasks/task.model';
-import {
-  AppBaseData,
-  AppDataComplete,
-  AppDataForProjects,
-} from '../../imex/sync/sync.model';
+import { AppBaseData, AppDataComplete } from '../../imex/sync/sync.model';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { DatabaseService } from './database.service';
-import { ProjectArchivedRelatedData } from '../../features/project/project-archive.model';
 import { Project, ProjectState } from '../../features/project/project.model';
 import {
   PersistenceBaseEntityModel,
   PersistenceBaseModel,
   PersistenceBaseModelCfg,
   PersistenceEntityModelCfg,
-  PersistenceForProjectModel,
-  PersistenceProjectModelCfg,
 } from './persistence.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import {
@@ -37,7 +30,6 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { Bookmark, BookmarkState } from '../../features/bookmark/bookmark.model';
 import { Note, NoteState } from '../../features/note/note.model';
 import { Action, Store } from '@ngrx/store';
 import { Tag, TagState } from '../../features/tag/tag.model';
@@ -52,11 +44,7 @@ import { removeFromDb, saveToDb } from './persistence.actions';
 import { crossModelMigrations } from './cross-model-migrations';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
-import {
-  BASE_MODEL_CFGS,
-  ENTITY_MODEL_CFGS,
-  PROJECT_MODEL_CFGS,
-} from './persistence.const';
+import { BASE_MODEL_CFGS, ENTITY_MODEL_CFGS } from './persistence.const';
 import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
@@ -74,7 +62,6 @@ export class PersistenceService {
 
   // handled as private but needs to be assigned before the creations
   _baseModels: PersistenceBaseModel<unknown>[] = [];
-  _projectModels: PersistenceForProjectModel<unknown, unknown>[] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
   globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(
@@ -135,12 +122,6 @@ export class PersistenceService {
       ENTITY_MODEL_CFGS.taskRepeatCfg,
     );
 
-  // PROJECT MODELS
-  bookmark: PersistenceForProjectModel<BookmarkState, Bookmark> = this._cmProject<
-    BookmarkState,
-    Bookmark
-  >(PROJECT_MODEL_CFGS.bookmark);
-
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;
     data: unknown;
@@ -167,25 +148,6 @@ export class PersistenceService {
       }
       return this.getValidCompleteData();
     }
-  }
-
-  async removeCompleteRelatedDataForProject(projectId: string): Promise<void> {
-    await Promise.all(
-      this._projectModels.map((modelCfg) => {
-        return modelCfg.remove(projectId);
-      }),
-    );
-  }
-
-  async restoreCompleteRelatedDataForProject(
-    projectId: string,
-    data: ProjectArchivedRelatedData,
-  ): Promise<void> {
-    await Promise.all(
-      this._projectModels.map((modelCfg) => {
-        return modelCfg.save(projectId, data[modelCfg.appDataKey], {});
-      }),
-    );
   }
 
   // BACKUP AND SYNC RELATED
@@ -221,11 +183,9 @@ export class PersistenceService {
 
     const r = isMigrate
       ? crossModelMigrations({
-          ...(await this._loadAppDataForProjects(pids)),
           ...(await this._loadAppBaseData()),
         } as AppDataComplete)
       : {
-          ...(await this._loadAppDataForProjects(pids)),
           ...(await this._loadAppBaseData()),
         };
 
@@ -248,18 +208,8 @@ export class PersistenceService {
         });
       }),
     );
-    const forProject = Promise.all(
-      this._projectModels.map(async (modelCfg: PersistenceForProjectModel<any, any>) => {
-        if (!data[modelCfg.appDataKey]) {
-          devError(
-            'No data for ' + modelCfg.appDataKey + ' - ' + data[modelCfg.appDataKey],
-          );
-          return;
-        }
-        return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg, true);
-      }),
-    );
-    return await Promise.all([forBase, forProject])
+
+    return await Promise.all([forBase])
       .then(() => {
         if (typeof data.lastLocalSyncModelChange !== 'number') {
           // not necessarily a critical error as there might be other reasons for this error to popup
@@ -397,86 +347,6 @@ export class PersistenceService {
 
     this._baseModels.push(model);
     return model;
-  }
-
-  private _cmProject<S extends Record<string, any>, M>({
-    appDataKey,
-  }: // migrateFn = (v) => v,
-  PersistenceProjectModelCfg<S, M>): PersistenceForProjectModel<S, M> {
-    const model = {
-      appDataKey,
-      load: (projectId: string): Promise<S> =>
-        this._loadFromDb({
-          dbKey: appDataKey,
-          projectId,
-        }),
-      // }).then((v) => migrateFn(v, projectId)),
-      save: (
-        projectId: string,
-        data: Record<string, any>,
-        {
-          isDataImport = false,
-          isSyncModelChange,
-        }: { isDataImport?: boolean; isSyncModelChange?: boolean },
-      ) =>
-        this._saveToDb({
-          dbKey: appDataKey,
-          data,
-          isDataImport,
-          projectId,
-          isSyncModelChange,
-        }),
-      remove: (projectId: string) => this._removeFromDb({ dbKey: appDataKey, projectId }),
-      ent: {
-        getById: async (projectId: string, id: string): Promise<M> => {
-          const state = (await model.load(projectId)) as any;
-          return (state && state.entities && state.entities[id]) || null;
-        },
-      },
-    };
-    this._projectModels.push(model);
-    return model;
-  }
-
-  private async _loadAppDataForProjects(
-    projectIds: string[],
-  ): Promise<AppDataForProjects> {
-    const forProjectsData = await Promise.all(
-      this._projectModels.map(async (modelCfg) => {
-        const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
-        return {
-          [modelCfg.appDataKey]: modelState,
-        };
-      }),
-    );
-    return Object.assign({}, ...forProjectsData);
-  }
-
-  // eslint-disable-next-line
-  private async _loadForProjectIds(pids: string[], getDataFn: Function): Promise<any> {
-    return await pids.reduce(async (acc, projectId) => {
-      const prevAcc = await acc;
-      const dataForProject = await getDataFn(projectId);
-      return {
-        ...prevAcc,
-        [projectId]: dataForProject,
-      };
-    }, Promise.resolve({}));
-  }
-
-  // eslint-disable-next-line
-  private async _saveForProjectIds(
-    data: any,
-    projectModel: PersistenceForProjectModel<unknown, unknown>,
-    isDataImport = false,
-  ) {
-    const promises: Promise<any>[] = [];
-    Object.keys(data).forEach((projectId) => {
-      if (data[projectId]) {
-        promises.push(projectModel.save(projectId, data[projectId], { isDataImport }));
-      }
-    });
-    return await Promise.all(promises);
   }
 
   // DATA STORAGE INTERFACE

@@ -113,20 +113,6 @@ button {
   }
 }
 
-.bookmark-btn {
-  mat-icon {
-    transition: $transition-standard !important;
-    transition-property: transform !important;
-  }
-
-  &.isOpen {
-    mat-icon {
-      transform: rotate(180deg);
-      transition: $transition-standard !important;
-    }
-  }
-}
-
 @keyframes pulse {
   0% {
     transform: scale(0.7);

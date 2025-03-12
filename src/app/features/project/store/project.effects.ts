@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
@@ -8,7 +8,6 @@ import {
   addToProjectBreakTime,
   archiveProject,
   deleteProject,
-  loadProjectRelatedDataSuccess,
   moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
@@ -28,7 +27,6 @@ import {
   upsertProject,
 } from './project.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { BookmarkService } from '../../bookmark/bookmark.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTask,
@@ -49,7 +47,6 @@ import {
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { Project } from '../project.model';
 import { Task, TaskArchive } from '../../tasks/task.model';
 import { unique } from '../../../util/unique';
@@ -71,7 +68,6 @@ export class ProjectEffects {
   private _snackService = inject(SnackService);
   private _projectService = inject(ProjectService);
   private _persistenceService = inject(PersistenceService);
-  private _bookmarkService = inject(BookmarkService);
   private _globalConfigService = inject(GlobalConfigService);
   private _dateService = inject(DateService);
   private _reminderService = inject(ReminderService);
@@ -227,22 +223,6 @@ export class ProjectEffects {
     ),
   );
 
-  onProjectIdChange$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(setActiveWorkContext),
-      filter(({ activeType }) => activeType === WorkContextType.PROJECT),
-      switchMap((action) => {
-        const projectId = action.activeId;
-        return Promise.all([this._bookmarkService.loadStateForProject(projectId)]).then(
-          () => projectId,
-        );
-      }),
-      map((projectId) => {
-        return loadProjectRelatedDataSuccess({ projectId });
-      }),
-    ),
-  );
-
   // TODO a solution for orphaned tasks might be needed
 
   deleteProjectRelatedData: Observable<unknown> = createEffect(
@@ -252,7 +232,6 @@ export class ProjectEffects {
         tap(async ({ project, allTaskIds }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
-          await this._persistenceService.removeCompleteRelatedDataForProject(id);
           this._removeAllArchiveTasksForProject(id);
           this._reminderService.removeRemindersByRelatedIds(allTaskIds);
 

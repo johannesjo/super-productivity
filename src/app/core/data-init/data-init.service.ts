@@ -1,8 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { from, Observable, of } from 'rxjs';
-import { filter, shareReplay, switchMap, take } from 'rxjs/operators';
-import { ProjectService } from '../../features/project/project.service';
-import { WorkContextService } from '../../features/work-context/work-context.service';
+import { inject, Injectable } from '@angular/core';
+import { from, Observable } from 'rxjs';
+import { mapTo, shareReplay, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import { PersistenceService } from '../persistence/persistence.service';
@@ -13,20 +11,11 @@ import { DataRepairService } from '../data-repair/data-repair.service';
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
   private _persistenceService = inject(PersistenceService);
-  private _projectService = inject(ProjectService);
-  private _workContextService = inject(WorkContextService);
   private _store$ = inject<Store<any>>(Store);
   private _dataRepairService = inject(DataRepairService);
 
   isAllDataLoadedInitially$: Observable<boolean> = from(this.reInit()).pipe(
-    switchMap(() => this._workContextService.isActiveWorkContextProject$),
-    switchMap((isProject) =>
-      isProject
-        ? // NOTE: this probably won't work some of the time
-          this._projectService.isRelatedDataLoadedForCurrentProject$
-        : of(true),
-    ),
-    filter((isLoaded) => isLoaded),
+    mapTo(true),
     take(1),
     // only ever load once
     shareReplay(1),

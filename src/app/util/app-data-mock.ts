@@ -35,7 +35,6 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
     ...createEmptyEntity(),
     todayOrder: [],
   },
-  bookmark: {},
   metric: createEmptyEntity(),
   improvement: createEmptyEntity() as any,
   obstruction: createEmptyEntity(),

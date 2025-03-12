@@ -1,4 +1,4 @@
-import { AppBaseData, AppDataComplete, AppDataForProjects } from './sync.model';
+import { AppBaseData, AppDataComplete } from './sync.model';
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
@@ -14,8 +14,6 @@ export const isValidAppData = (d: AppDataComplete): boolean => {
     dAny !== null &&
     typeof dAny.note === 'object' &&
     dAny.note !== null &&
-    typeof dAny.bookmark === 'object' &&
-    dAny.bookmark !== null &&
     typeof dAny.improvement === 'object' &&
     dAny.improvement !== null &&
     typeof dAny.obstruction === 'object' &&
@@ -306,7 +304,6 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     // 'improvement',
     // 'obstruction',
   ];
-  const projectStateKeys: (keyof AppDataForProjects)[] = ['bookmark'];
 
   const brokenBaseItem = baseStateKeys.find((key) => {
     if (!isEntityStateConsistent(data[key], key)) {
@@ -317,33 +314,7 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
     return false;
   });
 
-  const brokenProjectItem = projectStateKeys.find((projectModelKey) => {
-    const dataForProjects = data[projectModelKey];
-    if (typeof (dataForProjects as any) !== 'object') {
-      throw new Error('No dataForProjects');
-    }
-    return Object.keys(dataForProjects).find((projectId) => {
-      // also allow undefined for project models
-      if (
-        (data as any)[projectId] !== undefined &&
-        !isEntityStateConsistent(
-          (data as any)[projectId],
-          `${projectModelKey} pId:${projectId}`,
-        )
-      ) {
-        console.log(projectModelKey, projectId, (data as any)[projectId]);
-        _validityError('Inconsistent entity state for ' + projectModelKey, {
-          projectId,
-          projectModelKey,
-          data,
-        });
-        return true;
-      }
-      return false;
-    });
-  });
-
-  return !brokenBaseItem && !brokenProjectItem;
+  return !brokenBaseItem;
 };
 
 const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {

@@ -1,11 +1,6 @@
 import { NgModule } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
-import {
-  BOOKMARK_FEATURE_NAME,
-  bookmarkReducer,
-} from '../features/bookmark/store/bookmark.reducer';
 import { EffectsModule } from '@ngrx/effects';
-import { BookmarkEffects } from '../features/bookmark/store/bookmark.effects';
 import {
   LAYOUT_FEATURE_NAME,
   layoutReducer,
@@ -106,9 +101,6 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
   // TODO remove when possible
   providers: [LocalBackupService],
   imports: [
-    StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
-    EffectsModule.forFeature([BookmarkEffects]),
-
     StoreModule.forFeature(LAYOUT_FEATURE_NAME, layoutReducer),
     EffectsModule.forFeature([LayoutEffects]),
 

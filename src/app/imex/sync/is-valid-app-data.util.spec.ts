@@ -41,7 +41,6 @@ describe('isValidAppData()', () => {
   describe('should return false for', () => {
     [
       'note',
-      'bookmark',
       'improvement',
       'obstruction',
       'metric',

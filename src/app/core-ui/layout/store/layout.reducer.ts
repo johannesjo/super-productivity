@@ -23,7 +23,6 @@ export const LAYOUT_FEATURE_NAME = 'layout';
 
 export interface LayoutState {
   isShowAddTaskBar: boolean;
-  isShowBookmarkBar: boolean;
   isShowNotes: boolean;
   isShowIssuePanel: boolean;
   isShowSearchBar: boolean;
@@ -33,7 +32,6 @@ export interface LayoutState {
 
 const _initialLayoutState: LayoutState = {
   isShowAddTaskBar: false,
-  isShowBookmarkBar: false,
   isShowSideNav: false,
   isShowSearchBar: false,
   isShowNotes: false,
