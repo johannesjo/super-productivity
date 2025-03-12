@@ -58,9 +58,9 @@ $vertical-button-margin: $s;
       margin-left: $s * 1.5;
     }
 
-    .isError & {
-      color: $c-warn;
-    }
+    //.isError & {
+    //  color: $c-warn;
+    //}
   }
 }
 

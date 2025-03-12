@@ -1,7 +1,6 @@
 @if (activeBanner$ | async; as banner) {
   <div
     [@banner]
-    [class.isError]="banner.type === 'ERROR'"
     class="content-wrapper"
   >
     @if (banner.progress$ && (banner.progress$ | async); as progress) {

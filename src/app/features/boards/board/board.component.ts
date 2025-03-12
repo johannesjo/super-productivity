@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { BoardCfg } from '../boards.model';
 import { BoardPanelComponent } from '../board-panel/board-panel.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -25,19 +25,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoardEditComponent } from '../dialog-board-edit/dialog-board-edit.component';
 import { T } from '../../../t.const';
-import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
 @Component({
   selector: 'board',
   standalone: true,
-  imports: [
-    BoardPanelComponent,
-    MatIconButton,
-    MatIcon,
-    MatButton,
-    TranslatePipe,
-    MsToStringPipe,
-  ],
+  imports: [BoardPanelComponent, MatIcon, MatButton, TranslatePipe],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

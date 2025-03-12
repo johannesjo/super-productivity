@@ -20,7 +20,6 @@ import { MatIcon } from '@angular/material/icon';
 import { NoteComponent } from '../note/note.component';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ScheduleEventComponent } from '../../schedule/schedule-event/schedule-event.component';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 
@@ -38,7 +37,6 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
     NoteComponent,
     AsyncPipe,
     TranslatePipe,
-    ScheduleEventComponent,
     CdkDragHandle,
   ],
 })
