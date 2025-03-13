@@ -130,7 +130,7 @@ Offer to use remote or local (always create local backup before this)
           // TODO
           this._uploadModelGroup(groupId, {}).then((rev) => {
             if (typeof rev === 'string') {
-              realRevMap[groupId] = rev;
+              realRevMap[groupId] = this._cleanRev(rev);
             }
           }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
@@ -167,14 +167,18 @@ Offer to use remote or local (always create local backup before this)
       if (
         typeof revResult === 'object' &&
         'rev' in revResult &&
-        revResult.rev !== expectedRev
+        !this._isSameRev(revResult.rev, expectedRev)
       ) {
         throw new Error('Rev mismatch');
       }
     }
 
     const result = await syncProvider.downloadFileData(groupId, expectedRev || null);
-    if (typeof result === 'object' && 'rev' in result && result.rev !== expectedRev) {
+    if (
+      typeof result === 'object' &&
+      'rev' in result &&
+      !this._isSameRev(result.rev, expectedRev)
+    ) {
       throw new Error('Rev mismatch');
     }
     return result.dataStr;
@@ -201,7 +205,9 @@ Offer to use remote or local (always create local backup before this)
     revMapToOverwrite: PFAPIRevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
-      (groupId) => revMapNewer[groupId] !== revMapToOverwrite[groupId],
+      (groupId) =>
+        this._cleanRev(revMapNewer[groupId]) !==
+        this._cleanRev(revMapToOverwrite[groupId]),
     );
     const toDelete: string[] = Object.keys(revMapToOverwrite).filter(
       (groupId) => !revMapNewer[groupId],
@@ -267,4 +273,23 @@ Offer to use remote or local (always create local backup before this)
   private _handleConflict(): void {}
 
   private _getConflictInfo(): void {}
+
+  private _isSameRev(a: string | null, b: string | null): boolean {
+    if (!a || !b) {
+      console.warn(`Invalid revs a:${a} and b:${b} given`);
+      return false;
+    }
+    if (a === b) {
+      return true;
+    }
+    return this._cleanRev(a) === this._cleanRev(b);
+  }
+
+  private _cleanRev(rev: string): string {
+    const suffix = '-gzip';
+    if (rev.endsWith(suffix)) {
+      return rev.slice(0, -suffix.length);
+    }
+    return rev;
+  }
 }
