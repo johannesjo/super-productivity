@@ -108,7 +108,7 @@ export const shortSyntaxToTags = ({
       ];
       displayedDayStr = `${weekdays[plannedDate.getDay()]}`;
     }
-    const displayedDateStr = `${displayedDayStr} ${displayedTimeStr}`;
+    const displayedDateStr = `${displayedDayStr}${r.taskChanges?.hasPlannedTime === false ? '' : ', ' + displayedTimeStr}`;
     shortSyntaxTags.push({
       title: displayedDateStr,
       color: defaultColor,

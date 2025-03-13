@@ -28,11 +28,13 @@ import { shortSyntax } from '../short-syntax';
 import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
 import { environment } from '../../../../environments/environment';
 import { SnackService } from '../../../core/snack/snack.service';
+import { PlannerActions } from '../../planner/store/planner.actions';
 import { T } from '../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -133,13 +135,26 @@ export class ShortSyntaxEffects {
         );
         if (taskChanges.plannedAt && !taskChanges.reminderId) {
           const { plannedAt } = taskChanges;
-          const schedule = scheduleTask({
-            task,
-            plannedAt,
-            remindAt: remindOptionToMilliseconds(plannedAt, TaskReminderOptionId.AtStart),
-            isMoveToBacklog: false,
-          });
-          actions.push(schedule);
+          if (taskChanges.hasPlannedTime === false) {
+            const plannedDay = new Date(plannedAt);
+            const plannedDayInIsoFormat = getWorklogStr(plannedDay);
+            const plan = PlannerActions.planTaskForDay({
+              task,
+              day: plannedDayInIsoFormat,
+            });
+            actions.push(plan);
+          } else {
+            const schedule = scheduleTask({
+              task,
+              plannedAt,
+              remindAt: remindOptionToMilliseconds(
+                plannedAt,
+                TaskReminderOptionId.AtStart,
+              ),
+              isMoveToBacklog: false,
+            });
+            actions.push(schedule);
+          }
         }
         if (r.projectId && r.projectId !== task.projectId && !task.parentId) {
           if (task.repeatCfgId) {

@@ -77,6 +77,7 @@ export interface TaskCopy extends IssueFieldsForTask {
   isDone: boolean;
   doneOn?: number;
   plannedAt?: number;
+  hasPlannedTime?: boolean;
   // remindCfg: TaskReminderOptionId;
 
   notes: string;
