@@ -655,6 +655,7 @@ const T = {
       D: {
         ADD_PLANNED: {
           ADD_TO_TODAY: 'F.PLANNER.D.ADD_PLANNED.ADD_TO_TODAY',
+          RE_PLAN_ALL: 'F.PLANNER.D.ADD_PLANNED.RE_PLAN_ALL',
           TITLE: 'F.PLANNER.D.ADD_PLANNED.TITLE',
         },
         PLAN_FOR_DAY: {
