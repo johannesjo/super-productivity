@@ -1,37 +1,47 @@
-import { PfapiModelCfg } from './pfapi.model';
+import {
+  PFAPICfg,
+  PFAPIModelCfg,
+  PFAPISyncProviderServiceInterface,
+} from './pfapi.model';
+import { PFAPISyncService } from './pfapi-sync.service';
+import { BehaviorSubject } from 'rxjs';
 
-// export class Pfapi<PCfg extends PfapiCfg, Ms extends PfapiModelCfg<any>[]> {
-export class Pfapi<Ms extends PfapiModelCfg<any>[]> {
-  // TODO
-  setActiveProvider(activeProvider: any): void {}
+// export class PFAPI<PCfg extends PFAPICfg, Ms extends PFAPIModelCfg<any>[]> {
+export class PFAPI<Ms extends PFAPIModelCfg<unknown>[]> {
+  private readonly _currentSyncProvider$ =
+    new BehaviorSubject<PFAPISyncProviderServiceInterface | null>(null);
+  private _cfg$: BehaviorSubject<PFAPICfg>;
 
-  on(evName: string, cb: (ev: any) => void): any {}
+  private readonly _pfapiSyncService: PFAPISyncService<Ms>;
+  private static _wasInstanceCreated = false;
+
+  constructor(cfg: PFAPICfg) {
+    this._cfg$ = new BehaviorSubject(cfg);
+    this._pfapiSyncService = new PFAPISyncService(this._cfg$, this._currentSyncProvider$);
+
+    if (PFAPI._wasInstanceCreated) {
+      throw new Error('PFAPI: This should only ever be instantiated once');
+    }
+    PFAPI._wasInstanceCreated = true;
+  }
 
   init(): void {}
 
+  setActiveProvider(activeProvider: PFAPISyncProviderServiceInterface): void {
+    this._currentSyncProvider$.next(activeProvider);
+  }
+
+  on(evName: string, cb: (ev: any) => void): any {}
+
   model(modelId: keyof Ms): void {}
 
-  sync(): void {
-    /*
-    (0. maybe write lock file)
-    1. Download main file (if changed rev)
-    2. Check updated timestamps for conflicts (=> on conflict check for incomplete data on remote)
-
-    A remote newer than local
-    1. Check which revisions don't match the local version
-    2. Download all files that don't match the local
-    3. Do complete data import to Database
-    4. update local revs and meta file data from remote
-    5. inform about completion and pass back complete data to developer for import
-
-    B local newer than remote
-    1. Check which revisions don't match the local version
-    2. Upload all files that don't match remote
-    3. Update local meta and upload to remote
-    4. inform about completion
-
-On Conflict:
-Offer to use remote or local (always create local backup before this)
-     */
+  // TODO type
+  sync(): Promise<unknown> {
+    return this._pfapiSyncService.sync();
   }
+
+  pause(): void {}
+
+  // TODO think about this
+  // updateCfg(cfg: PFAPICfg): void {}
 }
