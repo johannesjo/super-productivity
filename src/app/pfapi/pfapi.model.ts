@@ -1,25 +1,39 @@
 import { Observable } from 'rxjs';
 import { SyncGetRevResult } from '../imex/sync/sync.model';
+import { PFAPIDatabaseAdapter } from './db/pfapi-database-adapter.model';
 
 export interface PFAPIModelCfg<T> {
   id: string;
   modelFileGroup?: string;
-  dbAdapter?: 'IndexedDB' | 'InMemory'; // or custom
   modelVersion: number;
   migrations: {
     [version: string]: (arg: T) => T;
   };
   isAlwaysReApplyOldMigrations?: boolean;
+  debounceDbWrite?: number;
+}
+
+export interface PFAPIFullData<F> {
+  data: F;
 }
 
 export interface PFAPICfg {
-  // translateFN: (key)=> translate(key),
   modelCfgs: PFAPIModelCfg<any>[];
+
+  dbAdapter?: PFAPIDatabaseAdapter;
+  onDbError?: (err: any) => void;
   pollInterval?: number;
   isEncryptData?: boolean;
-  isUseLockFile?: boolean;
+  encryptKey?: string;
   isCreateBackups?: boolean;
-  backupInterval?: 'daily';
+  crossModelVersion?: number;
+  crossModelMigrations?: {
+    [version: string]: (arg: PFAPIFullData<unknown>) => PFAPIFullData<unknown>;
+  };
+  // TODO
+  // backupInterval?: 'daily';
+  // isUseLockFile?: boolean;
+  // translateFN: (key)=> translate(key),
 }
 
 export interface PFAPIRevMap {
@@ -36,7 +50,7 @@ export interface PFAPIMetaFileContent {
 
 export interface PFAPICompleteBackup {
   timestamp: number;
-  data: { [modelId: string]: any };
+  data: { [modelGroupId: string]: any };
 }
 
 // NOTE: do not change!!
