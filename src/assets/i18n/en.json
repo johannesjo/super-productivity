@@ -646,6 +646,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Add to Today",
+          "RE_PLAN_ALL": "Reschedule all",
           "TITLE": "Add planned tasks to Today"
         },
         "PLAN_FOR_DAY": {

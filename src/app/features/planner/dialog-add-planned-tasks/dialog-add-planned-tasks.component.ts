@@ -124,6 +124,14 @@ export class DialogAddPlannedTasksComponent {
     this._close();
   }
 
+  // async rePlanAll(): Promise<void> {
+  //   const missingTasks = await this._missingTasks$.pipe(first()).toPromise();
+  //   missingTasks.forEach((task) => {
+  //     this._store.dispatch(PlannerActions.planTaskForDay({ task, day }));
+  //   });
+  //   this._close();
+  // }
+
   private _close(): void {
     this._matDialogRef.close();
   }
