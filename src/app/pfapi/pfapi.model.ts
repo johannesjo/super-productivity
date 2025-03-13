@@ -54,6 +54,7 @@ export interface PFAPISyncProviderServiceInterface {
   getFileRevAndLastClientUpdate(
     target: string,
     localRev: string | null,
+    // TODO maybe remove clientUpdate
   ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
 
   uploadFileData(
@@ -65,6 +66,7 @@ export interface PFAPISyncProviderServiceInterface {
 
   downloadFileData(
     syncTarget: string,
+    // TODO maybe remove localRev
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string }>;
 }

@@ -18,6 +18,12 @@ enum PFAPISyncStatus {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+enum PFAPIError {
+  RevMismatch = 'RevMismatch',
+  // ...
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFAPISyncService<Ms extends PFAPIModelCfg<unknown>[]> {
   private _cfg$: Observable<PFAPICfg>;
   private _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface | null>;
@@ -54,11 +60,6 @@ export class PFAPISyncService<Ms extends PFAPIModelCfg<unknown>[]> {
 On Conflict:
 Offer to use remote or local (always create local backup before this)
      */
-    /*
-    downloadAndCheckMetaFile => IN_SYNC | Error | PFAPIMetaFileContent
-    downloadAndCheckRevisions => {}
-
-     */
 
     if (!this._isReadyForSync()) {
       return PFAPISyncStatus.NotConfigured;
@@ -81,18 +82,55 @@ Offer to use remote or local (always create local backup before this)
     remoteMetaFileContent: PFAPIMetaFileContent,
     localSyncMetaData: PFAPIMetaFileContent,
   ): Promise<void> {
-    const modelIdsToDownload = await this._getModelsIdsToDownload(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
       remoteMetaFileContent.revMap,
       localSyncMetaData.revMap,
     );
-    const realRevMap = {} as any as PFAPIRevMap;
+    const realRevMap: PFAPIRevMap = {};
     await Promise.all(
-      modelIdsToDownload.map(
-        (modelId) =>
+      toUpdate.map((groupId) =>
+        // TODO properly create rev map
+        this._downloadModelGroup(groupId).then((rev) => {
+          if (typeof rev === 'string') {
+            realRevMap[groupId] = rev;
+          }
+        }),
+      ),
+    );
+
+    // TODO update local models
+    await this._updateLocalUpdatedModels([], []);
+    // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
+    // since remote might hava an incomplete update
+
+    // ON SUCCESS
+    await this._updateLocalMetaFileContent({
+      lastSync: Date.now(),
+      lastLocalSyncModelUpdate: remoteMetaFileContent.lastLocalSyncModelUpdate,
+      metaRev: remoteMetaFileContent.metaRev,
+      revMap: remoteMetaFileContent.revMap,
+    });
+  }
+
+  private async _updateRemote(
+    remoteMetaFileContent: PFAPIMetaFileContent,
+    localSyncMetaData: PFAPIMetaFileContent,
+  ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
+      localSyncMetaData.revMap,
+      remoteMetaFileContent.revMap,
+    );
+    const realRevMap: PFAPIRevMap = {};
+    await Promise.all(
+      toUpdate.map(
+        (groupId) =>
           // TODO properly create rev map
-          this._uploadModelId(modelId).then((rev) => {
+          // TODO
+          this._uploadModelGroup(groupId, {}).then((rev) => {
             if (typeof rev === 'string') {
-              realRevMap[modelId] = rev;
+              realRevMap[groupId] = rev;
             }
           }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
@@ -114,20 +152,85 @@ Offer to use remote or local (always create local backup before this)
     return true;
   }
 
-  private async _uploadModelId(modelId: string): Promise<string | Error> {
+  private async _downloadModelGroup(
+    groupId: string,
+    expectedRev?: string,
+  ): Promise<string | Error> {
     const syncProvider = await this._currentSyncProviderOrError$
       .pipe(first())
       .toPromise();
-    return syncProvider.uploadFileData(modelId, '', '', true);
+    if (expectedRev) {
+      const revResult = await syncProvider.getFileRevAndLastClientUpdate(
+        groupId,
+        expectedRev,
+      );
+      if (
+        typeof revResult === 'object' &&
+        'rev' in revResult &&
+        revResult.rev !== expectedRev
+      ) {
+        throw new Error('Rev mismatch');
+      }
+    }
+
+    const result = await syncProvider.downloadFileData(groupId, expectedRev || null);
+    if (typeof result === 'object' && 'rev' in result && result.rev !== expectedRev) {
+      throw new Error('Rev mismatch');
+    }
+    return result.dataStr;
   }
 
-  private async _getModelsIdsToDownload(
+  private _getRemoteFilePathForGroupId(groupId: string): string {
+    // TODO
+    return groupId;
+  }
+
+  private async _uploadModelGroup(groupId: string, data: any): Promise<string | Error> {
+    const target = this._getRemoteFilePathForGroupId(groupId);
+    const syncProvider = await this._currentSyncProviderOrError$
+      .pipe(first())
+      .toPromise();
+    // TODO
+    // this._deCompressAndDecryptData(data)
+    // TODO
+    return syncProvider.uploadFileData(target, '', '', true);
+  }
+
+  private async _getModelsGroupIdsToUpdate(
     revMapNewer: PFAPIRevMap,
     revMapToOverwrite: PFAPIRevMap,
-  ): Promise<string[]> {
-    return Object.keys(revMapNewer).filter(
-      (modelId) => revMapNewer[modelId] !== revMapToOverwrite[modelId],
+  ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
+    const toUpdate: string[] = Object.keys(revMapNewer).filter(
+      (groupId) => revMapNewer[groupId] !== revMapToOverwrite[groupId],
     );
+    const toDelete: string[] = Object.keys(revMapToOverwrite).filter(
+      (groupId) => !revMapNewer[groupId],
+    );
+
+    return { toUpdate, toDelete };
+  }
+
+  private async _updateLocalUpdatedModels(
+    // TODO
+    updates: any[],
+    toDelete: string[],
+  ): Promise<unknown> {
+    return await Promise.all([
+      // TODO
+      ...updates.map((update) => this._updateLocalModel('XX', 'XXX')),
+      // TODO
+      ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
+    ]);
+  }
+
+  private async _updateLocalModel(groupId: string, modelData: string): Promise<unknown> {
+    // TODO
+    // this._deCompressAndDecryptData()
+    return {} as any as unknown;
+  }
+
+  private async _deleteLocalModel(groupId: string, modelData: string): Promise<unknown> {
+    return {} as any as unknown;
   }
 
   private async _updateLocalMetaFileContent(
@@ -140,6 +243,16 @@ Offer to use remote or local (always create local backup before this)
     return {} as any as PFAPIMetaFileContent;
   }
 
+  private async _compressAndeEncryptData(data: string): Promise<string> {
+    // TODO
+    return data;
+  }
+
+  private async _deCompressAndDecryptData(data: string): Promise<string> {
+    // TODO
+    return data;
+  }
+
   private _checkMetaFileContent(
     remoteMetaFileContent: PFAPIMetaFileContent,
     localSyncMetaData: PFAPIMetaFileContent,
@@ -149,12 +262,6 @@ Offer to use remote or local (always create local backup before this)
 
   private async _getLocalSyncMetaData(): Promise<PFAPIMetaFileContent> {
     return {} as any as PFAPIMetaFileContent;
-  }
-
-  private async _downloadAndCheckRevisions(): Promise<
-    PFAPIMetaFileContent | PFAPISyncStatus
-  > {
-    return PFAPISyncStatus.InSync;
   }
 
   private _handleConflict(): void {}
