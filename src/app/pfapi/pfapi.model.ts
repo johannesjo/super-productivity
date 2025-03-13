@@ -4,7 +4,7 @@ import { SyncGetRevResult } from '../imex/sync/sync.model';
 export interface PFAPIModelCfg<T> {
   id: string;
   modelFileGroup?: string;
-  dbAdapter?: string;
+  dbAdapter?: 'IndexedDB' | 'InMemory'; // or custom
   modelVersion: number;
   migrations: {
     [version: string]: (arg: T) => T;
