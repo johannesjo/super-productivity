@@ -1,16 +1,16 @@
 import { PfapiModelCfgToModelCtrl } from './pf';
-import { PFModelCfgs } from './pf.model';
+import { PFModelCfgs, PFModelBase } from './pf.model';
 import { PFModelCtrl } from './pf-model-ctrl';
 
 interface PFGroupMap {
-  [groupId: string]: PFModelCtrl<unknown>[]; // modelIds
+  [groupId: string]: PFModelCtrl<PFModelBase>[]; // modelIds
 }
 
 export class PFSyncDataService<const MD extends PFModelCfgs> {
   public readonly m: PfapiModelCfgToModelCtrl<MD>;
 
   private _groupMap: PFGroupMap;
-  private _singleModels: PFModelCtrl<unknown>[];
+  private _singleModels: PFModelCtrl<PFModelBase>[];
 
   constructor(m: PfapiModelCfgToModelCtrl<MD>) {
     this.m = m;
@@ -33,10 +33,10 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
 
   private _getModelGroups(): {
     groups: PFGroupMap;
-    singleModels: PFModelCtrl<unknown>[];
+    singleModels: PFModelCtrl<PFModelBase>[];
   } {
     const groupMap: PFGroupMap = {};
-    const singleModels: PFModelCtrl<unknown>[] = [];
+    const singleModels: PFModelCtrl<PFModelBase>[] = [];
     Object.keys(this.m).map((modelId) => {
       const entry = this.m[modelId];
       if (entry.modelCfg.modelFileGroup) {

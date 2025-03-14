@@ -111,7 +111,14 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
         dataStr: r.data,
       };
     } catch (e) {
-      console.error(e);
+      if (
+        e instanceof PFNoRevError ||
+        e instanceof PFNoDataError ||
+        e instanceof PFInvalidDataError
+      ) {
+        throw e; // Pass through known errors
+      }
+      pfLog(e);
       throw new Error(e as any);
     }
   }
@@ -138,7 +145,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
         rev: r.rev,
       };
     } catch (e) {
-      console.error(e);
+      pfLog(e);
       throw new Error(e as any);
     }
   }

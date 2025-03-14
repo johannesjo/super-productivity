@@ -1,4 +1,4 @@
-import { PFModelCfg } from './pf.model';
+import { PFModelCfg, PFModelBase } from './pf.model';
 import { PFDatabase } from './db/pf-database.class';
 import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
 import { pfLog } from './pf-log';
@@ -6,7 +6,7 @@ import { pfLog } from './pf-log';
 // type ExtractPFModelCfgType<T extends PFModelCfg<unknown>> =
 //   T extends PFModelCfg<infer U> ? U : never;
 
-export class PFModelCtrl<MT> {
+export class PFModelCtrl<MT extends PFModelBase> {
   public readonly modelId: string;
   public readonly modelCfg: PFModelCfg<MT>;
 
@@ -36,7 +36,7 @@ export class PFModelCtrl<MT> {
   }
 
   async partialUpdate(data: Partial<MT>): Promise<unknown> {
-    if (typeof data !== 'object') {
+    if (typeof data !== 'object' || data === null) {
       throw new Error(`PFModelCtrl.${data} is not an object`);
     }
     const newData = {

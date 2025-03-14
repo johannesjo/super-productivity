@@ -49,3 +49,20 @@ export class PFInvalidDataError extends Error {
     this.name = 'InvalidData';
   }
 }
+
+export class PFInitializationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PFInitializationError';
+  }
+}
+
+export class PFSyncError extends Error {
+  constructor(
+    message: string,
+    public readonly originalError?: unknown,
+  ) {
+    super(message);
+    this.name = 'PFSyncError';
+  }
+}

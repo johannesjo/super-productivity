@@ -1,12 +1,23 @@
 import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
 
-// TODO limit T to object or array
-export interface PFModelCfg<T> {
+type JSONPrimitive = string | number | boolean | null;
+export type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
+
+interface SerializableObject {
+  [key: string]: Serializable;
+}
+
+type SerializableArray = Array<Serializable>;
+
+export type PFModelBase = SerializableObject | SerializableArray;
+
+export interface PFModelCfg<T extends PFModelBase> {
   modelFileGroup?: string;
   modelVersion: number;
   migrations?: {
     [version: string]: (arg: T) => T;
   };
+  // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
   defaultData?: T;
@@ -14,7 +25,7 @@ export interface PFModelCfg<T> {
 
 // export type PFModelCfgs = readonly PFModelCfg<unknown>[];
 export type PFModelCfgs = {
-  [modelId: string]: PFModelCfg<unknown>;
+  [modelId: string]: PFModelCfg<PFModelBase>;
 };
 
 export interface PFFullData<F> {
