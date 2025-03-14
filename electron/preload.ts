@@ -85,6 +85,9 @@ const ea: ElectronAPI = {
   updateCurrentTask: (task) => _send('CURRENT_TASK_UPDATED', task),
 
   exec: (command: string) => _send('EXEC', command),
+
+  setFullScreenMainWin: (isFullScreen: boolean) =>
+    _send('SET_FULLSCREEN_MAIN_WIN', isFullScreen),
 };
 contextBridge.exposeInMainWorld('ea', ea);
 

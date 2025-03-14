@@ -148,6 +148,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isNotifyWhenTimeEstimateExceeded: true,
     isAutoStartNextTask: false,
     isTrackingReminderEnabled: false,
+    isFullScreenTrackingReminder: false,
     isTrackingReminderShowOnMobile: false,
     trackingReminderMinTime: 5 * minute,
   },
