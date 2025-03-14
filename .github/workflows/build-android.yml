@@ -55,6 +55,15 @@ jobs:
         run: |
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
+      - name: Sign APK
+        run: |
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore keystore.jks \
+            -storepass ${{ secrets.DROID_KEYSTORE_PASSWORD }} \
+            -keypass ${{ secrets.DROID_KEY_PASSWORD }} \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            ${{ secrets.DROID_KEYSTORE_ALIAS }}
+
       - name: Build
         run: npm run dist:android:prod
         env:
