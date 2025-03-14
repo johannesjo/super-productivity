@@ -14,28 +14,8 @@ import { PfapiModelCtrl } from './pfapi-model-ctrl';
 type ExtractPFAPIModelCfgType<T extends PFAPIModelCfg<unknown>> =
   T extends PFAPIModelCfg<infer U> ? U : never;
 
-// TODO check difference
-// type ArrayToObject<T extends PFAPIModelCfgs> = {
-//   [K in T[number]['id']]: PfapiModelCtrl<
-//     ExtractPFAPIModelCfgType<Extract<T[number], { id: K }>>
-//   >;
-// };
-// type ArrayToObject<T extends readonly PFAPIModelCfg<unknown>[]> = {
-//   [K in T[number]['id']]: K extends string
-//     ? PfapiModelCtrl<ExtractPFAPIModelCfgType<Extract<T[number], { id: K }>>>
-//     : never;
-// };
-
-// type ArrayToObject<T extends readonly PFAPIModelCfg<unknown>[]> = {
-//   [K in Extract<T[number], { id: string }>['id']]: PfapiModelCtrl<
-//     ExtractPFAPIModelCfgType<Extract<T[number], { id: K }>>
-//   >;
-// };
-
-type ArrayToObject<T extends readonly PFAPIModelCfg<unknown>[]> = {
-  [K in Extract<T[number], { id: string }>['id']]: PfapiModelCtrl<
-    ExtractPFAPIModelCfgType<Extract<T[number], { id: K }>>
-  >;
+type ModelCfgToModelCtrl<T extends PFAPIModelCfgs> = {
+  [K in keyof T]: PfapiModelCtrl<ExtractPFAPIModelCfgType<T[K]>>;
 };
 
 // export class PFAPI<PCfg extends PFAPICfg, Ms extends PFAPIModelCfg<any>[]> {
@@ -48,7 +28,7 @@ export class PFAPI<const MD extends PFAPIModelCfgs> {
   private readonly _db: PFAPIDatabase;
 
   public readonly metaModel: PFAPIMetaModelCtrl;
-  public readonly m: ArrayToObject<MD>;
+  public readonly m: ModelCfgToModelCtrl<MD>;
 
   constructor(modelCfgs: MD, cfg?: PFAPIBaseCfg) {
     if (PFAPI._wasInstanceCreated) {
@@ -89,25 +69,17 @@ export class PFAPI<const MD extends PFAPIModelCfgs> {
 
   pause(): void {}
 
-  private _createModels(array: MD): ArrayToObject<MD> {
+  private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {
     const result = {} as Record<string, PfapiModelCtrl<unknown>>;
-    for (const item of array) {
-      const id = item.id;
+    // TODO validate modelCfgs
+    for (const [id, item] of Object.entries(modelCfgs)) {
       result[id] = new PfapiModelCtrl<ExtractPFAPIModelCfgType<typeof item>>(
         item,
         this._db,
         this.metaModel,
       );
     }
-
-    return result as ArrayToObject<MD>;
-
-    // TODO validate model cfgs
-    // return array.reduce((acc, item) => {
-    //   // acc[item.id] = { modelCfg: item };
-    //   acc[item.id] = new PfapiModelCtrl(item, this._db, this.metaModel);
-    //   return acc;
-    // }, {} as ArrayToObject<MD>);
+    return result as ModelCfgToModelCtrl<MD>;
   }
 
   // getAllModelData(): unknown {}

@@ -4,7 +4,6 @@ import { PFAPIDatabaseAdapter } from './db/pfapi-database-adapter.model';
 
 // TODO limit T to object or array
 export interface PFAPIModelCfg<T> {
-  id: string;
   modelFileGroup?: string;
   modelVersion: number;
   migrations?: {
@@ -15,7 +14,10 @@ export interface PFAPIModelCfg<T> {
   defaultData?: T;
 }
 
-export type PFAPIModelCfgs = readonly PFAPIModelCfg<unknown>[];
+// export type PFAPIModelCfgs = readonly PFAPIModelCfg<unknown>[];
+export type PFAPIModelCfgs = {
+  [modelId: string]: PFAPIModelCfg<unknown>;
+};
 
 export interface PFAPIFullData<F> {
   data: F;
