@@ -1,6 +1,6 @@
 import { PFAPI } from './pfapi';
 import { PFAPIModelCfg } from './pfapi.model';
-import { PfapiModelCtrl } from './pfapi-model-ctrl';
+import { PFAPIModelCtrl } from './pfapi-model-ctrl';
 
 interface MyModel {
   id: string;
@@ -29,7 +29,7 @@ const modelCfgs: ModelCfgs = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const pfapi = new PFAPI(modelCfgs);
-const _typeCheck: PfapiModelCtrl<MyModel> = {} as typeof pfapi.m.m1;
+const _typeCheck: PFAPIModelCtrl<MyModel> = {} as typeof pfapi.m.m1;
 console.log(_typeCheck);
 
 // SHOULD WORK => this should work (and it does)

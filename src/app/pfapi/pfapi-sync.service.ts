@@ -1,11 +1,13 @@
 import {
   PFAPIBaseCfg,
   PFAPIMetaFileContent,
+  PFAPIModelCfgs,
   PFAPIRevMap,
   PFAPISyncProviderServiceInterface,
 } from './pfapi.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { PFAPISyncDataService } from './pfapi-sync-data.service';
 
 enum PFAPISyncStatus {
   InSync = 'InSync',
@@ -23,18 +25,21 @@ enum PFAPIError {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPISyncService {
+export class PFAPISyncService<const MD extends PFAPIModelCfgs> {
   private _cfg$: Observable<PFAPIBaseCfg>;
   private _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface | null>;
   // TODO
   private _currentSyncProviderOrError$: Observable<PFAPISyncProviderServiceInterface>;
+  private readonly _pfapiSyncDataService: PFAPISyncDataService<MD>;
 
   constructor(
     cfg$: Observable<PFAPIBaseCfg>,
     _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface>,
+    _pfapiSyncDataService: PFAPISyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
+    this._pfapiSyncDataService = _pfapiSyncDataService;
   }
 
   async sync(): Promise<PFAPISyncStatus | any> {

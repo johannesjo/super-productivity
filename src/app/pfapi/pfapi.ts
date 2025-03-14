@@ -9,26 +9,29 @@ import { BehaviorSubject } from 'rxjs';
 import { PFAPIDatabase } from './db/pfapi-database.class';
 import { PFAPIIndexedDbAdapter } from './db/pfapi-indexed-db-adapter.class';
 import { PFAPIMetaModelCtrl } from './pfapi-meta-model-ctrl';
-import { PfapiModelCtrl } from './pfapi-model-ctrl';
+import { PFAPIModelCtrl } from './pfapi-model-ctrl';
+import { PFAPISyncDataService } from './pfapi-sync-data.service';
 
 type ExtractPFAPIModelCfgType<T extends PFAPIModelCfg<unknown>> =
   T extends PFAPIModelCfg<infer U> ? U : never;
 
-type ModelCfgToModelCtrl<T extends PFAPIModelCfgs> = {
-  [K in keyof T]: PfapiModelCtrl<ExtractPFAPIModelCfgType<T[K]>>;
+export type PfapiModelCfgToModelCtrl<T extends PFAPIModelCfgs> = {
+  [K in keyof T]: PFAPIModelCtrl<ExtractPFAPIModelCfgType<T[K]>>;
 };
 
 // export class PFAPI<PCfg extends PFAPICfg, Ms extends PFAPIModelCfg<any>[]> {
 export class PFAPI<const MD extends PFAPIModelCfgs> {
+  private static _wasInstanceCreated = false;
+
   private readonly _currentSyncProvider$ =
     new BehaviorSubject<PFAPISyncProviderServiceInterface | null>(null);
   private readonly _cfg$: BehaviorSubject<PFAPIBaseCfg>;
-  private readonly _pfapiSyncService: PFAPISyncService;
-  private static _wasInstanceCreated = false;
   private readonly _db: PFAPIDatabase;
+  private readonly _pfapiSyncService: PFAPISyncService<MD>;
+  private readonly _pfapiSyncDataService: PFAPISyncDataService<MD>;
 
   public readonly metaModel: PFAPIMetaModelCtrl;
-  public readonly m: ModelCfgToModelCtrl<MD>;
+  public readonly m: PfapiModelCfgToModelCtrl<MD>;
 
   constructor(modelCfgs: MD, cfg?: PFAPIBaseCfg) {
     if (PFAPI._wasInstanceCreated) {
@@ -38,7 +41,6 @@ export class PFAPI<const MD extends PFAPIModelCfgs> {
 
     this._cfg$ = new BehaviorSubject(cfg || null);
 
-    this._pfapiSyncService = new PFAPISyncService(this._cfg$, this._currentSyncProvider$);
     this._db = new PFAPIDatabase({
       onError: cfg.onDbError,
       adapter:
@@ -52,6 +54,13 @@ export class PFAPI<const MD extends PFAPIModelCfgs> {
 
     this.metaModel = new PFAPIMetaModelCtrl(this._db);
     this.m = this._createModels(modelCfgs);
+
+    this._pfapiSyncDataService = new PFAPISyncDataService<MD>(this.m);
+    this._pfapiSyncService = new PFAPISyncService<MD>(
+      this._cfg$,
+      this._currentSyncProvider$,
+      this._pfapiSyncDataService,
+    );
   }
 
   // init(): void {}
@@ -69,17 +78,18 @@ export class PFAPI<const MD extends PFAPIModelCfgs> {
 
   pause(): void {}
 
-  private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {
-    const result = {} as Record<string, PfapiModelCtrl<unknown>>;
+  private _createModels(modelCfgs: MD): PfapiModelCfgToModelCtrl<MD> {
+    const result = {} as Record<string, PFAPIModelCtrl<unknown>>;
     // TODO validate modelCfgs
     for (const [id, item] of Object.entries(modelCfgs)) {
-      result[id] = new PfapiModelCtrl<ExtractPFAPIModelCfgType<typeof item>>(
+      result[id] = new PFAPIModelCtrl<ExtractPFAPIModelCfgType<typeof item>>(
+        id,
         item,
         this._db,
         this.metaModel,
       );
     }
-    return result as ModelCfgToModelCtrl<MD>;
+    return result as PfapiModelCfgToModelCtrl<MD>;
   }
 
   // getAllModelData(): unknown {}
