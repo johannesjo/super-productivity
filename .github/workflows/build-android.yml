@@ -55,6 +55,13 @@ jobs:
         run: |
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
+      - name: Build
+        run: npm run dist:android:prod
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.DROID_KEYSTORE_PASSWORD }}
+          RELEASE_KEYSTORE_ALIAS: ${{ secrets.DROID_KEYSTORE_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.DROID_KEY_PASSWORD }}
+
       - name: DEBUG
         run: |
           ls -la android/app/build/outputs
@@ -70,13 +77,6 @@ jobs:
             -keypass ${{ secrets.DROID_KEY_PASSWORD }} \
             android/app/build/outputs/apk/play/release/app-play-release-unsigned.apk \
             ${{ secrets.DROID_KEYSTORE_ALIAS }}
-
-      - name: Build
-        run: npm run dist:android:prod
-        env:
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.DROID_KEYSTORE_PASSWORD }}
-          RELEASE_KEYSTORE_ALIAS: ${{ secrets.DROID_KEYSTORE_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.DROID_KEY_PASSWORD }}
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
