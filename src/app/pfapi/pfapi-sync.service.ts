@@ -1,7 +1,6 @@
 import {
-  PFAPICfg,
+  PFAPIBaseCfg,
   PFAPIMetaFileContent,
-  PFAPIModelCfg,
   PFAPIRevMap,
   PFAPISyncProviderServiceInterface,
 } from './pfapi.model';
@@ -24,14 +23,14 @@ enum PFAPIError {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPISyncService<Ms extends PFAPIModelCfg<unknown>[]> {
-  private _cfg$: Observable<PFAPICfg>;
+export class PFAPISyncService {
+  private _cfg$: Observable<PFAPIBaseCfg>;
   private _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface | null>;
   // TODO
   private _currentSyncProviderOrError$: Observable<PFAPISyncProviderServiceInterface>;
 
   constructor(
-    cfg$: Observable<PFAPICfg>,
+    cfg$: Observable<PFAPIBaseCfg>,
     _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface>,
   ) {
     this._cfg$ = cfg$;

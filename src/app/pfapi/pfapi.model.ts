@@ -6,20 +6,20 @@ export interface PFAPIModelCfg<T> {
   id: string;
   modelFileGroup?: string;
   modelVersion: number;
-  migrations: {
+  migrations?: {
     [version: string]: (arg: T) => T;
   };
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
 }
 
+export type PFAPIModelCfgs = readonly PFAPIModelCfg<unknown>[];
+
 export interface PFAPIFullData<F> {
   data: F;
 }
 
-export interface PFAPICfg {
-  modelCfgs: PFAPIModelCfg<any>[];
-
+export interface PFAPIBaseCfg {
   dbAdapter?: PFAPIDatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
