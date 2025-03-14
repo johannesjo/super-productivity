@@ -1,5 +1,6 @@
 import { PFAPI } from './pfapi';
 import { PFAPIModelCfg } from './pfapi.model';
+import { PfapiModelCtrl } from './pfapi-model-ctrl';
 
 interface MyModel {
   id: string;
@@ -7,14 +8,18 @@ interface MyModel {
   age: number;
 }
 
-type ModelCfgs = [PFAPIModelCfg<MyModel>, PFAPIModelCfg<MyModel>];
+interface MyModel2 {
+  fooo: boolean;
+}
+
+type ModelCfgs = [PFAPIModelCfg<MyModel>, PFAPIModelCfg<MyModel2>];
 const modelCfgs: ModelCfgs = [
   {
-    id: 'myModelId',
+    id: 'm1',
     modelVersion: 1,
   },
   {
-    id: 'myOtherModelId',
+    id: 'm2',
     modelVersion: 1,
   },
   // THIS PART IS IMPORTANT!!!
@@ -22,19 +27,26 @@ const modelCfgs: ModelCfgs = [
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const pfapi = new PFAPI(modelCfgs);
-// console.log(pfapi.m.myModelId.save({ id: 'AA', name: 'test', age: 10 }));
-// console.log(pfapi.m.myModelId.save({ id: 'AA', name: 'test', age: 10 }));
-// console.log(pfapi.m.myOtherModelId.load());
-// console.log(pfapi.m.oXXXXX.modelCfg);
-// console.log(pfapi.m.XXXXXXXXXXA.modelCfg);
 
-// // this should work
-// pfapi.m.myModelId.save({ id: 'AA', name: 'test', age: 10 });
-// pfapi.m.myOtherModelId.save({ id: 'AA', name: 'test', age: 10 });
-//
-// v = pfapi.m.myOtherModelId.modelCfg;
-//
-// // this should throw a typing error
-// pfapi.m.otherd.save({ id: 'BB', name: 'test', age: 10 });
-// // this should throw a typing error
-// pfapi.m.nXotDefined.save({ id: 'CCC', name: 'test', age: 10 });
+// SHOULD WORK => this should work (and it does)
+console.log(pfapi.m.m1.save({ id: 'AA', name: 'test', age: 10 }));
+console.log(pfapi.m.m2.save({ fooo: true }));
+
+// EXPECT ERROR => this should error (and it does NOT)
+console.log(
+  pfapi.m.m1.save({ id: 'AA', name: 'test', age: 10, fooo: true, additional: 'aaa' }),
+);
+console.log(pfapi.m.m2.save({ id: 'xx', name: 'test', age: 10 }));
+
+const _typeCheck: PfapiModelCtrl<MyModel> = {} as typeof pfapi.m.m1;
+console.log(_typeCheck);
+
+pfapi.m.m1.load().then((data) => {
+  console.log(data);
+  console.log(data.id);
+});
+
+pfapi.m.m2.load().then((data) => {
+  console.log(data);
+  console.log(data.id);
+});

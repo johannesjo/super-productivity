@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 import { SyncGetRevResult } from '../imex/sync/sync.model';
 import { PFAPIDatabaseAdapter } from './db/pfapi-database-adapter.model';
 
+// TODO limit T to object or array
 export interface PFAPIModelCfg<T> {
   id: string;
   modelFileGroup?: string;
@@ -11,6 +12,7 @@ export interface PFAPIModelCfg<T> {
   };
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
+  defaultData?: T;
 }
 
 export type PFAPIModelCfgs = readonly PFAPIModelCfg<unknown>[];
