@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { SyncGetRevResult } from '../imex/sync/sync.model';
-import { PFAPIDatabaseAdapter } from './db/pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './db/pfapi-database-adapter.model';
 
 // TODO limit T to object or array
-export interface PFAPIModelCfg<T> {
+export interface PFModelCfg<T> {
   modelFileGroup?: string;
   modelVersion: number;
   migrations?: {
@@ -14,17 +14,17 @@ export interface PFAPIModelCfg<T> {
   defaultData?: T;
 }
 
-// export type PFAPIModelCfgs = readonly PFAPIModelCfg<unknown>[];
-export type PFAPIModelCfgs = {
-  [modelId: string]: PFAPIModelCfg<unknown>;
+// export type PFModelCfgs = readonly PFModelCfg<unknown>[];
+export type PFModelCfgs = {
+  [modelId: string]: PFModelCfg<unknown>;
 };
 
-export interface PFAPIFullData<F> {
+export interface PFFullData<F> {
   data: F;
 }
 
-export interface PFAPIBaseCfg {
-  dbAdapter?: PFAPIDatabaseAdapter;
+export interface PFBaseCfg {
+  dbAdapter?: PFDatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
   isEncryptData?: boolean;
@@ -32,7 +32,7 @@ export interface PFAPIBaseCfg {
   isCreateBackups?: boolean;
   crossModelVersion?: number;
   crossModelMigrations?: {
-    [version: string]: (arg: PFAPIFullData<unknown>) => PFAPIFullData<unknown>;
+    [version: string]: (arg: PFFullData<unknown>) => PFFullData<unknown>;
   };
   // TODO
   // backupInterval?: 'daily';
@@ -40,32 +40,32 @@ export interface PFAPIBaseCfg {
   // translateFN: (key)=> translate(key),
 }
 
-export interface PFAPIRevMap {
+export interface PFRevMap {
   [modelOrFileGroupId: string]: string;
 }
 
-export interface PFAPIMetaFileContent {
+export interface PFMetaFileContent {
   lastLocalSyncModelUpdate?: number;
   lastSync?: number;
   metaRev?: string;
   // revision map
-  revMap: PFAPIRevMap;
+  revMap: PFRevMap;
 }
 
-export interface PFAPICompleteBackup {
+export interface PFCompleteBackup {
   timestamp: number;
   data: { [modelGroupId: string]: any };
 }
 
 // NOTE: do not change!!
-export enum PFAPISyncProviderId {
+export enum PFSyncProviderId {
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
 }
 
-export interface PFAPISyncProviderServiceInterface {
-  id: PFAPISyncProviderId;
+export interface PFSyncProviderServiceInterface {
+  id: PFSyncProviderId;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
 
@@ -89,4 +89,4 @@ export interface PFAPISyncProviderServiceInterface {
   ): Promise<{ rev: string; dataStr: string }>;
 }
 
-export type PFAPISyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
+export type PFSyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;

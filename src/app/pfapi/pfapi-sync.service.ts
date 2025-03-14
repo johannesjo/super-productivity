@@ -1,15 +1,15 @@
 import {
-  PFAPIBaseCfg,
-  PFAPIMetaFileContent,
-  PFAPIModelCfgs,
-  PFAPIRevMap,
-  PFAPISyncProviderServiceInterface,
+  PFBaseCfg,
+  PFMetaFileContent,
+  PFModelCfgs,
+  PFRevMap,
+  PFSyncProviderServiceInterface,
 } from './pfapi.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { PFAPISyncDataService } from './pfapi-sync-data.service';
+import { PFSyncDataService } from './pfapi-sync-data.service';
 
-enum PFAPISyncStatus {
+enum PFSyncStatus {
   InSync = 'InSync',
   UpdateRemote = 'UpdateRemote',
   UpdateLocal = 'UpdateLocal',
@@ -19,30 +19,30 @@ enum PFAPISyncStatus {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-enum PFAPIError {
+enum PFError {
   RevMismatch = 'RevMismatch',
   // ...
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPISyncService<const MD extends PFAPIModelCfgs> {
-  private _cfg$: Observable<PFAPIBaseCfg>;
-  private _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface | null>;
+export class PFSyncService<const MD extends PFModelCfgs> {
+  private _cfg$: Observable<PFBaseCfg>;
+  private _currentSyncProvider$: Observable<PFSyncProviderServiceInterface | null>;
   // TODO
-  private _currentSyncProviderOrError$: Observable<PFAPISyncProviderServiceInterface>;
-  private readonly _pfapiSyncDataService: PFAPISyncDataService<MD>;
+  private _currentSyncProviderOrError$: Observable<PFSyncProviderServiceInterface>;
+  private readonly _pfapiSyncDataService: PFSyncDataService<MD>;
 
   constructor(
-    cfg$: Observable<PFAPIBaseCfg>,
-    _currentSyncProvider$: Observable<PFAPISyncProviderServiceInterface>,
-    _pfapiSyncDataService: PFAPISyncDataService<MD>,
+    cfg$: Observable<PFBaseCfg>,
+    _currentSyncProvider$: Observable<PFSyncProviderServiceInterface>,
+    _pfapiSyncDataService: PFSyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._pfapiSyncDataService = _pfapiSyncDataService;
   }
 
-  async sync(): Promise<PFAPISyncStatus | any> {
+  async sync(): Promise<PFSyncStatus | any> {
     /*
     (0. maybe write lock file)
     1. Download main file (if changed rev)
@@ -66,32 +66,32 @@ Offer to use remote or local (always create local backup before this)
      */
 
     if (!this._isReadyForSync()) {
-      return PFAPISyncStatus.NotConfigured;
+      return PFSyncStatus.NotConfigured;
     }
 
     const localSyncMetaData = await this._getLocalSyncMetaData();
     const remoteMetaFileContent = await this._downloadMetaFile();
 
     switch (this._checkMetaFileContent(remoteMetaFileContent, localSyncMetaData)) {
-      case PFAPISyncStatus.UpdateLocal:
+      case PFSyncStatus.UpdateLocal:
         return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
-      case PFAPISyncStatus.UpdateRemote:
-      case PFAPISyncStatus.Conflict:
-      case PFAPISyncStatus.InSync:
-        return PFAPISyncStatus.InSync;
+      case PFSyncStatus.UpdateRemote:
+      case PFSyncStatus.Conflict:
+      case PFSyncStatus.InSync:
+        return PFSyncStatus.InSync;
     }
   }
 
   private async _updateLocal(
-    remoteMetaFileContent: PFAPIMetaFileContent,
-    localSyncMetaData: PFAPIMetaFileContent,
+    remoteMetaFileContent: PFMetaFileContent,
+    localSyncMetaData: PFMetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
       remoteMetaFileContent.revMap,
       localSyncMetaData.revMap,
     );
-    const realRevMap: PFAPIRevMap = {};
+    const realRevMap: PFRevMap = {};
     await Promise.all(
       toUpdate.map((groupId) =>
         // TODO properly create rev map
@@ -118,15 +118,15 @@ Offer to use remote or local (always create local backup before this)
   }
 
   private async _updateRemote(
-    remoteMetaFileContent: PFAPIMetaFileContent,
-    localSyncMetaData: PFAPIMetaFileContent,
+    remoteMetaFileContent: PFMetaFileContent,
+    localSyncMetaData: PFMetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
       localSyncMetaData.revMap,
       remoteMetaFileContent.revMap,
     );
-    const realRevMap: PFAPIRevMap = {};
+    const realRevMap: PFRevMap = {};
     await Promise.all(
       toUpdate.map(
         (groupId) =>
@@ -205,8 +205,8 @@ Offer to use remote or local (always create local backup before this)
   }
 
   private async _getModelsGroupIdsToUpdate(
-    revMapNewer: PFAPIRevMap,
-    revMapToOverwrite: PFAPIRevMap,
+    revMapNewer: PFRevMap,
+    revMapToOverwrite: PFRevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
       (groupId) =>
@@ -244,13 +244,13 @@ Offer to use remote or local (always create local backup before this)
   }
 
   private async _updateLocalMetaFileContent(
-    localMetaFileContent: PFAPIMetaFileContent,
+    localMetaFileContent: PFMetaFileContent,
   ): Promise<void> {
     // TODO
   }
 
-  private async _downloadMetaFile(): Promise<PFAPIMetaFileContent> {
-    return {} as any as PFAPIMetaFileContent;
+  private async _downloadMetaFile(): Promise<PFMetaFileContent> {
+    return {} as any as PFMetaFileContent;
   }
 
   private async _compressAndeEncryptData(data: string): Promise<string> {
@@ -264,14 +264,14 @@ Offer to use remote or local (always create local backup before this)
   }
 
   private _checkMetaFileContent(
-    remoteMetaFileContent: PFAPIMetaFileContent,
-    localSyncMetaData: PFAPIMetaFileContent,
-  ): PFAPISyncStatus {
-    return PFAPISyncStatus.InSync;
+    remoteMetaFileContent: PFMetaFileContent,
+    localSyncMetaData: PFMetaFileContent,
+  ): PFSyncStatus {
+    return PFSyncStatus.InSync;
   }
 
-  private async _getLocalSyncMetaData(): Promise<PFAPIMetaFileContent> {
-    return {} as any as PFAPIMetaFileContent;
+  private async _getLocalSyncMetaData(): Promise<PFMetaFileContent> {
+    return {} as any as PFMetaFileContent;
   }
 
   private _handleConflict(): void {}

@@ -1,33 +1,31 @@
-import { PFAPISyncProviderId } from '../pfapi.model';
-import { PFAPIAuthFailError, PFAPIHttpError } from '../errors/pfapi-errors';
+import { PFSyncProviderId } from '../pfapi.model';
+import { PFAuthFailError, PFHttpError } from '../errors/pfapi-errors';
 
-export type PFAPIRequestResult<T, E = Error> =
+export type PFRequestResult<T, E = Error> =
   | { success: true; data: T }
   | { success: false; error: E };
 
-export type PFAPICommonRequestErrors = PFAPIAuthFailError | PFAPIHttpError;
+export type PFCommonRequestErrors = PFAuthFailError | PFHttpError;
 
-export interface PFAPISyncProviderServiceInterface {
-  id: PFAPISyncProviderId;
+export interface PFSyncProviderServiceInterface {
+  id: PFSyncProviderId;
   isReady: boolean;
   isUploadForcePossible?: boolean;
 
   getFileRevAndLastClientUpdate(
     targetPath: string,
     localRev: string | null,
-  ): Promise<PFAPIRequestResult<{ rev: string }, PFAPICommonRequestErrors>>;
+  ): Promise<PFRequestResult<{ rev: string }, PFCommonRequestErrors>>;
 
   uploadFileData(
     targetPath: string,
     dataStr: string,
     localRev: string | null,
     isForceOverwrite?: boolean,
-  ): Promise<PFAPIRequestResult<{ rev: string }, PFAPICommonRequestErrors>>;
+  ): Promise<PFRequestResult<{ rev: string }, PFCommonRequestErrors>>;
 
   downloadFileData(
     targetPath: string,
     localRev: string | null,
-  ): Promise<
-    PFAPIRequestResult<{ rev: string; dataStr: string }, PFAPICommonRequestErrors>
-  >;
+  ): Promise<PFRequestResult<{ rev: string; dataStr: string }, PFCommonRequestErrors>>;
 }

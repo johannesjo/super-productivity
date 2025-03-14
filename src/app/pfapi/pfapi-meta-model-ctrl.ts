@@ -1,26 +1,24 @@
-import { PFAPIDatabase } from './db/pfapi-database.class';
-import { PFAPIMetaFileContent, PFAPIModelCfg } from './pfapi.model';
+import { PFDatabase } from './db/pfapi-database.class';
+import { PFMetaFileContent, PFModelCfg } from './pfapi.model';
 
-export class PFAPIMetaModelCtrl {
-  static readonly META_MODEL_ID = '___PFAPI_META_MODEL___';
+export class PFMetaModelCtrl {
+  static readonly META_MODEL_ID = '___PF_META_MODEL___';
 
-  private _db: PFAPIDatabase;
-  private _metaModel: PFAPIMetaFileContent;
+  private _db: PFDatabase;
+  private _metaModel: PFMetaFileContent;
 
-  constructor(db: PFAPIDatabase) {
+  constructor(db: PFDatabase) {
     this._db = db;
   }
 
-  onModelSave(modelCfg: PFAPIModelCfg<unknown>): Promise<unknown> {
+  onModelSave(modelCfg: PFModelCfg<unknown>): Promise<unknown> {
     const timestamp = Date.now();
     return this._update({
       lastLocalSyncModelUpdate: timestamp,
     });
   }
 
-  private async _update(
-    metaModelUpdate: Partial<PFAPIMetaFileContent>,
-  ): Promise<unknown> {
+  private async _update(metaModelUpdate: Partial<PFMetaFileContent>): Promise<unknown> {
     this._metaModel = {
       ...(await this._load()),
       ...metaModelUpdate,
@@ -28,17 +26,15 @@ export class PFAPIMetaModelCtrl {
     return this._save(this._metaModel);
   }
 
-  private _save(metaMode: PFAPIMetaFileContent): Promise<unknown> {
+  private _save(metaMode: PFMetaFileContent): Promise<unknown> {
     this._metaModel = metaMode;
-    return this._db.save(PFAPIMetaModelCtrl.META_MODEL_ID, {});
+    return this._db.save(PFMetaModelCtrl.META_MODEL_ID, {});
   }
 
-  private async _load(): Promise<PFAPIMetaFileContent> {
+  private async _load(): Promise<PFMetaFileContent> {
     return (
       this._metaModel ||
-      ((await this._db.load(
-        PFAPIMetaModelCtrl.META_MODEL_ID,
-      )) as Promise<PFAPIMetaFileContent>)
+      ((await this._db.load(PFMetaModelCtrl.META_MODEL_ID)) as Promise<PFMetaFileContent>)
     );
   }
 }

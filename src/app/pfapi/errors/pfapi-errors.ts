@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPIAuthFailError extends Error {
+export class PFAuthFailError extends Error {
   constructor(
     message: string,
     public statusCode: number,
@@ -10,7 +10,7 @@ export class PFAPIAuthFailError extends Error {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPIHttpError extends Error {
+export class PFHttpError extends Error {
   constructor(
     message: string,
     public statusCode: number,
@@ -21,7 +21,7 @@ export class PFAPIHttpError extends Error {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAPINoDataError extends Error {
+export class PFNoDataError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'NoDataError';

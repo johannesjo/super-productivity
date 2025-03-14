@@ -1,4 +1,4 @@
-export interface PFAPIDatabaseAdapter {
+export interface PFDatabaseAdapter {
   init(): Promise<unknown>;
 
   teardown(): Promise<void>;

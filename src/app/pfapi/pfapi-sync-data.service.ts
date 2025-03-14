@@ -1,16 +1,16 @@
 import { PfapiModelCfgToModelCtrl } from './pfapi';
-import { PFAPIModelCfgs } from './pfapi.model';
-import { PFAPIModelCtrl } from './pfapi-model-ctrl';
+import { PFModelCfgs } from './pfapi.model';
+import { PFModelCtrl } from './pfapi-model-ctrl';
 
-interface PFAPIGroupMap {
-  [groupId: string]: PFAPIModelCtrl<unknown>[]; // modelIds
+interface PFGroupMap {
+  [groupId: string]: PFModelCtrl<unknown>[]; // modelIds
 }
 
-export class PFAPISyncDataService<const MD extends PFAPIModelCfgs> {
+export class PFSyncDataService<const MD extends PFModelCfgs> {
   public readonly m: PfapiModelCfgToModelCtrl<MD>;
 
-  private _groupMap: PFAPIGroupMap;
-  private _singleModels: PFAPIModelCtrl<unknown>[];
+  private _groupMap: PFGroupMap;
+  private _singleModels: PFModelCtrl<unknown>[];
 
   constructor(m: PfapiModelCfgToModelCtrl<MD>) {
     this.m = m;
@@ -32,11 +32,11 @@ export class PFAPISyncDataService<const MD extends PFAPIModelCfgs> {
   // TODO migrations
 
   private _getModelGroups(): {
-    groups: PFAPIGroupMap;
-    singleModels: PFAPIModelCtrl<unknown>[];
+    groups: PFGroupMap;
+    singleModels: PFModelCtrl<unknown>[];
   } {
-    const groupMap: PFAPIGroupMap = {};
-    const singleModels: PFAPIModelCtrl<unknown>[] = [];
+    const groupMap: PFGroupMap = {};
+    const singleModels: PFModelCtrl<unknown>[] = [];
     Object.keys(this.m).map((modelId) => {
       const entry = this.m[modelId];
       if (entry.modelCfg.modelFileGroup) {

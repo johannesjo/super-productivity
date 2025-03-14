@@ -1,11 +1,11 @@
-import { PFAPIDatabaseAdapter } from './pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './pfapi-database-adapter.model';
 
-export class PFAPIDatabase {
+export class PFDatabase {
   private _lastParams?: { a: string; key?: string; data?: unknown };
-  private _adapter: PFAPIDatabaseAdapter;
+  private _adapter: PFDatabaseAdapter;
   private _onError: (e: Error) => void;
 
-  constructor(cfg: { onError: (e: Error) => void; adapter: PFAPIDatabaseAdapter }) {
+  constructor(cfg: { onError: (e: Error) => void; adapter: PFDatabaseAdapter }) {
     this._adapter = cfg.adapter;
     this._onError = cfg.onError;
     this._init().then();
@@ -16,7 +16,7 @@ export class PFAPIDatabase {
     try {
       return await this._adapter.load(key);
     } catch (e) {
-      console.warn('PFAPI.DB Load Error: Last Params,', this._lastParams);
+      console.warn('PF.DB Load Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.load, [key]);
     }
   }
@@ -28,7 +28,7 @@ export class PFAPIDatabase {
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      console.warn('PFAPI.DB Save Error: Last Params,', this._lastParams);
+      console.warn('PF.DB Save Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.save, [key, data]);
     }
   }
@@ -38,7 +38,7 @@ export class PFAPIDatabase {
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      console.warn('PFAPI.DB Remove Error: Last Params,', this._lastParams);
+      console.warn('PF.DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.remove, [key]);
     }
   }
@@ -48,7 +48,7 @@ export class PFAPIDatabase {
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      console.warn('PFAPI.DB Clear Error: Last Params,', this._lastParams);
+      console.warn('PF.DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.clearDatabase, []);
     }
   }
@@ -60,7 +60,7 @@ export class PFAPIDatabase {
       console.error('Database initialization failed');
       console.error('_lastParams', this._lastParams);
       console.error(e);
-      alert('PFAPI.DB INIT Error');
+      alert('PF.DB INIT Error');
       throw new Error(e as any);
     }
   }

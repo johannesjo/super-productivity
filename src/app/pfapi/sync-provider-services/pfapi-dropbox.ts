@@ -1,1 +1,1 @@
-export class PFAPIDropbox {}
+export class PFDropbox {}

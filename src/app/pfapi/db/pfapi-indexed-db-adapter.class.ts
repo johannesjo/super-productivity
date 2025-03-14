@@ -2,13 +2,13 @@ import { IDBPDatabase } from 'idb/build';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
-import { PFAPIDatabaseAdapter } from './pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './pfapi-database-adapter.model';
 
 interface MyDb extends DBSchema {
   [key: string]: any;
 }
 
-export class PFAPIIndexedDbAdapter implements PFAPIDatabaseAdapter {
+export class PFIndexedDbAdapter implements PFDatabaseAdapter {
   private _db?: IDBPDatabase<MyDb>;
   private _isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private _afterReady$: Observable<boolean> = this._isReady$.pipe(
