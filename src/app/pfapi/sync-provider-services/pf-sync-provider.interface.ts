@@ -1,31 +1,37 @@
 import { PFSyncProviderId } from '../pf.model';
-import { PFAuthFailError, PFHttpError } from '../errors/pf-errors';
 
-export type PFRequestResult<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };
+export interface PFSyncProviderAuthHelper {
+  authUrl?: string;
+  codeVerifier?: string;
+}
 
-export type PFCommonRequestErrors = PFAuthFailError | PFHttpError;
-
-export interface PFSyncProviderServiceInterface {
+export interface PFSyncProviderServiceInterface<C> {
   id: PFSyncProviderId;
-  isReady: boolean;
   isUploadForcePossible?: boolean;
 
   getFileRevAndLastClientUpdate(
     targetPath: string,
     localRev: string | null,
-  ): Promise<PFRequestResult<{ rev: string }, PFCommonRequestErrors>>;
+  ): Promise<{ rev: string }>;
 
   uploadFileData(
     targetPath: string,
     dataStr: string,
     localRev: string | null,
     isForceOverwrite?: boolean,
-  ): Promise<PFRequestResult<{ rev: string }, PFCommonRequestErrors>>;
+  ): Promise<{ rev: string }>;
 
   downloadFileData(
     targetPath: string,
     localRev: string | null,
-  ): Promise<PFRequestResult<{ rev: string; dataStr: string }, PFCommonRequestErrors>>;
+  ): Promise<{ rev: string; dataStr: string }>;
+
+  // createFolder(targetPath: string): Promise<void>;
+
+  // Auth
+  isReady(): Promise<boolean>;
+
+  getAuthHelper?(): Promise<PFSyncProviderAuthHelper>;
+
+  setCredentials(credentials: C): Promise<void>;
 }

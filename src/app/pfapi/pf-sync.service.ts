@@ -1,13 +1,8 @@
-import {
-  PFBaseCfg,
-  PFMetaFileContent,
-  PFModelCfgs,
-  PFRevMap,
-  PFSyncProviderServiceInterface,
-} from './pf.model';
+import { PFBaseCfg, PFMetaFileContent, PFModelCfgs, PFRevMap } from './pf.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { PFSyncDataService } from './pf-sync-data.service';
+import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
 
 enum PFSyncStatus {
   InSync = 'InSync',
@@ -27,14 +22,16 @@ enum PFError {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFSyncService<const MD extends PFModelCfgs> {
   private _cfg$: Observable<PFBaseCfg>;
-  private _currentSyncProvider$: Observable<PFSyncProviderServiceInterface | null>;
+  private _currentSyncProvider$: Observable<PFSyncProviderServiceInterface<unknown> | null>;
   // TODO
-  private _currentSyncProviderOrError$: Observable<PFSyncProviderServiceInterface>;
+  private _currentSyncProviderOrError$: Observable<
+    PFSyncProviderServiceInterface<unknown>
+  >;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
   constructor(
     cfg$: Observable<PFBaseCfg>,
-    _currentSyncProvider$: Observable<PFSyncProviderServiceInterface>,
+    _currentSyncProvider$: Observable<PFSyncProviderServiceInterface<unknown>>,
     _pfSyncDataService: PFSyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
@@ -201,7 +198,7 @@ Offer to use remote or local (always create local backup before this)
     // TODO
     // this._deCompressAndDecryptData(data)
     // TODO
-    return syncProvider.uploadFileData(target, '', '', true);
+    return (await syncProvider.uploadFileData(target, '', '', true)).rev;
   }
 
   private async _getModelsGroupIdsToUpdate(

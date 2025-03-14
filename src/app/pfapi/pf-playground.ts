@@ -1,6 +1,8 @@
 import { PF } from './pf';
 import { PFModelCfg } from './pf.model';
 import { PFModelCtrl } from './pf-model-ctrl';
+import { PFDropbox } from './sync-provider-services/pf-dropbox';
+import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 
 interface MyModel {
   id: string;
@@ -28,7 +30,13 @@ const modelCfgs: ModelCfgs = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const pf = new PF(modelCfgs);
+const pf = new PF(modelCfgs, {});
+pf.setActiveProvider(
+  new PFDropbox({
+    appKey: DROPBOX_APP_KEY,
+  }),
+);
+
 const _typeCheck: PFModelCtrl<MyModel> = {} as typeof pf.m.m1;
 console.log(_typeCheck);
 

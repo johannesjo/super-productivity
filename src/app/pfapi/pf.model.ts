@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-import { SyncGetRevResult } from '../imex/sync/sync.model';
 import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
 
 // TODO limit T to object or array
@@ -63,30 +61,3 @@ export enum PFSyncProviderId {
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
 }
-
-export interface PFSyncProviderServiceInterface {
-  id: PFSyncProviderId;
-  isUploadForcePossible?: boolean;
-  isReady$: Observable<boolean>;
-
-  getFileRevAndLastClientUpdate(
-    target: string,
-    localRev: string | null,
-    // TODO maybe remove clientUpdate
-  ): Promise<{ rev: string; clientUpdate?: number } | SyncGetRevResult>;
-
-  uploadFileData(
-    syncTarget: string,
-    dataStr: string,
-    localRev: string | null,
-    isForceOverwrite?: boolean,
-  ): Promise<string | Error>;
-
-  downloadFileData(
-    syncTarget: string,
-    // TODO maybe remove localRev
-    localRev: string | null,
-  ): Promise<{ rev: string; dataStr: string }>;
-}
-
-export type PFSyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
