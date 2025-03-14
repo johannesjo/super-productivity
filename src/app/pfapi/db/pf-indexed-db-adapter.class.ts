@@ -2,7 +2,7 @@ import { IDBPDatabase } from 'idb/build';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
-import { PFDatabaseAdapter } from './pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './pf-database-adapter.model';
 
 interface MyDb extends DBSchema {
   [key: string]: any;

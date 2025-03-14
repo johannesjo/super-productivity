@@ -4,10 +4,10 @@ import {
   PFModelCfgs,
   PFRevMap,
   PFSyncProviderServiceInterface,
-} from './pfapi.model';
+} from './pf.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { PFSyncDataService } from './pfapi-sync-data.service';
+import { PFSyncDataService } from './pf-sync-data.service';
 
 enum PFSyncStatus {
   InSync = 'InSync',
@@ -30,16 +30,16 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   private _currentSyncProvider$: Observable<PFSyncProviderServiceInterface | null>;
   // TODO
   private _currentSyncProviderOrError$: Observable<PFSyncProviderServiceInterface>;
-  private readonly _pfapiSyncDataService: PFSyncDataService<MD>;
+  private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
   constructor(
     cfg$: Observable<PFBaseCfg>,
     _currentSyncProvider$: Observable<PFSyncProviderServiceInterface>,
-    _pfapiSyncDataService: PFSyncDataService<MD>,
+    _pfSyncDataService: PFSyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
-    this._pfapiSyncDataService = _pfapiSyncDataService;
+    this._pfSyncDataService = _pfSyncDataService;
   }
 
   async sync(): Promise<PFSyncStatus | any> {

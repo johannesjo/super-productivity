@@ -3,14 +3,14 @@ import {
   PFModelCfg,
   PFModelCfgs,
   PFSyncProviderServiceInterface,
-} from './pfapi.model';
-import { PFSyncService } from './pfapi-sync.service';
+} from './pf.model';
+import { PFSyncService } from './pf-sync.service';
 import { BehaviorSubject } from 'rxjs';
-import { PFDatabase } from './db/pfapi-database.class';
-import { PFIndexedDbAdapter } from './db/pfapi-indexed-db-adapter.class';
-import { PFMetaModelCtrl } from './pfapi-meta-model-ctrl';
-import { PFModelCtrl } from './pfapi-model-ctrl';
-import { PFSyncDataService } from './pfapi-sync-data.service';
+import { PFDatabase } from './db/pf-database.class';
+import { PFIndexedDbAdapter } from './db/pf-indexed-db-adapter.class';
+import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
+import { PFModelCtrl } from './pf-model-ctrl';
+import { PFSyncDataService } from './pf-sync-data.service';
 
 type ExtractPFModelCfgType<T extends PFModelCfg<unknown>> =
   T extends PFModelCfg<infer U> ? U : never;
@@ -27,8 +27,8 @@ export class PF<const MD extends PFModelCfgs> {
     new BehaviorSubject<PFSyncProviderServiceInterface | null>(null);
   private readonly _cfg$: BehaviorSubject<PFBaseCfg>;
   private readonly _db: PFDatabase;
-  private readonly _pfapiSyncService: PFSyncService<MD>;
-  private readonly _pfapiSyncDataService: PFSyncDataService<MD>;
+  private readonly _pfSyncService: PFSyncService<MD>;
+  private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
   public readonly metaModel: PFMetaModelCtrl;
   public readonly m: PfapiModelCfgToModelCtrl<MD>;
@@ -46,7 +46,7 @@ export class PF<const MD extends PFModelCfgs> {
       adapter:
         cfg.dbAdapter ||
         new PFIndexedDbAdapter({
-          dbName: 'pfapi',
+          dbName: 'pf',
           dbMainName: 'main',
           version: 1,
         }),
@@ -55,11 +55,11 @@ export class PF<const MD extends PFModelCfgs> {
     this.metaModel = new PFMetaModelCtrl(this._db);
     this.m = this._createModels(modelCfgs);
 
-    this._pfapiSyncDataService = new PFSyncDataService<MD>(this.m);
-    this._pfapiSyncService = new PFSyncService<MD>(
+    this._pfSyncDataService = new PFSyncDataService<MD>(this.m);
+    this._pfSyncService = new PFSyncService<MD>(
       this._cfg$,
       this._currentSyncProvider$,
-      this._pfapiSyncDataService,
+      this._pfSyncDataService,
     );
   }
 
@@ -73,7 +73,7 @@ export class PF<const MD extends PFModelCfgs> {
 
   // TODO type
   sync(): Promise<unknown> {
-    return this._pfapiSyncService.sync();
+    return this._pfSyncService.sync();
   }
 
   pause(): void {}

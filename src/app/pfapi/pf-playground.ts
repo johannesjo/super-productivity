@@ -1,6 +1,6 @@
-import { PF } from './pfapi';
-import { PFModelCfg } from './pfapi.model';
-import { PFModelCtrl } from './pfapi-model-ctrl';
+import { PF } from './pf';
+import { PFModelCfg } from './pf.model';
+import { PFModelCtrl } from './pf-model-ctrl';
 
 interface MyModel {
   id: string;
@@ -28,16 +28,16 @@ const modelCfgs: ModelCfgs = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const pfapi = new PF(modelCfgs);
-const _typeCheck: PFModelCtrl<MyModel> = {} as typeof pfapi.m.m1;
+const pf = new PF(modelCfgs);
+const _typeCheck: PFModelCtrl<MyModel> = {} as typeof pf.m.m1;
 console.log(_typeCheck);
 
 // SHOULD WORK => this should work (and it does)
-console.log(pfapi.m.m1.save({ id: 'AA', name: 'test', age: 10 }));
-console.log(pfapi.m.m2.save({ fooo: true }));
+console.log(pf.m.m1.save({ id: 'AA', name: 'test', age: 10 }));
+console.log(pf.m.m2.save({ fooo: true }));
 
 // EXPECT ERROR => this should error (and it does NOT)
 // console.log(
-//   pfapi.m.m1.save({ id: 'AA', name: 'test', age: 10, fooo: true, additional: 'aaa' }),
+//   pf.m.m1.save({ id: 'AA', name: 'test', age: 10, fooo: true, additional: 'aaa' }),
 // );
-// console.log(pfapi.m.m2.save({ id: 'xx', name: 'test', age: 10 }));
+// console.log(pf.m.m2.save({ id: 'xx', name: 'test', age: 10 }));

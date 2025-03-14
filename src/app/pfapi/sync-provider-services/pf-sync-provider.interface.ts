@@ -1,5 +1,5 @@
-import { PFSyncProviderId } from '../pfapi.model';
-import { PFAuthFailError, PFHttpError } from '../errors/pfapi-errors';
+import { PFSyncProviderId } from '../pf.model';
+import { PFAuthFailError, PFHttpError } from '../errors/pf-errors';
 
 export type PFRequestResult<T, E = Error> =
   | { success: true; data: T }

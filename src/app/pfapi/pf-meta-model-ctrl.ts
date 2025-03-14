@@ -1,5 +1,5 @@
-import { PFDatabase } from './db/pfapi-database.class';
-import { PFMetaFileContent, PFModelCfg } from './pfapi.model';
+import { PFDatabase } from './db/pf-database.class';
+import { PFMetaFileContent, PFModelCfg } from './pf.model';
 
 export class PFMetaModelCtrl {
   static readonly META_MODEL_ID = '___PF_META_MODEL___';

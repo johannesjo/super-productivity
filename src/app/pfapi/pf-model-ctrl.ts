@@ -1,7 +1,7 @@
-import { PFModelCfg } from './pfapi.model';
-import { PFDatabase } from './db/pfapi-database.class';
-import { PFMetaModelCtrl } from './pfapi-meta-model-ctrl';
-import { pfapiLog } from './pfapi-log';
+import { PFModelCfg } from './pf.model';
+import { PFDatabase } from './db/pf-database.class';
+import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
+import { pfLog } from './pf-log';
 
 // type ExtractPFModelCfgType<T extends PFModelCfg<unknown>> =
 //   T extends PFModelCfg<infer U> ? U : never;
@@ -28,7 +28,7 @@ export class PFModelCtrl<MT> {
 
   save(data: MT): Promise<unknown> {
     this._inMemoryData = data;
-    pfapiLog('PFModelCtrl.save', this.modelId, data);
+    pfLog('PFModelCtrl.save', this.modelId, data);
     return Promise.all([
       this._metaModel.onModelSave(this.modelCfg),
       this._db.save(this.modelId, data),
@@ -47,7 +47,7 @@ export class PFModelCtrl<MT> {
   }
 
   async load(): Promise<MT> {
-    pfapiLog('PFModelCtrl.load', this._inMemoryData);
+    pfLog('PFModelCtrl.load', this._inMemoryData);
     return this._inMemoryData || ((await this._db.load(this.modelId)) as Promise<MT>);
   }
 }

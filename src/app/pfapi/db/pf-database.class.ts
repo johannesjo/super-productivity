@@ -1,4 +1,4 @@
-import { PFDatabaseAdapter } from './pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './pf-database-adapter.model';
 
 export class PFDatabase {
   private _lastParams?: { a: string; key?: string; data?: unknown };

@@ -1,6 +1,6 @@
-import { PfapiModelCfgToModelCtrl } from './pfapi';
-import { PFModelCfgs } from './pfapi.model';
-import { PFModelCtrl } from './pfapi-model-ctrl';
+import { PfapiModelCfgToModelCtrl } from './pf';
+import { PFModelCfgs } from './pf.model';
+import { PFModelCtrl } from './pf-model-ctrl';
 
 interface PFGroupMap {
   [groupId: string]: PFModelCtrl<unknown>[]; // modelIds

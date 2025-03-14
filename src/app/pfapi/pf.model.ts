@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { SyncGetRevResult } from '../imex/sync/sync.model';
-import { PFDatabaseAdapter } from './db/pfapi-database-adapter.model';
+import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
 
 // TODO limit T to object or array
 export interface PFModelCfg<T> {
