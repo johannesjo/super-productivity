@@ -60,6 +60,7 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
       key: 'voice',
       type: 'select',
       templateOptions: {
+        // TODO translate
         label: 'Select a Voice',
         description: 'Choose a voice',
         required: false,
