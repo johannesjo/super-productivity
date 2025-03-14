@@ -49,9 +49,11 @@ assignees: ''
 
 <!--- For the desktop versions, there is also an error log file in case there is no console output.
 Usually, you can find it here:
-on Linux: ~/.config/superProductivity/logs/main.log
 on macOS: ~/Library/Logs/superProductivity/main.log
 on Windows: %USERPROFILE%\AppData\Roaming\superProductivity\logs\main.log
+on Linux: ~/.config/superProductivity/logs/main.log
+on Linux (snap): ~/snap/superproductivity/common/.config/superProductivity/logs
+on Linux (flatpak): ~/.var/app/com.super_productivity/SuperProductivity/config/superProductivity/logs
 
 If you don't feel comfortable posting your logs here in public you can also send to me via email: contact@super-productivity.com
 . -->
