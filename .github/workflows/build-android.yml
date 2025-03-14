@@ -54,6 +54,13 @@ jobs:
         run: |
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
+      - name: DEBUG
+        run: |
+          ls -la android/app/build/outputs
+          ls -la android/app/build/outputs/apk
+          ls -la android/app/build/outputs/apk/play
+          ls -la android/app/build/outputs/apk/play/release
+
       - name: Sign APK
         run: |
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
