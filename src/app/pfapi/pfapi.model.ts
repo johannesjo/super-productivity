@@ -88,3 +88,5 @@ export interface PFAPISyncProviderServiceInterface {
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string }>;
 }
+
+export type PFAPISyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
