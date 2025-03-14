@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Накладання фокуса"
       },
       "BACK_TO_PLANNING": "Повернутись до планування",
-      "CANCEL_FOCUS_SESSION": "Скасувати сеанс фокусування",
       "CONGRATS": "Вітаємо з завершенням цього сеансу!",
       "CONTINUE_FOCUS_SESSION": "Продовжити сеанс фокусування",
       "COUNTDOWN": "Відлік",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Показати/приховати нотатки та вкладення завдання",
       "START_FOCUS_SESSION": "Розпочати сеанс фокусування",
       "START_NEXT_FOCUS_SESSION": "Розпочати наступний сеанс фокусування",
-      "WORKED_FOR": "Ви працювали протягом"
+      "WORKED_FOR": "Ви працювали протягом",
+      "CANCEL_FOCUS_SESSION": "Скасувати сеанс фокусування"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

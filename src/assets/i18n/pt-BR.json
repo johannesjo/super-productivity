@@ -161,7 +161,6 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Voltar ao Planejamento",
-      "CANCEL_FOCUS_SESSION": "Cancelar sessão de foco",
       "CONGRATS": "Parabéns por concluir esta sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar a sessão de foco",
       "FINISH_TASK_AND_SELECT_NEXT": "Conclua a tarefa e selecione a próxima",
@@ -183,7 +182,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas de tarefas e anexos",
       "START_FOCUS_SESSION": "Iniciar sessão de foco",
       "START_NEXT_FOCUS_SESSION": "Iniciar próxima sessão de foco",
-      "WORKED_FOR": "Você trabalhou por"
+      "WORKED_FOR": "Você trabalhou por",
+      "CANCEL_FOCUS_SESSION": "Cancelar sessão de foco"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

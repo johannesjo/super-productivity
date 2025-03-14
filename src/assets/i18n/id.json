@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Untuk Overlay Fokus"
       },
       "BACK_TO_PLANNING": "Kembali ke Perencanaan",
-      "CANCEL_FOCUS_SESSION": "Membatalkan Sesi Fokus",
       "CONGRATS": "Selamat karena telah menyelesaikan sesi ini!",
       "CONTINUE_FOCUS_SESSION": "Lanjutkan Sesi Fokus",
       "COUNTDOWN": "Hitung mundur",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Menampilkan/menyembunyikan catatan tugas dan lampiran",
       "START_FOCUS_SESSION": "Mulai Sesi Fokus",
       "START_NEXT_FOCUS_SESSION": "Mulai Sesi Fokus berikutnya",
-      "WORKED_FOR": "Anda bekerja untuk"
+      "WORKED_FOR": "Anda bekerja untuk",
+      "CANCEL_FOCUS_SESSION": "Membatalkan Sesi Fokus"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
