@@ -61,7 +61,7 @@ jobs:
             -keystore keystore.jks \
             -storepass ${{ secrets.DROID_KEYSTORE_PASSWORD }} \
             -keypass ${{ secrets.DROID_KEY_PASSWORD }} \
-            android/app/build/outputs/apk/play/release/app-release-unsigned.apk \
+            android/app/build/outputs/apk/play/release/app-play-release-unsigned.apk \
             ${{ secrets.DROID_KEYSTORE_ALIAS }}
 
       - name: Build
