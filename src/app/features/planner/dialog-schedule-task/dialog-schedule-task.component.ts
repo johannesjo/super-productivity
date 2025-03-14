@@ -344,6 +344,17 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
             extra: await this._plannerService.getSnackExtraStr(newDay),
           },
         });
+      } else if (this.data.task.plannedAt && !this.selectedTime) {
+        // time was removed for today task case
+        this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+          translateParams: {
+            date: formattedDate,
+            extra: await this._plannerService.getSnackExtraStr(newDay),
+          },
+        });
       } else {
         this._snackService.open({
           type: 'CUSTOM',
