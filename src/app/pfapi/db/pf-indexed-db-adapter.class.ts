@@ -1,8 +1,7 @@
 import { IDBPDatabase } from 'idb/build';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { PFDatabaseAdapter } from './pf-database-adapter.model';
+import { MiniObservable } from '../util/mini-observable';
 
 interface MyDb extends DBSchema {
   [key: string]: any;
@@ -10,11 +9,7 @@ interface MyDb extends DBSchema {
 
 export class PFIndexedDbAdapter implements PFDatabaseAdapter {
   private _db?: IDBPDatabase<MyDb>;
-  private _isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private _afterReady$: Observable<boolean> = this._isReady$.pipe(
-    filter((isReady) => isReady),
-    shareReplay(1),
-  );
+  private _isReady$: MiniObservable<boolean> = new MiniObservable<boolean>(false);
 
   private _dbName: string;
   private _dbMainName: string;
@@ -81,12 +76,17 @@ export class PFIndexedDbAdapter implements PFDatabaseAdapter {
     return await (this._db as IDBPDatabase<MyDb>).clear(this._dbMainName);
   }
 
-  private async _afterReady(): Promise<boolean> {
-    try {
-      return await this._afterReady$.pipe(take(1)).toPromise();
-    } catch (e) {
-      console.warn('DB After Ready Error: Last Params');
-      throw new Error(e as string);
+  private async _afterReady(): Promise<void> {
+    if (this._isReady$.value) {
+      return;
     }
+    return new Promise<void>((resolve) => {
+      const unsubscribe = this._isReady$.subscribe((isReady) => {
+        if (isReady) {
+          resolve();
+          unsubscribe();
+        }
+      });
+    });
   }
 }

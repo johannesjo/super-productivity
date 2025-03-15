@@ -6,12 +6,12 @@ import {
   PFSyncProviderServiceInterface,
 } from './pf.model';
 import { PFSyncService } from './pf-sync.service';
-import { BehaviorSubject } from 'rxjs';
 import { PFDatabase } from './db/pf-database.class';
 import { PFIndexedDbAdapter } from './db/pf-indexed-db-adapter.class';
 import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
 import { PFModelCtrl } from './pf-model-ctrl';
 import { PFSyncDataService } from './pf-sync-data.service';
+import { MiniObservable } from './util/mini-observable';
 
 type ExtractPFModelCfgType<T extends PFModelCfg<PFModelBase>> =
   T extends PFModelCfg<infer U> ? U : never;
@@ -33,8 +33,8 @@ export class PF<const MD extends PFModelCfgs> {
   private static _wasInstanceCreated = false;
 
   private readonly _currentSyncProvider$ =
-    new BehaviorSubject<PFSyncProviderServiceInterface | null>(null);
-  private readonly _cfg$: BehaviorSubject<PFBaseCfg>;
+    new MiniObservable<PFSyncProviderServiceInterface | null>(null);
+  private readonly _cfg$: MiniObservable<PFBaseCfg>;
   private readonly _db: PFDatabase;
   private readonly _pfSyncService: PFSyncService<MD>;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
@@ -52,7 +52,7 @@ export class PF<const MD extends PFModelCfgs> {
     }
     PF._wasInstanceCreated = true;
 
-    this._cfg$ = new BehaviorSubject(cfg || null);
+    this._cfg$ = new MiniObservable(cfg || null);
 
     this._db = new PFDatabase({
       onError: cfg.onDbError,
@@ -65,7 +65,7 @@ export class PF<const MD extends PFModelCfgs> {
         }),
     });
 
-    this.metaModel = new PFMetaModelCtrl(this._db);
+    this.metaModel = new PFMetaModelCtrl(this._db, this._cfg$);
     this.m = this._createModels(modelCfgs);
 
     this._pfSyncDataService = new PFSyncDataService<MD>(this.m);
@@ -129,7 +129,7 @@ export class PF<const MD extends PFModelCfgs> {
    */
   // TODO think about this
   public updateCfg(cfg: Partial<PFBaseCfg>): void {
-    const currentCfg = this._cfg$.getValue();
+    const currentCfg = this._cfg$.value;
     const newCfg = { ...currentCfg, ...cfg };
     this._cfg$.next(newCfg);
   }

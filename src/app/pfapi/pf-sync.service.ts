@@ -1,8 +1,7 @@
 import { PFBaseCfg, PFMetaFileContent, PFModelCfgs, PFRevMap } from './pf.model';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { PFSyncDataService } from './pf-sync-data.service';
 import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
+import { MiniObservable } from './util/mini-observable';
 
 enum PFSyncStatus {
   InSync = 'InSync',
@@ -21,17 +20,17 @@ enum PFError {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFSyncService<const MD extends PFModelCfgs> {
-  private _cfg$: Observable<PFBaseCfg>;
-  private _currentSyncProvider$: Observable<PFSyncProviderServiceInterface<unknown> | null>;
+  private _cfg$: MiniObservable<PFBaseCfg>;
+  private _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>;
   // TODO
-  private _currentSyncProviderOrError$: Observable<
+  private _currentSyncProviderOrError$: MiniObservable<
     PFSyncProviderServiceInterface<unknown>
   >;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
   constructor(
-    cfg$: Observable<PFBaseCfg>,
-    _currentSyncProvider$: Observable<PFSyncProviderServiceInterface<unknown>>,
+    cfg$: MiniObservable<PFBaseCfg>,
+    _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown>>,
     _pfSyncDataService: PFSyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
@@ -111,6 +110,8 @@ Offer to use remote or local (always create local backup before this)
       lastLocalSyncModelUpdate: remoteMetaFileContent.lastLocalSyncModelUpdate,
       metaRev: remoteMetaFileContent.metaRev,
       revMap: remoteMetaFileContent.revMap,
+      modelVersions: remoteMetaFileContent.modelVersions,
+      crossModelVersion: remoteMetaFileContent.crossModelVersion,
     });
   }
 
@@ -145,6 +146,8 @@ Offer to use remote or local (always create local backup before this)
       lastLocalSyncModelUpdate: remoteMetaFileContent.lastLocalSyncModelUpdate,
       metaRev: remoteMetaFileContent.metaRev,
       revMap: remoteMetaFileContent.revMap,
+      modelVersions: remoteMetaFileContent.modelVersions,
+      crossModelVersion: remoteMetaFileContent.crossModelVersion,
     });
   }
 
@@ -153,13 +156,19 @@ Offer to use remote or local (always create local backup before this)
     return true;
   }
 
+  private _getCurrentSyncProviderOrError(): PFSyncProviderServiceInterface<unknown> {
+    const provider = this._currentSyncProvider$.value;
+    if (!provider) {
+      throw new Error('No sync provider set');
+    }
+    return provider;
+  }
+
   private async _downloadModelGroup(
     groupId: string,
     expectedRev?: string,
   ): Promise<string | Error> {
-    const syncProvider = await this._currentSyncProviderOrError$
-      .pipe(first())
-      .toPromise();
+    const syncProvider = this._getCurrentSyncProviderOrError();
     if (expectedRev) {
       const revResult = await syncProvider.getFileRevAndLastClientUpdate(
         groupId,
@@ -192,9 +201,8 @@ Offer to use remote or local (always create local backup before this)
 
   private async _uploadModelGroup(groupId: string, data: any): Promise<string | Error> {
     const target = this._getRemoteFilePathForGroupId(groupId);
-    const syncProvider = await this._currentSyncProviderOrError$
-      .pipe(first())
-      .toPromise();
+    const syncProvider = this._getCurrentSyncProviderOrError();
+
     // TODO
     // this._deCompressAndDecryptData(data)
     // TODO

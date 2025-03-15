@@ -1,39 +1,50 @@
 import { PFDatabase } from './db/pf-database.class';
-import { PFMetaFileContent, PFModelBase, PFModelCfg } from './pf.model';
+import { PFBaseCfg, PFMetaFileContent, PFModelBase, PFModelCfg } from './pf.model';
+import { MiniObservable } from './util/mini-observable';
+
+const DEFAULT_META_MODEL: PFMetaFileContent = {
+  crossModelVersion: 1,
+  revMap: {},
+  modelVersions: {},
+};
 
 export class PFMetaModelCtrl {
   static readonly META_MODEL_ID = '__PF_META_MODEL__';
 
-  private _db: PFDatabase;
-  private _metaModel: PFMetaFileContent;
+  private readonly _db: PFDatabase;
+  private readonly _cfg$: MiniObservable<PFBaseCfg>;
+  private _metaModelInMemory: PFMetaFileContent;
 
-  constructor(db: PFDatabase) {
+  constructor(db: PFDatabase, cfg$: MiniObservable<PFBaseCfg>) {
     this._db = db;
   }
 
   onModelSave(modelCfg: PFModelCfg<PFModelBase>): Promise<unknown> {
     const timestamp = Date.now();
+    if (modelCfg.isLocalOnly) {
+      return Promise.resolve();
+    }
     return this._update({
       lastLocalSyncModelUpdate: timestamp,
     });
   }
 
   private async _update(metaModelUpdate: Partial<PFMetaFileContent>): Promise<unknown> {
-    this._metaModel = {
+    this._metaModelInMemory = {
       ...(await this._load()),
       ...metaModelUpdate,
     };
-    return this._save(this._metaModel);
+    return this._save(this._metaModelInMemory);
   }
 
   private _save(metaModel: PFMetaFileContent): Promise<unknown> {
-    this._metaModel = metaModel;
+    this._metaModelInMemory = metaModel;
     return this._db.save(PFMetaModelCtrl.META_MODEL_ID, metaModel);
   }
 
   private async _load(): Promise<PFMetaFileContent> {
-    if (this._metaModel) {
-      return this._metaModel;
+    if (this._metaModelInMemory) {
+      return this._metaModelInMemory;
     }
 
     const data = (await this._db.load(
@@ -41,14 +52,11 @@ export class PFMetaModelCtrl {
     )) as PFMetaFileContent;
     // Initialize if not found
     if (!data) {
-      const defaultMeta: PFMetaFileContent = {
-        revMap: {},
-      };
-      this._metaModel = defaultMeta;
-      return defaultMeta;
+      this._metaModelInMemory = { ...DEFAULT_META_MODEL };
+      return this._metaModelInMemory;
     }
 
-    this._metaModel = data;
+    this._metaModelInMemory = data;
     return data;
   }
 }

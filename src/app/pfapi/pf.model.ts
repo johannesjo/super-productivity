@@ -12,8 +12,8 @@ type SerializableArray = Array<Serializable>;
 export type PFModelBase = SerializableObject | SerializableArray;
 
 export interface PFModelCfg<T extends PFModelBase> {
-  modelFileGroup?: string;
   modelVersion: number;
+  isLocalOnly?: boolean;
   migrations?: {
     [version: string]: (arg: T) => T;
   };
@@ -21,6 +21,7 @@ export interface PFModelCfg<T extends PFModelBase> {
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
   defaultData?: T;
+  modelFileGroup?: string;
 }
 
 // export type PFModelCfgs = readonly PFModelCfg<unknown>[];
@@ -53,12 +54,18 @@ export interface PFRevMap {
   [modelOrFileGroupId: string]: string;
 }
 
+export interface PFModelVersionMap {
+  [modelId: string]: string;
+}
+
 export interface PFMetaFileContent {
   lastLocalSyncModelUpdate?: number;
   lastSync?: number;
   metaRev?: string;
   // revision map
   revMap: PFRevMap;
+  crossModelVersion: number;
+  modelVersions: PFModelVersionMap;
 }
 
 export interface PFCompleteBackup {
