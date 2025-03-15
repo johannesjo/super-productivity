@@ -1,10 +1,4 @@
-import {
-  PFBaseCfg,
-  PFModelBase,
-  PFModelCfg,
-  PFModelCfgs,
-  PFSyncProviderServiceInterface,
-} from './pf.model';
+import { PFBaseCfg, PFModelBase, PFModelCfg, PFModelCfgs } from './pf.model';
 import { PFSyncService } from './pf-sync.service';
 import { PFDatabase } from './db/pf-database.class';
 import { PFIndexedDbAdapter } from './db/pf-indexed-db-adapter.class';
@@ -12,6 +6,7 @@ import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
 import { PFModelCtrl } from './pf-model-ctrl';
 import { PFSyncDataService } from './pf-sync-data.service';
 import { MiniObservable } from './util/mini-observable';
+import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
 
 type ExtractPFModelCfgType<T extends PFModelCfg<PFModelBase>> =
   T extends PFModelCfg<infer U> ? U : never;
@@ -33,7 +28,7 @@ export class PF<const MD extends PFModelCfgs> {
   private static _wasInstanceCreated = false;
 
   private readonly _currentSyncProvider$ =
-    new MiniObservable<PFSyncProviderServiceInterface | null>(null);
+    new MiniObservable<PFSyncProviderServiceInterface<unknown> | null>(null);
   private readonly _cfg$: MiniObservable<PFBaseCfg>;
   private readonly _db: PFDatabase;
   private readonly _pfSyncService: PFSyncService<MD>;
@@ -81,7 +76,7 @@ export class PF<const MD extends PFModelCfgs> {
     return this._pfSyncService.sync();
   }
 
-  setActiveProvider(activeProvider: PFSyncProviderServiceInterface): void {
+  setActiveProvider(activeProvider: PFSyncProviderServiceInterface<unknown>): void {
     this._currentSyncProvider$.next(activeProvider);
   }
 

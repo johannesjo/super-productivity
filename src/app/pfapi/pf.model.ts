@@ -20,6 +20,15 @@ export interface PFModelCfg<T extends PFModelBase> {
   // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
+
+  // MAYBE?
+  validate?: (data: any) => boolean;
+  repair?: (data: any) => T;
+
+  // MAYBE?
+  transformBeforeSave?: <I>(data: I) => T;
+  transformBeforeLoad?: <I>(data: T) => I;
+
   defaultData?: T;
   modelFileGroup?: string;
 }
@@ -44,9 +53,13 @@ export interface PFBaseCfg {
   crossModelMigrations?: {
     [version: string]: (arg: PFFullData<unknown>) => PFFullData<unknown>;
   };
+  validate?: (data: any) => boolean;
+  // TODO type
+  repair?: (data: any) => any;
+
   // TODO
   // backupInterval?: 'daily';
-  // isUseLockFile?: boolean;
+  // isUseLockFile?: boolean;PFBaseCfg
   // translateFN: (key)=> translate(key),
 }
 
