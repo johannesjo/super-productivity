@@ -19,14 +19,33 @@ export class PFMetaModelCtrl {
     this._db = db;
   }
 
-  onModelSave(modelCfg: PFModelCfg<PFModelBase>): Promise<unknown> {
+  async onModelSave(
+    modelId: string,
+    modelCfg: PFModelCfg<PFModelBase>,
+  ): Promise<unknown> {
     const timestamp = Date.now();
     if (modelCfg.isLocalOnly) {
       return Promise.resolve();
     }
+
     return this._update({
       lastLocalSyncModelUpdate: timestamp,
     });
+
+    // TODO this or other approach
+    // const isModelVersionChange =
+    //   this._metaModelInMemory.modelVersions[modelId] !== modelCfg.modelVersion;
+    // return this._update({
+    //   lastLocalSyncModelUpdate: timestamp,
+    //   ...(isModelVersionChange
+    //     ? {
+    //         modelVersions: {
+    //           ...(await this._load()).modelVersions,
+    //           [modelId]: modelCfg.modelVersion,
+    //         },
+    //       }
+    //     : {}),
+    // });
   }
 
   private async _update(metaModelUpdate: Partial<PFMetaFileContent>): Promise<unknown> {

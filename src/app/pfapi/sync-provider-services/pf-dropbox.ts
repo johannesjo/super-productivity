@@ -9,7 +9,7 @@ import {
   PFNoDataError,
   PFNoRevError,
 } from '../errors/pf-errors';
-import { pfLog } from '../pf-log';
+import { pfLog } from '../util/pf-log';
 import { PFDropboxApi } from './pf-dropbox-api';
 import { generatePKCECodes } from '../../imex/sync/generate-pkce-codes';
 

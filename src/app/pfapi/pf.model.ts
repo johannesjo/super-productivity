@@ -68,7 +68,7 @@ export interface PFRevMap {
 }
 
 export interface PFModelVersionMap {
-  [modelId: string]: string;
+  [modelId: string]: number;
 }
 
 export interface PFMetaFileContent {

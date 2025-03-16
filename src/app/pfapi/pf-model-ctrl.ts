@@ -1,7 +1,7 @@
 import { PFModelCfg, PFModelBase } from './pf.model';
 import { PFDatabase } from './db/pf-database.class';
 import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
-import { pfLog } from './pf-log';
+import { pfLog } from './util/pf-log';
 
 // type ExtractPFModelCfgType<T extends PFModelCfg<unknown>> =
 //   T extends PFModelCfg<infer U> ? U : never;
@@ -30,7 +30,7 @@ export class PFModelCtrl<MT extends PFModelBase> {
     this._inMemoryData = data;
     pfLog('PFModelCtrl.save', this.modelId, data);
     return Promise.all([
-      this._metaModel.onModelSave(this.modelCfg),
+      this._metaModel.onModelSave(this.modelId, this.modelCfg),
       this._db.save(this.modelId, data),
     ]);
   }
