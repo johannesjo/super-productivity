@@ -1,4 +1,4 @@
-import { PFSyncProviderId } from '../pf.model';
+import { PFSyncProviderId } from '../pf.const';
 
 export interface PFSyncProviderAuthHelper {
   authUrl?: string;

@@ -2,7 +2,7 @@ import {
   PFSyncProviderAuthHelper,
   PFSyncProviderServiceInterface,
 } from './pf-sync-provider.interface';
-import { PFSyncProviderId } from '../pf.model';
+import { PFSyncProviderId } from '../pf.const';
 import {
   PFAuthFailError,
   PFInvalidDataError,
@@ -11,6 +11,7 @@ import {
 } from '../errors/pf-errors';
 import { pfLog } from '../util/pf-log';
 import { PFDropboxApi } from './pf-dropbox-api';
+// TODO move over here
 import { generatePKCECodes } from '../../imex/sync/generate-pkce-codes';
 
 export interface PFDropboxCredentials {

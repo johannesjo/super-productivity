@@ -2,30 +2,36 @@ import { PFBaseCfg, PFMetaFileContent, PFModelCfgs, PFRevMap } from './pf.model'
 import { PFSyncDataService } from './pf-sync-data.service';
 import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
 import { MiniObservable } from './util/mini-observable';
+import { PFSyncStatus } from './pf.const';
+import { PFRevMismatchError } from './errors/pf-errors';
 
-enum PFSyncStatus {
-  InSync = 'InSync',
-  UpdateRemote = 'UpdateRemote',
-  UpdateLocal = 'UpdateLocal',
-  Conflict = 'Conflict',
-  IncompleteRemoteData = 'IncompleteRemoteData',
-  NotConfigured = 'NotConfigured',
-}
+/*
+(0. maybe write lock file)
+1. Download main file (if changed rev)
+2. Check updated timestamps for conflicts (=> on conflict check for incomplete data on remote)
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-enum PFError {
-  RevMismatch = 'RevMismatch',
-  // ...
-}
+A remote newer than local
+1. Check which revisions don't match the local version
+2. Download all files that don't match the local
+3. Do complete data import to Database
+4. update local revs and meta file data from remote
+5. inform about completion and pass back complete data to developer for import
+
+B local newer than remote
+1. Check which revisions don't match the local version
+2. Upload all files that don't match remote
+3. Update local meta and upload to remote
+4. inform about completion
+
+On Conflict:
+Offer to use remote or local (always create local backup before this)
+ */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFSyncService<const MD extends PFModelCfgs> {
   private _cfg$: MiniObservable<PFBaseCfg>;
   private _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>;
-  // TODO
-  private _currentSyncProviderOrError$: MiniObservable<
-    PFSyncProviderServiceInterface<unknown>
-  >;
+
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
   constructor(
@@ -39,29 +45,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   }
 
   async sync(): Promise<PFSyncStatus | any> {
-    /*
-    (0. maybe write lock file)
-    1. Download main file (if changed rev)
-    2. Check updated timestamps for conflicts (=> on conflict check for incomplete data on remote)
-
-    A remote newer than local
-    1. Check which revisions don't match the local version
-    2. Download all files that don't match the local
-    3. Do complete data import to Database
-    4. update local revs and meta file data from remote
-    5. inform about completion and pass back complete data to developer for import
-
-    B local newer than remote
-    1. Check which revisions don't match the local version
-    2. Upload all files that don't match remote
-    3. Update local meta and upload to remote
-    4. inform about completion
-
-On Conflict:
-Offer to use remote or local (always create local backup before this)
-     */
-
-    if (!this._isReadyForSync()) {
+    if (!(await this._isReadyForSync())) {
       return PFSyncStatus.NotConfigured;
     }
 
@@ -72,7 +56,9 @@ Offer to use remote or local (always create local backup before this)
       case PFSyncStatus.UpdateLocal:
         return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
       case PFSyncStatus.UpdateRemote:
+        return this._updateRemote(remoteMetaFileContent, localSyncMetaData);
       case PFSyncStatus.Conflict:
+      // TODO
       case PFSyncStatus.InSync:
         return PFSyncStatus.InSync;
     }
@@ -83,17 +69,17 @@ Offer to use remote or local (always create local backup before this)
     localSyncMetaData: PFMetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
+    const { toUpdate, toDelete } = await this._getModelIdsToUpdate(
       remoteMetaFileContent.revMap,
       localSyncMetaData.revMap,
     );
     const realRevMap: PFRevMap = {};
     await Promise.all(
-      toUpdate.map((groupId) =>
+      toUpdate.map((modelId) =>
         // TODO properly create rev map
-        this._downloadModelGroup(groupId).then((rev) => {
+        this._downloadModel(modelId).then((rev) => {
           if (typeof rev === 'string') {
-            realRevMap[groupId] = rev;
+            realRevMap[modelId] = rev;
           }
         }),
       ),
@@ -120,7 +106,7 @@ Offer to use remote or local (always create local backup before this)
     localSyncMetaData: PFMetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { toUpdate, toDelete } = await this._getModelsGroupIdsToUpdate(
+    const { toUpdate, toDelete } = await this._getModelIdsToUpdate(
       localSyncMetaData.revMap,
       remoteMetaFileContent.revMap,
     );
@@ -130,7 +116,7 @@ Offer to use remote or local (always create local backup before this)
         (groupId) =>
           // TODO properly create rev map
           // TODO
-          this._uploadModelGroup(groupId, {}).then((rev) => {
+          this._uploadModel(groupId, {}).then((rev) => {
             if (typeof rev === 'string') {
               realRevMap[groupId] = this._cleanRev(rev);
             }
@@ -151,9 +137,8 @@ Offer to use remote or local (always create local backup before this)
     });
   }
 
-  private _isReadyForSync(): boolean {
-    // TODO check provider
-    return true;
+  private _isReadyForSync(): Promise<boolean> {
+    return this._getCurrentSyncProviderOrError().isReady();
   }
 
   private _getCurrentSyncProviderOrError(): PFSyncProviderServiceInterface<unknown> {
@@ -164,11 +149,12 @@ Offer to use remote or local (always create local backup before this)
     return provider;
   }
 
-  private async _downloadModelGroup(
+  private async _downloadModel(
     groupId: string,
     expectedRev?: string,
   ): Promise<string | Error> {
     const syncProvider = this._getCurrentSyncProviderOrError();
+
     if (expectedRev) {
       const revResult = await syncProvider.getFileRevAndLastClientUpdate(
         groupId,
@@ -179,7 +165,7 @@ Offer to use remote or local (always create local backup before this)
         'rev' in revResult &&
         !this._isSameRev(revResult.rev, expectedRev)
       ) {
-        throw new Error('Rev mismatch');
+        throw new PFRevMismatchError('Download Model Rev Mismatch1');
       }
     }
 
@@ -189,18 +175,17 @@ Offer to use remote or local (always create local backup before this)
       'rev' in result &&
       !this._isSameRev(result.rev, expectedRev)
     ) {
-      throw new Error('Rev mismatch');
+      throw new PFRevMismatchError('Download Model Rev Mismatch2');
     }
     return result.dataStr;
   }
 
-  private _getRemoteFilePathForGroupId(groupId: string): string {
-    // TODO
-    return groupId;
+  private _getRemoteFilePathForModelId(modelId: string): string {
+    return modelId;
   }
 
-  private async _uploadModelGroup(groupId: string, data: any): Promise<string | Error> {
-    const target = this._getRemoteFilePathForGroupId(groupId);
+  private async _uploadModel(modelId: string, data: any): Promise<string | Error> {
+    const target = this._getRemoteFilePathForModelId(modelId);
     const syncProvider = this._getCurrentSyncProviderOrError();
 
     // TODO
@@ -209,7 +194,7 @@ Offer to use remote or local (always create local backup before this)
     return (await syncProvider.uploadFileData(target, '', '', true)).rev;
   }
 
-  private async _getModelsGroupIdsToUpdate(
+  private async _getModelIdsToUpdate(
     revMapNewer: PFRevMap,
     revMapToOverwrite: PFRevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
@@ -272,6 +257,9 @@ Offer to use remote or local (always create local backup before this)
     remoteMetaFileContent: PFMetaFileContent,
     localSyncMetaData: PFMetaFileContent,
   ): PFSyncStatus {
+    // const allRemoteRevs = Object.values(remoteMetaFileContent.revMap);
+    // const allLocalRevs = Object.values(localSyncMetaData.revMap);
+
     return PFSyncStatus.InSync;
   }
 

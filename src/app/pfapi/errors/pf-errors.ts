@@ -34,11 +34,17 @@ export class PFNoRevError extends Error {
     this.name = 'NoRevError';
   }
 }
-
-export class PFAuthNotConfigured extends Error {
+export class PFRevMismatchError extends Error {
   constructor(message?: string) {
     super(message);
-    this.name = 'PFAuthNotConfigured';
+    this.name = 'RevMismatchError';
+  }
+}
+
+export class PFAuthNotConfiguredError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'PFAuthNotConfiguredError';
   }
 }
 
@@ -46,7 +52,7 @@ export class PFAuthNotConfigured extends Error {
 export class PFInvalidDataError extends Error {
   constructor(message?: string) {
     super(message);
-    this.name = 'InvalidData';
+    this.name = 'InvalidDataError';
   }
 }
 

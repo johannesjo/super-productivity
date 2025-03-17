@@ -30,7 +30,8 @@ export interface PFModelCfg<T extends PFModelBase> {
   transformBeforeLoad?: <I>(data: T) => I;
 
   defaultData?: T;
-  modelFileGroup?: string;
+  // TODO decide to kick or not
+  // modelFileGroup?: string;
 }
 
 // export type PFModelCfgs = readonly PFModelCfg<unknown>[];
@@ -84,11 +85,4 @@ export interface PFMetaFileContent {
 export interface PFCompleteBackup {
   timestamp: number;
   data: { [modelGroupId: string]: any };
-}
-
-// NOTE: do not change!!
-export enum PFSyncProviderId {
-  'Dropbox' = 'Dropbox',
-  'WebDAV' = 'WebDAV',
-  'LocalFile' = 'LocalFile',
 }

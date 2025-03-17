@@ -14,9 +14,9 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
 
   constructor(m: PfapiModelCfgToModelCtrl<MD>) {
     this.m = m;
-    const { groups, singleModels } = this._getModelGroups();
-    this._groupMap = groups;
-    this._singleModels = singleModels;
+    // const { groups, singleModels } = this._getModelGroups();
+    // this._groupMap = groups;
+    // this._singleModels = singleModels;
   }
 
   // TODO type
@@ -31,24 +31,24 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
   // TODO type
   // TODO migrations
 
-  private _getModelGroups(): {
-    groups: PFGroupMap;
-    singleModels: PFModelCtrl<PFModelBase>[];
-  } {
-    const groupMap: PFGroupMap = {};
-    const singleModels: PFModelCtrl<PFModelBase>[] = [];
-    Object.keys(this.m).map((modelId) => {
-      const entry = this.m[modelId];
-      if (entry.modelCfg.modelFileGroup) {
-        if (!groupMap[entry.modelCfg.modelFileGroup]) {
-          groupMap[entry.modelCfg.modelFileGroup] = [];
-        }
-        groupMap[entry.modelCfg.modelFileGroup].push(entry);
-      } else {
-        singleModels.push(entry);
-      }
-    });
-
-    return { groups: groupMap, singleModels: singleModels };
-  }
+  // private _getModelGroups(): {
+  //   groups: PFGroupMap;
+  //   singleModels: PFModelCtrl<PFModelBase>[];
+  // } {
+  //   const groupMap: PFGroupMap = {};
+  //   const singleModels: PFModelCtrl<PFModelBase>[] = [];
+  //   Object.keys(this.m).map((modelId) => {
+  //     const entry = this.m[modelId];
+  //     if (entry.modelCfg.modelFileGroup) {
+  //       if (!groupMap[entry.modelCfg.modelFileGroup]) {
+  //         groupMap[entry.modelCfg.modelFileGroup] = [];
+  //       }
+  //       groupMap[entry.modelCfg.modelFileGroup].push(entry);
+  //     } else {
+  //       singleModels.push(entry);
+  //     }
+  //   });
+  //
+  //   return { groups: groupMap, singleModels: singleModels };
+  // }
 }
