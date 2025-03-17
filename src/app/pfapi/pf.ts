@@ -16,6 +16,7 @@ import { MiniObservable } from './util/mini-observable';
 import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
 import { pfLog } from './util/pf-log';
 import { PFSyncStatus } from './pf.const';
+import { PFEncryptAndCompressHandlerService } from './pf-encrypt-and-compress-handler.service';
 
 // type PFEventMap = {
 //   'sync:start': undefined;
@@ -72,6 +73,7 @@ export class PF<const MD extends PFModelCfgs> {
       this._syncProvider$,
       this._pfSyncDataService,
       this.metaModel,
+      new PFEncryptAndCompressHandlerService(),
     );
   }
 

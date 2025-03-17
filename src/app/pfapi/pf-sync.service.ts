@@ -10,6 +10,7 @@ import {
 } from './errors/pf-errors';
 import { pfLog } from './util/pf-log';
 import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
+import { PFEncryptAndCompressHandlerService } from './pf-encrypt-and-compress-handler.service';
 
 /*
 (0. maybe write lock file)
@@ -40,17 +41,20 @@ export class PFSyncService<const MD extends PFModelCfgs> {
 
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
   private readonly _metaModelCtrl: PFMetaModelCtrl;
+  private readonly _encryptAndCompressHandler: PFEncryptAndCompressHandlerService;
 
   constructor(
     cfg$: MiniObservable<PFBaseCfg>,
     _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>,
     _pfSyncDataService: PFSyncDataService<MD>,
     _metaModelCtrl: PFMetaModelCtrl,
+    _encryptAndCompressHandler: PFEncryptAndCompressHandlerService,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._pfSyncDataService = _pfSyncDataService;
     this._metaModelCtrl = _metaModelCtrl;
+    this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
 
   // TODO
@@ -227,7 +231,10 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   ): Promise<string> {
     const target = this._getRemoteFilePathForModelId(modelId);
     const syncProvider = this._getCurrentSyncProviderOrError();
-    const encryptedAndCompressedData = await this._compressAndeEncryptData(data);
+    const encryptedAndCompressedData = await this._compressAndeEncryptData(
+      data,
+      this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+    );
     return (
       await syncProvider.uploadFileData(
         target,
@@ -262,7 +269,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
 
     const result = await syncProvider.downloadFileData(modelId, expectedRev);
     checkRev(result, '2');
-    return this._deCompressAndDecryptData(result.dataStr);
+    return this._decompressAndDecryptData(result.dataStr);
   }
 
   private async _getModelIdsToUpdate(
@@ -311,7 +318,10 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     rev: string | null = null,
   ): Promise<string> {
     pfLog('sync: _uploadMetaModel()', meta);
-    const encryptedAndCompressedData = await this._compressAndeEncryptData(meta);
+    const encryptedAndCompressedData = await this._compressAndeEncryptData(
+      meta,
+      meta.crossModelVersion,
+    );
     return this._uploadModel(
       PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
       encryptedAndCompressedData,
@@ -328,7 +338,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
         PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
         localRev || null,
       );
-      return this._deCompressAndDecryptData(r.dataStr);
+      return this._decompressAndDecryptData(r.dataStr);
     } catch (e) {
       if (e instanceof Error && e instanceof PFNoRemoteDataError) {
         throw new PFNoRemoteMetaFile();
@@ -343,16 +353,15 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }
 
-  private async _compressAndeEncryptData<T>(data: T): Promise<string> {
-    // TODO
-    return JSON.stringify(data);
+  private async _compressAndeEncryptData<T>(
+    data: T,
+    modelVersion: number,
+  ): Promise<string> {
+    return this._encryptAndCompressHandler.compressAndEncrypt(data, modelVersion);
   }
 
-  private async _deCompressAndDecryptData<T>(data: string): Promise<T> {
-    // TODO
-    const r = JSON.stringify(data) as T;
-    pfLog('sync: _downloadMetaFile()', r);
-    return r;
+  private async _decompressAndDecryptData<T>(data: string): Promise<T> {
+    return (await this._encryptAndCompressHandler.decompressAndDecrypt<T>(data)).data;
   }
 
   private _checkMetaFileContent(
