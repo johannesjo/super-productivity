@@ -1,4 +1,5 @@
 import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
+import { PFModelCtrl } from './pf-model-ctrl';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -91,3 +92,14 @@ export interface PFCompleteBackup {
   timestamp: number;
   data: { [modelGroupId: string]: any };
 }
+
+export type PFExtractModelCfgType<T extends PFModelCfg<PFModelBase>> =
+  T extends PFModelCfg<infer U> ? U : never;
+
+export type PFModelCfgToModelCtrl<T extends PFModelCfgs> = {
+  [K in keyof T]: PFModelCtrl<PFExtractModelCfgType<T[K]>>;
+};
+
+export type PFCompleteModel<T extends PFModelCfgs> = {
+  [K in keyof T]: PFExtractModelCfgType<T[K]>;
+};

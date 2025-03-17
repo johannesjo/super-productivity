@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { SyncProvider } from './sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { SyncResult } from './sync.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,6 +16,14 @@ import { PF } from '../../pfapi/pf';
 import { PFModelCfg } from '../../pfapi/pf.model';
 import { TaskState } from '../../features/tasks/task.model';
 import { ProjectState } from '../../features/project/project.model';
+import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
+import {
+  PFNoRemoteDataError,
+  PFNoRemoteMetaFile,
+  PFNoRevError,
+} from 'src/app/pfapi/errors/pf-errors';
+import { initialTaskState } from '../../features/tasks/store/task.reducer';
+import { initialProjectState } from '../../features/project/store/project.reducer';
 
 type ModelCfgs = {
   task: PFModelCfg<TaskState>;
@@ -39,6 +47,7 @@ export class SyncProviderService {
   private _translateService = inject(TranslateService);
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
+  private _persistenceLocalService = inject(PersistenceLocalService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
   // TODO
@@ -58,6 +67,8 @@ export class SyncProviderService {
         case SyncProvider.Dropbox:
           return new PFDropbox({
             appKey: DROPBOX_APP_KEY,
+            // basePath: `/${DROPBOX_APP_FOLDER}`,
+            basePath: `/`,
           });
         // case SyncProvider.WebDAV:
         //   return this._webDavSyncService;
@@ -83,7 +94,10 @@ export class SyncProviderService {
       ),
     ),
     this.isEnabled$,
-  ]).pipe(map(([isReady, isEnabled]) => isReady && isEnabled));
+  ]).pipe(
+    tap((v) => console.log('a', v)),
+    map(([isReady, isEnabled]) => isReady && isEnabled),
+  );
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
@@ -97,6 +111,25 @@ export class SyncProviderService {
     ),
   );
 
+  constructor() {
+    this._persistenceLocalService.load().then((d) => {
+      console.log(d);
+
+      this.currentProvider$.subscribe((provider) => {
+        this.pf.importCompleteData({
+          task: initialTaskState,
+          project: initialProjectState,
+        });
+        this.pf.setActiveProvider(provider);
+        // TODO real implementation
+        this.pf.setCredentialsForActiveProvider({
+          accessToken: d[SyncProvider.Dropbox].accessToken,
+          refreshToken: d[SyncProvider.Dropbox].refreshToken,
+        });
+      });
+    });
+  }
+
   // TODO move someplace else
 
   async sync(): Promise<SyncResult> {
@@ -105,7 +138,22 @@ export class SyncProviderService {
       throw new Error('No Sync Provider for sync()');
     }
 
-    await this.pf.sync();
+    try {
+      await this.pf.sync();
+    } catch (error: any) {
+      console.error(error);
+      if (error instanceof Error) {
+        if (error instanceof PFNoRemoteDataError) {
+          console.error('No data error');
+        } else if (error instanceof PFNoRevError) {
+          console.error('No data error');
+        } else if (error instanceof PFNoRemoteMetaFile) {
+          console.error('No data error');
+        }
+        // TODO ....
+      }
+      return 'ERROR';
+    }
     return 'SUCCESS';
 
     // TODO handle some place else

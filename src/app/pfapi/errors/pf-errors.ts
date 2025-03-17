@@ -1,26 +1,30 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFAuthFailError extends Error {
+  override name = PFNoRemoteMetaFile.name.replace('PF', '');
+
   constructor(
     message: string,
     public statusCode: number,
   ) {
     super(message);
-    this.name = 'AuthFailError';
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFHttpError extends Error {
+  override name = PFHttpError.name.replace('PF', '');
+
   constructor(
     message: string,
     public statusCode: number,
   ) {
     super(message);
-    this.name = 'HttpError';
   }
 }
 
 export class PFHttpRealError extends Error {
+  override name = PFHttpRealError.name.replace('PF', '');
+
   constructor(
     message: string,
     public statusCode: number,
@@ -28,59 +32,100 @@ export class PFHttpRealError extends Error {
     // public cause: Error,
   ) {
     super(message);
-    this.name = 'HttpRealError';
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFNoDataError extends Error {
-  constructor(message?: string) {
+export class PFNoRemoteMetaFile extends Error {
+  override name = PFNoRemoteMetaFile.name.replace('PF', '');
+
+  constructor(
+    message?: string,
+    public originalError?: unknown,
+  ) {
     super(message);
-    this.name = 'NoDataError';
+    this.originalError = originalError;
+    // Maintains proper stack trace for where our error was thrown (where the new error was created)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, PFNoRemoteDataError);
+    }
+  }
+}
+
+export class PFNoRemoteDataError extends Error {
+  override name = PFNoRemoteDataError.name.replace('PF', '');
+
+  constructor(
+    message?: string,
+    public originalError?: unknown,
+  ) {
+    super(message);
+    this.originalError = originalError;
+    // Maintains proper stack trace for where our error was thrown (where the new error was created)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, PFNoRemoteDataError);
+    }
   }
 }
 
 export class PFNoRevError extends Error {
+  override name = PFNoRevError.name.replace('PF', '');
+
   constructor(message?: string) {
     super(message);
-    this.name = 'NoRevError';
   }
 }
+
 export class PFRevMismatchError extends Error {
+  override name = PFRevMismatchError.name.replace('PF', '');
+
   constructor(message?: string) {
     super(message);
-    this.name = 'RevMismatchError';
   }
 }
 
 export class PFAuthNotConfiguredError extends Error {
+  override name = PFAuthNotConfiguredError.name.replace('PF', '');
+
   constructor(message?: string) {
     super(message);
-    this.name = 'PFAuthNotConfiguredError';
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFInvalidDataError extends Error {
-  constructor(message?: string) {
+  override name = PFInvalidDataError.name.replace('PF', '');
+
+  constructor(data: unknown, message?: string) {
     super(message);
-    this.name = 'InvalidDataError';
+    console.log(this.name, { data });
   }
 }
 
 export class PFInitializationError extends Error {
+  override name = PFInitializationError.name.replace('PF', '');
+
   constructor(message: string) {
     super(message);
-    this.name = 'PFInitializationError';
   }
 }
 
 export class PFSyncError extends Error {
+  override name = PFSyncError.name.replace('PF', '');
+
   constructor(
     message: string,
     public readonly originalError?: unknown,
   ) {
     super(message);
-    this.name = 'PFSyncError';
+  }
+}
+
+export class PFLockFileTimeout extends Error {
+  override name = PFSyncError.name.replace('PF', '');
+
+  constructor(
+    message: string,
+    public readonly originalError?: unknown,
+  ) {
+    super(message);
   }
 }

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { stringify } from 'querystring';
+import { stringify } from 'query-string';
 import { DropboxFileMetadata } from '../../imex/sync/dropbox/dropbox.model';
-import axios, { AxiosResponse, Method } from 'axios';
+import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { PFDropboxCredentials } from './pf-dropbox';
 import { MiniObservable } from '../util/mini-observable';
-import { PFAuthNotConfiguredError } from '../errors/pf-errors';
+import { PFAuthNotConfiguredError, PFNoRemoteDataError } from '../errors/pf-errors';
 
 export class PFDropboxApi {
   private _credentials$: MiniObservable<PFDropboxCredentials | null>;
@@ -31,25 +31,37 @@ export class PFDropboxApi {
     path: string;
     localRev?: string | null;
   }): Promise<{ meta: DropboxFileMetadata; data: T }> {
-    return this._request({
-      method: 'POST',
-      url: 'https://content.dropboxapi.com/2/files/download',
-      headers: {
-        'Dropbox-API-Arg': JSON.stringify({ path }),
-        // NOTE: doesn't do much, because we rarely get to the case where it would be
-        // useful due to our pre meta checks and because data often changes after
-        // we're checking it.
-        // If it messes up => Check service worker!
-        ...(localRev ? { 'If-None-Match': localRev } : {}),
-        // circumvent:
-        // https://github.com/angular/angular/issues/37133
-        // https://github.com/johannesjo/super-productivity/issues/645
-        // 'ngsw-bypass': true
-      },
-    }).then((res) => {
+    try {
+      const res = await this._request({
+        method: 'POST',
+        url: 'https://content.dropboxapi.com/2/files/download',
+        headers: {
+          'Dropbox-API-Arg': JSON.stringify({ path }),
+          // NOTE: doesn't do much, because we rarely get to the case where it would be
+          // useful due to our pre meta checks and because data often changes after
+          // we're checking it.
+          // If it messes up => Check service worker!
+          ...(localRev ? { 'If-None-Match': localRev } : {}),
+          // circumvent:
+          // https://github.com/angular/angular/issues/37133
+          // https://github.com/johannesjo/super-productivity/issues/645
+          // 'ngsw-bypass': true
+        },
+      });
       const meta = JSON.parse(res.headers['dropbox-api-result']);
       return { meta, data: res.data };
-    });
+    } catch (e) {
+      if (
+        typeof e === 'object' &&
+        ((e as AxiosError)?.response?.data as any)?.error_summary?.includes(
+          'path/not_found/',
+        )
+      ) {
+        throw new PFNoRemoteDataError(undefined, e);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async upload({

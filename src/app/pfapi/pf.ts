@@ -1,4 +1,11 @@
-import { PFBaseCfg, PFModelBase, PFModelCfg, PFModelCfgs } from './pf.model';
+import {
+  PFExtractModelCfgType,
+  PFBaseCfg,
+  PFModelBase,
+  PFModelCfgs,
+  PFModelCfgToModelCtrl,
+  PFCompleteModel,
+} from './pf.model';
 import { PFSyncService } from './pf-sync.service';
 import { PFDatabase } from './db/pf-database.class';
 import { PFIndexedDbAdapter } from './db/pf-indexed-db-adapter.class';
@@ -7,21 +14,15 @@ import { PFModelCtrl } from './pf-model-ctrl';
 import { PFSyncDataService } from './pf-sync-data.service';
 import { MiniObservable } from './util/mini-observable';
 import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
+import { pfLog } from './util/pf-log';
+import { PFSyncStatus } from './pf.const';
 
-type ExtractPFModelCfgType<T extends PFModelCfg<PFModelBase>> =
-  T extends PFModelCfg<infer U> ? U : never;
-
-export type PfapiModelCfgToModelCtrl<T extends PFModelCfgs> = {
-  [K in keyof T]: PFModelCtrl<ExtractPFModelCfgType<T[K]>>;
-};
-/* eslint-disable @typescript-eslint/naming-convention*/
-
-type PFEventMap = {
-  'sync:start': undefined;
-  'sync:complete': { success: boolean; timestamp: number };
-  'sync:error': Error;
-  'model:changed': { modelId: string; timestamp: number };
-};
+// type PFEventMap = {
+//   'sync:start': undefined;
+//   'sync:complete': { success: boolean; timestamp: number };
+//   'sync:error': Error;
+//   'model:changed': { modelId: string; timestamp: number };
+// };
 
 // export class PF<PCfg extends PFCfg, Ms extends PFModelCfg<any>[]> {
 export class PF<const MD extends PFModelCfgs> {
@@ -35,13 +36,13 @@ export class PF<const MD extends PFModelCfgs> {
   private readonly _pfSyncService: PFSyncService<MD>;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
 
-  private readonly _eventHandlers = new Map<
-    keyof PFEventMap,
-    Record<symbol, (data: unknown) => void>
-  >();
+  // private readonly _eventHandlers = new Map<
+  //   keyof PFEventMap,
+  //   Record<symbol, (data: unknown) => void>
+  // >();
 
   public readonly metaModel: PFMetaModelCtrl;
-  public readonly m: PfapiModelCfgToModelCtrl<MD>;
+  public readonly m: PFModelCfgToModelCtrl<MD>;
 
   constructor(modelCfgs: MD, cfg?: PFBaseCfg) {
     if (PF._wasInstanceCreated) {
@@ -70,16 +71,32 @@ export class PF<const MD extends PFModelCfgs> {
       this._cfg$,
       this._syncProvider$,
       this._pfSyncDataService,
+      this.metaModel,
     );
   }
 
   // TODO type
-  sync(): Promise<unknown> {
-    return this._pfSyncService.sync();
+  async sync(): Promise<PFSyncStatus | any> {
+    pfLog('sync()');
+    const result = await this._pfSyncService.sync();
+    pfLog('sync(): result:', result);
+    return result;
   }
 
   setActiveProvider(activeProvider: PFSyncProviderServiceInterface<unknown>): void {
+    pfLog('setActiveProvider()', activeProvider);
     this._syncProvider$.next(activeProvider);
+  }
+
+  // TODO typing
+  setCredentialsForActiveProvider(credentials: unknown): void {
+    pfLog('setCredentialsForActiveProvider()', credentials);
+    this._syncProvider$.value?.setCredentials(credentials);
+  }
+
+  importCompleteData(data: PFCompleteModel<MD>): Promise<unknown> {
+    pfLog('importCompleteData()', data);
+    return this._pfSyncDataService.importCompleteSyncData(data);
   }
 
   // public on<K extends keyof PFEventMap>(
@@ -104,11 +121,11 @@ export class PF<const MD extends PFModelCfgs> {
 
   pause(): void {}
 
-  private _createModels(modelCfgs: MD): PfapiModelCfgToModelCtrl<MD> {
+  private _createModels(modelCfgs: MD): PFModelCfgToModelCtrl<MD> {
     const result = {} as Record<string, PFModelCtrl<PFModelBase>>;
     // TODO validate modelCfgs
     for (const [id, item] of Object.entries(modelCfgs)) {
-      result[id] = new PFModelCtrl<ExtractPFModelCfgType<typeof item>>(
+      result[id] = new PFModelCtrl<PFExtractModelCfgType<typeof item>>(
         id,
         item,
         this._db,
@@ -118,7 +135,7 @@ export class PF<const MD extends PFModelCfgs> {
     // TODO fix type :(
     console.log('CHECK if expected', result);
 
-    return result as unknown as PfapiModelCfgToModelCtrl<MD>;
+    return result as unknown as PFModelCfgToModelCtrl<MD>;
   }
 
   // getAllModelData(): unknown {}

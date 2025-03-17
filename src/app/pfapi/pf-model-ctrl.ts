@@ -28,7 +28,7 @@ export class PFModelCtrl<MT extends PFModelBase> {
 
   save(data: MT): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog('PFModelCtrl.save', this.modelId, data);
+    pfLog('PFModelCtrl.save()', this.modelId, data);
     return Promise.all([
       this._metaModel.onModelSave(this.modelId, this.modelCfg),
       this._db.save(this.modelId, data),
@@ -37,7 +37,7 @@ export class PFModelCtrl<MT extends PFModelBase> {
 
   async partialUpdate(data: Partial<MT>): Promise<unknown> {
     if (typeof data !== 'object' || data === null) {
-      throw new Error(`PFModelCtrl.${data} is not an object`);
+      throw new Error(`PFModelCtrl: data is not an object`);
     }
     const newData = {
       ...(await this.load()),

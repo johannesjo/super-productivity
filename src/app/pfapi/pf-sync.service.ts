@@ -3,7 +3,13 @@ import { PFSyncDataService } from './pf-sync-data.service';
 import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
 import { MiniObservable } from './util/mini-observable';
 import { PFSyncStatus } from './pf.const';
-import { PFRevMismatchError } from './errors/pf-errors';
+import {
+  PFNoRemoteDataError,
+  PFNoRemoteMetaFile,
+  PFRevMismatchError,
+} from './errors/pf-errors';
+import { pfLog } from './util/pf-log';
+import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
 
 /*
 (0. maybe write lock file)
@@ -33,34 +39,57 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   private _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>;
 
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
+  private readonly _metaModelCtrl: PFMetaModelCtrl;
 
   constructor(
     cfg$: MiniObservable<PFBaseCfg>,
     _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>,
     _pfSyncDataService: PFSyncDataService<MD>,
+    _metaModelCtrl: PFMetaModelCtrl,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._pfSyncDataService = _pfSyncDataService;
+    this._metaModelCtrl = _metaModelCtrl;
   }
 
+  // TODO
   async sync(): Promise<PFSyncStatus | any> {
-    if (!(await this._isReadyForSync())) {
-      return PFSyncStatus.NotConfigured;
-    }
+    try {
+      if (!(await this._isReadyForSync())) {
+        return PFSyncStatus.NotConfigured;
+      }
 
-    const localSyncMetaData = await this._getLocalSyncMetaData();
-    const remoteMetaFileContent = await this._downloadMetaFile();
+      const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
+      const remoteMetaFileContent = await this._downloadMetaFile(
+        localSyncMetaData.metaRev,
+      );
 
-    switch (this._checkMetaFileContent(remoteMetaFileContent, localSyncMetaData)) {
-      case PFSyncStatus.UpdateLocal:
-        return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
-      case PFSyncStatus.UpdateRemote:
-        return this._updateRemote(remoteMetaFileContent, localSyncMetaData);
-      case PFSyncStatus.Conflict:
-      // TODO
-      case PFSyncStatus.InSync:
-        return PFSyncStatus.InSync;
+      const metaFileCheck = this._checkMetaFileContent(
+        remoteMetaFileContent,
+        localSyncMetaData,
+      );
+      pfLog('sync(): metaFileCheck', metaFileCheck);
+      switch (metaFileCheck) {
+        case PFSyncStatus.UpdateLocal:
+          return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
+        case PFSyncStatus.UpdateRemote:
+          return this._updateRemote(remoteMetaFileContent, localSyncMetaData);
+        case PFSyncStatus.Conflict:
+        // TODO
+        case PFSyncStatus.InSync:
+          return PFSyncStatus.InSync;
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e instanceof PFNoRemoteMetaFile) {
+          const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
+          console.log({ localSyncMetaData });
+
+          return this._updateRemoteAll(localSyncMetaData);
+        }
+      }
+      throw e;
     }
   }
 
@@ -111,29 +140,67 @@ export class PFSyncService<const MD extends PFModelCfgs> {
       remoteMetaFileContent.revMap,
     );
     const realRevMap: PFRevMap = {};
+    alert('AAAa');
     await Promise.all(
       toUpdate.map(
-        (groupId) =>
-          // TODO properly create rev map
-          // TODO
-          this._uploadModel(groupId, {}).then((rev) => {
-            if (typeof rev === 'string') {
-              realRevMap[groupId] = this._cleanRev(rev);
-            }
+        (modelId) =>
+          this._pfSyncDataService.m[modelId]
+            .load()
+            .then((data) => this._uploadModel(modelId, data))
+            .then((rev) => {
+              realRevMap[modelId] = this._cleanRev(rev);
+            }),
+        // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
+        //  since remote might hava an incomplete update
+      ),
+    );
+    console.log(realRevMap);
+
+    const metaRevAfterUpdate = await this._uploadMetaFile({
+      ...localSyncMetaData,
+      revMap: realRevMap,
+    });
+
+    // ON AFTER SUCCESS
+    await this._updateLocalMetaFileContent({
+      lastSync: Date.now(),
+      lastLocalSyncModelUpdate: localSyncMetaData.lastLocalSyncModelUpdate,
+      revMap: { ...localSyncMetaData.revMap, ...realRevMap },
+      metaRev: metaRevAfterUpdate,
+      modelVersions: localSyncMetaData.modelVersions,
+      crossModelVersion: localSyncMetaData.crossModelVersion,
+    });
+  }
+
+  private async _updateRemoteAll(localSyncMetaData: PFMetaFileContent): Promise<void> {
+    const realRevMap: PFRevMap = {};
+    const completeModelData = await this._pfSyncDataService.getCompleteSyncData();
+    const allModelIds = Object.keys(completeModelData);
+    await Promise.all(
+      allModelIds.map(
+        (modelId) =>
+          this._uploadModel(modelId, completeModelData[modelId]).then((rev) => {
+            realRevMap[modelId] = this._cleanRev(rev);
           }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
         // since remote might hava an incomplete update
       ),
     );
 
+    const lastSync = Date.now();
+    const metaRevAfterUpdate = await this._uploadMetaFile({
+      ...localSyncMetaData,
+      lastSync,
+      revMap: realRevMap,
+      metaRev: '',
+    });
+
     // ON SUCCESS
     await this._updateLocalMetaFileContent({
-      lastSync: Date.now(),
-      lastLocalSyncModelUpdate: remoteMetaFileContent.lastLocalSyncModelUpdate,
-      metaRev: remoteMetaFileContent.metaRev,
-      revMap: remoteMetaFileContent.revMap,
-      modelVersions: remoteMetaFileContent.modelVersions,
-      crossModelVersion: remoteMetaFileContent.crossModelVersion,
+      ...localSyncMetaData,
+      lastSync,
+      metaRev: metaRevAfterUpdate,
+      revMap: realRevMap,
     });
   }
 
@@ -149,49 +216,53 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     return provider;
   }
 
+  private _getRemoteFilePathForModelId(modelId: string): string {
+    return modelId;
+  }
+
+  private async _uploadModel(
+    modelId: string,
+    data: any,
+    localRev: string | null = null,
+  ): Promise<string> {
+    const target = this._getRemoteFilePathForModelId(modelId);
+    const syncProvider = this._getCurrentSyncProviderOrError();
+    const encryptedAndCompressedData = await this._compressAndeEncryptData(data);
+    return (
+      await syncProvider.uploadFileData(
+        target,
+        encryptedAndCompressedData,
+        localRev,
+        true,
+      )
+    ).rev;
+  }
+
   private async _downloadModel(
-    groupId: string,
+    modelId: string,
     expectedRev: string | null = null,
   ): Promise<string | Error> {
     const syncProvider = this._getCurrentSyncProviderOrError();
-
-    if (expectedRev) {
-      const revResult = await syncProvider.getFileRevAndLastClientUpdate(
-        groupId,
-        expectedRev,
-      );
+    const checkRev = (revResult: { rev: string }, msg: string): void => {
       if (
         typeof revResult === 'object' &&
         'rev' in revResult &&
         !this._isSameRev(revResult.rev, expectedRev)
       ) {
-        throw new PFRevMismatchError('Download Model Rev Mismatch1');
+        throw new PFRevMismatchError(`Download Model Rev: ${msg}`);
       }
+    };
+
+    if (expectedRev) {
+      checkRev(
+        await syncProvider.getFileRevAndLastClientUpdate(modelId, expectedRev),
+        '1',
+      );
     }
 
-    const result = await syncProvider.downloadFileData(groupId, expectedRev);
-    if (
-      typeof result === 'object' &&
-      'rev' in result &&
-      !this._isSameRev(result.rev, expectedRev)
-    ) {
-      throw new PFRevMismatchError('Download Model Rev Mismatch2');
-    }
-    return result.dataStr;
-  }
-
-  private _getRemoteFilePathForModelId(modelId: string): string {
-    return modelId;
-  }
-
-  private async _uploadModel(modelId: string, data: any): Promise<string | Error> {
-    const target = this._getRemoteFilePathForModelId(modelId);
-    const syncProvider = this._getCurrentSyncProviderOrError();
-
-    // TODO
-    // this._deCompressAndDecryptData(data)
-    // TODO
-    return (await syncProvider.uploadFileData(target, '', '', true)).rev;
+    const result = await syncProvider.downloadFileData(modelId, expectedRev);
+    checkRev(result, '2');
+    return this._deCompressAndDecryptData(result.dataStr);
   }
 
   private async _getModelIdsToUpdate(
@@ -199,12 +270,12 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     revMapToOverwrite: PFRevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
-      (groupId) =>
-        this._cleanRev(revMapNewer[groupId]) !==
-        this._cleanRev(revMapToOverwrite[groupId]),
+      (modelId) =>
+        this._cleanRev(revMapNewer[modelId]) !==
+        this._cleanRev(revMapToOverwrite[modelId]),
     );
     const toDelete: string[] = Object.keys(revMapToOverwrite).filter(
-      (groupId) => !revMapNewer[groupId],
+      (modelId) => !revMapNewer[modelId],
     );
 
     return { toUpdate, toDelete };
@@ -223,34 +294,65 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     ]);
   }
 
-  private async _updateLocalModel(groupId: string, modelData: string): Promise<unknown> {
+  private async _updateLocalModel(modelId: string, modelData: string): Promise<unknown> {
     // TODO
     // this._deCompressAndDecryptData()
     return {} as any as unknown;
   }
 
-  private async _deleteLocalModel(groupId: string, modelData: string): Promise<unknown> {
+  private async _deleteLocalModel(modelId: string, modelData: string): Promise<unknown> {
     return {} as any as unknown;
+  }
+
+  // META MODEL
+  // ----------
+  private async _uploadMetaFile(
+    meta: PFMetaFileContent,
+    rev: string | null = null,
+  ): Promise<string> {
+    pfLog('sync: _uploadMetaModel()', meta);
+    const encryptedAndCompressedData = await this._compressAndeEncryptData(meta);
+    return this._uploadModel(
+      PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
+      encryptedAndCompressedData,
+      rev,
+    );
+  }
+
+  private async _downloadMetaFile(localRev?: string | null): Promise<PFMetaFileContent> {
+    // return {} as any as PFMetaFileContent;
+    pfLog('sync: _downloadMetaFile()', localRev);
+    const syncProvider = this._getCurrentSyncProviderOrError();
+    try {
+      const r = await syncProvider.downloadFileData(
+        PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
+        localRev || null,
+      );
+      return this._deCompressAndDecryptData(r.dataStr);
+    } catch (e) {
+      if (e instanceof Error && e instanceof PFNoRemoteDataError) {
+        throw new PFNoRemoteMetaFile();
+      }
+      throw e;
+    }
   }
 
   private async _updateLocalMetaFileContent(
     localMetaFileContent: PFMetaFileContent,
-  ): Promise<void> {
-    // TODO
+  ): Promise<unknown> {
+    return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }
 
-  private async _downloadMetaFile(): Promise<PFMetaFileContent> {
-    return {} as any as PFMetaFileContent;
+  private async _compressAndeEncryptData<T>(data: T): Promise<string> {
+    // TODO
+    return JSON.stringify(data);
   }
 
-  private async _compressAndeEncryptData(data: string): Promise<string> {
+  private async _deCompressAndDecryptData<T>(data: string): Promise<T> {
     // TODO
-    return data;
-  }
-
-  private async _deCompressAndDecryptData(data: string): Promise<string> {
-    // TODO
-    return data;
+    const r = JSON.stringify(data) as T;
+    pfLog('sync: _downloadMetaFile()', r);
+    return r;
   }
 
   private _checkMetaFileContent(
@@ -261,10 +363,6 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     // const allLocalRevs = Object.values(localSyncMetaData.revMap);
 
     return PFSyncStatus.InSync;
-  }
-
-  private async _getLocalSyncMetaData(): Promise<PFMetaFileContent> {
-    return {} as any as PFMetaFileContent;
   }
 
   private _handleConflict(): void {}

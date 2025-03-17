@@ -6,7 +6,8 @@ import { PFSyncProviderId } from '../pf.const';
 import {
   PFAuthFailError,
   PFInvalidDataError,
-  PFNoDataError,
+  PFNoRemoteDataError,
+  PFNoRemoteMetaFile,
   PFNoRevError,
 } from '../errors/pf-errors';
 import { pfLog } from '../util/pf-log';
@@ -17,6 +18,7 @@ import { MiniObservable } from '../util/mini-observable';
 
 export interface PFDropboxCfg {
   appKey: string;
+  basePath: string;
 }
 
 export interface PFDropboxCredentials {
@@ -25,12 +27,13 @@ export interface PFDropboxCredentials {
 }
 
 export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCredentials> {
-  id: PFSyncProviderId = PFSyncProviderId.Dropbox;
-  isUploadForcePossible = true;
+  readonly id: PFSyncProviderId = PFSyncProviderId.Dropbox;
+  readonly isUploadForcePossible = true;
 
-  private _api: PFDropboxApi;
-  private _appKey: string;
-  private _credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
+  private readonly _api: PFDropboxApi;
+  private readonly _appKey: string;
+  private readonly _basePath: string;
+  private readonly _credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
 
   constructor(cfg: PFDropboxCfg) {
     if (!cfg.appKey) {
@@ -38,6 +41,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
     }
 
     this._appKey = cfg.appKey;
+    this._basePath = cfg.basePath || '/';
     this._api = new PFDropboxApi(this._appKey, this._credentials$);
   }
 
@@ -62,7 +66,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
     localRev: string,
   ): Promise<{ rev: string }> {
     try {
-      const r = await this._api.getMetaData(targetPath);
+      const r = await this._api.getMetaData(this._getPath(targetPath));
       return {
         rev: r.rev,
       };
@@ -74,7 +78,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
         (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
-        throw new PFNoDataError();
+        throw new PFNoRemoteDataError();
       } else if (isAxiosError && (e as any).response.status === 401) {
         if (
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
@@ -101,7 +105,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
   ): Promise<{ rev: string; dataStr: string }> {
     try {
       const r = await this._api.download({
-        path: targetPath,
+        path: this._getPath(targetPath),
         localRev,
       });
 
@@ -110,11 +114,12 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
       }
 
       if (!r.data) {
-        throw new PFNoDataError();
+        throw new PFNoRemoteDataError();
       }
 
       if (typeof r.data !== 'string') {
-        throw new PFInvalidDataError();
+        pfLog(r.data);
+        throw new PFInvalidDataError(r.data);
       }
 
       return {
@@ -124,7 +129,8 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
     } catch (e) {
       if (
         e instanceof PFNoRevError ||
-        e instanceof PFNoDataError ||
+        e instanceof PFNoRemoteMetaFile ||
+        e instanceof PFNoRemoteDataError ||
         e instanceof PFInvalidDataError
       ) {
         throw e; // Pass through known errors
@@ -142,7 +148,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
   ): Promise<{ rev: string }> {
     try {
       const r = await this._api.upload({
-        path: targetPath,
+        path: this._getPath(targetPath),
         data: dataStr,
         localRev,
         isForceOverwrite,
@@ -186,5 +192,9 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
       authUrl: authCodeUrl,
       codeVerifier,
     };
+  }
+
+  private _getPath(path: string): string {
+    return this._basePath + path;
   }
 }
