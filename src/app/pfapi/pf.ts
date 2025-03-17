@@ -1,10 +1,10 @@
 import {
-  PFExtractModelCfgType,
   PFBaseCfg,
+  PFCompleteModel,
+  PFExtractModelCfgType,
   PFModelBase,
   PFModelCfgs,
   PFModelCfgToModelCtrl,
-  PFCompleteModel,
 } from './pf.model';
 import { PFSyncService } from './pf-sync.service';
 import { PFDatabase } from './db/pf-database.class';
@@ -17,12 +17,14 @@ import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync
 import { pfLog } from './util/pf-log';
 import { PFSyncStatus } from './pf.const';
 import { PFEncryptAndCompressHandlerService } from './pf-encrypt-and-compress-handler.service';
+import { PFSyncProviderCredentialsStore } from './sync-provider-services/pf-sync-provider-credentials-store';
 
 // type PFEventMap = {
-//   'sync:start': undefined;
-//   'sync:complete': { success: boolean; timestamp: number };
-//   'sync:error': Error;
-//   'model:changed': { modelId: string; timestamp: number };
+// 'sync:start': undefined;
+// 'sync:complete': { success: boolean; timestamp: number };
+// 'sync:error': Error;
+// 'model:changed': { modelId: string; timestamp: number };
+// 'credentials:update': { credentials: unknown };
 // };
 
 // export class PF<PCfg extends PFCfg, Ms extends PFModelCfg<any>[]> {
@@ -36,6 +38,7 @@ export class PF<const MD extends PFModelCfgs> {
   private readonly _db: PFDatabase;
   private readonly _pfSyncService: PFSyncService<MD>;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
+  private readonly _pfSyncProviderCredentialsStore: PFSyncProviderCredentialsStore;
 
   // private readonly _eventHandlers = new Map<
   //   keyof PFEventMap,
@@ -67,6 +70,7 @@ export class PF<const MD extends PFModelCfgs> {
     this.metaModel = new PFMetaModelCtrl(this._db, this._cfg$);
     this.m = this._createModels(modelCfgs);
 
+    this._pfSyncProviderCredentialsStore = new PFSyncProviderCredentialsStore(this._db);
     this._pfSyncDataService = new PFSyncDataService<MD>(this.m);
     this._pfSyncService = new PFSyncService<MD>(
       this._cfg$,
@@ -77,6 +81,8 @@ export class PF<const MD extends PFModelCfgs> {
     );
   }
 
+  private _unsubscribeCredentials: () => void = () => {};
+
   // TODO type
   async sync(): Promise<PFSyncStatus | any> {
     pfLog('sync()');
@@ -85,8 +91,15 @@ export class PF<const MD extends PFModelCfgs> {
     return result;
   }
 
-  setActiveProvider(activeProvider: PFSyncProviderServiceInterface<unknown>): void {
+  setActiveProvider(activeProvider: PFSyncProviderServiceInterface<any>): void {
     pfLog('setActiveProvider()', activeProvider);
+    this._unsubscribeCredentials();
+    this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
+      pfLog('credentials update', v);
+      if (v) {
+        this._pfSyncProviderCredentialsStore.setCredentials(activeProvider.id, v);
+      }
+    });
     this._syncProvider$.next(activeProvider);
   }
 

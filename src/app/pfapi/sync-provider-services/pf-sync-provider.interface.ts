@@ -1,4 +1,5 @@
 import { PFSyncProviderId } from '../pf.const';
+import { MiniObservable } from '../util/mini-observable';
 
 export interface PFSyncProviderAuthHelper {
   authUrl?: string;
@@ -8,6 +9,8 @@ export interface PFSyncProviderAuthHelper {
 export interface PFSyncProviderServiceInterface<C> {
   id: PFSyncProviderId;
   isUploadForcePossible?: boolean;
+
+  credentials$: MiniObservable<C | null>;
 
   /**
    * Gets the current revision and last update time for a file

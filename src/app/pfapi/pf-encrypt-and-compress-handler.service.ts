@@ -3,6 +3,7 @@ import {
   pfGetSyncFilePrefix,
 } from './util/pf-sync-file-prefix';
 
+// TODO move to pure functions maybe
 export class PFEncryptAndCompressHandlerService {
   async compressAndEncrypt<T>(data: T, modelVersion: number): Promise<string> {
     // TODO actual encryption and compression

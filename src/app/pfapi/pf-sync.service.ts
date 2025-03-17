@@ -150,7 +150,13 @@ export class PFSyncService<const MD extends PFModelCfgs> {
         (modelId) =>
           this._pfSyncDataService.m[modelId]
             .load()
-            .then((data) => this._uploadModel(modelId, data))
+            .then((data) =>
+              this._uploadModel(
+                modelId,
+                this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+                data,
+              ),
+            )
             .then((rev) => {
               realRevMap[modelId] = this._cleanRev(rev);
             }),
@@ -183,7 +189,11 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     await Promise.all(
       allModelIds.map(
         (modelId) =>
-          this._uploadModel(modelId, completeModelData[modelId]).then((rev) => {
+          this._uploadModel(
+            modelId,
+            this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+            completeModelData[modelId],
+          ).then((rev) => {
             realRevMap[modelId] = this._cleanRev(rev);
           }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
@@ -226,14 +236,16 @@ export class PFSyncService<const MD extends PFModelCfgs> {
 
   private async _uploadModel(
     modelId: string,
+    modelVersion: number,
     data: any,
     localRev: string | null = null,
   ): Promise<string> {
     const target = this._getRemoteFilePathForModelId(modelId);
     const syncProvider = this._getCurrentSyncProviderOrError();
+
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
       data,
-      this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+      modelVersion,
     );
     return (
       await syncProvider.uploadFileData(
@@ -324,6 +336,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     );
     return this._uploadModel(
       PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
+      meta.crossModelVersion,
       encryptedAndCompressedData,
       rev,
     );

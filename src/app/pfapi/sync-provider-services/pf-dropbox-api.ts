@@ -6,6 +6,7 @@ import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { PFDropboxCredentials } from './pf-dropbox';
 import { MiniObservable } from '../util/mini-observable';
 import { PFAuthNotConfiguredError, PFNoRemoteDataError } from '../errors/pf-errors';
+import { pfLog } from '../util/pf-log';
 
 export class PFDropboxApi {
   private _credentials$: MiniObservable<PFDropboxCredentials | null>;
@@ -114,6 +115,7 @@ export class PFDropboxApi {
     data,
     headers = {},
     params,
+    isSkipTokenRefresh = false,
   }: {
     url: string;
     method?: Method;
@@ -121,21 +123,37 @@ export class PFDropboxApi {
     data?: string | Record<string, unknown>;
     params?: { [key: string]: string };
     accessToken?: string;
+    isSkipTokenRefresh?: boolean;
   }): Promise<AxiosResponse> {
     if (!this._credentials$.value?.accessToken) {
       throw new PFAuthNotConfiguredError('Dropbox no token');
     }
 
-    return axios.request({
-      url: params && Object.keys(params).length ? `${url}?${stringify(params)}` : url,
-      method,
-      data,
-      headers: {
-        authorization: `Bearer ${this._credentials$.value?.accessToken}`,
-        'Content-Type': 'application/json;charset=UTF-8',
-        ...headers,
-      },
-    });
+    try {
+      return await axios.request({
+        url: params && Object.keys(params).length ? `${url}?${stringify(params)}` : url,
+        method,
+        data,
+        headers: {
+          authorization: `Bearer ${this._credentials$.value?.accessToken}`,
+          'Content-Type': 'application/json;charset=UTF-8',
+          ...headers,
+        },
+      });
+    } catch (e) {
+      if (e && (e as any).response?.status === 401) {
+        await this.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this._request({
+          url,
+          method,
+          data,
+          headers,
+          params,
+          isSkipTokenRefresh: true,
+        });
+      }
+      throw e;
+    }
   }
 
   // async getAccessTokenViaDialog(): Promise<{
@@ -181,6 +199,7 @@ export class PFDropboxApi {
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
   > {
+    pfLog('updateAccessTokenFromRefreshTokenIfAvailable()');
     const refreshToken = this._credentials$.value?.refreshToken;
     if (!refreshToken) {
       console.error('Dropbox: No refresh token available');
@@ -201,20 +220,16 @@ export class PFDropboxApi {
         }),
       })
       .then(async (res) => {
-        console.log('Dropbox: Refresh access token Response', res);
-
-        // TODO handle differently
-        // await this.updateTokens({
-        //   accessToken: res.data.access_token,
-        //   // eslint-disable-next-line no-mixed-operators
-        //   expiresAt: +res.data.expires_in * 1000 + Date.now(),
-        // });
-
-        return 'SUCCESS' as any;
+        pfLog('Dropbox: Refresh access token Response', res);
+        this._credentials$.next({
+          accessToken: res.data.access_token,
+          refreshToken: res.data.refresh_token || this._credentials$.value?.refreshToken,
+        });
+        return 'SUCCESS' as const;
       })
       .catch((e) => {
         console.error(e);
-        return 'ERROR';
+        return 'ERROR' as const;
       });
   }
 

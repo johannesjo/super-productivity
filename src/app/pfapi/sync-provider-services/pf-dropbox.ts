@@ -33,7 +33,8 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
   private readonly _api: PFDropboxApi;
   private readonly _appKey: string;
   private readonly _basePath: string;
-  private readonly _credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
+
+  public readonly credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
 
   constructor(cfg: PFDropboxCfg) {
     if (!cfg.appKey) {
@@ -42,19 +43,19 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
 
     this._appKey = cfg.appKey;
     this._basePath = cfg.basePath || '/';
-    this._api = new PFDropboxApi(this._appKey, this._credentials$);
+    this._api = new PFDropboxApi(this._appKey, this.credentials$);
   }
 
   async isReady(): Promise<boolean> {
     return (
       !!this._appKey &&
-      !!this._credentials$.value?.accessToken &&
-      !!this._credentials$.value?.refreshToken
+      !!this.credentials$.value?.accessToken &&
+      !!this.credentials$.value?.refreshToken
     );
   }
 
   async setCredentials(credentials: PFDropboxCredentials): Promise<void> {
-    this._credentials$.next(credentials);
+    this.credentials$.next(credentials);
   }
 
   async getAuthHelper(): Promise<PFSyncProviderAuthHelper> {

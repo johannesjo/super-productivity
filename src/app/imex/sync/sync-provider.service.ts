@@ -122,10 +122,10 @@ export class SyncProviderService {
         });
         this.pf.setActiveProvider(provider);
         // TODO real implementation
-        this.pf.setCredentialsForActiveProvider({
-          accessToken: d[SyncProvider.Dropbox].accessToken,
-          refreshToken: d[SyncProvider.Dropbox].refreshToken,
-        });
+        // this.pf.setCredentialsForActiveProvider({
+        //   accessToken: d[SyncProvider.Dropbox].accessToken,
+        //   refreshToken: d[SyncProvider.Dropbox].refreshToken,
+        // });
       });
     });
   }
