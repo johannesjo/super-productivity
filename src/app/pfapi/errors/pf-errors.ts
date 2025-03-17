@@ -20,6 +20,17 @@ export class PFHttpError extends Error {
   }
 }
 
+export class PFHttpRealError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public cause: Error,
+  ) {
+    super(message);
+    this.name = 'HttpRealError';
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PFNoDataError extends Error {
   constructor(message?: string) {

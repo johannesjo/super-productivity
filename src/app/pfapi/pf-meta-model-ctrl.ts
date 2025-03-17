@@ -10,10 +10,12 @@ const DEFAULT_META_MODEL: PFMetaFileContent = {
 
 export class PFMetaModelCtrl {
   static readonly META_MODEL_ID = '__PF_META_MODEL__';
+  static readonly CLIENT_ID = '__PF_CLIENT_ID__';
 
   private readonly _db: PFDatabase;
   private readonly _cfg$: MiniObservable<PFBaseCfg>;
   private _metaModelInMemory: PFMetaFileContent;
+  private _clientIdInMemory?: string;
 
   constructor(db: PFDatabase, cfg$: MiniObservable<PFBaseCfg>) {
     this._db = db;
@@ -28,7 +30,7 @@ export class PFMetaModelCtrl {
       return Promise.resolve();
     }
 
-    return this._update({
+    return this._updateMetaModel({
       lastLocalSyncModelUpdate: timestamp,
     });
 
@@ -48,20 +50,22 @@ export class PFMetaModelCtrl {
     // });
   }
 
-  private async _update(metaModelUpdate: Partial<PFMetaFileContent>): Promise<unknown> {
+  private async _updateMetaModel(
+    metaModelUpdate: Partial<PFMetaFileContent>,
+  ): Promise<unknown> {
     this._metaModelInMemory = {
-      ...(await this._load()),
+      ...(await this._loadMetaModel()),
       ...metaModelUpdate,
     };
-    return this._save(this._metaModelInMemory);
+    return this._saveMetaModel(this._metaModelInMemory);
   }
 
-  private _save(metaModel: PFMetaFileContent): Promise<unknown> {
+  private _saveMetaModel(metaModel: PFMetaFileContent): Promise<unknown> {
     this._metaModelInMemory = metaModel;
     return this._db.save(PFMetaModelCtrl.META_MODEL_ID, metaModel);
   }
 
-  private async _load(): Promise<PFMetaFileContent> {
+  private async _loadMetaModel(): Promise<PFMetaFileContent> {
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
     }
@@ -77,5 +81,21 @@ export class PFMetaModelCtrl {
 
     this._metaModelInMemory = data;
     return data;
+  }
+
+  private _saveClientId(clientId: string): Promise<unknown> {
+    this._clientIdInMemory = clientId;
+    return this._db.save(PFMetaModelCtrl.CLIENT_ID, clientId);
+  }
+
+  private async _loadClientId(): Promise<string> {
+    if (this._clientIdInMemory) {
+      return this._clientIdInMemory;
+    }
+    const clientId = await this._db.load(PFMetaModelCtrl.CLIENT_ID);
+    if (typeof clientId !== 'string') {
+      throw new Error('Client ID not found');
+    }
+    return clientId;
   }
 }
