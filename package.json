@@ -183,7 +183,7 @@
     "helpful-decorators": "^2.1.0",
     "husky": "^4.2.5",
     "ical.js": "^2.1.0",
-    "idb": "^8.0.0",
+    "idb": "^8.0.2",
     "jasmine-core": "^4.0.0",
     "jasmine-marbles": "^0.8.4",
     "jasmine-spec-reporter": "~7.0.0",

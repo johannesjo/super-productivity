@@ -4,16 +4,16 @@ import { stringify } from 'querystring';
 import { DropboxFileMetadata } from '../../imex/sync/dropbox/dropbox.model';
 import axios, { AxiosResponse, Method } from 'axios';
 import { PFDropboxCredentials } from './pf-dropbox';
+import { MiniObservable } from '../util/mini-observable';
+import { PFAuthNotConfiguredError } from '../errors/pf-errors';
 
 export class PFDropboxApi {
-  private _accessToken: string;
-  private _refreshToken: string;
+  private _credentials$: MiniObservable<PFDropboxCredentials | null>;
   private _appKey: string;
 
-  constructor({ accessToken, refreshToken, appKey }: PFDropboxCredentials) {
-    this._accessToken = accessToken;
-    this._refreshToken = refreshToken;
+  constructor(appKey: string, credentials$: MiniObservable<PFDropboxCredentials | null>) {
     this._appKey = appKey;
+    this._credentials$ = credentials$;
   }
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
@@ -110,12 +110,16 @@ export class PFDropboxApi {
     params?: { [key: string]: string };
     accessToken?: string;
   }): Promise<AxiosResponse> {
+    if (!this._credentials$.value?.accessToken) {
+      throw new PFAuthNotConfiguredError('Dropbox no token');
+    }
+
     return axios.request({
       url: params && Object.keys(params).length ? `${url}?${stringify(params)}` : url,
       method,
       data,
       headers: {
-        authorization: `Bearer ${this._accessToken}`,
+        authorization: `Bearer ${this._credentials$.value?.accessToken}`,
         'Content-Type': 'application/json;charset=UTF-8',
         ...headers,
       },
@@ -165,7 +169,7 @@ export class PFDropboxApi {
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
   > {
-    const refreshToken = this._refreshToken;
+    const refreshToken = this._credentials$.value?.refreshToken;
     if (!refreshToken) {
       console.error('Dropbox: No refresh token available');
       return 'NO_REFRESH_TOKEN';

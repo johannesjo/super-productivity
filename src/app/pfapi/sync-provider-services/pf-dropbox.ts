@@ -13,11 +13,15 @@ import { pfLog } from '../util/pf-log';
 import { PFDropboxApi } from './pf-dropbox-api';
 // TODO move over here
 import { generatePKCECodes } from '../../imex/sync/generate-pkce-codes';
+import { MiniObservable } from '../util/mini-observable';
+
+export interface PFDropboxCfg {
+  appKey: string;
+}
 
 export interface PFDropboxCredentials {
   accessToken: string;
   refreshToken: string;
-  appKey: string;
 }
 
 export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCredentials> {
@@ -25,22 +29,28 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
   isUploadForcePossible = true;
 
   private _api: PFDropboxApi;
-  private _credentials: PFDropboxCredentials | null = null;
+  private _appKey: string;
+  private _credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
 
-  constructor(credentials: PFDropboxCredentials) {
-    this._api = new PFDropboxApi(credentials);
+  constructor(cfg: PFDropboxCfg) {
+    if (!cfg.appKey) {
+      throw new Error('Missing appKey for Dropbox');
+    }
+
+    this._appKey = cfg.appKey;
+    this._api = new PFDropboxApi(this._appKey, this._credentials$);
   }
 
   async isReady(): Promise<boolean> {
     return (
-      !!this._credentials?.accessToken &&
-      !!this._credentials?.appKey &&
-      !!this._credentials?.refreshToken
+      !!this._appKey &&
+      !!this._credentials$.value?.accessToken &&
+      !!this._credentials$.value?.refreshToken
     );
   }
 
   async setCredentials(credentials: PFDropboxCredentials): Promise<void> {
-    this._credentials = credentials;
+    this._credentials$.next(credentials);
   }
 
   async getAuthHelper(): Promise<PFSyncProviderAuthHelper> {
@@ -155,25 +165,20 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
     authUrl: string;
     codeVerifier: string;
   }> {
-    let codeVerifier: string, codeChallenge: string;
-    if (!this._credentials?.appKey) {
-      throw new Error('Missing appKey for Dropbox');
-    }
-
-    try {
-      ({ codeVerifier, codeChallenge } = await generatePKCECodes(128));
-    } catch (e) {
-      // TODO handle differently
-      // this._snackService.open({
-      //   msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
-      //   type: 'ERROR',
-      // });
-      return null;
-    }
+    const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
+    // try {
+    // } catch (e) {
+    //   // TODO handle differently
+    //   // this._snackService.open({
+    //   //   msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
+    //   //   type: 'ERROR',
+    //   // });
+    //   return null;
+    // }
 
     const authCodeUrl =
       `https://www.dropbox.com/oauth2/authorize` +
-      `?response_type=code&client_id=${this._credentials.appKey}` +
+      `?response_type=code&client_id=${this._appKey}` +
       '&code_challenge_method=S256' +
       '&token_access_type=offline' +
       `&code_challenge=${codeChallenge}`;

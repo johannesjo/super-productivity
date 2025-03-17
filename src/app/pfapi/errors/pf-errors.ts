@@ -24,7 +24,8 @@ export class PFHttpRealError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public cause: Error,
+    // TODO check
+    // public cause: Error,
   ) {
     super(message);
     this.name = 'HttpRealError';

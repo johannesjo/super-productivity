@@ -1,10 +1,12 @@
 import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
 
 type JSONPrimitive = string | number | boolean | null;
-export type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
+type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
 
 interface SerializableObject {
-  [key: string]: Serializable;
+  // TODO fix serializable check
+  // [key: string]: Serializable | any;
+  [key: string]: any;
 }
 
 type SerializableArray = Array<Serializable>;
@@ -14,9 +16,10 @@ export type PFModelBase = SerializableObject | SerializableArray;
 export interface PFModelCfg<T extends PFModelBase> {
   modelVersion: number;
   isLocalOnly?: boolean;
-  migrations?: {
-    [version: string]: (arg: T) => T;
-  };
+  // migrations?: {
+  //   [version: string]: (arg: T) => T;
+  // };
+  // TODO fix typing
   // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
@@ -26,8 +29,10 @@ export interface PFModelCfg<T extends PFModelBase> {
   repair?: (data: any) => T;
 
   // MAYBE?
-  transformBeforeSave?: <I>(data: I) => T;
-  transformBeforeLoad?: <I>(data: T) => I;
+  // TODO fix typing
+  // transformBeforeSave?: <I>(data: I) => T;
+  // TODO fix typing
+  // transformBeforeLoad?: <I>(data: T) => I;
 
   defaultData?: T;
   // TODO decide to kick or not

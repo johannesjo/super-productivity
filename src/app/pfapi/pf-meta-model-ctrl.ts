@@ -13,17 +13,17 @@ export class PFMetaModelCtrl {
   static readonly CLIENT_ID = '__PF_CLIENT_ID__';
 
   private readonly _db: PFDatabase;
-  private readonly _cfg$: MiniObservable<PFBaseCfg>;
-  private _metaModelInMemory: PFMetaFileContent;
+  // private readonly _cfg$: MiniObservable<PFBaseCfg>;
+  private _metaModelInMemory?: PFMetaFileContent;
   private _clientIdInMemory?: string;
 
   constructor(db: PFDatabase, cfg$: MiniObservable<PFBaseCfg>) {
     this._db = db;
   }
 
-  async onModelSave(
+  async onModelSave<MT extends PFModelBase>(
     modelId: string,
-    modelCfg: PFModelCfg<PFModelBase>,
+    modelCfg: PFModelCfg<MT>,
   ): Promise<unknown> {
     const timestamp = Date.now();
     if (modelCfg.isLocalOnly) {

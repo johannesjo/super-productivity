@@ -36,7 +36,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
 
   constructor(
     cfg$: MiniObservable<PFBaseCfg>,
-    _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown>>,
+    _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>,
     _pfSyncDataService: PFSyncDataService<MD>,
   ) {
     this._cfg$ = cfg$;
@@ -151,7 +151,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
 
   private async _downloadModel(
     groupId: string,
-    expectedRev?: string,
+    expectedRev: string | null = null,
   ): Promise<string | Error> {
     const syncProvider = this._getCurrentSyncProviderOrError();
 
@@ -169,7 +169,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
       }
     }
 
-    const result = await syncProvider.downloadFileData(groupId, expectedRev || null);
+    const result = await syncProvider.downloadFileData(groupId, expectedRev);
     if (
       typeof result === 'object' &&
       'rev' in result &&

@@ -1,3 +1,3 @@
-export const pfLog = (msg: string = '', ...args: unknown[]): void => {
+export const pfLog = (msg: unknown = '', ...args: unknown[]): void => {
   console.log('PF:', msg, ...args);
 };

@@ -27,12 +27,14 @@ type PFEventMap = {
 export class PF<const MD extends PFModelCfgs> {
   private static _wasInstanceCreated = false;
 
-  private readonly _currentSyncProvider$ =
+  private readonly _syncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null> =
     new MiniObservable<PFSyncProviderServiceInterface<unknown> | null>(null);
   private readonly _cfg$: MiniObservable<PFBaseCfg>;
+
   private readonly _db: PFDatabase;
   private readonly _pfSyncService: PFSyncService<MD>;
   private readonly _pfSyncDataService: PFSyncDataService<MD>;
+
   private readonly _eventHandlers = new Map<
     keyof PFEventMap,
     Record<symbol, (data: unknown) => void>
@@ -47,12 +49,12 @@ export class PF<const MD extends PFModelCfgs> {
     }
     PF._wasInstanceCreated = true;
 
-    this._cfg$ = new MiniObservable(cfg || null);
+    this._cfg$ = new MiniObservable(cfg || {});
 
     this._db = new PFDatabase({
-      onError: cfg.onDbError,
+      onError: cfg?.onDbError || (() => undefined),
       adapter:
-        cfg.dbAdapter ||
+        cfg?.dbAdapter ||
         new PFIndexedDbAdapter({
           dbName: 'pf',
           dbMainName: 'main',
@@ -66,7 +68,7 @@ export class PF<const MD extends PFModelCfgs> {
     this._pfSyncDataService = new PFSyncDataService<MD>(this.m);
     this._pfSyncService = new PFSyncService<MD>(
       this._cfg$,
-      this._currentSyncProvider$,
+      this._syncProvider$,
       this._pfSyncDataService,
     );
   }
@@ -77,28 +79,28 @@ export class PF<const MD extends PFModelCfgs> {
   }
 
   setActiveProvider(activeProvider: PFSyncProviderServiceInterface<unknown>): void {
-    this._currentSyncProvider$.next(activeProvider);
+    this._syncProvider$.next(activeProvider);
   }
 
-  public on<K extends keyof PFEventMap>(
-    eventName: K,
-    callback: (data: PFEventMap[K]) => void,
-  ): () => void {
-    // Implement event handling
-    const eventId = Symbol();
-    this._eventHandlers.set(eventName, {
-      ...(this._eventHandlers.get(eventName) || {}),
-      [eventId]: callback,
-    });
-
-    // Return unsubscribe function
-    return () => {
-      const handlers = this._eventHandlers.get(eventName);
-      if (handlers) {
-        delete handlers[eventId];
-      }
-    };
-  }
+  // public on<K extends keyof PFEventMap>(
+  //   eventName: K,
+  //   callback: (data: PFEventMap[K]) => void,
+  // ): () => void {
+  //   // Implement event handling
+  //   const eventId = Symbol();
+  //   this._eventHandlers.set(eventName, {
+  //     ...(this._eventHandlers.get(eventName) || {}),
+  //     [eventId]: callback,
+  //   });
+  //
+  //   // Return unsubscribe function
+  //   return () => {
+  //     const handlers = this._eventHandlers.get(eventName);
+  //     if (handlers) {
+  //       delete handlers[eventId];
+  //     }
+  //   };
+  // }
 
   pause(): void {}
 
@@ -113,7 +115,10 @@ export class PF<const MD extends PFModelCfgs> {
         this.metaModel,
       );
     }
-    return result as PfapiModelCfgToModelCtrl<MD>;
+    // TODO fix type :(
+    console.log('CHECK if expected', result);
+
+    return result as unknown as PfapiModelCfgToModelCtrl<MD>;
   }
 
   // getAllModelData(): unknown {}
