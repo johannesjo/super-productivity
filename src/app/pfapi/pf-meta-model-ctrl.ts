@@ -2,6 +2,7 @@ import { PFDatabase } from './db/pf-database.class';
 import { PFBaseCfg, PFMetaFileContent, PFModelBase, PFModelCfg } from './pf.model';
 import { MiniObservable } from './util/mini-observable';
 import { pfLog } from './util/pf-log';
+import { pfGetEnvironmentId } from './util/pf-get-environment-id';
 
 const DEFAULT_META_MODEL: PFMetaFileContent = {
   crossModelVersion: 1,
@@ -97,5 +98,9 @@ export class PFMetaModelCtrl {
   private _saveClientId(clientId: string): Promise<unknown> {
     this._clientIdInMemory = clientId;
     return this._db.save(PFMetaModelCtrl.CLIENT_ID, clientId);
+  }
+
+  private _generateClientId(): string {
+    return pfGetEnvironmentId() + '_' + Date.now();
   }
 }
