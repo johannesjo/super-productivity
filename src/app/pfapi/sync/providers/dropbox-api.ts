@@ -101,6 +101,14 @@ export class DropboxApi {
     }).then((res) => res.data);
   }
 
+  async remove(path: string): Promise<unknown> {
+    return this._request({
+      method: 'POST',
+      url: 'https://api.dropboxapi.com/2/files/delete_v2',
+      data: { path },
+    }).then((res) => res.data);
+  }
+
   async checkUser(accessToken: string): Promise<unknown> {
     return this._request({
       accessToken,

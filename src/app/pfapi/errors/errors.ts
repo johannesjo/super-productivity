@@ -127,11 +127,22 @@ export class SyncError extends Error {
   }
 }
 
-export class LockFileTimeout extends Error {
+export class LockFileTimeoutError extends Error {
   override name = SyncError.name.replace('', '');
 
   constructor(
-    message: string,
+    message?: string,
+    public readonly originalError?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+export class LockFilePresentError extends Error {
+  override name = SyncError.name.replace('', '');
+
+  constructor(
+    message?: string,
     public readonly originalError?: unknown,
   ) {
     super(message);

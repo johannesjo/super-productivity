@@ -29,7 +29,7 @@ export interface SyncProviderServiceInterface<C> {
    * @param localRev Current local revision or null if none
    * @param isForceOverwrite Whether to force overwrite existing file
    */
-  uploadFileData(
+  uploadFile(
     targetPath: string,
     dataStr: string,
     localRev: string | null,
@@ -41,10 +41,12 @@ export interface SyncProviderServiceInterface<C> {
    * @param targetPath Path to the file
    * @param localRev Current local revision or null if none
    */
-  downloadFileData(
+  downloadFile(
     targetPath: string,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string }>;
+
+  removeFile(targetPath: string): Promise<void>;
 
   // createFolder(targetPath: string): Promise<void>;
   // ensureDirectoryExists?(directoryPath: string): Promise<void>;

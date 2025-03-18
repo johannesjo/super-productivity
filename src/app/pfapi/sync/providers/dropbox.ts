@@ -99,7 +99,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     }
   }
 
-  async downloadFileData(
+  async downloadFile(
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
@@ -118,7 +118,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
       }
 
       if (typeof r.data !== 'string') {
-        pfLog(1, `${Dropbox.name}.${this.downloadFileData.name}() data`, r.data);
+        pfLog(1, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
         throw new InvalidDataError(r.data);
       }
 
@@ -140,7 +140,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     }
   }
 
-  async uploadFileData(
+  async uploadFile(
     targetPath: string,
     dataStr: string,
     localRev: string,
@@ -165,6 +165,16 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
       pfLog(1, e);
       throw new Error(e as any);
     }
+  }
+
+  async removeFile(targetPath: string): Promise<void> {
+    try {
+      await this._api.remove(this._getPath(targetPath));
+    } catch (e) {
+      pfLog(1, e);
+      throw new Error(e as any);
+    }
+    // TODO error handling
   }
 
   private async _getAuthUrlAndVerifier(): Promise<{
