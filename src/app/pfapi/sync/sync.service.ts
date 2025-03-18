@@ -66,7 +66,7 @@ export class SyncService<const MD extends ModelCfgs> {
         remoteMetaFileContent,
         localSyncMetaData,
       );
-      pfLog('sync(): metaFileCheck', metaFileCheck);
+      pfLog(2, `${SyncService.name}.${this.sync.name}(): metaFileCheck`, metaFileCheck);
       switch (metaFileCheck) {
         case SyncStatus.UpdateLocal:
           return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
@@ -321,7 +321,7 @@ export class SyncService<const MD extends ModelCfgs> {
     meta: MetaFileContent,
     rev: string | null = null,
   ): Promise<string> {
-    pfLog('sync: _uploadMetaModel()', meta);
+    pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, meta);
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
       meta,
       meta.crossModelVersion,
@@ -336,7 +336,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
   private async _downloadMetaFile(localRev?: string | null): Promise<MetaFileContent> {
     // return {} as any as MetaFileContent;
-    pfLog('sync: _downloadMetaFile()', localRev);
+    pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, localRev);
     const syncProvider = this._getCurrentSyncProviderOrError();
     try {
       const r = await syncProvider.downloadFileData(

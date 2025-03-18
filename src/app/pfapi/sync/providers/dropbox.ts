@@ -85,7 +85,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
           (e as any).response.data?.error_summary?.includes('invalid_access_token')
         ) {
-          pfLog('EXPIRED or INVALID TOKEN, trying to refresh');
+          pfLog(1, 'EXPIRED or INVALID TOKEN, trying to refresh');
           const refreshResult =
             await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
           if (refreshResult === 'SUCCESS') {
@@ -119,7 +119,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
       }
 
       if (typeof r.data !== 'string') {
-        pfLog(r.data);
+        pfLog(1, `${Dropbox.name}.${this.downloadFileData.name}() data`, r.data);
         throw new InvalidDataError(r.data);
       }
 
@@ -136,7 +136,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
       ) {
         throw e; // Pass through known errors
       }
-      pfLog(e);
+      pfLog(1, e);
       throw new Error(e as any);
     }
   }
@@ -163,7 +163,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
         rev: r.rev,
       };
     } catch (e) {
-      pfLog(e);
+      pfLog(1, e);
       throw new Error(e as any);
     }
   }

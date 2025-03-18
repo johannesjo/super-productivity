@@ -3,7 +3,6 @@ import { Database } from '../db/database';
 import { pfLog } from '../util/log';
 
 type Credentials = Record<string, unknown>;
-
 export class SyncProviderCredentialsStore {
   public static readonly DB_KEY = '__sync_provider_credentials_';
 
@@ -21,18 +20,27 @@ export class SyncProviderCredentialsStore {
   async setCredentials<T>(key: SyncProviderId, value: T): Promise<unknown> {
     this._credentialsInMemory = await this.load();
     this._credentialsInMemory[key] = value;
-    pfLog('ModelCtrl.setCredentials()', key, value);
+    pfLog(
+      2,
+      `${SyncProviderCredentialsStore.name}.${this.setCredentials.name}()`,
+      key,
+      value,
+    );
     return this.save(this._credentialsInMemory);
   }
 
   save(data: Credentials): Promise<unknown> {
     this._credentialsInMemory = data;
-    pfLog('ModelCtrl.save()', data);
+    pfLog(2, `${SyncProviderCredentialsStore.name}.${this.save.name}()`, data);
     return this._db.save(SyncProviderCredentialsStore.DB_KEY, data);
   }
 
   async load(): Promise<Credentials> {
-    pfLog('SyncProviderCredentialsStore.load', this._credentialsInMemory);
+    pfLog(
+      2,
+      `${SyncProviderCredentialsStore.name}.${this.load.name}`,
+      this._credentialsInMemory,
+    );
     return (
       this._credentialsInMemory ||
       ((await this._db.load(SyncProviderCredentialsStore.DB_KEY)) as Promise<Credentials>)

@@ -28,7 +28,7 @@ export class ModelCtrl<MT extends ModelBase> {
 
   save(data: MT): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog(`${ModelCtrl.name}.${this.save.name}()`, this.modelId, data);
+    pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, data);
     return Promise.all([
       this._metaModel.onModelSave(this.modelId, this.modelCfg),
       this._db.save(this.modelId, data),
@@ -47,7 +47,7 @@ export class ModelCtrl<MT extends ModelBase> {
   }
 
   async load(): Promise<MT> {
-    pfLog(`${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
+    pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
     return this._inMemoryData || ((await this._db.load(this.modelId)) as Promise<MT>);
   }
 }

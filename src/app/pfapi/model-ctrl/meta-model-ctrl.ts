@@ -26,7 +26,7 @@ export class MetaModelCtrl {
     modelId: string,
     modelCfg: ModelCfg<MT>,
   ): Promise<unknown> {
-    pfLog(`${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
+    pfLog(3, `${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
 
     const timestamp = Date.now();
     if (modelCfg.isLocalOnly) {
@@ -52,7 +52,7 @@ export class MetaModelCtrl {
   private async _updateMetaModel(
     metaModelUpdate: Partial<MetaFileContent>,
   ): Promise<unknown> {
-    pfLog(`${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
+    pfLog(3, `${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
     this._metaModelInMemory = {
       ...(await this.loadMetaModel()),
       ...metaModelUpdate,
@@ -61,13 +61,17 @@ export class MetaModelCtrl {
   }
 
   saveMetaModel(metaModel: MetaFileContent): Promise<unknown> {
-    pfLog(`${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
+    pfLog(2, `${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
     this._metaModelInMemory = metaModel;
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);
   }
 
   async loadMetaModel(): Promise<MetaFileContent> {
-    pfLog(`${MetaModelCtrl.name}.${this.loadMetaModel.name}()`, this._metaModelInMemory);
+    pfLog(
+      3,
+      `${MetaModelCtrl.name}.${this.loadMetaModel.name}()`,
+      this._metaModelInMemory,
+    );
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
     }
@@ -100,7 +104,7 @@ export class MetaModelCtrl {
   }
 
   private _generateClientId(): string {
-    pfLog(`${MetaModelCtrl.name}.${this._generateClientId.name}()`);
+    pfLog(2, `${MetaModelCtrl.name}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
   }
 }

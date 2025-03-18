@@ -95,7 +95,7 @@ export class SyncProviderService {
     ),
     this.isEnabled$,
   ]).pipe(
-    tap((v) => console.log('a', v)),
+    tap((v) => console.log('isEnabledAndReady$', v)),
     map(([isReady, isEnabled]) => isReady && isEnabled),
   );
 

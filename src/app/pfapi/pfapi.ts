@@ -66,6 +66,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.metaModel = new MetaModelCtrl(this._db);
     this.m = this._createModels(modelCfgs);
+    pfLog(2, `m`, this.m);
 
     this._syncProviderCredentialsStore = new SyncProviderCredentialsStore(this._db);
     this._syncDataService = new SyncDataService<MD>(this.m);
@@ -81,14 +82,14 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO type
   async sync(): Promise<SyncStatus | any> {
-    pfLog('sync()');
+    pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
-    pfLog('sync(): result:', result);
+    pfLog(2, `${this.sync.name}() result:`, result);
     return result;
   }
 
   setActiveProvider(activeProvider: SyncProviderServiceInterface<any>): void {
-    pfLog('setActiveProvider()', activeProvider);
+    pfLog(2, `${this.setActiveProvider.name}()`, activeProvider);
     // this._unsubscribeCredentials();
     // this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
     //   pfLog('credentials update', v);
@@ -101,12 +102,12 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO typing
   setCredentialsForActiveProvider(credentials: unknown): void {
-    pfLog('setCredentialsForActiveProvider()', credentials);
+    pfLog(2, `${this.setCredentialsForActiveProvider.name}()`, credentials);
     this._syncProvider$.value?.setCredentials(credentials);
   }
 
   importCompleteData(data: CompleteModel<MD>): Promise<unknown> {
-    pfLog('importCompleteData()', data);
+    pfLog(2, `${this.importCompleteData.name}()`, data);
     return this._syncDataService.importCompleteSyncData(data);
   }
 

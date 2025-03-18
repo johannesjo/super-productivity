@@ -35,7 +35,7 @@ export class SyncDataService<const MD extends ModelCfgs> {
 
   // TODO type
   async importCompleteSyncData(data: CompleteModel<MD>): Promise<unknown> {
-    pfLog('SyncDataService.importCompleteSyncData()', data);
+    pfLog(2, `${SyncDataService.name}.${this.importCompleteSyncData.name}`, data);
     const modelIds = Object.keys(data);
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];

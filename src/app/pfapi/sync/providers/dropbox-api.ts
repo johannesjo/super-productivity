@@ -199,7 +199,7 @@ export class DropboxApi {
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
   > {
-    pfLog('updateAccessTokenFromRefreshTokenIfAvailable()');
+    pfLog(2, 'updateAccessTokenFromRefreshTokenIfAvailable()');
     const refreshToken = this._credentials$.value?.refreshToken;
     if (!refreshToken) {
       console.error('Dropbox: No refresh token available');
@@ -220,7 +220,7 @@ export class DropboxApi {
         }),
       })
       .then(async (res) => {
-        pfLog('Dropbox: Refresh access token Response', res);
+        pfLog(2, 'Dropbox: Refresh access token Response', res);
         this._credentials$.next({
           accessToken: res.data.access_token,
           refreshToken: res.data.refresh_token || this._credentials$.value?.refreshToken,
