@@ -2,6 +2,7 @@ import { Database } from '../db/database';
 import { MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { getEnvironmentId } from '../util/get-environment-id';
+import { DBNames } from '../pfapi.const';
 
 const DEFAULT_META_MODEL: MetaFileContent = {
   crossModelVersion: 1,
@@ -10,9 +11,9 @@ const DEFAULT_META_MODEL: MetaFileContent = {
 };
 
 export class MetaModelCtrl {
-  static readonly META_MODEL_ID = '__meta_';
-  static readonly META_MODEL_REMOTE_FILE_NAME = '__meta_';
-  static readonly CLIENT_ID = '__client_id_';
+  static readonly META_MODEL_ID = DBNames.MetaModel;
+  static readonly META_MODEL_REMOTE_FILE_NAME = DBNames.MetaModel;
+  static readonly CLIENT_ID = DBNames.ClientId;
 
   private readonly _db: Database;
   private _metaModelInMemory?: MetaFileContent;

@@ -16,7 +16,7 @@ export class Database {
     try {
       return await this._adapter.load(key);
     } catch (e) {
-      console.warn('.DB Load Error: Last Params,', this._lastParams);
+      console.warn('DB Load Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.load, [key]);
     }
   }
@@ -28,7 +28,7 @@ export class Database {
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      console.warn('.DB Save Error: Last Params,', this._lastParams);
+      console.warn('DB Save Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.save, [key, data]);
     }
   }
@@ -38,7 +38,7 @@ export class Database {
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      console.warn('.DB Remove Error: Last Params,', this._lastParams);
+      console.warn('DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.remove, [key]);
     }
   }
@@ -48,7 +48,7 @@ export class Database {
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      console.warn('.DB Clear Error: Last Params,', this._lastParams);
+      console.warn('DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.clearDatabase, []);
     }
   }
@@ -60,7 +60,7 @@ export class Database {
       console.error('Database initialization failed');
       console.error('_lastParams', this._lastParams);
       console.error(e);
-      alert('.DB INIT Error');
+      alert('DB INIT Error');
       throw new Error(e as any);
     }
   }

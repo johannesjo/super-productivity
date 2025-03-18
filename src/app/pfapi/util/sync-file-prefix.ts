@@ -1,4 +1,6 @@
-const PREFIX = 'pf_';
+import { REMOTE_FILE_CONTENT_PREFIX } from '../pfapi.const';
+
+const PREFIX = REMOTE_FILE_CONTENT_PREFIX;
 const END_SEPERATOR = '__';
 
 export interface SyncFilePrefixParams {

@@ -12,6 +12,8 @@
 //   console.trace.apply(console, ['pf:', msg, ...args]);
 // };
 
+import { LOG_PREFIX } from '../pfapi.const';
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const createLogger = (prefix: string) => {
   return console.log.bind(console, prefix) as (
@@ -22,4 +24,4 @@ const createLogger = (prefix: string) => {
 };
 
 // Example usage:
-export const pfLog = createLogger('pf');
+export const pfLog = createLogger(LOG_PREFIX);

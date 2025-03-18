@@ -1,11 +1,11 @@
-import { SyncProviderId } from '../pfapi.const';
+import { DBNames, SyncProviderId } from '../pfapi.const';
 import { Database } from '../db/database';
 import { pfLog } from '../util/log';
 
 type Credentials = Record<string, unknown>;
 
 export class SyncProviderCredentialsStore<T> {
-  public static readonly DB_KEY_PREFIX = '__pf_sync_credentials_';
+  public static readonly DB_KEY_PREFIX = DBNames.CredentialsStorePrefix;
 
   private readonly _providerId: SyncProviderId;
   private readonly _dbKey: string;
