@@ -119,7 +119,10 @@ function createIndicatorStr(task: TaskCopy): string {
       title = title.substring(0, 37) + '...';
     }
 
-    if (task.timeSpent) {
+    if (task.timeEstimate) {
+      const restOfTime = Math.max(task.timeEstimate - task.timeSpent, 0);
+      timeStr = getCountdownMessage(restOfTime);
+    } else if (task.timeSpent) {
       timeStr = getCountdownMessage(task.timeSpent);
     }
 
