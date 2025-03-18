@@ -71,34 +71,43 @@ function initListeners(): void {
     }
   });
 
-  ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, currentTask) => {
-    const mainWin = getWin();
-    getSettings(mainWin, (settings: GlobalConfigState) => {
-      const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
+  ipcMain.on(
+    IPC.CURRENT_TASK_UPDATED,
+    (ev, currentTask, isPomodoroEnabled, currentPomodoroSessionTime) => {
+      const mainWin = getWin();
+      getSettings(mainWin, (settings: GlobalConfigState) => {
+        const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
 
-      const msg =
-        isTrayShowCurrentTask && currentTask ? createIndicatorStr(currentTask) : '';
+        const msg =
+          isTrayShowCurrentTask && currentTask
+            ? createIndicatorMessage(
+                currentTask,
+                isPomodoroEnabled,
+                currentPomodoroSessionTime,
+              )
+            : '';
 
-      if (tray) {
-        // tray handling
-        if (currentTask && currentTask.title) {
-          tray.setTitle(msg);
-          if (!IS_MAC) {
-            // NOTE apparently this has no effect for gnome
-            tray.setToolTip(msg);
+        if (tray) {
+          // tray handling
+          if (currentTask && currentTask.title) {
+            tray.setTitle(msg);
+            if (!IS_MAC) {
+              // NOTE apparently this has no effect for gnome
+              tray.setToolTip(msg);
+            }
+          } else {
+            tray.setTitle('');
+            if (!IS_MAC) {
+              // NOTE apparently this has no effect for gnome
+              tray.setToolTip(msg);
+            }
+            const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
+            setTrayIcon(tray, DIR + `stopped${suf}`);
           }
-        } else {
-          tray.setTitle('');
-          if (!IS_MAC) {
-            // NOTE apparently this has no effect for gnome
-            tray.setToolTip(msg);
-          }
-          const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
-          setTrayIcon(tray, DIR + `stopped${suf}`);
         }
-      }
-    });
-  });
+      });
+    },
+  );
 
   // ipcMain.on(IPC.POMODORO_UPDATE, (ev, params) => {
   // const isOnBreak = params.isOnBreak;
@@ -111,7 +120,11 @@ function initListeners(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createIndicatorStr(task: TaskCopy): string {
+function createIndicatorMessage(
+  task: TaskCopy,
+  isPomodoroEnabled: boolean,
+  currentPomodoroSessionTime: number,
+): string {
   if (task && task.title) {
     let title = task.title;
     let timeStr = '';
@@ -124,6 +137,10 @@ function createIndicatorStr(task: TaskCopy): string {
       timeStr = getCountdownMessage(restOfTime);
     } else if (task.timeSpent) {
       timeStr = getCountdownMessage(task.timeSpent);
+    }
+
+    if (isPomodoroEnabled) {
+      timeStr = getCountdownMessage(currentPomodoroSessionTime);
     }
 
     return `${title} ${timeStr}`;
