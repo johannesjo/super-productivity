@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFAuthFailError extends Error {
-  override name = PFNoRemoteMetaFile.name.replace('PF', '');
+export class AuthFailError extends Error {
+  override name = NoRemoteMetaFile.name.replace('', '');
 
   constructor(
     message: string,
@@ -11,8 +11,8 @@ export class PFAuthFailError extends Error {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFHttpError extends Error {
-  override name = PFHttpError.name.replace('PF', '');
+export class HttpError extends Error {
+  override name = HttpError.name.replace('', '');
 
   constructor(
     message: string,
@@ -22,8 +22,8 @@ export class PFHttpError extends Error {
   }
 }
 
-export class PFHttpRealError extends Error {
-  override name = PFHttpRealError.name.replace('PF', '');
+export class HttpRealError extends Error {
+  override name = HttpRealError.name.replace('', '');
 
   constructor(
     message: string,
@@ -35,8 +35,8 @@ export class PFHttpRealError extends Error {
   }
 }
 
-export class PFNoRemoteMetaFile extends Error {
-  override name = PFNoRemoteMetaFile.name.replace('PF', '');
+export class NoRemoteMetaFile extends Error {
+  override name = NoRemoteMetaFile.name.replace('', '');
 
   constructor(
     message?: string,
@@ -46,13 +46,13 @@ export class PFNoRemoteMetaFile extends Error {
     this.originalError = originalError;
     // Maintains proper stack trace for where our error was thrown (where the new error was created)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, PFNoRemoteDataError);
+      Error.captureStackTrace(this, NoRemoteDataError);
     }
   }
 }
 
-export class PFNoRemoteDataError extends Error {
-  override name = PFNoRemoteDataError.name.replace('PF', '');
+export class NoRemoteDataError extends Error {
+  override name = NoRemoteDataError.name.replace('', '');
 
   constructor(
     message?: string,
@@ -62,37 +62,37 @@ export class PFNoRemoteDataError extends Error {
     this.originalError = originalError;
     // Maintains proper stack trace for where our error was thrown (where the new error was created)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, PFNoRemoteDataError);
+      Error.captureStackTrace(this, NoRemoteDataError);
     }
   }
 }
 
-export class PFNoRevError extends Error {
-  override name = PFNoRevError.name.replace('PF', '');
+export class NoRevError extends Error {
+  override name = NoRevError.name.replace('', '');
 
   constructor(message?: string) {
     super(message);
   }
 }
 
-export class PFRevMismatchError extends Error {
-  override name = PFRevMismatchError.name.replace('PF', '');
+export class RevMismatchError extends Error {
+  override name = RevMismatchError.name.replace('', '');
 
   constructor(message?: string) {
     super(message);
   }
 }
 
-export class PFAuthNotConfiguredError extends Error {
-  override name = PFAuthNotConfiguredError.name.replace('PF', '');
+export class AuthNotConfiguredError extends Error {
+  override name = AuthNotConfiguredError.name.replace('', '');
 
   constructor(message?: string) {
     super(message);
   }
 }
 
-export class PFInvalidDataError extends Error {
-  override name = PFInvalidDataError.name.replace('PF', '');
+export class InvalidDataError extends Error {
+  override name = InvalidDataError.name.replace('', '');
 
   constructor(data: unknown, message?: string) {
     super(message);
@@ -100,16 +100,16 @@ export class PFInvalidDataError extends Error {
   }
 }
 
-export class PFInitializationError extends Error {
-  override name = PFInitializationError.name.replace('PF', '');
+export class InitializationError extends Error {
+  override name = InitializationError.name.replace('', '');
 
   constructor(message: string) {
     super(message);
   }
 }
 
-export class PFSyncError extends Error {
-  override name = PFSyncError.name.replace('PF', '');
+export class SyncError extends Error {
+  override name = SyncError.name.replace('', '');
 
   constructor(
     message: string,
@@ -119,8 +119,8 @@ export class PFSyncError extends Error {
   }
 }
 
-export class PFLockFileTimeout extends Error {
-  override name = PFSyncError.name.replace('PF', '');
+export class LockFileTimeout extends Error {
+  override name = SyncError.name.replace('', '');
 
   constructor(
     message: string,

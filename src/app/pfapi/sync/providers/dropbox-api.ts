@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { stringify } from 'query-string';
-import { DropboxFileMetadata } from '../../imex/sync/dropbox/dropbox.model';
+import { DropboxFileMetadata } from '../../../imex/sync/dropbox/dropbox.model';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
-import { PFDropboxCredentials } from './pf-dropbox';
-import { MiniObservable } from '../util/mini-observable';
-import { PFAuthNotConfiguredError, PFNoRemoteDataError } from '../errors/pf-errors';
-import { pfLog } from '../util/pf-log';
+import { DropboxCredentials } from './dropbox';
+import { MiniObservable } from '../../util/mini-observable';
+import { AuthNotConfiguredError, NoRemoteDataError } from '../../errors/errors';
+import { pfLog } from '../../util/log';
 
-export class PFDropboxApi {
-  private _credentials$: MiniObservable<PFDropboxCredentials | null>;
+export class DropboxApi {
+  private _credentials$: MiniObservable<DropboxCredentials | null>;
   private _appKey: string;
 
-  constructor(appKey: string, credentials$: MiniObservable<PFDropboxCredentials | null>) {
+  constructor(appKey: string, credentials$: MiniObservable<DropboxCredentials | null>) {
     this._appKey = appKey;
     this._credentials$ = credentials$;
   }
@@ -58,7 +58,7 @@ export class PFDropboxApi {
           'path/not_found/',
         )
       ) {
-        throw new PFNoRemoteDataError(undefined, e);
+        throw new NoRemoteDataError(undefined, e);
       } else {
         throw e;
       }
@@ -126,7 +126,7 @@ export class PFDropboxApi {
     isSkipTokenRefresh?: boolean;
   }): Promise<AxiosResponse> {
     if (!this._credentials$.value?.accessToken) {
-      throw new PFAuthNotConfiguredError('Dropbox no token');
+      throw new AuthNotConfiguredError('Dropbox no token');
     }
 
     try {

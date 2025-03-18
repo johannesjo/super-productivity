@@ -1,30 +1,30 @@
 const PREFIX = 'pf_';
 const END_SEPERATOR = '__';
 
-export interface PfSyncFilePrefixParams {
+export interface SyncFilePrefixParams {
   isCompressed: boolean;
   isEncrypted: boolean;
   modelVersion: number;
 }
-export interface PfSyncFilePrefixParamsOutput extends PfSyncFilePrefixParams {
+export interface SyncFilePrefixParamsOutput extends SyncFilePrefixParams {
   cleanDataStr: string;
 }
 
-export const pfGetSyncFilePrefix = (cfg: PfSyncFilePrefixParams): string => {
+export const getSyncFilePrefix = (cfg: SyncFilePrefixParams): string => {
   const c = cfg.isCompressed ? 'C' : '';
   const e = cfg.isEncrypted ? 'E' : '';
   return `${PREFIX}${c}${e}${cfg.modelVersion}${END_SEPERATOR}`;
 };
 
-export const pfExtractSyncFileStateFromPrefix = (
+export const extractSyncFileStateFromPrefix = (
   dataStr: string,
-): PfSyncFilePrefixParamsOutput => {
+): SyncFilePrefixParamsOutput => {
   // Modified regex to match decimal numbers
   const match = dataStr.match(
     new RegExp(`^${PREFIX}(C)?(E)?(\\d+(?:\\.\\d+)?)${END_SEPERATOR}`),
   );
   if (!match) {
-    throw new Error('pfExtractSyncFileStateFromPrefix: Invalid prefix');
+    throw new Error(`${extractSyncFileStateFromPrefix.name}: Invalid prefix`);
   }
 
   return {

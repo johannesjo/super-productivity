@@ -1,7 +1,7 @@
-import { PF } from './pf';
-import { PFModelCfg } from './pf.model';
-import { PFModelCtrl } from './pf-model-ctrl';
-import { PFDropbox } from './sync-provider-services/pf-dropbox';
+import {} from './pfapi';
+import { ModelCfg } from './pfapi.model';
+import { ModelCtrl } from './model-ctrl/model-ctrl';
+import { Dropbox } from './sync/providers/dropbox';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 
 interface MyModel {
@@ -15,8 +15,8 @@ interface MyModel2 {
 }
 
 type ModelCfgs = {
-  m1: PFModelCfg<MyModel>;
-  m2: PFModelCfg<MyModel2>;
+  m1: ModelCfg<MyModel>;
+  m2: ModelCfg<MyModel2>;
 };
 
 const modelCfgs: ModelCfgs = {
@@ -30,14 +30,14 @@ const modelCfgs: ModelCfgs = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const pf = new PF(modelCfgs, {});
+const pf = new (modelCfgs, {})();
 pf.setActiveProvider(
-  new PFDropbox({
+  new Dropbox({
     appKey: DROPBOX_APP_KEY,
   }),
 );
 
-const _typeCheck: PFModelCtrl<MyModel> = {} as typeof pf.m.m1;
+const _typeCheck: ModelCtrl<MyModel> = {} as typeof pf.m.m1;
 console.log(_typeCheck);
 
 // SHOULD WORK => this should work (and it does)

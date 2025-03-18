@@ -1,11 +1,11 @@
 // NOTE: do not change!!
-export enum PFSyncProviderId {
+export enum SyncProviderId {
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
 }
 
-export enum PFSyncStatus {
+export enum SyncStatus {
   InSync = 'InSync',
   UpdateRemote = 'UpdateRemote',
   UpdateLocal = 'UpdateLocal',

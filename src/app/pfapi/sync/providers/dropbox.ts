@@ -1,49 +1,49 @@
 import {
-  PFSyncProviderAuthHelper,
-  PFSyncProviderServiceInterface,
-} from './pf-sync-provider.interface';
-import { PFSyncProviderId } from '../pf.const';
+  SyncProviderAuthHelper,
+  SyncProviderServiceInterface,
+} from '../sync-provider.interface';
+import { SyncProviderId } from '../../pfapi.const';
 import {
-  PFAuthFailError,
-  PFInvalidDataError,
-  PFNoRemoteDataError,
-  PFNoRemoteMetaFile,
-  PFNoRevError,
-} from '../errors/pf-errors';
-import { pfLog } from '../util/pf-log';
-import { PFDropboxApi } from './pf-dropbox-api';
+  AuthFailError,
+  InvalidDataError,
+  NoRemoteDataError,
+  NoRemoteMetaFile,
+  NoRevError,
+} from '../../errors/errors';
+import { pfLog } from '../../util/log';
+import { DropboxApi } from './dropbox-api';
 // TODO move over here
-import { generatePKCECodes } from '../../imex/sync/generate-pkce-codes';
-import { MiniObservable } from '../util/mini-observable';
+import { generatePKCECodes } from '../../../imex/sync/generate-pkce-codes';
+import { MiniObservable } from '../../util/mini-observable';
 
-export interface PFDropboxCfg {
+export interface DropboxCfg {
   appKey: string;
   basePath: string;
 }
 
-export interface PFDropboxCredentials {
+export interface DropboxCredentials {
   accessToken: string;
   refreshToken: string;
 }
 
-export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCredentials> {
-  readonly id: PFSyncProviderId = PFSyncProviderId.Dropbox;
+export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials> {
+  readonly id: SyncProviderId = SyncProviderId.Dropbox;
   readonly isUploadForcePossible = true;
 
-  private readonly _api: PFDropboxApi;
+  private readonly _api: DropboxApi;
   private readonly _appKey: string;
   private readonly _basePath: string;
 
-  public readonly credentials$ = new MiniObservable<PFDropboxCredentials | null>(null);
+  public readonly credentials$ = new MiniObservable<DropboxCredentials | null>(null);
 
-  constructor(cfg: PFDropboxCfg) {
+  constructor(cfg: DropboxCfg) {
     if (!cfg.appKey) {
       throw new Error('Missing appKey for Dropbox');
     }
 
     this._appKey = cfg.appKey;
     this._basePath = cfg.basePath || '/';
-    this._api = new PFDropboxApi(this._appKey, this.credentials$);
+    this._api = new DropboxApi(this._appKey, this.credentials$);
   }
 
   async isReady(): Promise<boolean> {
@@ -54,11 +54,11 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
     );
   }
 
-  async setCredentials(credentials: PFDropboxCredentials): Promise<void> {
+  async setCredentials(credentials: DropboxCredentials): Promise<void> {
     this.credentials$.next(credentials);
   }
 
-  async getAuthHelper(): Promise<PFSyncProviderAuthHelper> {
+  async getAuthHelper(): Promise<SyncProviderAuthHelper> {
     return this._getAuthUrlAndVerifier();
   }
 
@@ -79,7 +79,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
         (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
-        throw new PFNoRemoteDataError();
+        throw new NoRemoteDataError();
       } else if (isAxiosError && (e as any).response.status === 401) {
         if (
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
@@ -92,7 +92,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
             return this.getFileRevAndLastClientUpdate(targetPath, localRev);
           }
         }
-        throw new PFAuthFailError('Dropbox 401', 401);
+        throw new AuthFailError('Dropbox 401', 401);
       } else {
         console.error(e);
         throw new Error(e as any);
@@ -111,16 +111,16 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
       });
 
       if (!r.meta.rev) {
-        throw new PFNoRevError();
+        throw new NoRevError();
       }
 
       if (!r.data) {
-        throw new PFNoRemoteDataError();
+        throw new NoRemoteDataError();
       }
 
       if (typeof r.data !== 'string') {
         pfLog(r.data);
-        throw new PFInvalidDataError(r.data);
+        throw new InvalidDataError(r.data);
       }
 
       return {
@@ -129,10 +129,10 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
       };
     } catch (e) {
       if (
-        e instanceof PFNoRevError ||
-        e instanceof PFNoRemoteMetaFile ||
-        e instanceof PFNoRemoteDataError ||
-        e instanceof PFInvalidDataError
+        e instanceof NoRevError ||
+        e instanceof NoRemoteMetaFile ||
+        e instanceof NoRemoteDataError ||
+        e instanceof InvalidDataError
       ) {
         throw e; // Pass through known errors
       }
@@ -156,7 +156,7 @@ export class PFDropbox implements PFSyncProviderServiceInterface<PFDropboxCreden
       });
 
       if (!r.rev) {
-        throw new PFNoRevError();
+        throw new NoRevError();
       }
 
       return {

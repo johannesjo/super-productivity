@@ -1,34 +1,34 @@
-import { PFDatabase } from './db/pf-database.class';
-import { PFBaseCfg, PFMetaFileContent, PFModelBase, PFModelCfg } from './pf.model';
-import { MiniObservable } from './util/mini-observable';
-import { pfLog } from './util/pf-log';
-import { pfGetEnvironmentId } from './util/pf-get-environment-id';
+import { Database } from '../db/database';
+import { BaseCfg, MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
+import { MiniObservable } from '../util/mini-observable';
+import { pfLog } from '../util/log';
+import { getEnvironmentId } from '../util/get-environment-id';
 
-const DEFAULT_META_MODEL: PFMetaFileContent = {
+const DEFAULT_META_MODEL: MetaFileContent = {
   crossModelVersion: 1,
   revMap: {},
   modelVersions: {},
 };
 
-export class PFMetaModelCtrl {
-  static readonly META_MODEL_ID = '_PF_meta_';
-  static readonly META_MODEL_REMOTE_FILE_NAME = '_PF_meta_';
-  static readonly CLIENT_ID = '_PF_client_id_';
+export class MetaModelCtrl {
+  static readonly META_MODEL_ID = '__meta_';
+  static readonly META_MODEL_REMOTE_FILE_NAME = '__meta_';
+  static readonly CLIENT_ID = '__client_id_';
 
-  private readonly _db: PFDatabase;
-  // private readonly _cfg$: MiniObservable<PFBaseCfg>;
-  private _metaModelInMemory?: PFMetaFileContent;
+  private readonly _db: Database;
+  private _metaModelInMemory?: MetaFileContent;
   private _clientIdInMemory?: string;
 
-  constructor(db: PFDatabase, cfg$: MiniObservable<PFBaseCfg>) {
+  constructor(db: Database, cfg$: MiniObservable<BaseCfg>) {
     this._db = db;
   }
 
-  async onModelSave<MT extends PFModelBase>(
+  async onModelSave<MT extends ModelBase>(
     modelId: string,
-    modelCfg: PFModelCfg<MT>,
+    modelCfg: ModelCfg<MT>,
   ): Promise<unknown> {
-    pfLog('PFMetaModelCtrl.onModelSave()', modelId, modelCfg);
+    pfLog(`${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
+
     const timestamp = Date.now();
     if (modelCfg.isLocalOnly) {
       return Promise.resolve();
@@ -51,9 +51,9 @@ export class PFMetaModelCtrl {
   }
 
   private async _updateMetaModel(
-    metaModelUpdate: Partial<PFMetaFileContent>,
+    metaModelUpdate: Partial<MetaFileContent>,
   ): Promise<unknown> {
-    pfLog('PFMetaModelCtrl._updateMetaModel()', metaModelUpdate);
+    pfLog(`${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
     this._metaModelInMemory = {
       ...(await this.loadMetaModel()),
       ...metaModelUpdate,
@@ -61,19 +61,19 @@ export class PFMetaModelCtrl {
     return this.saveMetaModel(this._metaModelInMemory);
   }
 
-  saveMetaModel(metaModel: PFMetaFileContent): Promise<unknown> {
+  saveMetaModel(metaModel: MetaFileContent): Promise<unknown> {
+    pfLog(`${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
     this._metaModelInMemory = metaModel;
-    return this._db.save(PFMetaModelCtrl.META_MODEL_ID, metaModel);
+    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);
   }
 
-  async loadMetaModel(): Promise<PFMetaFileContent> {
+  async loadMetaModel(): Promise<MetaFileContent> {
+    pfLog(`${MetaModelCtrl.name}.${this.loadMetaModel.name}()`, this._metaModelInMemory);
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
     }
 
-    const data = (await this._db.load(
-      PFMetaModelCtrl.META_MODEL_ID,
-    )) as PFMetaFileContent;
+    const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as MetaFileContent;
     // Initialize if not found
     if (!data) {
       this._metaModelInMemory = { ...DEFAULT_META_MODEL };
@@ -88,7 +88,7 @@ export class PFMetaModelCtrl {
     if (this._clientIdInMemory) {
       return this._clientIdInMemory;
     }
-    const clientId = await this._db.load(PFMetaModelCtrl.CLIENT_ID);
+    const clientId = await this._db.load(MetaModelCtrl.CLIENT_ID);
     if (typeof clientId !== 'string') {
       throw new Error('Client ID not found');
     }
@@ -97,10 +97,11 @@ export class PFMetaModelCtrl {
 
   private _saveClientId(clientId: string): Promise<unknown> {
     this._clientIdInMemory = clientId;
-    return this._db.save(PFMetaModelCtrl.CLIENT_ID, clientId);
+    return this._db.save(MetaModelCtrl.CLIENT_ID, clientId);
   }
 
   private _generateClientId(): string {
-    return pfGetEnvironmentId() + '_' + Date.now();
+    pfLog(`${MetaModelCtrl.name}.${this._generateClientId.name}()`);
+    return getEnvironmentId() + '_' + Date.now();
   }
 }

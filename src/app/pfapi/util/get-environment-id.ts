@@ -1,4 +1,4 @@
-export const pfGetEnvironmentId = (): string => {
+export const getEnvironmentId = (): string => {
   let platformCode = 'UNK'; // Default: Unknown
   let osCode = 'UNK';
 

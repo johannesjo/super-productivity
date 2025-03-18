@@ -1,5 +1,5 @@
-import { PFDatabaseAdapter } from './db/pf-database-adapter.model';
-import { PFModelCtrl } from './pf-model-ctrl';
+import { DatabaseAdapter } from './db/database-adapter.model';
+import { ModelCtrl } from './model-ctrl/model-ctrl';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -12,9 +12,9 @@ interface SerializableObject {
 
 type SerializableArray = Array<Serializable>;
 
-export type PFModelBase = SerializableObject | SerializableArray;
+export type ModelBase = SerializableObject | SerializableArray;
 
-export interface PFModelCfg<T extends PFModelBase> {
+export interface ModelCfg<T extends ModelBase> {
   modelVersion: number;
   isLocalOnly?: boolean;
   // migrations?: {
@@ -40,17 +40,17 @@ export interface PFModelCfg<T extends PFModelBase> {
   // modelFileGroup?: string;
 }
 
-// export type PFModelCfgs = readonly PFModelCfg<unknown>[];
-export type PFModelCfgs = {
-  [modelId: string]: PFModelCfg<PFModelBase>;
+// export type ModelCfgs = readonly ModelCfg<unknown>[];
+export type ModelCfgs = {
+  [modelId: string]: ModelCfg<ModelBase>;
 };
 
-export interface PFFullData<F> {
+export interface FullData<F> {
   data: F;
 }
 
-export interface PFBaseCfg {
-  dbAdapter?: PFDatabaseAdapter;
+export interface BaseCfg {
+  dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
   isEncryptData?: boolean;
@@ -58,7 +58,7 @@ export interface PFBaseCfg {
   isCreateBackups?: boolean;
   crossModelVersion?: number;
   crossModelMigrations?: {
-    [version: string]: (arg: PFFullData<unknown>) => PFFullData<unknown>;
+    [version: string]: (arg: FullData<unknown>) => FullData<unknown>;
   };
   validate?: (data: any) => boolean;
   // TODO type
@@ -66,40 +66,40 @@ export interface PFBaseCfg {
 
   // TODO
   // backupInterval?: 'daily';
-  // isUseLockFile?: boolean;PFBaseCfg
+  // isUseLockFile?: boolean;BaseCfg
   // translateFN: (key)=> translate(key),
 }
 
-export interface PFRevMap {
+export interface RevMap {
   [modelOrFileGroupId: string]: string;
 }
 
-export interface PFModelVersionMap {
+export interface ModelVersionMap {
   [modelId: string]: number;
 }
 
-export interface PFMetaFileContent {
+export interface MetaFileContent {
   lastLocalSyncModelUpdate?: number;
   lastSync?: number;
   metaRev?: string;
   // revision map
-  revMap: PFRevMap;
+  revMap: RevMap;
   crossModelVersion: number;
-  modelVersions: PFModelVersionMap;
+  modelVersions: ModelVersionMap;
 }
 
-export interface PFCompleteBackup {
+export interface CompleteBackup {
   timestamp: number;
   data: { [modelGroupId: string]: any };
 }
 
-export type PFExtractModelCfgType<T extends PFModelCfg<PFModelBase>> =
-  T extends PFModelCfg<infer U> ? U : never;
+export type ExtractModelCfgType<T extends ModelCfg<ModelBase>> =
+  T extends ModelCfg<infer U> ? U : never;
 
-export type PFModelCfgToModelCtrl<T extends PFModelCfgs> = {
-  [K in keyof T]: PFModelCtrl<PFExtractModelCfgType<T[K]>>;
+export type ModelCfgToModelCtrl<T extends ModelCfgs> = {
+  [K in keyof T]: ModelCtrl<ExtractModelCfgType<T[K]>>;
 };
 
-export type PFCompleteModel<T extends PFModelCfgs> = {
-  [K in keyof T]: PFExtractModelCfgType<T[K]>;
+export type CompleteModel<T extends ModelCfgs> = {
+  [K in keyof T]: ExtractModelCfgType<T[K]>;
 };

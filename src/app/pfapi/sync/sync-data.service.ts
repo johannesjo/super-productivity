@@ -1,24 +1,24 @@
-import { PFCompleteModel, PFModelCfgs, PFModelCfgToModelCtrl } from './pf.model';
-import { pfLog } from './util/pf-log';
+import { CompleteModel, ModelCfgs, ModelCfgToModelCtrl } from '../pfapi.model';
+import { pfLog } from '../util/log';
 
-// interface PFGroupMap {
-//   [groupId: string]: PFModelCtrl<PFModelBase>[]; // modelIds
+// interface GroupMap {
+//   [groupId: string]: ModelCtrl<ModelBase>[]; // modelIds
 // }
 
-export class PFSyncDataService<const MD extends PFModelCfgs> {
-  public readonly m: PFModelCfgToModelCtrl<MD>;
+export class SyncDataService<const MD extends ModelCfgs> {
+  public readonly m: ModelCfgToModelCtrl<MD>;
 
-  // private _groupMap: PFGroupMap;
-  // private _singleModels: PFModelCtrl<PFModelBase>[];
+  // private _groupMap: GroupMap;
+  // private _singleModels: ModelCtrl<ModelBase>[];
 
-  constructor(m: PFModelCfgToModelCtrl<MD>) {
+  constructor(m: ModelCfgToModelCtrl<MD>) {
     this.m = m;
     // const { groups, singleModels } = this._getModelGroups();
     // this._groupMap = groups;
     // this._singleModels = singleModels;
   }
 
-  async getCompleteSyncData(): Promise<PFCompleteModel<MD>> {
+  async getCompleteSyncData(): Promise<CompleteModel<MD>> {
     const modelIds = Object.keys(this.m);
     const promises = modelIds.map((modelId) => {
       const modelCtrl = this.m[modelId];
@@ -30,12 +30,12 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
-    return allData as PFCompleteModel<MD>;
+    return allData as CompleteModel<MD>;
   }
 
   // TODO type
-  async importCompleteSyncData(data: PFCompleteModel<MD>): Promise<unknown> {
-    pfLog('PFSyncDataService.importCompleteSyncData()', data);
+  async importCompleteSyncData(data: CompleteModel<MD>): Promise<unknown> {
+    pfLog('SyncDataService.importCompleteSyncData()', data);
     const modelIds = Object.keys(data);
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];
@@ -46,7 +46,7 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
   }
 
   // TODO type
-  async importPartialSyncData(partialData: Partial<PFCompleteModel<MD>>): Promise<any> {}
+  async importPartialSyncData(partialData: Partial<CompleteModel<MD>>): Promise<any> {}
 
   // TODO type
   // TODO migrations
@@ -56,11 +56,11 @@ export class PFSyncDataService<const MD extends PFModelCfgs> {
   // }
 
   // private _getModelGroups(): {
-  //   groups: PFGroupMap;
-  //   singleModels: PFModelCtrl<PFModelBase>[];
+  //   groups: GroupMap;
+  //   singleModels: ModelCtrl<ModelBase>[];
   // } {
-  //   const groupMap: PFGroupMap = {};
-  //   const singleModels: PFModelCtrl<PFModelBase>[] = [];
+  //   const groupMap: GroupMap = {};
+  //   const singleModels: ModelCtrl<ModelBase>[] = [];
   //   Object.keys(this.m).map((modelId) => {
   //     const entry = this.m[modelId];
   //     if (entry.modelCfg.modelFileGroup) {

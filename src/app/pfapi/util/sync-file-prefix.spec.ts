@@ -1,12 +1,12 @@
 import {
-  pfExtractSyncFileStateFromPrefix,
-  pfGetSyncFilePrefix,
-  PfSyncFilePrefixParams,
-  PfSyncFilePrefixParamsOutput,
-} from './pf-sync-file-prefix';
+  extractSyncFileStateFromPrefix,
+  getSyncFilePrefix,
+  SyncFilePrefixParams,
+  SyncFilePrefixParamsOutput,
+} from './sync-file-prefix';
 
 describe('pfGetSyncFilePrefix()', () => {
-  const cases: [PfSyncFilePrefixParams, string][] = [
+  const cases: [SyncFilePrefixParams, string][] = [
     [{ isCompressed: false, isEncrypted: false, modelVersion: 1 }, 'pf_1__'],
     [{ isCompressed: true, isEncrypted: false, modelVersion: 1 }, 'pf_C1__'],
     [{ isCompressed: false, isEncrypted: true, modelVersion: 1 }, 'pf_E1__'],
@@ -19,7 +19,7 @@ describe('pfGetSyncFilePrefix()', () => {
   ];
   cases.forEach(([input, expected]) => {
     it(`should return '${expected}' for ${JSON.stringify(input)}`, () => {
-      expect(pfGetSyncFilePrefix(input)).toBe(expected);
+      expect(getSyncFilePrefix(input)).toBe(expected);
     });
   });
 });
@@ -30,7 +30,7 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     isEncrypted: true,
     modelVersion: 2,
   };
-  const cases: [string, PfSyncFilePrefixParamsOutput][] = [
+  const cases: [string, SyncFilePrefixParamsOutput][] = [
     [
       'pf_1__testdata',
       {
@@ -107,12 +107,12 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
 
   cases.forEach(([input, expected]) => {
     it(`should extract correct params from '${input}'`, () => {
-      expect(pfExtractSyncFileStateFromPrefix(input)).toEqual(expected);
+      expect(extractSyncFileStateFromPrefix(input)).toEqual(expected);
     });
   });
 
   it('should throw error for invalid prefix', () => {
-    expect(() => pfExtractSyncFileStateFromPrefix('invalid_prefix')).toThrowError(
+    expect(() => extractSyncFileStateFromPrefix('invalid_prefix')).toThrowError(
       'pfExtractSyncFileStateFromPrefix: Invalid prefix',
     );
   });

@@ -10,24 +10,24 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
-import { PFDropbox } from '../../pfapi/sync-provider-services/pf-dropbox';
 import { DROPBOX_APP_KEY } from './dropbox/dropbox.const';
-import { PF } from '../../pfapi/pf';
-import { PFModelCfg } from '../../pfapi/pf.model';
+import {
+  Dropbox,
+  ModelCfg,
+  Pfapi,
+  NoRemoteDataError,
+  NoRemoteMetaFile,
+  NoRevError,
+} from '../../pfapi';
 import { TaskState } from '../../features/tasks/task.model';
 import { ProjectState } from '../../features/project/project.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
-import {
-  PFNoRemoteDataError,
-  PFNoRemoteMetaFile,
-  PFNoRevError,
-} from 'src/app/pfapi/errors/pf-errors';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { initialProjectState } from '../../features/project/store/project.reducer';
 
 type ModelCfgs = {
-  task: PFModelCfg<TaskState>;
-  project: PFModelCfg<ProjectState>;
+  task: ModelCfg<TaskState>;
+  project: ModelCfg<ProjectState>;
 };
 const MODEL_CFGS: ModelCfgs = {
   task: {
@@ -51,7 +51,7 @@ export class SyncProviderService {
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
   // TODO
-  pf = new PF(MODEL_CFGS, {});
+  pf = new Pfapi(MODEL_CFGS, {});
 
   // TODO
   isCurrentProviderInSync$ = of(false);
@@ -65,7 +65,7 @@ export class SyncProviderService {
       // console.log('Activated SyncProvider:', syncProvider);
       switch (cfg.syncProvider) {
         case SyncProvider.Dropbox:
-          return new PFDropbox({
+          return new Dropbox({
             appKey: DROPBOX_APP_KEY,
             // basePath: `/${DROPBOX_APP_FOLDER}`,
             basePath: `/`,
@@ -143,11 +143,11 @@ export class SyncProviderService {
     } catch (error: any) {
       console.error(error);
       if (error instanceof Error) {
-        if (error instanceof PFNoRemoteDataError) {
+        if (error instanceof NoRemoteDataError) {
           console.error('No data error');
-        } else if (error instanceof PFNoRevError) {
+        } else if (error instanceof NoRevError) {
           console.error('No data error');
-        } else if (error instanceof PFNoRemoteMetaFile) {
+        } else if (error instanceof NoRemoteMetaFile) {
           console.error('No data error');
         }
         // TODO ....

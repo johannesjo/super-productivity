@@ -1,16 +1,12 @@
-import { PFBaseCfg, PFMetaFileContent, PFModelCfgs, PFRevMap } from './pf.model';
-import { PFSyncDataService } from './pf-sync-data.service';
-import { PFSyncProviderServiceInterface } from './sync-provider-services/pf-sync-provider.interface';
-import { MiniObservable } from './util/mini-observable';
-import { PFSyncStatus } from './pf.const';
-import {
-  PFNoRemoteDataError,
-  PFNoRemoteMetaFile,
-  PFRevMismatchError,
-} from './errors/pf-errors';
-import { pfLog } from './util/pf-log';
-import { PFMetaModelCtrl } from './pf-meta-model-ctrl';
-import { PFEncryptAndCompressHandlerService } from './pf-encrypt-and-compress-handler.service';
+import { BaseCfg, MetaFileContent, ModelCfgs, RevMap } from '../pfapi.model';
+import { SyncDataService } from './sync-data.service';
+import { SyncProviderServiceInterface } from './sync-provider.interface';
+import { MiniObservable } from '../util/mini-observable';
+import { SyncStatus } from '../pfapi.const';
+import { NoRemoteDataError, NoRemoteMetaFile, RevMismatchError } from '../errors/errors';
+import { pfLog } from '../util/log';
+import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
+import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 
 /*
 (0. maybe write lock file)
@@ -35,33 +31,33 @@ Offer to use remote or local (always create local backup before this)
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PFSyncService<const MD extends PFModelCfgs> {
-  private _cfg$: MiniObservable<PFBaseCfg>;
-  private _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>;
+export class SyncService<const MD extends ModelCfgs> {
+  private _cfg$: MiniObservable<BaseCfg>;
+  private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
 
-  private readonly _pfSyncDataService: PFSyncDataService<MD>;
-  private readonly _metaModelCtrl: PFMetaModelCtrl;
-  private readonly _encryptAndCompressHandler: PFEncryptAndCompressHandlerService;
+  private readonly _syncDataService: SyncDataService<MD>;
+  private readonly _metaModelCtrl: MetaModelCtrl;
+  private readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
 
   constructor(
-    cfg$: MiniObservable<PFBaseCfg>,
-    _currentSyncProvider$: MiniObservable<PFSyncProviderServiceInterface<unknown> | null>,
-    _pfSyncDataService: PFSyncDataService<MD>,
-    _metaModelCtrl: PFMetaModelCtrl,
-    _encryptAndCompressHandler: PFEncryptAndCompressHandlerService,
+    cfg$: MiniObservable<BaseCfg>,
+    _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    _syncDataService: SyncDataService<MD>,
+    _metaModelCtrl: MetaModelCtrl,
+    _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
     this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
-    this._pfSyncDataService = _pfSyncDataService;
+    this._syncDataService = _syncDataService;
     this._metaModelCtrl = _metaModelCtrl;
     this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
 
   // TODO
-  async sync(): Promise<PFSyncStatus | any> {
+  async sync(): Promise<SyncStatus | any> {
     try {
       if (!(await this._isReadyForSync())) {
-        return PFSyncStatus.NotConfigured;
+        return SyncStatus.NotConfigured;
       }
 
       const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
@@ -75,18 +71,18 @@ export class PFSyncService<const MD extends PFModelCfgs> {
       );
       pfLog('sync(): metaFileCheck', metaFileCheck);
       switch (metaFileCheck) {
-        case PFSyncStatus.UpdateLocal:
+        case SyncStatus.UpdateLocal:
           return this._updateLocal(remoteMetaFileContent, localSyncMetaData);
-        case PFSyncStatus.UpdateRemote:
+        case SyncStatus.UpdateRemote:
           return this._updateRemote(remoteMetaFileContent, localSyncMetaData);
-        case PFSyncStatus.Conflict:
+        case SyncStatus.Conflict:
         // TODO
-        case PFSyncStatus.InSync:
-          return PFSyncStatus.InSync;
+        case SyncStatus.InSync:
+          return SyncStatus.InSync;
       }
     } catch (e) {
       if (e instanceof Error) {
-        if (e instanceof PFNoRemoteMetaFile) {
+        if (e instanceof NoRemoteMetaFile) {
           const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
           console.log({ localSyncMetaData });
 
@@ -98,15 +94,15 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   }
 
   private async _updateLocal(
-    remoteMetaFileContent: PFMetaFileContent,
-    localSyncMetaData: PFMetaFileContent,
+    remoteMetaFileContent: MetaFileContent,
+    localSyncMetaData: MetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = await this._getModelIdsToUpdate(
       remoteMetaFileContent.revMap,
       localSyncMetaData.revMap,
     );
-    const realRevMap: PFRevMap = {};
+    const realRevMap: RevMap = {};
     await Promise.all(
       toUpdate.map((modelId) =>
         // TODO properly create rev map
@@ -135,25 +131,25 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   }
 
   private async _updateRemote(
-    remoteMetaFileContent: PFMetaFileContent,
-    localSyncMetaData: PFMetaFileContent,
+    remoteMetaFileContent: MetaFileContent,
+    localSyncMetaData: MetaFileContent,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = await this._getModelIdsToUpdate(
       localSyncMetaData.revMap,
       remoteMetaFileContent.revMap,
     );
-    const realRevMap: PFRevMap = {};
+    const realRevMap: RevMap = {};
     alert('AAAa');
     await Promise.all(
       toUpdate.map(
         (modelId) =>
-          this._pfSyncDataService.m[modelId]
+          this._syncDataService.m[modelId]
             .load()
             .then((data) =>
               this._uploadModel(
                 modelId,
-                this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+                this._syncDataService.m[modelId].modelCfg.modelVersion,
                 data,
               ),
             )
@@ -182,16 +178,16 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     });
   }
 
-  private async _updateRemoteAll(localSyncMetaData: PFMetaFileContent): Promise<void> {
-    const realRevMap: PFRevMap = {};
-    const completeModelData = await this._pfSyncDataService.getCompleteSyncData();
+  private async _updateRemoteAll(localSyncMetaData: MetaFileContent): Promise<void> {
+    const realRevMap: RevMap = {};
+    const completeModelData = await this._syncDataService.getCompleteSyncData();
     const allModelIds = Object.keys(completeModelData);
     await Promise.all(
       allModelIds.map(
         (modelId) =>
           this._uploadModel(
             modelId,
-            this._pfSyncDataService.m[modelId].modelCfg.modelVersion,
+            this._syncDataService.m[modelId].modelCfg.modelVersion,
             completeModelData[modelId],
           ).then((rev) => {
             realRevMap[modelId] = this._cleanRev(rev);
@@ -222,7 +218,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
     return this._getCurrentSyncProviderOrError().isReady();
   }
 
-  private _getCurrentSyncProviderOrError(): PFSyncProviderServiceInterface<unknown> {
+  private _getCurrentSyncProviderOrError(): SyncProviderServiceInterface<unknown> {
     const provider = this._currentSyncProvider$.value;
     if (!provider) {
       throw new Error('No sync provider set');
@@ -268,7 +264,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
         'rev' in revResult &&
         !this._isSameRev(revResult.rev, expectedRev)
       ) {
-        throw new PFRevMismatchError(`Download Model Rev: ${msg}`);
+        throw new RevMismatchError(`Download Model Rev: ${msg}`);
       }
     };
 
@@ -285,8 +281,8 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   }
 
   private async _getModelIdsToUpdate(
-    revMapNewer: PFRevMap,
-    revMapToOverwrite: PFRevMap,
+    revMapNewer: RevMap,
+    revMapToOverwrite: RevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
       (modelId) =>
@@ -326,7 +322,7 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   // META MODEL
   // ----------
   private async _uploadMetaFile(
-    meta: PFMetaFileContent,
+    meta: MetaFileContent,
     rev: string | null = null,
   ): Promise<string> {
     pfLog('sync: _uploadMetaModel()', meta);
@@ -335,33 +331,33 @@ export class PFSyncService<const MD extends PFModelCfgs> {
       meta.crossModelVersion,
     );
     return this._uploadModel(
-      PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
+      MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
       meta.crossModelVersion,
       encryptedAndCompressedData,
       rev,
     );
   }
 
-  private async _downloadMetaFile(localRev?: string | null): Promise<PFMetaFileContent> {
-    // return {} as any as PFMetaFileContent;
+  private async _downloadMetaFile(localRev?: string | null): Promise<MetaFileContent> {
+    // return {} as any as MetaFileContent;
     pfLog('sync: _downloadMetaFile()', localRev);
     const syncProvider = this._getCurrentSyncProviderOrError();
     try {
       const r = await syncProvider.downloadFileData(
-        PFMetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
+        MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
         localRev || null,
       );
       return this._decompressAndDecryptData(r.dataStr);
     } catch (e) {
-      if (e instanceof Error && e instanceof PFNoRemoteDataError) {
-        throw new PFNoRemoteMetaFile();
+      if (e instanceof Error && e instanceof NoRemoteDataError) {
+        throw new NoRemoteMetaFile();
       }
       throw e;
     }
   }
 
   private async _updateLocalMetaFileContent(
-    localMetaFileContent: PFMetaFileContent,
+    localMetaFileContent: MetaFileContent,
   ): Promise<unknown> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }
@@ -378,13 +374,13 @@ export class PFSyncService<const MD extends PFModelCfgs> {
   }
 
   private _checkMetaFileContent(
-    remoteMetaFileContent: PFMetaFileContent,
-    localSyncMetaData: PFMetaFileContent,
-  ): PFSyncStatus {
+    remoteMetaFileContent: MetaFileContent,
+    localSyncMetaData: MetaFileContent,
+  ): SyncStatus {
     // const allRemoteRevs = Object.values(remoteMetaFileContent.revMap);
     // const allLocalRevs = Object.values(localSyncMetaData.revMap);
 
-    return PFSyncStatus.InSync;
+    return SyncStatus.InSync;
   }
 
   private _handleConflict(): void {}

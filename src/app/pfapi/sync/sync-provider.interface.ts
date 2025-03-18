@@ -1,13 +1,13 @@
-import { PFSyncProviderId } from '../pf.const';
+import { SyncProviderId } from '../pfapi.const';
 import { MiniObservable } from '../util/mini-observable';
 
-export interface PFSyncProviderAuthHelper {
+export interface SyncProviderAuthHelper {
   authUrl?: string;
   codeVerifier?: string;
 }
 
-export interface PFSyncProviderServiceInterface<C> {
-  id: PFSyncProviderId;
+export interface SyncProviderServiceInterface<C> {
+  id: SyncProviderId;
   isUploadForcePossible?: boolean;
 
   credentials$: MiniObservable<C | null>;
@@ -52,7 +52,7 @@ export interface PFSyncProviderServiceInterface<C> {
   // Auth
   isReady(): Promise<boolean>;
 
-  getAuthHelper?(): Promise<PFSyncProviderAuthHelper>;
+  getAuthHelper?(): Promise<SyncProviderAuthHelper>;
 
   setCredentials(credentials: C): Promise<void>;
 }

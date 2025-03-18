@@ -1,6 +1,6 @@
 import { IDBPDatabase } from 'idb/build';
 import { DBSchema, openDB } from 'idb';
-import { PFDatabaseAdapter } from './pf-database-adapter.model';
+import { DatabaseAdapter } from './database-adapter.model';
 import { MiniObservable } from '../util/mini-observable';
 
 interface MyDb extends DBSchema {
@@ -8,7 +8,7 @@ interface MyDb extends DBSchema {
 }
 
 // TODO fix all the typing
-export class PFIndexedDbAdapter implements PFDatabaseAdapter {
+export class IndexedDbAdapter implements DatabaseAdapter {
   private _db?: IDBPDatabase<MyDb>;
   private _isReady$: MiniObservable<boolean> = new MiniObservable<boolean>(false);
 
