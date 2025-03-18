@@ -75,6 +75,14 @@ export class NoRevError extends Error {
   }
 }
 
+export class NoSyncProviderSet extends Error {
+  override name = NoSyncProviderSet.name.replace('', '');
+
+  constructor(message?: string) {
+    super(message);
+  }
+}
+
 export class RevMismatchError extends Error {
   override name = RevMismatchError.name.replace('', '');
 

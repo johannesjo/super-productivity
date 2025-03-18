@@ -14,7 +14,7 @@ import { pfLog } from '../../util/log';
 import { DropboxApi } from './dropbox-api';
 // TODO move over here
 import { generatePKCECodes } from '../../../imex/sync/generate-pkce-codes';
-import { MiniObservable } from '../../util/mini-observable';
+import { SyncProviderCredentialsStore } from '../sync-provider-credentials-store';
 
 export interface DropboxCfg {
   appKey: string;
@@ -34,7 +34,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
   private readonly _appKey: string;
   private readonly _basePath: string;
 
-  public readonly credentials$ = new MiniObservable<DropboxCredentials | null>(null);
+  public credentialsStore!: SyncProviderCredentialsStore<DropboxCredentials>;
 
   constructor(cfg: DropboxCfg) {
     if (!cfg.appKey) {
@@ -43,19 +43,18 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
 
     this._appKey = cfg.appKey;
     this._basePath = cfg.basePath || '/';
-    this._api = new DropboxApi(this._appKey, this.credentials$);
+    this._api = new DropboxApi(this._appKey, this);
   }
 
   async isReady(): Promise<boolean> {
-    return (
-      !!this._appKey &&
-      !!this.credentials$.value?.accessToken &&
-      !!this.credentials$.value?.refreshToken
-    );
+    const credentials = await this.credentialsStore.getCredentials();
+    console.log({ credentials });
+
+    return !!this._appKey && !!credentials?.accessToken && !!credentials?.refreshToken;
   }
 
   async setCredentials(credentials: DropboxCredentials): Promise<void> {
-    this.credentials$.next(credentials);
+    await this.credentialsStore.setCredentials(credentials);
   }
 
   async getAuthHelper(): Promise<SyncProviderAuthHelper> {

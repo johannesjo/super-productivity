@@ -15,9 +15,10 @@ import { SyncDataService } from './sync/sync-data.service';
 import { MiniObservable } from './util/mini-observable';
 import { SyncProviderServiceInterface } from './sync/sync-provider.interface';
 import { pfLog } from './util/log';
-import { SyncStatus } from './pfapi.const';
+import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
+import { NoSyncProviderSet } from './errors/errors';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -37,7 +38,6 @@ export class Pfapi<const MD extends ModelCfgs> {
   private readonly _db: Database;
   private readonly _syncService: SyncService<MD>;
   private readonly _syncDataService: SyncDataService<MD>;
-  private readonly _syncProviderCredentialsStore: SyncProviderCredentialsStore;
 
   // private readonly _eventHandlers = new Map<
   //   keyof EventMap,
@@ -46,8 +46,13 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
+  public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
 
-  constructor(modelCfgs: MD, cfg?: BaseCfg) {
+  constructor(
+    modelCfgs: MD,
+    syncProviders: SyncProviderServiceInterface<unknown>[],
+    cfg?: BaseCfg,
+  ) {
     if (Pfapi._wasInstanceCreated) {
       throw new Error(': This should only ever be instantiated once');
     }
@@ -68,7 +73,11 @@ export class Pfapi<const MD extends ModelCfgs> {
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
-    this._syncProviderCredentialsStore = new SyncProviderCredentialsStore(this._db);
+    this.syncProviders = syncProviders;
+    this.syncProviders.forEach((sp) => {
+      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(this._db, sp.id);
+    });
+
     this._syncDataService = new SyncDataService<MD>(this.m);
     this._syncService = new SyncService<MD>(
       this._syncProvider$,
@@ -88,8 +97,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     return result;
   }
 
-  setActiveProvider(activeProvider: SyncProviderServiceInterface<any>): void {
-    pfLog(2, `${this.setActiveProvider.name}()`, activeProvider);
+  setActiveProvider(activeProviderId: SyncProviderId): void {
     // this._unsubscribeCredentials();
     // this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
     //   pfLog('credentials update', v);
@@ -97,13 +105,23 @@ export class Pfapi<const MD extends ModelCfgs> {
     //     this._syncProviderCredentialsStore.setCredentials(activeProvider.id, v);
     //   }
     // });
-    this._syncProvider$.next(activeProvider);
+    const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
+    pfLog(2, `${this.setActiveProvider.name}()`, activeProviderId, provider);
+    this._syncProvider$.next(provider || null);
   }
 
   // TODO typing
-  setCredentialsForActiveProvider(credentials: unknown): void {
-    pfLog(2, `${this.setCredentialsForActiveProvider.name}()`, credentials);
-    this._syncProvider$.value?.setCredentials(credentials);
+  setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
+    pfLog(
+      2,
+      `${this.setCredentialsForActiveProvider.name}()`,
+      credentials,
+      this._syncProvider$.value,
+    );
+    if (!this._syncProvider$.value) {
+      throw new NoSyncProviderSet();
+    }
+    return this._syncProvider$.value.setCredentials(credentials);
   }
 
   importCompleteData(data: CompleteModel<MD>): Promise<unknown> {

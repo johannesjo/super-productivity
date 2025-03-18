@@ -3,7 +3,12 @@ import { SyncDataService } from './sync-data.service';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { SyncStatus } from '../pfapi.const';
-import { NoRemoteDataError, NoRemoteMetaFile, RevMismatchError } from '../errors/errors';
+import {
+  NoSyncProviderSet,
+  NoRemoteDataError,
+  NoRemoteMetaFile,
+  RevMismatchError,
+} from '../errors/errors';
 import { pfLog } from '../util/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
@@ -218,7 +223,7 @@ export class SyncService<const MD extends ModelCfgs> {
   private _getCurrentSyncProviderOrError(): SyncProviderServiceInterface<unknown> {
     const provider = this._currentSyncProvider$.value;
     if (!provider) {
-      throw new Error('No sync provider set');
+      throw new NoSyncProviderSet();
     }
     return provider;
   }

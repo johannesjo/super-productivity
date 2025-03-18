@@ -1,5 +1,5 @@
 import { SyncProviderId } from '../pfapi.const';
-import { MiniObservable } from '../util/mini-observable';
+import { SyncProviderCredentialsStore } from './sync-provider-credentials-store';
 
 export interface SyncProviderAuthHelper {
   authUrl?: string;
@@ -10,7 +10,7 @@ export interface SyncProviderServiceInterface<C> {
   id: SyncProviderId;
   isUploadForcePossible?: boolean;
 
-  credentials$: MiniObservable<C | null>;
+  credentialsStore: SyncProviderCredentialsStore<C>;
 
   /**
    * Gets the current revision and last update time for a file

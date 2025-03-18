@@ -1,8 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { SyncProvider } from './sync-provider.model';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { SyncResult } from './sync.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -14,16 +13,18 @@ import { DROPBOX_APP_KEY } from './dropbox/dropbox.const';
 import {
   Dropbox,
   ModelCfg,
-  Pfapi,
   NoRemoteDataError,
   NoRemoteMetaFile,
   NoRevError,
+  Pfapi,
+  SyncProviderId,
 } from '../../pfapi';
 import { TaskState } from '../../features/tasks/task.model';
 import { ProjectState } from '../../features/project/project.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { initialProjectState } from '../../features/project/store/project.reducer';
+import { SyncProvider } from './sync-provider.model';
 
 type ModelCfgs = {
   task: ModelCfg<TaskState>;
@@ -38,6 +39,14 @@ const MODEL_CFGS: ModelCfgs = {
   },
 } as const;
 
+const SYNC_PROVIDERS = [
+  new Dropbox({
+    appKey: DROPBOX_APP_KEY,
+    // basePath: `/${DROPBOX_APP_FOLDER}`,
+    basePath: `/`,
+  }),
+];
+
 @Injectable({
   providedIn: 'root',
 })
@@ -51,7 +60,7 @@ export class SyncProviderService {
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
   // TODO
-  pf = new Pfapi(MODEL_CFGS, {});
+  pf = new Pfapi(MODEL_CFGS, SYNC_PROVIDERS, {});
 
   // TODO
   isCurrentProviderInSync$ = of(false);
@@ -59,45 +68,52 @@ export class SyncProviderService {
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
   );
-
-  currentProvider$ = this.syncCfg$.pipe(
-    map((cfg) => {
-      // console.log('Activated SyncProvider:', syncProvider);
-      switch (cfg.syncProvider) {
-        case SyncProvider.Dropbox:
-          return new Dropbox({
-            appKey: DROPBOX_APP_KEY,
-            // basePath: `/${DROPBOX_APP_FOLDER}`,
-            basePath: `/`,
-          });
-        // case SyncProvider.WebDAV:
-        //   return this._webDavSyncService;
-        // case SyncProvider.LocalFile:
-        //   if (IS_ANDROID_WEB_VIEW) {
-        //     return this._localFileSyncAndroidService;
-        //   } else {
-        //     return this._localFileSyncElectronService;
-        //   }
-        default:
-          return null;
-      }
-    }),
-    filter((p) => !!p),
-    shareReplay(1),
+  syncProviderId$: Observable<SyncProviderId> = this.syncCfg$.pipe(
+    // TODO fix typing
+    map((cfg) => cfg.syncProvider as unknown as SyncProviderId),
   );
+
+  // TODO replace with something
+  // currentProvider$ = this.syncCfg$.pipe(
+  //   map((cfg) => {
+  //     // console.log('Activated SyncProvider:', syncProvider);
+  //     switch (cfg.syncProvider) {
+  //       case SyncProvider.Dropbox:
+  //         return new Dropbox({
+  //           appKey: DROPBOX_APP_KEY,
+  //           // basePath: `/${DROPBOX_APP_FOLDER}`,
+  //           basePath: `/`,
+  //         });
+  //       // case SyncProvider.WebDAV:
+  //       //   return this._webDavSyncService;
+  //       // case SyncProvider.LocalFile:
+  //       //   if (IS_ANDROID_WEB_VIEW) {
+  //       //     return this._localFileSyncAndroidService;
+  //       //   } else {
+  //       //     return this._localFileSyncElectronService;
+  //       //   }
+  //       default:
+  //         return null;
+  //     }
+  //   }),
+  //   filter((p) => !!p),
+  //   shareReplay(1),
+  // );
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
-  isEnabledAndReady$: Observable<boolean> = combineLatest([
-    this.currentProvider$.pipe(
-      switchMap((currentProvider) =>
-        currentProvider ? currentProvider.isReady() : of(false),
-      ),
-    ),
-    this.isEnabled$,
-  ]).pipe(
-    tap((v) => console.log('isEnabledAndReady$', v)),
-    map(([isReady, isEnabled]) => isReady && isEnabled),
-  );
+  // TODO replace with something
+  isEnabledAndReady$: Observable<boolean> = of(true);
+  //   combineLatest([
+  //   this.currentProvider$.pipe(
+  //     switchMap((currentProvider) =>
+  //       currentProvider ? currentProvider.isReady() : of(false),
+  //     ),
+  //   ),
+  //   this.isEnabled$,
+  // ]).pipe(
+  //   tap((v) => console.log('isEnabledAndReady$', v)),
+  //   map(([isReady, isEnabled]) => isReady && isEnabled),
+  // );
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
@@ -112,29 +128,37 @@ export class SyncProviderService {
   );
 
   constructor() {
-    this._persistenceLocalService.load().then((d) => {
-      console.log(d);
+    this.pf.importCompleteData({
+      task: initialTaskState,
+      project: initialProjectState,
+    });
+    this.syncProviderId$.subscribe((v) => {
+      console.log('_______________________', { v });
 
-      this.currentProvider$.subscribe((provider) => {
-        this.pf.importCompleteData({
-          task: initialTaskState,
-          project: initialProjectState,
+      if (v) {
+        this.pf.setActiveProvider(v as unknown as SyncProviderId);
+
+        this._persistenceLocalService.load().then((d) => {
+          console.log(d);
+          // TODO real implementation
+          this.pf.setCredentialsForActiveProvider({
+            accessToken: d[SyncProvider.Dropbox].accessToken,
+            refreshToken: d[SyncProvider.Dropbox].refreshToken,
+          });
+
+          this.pf.sync();
         });
-        this.pf.setActiveProvider(provider);
-        // TODO real implementation
-        // this.pf.setCredentialsForActiveProvider({
-        //   accessToken: d[SyncProvider.Dropbox].accessToken,
-        //   refreshToken: d[SyncProvider.Dropbox].refreshToken,
-        // });
-      });
+      }
     });
   }
 
   // TODO move someplace else
 
   async sync(): Promise<SyncResult> {
-    const currentProvider = await this.currentProvider$.pipe(take(1)).toPromise();
-    if (!currentProvider) {
+    const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
+    const providerId = syncCfg.syncProvider;
+    if (!providerId) {
+      // TODO handle different
       throw new Error('No Sync Provider for sync()');
     }
 

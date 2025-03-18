@@ -4,17 +4,17 @@ import { stringify } from 'query-string';
 import { DropboxFileMetadata } from '../../../imex/sync/dropbox/dropbox.model';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { DropboxCredentials } from './dropbox';
-import { MiniObservable } from '../../util/mini-observable';
 import { AuthNotConfiguredError, NoRemoteDataError } from '../../errors/errors';
 import { pfLog } from '../../util/log';
+import { SyncProviderServiceInterface } from '../sync-provider.interface';
 
 export class DropboxApi {
-  private readonly _credentials$: MiniObservable<DropboxCredentials | null>;
   private _appKey: string;
+  private _parent: SyncProviderServiceInterface<DropboxCredentials>;
 
-  constructor(appKey: string, credentials$: MiniObservable<DropboxCredentials | null>) {
+  constructor(appKey: string, parent: SyncProviderServiceInterface<DropboxCredentials>) {
     this._appKey = appKey;
-    this._credentials$ = credentials$;
+    this._parent = parent;
   }
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
@@ -125,7 +125,8 @@ export class DropboxApi {
     accessToken?: string;
     isSkipTokenRefresh?: boolean;
   }): Promise<AxiosResponse> {
-    if (!this._credentials$.value?.accessToken) {
+    const credentials = await this._parent.credentialsStore.getCredentials();
+    if (!credentials?.accessToken) {
       throw new AuthNotConfiguredError('Dropbox no token');
     }
 
@@ -135,7 +136,7 @@ export class DropboxApi {
         method,
         data,
         headers: {
-          authorization: `Bearer ${this._credentials$.value?.accessToken}`,
+          authorization: `Bearer ${credentials?.accessToken}`,
           'Content-Type': 'application/json;charset=UTF-8',
           ...headers,
         },
@@ -200,7 +201,8 @@ export class DropboxApi {
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
   > {
     pfLog(2, 'updateAccessTokenFromRefreshTokenIfAvailable()');
-    const refreshToken = this._credentials$.value?.refreshToken;
+    const credentials = await this._parent.credentialsStore.getCredentials();
+    const refreshToken = credentials?.refreshToken;
     if (!refreshToken) {
       console.error('Dropbox: No refresh token available');
       return 'NO_REFRESH_TOKEN';
@@ -221,9 +223,9 @@ export class DropboxApi {
       })
       .then(async (res) => {
         pfLog(2, 'Dropbox: Refresh access token Response', res);
-        this._credentials$.next({
+        this._parent.credentialsStore.setCredentials({
           accessToken: res.data.access_token,
-          refreshToken: res.data.refresh_token || this._credentials$.value?.refreshToken,
+          refreshToken: res.data.refresh_token || credentials?.refreshToken,
         });
         return 'SUCCESS' as const;
       })
