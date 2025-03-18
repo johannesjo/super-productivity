@@ -7,6 +7,7 @@ import { selectCurrentTask } from './task.selectors';
 import { IS_ELECTRON } from '../../../app.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { selectIsFocusOverlayShown } from '../../focus-mode/store/focus-mode.selectors';
+import { PomodoroService } from '../../pomodoro/pomodoro.service';
 
 // TODO send message to electron when current task changes here
 
@@ -15,15 +16,24 @@ export class TaskElectronEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _configService = inject(GlobalConfigService);
+  private _pomodoroService = inject(PomodoroService);
 
   taskChangeElectron$: any = createEffect(
     () =>
       this._actions$.pipe(
         ofType(setCurrentTask, unsetCurrentTask, addTimeSpent),
-        withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
-        tap(([action, current]) => {
+        withLatestFrom(
+          this._store$.pipe(select(selectCurrentTask)),
+          this._pomodoroService.isEnabled$,
+          this._pomodoroService.currentSessionTime$,
+        ),
+        tap(([action, current, isPomodoroEnabled, currentPomodoroSessionTime]) => {
           if (IS_ELECTRON) {
-            window.ea.updateCurrentTask(current);
+            window.ea.updateCurrentTask(
+              current,
+              isPomodoroEnabled,
+              currentPomodoroSessionTime,
+            );
           }
         }),
       ),
