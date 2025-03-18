@@ -1,4 +1,5 @@
 import { DatabaseAdapter } from './database-adapter.model';
+import { pfLog } from '../util/log';
 
 export class Database {
   private _lastParams?: { a: string; key?: string; data?: unknown };
@@ -71,6 +72,7 @@ export class Database {
     fn: Function,
     args: any[],
   ): Promise<void> {
+    pfLog(1, `${Database.name}.${this._errorHandler.name}()`, e, fn, args);
     this._onError(e as Error);
 
     // TODO maybe

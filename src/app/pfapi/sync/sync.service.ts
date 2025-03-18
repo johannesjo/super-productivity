@@ -291,6 +291,10 @@ export class SyncService<const MD extends ModelCfgs> {
     revMapNewer: RevMap,
     revMapToOverwrite: RevMap,
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
+    pfLog(3, `${SyncService.name}.${this._getModelIdsToUpdate.name}()`, {
+      revMapNewer,
+      revMapToOverwrite,
+    });
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
       (modelId) =>
         cleanRev(revMapNewer[modelId]) !== cleanRev(revMapToOverwrite[modelId]),
@@ -379,6 +383,7 @@ export class SyncService<const MD extends ModelCfgs> {
     return (await this._encryptAndCompressHandler.decompressAndDecrypt<T>(data)).data;
   }
 
+  // TODO implement
   private _checkMetaFileContent(
     remoteMetaFileContent: MetaFileContent,
     localSyncMetaData: MetaFileContent,
@@ -386,7 +391,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // const allRemoteRevs = Object.values(remoteMetaFileContent.revMap);
     // const allLocalRevs = Object.values(localSyncMetaData.revMap);
 
-    return SyncStatus.InSync;
+    return SyncStatus.UpdateRemote;
   }
 
   private async _awaitLockFilePermission(): Promise<boolean> {

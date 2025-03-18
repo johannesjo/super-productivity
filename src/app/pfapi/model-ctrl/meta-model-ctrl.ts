@@ -3,6 +3,7 @@ import { MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { getEnvironmentId } from '../util/get-environment-id';
 import { DBNames } from '../pfapi.const';
+import { ClientIdNotFoundError } from '../errors/errors';
 
 const DEFAULT_META_MODEL: MetaFileContent = {
   crossModelVersion: 1,
@@ -21,6 +22,14 @@ export class MetaModelCtrl {
 
   constructor(db: Database) {
     this._db = db;
+    //
+    this.loadClientId().catch((e) => {
+      if (e instanceof ClientIdNotFoundError) {
+        const clientIdI = this._generateClientId();
+        pfLog(2, `${MetaModelCtrl.name} Create clientId ${clientIdI}`);
+        this._saveClientId(clientIdI);
+      }
+    });
   }
 
   async onModelSave<MT extends ModelBase>(
@@ -94,12 +103,13 @@ export class MetaModelCtrl {
     }
     const clientId = await this._db.load(MetaModelCtrl.CLIENT_ID);
     if (typeof clientId !== 'string') {
-      throw new Error('Client ID not found');
+      throw new ClientIdNotFoundError();
     }
     return clientId;
   }
 
   private _saveClientId(clientId: string): Promise<unknown> {
+    pfLog(2, `${MetaModelCtrl.name}.${this._saveClientId.name}()`, clientId);
     this._clientIdInMemory = clientId;
     return this._db.save(MetaModelCtrl.CLIENT_ID, clientId);
   }

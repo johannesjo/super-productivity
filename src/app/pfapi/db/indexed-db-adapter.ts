@@ -88,9 +88,9 @@ export class IndexedDbAdapter implements DatabaseAdapter {
     if (this._isReady$.value) {
       return;
     }
-    if (!this._db) {
-      throw new Error('DB not initialized');
-    }
+    // if (!this._db) {
+    //   throw new DBNotInitialized();
+    // }
     return new Promise<void>((resolve) => {
       const unsubscribe = this._isReady$.subscribe((isReady) => {
         if (isReady) {

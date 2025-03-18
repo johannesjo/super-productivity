@@ -63,6 +63,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       adapter:
         cfg?.dbAdapter ||
         new IndexedDbAdapter({
+          // TODO to variable
           dbName: 'pf',
           dbMainName: 'main',
           version: 1,

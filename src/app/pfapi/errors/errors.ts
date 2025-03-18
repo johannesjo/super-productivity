@@ -148,3 +148,10 @@ export class LockFilePresentError extends Error {
     super(message);
   }
 }
+
+export class ClientIdNotFoundError extends Error {
+  override name = ClientIdNotFoundError.name.replace('', '');
+}
+export class DBNotInitialized extends Error {
+  override name = DBNotInitialized.name.replace('', '');
+}

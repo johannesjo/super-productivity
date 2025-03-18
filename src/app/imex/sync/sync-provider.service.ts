@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { SyncResult } from './sync.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -10,15 +10,7 @@ import { DataImportService } from './data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import { DROPBOX_APP_KEY } from './dropbox/dropbox.const';
-import {
-  Dropbox,
-  ModelCfg,
-  NoRemoteDataError,
-  NoRemoteMetaFile,
-  NoRevError,
-  Pfapi,
-  SyncProviderId,
-} from '../../pfapi';
+import { Dropbox, ModelCfg, Pfapi, SyncProviderId } from '../../pfapi';
 import { TaskState } from '../../features/tasks/task.model';
 import { ProjectState } from '../../features/project/project.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
@@ -128,57 +120,63 @@ export class SyncProviderService {
   );
 
   constructor() {
-    this.pf.importCompleteData({
-      task: initialTaskState,
-      project: initialProjectState,
-    });
-    this.syncProviderId$.subscribe((v) => {
-      console.log('_______________________', { v });
+    setTimeout(() => {
+      this.syncProviderId$.subscribe((v) => {
+        console.log('_______________________', { v });
 
-      if (v) {
-        this.pf.setActiveProvider(v as unknown as SyncProviderId);
+        if (v) {
+          this.pf.setActiveProvider(v as unknown as SyncProviderId);
 
-        this._persistenceLocalService.load().then((d) => {
-          console.log(d);
-          // TODO real implementation
-          this.pf.setCredentialsForActiveProvider({
-            accessToken: d[SyncProvider.Dropbox].accessToken,
-            refreshToken: d[SyncProvider.Dropbox].refreshToken,
+          this._persistenceLocalService.load().then((d) => {
+            console.log(d);
+            // TODO real implementation
+            this.pf
+              .setCredentialsForActiveProvider({
+                accessToken: d[SyncProvider.Dropbox].accessToken,
+                refreshToken: d[SyncProvider.Dropbox].refreshToken,
+              })
+              .then(() => {
+                this.pf.sync();
+              });
           });
-
-          this.pf.sync();
-        });
-      }
-    });
+        }
+      });
+      this.pf.importCompleteData({
+        task: initialTaskState,
+        project: initialProjectState,
+      });
+    }, 2000);
   }
 
   // TODO move someplace else
 
   async sync(): Promise<SyncResult> {
-    const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
-    const providerId = syncCfg.syncProvider;
-    if (!providerId) {
-      // TODO handle different
-      throw new Error('No Sync Provider for sync()');
-    }
-
-    try {
-      await this.pf.sync();
-    } catch (error: any) {
-      console.error(error);
-      if (error instanceof Error) {
-        if (error instanceof NoRemoteDataError) {
-          console.error('No data error');
-        } else if (error instanceof NoRevError) {
-          console.error('No data error');
-        } else if (error instanceof NoRemoteMetaFile) {
-          console.error('No data error');
-        }
-        // TODO ....
-      }
-      return 'ERROR';
-    }
     return 'SUCCESS';
+
+    // const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
+    // const providerId = syncCfg.syncProvider;
+    // if (!providerId) {
+    //   // TODO handle different
+    //   throw new Error('No Sync Provider for sync()');
+    // }
+    //
+    // try {
+    //   await this.pf.sync();
+    // } catch (error: any) {
+    //   console.error(error);
+    //   if (error instanceof Error) {
+    //     if (error instanceof NoRemoteDataError) {
+    //       console.error('No data error');
+    //     } else if (error instanceof NoRevError) {
+    //       console.error('No data error');
+    //     } else if (error instanceof NoRemoteMetaFile) {
+    //       console.error('No data error');
+    //     }
+    //     // TODO ....
+    //   }
+    //   return 'ERROR';
+    // }
+    // return 'SUCCESS';
 
     // TODO handle some place else
     // if (
