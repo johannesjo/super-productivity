@@ -92,7 +92,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO type
   async sync(): Promise<SyncStatus | any> {
-    pfLog(3, `${this.sync.name}()`);
+    // pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
     pfLog(2, `${this.sync.name}() result:`, result);
     return result;

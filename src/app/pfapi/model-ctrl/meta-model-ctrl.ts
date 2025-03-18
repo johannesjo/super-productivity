@@ -36,7 +36,7 @@ export class MetaModelCtrl {
     modelId: string,
     modelCfg: ModelCfg<MT>,
   ): Promise<unknown> {
-    pfLog(3, `${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
+    // pfLog(3, `${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
 
     const timestamp = Date.now();
     if (modelCfg.isLocalOnly) {
@@ -48,6 +48,10 @@ export class MetaModelCtrl {
       metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
     return this._updateMetaModel({
       lastLocalSyncModelUpdate: timestamp,
+      revMap: {
+        ...metaModel.revMap,
+        [modelId]: timestamp.toString(),
+      },
       ...(isModelVersionChange
         ? {
             modelVersions: {
@@ -62,7 +66,7 @@ export class MetaModelCtrl {
   private async _updateMetaModel(
     metaModelUpdate: Partial<MetaFileContent>,
   ): Promise<unknown> {
-    pfLog(3, `${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
+    // pfLog(3, `${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
     this._metaModelInMemory = {
       ...(await this.loadMetaModel()),
       ...metaModelUpdate,
@@ -77,11 +81,11 @@ export class MetaModelCtrl {
   }
 
   async loadMetaModel(): Promise<MetaFileContent> {
-    pfLog(
-      3,
-      `${MetaModelCtrl.name}.${this.loadMetaModel.name}()`,
-      this._metaModelInMemory,
-    );
+    // pfLog(
+    //   3,
+    //   `${MetaModelCtrl.name}.${this.loadMetaModel.name}()`,
+    //   this._metaModelInMemory,
+    // );
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
     }

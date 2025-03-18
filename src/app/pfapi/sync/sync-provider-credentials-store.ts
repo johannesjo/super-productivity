@@ -27,6 +27,7 @@ export class SyncProviderCredentialsStore<T> {
     return (this._credentialsInMemory[key] || (await this.load())[key]) as T;
   }
 
+  // TODO check why to functions and maybe adjust
   async setCredentials(value: T): Promise<unknown> {
     const key = this._providerId;
     this._credentialsInMemory = await this.load();
@@ -47,11 +48,11 @@ export class SyncProviderCredentialsStore<T> {
   }
 
   async load(): Promise<Credentials> {
-    pfLog(
-      2,
-      `${SyncProviderCredentialsStore.name}.${this.load.name}`,
-      this._credentialsInMemory,
-    );
+    // pfLog(
+    //   3,
+    //   `${SyncProviderCredentialsStore.name}.${this.load.name}`,
+    //   this._credentialsInMemory,
+    // );
     return (
       this._credentialsInMemory ||
       ((await this._db.load(this._dbKey)) as Promise<Credentials>)

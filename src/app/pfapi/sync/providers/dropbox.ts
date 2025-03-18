@@ -78,7 +78,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
         (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
-        throw new NoRemoteDataError();
+        throw new NoRemoteDataError(targetPath);
       } else if (isAxiosError && (e as any).response.status === 401) {
         if (
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
@@ -114,7 +114,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
       }
 
       if (!r.data) {
-        throw new NoRemoteDataError();
+        throw new NoRemoteDataError(targetPath);
       }
 
       if (typeof r.data !== 'string') {

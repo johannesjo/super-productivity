@@ -21,7 +21,7 @@ export class EncryptAndCompressHandlerService {
   }> {
     const { isCompressed, isEncrypted, modelVersion, cleanDataStr } =
       extractSyncFileStateFromPrefix(dataStr);
-    console.log(isCompressed, isEncrypted, modelVersion, cleanDataStr);
+    console.log({ isCompressed, isEncrypted, modelVersion, cleanDataStr });
 
     return {
       data: JSON.parse(cleanDataStr),
