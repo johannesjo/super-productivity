@@ -9,7 +9,7 @@ import { AuthNotConfiguredError, NoRemoteDataError } from '../../errors/errors';
 import { pfLog } from '../../util/log';
 
 export class DropboxApi {
-  private _credentials$: MiniObservable<DropboxCredentials | null>;
+  private readonly _credentials$: MiniObservable<DropboxCredentials | null>;
   private _appKey: string;
 
   constructor(appKey: string, credentials$: MiniObservable<DropboxCredentials | null>) {

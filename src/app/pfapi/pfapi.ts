@@ -33,7 +33,6 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private readonly _syncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
     new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
-  private readonly _cfg$: MiniObservable<BaseCfg>;
 
   private readonly _db: Database;
   private readonly _syncService: SyncService<MD>;
@@ -54,8 +53,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     Pfapi._wasInstanceCreated = true;
 
-    this._cfg$ = new MiniObservable(cfg || {});
-
     this._db = new Database({
       onError: cfg?.onDbError || (() => undefined),
       adapter:
@@ -67,13 +64,12 @@ export class Pfapi<const MD extends ModelCfgs> {
         }),
     });
 
-    this.metaModel = new MetaModelCtrl(this._db, this._cfg$);
+    this.metaModel = new MetaModelCtrl(this._db);
     this.m = this._createModels(modelCfgs);
 
     this._syncProviderCredentialsStore = new SyncProviderCredentialsStore(this._db);
     this._syncDataService = new SyncDataService<MD>(this.m);
     this._syncService = new SyncService<MD>(
-      this._cfg$,
       this._syncProvider$,
       this._syncDataService,
       this.metaModel,
@@ -93,13 +89,13 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   setActiveProvider(activeProvider: SyncProviderServiceInterface<any>): void {
     pfLog('setActiveProvider()', activeProvider);
-    this._unsubscribeCredentials();
-    this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
-      pfLog('credentials update', v);
-      if (v) {
-        this._syncProviderCredentialsStore.setCredentials(activeProvider.id, v);
-      }
-    });
+    // this._unsubscribeCredentials();
+    // this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
+    //   pfLog('credentials update', v);
+    //   if (v) {
+    //     this._syncProviderCredentialsStore.setCredentials(activeProvider.id, v);
+    //   }
+    // });
     this._syncProvider$.next(activeProvider);
   }
 
@@ -155,14 +151,14 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // getAllModelData(): unknown {}
 
-  /**
-   * Updates configuration and propagates changes
-   * @param cfg Updated configuration
-   */
-  // TODO think about this
-  public updateCfg(cfg: Partial<BaseCfg>): void {
-    const currentCfg = this._cfg$.value;
-    const newCfg = { ...currentCfg, ...cfg };
-    this._cfg$.next(newCfg);
-  }
+  // /**
+  //  * Updates configuration and propagates changes
+  //  * @param cfg Updated configuration
+  //  */
+  // // TODO think about this
+  // public updateCfg(cfg: Partial<BaseCfg>): void {
+  //   const currentCfg = this._cfg$.value;
+  //   const newCfg = { ...currentCfg, ...cfg };
+  //   this._cfg$.next(newCfg);
+  // }
 }

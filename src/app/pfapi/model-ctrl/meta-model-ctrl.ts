@@ -1,6 +1,5 @@
 import { Database } from '../db/database';
-import { BaseCfg, MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
-import { MiniObservable } from '../util/mini-observable';
+import { MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { getEnvironmentId } from '../util/get-environment-id';
 
@@ -19,7 +18,7 @@ export class MetaModelCtrl {
   private _metaModelInMemory?: MetaFileContent;
   private _clientIdInMemory?: string;
 
-  constructor(db: Database, cfg$: MiniObservable<BaseCfg>) {
+  constructor(db: Database) {
     this._db = db;
   }
 

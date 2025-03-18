@@ -1,4 +1,4 @@
-import { BaseCfg, MetaFileContent, ModelCfgs, RevMap } from '../pfapi.model';
+import { MetaFileContent, ModelCfgs, RevMap } from '../pfapi.model';
 import { SyncDataService } from './sync-data.service';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
@@ -7,6 +7,7 @@ import { NoRemoteDataError, NoRemoteMetaFile, RevMismatchError } from '../errors
 import { pfLog } from '../util/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
+import { cleanRev } from '../util/clean-rev';
 
 /*
 (0. maybe write lock file)
@@ -32,21 +33,17 @@ Offer to use remote or local (always create local backup before this)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
-  private _cfg$: MiniObservable<BaseCfg>;
-  private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
-
+  private readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
   private readonly _syncDataService: SyncDataService<MD>;
   private readonly _metaModelCtrl: MetaModelCtrl;
   private readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
 
   constructor(
-    cfg$: MiniObservable<BaseCfg>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     _syncDataService: SyncDataService<MD>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
-    this._cfg$ = cfg$;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._syncDataService = _syncDataService;
     this._metaModelCtrl = _metaModelCtrl;
@@ -154,7 +151,7 @@ export class SyncService<const MD extends ModelCfgs> {
               ),
             )
             .then((rev) => {
-              realRevMap[modelId] = this._cleanRev(rev);
+              realRevMap[modelId] = cleanRev(rev);
             }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
         //  since remote might hava an incomplete update
@@ -190,7 +187,7 @@ export class SyncService<const MD extends ModelCfgs> {
             this._syncDataService.m[modelId].modelCfg.modelVersion,
             completeModelData[modelId],
           ).then((rev) => {
-            realRevMap[modelId] = this._cleanRev(rev);
+            realRevMap[modelId] = cleanRev(rev);
           }),
         // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
         // since remote might hava an incomplete update
@@ -286,8 +283,7 @@ export class SyncService<const MD extends ModelCfgs> {
   ): Promise<{ toUpdate: string[]; toDelete: string[] }> {
     const toUpdate: string[] = Object.keys(revMapNewer).filter(
       (modelId) =>
-        this._cleanRev(revMapNewer[modelId]) !==
-        this._cleanRev(revMapToOverwrite[modelId]),
+        cleanRev(revMapNewer[modelId]) !== cleanRev(revMapToOverwrite[modelId]),
     );
     const toDelete: string[] = Object.keys(revMapToOverwrite).filter(
       (modelId) => !revMapNewer[modelId],
@@ -395,14 +391,6 @@ export class SyncService<const MD extends ModelCfgs> {
     if (a === b) {
       return true;
     }
-    return this._cleanRev(a) === this._cleanRev(b);
-  }
-
-  private _cleanRev(rev: string): string {
-    const suffix = '-gzip';
-    if (rev.endsWith(suffix)) {
-      return rev.slice(0, -suffix.length);
-    }
-    return rev;
+    return cleanRev(a) === cleanRev(b);
   }
 }
