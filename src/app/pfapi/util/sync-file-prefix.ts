@@ -1,4 +1,5 @@
 import { REMOTE_FILE_CONTENT_PREFIX } from '../pfapi.const';
+import { InvalidFilePrefixError } from '../errors/errors';
 
 const PREFIX = REMOTE_FILE_CONTENT_PREFIX;
 const END_SEPERATOR = '__';
@@ -26,7 +27,7 @@ export const extractSyncFileStateFromPrefix = (
     new RegExp(`^${PREFIX}(C)?(E)?(\\d+(?:\\.\\d+)?)${END_SEPERATOR}`),
   );
   if (!match) {
-    throw new Error(`${extractSyncFileStateFromPrefix.name}: Invalid prefix`);
+    throw new InvalidFilePrefixError();
   }
 
   return {

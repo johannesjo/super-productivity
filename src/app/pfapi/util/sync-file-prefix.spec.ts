@@ -4,6 +4,7 @@ import {
   SyncFilePrefixParams,
   SyncFilePrefixParamsOutput,
 } from './sync-file-prefix';
+import { InvalidFilePrefixError } from '../errors/errors';
 
 describe('pfGetSyncFilePrefix()', () => {
   const cases: [SyncFilePrefixParams, string][] = [
@@ -113,7 +114,7 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
 
   it('should throw error for invalid prefix', () => {
     expect(() => extractSyncFileStateFromPrefix('invalid_prefix')).toThrowError(
-      'pfExtractSyncFileStateFromPrefix: Invalid prefix',
+      InvalidFilePrefixError,
     );
   });
 });

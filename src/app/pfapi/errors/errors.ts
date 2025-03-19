@@ -168,3 +168,7 @@ export class InvalidMetaFileError extends Error {
     super(message);
   }
 }
+
+export class InvalidFilePrefixError extends Error {
+  override name = InvalidFilePrefixError.name.replace('', '');
+}
