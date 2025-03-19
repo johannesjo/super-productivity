@@ -110,12 +110,12 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // NOTE: Public for testing
   async updateLocal(
-    remoteMetaFileContent: MetaFileContent,
-    localSyncMetaData: MetaFileContent,
+    remoteMeta: MetaFileContent,
+    localMeta: MetaFileContent,
   ): Promise<void> {
     pfLog(2, `${SyncService.name}.${this.updateLocal.name}()`, {
-      remoteMetaFileContent,
-      localSyncMetaData,
+      remoteMeta,
+      localMeta,
     });
     await this._awaitLockFilePermission();
     // NOTE: also makes sense to lock, since otherwise we might get an incomplete state
@@ -123,8 +123,8 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      remoteMetaFileContent.revMap,
-      localSyncMetaData.revMap,
+      remoteMeta.revMap,
+      localMeta.revMap,
     );
     const realRevMap: RevMap = {};
     await Promise.all(
@@ -146,11 +146,11 @@ export class SyncService<const MD extends ModelCfgs> {
     // ON SUCCESS
     await this._updateLocalMetaFileContent({
       lastSync: Date.now(),
-      lastLocalSyncModelUpdate: remoteMetaFileContent.lastLocalSyncModelUpdate,
-      metaRev: remoteMetaFileContent.metaRev,
-      revMap: remoteMetaFileContent.revMap,
-      modelVersions: remoteMetaFileContent.modelVersions,
-      crossModelVersion: remoteMetaFileContent.crossModelVersion,
+      lastSyncModelUpdate: remoteMeta.lastSyncModelUpdate,
+      metaRev: remoteMeta.metaRev,
+      revMap: remoteMeta.revMap,
+      modelVersions: remoteMeta.modelVersions,
+      crossModelVersion: remoteMeta.crossModelVersion,
     });
 
     await this._removeLockFile();
@@ -199,7 +199,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // ON AFTER SUCCESS
     await this._updateLocalMetaFileContent({
       lastSync: Date.now(),
-      lastLocalSyncModelUpdate: localSyncMetaData.lastLocalSyncModelUpdate,
+      lastSyncModelUpdate: localSyncMetaData.lastSyncModelUpdate,
       revMap: { ...localSyncMetaData.revMap, ...realRevMap },
       metaRev: metaRevAfterUpdate,
       modelVersions: localSyncMetaData.modelVersions,

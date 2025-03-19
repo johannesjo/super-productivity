@@ -15,6 +15,13 @@ export enum SyncStatus {
   NotConfigured = 'NotConfigured',
 }
 
+export enum ConflictReason {
+  NoLastSync = 'NoLastSync',
+  BothNewerLastSync = 'BothNewerLastSync',
+  MatchingModelChangeButLastSyncMismatch = 'MatchingModelChangeButLastSyncMismatch',
+  UnexpectedRevMismatch = 'UnexpectedRevMismatch',
+}
+
 export const LOCK_FILE_CHECK_INTERVAL = 5000;
 
 export const LOG_PREFIX = 'pf' as const;

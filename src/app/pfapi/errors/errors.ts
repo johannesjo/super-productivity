@@ -1,4 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+class AdditionalLogErrorBase extends Error {
+  constructor(additional: any) {
+    super(additional);
+  }
+}
+
 export class AuthFailError extends Error {
   override name = NoRemoteMetaFile.name.replace('', '');
 
@@ -152,15 +157,18 @@ export class LockFilePresentError extends Error {
 export class ClientIdNotFoundError extends Error {
   override name = ClientIdNotFoundError.name.replace('', '');
 }
+
 export class DBNotInitializedError extends Error {
   override name = DBNotInitializedError.name.replace('', '');
 }
+
 export class UnknownSyncStateError extends Error {
   override name = DBNotInitializedError.name.replace('', '');
 }
 
 export class InvalidMetaFileError extends Error {
   override name = DBNotInitializedError.name.replace('', '');
+
   constructor(
     message?: string,
     public readonly originalError?: unknown,
@@ -171,4 +179,20 @@ export class InvalidMetaFileError extends Error {
 
 export class InvalidFilePrefixError extends Error {
   override name = InvalidFilePrefixError.name.replace('', '');
+}
+
+export class SyncInvalidTimeValuesError extends AdditionalLogErrorBase {
+  override name = SyncInvalidTimeValuesError.name.replace('', '');
+}
+
+// export class LastSyncValNotUpToDateError extends Error {
+//   override name = LastSyncValNotUpToDateError.name.replace('', '');
+// }
+
+export class ImpossibleError extends Error {
+  override name = ImpossibleError.name.replace('', '');
+
+  constructor(message?: string) {
+    super(message);
+  }
 }

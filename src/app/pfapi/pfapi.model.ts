@@ -1,5 +1,6 @@
 import { DatabaseAdapter } from './db/database-adapter.model';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
+import { ConflictReason } from './pfapi.const';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -79,13 +80,19 @@ export interface ModelVersionMap {
 }
 
 export interface MetaFileContent {
-  lastLocalSyncModelUpdate?: number;
+  lastSyncModelUpdate?: number;
+  // TODO maybe remove
   lastSync?: number;
   metaRev?: string;
   // revision map
   revMap: RevMap;
   crossModelVersion: number;
   modelVersions: ModelVersionMap;
+}
+
+export interface ConflictData {
+  reason: ConflictReason;
+  additional?: unknown;
 }
 
 export interface CompleteBackup {

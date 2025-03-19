@@ -47,7 +47,7 @@ export class MetaModelCtrl {
     const isModelVersionChange =
       metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
     return this._updateMetaModel({
-      lastLocalSyncModelUpdate: timestamp,
+      lastSyncModelUpdate: timestamp,
       revMap: {
         ...metaModel.revMap,
         [modelId]: timestamp.toString(),
