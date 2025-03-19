@@ -152,12 +152,15 @@ export class LockFilePresentError extends Error {
 export class ClientIdNotFoundError extends Error {
   override name = ClientIdNotFoundError.name.replace('', '');
 }
-export class DBNotInitialized extends Error {
-  override name = DBNotInitialized.name.replace('', '');
+export class DBNotInitializedError extends Error {
+  override name = DBNotInitializedError.name.replace('', '');
+}
+export class UnknownSyncStateError extends Error {
+  override name = DBNotInitializedError.name.replace('', '');
 }
 
-export class InvalidMetaFile extends Error {
-  override name = DBNotInitialized.name.replace('', '');
+export class InvalidMetaFileError extends Error {
+  override name = DBNotInitializedError.name.replace('', '');
   constructor(
     message?: string,
     public readonly originalError?: unknown,

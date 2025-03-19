@@ -4,19 +4,21 @@ import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { LOCK_FILE_NAME, LOG_PREFIX, SyncStatus } from '../pfapi.const';
 import {
-  InvalidMetaFile,
+  InvalidMetaFileError,
   LockFilePresentError,
   NoRemoteDataError,
   NoRemoteMetaFile,
   NoRevError,
   NoSyncProviderSet,
   RevMismatchError,
+  UnknownSyncStateError,
 } from '../errors/errors';
 import { pfLog } from '../util/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
+import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
 
 /*
 (0. maybe write lock file)
@@ -60,42 +62,46 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   // TODO
-  async sync(): Promise<SyncStatus | any> {
+  async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
     try {
       if (!(await this._isReadyForSync())) {
-        return SyncStatus.NotConfigured;
+        return { status: SyncStatus.NotConfigured };
       }
 
-      const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
-      const remoteMetaFileContent = await this._downloadMetaFile(
-        localSyncMetaData.metaRev,
-      );
+      const localMeta = await this._metaModelCtrl.loadMetaModel();
+      const remoteMeta = await this._downloadMetaFile(localMeta.metaRev);
 
-      const metaFileCheck = this._checkMetaFileContent(
-        remoteMetaFileContent,
-        localSyncMetaData,
-      );
-      pfLog(2, `${SyncService.name}.${this.sync.name}(): metaFileCheck`, metaFileCheck, {
-        remoteMetaFileContent,
-        localSyncMetaData,
+      const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
+      pfLog(2, `${SyncService.name}.${this.sync.name}(): metaFileCheck`, status, {
+        remoteMetaFileContent: remoteMeta,
+        localSyncMetaData: localMeta,
       });
-      switch (metaFileCheck) {
+
+      switch (status) {
         case SyncStatus.UpdateLocal:
-          return this.updateLocal(remoteMetaFileContent, localSyncMetaData);
+          await this.updateLocal(remoteMeta, localMeta);
+          return { status };
         case SyncStatus.UpdateRemote:
-          return this.updateRemote(remoteMetaFileContent, localSyncMetaData);
-        case SyncStatus.Conflict:
-        // TODO
+          await this.updateRemote(remoteMeta, localMeta);
+          return { status };
         case SyncStatus.InSync:
-          return SyncStatus.InSync;
+          return { status };
+        case SyncStatus.Conflict:
+          return { status, conflictData };
+        case SyncStatus.IncompleteRemoteData:
+          return { status, conflictData };
+        default:
+          // likely will never happen
+          throw new UnknownSyncStateError();
       }
     } catch (e) {
       if (e instanceof Error) {
         if (e instanceof NoRemoteMetaFile) {
           const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
           console.log({ localSyncMetaData });
-
-          return this.updateRemoteAll(localSyncMetaData);
+          alert('NO REMOTE FILE');
+          await this.updateRemoteAll(localSyncMetaData);
+          return { status: SyncStatus.UpdateRemoteAll };
         }
       }
       throw e;
@@ -366,7 +372,7 @@ export class SyncService<const MD extends ModelCfgs> {
       );
       const data = await this._decompressAndDecryptData<MetaFileContent>(r.dataStr);
       if (!data || !data.revMap) {
-        throw new InvalidMetaFile('downloadMetaFile: revMap not found');
+        throw new InvalidMetaFileError('downloadMetaFile: revMap not found');
       }
       return data;
     } catch (e) {
@@ -392,21 +398,6 @@ export class SyncService<const MD extends ModelCfgs> {
 
   private async _decompressAndDecryptData<T>(data: string): Promise<T> {
     return (await this._encryptAndCompressHandler.decompressAndDecrypt<T>(data)).data;
-  }
-
-  // TODO implement
-  private _checkMetaFileContent(
-    remoteMetaFileContent: MetaFileContent,
-    localSyncMetaData: MetaFileContent,
-  ): SyncStatus {
-    if (!remoteMetaFileContent) {
-      throw new NoRemoteMetaFile();
-    }
-
-    // const allRemoteRevs = Object.values(remoteMetaFileContent.revMap);
-    // const allLocalRevs = Object.values(localSyncMetaData.revMap);
-
-    return SyncStatus.UpdateRemote;
   }
 
   private async _awaitLockFilePermission(): Promise<boolean> {

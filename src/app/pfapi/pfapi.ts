@@ -91,7 +91,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   private _unsubscribeCredentials: () => void = () => {};
 
   // TODO type
-  async sync(): Promise<SyncStatus | any> {
+  async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
     // pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
     pfLog(2, `${this.sync.name}() result:`, result);

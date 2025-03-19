@@ -3,7 +3,7 @@ import { MetaFileContent, ModelBase, ModelCfg } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { getEnvironmentId } from '../util/get-environment-id';
 import { DBNames } from '../pfapi.const';
-import { ClientIdNotFoundError, InvalidMetaFile } from '../errors/errors';
+import { ClientIdNotFoundError, InvalidMetaFileError } from '../errors/errors';
 
 const DEFAULT_META_MODEL: MetaFileContent = {
   crossModelVersion: 1,
@@ -97,7 +97,7 @@ export class MetaModelCtrl {
       return this._metaModelInMemory;
     }
     if (!data.revMap) {
-      throw new InvalidMetaFile('loadMetaModel: revMap not found');
+      throw new InvalidMetaFileError('loadMetaModel: revMap not found');
     }
 
     this._metaModelInMemory = data;

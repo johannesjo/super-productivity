@@ -8,6 +8,7 @@ export enum SyncProviderId {
 export enum SyncStatus {
   InSync = 'InSync',
   UpdateRemote = 'UpdateRemote',
+  UpdateRemoteAll = 'UpdateRemoteAll',
   UpdateLocal = 'UpdateLocal',
   Conflict = 'Conflict',
   IncompleteRemoteData = 'IncompleteRemoteData',
