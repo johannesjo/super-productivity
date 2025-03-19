@@ -68,7 +68,7 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
           changes: this.UNLINKED_PARTIAL_TASK,
         };
       });
-    await this._persistenceService.taskArchive.execAction(
+    await this._persistenceService.pfapi.m.taskArchive.execAction(
       __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
       true,
     );

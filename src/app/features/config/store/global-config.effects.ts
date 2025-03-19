@@ -172,7 +172,7 @@ export class GlobalConfigEffects {
     { isSkipSyncModelChangeUpdate } = { isSkipSyncModelChangeUpdate: false },
   ): void {
     const globalConfig = completeState[CONFIG_FEATURE_NAME];
-    this._persistenceService.globalConfig.saveState(globalConfig, {
+    this._persistenceService.pfapi.m.globalConfig.save(globalConfig, {
       isSyncModelChange: !isSkipSyncModelChangeUpdate,
     });
   }

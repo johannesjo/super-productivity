@@ -42,7 +42,7 @@ export class NoteEffects {
   );
 
   private _saveToLs(noteState: NoteState): void {
-    this._persistenceService.note.saveState(noteState, {
+    this._persistenceService.pfapi.m.note.save(noteState, {
       isSyncModelChange: true,
     });
   }

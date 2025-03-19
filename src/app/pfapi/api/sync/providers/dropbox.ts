@@ -13,7 +13,7 @@ import {
 import { pfLog } from '../../util/log';
 import { DropboxApi } from './dropbox-api';
 // TODO move over here
-import { generatePKCECodes } from '../../../imex/sync/generate-pkce-codes';
+import { generatePKCECodes } from '../../../../imex/sync/generate-pkce-codes';
 import { SyncProviderCredentialsStore } from '../sync-provider-credentials-store';
 
 export interface DropboxCfg {

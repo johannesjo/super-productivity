@@ -9,37 +9,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
-import { DROPBOX_APP_KEY } from './dropbox/dropbox.const';
-import { Dropbox, ModelCfg, Pfapi, SyncProviderId } from '../../pfapi';
-import { TaskState } from '../../features/tasks/task.model';
-import { ProjectState } from '../../features/project/project.model';
+import { SyncProviderId } from '../../pfapi/api';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
-
-type ModelCfgs = {
-  task: ModelCfg<TaskState>;
-  project: ModelCfg<ProjectState>;
-};
-const MODEL_CFGS: ModelCfgs = {
-  task: {
-    modelVersion: 1,
-  },
-  project: {
-    modelVersion: 1,
-  },
-} as const;
-
-const SYNC_PROVIDERS = [
-  new Dropbox({
-    appKey: DROPBOX_APP_KEY,
-    // basePath: `/${DROPBOX_APP_FOLDER}`,
-    basePath: `/`,
-  }),
-];
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SyncProviderService {
+  private _pfapiWrapperService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _dataImportService = inject(DataImportService);
   private _translateService = inject(TranslateService);
@@ -49,8 +27,6 @@ export class SyncProviderService {
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
   // TODO
-  pf = new Pfapi(MODEL_CFGS, SYNC_PROVIDERS, {});
-
   // TODO
   isCurrentProviderInSync$ = of(false);
 
@@ -121,7 +97,7 @@ export class SyncProviderService {
       console.log('_______________________', { v });
 
       if (v) {
-        this.pf.setActiveProvider(v as unknown as SyncProviderId);
+        this._pfapiWrapperService.pf.setActiveProvider(v as unknown as SyncProviderId);
 
         this._persistenceLocalService.load().then((d) => {
           console.log(d);
@@ -156,7 +132,7 @@ export class SyncProviderService {
       throw new Error('No Sync Provider for sync()');
     }
     try {
-      await this.pf.sync();
+      await this._pfapiWrapperService.pf.sync();
     } catch (error: any) {
       console.error(error);
       if (error instanceof Error) {

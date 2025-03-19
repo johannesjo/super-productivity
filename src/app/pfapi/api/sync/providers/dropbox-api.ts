@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { stringify } from 'query-string';
-import { DropboxFileMetadata } from '../../../imex/sync/dropbox/dropbox.model';
+import { DropboxFileMetadata } from '../../../../imex/sync/dropbox/dropbox.model';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { DropboxCredentials } from './dropbox';
 import { AuthNotConfiguredError, NoRemoteDataError } from '../../errors/errors';

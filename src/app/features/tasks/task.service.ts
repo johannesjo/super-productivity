@@ -749,7 +749,7 @@ export class TaskService {
     );
 
     // archive
-    await this._persistenceService.taskArchive.execAction(
+    await this._persistenceService.pfapi.m.taskArchive.execAction(
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
       true,
     );
@@ -890,7 +890,7 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    await this._persistenceService.taskArchive.execAction(
+    await this._persistenceService.pfapi.m.taskArchive.execAction(
       updateTask({
         task: {
           id,
@@ -903,7 +903,7 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    await this._persistenceService.taskArchive.execActions(
+    await this._persistenceService.pfapi.m.taskArchive.execActions(
       updates.map((upd) => updateTask({ task: upd })),
       true,
     );
@@ -912,22 +912,22 @@ export class TaskService {
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
       return (
-        (await this._persistenceService.task.getById(id)) ||
-        (await this._persistenceService.taskArchive.getById(id))
+        (await this._persistenceService.pfapi.m.task.getById(id)) ||
+        (await this._persistenceService.pfapi.m.taskArchive.getById(id))
       );
     }
 
     if (isArchive) {
-      return await this._persistenceService.taskArchive.getById(id);
+      return await this._persistenceService.pfapi.m.taskArchive.getById(id);
     } else {
-      return await this._persistenceService.task.getById(id);
+      return await this._persistenceService.pfapi.m.task.getById(id);
     }
   }
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+      await this._persistenceService.pfapi.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -937,7 +937,7 @@ export class TaskService {
 
   async getArchiveTasksForRepeatCfgId(repeatCfgId: string): Promise<Task[]> {
     const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+      await this._persistenceService.pfapi.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return archiveTasks.filter(
@@ -947,7 +947,7 @@ export class TaskService {
 
   async getArchivedTasks(): Promise<Task[]> {
     const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState(true);
+      await this._persistenceService.pfapi.m.taskArchive.load(true);
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;
@@ -973,7 +973,7 @@ export class TaskService {
   async getAllTasksEverywhere(): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
     const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+      await this._persistenceService.pfapi.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks] as Task[];
@@ -1010,7 +1010,7 @@ export class TaskService {
       };
     } else {
       const archiveTaskState: TaskArchive =
-        await this._persistenceService.taskArchive.loadState();
+        await this._persistenceService.pfapi.m.taskArchive.load();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids

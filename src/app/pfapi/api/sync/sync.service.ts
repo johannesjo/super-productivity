@@ -1,5 +1,10 @@
-import { LocalMeta, ModelCfgs, RemoteMeta, RevMap } from '../pfapi.model';
-import { SyncDataService } from './sync-data.service';
+import {
+  LocalMeta,
+  ModelCfgs,
+  ModelCfgToModelCtrl,
+  RemoteMeta,
+  RevMap,
+} from '../pfapi.model';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { LOCK_FILE_NAME, LOG_PREFIX, SyncStatus } from '../pfapi.const';
@@ -45,19 +50,20 @@ Offer to use remote or local (always create local backup before this)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
+  public readonly m: ModelCfgToModelCtrl<MD>;
+
   private readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
-  private readonly _syncDataService: SyncDataService<MD>;
   private readonly _metaModelCtrl: MetaModelCtrl;
   private readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
 
   constructor(
+    m: ModelCfgToModelCtrl<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
-    _syncDataService: SyncDataService<MD>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
+    this.m = m;
     this._currentSyncProvider$ = _currentSyncProvider$;
-    this._syncDataService = _syncDataService;
     this._metaModelCtrl = _metaModelCtrl;
     this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
@@ -197,7 +203,7 @@ export class SyncService<const MD extends ModelCfgs> {
     await Promise.all(
       toUpdate.map(
         (modelId) =>
-          this._syncDataService.m[modelId]
+          this.m[modelId]
             .load()
             .then((data) =>
               this._uploadModel(modelId, this._getModelVersion(modelId), data),
@@ -253,7 +259,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   private _getModelVersion(modelId: string): number {
-    return this._syncDataService.m[modelId].modelCfg.modelVersion;
+    return this.m[modelId].modelCfg.modelVersion;
   }
 
   private _getCurrentSyncProviderOrError(): SyncProviderServiceInterface<unknown> {
@@ -315,7 +321,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
   private async _updateLocalModel(modelId: string, modelData: unknown): Promise<void> {
     // TODO better typing
-    await this._syncDataService.m[modelId].save(modelData as any);
+    await this.m[modelId].save(modelData as any);
   }
 
   // private async _deleteLocalModel(modelId: string, modelData: string): Promise<unknown> {

@@ -341,7 +341,7 @@ export class ProjectEffects {
     projectIdToDelete: string,
   ): Promise<any> {
     const taskArchiveState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+      await this._persistenceService.pfapi.m.taskArchive.load();
     // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
@@ -358,7 +358,7 @@ export class ProjectEffects {
       unique(archiveTaskIdsToDelete),
     );
     // remove archive
-    await this._persistenceService.taskArchive.execAction(
+    await this._persistenceService.pfapi.m.taskArchive.execAction(
       deleteTasks({ taskIds: archiveTaskIdsToDelete }),
       true,
     );
@@ -370,7 +370,9 @@ export class ProjectEffects {
       select(selectProjectFeatureState),
       take(1),
       switchMap((projectState) =>
-        this._persistenceService.project.saveState(projectState, { isSyncModelChange }),
+        this._persistenceService.pfapi.m.project.save(projectState, {
+          isSyncModelChange,
+        }),
       ),
     );
   }

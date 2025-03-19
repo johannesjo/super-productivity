@@ -80,7 +80,7 @@ export class TagEffects {
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) =>
-      this._persistenceService.tag.saveState(tagState, { isSyncModelChange: true }),
+      this._persistenceService.pfapi.m.tag.save(tagState, { isSyncModelChange: true }),
     ),
   );
   updateTagsStorage$: Observable<unknown> = createEffect(
@@ -232,7 +232,7 @@ export class TagEffects {
           // remove from all tasks
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
-          await this._persistenceService.taskArchive.execAction(
+          await this._persistenceService.pfapi.m.taskArchive.execAction(
             removeTagsForAllTasks({ tagIdsToRemove }),
             true,
           );
@@ -249,7 +249,7 @@ export class TagEffects {
 
           // remove orphaned for archive
           const taskArchiveState: TaskArchive =
-            (await this._persistenceService.taskArchive.loadState()) ||
+            (await this._persistenceService.pfapi.m.taskArchive.load()) ||
             createEmptyEntity();
 
           let archiveSubTaskIdsToDelete: string[] = [];
@@ -262,7 +262,7 @@ export class TagEffects {
             }
           });
 
-          await this._persistenceService.taskArchive.execAction(
+          await this._persistenceService.pfapi.m.taskArchive.execAction(
             deleteTasks({
               taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
             }),

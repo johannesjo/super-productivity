@@ -211,7 +211,7 @@ export class WorklogService {
     workContext: WorkContext,
   ): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();
@@ -248,7 +248,7 @@ export class WorklogService {
     workContext: WorkContext,
   ): Promise<WorklogYearsWithWeeks | null> {
     const archive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();

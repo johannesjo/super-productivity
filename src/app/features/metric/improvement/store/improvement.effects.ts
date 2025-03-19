@@ -68,7 +68,7 @@ export class ImprovementEffects {
   );
 
   private _saveToLs(improvementState: ImprovementState): void {
-    this._persistenceService.improvement.saveState(improvementState, {
+    this._persistenceService.pfapi.m.improvement.save(improvementState, {
       isSyncModelChange: true,
     });
   }

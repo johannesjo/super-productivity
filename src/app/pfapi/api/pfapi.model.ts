@@ -13,7 +13,7 @@ interface SerializableObject {
 
 type SerializableArray = Array<Serializable>;
 
-export type ModelBase = SerializableObject | SerializableArray;
+export type ModelBase = SerializableObject | SerializableArray | unknown;
 
 export interface ModelCfg<T extends ModelBase> {
   modelVersion: number;
@@ -110,6 +110,21 @@ export type ModelCfgToModelCtrl<T extends ModelCfgs> = {
   [K in keyof T]: ModelCtrl<ExtractModelCfgType<T[K]>>;
 };
 
-export type CompleteModel<T extends ModelCfgs> = {
+// TODO better typing
+export type AllSyncModels<T extends ModelCfgs> = {
   [K in keyof T]: ExtractModelCfgType<T[K]>;
 };
+
+// TODO better typing
+export type AllPrivateModels<T extends ModelCfgs> = {
+  [K in keyof T]: ExtractModelCfgType<T[K]>;
+};
+
+export interface CompleteExport<T extends ModelCfgs> {
+  meta: LocalMeta;
+  sync: AllSyncModels<T>;
+  local: AllPrivateModels<T>;
+  cred: {
+    [providerId: string]: unknown;
+  };
+}

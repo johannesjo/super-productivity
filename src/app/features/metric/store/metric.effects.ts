@@ -26,6 +26,8 @@ export class MetricEffects {
   );
 
   private _saveToLs(metricState: MetricState): void {
-    this._persistenceService.metric.saveState(metricState, { isSyncModelChange: true });
+    this._persistenceService.pfapi.m.metric.save(metricState, {
+      isSyncModelChange: true,
+    });
   }
 }

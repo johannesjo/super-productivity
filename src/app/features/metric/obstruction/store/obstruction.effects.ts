@@ -41,7 +41,7 @@ export class ObstructionEffects {
   );
 
   private _saveToLs(obstructionState: ObstructionState): void {
-    this._persistenceService.obstruction.saveState(obstructionState, {
+    this._persistenceService.pfapi.m.obstruction.save(obstructionState, {
       isSyncModelChange: true,
     });
   }

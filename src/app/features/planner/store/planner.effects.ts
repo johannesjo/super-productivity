@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PlannerActions } from './planner.actions';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
@@ -71,7 +71,7 @@ export class PlannerEffects {
     plannerState: PlannerState,
     isSyncModelChange: boolean = false,
   ): void {
-    this._persistenceService.planner.saveState(plannerState, {
+    this._persistenceService.pfapi.m.planner.save(plannerState, {
       isSyncModelChange,
     });
   }

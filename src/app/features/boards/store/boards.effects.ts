@@ -34,7 +34,7 @@ export class BoardsEffects {
       select(selectBoardsState),
       take(1),
       switchMap((boardsState) =>
-        this._persistenceService.boards.saveState(boardsState, {
+        this._persistenceService.pfapi.m.boards.save(boardsState, {
           isSyncModelChange: true,
         }),
       ),

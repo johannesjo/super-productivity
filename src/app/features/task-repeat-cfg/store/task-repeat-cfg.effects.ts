@@ -319,31 +319,33 @@ export class TaskRepeatCfgEffects {
   }
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
-    this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {
+    this._persistenceService.pfapi.m.taskRepeatCfg.save(taskRepeatCfgState, {
       isSyncModelChange: true,
     });
   }
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
-    this._persistenceService.taskArchive.loadState().then((taskArchive: TaskArchive) => {
-      // if not yet initialized for project
-      if (!taskArchive) {
-        return;
-      }
+    this._persistenceService.pfapi.m.taskArchive
+      .load()
+      .then((taskArchive: TaskArchive) => {
+        // if not yet initialized for project
+        if (!taskArchive) {
+          return;
+        }
 
-      const newState = { ...taskArchive };
-      const ids = newState.ids as string[];
+        const newState = { ...taskArchive };
+        const ids = newState.ids as string[];
 
-      const tasksWithRepeatCfgId = ids
-        .map((id) => newState.entities[id] as Task)
-        .filter((task) => task.repeatCfgId === repeatConfigId);
+        const tasksWithRepeatCfgId = ids
+          .map((id) => newState.entities[id] as Task)
+          .filter((task) => task.repeatCfgId === repeatConfigId);
 
-      if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
-        tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
-        this._persistenceService.taskArchive.saveState(newState, {
-          isSyncModelChange: true,
-        });
-      }
-    });
+        if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
+          tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
+          this._persistenceService.pfapi.m.taskArchive.save(newState, {
+            isSyncModelChange: true,
+          });
+        }
+      });
   }
 }

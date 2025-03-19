@@ -491,11 +491,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     };
 
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
-      from(this._persistenceService.taskArchive.loadState()),
+      from(this._persistenceService.pfapi.m.taskArchive.load()),
       this._worklogService.archiveUpdateManualTrigger$.pipe(
         // hacky wait for save
         delay(70),
-        switchMap(() => this._persistenceService.taskArchive.loadState()),
+        switchMap(() => this._persistenceService.pfapi.m.taskArchive.load()),
       ),
     ).pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),

@@ -1,6 +1,6 @@
 import {
+  AllSyncModels,
   BaseCfg,
-  CompleteModel,
   ExtractModelCfgType,
   ModelBase,
   ModelCfgs,
@@ -11,7 +11,6 @@ import { Database } from './db/database';
 import { IndexedDbAdapter } from './db/indexed-db-adapter';
 import { MetaModelCtrl } from './model-ctrl/meta-model-ctrl';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
-import { SyncDataService } from './sync/sync-data.service';
 import { MiniObservable } from './util/mini-observable';
 import { SyncProviderServiceInterface } from './sync/sync-provider.interface';
 import { pfLog } from './util/log';
@@ -37,7 +36,6 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private readonly _db: Database;
   private readonly _syncService: SyncService<MD>;
-  private readonly _syncDataService: SyncDataService<MD>;
 
   // private readonly _eventHandlers = new Map<
   //   keyof EventMap,
@@ -79,10 +77,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(this._db, sp.id);
     });
 
-    this._syncDataService = new SyncDataService<MD>(this.m);
     this._syncService = new SyncService<MD>(
+      this.m,
       this._syncProvider$,
-      this._syncDataService,
       this.metaModel,
       new EncryptAndCompressHandlerService(),
     );
@@ -125,9 +122,32 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._syncProvider$.value.setCredentials(credentials);
   }
 
-  importCompleteData(data: CompleteModel<MD>): Promise<unknown> {
+  async getCompleteData(): Promise<AllSyncModels<MD>> {
+    pfLog(3, `${this.getCompleteData.name}()`);
+    const modelIds = Object.keys(this.m);
+    const promises = modelIds.map((modelId) => {
+      const modelCtrl = this.m[modelId];
+      return modelCtrl.load();
+    });
+
+    const allDataArr = await Promise.all(promises);
+    const allData = allDataArr.reduce((acc, cur, idx) => {
+      acc[modelIds[idx]] = cur;
+      return acc;
+    }, {});
+    return allData as AllSyncModels<MD>;
+  }
+
+  // TODO type
+  async importCompleteData(data: AllSyncModels<MD>): Promise<unknown> {
     pfLog(2, `${this.importCompleteData.name}()`, data);
-    return this._syncDataService.importCompleteSyncData(data);
+    const modelIds = Object.keys(data);
+    const promises = modelIds.map((modelId) => {
+      const modelData = data[modelId];
+      const modelCtrl = this.m[modelId];
+      return modelCtrl.save(modelData);
+    });
+    return Promise.all(promises);
   }
 
   // public on<K extends keyof EventMap>(

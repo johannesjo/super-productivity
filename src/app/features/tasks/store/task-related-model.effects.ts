@@ -222,7 +222,7 @@ export class TaskRelatedModelEffects {
   private async _removeFromArchive(task: Task): Promise<unknown> {
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
     const allIds = (currentArchive.ids as string[]) || [];
     const idsToRemove: string[] = [];
 
@@ -233,7 +233,7 @@ export class TaskRelatedModelEffects {
       }
     });
 
-    return this._persistenceService.taskArchive.saveState(
+    return this._persistenceService.pfapi.m.taskArchive.save(
       {
         ...currentArchive,
         ids: allIds.filter((id) => !idsToRemove.includes(id)),
@@ -250,7 +250,7 @@ export class TaskRelatedModelEffects {
     }
 
     const currentArchive: TaskArchive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
 
     const newArchive = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
@@ -277,7 +277,7 @@ export class TaskRelatedModelEffects {
         this._reminderService.removeReminder(t.reminderId);
       });
 
-    return this._persistenceService.taskArchive.saveState(newArchive, {
+    return this._persistenceService.pfapi.m.taskArchive.save(newArchive, {
       isSyncModelChange: true,
     });
   }

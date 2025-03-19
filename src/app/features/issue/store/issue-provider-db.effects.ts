@@ -46,7 +46,7 @@ export class IssueProviderDbEffects {
       select(selectIssueProviderState),
       take(1),
       switchMap((issueProviderState) =>
-        this._persistenceService.issueProvider.saveState(issueProviderState, {
+        this._persistenceService.pfapi.m.issueProvider.save(issueProviderState, {
           isSyncModelChange,
         }),
       ),

@@ -26,9 +26,15 @@ export class ModelCtrl<MT extends ModelBase> {
     this.modelId = modelId;
   }
 
-  save(data: MT): Promise<unknown> {
+  // TODO improve on isSyncModelChange
+  save(data: MT, p?: { isSyncModelChange: boolean }): Promise<unknown> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, data);
+
+    if (!p?.isSyncModelChange) {
+      return this._db.save(this.modelId, data);
+    }
+
     return Promise.all([
       this._metaModel.onModelSave(this.modelId, this.modelCfg),
       this._db.save(this.modelId, data),
@@ -40,14 +46,27 @@ export class ModelCtrl<MT extends ModelBase> {
       throw new Error(`${ModelCtrl.name}:${this.modelId}: data is not an object`);
     }
     const newData = {
+      // TODO fix
+      // @ts-ignore
       ...(await this.load()),
       ...data,
     };
     return this.save(newData);
   }
 
-  async load(): Promise<MT> {
+  // TODO implement isSkipMigration
+  async load(isSkipMigration?: boolean): Promise<MT> {
     pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
     return this._inMemoryData || ((await this._db.load(this.modelId)) as Promise<MT>);
+  }
+
+  execAction(...p: any[]): any {
+    throw new Error('not implemented');
+  }
+  execActions(...p: any[]): any {
+    throw new Error('not implemented');
+  }
+  getById(id: string): any {
+    throw new Error('not implemented');
   }
 }

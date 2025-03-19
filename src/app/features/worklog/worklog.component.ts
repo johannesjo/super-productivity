@@ -133,7 +133,8 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
         if (isConfirm) {
           let subTasks;
           if (task.subTaskIds && task.subTaskIds.length) {
-            const archiveState = await this._persistenceService.taskArchive.loadState();
+            const archiveState =
+              await this._persistenceService.pfapi.m.taskArchive.load();
             subTasks = task.subTaskIds
               .map((id) => archiveState.entities[id])
               .filter((v) => !!v);

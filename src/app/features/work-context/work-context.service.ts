@@ -389,7 +389,7 @@ export class WorkContextService {
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
-    const taskArchiveState = await this._persistenceService.taskArchive.loadState();
+    const taskArchiveState = await this._persistenceService.pfapi.m.taskArchive.load();
 
     const { ids, entities } = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids
