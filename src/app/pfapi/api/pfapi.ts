@@ -34,7 +34,6 @@ export class Pfapi<const MD extends ModelCfgs> {
   private readonly _syncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
     new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
 
-  private readonly _db: Database;
   private readonly _syncService: SyncService<MD>;
 
   // private readonly _eventHandlers = new Map<
@@ -42,6 +41,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   //   Record<symbol, (data: unknown) => void>
   // >();
 
+  public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
@@ -56,7 +56,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     Pfapi._wasInstanceCreated = true;
 
-    this._db = new Database({
+    this.db = new Database({
       onError: cfg?.onDbError || (() => undefined),
       adapter:
         cfg?.dbAdapter ||
@@ -68,13 +68,13 @@ export class Pfapi<const MD extends ModelCfgs> {
         }),
     });
 
-    this.metaModel = new MetaModelCtrl(this._db);
+    this.metaModel = new MetaModelCtrl(this.db);
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
     this.syncProviders = syncProviders;
     this.syncProviders.forEach((sp) => {
-      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(this._db, sp.id);
+      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(this.db, sp.id);
     });
 
     this._syncService = new SyncService<MD>(
@@ -122,8 +122,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._syncProvider$.value.setCredentials(credentials);
   }
 
-  async getCompleteData(): Promise<AllSyncModels<MD>> {
-    pfLog(3, `${this.getCompleteData.name}()`);
+  async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
+    pfLog(3, `${this.getAllSyncModelData.name}()`);
     const modelIds = Object.keys(this.m);
     const promises = modelIds.map((modelId) => {
       const modelCtrl = this.m[modelId];
@@ -139,8 +139,8 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   // TODO type
-  async importCompleteData(data: AllSyncModels<MD>): Promise<unknown> {
-    pfLog(2, `${this.importCompleteData.name}()`, data);
+  async importAllSycModelData(data: AllSyncModels<MD>): Promise<unknown> {
+    pfLog(2, `${this.importAllSycModelData.name}()`, data);
     const modelIds = Object.keys(data);
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];
@@ -179,7 +179,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       result[id] = new ModelCtrl<ExtractModelCfgType<typeof item>>(
         id,
         item,
-        this._db,
+        this.db,
         this.metaModel,
       );
     }

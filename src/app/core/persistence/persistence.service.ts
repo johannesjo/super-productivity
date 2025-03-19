@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AllowedDBKeys } from './storage-keys.const';
+import { AllowedDBKeys, DB } from './storage-keys.const';
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { Subject } from 'rxjs';
 import { devError } from '../../util/dev-error';
@@ -13,6 +13,7 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 })
 export class PersistenceService {
   pfapi = inject(PfapiService);
+  // TODO replace with pfapi event
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;
     data: unknown;
@@ -21,7 +22,6 @@ export class PersistenceService {
     projectId?: string;
   }> = new Subject();
 
-  private _isBlockSaving: boolean = false;
   private _invalidDataCount = 0;
 
   async getValidCompleteData(): Promise<AppDataComplete> {
@@ -45,69 +45,32 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   async loadBackup(): Promise<AppDataComplete> {
-    throw new Error('Method not implemented.');
-    // return this._loadFromDb({ dbKey: DB.BACKUP });
+    return (await this.pfapi.pf.db.load(DB.BACKUP)) as any;
   }
 
   async saveBackup(backup?: AppDataComplete): Promise<unknown> {
-    // const data: AppDataComplete = backup || (await this.loadComplete());
-    throw new Error('Method not implemented.');
-    // return this._saveToDb({
-    //   dbKey: DB.BACKUP,
-    //   data,
-    //   isDataImport: true,
-    //   isSyncModelChange: true,
-    // });
+    return (await this.pfapi.pf.db.save(DB.BACKUP, backup)) as any;
   }
 
   async clearBackup(): Promise<unknown> {
-    throw new Error('Method not implemented.');
-    // return this._removeFromDb({ dbKey: DB.BACKUP });
+    return (await this.pfapi.pf.db.remove(DB.BACKUP)) as any;
   }
 
-  // NOTE: not including backup
-  // async loadCompleteWithPrivate(): Promise<AppDataComplete> {
-  // }
-
   async loadComplete(isMigrate = false): Promise<AppDataComplete> {
-    // TODO
-    return this.pfapi.pf.getCompleteData() as any;
+    // TODO better
+    const syncModels = await this.pfapi.pf.getAllSyncModelData();
+    console.log(syncModels);
+
+    return {
+      ...syncModels,
+      // TODO better
+      lastLocalSyncModelChange: null,
+      lastArchiveUpdate: null,
+    } as any;
   }
 
   async importComplete(data: AppDataComplete): Promise<unknown> {
-    throw new Error('Method not implemented.');
-    return this.pfapi.pf.getCompleteData() as any;
-    // console.log('IMPORT--->', data);
-    // this._isBlockSaving = true;
-    //
-    // const forBase = Promise.all(
-    //   this._baseModels.map(async (modelCfg: PersistenceBaseModel<any>) => {
-    //     return await modelCfg.saveState(data[modelCfg.appDataKey], {
-    //       isDataImport: true,
-    //     });
-    //   }),
-    // );
-    //
-    // return await Promise.all([forBase])
-    //   .then(() => {
-    //     if (typeof data.lastLocalSyncModelChange !== 'number') {
-    //       // not necessarily a critical error as there might be other reasons for this error to popup
-    //       devError('No lastLocalSyncModelChange for imported data');
-    //       data.lastLocalSyncModelChange = Date.now();
-    //     }
-    //
-    //     return Promise.all([
-    //       this._persistenceLocalService.updateLastSyncModelChange(
-    //         data.lastLocalSyncModelChange,
-    //       ),
-    //       this._persistenceLocalService.updateLastArchiveChange(
-    //         data.lastArchiveUpdate || 0,
-    //       ),
-    //     ]);
-    //   })
-    //   .finally(() => {
-    //     this._isBlockSaving = false;
-    //   });
+    return await this.pfapi.pf.importAllSycModelData(data as any);
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {

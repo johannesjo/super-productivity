@@ -114,7 +114,6 @@ export class SyncService<const MD extends ModelCfgs> {
         if (e instanceof NoRemoteMetaFile) {
           const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
           console.log({ localSyncMetaData });
-          alert('NO REMOTE FILE');
           await this.updateRemoteAll(localSyncMetaData);
           return { status: SyncStatus.UpdateRemoteAll };
         }
@@ -180,8 +179,6 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // NOTE: Public for testing
   async updateRemote(remote: RemoteMeta, local: LocalMeta): Promise<void> {
-    alert('REMOTE');
-
     const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
       local.revMap,
       remote.revMap,
