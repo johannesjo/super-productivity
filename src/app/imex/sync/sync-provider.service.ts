@@ -16,7 +16,6 @@ import { ProjectState } from '../../features/project/project.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { initialProjectState } from '../../features/project/store/project.reducer';
-import { SyncProvider } from './sync-provider.model';
 
 type ModelCfgs = {
   task: ModelCfg<TaskState>;
@@ -130,14 +129,15 @@ export class SyncProviderService {
           this._persistenceLocalService.load().then((d) => {
             console.log(d);
             // TODO real implementation
-            this.pf
-              .setCredentialsForActiveProvider({
-                accessToken: d[SyncProvider.Dropbox].accessToken,
-                refreshToken: d[SyncProvider.Dropbox].refreshToken,
-              })
-              .then(() => {
-                this.pf.sync();
-              });
+            // this.pf
+            //   .setCredentialsForActiveProvider({
+            //     accessToken: d[SyncProvider.Dropbox].accessToken,
+            //     refreshToken: d[SyncProvider.Dropbox].refreshToken,
+            //   })
+            //   .then(() => {
+            //     this.pf.sync();
+            //   });
+            this.pf.sync();
           });
         }
       });

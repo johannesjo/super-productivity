@@ -92,7 +92,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO type
   async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
-    // pfLog(3, `${this.sync.name}()`);
+    pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
     pfLog(2, `${this.sync.name}() result:`, result);
     return result;
@@ -114,7 +114,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   // TODO typing
   setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
     pfLog(
-      2,
+      3,
       `${this.setCredentialsForActiveProvider.name}()`,
       credentials,
       this._syncProvider$.value,

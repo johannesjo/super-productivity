@@ -5,17 +5,20 @@ const PREFIX = REMOTE_FILE_CONTENT_PREFIX;
 const END_SEPERATOR = '__';
 
 export interface SyncFilePrefixParams {
+  isCompress: boolean;
+  isEncrypt: boolean;
+  modelVersion: number;
+}
+export interface SyncFilePrefixParamsOutput {
   isCompressed: boolean;
   isEncrypted: boolean;
   modelVersion: number;
-}
-export interface SyncFilePrefixParamsOutput extends SyncFilePrefixParams {
   cleanDataStr: string;
 }
 
 export const getSyncFilePrefix = (cfg: SyncFilePrefixParams): string => {
-  const c = cfg.isCompressed ? 'C' : '';
-  const e = cfg.isEncrypted ? 'E' : '';
+  const c = cfg.isCompress ? 'C' : '';
+  const e = cfg.isEncrypt ? 'E' : '';
   return `${PREFIX}${c}${e}${cfg.modelVersion}${END_SEPERATOR}`;
 };
 

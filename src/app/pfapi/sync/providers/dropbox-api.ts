@@ -133,7 +133,7 @@ export class DropboxApi {
     accessToken?: string;
     isSkipTokenRefresh?: boolean;
   }): Promise<AxiosResponse> {
-    const credentials = await this._parent.credentialsStore.getCredentials();
+    const credentials = await this._parent.credentialsStore.load();
     if (!credentials?.accessToken) {
       throw new AuthNotConfiguredError('Dropbox no token');
     }
@@ -209,7 +209,7 @@ export class DropboxApi {
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
   > {
     pfLog(2, 'updateAccessTokenFromRefreshTokenIfAvailable()');
-    const credentials = await this._parent.credentialsStore.getCredentials();
+    const credentials = await this._parent.credentialsStore.load();
     const refreshToken = credentials?.refreshToken;
     if (!refreshToken) {
       console.error('Dropbox: No refresh token available');
@@ -231,7 +231,7 @@ export class DropboxApi {
       })
       .then(async (res) => {
         pfLog(2, 'Dropbox: Refresh access token Response', res);
-        this._parent.credentialsStore.setCredentials({
+        this._parent.credentialsStore.save({
           accessToken: res.data.access_token,
           refreshToken: res.data.refresh_token || credentials?.refreshToken,
         });

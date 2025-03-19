@@ -8,13 +8,13 @@ import { InvalidFilePrefixError } from '../errors/errors';
 
 describe('pfGetSyncFilePrefix()', () => {
   const cases: [SyncFilePrefixParams, string][] = [
-    [{ isCompressed: false, isEncrypted: false, modelVersion: 1 }, 'pf_1__'],
-    [{ isCompressed: true, isEncrypted: false, modelVersion: 1 }, 'pf_C1__'],
-    [{ isCompressed: false, isEncrypted: true, modelVersion: 1 }, 'pf_E1__'],
-    [{ isCompressed: true, isEncrypted: true, modelVersion: 1 }, 'pf_CE1__'],
-    [{ isCompressed: true, isEncrypted: true, modelVersion: 33 }, 'pf_CE33__'],
+    [{ isCompress: false, isEncrypt: false, modelVersion: 1 }, 'pf_1__'],
+    [{ isCompress: true, isEncrypt: false, modelVersion: 1 }, 'pf_C1__'],
+    [{ isCompress: false, isEncrypt: true, modelVersion: 1 }, 'pf_E1__'],
+    [{ isCompress: true, isEncrypt: true, modelVersion: 1 }, 'pf_CE1__'],
+    [{ isCompress: true, isEncrypt: true, modelVersion: 33 }, 'pf_CE33__'],
     [
-      { isCompressed: true, isEncrypted: true, modelVersion: 33.1232343 },
+      { isCompress: true, isEncrypt: true, modelVersion: 33.1232343 },
       'pf_CE33.1232343__',
     ],
   ];
@@ -35,8 +35,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_1__testdata',
       {
-        isCompressed: false,
-        isEncrypted: false,
+        isCompress: false,
+        isEncrypt: false,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },
@@ -44,8 +44,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_1.12345__testdata',
       {
-        isCompressed: false,
-        isEncrypted: false,
+        isCompress: false,
+        isEncrypt: false,
         modelVersion: 1.12345,
         cleanDataStr: 'testdata',
       },
@@ -53,8 +53,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_C1__testdata',
       {
-        isCompressed: true,
-        isEncrypted: false,
+        isCompress: true,
+        isEncrypt: false,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },
@@ -62,8 +62,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_E1__testdata',
       {
-        isCompressed: false,
-        isEncrypted: true,
+        isCompress: false,
+        isEncrypt: true,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },

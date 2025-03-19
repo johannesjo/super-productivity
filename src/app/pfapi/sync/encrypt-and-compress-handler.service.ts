@@ -2,16 +2,21 @@ import {
   extractSyncFileStateFromPrefix,
   getSyncFilePrefix,
 } from '../util/sync-file-prefix';
+import { pfLog } from '../util/log';
 
 // TODO move to pure functions maybe
 export class EncryptAndCompressHandlerService {
   async compressAndEncrypt<T>(data: T, modelVersion: number): Promise<string> {
-    // TODO actual encryption and compression
     const prefix = getSyncFilePrefix({
-      isCompressed: false,
-      isEncrypted: false,
+      isCompress: false,
+      isEncrypt: false,
       modelVersion,
     });
+    pfLog(
+      3,
+      `${EncryptAndCompressHandlerService.name}.${this.compressAndEncrypt.name}()`,
+      { prefix },
+    );
     return prefix + JSON.stringify(data);
   }
 
@@ -21,7 +26,11 @@ export class EncryptAndCompressHandlerService {
   }> {
     const { isCompressed, isEncrypted, modelVersion, cleanDataStr } =
       extractSyncFileStateFromPrefix(dataStr);
-    console.log({ isCompressed, isEncrypted, modelVersion, cleanDataStr });
+    pfLog(
+      3,
+      `${EncryptAndCompressHandlerService.name}.${this.decompressAndDecrypt.name}()`,
+      { isCompressed, isEncrypted, modelVersion, cleanDataStr },
+    );
 
     return {
       data: JSON.parse(cleanDataStr),

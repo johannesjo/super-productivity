@@ -47,14 +47,12 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
   }
 
   async isReady(): Promise<boolean> {
-    const credentials = await this.credentialsStore.getCredentials();
-    console.log({ credentials });
-
+    const credentials = await this.credentialsStore.load();
     return !!this._appKey && !!credentials?.accessToken && !!credentials?.refreshToken;
   }
 
   async setCredentials(credentials: DropboxCredentials): Promise<void> {
-    await this.credentialsStore.setCredentials(credentials);
+    await this.credentialsStore.save(credentials);
   }
 
   async getAuthHelper(): Promise<SyncProviderAuthHelper> {

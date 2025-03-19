@@ -47,7 +47,7 @@ export class ModelCtrl<MT extends ModelBase> {
   }
 
   async load(): Promise<MT> {
-    // pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
+    pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
     return this._inMemoryData || ((await this._db.load(this.modelId)) as Promise<MT>);
   }
 }
