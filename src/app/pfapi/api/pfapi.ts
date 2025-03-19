@@ -1,6 +1,7 @@
 import {
   AllSyncModels,
   BaseCfg,
+  ConflictData,
   ExtractModelCfgType,
   ModelBase,
   ModelCfgs,
@@ -86,7 +87,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   // TODO type
-  async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
+  async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
     pfLog(2, `${this.sync.name}() result:`, result);

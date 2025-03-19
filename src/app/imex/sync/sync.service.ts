@@ -4,7 +4,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DataImportService } from './data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
@@ -19,6 +19,12 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
+import {
+  DialogConflictResolutionResult,
+  DialogPermissionResolutionResult,
+} from './sync.model';
+import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
+import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 
 @Injectable({
   providedIn: 'root',
@@ -147,10 +153,26 @@ export class SyncService {
           this._configureActiveSyncProvider();
           return r.status;
 
-        case SyncStatus.Conflict:
+        case SyncStatus.IncompleteRemoteData:
           return r.status;
 
-        case SyncStatus.IncompleteRemoteData:
+        case SyncStatus.Conflict:
+          const res = await this._openConflictDialog$({
+            remote: r.conflictData?.remote.lastUpdate as number,
+            local: r.conflictData?.local.lastUpdate as number,
+            lastSync: r.conflictData?.local.lastSyncedUpdate as number,
+          }).toPromise();
+          console.log({ res });
+
+          // TODO implement and test force cases
+          // if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
+          // TODO implement and test force cases
+          // this._pfapiWrapperService.pf
+          // switch (r.conflictData?.reason) {
+          //   case ConflictReason.NoLastSync:
+          // }
+          // }
+          // return 'USER_ABORT';
           return r.status;
       }
     } catch (error: any) {
@@ -231,5 +253,40 @@ export class SyncService {
         });
       }
     }
+  }
+
+  private lastDialog?: MatDialogRef<any, any>;
+
+  private _openConflictDialog$({
+    remote,
+    local,
+    lastSync,
+  }: {
+    remote: number | null;
+    local: number | null;
+    lastSync: number;
+  }): Observable<DialogConflictResolutionResult> {
+    if (this.lastDialog) {
+      this.lastDialog.close();
+    }
+    this.lastDialog = this._matDialog.open(DialogSyncConflictComponent, {
+      restoreFocus: true,
+      disableClose: true,
+      data: {
+        remote,
+        local,
+        lastSync,
+      },
+    });
+    return this.lastDialog.afterClosed();
+  }
+
+  private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {
+    return this._matDialog
+      .open(DialogSyncPermissionComponent, {
+        restoreFocus: true,
+        disableClose: true,
+      })
+      .afterClosed();
   }
 }
