@@ -19,6 +19,7 @@ import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
 import { validateRemoteMeta } from '../util/validate-remote-meta';
+import { validateRevMap } from '../util/validate-rev-map';
 
 /*
 (0. maybe write lock file)
@@ -136,19 +137,21 @@ export class SyncService<const MD extends ModelCfgs> {
       local.revMap,
     );
     const realRevMap: RevMap = {};
+    const dataMap: { [key: string]: unknown } = {};
+
     await Promise.all(
       toUpdate.map((modelId) =>
-        // TODO properly create rev map
-        this._downloadModel(modelId).then((rev) => {
+        this._downloadModel(modelId).then(({ rev, data }) => {
           if (typeof rev === 'string') {
             realRevMap[modelId] = rev;
+            dataMap[modelId] = data;
           }
         }),
       ),
     );
 
-    // TODO update local models
-    await this._updateLocalUpdatedModels([], []);
+    await this._updateLocalUpdatedModels(toUpdate, [], dataMap);
+
     // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
     // since remote might hava an incomplete update
 
@@ -158,7 +161,10 @@ export class SyncService<const MD extends ModelCfgs> {
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
       // TODO check if we need to extend the revMap and modelVersions???
-      revMap: remote.revMap,
+      revMap: validateRevMap({
+        ...local.revMap,
+        ...realRevMap,
+      }),
       modelVersions: remote.modelVersions,
       crossModelVersion: remote.crossModelVersion,
     });
@@ -205,8 +211,9 @@ export class SyncService<const MD extends ModelCfgs> {
     );
     console.log(realRevMap);
 
+    const validatedRevMap = validateRevMap(realRevMap);
     const metaRevAfterUpdate = await this._uploadMetaFile({
-      revMap: realRevMap,
+      revMap: validatedRevMap,
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
@@ -221,7 +228,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
-      revMap: { ...realRevMap },
+      revMap: validatedRevMap,
       metaRev: metaRevAfterUpdate,
     });
     await this._removeLockFile();
@@ -278,55 +285,42 @@ export class SyncService<const MD extends ModelCfgs> {
     ).rev;
   }
 
-  private async _downloadModel(
+  private async _downloadModel<T>(
     modelId: string,
     expectedRev: string | null = null,
-  ): Promise<string | Error> {
+  ): Promise<{ data: T; rev: string }> {
     const syncProvider = this._getCurrentSyncProviderOrError();
-    const checkRev = (revResult: { rev: string }, msg: string): void => {
-      if (
-        typeof revResult === 'object' &&
-        'rev' in revResult &&
-        !this._isSameRev(revResult.rev, expectedRev)
-      ) {
-        throw new RevMismatchError(`Download Model Rev: ${msg}`);
-      }
-    };
-
+    const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
     if (expectedRev) {
-      checkRev(
-        await syncProvider.getFileRevAndLastClientUpdate(modelId, expectedRev),
-        '1',
-      );
+      if (!rev || !this._isSameRev(rev, expectedRev)) {
+        throw new RevMismatchError(`Download Model Rev: ${modelId}`);
+      }
     }
-
-    const result = await syncProvider.downloadFile(modelId, expectedRev);
-    checkRev(result, '2');
-    return this._decompressAndDecryptData(result.dataStr);
+    // TODO maybe validate
+    const data = await this._decompressAndDecryptData<T>(dataStr);
+    return { data, rev };
   }
 
   private async _updateLocalUpdatedModels(
-    // TODO
-    updates: any[],
+    toUpdate: string[],
     toDelete: string[],
+    dataMap: { [key: string]: unknown },
   ): Promise<unknown> {
     return await Promise.all([
+      ...toUpdate.map((modelId) => this._updateLocalModel(modelId, dataMap[modelId])),
       // TODO
-      ...updates.map((update) => this._updateLocalModel('XX', 'XXX')),
-      // TODO
-      ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
+      // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
     ]);
   }
 
-  private async _updateLocalModel(modelId: string, modelData: string): Promise<unknown> {
-    // TODO
-    // this._deCompressAndDecryptData()
-    return {} as any as unknown;
+  private async _updateLocalModel(modelId: string, modelData: unknown): Promise<void> {
+    // TODO better typing
+    await this._syncDataService.m[modelId].save(modelData as any);
   }
 
-  private async _deleteLocalModel(modelId: string, modelData: string): Promise<unknown> {
-    return {} as any as unknown;
-  }
+  // private async _deleteLocalModel(modelId: string, modelData: string): Promise<unknown> {
+  //   return {} as any as unknown;
+  // }
 
   // META MODEL
   // ----------

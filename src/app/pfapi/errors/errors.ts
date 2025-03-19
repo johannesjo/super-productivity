@@ -181,6 +181,10 @@ export class SyncInvalidTimeValuesError extends AdditionalLogErrorBase {
   override name = SyncInvalidTimeValuesError.name;
 }
 
+export class InvalidRevMapError extends AdditionalLogErrorBase {
+  override name = InvalidRevMapError.name;
+}
+
 // export class LastSyncValNotUpToDateError extends Error {
 //   override name = LastSyncValNotUpToDateError.name;
 // }

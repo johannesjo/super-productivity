@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { SyncResult } from './sync.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -117,64 +117,61 @@ export class SyncProviderService {
   );
 
   constructor() {
-    setTimeout(() => {
-      this.syncProviderId$.subscribe((v) => {
-        console.log('_______________________', { v });
+    this.syncProviderId$.subscribe((v) => {
+      console.log('_______________________', { v });
 
-        if (v) {
-          this.pf.setActiveProvider(v as unknown as SyncProviderId);
+      if (v) {
+        this.pf.setActiveProvider(v as unknown as SyncProviderId);
 
-          this._persistenceLocalService.load().then((d) => {
-            console.log(d);
-            // TODO real implementation
-            // this.pf
-            //   .setCredentialsForActiveProvider({
-            //     accessToken: d[SyncProvider.Dropbox].accessToken,
-            //     refreshToken: d[SyncProvider.Dropbox].refreshToken,
-            //   })
-            //   .then(() => {
-            //     this.pf.sync();
-            //   });
-            this.pf.sync();
-          });
-        }
-      });
-      // this.pf.importCompleteData({
-      //   task: initialTaskState,
-      //   project: initialProjectState,
-      // });
-    }, 2000);
+        this._persistenceLocalService.load().then((d) => {
+          console.log(d);
+          // TODO real implementation
+          // this.pf
+          //   .setCredentialsForActiveProvider({
+          //     accessToken: d[SyncProvider.Dropbox].accessToken,
+          //     refreshToken: d[SyncProvider.Dropbox].refreshToken,
+          //   })
+          //   .then(() => {
+          //     this.pf.sync();
+          //   });
+          // this.pf.sync();
+        });
+      }
+    });
+    // this.pf.importCompleteData({
+    //   task: initialTaskState,
+    //   project: initialProjectState,
+    // });
   }
 
   // TODO move someplace else
 
   async sync(): Promise<SyncResult> {
-    return 'SUCCESS';
+    const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
+    console.log({ syncCfg });
 
-    // const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
-    // const providerId = syncCfg.syncProvider;
-    // if (!providerId) {
-    //   // TODO handle different
-    //   throw new Error('No Sync Provider for sync()');
-    // }
-    //
-    // try {
-    //   await this.pf.sync();
-    // } catch (error: any) {
-    //   console.error(error);
-    //   if (error instanceof Error) {
-    //     if (error instanceof NoRemoteDataError) {
-    //       console.error('No data error');
-    //     } else if (error instanceof NoRevError) {
-    //       console.error('No data error');
-    //     } else if (error instanceof NoRemoteMetaFile) {
-    //       console.error('No data error');
-    //     }
-    //     // TODO ....
-    //   }
-    //   return 'ERROR';
-    // }
-    // return 'SUCCESS';
+    const providerId = syncCfg.syncProvider;
+    if (!providerId) {
+      //   // TODO handle different
+      throw new Error('No Sync Provider for sync()');
+    }
+    try {
+      await this.pf.sync();
+    } catch (error: any) {
+      console.error(error);
+      if (error instanceof Error) {
+        // if (error instanceof NoRemoteDataError) {
+        //   console.error('No data error');
+        // } else if (error instanceof NoRevError) {
+        //   console.error('No data error');
+        // } else if (error instanceof NoRemoteMetaFile) {
+        //   console.error('No data error');
+        // }
+        // TODO ....
+      }
+      return 'ERROR';
+    }
+    return 'SUCCESS';
 
     // TODO handle some place else
     // if (
