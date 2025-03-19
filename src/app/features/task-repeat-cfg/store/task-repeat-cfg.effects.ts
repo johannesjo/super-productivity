@@ -35,7 +35,7 @@ import {
 import { forkJoin, from, merge, of } from 'rxjs';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
-import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
+import { SyncService } from '../../../imex/sync/sync.service';
 import { sortRepeatableTaskCfgs } from '../sort-repeatable-task-cfg';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -55,7 +55,7 @@ export class TaskRepeatCfgEffects {
   private _dateService = inject(DateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _syncTriggerService = inject(SyncTriggerService);
-  private _syncProviderService = inject(SyncProviderService);
+  private _syncService = inject(SyncService);
   private _matDialog = inject(MatDialog);
 
   updateTaskRepeatCfgs$: any = createEffect(
@@ -82,7 +82,7 @@ export class TaskRepeatCfgEffects {
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
     this._actions$.pipe(
       ofType(setActiveWorkContext),
-      concatMap(() => this._syncProviderService.afterCurrentSyncDoneOrSyncDisabled$),
+      concatMap(() => this._syncService.afterCurrentSyncDoneOrSyncDisabled$),
     ),
   ).pipe(
     // make sure everything has settled

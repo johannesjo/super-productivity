@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { AppArchiveFileData, AppMainFileData, SyncGetRevResult } from './sync.model';
 
 // NOTE: do not change!!
-export enum SyncProvider {
+export enum LegacySyncProvider {
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
@@ -11,7 +11,7 @@ export enum SyncProvider {
 export type SyncTarget = 'MAIN' | 'ARCHIVE';
 
 export interface SyncProviderServiceInterface {
-  id: SyncProvider;
+  id: LegacySyncProvider;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean>;
 

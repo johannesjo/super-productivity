@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
 import { filter, tap } from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
-import { SyncProvider } from '../../sync-provider.model';
+import { LegacySyncProvider } from '../../legacy-sync-provider.model';
 import { LocalFileSyncElectronService } from '../local-file-sync-electron.service';
 import { IS_ELECTRON } from '../../../../app.constants';
 
@@ -22,7 +22,7 @@ export class LocalFileSyncElectronEffects {
           filter(
             ({ sectionKey, sectionCfg }): boolean =>
               sectionKey === 'sync' &&
-              (sectionCfg as SyncConfig).syncProvider === SyncProvider.LocalFile &&
+              (sectionCfg as SyncConfig).syncProvider === LegacySyncProvider.LocalFile &&
               (sectionCfg as SyncConfig).isEnabled,
           ),
           tap(() =>

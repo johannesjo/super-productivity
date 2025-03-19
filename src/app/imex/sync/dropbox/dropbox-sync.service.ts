@@ -11,10 +11,10 @@ import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import {
-  SyncProvider,
+  LegacySyncProvider,
   SyncProviderServiceInterface,
   SyncTarget,
-} from '../sync-provider.model';
+} from '../legacy-sync-provider.model';
 import { Store } from '@ngrx/store';
 import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
@@ -25,7 +25,7 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
   private _snackService = inject(SnackService);
   private _store = inject(Store);
 
-  id: SyncProvider = SyncProvider.Dropbox;
+  id: LegacySyncProvider = LegacySyncProvider.Dropbox;
   isUploadForcePossible: boolean = true;
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(

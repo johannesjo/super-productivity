@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
 import { ConfigFormSection, SyncConfig } from '../global-config.model';
-import { SyncProvider } from '../../../imex/sync/sync-provider.model';
+import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
 import { androidInterface } from '../../android/android-interface';
@@ -26,19 +26,24 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         label: T.F.SYNC.FORM.L_SYNC_PROVIDER,
         required: true,
         options: [
-          { label: SyncProvider.Dropbox, value: SyncProvider.Dropbox },
-          { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
+          { label: LegacySyncProvider.Dropbox, value: LegacySyncProvider.Dropbox },
+          { label: LegacySyncProvider.WebDAV, value: LegacySyncProvider.WebDAV },
           ...(IS_ELECTRON ||
           (IS_ANDROID_WEB_VIEW &&
             (androidInterface as any).grantFilePermission &&
             (androidInterface as any).isGrantedFilePermission)
-            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
+            ? [
+                {
+                  label: LegacySyncProvider.LocalFile,
+                  value: LegacySyncProvider.LocalFile,
+                },
+              ]
             : []),
         ],
         change: (field, ev) => {
           if (
             IS_ANDROID_WEB_VIEW &&
-            field.model.syncProvider === SyncProvider.LocalFile
+            field.model.syncProvider === LegacySyncProvider.LocalFile
           ) {
             // disable / enable is a workaround for the hide expression for the info file path info tpl
             field.formControl?.disable();
@@ -58,7 +63,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       validators: {
         validFileAccessPermission: {
           expression: (c: any) => {
-            if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
+            if (IS_ANDROID_WEB_VIEW && c.value === LegacySyncProvider.LocalFile) {
               console.log(
                 'Checking file access permission for android',
                 androidInterface.isGrantedFilePermission(),
@@ -96,7 +101,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (m, v, field) => {
             return (
               !IS_ANDROID_WEB_VIEW ||
-              field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+              field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
               !androidInterface?.isGrantedFilePermission() ||
               !androidInterface?.allowedFolderPath()
             );
@@ -114,7 +119,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       : {},
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
         // hide for android
         IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
@@ -131,7 +136,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
+        field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: [
         ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW

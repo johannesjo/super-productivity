@@ -1,5 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const watchObject = <T extends object>(
+// TODO untested
+
+export const watchObject = <T extends object>(
   obj: T,
   onChange: (prop: string, value: any) => void,
 ): T =>

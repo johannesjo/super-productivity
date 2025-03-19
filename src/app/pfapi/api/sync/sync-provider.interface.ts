@@ -4,6 +4,11 @@ import { SyncProviderCredentialsStore } from './sync-provider-credentials-store'
 export interface SyncProviderAuthHelper {
   authUrl?: string;
   codeVerifier?: string;
+  verifyCodeChallenge?(codeChallenge: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: number;
+  }>;
 }
 
 export interface SyncProviderServiceInterface<C> {

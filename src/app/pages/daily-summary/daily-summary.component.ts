@@ -33,7 +33,7 @@ import moment from 'moment';
 import { T } from '../../t.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { SyncProviderService } from '../../imex/sync/sync-provider.service';
+import { SyncService } from '../../imex/sync/sync.service';
 import { isToday, isYesterday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -115,7 +115,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private readonly _worklogService = inject(WorklogService);
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _activatedRoute = inject(ActivatedRoute);
-  private readonly _syncProviderService = inject(SyncProviderService);
+  private readonly _syncService = inject(SyncService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
   private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
@@ -371,7 +371,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private async _finishDayForGood(cb?: any): Promise<void> {
     const syncCfg = this.configService.cfg?.sync;
     if (syncCfg?.isEnabled) {
-      await this._syncProviderService.sync();
+      await this._syncService.sync();
     }
     this._initSuccessAnimation(cb);
   }

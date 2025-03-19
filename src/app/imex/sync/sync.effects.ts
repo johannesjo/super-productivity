@@ -30,13 +30,13 @@ import { ExecBeforeCloseService } from '../../core/electron/exec-before-close.se
 import { IS_ELECTRON } from '../../app.constants';
 import { TaskService } from '../../features/tasks/task.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
-import { SyncProviderService } from './sync-provider.service';
+import { SyncService } from './sync.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-check.service';
 
 @Injectable()
 export class SyncEffects {
-  private _syncProviderService = inject(SyncProviderService);
+  private _syncService = inject(SyncService);
   private _syncTriggerService = inject(SyncTriggerService);
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
@@ -50,7 +50,7 @@ export class SyncEffects {
       !IS_ELECTRON
         ? EMPTY
         : this._dataInitService.isAllDataLoadedInitially$.pipe(
-            concatMap(() => this._syncProviderService.isEnabledAndReady$),
+            concatMap(() => this._syncService.isEnabledAndReady$),
             distinctUntilChanged(),
             tap((isEnabled) =>
               isEnabled
@@ -68,7 +68,7 @@ export class SyncEffects {
             // minimally hacky delay to wait for inMemoryDatabase update...
             delay(100),
             switchMap(() =>
-              this._syncProviderService
+              this._syncService
                 .sync()
                 .then(() => {
                   this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
@@ -91,7 +91,7 @@ export class SyncEffects {
   private _wasJustEnabled$: Observable<boolean> =
     this._dataInitService.isAllDataLoadedInitially$.pipe(
       // NOTE: it is important that we don't use distinct until changed here
-      switchMap(() => this._syncProviderService.isEnabledAndReady$),
+      switchMap(() => this._syncService.isEnabledAndReady$),
       pairwise(),
       map(([a, b]) => !a && !!b),
       filter((wasJustEnabled) => wasJustEnabled),
@@ -105,8 +105,8 @@ export class SyncEffects {
           merge(
             // dynamic
             combineLatest([
-              this._syncProviderService.isEnabledAndReady$,
-              this._syncProviderService.syncInterval$,
+              this._syncService.isEnabledAndReady$,
+              this._syncService.syncInterval$,
             ]).pipe(
               switchMap(([isEnabledAndReady, syncInterval]) =>
                 isEnabledAndReady
@@ -120,9 +120,9 @@ export class SyncEffects {
 
             // initial after starting app
             this._initialPwaUpdateCheckService.afterInitialUpdateCheck$.pipe(
-              concatMap(() => this._syncProviderService.isEnabledAndReady$),
+              concatMap(() => this._syncService.isEnabledAndReady$),
               take(1),
-              withLatestFrom(this._syncProviderService.isEnabled$),
+              withLatestFrom(this._syncService.isEnabled$),
               switchMap(([isEnabledAndReady, isEnabled]) => {
                 if (isEnabledAndReady) {
                   return of(SYNC_INITIAL_SYNC_TRIGGER);
@@ -155,7 +155,7 @@ export class SyncEffects {
             // we need to return something
             return of(null);
           }
-          return this._syncProviderService
+          return this._syncService
             .sync()
             .then(() => {
               if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {

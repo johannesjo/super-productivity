@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  SyncProvider,
+  LegacySyncProvider,
   SyncProviderServiceInterface,
   SyncTarget,
-} from '../sync-provider.model';
+} from '../legacy-sync-provider.model';
 import { SyncGetRevResult } from '../sync.model';
 
 import { Observable } from 'rxjs';
@@ -20,7 +20,7 @@ export class WebDavSyncService implements SyncProviderServiceInterface {
   private _dataInitService = inject(DataInitService);
   private _globalConfigService = inject(GlobalConfigService);
 
-  id: SyncProvider = SyncProvider.WebDAV;
+  id: LegacySyncProvider = LegacySyncProvider.WebDAV;
 
   isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
     concatMap(() => this._webDavApiService.isAllConfigDataAvailable$),

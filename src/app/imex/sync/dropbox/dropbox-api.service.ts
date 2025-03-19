@@ -12,7 +12,7 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { generatePKCECodes } from '../generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
-import { SyncProvider } from '../sync-provider.model';
+import { LegacySyncProvider } from '../legacy-sync-provider.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { environment } from '../../../../environments/environment';
 
@@ -246,9 +246,12 @@ export class DropboxApiService {
 
   private async _initTokens(): Promise<void> {
     const d = await this._persistenceLocalService.load();
-    if (d[SyncProvider.Dropbox].accessToken && d[SyncProvider.Dropbox].refreshToken) {
-      this._accessToken$.next(d[SyncProvider.Dropbox].accessToken);
-      this._refreshToken$.next(d[SyncProvider.Dropbox].refreshToken);
+    if (
+      d[LegacySyncProvider.Dropbox].accessToken &&
+      d[LegacySyncProvider.Dropbox].refreshToken
+    ) {
+      this._accessToken$.next(d[LegacySyncProvider.Dropbox].accessToken);
+      this._refreshToken$.next(d[LegacySyncProvider.Dropbox].refreshToken);
     } else {
       if (environment.production) {
         console.log('LEGACY TOKENS');

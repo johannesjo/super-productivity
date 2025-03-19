@@ -1,4 +1,5 @@
 import {
+  ConflictData,
   LocalMeta,
   ModelCfgs,
   ModelCfgToModelCtrl,
@@ -69,7 +70,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   // TODO
-  async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
+  async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     try {
       if (!(await this._isReadyForSync())) {
         return { status: SyncStatus.NotConfigured };

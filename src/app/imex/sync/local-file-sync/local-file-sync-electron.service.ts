@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  SyncProvider,
+  LegacySyncProvider,
   SyncProviderServiceInterface,
   SyncTarget,
-} from '../sync-provider.model';
+} from '../legacy-sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SyncGetRevResult } from '../sync.model';
@@ -17,7 +17,7 @@ import { createSha1Hash } from '../../../util/create-sha-1-hash';
 export class LocalFileSyncElectronService implements SyncProviderServiceInterface {
   private _globalConfigService = inject(GlobalConfigService);
 
-  id: SyncProvider = SyncProvider.LocalFile;
+  id: LegacySyncProvider = LegacySyncProvider.LocalFile;
   isUploadForcePossible?: boolean;
   isReady$: Observable<boolean> = of(IS_ELECTRON).pipe(
     concatMap(() => this._folderPath$),

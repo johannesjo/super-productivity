@@ -85,8 +85,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     );
   }
 
-  private _unsubscribeCredentials: () => void = () => {};
-
   // TODO type
   async sync(): Promise<{ status: SyncStatus; conflictData?: unknown }> {
     pfLog(3, `${this.sync.name}()`);
@@ -95,17 +93,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     return result;
   }
 
-  setActiveProvider(activeProviderId: SyncProviderId): void {
-    // this._unsubscribeCredentials();
-    // this._unsubscribeCredentials = activeProvider.credentials$.subscribe((v) => {
-    //   pfLog('credentials update', v);
-    //   if (v) {
-    //     this._syncProviderCredentialsStore.setCredentials(activeProvider.id, v);
-    //   }
-    // });
+  setActiveSyncProvider(activeProviderId: SyncProviderId): void {
     const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
-    pfLog(2, `${this.setActiveProvider.name}()`, activeProviderId, provider);
+    pfLog(2, `${this.setActiveSyncProvider.name}()`, activeProviderId, provider);
     this._syncProvider$.next(provider || null);
+  }
+
+  getActiveSyncProvider(): SyncProviderServiceInterface<unknown> | null {
+    return this._syncProvider$.value;
   }
 
   // TODO typing

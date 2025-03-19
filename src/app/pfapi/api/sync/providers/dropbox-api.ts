@@ -165,45 +165,6 @@ export class DropboxApi {
     }
   }
 
-  // async getAccessTokenViaDialog(): Promise<{
-  //   accessToken: string;
-  //   refreshToken: string;
-  //   expiresAt: number;
-  // } | null> {
-  // let codeVerifier: string, codeChallenge: string;
-  //
-  // try {
-  //   ({ codeVerifier, codeChallenge } = await generatePKCECodes(128));
-  // } catch (e) {
-  //   // TODO handle differently
-  //   // this._snackService.open({
-  //   //   msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
-  //   //   type: 'ERROR',
-  //   // });
-  //   return null;
-  // }
-  //
-  // const DROPBOX_AUTH_CODE_URL =
-  //   `https://www.dropbox.com/oauth2/authorize` +
-  //   `?response_type=code&client_id=${this._accessToken}` +
-  //   '&code_challenge_method=S256' +
-  //   '&token_access_type=offline' +
-  //   `&code_challenge=${codeChallenge}`;
-  //
-  // // TODO handle differently
-  // const authCode = await this._matDialog
-  //   .open(DialogGetAndEnterAuthCodeComponent, {
-  //     restoreFocus: true,
-  //     data: {
-  //       providerName: 'Dropbox',
-  //       url: DROPBOX_AUTH_CODE_URL,
-  //     },
-  //   })
-  //   .afterClosed()
-  //   .toPromise();
-  // return this._getTokensFromAuthCode(authCode, codeVerifier);
-  // }
-
   // TODO add real type
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<
     'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR'
@@ -243,7 +204,7 @@ export class DropboxApi {
       });
   }
 
-  private async _getTokensFromAuthCode(
+  public async getTokensFromAuthCode(
     authCode: string,
     codeVerifier: string,
   ): Promise<{

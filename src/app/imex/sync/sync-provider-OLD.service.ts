@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { DropboxSyncService } from './dropbox/dropbox-sync.service';
-import { SyncProvider, SyncProviderServiceInterface } from './sync-provider.model';
+import {
+  LegacySyncProvider,
+  SyncProviderServiceInterface,
+} from './legacy-sync-provider.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   distinctUntilChanged,
@@ -21,7 +24,7 @@ import {
   DialogConflictResolutionResult,
   DialogPermissionResolutionResult,
   LocalSyncMetaForProvider,
-  SyncResult,
+  SyncResultLegacy,
 } from './sync.model';
 import { T } from '../../t.const';
 import { checkForUpdate, UpdateCheckResult } from './check-for-update.util';
@@ -82,25 +85,27 @@ export class SyncProviderService {
     map((cfg) => cfg?.sync),
   );
   currentProvider$: Observable<SyncProviderServiceInterface> = this.syncCfg$.pipe(
-    map((cfg: SyncConfig): SyncProvider | null => cfg.syncProvider),
+    map((cfg: SyncConfig): LegacySyncProvider | null => cfg.syncProvider),
     distinctUntilChanged(),
-    map((syncProvider: SyncProvider | null): SyncProviderServiceInterface | null => {
-      // console.log('Activated SyncProvider:', syncProvider);
-      switch (syncProvider) {
-        case SyncProvider.Dropbox:
-          return this._dropboxSyncService;
-        case SyncProvider.WebDAV:
-          return this._webDavSyncService;
-        case SyncProvider.LocalFile:
-          if (IS_ANDROID_WEB_VIEW) {
-            return this._localFileSyncAndroidService;
-          } else {
-            return this._localFileSyncElectronService;
-          }
-        default:
-          return null;
-      }
-    }),
+    map(
+      (syncProvider: LegacySyncProvider | null): SyncProviderServiceInterface | null => {
+        // console.log('Activated SyncProvider:', syncProvider);
+        switch (syncProvider) {
+          case LegacySyncProvider.Dropbox:
+            return this._dropboxSyncService;
+          case LegacySyncProvider.WebDAV:
+            return this._webDavSyncService;
+          case LegacySyncProvider.LocalFile:
+            if (IS_ANDROID_WEB_VIEW) {
+              return this._localFileSyncAndroidService;
+            } else {
+              return this._localFileSyncElectronService;
+            }
+          default:
+            return null;
+        }
+      },
+    ),
     filter((p) => !!p),
     map((v) => v as SyncProviderServiceInterface),
     shareReplay(1),
@@ -123,7 +128,7 @@ export class SyncProviderService {
     ),
   );
 
-  async sync(): Promise<SyncResult> {
+  async sync(): Promise<SyncResultLegacy> {
     const currentProvider = await this.currentProvider$.pipe(take(1)).toPromise();
     if (!currentProvider) {
       throw new Error('No Sync Provider for sync()');
@@ -176,7 +181,7 @@ export class SyncProviderService {
     }
   }
 
-  private async _sync(cp: SyncProviderServiceInterface): Promise<SyncResult> {
+  private async _sync(cp: SyncProviderServiceInterface): Promise<SyncResultLegacy> {
     let local: AppDataComplete | undefined;
     let isReady: boolean = false;
     try {
@@ -496,7 +501,7 @@ export class SyncProviderService {
     ): Promise<void> => {
       this._log(cp, 'X Upload Request Error retryIfPossibleOrWarnUser()', revOrError);
       if (
-        cp.id !== SyncProvider.LocalFile &&
+        cp.id !== LegacySyncProvider.LocalFile &&
         (retryAttemptNr < NR_OF_RETRIES ||
           (cp.isUploadForcePossible &&
             retryAttemptNr === 1 &&

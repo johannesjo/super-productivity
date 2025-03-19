@@ -1,7 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
+import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 import { LegacyCalendarProvider } from '../issue/providers/calendar/calendar.model';
 
@@ -123,7 +123,7 @@ export type SyncConfig = Readonly<{
   isEncryptionEnabled: boolean;
   encryptionPassword: string | null;
   isCompressionEnabled: boolean;
-  syncProvider: SyncProvider | null;
+  syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
   dropboxSync: DropboxSyncConfig;

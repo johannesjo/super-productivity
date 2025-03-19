@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  SyncProvider,
+  LegacySyncProvider,
   SyncProviderServiceInterface,
   SyncTarget,
-} from '../sync-provider.model';
+} from '../legacy-sync-provider.model';
 import { Observable, of } from 'rxjs';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { SyncGetRevResult } from '../sync.model';
@@ -20,12 +20,14 @@ const ERROR_MSG_DOWNLOAD = 'Could not load file with android adapter';
 export class LocalFileSyncAndroidService implements SyncProviderServiceInterface {
   private _globalConfigService = inject(GlobalConfigService);
 
-  id: SyncProvider = SyncProvider.LocalFile;
+  id: LegacySyncProvider = LegacySyncProvider.LocalFile;
   isUploadForcePossible?: boolean = false;
   isReady$: Observable<boolean> = of(IS_ANDROID_WEB_VIEW).pipe(
     concatMap(() =>
       this._globalConfigService.sync$.pipe(
-        map((sync) => sync.isEnabled && sync.syncProvider === SyncProvider.LocalFile),
+        map(
+          (sync) => sync.isEnabled && sync.syncProvider === LegacySyncProvider.LocalFile,
+        ),
       ),
     ),
     map((v) => !!v),

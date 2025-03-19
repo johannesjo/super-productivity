@@ -7,7 +7,6 @@ import {
   AuthFailError,
   InvalidDataError,
   NoRemoteDataError,
-  NoRemoteMetaFile,
   NoRevError,
 } from '../../errors/errors';
 import { pfLog } from '../../util/log';
@@ -55,10 +54,6 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     await this.credentialsStore.save(credentials);
   }
 
-  async getAuthHelper(): Promise<SyncProviderAuthHelper> {
-    return this._getAuthUrlAndVerifier();
-  }
-
   async getFileRevAndLastClientUpdate(
     targetPath: string,
     localRev: string,
@@ -101,41 +96,28 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    try {
-      const r = await this._api.download({
-        path: this._getPath(targetPath),
-        localRev,
-      });
+    const r = await this._api.download({
+      path: this._getPath(targetPath),
+      localRev,
+    });
 
-      if (!r.meta.rev) {
-        throw new NoRevError();
-      }
-
-      if (!r.data) {
-        throw new NoRemoteDataError(targetPath);
-      }
-
-      if (typeof r.data !== 'string') {
-        pfLog(1, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
-        throw new InvalidDataError(r.data);
-      }
-
-      return {
-        rev: r.meta.rev,
-        dataStr: r.data,
-      };
-    } catch (e) {
-      if (
-        e instanceof NoRevError ||
-        e instanceof NoRemoteMetaFile ||
-        e instanceof NoRemoteDataError ||
-        e instanceof InvalidDataError
-      ) {
-        throw e; // Pass through known errors
-      }
-      pfLog(1, e);
-      throw new Error(e as any);
+    if (!r.meta.rev) {
+      throw new NoRevError();
     }
+
+    if (!r.data) {
+      throw new NoRemoteDataError(targetPath);
+    }
+
+    if (typeof r.data !== 'string') {
+      pfLog(1, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
+      throw new InvalidDataError(r.data);
+    }
+
+    return {
+      rev: r.meta.rev,
+      dataStr: r.data,
+    };
   }
 
   async uploadFile(
@@ -144,25 +126,20 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    try {
-      const r = await this._api.upload({
-        path: this._getPath(targetPath),
-        data: dataStr,
-        localRev,
-        isForceOverwrite,
-      });
+    const r = await this._api.upload({
+      path: this._getPath(targetPath),
+      data: dataStr,
+      localRev,
+      isForceOverwrite,
+    });
 
-      if (!r.rev) {
-        throw new NoRevError();
-      }
-
-      return {
-        rev: r.rev,
-      };
-    } catch (e) {
-      pfLog(1, e);
-      throw new Error(e as any);
+    if (!r.rev) {
+      throw new NoRevError();
     }
+
+    return {
+      rev: r.rev,
+    };
   }
 
   async removeFile(targetPath: string): Promise<void> {
@@ -175,20 +152,8 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     // TODO error handling
   }
 
-  private async _getAuthUrlAndVerifier(): Promise<{
-    authUrl: string;
-    codeVerifier: string;
-  }> {
+  async getAuthHelper(): Promise<SyncProviderAuthHelper> {
     const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
-    // try {
-    // } catch (e) {
-    //   // TODO handle differently
-    //   // this._snackService.open({
-    //   //   msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
-    //   //   type: 'ERROR',
-    //   // });
-    //   return null;
-    // }
 
     const authCodeUrl =
       `https://www.dropbox.com/oauth2/authorize` +
@@ -199,6 +164,9 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     return {
       authUrl: authCodeUrl,
       codeVerifier,
+      verifyCodeChallenge: async <T>(authCode: string) => {
+        return (await this._api.getTokensFromAuthCode(authCode, codeVerifier)) as T;
+      },
     };
   }
 

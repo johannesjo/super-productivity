@@ -12,7 +12,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
-import { SyncProvider } from '../../sync-provider.model';
+import { LegacySyncProvider } from '../../legacy-sync-provider.model';
 import { triggerDropboxAuthDialog } from './dropbox.actions';
 import { GlobalConfigService } from '../../../../features/config/global-config.service';
 import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
@@ -52,7 +52,7 @@ export class DropboxEffects {
       filter(
         ({ sectionKey, sectionCfg }): boolean =>
           sectionKey === 'sync' &&
-          (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
+          (sectionCfg as SyncConfig).syncProvider === LegacySyncProvider.Dropbox &&
           (sectionCfg as SyncConfig).isEnabled !== false,
       ),
       withLatestFrom(this._dropboxApiService.isTokenAvailable$),
@@ -68,7 +68,7 @@ export class DropboxEffects {
         filter(
           ({ sectionKey, sectionCfg }): boolean =>
             sectionKey === 'sync' &&
-            (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox &&
+            (sectionCfg as SyncConfig).syncProvider === LegacySyncProvider.Dropbox &&
             (sectionCfg as SyncConfig).isEnabled === false,
         ),
         withLatestFrom(this._dropboxApiService.isTokenAvailable$),

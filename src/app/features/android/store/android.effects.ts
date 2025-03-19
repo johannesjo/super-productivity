@@ -18,7 +18,7 @@ import {
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { androidInterface } from '../android-interface';
-import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
+import { SyncService } from '../../../imex/sync/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
@@ -32,7 +32,7 @@ export class AndroidEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _globalConfigService = inject(GlobalConfigService);
-  private _syncProviderService = inject(SyncProviderService);
+  private _syncService = inject(SyncService);
   private _translateService = inject(TranslateService);
 
   taskChangeNotification$: any = createEffect(
@@ -42,7 +42,7 @@ export class AndroidEffects {
         withLatestFrom(
           this._store$.pipe(select(selectCurrentTask)),
           this._globalConfigService.cfg$,
-          this._syncProviderService.isSyncing$,
+          this._syncService.isSyncing$,
         ),
         tap(([action, current, cfg, isSyncing]) => {
           if (isSyncing) {
@@ -72,7 +72,7 @@ export class AndroidEffects {
 
   syncNotification$ = createEffect(
     () =>
-      this._syncProviderService.isSyncing$.pipe(
+      this._syncService.isSyncing$.pipe(
         // skip first to avoid default message
         skip(1),
         distinctUntilChanged(),
