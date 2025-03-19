@@ -6,7 +6,7 @@ type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
 
 interface SerializableObject {
   // TODO fix serializable check
-  // [key: string]: Serializable | any;
+  // [key: string]: Serializable;
   [key: string]: any;
 }
 

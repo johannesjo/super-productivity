@@ -155,3 +155,13 @@ export class ClientIdNotFoundError extends Error {
 export class DBNotInitialized extends Error {
   override name = DBNotInitialized.name.replace('', '');
 }
+
+export class InvalidMetaFile extends Error {
+  override name = DBNotInitialized.name.replace('', '');
+  constructor(
+    message?: string,
+    public readonly originalError?: unknown,
+  ) {
+    super(message);
+  }
+}
