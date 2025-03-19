@@ -18,7 +18,7 @@ import { pfLog } from './util/log';
 import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
-import { NoSyncProviderSet } from './errors/errors';
+import { ModelIdWithoutCtrlError, NoSyncProviderSet } from './errors/errors';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -141,6 +141,10 @@ export class Pfapi<const MD extends ModelCfgs> {
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];
       const modelCtrl = this.m[modelId];
+      if (!modelCtrl) {
+        throw new ModelIdWithoutCtrlError(modelId, modelData);
+      }
+
       return modelCtrl.save(modelData);
     });
     return Promise.all(promises);

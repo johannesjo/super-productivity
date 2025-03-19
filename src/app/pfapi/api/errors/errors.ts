@@ -60,6 +60,10 @@ export class InvalidRevMapError extends AdditionalLogErrorBase {
   override name = InvalidRevMapError.name;
 }
 
+export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
+  override name = ModelIdWithoutCtrlError.name;
+}
+
 export class ImpossibleError extends Error {
   override name = ImpossibleError.name;
 }

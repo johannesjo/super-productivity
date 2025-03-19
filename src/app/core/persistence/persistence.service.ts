@@ -74,14 +74,14 @@ export class PersistenceService {
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
-    throw new Error('Method not implemented.');
-    // const backup: AppDataComplete = await this.loadBackup();
+    const backup: AppDataComplete = await this.loadBackup();
+    // TODO
     // const localOnlyModel = await this._persistenceLocalService.load();
-    // await this._databaseService.clearDatabase();
+    await this.pfapi.pf.db.clearDatabase();
     // await this._persistenceLocalService.save(localOnlyModel);
-    // if (backup) {
-    //   await this.saveBackup(backup);
-    // }
+    if (backup) {
+      await this.saveBackup(backup);
+    }
   }
 
   // DATA STORAGE INTERFACE
