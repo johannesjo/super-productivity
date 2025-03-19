@@ -1,16 +1,16 @@
-import { ConflictData, MetaFileContent } from '../pfapi.model';
+import { ConflictData, LocalMeta, RemoteMeta } from '../pfapi.model';
 import { ConflictReason, SyncStatus } from '../pfapi.const';
 import {
   ImpossibleError,
-  InvalidMetaFileError,
+  InvalidMetaError,
   NoRemoteMetaFile,
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
 
 export const getSyncStatusFromMetaFiles = (
-  remote: MetaFileContent,
-  local: MetaFileContent,
+  remote: RemoteMeta,
+  local: LocalMeta,
 ): {
   status: SyncStatus;
   conflictData?: ConflictData;
@@ -19,23 +19,23 @@ export const getSyncStatusFromMetaFiles = (
     throw new NoRemoteMetaFile();
   }
   if (!local) {
-    throw new InvalidMetaFileError('localSyncMetaData is not defined');
+    throw new InvalidMetaError('localSyncMetaData is not defined');
   }
 
-  if (typeof local.lastSyncModelUpdate !== 'number') {
+  if (typeof local.lastUpdate !== 'number') {
     return {
       status: SyncStatus.UpdateLocal,
     };
-  } else if (typeof remote.lastSyncModelUpdate !== 'number') {
+  } else if (typeof remote.lastUpdate !== 'number') {
     return {
       status: SyncStatus.UpdateRemote,
     };
   } else {
-    if (typeof local.lastSync === 'number') {
+    if (typeof local.lastSyncedUpdate === 'number') {
       const r = _checkForUpdate({
-        remote: remote.lastSyncModelUpdate,
-        local: local.lastSyncModelUpdate,
-        lastSync: local.lastSync,
+        remote: remote.lastUpdate,
+        local: local.lastUpdate,
+        lastSync: local.lastSyncedUpdate,
       });
 
       switch (r) {
@@ -56,6 +56,8 @@ export const getSyncStatusFromMetaFiles = (
             status: SyncStatus.Conflict,
             conflictData: {
               reason: ConflictReason.BothNewerLastSync,
+              remote,
+              local,
             },
           };
         case UpdateCheckResult.LastSyncNotUpToDate:
@@ -63,6 +65,8 @@ export const getSyncStatusFromMetaFiles = (
             status: SyncStatus.Conflict,
             conflictData: {
               reason: ConflictReason.MatchingModelChangeButLastSyncMismatch,
+              remote,
+              local,
             },
           };
         default:
@@ -74,6 +78,8 @@ export const getSyncStatusFromMetaFiles = (
         status: SyncStatus.Conflict,
         conflictData: {
           reason: ConflictReason.NoLastSync,
+          remote,
+          local,
         },
       };
     }
@@ -152,7 +158,11 @@ const _logHelper = (params: {
   local: number;
   lastSync: number;
 }): void => {
-  console.log(params);
+  pfLog(2, `${getSyncStatusFromMetaFiles.name}()`, params, {
+    remote: new Date(params.remote).toISOString(),
+    local: new Date(params.local).toISOString(),
+    lastSync: new Date(params.lastSync).toISOString(),
+  });
   const oldestFirst = Object.keys(params).sort(
     (k1: string, k2: string) => (params as any)[k1] - (params as any)[k2],
   );
@@ -164,5 +174,10 @@ const _logHelper = (params: {
     }),
     {},
   );
-  console.log(zeroed, (Date.now() - (params as any)[keyOfOldest]) / 1000);
+  pfLog(
+    2,
+    `${getSyncStatusFromMetaFiles.name}()`,
+    zeroed,
+    (Date.now() - (params as any)[keyOfOldest]) / 1000,
+  );
 };

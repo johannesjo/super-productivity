@@ -1,10 +1,9 @@
-import { MetaFileContent, ModelCfgs, RevMap } from '../pfapi.model';
+import { LocalMeta, ModelCfgs, RemoteMeta, RevMap } from '../pfapi.model';
 import { SyncDataService } from './sync-data.service';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { LOCK_FILE_NAME, LOG_PREFIX, SyncStatus } from '../pfapi.const';
 import {
-  InvalidMetaFileError,
   LockFilePresentError,
   NoRemoteDataError,
   NoRemoteMetaFile,
@@ -19,6 +18,7 @@ import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
+import { validateRemoteMeta } from '../util/validate-remote-meta';
 
 /*
 (0. maybe write lock file)
@@ -69,17 +69,25 @@ export class SyncService<const MD extends ModelCfgs> {
       }
 
       const localMeta = await this._metaModelCtrl.loadMetaModel();
-      const remoteMeta = await this._downloadMetaFile(localMeta.metaRev);
+      const { remoteMeta, remoteRev } = await this._downloadMetaFile(localMeta.metaRev);
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
-      pfLog(2, `${SyncService.name}.${this.sync.name}(): metaFileCheck`, status, {
-        remoteMetaFileContent: remoteMeta,
-        localSyncMetaData: localMeta,
-      });
+      pfLog(
+        2,
+        `${SyncService.name}.${this.sync.name}(): __SYNC_START__ metaFileCheck`,
+        status,
+        {
+          l: localMeta.lastUpdate && new Date(localMeta.lastUpdate).toISOString(),
+          r: remoteMeta.lastUpdate && new Date(remoteMeta.lastUpdate).toISOString(),
+          remoteMetaFileContent: remoteMeta,
+          localSyncMetaData: localMeta,
+          remoteRev,
+        },
+      );
 
       switch (status) {
         case SyncStatus.UpdateLocal:
-          await this.updateLocal(remoteMeta, localMeta);
+          await this.updateLocal(remoteMeta, localMeta, remoteRev);
           return { status };
         case SyncStatus.UpdateRemote:
           await this.updateRemote(remoteMeta, localMeta);
@@ -110,12 +118,13 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // NOTE: Public for testing
   async updateLocal(
-    remoteMeta: MetaFileContent,
-    localMeta: MetaFileContent,
+    remote: RemoteMeta,
+    local: LocalMeta,
+    remoteRev: string,
   ): Promise<void> {
     pfLog(2, `${SyncService.name}.${this.updateLocal.name}()`, {
-      remoteMeta,
-      localMeta,
+      remoteMeta: remote,
+      localMeta: local,
     });
     await this._awaitLockFilePermission();
     // NOTE: also makes sense to lock, since otherwise we might get an incomplete state
@@ -123,8 +132,8 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      remoteMeta.revMap,
-      localMeta.revMap,
+      remote.revMap,
+      local.revMap,
     );
     const realRevMap: RevMap = {};
     await Promise.all(
@@ -145,35 +154,40 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // ON SUCCESS
     await this._updateLocalMetaFileContent({
-      lastSync: Date.now(),
-      lastSyncModelUpdate: remoteMeta.lastSyncModelUpdate,
-      metaRev: remoteMeta.metaRev,
-      revMap: remoteMeta.revMap,
-      modelVersions: remoteMeta.modelVersions,
-      crossModelVersion: remoteMeta.crossModelVersion,
+      metaRev: remoteRev,
+      lastSyncedUpdate: remote.lastUpdate,
+      lastUpdate: remote.lastUpdate,
+      // TODO check if we need to extend the revMap and modelVersions???
+      revMap: remote.revMap,
+      modelVersions: remote.modelVersions,
+      crossModelVersion: remote.crossModelVersion,
     });
 
     await this._removeLockFile();
   }
 
   // NOTE: Public for testing
-  async updateRemote(
-    remoteMetaFileContent: MetaFileContent,
-    localSyncMetaData: MetaFileContent,
-  ): Promise<void> {
+  async updateRemote(remote: RemoteMeta, local: LocalMeta): Promise<void> {
     alert('REMOTE');
+
+    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
+      local.revMap,
+      remote.revMap,
+    );
+
     pfLog(2, `${SyncService.name}.${this.updateRemote.name}()`, {
-      remoteMetaFileContent,
-      localSyncMetaData,
+      toUpdate,
+      toDelete,
+      remote,
+      local,
     });
+
     await this._awaitLockFilePermission();
     await this._writeLockFile();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      localSyncMetaData.revMap,
-      remoteMetaFileContent.revMap,
-    );
-    const realRevMap: RevMap = {};
+
+    const realRevMap: RevMap = {
+      ...local.revMap,
+    };
     await Promise.all(
       toUpdate.map(
         (modelId) =>
@@ -192,58 +206,39 @@ export class SyncService<const MD extends ModelCfgs> {
     console.log(realRevMap);
 
     const metaRevAfterUpdate = await this._uploadMetaFile({
-      ...localSyncMetaData,
       revMap: realRevMap,
+      lastUpdate: local.lastUpdate,
+      crossModelVersion: local.crossModelVersion,
+      modelVersions: local.modelVersions,
     });
 
     // ON AFTER SUCCESS
     await this._updateLocalMetaFileContent({
-      lastSync: Date.now(),
-      lastSyncModelUpdate: localSyncMetaData.lastSyncModelUpdate,
-      revMap: { ...localSyncMetaData.revMap, ...realRevMap },
+      // leave as is basically
+      lastUpdate: local.lastUpdate,
+      modelVersions: local.modelVersions,
+      crossModelVersion: local.crossModelVersion,
+
+      // actual updates
+      lastSyncedUpdate: local.lastUpdate,
+      revMap: { ...realRevMap },
       metaRev: metaRevAfterUpdate,
-      modelVersions: localSyncMetaData.modelVersions,
-      crossModelVersion: localSyncMetaData.crossModelVersion,
     });
     await this._removeLockFile();
   }
 
   // NOTE: Public for testing
-  async updateRemoteAll(localSyncMetaData: MetaFileContent): Promise<void> {
+  async updateRemoteAll(local: LocalMeta): Promise<void> {
     alert('REMOTE ALL');
-    const realRevMap: RevMap = {};
-    const completeModelData = await this._syncDataService.getCompleteSyncData();
-    const allModelIds = Object.keys(completeModelData);
-    await Promise.all(
-      allModelIds.map(
-        (modelId) =>
-          this._uploadModel(
-            modelId,
-            this._getModelVersion(modelId),
-            completeModelData[modelId],
-          ).then((rev) => {
-            realRevMap[modelId] = cleanRev(rev);
-          }),
-        // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
-        // since remote might hava an incomplete update
-      ),
+    return this.updateRemote(
+      {
+        modelVersions: local.modelVersions,
+        crossModelVersion: local.crossModelVersion,
+        lastUpdate: local.lastUpdate,
+        revMap: {},
+      },
+      local,
     );
-
-    const lastSync = Date.now();
-    const metaRevAfterUpdate = await this._uploadMetaFile({
-      ...localSyncMetaData,
-      lastSync,
-      revMap: realRevMap,
-      metaRev: '',
-    });
-
-    // ON SUCCESS
-    await this._updateLocalMetaFileContent({
-      ...localSyncMetaData,
-      lastSync,
-      metaRev: metaRevAfterUpdate,
-      revMap: realRevMap,
-    });
   }
 
   private _isReadyForSync(): Promise<boolean> {
@@ -336,19 +331,18 @@ export class SyncService<const MD extends ModelCfgs> {
   // META MODEL
   // ----------
   private async _uploadMetaFile(
-    meta: MetaFileContent,
+    meta: RemoteMeta,
     rev: string | null = null,
   ): Promise<string> {
-    pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, meta);
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
-      meta,
+      validateRemoteMeta(meta),
       meta.crossModelVersion,
     );
-    pfLog(
-      2,
-      `${SyncService.name}.${this._uploadMetaFile.name}()`,
+    pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, {
+      meta,
       encryptedAndCompressedData,
-    );
+    });
+
     const syncProvider = this._getCurrentSyncProviderOrError();
 
     return (
@@ -361,20 +355,19 @@ export class SyncService<const MD extends ModelCfgs> {
     ).rev;
   }
 
-  private async _downloadMetaFile(localRev?: string | null): Promise<MetaFileContent> {
+  private async _downloadMetaFile(
+    localRev?: string | null,
+  ): Promise<{ remoteMeta: RemoteMeta; remoteRev: string }> {
     // return {} as any as MetaFileContent;
-    pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, localRev);
+    pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, { localRev });
     const syncProvider = this._getCurrentSyncProviderOrError();
     try {
       const r = await syncProvider.downloadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
         localRev || null,
       );
-      const data = await this._decompressAndDecryptData<MetaFileContent>(r.dataStr);
-      if (!data || !data.revMap) {
-        throw new InvalidMetaFileError('downloadMetaFile: revMap not found');
-      }
-      return data;
+      const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
+      return { remoteMeta: validateRemoteMeta(data), remoteRev: r.rev };
     } catch (e) {
       if (e instanceof Error && e instanceof NoRemoteDataError) {
         throw new NoRemoteMetaFile();
@@ -384,7 +377,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   private async _updateLocalMetaFileContent(
-    localMetaFileContent: MetaFileContent,
+    localMetaFileContent: LocalMeta,
   ): Promise<unknown> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }

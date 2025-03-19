@@ -79,19 +79,22 @@ export interface ModelVersionMap {
   [modelId: string]: number;
 }
 
-export interface MetaFileContent {
-  lastSyncModelUpdate?: number;
-  // TODO maybe remove
-  lastSync?: number;
-  metaRev?: string;
-  // revision map
+export interface RemoteMeta {
+  lastUpdate?: number;
   revMap: RevMap;
   crossModelVersion: number;
   modelVersions: ModelVersionMap;
 }
 
+export interface LocalMeta extends RemoteMeta {
+  lastSyncedUpdate?: number;
+  metaRev?: string;
+}
+
 export interface ConflictData {
   reason: ConflictReason;
+  remote: RemoteMeta;
+  local: LocalMeta;
   additional?: unknown;
 }
 

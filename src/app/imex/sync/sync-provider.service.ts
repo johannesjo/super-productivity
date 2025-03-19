@@ -14,8 +14,6 @@ import { Dropbox, ModelCfg, Pfapi, SyncProviderId } from '../../pfapi';
 import { TaskState } from '../../features/tasks/task.model';
 import { ProjectState } from '../../features/project/project.model';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
-import { initialTaskState } from '../../features/tasks/store/task.reducer';
-import { initialProjectState } from '../../features/project/store/project.reducer';
 
 type ModelCfgs = {
   task: ModelCfg<TaskState>;
@@ -141,10 +139,10 @@ export class SyncProviderService {
           });
         }
       });
-      this.pf.importCompleteData({
-        task: initialTaskState,
-        project: initialProjectState,
-      });
+      // this.pf.importCompleteData({
+      //   task: initialTaskState,
+      //   project: initialProjectState,
+      // });
     }, 2000);
   }
 
