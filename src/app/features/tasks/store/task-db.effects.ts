@@ -30,7 +30,6 @@ import {
 } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectTaskFeatureState } from './task.selectors';
 import { TaskState } from '../task.model';
 import { environment } from '../../../../environments/environment';
@@ -42,12 +41,13 @@ import {
 } from '../task-attachment/task-attachment.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class TaskDbEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   updateTask$: any = createEffect(
     () =>
@@ -116,7 +116,7 @@ export class TaskDbEffects {
 
   // @debounce(50)
   private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false): void {
-    this._persistenceService.pfapi.m.task.save(
+    this._pfapiService.m.task.save(
       {
         ...taskState,
 

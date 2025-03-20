@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import confetti from 'canvas-confetti';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import {
   addSimpleCounter,
   deleteSimpleCounter,
@@ -30,6 +29,7 @@ import { DateService } from 'src/app/core/date/date.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { TranslateService } from '@ngx-translate/core';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -37,7 +37,7 @@ export class SimpleCounterEffects {
   private _store$ = inject<Store<any>>(Store);
   private _timeTrackingService = inject(GlobalTrackingIntervalService);
   private _dateService = inject(DateService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _simpleCounterService = inject(SimpleCounterService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
@@ -155,7 +155,7 @@ export class SimpleCounterEffects {
   );
 
   private _saveToLs(simpleCounterState: SimpleCounterState): void {
-    this._persistenceService.pfapi.m.simpleCounter.save(simpleCounterState, {
+    this._pfapiService.m.simpleCounter.save(simpleCounterState, {
       isSyncModelChange: true,
     });
   }

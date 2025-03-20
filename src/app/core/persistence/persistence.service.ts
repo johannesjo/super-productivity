@@ -12,7 +12,8 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
   providedIn: 'root',
 })
 export class PersistenceService {
-  pfapi = inject(PfapiService);
+  private _pfapi = inject(PfapiService);
+
   // TODO replace with pfapi event
   onAfterSave$: Subject<{
     appDataKey: AllowedDBKeys;
@@ -45,20 +46,20 @@ export class PersistenceService {
   // BACKUP AND SYNC RELATED
   // -----------------------
   async loadBackup(): Promise<AppDataComplete> {
-    return (await this.pfapi.pf.db.load(DB.BACKUP)) as any;
+    return (await this._pfapi.pf.db.load(DB.BACKUP)) as any;
   }
 
   async saveBackup(backup?: AppDataComplete): Promise<unknown> {
-    return (await this.pfapi.pf.db.save(DB.BACKUP, backup)) as any;
+    return (await this._pfapi.pf.db.save(DB.BACKUP, backup)) as any;
   }
 
   async clearBackup(): Promise<unknown> {
-    return (await this.pfapi.pf.db.remove(DB.BACKUP)) as any;
+    return (await this._pfapi.pf.db.remove(DB.BACKUP)) as any;
   }
 
   async loadComplete(isMigrate = false): Promise<AppDataComplete> {
     // TODO better
-    const syncModels = await this.pfapi.pf.getAllSyncModelData();
+    const syncModels = await this._pfapi.pf.getAllSyncModelData();
     console.log(syncModels);
 
     return {
@@ -70,14 +71,14 @@ export class PersistenceService {
   }
 
   async importComplete(data: AppDataComplete): Promise<unknown> {
-    return await this.pfapi.pf.importAllSycModelData(data as any);
+    return await this._pfapi.pf.importAllSycModelData(data as any);
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
     const backup: AppDataComplete = await this.loadBackup();
     // TODO
     // const localOnlyModel = await this._persistenceLocalService.load();
-    await this.pfapi.pf.db.clearDatabase();
+    await this._pfapi.pf.db.clearDatabase();
     // await this._persistenceLocalService.save(localOnlyModel);
     if (backup) {
       await this.saveBackup(backup);

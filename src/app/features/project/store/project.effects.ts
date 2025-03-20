@@ -26,7 +26,6 @@ import {
   updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTask,
@@ -62,6 +61,7 @@ import { DateService } from 'src/app/core/date/date.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { modelExecAction } from '../../../pfapi/pfapi-helper';
 import { taskReducer } from '../../tasks/store/task.reducer';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -69,7 +69,7 @@ export class ProjectEffects {
   private _store$ = inject<Store<any>>(Store);
   private _snackService = inject(SnackService);
   private _projectService = inject(ProjectService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _dateService = inject(DateService);
   private _reminderService = inject(ReminderService);
@@ -342,8 +342,7 @@ export class ProjectEffects {
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,
   ): Promise<any> {
-    const taskArchiveState: TaskArchive =
-      await this._persistenceService.pfapi.m.taskArchive.load();
+    const taskArchiveState: TaskArchive = await this._pfapiService.m.taskArchive.load();
     // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
@@ -361,7 +360,7 @@ export class ProjectEffects {
     );
     // remove archive
     await modelExecAction(
-      this._persistenceService.pfapi.m.taskArchive,
+      this._pfapiService.m.taskArchive,
       deleteTasks({ taskIds: archiveTaskIdsToDelete }),
       taskReducer as any,
       true,
@@ -374,7 +373,7 @@ export class ProjectEffects {
       select(selectProjectFeatureState),
       take(1),
       switchMap((projectState) =>
-        this._persistenceService.pfapi.m.project.save(projectState, {
+        this._pfapiService.m.project.save(projectState, {
           isSyncModelChange,
         }),
       ),

@@ -5,7 +5,6 @@ import {
   inject,
   OnDestroy,
 } from '@angular/core';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './worklog.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,6 +34,7 @@ import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { NumberToMonthPipe } from '../../ui/pipes/number-to-month.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Component({
   selector: 'worklog',
@@ -67,7 +67,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class WorklogComponent implements AfterViewInit, OnDestroy {
   readonly worklogService = inject(WorklogService);
   readonly workContextService = inject(WorkContextService);
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _pfapiService = inject(PfapiService);
   private readonly _taskService = inject(TaskService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _router = inject(Router);
@@ -133,8 +133,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
         if (isConfirm) {
           let subTasks;
           if (task.subTaskIds && task.subTaskIds.length) {
-            const archiveState =
-              await this._persistenceService.pfapi.m.taskArchive.load();
+            const archiveState = await this._pfapiService.m.taskArchive.load();
             subTasks = task.subTaskIds
               .map((id) => archiveState.entities[id])
               .filter((v) => !!v);

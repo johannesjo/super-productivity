@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskService } from '../../tasks/task.service';
 import { TaskCopy } from '../../tasks/task.model';
@@ -8,16 +8,16 @@ import { Observable } from 'rxjs';
 import { Update } from '@ngrx/entity/src/models';
 import { Store } from '@ngrx/store';
 import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { modelExecAction } from '../../../pfapi/pfapi-helper';
 import { taskReducer } from '../../tasks/store/task.reducer';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
     issueId: undefined,
@@ -72,7 +72,7 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
       });
 
     await modelExecAction(
-      this._persistenceService.pfapi.m.taskArchive,
+      this._pfapiService.m.taskArchive,
       __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
       taskReducer as any,
       true,

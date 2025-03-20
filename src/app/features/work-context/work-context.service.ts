@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
@@ -68,7 +68,7 @@ import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
-import { PersistenceService } from '../../core/persistence/persistence.service';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({
   providedIn: 'root',
@@ -81,7 +81,7 @@ export class WorkContextService {
   private _dateService = inject(DateService);
   private _router = inject(Router);
   private _translateService = inject(TranslateService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   // here because to avoid circular dependencies
   // should be treated as private
@@ -389,7 +389,7 @@ export class WorkContextService {
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
-    const taskArchiveState = await this._persistenceService.pfapi.m.taskArchive.load();
+    const taskArchiveState = await this._pfapiService.m.taskArchive.load();
 
     const { ids, entities } = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids

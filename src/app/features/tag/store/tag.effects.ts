@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   concatMap,
@@ -13,7 +13,6 @@ import {
 } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { selectTagById, selectTagFeatureState } from './tag.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
@@ -64,12 +63,13 @@ import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
 import { modelExecAction } from '../../../pfapi/pfapi-helper';
 import { taskReducer } from '../../tasks/store/task.reducer';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class TagEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
   private _tagService = inject(TagService);
   private _workContextService = inject(WorkContextService);
@@ -82,7 +82,7 @@ export class TagEffects {
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) =>
-      this._persistenceService.pfapi.m.tag.save(tagState, { isSyncModelChange: true }),
+      this._pfapiService.m.tag.save(tagState, { isSyncModelChange: true }),
     ),
   );
   updateTagsStorage$: Observable<unknown> = createEffect(
@@ -235,7 +235,7 @@ export class TagEffects {
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
           await modelExecAction(
-            this._persistenceService.pfapi.m.taskArchive,
+            this._pfapiService.m.taskArchive,
             removeTagsForAllTasks({ tagIdsToRemove }),
             taskReducer as any,
             true,
@@ -253,8 +253,7 @@ export class TagEffects {
 
           // remove orphaned for archive
           const taskArchiveState: TaskArchive =
-            (await this._persistenceService.pfapi.m.taskArchive.load()) ||
-            createEmptyEntity();
+            (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
 
           let archiveSubTaskIdsToDelete: string[] = [];
           const archiveMainTaskIdsToDelete: string[] = [];
@@ -267,7 +266,7 @@ export class TagEffects {
           });
 
           await modelExecAction(
-            this._persistenceService.pfapi.m.taskArchive,
+            this._pfapiService.m.taskArchive,
             deleteTasks({
               taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
             }),

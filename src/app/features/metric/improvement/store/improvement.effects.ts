@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -17,17 +17,17 @@ import {
   selectImprovementFeatureState,
   selectImprovementHideDay,
 } from './improvement.reducer';
-import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectUnusedImprovementIds } from '../../store/metric.selectors';
 import { ImprovementState } from '../improvement.model';
 import { DateService } from 'src/app/core/date/date.service';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
 
 @Injectable()
 export class ImprovementEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _dateService = inject(DateService);
 
   updateImprovements$: any = createEffect(
@@ -68,7 +68,7 @@ export class ImprovementEffects {
   );
 
   private _saveToLs(improvementState: ImprovementState): void {
-    this._persistenceService.pfapi.m.improvement.save(improvementState, {
+    this._pfapiService.m.improvement.save(improvementState, {
       isSyncModelChange: true,
     });
   }

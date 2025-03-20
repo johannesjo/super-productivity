@@ -1,18 +1,18 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectIssueProviderState } from './issue-provider.selectors';
 import { IssueProviderActions } from './issue-provider.actions';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class IssueProviderDbEffects {
   private _actions$ = inject(Actions);
   private _store = inject(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
@@ -46,7 +46,7 @@ export class IssueProviderDbEffects {
       select(selectIssueProviderState),
       take(1),
       switchMap((issueProviderState) =>
-        this._persistenceService.pfapi.m.issueProvider.save(issueProviderState, {
+        this._pfapiService.m.issueProvider.save(issueProviderState, {
           isSyncModelChange,
         }),
       ),

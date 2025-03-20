@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Worklog,
   WorklogDay,
@@ -7,7 +7,6 @@ import {
   WorklogYearsWithWeeks,
 } from './worklog.model';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { BehaviorSubject, from, merge, Observable } from 'rxjs';
 import {
   concatMap,
@@ -32,10 +31,11 @@ import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
 import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _pfapiService = inject(PfapiService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _dataInitService = inject(DataInitService);
   private readonly _taskService = inject(TaskService);
@@ -211,7 +211,7 @@ export class WorklogService {
     workContext: WorkContext,
   ): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive =
-      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
+      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();
@@ -248,7 +248,7 @@ export class WorklogService {
     workContext: WorkContext,
   ): Promise<WorklogYearsWithWeeks | null> {
     const archive =
-      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
+      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();

@@ -46,7 +46,6 @@ import {
   updateTaskTags,
   updateTaskUi,
 } from './store/task.actions';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue.model';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import {
@@ -102,13 +101,14 @@ import {
   modelGetById,
 } from '../../pfapi/pfapi-helper';
 import { taskReducer } from './store/task.reducer';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   private readonly _store = inject<Store<any>>(Store);
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _pfapiService = inject(PfapiService);
   private readonly _tagService = inject(TagService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _imexMetaService = inject(ImexMetaService);
@@ -756,7 +756,7 @@ export class TaskService {
 
     // archive
     await modelExecAction(
-      this._persistenceService.pfapi.m.taskArchive,
+      this._pfapiService.m.taskArchive,
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
       taskReducer as any,
       true,
@@ -899,7 +899,7 @@ export class TaskService {
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
     await modelExecAction(
-      this._persistenceService.pfapi.m.taskArchive,
+      this._pfapiService.m.taskArchive,
       updateTask({
         task: {
           id,
@@ -914,7 +914,7 @@ export class TaskService {
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
     await modelExecActions(
-      this._persistenceService.pfapi.m.taskArchive,
+      this._pfapiService.m.taskArchive,
       updates.map((upd) => updateTask({ task: upd })),
       taskReducer as any,
       true,
@@ -924,22 +924,21 @@ export class TaskService {
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
       return (
-        (await modelGetById(id, this._persistenceService.pfapi.m.task)) ||
-        (await modelGetById(id, this._persistenceService.pfapi.m.taskArchive))
+        (await modelGetById(id, this._pfapiService.m.task)) ||
+        (await modelGetById(id, this._pfapiService.m.taskArchive))
       );
     }
 
     if (isArchive) {
-      return await modelGetById(id, this._persistenceService.pfapi.m.taskArchive);
+      return await modelGetById(id, this._pfapiService.m.taskArchive);
     } else {
-      return await modelGetById(id, this._persistenceService.pfapi.m.task);
+      return await modelGetById(id, this._pfapiService.m.task);
     }
   }
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.pfapi.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -948,8 +947,7 @@ export class TaskService {
   }
 
   async getArchiveTasksForRepeatCfgId(repeatCfgId: string): Promise<Task[]> {
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.pfapi.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return archiveTasks.filter(
@@ -959,7 +957,7 @@ export class TaskService {
 
   async getArchivedTasks(): Promise<Task[]> {
     const archiveTaskState: TaskArchive =
-      await this._persistenceService.pfapi.m.taskArchive.load(true);
+      await this._pfapiService.m.taskArchive.load(true);
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;
@@ -984,8 +982,7 @@ export class TaskService {
 
   async getAllTasksEverywhere(): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.pfapi.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks] as Task[];
@@ -1021,8 +1018,7 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive =
-        await this._persistenceService.pfapi.m.taskArchive.load();
+      const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids

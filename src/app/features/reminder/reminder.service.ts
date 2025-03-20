@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
-import { Injectable, inject } from '@angular/core';
-import { PersistenceService } from '../../core/persistence/persistence.service';
+import { inject, Injectable } from '@angular/core';
 import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
@@ -15,12 +14,13 @@ import { migrateReminders } from './migrate-reminder.util';
 import { devError } from '../../util/dev-error';
 import { Note } from '../note/note.model';
 import { environment } from 'src/environments/environment';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReminderService {
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _pfapiService = inject(PfapiService);
   private readonly _snackService = inject(SnackService);
   private readonly _taskService = inject(TaskService);
   private readonly _noteService = inject(NoteService);
@@ -224,9 +224,7 @@ export class ReminderService {
   }
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
-    return migrateReminders(
-      (await this._persistenceService.pfapi.m.reminder.load()) || [],
-    );
+    return migrateReminders((await this._pfapiService.m.reminder.load()) || []);
   }
 
   private async _saveModel(reminders: Reminder[]): Promise<void> {
@@ -234,7 +232,7 @@ export class ReminderService {
       throw new Error('Reminders not loaded initially when trying to save model');
     }
     console.log('saveReminders', reminders);
-    await this._persistenceService.pfapi.m.reminder.save(reminders, {
+    await this._pfapiService.m.reminder.save(reminders, {
       isSyncModelChange: true,
     });
     this._updateRemindersInWorker(this._reminders);

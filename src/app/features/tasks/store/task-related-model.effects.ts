@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addTimeSpent,
@@ -8,7 +8,6 @@ import {
   updateTaskTags,
 } from './task.actions';
 import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
@@ -23,6 +22,7 @@ import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -30,7 +30,7 @@ export class TaskRelatedModelEffects {
   private _reminderService = inject(ReminderService);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
 
   // EFFECTS ===> EXTERNAL
@@ -222,7 +222,7 @@ export class TaskRelatedModelEffects {
   private async _removeFromArchive(task: Task): Promise<unknown> {
     const taskIds = [task.id, ...task.subTaskIds];
     const currentArchive: TaskArchive =
-      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
+      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
     const allIds = (currentArchive.ids as string[]) || [];
     const idsToRemove: string[] = [];
 
@@ -233,7 +233,7 @@ export class TaskRelatedModelEffects {
       }
     });
 
-    return this._persistenceService.pfapi.m.taskArchive.save(
+    return this._pfapiService.m.taskArchive.save(
       {
         ...currentArchive,
         ids: allIds.filter((id) => !idsToRemove.includes(id)),
@@ -250,7 +250,7 @@ export class TaskRelatedModelEffects {
     }
 
     const currentArchive: TaskArchive =
-      (await this._persistenceService.pfapi.m.taskArchive.load()) || createEmptyEntity();
+      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
 
     const newArchive = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
@@ -277,7 +277,7 @@ export class TaskRelatedModelEffects {
         this._reminderService.removeReminder(t.reminderId);
       });
 
-    return this._persistenceService.pfapi.m.taskArchive.save(newArchive, {
+    return this._pfapiService.m.taskArchive.save(newArchive, {
       isSyncModelChange: true,
     });
   }

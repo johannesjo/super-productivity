@@ -22,7 +22,6 @@ import {
   upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Task, TaskArchive, TaskCopy } from '../../tasks/task.model';
 import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
@@ -45,13 +44,14 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { isToday } from '../../../util/is-today.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _dateService = inject(DateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _syncTriggerService = inject(SyncTriggerService);
@@ -319,33 +319,31 @@ export class TaskRepeatCfgEffects {
   }
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
-    this._persistenceService.pfapi.m.taskRepeatCfg.save(taskRepeatCfgState, {
+    this._pfapiService.m.taskRepeatCfg.save(taskRepeatCfgState, {
       isSyncModelChange: true,
     });
   }
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
-    this._persistenceService.pfapi.m.taskArchive
-      .load()
-      .then((taskArchive: TaskArchive) => {
-        // if not yet initialized for project
-        if (!taskArchive) {
-          return;
-        }
+    this._pfapiService.m.taskArchive.load().then((taskArchive: TaskArchive) => {
+      // if not yet initialized for project
+      if (!taskArchive) {
+        return;
+      }
 
-        const newState = { ...taskArchive };
-        const ids = newState.ids as string[];
+      const newState = { ...taskArchive };
+      const ids = newState.ids as string[];
 
-        const tasksWithRepeatCfgId = ids
-          .map((id) => newState.entities[id] as Task)
-          .filter((task) => task.repeatCfgId === repeatConfigId);
+      const tasksWithRepeatCfgId = ids
+        .map((id) => newState.entities[id] as Task)
+        .filter((task) => task.repeatCfgId === repeatConfigId);
 
-        if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
-          tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
-          this._persistenceService.pfapi.m.taskArchive.save(newState, {
-            isSyncModelChange: true,
-          });
-        }
-      });
+      if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
+        tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
+        this._pfapiService.m.taskArchive.save(newState, {
+          isSyncModelChange: true,
+        });
+      }
+    });
   }
 }
