@@ -58,7 +58,7 @@ export class CalendarIntegrationEffects {
             activatedProviders.map((calProvider) =>
               timer(0, calProvider.checkUpdatesEvery).pipe(
                 // timer(0, 10000).pipe(
-                tap(() => console.log('REQUEST CALENDAR', calProvider)),
+                // tap(() => console.log('REQUEST CALENDAR', calProvider)),
                 switchMap(() =>
                   this._calendarIntegrationService.requestEvents$(calProvider),
                 ),

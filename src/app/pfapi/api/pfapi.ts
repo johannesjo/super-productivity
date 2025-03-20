@@ -18,7 +18,11 @@ import { pfLog } from './util/log';
 import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
-import { ModelIdWithoutCtrlError, NoSyncProviderSet } from './errors/errors';
+import {
+  InvalidModelCfgError,
+  ModelIdWithoutCtrlError,
+  NoSyncProviderSet,
+} from './errors/errors';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -176,6 +180,9 @@ export class Pfapi<const MD extends ModelCfgs> {
     const result = {} as Record<string, ModelCtrl<ModelBase>>;
     // TODO validate modelCfgs
     for (const [id, item] of Object.entries(modelCfgs)) {
+      if (item.modelVersion) {
+        throw new InvalidModelCfgError({ modelCfgs });
+      }
       result[id] = new ModelCtrl<ExtractModelCfgType<typeof item>>(
         id,
         item,
@@ -183,10 +190,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         this.metaModel,
       );
     }
-    // TODO fix type :(
-    console.log('CHECK if expected', result);
-
-    return result as unknown as ModelCfgToModelCtrl<MD>;
+    return result as ModelCfgToModelCtrl<MD>;
   }
 
   // getAllModelData(): unknown {}

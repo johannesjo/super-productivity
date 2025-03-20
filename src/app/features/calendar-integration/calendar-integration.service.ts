@@ -133,7 +133,7 @@ export class CalendarIntegrationService {
     end = getEndOfDayTimestamp(),
     isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
-    console.log('REQUEST EVENTS', calProvider, start, end);
+    // console.log('REQUEST EVENTS', calProvider, start, end);
 
     return this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
       map((icalStrData) =>
