@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -25,6 +25,7 @@ import {
 } from './sync.model';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
+import { miniObservableToObservable } from '../../pfapi/pfapi-helper';
 
 @Injectable({
   providedIn: 'root',
@@ -53,19 +54,14 @@ export class SyncService {
 
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
-  // TODO replace with something
-  isEnabledAndReady$: Observable<boolean> = of(true);
-  //   combineLatest([
-  //   this.currentProvider$.pipe(
-  //     switchMap((currentProvider) =>
-  //       currentProvider ? currentProvider.isReady() : of(false),
-  //     ),
-  //   ),
-  //   this.isEnabled$,
-  // ]).pipe(
-  //   tap((v) => console.log('isEnabledAndReady$', v)),
-  //   map(([isReady, isEnabled]) => isReady && isEnabled),
+
+  // activeProvider$: Observable<unknown> = this.syncProviderId$.pipe(
+  //   switchMap(() => this._pfapiWrapperService.pf.getActiveSyncProvider()),
   // );
+
+  isEnabledAndReady$: Observable<boolean> = miniObservableToObservable(
+    this._pfapiWrapperService.pf.isSyncProviderActiveAndReady$,
+  ).pipe(tap((v) => console.log('aaaaaaaa', v)));
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
@@ -83,7 +79,6 @@ export class SyncService {
     // TODO better place
     this.syncProviderId$.subscribe((v) => {
       console.log('_______________________', { v });
-
       if (v) {
         this._pfapiWrapperService.pf.setActiveSyncProvider(
           v as unknown as SyncProviderId,
@@ -140,6 +135,8 @@ export class SyncService {
       this._globalProgressBarService.countUp('SYNC');
       this.isSyncing$.next(true);
       const r = await this._pfapiWrapperService.pf.sync();
+      console.log({ r });
+
       this.isSyncing$.next(false);
       this._globalProgressBarService.countDown();
 
@@ -162,6 +159,15 @@ export class SyncService {
             local: r.conflictData?.local.lastUpdate as number,
             lastSync: r.conflictData?.local.lastSyncedUpdate as number,
           }).toPromise();
+
+          if (res === 'USE_LOCAL') {
+            alert('UPLOAD ALL');
+            await this._pfapiWrapperService.pf.uploadAll();
+          } else if (res === 'USE_REMOTE') {
+            alert('DOWNLOAD ALL');
+            await this._pfapiWrapperService.pf.downloadAll();
+          }
+
           console.log({ res });
 
           // TODO implement and test force cases

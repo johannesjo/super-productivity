@@ -12,8 +12,8 @@ export class NoRevError extends Error {
   override name = NoRevError.name;
 }
 
-export class NoSyncProviderSet extends Error {
-  override name = NoSyncProviderSet.name;
+export class NoSyncProviderSetError extends Error {
+  override name = NoSyncProviderSetError.name;
 }
 
 export class RevMismatchError extends Error {
@@ -70,6 +70,14 @@ export class InvalidModelCfgError extends AdditionalLogErrorBase {
 
 export class ImpossibleError extends Error {
   override name = ImpossibleError.name;
+}
+
+export class InvalidSyncProviderError extends Error {
+  override name = InvalidSyncProviderError.name;
+}
+
+export class TooManyRequestsError extends AdditionalLogErrorBase {
+  override name = TooManyRequestsError.name;
 }
 
 // ----------------------------

@@ -20,8 +20,9 @@ import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-ha
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
 import {
   InvalidModelCfgError,
+  InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
-  NoSyncProviderSet,
+  NoSyncProviderSetError,
 } from './errors/errors';
 
 // type EventMap = {
@@ -36,10 +37,9 @@ import {
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
 
-  private readonly _syncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
-    new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
-
   private readonly _syncService: SyncService<MD>;
+  private readonly _activeSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
+    new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
 
   // private readonly _eventHandlers = new Map<
   //   keyof EventMap,
@@ -50,6 +50,9 @@ export class Pfapi<const MD extends ModelCfgs> {
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
+
+  public readonly isSyncProviderActiveAndReady$: MiniObservable<boolean> =
+    new MiniObservable<boolean>(false);
 
   constructor(
     modelCfgs: MD,
@@ -84,7 +87,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this._syncService = new SyncService<MD>(
       this.m,
-      this._syncProvider$,
+      this._activeSyncProvider$,
       this.metaModel,
       new EncryptAndCompressHandlerService(),
     );
@@ -98,28 +101,42 @@ export class Pfapi<const MD extends ModelCfgs> {
     return result;
   }
 
-  setActiveSyncProvider(activeProviderId: SyncProviderId): void {
-    const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
-    pfLog(2, `${this.setActiveSyncProvider.name}()`, activeProviderId, provider);
-    this._syncProvider$.next(provider || null);
+  setActiveSyncProvider(activeProviderId: SyncProviderId | null): void {
+    pfLog(2, `${this.setActiveSyncProvider.name}()`, activeProviderId, activeProviderId);
+    if (activeProviderId) {
+      const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
+      if (!provider) {
+        throw new InvalidSyncProviderError();
+      }
+      this._activeSyncProvider$.next(provider);
+      provider.isReady().then((isReady) => {
+        this.isSyncProviderActiveAndReady$.next(isReady);
+      });
+    } else {
+      this.isSyncProviderActiveAndReady$.next(false);
+      this._activeSyncProvider$.next(null);
+    }
   }
 
   getActiveSyncProvider(): SyncProviderServiceInterface<unknown> | null {
-    return this._syncProvider$.value;
+    return this._activeSyncProvider$.value;
   }
 
   // TODO typing
-  setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
+  async setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
     pfLog(
       3,
       `${this.setCredentialsForActiveProvider.name}()`,
       credentials,
-      this._syncProvider$.value,
+      this._activeSyncProvider$.value,
     );
-    if (!this._syncProvider$.value) {
-      throw new NoSyncProviderSet();
+    if (!this._activeSyncProvider$.value) {
+      throw new NoSyncProviderSetError();
     }
-    return this._syncProvider$.value.setCredentials(credentials);
+    await this._activeSyncProvider$.value.setCredentials(credentials);
+    this.isSyncProviderActiveAndReady$.next(
+      await this._activeSyncProvider$.value.isReady(),
+    );
   }
 
   async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
@@ -154,6 +171,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     return Promise.all(promises);
   }
 
+  downloadAll(): Promise<void> {
+    return this._syncService.downloadAll();
+  }
+
+  uploadAll(): Promise<void> {
+    return this._syncService.uploadAll();
+  }
+
   // public on<K extends keyof EventMap>(
   //   eventName: K,
   //   callback: (data: EventMap[K]) => void,
@@ -174,13 +199,11 @@ export class Pfapi<const MD extends ModelCfgs> {
   //   };
   // }
 
-  pause(): void {}
-
   private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {
     const result = {} as Record<string, ModelCtrl<ModelBase>>;
     // TODO validate modelCfgs
     for (const [id, item] of Object.entries(modelCfgs)) {
-      if (item.modelVersion) {
+      if (!item.modelVersion) {
         throw new InvalidModelCfgError({ modelCfgs });
       }
       result[id] = new ModelCtrl<ExtractModelCfgType<typeof item>>(

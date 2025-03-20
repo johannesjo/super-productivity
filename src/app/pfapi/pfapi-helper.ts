@@ -3,6 +3,8 @@ import { EntityState } from '@ngrx/entity';
 import { AdditionalLogErrorBase } from '../core/errors/errors';
 import { Action } from '@ngrx/store';
 import { ActionReducer } from '@ngrx/store/src/models';
+import { MiniObservable } from './api/util/mini-observable';
+import { Observable } from 'rxjs';
 
 export class ModelNotFoundError extends AdditionalLogErrorBase {
   override name = ModelNotFoundError.name;
@@ -42,4 +44,13 @@ export const modelExecActions = async <M, T extends EntityState<M>>(
   const newState = actions.reduce((acc, act) => reducerFn(acc, act), data);
   await pfapiModel.save(newState, { isSyncModelChange });
   return newState;
+};
+
+export const miniObservableToObservable = <T>(
+  miniObs: MiniObservable<T>,
+): Observable<T> => {
+  return new Observable((observer) => {
+    const unsub = miniObs.subscribe((v) => observer.next(v));
+    return () => unsub();
+  });
 };

@@ -14,7 +14,7 @@ import {
   NoRemoteDataError,
   NoRemoteMetaFile,
   NoRevError,
-  NoSyncProviderSet,
+  NoSyncProviderSetError,
   RevMismatchError,
   UnknownSyncStateError,
 } from '../errors/errors';
@@ -113,9 +113,7 @@ export class SyncService<const MD extends ModelCfgs> {
     } catch (e) {
       if (e instanceof Error) {
         if (e instanceof NoRemoteMetaFile) {
-          const localSyncMetaData = await this._metaModelCtrl.loadMetaModel();
-          console.log({ localSyncMetaData });
-          await this.updateRemoteAll(localSyncMetaData);
+          await this.uploadAll();
           return { status: SyncStatus.UpdateRemoteAll };
         }
       }
@@ -178,6 +176,32 @@ export class SyncService<const MD extends ModelCfgs> {
     await this._removeLockFile();
   }
 
+  async uploadAll(): Promise<void> {
+    alert('REMOTE ALL');
+    const local = await this._metaModelCtrl.loadMetaModel();
+    return this.updateRemote(
+      {
+        modelVersions: local.modelVersions,
+        crossModelVersion: local.crossModelVersion,
+        lastUpdate: local.lastUpdate,
+        revMap: {},
+      },
+      { ...local, revMap: this._fakeFullRevMap() },
+    );
+  }
+
+  async downloadAll(): Promise<void> {
+    const local = await this._metaModelCtrl.loadMetaModel();
+    const { remoteMeta, remoteRev } = await this._downloadMetaFile();
+    const fakeLocal: LocalMeta = {
+      // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
+      crossModelVersion: local.crossModelVersion,
+      modelVersions: local.modelVersions,
+      revMap: {},
+    };
+    return this.updateLocal(remoteMeta, fakeLocal, remoteRev);
+  }
+
   // NOTE: Public for testing
   async updateRemote(remote: RemoteMeta, local: LocalMeta): Promise<void> {
     const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
@@ -213,7 +237,7 @@ export class SyncService<const MD extends ModelCfgs> {
         //  since remote might hava an incomplete update
       ),
     );
-    console.log(realRevMap);
+    console.log({ realRevMap });
 
     const validatedRevMap = validateRevMap(realRevMap);
     const metaRevAfterUpdate = await this._uploadMetaFile({
@@ -238,20 +262,6 @@ export class SyncService<const MD extends ModelCfgs> {
     await this._removeLockFile();
   }
 
-  // NOTE: Public for testing
-  async updateRemoteAll(local: LocalMeta): Promise<void> {
-    alert('REMOTE ALL');
-    return this.updateRemote(
-      {
-        modelVersions: local.modelVersions,
-        crossModelVersion: local.crossModelVersion,
-        lastUpdate: local.lastUpdate,
-        revMap: {},
-      },
-      local,
-    );
-  }
-
   private _isReadyForSync(): Promise<boolean> {
     return this._getCurrentSyncProviderOrError().isReady();
   }
@@ -263,7 +273,7 @@ export class SyncService<const MD extends ModelCfgs> {
   private _getCurrentSyncProviderOrError(): SyncProviderServiceInterface<unknown> {
     const provider = this._currentSyncProvider$.value;
     if (!provider) {
-      throw new NoSyncProviderSet();
+      throw new NoSyncProviderSetError();
     }
     return provider;
   }
@@ -278,6 +288,12 @@ export class SyncService<const MD extends ModelCfgs> {
     data: any,
     localRev: string | null = null,
   ): Promise<string> {
+    pfLog(2, `${SyncService.name}.${this._uploadModel.name}()`, modelId, {
+      modelVersion,
+      data,
+      localRev,
+    });
+
     const target = this._getRemoteFilePathForModelId(modelId);
     const syncProvider = this._getCurrentSyncProviderOrError();
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
@@ -293,6 +309,11 @@ export class SyncService<const MD extends ModelCfgs> {
     modelId: string,
     expectedRev: string | null = null,
   ): Promise<{ data: T; rev: string }> {
+    pfLog(2, `${SyncService.name}.${this._downloadModel.name}()`, {
+      modelId,
+      expectedRev,
+    });
+
     const syncProvider = this._getCurrentSyncProviderOrError();
     const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
     if (expectedRev) {
@@ -434,9 +455,16 @@ export class SyncService<const MD extends ModelCfgs> {
     await syncProvider.removeFile(LOCK_FILE_NAME);
   }
 
-  private _handleConflict(): void {}
-
-  private _getConflictInfo(): void {}
+  private _allModelIds(): string[] {
+    return Object.keys(this.m);
+  }
+  private _fakeFullRevMap(): RevMap {
+    const revMap: RevMap = {};
+    this._allModelIds().forEach((modelId) => {
+      revMap[modelId] = 'FAKE_VAL_TO_TRIGGER_UPDATE_ALL';
+    });
+    return revMap;
+  }
 
   private _isSameRev(a: string | null, b: string | null): boolean {
     if (!a || !b) {
