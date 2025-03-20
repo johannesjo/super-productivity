@@ -3,14 +3,14 @@ import { from, Observable } from 'rxjs';
 import { mapTo, shareReplay, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
-import { PersistenceService } from '../persistence/persistence.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _store$ = inject<Store<any>>(Store);
   private _dataRepairService = inject(DataRepairService);
 
@@ -32,7 +32,7 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
-    const appDataComplete = await this._persistenceService.loadComplete(true);
+    const appDataComplete = await this._pfapiService.loadComplete(true);
     const isValid = isValidAppData(appDataComplete);
     if (isValid) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
@@ -45,7 +45,7 @@ export class DataInitService {
             isOmitTokens,
           }),
         );
-        await this._persistenceService.importComplete(fixedData);
+        await this._pfapiService.importComplete(fixedData);
       }
     }
   }

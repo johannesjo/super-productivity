@@ -38,7 +38,6 @@ import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { getSyncErrorStr } from './get-sync-error-str';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalFileSyncAndroidService } from './local-file-sync/local-file-sync-android.service';
 import { LocalFileSyncElectronService } from './local-file-sync/local-file-sync-electron.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
@@ -52,6 +51,7 @@ import {
   DialogIncompleteSyncComponent,
   DialogIncompleteSyncData,
 } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 
@@ -67,7 +67,7 @@ export class SyncProviderService {
   private _globalConfigService = inject(GlobalConfigService);
   private _persistenceLocalService = inject(PersistenceLocalService);
   private _translateService = inject(TranslateService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _compressionService = inject(CompressionService);
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
@@ -223,7 +223,7 @@ export class SyncProviderService {
       }
       if (this._c(T.F.SYNC.C.NO_REMOTE_DATA)) {
         this._log(cp, '↑ Update Remote after no getFileRevAndLastClientUpdate()');
-        const localLocal = await this._persistenceService.getValidCompleteData();
+        const localLocal = await this._pfapiService.getValidCompleteData();
         await this._uploadAppData({
           cp,
           localDataComplete: localLocal,
@@ -263,7 +263,7 @@ export class SyncProviderService {
     if (rev && this._isSameRev(rev, localRev)) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same mainFileRev, doesn't mean. that we can't have local changes
-      local = await this._persistenceService.getValidCompleteData();
+      local = await this._pfapiService.getValidCompleteData();
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
         this._snackService.open({
@@ -279,7 +279,7 @@ export class SyncProviderService {
     // simple check based on local meta
     // simple check if lastLocalSyncModelChange
     // ------------------------------------
-    local = local || (await this._persistenceService.getValidCompleteData());
+    local = local || (await this._pfapiService.getValidCompleteData());
     // NOTE: should never be the case, but we need to make sure it is
     if (typeof local.lastLocalSyncModelChange !== 'number') {
       console.log(local);
@@ -709,7 +709,7 @@ export class SyncProviderService {
       if (res === 'FORCE_UPDATE_REMOTE') {
         await this._uploadAppData({
           cp,
-          localDataComplete: await this._persistenceService.getValidCompleteData(),
+          localDataComplete: await this._pfapiService.getValidCompleteData(),
           isForceOverwrite: true,
           isForceArchiveUpdate: true,
         });

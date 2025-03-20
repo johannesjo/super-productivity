@@ -3,11 +3,11 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
 import { androidInterface } from '../../features/android/android-interface';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';
@@ -17,7 +17,7 @@ const ANDROID_DB_KEY = 'backup';
 @Injectable()
 export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
@@ -47,7 +47,7 @@ export class LocalBackupService {
   }
 
   private async _backup(): Promise<void> {
-    const data = await this._persistenceService.loadComplete();
+    const data = await this._pfapiService.loadComplete();
     if (IS_ELECTRON) {
       window.ea.backupAppData(data);
     }

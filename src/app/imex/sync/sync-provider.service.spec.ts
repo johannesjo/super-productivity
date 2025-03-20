@@ -23,7 +23,7 @@
 //   let persistenceLocalServiceMock: jasmine.SpyObj<PersistenceLocalService>;
 //   let dataImportServiceMock: jasmine.SpyObj<DataImportService>;
 //   let snackServiceMock: jasmine.SpyObj<SnackService>;
-//   let persistenceServiceMock: jasmine.SpyObj<PersistenceService>;
+//   let pfapiServiceMock: jasmine.SpyObj<PersistenceService>;
 //
 //   beforeEach(() => {
 //     snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
@@ -33,7 +33,7 @@
 //     dataImportServiceMock = jasmine.createSpyObj('DataImportService', [
 //       'importCompleteSyncData',
 //     ]);
-//     persistenceServiceMock = jasmine.createSpyObj('PersistenceService', [
+//     pfapiServiceMock = jasmine.createSpyObj('PersistenceService', [
 //       'getValidCompleteData',
 //       'loadComplete',
 //     ]);
@@ -79,7 +79,7 @@
 //         { provide: TranslateService, useValue: translateServiceMock },
 //         { provide: CompressionService, useValue: compressionServiceMock },
 //         { provide: PersistenceLocalService, useValue: persistenceLocalServiceMock },
-//         { provide: PersistenceService, useValue: persistenceServiceMock },
+//         { provide: PersistenceService, useValue: pfapiServiceMock },
 //         { provide: DataImportService, useValue: dataImportServiceMock },
 //         { provide: SnackService, useValue: snackServiceMock },
 //         {
@@ -264,7 +264,7 @@
 //   //     lastLocalSyncModelChange: 5555,
 //   //   } as Partial<AppDataComplete> as AppDataComplete;
 //   //
-//   //   persistenceServiceMock.getValidCompleteData.and.returnValue(
+//   //   pfapiServiceMock.getValidCompleteData.and.returnValue(
 //   //     Promise.resolve(localDataComplete),
 //   //   );
 //   //

@@ -453,7 +453,7 @@ export class WorkContextService {
   async load(): Promise<void> {
     // NOTE: currently route has prevalence over everything else and as there is not state apart from
     // activeContextId, and activeContextType, we don't need to load it
-    // const state = await this._persistenceService.context.loadState() || initialContextState;
+    // const state = await this._pfapiService.context.loadState() || initialContextState;
     // this._store$.dispatch(loadWorkContextState({state}));
   }
 

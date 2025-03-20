@@ -266,7 +266,7 @@ export class ProjectEffects {
   //     this._actions$.pipe(
   //       ofType(archiveProject.type),
   //       tap(async ({ id }) => {
-  //         await this._persistenceService.archiveProject(id);
+  //         await this._pfapiService.archiveProject(id);
   //         // TODO remove reminders
   //         this._snackService.open({
   //           ico: 'archive',
@@ -281,7 +281,7 @@ export class ProjectEffects {
   //     this._actions$.pipe(
   //       ofType(unarchiveProject.type),
   //       tap(async ({ id }) => {
-  //         await this._persistenceService.unarchiveProject(id);
+  //         await this._pfapiService.unarchiveProject(id);
   //
   //         this._snackService.open({
   //           ico: 'unarchive',

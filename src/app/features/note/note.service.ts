@@ -15,20 +15,20 @@ import {
   selectNoteById,
   selectNoteFeatureState,
 } from './store/note.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';
 import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
 import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NoteService {
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _workContextService = inject(WorkContextService);
 
   notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));

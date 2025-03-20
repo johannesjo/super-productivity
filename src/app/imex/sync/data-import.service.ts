@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { AppDataComplete } from './sync.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { ImexMetaService } from '../imex-meta/imex-meta.service';
@@ -12,6 +11,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TranslateService } from '@ngx-translate/core';
 import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
 import { get, set } from 'object-path';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 // TODO some of this can be done in a background script
 
@@ -19,7 +19,7 @@ import { get, set } from 'object-path';
   providedIn: 'root',
 })
 export class DataImportService {
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
   private _reminderService = inject(ReminderService);
   private _imexMetaService = inject(ImexMetaService);
@@ -32,7 +32,7 @@ export class DataImportService {
   }
 
   async getCompleteSyncData(): Promise<AppDataComplete> {
-    return await this._persistenceService.loadComplete();
+    return await this._pfapiService.loadComplete();
   }
 
   async importCompleteSyncData(
@@ -62,7 +62,7 @@ export class DataImportService {
       ) {
         return;
       }
-      await this._persistenceService.saveBackup();
+      await this._pfapiService.saveBackup();
     }
 
     if (isValidAppData(data)) {
@@ -73,12 +73,12 @@ export class DataImportService {
           : data;
 
         // clear database to have a clean one and delete legacy stuff
-        await this._persistenceService.clearDatabaseExceptBackupAndLocalOnlyModel();
+        await this._pfapiService.clearDatabaseExceptBackupAndLocalOnlyModel();
 
         // save data to database first then load to store from there
-        await this._persistenceService.importComplete(mergedData);
+        await this._pfapiService.importComplete(mergedData);
         await this._loadAllFromDatabaseToStore();
-        await this._persistenceService.clearBackup();
+        await this._pfapiService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
         this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_IMPORT });
       } catch (e) {
@@ -108,8 +108,7 @@ export class DataImportService {
   private async _mergeWithLocalOmittedFields(
     newData: AppDataComplete,
   ): Promise<AppDataComplete> {
-    const oldLocalData: AppDataComplete =
-      await this._persistenceService.loadComplete(true);
+    const oldLocalData: AppDataComplete = await this._pfapiService.loadComplete(true);
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);
@@ -131,15 +130,15 @@ export class DataImportService {
   }
 
   private async _importLocalDBBackup(): Promise<any> {
-    const data = await this._persistenceService.loadBackup();
+    const data = await this._pfapiService.loadBackup();
     return this.importCompleteSyncData(data, { isBackupReload: true });
   }
 
   private async _isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
-    const backup = await this._persistenceService.loadBackup();
+    const backup = await this._pfapiService.loadBackup();
     if (!localStorage.getItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
-        await this._persistenceService.clearBackup();
+        await this._pfapiService.clearBackup();
       }
       localStorage.setItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP, 'true');
     }
@@ -150,7 +149,7 @@ export class DataImportService {
         return true;
       } else {
         if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
-          await this._persistenceService.clearBackup();
+          await this._pfapiService.clearBackup();
         }
       }
     }

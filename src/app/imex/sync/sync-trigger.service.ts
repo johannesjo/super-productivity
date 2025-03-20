@@ -20,7 +20,6 @@ import {
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import {
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
   SYNC_DEFAULT_AUDIT_TIME,
@@ -33,6 +32,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -45,14 +45,14 @@ export class SyncTriggerService {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _dataInitService = inject(DataInitService);
   private readonly _idleService = inject(IdleService);
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _pfapiService = inject(PfapiService);
 
   private _onUpdateLocalDataTrigger$: Observable<{
     appDataKey: AllowedDBKeys;
     data: any;
     isDataImport: boolean;
     projectId?: string;
-  }> = this._persistenceService.onAfterSave$.pipe(
+  }> = this._pfapiService.onAfterSave$.pipe(
     filter(
       ({ appDataKey, data, isDataImport, isSyncModelChange }) =>
         !!data && !isDataImport && isSyncModelChange,
