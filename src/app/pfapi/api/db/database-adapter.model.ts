@@ -9,5 +9,7 @@ export interface DatabaseAdapter {
 
   remove(key: string): Promise<unknown>;
 
+  loadAll(): Promise<unknown>;
+
   clearDatabase(): Promise<unknown>;
 }

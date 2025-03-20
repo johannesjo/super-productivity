@@ -199,6 +199,27 @@ export class Pfapi<const MD extends ModelCfgs> {
   //   };
   // }
 
+  async clearDatabaseExceptLocalOnly(): Promise<void> {
+    const MODELS_TO_PRESERVE: string[] = [
+      MetaModelCtrl.META_MODEL_ID,
+      MetaModelCtrl.CLIENT_ID,
+      // NOTE prefixes also work
+      SyncProviderCredentialsStore.DB_KEY_PREFIX,
+    ];
+    const localOnlyModels = Object.keys(this.m).filter(
+      (modelId) => this.m[modelId].modelCfg.isLocalOnly,
+    );
+    const allModelsToPreserve = [...MODELS_TO_PRESERVE, ...localOnlyModels];
+    console.log({ allModelsToPreserve });
+
+    const model = this.db.loadAll();
+    const keysToDelete = Object.keys(model).filter(
+      (key) => !allModelsToPreserve.includes(key),
+    );
+    const promises = keysToDelete.map((key) => this.db.remove(key));
+    await Promise.all(promises);
+  }
+
   private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {
     const result = {} as Record<string, ModelCtrl<ModelBase>>;
     // TODO validate modelCfgs

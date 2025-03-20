@@ -22,6 +22,16 @@ export class Database {
     }
   }
 
+  async loadAll(): Promise<unknown> {
+    this._lastParams = { a: 'loadAll' };
+    try {
+      return await this._adapter.loadAll();
+    } catch (e) {
+      console.warn('DB LoadAll Error: Last Params,', this._lastParams);
+      return this._errorHandler(e, this.loadAll, []);
+    }
+  }
+
   async save(key: string, data: unknown): Promise<unknown> {
     this._lastParams = { a: 'save', key, data };
     // disable saving during testing

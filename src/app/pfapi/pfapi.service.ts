@@ -72,15 +72,13 @@ export class PfapiService {
   }
 
   async importComplete(data: AppDataComplete): Promise<unknown> {
+    // TODO typing
     return await this.pf.importAllSycModelData(data as any);
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
     const backup: AppDataComplete = await this.loadBackup();
-    // TODO
-    // const localOnlyModel = await this._persistenceLocalService.load();
-    await this.pf.db.clearDatabase();
-    // await this._persistenceLocalService.save(localOnlyModel);
+    await this.pf.clearDatabaseExceptLocalOnly();
     if (backup) {
       await this.saveBackup(backup);
     }

@@ -78,6 +78,12 @@ export class IndexedDbAdapter implements DatabaseAdapter {
     return await (this._db as any).delete(this._dbMainName, key);
   }
 
+  async loadAll(): Promise<unknown> {
+    console.log(await (this._db as any).load(this._dbMainName));
+
+    return await (this._db as any).load(this._dbMainName);
+  }
+
   async clearDatabase(): Promise<unknown> {
     await this._afterReady();
     // TODO
