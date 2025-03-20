@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
@@ -96,6 +96,12 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
+import {
+  modelExecAction,
+  modelExecActions,
+  modelGetById,
+} from '../../pfapi/pfapi-helper';
+import { taskReducer } from './store/task.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -749,8 +755,10 @@ export class TaskService {
     );
 
     // archive
-    await this._persistenceService.pfapi.m.taskArchive.execAction(
+    await modelExecAction(
+      this._persistenceService.pfapi.m.taskArchive,
       roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
+      taskReducer as any,
       true,
     );
   }
@@ -890,21 +898,25 @@ export class TaskService {
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    await this._persistenceService.pfapi.m.taskArchive.execAction(
+    await modelExecAction(
+      this._persistenceService.pfapi.m.taskArchive,
       updateTask({
         task: {
           id,
           changes: changedFields,
         },
       }),
+      taskReducer as any,
       true,
     );
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    await this._persistenceService.pfapi.m.taskArchive.execActions(
+    await modelExecActions(
+      this._persistenceService.pfapi.m.taskArchive,
       updates.map((upd) => updateTask({ task: upd })),
+      taskReducer as any,
       true,
     );
   }
@@ -912,15 +924,15 @@ export class TaskService {
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
       return (
-        (await this._persistenceService.pfapi.m.task.getById(id)) ||
-        (await this._persistenceService.pfapi.m.taskArchive.getById(id))
+        (await modelGetById(id, this._persistenceService.pfapi.m.task)) ||
+        (await modelGetById(id, this._persistenceService.pfapi.m.taskArchive))
       );
     }
 
     if (isArchive) {
-      return await this._persistenceService.pfapi.m.taskArchive.getById(id);
+      return await modelGetById(id, this._persistenceService.pfapi.m.taskArchive);
     } else {
-      return await this._persistenceService.pfapi.m.task.getById(id);
+      return await modelGetById(id, this._persistenceService.pfapi.m.task);
     }
   }
 

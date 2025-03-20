@@ -62,6 +62,8 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
+import { modelExecAction } from '../../../pfapi/pfapi-helper';
+import { taskReducer } from '../../tasks/store/task.reducer';
 
 @Injectable()
 export class TagEffects {
@@ -232,8 +234,10 @@ export class TagEffects {
           // remove from all tasks
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
-          await this._persistenceService.pfapi.m.taskArchive.execAction(
+          await modelExecAction(
+            this._persistenceService.pfapi.m.taskArchive,
             removeTagsForAllTasks({ tagIdsToRemove }),
+            taskReducer as any,
             true,
           );
 
@@ -262,10 +266,12 @@ export class TagEffects {
             }
           });
 
-          await this._persistenceService.pfapi.m.taskArchive.execAction(
+          await modelExecAction(
+            this._persistenceService.pfapi.m.taskArchive,
             deleteTasks({
               taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
             }),
+            taskReducer as any,
             true,
           );
 

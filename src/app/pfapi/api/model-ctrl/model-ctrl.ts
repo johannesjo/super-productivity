@@ -63,14 +63,4 @@ export class ModelCtrl<MT extends ModelBase> {
       (this.modelCfg.defaultData as MT)
     );
   }
-
-  execAction(...p: any[]): any {
-    throw new Error('not implemented');
-  }
-  execActions(...p: any[]): any {
-    throw new Error('not implemented');
-  }
-  getById(id: string): any {
-    throw new Error('not implemented');
-  }
 }

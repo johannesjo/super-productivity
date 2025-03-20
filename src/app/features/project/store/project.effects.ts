@@ -60,6 +60,8 @@ import {
 } from '../../note/store/note.actions';
 import { DateService } from 'src/app/core/date/date.service';
 import { ReminderService } from '../../reminder/reminder.service';
+import { modelExecAction } from '../../../pfapi/pfapi-helper';
+import { taskReducer } from '../../tasks/store/task.reducer';
 
 @Injectable()
 export class ProjectEffects {
@@ -358,8 +360,10 @@ export class ProjectEffects {
       unique(archiveTaskIdsToDelete),
     );
     // remove archive
-    await this._persistenceService.pfapi.m.taskArchive.execAction(
+    await modelExecAction(
+      this._persistenceService.pfapi.m.taskArchive,
       deleteTasks({ taskIds: archiveTaskIdsToDelete }),
+      taskReducer as any,
       true,
     );
   }

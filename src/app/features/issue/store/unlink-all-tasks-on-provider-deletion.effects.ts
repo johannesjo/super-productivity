@@ -9,6 +9,8 @@ import { Update } from '@ngrx/entity/src/models';
 import { Store } from '@ngrx/store';
 import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { modelExecAction } from '../../../pfapi/pfapi-helper';
+import { taskReducer } from '../../tasks/store/task.reducer';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
@@ -68,8 +70,11 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
           changes: this.UNLINKED_PARTIAL_TASK,
         };
       });
-    await this._persistenceService.pfapi.m.taskArchive.execAction(
+
+    await modelExecAction(
+      this._persistenceService.pfapi.m.taskArchive,
       __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
+      taskReducer as any,
       true,
     );
 
