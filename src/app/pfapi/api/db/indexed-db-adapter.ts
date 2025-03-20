@@ -3,20 +3,25 @@ import { DBSchema, openDB } from 'idb';
 import { DatabaseAdapter } from './database-adapter.model';
 import { MiniObservable } from '../util/mini-observable';
 
+// otherwise the typing of idb dependency won't work
+const FAKE = 'FAAAAAKE' as const;
+
 interface MyDb extends DBSchema {
   [storeName: string]: any;
+
+  [FAKE]: any;
 }
 
 // TODO fix all the typing
 export class IndexedDbAdapter implements DatabaseAdapter {
-  private _db?: IDBPDatabase<MyDb>;
+  private _db!: IDBPDatabase<MyDb>;
   private _isReady$: MiniObservable<boolean> = new MiniObservable<boolean>(false);
 
   private readonly _dbName: string;
   private readonly _dbMainName: string;
   private readonly _dbVersion: number;
 
-  constructor(cfg: { dbName: string; dbMainName: string; version: number }) {
+  constructor(readonly cfg: { dbName: string; dbMainName: string; version: number }) {
     this._dbName = cfg.dbName;
     this._dbMainName = cfg.dbMainName;
     this._dbVersion = cfg.version;
@@ -32,7 +37,8 @@ export class IndexedDbAdapter implements DatabaseAdapter {
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
           console.log('IDB UPGRADE', oldVersion, newVersion);
           // TODO
-          (db as any).createObjectStore(that._dbMainName);
+          db.createObjectStore(that._dbMainName as typeof FAKE);
+          // db.createObjectStore(FAKE_DB_MAIN_NAME);
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         blocked(): void {
@@ -63,31 +69,34 @@ export class IndexedDbAdapter implements DatabaseAdapter {
   async load(key: string): Promise<unknown> {
     await this._afterReady();
     // TODO
-    return await (this._db as any).get(this._dbMainName, key);
+    return await this._db.get(this._dbMainName as typeof FAKE, key);
   }
 
   async save(key: string, data: unknown): Promise<unknown> {
     await this._afterReady();
     // TODO
-    return await (this._db as any).put(this._dbMainName, data, key);
+    return await this._db.put(this._dbMainName as typeof FAKE, data, key);
   }
 
   async remove(key: string): Promise<unknown> {
     await this._afterReady();
     // TODO
-    return await (this._db as any).delete(this._dbMainName, key);
+    return await this._db.delete(this._dbMainName as typeof FAKE, key);
   }
 
-  async loadAll(): Promise<unknown> {
-    console.log(await (this._db as any).load(this._dbMainName));
+  async loadAll(): Promise<Record<string, unknown>> {
+    const data = await this._db.getAll(this._dbMainName as typeof FAKE);
+    const keys = await this._db.getAllKeys(this._dbMainName as typeof FAKE);
 
-    return await (this._db as any).load(this._dbMainName);
+    return keys.reduce<Record<string, unknown>>((acc, key, idx) => {
+      acc[key as string] = data[idx]; // Ensure key is a string
+      return acc;
+    }, {});
   }
 
   async clearDatabase(): Promise<unknown> {
     await this._afterReady();
-    // TODO
-    return await (this._db as any).clear(this._dbMainName);
+    return await this._db.clear(this._dbMainName as typeof FAKE);
   }
 
   private async _afterReady(): Promise<void> {
