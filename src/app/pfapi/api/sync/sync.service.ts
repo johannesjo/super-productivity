@@ -112,11 +112,9 @@ export class SyncService<const MD extends ModelCfgs> {
           throw new UnknownSyncStateError();
       }
     } catch (e) {
-      if (e instanceof Error) {
-        if (e instanceof NoRemoteMetaFile) {
-          await this.uploadAll();
-          return { status: SyncStatus.UpdateRemoteAll };
-        }
+      if (e instanceof NoRemoteMetaFile) {
+        await this.uploadAll();
+        return { status: SyncStatus.UpdateRemoteAll };
       }
       throw e;
     }
@@ -394,7 +392,7 @@ export class SyncService<const MD extends ModelCfgs> {
       const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
       return { remoteMeta: validateRemoteMeta(data), remoteRev: r.rev };
     } catch (e) {
-      if (e instanceof Error && e instanceof NoRemoteDataError) {
+      if (e instanceof NoRemoteDataError) {
         throw new NoRemoteMetaFile();
       }
       throw e;
@@ -438,11 +436,10 @@ export class SyncService<const MD extends ModelCfgs> {
       }
       throw new LockFilePresentError();
     } catch (e) {
-      console.log(e);
-
       if (e instanceof NoRevError || e instanceof NoRemoteDataError) {
         return true;
       }
+      console.log(e);
       throw e;
     }
     // TODO maybe check using last rev instead of clientId, if it is faster maybe

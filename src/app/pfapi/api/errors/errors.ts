@@ -110,36 +110,10 @@ export class HttpRealError extends Error {
 
 export class NoRemoteMetaFile extends Error {
   override name = NoRemoteMetaFile.name;
-
-  constructor(
-    message?: string,
-    public originalError?: unknown,
-  ) {
-    super(message);
-    this.originalError = originalError;
-    // TODO check if needed
-    // Maintains proper stack trace for where our error was thrown (where the new error was created)
-    // if (Error.captureStackTrace) {
-    //   Error.captureStackTrace(this, NoRemoteDataError);
-    // }
-  }
 }
 
-export class NoRemoteDataError extends Error {
+export class NoRemoteDataError extends AdditionalLogErrorBase {
   override name = NoRemoteDataError.name;
-
-  constructor(
-    message?: string,
-    public originalError?: unknown,
-  ) {
-    super(message);
-    this.originalError = originalError;
-    // TODO check if needed
-    // Maintains proper stack trace for where our error was thrown (where the new error was created)
-    // if (Error.captureStackTrace) {
-    //   Error.captureStackTrace(this, NoRemoteDataError);
-    // }
-  }
 }
 
 export class InvalidDataError extends Error {

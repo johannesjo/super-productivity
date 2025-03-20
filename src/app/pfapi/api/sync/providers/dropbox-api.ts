@@ -62,7 +62,7 @@ export class DropboxApi {
           'path/not_found/',
         )
       ) {
-        throw new NoRemoteDataError(undefined, e);
+        throw new NoRemoteDataError(path, e);
       } else {
         throw e;
       }
