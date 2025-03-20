@@ -16,6 +16,7 @@ import {
   NoRevError,
   NoSyncProviderSetError,
   RevMismatchError,
+  UnableToWriteLockFile,
   UnknownSyncStateError,
 } from '../errors/errors';
 import { pfLog } from '../util/log';
@@ -97,6 +98,7 @@ export class SyncService<const MD extends ModelCfgs> {
       switch (status) {
         case SyncStatus.UpdateLocal:
           await this.updateLocal(remoteMeta, localMeta, remoteRev);
+          alert('UPDATE_LOCAL DONE');
           return { status };
         case SyncStatus.UpdateRemote:
           await this.updateRemote(remoteMeta, localMeta);
@@ -112,6 +114,9 @@ export class SyncService<const MD extends ModelCfgs> {
           throw new UnknownSyncStateError();
       }
     } catch (e) {
+      alert(e);
+      console.error(e);
+
       if (e instanceof NoRemoteMetaFile) {
         await this.uploadAll();
         return { status: SyncStatus.UpdateRemoteAll };
@@ -449,7 +454,11 @@ export class SyncService<const MD extends ModelCfgs> {
     const syncProvider = this._getCurrentSyncProviderOrError();
     const localClientId = await this._metaModelCtrl.loadClientId();
     pfLog(2, `${SyncService.name}.${this._writeLockFile.name}()`, localClientId);
-    await syncProvider.uploadFile(LOCK_FILE_NAME, localClientId, null);
+    try {
+      await syncProvider.uploadFile(LOCK_FILE_NAME, localClientId, null, false);
+    } catch (e) {
+      throw new UnableToWriteLockFile();
+    }
   }
 
   private async _removeLockFile(): Promise<void> {

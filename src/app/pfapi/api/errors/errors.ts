@@ -32,6 +32,10 @@ export class LockFilePresentError extends Error {
   override name = LockFilePresentError.name;
 }
 
+export class UnableToWriteLockFile extends Error {
+  override name = UnableToWriteLockFile.name;
+}
+
 export class ClientIdNotFoundError extends Error {
   override name = ClientIdNotFoundError.name;
 }

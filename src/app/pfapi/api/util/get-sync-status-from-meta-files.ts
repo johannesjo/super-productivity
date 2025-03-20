@@ -8,6 +8,7 @@ import {
 } from '../errors/errors';
 import { pfLog } from './log';
 
+// TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
   remote: RemoteMeta,
   local: LocalMeta,
@@ -135,11 +136,7 @@ const _checkForUpdate = (params: {
     } else if (lastSync < local) {
       return UpdateCheckResult.RemoteUpdateRequired;
     } else if (lastSync === local) {
-      throw new SyncInvalidTimeValuesError({
-        msg: 'Dropbox date not up to date despite seemingly successful sync. (This might happen when: 1. You have conflict changes and decide to take the local version. 2. You open the other instance and also decide to use the local version.',
-        lastSync,
-        local,
-      });
+      return UpdateCheckResult.RemoteUpdateRequired;
     }
   } else if (local < remote) {
     if (lastSync !== local) {

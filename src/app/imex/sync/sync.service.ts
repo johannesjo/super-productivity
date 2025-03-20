@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, skip, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -11,8 +11,10 @@ import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/glob
 import {
   AuthFailError,
   ImpossibleError,
+  LockFilePresentError,
   SyncProviderId,
   SyncStatus,
+  UnableToWriteLockFile,
 } from '../../pfapi/api';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
@@ -55,13 +57,12 @@ export class SyncService {
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
 
-  // activeProvider$: Observable<unknown> = this.syncProviderId$.pipe(
-  //   switchMap(() => this._pfapiWrapperService.pf.getActiveSyncProvider()),
-  // );
-
   isEnabledAndReady$: Observable<boolean> = miniObservableToObservable(
     this._pfapiWrapperService.pf.isSyncProviderActiveAndReady$,
-  ).pipe(tap((v) => console.log('aaaaaaaa', v)));
+  ).pipe(
+    // since first is always false, we skip
+    skip(1),
+  );
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
@@ -150,8 +151,8 @@ export class SyncService {
 
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateLocalAll:
-          const data = this._pfapiWrapperService.getValidCompleteData();
-          await this._dataImportService.importCompleteSyncData(data as any);
+          // TODO dare to do more complicated stuff for UpdateLocal
+          await this._updateAllFromDB();
           return r.status;
 
         case SyncStatus.NotConfigured:
@@ -170,12 +171,19 @@ export class SyncService {
           }).toPromise();
 
           if (res === 'USE_LOCAL') {
-            alert('UPLOAD ALL');
+            this._globalProgressBarService.countUp('SYNC');
+            this.isSyncing$.next(true);
             await this._pfapiWrapperService.pf.uploadAll();
+            this.isSyncing$.next(false);
+            this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
           } else if (res === 'USE_REMOTE') {
-            alert('DOWNLOAD ALL');
+            this._globalProgressBarService.countUp('SYNC');
+            this.isSyncing$.next(true);
             await this._pfapiWrapperService.pf.downloadAll();
+            await this._updateAllFromDB();
+            this.isSyncing$.next(false);
+            this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
           }
 
@@ -198,13 +206,25 @@ export class SyncService {
       console.error(error);
 
       if (error instanceof AuthFailError) {
-        alert('AuthFailError');
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',
         });
+        return 'HANDLED_ERROR';
+      } else if (
+        error instanceof LockFilePresentError ||
+        error instanceof UnableToWriteLockFile
+      ) {
+        // TODO improve handling
+        this._snackService.open({
+          // msg: T.F.SYNC.S.INCOMPLETE_CFG,
+          msg: 'Remote Data is currently being written',
+          type: 'ERROR',
+        });
+        return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
+        alert(errStr);
         // TODO check if needed
         // if (errStr.includes(KNOWN_SYNC_ERROR_PREFIX)) {
         //   this._snackService.open({
@@ -218,14 +238,18 @@ export class SyncService {
           msg: errStr,
           type: 'ERROR',
           translateParams: {
-            err: getSyncErrorStr(errStr),
+            err: errStr,
           },
         });
+        return 'HANDLED_ERROR';
       }
-      return 'HANDLED_ERROR';
+      throw new Error('unhandled sync error');
     }
+  }
 
-    throw new Error('unhandled sync error');
+  private async _updateAllFromDB(): Promise<void> {
+    const data = await this._pfapiWrapperService.getValidCompleteData();
+    await this._dataImportService.importCompleteSyncData(data);
   }
 
   private _c(str: string): boolean {

@@ -90,8 +90,11 @@ export class DropboxApi {
       //   : {}),
     };
 
-    if (localRev && !isForceOverwrite) {
-      args.mode = { '.tag': 'update', update: localRev } as any;
+    if (!isForceOverwrite) {
+      args.mode = localRev
+        ? ({ '.tag': 'update', update: localRev } as any)
+        : // we do this to force an error if the file does exist
+          { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
     }
 
     return this._request({
