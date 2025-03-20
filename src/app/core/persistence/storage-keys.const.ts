@@ -1,6 +1,6 @@
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 
-export type AllowedDBKeys = keyof AppDataComplete | 'SUP_COMPLETE_BACKUP';
+export type AllowedDBKeys = keyof AppDataCompleteLegacy | 'SUP_COMPLETE_BACKUP';
 
 // INDEXEDDB
 export enum DB {

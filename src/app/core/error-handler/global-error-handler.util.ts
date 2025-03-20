@@ -4,7 +4,7 @@ import pThrottle from 'p-throttle';
 import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteNew } from '../../imex/sync/sync.model';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
 
@@ -70,7 +70,7 @@ export const createErrorAlert = (
   err: string = '',
   stackTrace: string,
   origErr: any,
-  userData?: AppDataComplete | undefined,
+  userData?: AppDataCompleteNew | undefined,
 ): void => {
   if (isWasErrorAlertCreated) {
     return;

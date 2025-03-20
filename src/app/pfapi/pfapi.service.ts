@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ModelCfgToModelCtrl, Pfapi } from './api';
 import { Subject } from 'rxjs';
 import { AllowedDBKeys, DB } from '../core/persistence/storage-keys.const';
-import { AppDataComplete } from '../imex/sync/sync.model';
+import { AppDataCompleteNew } from '../imex/sync/sync.model';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { devError } from '../util/dev-error';
 import { PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PfapiModelCfgs } from './pfapi-config';
@@ -27,7 +27,7 @@ export class PfapiService {
 
   private _invalidDataCount = 0;
 
-  async getValidCompleteData(): Promise<AppDataComplete> {
+  async getValidCompleteData(): Promise<AppDataCompleteNew> {
     const d = await this.loadComplete();
     // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
     if (isValidAppData(d)) {
@@ -46,11 +46,11 @@ export class PfapiService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  async loadBackup(): Promise<AppDataComplete> {
+  async loadBackup(): Promise<AppDataCompleteNew> {
     return (await this.pf.db.load(DB.BACKUP)) as any;
   }
 
-  async saveBackup(backup?: AppDataComplete): Promise<unknown> {
+  async saveBackup(backup?: AppDataCompleteNew): Promise<unknown> {
     return (await this.pf.db.save(DB.BACKUP, backup)) as any;
   }
 
@@ -58,26 +58,23 @@ export class PfapiService {
     return (await this.pf.db.remove(DB.BACKUP)) as any;
   }
 
-  async loadComplete(isMigrate = false): Promise<AppDataComplete> {
+  async loadComplete(isMigrate = false): Promise<AppDataCompleteNew> {
     // TODO better
     const syncModels = await this.pf.getAllSyncModelData();
     console.log(syncModels);
 
     return {
       ...syncModels,
-      // TODO better
-      lastLocalSyncModelChange: null,
-      lastArchiveUpdate: null,
     } as any;
   }
 
-  async importComplete(data: AppDataComplete): Promise<unknown> {
+  async importComplete(data: AppDataCompleteNew): Promise<unknown> {
     // TODO typing
     return await this.pf.importAllSycModelData(data as any);
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
-    const backup: AppDataComplete = await this.loadBackup();
+    const backup: AppDataCompleteNew = await this.loadBackup();
     await this.pf.clearDatabaseExceptLocalOnly();
     if (backup) {
       await this.saveBackup(backup);

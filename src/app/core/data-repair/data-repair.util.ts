@@ -1,4 +1,8 @@
-import { AppBaseDataEntityLikeStates, AppDataComplete } from '../../imex/sync/sync.model';
+import {
+  AppBaseDataEntityLikeStates,
+  AppDataCompleteLegacy,
+  AppDataCompleteNew,
+} from '../../imex/sync/sync.model';
 import { Tag, TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
@@ -9,16 +13,18 @@ import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cf
 import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
 
-const ENTITY_STATE_KEYS: (keyof AppDataComplete)[] = ALL_ENTITY_MODEL_KEYS;
+const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
 
-export const dataRepair = (data: AppDataComplete): AppDataComplete => {
+export const dataRepair = (
+  data: AppDataCompleteLegacy | AppDataCompleteNew,
+): AppDataCompleteLegacy | AppDataCompleteNew => {
   if (!isDataRepairPossible(data)) {
     throw new Error('Data repair attempted but not possible');
   }
 
   // console.time('dataRepair');
   // NOTE copy is important to prevent readonly errors
-  let dataOut: AppDataComplete = { ...data };
+  let dataOut: AppDataCompleteNew = { ...data };
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
@@ -42,7 +48,7 @@ export const dataRepair = (data: AppDataComplete): AppDataComplete => {
   return dataOut;
 };
 
-const _fixEntityStates = (data: AppDataComplete): AppDataComplete => {
+const _fixEntityStates = (data: AppDataCompleteNew): AppDataCompleteNew => {
   ENTITY_STATE_KEYS.forEach((key) => {
     data[key] = _resetEntityIdsFromObjects(
       data[key] as AppBaseDataEntityLikeStates,
@@ -52,7 +58,7 @@ const _fixEntityStates = (data: AppDataComplete): AppDataComplete => {
   return data;
 };
 
-const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete => {
+const _removeDuplicatesFromArchive = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const taskIds = data.task.ids as string[];
   const archiveTaskIds = data.taskArchive.ids as string[];
   const duplicateIds = taskIds.filter((id) => archiveTaskIds.includes(id));
@@ -71,7 +77,7 @@ const _removeDuplicatesFromArchive = (data: AppDataComplete): AppDataComplete =>
   return data;
 };
 
-const _removeMissingReminderIds = (data: AppDataComplete): AppDataComplete => {
+const _removeMissingReminderIds = (data: AppDataCompleteNew): AppDataCompleteNew => {
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
     if (t.reminderId && !data.reminders.find((r) => r.id === t.reminderId)) {
@@ -86,8 +92,8 @@ const _removeMissingReminderIds = (data: AppDataComplete): AppDataComplete => {
 };
 
 const _moveArchivedSubTasksToUnarchivedParents = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   // to avoid ambiguity
   const taskState: TaskState = data.task;
   const taskArchiveState: TaskArchive = data.taskArchive;
@@ -130,8 +136,8 @@ const _moveArchivedSubTasksToUnarchivedParents = (
 };
 
 const _moveUnArchivedSubTasksToArchivedParents = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   // to avoid ambiguity
   const taskState: TaskState = data.task;
   const taskArchiveState: TaskArchive = data.taskArchive;
@@ -173,8 +179,8 @@ const _moveUnArchivedSubTasksToArchivedParents = (
 };
 
 const _removeMissingTasksFromListsOrRestoreFromArchive = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const { task, project, tag, taskArchive } = data;
   const taskIds: string[] = task.ids;
   const taskArchiveIds: string[] = taskArchive.ids as string[];
@@ -236,7 +242,9 @@ const _resetEntityIdsFromObjects = (
   };
 };
 
-const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete => {
+const _addOrphanedTasksToProjectLists = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const { task, project } = data;
   let allTaskIdsOnProjectLists: string[] = [];
 
@@ -273,8 +281,8 @@ const _addOrphanedTasksToProjectLists = (data: AppDataComplete): AppDataComplete
 };
 
 const _removeNonExistentProjectIdsFromTasks = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const { task, project, taskArchive } = data;
   const projectIds: string[] = project.ids as string[];
   const taskIds: string[] = task.ids;
@@ -299,8 +307,8 @@ const _removeNonExistentProjectIdsFromTasks = (
 };
 
 const _removeNonExistentProjectIdsFromIssueProviders = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const { issueProvider, project } = data;
   const projectIds: string[] = project.ids as string[];
   const issueProviderIds: string[] = issueProvider.ids;
@@ -316,8 +324,8 @@ const _removeNonExistentProjectIdsFromIssueProviders = (
 };
 
 const _removeNonExistentProjectIdsFromTaskRepeatCfg = (
-  data: AppDataComplete,
-): AppDataComplete => {
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const { project, taskRepeatCfg } = data;
   const projectIds: string[] = project.ids as string[];
   const taskRepeatCfgIds: string[] = taskRepeatCfg.ids as string[];
@@ -343,7 +351,9 @@ const _removeNonExistentProjectIdsFromTaskRepeatCfg = (
   return data;
 };
 
-const _cleanupNonExistingTasksFromLists = (data: AppDataComplete): AppDataComplete => {
+const _cleanupNonExistingTasksFromLists = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const projectIds: string[] = data.project.ids as string[];
   projectIds.forEach((pid) => {
     const projectItem = data.project.entities[pid];
@@ -373,7 +383,9 @@ const _cleanupNonExistingTasksFromLists = (data: AppDataComplete): AppDataComple
   return data;
 };
 
-const _cleanupNonExistingNotesFromLists = (data: AppDataComplete): AppDataComplete => {
+const _cleanupNonExistingNotesFromLists = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const projectIds: string[] = data.project.ids as string[];
   projectIds.forEach((pid) => {
     const projectItem = data.project.entities[pid];
@@ -394,7 +406,7 @@ const _cleanupNonExistingNotesFromLists = (data: AppDataComplete): AppDataComple
   return data;
 };
 
-const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
+const _fixInconsistentProjectId = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const projectIds: string[] = data.project.ids as string[];
   projectIds
     .map((id) => data.project.entities[id])
@@ -439,7 +451,7 @@ const _fixInconsistentProjectId = (data: AppDataComplete): AppDataComplete => {
   return data;
 };
 
-const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
+const _fixInconsistentTagId = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const tagIds: string[] = data.tag.ids as string[];
   tagIds
     .map((id) => data.tag.entities[id])
@@ -461,7 +473,9 @@ const _fixInconsistentTagId = (data: AppDataComplete): AppDataComplete => {
   return data;
 };
 
-const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplete => {
+const _addTodayTagIfNoProjectIdOrTagId = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const taskIds: string[] = data.task.ids as string[];
   taskIds
     .map((id) => data.task.entities[id])
@@ -485,7 +499,9 @@ const _addTodayTagIfNoProjectIdOrTagId = (data: AppDataComplete): AppDataComplet
   return data;
 };
 
-const _setTaskProjectIdAccordingToParent = (data: AppDataComplete): AppDataComplete => {
+const _setTaskProjectIdAccordingToParent = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
   const taskIds: string[] = data.task.ids as string[];
   taskIds
     .map((id) => data.task.entities[id])
@@ -533,7 +549,7 @@ const _setTaskProjectIdAccordingToParent = (data: AppDataComplete): AppDataCompl
   return data;
 };
 
-const _cleanupOrphanedSubTasks = (data: AppDataComplete): AppDataComplete => {
+const _cleanupOrphanedSubTasks = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const taskIds: string[] = data.task.ids as string[];
   taskIds
     .map((id) => data.task.entities[id])

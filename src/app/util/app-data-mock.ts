@@ -1,9 +1,9 @@
-import { AppDataComplete } from '../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../imex/sync/sync.model';
 import { MODEL_VERSION_KEY } from '../app.constants';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import { createEmptyEntity } from './create-empty-entity';
 
-export const createAppDataCompleteMock = (): AppDataComplete => ({
+export const createAppDataCompleteMock = (): AppDataCompleteLegacy => ({
   project: {
     ...createEmptyEntity(),
     [MODEL_VERSION_KEY]: 5,

@@ -3,7 +3,11 @@ import { LocalMeta, ModelBase, ModelCfg } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { getEnvironmentId } from '../util/get-environment-id';
 import { DBNames } from '../pfapi.const';
-import { ClientIdNotFoundError, InvalidMetaError } from '../errors/errors';
+import {
+  ClientIdNotFoundError,
+  InvalidMetaError,
+  MetaNotReadyError,
+} from '../errors/errors';
 import { validateLocalMeta } from '../util/validate-local-meta';
 
 const DEFAULT_META_MODEL: LocalMeta = {
@@ -33,23 +37,29 @@ export class MetaModelCtrl {
         this._saveClientId(clientIdI);
       }
     });
+    this.loadMetaModel().then((v) => {
+      this._metaModelInMemory = v;
+    });
   }
 
-  async onModelSave<MT extends ModelBase>(
-    modelId: string,
-    modelCfg: ModelCfg<MT>,
-  ): Promise<unknown> {
-    pfLog(3, `${MetaModelCtrl.name}.${this.onModelSave.name}()`, modelId, modelCfg);
-
-    const timestamp = Date.now();
+  updateRevForModel<MT extends ModelBase>(modelId: string, modelCfg: ModelCfg<MT>): void {
+    pfLog(3, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, modelCfg);
+    console.log(this._metaModelInMemory);
     if (modelCfg.isLocalOnly) {
-      return Promise.resolve();
+      return;
+    }
+    const timestamp = Date.now();
+
+    const metaModel = this._metaModelInMemory;
+    if (!metaModel) {
+      throw new MetaNotReadyError(modelId, modelCfg);
     }
 
-    const metaModel = await this.loadMetaModel();
     const isModelVersionChange =
       metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
-    return this._updateMetaModel({
+
+    this.saveMetaModel({
+      ...metaModel,
       lastUpdate: timestamp,
       revMap: {
         ...metaModel.revMap,
@@ -66,15 +76,6 @@ export class MetaModelCtrl {
     });
   }
 
-  private async _updateMetaModel(metaModelUpdate: Partial<LocalMeta>): Promise<unknown> {
-    pfLog(3, `${MetaModelCtrl.name}.${this._updateMetaModel.name}()`, metaModelUpdate);
-    this._metaModelInMemory = {
-      ...(await this.loadMetaModel()),
-      ...metaModelUpdate,
-    };
-    return this.saveMetaModel(this._metaModelInMemory);
-  }
-
   saveMetaModel(metaModel: LocalMeta): Promise<unknown> {
     pfLog(2, `${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
     if (!metaModel.lastUpdate) {
@@ -83,6 +84,7 @@ export class MetaModelCtrl {
         'lastUpdate not found',
       );
     }
+    // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);
   }

@@ -7,7 +7,7 @@ import {
   TaskArchive,
   TaskState,
 } from '../../features/tasks/task.model';
-import { AppBaseData, AppDataComplete } from '../../imex/sync/sync.model';
+import { AppBaseData, AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { DatabaseService } from './database.service';
 import { Project, ProjectState } from '../../features/project/project.model';
@@ -133,7 +133,7 @@ export class PersistenceLegacyService {
   private _isBlockSaving: boolean = false;
   private _invalidDataCount = 0;
 
-  async getValidCompleteData(): Promise<AppDataComplete> {
+  async getValidCompleteData(): Promise<AppDataCompleteLegacy> {
     const d = await this.loadComplete();
     // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
     if (isValidAppData(d)) {
@@ -152,12 +152,12 @@ export class PersistenceLegacyService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  async loadBackup(): Promise<AppDataComplete> {
+  async loadBackup(): Promise<AppDataCompleteLegacy> {
     return this._loadFromDb({ dbKey: DB.BACKUP });
   }
 
-  async saveBackup(backup?: AppDataComplete): Promise<unknown> {
-    const data: AppDataComplete = backup || (await this.loadComplete());
+  async saveBackup(backup?: AppDataCompleteLegacy): Promise<unknown> {
+    const data: AppDataCompleteLegacy = backup || (await this.loadComplete());
     return this._saveToDb({
       dbKey: DB.BACKUP,
       data,
@@ -174,7 +174,7 @@ export class PersistenceLegacyService {
   // async loadCompleteWithPrivate(): Promise<AppDataComplete> {
   // }
 
-  async loadComplete(isMigrate = false): Promise<AppDataComplete> {
+  async loadComplete(isMigrate = false): Promise<AppDataCompleteLegacy> {
     const projectState = await this.project.loadState();
     const pids = projectState ? (projectState.ids as string[]) : [];
     if (!pids) {
@@ -184,7 +184,7 @@ export class PersistenceLegacyService {
     const r = isMigrate
       ? crossModelMigrations({
           ...(await this._loadAppBaseData()),
-        } as AppDataComplete)
+        } as AppDataCompleteLegacy)
       : {
           ...(await this._loadAppBaseData()),
         };
@@ -197,7 +197,7 @@ export class PersistenceLegacyService {
     };
   }
 
-  async importComplete(data: AppDataComplete): Promise<unknown> {
+  async importComplete(data: AppDataCompleteLegacy): Promise<unknown> {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
 
@@ -232,7 +232,7 @@ export class PersistenceLegacyService {
   }
 
   async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
-    const backup: AppDataComplete = await this.loadBackup();
+    const backup: AppDataCompleteLegacy = await this.loadBackup();
     const localOnlyModel = await this._persistenceLocalService.load();
     await this._databaseService.clearDatabase();
     await this._persistenceLocalService.save(localOnlyModel);

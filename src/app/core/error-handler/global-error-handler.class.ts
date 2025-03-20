@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable, Injector, inject } from '@angular/core';
+import { ErrorHandler, inject, Injectable, Injector } from '@angular/core';
 import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
@@ -8,7 +8,7 @@ import {
   logAdvancedStacktrace,
 } from './global-error-handler.util';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteNew } from '../../imex/sync/sync.model';
 import { error } from 'electron-log/renderer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 
@@ -57,7 +57,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
   }
 
-  private async _getUserData(): Promise<AppDataComplete | undefined> {
+  private async _getUserData(): Promise<AppDataCompleteNew | undefined> {
     try {
       return this.injector.get(PfapiService).loadComplete();
     } catch (e) {

@@ -1,5 +1,5 @@
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { AppDataComplete } from '../sync/sync.model';
+import { AppDataCompleteLegacy, AppDataCompleteNew } from '../sync/sync.model';
 
 let i: number = 0;
 
@@ -56,7 +56,7 @@ const recurse = (obj: any): void => {
   }
 };
 
-export const privacyExport = (d: AppDataComplete): string => {
+export const privacyExport = (d: AppDataCompleteLegacy | AppDataCompleteNew): string => {
   const cpy = dirtyDeepCopy(d);
   recurse(cpy);
 

@@ -29,16 +29,15 @@ export class ModelCtrl<MT extends ModelBase> {
   // TODO improve on isSyncModelChange
   save(data: MT, p?: { isSyncModelChange: boolean }): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, data);
+    pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
     if (!p?.isSyncModelChange) {
       return this._db.save(this.modelId, data);
     }
+    this._metaModel.updateRevForModel(this.modelId, this.modelCfg);
 
-    return Promise.all([
-      this._metaModel.onModelSave(this.modelId, this.modelCfg),
-      this._db.save(this.modelId, data),
-    ]);
+    // TODO check if making this "more sync" will solve the problem
+    return this._db.save(this.modelId, data);
   }
 
   async partialUpdate(data: Partial<MT>): Promise<unknown> {

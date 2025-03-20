@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { AppDataComplete } from '../sync/sync.model';
+import { AppDataCompleteNew } from '../sync/sync.model';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -41,7 +41,7 @@ export class FileImexComponent {
     reader.onload = async () => {
       const textData = reader.result;
       console.log(textData);
-      let data: AppDataComplete | undefined;
+      let data: AppDataCompleteNew | undefined;
       let oldData;
       try {
         data = oldData = JSON.parse((textData as any).toString());
@@ -55,7 +55,7 @@ export class FileImexComponent {
         alert('V1 Data. Migration not supported any more.');
       } else {
         await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
+        await this._dataImportService.importCompleteSyncData(data as AppDataCompleteNew);
       }
 
       const fileInputRef = this.fileInputRef();

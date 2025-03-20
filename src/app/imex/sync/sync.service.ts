@@ -142,19 +142,22 @@ export class SyncService {
 
       switch (r.status) {
         case SyncStatus.InSync:
+          return r.status;
+
         case SyncStatus.UpdateRemote:
         case SyncStatus.UpdateRemoteAll:
           return r.status;
 
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateLocalAll:
-          // const data = this._pfapiWrapperService.getValidCompleteData();
-          // this._dataImportService.importCompleteSyncData(r.data as any);
+          const data = this._pfapiWrapperService.getValidCompleteData();
+          await this._dataImportService.importCompleteSyncData(data as any);
           return r.status;
 
         case SyncStatus.NotConfigured:
-          this._configureActiveSyncProvider();
-          return r.status;
+          await this._configureActiveSyncProvider();
+          return this.sync();
+        // return r.status;
 
         case SyncStatus.IncompleteRemoteData:
           return r.status;

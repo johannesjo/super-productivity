@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { take, tap } from 'rxjs/operators';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { AppDataComplete } from '../sync/sync.model';
+import { AppDataCompleteLegacy, AppDataCompleteNew } from '../sync/sync.model';
 import { IS_ELECTRON } from '../../app.constants';
 import { LocalBackupService } from './local-backup.service';
 import { DataImportService } from '../sync/data-import.service';
@@ -33,11 +33,13 @@ export class LocalBackupEffects {
       { dispatch: false },
     );
 
-  private async _checkForBackupIfEmpty(appDataComplete: AppDataComplete): Promise<void> {
+  private async _checkForBackupIfEmpty(
+    appDataComplete: AppDataCompleteLegacy | AppDataCompleteNew,
+  ): Promise<void> {
     if (
       appDataComplete.task.ids.length === 0 &&
       appDataComplete.taskArchive.ids.length === 0 &&
-      !appDataComplete.lastLocalSyncModelChange
+      !(appDataComplete as AppDataCompleteLegacy).lastLocalSyncModelChange
     ) {
       const backupMeta = await this._localBackupService.checkBackupAvailable();
 

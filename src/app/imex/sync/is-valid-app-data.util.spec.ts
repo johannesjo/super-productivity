@@ -1,4 +1,4 @@
-import { AppDataComplete } from './sync.model';
+import { AppDataCompleteLegacy } from './sync.model';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
@@ -26,7 +26,7 @@ import { IssueProvider } from '../../features/issue/issue.model';
 // ];
 
 describe('isValidAppData()', () => {
-  let mock: AppDataComplete;
+  let mock: AppDataCompleteLegacy;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     spyOn(window, 'alert').and.stub();

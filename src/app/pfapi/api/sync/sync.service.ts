@@ -181,7 +181,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   async uploadAll(): Promise<void> {
-    alert('REMOTE ALL');
+    alert('UPLOAD ALL TO REMOTE');
     const local = await this._metaModelCtrl.loadMetaModel();
     return this.updateRemote(
       {

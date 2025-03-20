@@ -11,7 +11,7 @@ import { IPC } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import * as path from 'path';
 import { error, log } from 'electron-log/main';
-import { AppDataComplete } from '../src/app/imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../src/app/imex/sync/sync.model';
 
 export const BACKUP_DIR = path.join(app.getPath('userData'), `backups`);
 
@@ -58,7 +58,7 @@ export function initBackupAdapter(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function backupData(ev: IpcMainEvent, data: AppDataComplete): void {
+function backupData(ev: IpcMainEvent, data: AppDataCompleteLegacy): void {
   if (!existsSync(BACKUP_DIR)) {
     mkdirSync(BACKUP_DIR);
   }

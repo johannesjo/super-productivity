@@ -1,6 +1,8 @@
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy, AppDataCompleteNew } from '../../imex/sync/sync.model';
 
-export const isDataRepairPossible = (data: AppDataComplete): boolean => {
+export const isDataRepairPossible = (
+  data: AppDataCompleteLegacy | AppDataCompleteNew,
+): boolean => {
   const d: any = data as any;
   return (
     typeof d === 'object' &&

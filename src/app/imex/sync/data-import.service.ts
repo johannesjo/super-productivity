@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AppDataComplete } from './sync.model';
+import { AppDataCompleteNew } from './sync.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { ImexMetaService } from '../imex-meta/imex-meta.service';
@@ -31,12 +31,12 @@ export class DataImportService {
     this._isCheckForStrayLocalDBBackupAndImport();
   }
 
-  async getCompleteSyncData(): Promise<AppDataComplete> {
+  async getCompleteSyncData(): Promise<AppDataCompleteNew> {
     return await this._pfapiService.loadComplete();
   }
 
   async importCompleteSyncData(
-    data: AppDataComplete,
+    data: AppDataCompleteNew,
     {
       isBackupReload = false,
       isSkipStrayBackupCheck = false,
@@ -106,9 +106,9 @@ export class DataImportService {
   }
 
   private async _mergeWithLocalOmittedFields(
-    newData: AppDataComplete,
-  ): Promise<AppDataComplete> {
-    const oldLocalData: AppDataComplete = await this._pfapiService.loadComplete(true);
+    newData: AppDataCompleteNew,
+  ): Promise<AppDataCompleteNew> {
+    const oldLocalData: AppDataCompleteNew = await this._pfapiService.loadComplete(true);
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);

@@ -18,7 +18,7 @@ import {
 import { SyncConfig } from '../../features/config/global-config.model';
 import {
   AppArchiveFileData,
-  AppDataComplete,
+  AppDataCompleteLegacy,
   AppMainFileData,
   AppMainFileNoRevsData,
   DialogConflictResolutionResult,
@@ -182,7 +182,7 @@ export class SyncProviderService {
   }
 
   private async _sync(cp: SyncProviderServiceInterface): Promise<SyncResultLegacy> {
-    let local: AppDataComplete | undefined;
+    let local: AppDataCompleteLegacy | undefined;
     let isReady: boolean = false;
     try {
       isReady = await cp.isReady$.pipe(first()).toPromise();
@@ -488,7 +488,7 @@ export class SyncProviderService {
     isForceArchiveUpdate = false,
   }: {
     cp: SyncProviderServiceInterface;
-    localDataComplete: AppDataComplete;
+    localDataComplete: AppDataCompleteLegacy;
     isForceArchiveUpdate?: boolean;
     isForceOverwrite?: boolean;
     retryAttemptNr?: number;
@@ -606,7 +606,7 @@ export class SyncProviderService {
   }
 
   private _splitData = (
-    data: AppDataComplete,
+    data: AppDataCompleteLegacy,
   ): { archive: AppArchiveFileData; mainNoRevs: AppMainFileNoRevsData } => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { taskArchive, archivedProjects, lastArchiveUpdate, ...mainNoRevs } = data;
@@ -629,7 +629,7 @@ export class SyncProviderService {
   }: {
     cp: SyncProviderServiceInterface;
     remoteMainFileData: AppMainFileData;
-    localComplete: AppDataComplete;
+    localComplete: AppDataCompleteLegacy;
     isForceArchiveUpdate?: boolean;
     mainFileRev: string;
   }): Promise<void> {
@@ -721,7 +721,7 @@ export class SyncProviderService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { archiveRev, archiveLastUpdate, ...cleanedRemoteMainFile } =
       remoteMainFileData;
-    const completeData: AppDataComplete = {
+    const completeData: AppDataCompleteLegacy = {
       ...cleanedRemoteMainFile,
       ...(remoteArchiveData
         ? {
@@ -813,7 +813,7 @@ export class SyncProviderService {
   }: {
     cp: SyncProviderServiceInterface;
     remote: AppMainFileData;
-    local: AppDataComplete;
+    local: AppDataCompleteLegacy;
     lastSync: number;
     rev: string;
   }): Promise<void> {

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy, AppDataCompleteNew } from '../../imex/sync/sync.model';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { dataRepair } from './data-repair.util';
@@ -13,12 +13,17 @@ import { IS_ELECTRON } from '../../app.constants';
 export class DataRepairService {
   private _translateService = inject(TranslateService);
 
-  repairData(dataIn: AppDataComplete): AppDataComplete {
+  repairData(
+    dataIn: AppDataCompleteLegacy | AppDataCompleteNew,
+  ): AppDataCompleteLegacy | AppDataCompleteNew {
     return dataRepair(dataIn);
   }
 
-  isRepairPossibleAndConfirmed(dataIn: AppDataComplete): boolean {
+  isRepairPossibleAndConfirmed(
+    dataIn: AppDataCompleteLegacy | AppDataCompleteNew,
+  ): boolean {
     if (!isDataRepairPossible(dataIn)) {
+      console.log({ dataIn });
       alert('Data damaged, repair not possible.');
       return false;
     }

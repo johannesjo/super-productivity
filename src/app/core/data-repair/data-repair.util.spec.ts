@@ -1,4 +1,4 @@
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { dataRepair } from './data-repair.util';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
@@ -13,7 +13,7 @@ import { IssueProvider } from '../../features/issue/issue.model';
 
 const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
-  let mock: AppDataComplete;
+  let mock: AppDataCompleteLegacy;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     mock.project = {

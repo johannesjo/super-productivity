@@ -1,4 +1,4 @@
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { initialNoteState } from '../../features/note/store/note.reducer';
 import { Note, NoteState } from '../../features/note/note.model';
@@ -34,7 +34,9 @@ import { issueProviderInitialState } from '../../features/issue/store/issue-prov
 import { MODEL_VERSION } from '../model-version';
 import { LegacyCalendarProvider } from '../../features/issue/providers/calendar/calendar.model';
 
-export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => {
+export const crossModelMigrations = (
+  data: AppDataCompleteLegacy,
+): AppDataCompleteLegacy => {
   console.log('[M] Starting cross model migrations...', data);
   let newData = migrateTaskReminders(data);
 
@@ -70,7 +72,9 @@ export const crossModelMigrations = (data: AppDataComplete): AppDataComplete => 
   return newData;
 };
 
-const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComplete => {
+const migrateIssueProvidersFromProjects = (
+  data: AppDataCompleteLegacy,
+): AppDataCompleteLegacy => {
   const copy = { ...data };
 
   if (!copy.issueProvider) {
@@ -96,7 +100,9 @@ const migrateIssueProvidersFromProjects = (data: AppDataComplete): AppDataComple
   return data;
 };
 
-const migrateIssueProvidersFromCalendars = (data: AppDataComplete): AppDataComplete => {
+const migrateIssueProvidersFromCalendars = (
+  data: AppDataCompleteLegacy,
+): AppDataCompleteLegacy => {
   const copy = { ...data };
 
   if (!copy.issueProvider) {
@@ -128,7 +134,7 @@ const migrateIssueProvidersFromCalendars = (data: AppDataComplete): AppDataCompl
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _cleanupIssueDataFromOrphanedIssueTasks(data: AppDataComplete): string[] {
+function _cleanupIssueDataFromOrphanedIssueTasks(data: AppDataCompleteLegacy): string[] {
   let count = 0;
 
   const updateTaskIfNecessary = (task: TaskCopy): void => {
@@ -174,7 +180,7 @@ function _cleanupIssueDataFromOrphanedIssueTasks(data: AppDataComplete): string[
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _addIssueProvider(data: AppDataComplete, newEntity: IssueProvider): void {
+function _addIssueProvider(data: AppDataCompleteLegacy, newEntity: IssueProvider): void {
   // Create a copy of the issueProvider object
   const newIssueProvider = {
     ...data.issueProvider,
@@ -192,7 +198,10 @@ function _addIssueProvider(data: AppDataComplete, newEntity: IssueProvider): voi
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function _addIssueProvidersForProject(data: AppDataComplete, project: Project): string[] {
+function _addIssueProvidersForProject(
+  data: AppDataCompleteLegacy,
+  project: Project,
+): string[] {
   let count = 0;
   if (!project.issueIntegrationCfgs) {
     return [];
@@ -229,7 +238,7 @@ function _addIssueProvidersForProject(data: AppDataComplete, project: Project): 
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _addIssueProvidersForCalendar(
-  data: AppDataComplete,
+  data: AppDataCompleteLegacy,
   legacyCalProvider: LegacyCalendarProvider,
 ): string[] {
   if (!legacyCalProvider.id) {
@@ -259,7 +268,7 @@ function _addIssueProvidersForCalendar(
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _updateTasksForIssueProvider(
-  data: AppDataComplete,
+  data: AppDataCompleteLegacy,
   issueProvider: IssueProvider,
   projectId: string,
 ): void {
@@ -341,7 +350,7 @@ function _isMigrateIssueProvider(
 
 // TASK REMINDERS
 // --------------
-const migrateTaskReminders = (data: AppDataComplete): AppDataComplete => {
+const migrateTaskReminders = (data: AppDataCompleteLegacy): AppDataCompleteLegacy => {
   if (data?.task?.ids.length && data?.reminders?.length) {
     data.reminders.forEach((reminder) => {
       const task = data.task.entities[reminder.relatedId];
@@ -354,7 +363,7 @@ const migrateTaskReminders = (data: AppDataComplete): AppDataComplete => {
   return data;
 };
 
-const migrateGlobalNoteModel = (data: AppDataComplete): AppDataComplete => {
+const migrateGlobalNoteModel = (data: AppDataCompleteLegacy): AppDataCompleteLegacy => {
   const legacyNote = data.note;
 
   console.log('[M] Migrating Legacy Note State to new model');
@@ -418,7 +427,7 @@ const _mergeNotesState = (
   return s;
 };
 
-const migrateGlobalMetricModel = (data: AppDataComplete): AppDataComplete => {
+const migrateGlobalMetricModel = (data: AppDataCompleteLegacy): AppDataCompleteLegacy => {
   const metricState = data.metric;
   const projectState = data.project;
   console.log('[M] Migrating Legacy Metric State to new model');
@@ -463,7 +472,9 @@ const migrateGlobalMetricModel = (data: AppDataComplete): AppDataComplete => {
 
   return data;
 };
-const migrateDefaultProjectIdChange = (data: AppDataComplete): AppDataComplete => {
+const migrateDefaultProjectIdChange = (
+  data: AppDataCompleteLegacy,
+): AppDataCompleteLegacy => {
   console.log(
     '[M] Migrating default project id state to make it work with legacy default',
   );

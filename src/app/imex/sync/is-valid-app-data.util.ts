@@ -1,4 +1,4 @@
-import { AppBaseData, AppDataComplete } from './sync.model';
+import { AppBaseData, AppDataCompleteLegacy, AppDataCompleteNew } from './sync.model';
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
@@ -7,7 +7,9 @@ import { Task } from '../../features/tasks/task.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { environment } from '../../../environments/environment';
 
-export const isValidAppData = (d: AppDataComplete): boolean => {
+export const isValidAppData = (
+  d: AppDataCompleteLegacy | AppDataCompleteNew,
+): boolean => {
   const dAny: any = d;
   const isValid =
     typeof dAny === 'object' &&
@@ -59,7 +61,7 @@ const _validityError = (errTxt: string, additionalInfo?: any): void => {
   lastValidityError = errTxt;
 };
 
-const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean => {
+const _isAllRemindersAvailable = ({ reminders, task }: AppDataCompleteNew): boolean => {
   if (environment.production) {
     // NOTE don't check for production, is it is not a big problem
     return true;
@@ -82,7 +84,7 @@ const _isAllRemindersAvailable = ({ reminders, task }: AppDataComplete): boolean
   return isValid;
 };
 
-const _isAllProjectsAvailableForTasks = (data: AppDataComplete): boolean => {
+const _isAllProjectsAvailableForTasks = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   const pids = data.project.ids as string[];
   data.task.ids.forEach((id: string) => {
@@ -108,7 +110,7 @@ const _isAllProjectsAvailableForTasks = (data: AppDataComplete): boolean => {
   return isValid;
 };
 
-const _isAllProjectsAvailableForIssueProviders = (data: AppDataComplete): boolean => {
+const _isAllProjectsAvailableForIssueProviders = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   const pids = data.project.ids as string[];
   data.issueProvider.ids.forEach((id: string) => {
@@ -126,7 +128,7 @@ const _isAllProjectsAvailableForIssueProviders = (data: AppDataComplete): boolea
   return isValid;
 };
 
-const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
+const _isAllTagsAvailable = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   const allTagIds = data.tag.ids as string[];
   data.task.ids.forEach((id: string) => {
@@ -154,7 +156,7 @@ const _isAllTagsAvailable = (data: AppDataComplete): boolean => {
   return isValid;
 };
 
-const _isAllTasksHaveAProjectOrTag = (data: AppDataComplete): boolean => {
+const _isAllTasksHaveAProjectOrTag = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
@@ -166,7 +168,7 @@ const _isAllTasksHaveAProjectOrTag = (data: AppDataComplete): boolean => {
   return isValid;
 };
 
-const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean => {
+const _isAllTasksAvailableAndListConsistent = (data: AppDataCompleteNew): boolean => {
   let allIds: string[] = [];
   let isInconsistentProjectId: boolean = false;
   let isMissingTaskData: boolean = false;
@@ -237,7 +239,7 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataComplete): boolean =
   return !idNotFound && !isInconsistentProjectId && !isMissingTaskData;
 };
 
-const _isAllNotesAvailableAndListConsistent = (data: AppDataComplete): boolean => {
+const _isAllNotesAvailableAndListConsistent = (data: AppDataCompleteNew): boolean => {
   let allIds: string[] = [];
   let isInconsistentProjectId: boolean = false;
   let isMissingNoteData: boolean = false;
@@ -289,7 +291,7 @@ const _isAllNotesAvailableAndListConsistent = (data: AppDataComplete): boolean =
   return !idNotFound && !isInconsistentProjectId && !isMissingNoteData;
 };
 
-const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
+const _isEntityStatesConsistent = (data: AppDataCompleteNew): boolean => {
   const baseStateKeys: (keyof AppBaseData)[] = [
     'task',
     'taskArchive',
@@ -317,7 +319,7 @@ const _isEntityStatesConsistent = (data: AppDataComplete): boolean => {
   return !brokenBaseItem;
 };
 
-const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
+const _isNoLonelySubTasks = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;
@@ -346,7 +348,7 @@ const _isNoLonelySubTasks = (data: AppDataComplete): boolean => {
   return isValid;
 };
 
-const _isNoMissingSubTasks = (data: AppDataComplete): boolean => {
+const _isNoMissingSubTasks = (data: AppDataCompleteNew): boolean => {
   let isValid: boolean = true;
   data.task.ids.forEach((id: string) => {
     const t: Task = data.task.entities[id] as Task;

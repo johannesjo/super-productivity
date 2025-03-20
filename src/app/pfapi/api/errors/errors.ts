@@ -48,6 +48,10 @@ export class InvalidMetaError extends AdditionalLogErrorBase {
   override name = InvalidMetaError.name;
 }
 
+export class MetaNotReadyError extends AdditionalLogErrorBase {
+  override name = MetaNotReadyError.name;
+}
+
 export class InvalidFilePrefixError extends Error {
   override name = InvalidFilePrefixError.name;
 }
