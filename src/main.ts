@@ -158,36 +158,34 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation()),
   ],
-})
-  .then(() => {
-    // TODO make asset caching work for electron
-    if (
-      'serviceWorker' in navigator &&
-      (environment.production || environment.stage) &&
-      !IS_ELECTRON &&
-      !IS_ANDROID_WEB_VIEW
-    ) {
-      console.log('Registering Service worker');
-      return navigator.serviceWorker.register('ngsw-worker.js');
-    } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
-      navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
-          for (const registration of registrations) {
-            registration.unregister();
-          }
-        })
-        .catch((e) => {
-          console.error('ERROR when unregistering service worker');
-          console.error(e);
-        });
-    }
-    return;
-  })
-  .catch((err: any) => {
-    console.log('Service Worker Registration Error');
-    console.log(err);
-  });
+}).then(() => {
+  // TODO make asset caching work for electron
+  if (
+    'serviceWorker' in navigator &&
+    (environment.production || environment.stage) &&
+    !IS_ELECTRON &&
+    !IS_ANDROID_WEB_VIEW
+  ) {
+    console.log('Registering Service worker');
+    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: any) => {
+      console.log('Service Worker Registration Error');
+      console.error(err);
+    });
+  } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+        }
+      })
+      .catch((e) => {
+        console.error('ERROR when unregistering service worker');
+        console.error(e);
+      });
+  }
+  return undefined;
+});
 
 // fix mobile scrolling while dragging
 window.addEventListener('touchmove', () => {});
