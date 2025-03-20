@@ -28,6 +28,7 @@ export interface DropboxCredentials {
 export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials> {
   readonly id: SyncProviderId = SyncProviderId.Dropbox;
   readonly isUploadForcePossible = true;
+  readonly maxConcurrentRequests = 4;
 
   private readonly _api: DropboxApi;
   private readonly _appKey: string;

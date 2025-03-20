@@ -171,7 +171,39 @@ export class DropboxApi {
         (e as any).response.data &&
         (e as any).response.data.error_summary?.includes('too_many_write_operations')
       ) {
-        throw new TooManyRequestsError(url, { method, e, data });
+        console.log(((e as AxiosError)?.response?.data as any)?.error);
+
+        const retryAfter = ((e as AxiosError)?.response?.data as any)?.error?.retry_after;
+        const EXTRA_WAIT = 1 as const;
+        if (retryAfter) {
+          return new Promise((resolve, reject) => {
+            setTimeout(
+              () => {
+                pfLog(
+                  2,
+                  `To many requests(${headers['Dropbox-API-Arg']}), retrying in ${retryAfter}s...`,
+                );
+                this._request({
+                  url,
+                  method,
+                  data,
+                  headers,
+                  params,
+                  isSkipTokenRefresh: true,
+                })
+                  .then(resolve)
+                  .catch(reject);
+              },
+              (retryAfter + EXTRA_WAIT) * 1000,
+            );
+          });
+        } else {
+          throw new TooManyRequestsError(url, headers['Dropbox-API-Arg'], {
+            method,
+            e,
+            data,
+          });
+        }
       }
 
       throw e;

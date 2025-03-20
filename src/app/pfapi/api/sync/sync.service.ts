@@ -26,6 +26,7 @@ import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
 import { validateRemoteMeta } from '../util/validate-remote-meta';
 import { validateRevMap } from '../util/validate-rev-map';
+import { loadBalancer } from '../util/load-balancer';
 
 /*
 (0. maybe write lock file)
@@ -143,15 +144,18 @@ export class SyncService<const MD extends ModelCfgs> {
     const realRevMap: RevMap = {};
     const dataMap: { [key: string]: unknown } = {};
 
-    await Promise.all(
-      toUpdate.map((modelId) =>
+    const downloadModelFns = toUpdate.map(
+      (modelId) => () =>
         this._downloadModel(modelId).then(({ rev, data }) => {
           if (typeof rev === 'string') {
             realRevMap[modelId] = rev;
             dataMap[modelId] = data;
           }
         }),
-      ),
+    );
+    await loadBalancer(
+      downloadModelFns,
+      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
     );
 
     await this._updateLocalUpdatedModels(toUpdate, [], dataMap);
@@ -222,20 +226,22 @@ export class SyncService<const MD extends ModelCfgs> {
     const realRevMap: RevMap = {
       ...local.revMap,
     };
-    await Promise.all(
-      toUpdate.map(
-        (modelId) =>
-          this.m[modelId]
-            .load()
-            .then((data) =>
-              this._uploadModel(modelId, this._getModelVersion(modelId), data),
-            )
-            .then((rev) => {
-              realRevMap[modelId] = cleanRev(rev);
-            }),
-        // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
-        //  since remote might hava an incomplete update
-      ),
+    const uploadModelFns = toUpdate.map(
+      (modelId) => () =>
+        this.m[modelId]
+          .load()
+          .then((data) =>
+            this._uploadModel(modelId, this._getModelVersion(modelId), data),
+          )
+          .then((rev) => {
+            realRevMap[modelId] = cleanRev(rev);
+          }),
+      // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
+      //  since remote might hava an incomplete update
+    );
+    await loadBalancer(
+      uploadModelFns,
+      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
     );
     console.log({ realRevMap });
 
@@ -458,6 +464,7 @@ export class SyncService<const MD extends ModelCfgs> {
   private _allModelIds(): string[] {
     return Object.keys(this.m);
   }
+
   private _fakeFullRevMap(): RevMap {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {

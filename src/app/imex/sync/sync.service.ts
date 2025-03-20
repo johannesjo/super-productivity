@@ -144,6 +144,8 @@ export class SyncService {
         case SyncStatus.InSync:
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateRemote:
+        case SyncStatus.UpdateRemoteAll:
+        case SyncStatus.UpdateLocalAll:
           return r.status;
 
         case SyncStatus.NotConfigured:
@@ -163,9 +165,11 @@ export class SyncService {
           if (res === 'USE_LOCAL') {
             alert('UPLOAD ALL');
             await this._pfapiWrapperService.pf.uploadAll();
+            return SyncStatus.UpdateLocalAll;
           } else if (res === 'USE_REMOTE') {
             alert('DOWNLOAD ALL');
             await this._pfapiWrapperService.pf.downloadAll();
+            return SyncStatus.UpdateLocalAll;
           }
 
           console.log({ res });

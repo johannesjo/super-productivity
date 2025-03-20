@@ -10,6 +10,7 @@ export enum SyncStatus {
   UpdateRemote = 'UpdateRemote',
   UpdateRemoteAll = 'UpdateRemoteAll',
   UpdateLocal = 'UpdateLocal',
+  UpdateLocalAll = 'UpdateLocalAll',
   Conflict = 'Conflict',
   IncompleteRemoteData = 'IncompleteRemoteData',
   NotConfigured = 'NotConfigured',
