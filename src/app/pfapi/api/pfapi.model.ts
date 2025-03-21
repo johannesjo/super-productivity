@@ -25,6 +25,8 @@ export interface ModelCfg<T extends ModelBase> {
   // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
+  // for cascading only
+  isMainFileModel?: boolean;
 
   // MAYBE?
   validate?: (data: any) => boolean;
@@ -50,10 +52,17 @@ export interface FullData<F> {
   data: F;
 }
 
+// TODO better type
+export interface MainModelData {
+  [modelId: string]: ModelBase;
+}
+
 export interface BaseCfg {
   dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
+  isCascadingMode?: boolean;
+  // TODO needs to be dynamically settable
   isEncryptData?: boolean;
   encryptKey?: string;
   isCreateBackups?: boolean;
@@ -84,11 +93,13 @@ export interface RemoteMeta {
   revMap: RevMap;
   crossModelVersion: number;
   modelVersions: ModelVersionMap;
+  mainModelData?: MainModelData;
 }
 
 export interface LocalMeta extends RemoteMeta {
   lastSyncedUpdate?: number;
   metaRev?: string;
+  mainModelData?: MainModelData;
 }
 
 export interface ConflictData {

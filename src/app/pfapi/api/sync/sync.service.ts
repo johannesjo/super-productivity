@@ -30,42 +30,23 @@ import { validateRemoteMeta } from '../util/validate-remote-meta';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
 
-/*
-(0. maybe write lock file)
-1. Download main file (if changed rev)
-2. Check updated timestamps for conflicts (=> on conflict check for incomplete data on remote)
-
-A remote newer than local
-1. Check which revisions don't match the local version
-2. Download all files that don't match the local
-3. Do complete data import to Database
-4. update local revs and meta file data from remote
-5. inform about completion and pass back complete data to developer for import
-
-B local newer than remote
-1. Check which revisions don't match the local version
-2. Upload all files that don't match remote
-3. Update local meta and upload to remote
-4. inform about completion
-
-On Conflict:
-Offer to use remote or local (always create local backup before this)
- */
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly m: ModelCfgToModelCtrl<MD>;
+  public readonly IS_CASCADE: boolean;
 
-  private readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
-  private readonly _metaModelCtrl: MetaModelCtrl;
-  private readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
+  readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
+  readonly _metaModelCtrl: MetaModelCtrl;
+  readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
 
   constructor(
+    isCascadingMode: boolean,
     m: ModelCfgToModelCtrl<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
+    this.IS_CASCADE = isCascadingMode;
     this.m = m;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._metaModelCtrl = _metaModelCtrl;
@@ -88,13 +69,16 @@ export class SyncService<const MD extends ModelCfgs> {
         }
       }
 
-      // since we delete the lock file only AFTER writing the meta file, we can safely execute these in parallel
-      // NOTE: a race condition introduced is, that one error might pop up before the other
-      // so we should re-check the lock file, when handling errors from downloading the meta file
-      const [, { remoteMeta, remoteRev }] = await Promise.all([
-        this._awaitLockFilePermissionAndWrite(),
-        this._downloadMetaFile(localMeta.metaRev),
-      ]);
+      // NOTE: for cascading mode we don't need to check the lock file before
+      const [{ remoteMeta, remoteRev }] = this.IS_CASCADE
+        ? await Promise.all([this._downloadMetaFile(localMeta.metaRev)])
+        : // since we delete the lock file only AFTER writing the meta file, we can safely execute these in parallel
+          // NOTE: a race condition introduced is, that one error might pop up before the other
+          // so we should re-check the lock file, when handling errors from downloading the meta file
+          await Promise.all([
+            this._downloadMetaFile(localMeta.metaRev),
+            this._awaitLockFilePermissionAndWrite(),
+          ]);
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
       pfLog(
@@ -148,27 +132,67 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  // NOTE: Public for testing
+  async uploadAll(isSkipLockFileCheck = false): Promise<void> {
+    alert('UPLOAD ALL TO REMOTE');
+    const local = await this._metaModelCtrl.loadMetaModel();
+    return this.updateRemote(
+      {
+        modelVersions: local.modelVersions,
+        crossModelVersion: local.crossModelVersion,
+        lastUpdate: local.lastUpdate,
+        revMap: {},
+      },
+      { ...local, revMap: this._fakeFullRevMap() },
+      isSkipLockFileCheck,
+    );
+  }
+
+  async downloadAll(isSkipLockFileCheck = false): Promise<void> {
+    const local = await this._metaModelCtrl.loadMetaModel();
+    const { remoteMeta, remoteRev } = await this._downloadMetaFile();
+    const fakeLocal: LocalMeta = {
+      // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
+      crossModelVersion: local.crossModelVersion,
+      modelVersions: local.modelVersions,
+      revMap: {},
+    };
+    return this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
+  }
+
+  // NOTE: Public for testing only
   async updateLocal(
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    pfLog(2, `${SyncService.name}.${this.updateLocal.name}()`, {
+    const fn = this.IS_CASCADE
+      ? this._updateLocalCascadingMode
+      : this._updateLocalMultiFileMode;
+    return fn(remote, local, remoteRev, isSkipLockFileCheck);
+  }
+
+  async _updateLocalCascadingMode(
+    remote: RemoteMeta,
+    local: LocalMeta,
+    remoteRev: string,
+    isSkipLockFileCheck = false,
+  ): Promise<void> {
+    pfLog(2, `${SyncService.name}.${this._updateLocalCascadingMode.name}()`, {
       remoteMeta: remote,
       localMeta: local,
     });
 
-    if (!isSkipLockFileCheck) {
-      await this._awaitLockFilePermissionAndWrite();
-    }
+    // if (!isSkipLockFileCheck) {
+    //   await this._awaitLockFilePermissionAndWrite();
+    // }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      remote.revMap,
-      local.revMap,
+    const modelIds = getModelIdsToUpdateFromRevMaps(remote.revMap, local.revMap);
+    const toUpdate = modelIds.toUpdate.filter(
+      (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
     );
+
     const realRevMap: RevMap = {};
     const dataMap: { [key: string]: unknown } = {};
 
@@ -208,12 +232,82 @@ export class SyncService<const MD extends ModelCfgs> {
     await this._removeLockFile();
   }
 
-  // NOTE: Public for testing
+  async _updateLocalMultiFileMode(
+    remote: RemoteMeta,
+    local: LocalMeta,
+    remoteRev: string,
+    isSkipLockFileCheck = false,
+  ): Promise<void> {
+    // TODO split up in two different functions for cascading and non cascading
+    // .filter(
+    //     (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
+    //   );
+
+    pfLog(2, `${SyncService.name}.${this.updateLocal.name}()`, {
+      remoteMeta: remote,
+      localMeta: local,
+    });
+
+    if (!isSkipLockFileCheck) {
+      await this._awaitLockFilePermissionAndWrite();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
+      remote.revMap,
+      local.revMap,
+    );
+
+    const realRevMap: RevMap = {};
+    const dataMap: { [key: string]: unknown } = {};
+
+    const downloadModelFns = toUpdate.map(
+      (modelId) => () =>
+        this._downloadModel(modelId).then(({ rev, data }) => {
+          if (typeof rev === 'string') {
+            realRevMap[modelId] = rev;
+            dataMap[modelId] = data;
+          }
+        }),
+    );
+    await loadBalancer(
+      downloadModelFns,
+      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
+    );
+
+    await this._updateLocalUpdatedModels(toUpdate, [], dataMap);
+
+    // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
+    // since remote might hava an incomplete update
+
+    // ON SUCCESS
+    await this._updateLocalMetaFileContent({
+      metaRev: remoteRev,
+      lastSyncedUpdate: remote.lastUpdate,
+      lastUpdate: remote.lastUpdate,
+      // TODO check if we need to extend the revMap and modelVersions???
+      revMap: validateRevMap({
+        ...local.revMap,
+        ...realRevMap,
+      }),
+      modelVersions: remote.modelVersions,
+      crossModelVersion: remote.crossModelVersion,
+    });
+
+    await this._removeLockFile();
+  }
+
+  // NOTE: Public for testing only
   async updateRemote(
     remote: RemoteMeta,
     local: LocalMeta,
     isSkipLockFileCheck = false,
   ): Promise<void> {
+    // TODO split up in two different functions for cascading and non cascading
+    // .filter(
+    //     (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
+    //   );
+
     const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
       local.revMap,
       remote.revMap,
@@ -272,33 +366,6 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: metaRevAfterUpdate,
     });
     await this._removeLockFile();
-  }
-
-  async downloadAll(isSkipLockFileCheck = false): Promise<void> {
-    const local = await this._metaModelCtrl.loadMetaModel();
-    const { remoteMeta, remoteRev } = await this._downloadMetaFile();
-    const fakeLocal: LocalMeta = {
-      // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
-      crossModelVersion: local.crossModelVersion,
-      modelVersions: local.modelVersions,
-      revMap: {},
-    };
-    return this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
-  }
-
-  async uploadAll(isSkipLockFileCheck = false): Promise<void> {
-    alert('UPLOAD ALL TO REMOTE');
-    const local = await this._metaModelCtrl.loadMetaModel();
-    return this.updateRemote(
-      {
-        modelVersions: local.modelVersions,
-        crossModelVersion: local.crossModelVersion,
-        lastUpdate: local.lastUpdate,
-        revMap: {},
-      },
-      { ...local, revMap: this._fakeFullRevMap() },
-      isSkipLockFileCheck,
-    );
   }
 
   private _isReadyForSync(): Promise<boolean> {
@@ -381,10 +448,6 @@ export class SyncService<const MD extends ModelCfgs> {
     // TODO better typing
     await this.m[modelId].save(modelData as any);
   }
-
-  // private async _deleteLocalModel(modelId: string, modelData: string): Promise<unknown> {
-  //   return {} as any as unknown;
-  // }
 
   // META MODEL
   // ----------

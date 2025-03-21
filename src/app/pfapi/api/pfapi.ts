@@ -86,6 +86,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     });
 
     this._syncService = new SyncService<MD>(
+      cfg?.isCascadingMode || false,
       this.m,
       this._activeSyncProvider$,
       this.metaModel,
