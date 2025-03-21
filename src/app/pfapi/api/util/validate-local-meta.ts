@@ -1,6 +1,6 @@
 import { LocalMeta } from '../pfapi.model';
-import { validateRemoteMeta } from './validate-remote-meta';
+import { validateMetaBase } from './validate-meta-base';
 
 export const validateLocalMeta = (local: LocalMeta): LocalMeta => {
-  return validateRemoteMeta(local);
+  return validateMetaBase(local);
 };

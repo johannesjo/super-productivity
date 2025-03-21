@@ -13,7 +13,9 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
   providedIn: 'root',
 })
 export class PfapiService {
-  public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, {});
+  public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, {
+    isMainFileMode: true,
+  });
   public readonly m: ModelCfgToModelCtrl<PfapiModelCfgs> = this.pf.m;
 
   // TODO replace with pfapi event

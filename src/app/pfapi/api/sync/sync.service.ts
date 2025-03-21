@@ -1,6 +1,7 @@
 import {
   ConflictData,
   LocalMeta,
+  MainModelData,
   ModelCfgs,
   ModelCfgToModelCtrl,
   RemoteMeta,
@@ -26,34 +27,33 @@ import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
-import { validateRemoteMeta } from '../util/validate-remote-meta';
+import { validateMetaBase } from '../util/validate-meta-base';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly m: ModelCfgToModelCtrl<MD>;
-  public readonly IS_CASCADE: boolean;
+  public readonly IS_MAIN_FILE_MODE: boolean;
 
   readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
   readonly _metaModelCtrl: MetaModelCtrl;
   readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
 
   constructor(
-    isCascadingMode: boolean,
+    isMainFileMode: boolean,
     m: ModelCfgToModelCtrl<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
-    this.IS_CASCADE = isCascadingMode;
+    this.IS_MAIN_FILE_MODE = isMainFileMode;
     this.m = m;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._metaModelCtrl = _metaModelCtrl;
     this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
 
-  // TODO
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     try {
       if (!(await this._isReadyForSync())) {
@@ -70,7 +70,7 @@ export class SyncService<const MD extends ModelCfgs> {
       }
 
       // NOTE: for cascading mode we don't need to check the lock file before
-      const [{ remoteMeta, remoteRev }] = this.IS_CASCADE
+      const [{ remoteMeta, remoteRev }] = this.IS_MAIN_FILE_MODE
         ? await Promise.all([this._downloadMetaFile(localMeta.metaRev)])
         : // since we delete the lock file only AFTER writing the meta file, we can safely execute these in parallel
           // NOTE: a race condition introduced is, that one error might pop up before the other
@@ -96,11 +96,22 @@ export class SyncService<const MD extends ModelCfgs> {
 
       switch (status) {
         case SyncStatus.UpdateLocal:
-          await this.updateLocal(remoteMeta, localMeta, remoteRev, true);
+          await this.updateLocal(
+            remoteMeta,
+            localMeta,
+            remoteRev,
+            // NOTE: because we checked lock file above for multi file mode
+            !this.IS_MAIN_FILE_MODE,
+          );
           alert('UPDATE_LOCAL DONE');
           return { status };
         case SyncStatus.UpdateRemote:
-          await this.updateRemote(remoteMeta, localMeta, true);
+          await this.updateRemote(
+            remoteMeta,
+            localMeta,
+            // NOTE: because we checked lock file above for multi file mode
+            !this.IS_MAIN_FILE_MODE,
+          );
           return { status };
         case SyncStatus.InSync:
           return { status };
@@ -132,6 +143,7 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
+  // --------------------------------------------------
   async uploadAll(isSkipLockFileCheck = false): Promise<void> {
     alert('UPLOAD ALL TO REMOTE');
     const local = await this._metaModelCtrl.loadMetaModel();
@@ -159,6 +171,7 @@ export class SyncService<const MD extends ModelCfgs> {
     return this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
   }
 
+  // --------------------------------------------------
   // NOTE: Public for testing only
   async updateLocal(
     remote: RemoteMeta,
@@ -166,97 +179,66 @@ export class SyncService<const MD extends ModelCfgs> {
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    const fn = this.IS_CASCADE
-      ? this._updateLocalCascadingMode
-      : this._updateLocalMultiFileMode;
+    const fn = this.IS_MAIN_FILE_MODE ? this._updateLocalMAIN : this._updateLocalMULTI;
     return fn(remote, local, remoteRev, isSkipLockFileCheck);
   }
 
-  async _updateLocalCascadingMode(
+  async _updateLocalMAIN(
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    pfLog(2, `${SyncService.name}.${this._updateLocalCascadingMode.name}()`, {
+    pfLog(2, `${SyncService.name}.${this._updateLocalMAIN.name}()`, {
       remoteMeta: remote,
       localMeta: local,
+      remoteRev,
+      isSkipLockFileCheck,
     });
 
-    // if (!isSkipLockFileCheck) {
-    //   await this._awaitLockFilePermissionAndWrite();
-    // }
+    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+      revMapNewer: remote.revMap,
+      revMapToOverwrite: local.revMap,
+    });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const modelIds = getModelIdsToUpdateFromRevMaps(remote.revMap, local.revMap);
-    const toUpdate = modelIds.toUpdate.filter(
-      (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
-    );
-
-    const realRevMap: RevMap = {};
-    const dataMap: { [key: string]: unknown } = {};
-
-    const downloadModelFns = toUpdate.map(
-      (modelId) => () =>
-        this._downloadModel(modelId).then(({ rev, data }) => {
-          if (typeof rev === 'string') {
-            realRevMap[modelId] = rev;
-            dataMap[modelId] = data;
-          }
+    if (toUpdate.length === 0 && toDelete.length === 0) {
+      await this._updateLocalMainModels(remote);
+      await this._updateLocalMetaFileContent({
+        metaRev: remoteRev,
+        lastSyncedUpdate: remote.lastUpdate,
+        lastUpdate: remote.lastUpdate,
+        revMap: validateRevMap({
+          ...local.revMap,
         }),
-    );
-    await loadBalancer(
-      downloadModelFns,
-      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
-    );
-
-    await this._updateLocalUpdatedModels(toUpdate, [], dataMap);
-
-    // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
-    // since remote might hava an incomplete update
-
-    // ON SUCCESS
-    await this._updateLocalMetaFileContent({
-      metaRev: remoteRev,
-      lastSyncedUpdate: remote.lastUpdate,
-      lastUpdate: remote.lastUpdate,
-      // TODO check if we need to extend the revMap and modelVersions???
-      revMap: validateRevMap({
-        ...local.revMap,
-        ...realRevMap,
-      }),
-      modelVersions: remote.modelVersions,
-      crossModelVersion: remote.crossModelVersion,
-    });
-
-    await this._removeLockFile();
+        modelVersions: remote.modelVersions,
+        crossModelVersion: remote.crossModelVersion,
+      });
+      return;
+    }
+    // TODO make rev change to see if there were updates before lock file maybe
+    return this._updateLocalMULTI(remote, local, remoteRev, isSkipLockFileCheck);
   }
 
-  async _updateLocalMultiFileMode(
+  async _updateLocalMULTI(
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    // TODO split up in two different functions for cascading and non cascading
-    // .filter(
-    //     (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
-    //   );
-
-    pfLog(2, `${SyncService.name}.${this.updateLocal.name}()`, {
+    pfLog(2, `${SyncService.name}.${this._updateLocalMULTI.name}()`, {
       remoteMeta: remote,
       localMeta: local,
+      isSkipLockFileCheck,
     });
 
     if (!isSkipLockFileCheck) {
       await this._awaitLockFilePermissionAndWrite();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      remote.revMap,
-      local.revMap,
-    );
+    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+      revMapNewer: remote.revMap,
+      revMapToOverwrite: local.revMap,
+    });
 
     const realRevMap: RevMap = {};
     const dataMap: { [key: string]: unknown } = {};
@@ -270,12 +252,13 @@ export class SyncService<const MD extends ModelCfgs> {
           }
         }),
     );
+
     await loadBalancer(
       downloadModelFns,
       this._getCurrentSyncProviderOrError().maxConcurrentRequests,
     );
 
-    await this._updateLocalUpdatedModels(toUpdate, [], dataMap);
+    await this._updateLocalUpdatedModels(toUpdate, toDelete, dataMap);
 
     // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
     // since remote might hava an incomplete update
@@ -294,28 +277,81 @@ export class SyncService<const MD extends ModelCfgs> {
       crossModelVersion: remote.crossModelVersion,
     });
 
-    await this._removeLockFile();
+    if (!isSkipLockFileCheck) {
+      await this._removeLockFile();
+    }
   }
 
-  // NOTE: Public for testing only
+  // ----------------------
   async updateRemote(
     remote: RemoteMeta,
     local: LocalMeta,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    // TODO split up in two different functions for cascading and non cascading
-    // .filter(
-    //     (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
-    //   );
+    return this.IS_MAIN_FILE_MODE
+      ? this._updateRemoteMAIN(remote, local, isSkipLockFileCheck)
+      : this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
+  }
 
-    const { toUpdate, toDelete } = getModelIdsToUpdateFromRevMaps(
-      local.revMap,
-      remote.revMap,
-    );
+  async _updateRemoteMAIN(
+    remote: RemoteMeta,
+    local: LocalMeta,
+    isSkipLockFileCheck = false,
+  ): Promise<void> {
+    pfLog(2, `${SyncService.name}.${this._updateRemoteMAIN.name}()`, {
+      remoteMeta: remote,
+      localMeta: local,
+      isSkipLockFileCheck,
+    });
 
-    pfLog(2, `${SyncService.name}.${this.updateRemote.name}()`, {
+    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+      revMapNewer: local.revMap,
+      revMapToOverwrite: remote.revMap,
+    });
+
+    if (toUpdate.length === 0 && toDelete.length === 0) {
+      alert('_updateRemoteMAIN(): NO NON MAIN MODELS TO UPDATE');
+      const mainModelData = await this._getMainFileModelData();
+      const metaRevAfterUpdate = await this._uploadMetaFile({
+        revMap: local.revMap,
+        lastUpdate: local.lastUpdate,
+        crossModelVersion: local.crossModelVersion,
+        modelVersions: local.modelVersions,
+        mainModelData,
+      });
+      // ON AFTER SUCCESS
+      await this._updateLocalMetaFileContent({
+        // leave as is basically
+        lastUpdate: local.lastUpdate,
+        modelVersions: local.modelVersions,
+        crossModelVersion: local.crossModelVersion,
+        lastSyncedUpdate: local.lastUpdate,
+        revMap: local.revMap,
+
+        // actual update
+        metaRev: metaRevAfterUpdate,
+      });
+      return;
+    }
+    // TODO make rev change to see if there were updates before lock file maybe
+    return this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
+  }
+
+  // NOTE: Public for testing only
+  async _updateRemoteMULTI(
+    remote: RemoteMeta,
+    local: LocalMeta,
+    isSkipLockFileCheck = false,
+  ): Promise<void> {
+    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+      revMapNewer: local.revMap,
+      revMapToOverwrite: remote.revMap,
+    });
+
+    pfLog(2, `${SyncService.name}.${this._updateRemoteMULTI.name}()`, {
       toUpdate,
       toDelete,
+      isSkipLockFileCheck,
       remote,
       local,
     });
@@ -339,6 +375,8 @@ export class SyncService<const MD extends ModelCfgs> {
       // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
       //  since remote might hava an incomplete update
     );
+    // const toDeleteFns = toDelete.map((modelId) => () => this._removeModel(modelId));
+
     await loadBalancer(
       uploadModelFns,
       this._getCurrentSyncProviderOrError().maxConcurrentRequests,
@@ -351,6 +389,9 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
+      mainModelData: this.IS_MAIN_FILE_MODE
+        ? await this._getMainFileModelData()
+        : undefined,
     });
 
     // ON AFTER SUCCESS
@@ -365,9 +406,13 @@ export class SyncService<const MD extends ModelCfgs> {
       revMap: validatedRevMap,
       metaRev: metaRevAfterUpdate,
     });
-    await this._removeLockFile();
+
+    if (!isSkipLockFileCheck) {
+      await this._removeLockFile();
+    }
   }
 
+  // --------------------------------------------------
   private _isReadyForSync(): Promise<boolean> {
     return this._getCurrentSyncProviderOrError().isReady();
   }
@@ -388,6 +433,7 @@ export class SyncService<const MD extends ModelCfgs> {
     return modelId;
   }
 
+  // ------------------------------------------------
   private async _uploadModel(
     modelId: string,
     modelVersion: number,
@@ -432,6 +478,17 @@ export class SyncService<const MD extends ModelCfgs> {
     return { data, rev };
   }
 
+  private async _removeModel(modelId: string): Promise<void> {
+    pfLog(2, `${SyncService.name}.${this._removeModel.name}()`, {
+      modelId,
+    });
+
+    const syncProvider = this._getCurrentSyncProviderOrError();
+    await syncProvider.removeFile(modelId);
+  }
+
+  // --------------------------------------------------
+
   private async _updateLocalUpdatedModels(
     toUpdate: string[],
     toDelete: string[],
@@ -439,7 +496,7 @@ export class SyncService<const MD extends ModelCfgs> {
   ): Promise<unknown> {
     return await Promise.all([
       ...toUpdate.map((modelId) => this._updateLocalModel(modelId, dataMap[modelId])),
-      // TODO
+      // TODO delete local models
       // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
     ]);
   }
@@ -456,7 +513,7 @@ export class SyncService<const MD extends ModelCfgs> {
     rev: string | null = null,
   ): Promise<string> {
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
-      validateRemoteMeta(meta),
+      validateMetaBase(meta),
       meta.crossModelVersion,
     );
     pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, {
@@ -476,6 +533,7 @@ export class SyncService<const MD extends ModelCfgs> {
     ).rev;
   }
 
+  // --------------------------------------------------
   private async _getMetaRev(localRev?: string): Promise<string> {
     pfLog(2, `${SyncService.name}.${this._getMetaRev.name}()`, { localRev });
     const syncProvider = this._getCurrentSyncProviderOrError();
@@ -505,7 +563,7 @@ export class SyncService<const MD extends ModelCfgs> {
         localRev || null,
       );
       const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
-      return { remoteMeta: validateRemoteMeta(data), remoteRev: r.rev };
+      return { remoteMeta: validateMetaBase(data), remoteRev: r.rev };
     } catch (e) {
       if (e instanceof NoRemoteDataError) {
         throw new NoRemoteMetaFile();
@@ -520,6 +578,32 @@ export class SyncService<const MD extends ModelCfgs> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }
 
+  // ---------------------------------------
+
+  private _getModelIdsToUpdateFromRevMaps({
+    revMapNewer,
+    revMapToOverwrite,
+  }: {
+    revMapNewer: RevMap;
+    revMapToOverwrite: RevMap;
+  }): { toUpdate: string[]; toDelete: string[] } {
+    const all = getModelIdsToUpdateFromRevMaps(revMapNewer, revMapToOverwrite);
+    return this.IS_MAIN_FILE_MODE
+      ? {
+          toUpdate: all.toUpdate.filter(
+            (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
+          ),
+          toDelete: all.toDelete.filter(
+            (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
+          ),
+        }
+      : {
+          toUpdate: all.toUpdate,
+          toDelete: all.toDelete,
+        };
+  }
+
+  // --------------------------------------------------
   private async _compressAndeEncryptData<T>(
     data: T,
     modelVersion: number,
@@ -531,6 +615,7 @@ export class SyncService<const MD extends ModelCfgs> {
     return (await this._encryptAndCompressHandler.decompressAndDecrypt<T>(data)).data;
   }
 
+  // --------------------------------------------------
   private async _awaitLockFilePermissionAndWrite(): Promise<void> {
     pfLog(2, `${SyncService.name}.${this._awaitLockFilePermissionAndWrite.name}()`);
     const syncProvider = this._getCurrentSyncProviderOrError();
@@ -569,6 +654,46 @@ export class SyncService<const MD extends ModelCfgs> {
     await syncProvider.removeFile(LOCK_FILE_NAME);
   }
 
+  // --------------------------------------------------
+
+  // TODO make async work correctly
+  private async _updateLocalMainModels(remote: RemoteMeta): Promise<void> {
+    alert('NO NON MAIN MODELS TO UPDATE');
+    const mainModelData = remote.mainModelData;
+    if (typeof mainModelData === 'object' && mainModelData !== null) {
+      pfLog(
+        2,
+        `${SyncService.name}.${this._updateLocalMainModels.name}() updating mainModels`,
+        Object.keys(mainModelData),
+      );
+
+      Object.keys(mainModelData).forEach((modelId) => {
+        if (modelId in mainModelData) {
+          // TODO better typing
+          this.m[modelId].save(mainModelData[modelId] as any);
+        }
+      });
+    } else {
+      console.warn('No remote.mainModelData!!! Is this correct?');
+    }
+  }
+
+  private async _getMainFileModelData(): Promise<MainModelData> {
+    const mainFileModelIds = Object.keys(this.m).filter(
+      (modelId) => this.m[modelId].modelCfg.isMainFileModel,
+    );
+    const mainModelData: MainModelData = Object.fromEntries(
+      await Promise.all(
+        mainFileModelIds.map(async (modelId) => [modelId, await this.m[modelId].load()]),
+      ),
+    );
+    pfLog(2, `${SyncService.name}.${this._getMainFileModelData.name}()`, {
+      mainModelData,
+    });
+    return mainModelData;
+  }
+
+  // --------------------------------------------------
   private _allModelIds(): string[] {
     return Object.keys(this.m);
   }

@@ -33,7 +33,6 @@ import { Webdav } from './api/sync/providers/webdav';
 export type PfapiModelCfgs = {
   project: ModelCfg<ProjectState>;
   globalConfig: ModelCfg<GlobalConfigState>;
-  reminders: ModelCfg<Reminder[]>;
   planner: ModelCfg<PlannerState>;
   boards: ModelCfg<BoardsState>;
   note: ModelCfg<NoteState>;
@@ -50,33 +49,54 @@ export type PfapiModelCfgs = {
   taskRepeatCfg: ModelCfg<TaskRepeatCfgState>;
 
   taskArchive: ModelCfg<TaskArchive>;
-  reminder: ModelCfg<Reminder[]>;
+  reminders: ModelCfg<Reminder[]>;
 };
 
 export const PFAPI_MODEL_CFGS: PfapiModelCfgs = {
+  task: {
+    modelVersion: 1,
+    defaultData: initialTaskState,
+    isMainFileModel: true,
+  },
   project: {
     modelVersion: 1,
     defaultData: initialProjectState,
+    isMainFileModel: true,
   },
-  globalConfig: {
+  tag: {
     modelVersion: 1,
-    defaultData: DEFAULT_GLOBAL_CONFIG,
+    defaultData: initialTagState,
+    isMainFileModel: true,
+  },
+  simpleCounter: {
+    modelVersion: 1,
+    defaultData: initialSimpleCounterState,
+    isMainFileModel: true,
   },
   reminders: {
     modelVersion: 1,
     defaultData: [],
+    isMainFileModel: true,
   },
   planner: {
     modelVersion: 1,
     defaultData: plannerInitialState,
+    isMainFileModel: true,
   },
   boards: {
     modelVersion: 1,
     defaultData: initialBoardsState,
+    isMainFileModel: true,
   },
   note: {
     modelVersion: 1,
     defaultData: initialNoteState,
+    isMainFileModel: true,
+  },
+
+  globalConfig: {
+    modelVersion: 1,
+    defaultData: DEFAULT_GLOBAL_CONFIG,
   },
   issueProvider: {
     modelVersion: 1,
@@ -97,18 +117,6 @@ export const PFAPI_MODEL_CFGS: PfapiModelCfgs = {
     defaultData: initialObstructionState,
   },
 
-  task: {
-    modelVersion: 1,
-    defaultData: initialTaskState,
-  },
-  tag: {
-    modelVersion: 1,
-    defaultData: initialTagState,
-  },
-  simpleCounter: {
-    modelVersion: 1,
-    defaultData: initialSimpleCounterState,
-  },
   taskRepeatCfg: {
     modelVersion: 1,
     defaultData: initialTaskRepeatCfgState,
@@ -117,10 +125,6 @@ export const PFAPI_MODEL_CFGS: PfapiModelCfgs = {
   taskArchive: {
     modelVersion: 1,
     defaultData: initialTaskState,
-  },
-  reminder: {
-    modelVersion: 1,
-    defaultData: [],
   },
 } as const;
 

@@ -61,7 +61,7 @@ export interface BaseCfg {
   dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
-  isCascadingMode?: boolean;
+  isMainFileMode?: boolean;
   // TODO needs to be dynamically settable
   isEncryptData?: boolean;
   encryptKey?: string;
@@ -88,18 +88,20 @@ export interface ModelVersionMap {
   [modelId: string]: number;
 }
 
-export interface RemoteMeta {
+export interface MetaFileBase {
   lastUpdate?: number;
   revMap: RevMap;
   crossModelVersion: number;
   modelVersions: ModelVersionMap;
+}
+
+export interface RemoteMeta extends MetaFileBase {
   mainModelData?: MainModelData;
 }
 
-export interface LocalMeta extends RemoteMeta {
+export interface LocalMeta extends MetaFileBase {
   lastSyncedUpdate?: number;
   metaRev?: string;
-  mainModelData?: MainModelData;
 }
 
 export interface ConflictData {

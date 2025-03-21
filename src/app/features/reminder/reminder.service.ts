@@ -224,7 +224,7 @@ export class ReminderService {
   }
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
-    return migrateReminders((await this._pfapiService.m.reminder.load()) || []);
+    return migrateReminders((await this._pfapiService.m.reminders.load()) || []);
   }
 
   private async _saveModel(reminders: Reminder[]): Promise<void> {
@@ -232,7 +232,7 @@ export class ReminderService {
       throw new Error('Reminders not loaded initially when trying to save model');
     }
     console.log('saveReminders', reminders);
-    await this._pfapiService.m.reminder.save(reminders, {
+    await this._pfapiService.m.reminders.save(reminders, {
       isSyncModelChange: true,
     });
     this._updateRemindersInWorker(this._reminders);
