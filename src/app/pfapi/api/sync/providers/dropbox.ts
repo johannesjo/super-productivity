@@ -147,8 +147,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     try {
       await this._api.remove(this._getPath(targetPath));
     } catch (e) {
-      pfLog(1, e);
-      throw new Error(e as any);
+      throw e;
     }
     // TODO error handling
   }

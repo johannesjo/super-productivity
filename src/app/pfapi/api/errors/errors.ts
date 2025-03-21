@@ -96,6 +96,10 @@ export class TooManyRequestsError extends AdditionalLogErrorBase {
   override name = TooManyRequestsError.name;
 }
 
+export class NoEtagError extends AdditionalLogErrorBase {
+  override name = NoEtagError.name;
+}
+
 // ----------------------------
 
 export class AuthFailError extends Error {
@@ -128,11 +132,6 @@ export class NoRemoteDataError extends AdditionalLogErrorBase {
   override name = NoRemoteDataError.name;
 }
 
-export class InvalidDataError extends Error {
+export class InvalidDataError extends AdditionalLogErrorBase {
   override name = InvalidDataError.name;
-
-  constructor(data: unknown, message?: string) {
-    super(message);
-    console.log(this.name, { data });
-  }
 }
