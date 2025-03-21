@@ -2,14 +2,15 @@ import { SyncProviderServiceInterface } from '../sync-provider.interface';
 import { SyncProviderId } from '../../pfapi.const';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderCredentialsStore } from '../sync-provider-credentials-store';
-import { WebDavHeadResponse } from '../../../../imex/sync/web-dav/web-dav.model';
 import {
+  AuthNotConfiguredError,
   InvalidDataError,
   NoEtagError,
   NoRemoteDataError,
   NoRevError,
 } from '../../errors/errors';
 import { pfLog } from '../../util/log';
+import { FileStat } from 'webdav/dist/node/types';
 
 // TODO check all
 // import {
@@ -36,13 +37,11 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
   readonly maxConcurrentRequests = 10;
 
   private readonly _api: WebdavApi;
-  private readonly _appKey: string;
-  private readonly _basePath: string;
 
   public credentialsStore!: SyncProviderCredentialsStore<WebdavCredentials>;
 
   constructor(cfg: WebdavCfg) {
-    this._api = new WebdavApi(this);
+    this._api = new WebdavApi(() => this._cfgOrError());
   }
 
   async isReady(): Promise<boolean> {
@@ -60,14 +59,13 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     await this.credentialsStore.save(credentials);
   }
 
-  async getFileRevAndLastClientUpdate(
+  async getFileRev(
     targetPath: string,
     localRev: string | null,
   ): Promise<{ rev: string }> {
-    const cfg = await this.credentialsStore.load();
-
+    const cfg = await this._cfgOrError();
     try {
-      const meta = await this._api.getFileMetaData(this._getFilePath(targetPath, cfg));
+      const meta = await this._api.getFileMeta(this._getFilePath(targetPath, cfg));
       // const d = new Date(meta['last-modified']);
       return {
         rev: this._getRevFromMeta(meta),
@@ -87,34 +85,36 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    const cfg = await this.credentialsStore.load();
+    const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
     try {
-      await this._api.upload({
+      const r = await this._api.upload({
         path: filePath,
         data: dataStr,
+        isOverwrite: isForceOverwrite,
       });
+      console.log(r);
     } catch (e) {
       // TODO check if this is enough
-      if (e?.toString?.().includes('404')) {
-        // folder might not exist, so we try to create it
-        await this._api.createFolder({
-          folderPath: cfg.syncFolderPath as string,
-        });
-        await this._api.upload({
-          path: filePath,
-          data: dataStr,
-        });
-      }
+      // TODO re-implement but for folders only
+      // if (e?.toString?.().includes('404')) {
+      //   // folder might not exist, so we try to create it
+      //   await this._api.createFolder({
+      //     folderPath: cfg.syncFolderPath as string,
+      //   });
+      //   await this._api.upload({
+      //     path: filePath,
+      //     data: dataStr,
+      //   });
+      // }
       throw e;
     }
-    const fileMeta = await this._api.getFileMetaData(filePath);
-    if (!fileMeta.rev) {
+    const rev = this._getRevFromMeta(await this._api.getFileMeta(filePath));
+    if (!rev) {
       throw new NoRevError();
     }
-
     return {
-      rev: this._getRevFromMeta(fileMeta),
+      rev,
     };
   }
 
@@ -122,33 +122,33 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    const cfg = await this.credentialsStore.load();
+    const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
-    const r = await this._api.download({
-      path: filePath,
-      localRev,
-    });
+    try {
+      const { rev, dataStr } = await this._api.download({
+        path: filePath,
+        localRev,
+      });
+      if (!dataStr) {
+        throw new NoRemoteDataError(targetPath);
+      }
+      if (typeof rev !== 'string') {
+        throw new InvalidDataError(rev);
+      }
+      return { rev, dataStr };
+    } catch (e) {
+      console.log(e, Object.keys(e as any), (e as any)?.status, (e as any)?.response);
 
-    if (!r) {
-      throw new NoRemoteDataError(targetPath);
-    }
-    if (typeof r !== 'string') {
-      throw new InvalidDataError(r);
-    }
+      if ((e as any)?.status === 404) {
+        throw new NoRemoteDataError(targetPath);
+      }
 
-    const fileMeta = await this._api.getFileMetaData(filePath);
-    if (!fileMeta.rev) {
-      throw new NoRevError();
+      throw e;
     }
-
-    return {
-      rev: this._getRevFromMeta(fileMeta),
-      dataStr: r,
-    };
   }
 
   async removeFile(targetPath: string): Promise<void> {
-    const cfg = await this.credentialsStore.load();
+    const cfg = await this._cfgOrError();
     try {
       await this._api.remove(this._getFilePath(targetPath, cfg));
     } catch (e) {
@@ -157,17 +157,19 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     // TODO error handling
   }
 
-  private _getRevFromMeta(fileMeta: WebDavHeadResponse): string {
-    if (typeof fileMeta?.etag !== 'string') {
+  private _getRevFromMeta(fileMeta: FileStat): string {
+    const d = (fileMeta as any)?.data || fileMeta;
+    if (typeof d?.etag !== 'string') {
       console.warn('No etag for WebDAV, using instead: ', {
-        etag: fileMeta.etag,
+        d,
+        etag: d.etag,
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        'oc-etag': fileMeta['oc-etag'],
+        'oc-etag': d['oc-etag'],
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        'last-modified': fileMeta['last-modified'],
+        'last-modified': d['last-modified'],
       });
     }
-    const rev = fileMeta.etag || fileMeta['oc-etag'] || fileMeta['last-modified'];
+    const rev = d.etag || d['oc-etag'] || d['last-modified'];
     if (!rev) {
       throw new NoEtagError(fileMeta);
     }
@@ -181,6 +183,14 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
   }
 
   private _getFilePath(targetPath: string, cfg: WebdavCredentials): string {
-    return `${cfg.syncFolderPath as string}/${targetPath}.json`;
+    return `${cfg.syncFolderPath}/${targetPath}`;
+  }
+
+  private async _cfgOrError(): Promise<WebdavCredentials> {
+    const cfg = await this.credentialsStore.load();
+    if (!cfg) {
+      throw new AuthNotConfiguredError();
+    }
+    return cfg;
   }
 }

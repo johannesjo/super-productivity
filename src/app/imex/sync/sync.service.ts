@@ -78,12 +78,27 @@ export class SyncService {
 
   constructor() {
     // TODO better place
-    this.syncProviderId$.subscribe((v) => {
+    this.syncProviderId$.pipe().subscribe((v) => {
       console.log('_______________________', { v });
       if (v) {
         this._pfapiWrapperService.pf.setActiveSyncProvider(
           v as unknown as SyncProviderId,
         );
+
+        this.syncCfg$.pipe(take(1)).subscribe((syncCfg) => {
+          console.log({ syncCfg });
+          // this._pfapiWrapperService.pf.setCredentialsForActiveProvider(
+          //   v as unknown as SyncProviderId,
+          // );
+          // @ts-ignore
+          if (syncCfg.syncProvider === SyncProviderId.WebDAV) {
+            if (syncCfg.webDav) {
+              this._pfapiWrapperService.pf.setCredentialsForActiveProvider({
+                ...syncCfg.webDav,
+              });
+            }
+          }
+        });
 
         this._persistenceLocalService.load().then((d) => {
           console.log(d);
@@ -109,10 +124,7 @@ export class SyncService {
   // TODO move someplace else
 
   async sync(): Promise<SyncStatus | 'USER_ABORT' | 'HANDLED_ERROR'> {
-    const syncCfg = await this.syncCfg$.pipe(take(1)).toPromise();
-    console.log({ syncCfg });
-
-    const providerId = syncCfg.syncProvider;
+    const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
       //   // TODO handle different
       throw new Error('No Sync Provider for sync()');
@@ -156,9 +168,10 @@ export class SyncService {
           return r.status;
 
         case SyncStatus.NotConfigured:
-          await this._configureActiveSyncProvider();
-          return this.sync();
-        // return r.status;
+          if (await this._configureActiveSyncProvider()) {
+            return this.sync();
+          }
+          return r.status;
 
         case SyncStatus.IncompleteRemoteData:
           return r.status;
@@ -224,7 +237,7 @@ export class SyncService {
         return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
-        alert(errStr);
+        alert('IMEXSyncService ERR: ' + errStr);
         // TODO check if needed
         // if (errStr.includes(KNOWN_SYNC_ERROR_PREFIX)) {
         //   this._snackService.open({
@@ -256,11 +269,12 @@ export class SyncService {
     return confirm(this._translateService.instant(str));
   }
 
-  private async _configureActiveSyncProvider(): Promise<void> {
+  private async _configureActiveSyncProvider(): Promise<boolean> {
     const provider = this._pfapiWrapperService.pf.getActiveSyncProvider();
     if (!provider) {
       throw new ImpossibleError('No provider');
     }
+
     if (provider.getAuthHelper) {
       try {
         const { authUrl, codeVerifier, verifyCodeChallenge } =
@@ -293,7 +307,14 @@ export class SyncService {
           type: 'ERROR',
         });
       }
+      return true;
     }
+
+    this._snackService.open({
+      msg: T.F.SYNC.S.INCOMPLETE_CFG,
+      type: 'ERROR',
+    });
+    return false;
   }
 
   private lastDialog?: MatDialogRef<any, any>;

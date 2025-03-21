@@ -28,6 +28,7 @@ import { initialTagState } from '../features/tag/store/tag.reducer';
 import { initialSimpleCounterState } from '../features/simple-counter/store/simple-counter.reducer';
 import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
+import { Webdav } from './api/sync/providers/webdav';
 
 export type PfapiModelCfgs = {
   project: ModelCfg<ProjectState>;
@@ -126,7 +127,7 @@ export const PFAPI_MODEL_CFGS: PfapiModelCfgs = {
 export const PFAPI_SYNC_PROVIDERS = [
   new Dropbox({
     appKey: DROPBOX_APP_KEY,
-    // basePath: `/${DROPBOX_APP_FOLDER}`,
     basePath: `/`,
   }),
+  new Webdav({}),
 ];

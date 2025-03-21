@@ -55,10 +55,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
     await this.credentialsStore.save(credentials);
   }
 
-  async getFileRevAndLastClientUpdate(
-    targetPath: string,
-    localRev: string,
-  ): Promise<{ rev: string }> {
+  async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
     try {
       const r = await this._api.getMetaData(this._getPath(targetPath));
       return {
@@ -82,7 +79,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
           const refreshResult =
             await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
           if (refreshResult === 'SUCCESS') {
-            return this.getFileRevAndLastClientUpdate(targetPath, localRev);
+            return this.getFileRev(targetPath, localRev);
           }
         }
         throw new AuthFailError('Dropbox 401', 401);

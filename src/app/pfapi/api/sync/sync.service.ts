@@ -129,14 +129,16 @@ export class SyncService<const MD extends ModelCfgs> {
           throw new UnknownSyncStateError();
       }
     } catch (e) {
-      alert(e);
+      pfLog(1, `${SyncService.name}.${this.sync.name}()`, e);
       console.error(e);
 
       if (e instanceof NoRemoteMetaFile) {
-        // for this case we NEED to re-check the lock file being present, see above ^
-        await this.uploadAll();
+        // if there is no remote meta file, we need to upload all data
+        await this._writeLockFile(true);
+        await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
+
       // this indicates an incomplete sync, so we need to retry to upload all data
       if (e instanceof LockFileFromLocalClientPresentError) {
         await this.uploadAll(true);
@@ -227,7 +229,6 @@ export class SyncService<const MD extends ModelCfgs> {
     if (!isSkipLockFileCheck) {
       await this._awaitLockFilePermissionAndWrite();
     }
-
     const realRevMap: RevMap = {
       ...local.revMap,
     };
@@ -416,14 +417,12 @@ export class SyncService<const MD extends ModelCfgs> {
     pfLog(2, `${SyncService.name}.${this._getMetaRev.name}()`, { localRev });
     const syncProvider = this._getCurrentSyncProviderOrError();
     try {
-      const r = await syncProvider.getFileRevAndLastClientUpdate(
+      const r = await syncProvider.getFileRev(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
         localRev || null,
       );
       return r.rev;
     } catch (e) {
-      alert(e);
-      console.error(e);
       if (e instanceof NoRemoteDataError) {
         throw new NoRemoteMetaFile();
       }
@@ -490,12 +489,12 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  private async _writeLockFile(): Promise<void> {
+  private async _writeLockFile(isOverwrite = false): Promise<void> {
     const syncProvider = this._getCurrentSyncProviderOrError();
     const localClientId = await this._metaModelCtrl.loadClientId();
     pfLog(2, `${SyncService.name}.${this._writeLockFile.name}()`, localClientId);
     try {
-      await syncProvider.uploadFile(LOCK_FILE_NAME, localClientId, null, false);
+      await syncProvider.uploadFile(LOCK_FILE_NAME, localClientId, null, isOverwrite);
     } catch (e) {
       throw new UnableToWriteLockFileError();
     }

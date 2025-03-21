@@ -23,10 +23,7 @@ export interface SyncProviderServiceInterface<C> {
    * @param targetPath Path to the file
    * @param localRev Current local revision or null if none
    */
-  getFileRevAndLastClientUpdate(
-    targetPath: string,
-    localRev: string | null,
-  ): Promise<{ rev: string }>;
+  getFileRev(targetPath: string, localRev: string | null): Promise<{ rev: string }>;
 
   /**
    * Uploads file data to the sync provider
