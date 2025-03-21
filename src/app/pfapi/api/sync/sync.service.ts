@@ -181,8 +181,11 @@ export class SyncService<const MD extends ModelCfgs> {
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    const fn = this.IS_MAIN_FILE_MODE ? this._updateLocalMAIN : this._updateLocalMULTI;
-    return fn(remote, local, remoteRev, isSkipLockFileCheck);
+    if (this.IS_MAIN_FILE_MODE) {
+      return this._updateLocalMAIN(remote, local, remoteRev, isSkipLockFileCheck);
+    } else {
+      return this._updateLocalMULTI(remote, local, remoteRev, isSkipLockFileCheck);
+    }
   }
 
   async _updateLocalMAIN(
@@ -218,6 +221,7 @@ export class SyncService<const MD extends ModelCfgs> {
       });
       return;
     }
+
     // TODO make rev change to see if there were updates before lock file maybe
     return this._updateLocalMULTI(remote, local, remoteRev, isSkipLockFileCheck);
   }
@@ -268,6 +272,9 @@ export class SyncService<const MD extends ModelCfgs> {
     // since remote might hava an incomplete update
 
     // ON SUCCESS
+    if (this.IS_MAIN_FILE_MODE) {
+      await this._updateLocalMainModels(remote);
+    }
     await this._updateLocalMetaFileContent({
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
@@ -292,9 +299,11 @@ export class SyncService<const MD extends ModelCfgs> {
     local: LocalMeta,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    return this.IS_MAIN_FILE_MODE
-      ? this._updateRemoteMAIN(remote, local, isSkipLockFileCheck)
-      : this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
+    if (this.IS_MAIN_FILE_MODE) {
+      return this._updateRemoteMAIN(remote, local, isSkipLockFileCheck);
+    } else {
+      return this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
+    }
   }
 
   async _updateRemoteMAIN(
