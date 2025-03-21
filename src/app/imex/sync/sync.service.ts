@@ -14,7 +14,7 @@ import {
   LockFilePresentError,
   SyncProviderId,
   SyncStatus,
-  UnableToWriteLockFile,
+  UnableToWriteLockFileError,
 } from '../../pfapi/api';
 import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
@@ -213,7 +213,7 @@ export class SyncService {
         return 'HANDLED_ERROR';
       } else if (
         error instanceof LockFilePresentError ||
-        error instanceof UnableToWriteLockFile
+        error instanceof UnableToWriteLockFileError
       ) {
         // TODO improve handling
         this._snackService.open({
