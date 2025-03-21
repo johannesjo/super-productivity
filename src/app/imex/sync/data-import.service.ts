@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AppDataCompleteNew } from './sync.model';
+import { AppDataCompleteLegacy, AppDataCompleteNew } from './sync.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { ImexMetaService } from '../imex-meta/imex-meta.service';
@@ -36,7 +36,7 @@ export class DataImportService {
   }
 
   async importCompleteSyncData(
-    data: AppDataCompleteNew,
+    data: AppDataCompleteNew | AppDataCompleteLegacy,
     {
       isBackupReload = false,
       isSkipStrayBackupCheck = false,
@@ -69,11 +69,18 @@ export class DataImportService {
       console.log('isValidAppData', true, data);
       try {
         const mergedData = isOmitLocalFields
-          ? await this._mergeWithLocalOmittedFields(data)
+          ? // TODO check
+            await this._mergeWithLocalOmittedFields(data)
           : data;
 
         // clear database to have a clean one and delete legacy stuff
         await this._pfapiService.clearDatabaseExceptBackupAndLocalOnlyModel();
+
+        // legacy compatability
+        if ((mergedData as AppDataCompleteLegacy).lastLocalSyncModelChange) {
+          delete (mergedData as any).lastLocalSyncModelChange;
+          delete (mergedData as any).lastArchiveUpdate;
+        }
 
         // save data to database first then load to store from there
         await this._pfapiService.importComplete(mergedData);
