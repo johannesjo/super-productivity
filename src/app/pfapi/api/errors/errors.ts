@@ -100,6 +100,14 @@ export class NoEtagError extends AdditionalLogErrorBase {
   override name = NoEtagError.name;
 }
 
+export class RevMapModelMismatchErrorOnDownload extends AdditionalLogErrorBase {
+  override name = RevMapModelMismatchErrorOnDownload.name;
+}
+
+export class RevMapModelMismatchErrorOnUpload extends AdditionalLogErrorBase {
+  override name = RevMapModelMismatchErrorOnUpload.name;
+}
+
 // ----------------------------
 
 export class AuthFailError extends Error {

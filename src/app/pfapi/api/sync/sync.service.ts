@@ -17,6 +17,8 @@ import {
   NoRemoteDataError,
   NoRemoteMetaFile,
   NoSyncProviderSetError,
+  RevMapModelMismatchErrorOnDownload,
+  RevMapModelMismatchErrorOnUpload,
   RevMismatchError,
   UnableToWriteLockFileError,
   UnknownSyncStateError,
@@ -103,7 +105,6 @@ export class SyncService<const MD extends ModelCfgs> {
             // NOTE: because we checked lock file above for multi file mode
             !this.IS_MAIN_FILE_MODE,
           );
-          alert('UPDATE_LOCAL DONE');
           return { status };
         case SyncStatus.UpdateRemote:
           await this.updateRemote(
@@ -160,6 +161,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   async downloadAll(isSkipLockFileCheck = false): Promise<void> {
+    alert('DOWNLOAD ALL TO LOCAL');
     const local = await this._metaModelCtrl.loadMetaModel();
     const { remoteMeta, remoteRev } = await this._downloadMetaFile();
     const fakeLocal: LocalMeta = {
@@ -199,6 +201,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
       revMapToOverwrite: local.revMap,
+      context: 'DOWNLOAD',
     });
 
     if (toUpdate.length === 0 && toDelete.length === 0) {
@@ -238,6 +241,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
       revMapToOverwrite: local.revMap,
+      context: 'DOWNLOAD',
     });
 
     const realRevMap: RevMap = {};
@@ -307,10 +311,10 @@ export class SyncService<const MD extends ModelCfgs> {
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: local.revMap,
       revMapToOverwrite: remote.revMap,
+      context: 'UPLOAD',
     });
 
     if (toUpdate.length === 0 && toDelete.length === 0) {
-      alert('_updateRemoteMAIN(): NO NON MAIN MODELS TO UPDATE');
       const mainModelData = await this._getMainFileModelData();
       const metaRevAfterUpdate = await this._uploadMetaFile({
         revMap: local.revMap,
@@ -346,6 +350,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: local.revMap,
       revMapToOverwrite: remote.revMap,
+      context: 'UPLOAD',
     });
 
     pfLog(2, `${SyncService.name}.${this._updateRemoteMULTI.name}()`, {
@@ -583,24 +588,41 @@ export class SyncService<const MD extends ModelCfgs> {
   private _getModelIdsToUpdateFromRevMaps({
     revMapNewer,
     revMapToOverwrite,
+    context,
   }: {
     revMapNewer: RevMap;
     revMapToOverwrite: RevMap;
+    context: 'UPLOAD' | 'DOWNLOAD';
   }): { toUpdate: string[]; toDelete: string[] } {
     const all = getModelIdsToUpdateFromRevMaps(revMapNewer, revMapToOverwrite);
-    return this.IS_MAIN_FILE_MODE
-      ? {
-          toUpdate: all.toUpdate.filter(
-            (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
-          ),
-          toDelete: all.toDelete.filter(
-            (modelId) => !this.m[modelId].modelCfg.isMainFileModel,
-          ),
-        }
-      : {
-          toUpdate: all.toUpdate,
-          toDelete: all.toDelete,
-        };
+    try {
+      return this.IS_MAIN_FILE_MODE
+        ? {
+            toUpdate: all.toUpdate.filter(
+              // NOTE: we are also filtering out all non-existing local models
+              (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+            ),
+            toDelete: all.toDelete.filter(
+              // NOTE: we are also filtering out all non-existing local models
+              (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+            ),
+          }
+        : {
+            toUpdate: all.toUpdate,
+            toDelete: all.toDelete,
+          };
+    } catch (e) {
+      // TODO maybe remove error again
+      if (context === 'UPLOAD') {
+        throw new RevMapModelMismatchErrorOnUpload({ e, revMapNewer, revMapToOverwrite });
+      } else {
+        throw new RevMapModelMismatchErrorOnDownload({
+          e,
+          revMapNewer,
+          revMapToOverwrite,
+        });
+      }
+    }
   }
 
   // --------------------------------------------------
@@ -658,7 +680,6 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // TODO make async work correctly
   private async _updateLocalMainModels(remote: RemoteMeta): Promise<void> {
-    alert('NO NON MAIN MODELS TO UPDATE');
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
       pfLog(
