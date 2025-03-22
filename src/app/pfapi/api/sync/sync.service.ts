@@ -61,26 +61,29 @@ export class SyncService<const MD extends ModelCfgs> {
       if (!(await this._isReadyForSync())) {
         return { status: SyncStatus.NotConfigured };
       }
-      const localMeta = await this._metaModelCtrl.loadMetaModel();
+      const localMeta0 = await this._metaModelCtrl.loadMetaModel();
 
       // quick pre-check for all synced
-      if (localMeta.lastSyncedUpdate === localMeta.lastUpdate) {
-        const metaRev = await this._getMetaRev(localMeta.metaRev);
-        if (metaRev === localMeta.metaRev) {
+      if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
+        const metaRev = await this._getMetaRev(localMeta0.metaRev);
+        if (metaRev === localMeta0.metaRev) {
           return { status: SyncStatus.InSync };
         }
       }
 
       // NOTE: for cascading mode we don't need to check the lock file before
       const [{ remoteMeta, remoteRev }] = this.IS_MAIN_FILE_MODE
-        ? await Promise.all([this._downloadMetaFile(localMeta.metaRev)])
+        ? await Promise.all([this._downloadMetaFile(localMeta0.metaRev)])
         : // since we delete the lock file only AFTER writing the meta file, we can safely execute these in parallel
           // NOTE: a race condition introduced is, that one error might pop up before the other
           // so we should re-check the lock file, when handling errors from downloading the meta file
           await Promise.all([
-            this._downloadMetaFile(localMeta.metaRev),
+            this._downloadMetaFile(localMeta0.metaRev),
             this._awaitLockFilePermissionAndWrite(),
           ]);
+
+      // we load again, to get the latest local changes for our checks and the data to upload
+      const localMeta = await this._metaModelCtrl.loadMetaModel();
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
       pfLog(

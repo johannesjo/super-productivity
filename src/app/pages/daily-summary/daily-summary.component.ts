@@ -70,6 +70,7 @@ import {
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { promiseTimeout } from '../../util/promise-timeout';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -366,6 +367,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private async _moveDoneToArchive(): Promise<void> {
     const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
     this._taskService.moveToArchive(doneTasks);
+    // wait for tasks being actually moved to archive and all database stuff to be completed...
+    await promiseTimeout(50);
   }
 
   private async _finishDayForGood(cb?: any): Promise<void> {
