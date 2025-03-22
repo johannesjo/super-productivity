@@ -57,7 +57,7 @@ export interface MainModelData {
   [modelId: string]: ModelBase;
 }
 
-export interface BaseCfg {
+export interface PfapiBaseCfg<T extends ModelCfgs> {
   dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
@@ -70,7 +70,8 @@ export interface BaseCfg {
   crossModelMigrations?: {
     [version: string]: (arg: FullData<unknown>) => FullData<unknown>;
   };
-  validate?: (data: any) => boolean;
+  validate?: (data: AllModelData<T>) => boolean;
+  // validate?: (data: any) => boolean;
   // TODO type
   repair?: (data: any) => any;
 
@@ -123,7 +124,10 @@ export type ModelCfgToModelCtrl<T extends ModelCfgs> = {
   [K in keyof T]: ModelCtrl<ExtractModelCfgType<T[K]>>;
 };
 
-// TODO better typing
+export type AllModelData<T extends ModelCfgs> = {
+  [K in keyof T]: ExtractModelCfgType<T[K]>;
+};
+
 export type AllSyncModels<T extends ModelCfgs> = {
   [K in keyof T]: ExtractModelCfgType<T[K]>;
 };

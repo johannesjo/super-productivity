@@ -1,4 +1,4 @@
-import { Dropbox, ModelCfg } from './api';
+import { Dropbox, ModelCfg, PfapiBaseCfg } from './api';
 import { ProjectState } from '../features/project/project.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
@@ -30,7 +30,7 @@ import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/tas
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
 
-export type PfapiModelCfgs = {
+export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
   globalConfig: ModelCfg<GlobalConfigState>;
   planner: ModelCfg<PlannerState>;
@@ -52,7 +52,7 @@ export type PfapiModelCfgs = {
   reminders: ModelCfg<Reminder[]>;
 };
 
-export const PFAPI_MODEL_CFGS: PfapiModelCfgs = {
+export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   task: {
     modelVersion: 1,
     defaultData: initialTaskState,
@@ -135,3 +135,15 @@ export const PFAPI_SYNC_PROVIDERS = [
   }),
   new Webdav({}),
 ];
+
+export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
+  isMainFileMode: true,
+  validate: (data) => {
+    console.log(data);
+
+    console.log(data.boards);
+    console.log(data.metric);
+
+    return false;
+  },
+};

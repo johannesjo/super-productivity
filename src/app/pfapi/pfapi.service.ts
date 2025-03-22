@@ -5,7 +5,12 @@ import { AllowedDBKeys, DB } from '../core/persistence/storage-keys.const';
 import { AppDataCompleteNew } from '../imex/sync/sync.model';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { devError } from '../util/dev-error';
-import { PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PfapiModelCfgs } from './pfapi-config';
+import {
+  PFAPI_CFG,
+  PFAPI_MODEL_CFGS,
+  PFAPI_SYNC_PROVIDERS,
+  PfapiAllModelCfg,
+} from './pfapi-config';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -13,10 +18,8 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
   providedIn: 'root',
 })
 export class PfapiService {
-  public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, {
-    isMainFileMode: true,
-  });
-  public readonly m: ModelCfgToModelCtrl<PfapiModelCfgs> = this.pf.m;
+  public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
+  public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
   // TODO replace with pfapi event
   onAfterSave$: Subject<{

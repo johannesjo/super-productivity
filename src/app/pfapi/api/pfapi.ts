@@ -1,11 +1,11 @@
 import {
   AllSyncModels,
-  BaseCfg,
   ConflictData,
   ExtractModelCfgType,
   ModelBase,
   ModelCfgs,
   ModelCfgToModelCtrl,
+  PfapiBaseCfg,
 } from './pfapi.model';
 import { SyncService } from './sync/sync.service';
 import { Database } from './db/database';
@@ -19,6 +19,7 @@ import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
 import {
+  DataValidationFailedError,
   InvalidModelCfgError,
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
@@ -40,6 +41,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   private readonly _syncService: SyncService<MD>;
   private readonly _activeSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
     new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
+  private readonly _cfg?: PfapiBaseCfg<MD>;
 
   // private readonly _eventHandlers = new Map<
   //   keyof EventMap,
@@ -57,13 +59,14 @@ export class Pfapi<const MD extends ModelCfgs> {
   constructor(
     modelCfgs: MD,
     syncProviders: SyncProviderServiceInterface<unknown>[],
-    cfg?: BaseCfg,
+    cfg?: PfapiBaseCfg<MD>,
   ) {
     if (Pfapi._wasInstanceCreated) {
       throw new Error(': This should only ever be instantiated once');
     }
     Pfapi._wasInstanceCreated = true;
 
+    this._cfg = cfg;
     const IS_MAIN_FILE_MODE = cfg?.isMainFileMode || false;
 
     this.db = new Database({
@@ -160,7 +163,11 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO type
   async importAllSycModelData(data: AllSyncModels<MD>): Promise<unknown> {
-    pfLog(2, `${this.importAllSycModelData.name}()`, data);
+    pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this._cfg });
+    if (this._cfg?.validate && !this._cfg.validate(data)) {
+      throw new DataValidationFailedError();
+    }
+
     const modelIds = Object.keys(data);
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];

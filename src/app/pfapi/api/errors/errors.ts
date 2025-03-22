@@ -143,3 +143,7 @@ export class NoRemoteDataError extends AdditionalLogErrorBase {
 export class InvalidDataError extends AdditionalLogErrorBase {
   override name = InvalidDataError.name;
 }
+
+export class DataValidationFailedError extends AdditionalLogErrorBase {
+  override name = DataValidationFailedError.name;
+}
