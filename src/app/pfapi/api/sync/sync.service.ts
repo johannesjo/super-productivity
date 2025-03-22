@@ -1,4 +1,5 @@
 import {
+  AllSyncModels,
   ConflictData,
   LocalMeta,
   MainModelData,
@@ -32,6 +33,7 @@ import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-fi
 import { validateMetaBase } from '../util/validate-meta-base';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
+import { Pfapi } from '../pfapi';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
@@ -41,16 +43,19 @@ export class SyncService<const MD extends ModelCfgs> {
   readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
   readonly _metaModelCtrl: MetaModelCtrl;
   readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
+  readonly _pfapiMain: Pfapi<MD>;
 
   constructor(
     isMainFileMode: boolean,
     m: ModelCfgToModelCtrl<MD>,
+    _pfapiMain: Pfapi<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
     this.IS_MAIN_FILE_MODE = isMainFileMode;
     this.m = m;
+    this._pfapiMain = _pfapiMain;
     this._currentSyncProvider$ = _currentSyncProvider$;
     this._metaModelCtrl = _metaModelCtrl;
     this._encryptAndCompressHandler = _encryptAndCompressHandler;
@@ -408,16 +413,17 @@ export class SyncService<const MD extends ModelCfgs> {
     const realRevMap: RevMap = {
       ...local.revMap,
     };
+    const completeData = await this._pfapiMain.getAllSyncModelData();
+
     const uploadModelFns = toUpdate.map(
       (modelId) => () =>
-        this.m[modelId]
-          .load()
-          .then((data) =>
-            this._uploadModel(modelId, this._getModelVersion(modelId), data),
-          )
-          .then((rev) => {
-            realRevMap[modelId] = cleanRev(rev);
-          }),
+        this._uploadModel(
+          modelId,
+          this._getModelVersion(modelId),
+          completeData[modelId],
+        ).then((rev) => {
+          realRevMap[modelId] = cleanRev(rev);
+        }),
       // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
       //  since remote might hava an incomplete update
     );
@@ -435,9 +441,7 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
-      mainModelData: this.IS_MAIN_FILE_MODE
-        ? await this._getMainFileModelData()
-        : undefined,
+      mainModelData: this.IS_MAIN_FILE_MODE ? completeData : undefined,
     });
 
     // ON AFTER SUCCESS
@@ -756,14 +760,15 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  private async _getMainFileModelData(): Promise<MainModelData> {
+  private async _getMainFileModelData(
+    completeModel?: AllSyncModels<MD>,
+  ): Promise<MainModelData> {
     const mainFileModelIds = Object.keys(this.m).filter(
       (modelId) => this.m[modelId].modelCfg.isMainFileModel,
     );
+    completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
     const mainModelData: MainModelData = Object.fromEntries(
-      await Promise.all(
-        mainFileModelIds.map(async (modelId) => [modelId, await this.m[modelId].load()]),
-      ),
+      mainFileModelIds.map((modelId) => [modelId, completeModel[modelId]]),
     );
     pfLog(2, `${SyncService.name}.${this._getMainFileModelData.name}()`, {
       mainModelData,

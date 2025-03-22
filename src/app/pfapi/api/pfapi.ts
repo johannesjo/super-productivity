@@ -30,6 +30,7 @@ import {
   NoValidateFunctionProvidedError,
 } from './errors/errors';
 import { TmpBackupService } from './backup/tmp-backup.service';
+import { promiseTimeout } from '../../util/promise-timeout';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -101,13 +102,13 @@ export class Pfapi<const MD extends ModelCfgs> {
     this._syncService = new SyncService<MD>(
       IS_MAIN_FILE_MODE,
       this.m,
+      this,
       this._activeSyncProvider$,
       this.metaModel,
       new EncryptAndCompressHandlerService(),
     );
   }
 
-  // TODO type
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     pfLog(3, `${this.sync.name}()`);
     const result = await this._syncService.sync();
@@ -153,6 +154,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     );
   }
 
+  private _getAllSyncModelDataRetryCount = 0;
+
   async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
     pfLog(2, `${this.getAllSyncModelData.name}()`);
     const modelIds = Object.keys(this.m);
@@ -166,6 +169,16 @@ export class Pfapi<const MD extends ModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
+
+    if (this._cfg?.validate && !this._cfg.validate(allData as AllSyncModels<MD>)) {
+      alert('actually got one!!!');
+      if (this._getAllSyncModelDataRetryCount >= 1) {
+        throw new DataValidationFailedError();
+      }
+      await promiseTimeout(100);
+      return this.getAllSyncModelData();
+    }
+    this._getAllSyncModelDataRetryCount = 0;
     return allData as AllSyncModels<MD>;
   }
 
@@ -265,8 +278,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._syncService.uploadAll(isSkipLockFileCheck);
   }
 
-  // TODO isStrayLocalBackup
-
   // public on<K extends keyof EventMap>(
   //   eventName: K,
   //   callback: (data: EventMap[K]) => void,
@@ -306,29 +317,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._cfg.repair(data);
   }
 
-  async clearDatabaseExceptLocalOnly(): Promise<void> {
-    pfLog(2, `${this.clearDatabaseExceptLocalOnly.name}()`);
-
-    const MODELS_TO_PRESERVE: string[] = [
-      MetaModelCtrl.META_MODEL_ID,
-      MetaModelCtrl.CLIENT_ID,
-      // NOTE prefixes also work
-      SyncProviderCredentialsStore.DB_KEY_PREFIX,
-    ];
-    const localOnlyModels = Object.keys(this.m).filter(
-      (modelId) => this.m[modelId].modelCfg.isLocalOnly,
-    );
-    const allModelsToPreserve = [...MODELS_TO_PRESERVE, ...localOnlyModels];
-    console.log({ allModelsToPreserve });
-
-    const model = this.db.loadAll();
-    const keysToDelete = Object.keys(model).filter(
-      (key) => !allModelsToPreserve.includes(key),
-    );
-    const promises = keysToDelete.map((key) => this.db.remove(key));
-    await Promise.all(promises);
-  }
-
   private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {
     const result = {} as Record<string, ModelCtrl<ModelBase>>;
     // TODO validate modelCfgs
@@ -345,8 +333,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     return result as ModelCfgToModelCtrl<MD>;
   }
-
-  // getAllModelData(): unknown {}
 
   // /**
   //  * Updates configuration and propagates changes
