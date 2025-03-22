@@ -33,7 +33,7 @@ export class PlannerEffects {
           updateTaskTags,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
-        tap(([, plannerState]) => this._saveToLs(plannerState, true)),
+        tap(([, plannerState]) => this._saveToLs(plannerState)),
       );
     },
     { dispatch: false },
@@ -67,12 +67,9 @@ export class PlannerEffects {
     );
   });
 
-  private _saveToLs(
-    plannerState: PlannerState,
-    isSyncModelChange: boolean = false,
-  ): void {
+  private _saveToLs(plannerState: PlannerState): void {
     this._pfapiService.m.planner.save(plannerState, {
-      isUpdateRevAndLastUpdate: isSyncModelChange,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

@@ -26,11 +26,11 @@ export const modelExecAction = async <M, T extends EntityState<M>>(
   pfapiModel: ModelCtrl<T>,
   action: Action,
   reducerFn: ActionReducer<T, { type: string; payload?: any }>,
-  isSyncModelChange: boolean = false,
+  isUpdateRevAndLastUpdate: boolean = false,
 ): Promise<T> => {
   const data = await pfapiModel.load();
   const newState = reducerFn(data, action);
-  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isSyncModelChange });
+  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isUpdateRevAndLastUpdate });
   return newState;
 };
 
@@ -38,11 +38,11 @@ export const modelExecActions = async <M, T extends EntityState<M>>(
   pfapiModel: ModelCtrl<T>,
   actions: Action[],
   reducerFn: ActionReducer<T, { type: string; payload?: any }>,
-  isSyncModelChange: boolean = false,
+  isUpdateRevAndLastUpdate: boolean = false,
 ): Promise<T> => {
   const data = await pfapiModel.load();
   const newState = actions.reduce((acc, act) => reducerFn(acc, act), data);
-  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isSyncModelChange });
+  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isUpdateRevAndLastUpdate });
   return newState;
 };
 

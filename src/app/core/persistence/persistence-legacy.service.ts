@@ -13,7 +13,7 @@ import { DatabaseService } from './database.service';
 import { Project, ProjectState } from '../../features/project/project.model';
 import {
   PersistenceBaseEntityModel,
-  PersistenceBaseModel,
+  PersistenceLegacyBaseModel,
   PersistenceBaseModelCfg,
   PersistenceEntityModelCfg,
 } from './persistence.model';
@@ -61,19 +61,18 @@ export class PersistenceLegacyService {
   private _store = inject<Store<any>>(Store);
 
   // handled as private but needs to be assigned before the creations
-  _baseModels: PersistenceBaseModel<unknown>[] = [];
+  _baseModels: PersistenceLegacyBaseModel<unknown>[] = [];
 
   // TODO auto generate ls keys from appDataKey where possible
-  globalConfig: PersistenceBaseModel<GlobalConfigState> = this._cmBase<GlobalConfigState>(
-    BASE_MODEL_CFGS.globalConfig,
-  );
-  reminders: PersistenceBaseModel<Reminder[]> = this._cmBase<Reminder[]>(
+  globalConfig: PersistenceLegacyBaseModel<GlobalConfigState> =
+    this._cmBase<GlobalConfigState>(BASE_MODEL_CFGS.globalConfig);
+  reminders: PersistenceLegacyBaseModel<Reminder[]> = this._cmBase<Reminder[]>(
     BASE_MODEL_CFGS.reminders,
   );
-  planner: PersistenceBaseModel<PlannerState> = this._cmBase<PlannerState>(
+  planner: PersistenceLegacyBaseModel<PlannerState> = this._cmBase<PlannerState>(
     BASE_MODEL_CFGS.planner,
   );
-  boards: PersistenceBaseModel<BoardsState> = this._cmBase<BoardsState>(
+  boards: PersistenceLegacyBaseModel<BoardsState> = this._cmBase<BoardsState>(
     BASE_MODEL_CFGS.boards,
   );
 
@@ -126,7 +125,7 @@ export class PersistenceLegacyService {
     appDataKey: AllowedDBKeys;
     data: unknown;
     isDataImport: boolean;
-    isSyncModelChange: boolean;
+    isUpdateRevAndLastUpdate: boolean;
     projectId?: string;
   }> = new Subject();
 
@@ -202,7 +201,7 @@ export class PersistenceLegacyService {
     this._isBlockSaving = true;
 
     const forBase = Promise.all(
-      this._baseModels.map(async (modelCfg: PersistenceBaseModel<any>) => {
+      this._baseModels.map(async (modelCfg: PersistenceLegacyBaseModel<any>) => {
         return await modelCfg.saveState(data[modelCfg.appDataKey], {
           isDataImport: true,
         });
@@ -260,7 +259,7 @@ export class PersistenceLegacyService {
     migrateFn = (v) => v,
     // NOTE: isSkipPush is used to use this for _cmBaseEntity as well
     isSkipPush = false,
-  }: PersistenceBaseModelCfg<T>): PersistenceBaseModel<T> {
+  }: PersistenceBaseModelCfg<T>): PersistenceLegacyBaseModel<T> {
     const model = {
       appDataKey,
       loadState: async (isSkipMigrate = false) => {
@@ -386,7 +385,7 @@ export class PersistenceLegacyService {
         data,
         isDataImport,
         projectId,
-        isSyncModelChange,
+        isUpdateRevAndLastUpdate: isSyncModelChange,
       });
 
       return r;

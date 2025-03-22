@@ -35,19 +35,19 @@ export class IssueProviderDbEffects {
 
           IssueProviderActions.clearIssueProviders,
         ),
-        switchMap(() => this.saveToLs$(true)),
+        switchMap(() => this.saveToLs$()),
       ),
     { dispatch: false },
   );
 
-  private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
+  private saveToLs$(): Observable<unknown> {
     return this._store.pipe(
       // tap(() => console.log('SAVE')),
       select(selectIssueProviderState),
       take(1),
       switchMap((issueProviderState) =>
         this._pfapiService.m.issueProvider.save(issueProviderState, {
-          isUpdateRevAndLastUpdate: isSyncModelChange,
+          isUpdateRevAndLastUpdate: true,
         }),
       ),
     );

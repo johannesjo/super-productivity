@@ -33,7 +33,7 @@ export class PfapiService {
     appDataKey: AllowedDBKeys;
     data: unknown;
     isDataImport: boolean;
-    isSyncModelChange: boolean;
+    isUpdateRevAndLastUpdate: boolean;
     projectId?: string;
   }> = new Subject();
 

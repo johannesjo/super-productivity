@@ -54,8 +54,8 @@ export class SyncTriggerService {
     projectId?: string;
   }> = this._pfapiService.onAfterSave$.pipe(
     filter(
-      ({ appDataKey, data, isDataImport, isSyncModelChange }) =>
-        !!data && !isDataImport && isSyncModelChange,
+      ({ appDataKey, data, isDataImport, isUpdateRevAndLastUpdate }) =>
+        !!data && !isDataImport && isUpdateRevAndLastUpdate,
     ),
   );
 

@@ -115,7 +115,10 @@ export class TaskDbEffects {
   );
 
   // @debounce(50)
-  private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false): void {
+  private _saveToLs(
+    taskState: TaskState,
+    isUpdateRevAndLastUpdate: boolean = false,
+  ): void {
     this._pfapiService.m.task.save(
       {
         ...taskState,
@@ -124,7 +127,7 @@ export class TaskDbEffects {
         selectedTaskId: environment.production ? null : taskState.selectedTaskId,
         currentTaskId: null,
       },
-      { isUpdateRevAndLastUpdate: isSyncModelChange },
+      { isUpdateRevAndLastUpdate },
     );
   }
 }

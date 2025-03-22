@@ -367,14 +367,14 @@ export class ProjectEffects {
     );
   }
 
-  private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
+  private saveToLs$(isUpdateRevAndLastUpdate: boolean): Observable<unknown> {
     return this._store$.pipe(
       // tap(() => console.log('SAVE')),
       select(selectProjectFeatureState),
       take(1),
       switchMap((projectState) =>
         this._pfapiService.m.project.save(projectState, {
-          isUpdateRevAndLastUpdate: isSyncModelChange,
+          isUpdateRevAndLastUpdate,
         }),
       ),
     );
