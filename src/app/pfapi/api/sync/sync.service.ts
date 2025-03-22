@@ -177,6 +177,9 @@ export class SyncService<const MD extends ModelCfgs> {
       // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
+      lastUpdate: 1,
+      lastSyncedUpdate: null,
+      metaRev: null,
       revMap: {},
     };
     return await this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
@@ -226,10 +229,14 @@ export class SyncService<const MD extends ModelCfgs> {
         localRevMap: local.revMap,
       });
 
-      await this._updateLocalMetaFileContent({
-        ...remote,
-        // revMap: local.revMap,
+      await this._saveLocalMetaFileContent({
+        // shared
+        lastUpdate: remote.lastUpdate,
+        crossModelVersion: remote.crossModelVersion,
+        modelVersions: remote.modelVersions,
         revMap: remote.revMap,
+        // local meta
+        lastSyncedUpdate: remote.lastUpdate,
         metaRev: remoteRev,
       });
       return;
@@ -291,7 +298,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
     console.log('AAAAAAAAAAAAAA', { realRevMap, local });
 
-    await this._updateLocalMetaFileContent({
+    await this._saveLocalMetaFileContent({
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
@@ -361,8 +368,9 @@ export class SyncService<const MD extends ModelCfgs> {
         mainModelData,
       });
       // ON AFTER SUCCESS
-      await this._updateLocalMetaFileContent({
+      await this._saveLocalMetaFileContent({
         ...local,
+        lastSyncedUpdate: local.lastUpdate,
         metaRev: metaRevAfterUpdate,
       });
       return;
@@ -430,7 +438,7 @@ export class SyncService<const MD extends ModelCfgs> {
     });
 
     // ON AFTER SUCCESS
-    await this._updateLocalMetaFileContent({
+    await this._saveLocalMetaFileContent({
       // leave as is basically
       lastUpdate: local.lastUpdate,
       modelVersions: local.modelVersions,
@@ -581,7 +589,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   // --------------------------------------------------
-  private async _getMetaRev(localRev?: string): Promise<string> {
+  private async _getMetaRev(localRev: string | null): Promise<string> {
     pfLog(2, `${SyncService.name}.${this._getMetaRev.name}()`, { localRev });
     const syncProvider = this._getCurrentSyncProviderOrError();
     try {
@@ -621,7 +629,7 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  private async _updateLocalMetaFileContent(
+  private async _saveLocalMetaFileContent(
     localMetaFileContent: LocalMeta,
   ): Promise<unknown> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);

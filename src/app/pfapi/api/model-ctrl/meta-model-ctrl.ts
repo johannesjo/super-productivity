@@ -16,6 +16,8 @@ const DEFAULT_META_MODEL: LocalMeta = {
   modelVersions: {},
   // TODO make mandatory
   lastUpdate: Date.now(),
+  metaRev: null,
+  lastSyncedUpdate: null,
 };
 
 export class MetaModelCtrl {

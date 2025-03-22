@@ -89,7 +89,7 @@ export interface ModelVersionMap {
 }
 
 export interface MetaFileBase {
-  lastUpdate?: number;
+  lastUpdate: number;
   revMap: RevMap;
   crossModelVersion: number;
   modelVersions: ModelVersionMap;
@@ -100,8 +100,8 @@ export interface RemoteMeta extends MetaFileBase {
 }
 
 export interface LocalMeta extends MetaFileBase {
-  lastSyncedUpdate?: number;
-  metaRev?: string;
+  lastSyncedUpdate: number | null;
+  metaRev: string | null;
 }
 
 export interface ConflictData {
