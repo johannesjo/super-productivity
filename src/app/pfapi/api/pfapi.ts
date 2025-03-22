@@ -171,9 +171,13 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO maybe limit model
   async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
+    const d = await this.getAllSyncModelData();
+    if (this._cfg?.validate && !this._cfg.validate(d)) {
+      throw new DataValidationFailedError();
+    }
     const meta = await this.metaModel.loadMetaModel();
     return {
-      data: await this.getAllSyncModelData(),
+      data: d,
       crossModelVersion: meta.crossModelVersion,
       modelVersions: meta.modelVersions,
       lastUpdate: meta.lastUpdate,
