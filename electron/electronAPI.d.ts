@@ -5,13 +5,10 @@ import {
 } from '../src/app/features/config/global-config.model';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import {
-  AppDataCompleteLegacy,
-  AppDataCompleteNew,
-  SyncGetRevResult,
-} from '../src/app/imex/sync/sync.model';
+import { AppDataCompleteLegacy, SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { Task } from '../src/app/features/tasks/task.model';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
+import { AppDataCompleteNew } from '../src/app/pfapi/pfapi-config';
 
 export interface ElectronAPI {
   on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;

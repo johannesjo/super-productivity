@@ -1,4 +1,4 @@
-import { AppBaseData, AppDataCompleteLegacy, AppDataCompleteNew } from './sync.model';
+import { AppBaseData, AppDataCompleteLegacy } from './sync.model';
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
@@ -6,6 +6,7 @@ import { Project } from '../../features/project/project.model';
 import { Task } from '../../features/tasks/task.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { environment } from '../../../environments/environment';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 export const isValidAppData = (
   d: AppDataCompleteLegacy | AppDataCompleteNew,

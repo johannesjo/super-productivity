@@ -4,9 +4,9 @@ import { mapTo, shareReplay, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { CROSS_MODEL_VERSION } from '../../pfapi/pfapi-config';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
@@ -32,20 +32,20 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
-    const appDataComplete = await this._pfapiService.loadComplete(true);
-    const isValid = isValidAppData(appDataComplete);
+    const appDataComplete = await this._pfapiService.getAllSyncModelData();
+    const isValid = this._pfapiService.isValidateComplete(appDataComplete);
     if (isValid) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
-        const fixedData = this._dataRepairService.repairData(appDataComplete);
+        const fixedData = this._pfapiService.repairCompleteData(appDataComplete);
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,
             isOmitTokens,
           }),
         );
-        await this._pfapiService.importComplete(fixedData);
+        await this._pfapiService.importAllSycModelData(fixedData, CROSS_MODEL_VERSION);
       }
     }
   }

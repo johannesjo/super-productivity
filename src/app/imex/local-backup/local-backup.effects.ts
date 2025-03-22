@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { take, tap } from 'rxjs/operators';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { AppDataCompleteLegacy, AppDataCompleteNew } from '../sync/sync.model';
+import { AppDataCompleteLegacy } from '../sync/sync.model';
 import { IS_ELECTRON } from '../../app.constants';
 import { LocalBackupService } from './local-backup.service';
 import { DataImportService } from '../sync/data-import.service';
@@ -11,6 +11,7 @@ import { T } from '../../t.const';
 import moment from 'moment';
 import { IS_ANDROID_BACKUP_READY } from '../../features/android/android-interface';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 @Injectable()
 export class LocalBackupEffects {

@@ -1,23 +1,17 @@
-import { Injectable, inject } from '@angular/core';
-import { AppDataCompleteLegacy, AppDataCompleteNew } from '../../imex/sync/sync.model';
+import { inject, Injectable } from '@angular/core';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
-import { dataRepair } from './data-repair.util';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
 import { getLastValidityError } from '../../imex/sync/is-valid-app-data.util';
 import { IS_ELECTRON } from '../../app.constants';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataRepairService {
   private _translateService = inject(TranslateService);
-
-  repairData(
-    dataIn: AppDataCompleteLegacy | AppDataCompleteNew,
-  ): AppDataCompleteLegacy | AppDataCompleteNew {
-    return dataRepair(dataIn);
-  }
 
   isRepairPossibleAndConfirmed(
     dataIn: AppDataCompleteLegacy | AppDataCompleteNew,
@@ -27,13 +21,11 @@ export class DataRepairService {
       alert('Data damaged, repair not possible.');
       return false;
     }
-
     const isConfirmed = confirm(
       this._translateService.instant(T.CONFIRM.AUTO_FIX, {
         validityError: getLastValidityError() || 'Unknown validity error',
       }),
     );
-
     if (IS_ELECTRON && !isConfirmed) {
       window.ea.shutdownNow();
     }

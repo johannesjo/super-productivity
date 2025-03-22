@@ -4,9 +4,9 @@ import pThrottle from 'p-throttle';
 import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
-import { AppDataCompleteNew } from '../../imex/sync/sync.model';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 let isWasErrorAlertCreated = false;
 

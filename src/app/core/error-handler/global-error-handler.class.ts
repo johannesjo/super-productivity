@@ -8,9 +8,9 @@ import {
   logAdvancedStacktrace,
 } from './global-error-handler.util';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
-import { AppDataCompleteNew } from '../../imex/sync/sync.model';
 import { error } from 'electron-log/renderer';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
@@ -59,7 +59,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private async _getUserData(): Promise<AppDataCompleteNew | undefined> {
     try {
-      return this.injector.get(PfapiService).loadComplete();
+      return this.injector.get(PfapiService).getAllSyncModelData();
     } catch (e) {
       console.log('Cannot load data');
       console.error(e);

@@ -147,3 +147,15 @@ export class InvalidDataError extends AdditionalLogErrorBase {
 export class DataValidationFailedError extends AdditionalLogErrorBase {
   override name = DataValidationFailedError.name;
 }
+
+export class DataRepairNotPossibleError extends AdditionalLogErrorBase {
+  override name = DataRepairNotPossibleError.name;
+}
+
+export class NoRepairFunctionProvidedError extends Error {
+  override name = NoRepairFunctionProvidedError.name;
+}
+
+export class NoValidateFunctionProvidedError extends Error {
+  override name = NoValidateFunctionProvidedError.name;
+}

@@ -28,15 +28,15 @@ export interface ModelCfg<T extends ModelBase> {
   // for cascading only
   isMainFileModel?: boolean;
 
-  // MAYBE?
-  validate?: (data: any) => boolean;
-  repair?: (data: any) => T;
+  // MAYBE? TODO
+  // validate?: (data: any) => boolean;
+  // repair?: (data: any) => T;
 
-  // MAYBE?
-  // TODO fix typing
+  // MAYBE? TODO
   // transformBeforeSave?: <I>(data: I) => T;
-  // TODO fix typing
   // transformBeforeLoad?: <I>(data: T) => I;
+  // transformBeforeUpload?: <I>(data: I) => T;
+  // transformBeforeDownload?: <I>(data: T) => I;
 
   defaultData?: T;
   // TODO decide to kick or not
@@ -53,6 +53,7 @@ export interface FullData<F> {
 }
 
 // TODO better type
+// maybe Partial<AllModelData>
 export interface MainModelData {
   [modelId: string]: ModelBase;
 }
@@ -71,9 +72,7 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
     [version: string]: (arg: FullData<unknown>) => FullData<unknown>;
   };
   validate?: (data: AllModelData<T>) => boolean;
-  // validate?: (data: any) => boolean;
-  // TODO type
-  repair?: (data: any) => any;
+  repair?: <R>(data: R | unknown) => AllModelData<T>;
 
   // TODO
   // backupInterval?: 'daily';

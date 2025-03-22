@@ -1,4 +1,10 @@
-import { Dropbox, ModelCfg, PfapiBaseCfg } from './api';
+import {
+  AllModelData,
+  DataRepairNotPossibleError,
+  Dropbox,
+  ModelCfg,
+  PfapiBaseCfg,
+} from './api';
 import { ProjectState } from '../features/project/project.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
@@ -29,6 +35,11 @@ import { initialSimpleCounterState } from '../features/simple-counter/store/simp
 import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
+import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
+import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
+import { dataRepair } from '../core/data-repair/data-repair.util';
+
+export const CROSS_MODEL_VERSION = 1;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
@@ -51,6 +62,7 @@ export type PfapiAllModelCfg = {
   taskArchive: ModelCfg<TaskArchive>;
   reminders: ModelCfg<Reminder[]>;
 };
+export type AppDataCompleteNew = AllModelData<PfapiAllModelCfg>;
 
 export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   task: {
@@ -94,6 +106,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     isMainFileModel: true,
   },
 
+  //-------------------------------
   globalConfig: {
     modelVersion: 1,
     defaultData: DEFAULT_GLOBAL_CONFIG,
@@ -126,6 +139,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialTaskState,
   },
+  // TODO task archive old
 } as const;
 
 export const PFAPI_SYNC_PROVIDERS = [
@@ -137,13 +151,15 @@ export const PFAPI_SYNC_PROVIDERS = [
 ];
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
+  crossModelVersion: CROSS_MODEL_VERSION,
   isMainFileMode: true,
   validate: (data) => {
-    console.log(data);
-
-    console.log(data.boards);
-    console.log(data.metric);
-
-    return false;
+    return isValidAppData(data);
+  },
+  repair: (data: any) => {
+    if (!isDataRepairPossible(data)) {
+      throw new DataRepairNotPossibleError(data);
+    }
+    return dataRepair(data);
   },
 };

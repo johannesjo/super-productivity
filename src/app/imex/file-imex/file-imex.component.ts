@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { AppDataCompleteNew } from '../sync/sync.model';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -17,6 +16,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 @Component({
   selector: 'file-imex',

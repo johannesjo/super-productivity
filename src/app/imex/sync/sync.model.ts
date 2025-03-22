@@ -76,8 +76,6 @@ export type AppBaseDataEntityLikeStates =
   | TaskArchive
   | SimpleCounterState;
 
-export type AppDataCompleteNew = AppBaseData;
-
 export interface AppDataCompleteLegacy extends AppBaseData {
   lastLocalSyncModelChange: number | null;
   lastArchiveUpdate: number | null;

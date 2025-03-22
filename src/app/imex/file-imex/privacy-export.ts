@@ -1,5 +1,6 @@
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { AppDataCompleteLegacy, AppDataCompleteNew } from '../sync/sync.model';
+import { AppDataCompleteLegacy } from '../sync/sync.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 let i: number = 0;
 

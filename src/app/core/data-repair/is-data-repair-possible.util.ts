@@ -1,4 +1,5 @@
-import { AppDataCompleteLegacy, AppDataCompleteNew } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 export const isDataRepairPossible = (
   data: AppDataCompleteLegacy | AppDataCompleteNew,

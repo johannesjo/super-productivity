@@ -1,7 +1,6 @@
 import {
   AppBaseDataEntityLikeStates,
   AppDataCompleteLegacy,
-  AppDataCompleteNew,
 } from '../../imex/sync/sync.model';
 import { Tag, TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
@@ -12,6 +11,7 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
 

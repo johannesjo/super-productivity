@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AppDataCompleteLegacy, AppDataCompleteNew } from './sync.model';
+import { AppDataCompleteLegacy } from './sync.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { ImexMetaService } from '../imex-meta/imex-meta.service';
@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { GLOBAL_CONFIG_LOCAL_ONLY_FIELDS } from './sync.const';
 import { get, set } from 'object-path';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 // TODO some of this can be done in a background script
 
@@ -32,7 +33,7 @@ export class DataImportService {
   }
 
   async getCompleteSyncData(): Promise<AppDataCompleteNew> {
-    return await this._pfapiService.loadComplete();
+    return await this._pfapiService.getAllSyncModelData();
   }
 
   async importCompleteSyncData(
@@ -83,7 +84,7 @@ export class DataImportService {
         }
 
         // save data to database first then load to store from there
-        await this._pfapiService.importComplete(mergedData);
+        // await this._pfapiService.importAllSycModelData(mergedData, 0);
         await this._loadAllFromDatabaseToStore();
         await this._pfapiService.clearBackup();
         this._imexMetaService.setDataImportInProgress(false);
@@ -99,11 +100,11 @@ export class DataImportService {
         this._imexMetaService.setDataImportInProgress(false);
       }
     } else if (this._dataRepairService.isRepairPossibleAndConfirmed(data)) {
-      const fixedData = this._dataRepairService.repairData(data);
-      await this.importCompleteSyncData(fixedData, {
-        isBackupReload,
-        isSkipStrayBackupCheck: true,
-      });
+      // const fixedData = this._dataRepairService.repairData(data);
+      // await this.importCompleteSyncData(fixedData, {
+      //   isBackupReload,
+      //   isSkipStrayBackupCheck: true,
+      // });
     } else {
       console.log('isValidAppData', false, data);
       this._snackService.open({ type: 'ERROR', msg: T.F.SYNC.S.ERROR_INVALID_DATA });
@@ -115,7 +116,8 @@ export class DataImportService {
   private async _mergeWithLocalOmittedFields(
     newData: AppDataCompleteNew,
   ): Promise<AppDataCompleteNew> {
-    const oldLocalData: AppDataCompleteNew = await this._pfapiService.loadComplete(true);
+    const oldLocalData: AppDataCompleteNew =
+      await this._pfapiService.getAllSyncModelData();
     const mergedData = { ...newData };
     GLOBAL_CONFIG_LOCAL_ONLY_FIELDS.forEach((op) => {
       const oldLocalValue = get(oldLocalData.globalConfig, op);

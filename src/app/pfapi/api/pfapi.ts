@@ -23,7 +23,9 @@ import {
   InvalidModelCfgError,
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
+  NoRepairFunctionProvidedError,
   NoSyncProviderSetError,
+  NoValidateFunctionProvidedError,
 } from './errors/errors';
 
 // type EventMap = {
@@ -131,7 +133,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   // TODO typing
   async setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
     pfLog(
-      3,
+      2,
       `${this.setCredentialsForActiveProvider.name}()`,
       credentials,
       this._activeSyncProvider$.value,
@@ -146,7 +148,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
-    pfLog(3, `${this.getAllSyncModelData.name}()`);
+    pfLog(2, `${this.getAllSyncModelData.name}()`);
     const modelIds = Object.keys(this.m);
     const promises = modelIds.map((modelId) => {
       const modelCtrl = this.m[modelId];
@@ -161,13 +163,18 @@ export class Pfapi<const MD extends ModelCfgs> {
     return allData as AllSyncModels<MD>;
   }
 
-  // TODO type
-  async importAllSycModelData(data: AllSyncModels<MD>): Promise<unknown> {
+  async importAllSycModelData(
+    data: AllSyncModels<MD>,
+    crossModelVersion: number,
+    isAttemptRepair = false,
+  ): Promise<unknown> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this._cfg });
     if (this._cfg?.validate && !this._cfg.validate(data)) {
+      if (isAttemptRepair && this._cfg.repair) {
+        data = this._cfg.repair(data);
+      }
       throw new DataValidationFailedError();
     }
-
     const modelIds = Object.keys(data);
     const promises = modelIds.map((modelId) => {
       const modelData = data[modelId];
@@ -182,10 +189,12 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   downloadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
+    pfLog(2, `${this.downloadAll.name}()`, { isSkipLockFileCheck });
     return this._syncService.downloadAll(isSkipLockFileCheck);
   }
 
   uploadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
+    pfLog(2, `${this.uploadAll.name}()`, { isSkipLockFileCheck });
     return this._syncService.uploadAll(isSkipLockFileCheck);
   }
 
@@ -209,7 +218,28 @@ export class Pfapi<const MD extends ModelCfgs> {
   //   };
   // }
 
+  isValidateComplete(data: AllSyncModels<MD>): boolean {
+    pfLog(2, `${this.isValidateComplete.name}()`, { data });
+    if (!this._cfg?.validate) {
+      throw new NoValidateFunctionProvidedError();
+    }
+    if (!this._cfg.validate(data)) {
+      throw new DataValidationFailedError();
+    }
+    return true;
+  }
+
+  repairCompleteData(data: unknown): AllSyncModels<MD> {
+    pfLog(2, `${this.repairCompleteData.name}()`, { data });
+    if (!this._cfg?.repair) {
+      throw new NoRepairFunctionProvidedError();
+    }
+    return this._cfg.repair(data);
+  }
+
   async clearDatabaseExceptLocalOnly(): Promise<void> {
+    pfLog(2, `${this.clearDatabaseExceptLocalOnly.name}()`);
+
     const MODELS_TO_PRESERVE: string[] = [
       MetaModelCtrl.META_MODEL_ID,
       MetaModelCtrl.CLIENT_ID,
