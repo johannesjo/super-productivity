@@ -46,6 +46,7 @@ export class MetaModelCtrl {
     });
   }
 
+  // TODO unit test
   updateRevForModel<MT extends ModelBase>(modelId: string, modelCfg: ModelCfg<MT>): void {
     pfLog(2, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
@@ -69,10 +70,12 @@ export class MetaModelCtrl {
       lastUpdate: timestamp,
 
       ...(modelCfg.isMainFileModel && this.IS_MAIN_FILE_MODE
-        ? metaModel.revMap
+        ? {}
         : {
-            ...metaModel.revMap,
-            [modelId]: timestamp.toString(),
+            revMap: {
+              ...metaModel.revMap,
+              [modelId]: timestamp.toString(),
+            },
           }),
 
       ...(isModelVersionChange
