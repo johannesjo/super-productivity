@@ -7,6 +7,7 @@ import { SyncConfig } from '../../../../features/config/global-config.model';
 import { LegacySyncProvider } from '../../legacy-sync-provider.model';
 import { LocalFileSyncElectronService } from '../local-file-sync-electron.service';
 import { IS_ELECTRON } from '../../../../app.constants';
+import { fileSyncElectron } from '../../../../pfapi/pfapi-config';
 
 @Injectable()
 export class LocalFileSyncElectronEffects {
@@ -25,9 +26,7 @@ export class LocalFileSyncElectronEffects {
               (sectionCfg as SyncConfig).syncProvider === LegacySyncProvider.LocalFile &&
               (sectionCfg as SyncConfig).isEnabled,
           ),
-          tap(() =>
-            this._localFileSyncElectronService.checkDirAndOpenPickerIfNotExists(),
-          ),
+          tap(() => fileSyncElectron.checkDirAndOpenPickerIfNotExists()),
         ),
       { dispatch: false },
     );

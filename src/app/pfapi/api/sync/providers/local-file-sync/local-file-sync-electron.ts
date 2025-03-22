@@ -3,9 +3,10 @@ import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-st
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { createSha1Hash } from '../../../../../util/create-sha-1-hash';
 import { IS_ELECTRON } from '../../../../../app.constants';
+import { NoRemoteDataError } from '../../../errors/errors';
 
 export interface LocalFileSyncElectronCfg {
-  X: string;
+  [key: string]: any;
 }
 
 export interface LocalFileSyncElectronCredentials {
@@ -65,23 +66,32 @@ export class LocalFileSyncElectron
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    const r = await window.ea.fileSyncLoad({
-      localRev,
-      filePath: await this._getFilePath(targetPath),
-    });
+    try {
+      const r = await (window as any).ea.fileSyncLoad({
+        localRev,
+        filePath: await this._getFilePath(targetPath),
+      });
 
-    if (r instanceof Error) {
-      throw r;
+      if (r instanceof Error) {
+        throw r;
+      }
+
+      if (!r.dataStr) {
+        throw new NoRemoteDataError();
+      }
+
+      return {
+        rev: await this._getLocalRev(r.dataStr),
+        dataStr: r.dataStr,
+      };
+    } catch (e) {
+      if (e?.toString && e?.toString().includes('ENOENT')) {
+        throw new NoRemoteDataError();
+      }
+      console.log(e);
+
+      throw e;
     }
-
-    if (!r.dataStr) {
-      throw new Error('downloadFileData unknown error');
-    }
-
-    return {
-      rev: await this._getLocalRev(r.dataStr),
-      dataStr: r.dataStr,
-    };
   }
 
   async uploadFile(
@@ -90,7 +100,7 @@ export class LocalFileSyncElectron
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    const r = await window.ea.fileSyncSave({
+    const r = await (window as any).ea.fileSyncSave({
       localRev,
       filePath: await this._getFilePath(targetPath),
       dataStr,
@@ -114,8 +124,8 @@ export class LocalFileSyncElectron
   }
 
   async checkDirAndOpenPickerIfNotExists(): Promise<void> {
-    const folderPath = await this._getFolderPath();
     try {
+      const folderPath = await this._getFolderPath();
       const isDirExists = await this._checkDirExists(folderPath as string);
       if (!isDirExists) {
         alert(' Please select a local directory for file sync.');
@@ -138,7 +148,7 @@ export class LocalFileSyncElectron
 
   private async _getFilePath(targetPath: string): Promise<string> {
     const folderPath = await this._getFolderPath();
-    return `${folderPath}/${targetPath}.json`;
+    return `${folderPath}/${targetPath}`;
   }
 
   private _getLocalRev(dataStr: string): Promise<string> {
@@ -146,7 +156,7 @@ export class LocalFileSyncElectron
   }
 
   private async _checkDirExists(dirPath: string): Promise<boolean> {
-    const r = await window.ea.checkDirExists({
+    const r = await (window as any).ea.checkDirExists({
       dirPath,
     });
     if (r instanceof Error) {
@@ -161,7 +171,8 @@ export class LocalFileSyncElectron
       return;
     }
 
-    const dir = await window.ea.pickDirectory();
+    const dir = await (window as any).ea.pickDirectory();
+    alert(dir);
     if (dir) {
       this.credentialsStore.save({
         folderPath: dir,

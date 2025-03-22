@@ -38,6 +38,7 @@ import { Webdav } from './api/sync/providers/webdav/webdav';
 import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { dataRepair } from '../core/data-repair/data-repair.util';
+import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 
 export const CROSS_MODEL_VERSION = 1 as const;
 
@@ -142,12 +143,15 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   // TODO task archive old
 } as const;
 
+export const fileSyncElectron = new LocalFileSyncElectron({});
+
 export const PFAPI_SYNC_PROVIDERS = [
   new Dropbox({
     appKey: DROPBOX_APP_KEY,
     basePath: `/`,
   }),
   new Webdav({}),
+  fileSyncElectron,
 ];
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
