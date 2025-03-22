@@ -1,11 +1,11 @@
-import {
-  ConfigFormSection,
-  LimitedFormlyFieldConfig,
-} from 'src/app/features/config/global-config.model';
-import { T } from 'src/app/t.const';
 import { GiteaCfg } from './gitea.model';
 import { IssueProviderGitea } from '../../issue.model';
 import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
+import {
+  ConfigFormSection,
+  LimitedFormlyFieldConfig,
+} from '../../../config/global-config.model';
+import { T } from '../../../../t.const';
 
 export const GITEA_POLL_INTERVAL = 5 * 60 * 1000;
 export const GITEA_INITIAL_POLL_DELAY = 8 * 1000;

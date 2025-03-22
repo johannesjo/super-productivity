@@ -1,7 +1,7 @@
 import { GlobalConfigState } from './global-config.model';
 import { DEFAULT_PROJECT_ID } from '../project/project.const';
-import { TRACKING_INTERVAL } from 'src/app/app.constants';
-import { getDefaultVoice } from 'src/app/features/domina-mode/getAvailableVoices';
+import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
+import { TRACKING_INTERVAL } from '../../app.constants';
 const minute = 60 * 1000;
 const defaultVoice = getDefaultVoice();
 console.log('Setting default voice as' + defaultVoice);
