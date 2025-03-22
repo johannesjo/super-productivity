@@ -148,7 +148,6 @@ export class SyncService {
       this._globalProgressBarService.countUp('SYNC');
       this.isSyncing$.next(true);
       const r = await this._pfapiWrapperService.pf.sync();
-      console.log({ r });
 
       this.isSyncing$.next(false);
       this._globalProgressBarService.countDown();

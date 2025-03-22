@@ -43,8 +43,10 @@ export class MetaModelCtrl {
   }
 
   updateRevForModel<MT extends ModelBase>(modelId: string, modelCfg: ModelCfg<MT>): void {
-    pfLog(3, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, modelCfg);
-    console.log(this._metaModelInMemory);
+    pfLog(3, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
+      modelCfg,
+      inMemory: this._metaModelInMemory,
+    });
     if (modelCfg.isLocalOnly) {
       return;
     }

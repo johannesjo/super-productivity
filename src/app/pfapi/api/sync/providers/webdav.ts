@@ -88,12 +88,12 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
     try {
-      const r = await this._api.upload({
+      // TODO get rev from upload directly
+      await this._api.upload({
         path: filePath,
         data: dataStr,
         isOverwrite: isForceOverwrite,
       });
-      console.log(r);
     } catch (e) {
       // TODO check if this is enough
       // TODO re-implement but for folders only
