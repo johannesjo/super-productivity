@@ -1,19 +1,19 @@
 import {
   SyncProviderAuthHelper,
   SyncProviderServiceInterface,
-} from '../sync-provider.interface';
-import { SyncProviderId } from '../../pfapi.const';
+} from '../../sync-provider.interface';
+import { SyncProviderId } from '../../../pfapi.const';
 import {
   AuthFailError,
   InvalidDataError,
   NoRemoteDataError,
   NoRevError,
-} from '../../errors/errors';
-import { pfLog } from '../../util/log';
+} from '../../../errors/errors';
+import { pfLog } from '../../../util/log';
 import { DropboxApi } from './dropbox-api';
 // TODO move over here
-import { generatePKCECodes } from '../../../../imex/sync/generate-pkce-codes';
-import { SyncProviderCredentialsStore } from '../sync-provider-credentials-store';
+import { generatePKCECodes } from './generate-pkce-codes';
+import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-store';
 
 export interface DropboxCfg {
   appKey: string;

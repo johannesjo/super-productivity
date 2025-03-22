@@ -1,15 +1,15 @@
-import { SyncProviderServiceInterface } from '../sync-provider.interface';
-import { SyncProviderId } from '../../pfapi.const';
+import { SyncProviderServiceInterface } from '../../sync-provider.interface';
+import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
-import { SyncProviderCredentialsStore } from '../sync-provider-credentials-store';
+import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-store';
 import {
   AuthNotConfiguredError,
   InvalidDataError,
   NoEtagError,
   NoRemoteDataError,
   NoRevError,
-} from '../../errors/errors';
-import { pfLog } from '../../util/log';
+} from '../../../errors/errors';
+import { pfLog } from '../../../util/log';
 import { FileStat } from 'webdav/dist/node/types';
 
 // TODO check all

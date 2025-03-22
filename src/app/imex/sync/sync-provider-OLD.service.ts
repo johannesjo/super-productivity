@@ -43,7 +43,7 @@ import { LocalFileSyncElectronService } from './local-file-sync/local-file-sync-
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { CompressionService } from '../../core/compression/compression.service';
-import { decrypt, encrypt } from './encryption';
+import { decrypt, encrypt } from '../../pfapi/api/encryption/encryption';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';

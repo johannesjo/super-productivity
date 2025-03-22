@@ -10,7 +10,7 @@ import { DialogGetAndEnterAuthCodeComponent } from '../dialog-get-and-enter-auth
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { generatePKCECodes } from '../generate-pkce-codes';
+import { generatePKCECodes } from '../../../pfapi/api/sync/providers/dropbox/generate-pkce-codes';
 import { PersistenceLocalService } from '../../../core/persistence/persistence-local.service';
 import { LegacySyncProvider } from '../legacy-sync-provider.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';

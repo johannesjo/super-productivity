@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { stringify } from 'query-string';
-import { DropboxFileMetadata } from '../../../../imex/sync/dropbox/dropbox.model';
+import { DropboxFileMetadata } from '../../../../../imex/sync/dropbox/dropbox.model';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { DropboxCredentials } from './dropbox';
 import {
   AuthNotConfiguredError,
   NoRemoteDataError,
   TooManyRequestsError,
-} from '../../errors/errors';
-import { pfLog } from '../../util/log';
-import { SyncProviderServiceInterface } from '../sync-provider.interface';
+} from '../../../errors/errors';
+import { pfLog } from '../../../util/log';
+import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 
 export class DropboxApi {
   private _appKey: string;
