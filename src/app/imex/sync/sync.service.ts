@@ -137,7 +137,6 @@ export class SyncService {
             this.isSyncing$.next(true);
             await this._pfapiWrapperService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
-            this._imexViewService.setDataImportInProgress(true);
             this.isSyncing$.next(false);
             this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
@@ -213,9 +212,9 @@ export class SyncService {
     ]);
     // this._imexViewService.setDataImportInProgress(false);
     // TODO better solution, unclear why needed
-    setTimeout(() => {
-      // this._imexViewService.setDataImportInProgress(false);
-    });
+    // setTimeout(() => {
+    // this._imexViewService.setDataImportInProgress(false);
+    // });
   }
 
   private _c(str: string): boolean {

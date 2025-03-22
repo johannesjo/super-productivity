@@ -304,8 +304,6 @@ export class SyncService<const MD extends ModelCfgs> {
       await this._updateLocalMainModels(remote);
     }
 
-    console.log('AAAAAAAAAAAAAA', { realRevMap, local });
-
     await this._saveLocalMetaFileContent({
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
