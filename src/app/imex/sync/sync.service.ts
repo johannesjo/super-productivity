@@ -15,7 +15,6 @@ import {
   SyncStatus,
   UnableToWriteLockFileError,
 } from '../../pfapi/api';
-import { PersistenceLocalService } from '../../core/persistence/persistence-local.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
 import { getSyncErrorStr } from './get-sync-error-str';
@@ -38,7 +37,6 @@ export class SyncService {
   private _pfapiWrapperService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _translateService = inject(TranslateService);
-  private _persistenceLocalService = inject(PersistenceLocalService);
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
@@ -80,51 +78,6 @@ export class SyncService {
     ),
   );
 
-  constructor() {
-    // TODO better place
-    this.syncProviderId$.pipe().subscribe((v) => {
-      console.log('_______________________', { v });
-      if (v) {
-        this._pfapiWrapperService.pf.setActiveSyncProvider(
-          v as unknown as SyncProviderId,
-        );
-
-        this.syncCfg$.pipe(take(1)).subscribe((syncCfg) => {
-          console.log({ syncCfg });
-          // this._pfapiWrapperService.pf.setCredentialsForActiveProvider(
-          //   v as unknown as SyncProviderId,
-          // );
-          // @ts-ignore
-          if (syncCfg.syncProvider === SyncProviderId.WebDAV) {
-            if (syncCfg.webDav) {
-              this._pfapiWrapperService.pf.setCredentialsForActiveProvider({
-                ...syncCfg.webDav,
-              });
-            }
-          }
-        });
-
-        this._persistenceLocalService.load().then((d) => {
-          console.log(d);
-          // TODO real implementation
-          // this.pf
-          //   .setCredentialsForActiveProvider({
-          //     accessToken: d[SyncProvider.Dropbox].accessToken,
-          //     refreshToken: d[SyncProvider.Dropbox].refreshToken,
-          //   })
-          //   .then(() => {
-          //     this.pf.sync();
-          //   });
-          // this.pf.sync();
-        });
-      }
-    });
-    // this.pf.importCompleteData({
-    //   task: initialTaskState,
-    //   project: initialProjectState,
-    // });
-  }
-
   // TODO move someplace else
 
   async sync(): Promise<SyncStatus | 'USER_ABORT' | 'HANDLED_ERROR'> {
@@ -133,20 +86,6 @@ export class SyncService {
       //   // TODO handle different
       throw new Error('No Sync Provider for sync()');
     }
-
-    // TODO re-implement
-    // if (
-    //   providerId === this._localFileSyncAndroidService &&
-    //   !androidInterface.isGrantedFilePermission()
-    // ) {
-    //   if (androidInterface.isGrantFilePermissionInProgress) {
-    //     return 'USER_ABORT';
-    //   }
-    //   const res = await this._openPermissionDialog$().toPromise();
-    //   if (res === 'DISABLED_SYNC') {
-    //     return 'USER_ABORT';
-    //   }
-    // }
 
     try {
       this._globalProgressBarService.countUp('SYNC');

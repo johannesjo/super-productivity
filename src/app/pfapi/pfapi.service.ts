@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { CompleteBackup, ModelCfgToModelCtrl, Pfapi } from './api';
+import { CompleteBackup, ModelCfgToModelCtrl, Pfapi, SyncProviderId } from './api';
 import { Subject } from 'rxjs';
 import { AllowedDBKeys, LS } from '../core/persistence/storage-keys.const';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
@@ -15,6 +15,8 @@ import {
 import { T } from '../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
+import { Store } from '@ngrx/store';
+import { selectSyncConfig } from '../features/config/store/global-config.reducer';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -24,9 +26,12 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 export class PfapiService {
   private _translateService = inject(TranslateService);
   private _imexViewService = inject(ImexViewService);
+  private _store = inject(Store);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
+
+  private readonly _syncConfig$ = this._store.select(selectSyncConfig);
 
   // TODO replace with pfapi event
   onAfterSave$: Subject<{
@@ -45,10 +50,44 @@ export class PfapiService {
   repairCompleteData = this.pf.repairCompleteData.bind(this.pf);
   getCompleteBackup = this.pf.loadCompleteBackup.bind(this.pf);
 
-  // importCompleteBackup = this.pf.importCompleteBackup.bind(this.pf);
-
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
+
+    this._syncConfig$.subscribe((cfg) => {
+      // TODO handle android webdav
+      this.pf.setActiveSyncProvider(cfg.syncProvider as unknown as SyncProviderId);
+      // TODO re-implement
+      // if (
+      //   providerId === this._localFileSyncAndroidService &&
+      //   !androidInterface.isGrantedFilePermission()
+      // ) {
+      //   if (androidInterface.isGrantFilePermissionInProgress) {
+      //     return 'USER_ABORT';
+      //   }
+      //   const res = await this._openPermissionDialog$().toPromise();
+      //   if (res === 'DISABLED_SYNC') {
+      //     return 'USER_ABORT';
+      //   }
+      // }
+
+      // TODO better place
+      // console.log('_______________________', { v });
+      // this.syncCfg$.pipe(take(1)).subscribe((syncCfg) => {
+      //   console.log({ syncCfg });
+      //   // this._pfapiWrapperService.pf.setCredentialsForActiveProvider(
+      //   //   v as unknown as SyncProviderId,
+      //   // );
+      //   // @ts-ignore
+      //   if (syncCfg.syncProvider === SyncProviderId.WebDAV) {
+      //     if (syncCfg.webDav) {
+      //       this._pfapiWrapperService.pf.setCredentialsForActiveProvider({
+      //         ...syncCfg.webDav,
+      //       });
+      //     }
+      //   }
+      // });
+      // this._persistenceLocalService.load().then((d) => {});
+    });
   }
 
   async importCompleteBackup(
