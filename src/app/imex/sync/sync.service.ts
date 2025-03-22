@@ -28,7 +28,6 @@ import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-s
 import { miniObservableToObservable } from '../../pfapi/pfapi-helper';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
-import { ImexViewService } from '../imex-meta/imex-view.service';
 
 @Injectable({
   providedIn: 'root',
@@ -42,10 +41,10 @@ export class SyncService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
-  private _imexViewService = inject(ImexViewService);
+  // private _imexViewService = inject(ImexViewService);
 
   // TODO
-  isCurrentProviderInSync$ = of(false);
+  isCurrentProviderInSync$ = this._pfapiWrapperService.isCurrentProviderInSync$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),

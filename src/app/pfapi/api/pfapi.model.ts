@@ -147,3 +147,5 @@ export interface CompleteExport<T extends ModelCfgs> {
     [providerId: string]: unknown;
   };
 }
+
+export type PfapiEvents = 'syncDone' | 'syncStart' | 'syncError' | 'metaModelChange';

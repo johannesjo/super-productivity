@@ -9,6 +9,7 @@ import {
   MetaNotReadyError,
 } from '../errors/errors';
 import { validateLocalMeta } from '../util/validate-local-meta';
+import { PFEventEmitter } from '../util/events';
 
 const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -29,10 +30,12 @@ export class MetaModelCtrl {
   private readonly _db: Database;
   private _metaModelInMemory?: LocalMeta;
   private _clientIdInMemory?: string;
+  private _ev: PFEventEmitter;
 
-  constructor(db: Database, _IS_MAIN_FILE_MODE: boolean) {
+  constructor(db: Database, _IS_MAIN_FILE_MODE: boolean, ev: PFEventEmitter) {
     this._db = db;
     this.IS_MAIN_FILE_MODE = _IS_MAIN_FILE_MODE;
+    this._ev = ev;
     //
     this.loadClientId().catch((e) => {
       if (e instanceof ClientIdNotFoundError) {
@@ -100,6 +103,7 @@ export class MetaModelCtrl {
 
     // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
+    this._ev.emit('metaModelChange', metaModel);
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);
   }
 

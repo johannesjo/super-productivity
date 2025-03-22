@@ -31,6 +31,7 @@ import {
 } from './errors/errors';
 import { TmpBackupService } from './backup/tmp-backup.service';
 import { promiseTimeout } from '../../util/promise-timeout';
+import { PFEventEmitter } from './util/events';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -49,16 +50,12 @@ export class Pfapi<const MD extends ModelCfgs> {
     new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
   private readonly _cfg?: PfapiBaseCfg<MD>;
 
-  // private readonly _eventHandlers = new Map<
-  //   keyof EventMap,
-  //   Record<symbol, (data: unknown) => void>
-  // >();
-
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
   public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
+  public readonly ev = new PFEventEmitter();
 
   public readonly isSyncProviderActiveAndReady$: MiniObservable<boolean> =
     new MiniObservable<boolean>(false);
@@ -90,7 +87,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.tmpBackupService = new TmpBackupService<AllSyncModels<MD>>(this.db);
 
-    this.metaModel = new MetaModelCtrl(this.db, IS_MAIN_FILE_MODE);
+    this.metaModel = new MetaModelCtrl(this.db, IS_MAIN_FILE_MODE, this.ev);
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
@@ -111,9 +108,17 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     pfLog(3, `${this.sync.name}()`);
-    const result = await this._syncService.sync();
-    pfLog(2, `${this.sync.name}() result:`, result);
-    return result;
+    this.ev.emit('syncStart');
+    try {
+      const result = await this._syncService.sync();
+      pfLog(2, `${this.sync.name}() result:`, result);
+      this.ev.emit('syncDone', result);
+      return result;
+    } catch (e) {
+      this.ev.emit('syncError');
+      this.ev.emit('syncDone');
+      throw e;
+    }
   }
 
   setActiveSyncProvider(activeProviderId: SyncProviderId | null): void {
