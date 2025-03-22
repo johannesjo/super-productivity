@@ -25,7 +25,7 @@ import { GlobalThemeService } from './core/theme/global-theme.service';
 import { UiHelperService } from './features/ui-helper/ui-helper.service';
 import { LanguageService } from './core/language/language.service';
 import { WorkContextService } from './features/work-context/work-context.service';
-import { ImexMetaService } from './imex/imex-meta/imex-meta.service';
+import { ImexViewService } from './imex/imex-meta/imex-view.service';
 import { AndroidService } from './features/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline$ } from './util/is-online';
@@ -100,7 +100,7 @@ export class AppComponent implements OnDestroy {
   private _startTrackingReminderService = inject(TrackingReminderService);
   private _activatedRoute = inject(ActivatedRoute);
   readonly syncTriggerService = inject(SyncTriggerService);
-  readonly imexMetaService = inject(ImexMetaService);
+  readonly imexMetaService = inject(ImexViewService);
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
   readonly globalThemeService = inject(GlobalThemeService);

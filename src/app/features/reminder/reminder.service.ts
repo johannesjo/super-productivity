@@ -4,7 +4,7 @@ import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminde
 import { SnackService } from '../../core/snack/snack.service';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
@@ -24,7 +24,7 @@ export class ReminderService {
   private readonly _snackService = inject(SnackService);
   private readonly _taskService = inject(TaskService);
   private readonly _noteService = inject(NoteService);
-  private readonly _imexMetaService = inject(ImexMetaService);
+  private readonly _imexMetaService = inject(ImexViewService);
 
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(

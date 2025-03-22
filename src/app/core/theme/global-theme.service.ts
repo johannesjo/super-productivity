@@ -14,7 +14,7 @@ import { WorkContextThemeCfg } from '../../features/work-context/work-context.mo
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { ChartConfiguration } from 'chart.js';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
@@ -31,7 +31,7 @@ export class GlobalThemeService {
   private _domSanitizer = inject(DomSanitizer);
   private _chartThemeService = inject(NgChartThemeService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
-  private _imexMetaService = inject(ImexMetaService);
+  private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
 
   isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(

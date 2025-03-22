@@ -29,6 +29,7 @@ import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-s
 import { miniObservableToObservable } from '../../pfapi/pfapi-helper';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
+import { ImexViewService } from '../imex-meta/imex-view.service';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +44,7 @@ export class SyncService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
+  private _imexViewService = inject(ImexViewService);
 
   // TODO
   isCurrentProviderInSync$ = of(false);
@@ -196,6 +198,7 @@ export class SyncService {
             this.isSyncing$.next(true);
             await this._pfapiWrapperService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
+            this._imexViewService.setDataImportInProgress(true);
             this.isSyncing$.next(false);
             this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
@@ -261,12 +264,19 @@ export class SyncService {
     }
   }
 
-  private async _reInitAppAfterDataModelChange(): Promise<unknown> {
-    return await Promise.all([
+  private async _reInitAppAfterDataModelChange(): Promise<void> {
+    // TODO maybe do it more elegantly with pfapi.events
+    // this._imexViewService.setDataImportInProgress(true);
+    await Promise.all([
       // reload view model from ls
       this._dataInitService.reInit(true),
       this._reminderService.reloadFromDatabase(),
     ]);
+    // this._imexViewService.setDataImportInProgress(false);
+    // TODO better solution, unclear why needed
+    setTimeout(() => {
+      // this._imexViewService.setDataImportInProgress(false);
+    });
   }
 
   private _c(str: string): boolean {

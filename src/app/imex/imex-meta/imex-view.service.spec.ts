@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ImexMetaService } from './imex-meta.service';
+import { ImexViewService } from './imex-view.service';
 
-describe('ImexMetaService', () => {
+describe('ImexViewService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: ImexMetaService = TestBed.inject(ImexMetaService);
+    const service: ImexViewService = TestBed.inject(ImexViewService);
     expect(service).toBeTruthy();
   });
 });

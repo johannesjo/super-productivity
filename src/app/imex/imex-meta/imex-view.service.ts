@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class ImexMetaService {
+export class ImexViewService {
   // TODO check if this is needed
   isDataImportInProgress: boolean = false;
   private _isDataImportInProgress$: BehaviorSubject<boolean> =

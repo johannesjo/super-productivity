@@ -82,7 +82,7 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import {
   moveProjectTaskDownInBacklogList,
@@ -111,7 +111,7 @@ export class TaskService {
   private readonly _pfapiService = inject(PfapiService);
   private readonly _tagService = inject(TagService);
   private readonly _workContextService = inject(WorkContextService);
-  private readonly _imexMetaService = inject(ImexMetaService);
+  private readonly _imexMetaService = inject(ImexViewService);
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);
   private readonly _dateService = inject(DateService);
   private readonly _router = inject(Router);

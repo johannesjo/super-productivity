@@ -14,6 +14,7 @@ import {
 } from './pfapi-config';
 import { T } from '../t.const';
 import { TranslateService } from '@ngx-translate/core';
+import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -22,6 +23,7 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 })
 export class PfapiService {
   private _translateService = inject(TranslateService);
+  private _imexViewService = inject(ImexViewService);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
@@ -49,22 +51,31 @@ export class PfapiService {
     this._isCheckForStrayLocalDBBackupAndImport();
   }
 
-  importCompleteBackup(
+  async importCompleteBackup(
     data: AppDataCompleteNew | CompleteBackup<PfapiAllModelCfg>,
   ): Promise<void> {
-    return 'crossModelVersion' in data && 'timestamp' in data
-      ? this.importAllSycModelData({
-          data: data.data,
-          crossModelVersion: data.crossModelVersion,
-          isBackupData: false,
-          isAttemptRepair: false,
-        })
-      : this.importAllSycModelData({
-          data,
-          crossModelVersion: CROSS_MODEL_VERSION,
-          isBackupData: false,
-          isAttemptRepair: false,
-        });
+    try {
+      this._imexViewService.setDataImportInProgress(true);
+      await ('crossModelVersion' in data && 'timestamp' in data
+        ? this.importAllSycModelData({
+            data: data.data,
+            crossModelVersion: data.crossModelVersion,
+            isBackupData: false,
+            isAttemptRepair: false,
+          })
+        : this.importAllSycModelData({
+            data,
+            crossModelVersion: CROSS_MODEL_VERSION,
+            isBackupData: false,
+            isAttemptRepair: false,
+          }));
+      this._imexViewService.setDataImportInProgress(false);
+    } catch (e) {
+      console.log(e);
+      alert('importCompleteBackup error');
+      this._imexViewService.setDataImportInProgress(false);
+      throw e;
+    }
   }
 
   // TODO improve on this
@@ -83,22 +94,6 @@ export class PfapiService {
       }
       return this.getValidCompleteData();
     }
-  }
-
-  // async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
-  //   const backup: AppDataCompleteNew | null = await this.pf.tmpBackupService.load();
-  //   await this.pf.clearDatabaseExceptLocalOnly();
-  //   if (backup) {
-  //     await this.pf.tmpBackupService.save(backup);
-  //   }
-  // }
-
-  private async _loadAllFromDatabaseToStore(): Promise<any> {
-    // return await Promise.all([
-    //   // reload view model from ls
-    //   this._dataInitService.reInit(true),
-    //   this._reminderService.reloadFromDatabase(),
-    // ]);
   }
 
   private async _isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
