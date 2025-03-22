@@ -169,7 +169,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     return allData as AllSyncModels<MD>;
   }
 
-  // TODO maybe limit model
   async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
     const d = await this.getAllSyncModelData();
     if (this._cfg?.validate && !this._cfg.validate(d)) {

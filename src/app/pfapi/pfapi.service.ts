@@ -57,17 +57,13 @@ export class PfapiService {
     try {
       this._imexViewService.setDataImportInProgress(true);
       await ('crossModelVersion' in data && 'timestamp' in data
-        ? this.importAllSycModelData({
-            data: data.data,
-            crossModelVersion: data.crossModelVersion,
-            isBackupData: false,
-            isAttemptRepair: false,
-          })
-        : this.importAllSycModelData({
+        ? this.pf.importCompleteBackup(data)
+        : this.pf.importCompleteBackup({
             data,
             crossModelVersion: CROSS_MODEL_VERSION,
-            isBackupData: false,
-            isAttemptRepair: false,
+            lastUpdate: 1,
+            modelVersions: {},
+            timestamp: 1,
           }));
       this._imexViewService.setDataImportInProgress(false);
     } catch (e) {
@@ -75,24 +71,6 @@ export class PfapiService {
       alert('importCompleteBackup error');
       this._imexViewService.setDataImportInProgress(false);
       throw e;
-    }
-  }
-
-  // TODO improve on this
-  async getValidCompleteData(): Promise<AppDataCompleteNew> {
-    const d = (await this.getAllSyncModelData()) as AppDataCompleteNew;
-    // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
-    if (isValidAppData(d)) {
-      this._invalidDataCount = 0;
-      return d;
-    } else {
-      // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
-      devError('Invalid data => RETRY getValidCompleteData');
-      this._invalidDataCount++;
-      if (this._invalidDataCount > MAX_INVALID_DATA_ATTEMPTS) {
-        throw new Error('Unable to get valid app data');
-      }
-      return this.getValidCompleteData();
     }
   }
 
@@ -120,5 +98,23 @@ export class PfapiService {
       }
     }
     return false;
+  }
+
+  // TODO remove this later, since it only needed for legacy sync
+  async getValidCompleteData(): Promise<AppDataCompleteNew> {
+    const d = (await this.getAllSyncModelData()) as AppDataCompleteNew;
+    // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
+    if (isValidAppData(d)) {
+      this._invalidDataCount = 0;
+      return d;
+    } else {
+      // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
+      devError('Invalid data => RETRY getValidCompleteData');
+      this._invalidDataCount++;
+      if (this._invalidDataCount > MAX_INVALID_DATA_ATTEMPTS) {
+        throw new Error('Unable to get valid app data');
+      }
+      return this.getValidCompleteData();
+    }
   }
 }
