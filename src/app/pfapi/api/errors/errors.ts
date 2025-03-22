@@ -159,3 +159,7 @@ export class NoRepairFunctionProvidedError extends Error {
 export class NoValidateFunctionProvidedError extends Error {
   override name = NoValidateFunctionProvidedError.name;
 }
+
+export class BackupImportFailedError extends AdditionalLogErrorBase {
+  override name = BackupImportFailedError.name;
+}

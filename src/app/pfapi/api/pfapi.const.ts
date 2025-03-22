@@ -34,4 +34,5 @@ export enum DBNames {
   CredentialsStorePrefix = '__sp_cred_',
   ClientId = '__client_id_',
   MetaModel = '__meta_',
+  TmpBackup = '__TMP_BACKUP',
 }

@@ -10,7 +10,7 @@ import {
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 import { error } from 'electron-log/renderer';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { CompleteBackup } from '../../pfapi/api';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
@@ -57,9 +57,9 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
   }
 
-  private async _getUserData(): Promise<AppDataCompleteNew | undefined> {
+  private async _getUserData(): Promise<CompleteBackup<any> | undefined> {
     try {
-      return this.injector.get(PfapiService).getAllSyncModelData();
+      return this.injector.get(PfapiService).getCompleteBackup();
     } catch (e) {
       console.log('Cannot load data');
       console.error(e);

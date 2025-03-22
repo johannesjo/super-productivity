@@ -32,7 +32,6 @@ import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-s
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { DataImportService } from './data-import.service';
 import { WebDavSyncService } from './web-dav/web-dav-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { isValidAppData } from './is-valid-app-data.util';
@@ -60,7 +59,6 @@ const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
 })
 export class SyncProviderService {
   private _dropboxSyncService = inject(DropboxSyncService);
-  private _dataImportService = inject(DataImportService);
   private _webDavSyncService = inject(WebDavSyncService);
   private _localFileSyncElectronService = inject(LocalFileSyncElectronService);
   private _localFileSyncAndroidService = inject(LocalFileSyncAndroidService);
@@ -226,7 +224,8 @@ export class SyncProviderService {
         const localLocal = await this._pfapiService.getValidCompleteData();
         await this._uploadAppData({
           cp,
-          localDataComplete: localLocal,
+          // TODO check side effects
+          localDataComplete: localLocal as AppDataCompleteLegacy,
           isForceArchiveUpdate: true,
         });
         return 'SUCCESS';
@@ -263,7 +262,8 @@ export class SyncProviderService {
     if (rev && this._isSameRev(rev, localRev)) {
       this._log(cp, 'PRE1: ↔ Same Rev', rev);
       // NOTE: same mainFileRev, doesn't mean. that we can't have local changes
-      local = await this._pfapiService.getValidCompleteData();
+      // TODO check side effects
+      local = (await this._pfapiService.getValidCompleteData()) as AppDataCompleteLegacy;
       if (lastSync === local.lastLocalSyncModelChange) {
         this._log(cp, 'PRE1: No local changes to sync');
         this._snackService.open({
@@ -279,7 +279,10 @@ export class SyncProviderService {
     // simple check based on local meta
     // simple check if lastLocalSyncModelChange
     // ------------------------------------
-    local = local || (await this._pfapiService.getValidCompleteData());
+    local =
+      local ||
+      // TODO check side effects
+      ((await this._pfapiService.getValidCompleteData()) as AppDataCompleteLegacy);
     // NOTE: should never be the case, but we need to make sure it is
     if (typeof local.lastLocalSyncModelChange !== 'number') {
       console.log(local);
@@ -709,7 +712,9 @@ export class SyncProviderService {
       if (res === 'FORCE_UPDATE_REMOTE') {
         await this._uploadAppData({
           cp,
-          localDataComplete: await this._pfapiService.getValidCompleteData(),
+          // TODO check side effects
+          localDataComplete:
+            (await this._pfapiService.getValidCompleteData()) as AppDataCompleteLegacy,
           isForceOverwrite: true,
           isForceArchiveUpdate: true,
         });
@@ -736,7 +741,7 @@ export class SyncProviderService {
           }),
     };
 
-    await this._dataImportService.importCompleteSyncData(completeData, {
+    await this._pfapiService.importAllSycModelData(completeData, {
       isOmitLocalFields: true,
     });
 

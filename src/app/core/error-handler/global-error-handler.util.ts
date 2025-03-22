@@ -6,7 +6,7 @@ import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { CompleteBackup } from '../../pfapi/api';
 
 let isWasErrorAlertCreated = false;
 
@@ -70,7 +70,7 @@ export const createErrorAlert = (
   err: string = '',
   stackTrace: string,
   origErr: any,
-  userData?: AppDataCompleteNew | undefined,
+  userData?: CompleteBackup<any> | undefined,
 ): void => {
   if (isWasErrorAlertCreated) {
     return;

@@ -37,6 +37,8 @@ export class DataInitService {
     if (isValid) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
+      // DATA REPAIR CASE
+      // ----------------
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
         const fixedData = this._pfapiService.repairCompleteData(appDataComplete);
         this._store$.dispatch(
@@ -45,8 +47,13 @@ export class DataInitService {
             isOmitTokens,
           }),
         );
-        await this._pfapiService.importAllSycModelData(fixedData, CROSS_MODEL_VERSION);
+        await this._pfapiService.importAllSycModelData({
+          data: fixedData,
+          // TODO decide if this or to reapply all migrations??
+          crossModelVersion: CROSS_MODEL_VERSION,
+        });
       }
+      // TODO handle start fresh case
     }
   }
 }

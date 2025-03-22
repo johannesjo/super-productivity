@@ -5,20 +5,20 @@ import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { AppDataCompleteLegacy } from '../sync/sync.model';
 import { IS_ELECTRON } from '../../app.constants';
 import { LocalBackupService } from './local-backup.service';
-import { DataImportService } from '../sync/data-import.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import moment from 'moment';
 import { IS_ANDROID_BACKUP_READY } from '../../features/android/android-interface';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { PfapiService } from '../../pfapi/pfapi.service';
 
 @Injectable()
 export class LocalBackupEffects {
   private _actions$ = inject(Actions);
   private _localBackupService = inject(LocalBackupService);
-  private _dataImportService = inject(DataImportService);
   private _translateService = inject(TranslateService);
+  private _pfapiService = inject(PfapiService);
 
   checkForBackupIfNoTasks$: any =
     (IS_ELECTRON || IS_ANDROID_BACKUP_READY) &&
@@ -59,7 +59,7 @@ export class LocalBackupEffects {
             backupMeta.path,
           );
           console.log('backupData', backupData);
-          await this._dataImportService.importCompleteSyncData(JSON.parse(backupData));
+          await this._pfapiService.importCompleteBackup(JSON.parse(backupData));
         }
 
         // ANDROID
@@ -72,9 +72,7 @@ export class LocalBackupEffects {
           console.log('backupData', backupData);
           const lineBreaksReplaced = backupData.replace(/\n/g, '\\n');
           console.log('lineBreaksReplaced', lineBreaksReplaced);
-          await this._dataImportService.importCompleteSyncData(
-            JSON.parse(lineBreaksReplaced),
-          );
+          await this._pfapiService.importCompleteBackup(JSON.parse(lineBreaksReplaced));
         }
       }
     }

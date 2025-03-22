@@ -1,5 +1,6 @@
 import {
   AllSyncModels,
+  CompleteBackup,
   ConflictData,
   ExtractModelCfgType,
   ModelBase,
@@ -19,6 +20,7 @@ import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
 import {
+  BackupImportFailedError,
   DataValidationFailedError,
   InvalidModelCfgError,
   InvalidSyncProviderError,
@@ -27,6 +29,7 @@ import {
   NoSyncProviderSetError,
   NoValidateFunctionProvidedError,
 } from './errors/errors';
+import { TmpBackupService } from './backup/tmp-backup.service';
 
 // type EventMap = {
 // 'sync:start': undefined;
@@ -50,6 +53,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   //   Record<symbol, (data: unknown) => void>
   // >();
 
+  public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
   public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
@@ -82,6 +86,8 @@ export class Pfapi<const MD extends ModelCfgs> {
           version: 1,
         }),
     });
+
+    this.tmpBackupService = new TmpBackupService<AllSyncModels<MD>>(this.db);
 
     this.metaModel = new MetaModelCtrl(this.db, IS_MAIN_FILE_MODE);
     this.m = this._createModels(modelCfgs);
@@ -163,29 +169,87 @@ export class Pfapi<const MD extends ModelCfgs> {
     return allData as AllSyncModels<MD>;
   }
 
-  async importAllSycModelData(
-    data: AllSyncModels<MD>,
-    crossModelVersion: number,
+  // TODO maybe limit model
+  async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
+    const meta = await this.metaModel.loadMetaModel();
+    return {
+      data: await this.getAllSyncModelData(),
+      crossModelVersion: meta.crossModelVersion,
+      modelVersions: meta.modelVersions,
+      lastUpdate: meta.lastUpdate,
+      timestamp: Date.now(),
+    };
+  }
+
+  async importCompleteBackup(backup: CompleteBackup<MD>): Promise<void> {
+    return this.importAllSycModelData({
+      data: backup.data,
+      crossModelVersion: backup.crossModelVersion,
+      // TODO maybe also make model versions work
+      isBackupData: true,
+      isAttemptRepair: true,
+    });
+  }
+
+  // TODO
+  // async importCompleteBackup
+
+  async importAllSycModelData({
+    data,
+    crossModelVersion,
     isAttemptRepair = false,
-  ): Promise<unknown> {
+    isBackupData = false,
+  }: {
+    data: AllSyncModels<MD>;
+    crossModelVersion: number;
+    isAttemptRepair?: boolean;
+    isBackupData?: boolean;
+  }): Promise<void> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this._cfg });
+
+    // TODO migrations
+
     if (this._cfg?.validate && !this._cfg.validate(data)) {
       if (isAttemptRepair && this._cfg.repair) {
         data = this._cfg.repair(data);
       }
       throw new DataValidationFailedError();
     }
-    const modelIds = Object.keys(data);
-    const promises = modelIds.map((modelId) => {
-      const modelData = data[modelId];
-      const modelCtrl = this.m[modelId];
-      if (!modelCtrl) {
-        throw new ModelIdWithoutCtrlError(modelId, modelData);
-      }
 
-      return modelCtrl.save(modelData, { isUpdateRevAndLastUpdate: false });
-    });
-    return Promise.all(promises);
+    if (isBackupData) {
+      await this.tmpBackupService.save(await this.getAllSyncModelData());
+    }
+
+    try {
+      const modelIds = Object.keys(data);
+      const promises = modelIds.map((modelId) => {
+        const modelData = data[modelId];
+        const modelCtrl = this.m[modelId];
+        if (!modelCtrl) {
+          throw new ModelIdWithoutCtrlError(modelId, modelData);
+        }
+
+        return modelCtrl.save(modelData, { isUpdateRevAndLastUpdate: false });
+      });
+      await Promise.all(promises);
+    } catch (e) {
+      const backup = await this.tmpBackupService.load();
+      if (backup) {
+        try {
+          await this.importAllSycModelData({
+            data: backup,
+            crossModelVersion: this._cfg?.crossModelVersion || 0,
+          });
+        } catch (eII) {
+          throw new BackupImportFailedError(eII);
+        }
+      }
+      throw e;
+    }
+
+    if (isBackupData) {
+      await this.tmpBackupService.clear();
+    }
   }
 
   downloadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
@@ -197,6 +261,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     pfLog(2, `${this.uploadAll.name}()`, { isSkipLockFileCheck });
     return this._syncService.uploadAll(isSkipLockFileCheck);
   }
+
+  // TODO isStrayLocalBackup
 
   // public on<K extends keyof EventMap>(
   //   eventName: K,

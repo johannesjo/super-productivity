@@ -111,9 +111,12 @@ export interface ConflictData {
   additional?: unknown;
 }
 
-export interface CompleteBackup {
+export interface CompleteBackup<T extends ModelCfgs> {
   timestamp: number;
-  data: { [modelGroupId: string]: any };
+  lastUpdate: number;
+  crossModelVersion: number;
+  modelVersions: ModelVersionMap;
+  data: AllModelData<T>;
 }
 
 export type ExtractModelCfgType<T extends ModelCfg<ModelBase>> =

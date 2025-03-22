@@ -5,7 +5,6 @@ import {
   inject,
   viewChild,
 } from '@angular/core';
-import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
@@ -17,6 +16,7 @@ import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { PfapiService } from 'src/app/pfapi/pfapi.service';
 
 @Component({
   selector: 'file-imex',
@@ -26,9 +26,9 @@ import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
   imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class FileImexComponent {
-  private _dataImportService = inject(DataImportService);
   private _snackService = inject(SnackService);
   private _router = inject(Router);
+  private _pfapiService = inject(PfapiService);
 
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
@@ -55,7 +55,7 @@ export class FileImexComponent {
         alert('V1 Data. Migration not supported any more.');
       } else {
         await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        await this._dataImportService.importCompleteSyncData(data as AppDataCompleteNew);
+        await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
       }
 
       const fileInputRef = this.fileInputRef();
@@ -72,13 +72,13 @@ export class FileImexComponent {
   }
 
   async downloadBackup(): Promise<void> {
-    const data = await this._dataImportService.getCompleteSyncData();
+    const data = await this._pfapiService.getCompleteBackup();
     download('super-productivity-backup.json', JSON.stringify(data));
     // download('super-productivity-backup.json', privacyExport(data));
   }
 
   async privacyAppDataDownload(): Promise<void> {
-    const data = await this._dataImportService.getCompleteSyncData();
+    const data = await this._pfapiService.getCompleteBackup();
     download('super-productivity-backup.json', privacyExport(data));
   }
 }

@@ -1,6 +1,5 @@
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { AppDataCompleteLegacy } from '../sync/sync.model';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { CompleteBackup } from '../../pfapi/api';
 
 let i: number = 0;
 
@@ -57,9 +56,8 @@ const recurse = (obj: any): void => {
   }
 };
 
-export const privacyExport = (d: AppDataCompleteLegacy | AppDataCompleteNew): string => {
+export const privacyExport = (d: CompleteBackup<any>): string => {
   const cpy = dirtyDeepCopy(d);
   recurse(cpy);
-
   return JSON.stringify(cpy);
 };

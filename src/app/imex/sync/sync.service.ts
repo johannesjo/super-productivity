@@ -5,7 +5,6 @@ import { filter, map, skip, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { DataImportService } from './data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
@@ -28,6 +27,8 @@ import {
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { miniObservableToObservable } from '../../pfapi/pfapi-helper';
+import { DataInitService } from '../../core/data-init/data-init.service';
+import { ReminderService } from '../../features/reminder/reminder.service';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +40,8 @@ export class SyncService {
   private _persistenceLocalService = inject(PersistenceLocalService);
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
-  private _dataImportService = inject(DataImportService);
+  private _dataInitService = inject(DataInitService);
+  private _reminderService = inject(ReminderService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
   // TODO
@@ -163,7 +165,7 @@ export class SyncService {
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateLocalAll:
           // TODO dare to do more complicated stuff for UpdateLocal
-          await this._updateAllFromDB();
+          await this._reInitAppAfterDataModelChange();
           return r.status;
 
         case SyncStatus.NotConfigured:
@@ -193,7 +195,7 @@ export class SyncService {
             this._globalProgressBarService.countUp('SYNC');
             this.isSyncing$.next(true);
             await this._pfapiWrapperService.pf.downloadAll();
-            await this._updateAllFromDB();
+            await this._reInitAppAfterDataModelChange();
             this.isSyncing$.next(false);
             this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
@@ -259,9 +261,12 @@ export class SyncService {
     }
   }
 
-  private async _updateAllFromDB(): Promise<void> {
-    const data = await this._pfapiWrapperService.getValidCompleteData();
-    await this._dataImportService.importCompleteSyncData(data);
+  private async _reInitAppAfterDataModelChange(): Promise<unknown> {
+    return await Promise.all([
+      // reload view model from ls
+      this._dataInitService.reInit(true),
+      this._reminderService.reloadFromDatabase(),
+    ]);
   }
 
   private _c(str: string): boolean {

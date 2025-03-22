@@ -39,7 +39,7 @@ import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possibl
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { dataRepair } from '../core/data-repair/data-repair.util';
 
-export const CROSS_MODEL_VERSION = 1;
+export const CROSS_MODEL_VERSION = 1 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
