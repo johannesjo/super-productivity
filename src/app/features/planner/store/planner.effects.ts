@@ -72,7 +72,7 @@ export class PlannerEffects {
     isSyncModelChange: boolean = false,
   ): void {
     this._pfapiService.m.planner.save(plannerState, {
-      isSyncModelChange,
+      isUpdateRevAndLastUpdate: isSyncModelChange,
     });
   }
 }

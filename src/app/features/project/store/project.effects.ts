@@ -374,7 +374,7 @@ export class ProjectEffects {
       take(1),
       switchMap((projectState) =>
         this._pfapiService.m.project.save(projectState, {
-          isSyncModelChange,
+          isUpdateRevAndLastUpdate: isSyncModelChange,
         }),
       ),
     );

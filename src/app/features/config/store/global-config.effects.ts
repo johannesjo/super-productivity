@@ -173,7 +173,7 @@ export class GlobalConfigEffects {
   ): void {
     const globalConfig = completeState[CONFIG_FEATURE_NAME];
     this._pfapiService.m.globalConfig.save(globalConfig, {
-      isSyncModelChange: !isSkipSyncModelChangeUpdate,
+      isUpdateRevAndLastUpdate: !isSkipSyncModelChangeUpdate,
     });
   }
 }

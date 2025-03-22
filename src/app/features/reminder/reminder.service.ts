@@ -233,7 +233,7 @@ export class ReminderService {
     }
     console.log('saveReminders', reminders);
     await this._pfapiService.m.reminders.save(reminders, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
     this._updateRemindersInWorker(this._reminders);
     this._reminders$.next(this._reminders);

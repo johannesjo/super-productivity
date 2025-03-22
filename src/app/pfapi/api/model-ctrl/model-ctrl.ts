@@ -27,11 +27,11 @@ export class ModelCtrl<MT extends ModelBase> {
   }
 
   // TODO improve on isSyncModelChange
-  save(data: MT, p?: { isSyncModelChange: boolean }): Promise<unknown> {
+  save(data: MT, p?: { isUpdateRevAndLastUpdate: boolean }): Promise<unknown> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
-    if (!p?.isSyncModelChange) {
+    if (!p?.isUpdateRevAndLastUpdate) {
       return this._db.save(this.modelId, data);
     }
     this._metaModel.updateRevForModel(this.modelId, this.modelCfg);

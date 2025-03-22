@@ -69,7 +69,7 @@ export class ImprovementEffects {
 
   private _saveToLs(improvementState: ImprovementState): void {
     this._pfapiService.m.improvement.save(improvementState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

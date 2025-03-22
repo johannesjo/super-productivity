@@ -238,7 +238,7 @@ export class TaskRelatedModelEffects {
         ...currentArchive,
         ids: allIds.filter((id) => !idsToRemove.includes(id)),
       },
-      { isSyncModelChange: true },
+      { isUpdateRevAndLastUpdate: true },
     );
   }
 
@@ -278,7 +278,7 @@ export class TaskRelatedModelEffects {
       });
 
     return this._pfapiService.m.taskArchive.save(newArchive, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

@@ -41,7 +41,7 @@ export class NoteEffects {
 
   private _saveToLs(noteState: NoteState): void {
     this._pfapiService.m.note.save(noteState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

@@ -30,7 +30,7 @@ export const modelExecAction = async <M, T extends EntityState<M>>(
 ): Promise<T> => {
   const data = await pfapiModel.load();
   const newState = reducerFn(data, action);
-  await pfapiModel.save(newState, { isSyncModelChange });
+  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isSyncModelChange });
   return newState;
 };
 
@@ -42,7 +42,7 @@ export const modelExecActions = async <M, T extends EntityState<M>>(
 ): Promise<T> => {
   const data = await pfapiModel.load();
   const newState = actions.reduce((acc, act) => reducerFn(acc, act), data);
-  await pfapiModel.save(newState, { isSyncModelChange });
+  await pfapiModel.save(newState, { isUpdateRevAndLastUpdate: isSyncModelChange });
   return newState;
 };
 

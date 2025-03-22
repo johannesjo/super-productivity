@@ -124,7 +124,7 @@ export class TaskDbEffects {
         selectedTaskId: environment.production ? null : taskState.selectedTaskId,
         currentTaskId: null,
       },
-      { isSyncModelChange },
+      { isUpdateRevAndLastUpdate: isSyncModelChange },
     );
   }
 }

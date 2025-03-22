@@ -29,9 +29,8 @@ export class EncryptAndCompressHandlerService {
     pfLog(
       3,
       `${EncryptAndCompressHandlerService.name}.${this.decompressAndDecrypt.name}()`,
-      { isCompressed, isEncrypted, modelVersion, cleanDataStr },
+      { isCompressed, isEncrypted, modelVersion, cleanDataStr, dataStr },
     );
-
     return {
       data: JSON.parse(cleanDataStr),
       modelVersion,

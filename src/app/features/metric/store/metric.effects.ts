@@ -27,7 +27,7 @@ export class MetricEffects {
 
   private _saveToLs(metricState: MetricState): void {
     this._pfapiService.m.metric.save(metricState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

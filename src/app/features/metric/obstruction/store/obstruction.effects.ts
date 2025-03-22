@@ -42,7 +42,7 @@ export class ObstructionEffects {
 
   private _saveToLs(obstructionState: ObstructionState): void {
     this._pfapiService.m.obstruction.save(obstructionState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

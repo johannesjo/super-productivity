@@ -82,7 +82,7 @@ export class TagEffects {
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) =>
-      this._pfapiService.m.tag.save(tagState, { isSyncModelChange: true }),
+      this._pfapiService.m.tag.save(tagState, { isUpdateRevAndLastUpdate: true }),
     ),
   );
   updateTagsStorage$: Observable<unknown> = createEffect(

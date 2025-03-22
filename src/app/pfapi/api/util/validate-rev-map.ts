@@ -9,6 +9,9 @@ export const validateRevMap = (revMap: RevMap): RevMap => {
     if (typeof revMap[modelId] !== 'string' || !revMap[modelId]) {
       throw new InvalidRevMapError(revMap);
     }
+    if (revMap[modelId].includes('\"')) {
+      throw new Error('" occurred ERR');
+    }
   });
   return revMap;
 };

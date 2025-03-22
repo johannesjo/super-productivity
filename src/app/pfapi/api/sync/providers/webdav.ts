@@ -177,7 +177,11 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
   }
 
   private _cleanRev(rev: string): string {
-    const result = rev.replace(/"/g, '').replace(/^W\//, '');
+    const result = rev
+      //
+      .replace(/\//g, '')
+      .replace(/"/g, '');
+
     pfLog(3, `${Webdav.name}.${this._cleanRev.name}()`, result);
     return result;
   }

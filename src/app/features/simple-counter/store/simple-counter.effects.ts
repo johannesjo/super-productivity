@@ -156,7 +156,7 @@ export class SimpleCounterEffects {
 
   private _saveToLs(simpleCounterState: SimpleCounterState): void {
     this._pfapiService.m.simpleCounter.save(simpleCounterState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 

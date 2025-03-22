@@ -35,7 +35,7 @@ export class BoardsEffects {
       take(1),
       switchMap((boardsState) =>
         this._pfapiService.m.boards.save(boardsState, {
-          isSyncModelChange: true,
+          isUpdateRevAndLastUpdate: true,
         }),
       ),
     );

@@ -64,6 +64,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     Pfapi._wasInstanceCreated = true;
 
+    const IS_MAIN_FILE_MODE = cfg?.isMainFileMode || false;
+
     this.db = new Database({
       onError: cfg?.onDbError || (() => undefined),
       adapter:
@@ -76,7 +78,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         }),
     });
 
-    this.metaModel = new MetaModelCtrl(this.db);
+    this.metaModel = new MetaModelCtrl(this.db, IS_MAIN_FILE_MODE);
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
@@ -86,7 +88,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     });
 
     this._syncService = new SyncService<MD>(
-      cfg?.isMainFileMode || false,
+      IS_MAIN_FILE_MODE,
       this.m,
       this._activeSyncProvider$,
       this.metaModel,
@@ -167,17 +169,17 @@ export class Pfapi<const MD extends ModelCfgs> {
         throw new ModelIdWithoutCtrlError(modelId, modelData);
       }
 
-      return modelCtrl.save(modelData);
+      return modelCtrl.save(modelData, { isUpdateRevAndLastUpdate: false });
     });
     return Promise.all(promises);
   }
 
-  downloadAll(): Promise<void> {
-    return this._syncService.downloadAll();
+  downloadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
+    return this._syncService.downloadAll(isSkipLockFileCheck);
   }
 
-  uploadAll(): Promise<void> {
-    return this._syncService.uploadAll();
+  uploadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
+    return this._syncService.uploadAll(isSkipLockFileCheck);
   }
 
   // public on<K extends keyof EventMap>(

@@ -47,7 +47,7 @@ export class IssueProviderDbEffects {
       take(1),
       switchMap((issueProviderState) =>
         this._pfapiService.m.issueProvider.save(issueProviderState, {
-          isSyncModelChange,
+          isUpdateRevAndLastUpdate: isSyncModelChange,
         }),
       ),
     );

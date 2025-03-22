@@ -320,7 +320,7 @@ export class TaskRepeatCfgEffects {
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
     this._pfapiService.m.taskRepeatCfg.save(taskRepeatCfgState, {
-      isSyncModelChange: true,
+      isUpdateRevAndLastUpdate: true,
     });
   }
 
@@ -341,7 +341,7 @@ export class TaskRepeatCfgEffects {
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
         tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
         this._pfapiService.m.taskArchive.save(newState, {
-          isSyncModelChange: true,
+          isUpdateRevAndLastUpdate: true,
         });
       }
     });

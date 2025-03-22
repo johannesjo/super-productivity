@@ -82,8 +82,10 @@ export class WebdavApi {
   }): Promise<{ rev: string; dataStr: string }> {
     const client = await this._createClient();
     const r = await client.getFileContents(path, { format: 'text', details: true });
+    console.log(r.headers);
+
     return {
-      rev: r.headers.etag,
+      rev: this._cleanEtag(r.headers.etag),
       dataStr: r.data as string,
     };
   }
@@ -99,5 +101,9 @@ export class WebdavApi {
       username: cfg.userName,
       password: cfg.password,
     });
+  }
+
+  private _cleanEtag(etag: string): string {
+    return etag.replace(/"/g, '');
   }
 }

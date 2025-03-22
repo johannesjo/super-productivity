@@ -22,13 +22,15 @@ export class MetaModelCtrl {
   static readonly META_MODEL_ID = DBNames.MetaModel;
   static readonly META_MODEL_REMOTE_FILE_NAME = DBNames.MetaModel;
   static readonly CLIENT_ID = DBNames.ClientId;
+  public readonly IS_MAIN_FILE_MODE: boolean;
 
   private readonly _db: Database;
   private _metaModelInMemory?: LocalMeta;
   private _clientIdInMemory?: string;
 
-  constructor(db: Database) {
+  constructor(db: Database, _IS_MAIN_FILE_MODE: boolean) {
     this._db = db;
+    this.IS_MAIN_FILE_MODE = _IS_MAIN_FILE_MODE;
     //
     this.loadClientId().catch((e) => {
       if (e instanceof ClientIdNotFoundError) {
@@ -43,7 +45,7 @@ export class MetaModelCtrl {
   }
 
   updateRevForModel<MT extends ModelBase>(modelId: string, modelCfg: ModelCfg<MT>): void {
-    pfLog(3, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
+    pfLog(2, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
     });
@@ -63,10 +65,14 @@ export class MetaModelCtrl {
     this.saveMetaModel({
       ...metaModel,
       lastUpdate: timestamp,
-      revMap: {
-        ...metaModel.revMap,
-        [modelId]: timestamp.toString(),
-      },
+
+      ...(modelCfg.isMainFileModel && this.IS_MAIN_FILE_MODE
+        ? metaModel.revMap
+        : {
+            ...metaModel.revMap,
+            [modelId]: timestamp.toString(),
+          }),
+
       ...(isModelVersionChange
         ? {
             modelVersions: {
@@ -86,6 +92,7 @@ export class MetaModelCtrl {
         'lastUpdate not found',
       );
     }
+
     // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);

@@ -137,6 +137,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // this indicates an incomplete sync, so we need to retry to upload all data
       if (e instanceof LockFileFromLocalClientPresentError) {
+        alert('CATCH LockFileFromLocalClientPresentError 1');
         await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
@@ -148,16 +149,24 @@ export class SyncService<const MD extends ModelCfgs> {
   async uploadAll(isSkipLockFileCheck = false): Promise<void> {
     alert('UPLOAD ALL TO REMOTE');
     const local = await this._metaModelCtrl.loadMetaModel();
-    return this.updateRemote(
-      {
-        modelVersions: local.modelVersions,
-        crossModelVersion: local.crossModelVersion,
-        lastUpdate: local.lastUpdate,
-        revMap: {},
-      },
-      { ...local, revMap: this._fakeFullRevMap() },
-      isSkipLockFileCheck,
-    );
+    try {
+      return await this.updateRemote(
+        {
+          modelVersions: local.modelVersions,
+          crossModelVersion: local.crossModelVersion,
+          lastUpdate: local.lastUpdate,
+          revMap: {},
+        },
+        { ...local, revMap: this._fakeFullRevMap() },
+        isSkipLockFileCheck,
+      );
+    } catch (e) {
+      if (e instanceof LockFileFromLocalClientPresentError) {
+        alert('CATCH LockFileFromLocalClientPresentError 2');
+        return await this.uploadAll(true);
+      }
+      throw e;
+    }
   }
 
   async downloadAll(isSkipLockFileCheck = false): Promise<void> {
@@ -170,7 +179,7 @@ export class SyncService<const MD extends ModelCfgs> {
       modelVersions: local.modelVersions,
       revMap: {},
     };
-    return this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
+    return await this.updateLocal(remoteMeta, fakeLocal, remoteRev, isSkipLockFileCheck);
   }
 
   // --------------------------------------------------
@@ -194,30 +203,34 @@ export class SyncService<const MD extends ModelCfgs> {
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    pfLog(2, `${SyncService.name}.${this._updateLocalMAIN.name}()`, {
-      remoteMeta: remote,
-      localMeta: local,
-      remoteRev,
-      isSkipLockFileCheck,
-    });
-
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
       revMapToOverwrite: local.revMap,
       context: 'DOWNLOAD',
     });
 
+    pfLog(2, `${SyncService.name}.${this._updateLocalMAIN.name}()`, {
+      remoteMeta: remote,
+      localMeta: local,
+      remoteRev,
+      isSkipLockFileCheck,
+      toUpdate,
+      toDelete,
+    });
+
     if (toUpdate.length === 0 && toDelete.length === 0) {
       await this._updateLocalMainModels(remote);
+      console.log('XXXXXXXXXXXXXXXXXXXXXXX', {
+        isEqual: JSON.stringify(remote.revMap) === JSON.stringify(local.revMap),
+        remoteRevMap: remote.revMap,
+        localRevMap: local.revMap,
+      });
+
       await this._updateLocalMetaFileContent({
+        ...remote,
+        // revMap: local.revMap,
+        revMap: remote.revMap,
         metaRev: remoteRev,
-        lastSyncedUpdate: remote.lastUpdate,
-        lastUpdate: remote.lastUpdate,
-        revMap: validateRevMap({
-          ...local.revMap,
-        }),
-        modelVersions: remote.modelVersions,
-        crossModelVersion: remote.crossModelVersion,
       });
       return;
     }
@@ -275,6 +288,9 @@ export class SyncService<const MD extends ModelCfgs> {
     if (this.IS_MAIN_FILE_MODE) {
       await this._updateLocalMainModels(remote);
     }
+
+    console.log('AAAAAAAAAAAAAA', { realRevMap, local });
+
     await this._updateLocalMetaFileContent({
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
@@ -288,7 +304,19 @@ export class SyncService<const MD extends ModelCfgs> {
       crossModelVersion: remote.crossModelVersion,
     });
 
-    if (!isSkipLockFileCheck) {
+    // TODO handle more elegantly
+    if (isSkipLockFileCheck) {
+      try {
+        await this._removeLockFile();
+      } catch (e) {
+        pfLog(
+          2,
+          `${SyncService.name}.${this._updateLocalMULTI.name}()`,
+          'unable to remove lock file',
+          e,
+        );
+      }
+    } else {
       await this._removeLockFile();
     }
   }
@@ -334,19 +362,12 @@ export class SyncService<const MD extends ModelCfgs> {
       });
       // ON AFTER SUCCESS
       await this._updateLocalMetaFileContent({
-        // leave as is basically
-        lastUpdate: local.lastUpdate,
-        modelVersions: local.modelVersions,
-        crossModelVersion: local.crossModelVersion,
-        lastSyncedUpdate: local.lastUpdate,
-        revMap: local.revMap,
-
-        // actual update
+        ...local,
         metaRev: metaRevAfterUpdate,
       });
       return;
     }
-    // TODO make rev change to see if there were updates before lock file maybe
+    // TODO maybe make rev check for meta file to see if there were updates before lock file maybe
     return this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
   }
 
@@ -421,7 +442,19 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: metaRevAfterUpdate,
     });
 
-    if (!isSkipLockFileCheck) {
+    // TODO handle more elegantly
+    if (isSkipLockFileCheck) {
+      try {
+        await this._removeLockFile();
+      } catch (e) {
+        pfLog(
+          2,
+          `${SyncService.name}.${this._updateRemoteMULTI.name}()`,
+          'unable to remove lock file',
+          e,
+        );
+      }
+    } else {
       await this._removeLockFile();
     }
   }
@@ -577,6 +610,8 @@ export class SyncService<const MD extends ModelCfgs> {
         localRev || null,
       );
       const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
+      console.log(data);
+
       return { remoteMeta: validateMetaBase(data), remoteRev: r.rev };
     } catch (e) {
       if (e instanceof NoRemoteDataError) {
@@ -700,7 +735,9 @@ export class SyncService<const MD extends ModelCfgs> {
       Object.keys(mainModelData).forEach((modelId) => {
         if (modelId in mainModelData) {
           // TODO better typing
-          this.m[modelId].save(mainModelData[modelId] as any);
+          this.m[modelId].save(mainModelData[modelId] as any, {
+            isUpdateRevAndLastUpdate: false,
+          });
         }
       });
     } else {
@@ -731,7 +768,9 @@ export class SyncService<const MD extends ModelCfgs> {
   private _fakeFullRevMap(): RevMap {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {
-      revMap[modelId] = 'FAKE_VAL_TO_TRIGGER_UPDATE_ALL';
+      if (!this.IS_MAIN_FILE_MODE || !this.m[modelId].modelCfg.isMainFileModel) {
+        revMap[modelId] = 'UPDATE_ALL_REV';
+      }
     });
     return revMap;
   }
