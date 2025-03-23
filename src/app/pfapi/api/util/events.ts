@@ -1,40 +1,50 @@
-import { PfapiEvents } from '../pfapi.model';
+import { PfapiEvents, PfapiEventPayloadMap } from '../pfapi.model';
 
-type EventHandler<T = any> = (data: T) => void;
+type EventHandler<T> = (data: T) => void;
 
 export class PFEventEmitter {
-  private events: Record<PfapiEvents, EventHandler[]> = {
+  // Explicitly initialize with the correct structure
+  private events: {
+    [K in PfapiEvents]: Array<EventHandler<PfapiEventPayloadMap[K]>>;
+  } = {
     syncDone: [],
     syncStart: [],
     syncError: [],
     metaModelChange: [],
+    providerChange: [],
+    providerReady: [],
   };
 
-  // Subscribe to an event
-  on<T>(event: PfapiEvents, handler: EventHandler<T>): void {
-    if (!this.events[event]) {
-      this.events[event] = [];
-    }
-    this.events[event].push(handler as EventHandler);
+  on<K extends PfapiEvents>(
+    event: K,
+    handler: EventHandler<PfapiEventPayloadMap[K]>,
+  ): void {
+    this.events[event].push(handler);
   }
 
-  // Unsubscribe from an event
-  off<T>(event: PfapiEvents, handler: EventHandler<T>): void {
-    if (!this.events[event]) return;
-    this.events[event] = this.events[event].filter((h) => h !== handler);
+  off<K extends PfapiEvents>(
+    event: K,
+    handler: EventHandler<PfapiEventPayloadMap[K]>,
+  ): void {
+    this.events[event] = this.events[event].filter((h) => h !== handler) as any;
   }
 
-  // Emit an event
-  emit<T>(event: PfapiEvents, data?: T): void {
-    if (!this.events[event]) return;
+  emit<K extends PfapiEvents>(event: K, data: PfapiEventPayloadMap[K]): void {
     this.events[event].forEach((handler) => handler(data));
   }
+
   // Aliases for RxJS compatibility
-  addEventListener<T>(event: PfapiEvents, handler: EventHandler<T>): void {
+  addEventListener<K extends PfapiEvents>(
+    event: K,
+    handler: EventHandler<PfapiEventPayloadMap[K]>,
+  ): void {
     this.on(event, handler);
   }
 
-  removeEventListener<T>(event: PfapiEvents, handler: EventHandler<T>): void {
+  removeEventListener<K extends PfapiEvents>(
+    event: K,
+    handler: EventHandler<PfapiEventPayloadMap[K]>,
+  ): void {
     this.off(event, handler);
   }
 }

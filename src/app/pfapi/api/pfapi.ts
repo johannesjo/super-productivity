@@ -57,14 +57,12 @@ export class Pfapi<const MD extends ModelCfgs> {
   public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
   public readonly ev = new PFEventEmitter();
 
-  public readonly isSyncProviderActiveAndReady$: MiniObservable<boolean> =
-    new MiniObservable<boolean>(false);
-
   constructor(
     modelCfgs: MD,
     syncProviders: SyncProviderServiceInterface<unknown>[],
     cfg?: PfapiBaseCfg<MD>,
   ) {
+    this.ev.on('syncStart', (v) => {});
     if (Pfapi._wasInstanceCreated) {
       throw new Error(': This should only ever be instantiated once');
     }
@@ -108,15 +106,15 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     pfLog(3, `${this.sync.name}()`);
-    this.ev.emit('syncStart');
+    this.ev.emit('syncStart', undefined);
     try {
       const result = await this._syncService.sync();
       pfLog(2, `${this.sync.name}() result:`, result);
       this.ev.emit('syncDone', result);
       return result;
     } catch (e) {
-      this.ev.emit('syncError');
-      this.ev.emit('syncDone');
+      this.ev.emit('syncError', e);
+      this.ev.emit('syncDone', e);
       throw e;
     }
   }
@@ -126,16 +124,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (activeProviderId) {
       const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
       if (!provider) {
-        console.log(this.syncProviders, activeProviderId);
-
         throw new InvalidSyncProviderError();
       }
       this._activeSyncProvider$.next(provider);
       provider.isReady().then((isReady) => {
-        this.isSyncProviderActiveAndReady$.next(isReady);
+        this.ev.emit('providerReady', isReady);
       });
     } else {
-      this.isSyncProviderActiveAndReady$.next(false);
+      this.ev.emit('providerReady', false);
       this._activeSyncProvider$.next(null);
     }
   }
@@ -156,9 +152,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       throw new NoSyncProviderSetError();
     }
     await this._activeSyncProvider$.value.setCredentials(credentials);
-    this.isSyncProviderActiveAndReady$.next(
-      await this._activeSyncProvider$.value.isReady(),
-    );
+    this.ev.emit('providerReady', await this._activeSyncProvider$.value.isReady());
   }
 
   private _getAllSyncModelDataRetryCount = 0;

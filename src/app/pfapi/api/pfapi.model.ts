@@ -1,6 +1,6 @@
 import { DatabaseAdapter } from './db/database-adapter.model';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
-import { ConflictReason } from './pfapi.const';
+import { ConflictReason, SyncStatus } from './pfapi.const';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -148,4 +148,21 @@ export interface CompleteExport<T extends ModelCfgs> {
   };
 }
 
-export type PfapiEvents = 'syncDone' | 'syncStart' | 'syncError' | 'metaModelChange';
+// Define all possible event names
+export type PfapiEvents =
+  | 'syncDone'
+  | 'syncStart'
+  | 'syncError'
+  | 'metaModelChange'
+  | 'providerChange'
+  | 'providerReady';
+
+// Map each event name to its payload type
+export interface PfapiEventPayloadMap {
+  syncDone: { status: SyncStatus; conflictData?: ConflictData } | unknown;
+  syncStart: undefined;
+  syncError: unknown;
+  metaModelChange: LocalMeta;
+  providerChange: { id: string };
+  providerReady: boolean;
+}

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { CompleteBackup, ModelCfgToModelCtrl, Pfapi, SyncProviderId } from './api';
-import { from, fromEvent, merge, of, Subject } from 'rxjs';
+import { from, merge, of, Subject } from 'rxjs';
 import { AllowedDBKeys, LS } from '../core/persistence/storage-keys.const';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { devError } from '../util/dev-error';
@@ -17,7 +17,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { delay, map, switchMap } from 'rxjs/operators';
+import { delay, map, shareReplay, switchMap } from 'rxjs/operators';
+import { fromPfapiEvent } from './pfapi-helper';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -32,19 +33,22 @@ export class PfapiService {
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
+  public readonly isSyncProviderEnabledAndReady$ = fromPfapiEvent(
+    this.pf.ev,
+    'providerReady',
+  ).pipe(
+    map((v) => !!v),
+    shareReplay(1),
+  );
+
   public readonly isCurrentProviderInSync$ = merge(
-    fromEvent(this.pf.ev, 'metaModelChange'),
+    fromPfapiEvent(this.pf.ev, 'metaModelChange'),
+    // delay initial check
     of(null).pipe(
       delay(2000),
       switchMap(() => from(this.pf.metaModel.loadMetaModel())),
     ),
-  ).pipe(
-    map(
-      (d) =>
-        (d as any)?.lastSyncedUpdate &&
-        (d as any)?.lastSyncedUpdate === (d as any)?.lastUpdate,
-    ),
-  );
+  ).pipe(map((d) => !!d.lastSyncedUpdate && d.lastSyncedUpdate === d.lastUpdate));
 
   private readonly _syncConfig$ = this._store.select(selectSyncConfig);
 
@@ -67,6 +71,10 @@ export class PfapiService {
 
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
+    this.isSyncProviderEnabledAndReady$.subscribe((v) =>
+      console.log(`isSyncProviderEnabledAndReady$`, v),
+    );
+
     this.isCurrentProviderInSync$.subscribe((v) =>
       console.log(`isCurrentProviderInSync$`, v),
     );
