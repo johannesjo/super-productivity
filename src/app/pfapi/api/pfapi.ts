@@ -91,7 +91,11 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.syncProviders = syncProviders;
     this.syncProviders.forEach((sp) => {
-      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(this.db, sp.id);
+      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(
+        sp.id,
+        this.db,
+        this.ev,
+      );
     });
 
     this._syncService = new SyncService<MD>(

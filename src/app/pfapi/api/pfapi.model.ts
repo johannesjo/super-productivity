@@ -1,6 +1,9 @@
 import { DatabaseAdapter } from './db/database-adapter.model';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
 import { ConflictReason, SyncStatus } from './pfapi.const';
+import { DropboxCredentials } from './sync/providers/dropbox/dropbox';
+import { WebdavCredentials } from './sync/providers/webdav/webdav';
+import { LocalFileSyncElectronCredentials } from './sync/providers/local-file-sync/local-file-sync-electron';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -148,6 +151,12 @@ export interface CompleteExport<T extends ModelCfgs> {
   };
 }
 
+// TODO better dynamic typing
+export type SyncProviderCredentials =
+  | DropboxCredentials
+  | WebdavCredentials
+  | LocalFileSyncElectronCredentials;
+
 // Define all possible event names
 export type PfapiEvents =
   | 'syncDone'
@@ -155,6 +164,7 @@ export type PfapiEvents =
   | 'syncError'
   | 'metaModelChange'
   | 'providerChange'
+  | 'providerCredentialsChange'
   | 'providerReady';
 
 // Map each event name to its payload type
@@ -165,4 +175,9 @@ export interface PfapiEventPayloadMap {
   metaModelChange: LocalMeta;
   providerChange: { id: string };
   providerReady: boolean;
+  // TODO better dynamic typing
+  providerCredentialsChange: {
+    providerId: string;
+    credentials: SyncProviderCredentials;
+  };
 }

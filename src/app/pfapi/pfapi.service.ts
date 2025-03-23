@@ -17,7 +17,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { delay, map, shareReplay, switchMap } from 'rxjs/operators';
+import { delay, distinctUntilChanged, map, shareReplay, switchMap } from 'rxjs/operators';
 import { fromPfapiEvent } from './pfapi-helper';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
@@ -36,10 +36,28 @@ export class PfapiService {
   public readonly isSyncProviderEnabledAndReady$ = fromPfapiEvent(
     this.pf.ev,
     'providerReady',
-  ).pipe(
-    map((v) => !!v),
-    shareReplay(1),
-  );
+  ).pipe(shareReplay(1), distinctUntilChanged());
+
+  // TODO add helper for fromPfapiEventWithInitial
+  // TODO needs to contain all the credentials ideally
+  public readonly currentProviderCfg$ = merge(
+    fromPfapiEvent(this.pf.ev, 'providerCredentialsChange'),
+    of(null).pipe(
+      delay(2000),
+      switchMap(() => {
+        const activeProvider = this.pf.getActiveSyncProvider();
+        if (activeProvider) {
+          return from(activeProvider.credentialsStore.load()).pipe(
+            map((d) => ({
+              credentials: d,
+              providerId: activeProvider.id,
+            })),
+          );
+        }
+        return of(null);
+      }),
+    ),
+  ).pipe(shareReplay(1));
 
   public readonly isCurrentProviderInSync$ = merge(
     fromPfapiEvent(this.pf.ev, 'metaModelChange'),
@@ -50,7 +68,7 @@ export class PfapiService {
     ),
   ).pipe(map((d) => !!d.lastSyncedUpdate && d.lastSyncedUpdate === d.lastUpdate));
 
-  private readonly _syncConfig$ = this._store.select(selectSyncConfig);
+  private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
 
   // TODO replace with pfapi event
   onAfterSave$: Subject<{
@@ -79,7 +97,7 @@ export class PfapiService {
       console.log(`isCurrentProviderInSync$`, v),
     );
 
-    this._syncConfig$.subscribe((cfg) => {
+    this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       // TODO handle android webdav
       this.pf.setActiveSyncProvider(cfg.syncProvider as unknown as SyncProviderId);
       // TODO re-implement

@@ -68,8 +68,17 @@
         >
           {{ T.PS.SYNC_EXPORT | translate }}
         </h2>
-        @for (section of globalSyncProviderFormCfg; track section.key) {
-          <section class="config-section tour-syncSection">
+
+        <section class="config-section tour-syncSection">
+          <config-section
+            (save)="saveSyncFormCfg($event)"
+            [cfg]="syncFormCfg$ | async"
+            [section]="globalSyncConfigFormCfg"
+          ></config-section>
+        </section>
+
+        @for (section of globalImexFormCfg; track section.key) {
+          <section class="config-section imex-section">
             <config-section
               (save)="saveGlobalCfg($event)"
               [cfg]="getGlobalCfgSection(section.key)"

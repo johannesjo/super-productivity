@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, tap, take } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -58,9 +58,7 @@ export class SyncService {
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
 
   isEnabledAndReady$: Observable<boolean> =
-    this._pfapiWrapperService.isSyncProviderEnabledAndReady$.pipe(
-      tap((v) => console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXX', v)),
-    );
+    this._pfapiWrapperService.isSyncProviderEnabledAndReady$.pipe();
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
