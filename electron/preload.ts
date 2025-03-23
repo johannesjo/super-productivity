@@ -35,6 +35,7 @@ const ea: ElectronAPI = {
       rev: string;
       dataStr: string | undefined;
     }>,
+  fileSyncRemove: (filePath) => _invoke('FILE_SYNC_REMOVE', filePath) as Promise<void>,
   checkDirExists: (dirPath) =>
     _invoke('CHECK_DIR_EXISTS', dirPath) as Promise<true | Error>,
 

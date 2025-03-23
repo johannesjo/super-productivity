@@ -1,6 +1,6 @@
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } from 'fs';
 import { error, log } from 'electron-log/main';
 import { dialog, ipcMain } from 'electron';
 import { getWin } from './main-window';
@@ -84,6 +84,28 @@ export const initLocalFileSyncAdapter = (): void => {
           rev: getRev(filePath),
           dataStr,
         };
+      } catch (e) {
+        log('ERR: Sync error while loading file from ' + filePath);
+        error(e);
+        return new Error(e as string);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC.FILE_SYNC_REMOVE,
+    (
+      ev,
+      {
+        filePath,
+      }: {
+        filePath: string;
+      },
+    ): void | Error => {
+      try {
+        console.log(IPC.FILE_SYNC_REMOVE, filePath);
+        unlinkSync(filePath);
+        return;
       } catch (e) {
         log('ERR: Sync error while loading file from ' + filePath);
         error(e);

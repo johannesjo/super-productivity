@@ -39,6 +39,7 @@ import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possibl
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { dataRepair } from '../core/data-repair/data-repair.util';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
+import { IS_ELECTRON } from '../app.constants';
 
 export const CROSS_MODEL_VERSION = 1 as const;
 
@@ -151,7 +152,9 @@ export const PFAPI_SYNC_PROVIDERS = [
     basePath: `/`,
   }),
   new Webdav({}),
-  fileSyncElectron,
+  ...(IS_ELECTRON ? [fileSyncElectron] : []),
+  // TODO android
+  // ...(IS_ELECTRON ? [fileSyncElectron] : []),
 ];
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {

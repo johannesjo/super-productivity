@@ -39,6 +39,8 @@ export interface ElectronAPI {
     localRev: string | null;
   }): Promise<{ rev: string; dataStr: string | undefined } | Error>;
 
+  fileSyncRemove(args: { filePath: string }): Promise<unknown | Error>;
+
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
   pickDirectory(): Promise<string | undefined>;

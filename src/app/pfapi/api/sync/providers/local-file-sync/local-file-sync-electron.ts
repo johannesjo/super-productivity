@@ -113,14 +113,12 @@ export class LocalFileSyncElectron
   }
 
   async removeFile(targetPath: string): Promise<void> {
-    // TODO
-    alert('Not implemented');
-    // try {
-    //   await this._api.remove(this._getPath(targetPath));
-    // } catch (e) {
-    //   throw e;
-    // }
-    // TODO error handling
+    const r = await (window as any).ea.fileSyncRemove({
+      filePath: await this._getFilePath(targetPath),
+    });
+    if (r instanceof Error) {
+      throw r;
+    }
   }
 
   async checkDirAndOpenPickerIfNotExists(): Promise<void> {
