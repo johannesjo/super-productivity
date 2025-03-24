@@ -53,5 +53,13 @@
         }
       </mat-select>
     </mat-form-field>
+    <mat-form-field class="width100">
+      <mat-label>{{ 'GCF.SOUND.TRACK_TIME_SOUND' | translate }}</mat-label>
+      <mat-select formControlName="trackTimeSound">
+        @for (sound of soundOpts; track sound) {
+          <mat-option [value]="sound.value">{{ sound.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 </collapsible>
