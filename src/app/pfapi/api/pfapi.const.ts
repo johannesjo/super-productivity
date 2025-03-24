@@ -31,7 +31,7 @@ export const REMOTE_FILE_CONTENT_PREFIX = 'pf_' as const;
 export const LOCK_FILE_NAME = '__lock' as const;
 
 export enum DBNames {
-  CredentialsStorePrefix = '__sp_cred_',
+  PrivateCfgStorePrefix = '__sp_cred_',
   ClientId = '__client_id_',
   MetaModel = '__meta_',
   TmpBackup = '__TMP_BACKUP',

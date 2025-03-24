@@ -1,5 +1,5 @@
 import { SyncProviderId } from '../pfapi.const';
-import { SyncProviderCredentialsStore } from './sync-provider-credentials-store';
+import { SyncProviderPrivateCfgStore } from './sync-provider-private-cfg-store';
 
 export interface SyncProviderAuthHelper {
   authUrl?: string;
@@ -16,7 +16,7 @@ export interface SyncProviderServiceInterface<C> {
   isUploadForcePossible?: boolean;
   maxConcurrentRequests: number;
 
-  credentialsStore: SyncProviderCredentialsStore<C>;
+  privateCfg: SyncProviderPrivateCfgStore<C>;
 
   /**
    * Gets the current revision and last update time for a file
@@ -59,5 +59,5 @@ export interface SyncProviderServiceInterface<C> {
 
   getAuthHelper?(): Promise<SyncProviderAuthHelper>;
 
-  setCredentials(credentials: C): Promise<void>;
+  setPrivateCfg(privateCfg: C): Promise<void>;
 }

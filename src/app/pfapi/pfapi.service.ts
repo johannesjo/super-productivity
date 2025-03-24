@@ -41,15 +41,15 @@ export class PfapiService {
   // TODO add helper for fromPfapiEventWithInitial
   // TODO needs to contain all the credentials ideally
   public readonly currentProviderCfg$ = merge(
-    fromPfapiEvent(this.pf.ev, 'providerCredentialsChange'),
+    fromPfapiEvent(this.pf.ev, 'providerPrivateCfgChange'),
     of(null).pipe(
       delay(2000),
       switchMap(() => {
         const activeProvider = this.pf.getActiveSyncProvider();
         if (activeProvider) {
-          return from(activeProvider.credentialsStore.load()).pipe(
+          return from(activeProvider.privateCfg.load()).pipe(
             map((d) => ({
-              credentials: d,
+              privateCfg: d,
               providerId: activeProvider.id,
             })),
           );
@@ -118,13 +118,13 @@ export class PfapiService {
       // console.log('_______________________', { v });
       // this.syncCfg$.pipe(take(1)).subscribe((syncCfg) => {
       //   console.log({ syncCfg });
-      //   // this._pfapiWrapperService.pf.setCredentialsForActiveProvider(
+      //   // this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider(
       //   //   v as unknown as SyncProviderId,
       //   // );
       //   // @ts-ignore
       //   if (syncCfg.syncProvider === SyncProviderId.WebDAV) {
       //     if (syncCfg.webDav) {
-      //       this._pfapiWrapperService.pf.setCredentialsForActiveProvider({
+      //       this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider({
       //         ...syncCfg.webDav,
       //       });
       //     }

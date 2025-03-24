@@ -1,9 +1,9 @@
 import { DatabaseAdapter } from './db/database-adapter.model';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
-import { ConflictReason, SyncStatus } from './pfapi.const';
-import { DropboxCredentials } from './sync/providers/dropbox/dropbox';
-import { WebdavCredentials } from './sync/providers/webdav/webdav';
-import { LocalFileSyncElectronCredentials } from './sync/providers/local-file-sync/local-file-sync-electron';
+import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
+import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
+import { WebdavPrivateCfg } from './sync/providers/webdav/webdav';
+import { LocalFileSyncElectronPrivateCfg } from './sync/providers/local-file-sync/local-file-sync-electron';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -152,10 +152,19 @@ export interface CompleteExport<T extends ModelCfgs> {
 }
 
 // TODO better dynamic typing
-export type SyncProviderCredentials =
-  | DropboxCredentials
-  | WebdavCredentials
-  | LocalFileSyncElectronCredentials;
+export type SyncProviderPrivateCfg =
+  | DropboxPrivateCfg
+  | WebdavPrivateCfg
+  | LocalFileSyncElectronPrivateCfg;
+
+export type CredentialByProviderId<T extends SyncProviderId> =
+  T extends SyncProviderId.LocalFile
+    ? LocalFileSyncElectronPrivateCfg
+    : T extends SyncProviderId.WebDAV
+      ? WebdavPrivateCfg
+      : T extends SyncProviderId.Dropbox
+        ? DropboxPrivateCfg
+        : never;
 
 // Define all possible event names
 export type PfapiEvents =
@@ -164,7 +173,7 @@ export type PfapiEvents =
   | 'syncError'
   | 'metaModelChange'
   | 'providerChange'
-  | 'providerCredentialsChange'
+  | 'providerPrivateCfgChange'
   | 'providerReady';
 
 // Map each event name to its payload type
@@ -176,8 +185,8 @@ export interface PfapiEventPayloadMap {
   providerChange: { id: string };
   providerReady: boolean;
   // TODO better dynamic typing
-  providerCredentialsChange: {
+  providerPrivateCfgChange: {
     providerId: string;
-    credentials: SyncProviderCredentials;
+    privateCfg: SyncProviderPrivateCfg;
   };
 }

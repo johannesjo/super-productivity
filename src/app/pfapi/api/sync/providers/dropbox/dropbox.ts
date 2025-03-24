@@ -13,19 +13,19 @@ import { pfLog } from '../../../util/log';
 import { DropboxApi } from './dropbox-api';
 // TODO move over here
 import { generatePKCECodes } from './generate-pkce-codes';
-import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-store';
+import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 
 export interface DropboxCfg {
   appKey: string;
   basePath: string;
 }
 
-export interface DropboxCredentials {
+export interface DropboxPrivateCfg {
   accessToken: string;
   refreshToken: string;
 }
 
-export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials> {
+export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> {
   readonly id: SyncProviderId = SyncProviderId.Dropbox;
   readonly isUploadForcePossible = true;
   readonly maxConcurrentRequests = 4;
@@ -34,7 +34,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
   private readonly _appKey: string;
   private readonly _basePath: string;
 
-  public credentialsStore!: SyncProviderCredentialsStore<DropboxCredentials>;
+  public privateCfg!: SyncProviderPrivateCfgStore<DropboxPrivateCfg>;
 
   constructor(cfg: DropboxCfg) {
     if (!cfg.appKey) {
@@ -47,12 +47,12 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxCredentials>
   }
 
   async isReady(): Promise<boolean> {
-    const credentials = await this.credentialsStore.load();
-    return !!this._appKey && !!credentials?.accessToken && !!credentials?.refreshToken;
+    const privateCfg = await this.privateCfg.load();
+    return !!this._appKey && !!privateCfg?.accessToken && !!privateCfg?.refreshToken;
   }
 
-  async setCredentials(credentials: DropboxCredentials): Promise<void> {
-    await this.credentialsStore.save(credentials);
+  async setPrivateCfg(privateCfg: DropboxPrivateCfg): Promise<void> {
+    await this.privateCfg.save(privateCfg);
   }
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {

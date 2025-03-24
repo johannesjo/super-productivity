@@ -1,36 +1,32 @@
 import { SyncProviderId } from '../../../pfapi.const';
-import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-store';
+import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { createSha1Hash } from '../../../../../util/create-sha-1-hash';
 import { IS_ELECTRON } from '../../../../../app.constants';
 import { NoRemoteDataError } from '../../../errors/errors';
 
-export interface LocalFileSyncElectronCfg {
-  [key: string]: any;
-}
-
-export interface LocalFileSyncElectronCredentials {
+export interface LocalFileSyncElectronPrivateCfg {
   folderPath: string;
 }
 
 // TODO fix errors here
 export class LocalFileSyncElectron
-  implements SyncProviderServiceInterface<LocalFileSyncElectronCredentials>
+  implements SyncProviderServiceInterface<LocalFileSyncElectronPrivateCfg>
 {
   readonly id: SyncProviderId = SyncProviderId.LocalFile;
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
 
-  public credentialsStore!: SyncProviderCredentialsStore<LocalFileSyncElectronCredentials>;
+  public privateCfg!: SyncProviderPrivateCfgStore<LocalFileSyncElectronPrivateCfg>;
 
-  constructor(cfg: LocalFileSyncElectronCfg) {}
+  constructor() {}
 
   async isReady(): Promise<boolean> {
     return true;
   }
 
-  async setCredentials(credentials: LocalFileSyncElectronCredentials): Promise<void> {
-    await this.credentialsStore.save(credentials);
+  async setPrivateCfg(privateCfg: LocalFileSyncElectronPrivateCfg): Promise<void> {
+    await this.privateCfg.save(privateCfg);
   }
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
@@ -137,7 +133,7 @@ export class LocalFileSyncElectron
   }
 
   private async _getFolderPath(): Promise<string> {
-    const folderPath = (await this.credentialsStore.load())?.folderPath;
+    const folderPath = (await this.privateCfg.load())?.folderPath;
     if (!folderPath) {
       throw new Error('No folder path given');
     }
@@ -172,7 +168,7 @@ export class LocalFileSyncElectron
     const dir = await (window as any).ea.pickDirectory();
     alert(dir);
     if (dir) {
-      this.credentialsStore.save({
+      this.privateCfg.save({
         folderPath: dir,
       });
     }

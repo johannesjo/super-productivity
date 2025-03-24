@@ -85,7 +85,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         }
         return {
           ...syncCfg,
-          [currentProviderCfg.providerId]: currentProviderCfg.credentials,
+          [currentProviderCfg.providerId]: currentProviderCfg.privateCfg,
         };
       }),
     )

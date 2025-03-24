@@ -13,7 +13,7 @@ export class PFEventEmitter {
     metaModelChange: [],
     providerChange: [],
     providerReady: [],
-    providerCredentialsChange: [],
+    providerPrivateCfgChange: [],
   };
 
   on<K extends PfapiEvents>(

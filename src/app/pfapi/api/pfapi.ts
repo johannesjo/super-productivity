@@ -18,7 +18,7 @@ import { SyncProviderServiceInterface } from './sync/sync-provider.interface';
 import { pfLog } from './util/log';
 import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
-import { SyncProviderCredentialsStore } from './sync/sync-provider-credentials-store';
+import { SyncProviderPrivateCfgStore } from './sync/sync-provider-private-cfg-store';
 import {
   BackupImportFailedError,
   DataValidationFailedError,
@@ -38,7 +38,7 @@ import { PFEventEmitter } from './util/events';
 // 'sync:complete': { success: boolean; timestamp: number };
 // 'sync:error': Error;
 // 'model:changed': { modelId: string; timestamp: number };
-// 'credentials:update': { credentials: unknown };
+// 'privateCfg:update': { privateCfg: unknown };
 // };
 
 // export class <PCfg extends Cfg, Ms extends ModelCfg<any>[]> {
@@ -91,11 +91,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.syncProviders = syncProviders;
     this.syncProviders.forEach((sp) => {
-      sp.credentialsStore = new SyncProviderCredentialsStore<unknown>(
-        sp.id,
-        this.db,
-        this.ev,
-      );
+      sp.privateCfg = new SyncProviderPrivateCfgStore<unknown>(sp.id, this.db, this.ev);
     });
 
     this._syncService = new SyncService<MD>(
@@ -145,17 +141,17 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   // TODO typing
-  async setCredentialsForActiveProvider(credentials: unknown): Promise<void> {
+  async setPrivateCfgForActiveProvider(privateCfg: unknown): Promise<void> {
     pfLog(
       2,
-      `${this.setCredentialsForActiveProvider.name}()`,
-      credentials,
+      `${this.setPrivateCfgForActiveProvider.name}()`,
+      privateCfg,
       this._activeSyncProvider$.value,
     );
     if (!this._activeSyncProvider$.value) {
       throw new NoSyncProviderSetError();
     }
-    await this._activeSyncProvider$.value.setCredentials(credentials);
+    await this._activeSyncProvider$.value.setPrivateCfg(privateCfg);
     this.ev.emit('providerReady', await this._activeSyncProvider$.value.isReady());
   }
 

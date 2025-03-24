@@ -240,7 +240,7 @@ export class SyncService {
 
           if (authCode) {
             const r = await verifyCodeChallenge(authCode);
-            await this._pfapiWrapperService.pf.setCredentialsForActiveProvider(r);
+            await this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider(r);
           } else {
             throw new Error('No auth code');
           }

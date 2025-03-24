@@ -1,12 +1,12 @@
 // import { createClient } from 'webdav/web';
 import { createClient } from 'webdav';
-import { WebdavCredentials } from './webdav';
+import { WebdavPrivateCfg } from './webdav';
 import { FileStat } from 'webdav/dist/node/types';
 
 export class WebdavApi {
-  private _getCfgOrError: () => Promise<WebdavCredentials>;
+  private _getCfgOrError: () => Promise<WebdavPrivateCfg>;
 
-  constructor(_getCfgOrError: () => Promise<WebdavCredentials>) {
+  constructor(_getCfgOrError: () => Promise<WebdavPrivateCfg>) {
     this._getCfgOrError = _getCfgOrError;
   }
 

@@ -144,14 +144,14 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   // TODO task archive old
 } as const;
 
-export const fileSyncElectron = new LocalFileSyncElectron({});
+export const fileSyncElectron = new LocalFileSyncElectron();
 
 export const PFAPI_SYNC_PROVIDERS = [
   new Dropbox({
     appKey: DROPBOX_APP_KEY,
     basePath: `/`,
   }),
-  new Webdav({}),
+  new Webdav(),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
   // TODO android
   // ...(IS_ELECTRON ? [fileSyncElectron] : []),

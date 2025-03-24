@@ -1,7 +1,7 @@
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
-import { SyncProviderCredentialsStore } from '../../sync-provider-credentials-store';
+import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import {
   AuthNotConfiguredError,
   InvalidDataError,
@@ -20,43 +20,39 @@ import { FileStat } from 'webdav/dist/node/types';
 //   NoRevError,
 // } from '../../errors/errors';
 
-export interface WebdavCfg {
-  bla?: string;
-}
-
-export interface WebdavCredentials {
+export interface WebdavPrivateCfg {
   baseUrl: string;
   userName: string;
   password: string;
   syncFolderPath: string;
 }
 
-export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
+export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   readonly id: SyncProviderId = SyncProviderId.WebDAV;
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
 
   private readonly _api: WebdavApi;
 
-  public credentialsStore!: SyncProviderCredentialsStore<WebdavCredentials>;
+  public privateCfg!: SyncProviderPrivateCfgStore<WebdavPrivateCfg>;
 
-  constructor(cfg: WebdavCfg) {
+  constructor() {
     this._api = new WebdavApi(() => this._cfgOrError());
   }
 
   async isReady(): Promise<boolean> {
-    const credentials = await this.credentialsStore.load();
+    const privateCfg = await this.privateCfg.load();
     return !!(
-      credentials &&
-      credentials.userName &&
-      credentials.baseUrl &&
-      credentials.syncFolderPath &&
-      credentials.password
+      privateCfg &&
+      privateCfg.userName &&
+      privateCfg.baseUrl &&
+      privateCfg.syncFolderPath &&
+      privateCfg.password
     );
   }
 
-  async setCredentials(credentials: WebdavCredentials): Promise<void> {
-    await this.credentialsStore.save(credentials);
+  async setPrivateCfg(privateCfg: WebdavPrivateCfg): Promise<void> {
+    await this.privateCfg.save(privateCfg);
   }
 
   async getFileRev(
@@ -186,12 +182,12 @@ export class Webdav implements SyncProviderServiceInterface<WebdavCredentials> {
     return result;
   }
 
-  private _getFilePath(targetPath: string, cfg: WebdavCredentials): string {
+  private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
     return `${cfg.syncFolderPath}/${targetPath}`;
   }
 
-  private async _cfgOrError(): Promise<WebdavCredentials> {
-    const cfg = await this.credentialsStore.load();
+  private async _cfgOrError(): Promise<WebdavPrivateCfg> {
+    const cfg = await this.privateCfg.load();
     if (!cfg) {
       throw new AuthNotConfiguredError();
     }
