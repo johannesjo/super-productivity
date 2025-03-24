@@ -40,7 +40,7 @@ export class PfapiService {
 
   // TODO add helper for fromPfapiEventWithInitial
   // TODO needs to contain all the credentials ideally
-  public readonly currentProviderCfg$ = merge(
+  public readonly currentProviderPrivateCfg$ = merge(
     fromPfapiEvent(this.pf.ev, 'providerPrivateCfgChange'),
     of(null).pipe(
       delay(2000),
@@ -86,6 +86,7 @@ export class PfapiService {
   isValidateComplete = this.pf.isValidateComplete.bind(this.pf);
   repairCompleteData = this.pf.repairCompleteData.bind(this.pf);
   getCompleteBackup = this.pf.loadCompleteBackup.bind(this.pf);
+  setPrivateCfgForActiveProvider = this.pf.setPrivateCfgForSyncProvider.bind(this.pf);
 
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();

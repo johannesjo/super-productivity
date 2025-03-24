@@ -254,25 +254,8 @@ export class DropboxApiService {
       this._refreshToken$.next(d[LegacySyncProvider.Dropbox].refreshToken);
     } else {
       if (environment.production) {
-        console.log('LEGACY TOKENS');
+        console.log('LEGACY TOKENS BUT REMOVED');
       }
-      // TODO remove legacy stuff
-      this._dataInitService.isAllDataLoadedInitially$
-        .pipe(
-          switchMap(() => this._globalConfigService.cfg$),
-          map((cfg) => cfg?.sync.dropboxSync),
-          first(),
-        )
-        .subscribe((v) => {
-          if (environment.production) {
-            console.log('SETTING LEGACY TOKENS', v as any);
-          }
-          this.updateTokens({
-            accessToken: (v as any)?.accessToken,
-            refreshToken: (v as any)?.refreshToken,
-            expiresAt: 0,
-          });
-        });
     }
   }
 

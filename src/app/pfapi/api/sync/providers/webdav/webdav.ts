@@ -3,6 +3,7 @@ import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import {
+  AuthFailError,
   AuthNotConfiguredError,
   InvalidDataError,
   NoEtagError,
@@ -137,6 +138,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
 
       if ((e as any)?.status === 404) {
         throw new NoRemoteDataError(targetPath);
+      }
+      if ((e as any)?.status === 401) {
+        throw new AuthFailError('WebDav 401', targetPath);
       }
 
       throw e;

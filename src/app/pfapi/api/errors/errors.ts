@@ -110,15 +110,8 @@ export class RevMapModelMismatchErrorOnUpload extends AdditionalLogErrorBase {
 
 // ----------------------------
 
-export class AuthFailError extends Error {
+export class AuthFailError extends AdditionalLogErrorBase {
   override name = AuthFailError.name;
-
-  constructor(
-    message: string,
-    public statusCode: number,
-  ) {
-    super(message);
-  }
 }
 
 export class HttpRealError extends Error {

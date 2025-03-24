@@ -82,7 +82,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
             return this.getFileRev(targetPath, localRev);
           }
         }
-        throw new AuthFailError('Dropbox 401', 401);
+        throw new AuthFailError('Dropbox 401 getFileRev', targetPath);
       } else {
         console.error(e);
         throw new Error(e as any);

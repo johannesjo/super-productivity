@@ -7,6 +7,7 @@ import {
   ModelCfgs,
   ModelCfgToModelCtrl,
   PfapiBaseCfg,
+  PrivateCfgByProviderId,
 } from './pfapi.model';
 import { SyncService } from './sync/sync.service';
 import { Database } from './db/database';
@@ -26,7 +27,6 @@ import {
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
   NoRepairFunctionProvidedError,
-  NoSyncProviderSetError,
   NoValidateFunctionProvidedError,
 } from './errors/errors';
 import { TmpBackupService } from './backup/tmp-backup.service';
@@ -141,18 +141,20 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   // TODO typing
-  async setPrivateCfgForActiveProvider(privateCfg: unknown): Promise<void> {
-    pfLog(
-      2,
-      `${this.setPrivateCfgForActiveProvider.name}()`,
-      privateCfg,
-      this._activeSyncProvider$.value,
-    );
-    if (!this._activeSyncProvider$.value) {
-      throw new NoSyncProviderSetError();
+  async setPrivateCfgForSyncProvider<T extends SyncProviderId>(
+    providerId: T,
+    privateCfg: PrivateCfgByProviderId<T>,
+  ): Promise<void> {
+    pfLog(2, `${this.setPrivateCfgForSyncProvider.name}()`, providerId, privateCfg);
+    const provider = this.syncProviders.find((sp) => sp.id === providerId);
+    if (!provider) {
+      throw new InvalidSyncProviderError();
     }
-    await this._activeSyncProvider$.value.setPrivateCfg(privateCfg);
-    this.ev.emit('providerReady', await this._activeSyncProvider$.value.isReady());
+    await provider.setPrivateCfg(privateCfg);
+
+    if (this._activeSyncProvider$.value?.id === providerId) {
+      this.ev.emit('providerReady', await this._activeSyncProvider$.value.isReady());
+    }
   }
 
   private _getAllSyncModelDataRetryCount = 0;

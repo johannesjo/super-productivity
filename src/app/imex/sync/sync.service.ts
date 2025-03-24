@@ -104,6 +104,7 @@ export class SyncService {
           return r.status;
 
         case SyncStatus.NotConfigured:
+          // TODO try only once to configure or handle via snack
           if (await this._configureActiveSyncProvider()) {
             return this.sync();
           }
@@ -240,7 +241,10 @@ export class SyncService {
 
           if (authCode) {
             const r = await verifyCodeChallenge(authCode);
-            await this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider(r);
+            await this._pfapiWrapperService.pf.setPrivateCfgForSyncProvider(
+              provider.id,
+              r,
+            );
           } else {
             throw new Error('No auth code');
           }

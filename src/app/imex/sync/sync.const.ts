@@ -68,6 +68,6 @@ type ConfigPath =
 
 export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: ConfigPath[] = [
   ['misc', 'darkMode'],
-  ['sync', 'localFileSync', 'syncFolderPath'],
-  ['sync', 'webDav', 'password'],
+  // ['sync', 'localFileSync'],
+  // ['sync', 'webDav', 'password'],
 ];

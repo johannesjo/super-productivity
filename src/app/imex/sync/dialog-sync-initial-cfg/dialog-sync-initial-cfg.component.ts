@@ -16,6 +16,8 @@ import { FormlyModule } from '@ngx-formly/core';
 import { SyncConfig } from '../../../features/config/global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../../../features/config/default-global-config.const';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { SyncSettingsService } from '../sync-settings.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'dialog-sync-initial-cfg',
@@ -31,10 +33,13 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
     TranslatePipe,
     FormlyConfigModule,
     FormlyModule,
+    AsyncPipe,
   ],
 })
 export class DialogSyncInitialCfgComponent {
   globalConfigService = inject(GlobalConfigService);
+  syncSettingsService = inject(SyncSettingsService);
+
   T = T;
   SYNC_FORM = SYNC_FORM;
   fields = [
@@ -55,12 +60,8 @@ export class DialogSyncInitialCfgComponent {
     this._matDialogRef.close();
   }
 
-  save(): void {
+  save(cfg): void {
     this.globalConfigService.updateSection('sync', this.cfg);
     this._matDialogRef.close();
-  }
-
-  updateCfg(d: SyncConfig): void {
-    this.cfg = d;
   }
 }

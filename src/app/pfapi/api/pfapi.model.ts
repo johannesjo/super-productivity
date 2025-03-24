@@ -157,7 +157,7 @@ export type SyncProviderPrivateCfg =
   | WebdavPrivateCfg
   | LocalFileSyncElectronPrivateCfg;
 
-export type CredentialByProviderId<T extends SyncProviderId> =
+export type PrivateCfgByProviderId<T extends SyncProviderId> =
   T extends SyncProviderId.LocalFile
     ? LocalFileSyncElectronPrivateCfg
     : T extends SyncProviderId.WebDAV

@@ -25,7 +25,7 @@ export class LocalFileSyncElectronService implements SyncProviderServiceInterfac
   );
 
   private _folderPath$: Observable<string | null> = this._globalConfigService.sync$.pipe(
-    map((sync) => sync.localFileSync.syncFolderPath),
+    map((sync) => sync.localFileSync?.syncFolderPath || null),
   );
   private _folderPathOnce$: Observable<string | null> = this._folderPath$.pipe(first());
 

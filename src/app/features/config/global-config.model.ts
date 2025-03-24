@@ -84,8 +84,7 @@ export type PomodoroConfig = Readonly<{
 }>;
 
 // NOTE: needs to be writable due to how we use it
-
-export type DropboxSyncConfig = object;
+// export type DropboxSyncConfig = object;
 
 export interface WebDavConfig {
   baseUrl: string | null;
@@ -126,12 +125,12 @@ export type SyncConfig = Readonly<{
   syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
-  /* @deprecated */
-  dropboxSync: DropboxSyncConfig;
-  /* @deprecated */
-  webDav: WebDavConfig;
-  /* @deprecated */
-  localFileSync: LocalFileSyncConfig;
+  /* NOTE: view model for form only*/
+  // dropboxSync?: DropboxSyncConfig;
+  /* NOTE: view model for form only*/
+  webDav?: WebDavConfig;
+  /* NOTE: view model for form only*/
+  localFileSync?: LocalFileSyncConfig;
 }>;
 export type LegacyCalendarIntegrationConfig = Readonly<{
   calendarProviders: LegacyCalendarProvider[];

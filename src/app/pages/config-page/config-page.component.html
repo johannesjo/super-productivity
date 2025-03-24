@@ -70,9 +70,11 @@
         </h2>
 
         <section class="config-section tour-syncSection">
+          <!-- weirdly this also fixes the issue of the form updating when clicking to expand the advanced settings -->
+          @let syncSettingsForForm = syncSettingsService.syncSettingsForm$ | async;
           <config-section
-            (save)="saveSyncFormCfg($event)"
-            [cfg]="syncFormCfg$ | async"
+            (save)="syncSettingsService.updateSettingsFromForm($event.config)"
+            [cfg]=""
             [section]="globalSyncConfigFormCfg"
           ></config-section>
         </section>

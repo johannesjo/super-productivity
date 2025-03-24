@@ -216,7 +216,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
       delete (config.sync as any).googleDriveSync;
     }
 
-    if (!config.sync.localFileSync || !config.sync.dropboxSync || !config.sync.webDav) {
+    if (!config.sync.localFileSync || !config.sync.webDav) {
       console.warn(
         'sync config was missing some keys, reverting to default',
         config.sync,

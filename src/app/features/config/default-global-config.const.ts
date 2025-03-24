@@ -176,12 +176,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     syncProvider: null,
     syncInterval: minute,
 
-    dropboxSync: {
-      accessToken: null,
-      refreshToken: null,
-      _tokenExpiresAt: undefined,
-    },
-
     webDav: {
       baseUrl: null,
       userName: null,

@@ -40,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
 import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
+import { SyncSettingsService } from '../../imex/sync/sync-settings.service';
 
 @Component({
   selector: 'config-page',
@@ -60,6 +61,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _pfapiService = inject(PfapiService);
   readonly configService = inject(GlobalConfigService);
+  readonly syncSettingsService = inject(SyncSettingsService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -75,7 +77,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   // TODO needs to contain all sync providers....
   // TODO maybe handling this in an effect would be better????
   syncFormCfg$: Observable<any> = combineLatest([
-    this._pfapiService.currentProviderCfg$,
+    this._pfapiService.currentProviderPrivateCfg$,
     this.configService.sync$,
   ])
     .pipe(
@@ -117,7 +119,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.add(
       this.configService.cfg$.subscribe((cfg) => {
         this.globalCfg = cfg;
-        this._cd.detectChanges();
+        // this._cd.detectChanges();
       }),
     );
   }
