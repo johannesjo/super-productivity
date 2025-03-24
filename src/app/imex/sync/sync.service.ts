@@ -9,7 +9,6 @@ import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
   AuthFailError,
-  ImpossibleError,
   LockFilePresentError,
   SyncProviderId,
   SyncStatus,
@@ -32,7 +31,7 @@ import { ReminderService } from '../../features/reminder/reminder.service';
   providedIn: 'root',
 })
 export class SyncService {
-  private _pfapiWrapperService = inject(PfapiService);
+  private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _translateService = inject(TranslateService);
   private _snackService = inject(SnackService);
@@ -43,7 +42,7 @@ export class SyncService {
   // private _imexViewService = inject(ImexViewService);
 
   // TODO
-  isCurrentProviderInSync$ = this._pfapiWrapperService.isCurrentProviderInSync$;
+  isCurrentProviderInSync$ = this._pfapiService.isCurrentProviderInSync$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),
@@ -58,7 +57,7 @@ export class SyncService {
   isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
 
   isEnabledAndReady$: Observable<boolean> =
-    this._pfapiWrapperService.isSyncProviderEnabledAndReady$.pipe();
+    this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
 
   isSyncing$ = new BehaviorSubject<boolean>(false);
 
@@ -84,7 +83,7 @@ export class SyncService {
     try {
       this._globalProgressBarService.countUp('SYNC');
       this.isSyncing$.next(true);
-      const r = await this._pfapiWrapperService.pf.sync();
+      const r = await this._pfapiService.pf.sync();
 
       this.isSyncing$.next(false);
       this._globalProgressBarService.countDown();
@@ -104,10 +103,8 @@ export class SyncService {
           return r.status;
 
         case SyncStatus.NotConfigured:
-          // TODO try only once to configure or handle via snack
-          if (await this._configureActiveSyncProvider()) {
-            return this.sync();
-          }
+          alert('aa');
+          this.configuredAuthForSyncProviderIfNecessary(providerId);
           return r.status;
 
         case SyncStatus.IncompleteRemoteData:
@@ -123,14 +120,14 @@ export class SyncService {
           if (res === 'USE_LOCAL') {
             this._globalProgressBarService.countUp('SYNC');
             this.isSyncing$.next(true);
-            await this._pfapiWrapperService.pf.uploadAll();
+            await this._pfapiService.pf.uploadAll();
             this.isSyncing$.next(false);
             this._globalProgressBarService.countDown();
             return SyncStatus.UpdateLocalAll;
           } else if (res === 'USE_REMOTE') {
             this._globalProgressBarService.countUp('SYNC');
             this.isSyncing$.next(true);
-            await this._pfapiWrapperService.pf.downloadAll();
+            await this._pfapiService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
             this.isSyncing$.next(false);
             this._globalProgressBarService.countDown();
@@ -197,6 +194,65 @@ export class SyncService {
     }
   }
 
+  async configuredAuthForSyncProviderIfNecessary(
+    providerId: SyncProviderId,
+  ): Promise<{ wasConfigured: boolean }> {
+    const provider = await this._pfapiService.getSyncProviderById(providerId);
+    console.log(provider);
+
+    if (!provider) {
+      return { wasConfigured: false };
+    }
+
+    if (!provider.getAuthHelper) {
+      this._snackService.open({
+        msg: T.F.SYNC.S.INCOMPLETE_CFG,
+        type: 'ERROR',
+      });
+      return { wasConfigured: false };
+    }
+
+    try {
+      const { authUrl, codeVerifier, verifyCodeChallenge } =
+        await provider.getAuthHelper();
+      if (authUrl && codeVerifier && verifyCodeChallenge) {
+        const authCode = await this._matDialog
+          .open(DialogGetAndEnterAuthCodeComponent, {
+            restoreFocus: true,
+            data: {
+              providerName: provider.id,
+              url: authUrl,
+            },
+          })
+          .afterClosed()
+          .toPromise();
+        if (authCode) {
+          const r = await verifyCodeChallenge(authCode);
+          await this._pfapiService.setPrivateCfgForSyncProvider(provider.id, r);
+          // NOTE: exec sync afterward; promise not awaited
+          setTimeout(() => {
+            this.sync();
+          }, 1000);
+          return { wasConfigured: true };
+        } else {
+          // this._globalConfigService.updateSection('sync', {
+          //   isEnabled: false,
+          // });
+          return { wasConfigured: false };
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      this._snackService.open({
+        // TODO don't limit snack to dropbox
+        msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
+        type: 'ERROR',
+      });
+      return { wasConfigured: false };
+    }
+    return { wasConfigured: false };
+  }
+
   private async _reInitAppAfterDataModelChange(): Promise<void> {
     // TODO maybe do it more elegantly with pfapi.events
     // this._imexViewService.setDataImportInProgress(true);
@@ -216,58 +272,7 @@ export class SyncService {
     return confirm(this._translateService.instant(str));
   }
 
-  private async _configureActiveSyncProvider(): Promise<boolean> {
-    const provider = this._pfapiWrapperService.pf.getActiveSyncProvider();
-    if (!provider) {
-      throw new ImpossibleError('No provider');
-    }
-
-    if (provider.getAuthHelper) {
-      try {
-        const { authUrl, codeVerifier, verifyCodeChallenge } =
-          await provider.getAuthHelper();
-        if (authUrl && codeVerifier && verifyCodeChallenge) {
-          const authCode = await this._matDialog
-            .open(DialogGetAndEnterAuthCodeComponent, {
-              restoreFocus: true,
-              data: {
-                // TODO better name
-                providerName: provider.id,
-                url: authUrl,
-              },
-            })
-            .afterClosed()
-            .toPromise();
-
-          if (authCode) {
-            const r = await verifyCodeChallenge(authCode);
-            await this._pfapiWrapperService.pf.setPrivateCfgForSyncProvider(
-              provider.id,
-              r,
-            );
-          } else {
-            throw new Error('No auth code');
-          }
-        }
-      } catch (error) {
-        console.error(error);
-        this._snackService.open({
-          // TODO don't limit snack to dropbox
-          msg: T.F.DROPBOX.S.UNABLE_TO_GENERATE_PKCE_CHALLENGE,
-          type: 'ERROR',
-        });
-      }
-      return true;
-    }
-
-    this._snackService.open({
-      msg: T.F.SYNC.S.INCOMPLETE_CFG,
-      type: 'ERROR',
-    });
-    return false;
-  }
-
-  private lastDialog?: MatDialogRef<any, any>;
+  private lastConflictDialog?: MatDialogRef<any, any>;
 
   private _openConflictDialog$({
     remote,
@@ -278,10 +283,10 @@ export class SyncService {
     local: number | null;
     lastSync: number;
   }): Observable<DialogConflictResolutionResult> {
-    if (this.lastDialog) {
-      this.lastDialog.close();
+    if (this.lastConflictDialog) {
+      this.lastConflictDialog.close();
     }
-    this.lastDialog = this._matDialog.open(DialogSyncConflictComponent, {
+    this.lastConflictDialog = this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
       disableClose: true,
       data: {
@@ -290,7 +295,7 @@ export class SyncService {
         lastSync,
       },
     });
-    return this.lastDialog.afterClosed();
+    return this.lastConflictDialog.afterClosed();
   }
 
   private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {

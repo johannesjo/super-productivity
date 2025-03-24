@@ -40,7 +40,7 @@ import { AsyncPipe } from '@angular/common';
 import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
-import { SyncSettingsService } from '../../imex/sync/sync-settings.service';
+import { SyncConfigService } from '../../imex/sync/sync-config.service';
 
 @Component({
   selector: 'config-page',
@@ -61,13 +61,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _pfapiService = inject(PfapiService);
   readonly configService = inject(GlobalConfigService);
-  readonly syncSettingsService = inject(SyncSettingsService);
+  readonly syncSettingsService = inject(SyncConfigService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
   globalImexFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
-  globalSyncConfigFormCfg = SYNC_FORM;
+  globalSyncConfigFormCfg = { ...SYNC_FORM };
 
   globalCfg?: GlobalConfigState;
 

@@ -2,18 +2,17 @@
 <h1 mat-dialog-title>{{ T.F.SYNC.D_INITIAL_CFG.TITLE | translate }}</h1>
 
 <mat-dialog-content>
-  <!-- weirdly this also fixes the issue of the form updating when clicking to expand the advanced settings -->
-  @let syncSettingsForForm = syncSettingsService.syncSettingsForm$ | async;
-
-  <form [formGroup]="form">
-    <formly-form
-      (modelChange)="syncSettingsService.updateSettingsFromForm($event)"
-      [fields]="fields"
-      [form]="form"
-      [model]="syncSettingsForForm"
-    >
-    </formly-form>
-  </form>
+  @if (_tmpUpdatedCfg) {
+    <form [formGroup]="form">
+      <formly-form
+        (modelChange)="updateTmpCfg($event)"
+        [fields]="fields"
+        [form]="form"
+        [model]="_tmpUpdatedCfg"
+      >
+      </formly-form>
+    </form>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

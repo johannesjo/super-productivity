@@ -17,7 +17,14 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { delay, distinctUntilChanged, map, shareReplay, switchMap } from 'rxjs/operators';
+import {
+  delay,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { fromPfapiEvent } from './pfapi-helper';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
@@ -36,7 +43,11 @@ export class PfapiService {
   public readonly isSyncProviderEnabledAndReady$ = fromPfapiEvent(
     this.pf.ev,
     'providerReady',
-  ).pipe(shareReplay(1), distinctUntilChanged());
+  ).pipe(
+    shareReplay(1),
+    distinctUntilChanged(),
+    tap((v) => console.log(`isSyncProviderEnabledAndReady$`, v)),
+  );
 
   // TODO add helper for fromPfapiEventWithInitial
   // TODO needs to contain all the credentials ideally
@@ -86,7 +97,9 @@ export class PfapiService {
   isValidateComplete = this.pf.isValidateComplete.bind(this.pf);
   repairCompleteData = this.pf.repairCompleteData.bind(this.pf);
   getCompleteBackup = this.pf.loadCompleteBackup.bind(this.pf);
-  setPrivateCfgForActiveProvider = this.pf.setPrivateCfgForSyncProvider.bind(this.pf);
+  setPrivateCfgForSyncProvider = this.pf.setPrivateCfgForSyncProvider.bind(this.pf);
+  getSyncProviderPrivateCfg = this.pf.getSyncProviderPrivateCfg.bind(this.pf);
+  getSyncProviderById = this.pf.getSyncProviderById.bind(this.pf);
 
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
@@ -100,7 +113,11 @@ export class PfapiService {
 
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       // TODO handle android webdav
-      this.pf.setActiveSyncProvider(cfg.syncProvider as unknown as SyncProviderId);
+      console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider);
+
+      this.pf.setActiveSyncProvider(
+        cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
+      );
       // TODO re-implement
       // if (
       //   providerId === this._localFileSyncAndroidService &&

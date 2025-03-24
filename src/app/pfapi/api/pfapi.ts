@@ -140,6 +140,30 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._activeSyncProvider$.value;
   }
 
+  async getSyncProviderById<T extends SyncProviderId>(
+    providerId: T,
+  ): Promise<SyncProviderServiceInterface<T>> {
+    pfLog(2, `${this.getSyncProviderById.name}()`, providerId);
+    const provider = this.syncProviders.find((sp) => sp.id === providerId);
+    if (!provider) {
+      throw new InvalidSyncProviderError();
+    }
+    // TODO typing
+    return provider as SyncProviderServiceInterface<T>;
+  }
+
+  async getSyncProviderPrivateCfg<T extends SyncProviderId>(
+    providerId: T,
+  ): Promise<PrivateCfgByProviderId<T>> {
+    pfLog(2, `${this.getSyncProviderPrivateCfg.name}()`, providerId);
+    const provider = this.syncProviders.find((sp) => sp.id === providerId);
+    if (!provider) {
+      throw new InvalidSyncProviderError();
+    }
+    // TODO typing
+    return (await provider.privateCfg.load()) as Promise<PrivateCfgByProviderId<T>>;
+  }
+
   // TODO typing
   async setPrivateCfgForSyncProvider<T extends SyncProviderId>(
     providerId: T,

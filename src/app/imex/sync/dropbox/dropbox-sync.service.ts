@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged } from 'rxjs/operators';
 import { DropboxApiService } from './dropbox-api.service';
@@ -9,14 +9,12 @@ import {
 import { SyncGetRevResult } from '../sync.model';
 import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { T } from '../../../t.const';
 import {
   LegacySyncProvider,
   SyncProviderServiceInterface,
   SyncTarget,
 } from '../legacy-sync-provider.model';
 import { Store } from '@ngrx/store';
-import { triggerDropboxAuthDialog } from './store/dropbox.actions';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxSyncService implements SyncProviderServiceInterface {
@@ -68,12 +66,12 @@ export class DropboxSyncService implements SyncProviderServiceInterface {
             return this.getFileRevAndLastClientUpdate(syncTarget, localRev);
           }
         }
-        this._snackService.open({
-          msg: T.F.DROPBOX.S.AUTH_ERROR,
-          type: 'ERROR',
-          actionStr: T.F.DROPBOX.S.AUTH_ERROR_ACTION,
-          actionFn: () => this._store.dispatch(triggerDropboxAuthDialog()),
-        });
+        // this._snackService.open({
+        //   msg: T.F.DROPBOX.S.AUTH_ERROR,
+        //   type: 'ERROR',
+        //   actionStr: T.F.DROPBOX.S.AUTH_ERROR_ACTION,
+        //   actionFn: () => this._store.dispatch(triggerDropboxAuthDialog()),
+        // });
         return 'HANDLED_ERROR';
       } else {
         console.error(e);

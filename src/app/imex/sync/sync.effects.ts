@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import {
   concatMap,
@@ -7,7 +7,6 @@ import {
   exhaustMap,
   filter,
   map,
-  mapTo,
   pairwise,
   shareReplay,
   switchMap,
@@ -140,7 +139,8 @@ export class SyncEffects {
             ),
 
             // initial after enabling it,
-            this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
+            // TODO maybe re-enable
+            // this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
           ),
         ),
         tap((x) => console.log('sync(effect).....', x)),

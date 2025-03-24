@@ -14,10 +14,11 @@ import { FormGroup } from '@angular/forms';
 import { FormlyConfigModule } from '../../../ui/formly-config.module';
 import { FormlyModule } from '@ngx-formly/core';
 import { SyncConfig } from '../../../features/config/global-config.model';
-import { DEFAULT_GLOBAL_CONFIG } from '../../../features/config/default-global-config.const';
-import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { SyncSettingsService } from '../sync-settings.service';
-import { AsyncPipe } from '@angular/common';
+import { SyncConfigService } from '../sync-config.service';
+import { SyncService } from '../sync.service';
+import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { SyncProviderId } from '../../../pfapi/api';
 
 @Component({
   selector: 'dialog-sync-initial-cfg',
@@ -33,12 +34,11 @@ import { AsyncPipe } from '@angular/common';
     TranslatePipe,
     FormlyConfigModule,
     FormlyModule,
-    AsyncPipe,
   ],
 })
 export class DialogSyncInitialCfgComponent {
-  globalConfigService = inject(GlobalConfigService);
-  syncSettingsService = inject(SyncSettingsService);
+  syncConfigService = inject(SyncConfigService);
+  syncService = inject(SyncService);
 
   T = T;
   SYNC_FORM = SYNC_FORM;
@@ -47,21 +47,50 @@ export class DialogSyncInitialCfgComponent {
     ...SYNC_FORM.items!.filter((f) => f.key !== 'isEnabled' && f.key !== 'syncProvider'),
   ];
   form = new FormGroup({});
-  cfg: SyncConfig = {
-    ...DEFAULT_GLOBAL_CONFIG.sync,
-    ...this.globalConfigService.cfg?.sync,
-    isEnabled: true,
-  };
+  _tmpUpdatedCfg?: SyncConfig;
 
   private _matDialogRef =
     inject<MatDialogRef<DialogSyncInitialCfgComponent>>(MatDialogRef);
+
+  private _subs = new Subscription();
+
+  constructor() {
+    this._subs.add(
+      this.syncConfigService.syncSettingsForm$.pipe(first()).subscribe((v) => {
+        this.updateTmpCfg({
+          ...v,
+          isEnabled: true,
+        });
+      }),
+    );
+  }
 
   close(): void {
     this._matDialogRef.close();
   }
 
-  save(cfg): void {
-    this.globalConfigService.updateSection('sync', this.cfg);
-    this._matDialogRef.close();
+  async save(): Promise<void> {
+    if (this._tmpUpdatedCfg) {
+      await this.syncConfigService.updateSettingsFromForm(
+        {
+          ...this._tmpUpdatedCfg,
+          isEnabled: true,
+        },
+        true,
+      );
+      if (this._tmpUpdatedCfg.syncProvider) {
+        this.syncService.configuredAuthForSyncProviderIfNecessary(
+          this._tmpUpdatedCfg.syncProvider as unknown as SyncProviderId,
+        );
+      }
+
+      this._matDialogRef.close();
+    } else {
+      throw new Error('No tmpCfg');
+    }
+  }
+
+  updateTmpCfg(cfg: SyncConfig): void {
+    this._tmpUpdatedCfg = cfg;
   }
 }
