@@ -71,11 +71,11 @@
 
         <section class="config-section tour-syncSection">
           <!-- NOTE: we need to debounce, as external updates end us in an endless loop -->
-          @let syncSettingsFormOnce = syncSettingsService.syncSettingsFormOnce$ | async;
-          @if (syncSettingsFormOnce) {
+          @let syncSettingsForm = syncSettingsService.syncSettingsForm$ | async;
+          @if (syncSettingsForm) {
             <config-section
               (save)="syncSettingsService.updateSettingsFromForm($event.config)"
-              [cfg]="syncSettingsFormOnce"
+              [cfg]="syncSettingsForm"
               [section]="globalSyncConfigFormCfg"
             ></config-section>
           }
