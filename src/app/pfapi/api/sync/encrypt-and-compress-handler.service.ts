@@ -5,8 +5,11 @@ import {
 import { pfLog } from '../util/log';
 import { decrypt, encrypt } from '../encryption/encryption';
 import { DecryptNoPasswordError } from '../errors/errors';
+import {
+  compressWithGzipToString,
+  decompressGzipFromString,
+} from '../compression/compression-handler';
 
-// TODO move to pure functions maybe
 export class EncryptAndCompressHandlerService {
   async compressAndEncrypt<T>({
     data,
@@ -29,12 +32,11 @@ export class EncryptAndCompressHandlerService {
     pfLog(
       2,
       `${EncryptAndCompressHandlerService.name}.${this.compressAndEncrypt.name}()`,
-      { prefix, data, modelVersion, isCompress, isEncrypt },
+      { prefix, modelVersion, isCompress, isEncrypt },
     );
     let dataStr = JSON.stringify(data);
     if (isCompress) {
-      // TODO
-      // dataStr = dataStr;
+      dataStr = await compressWithGzipToString(dataStr);
     }
     if (isEncrypt) {
       if (!encryptKey) {
@@ -62,12 +64,11 @@ export class EncryptAndCompressHandlerService {
     pfLog(
       2,
       `${EncryptAndCompressHandlerService.name}.${this.decompressAndDecrypt.name}()`,
-      { isCompressed, isEncrypted, modelVersion, cleanDataStr, dataStr },
+      { isCompressed, isEncrypted, modelVersion },
     );
     let outStr = cleanDataStr;
     if (isCompressed) {
-      // TODO
-      // outStr = outStr;
+      outStr = await decompressGzipFromString(outStr);
     }
     if (isEncrypted) {
       if (!encryptKey) {
@@ -80,7 +81,6 @@ export class EncryptAndCompressHandlerService {
         });
       }
       outStr = await decrypt(outStr, encryptKey);
-      console.log({ outStr });
     }
 
     return {

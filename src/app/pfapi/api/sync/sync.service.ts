@@ -589,9 +589,13 @@ export class SyncService<const MD extends ModelCfgs> {
       validateMetaBase(meta),
       meta.crossModelVersion,
     );
+    if (encryptedAndCompressedData.length > 200000) {
+      console.log('___________LAAARGE DATA UPLOAD');
+      alert('LAAARGE DATA UPLOAD');
+    }
     pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, {
       meta,
-      encryptedAndCompressedData,
+      // encryptedAndCompressedData,
     });
 
     const syncProvider = this._getCurrentSyncProviderOrError();
@@ -791,6 +795,8 @@ export class SyncService<const MD extends ModelCfgs> {
     const mainFileModelIds = Object.keys(this.m).filter(
       (modelId) => this.m[modelId].modelCfg.isMainFileModel,
     );
+    console.log('____________________________', mainFileModelIds);
+
     completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
     const mainModelData: MainModelData = Object.fromEntries(
       mainFileModelIds.map((modelId) => [modelId, completeModel[modelId]]),

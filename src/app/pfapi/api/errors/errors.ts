@@ -164,3 +164,10 @@ export class DecryptNoPasswordError extends AdditionalLogErrorBase {
 export class CannotGetEncryptAndCompressCfg extends AdditionalLogErrorBase {
   override name = CannotGetEncryptAndCompressCfg.name;
 }
+
+export class CompressError extends AdditionalLogErrorBase {
+  override name = CompressError.name;
+}
+export class DecompressError extends AdditionalLogErrorBase {
+  override name = DecompressError.name;
+}
