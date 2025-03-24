@@ -25,14 +25,14 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
-  // We don't wan the spinner to appear forever, after 30000 seconds we just assume something
+  // We don't want the spinner to appear forever, after 60 seconds we just assume something
   // was not counted down correctly
   private _dirtyCountdown$ = this.isShowGlobalProgressBar$.pipe(
     switchMap((isShow) => {
       return isShow
-        ? timer(30 * 1000).pipe(
+        ? timer(60 * 1000).pipe(
             tap(() => {
-              console.error('Global spinner was shown forever (30s). Forcing countDown!');
+              console.error('Global spinner was shown forever (60s). Forcing countDown!');
               this.countDown();
             }),
           )

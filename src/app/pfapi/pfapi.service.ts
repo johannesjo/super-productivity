@@ -116,6 +116,11 @@ export class PfapiService {
       this.pf.setActiveSyncProvider(
         cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
       );
+      this.pf.setEncryptAndCompressCfg({
+        encryptKey: cfg.encryptionPassword || undefined,
+        isEncrypt: cfg.isEncryptionEnabled,
+        isCompress: cfg.isCompressionEnabled,
+      });
       // TODO re-implement
       // if (
       //   providerId === this._localFileSyncAndroidService &&

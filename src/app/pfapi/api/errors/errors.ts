@@ -156,3 +156,11 @@ export class NoValidateFunctionProvidedError extends Error {
 export class BackupImportFailedError extends AdditionalLogErrorBase {
   override name = BackupImportFailedError.name;
 }
+
+export class DecryptNoPasswordError extends AdditionalLogErrorBase {
+  override name = DecryptNoPasswordError.name;
+}
+
+export class CannotGetEncryptAndCompressCfg extends AdditionalLogErrorBase {
+  override name = CannotGetEncryptAndCompressCfg.name;
+}

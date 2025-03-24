@@ -2,6 +2,7 @@ import {
   AllSyncModels,
   CompleteBackup,
   ConflictData,
+  EncryptAndCompressCfg,
   ExtractModelCfgType,
   ModelBase,
   ModelCfgs,
@@ -33,21 +34,18 @@ import { TmpBackupService } from './backup/tmp-backup.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 
-// type EventMap = {
-// 'sync:start': undefined;
-// 'sync:complete': { success: boolean; timestamp: number };
-// 'sync:error': Error;
-// 'model:changed': { modelId: string; timestamp: number };
-// 'privateCfg:update': { privateCfg: unknown };
-// };
-
 // export class <PCfg extends Cfg, Ms extends ModelCfg<any>[]> {
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
 
   private readonly _syncService: SyncService<MD>;
-  private readonly _activeSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null> =
+  private readonly _activeSyncProvider$ =
     new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
+  private readonly _encryptAndCompressCfg$ = new MiniObservable<EncryptAndCompressCfg>({
+    isCompress: false,
+    isEncrypt: false,
+    encryptKey: undefined,
+  });
   private readonly _cfg?: PfapiBaseCfg<MD>;
 
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
@@ -99,6 +97,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.m,
       this,
       this._activeSyncProvider$,
+      this._encryptAndCompressCfg$,
       this.metaModel,
       new EncryptAndCompressHandlerService(),
     );
@@ -179,6 +178,11 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (this._activeSyncProvider$.value?.id === providerId) {
       this.ev.emit('providerReady', await this._activeSyncProvider$.value.isReady());
     }
+  }
+
+  setEncryptAndCompressCfg(cfg: EncryptAndCompressCfg): void {
+    pfLog(2, `${this.setEncryptAndCompressCfg.name}()`, cfg);
+    this._encryptAndCompressCfg$.next(cfg);
   }
 
   private _getAllSyncModelDataRetryCount = 0;
@@ -305,26 +309,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     return this._syncService.uploadAll(isSkipLockFileCheck);
   }
 
-  // public on<K extends keyof EventMap>(
-  //   eventName: K,
-  //   callback: (data: EventMap[K]) => void,
-  // ): () => void {
-  //   // Implement event handling
-  //   const eventId = Symbol();
-  //   this._eventHandlers.set(eventName, {
-  //     ...(this._eventHandlers.get(eventName) || {}),
-  //     [eventId]: callback,
-  //   });
-  //
-  //   // Return unsubscribe function
-  //   return () => {
-  //     const handlers = this._eventHandlers.get(eventName);
-  //     if (handlers) {
-  //       delete handlers[eventId];
-  //     }
-  //   };
-  // }
-
   isValidateComplete(data: AllSyncModels<MD>): boolean {
     pfLog(2, `${this.isValidateComplete.name}()`, { data });
     if (!this._cfg?.validate) {
@@ -360,15 +344,4 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     return result as ModelCfgToModelCtrl<MD>;
   }
-
-  // /**
-  //  * Updates configuration and propagates changes
-  //  * @param cfg Updated configuration
-  //  */
-  // // TODO think about this
-  // public updateCfg(cfg: Partial<BaseCfg>): void {
-  //   const currentCfg = this._cfg$.value;
-  //   const newCfg = { ...currentCfg, ...cfg };
-  //   this._cfg$.next(newCfg);
-  // }
 }

@@ -1,6 +1,7 @@
 import {
   AllSyncModels,
   ConflictData,
+  EncryptAndCompressCfg,
   LocalMeta,
   MainModelData,
   ModelCfgs,
@@ -12,6 +13,7 @@ import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { LOCK_FILE_NAME, SyncStatus } from '../pfapi.const';
 import {
+  CannotGetEncryptAndCompressCfg,
   LockFileEmptyOrMessedUpError,
   LockFileFromLocalClientPresentError,
   LockFilePresentError,
@@ -41,6 +43,7 @@ export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_MAIN_FILE_MODE: boolean;
 
   readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
+  readonly _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>;
   readonly _metaModelCtrl: MetaModelCtrl;
   readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
   readonly _pfapiMain: Pfapi<MD>;
@@ -50,6 +53,7 @@ export class SyncService<const MD extends ModelCfgs> {
     m: ModelCfgToModelCtrl<MD>,
     _pfapiMain: Pfapi<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
@@ -57,6 +61,7 @@ export class SyncService<const MD extends ModelCfgs> {
     this.m = m;
     this._pfapiMain = _pfapiMain;
     this._currentSyncProvider$ = _currentSyncProvider$;
+    this._encryptAndCompressCfg$ = _encryptAndCompressCfg$;
     this._metaModelCtrl = _metaModelCtrl;
     this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
@@ -489,6 +494,14 @@ export class SyncService<const MD extends ModelCfgs> {
     return provider;
   }
 
+  private _getEncryptionAndCompressionSettings(): EncryptAndCompressCfg {
+    const cfg = this._encryptAndCompressCfg$.value;
+    if (!cfg) {
+      throw new CannotGetEncryptAndCompressCfg();
+    }
+    return cfg;
+  }
+
   private _getRemoteFilePathForModelId(modelId: string): string {
     return modelId;
   }
@@ -687,11 +700,25 @@ export class SyncService<const MD extends ModelCfgs> {
     data: T,
     modelVersion: number,
   ): Promise<string> {
-    return this._encryptAndCompressHandler.compressAndEncrypt(data, modelVersion);
+    const { isCompress, isEncrypt, encryptKey } =
+      this._getEncryptionAndCompressionSettings();
+    return this._encryptAndCompressHandler.compressAndEncrypt({
+      data,
+      modelVersion,
+      isCompress,
+      isEncrypt,
+      encryptKey,
+    });
   }
 
-  private async _decompressAndDecryptData<T>(data: string): Promise<T> {
-    return (await this._encryptAndCompressHandler.decompressAndDecrypt<T>(data)).data;
+  private async _decompressAndDecryptData<T>(dataStr: string): Promise<T> {
+    const { encryptKey } = this._getEncryptionAndCompressionSettings();
+    return (
+      await this._encryptAndCompressHandler.decompressAndDecrypt<T>({
+        dataStr,
+        encryptKey,
+      })
+    ).data;
   }
 
   // --------------------------------------------------

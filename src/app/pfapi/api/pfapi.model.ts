@@ -190,3 +190,9 @@ export interface PfapiEventPayloadMap {
     privateCfg: SyncProviderPrivateCfg;
   };
 }
+
+export interface EncryptAndCompressCfg {
+  isEncrypt: boolean;
+  isCompress: boolean;
+  encryptKey?: string;
+}
