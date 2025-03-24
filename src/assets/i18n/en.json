@@ -1267,7 +1267,8 @@
         "IDLE_FOR": "You have been idle for:",
         "TASK": "Task",
         "TRACK_TO": "Track to:",
-        "UNTRACKED_TIME": "Untracked time:"
+        "UNTRACKED_TIME": "Untracked time:",
+        "NOTIFICATION_TITLE": "Track your time!"
       }
     },
     "WORKLOG": {
@@ -1548,6 +1549,7 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
+      "TRACK_TIME_SOUND": "Track time reminder sound",
       "DONE_SOUND": "Task marked done sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
       "TITLE": "Sound",
@@ -1578,7 +1580,9 @@
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
       "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
-      "TITLE": "Time Tracking"
+      "TITLE": "Time Tracking",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Notify when time tracking reminder is shown",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)"
     }
   },
   "GLOBAL_SNACK": {

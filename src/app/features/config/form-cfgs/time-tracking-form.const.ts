@@ -55,6 +55,22 @@ export const TIME_TRACKING_FORM_CFG: ConfigFormSection<TimeTrackingConfig> = {
       },
     },
     {
+      key: 'isTrackingReminderNotify',
+      type: 'checkbox',
+      hideExpression: (model) => !model.isTrackingReminderEnabled,
+      templateOptions: {
+        label: T.GCF.TIME_TRACKING.L_IS_TRACKING_REMINDER_NOTIFY,
+      },
+    },
+    {
+      key: 'isTrackingReminderFocusWindow',
+      type: 'checkbox',
+      hideExpression: (model) => !model.isTrackingReminderEnabled,
+      templateOptions: {
+        label: T.GCF.TIME_TRACKING.L_IS_TRACKING_REMINDER_FOCUS_WINDOW,
+      },
+    },
+    {
       key: 'trackingReminderMinTime',
       type: 'duration',
       hideExpression: (model) => !model.isTrackingReminderEnabled,
