@@ -39,9 +39,7 @@ export class SyncService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
-  // private _imexViewService = inject(ImexViewService);
 
-  // TODO
   isCurrentProviderInSync$ = this._pfapiService.isCurrentProviderInSync$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(

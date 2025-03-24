@@ -40,6 +40,7 @@ export class PfapiService {
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
+  // NOTE: subscribing to this to early (e.g. in a constructor), might mess up due to share replay
   public readonly isSyncProviderEnabledAndReady$ = fromPfapiEvent(
     this.pf.ev,
     'providerReady',
@@ -103,9 +104,6 @@ export class PfapiService {
 
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
-    this.isSyncProviderEnabledAndReady$.subscribe((v) =>
-      console.log(`isSyncProviderEnabledAndReady$`, v),
-    );
 
     this.isCurrentProviderInSync$.subscribe((v) =>
       console.log(`isCurrentProviderInSync$`, v),
