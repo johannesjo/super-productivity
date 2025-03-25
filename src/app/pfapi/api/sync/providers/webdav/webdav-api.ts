@@ -39,6 +39,7 @@ export class WebdavApi {
     });
 
     if (response.status === 412) {
+      // TODO better handle this case, since it means the file is already there
     }
 
     if (!response.ok) {
@@ -65,23 +66,13 @@ export class WebdavApi {
   async getFileMeta(path: string): Promise<any> {
     const cfg = await this._getCfgOrError();
 
-    const headers = new Headers({
-      Depth: '0',
-      'Content-Type': 'application/xml',
-      Accept: 'text/plain,application/xml',
-    });
-
+    const headers = new Headers();
     headers.append('Authorization', this._getAuthHeader(cfg));
 
-    const propfindXml = `<?xml version="1.0" encoding="utf-8"?>
-    <d:propfind xmlns:d="DAV:">
-      <d:allprop/>
-    </d:propfind>`;
-
+    // Use HEAD method instead of PROPFIND
     const response = await fetch(this._getUrl(path, cfg), {
-      method: 'PROPFIND',
+      method: 'HEAD',
       headers,
-      body: propfindXml,
     });
 
     if (!response.ok) {
@@ -90,44 +81,14 @@ export class WebdavApi {
       );
     }
 
-    const xml = await response.text();
-
     // Create case-insensitive header object
     const headerObj: Record<string, string> = {};
     response.headers.forEach((value, key) => {
       headerObj[key.toLowerCase()] = value;
     });
 
-    console.debug('WebDAV response headers:', headerObj);
-    console.debug('WebDAV XML response length:', xml.length);
-
-    // Get etag from response headers first (case-insensitive)
-    let etag = headerObj.etag || headerObj.etag || '';
-
-    // If no etag in headers, try to extract from XML with broader patterns
-    if (!etag) {
-      console.debug('Extracting etag from XML');
-
-      // Common WebDAV etag patterns
-      const patterns = [
-        /<d:getetag>(.*?)<\/d:getetag>/i,
-        /<oc:etag>(.*?)<\/oc:etag>/i,
-        /<etag>(.*?)<\/etag>/i,
-        /<getetag>(.*?)<\/getetag>/i,
-        /<DAV:getetag>(.*?)<\/DAV:getetag>/i,
-      ];
-
-      for (const pattern of patterns) {
-        const match = xml.match(pattern);
-        if (match && match[1]) {
-          etag = match[1];
-          console.debug('Found etag with pattern:', pattern, etag);
-          break;
-        }
-      }
-    }
-
-    console.debug('Final etag value:', etag);
+    // Get etag from response headers
+    const etag = headerObj.etag || '';
 
     // Build the file stat object
     const fileStat = {
@@ -139,12 +100,10 @@ export class WebdavApi {
       etag: etag,
       data: {
         ...headerObj,
-        etag, // Add etag explicitly to data
-        'xml-response': xml,
       },
     };
 
-    // Clean the etag using your existing method
+    // Clean the etag if present
     if (fileStat.etag) {
       fileStat.etag = this._cleanRev(fileStat.etag);
     }
@@ -258,3 +217,93 @@ export class WebdavApi {
     return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
   }
 }
+
+// async getFileMeta(path: string): Promise<any> {
+//   const cfg = await this._getCfgOrError();
+//
+//   const headers = new Headers({
+//     Depth: '0',
+//     'Content-Type': 'application/xml',
+//     Accept: 'text/plain,application/xml',
+//   });
+//
+//   headers.append('Authorization', this._getAuthHeader(cfg));
+//
+//   const propfindXml = `<?xml version="1.0" encoding="utf-8"?>
+//   <d:propfind xmlns:d="DAV:">
+//     <d:allprop/>
+//   </d:propfind>`;
+//
+//   const response = await fetch(this._getUrl(path, cfg), {
+//     method: 'PROPFIND',
+//     headers,
+//     body: propfindXml,
+//   });
+//
+//   if (!response.ok) {
+//     throw new Error(
+//       `Get file metadata failed: ${response.status} ${response.statusText}`,
+//     );
+//   }
+//
+//   const xml = await response.text();
+//
+//   // Create case-insensitive header object
+//   const headerObj: Record<string, string> = {};
+//   response.headers.forEach((value, key) => {
+//     headerObj[key.toLowerCase()] = value;
+//   });
+//
+//   console.debug('WebDAV response headers:', headerObj);
+//   console.debug('WebDAV XML response length:', xml.length);
+//
+//   // Get etag from response headers first (case-insensitive)
+//   let etag = headerObj.etag || headerObj.etag || '';
+//
+//   // If no etag in headers, try to extract from XML with broader patterns
+//   if (!etag) {
+//     console.debug('Extracting etag from XML');
+//
+//     // Common WebDAV etag patterns
+//     const patterns = [
+//       /<d:getetag>(.*?)<\/d:getetag>/i,
+//       /<oc:etag>(.*?)<\/oc:etag>/i,
+//       /<etag>(.*?)<\/etag>/i,
+//       /<getetag>(.*?)<\/getetag>/i,
+//       /<DAV:getetag>(.*?)<\/DAV:getetag>/i,
+//     ];
+//
+//     for (const pattern of patterns) {
+//       const match = xml.match(pattern);
+//       if (match && match[1]) {
+//         etag = match[1];
+//         console.debug('Found etag with pattern:', pattern, etag);
+//         break;
+//       }
+//     }
+//   }
+//
+//   console.debug('Final etag value:', etag);
+//
+//   // Build the file stat object
+//   const fileStat = {
+//     filename: path.split('/').pop() || '',
+//     basename: path.split('/').pop() || '',
+//     lastmod: headerObj['last-modified'] || '',
+//     size: parseInt(headerObj['content-length'] || '0', 10),
+//     type: 'file',
+//     etag: etag,
+//     data: {
+//       ...headerObj,
+//       etag, // Add etag explicitly to data
+//       'xml-response': xml,
+//     },
+//   };
+//
+//   // Clean the etag using your existing method
+//   if (fileStat.etag) {
+//     fileStat.etag = this._cleanRev(fileStat.etag);
+//   }
+//
+//   return fileStat;
+// }
