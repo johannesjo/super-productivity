@@ -444,7 +444,9 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
-      mainModelData: this.IS_MAIN_FILE_MODE ? completeData : undefined,
+      mainModelData: this.IS_MAIN_FILE_MODE
+        ? await this._getMainFileModelData(completeData)
+        : undefined,
     });
 
     // ON AFTER SUCCESS
