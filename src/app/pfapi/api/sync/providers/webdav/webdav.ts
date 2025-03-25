@@ -6,11 +6,9 @@ import {
   AuthFailError,
   AuthNotConfiguredError,
   InvalidDataError,
-  NoEtagError,
   NoRemoteDataError,
   NoRevError,
 } from '../../../errors/errors';
-import { pfLog } from '../../../util/log';
 import { FileStat } from 'webdav/dist/node/types';
 
 // TODO check all
@@ -158,32 +156,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   }
 
   private _getRevFromMeta(fileMeta: FileStat): string {
-    const d = (fileMeta as any)?.data || fileMeta;
-    if (typeof d?.etag !== 'string') {
-      console.warn('No etag for WebDAV, using instead: ', {
-        d,
-        etag: d.etag,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'oc-etag': d['oc-etag'],
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'last-modified': d['last-modified'],
-      });
-    }
-    const rev = d.etag || d['oc-etag'] || d['last-modified'];
-    if (!rev) {
-      throw new NoEtagError(fileMeta);
-    }
-    return this._cleanRev(rev);
-  }
-
-  private _cleanRev(rev: string): string {
-    const result = rev
-      //
-      .replace(/\//g, '')
-      .replace(/"/g, '');
-
-    pfLog(3, `${Webdav.name}.${this._cleanRev.name}()`, result);
-    return result;
+    return this._api.getRevFromMeta(fileMeta);
   }
 
   private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {

@@ -1,7 +1,9 @@
 // import { createClient } from 'webdav/web';
 import { createClient } from 'webdav';
-import { WebdavPrivateCfg } from './webdav';
-import { FileStat } from 'webdav/dist/node/types';
+import { Webdav, WebdavPrivateCfg } from './webdav';
+import { FileStat, Headers } from 'webdav/dist/node/types';
+import { NoEtagError } from '../../../errors/errors';
+import { pfLog } from '../../../util/log';
 
 export class WebdavApi {
   private _getCfgOrError: () => Promise<WebdavPrivateCfg>;
@@ -82,10 +84,10 @@ export class WebdavApi {
   }): Promise<{ rev: string; dataStr: string }> {
     const client = await this._createClient();
     const r = await client.getFileContents(path, { format: 'text', details: true });
-    console.log(r.headers);
+    console.log('HEADERS', r.headers, r);
 
     return {
-      rev: this._cleanEtag(r.headers.etag),
+      rev: this.getRevFromMeta(r.headers),
       dataStr: r.data as string,
     };
   }
@@ -103,7 +105,37 @@ export class WebdavApi {
     });
   }
 
-  private _cleanEtag(etag: string): string {
-    return etag.replace(/"/g, '');
+  getRevFromMeta(fileMeta: FileStat | Headers): string {
+    const d = (fileMeta as any)?.data || fileMeta;
+    let etagVal = d?.etag;
+    if (typeof etagVal !== 'string') {
+      const eTagAlternatives = ['oc-etag', 'last-modified'];
+      const propToUseInstead = eTagAlternatives.find((alt) => alt in d);
+      console.warn('No etag for WebDAV, using instead: ', propToUseInstead, {
+        d,
+        propToUseInstead,
+        etag: d.etag,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'oc-etag': d['oc-etag'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'last-modified': d['last-modified'],
+      });
+      if (!propToUseInstead || !d[propToUseInstead]) {
+        throw new NoEtagError(fileMeta);
+      }
+      etagVal = d[propToUseInstead];
+    }
+
+    return this._cleanRev(etagVal);
+  }
+
+  private _cleanRev(rev: string): string {
+    const result = rev
+      //
+      .replace(/\//g, '')
+      .replace(/"/g, '');
+
+    pfLog(3, `${Webdav.name}.${this._cleanRev.name}()`, result);
+    return result;
   }
 }
