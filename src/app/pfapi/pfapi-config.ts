@@ -107,6 +107,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialNoteState,
     isMainFileModel: true,
   },
+  taskRepeatCfg: {
+    modelVersion: 1,
+    defaultData: initialTaskRepeatCfgState,
+    // needs to be due to last creation data being saved to model
+    isMainFileModel: true,
+  },
 
   //-------------------------------
   globalConfig: {
@@ -130,11 +136,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
-  },
-
-  taskRepeatCfg: {
-    modelVersion: 1,
-    defaultData: initialTaskRepeatCfgState,
   },
 
   taskArchive: {
