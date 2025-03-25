@@ -1,9 +1,8 @@
-// import { createClient } from 'webdav/web';
-import { createClient } from 'webdav';
 import { Webdav, WebdavPrivateCfg } from './webdav';
-import { FileStat, Headers } from 'webdav/dist/node/types';
 import { NoEtagError } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
+
+/* eslint-disable @typescript-eslint/naming-convention */
 
 export class WebdavApi {
   private _getCfgOrError: () => Promise<WebdavPrivateCfg>;
@@ -21,58 +20,136 @@ export class WebdavApi {
     path: string;
     isOverwrite?: boolean;
   }): Promise<void> {
-    const client = await this._createClient();
-    // await client.putFileContents(path, data, {
-    //   contentLength: false,
-    //   details: true,
-    //   overwrite: isOverwrite,
-    //   transformResponse: (a) => {
-    //     console.log('3333', { a });
-    //     return a;
-    //   },
-    // }),
-    console.log(path, { isOverwrite, data });
+    const cfg = await this._getCfgOrError();
 
-    await client.customRequest(path, {
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'Content-Type': 'application/octet-stream',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        ...(isOverwrite ? {} : { 'If-None-Match': '*' }),
-      },
-      method: 'PUT',
-      data,
+    const headers = new Headers({
+      'Content-Type': 'application/octet-stream',
     });
 
-    // console.log(await r.text());
-    // console.log(r.headers);
-    // console.log(r.headers.entries());
-    // console.log(r.headers.values());
-    // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', r, r.headers);
+    if (!isOverwrite) {
+      headers.append('If-None-Match', '*');
+    }
+
+    headers.append('Authorization', this._getAuthHeader(cfg));
+
+    const response = await fetch(this._getUrl(path, cfg), {
+      method: 'PUT',
+      headers,
+      body: data,
+    });
+
+    if (response.status === 412) {
+    }
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+    }
   }
 
   async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
-    const client = await this._createClient();
+    const cfg = await this._getCfgOrError();
 
-    await client.createDirectory(folderPath, {
-      recursive: true,
-      details: true,
+    const headers = new Headers();
+    headers.append('Authorization', this._getAuthHeader(cfg));
+
+    const response = await fetch(this._getUrl(folderPath, cfg), {
+      method: 'MKCOL',
+      headers,
     });
+
+    if (!response.ok) {
+      throw new Error(`Create folder failed: ${response.status} ${response.statusText}`);
+    }
   }
 
-  async getFileMeta(path: string): Promise<FileStat> {
-    const client = await this._createClient();
-    const stat = await client.stat(path, { details: true });
-    return stat;
-    // const r = await client.customRequest(path, {
-    //   method: 'HEAD',
-    //   details: true,
-    // });
-    // // TODO transform stream response properly
-    // console.log(await r.text());
-    // console.log('NEEEEEEEEEEEEEEEEEEEEEEEETA', { r });
-    // return r.headers;
-    // }
+  async getFileMeta(path: string): Promise<any> {
+    const cfg = await this._getCfgOrError();
+
+    const headers = new Headers({
+      Depth: '0',
+      'Content-Type': 'application/xml',
+      Accept: 'text/plain,application/xml',
+    });
+
+    headers.append('Authorization', this._getAuthHeader(cfg));
+
+    const propfindXml = `<?xml version="1.0" encoding="utf-8"?>
+    <d:propfind xmlns:d="DAV:">
+      <d:allprop/>
+    </d:propfind>`;
+
+    const response = await fetch(this._getUrl(path, cfg), {
+      method: 'PROPFIND',
+      headers,
+      body: propfindXml,
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Get file metadata failed: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const xml = await response.text();
+
+    // Create case-insensitive header object
+    const headerObj: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headerObj[key.toLowerCase()] = value;
+    });
+
+    console.debug('WebDAV response headers:', headerObj);
+    console.debug('WebDAV XML response length:', xml.length);
+
+    // Get etag from response headers first (case-insensitive)
+    let etag = headerObj.etag || headerObj.etag || '';
+
+    // If no etag in headers, try to extract from XML with broader patterns
+    if (!etag) {
+      console.debug('Extracting etag from XML');
+
+      // Common WebDAV etag patterns
+      const patterns = [
+        /<d:getetag>(.*?)<\/d:getetag>/i,
+        /<oc:etag>(.*?)<\/oc:etag>/i,
+        /<etag>(.*?)<\/etag>/i,
+        /<getetag>(.*?)<\/getetag>/i,
+        /<DAV:getetag>(.*?)<\/DAV:getetag>/i,
+      ];
+
+      for (const pattern of patterns) {
+        const match = xml.match(pattern);
+        if (match && match[1]) {
+          etag = match[1];
+          console.debug('Found etag with pattern:', pattern, etag);
+          break;
+        }
+      }
+    }
+
+    console.debug('Final etag value:', etag);
+
+    // Build the file stat object
+    const fileStat = {
+      filename: path.split('/').pop() || '',
+      basename: path.split('/').pop() || '',
+      lastmod: headerObj['last-modified'] || '',
+      size: parseInt(headerObj['content-length'] || '0', 10),
+      type: 'file',
+      etag: etag,
+      data: {
+        ...headerObj,
+        etag, // Add etag explicitly to data
+        'xml-response': xml,
+      },
+    };
+
+    // Clean the etag using your existing method
+    if (fileStat.etag) {
+      fileStat.etag = this._cleanRev(fileStat.etag);
+    }
+
+    return fileStat;
   }
 
   async download({
@@ -82,30 +159,62 @@ export class WebdavApi {
     path: string;
     localRev?: string | null;
   }): Promise<{ rev: string; dataStr: string }> {
-    const client = await this._createClient();
-    const r = await client.getFileContents(path, { format: 'text', details: true });
-    console.log('HEADERS', r.headers, r);
+    const cfg = await this._getCfgOrError();
+
+    const headers = new Headers();
+    headers.append('Authorization', this._getAuthHeader(cfg));
+
+    if (localRev) {
+      headers.append('If-None-Match', `${localRev}`);
+    }
+
+    const response = await fetch(this._getUrl(path, cfg), {
+      method: 'GET',
+      headers,
+    });
+
+    if (response.status === 412) {
+      throw new Error('If-None-Match was matched');
+    }
+
+    if (response.status === 304) {
+      throw new Error('Not modified');
+    }
+
+    if (!response.ok) {
+      throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+    }
+
+    const dataStr = await response.text();
+
+    const headerObj: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headerObj[key] = value;
+    });
 
     return {
-      rev: this.getRevFromMeta(r.headers),
-      dataStr: r.data as string,
+      rev: this.getRevFromMeta(headerObj),
+      dataStr,
     };
   }
 
   async remove(filePath: string): Promise<void> {
-    const client = await this._createClient();
-    return await client.deleteFile(filePath);
-  }
-
-  private async _createClient(): Promise<any> {
     const cfg = await this._getCfgOrError();
-    return createClient(cfg.baseUrl, {
-      username: cfg.userName,
-      password: cfg.password,
+
+    const headers = new Headers();
+    headers.append('Authorization', this._getAuthHeader(cfg));
+
+    const response = await fetch(this._getUrl(filePath, cfg), {
+      method: 'DELETE',
+      headers,
     });
+
+    if (!response.ok) {
+      throw new Error(`Remove file failed: ${response.status} ${response.statusText}`);
+    }
   }
 
-  getRevFromMeta(fileMeta: FileStat | Headers): string {
+  getRevFromMeta(fileMeta: unknown | Headers): string {
     const d = (fileMeta as any)?.data || fileMeta;
     let etagVal = d?.etag;
     if (typeof etagVal !== 'string') {
@@ -115,9 +224,7 @@ export class WebdavApi {
         d,
         propToUseInstead,
         etag: d.etag,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'oc-etag': d['oc-etag'],
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'last-modified': d['last-modified'],
       });
       if (!propToUseInstead || !d[propToUseInstead]) {
@@ -131,11 +238,23 @@ export class WebdavApi {
 
   private _cleanRev(rev: string): string {
     const result = rev
-      //
       .replace(/\//g, '')
-      .replace(/"/g, '');
+      .replace(/"/g, '')
+      .replace('&quot;', '')
+      .replace('&quot;', '');
 
-    pfLog(3, `${Webdav.name}.${this._cleanRev.name}()`, result);
+    pfLog(2, `${Webdav.name}.${this._cleanRev.name}()`, result);
     return result;
+  }
+
+  private _getUrl(path: string, cfg: WebdavPrivateCfg): string {
+    return new URL(
+      path,
+      cfg.baseUrl.endsWith('/') ? cfg.baseUrl : `${cfg.baseUrl}/`,
+    ).toString();
+  }
+
+  private _getAuthHeader(cfg: WebdavPrivateCfg): string {
+    return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
   }
 }
