@@ -72,7 +72,7 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
   isCreateBackups?: boolean;
   crossModelVersion?: number;
   crossModelMigrations?: {
-    [version: string]: (arg: FullData<unknown>) => FullData<unknown>;
+    [version: number]: (arg: FullData<unknown>) => FullData<unknown>;
   };
   validate?: (data: AllModelData<T>) => boolean;
   repair?: <R>(data: R | unknown) => AllModelData<T>;

@@ -17,6 +17,7 @@ import {
   LockFileEmptyOrMessedUpError,
   LockFileFromLocalClientPresentError,
   LockFilePresentError,
+  ModelVersionToImportNewerThanLocalError,
   NoRemoteDataError,
   NoRemoteMetaFile,
   NoSyncProviderSetError,
@@ -36,11 +37,13 @@ import { validateMetaBase } from '../util/validate-meta-base';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
 import { Pfapi } from '../pfapi';
+import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly IS_MAIN_FILE_MODE: boolean;
+  public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
 
   readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
   readonly _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>;
@@ -58,6 +61,11 @@ export class SyncService<const MD extends ModelCfgs> {
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
     this.IS_MAIN_FILE_MODE = isMainFileMode;
+    this.IS_DO_CROSS_MODEL_MIGRATIONS = !!(
+      _pfapiMain.cfg?.crossModelVersion &&
+      _pfapiMain.cfg?.crossModelMigrations &&
+      Object.keys(_pfapiMain.cfg?.crossModelMigrations).length
+    );
     this.m = m;
     this._pfapiMain = _pfapiMain;
     this._currentSyncProvider$ = _currentSyncProvider$;
@@ -96,6 +104,7 @@ export class SyncService<const MD extends ModelCfgs> {
       const localMeta = await this._metaModelCtrl.loadMetaModel();
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
+
       pfLog(
         2,
         `${SyncService.name}.${this.sync.name}(): __SYNC_START__ metaFileCheck`,
@@ -111,6 +120,28 @@ export class SyncService<const MD extends ModelCfgs> {
 
       switch (status) {
         case SyncStatus.UpdateLocal:
+          if (this.IS_DO_CROSS_MODEL_MIGRATIONS) {
+            const mcr = modelVersionCheck({
+              // TODO check for problems
+              clientVersion:
+                this._pfapiMain.cfg?.crossModelVersion || localMeta.crossModelVersion,
+              toImport: remoteMeta.crossModelVersion,
+            });
+            switch (mcr) {
+              case ModelVersionCheckResult.MinorUpdate:
+              case ModelVersionCheckResult.MajorUpdate:
+                throw new Error('NOT IMPLEMENTED');
+              // TODO implement complete download of all (!! not just changed models)
+              // return { status: SyncStatus.UpdateLocalAll };
+
+              case ModelVersionCheckResult.RemoteMajorAhead:
+                throw new ModelVersionToImportNewerThanLocalError({
+                  localMeta,
+                  remoteMeta,
+                });
+            }
+          }
+          // NOTE: also fallthrough for case ModelVersionCheckResult.RemoteModelEqualOrMinorUpdateOnly:
           await this.updateLocal(
             remoteMeta,
             localMeta,
@@ -119,6 +150,7 @@ export class SyncService<const MD extends ModelCfgs> {
             !this.IS_MAIN_FILE_MODE,
           );
           return { status };
+
         case SyncStatus.UpdateRemote:
           await this.updateRemote(
             remoteMeta,
@@ -139,7 +171,6 @@ export class SyncService<const MD extends ModelCfgs> {
       }
     } catch (e) {
       pfLog(1, `${SyncService.name}.${this.sync.name}()`, e);
-      console.error(e);
 
       if (e instanceof NoRemoteMetaFile) {
         // if there is no remote meta file, we need to upload all data
@@ -154,6 +185,7 @@ export class SyncService<const MD extends ModelCfgs> {
         await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
+      console.error(e);
       throw e;
     }
   }

@@ -46,8 +46,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     isEncrypt: false,
     encryptKey: undefined,
   });
-  private readonly _cfg?: PfapiBaseCfg<MD>;
 
+  public readonly cfg?: PfapiBaseCfg<MD>;
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
   public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
@@ -66,7 +66,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     Pfapi._wasInstanceCreated = true;
 
-    this._cfg = cfg;
+    this.cfg = cfg;
     const IS_MAIN_FILE_MODE = cfg?.isMainFileMode || false;
 
     this.db = new Database({
@@ -201,7 +201,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       return acc;
     }, {});
 
-    if (this._cfg?.validate && !this._cfg.validate(allData as AllSyncModels<MD>)) {
+    if (this.cfg?.validate && !this.cfg.validate(allData as AllSyncModels<MD>)) {
       alert('actually got one!!!');
       if (this._getAllSyncModelDataRetryCount >= 1) {
         throw new DataValidationFailedError();
@@ -215,7 +215,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
     const d = await this.getAllSyncModelData();
-    if (this._cfg?.validate && !this._cfg.validate(d)) {
+    if (this.cfg?.validate && !this.cfg.validate(d)) {
       throw new DataValidationFailedError();
     }
     const meta = await this.metaModel.loadMetaModel();
@@ -252,13 +252,13 @@ export class Pfapi<const MD extends ModelCfgs> {
     isAttemptRepair?: boolean;
     isBackupData?: boolean;
   }): Promise<void> {
-    pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this._cfg });
+    pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
     // TODO migrations
 
-    if (this._cfg?.validate && !this._cfg.validate(data)) {
-      if (isAttemptRepair && this._cfg.repair) {
-        data = this._cfg.repair(data);
+    if (this.cfg?.validate && !this.cfg.validate(data)) {
+      if (isAttemptRepair && this.cfg.repair) {
+        data = this.cfg.repair(data);
       }
       throw new DataValidationFailedError();
     }
@@ -285,7 +285,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         try {
           await this.importAllSycModelData({
             data: backup,
-            crossModelVersion: this._cfg?.crossModelVersion || 0,
+            crossModelVersion: this.cfg?.crossModelVersion || 0,
           });
         } catch (eII) {
           throw new BackupImportFailedError(eII);
@@ -311,10 +311,10 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   isValidateComplete(data: AllSyncModels<MD>): boolean {
     pfLog(2, `${this.isValidateComplete.name}()`, { data });
-    if (!this._cfg?.validate) {
+    if (!this.cfg?.validate) {
       throw new NoValidateFunctionProvidedError();
     }
-    if (!this._cfg.validate(data)) {
+    if (!this.cfg.validate(data)) {
       throw new DataValidationFailedError();
     }
     return true;
@@ -322,10 +322,10 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   repairCompleteData(data: unknown): AllSyncModels<MD> {
     pfLog(2, `${this.repairCompleteData.name}()`, { data });
-    if (!this._cfg?.repair) {
+    if (!this.cfg?.repair) {
       throw new NoRepairFunctionProvidedError();
     }
-    return this._cfg.repair(data);
+    return this.cfg.repair(data);
   }
 
   private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {

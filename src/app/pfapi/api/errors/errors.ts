@@ -171,3 +171,7 @@ export class CompressError extends AdditionalLogErrorBase {
 export class DecompressError extends AdditionalLogErrorBase {
   override name = DecompressError.name;
 }
+
+export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorBase {
+  override name = ModelVersionToImportNewerThanLocalError.name;
+}

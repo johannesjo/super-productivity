@@ -35,8 +35,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_1__testdata',
       {
-        isCompress: false,
-        isEncrypt: false,
+        isCompressed: false,
+        isEncrypted: false,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },
@@ -44,8 +44,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_1.12345__testdata',
       {
-        isCompress: false,
-        isEncrypt: false,
+        isCompressed: false,
+        isEncrypted: false,
         modelVersion: 1.12345,
         cleanDataStr: 'testdata',
       },
@@ -53,8 +53,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_C1__testdata',
       {
-        isCompress: true,
-        isEncrypt: false,
+        isCompressed: true,
+        isEncrypted: false,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },
@@ -62,8 +62,8 @@ describe('pfExtractSyncFileStateFromPrefix()', () => {
     [
       'pf_E1__testdata',
       {
-        isCompress: false,
-        isEncrypt: true,
+        isCompressed: false,
+        isEncrypted: true,
         modelVersion: 1,
         cleanDataStr: 'testdata',
       },
