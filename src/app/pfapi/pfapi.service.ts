@@ -93,6 +93,9 @@ export class PfapiService {
 
   private _invalidDataCount = 0;
 
+  sync = this.pf.sync.bind(this.pf);
+  uploadAll = this.pf.uploadAll.bind(this.pf);
+  downloadAll = this.pf.downloadAll.bind(this.pf);
   getAllSyncModelData = this.pf.getAllSyncModelData.bind(this.pf);
   importAllSycModelData = this.pf.importAllSycModelData.bind(this.pf);
   isValidateComplete = this.pf.isValidateComplete.bind(this.pf);

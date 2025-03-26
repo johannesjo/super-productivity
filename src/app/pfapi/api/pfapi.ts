@@ -118,6 +118,13 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
   }
 
+  async forceUploadAll(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
+    pfLog(2, `${this.forceUploadAll.name}()`);
+    const result = await this._syncService.uploadAll(true);
+    pfLog(2, `${this.forceUploadAll.name}() result:`, result);
+    return { status: SyncStatus.UpdateRemoteAll };
+  }
+
   setActiveSyncProvider(activeProviderId: SyncProviderId | null): void {
     pfLog(2, `${this.setActiveSyncProvider.name}()`, activeProviderId, activeProviderId);
     if (activeProviderId) {

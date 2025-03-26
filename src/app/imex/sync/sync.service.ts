@@ -81,7 +81,7 @@ export class SyncService {
     try {
       this._globalProgressBarService.countUp('SYNC');
       this.isSyncing$.next(true);
-      const r = await this._pfapiService.pf.sync();
+      const r = await this._pfapiService.sync();
 
       this.isSyncing$.next(false);
       this._globalProgressBarService.countDown();
@@ -116,24 +116,13 @@ export class SyncService {
           }).toPromise();
 
           if (res === 'USE_LOCAL') {
-            this._globalProgressBarService.countUp('SYNC');
-            this.isSyncing$.next(true);
-            await this._pfapiService.pf.uploadAll();
-            this.isSyncing$.next(false);
-            this._globalProgressBarService.countDown();
-            return SyncStatus.UpdateLocalAll;
+            await this._pfapiService.uploadAll();
+            return SyncStatus.UpdateRemoteAll;
           } else if (res === 'USE_REMOTE') {
-            this._globalProgressBarService.countUp('SYNC');
-            this.isSyncing$.next(true);
-            await this._pfapiService.pf.downloadAll();
-            await this._reInitAppAfterDataModelChange();
-            this.isSyncing$.next(false);
-            this._globalProgressBarService.countDown();
-            return SyncStatus.UpdateLocalAll;
+            await this._pfapiService.downloadAll();
           }
 
           console.log({ res });
-
           // TODO implement and test force cases
           // if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
           // TODO implement and test force cases
@@ -165,6 +154,8 @@ export class SyncService {
           // msg: T.F.SYNC.S.INCOMPLETE_CFG,
           msg: 'Remote Data is currently being written',
           type: 'ERROR',
+          actionFn: async () => this._forceUpload(),
+          actionStr: 'Force Overwrite',
         });
         return 'HANDLED_ERROR';
       } else {
@@ -189,6 +180,37 @@ export class SyncService {
         return 'HANDLED_ERROR';
       }
       throw new Error('unhandled sync error');
+    }
+  }
+
+  private async _forceUpload(): Promise<void> {
+    if (
+      !this._c(
+        this._translateService.instant(
+          'Forcing an upload of your data could lead to data loss. Continue?',
+        ),
+      )
+    ) {
+      return;
+    }
+    this._globalProgressBarService.countUp('SYNC');
+    this.isSyncing$.next(true);
+    try {
+      await this._pfapiService.uploadAll(true);
+      this.isSyncing$.next(false);
+      this._globalProgressBarService.countDown();
+    } catch (e) {
+      const errStr = getSyncErrorStr(e);
+      this.isSyncing$.next(false);
+      this._globalProgressBarService.countDown();
+      this._snackService.open({
+        // msg: T.F.SYNC.S.UNKNOWN_ERROR,
+        msg: errStr,
+        type: 'ERROR',
+        translateParams: {
+          err: errStr,
+        },
+      });
     }
   }
 
