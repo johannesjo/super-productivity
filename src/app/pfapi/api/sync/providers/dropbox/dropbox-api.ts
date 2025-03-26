@@ -5,9 +5,9 @@ import { DropboxFileMetadata } from '../../../../../imex/sync/dropbox/dropbox.mo
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { DropboxPrivateCfg } from './dropbox';
 import {
-  AuthNotConfiguredError,
-  NoRemoteDataError,
-  TooManyRequestsError,
+  MissingCredentialsSPError,
+  RemoteFileNotFoundSPError,
+  TooManyRequestsAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
@@ -62,7 +62,7 @@ export class DropboxApi {
           'path/not_found/',
         )
       ) {
-        throw new NoRemoteDataError(path, e);
+        throw new RemoteFileNotFoundSPError(path, e);
       } else {
         throw e;
       }
@@ -142,7 +142,7 @@ export class DropboxApi {
   }): Promise<AxiosResponse> {
     const privateCfg = await this._parent.privateCfg.load();
     if (!privateCfg?.accessToken) {
-      throw new AuthNotConfiguredError('Dropbox no token');
+      throw new MissingCredentialsSPError('Dropbox no token');
     }
 
     try {
@@ -201,7 +201,7 @@ export class DropboxApi {
             );
           });
         } else {
-          throw new TooManyRequestsError(url, headers['Dropbox-API-Arg'], {
+          throw new TooManyRequestsAPIError(url, headers['Dropbox-API-Arg'], {
             method,
             e,
             data,

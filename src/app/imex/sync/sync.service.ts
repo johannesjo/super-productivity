@@ -8,7 +8,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
-  AuthFailError,
+  AuthFailSPError,
   LockFilePresentError,
   SyncProviderId,
   SyncStatus,
@@ -150,7 +150,7 @@ export class SyncService {
       this.isSyncing$.next(false);
       console.error(error);
 
-      if (error instanceof AuthFailError) {
+      if (error instanceof AuthFailSPError) {
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',

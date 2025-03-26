@@ -3,13 +3,12 @@ import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import {
-  AuthFailError,
-  AuthNotConfiguredError,
-  InvalidDataError,
-  NoRemoteDataError,
-  NoRevError,
+  AuthFailSPError,
+  InvalidDataSPError,
+  MissingCredentialsSPError,
+  NoRevAPIError,
+  RemoteFileNotFoundSPError,
 } from '../../../errors/errors';
-import { FileStat } from 'webdav/dist/node/types';
 
 // TODO check all
 // import {
@@ -61,15 +60,15 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     const cfg = await this._cfgOrError();
     try {
       const meta = await this._api.getFileMeta(this._getFilePath(targetPath, cfg));
-      // const d = new Date(meta['last-modified']);
       return {
         rev: this._getRevFromMeta(meta),
       };
     } catch (e: any) {
-      const isAxiosError = !!(e?.response && e.response.status);
-      if ((isAxiosError && e.response.status === 404) || e.status === 404) {
-        throw new NoRemoteDataError(targetPath);
+      const isHttpError = !!(e?.response && e.response.status);
+      if ((isHttpError && e.response.status === 404) || e.status === 404) {
+        throw new RemoteFileNotFoundSPError(targetPath);
       }
+      this._checkCommonErrors(e, targetPath);
       throw e;
     }
   }
@@ -90,6 +89,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         isOverwrite: isForceOverwrite,
       });
     } catch (e) {
+      alert(e);
+      console.error(e);
+
       // TODO check if this is enough
       // TODO re-implement but for folders only
       // if (e?.toString?.().includes('404')) {
@@ -102,11 +104,12 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       //     data: dataStr,
       //   });
       // }
+      this._checkCommonErrors(e, targetPath);
       throw e;
     }
     const rev = this._getRevFromMeta(await this._api.getFileMeta(filePath));
     if (!rev) {
-      throw new NoRevError();
+      throw new NoRevAPIError();
     }
     return {
       rev,
@@ -125,22 +128,15 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         localRev,
       });
       if (!dataStr) {
-        throw new NoRemoteDataError(targetPath);
+        throw new RemoteFileNotFoundSPError(targetPath);
       }
       if (typeof rev !== 'string') {
-        throw new InvalidDataError(rev);
+        throw new InvalidDataSPError({ rev });
       }
       return { rev, dataStr };
     } catch (e) {
       console.log(e, Object.keys(e as any), (e as any)?.status, (e as any)?.response);
-
-      if ((e as any)?.status === 404) {
-        throw new NoRemoteDataError(targetPath);
-      }
-      if ((e as any)?.status === 401) {
-        throw new AuthFailError('WebDav 401', targetPath);
-      }
-
+      this._checkCommonErrors(e, targetPath);
       throw e;
     }
   }
@@ -155,7 +151,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     // TODO error handling
   }
 
-  private _getRevFromMeta(fileMeta: FileStat): string {
+  private _getRevFromMeta(fileMeta: Record<string, string>): string {
     return this._api.getRevFromMeta(fileMeta);
   }
 
@@ -166,8 +162,17 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   private async _cfgOrError(): Promise<WebdavPrivateCfg> {
     const cfg = await this.privateCfg.load();
     if (!cfg) {
-      throw new AuthNotConfiguredError();
+      throw new MissingCredentialsSPError();
     }
     return cfg;
+  }
+
+  private _checkCommonErrors(e: any, targetPath: string): void {
+    if ((e as any)?.status === 404) {
+      throw new RemoteFileNotFoundSPError(targetPath);
+    }
+    if ((e as any)?.status === 401) {
+      throw new AuthFailSPError('WebDav 401', targetPath);
+    }
   }
 }

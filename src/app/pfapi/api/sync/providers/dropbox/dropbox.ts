@@ -4,10 +4,10 @@ import {
 } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
 import {
-  AuthFailError,
-  InvalidDataError,
-  NoRemoteDataError,
-  NoRevError,
+  AuthFailSPError,
+  InvalidDataSPError,
+  RemoteFileNotFoundSPError,
+  NoRevAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
 import { DropboxApi } from './dropbox-api';
@@ -69,7 +69,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
         (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
-        throw new NoRemoteDataError(targetPath);
+        throw new RemoteFileNotFoundSPError(targetPath);
       } else if (isAxiosError && (e as any).response.status === 401) {
         if (
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
@@ -82,7 +82,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
             return this.getFileRev(targetPath, localRev);
           }
         }
-        throw new AuthFailError('Dropbox 401 getFileRev', targetPath);
+        throw new AuthFailSPError('Dropbox 401 getFileRev', targetPath);
       } else {
         console.error(e);
         throw new Error(e as any);
@@ -100,16 +100,16 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     });
 
     if (!r.meta.rev) {
-      throw new NoRevError();
+      throw new NoRevAPIError();
     }
 
     if (!r.data) {
-      throw new NoRemoteDataError(targetPath);
+      throw new RemoteFileNotFoundSPError(targetPath);
     }
 
     if (typeof r.data !== 'string') {
       pfLog(1, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
-      throw new InvalidDataError(r.data);
+      throw new InvalidDataSPError(r.data);
     }
 
     return {
@@ -132,7 +132,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     });
 
     if (!r.rev) {
-      throw new NoRevError();
+      throw new NoRevAPIError();
     }
 
     return {

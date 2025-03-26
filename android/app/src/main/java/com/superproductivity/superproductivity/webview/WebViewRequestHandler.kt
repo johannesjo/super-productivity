@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream
  * Strip the original WebViewClient logic to ensure that both types share the same logic
  */
 class WebViewRequestHandler(private val activity: Activity, private val serviceHost: String) {
+    private val CORS_SKIP_HEADER = "sp_cors_skip"
 
     @Deprecated("Deprecated in Java")
     fun handleUrlLoading(view: WebView, url: String): Boolean {
@@ -36,8 +37,14 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
 
 
     fun interceptWebRequest(request: WebResourceRequest?): WebResourceResponse? {
+
         try {
             if (request == null || request.isForMainFrame) {
+                return null
+            }
+
+            if (!request.requestHeaders.containsKey(CORS_SKIP_HEADER)) {
+                Log.v("TW", "_______________________________________")
                 return null
             }
 
@@ -64,6 +71,7 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
                 return null
             }
 
+
             val client = OkHttpClient()
             val newRequestBuilder = Request.Builder()
                 .url(request.url.toString())
@@ -71,7 +79,7 @@ class WebViewRequestHandler(private val activity: Activity, private val serviceH
 
             for ((key, value) in request.requestHeaders) {
                 Log.v("TW", "interceptRequest header:${key} – ${value}")
-                if (key == "User-Agent" || key == "Origin" || key == "Referer" || key == "Sec-Fetch-Mode") {
+                if (key == CORS_SKIP_HEADER || key == "User-Agent" || key == "Origin" || key == "Referer" || key == "Sec-Fetch-Mode") {
                     continue
                 }
                 newRequestBuilder.addHeader(key, value)
