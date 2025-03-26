@@ -57,7 +57,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
     try {
-      const r = await this._api.getMetaData(this._getPath(targetPath));
+      const r = await this._api.getMetaData(this._getPath(targetPath), localRev);
       return {
         rev: r.rev,
       };

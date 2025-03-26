@@ -43,12 +43,15 @@ export class DropboxApi {
     this._parent = parent;
   }
 
-  async getMetaData(path: string): Promise<DropboxFileMetadata> {
+  async getMetaData(path: string, localRev: string): Promise<DropboxFileMetadata> {
     try {
       const response = await this._request({
         method: 'POST',
         url: 'https://api.dropboxapi.com/2/files/get_metadata',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localRev ? { 'If-None-Match': localRev } : {}),
+        },
         data: { path },
       });
       return response.json();

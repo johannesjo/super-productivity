@@ -687,7 +687,7 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   private async _downloadMetaFile(
-    localRev?: string | null,
+    localRev: string | null = null,
   ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
     pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, { localRev });
@@ -695,7 +695,7 @@ export class SyncService<const MD extends ModelCfgs> {
     try {
       const r = await syncProvider.downloadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        localRev || null,
+        localRev,
       );
       const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
       console.log(data);
