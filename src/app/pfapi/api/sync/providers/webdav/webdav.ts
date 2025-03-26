@@ -3,20 +3,11 @@ import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import {
-  AuthFailSPError,
   InvalidDataSPError,
   MissingCredentialsSPError,
   NoRevAPIError,
-  RemoteFileNotFoundSPError,
+  RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
-
-// TODO check all
-// import {
-//   AuthFailError,
-//   InvalidDataError,
-//   NoRemoteDataError,
-//   NoRevError,
-// } from '../../errors/errors';
 
 export interface WebdavPrivateCfg {
   baseUrl: string;
@@ -59,16 +50,14 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   ): Promise<{ rev: string }> {
     const cfg = await this._cfgOrError();
     try {
-      const meta = await this._api.getFileMeta(this._getFilePath(targetPath, cfg));
+      const meta = await this._api.getFileMeta(
+        this._getFilePath(targetPath, cfg),
+        localRev,
+      );
       return {
         rev: this._getRevFromMeta(meta),
       };
     } catch (e: any) {
-      const isHttpError = !!(e?.response && e.response.status);
-      if ((isHttpError && e.response.status === 404) || e.status === 404) {
-        throw new RemoteFileNotFoundSPError(targetPath);
-      }
-      this._checkCommonErrors(e, targetPath);
       throw e;
     }
   }
@@ -82,7 +71,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
     try {
-      // TODO get rev from upload directly
+      // TODO get rev from upload directly!!!
       await this._api.upload({
         path: filePath,
         data: dataStr,
@@ -91,7 +80,6 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     } catch (e) {
       alert(e);
       console.error(e);
-
       // TODO check if this is enough
       // TODO re-implement but for folders only
       // if (e?.toString?.().includes('404')) {
@@ -104,10 +92,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       //     data: dataStr,
       //   });
       // }
-      this._checkCommonErrors(e, targetPath);
       throw e;
     }
-    const rev = this._getRevFromMeta(await this._api.getFileMeta(filePath));
+    const rev = this._getRevFromMeta(await this._api.getFileMeta(filePath, null));
     if (!rev) {
       throw new NoRevAPIError();
     }
@@ -128,7 +115,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         localRev,
       });
       if (!dataStr) {
-        throw new RemoteFileNotFoundSPError(targetPath);
+        throw new RemoteFileNotFoundAPIError(targetPath);
       }
       if (typeof rev !== 'string') {
         throw new InvalidDataSPError({ rev });
@@ -136,7 +123,6 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       return { rev, dataStr };
     } catch (e) {
       console.log(e, Object.keys(e as any), (e as any)?.status, (e as any)?.response);
-      this._checkCommonErrors(e, targetPath);
       throw e;
     }
   }
@@ -165,14 +151,5 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       throw new MissingCredentialsSPError();
     }
     return cfg;
-  }
-
-  private _checkCommonErrors(e: any, targetPath: string): void {
-    if ((e as any)?.status === 404) {
-      throw new RemoteFileNotFoundSPError(targetPath);
-    }
-    if ((e as any)?.status === 401) {
-      throw new AuthFailSPError('WebDav 401', targetPath);
-    }
   }
 }

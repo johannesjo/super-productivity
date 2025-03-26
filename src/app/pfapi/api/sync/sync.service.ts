@@ -18,7 +18,7 @@ import {
   LockFileFromLocalClientPresentError,
   LockFilePresentError,
   ModelVersionToImportNewerThanLocalError,
-  RemoteFileNotFoundSPError,
+  RemoteFileNotFoundAPIError,
   NoRemoteMetaFile,
   NoSyncProviderSetError,
   RevMapModelMismatchErrorOnDownload,
@@ -655,7 +655,7 @@ export class SyncService<const MD extends ModelCfgs> {
       );
       return r.rev;
     } catch (e) {
-      if (e instanceof RemoteFileNotFoundSPError) {
+      if (e instanceof RemoteFileNotFoundAPIError) {
         throw new NoRemoteMetaFile();
       }
       throw e;
@@ -678,7 +678,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       return { remoteMeta: validateMetaBase(data), remoteRev: r.rev };
     } catch (e) {
-      if (e instanceof RemoteFileNotFoundSPError) {
+      if (e instanceof RemoteFileNotFoundAPIError) {
         throw new NoRemoteMetaFile();
       }
       throw e;

@@ -3,7 +3,7 @@ import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-sto
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { createSha1Hash } from '../../../../../util/create-sha-1-hash';
 import { IS_ELECTRON } from '../../../../../app.constants';
-import { RemoteFileNotFoundSPError } from '../../../errors/errors';
+import { RemoteFileNotFoundAPIError } from '../../../errors/errors';
 
 export interface LocalFileSyncElectronPrivateCfg {
   folderPath: string;
@@ -73,7 +73,7 @@ export class LocalFileSyncElectron
       }
 
       if (!r.dataStr) {
-        throw new RemoteFileNotFoundSPError();
+        throw new RemoteFileNotFoundAPIError();
       }
 
       return {
@@ -82,7 +82,7 @@ export class LocalFileSyncElectron
       };
     } catch (e) {
       if (e?.toString && e?.toString().includes('ENOENT')) {
-        throw new RemoteFileNotFoundSPError();
+        throw new RemoteFileNotFoundAPIError();
       }
       console.log(e);
 

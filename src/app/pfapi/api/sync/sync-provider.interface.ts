@@ -21,33 +21,33 @@ export interface SyncProviderServiceInterface<C> {
   /**
    * Gets the current revision and last update time for a file
    * @param targetPath Path to the file
-   * @param localRev Current local revision or null if none; can be used to check if upload is necessary
+   * @param localRev Current local revision; can be used to check if download is necessary
    */
   getFileRev(targetPath: string, localRev: string | null): Promise<{ rev: string }>;
 
   /**
-   * Uploads file data to the sync provider
-   * @param targetPath Path to the file
-   * @param dataStr Serialized file data
-   * @param localRev Current local revision or null if none; can be used to check if upload is necessary
-   * @param isForceOverwrite Whether to force overwrite existing file
-   */
-  uploadFile(
-    targetPath: string,
-    dataStr: string,
-    localRev: string | null,
-    isForceOverwrite?: boolean,
-  ): Promise<{ rev: string }>;
-
-  /**
    * Downloads file data from the sync provider
    * @param targetPath Path to the file
-   * @param localRev Current local revision or null if none
+   * @param localRev Current local revision; can be used to check if download is necessary
    */
   downloadFile(
     targetPath: string,
     localRev: string | null,
   ): Promise<{ rev: string; dataStr: string }>;
+
+  /**
+   * Uploads file data to the sync provider
+   * @param targetPath Path to the file
+   * @param dataStr Serialized file data
+   * @param revToMatch If revision does not match, the upload will fail
+   * @param isForceOverwrite Whether to force overwrite existing file
+   */
+  uploadFile(
+    targetPath: string,
+    dataStr: string,
+    revToMatch: string | null,
+    isForceOverwrite?: boolean,
+  ): Promise<{ rev: string }>;
 
   removeFile(targetPath: string): Promise<void>;
 

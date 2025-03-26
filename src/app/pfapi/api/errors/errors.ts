@@ -28,17 +28,22 @@ export class FileExistsAPIError extends Error {
   override name = FileExistsAPIError.name;
 }
 
-export class HttpNotOkAPIError extends AdditionalLogErrorBase {
-  override name = HttpNotOkAPIError.name;
-  response: Response;
-  constructor(response: Response) {
-    super();
-    this.response = response;
-  }
+export class RemoteFileNotFoundAPIError extends AdditionalLogErrorBase {
+  override name = RemoteFileNotFoundAPIError.name;
 }
 
 export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
   override name = CannotCreateFolderAPIError.name;
+}
+
+export class HttpNotOkAPIError extends AdditionalLogErrorBase {
+  override name = HttpNotOkAPIError.name;
+  response: Response;
+
+  constructor(response: Response) {
+    super();
+    this.response = response;
+  }
 }
 
 // --------------SYNC PROVIDER ERRORS--------------
@@ -49,10 +54,6 @@ export class MissingCredentialsSPError extends Error {
 
 export class AuthFailSPError extends AdditionalLogErrorBase {
   override name = AuthFailSPError.name;
-}
-
-export class RemoteFileNotFoundSPError extends AdditionalLogErrorBase {
-  override name = RemoteFileNotFoundSPError.name;
 }
 
 export class InvalidDataSPError extends AdditionalLogErrorBase {

@@ -6,7 +6,7 @@ import { SyncProviderId } from '../../../pfapi.const';
 import {
   AuthFailSPError,
   InvalidDataSPError,
-  RemoteFileNotFoundSPError,
+  RemoteFileNotFoundAPIError,
   NoRevAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
@@ -69,7 +69,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
         // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
         (e as any).response.data.error_summary?.includes('path/not_found')
       ) {
-        throw new RemoteFileNotFoundSPError(targetPath);
+        throw new RemoteFileNotFoundAPIError(targetPath);
       } else if (isAxiosError && (e as any).response.status === 401) {
         if (
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
@@ -104,7 +104,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     }
 
     if (!r.data) {
-      throw new RemoteFileNotFoundSPError(targetPath);
+      throw new RemoteFileNotFoundAPIError(targetPath);
     }
 
     if (typeof r.data !== 'string') {

@@ -6,7 +6,7 @@ import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { DropboxPrivateCfg } from './dropbox';
 import {
   MissingCredentialsSPError,
-  RemoteFileNotFoundSPError,
+  RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
@@ -62,7 +62,7 @@ export class DropboxApi {
           'path/not_found/',
         )
       ) {
-        throw new RemoteFileNotFoundSPError(path, e);
+        throw new RemoteFileNotFoundAPIError(path, e);
       } else {
         throw e;
       }
