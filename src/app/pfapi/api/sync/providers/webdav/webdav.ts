@@ -8,6 +8,7 @@ import {
   NoRevAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
+import { pfLog } from '../../../util/log';
 
 export interface WebdavPrivateCfg {
   baseUrl: string;
@@ -49,17 +50,13 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     localRev: string | null,
   ): Promise<{ rev: string }> {
     const cfg = await this._cfgOrError();
-    try {
-      const meta = await this._api.getFileMeta(
-        this._getFilePath(targetPath, cfg),
-        localRev,
-      );
-      return {
-        rev: this._getRevFromMeta(meta),
-      };
-    } catch (e: any) {
-      throw e;
-    }
+    const meta = await this._api.getFileMeta(
+      this._getFilePath(targetPath, cfg),
+      localRev,
+    );
+    return {
+      rev: this._getRevFromMeta(meta),
+    };
   }
 
   async uploadFile(
@@ -78,29 +75,33 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         isOverwrite: isForceOverwrite,
       });
     } catch (e) {
+      // TODO test
       alert(e);
       console.error(e);
-      // TODO check if this is enough
-      // TODO re-implement but for folders only
-      // if (e?.toString?.().includes('404')) {
-      //   // folder might not exist, so we try to create it
-      //   await this._api.createFolder({
-      //     folderPath: cfg.syncFolderPath as string,
-      //   });
-      //   await this._api.upload({
-      //     path: filePath,
-      //     data: dataStr,
-      //   });
-      // }
-      throw e;
+      if (e instanceof RemoteFileNotFoundAPIError) {
+        pfLog(2, `${Webdav.name}.uploadFile() creating parent folders and retrying`);
+
+        // Create necessary parent folders
+        await this._ensureFolderExists(targetPath, cfg);
+
+        // Retry upload after folder creation
+        await this._api.upload({
+          path: filePath,
+          data: dataStr,
+          isOverwrite: isForceOverwrite,
+        });
+      } else {
+        throw e;
+      }
     }
-    const rev = this._getRevFromMeta(await this._api.getFileMeta(filePath, null));
+    const meta = await this._api.getFileMeta(filePath, null);
+    const rev = this._getRevFromMeta(meta);
+
     if (!rev) {
       throw new NoRevAPIError();
     }
-    return {
-      rev,
-    };
+
+    return { rev };
   }
 
   async downloadFile(
@@ -109,32 +110,22 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   ): Promise<{ rev: string; dataStr: string }> {
     const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
-    try {
-      const { rev, dataStr } = await this._api.download({
-        path: filePath,
-        localRev,
-      });
-      if (!dataStr) {
-        throw new RemoteFileNotFoundAPIError(targetPath);
-      }
-      if (typeof rev !== 'string') {
-        throw new InvalidDataSPError({ rev });
-      }
-      return { rev, dataStr };
-    } catch (e) {
-      console.log(e, Object.keys(e as any), (e as any)?.status, (e as any)?.response);
-      throw e;
+    const { rev, dataStr } = await this._api.download({
+      path: filePath,
+      localRev,
+    });
+    if (!dataStr) {
+      throw new InvalidDataSPError(targetPath);
     }
+    if (typeof rev !== 'string') {
+      throw new NoRevAPIError();
+    }
+    return { rev, dataStr };
   }
 
   async removeFile(targetPath: string): Promise<void> {
     const cfg = await this._cfgOrError();
-    try {
-      await this._api.remove(this._getFilePath(targetPath, cfg));
-    } catch (e) {
-      throw e;
-    }
-    // TODO error handling
+    await this._api.remove(this._getFilePath(targetPath, cfg));
   }
 
   private _getRevFromMeta(fileMeta: Record<string, string>): string {
@@ -151,5 +142,37 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       throw new MissingCredentialsSPError();
     }
     return cfg;
+  }
+
+  private async _ensureFolderExists(
+    targetPath: string,
+    cfg: WebdavPrivateCfg,
+  ): Promise<void> {
+    // Extract the directory path from the target file path
+    const pathParts = targetPath.split('/');
+    pathParts.pop(); // Remove the filename part
+
+    if (pathParts.length === 0) {
+      return; // No folder needed, file is at root level
+    }
+
+    // Create folder hierarchy as needed
+    let currentPath = cfg.syncFolderPath;
+
+    for (const part of pathParts) {
+      currentPath = `${currentPath}/${part}`;
+
+      try {
+        await this._api.createFolder({ folderPath: currentPath });
+        pfLog(2, `${Webdav.name}.ensureFolderExists() created folder`, currentPath);
+      } catch (e: any) {
+        // Ignore 405 Method Not Allowed (folder likely exists)
+        // Ignore 409 Conflict (folder already exists)
+        if (e?.status !== 405 && e?.status !== 409) {
+          pfLog(1, `${Webdav.name}.ensureFolderExists() error creating folder`, e);
+          throw e;
+        }
+      }
+    }
   }
 }

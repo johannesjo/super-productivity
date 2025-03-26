@@ -219,6 +219,7 @@ export class WebdavApi {
   }
 
   private _checkCommonErrors(e: any, targetPath: string): void {
+    pfLog(1, `${Webdav.name} API ${targetPath}`, e);
     if ('status' in e) {
       if (e.status === 404) {
         throw new RemoteFileNotFoundAPIError(targetPath);
