@@ -76,11 +76,8 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
           (e as any).response.data?.error_summary?.includes('invalid_access_token')
         ) {
           pfLog(1, 'EXPIRED or INVALID TOKEN, trying to refresh');
-          const refreshResult =
-            await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
-          if (refreshResult === 'SUCCESS') {
-            return this.getFileRev(targetPath, localRev);
-          }
+          await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+          return this.getFileRev(targetPath, localRev);
         }
         throw new AuthFailSPError('Dropbox 401 getFileRev', targetPath);
       } else {
