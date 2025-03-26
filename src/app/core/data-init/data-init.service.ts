@@ -32,7 +32,7 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
-    const appDataComplete = await this._pfapiService.getAllSyncModelData();
+    const appDataComplete = await this._pfapiService.getAllSyncModelData(true);
     const isValid = this._pfapiService.isValidateComplete(appDataComplete);
     if (isValid) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));

@@ -101,7 +101,6 @@ export class SyncService {
           return r.status;
 
         case SyncStatus.NotConfigured:
-          alert('aa');
           this.configuredAuthForSyncProviderIfNecessary(providerId);
           return r.status;
 

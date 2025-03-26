@@ -75,6 +75,7 @@ export class DropboxApi {
         url: 'https://content.dropboxapi.com/2/files/download',
         headers: {
           'Dropbox-API-Arg': JSON.stringify({ path }),
+          'Content-Type': 'application/octet-stream',
           ...(localRev ? { 'If-None-Match': localRev } : {}),
         },
       });

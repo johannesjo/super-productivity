@@ -194,7 +194,8 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private _getAllSyncModelDataRetryCount = 0;
 
-  async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
+  // TODO improve naming with validity check
+  async getAllSyncModelData(isSkipValidityCheck = false): Promise<AllSyncModels<MD>> {
     pfLog(2, `${this.getAllSyncModelData.name}()`);
     const modelIds = Object.keys(this.m);
     const promises = modelIds.map((modelId) => {
@@ -208,12 +209,19 @@ export class Pfapi<const MD extends ModelCfgs> {
       return acc;
     }, {});
 
-    if (this.cfg?.validate && !this.cfg.validate(allData as AllSyncModels<MD>)) {
-      alert('actually got one!!!');
+    if (
+      !isSkipValidityCheck &&
+      this.cfg?.validate &&
+      !this.cfg.validate(allData as AllSyncModels<MD>)
+    ) {
+      alert('actually got one!!! ' + this._getAllSyncModelDataRetryCount);
       if (this._getAllSyncModelDataRetryCount >= 1) {
+        alert('THROW');
+        this._getAllSyncModelDataRetryCount = 0;
         throw new DataValidationFailedError();
       }
-      await promiseTimeout(100);
+      await promiseTimeout(1000);
+      this._getAllSyncModelDataRetryCount++;
       return this.getAllSyncModelData();
     }
     this._getAllSyncModelDataRetryCount = 0;
@@ -221,10 +229,8 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
+    alert('loadCompleteBackup');
     const d = await this.getAllSyncModelData();
-    if (this.cfg?.validate && !this.cfg.validate(d)) {
-      throw new DataValidationFailedError();
-    }
     const meta = await this.metaModel.loadMetaModel();
     return {
       data: d,
