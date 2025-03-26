@@ -3,7 +3,9 @@ import { pfLog } from '../util/log';
 class AdditionalLogErrorBase extends Error {
   constructor(...additional: any) {
     super(...additional);
-    pfLog(1, this.name, ...additional);
+    if (additional.length > 0) {
+      pfLog(1, this.name, ...additional);
+    }
   }
 }
 
@@ -12,7 +14,7 @@ export class ImpossibleError extends Error {
 }
 
 // --------------API ERRORS--------------
-export class NoRevAPIError extends Error {
+export class NoRevAPIError extends AdditionalLogErrorBase {
   override name = NoRevAPIError.name;
 }
 
@@ -34,6 +36,10 @@ export class RemoteFileNotFoundAPIError extends AdditionalLogErrorBase {
 
 export class MissingRefreshTokenAPIError extends Error {
   override name = MissingRefreshTokenAPIError.name;
+}
+
+export class FileHashCreationAPIError extends AdditionalLogErrorBase {
+  override name = FileHashCreationAPIError.name;
 }
 
 export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
@@ -188,4 +194,8 @@ export class NoValidateFunctionProvidedError extends Error {
 
 export class BackupImportFailedError extends AdditionalLogErrorBase {
   override name = BackupImportFailedError.name;
+}
+
+export class WebCryptoNotAvailableError extends Error {
+  override name = WebCryptoNotAvailableError.name;
 }

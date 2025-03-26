@@ -432,6 +432,33 @@ class JavaScriptInterface(
         return sb
     }
 
+    @JavascriptInterface
+    fun removeFile(filePath: String) {
+        Log.d("SuperProductivity", "removeFile: trying to remove filePath: $filePath")
+        // Get folder path
+        val sp = activity.getPreferences(Context.MODE_PRIVATE)
+        val folderPath = sp.getString("filesyncFolder", "") ?: ""
+
+        // Scoped storage permission management for Android 10+, but also works for Android < 10
+        // Open file with write access, using DocumentFile URI
+        val folder = DocumentFile.fromTreeUri(activity, Uri.parse(folderPath))
+        val file = folder?.findFile(filePath)
+        Log.d("SuperProductivity", "removeFile: trying to remove: $file")
+
+        if (file != null && file.exists()) {
+            // File exists, attempt to delete it
+            val deleted = file.delete()
+
+            if (deleted) {
+                Log.d("SuperProductivity", "File deleted successfully: $filePath")
+            } else {
+                Log.e("SuperProductivity", "Failed to delete the file: $filePath")
+            }
+        } else {
+            Log.d("SuperProductivity", "File does not exist: $filePath")
+        }
+    }
+
     @Suppress("unused")
     @JavascriptInterface
     fun writeFile(filePath: String, data: String) {

@@ -19,8 +19,6 @@ export class LocalFileSyncElectron
 
   public privateCfg!: SyncProviderPrivateCfgStore<LocalFileSyncElectronPrivateCfg>;
 
-  constructor() {}
-
   async isReady(): Promise<boolean> {
     return true;
   }

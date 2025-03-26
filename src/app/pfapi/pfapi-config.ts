@@ -40,6 +40,8 @@ import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { dataRepair } from '../core/data-repair/data-repair.util';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
+import { LocalFileSyncAndroid } from './api/sync/providers/local-file-sync/local-file-sync-android';
 
 export const CROSS_MODEL_VERSION = 1 as const;
 
@@ -154,6 +156,7 @@ export const PFAPI_SYNC_PROVIDERS = [
   }),
   new Webdav(),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
+  ...(IS_ANDROID_WEB_VIEW ? [new LocalFileSyncAndroid()] : []),
   // TODO android
   // ...(IS_ELECTRON ? [fileSyncElectron] : []),
 ];
