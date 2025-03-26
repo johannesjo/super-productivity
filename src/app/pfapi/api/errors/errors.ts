@@ -32,6 +32,10 @@ export class RemoteFileNotFoundAPIError extends AdditionalLogErrorBase {
   override name = RemoteFileNotFoundAPIError.name;
 }
 
+export class MissingRefreshTokenAPIError extends Error {
+  override name = MissingRefreshTokenAPIError.name;
+}
+
 export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
   override name = CannotCreateFolderAPIError.name;
 }

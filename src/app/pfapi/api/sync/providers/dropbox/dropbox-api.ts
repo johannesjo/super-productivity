@@ -4,14 +4,36 @@ import { stringify } from 'query-string';
 import { DropboxFileMetadata } from '../../../../../imex/sync/dropbox/dropbox.model';
 import { DropboxPrivateCfg } from './dropbox';
 import {
+  AuthFailSPError,
+  HttpNotOkAPIError,
+  InvalidDataSPError,
   MissingCredentialsSPError,
+  MissingRefreshTokenAPIError,
+  NoRevAPIError,
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 
+interface DropboxApiOptions {
+  method: HttpMethod;
+  url: string;
+  headers?: Record<string, any>;
+  data?: string | Record<string, unknown>;
+  params?: Record<string, string>;
+  accessToken?: string;
+  isSkipTokenRefresh?: boolean;
+}
+
+interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+type TokenRefreshResult = 'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR';
 
 export class DropboxApi {
   private _appKey: string;
@@ -23,13 +45,19 @@ export class DropboxApi {
   }
 
   async getMetaData(path: string): Promise<DropboxFileMetadata> {
-    const response = await this._request({
-      method: 'POST',
-      url: 'https://api.dropboxapi.com/2/files/get_metadata',
-      data: { path },
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.json();
+    try {
+      const response = await this._request({
+        method: 'POST',
+        url: 'https://api.dropboxapi.com/2/files/get_metadata',
+        headers: { 'Content-Type': 'application/json' },
+        data: { path },
+      });
+      return response.json();
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.getMetaData() error for path: ${path}`, e);
+      this._checkCommonErrors(e, path);
+      throw e;
+    }
   }
 
   async download<T>({
@@ -50,16 +78,22 @@ export class DropboxApi {
       });
 
       const apiResult = response.headers.get('dropbox-api-result');
-      const meta = apiResult ? JSON.parse(apiResult) : {};
+      if (!apiResult) {
+        throw new InvalidDataSPError('Missing dropbox-api-result header');
+      }
+
+      const meta = JSON.parse(apiResult);
       const data = await response.text();
 
-      return { meta, data: data as unknown as T };
-    } catch (e: any) {
-      if (e?.error_summary?.includes('path/not_found/')) {
-        throw new RemoteFileNotFoundAPIError(path, e);
-      } else {
-        throw e;
+      if (!meta.rev) {
+        throw new NoRevAPIError();
       }
+
+      return { meta, data: data as unknown as T };
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.download() error for path: ${path}`, e);
+      this._checkCommonErrors(e, path);
+      throw e;
     }
   }
 
@@ -86,43 +120,168 @@ export class DropboxApi {
         : { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
     }
 
-    const response = await this._request({
-      method: 'POST',
-      url: 'https://content.dropboxapi.com/2/files/upload',
-      data,
-      headers: {
-        'Dropbox-API-Arg': JSON.stringify(args),
-      },
-    });
-    return response.json();
+    try {
+      const response = await this._request({
+        method: 'POST',
+        url: 'https://content.dropboxapi.com/2/files/upload',
+        data,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Dropbox-API-Arg': JSON.stringify(args),
+        },
+      });
+
+      const result = await response.json();
+
+      if (!result.rev) {
+        throw new NoRevAPIError();
+      }
+
+      return result;
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.upload() error for path: ${path}`, e);
+      this._checkCommonErrors(e, path);
+      throw e;
+    }
   }
 
   async remove(path: string): Promise<unknown> {
-    const response = await this._request({
-      method: 'POST',
-      url: 'https://api.dropboxapi.com/2/files/delete_v2',
-      data: { path },
-    });
-    return response.json();
+    try {
+      const response = await this._request({
+        method: 'POST',
+        url: 'https://api.dropboxapi.com/2/files/delete_v2',
+        headers: { 'Content-Type': 'application/json' },
+        data: { path },
+      });
+      return response.json();
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.remove() error for path: ${path}`, e);
+      this._checkCommonErrors(e, path);
+      throw e;
+    }
   }
 
-  async _request({
-    url,
-    method = 'GET',
-    data,
-    headers = {},
-    params,
-    accessToken,
-    isSkipTokenRefresh = false,
-  }: {
-    url: string;
-    method?: HttpMethod;
-    headers?: { [key: string]: any };
-    data?: string | Record<string, unknown>;
-    params?: { [key: string]: string };
-    accessToken?: string;
-    isSkipTokenRefresh?: boolean;
-  }): Promise<Response> {
+  async checkUser(accessToken: string): Promise<unknown> {
+    try {
+      const response = await this._request({
+        method: 'POST',
+        url: 'https://api.dropboxapi.com/2/check/user',
+        headers: { 'Content-Type': 'application/json' },
+        accessToken,
+      });
+      return response.json();
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.checkUser() error`, e);
+      this._checkCommonErrors(e, 'check/user');
+      throw e;
+    }
+  }
+
+  async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<TokenRefreshResult> {
+    pfLog(2, `${DropboxApi.name}.updateAccessTokenFromRefreshTokenIfAvailable()`);
+
+    const privateCfg = await this._parent.privateCfg.load();
+    const refreshToken = privateCfg?.refreshToken;
+
+    if (!refreshToken) {
+      pfLog(1, 'Dropbox: No refresh token available');
+      throw new MissingRefreshTokenAPIError();
+    }
+
+    try {
+      const response = await fetch('https://api.dropbox.com/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: stringify({
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token',
+          client_id: this._appKey,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new HttpNotOkAPIError(response);
+      }
+
+      const data = (await response.json()) as TokenResponse;
+      pfLog(2, 'Dropbox: Refresh access token Response', data);
+
+      await this._parent.privateCfg.save({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token || privateCfg?.refreshToken,
+      });
+
+      return 'SUCCESS';
+    } catch (e) {
+      pfLog(1, 'Dropbox: Failed to refresh token', e);
+      return 'ERROR';
+    }
+  }
+
+  async getTokensFromAuthCode(
+    authCode: string,
+    codeVerifier: string,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: number;
+  } | null> {
+    try {
+      const response = await fetch('https://api.dropboxapi.com/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: stringify({
+          code: authCode,
+          grant_type: 'authorization_code',
+          client_id: this._appKey,
+          code_verifier: codeVerifier,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new HttpNotOkAPIError(response);
+      }
+
+      const data = (await response.json()) as TokenResponse;
+
+      // Validate response data
+      if (typeof data.access_token !== 'string') {
+        throw new Error('Dropbox: Invalid access token response');
+      }
+      if (typeof data.refresh_token !== 'string') {
+        throw new Error('Dropbox: Invalid refresh token response');
+      }
+      if (typeof +data.expires_in !== 'number') {
+        throw new Error('Dropbox: Invalid expiresIn response');
+      }
+
+      return {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        // eslint-disable-next-line no-mixed-operators
+        expiresAt: +data.expires_in * 1000 + Date.now(),
+      };
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}.getTokensFromAuthCode() error`, e);
+      throw e;
+    }
+  }
+
+  async _request(options: DropboxApiOptions): Promise<Response> {
+    const {
+      url,
+      method = 'GET',
+      data,
+      headers = {},
+      params,
+      accessToken,
+      isSkipTokenRefresh = false,
+    } = options;
+
     let token = accessToken;
     if (!token) {
       const privateCfg = await this._parent.privateCfg.load();
@@ -137,15 +296,24 @@ export class DropboxApi {
       params && Object.keys(params).length ? `${url}?${stringify(params)}` : url;
 
     // Prepare request options
+    const requestHeaders: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      ...headers,
+    };
+
+    // Set default content-type for JSON requests if not explicitly disabled or set
+    if (
+      requestHeaders['Content-Type'] === undefined &&
+      data &&
+      typeof data !== 'string' &&
+      !requestHeaders['Dropbox-API-Arg']
+    ) {
+      requestHeaders['Content-Type'] = 'application/json';
+    }
+
     const requestOptions: RequestInit = {
       method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...((method === 'POST' || method === 'PUT') && {
-          'Content-Type': 'application/octet-stream',
-        }),
-        ...headers,
-      },
+      headers: requestHeaders,
     };
 
     // Add request body if data is present
@@ -153,177 +321,127 @@ export class DropboxApi {
       requestOptions.body = typeof data === 'string' ? data : JSON.stringify(data);
     }
 
-    const response = await fetch(requestUrl, requestOptions);
+    try {
+      const response = await fetch(requestUrl, requestOptions);
 
-    // Handle token refresh
-    if (response.status === 401 && !isSkipTokenRefresh) {
-      await this.updateAccessTokenFromRefreshTokenIfAvailable();
-      // retry once
-      return this._request({
-        url,
-        method,
-        data,
-        headers,
-        params,
-        isSkipTokenRefresh: true,
-      });
-    }
-
-    // Handle errors
-    if (!response.ok) {
-      let responseData = {};
-      try {
-        responseData = await response.json();
-      } catch (e) {
-        // Ignore JSON parse errors for non-JSON responses
-      }
-
-      // Handle rate limiting
-      if ((responseData as any)?.error_summary?.includes('too_many_write_operations')) {
-        const retryAfter = (responseData as any)?.error?.retry_after;
-        const EXTRA_WAIT = 1;
-
-        if (retryAfter) {
-          return new Promise((resolve, reject) => {
-            setTimeout(
-              () => {
-                pfLog(
-                  2,
-                  `Too many requests(${headers['Dropbox-API-Arg']}), retrying in ${retryAfter}s...`,
-                );
-                this._request({
-                  url,
-                  method,
-                  data,
-                  headers,
-                  params,
-                  isSkipTokenRefresh: true,
-                })
-                  .then(resolve)
-                  .catch(reject);
-              },
-              (retryAfter + EXTRA_WAIT) * 1000,
-            );
-          });
-        } else {
-          throw new TooManyRequestsAPIError(url, headers['Dropbox-API-Arg'], {
-            method,
-            error: responseData,
-            data,
+      // Handle token refresh
+      if (response.status === 401 && !isSkipTokenRefresh) {
+        const refreshResult = await this.updateAccessTokenFromRefreshTokenIfAvailable();
+        if (refreshResult === 'SUCCESS') {
+          return this._request({
+            ...options,
+            isSkipTokenRefresh: true,
           });
         }
       }
 
-      // Handle missing file errors
-      if ((responseData as any)?.error_summary?.includes('path/not_found/')) {
-        throw new RemoteFileNotFoundAPIError(
-          headers['Dropbox-API-Arg'] ? JSON.parse(headers['Dropbox-API-Arg']).path : url,
-          responseData,
+      // Handle errors
+      if (!response.ok) {
+        const path = headers['Dropbox-API-Arg']
+          ? JSON.parse(headers['Dropbox-API-Arg']).path
+          : 'unknown';
+
+        await this._handleErrorResponse(response, requestHeaders, path, () =>
+          this._request({
+            ...options,
+            isSkipTokenRefresh: true,
+          }),
         );
       }
 
-      // Throw error data in a format similar to axios for compatibility
-      throw {
+      return response;
+    } catch (e) {
+      pfLog(1, `${DropboxApi.name}._request() error for ${url}`, e);
+      throw e;
+    }
+  }
+
+  private async _handleErrorResponse(
+    response: Response,
+    headers: Record<string, any>,
+    path: string,
+    originalRequestExecutor: () => Promise<any>,
+  ): Promise<never> {
+    let responseData = {};
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      // Ignore JSON parse errors for non-JSON responses
+    }
+
+    // Handle rate limiting
+    if ((responseData as any)?.error_summary?.includes('too_many_write_operations')) {
+      const retryAfter = (responseData as any)?.error?.retry_after;
+      if (retryAfter) {
+        return this._handleRateLimit(retryAfter, path, originalRequestExecutor);
+      }
+    } else {
+      throw new TooManyRequestsAPIError({ response, headers, responseData });
+    }
+
+    // Handle specific error cases
+    if ((responseData as any)?.error_summary?.includes('path/not_found/')) {
+      throw new RemoteFileNotFoundAPIError(path, responseData);
+    }
+
+    if (response.status === 401) {
+      if (
+        (responseData as any)?.error_summary?.includes('expired_access_token') ||
+        (responseData as any)?.error_summary?.includes('invalid_access_token')
+      ) {
+        throw new AuthFailSPError('Dropbox token expired or invalid', '', responseData);
+      }
+      throw new AuthFailSPError(`Dropbox ${response.status}`, '', responseData);
+    }
+
+    if (!response.ok) {
+      throw new HttpNotOkAPIError(response);
+    }
+
+    // Throw formatted error for consistency
+    throw {
+      status: response.status,
+      response: {
         status: response.status,
-        response: {
-          status: response.status,
-          data: responseData,
-        },
-        error_summary: (responseData as any)?.error_summary,
-      };
-    }
-
-    return response;
-  }
-
-  async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<void> {
-    pfLog(2, 'updateAccessTokenFromRefreshTokenIfAvailable()');
-    const privateCfg = await this._parent.privateCfg.load();
-    const refreshToken = privateCfg?.refreshToken;
-    if (!refreshToken) {
-      console.error('Dropbox: No refresh token available');
-      throw new Error('NO_REFRESH_TOKEN');
-    }
-
-    const response = await fetch('https://api.dropbox.com/oauth2/token', {
-      method: 'POST',
-      headers: {
-        // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        data: responseData,
       },
-      body: stringify({
-        refresh_token: refreshToken,
-        grant_type: 'refresh_token',
-        client_id: this._appKey,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    pfLog(2, 'Dropbox: Refresh access token Response', data);
-
-    await this._parent.privateCfg.save({
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token || privateCfg?.refreshToken,
-    });
-  }
-
-  async getTokensFromAuthCode(
-    authCode: string,
-    codeVerifier: string,
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
-  } | null> {
-    const response = await fetch('https://api.dropboxapi.com/oauth2/token', {
-      method: 'POST',
-      headers: {
-        // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: stringify({
-        code: authCode,
-        grant_type: 'authorization_code',
-        client_id: this._appKey,
-        code_verifier: codeVerifier,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (typeof data.access_token !== 'string') {
-      console.log(data);
-      throw new Error('Dropbox: Invalid access token response');
-    }
-    if (typeof data.refresh_token !== 'string') {
-      console.log(data);
-      throw new Error('Dropbox: Invalid refresh token response');
-    }
-    if (typeof +data.expires_in !== 'number') {
-      console.log(data);
-      throw new Error('Dropbox: Invalid expiresIn response');
-    }
-
-    return {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token,
-      // eslint-disable-next-line no-mixed-operators
-      expiresAt: +data.expires_in * 1000 + Date.now(),
+      error_summary: (responseData as any)?.error_summary,
     };
   }
 
-  // async checkUser(accessToken: string): Promise<unknown> {
-  //   const response = await this._request({
-  //     method: 'POST',
-  //     url: 'https://api.dropboxapi.com/2/check/user',
-  //     accessToken,
-  //   });
-  //   return response.json();
-  // }
+  private _handleRateLimit(
+    retryAfter: number,
+    path: string,
+    originalRequestExecutor: () => Promise<any>,
+  ): Promise<never> {
+    const EXTRA_WAIT = 1;
+    return new Promise((resolve, reject) => {
+      setTimeout(
+        () => {
+          pfLog(2, `Too many requests ${path}, retrying in ${retryAfter}s...`);
+          originalRequestExecutor().then(resolve).catch(reject);
+        },
+        (retryAfter + EXTRA_WAIT) * 1000,
+      );
+    });
+  }
+
+  private _checkCommonErrors(e: any, targetPath: string): void {
+    if (
+      e instanceof RemoteFileNotFoundAPIError ||
+      e instanceof AuthFailSPError ||
+      e instanceof NoRevAPIError ||
+      e instanceof TooManyRequestsAPIError
+    ) {
+      return;
+    }
+
+    if (e?.status === 401) {
+      throw new AuthFailSPError(`Dropbox ${e.status}`, targetPath);
+    }
+
+    if (e?.error_summary?.includes('path/not_found/')) {
+      throw new RemoteFileNotFoundAPIError(targetPath);
+    }
+  }
 }
