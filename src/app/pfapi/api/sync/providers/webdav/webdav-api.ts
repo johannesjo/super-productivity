@@ -10,6 +10,24 @@ import { pfLog } from '../../../util/log';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+interface WebDavRequestOptions {
+  method: string;
+  path: string;
+  body?: string | null;
+  headers?: Record<string, string>;
+  ifNoneMatch?: string | null;
+}
+
+interface FileMeta {
+  filename: string;
+  basename: string;
+  lastmod: string;
+  size: number;
+  type: string;
+  etag: string;
+  data: Record<string, string>;
+}
+
 export class WebdavApi {
   private _getCfgOrError: () => Promise<WebdavPrivateCfg>;
 
@@ -26,72 +44,52 @@ export class WebdavApi {
     path: string;
     isOverwrite?: boolean;
   }): Promise<void> {
-    const cfg = await this._getCfgOrError();
-    const headers = this._geReqtHeaders(cfg, isOverwrite ? null : '*');
-    headers.append('Content-Type', 'application/octet-stream');
     try {
-      const response = await fetch(this._getUrl(path, cfg), {
+      await this._makeRequest({
         method: 'PUT',
-        headers,
+        path,
         body: data,
+        headers: { 'Content-Type': 'application/octet-stream' },
+        ifNoneMatch: isOverwrite ? null : '*',
       });
-      if (response.status === 412) {
+    } catch (e: any) {
+      if (e?.status === 412) {
         throw new FileExistsAPIError();
       }
-
-      if (!response.ok) {
-        throw new HttpNotOkAPIError(response);
-      }
-    } catch (e) {
-      this._checkCommonErrors(e, path);
       throw e;
     }
   }
 
-  async getFileMeta(path: string, localRev: string | null): Promise<any> {
-    const cfg = await this._getCfgOrError();
+  async getFileMeta(path: string, localRev: string | null): Promise<FileMeta> {
+    const response = await this._makeRequest({
+      method: 'HEAD',
+      path,
+      ifNoneMatch: localRev,
+    });
 
-    try {
-      const response = await fetch(this._getUrl(path, cfg), {
-        method: 'HEAD',
-        headers: this._geReqtHeaders(cfg, localRev),
-      });
-      if (!response.ok) {
-        throw new HttpNotOkAPIError(response);
-      }
+    // Create case-insensitive header object
+    const responseHeaderObj: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      responseHeaderObj[key.toLowerCase()] = value;
+    });
 
-      // Create case-insensitive header object
-      const responseHeaderObj: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        responseHeaderObj[key.toLowerCase()] = value;
-      });
+    // Get etag from response headers
+    const etag = this._findEtagInHeaders(responseHeaderObj);
 
-      // Get etag from response headers
-      const etag = responseHeaderObj.etag || '';
+    // Build the file stat object
+    const fileMeta: FileMeta = {
+      filename: path.split('/').pop() || '',
+      basename: path.split('/').pop() || '',
+      lastmod: responseHeaderObj['last-modified'] || '',
+      size: parseInt(responseHeaderObj['content-length'] || '0', 10),
+      type: 'file',
+      etag: etag,
+      data: {
+        ...responseHeaderObj,
+      },
+    };
 
-      // Build the file stat object
-      const fileMeta = {
-        filename: path.split('/').pop() || '',
-        basename: path.split('/').pop() || '',
-        lastmod: responseHeaderObj['last-modified'] || '',
-        size: parseInt(responseHeaderObj['content-length'] || '0', 10),
-        type: 'file',
-        etag: etag,
-        data: {
-          ...responseHeaderObj,
-        },
-      };
-
-      // Clean the etag if present
-      if (fileMeta.etag) {
-        fileMeta.etag = this._cleanRev(fileMeta.etag);
-      }
-
-      return fileMeta;
-    } catch (e) {
-      this._checkCommonErrors(e, path);
-      throw e;
-    }
+    return fileMeta;
   }
 
   async download({
@@ -101,117 +99,144 @@ export class WebdavApi {
     path: string;
     localRev?: string | null;
   }): Promise<{ rev: string; dataStr: string }> {
-    const cfg = await this._getCfgOrError();
-    try {
-      const response = await fetch(this._getUrl(path, cfg), {
-        method: 'GET',
-        headers: this._geReqtHeaders(cfg, localRev),
-      });
-      if (!response.ok) {
-        throw new HttpNotOkAPIError(response);
-      }
-      const dataStr = await response.text();
+    const response = await this._makeRequest({
+      method: 'GET',
+      path,
+      ifNoneMatch: localRev,
+    });
 
-      const headerObj: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        headerObj[key] = value;
-      });
+    const dataStr = await response.text();
 
-      return {
-        rev: this.getRevFromMeta(headerObj),
-        dataStr,
-      };
-    } catch (e) {
-      this._checkCommonErrors(e, path);
-      throw e;
+    const headerObj: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headerObj[key.toLowerCase()] = value;
+    });
+
+    const rev = this._findEtagInHeaders(headerObj);
+
+    if (!rev) {
+      throw new NoEtagAPIError(headerObj);
     }
+
+    return {
+      rev: this._cleanRev(rev),
+      dataStr,
+    };
   }
 
   async remove(path: string): Promise<void> {
+    await this._makeRequest({
+      method: 'DELETE',
+      path,
+    });
+  }
+
+  getRevFromMetaHelper(fileMeta: unknown | Headers): string {
+    const d = (fileMeta as any)?.data || fileMeta;
+
+    // Case-insensitive search for etag
+    const etagKey = this._findEtagKeyInObject(d);
+    if (etagKey && d[etagKey]) {
+      return this._cleanRev(d[etagKey]);
+    }
+
+    pfLog(1, `${Webdav.name}.getRevFromMeta() No etag found in metadata`, {
+      availableKeys: Object.keys(d),
+      metadata: d,
+    });
+    throw new NoEtagAPIError(fileMeta);
+  }
+
+  async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
+    try {
+      await this._makeRequest({
+        method: 'MKCOL',
+        path: folderPath,
+      });
+    } catch (e: any) {
+      // If MKCOL is not supported, try alternative approach with PUT
+      if (e?.message?.includes('Method not allowed') || e?.status === 405) {
+        pfLog(2, `${Webdav.name}.createFolder() MKCOL not supported, trying PUT`);
+        await this._makeRequest({
+          method: 'PUT',
+          path: `${folderPath}/.folder`,
+          body: '',
+        });
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  private async _makeRequest({
+    method,
+    path,
+    body = null,
+    headers = {},
+    ifNoneMatch = null,
+  }: WebDavRequestOptions): Promise<Response> {
     const cfg = await this._getCfgOrError();
+
+    const requestHeaders = new Headers();
+    requestHeaders.append('Authorization', this._getAuthHeader(cfg));
+    if (ifNoneMatch) {
+      requestHeaders.append('If-None-Match', ifNoneMatch);
+    }
+    // Add custom headers
+    Object.entries(headers).forEach(([key, value]) => {
+      requestHeaders.append(key, value);
+    });
 
     try {
       const response = await fetch(this._getUrl(path, cfg), {
-        method: 'DELETE',
-        headers: this._geReqtHeaders(cfg),
+        method,
+        headers: requestHeaders,
+        body,
       });
 
       if (!response.ok) {
-        throw new Error(`Remove file failed: ${response.status} ${response.statusText}`);
+        throw new HttpNotOkAPIError(response);
       }
+      return response;
     } catch (e) {
       this._checkCommonErrors(e, path);
       throw e;
     }
   }
 
-  getRevFromMeta(fileMeta: unknown | Headers): string {
-    const d = (fileMeta as any)?.data || fileMeta;
-    let etagVal = d?.etag;
-    if (typeof etagVal !== 'string') {
-      const eTagAlternatives = ['oc-etag', 'last-modified'];
-      const propToUseInstead = eTagAlternatives.find((alt) => alt in d);
-      console.warn('No etag for WebDAV, using instead: ', propToUseInstead, {
-        d,
-        propToUseInstead,
-        etag: d.etag,
-        'oc-etag': d['oc-etag'],
-        'last-modified': d['last-modified'],
-      });
-      if (!propToUseInstead || !d[propToUseInstead]) {
-        throw new NoEtagAPIError(fileMeta);
-      }
-      etagVal = d[propToUseInstead];
-    }
-
-    return this._cleanRev(etagVal);
+  private _findEtagInHeaders(headers: Record<string, string>): string {
+    const etagKey = this._findEtagKeyInObject(headers);
+    return etagKey ? this._cleanRev(headers[etagKey]) : '';
   }
 
-  async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
-    const cfg = await this._getCfgOrError();
-    try {
-      const response = await fetch(this._getUrl(folderPath, cfg), {
-        method: 'MKCOL',
-        headers: this._geReqtHeaders(cfg),
-      });
+  private _findEtagKeyInObject(obj: Record<string, any>): string | undefined {
+    // Standard etag headers (case-insensitive search)
+    const possibleEtagKeys = ['etag', 'oc-etag', 'oc:etag', 'getetag', 'x-oc-etag'];
 
-      if (!response.ok) {
-        throw new HttpNotOkAPIError(response);
-      }
-    } catch (e) {
-      this._checkCommonErrors(e, folderPath);
-      throw e;
-    }
-  }
-
-  private _geReqtHeaders(
-    cfg: WebdavPrivateCfg,
-    ifNoneMatch: string | null = null,
-  ): Headers {
-    const headers = new Headers();
-    headers.append('Authorization', this._getAuthHeader(cfg));
-    if (ifNoneMatch) {
-      headers.append('If-None-Match', ifNoneMatch);
-    }
-    return headers;
+    return Object.keys(obj).find((key) => possibleEtagKeys.includes(key.toLowerCase()));
   }
 
   private _cleanRev(rev: string): string {
+    if (!rev) return '';
+
     const result = rev
       .replace(/\//g, '')
       .replace(/"/g, '')
-      .replace('&quot;', '')
-      .replace('&quot;', '');
+      .replace(/&quot;/g, '')
+      .trim();
 
-    pfLog(2, `${Webdav.name}.${this._cleanRev.name}()`, result);
+    pfLog(3, `${Webdav.name}.cleanRev() "${rev}" -> "${result}"`);
     return result;
   }
 
   private _getUrl(path: string, cfg: WebdavPrivateCfg): string {
-    return new URL(
-      path,
-      cfg.baseUrl.endsWith('/') ? cfg.baseUrl : `${cfg.baseUrl}/`,
-    ).toString();
+    // Ensure base URL ends with a trailing slash
+    const baseUrl = cfg.baseUrl.endsWith('/') ? cfg.baseUrl : `${cfg.baseUrl}/`;
+
+    // Remove leading slash from path if it exists
+    const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+
+    return new URL(normalizedPath, baseUrl).toString();
   }
 
   private _getAuthHeader(cfg: WebdavPrivateCfg): string {
@@ -219,13 +244,16 @@ export class WebdavApi {
   }
 
   private _checkCommonErrors(e: any, targetPath: string): void {
-    pfLog(1, `${Webdav.name} API ${targetPath}`, e);
+    pfLog(1, `${Webdav.name} API error for ${targetPath}`, e);
+
     if ('status' in e) {
-      if (e.status === 404) {
-        throw new RemoteFileNotFoundAPIError(targetPath);
-      }
-      if (e.status === 401) {
-        throw new AuthFailSPError('WebDav 401', targetPath);
+      // Handle common HTTP error codes
+      switch (e.status) {
+        case 401:
+        case 403:
+          throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
+        case 404:
+          throw new RemoteFileNotFoundAPIError(targetPath);
       }
     }
   }

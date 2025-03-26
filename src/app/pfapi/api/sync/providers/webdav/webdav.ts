@@ -55,7 +55,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       localRev,
     );
     return {
-      rev: this._getRevFromMeta(meta),
+      rev: meta.etag,
     };
   }
 
@@ -94,14 +94,11 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         throw e;
       }
     }
-    const meta = await this._api.getFileMeta(filePath, null);
-    const rev = this._getRevFromMeta(meta);
-
-    if (!rev) {
+    const { etag } = await this._api.getFileMeta(filePath, null);
+    if (!etag) {
       throw new NoRevAPIError();
     }
-
-    return { rev };
+    return { rev: etag };
   }
 
   async downloadFile(
@@ -126,10 +123,6 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   async removeFile(targetPath: string): Promise<void> {
     const cfg = await this._cfgOrError();
     await this._api.remove(this._getFilePath(targetPath, cfg));
-  }
-
-  private _getRevFromMeta(fileMeta: Record<string, string>): string {
-    return this._api.getRevFromMeta(fileMeta);
   }
 
   private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
