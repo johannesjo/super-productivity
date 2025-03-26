@@ -33,7 +33,6 @@ interface TokenResponse {
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
-type TokenRefreshResult = 'SUCCESS' | 'NO_REFRESH_TOKEN' | 'ERROR';
 
 export class DropboxApi {
   private _appKey: string;
@@ -177,7 +176,7 @@ export class DropboxApi {
     }
   }
 
-  async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<TokenRefreshResult> {
+  async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<void> {
     pfLog(2, `${DropboxApi.name}.updateAccessTokenFromRefreshTokenIfAvailable()`);
 
     const privateCfg = await this._parent.privateCfg.load();
@@ -188,36 +187,29 @@ export class DropboxApi {
       throw new MissingRefreshTokenAPIError();
     }
 
-    try {
-      const response = await fetch('https://api.dropbox.com/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-        body: stringify({
-          refresh_token: refreshToken,
-          grant_type: 'refresh_token',
-          client_id: this._appKey,
-        }),
-      });
+    const response = await fetch('https://api.dropbox.com/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: stringify({
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+        client_id: this._appKey,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new HttpNotOkAPIError(response);
-      }
-
-      const data = (await response.json()) as TokenResponse;
-      pfLog(2, 'Dropbox: Refresh access token Response', data);
-
-      await this._parent.privateCfg.save({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token || privateCfg?.refreshToken,
-      });
-
-      return 'SUCCESS';
-    } catch (e) {
-      pfLog(1, 'Dropbox: Failed to refresh token', e);
-      return 'ERROR';
+    if (!response.ok) {
+      throw new HttpNotOkAPIError(response);
     }
+
+    const data = (await response.json()) as TokenResponse;
+    pfLog(2, 'Dropbox: Refresh access token Response', data);
+
+    await this._parent.privateCfg.save({
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || privateCfg?.refreshToken,
+    });
   }
 
   async getTokensFromAuthCode(
@@ -326,13 +318,11 @@ export class DropboxApi {
 
       // Handle token refresh
       if (response.status === 401 && !isSkipTokenRefresh) {
-        const refreshResult = await this.updateAccessTokenFromRefreshTokenIfAvailable();
-        if (refreshResult === 'SUCCESS') {
-          return this._request({
-            ...options,
-            isSkipTokenRefresh: true,
-          });
-        }
+        await this.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this._request({
+          ...options,
+          isSkipTokenRefresh: true,
+        });
       }
 
       // Handle errors
@@ -352,6 +342,7 @@ export class DropboxApi {
       return response;
     } catch (e) {
       pfLog(1, `${DropboxApi.name}._request() error for ${url}`, e);
+      this._checkCommonErrors(e, url);
       throw e;
     }
   }
@@ -375,7 +366,6 @@ export class DropboxApi {
       if (retryAfter) {
         return this._handleRateLimit(retryAfter, path, originalRequestExecutor);
       }
-    } else {
       throw new TooManyRequestsAPIError({ response, headers, responseData });
     }
 
