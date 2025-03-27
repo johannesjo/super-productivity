@@ -117,13 +117,13 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
   async uploadFile(
     targetPath: string,
     dataStr: string,
-    localRev: string,
+    revToMatch: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
     const r = await this._api.upload({
       path: this._getPath(targetPath),
       data: dataStr,
-      localRev,
+      revToMatch,
       isForceOverwrite,
     });
 

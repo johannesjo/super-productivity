@@ -41,6 +41,9 @@ export class MissingRefreshTokenAPIError extends Error {
 export class FileHashCreationAPIError extends AdditionalLogErrorBase {
   override name = FileHashCreationAPIError.name;
 }
+export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
+  override name = UploadRevToMatchMismatchAPIError.name;
+}
 
 export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
   override name = CannotCreateFolderAPIError.name;

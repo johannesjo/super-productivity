@@ -102,12 +102,12 @@ export class DropboxApi {
 
   async upload({
     path,
-    localRev,
+    revToMatch,
     data,
     isForceOverwrite = false,
   }: {
     path: string;
-    localRev?: string | null;
+    revToMatch?: string | null;
     data: any;
     isForceOverwrite?: boolean;
   }): Promise<DropboxFileMetadata> {
@@ -118,8 +118,8 @@ export class DropboxApi {
     };
 
     if (!isForceOverwrite) {
-      args.mode = localRev
-        ? ({ '.tag': 'update', update: localRev } as any)
+      args.mode = revToMatch
+        ? ({ '.tag': 'update', update: revToMatch } as any)
         : { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
     }
 
@@ -143,6 +143,9 @@ export class DropboxApi {
       return result;
     } catch (e) {
       pfLog(1, `${DropboxApi.name}.upload() error for path: ${path}`, e);
+      // TODO maybe throw proper for case
+      // if(xyz){throw new UploadRevToMatchMismatchAPIError();}
+
       this._checkCommonErrors(e, path);
       throw e;
     }

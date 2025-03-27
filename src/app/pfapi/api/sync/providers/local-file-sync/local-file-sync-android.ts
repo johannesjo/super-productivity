@@ -1,7 +1,6 @@
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
-import { androidInterface } from '../../../../../features/android/android-interface';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 
 import {
@@ -9,9 +8,11 @@ import {
   InvalidDataSPError,
   NoRevAPIError,
   RemoteFileNotFoundAPIError,
+  UploadRevToMatchMismatchAPIError,
   WebCryptoNotAvailableError,
 } from '../../../errors/errors';
 import { md5HashPromise } from '../../../../../util/md5-hash';
+import { pfLog } from '../../../util/log';
 
 export type LocalFileSyncAndroidPrivateCfg = undefined;
 
@@ -25,6 +26,7 @@ export class LocalFileSyncAndroid
   readonly id: SyncProviderId = SyncProviderId.LocalFile;
   readonly isUploadForcePossible: boolean = false;
   readonly maxConcurrentRequests = 10;
+  readonly fileDirectory: Directory = Directory.Data as const;
 
   public privateCfg!: SyncProviderPrivateCfgStore<LocalFileSyncAndroidPrivateCfg>;
 
@@ -38,14 +40,12 @@ export class LocalFileSyncAndroid
   }
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
+    pfLog(2, `${LocalFileSyncAndroid.name}.getFileRev`, { targetPath, localRev });
     try {
       const r = await this.downloadFile(targetPath, localRev);
-      return {
-        rev: r.rev,
-      };
+      return { rev: r.rev };
     } catch (e) {
-      if (e instanceof InvalidDataSPError) {
-      }
+      pfLog(1, `${LocalFileSyncAndroid.name}.getFileRev error`, e);
       throw e;
     }
   }
@@ -54,49 +54,121 @@ export class LocalFileSyncAndroid
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    const filePath = await this._getFilePath(targetPath);
-    const dataStr = androidInterface.readFile(filePath);
-    await Filesystem.readFile({
-      path: targetPath,
-      directory: Directory.Documents,
-      encoding: Encoding.UTF8,
-    });
-    if (dataStr === '') {
-      throw new RemoteFileNotFoundAPIError();
+    pfLog(2, `${LocalFileSyncAndroid.name}.downloadFile`, { targetPath, localRev });
+
+    try {
+      const filePath = await this._getFilePath(targetPath);
+      const res = await Filesystem.readFile({
+        path: filePath,
+        directory: this.fileDirectory,
+        encoding: Encoding.UTF8,
+      });
+
+      // Ensure res.data is a string
+      let dataStr: string;
+      if (typeof res.data === 'string') {
+        dataStr = res.data;
+      } else if (res.data instanceof Blob) {
+        dataStr = await res.data.text();
+      } else {
+        throw new RemoteFileNotFoundAPIError({ targetPath, res });
+      }
+
+      // Validate content
+      if (!dataStr || dataStr === '') {
+        throw new RemoteFileNotFoundAPIError(targetPath);
+      }
+
+      if (dataStr.length <= 3) {
+        throw new InvalidDataSPError(`File content too short: ${dataStr.length} chars`);
+      }
+
+      return {
+        rev: await this._getLocalRev(dataStr),
+        dataStr,
+      };
+    } catch (e) {
+      if (e instanceof RemoteFileNotFoundAPIError || e instanceof InvalidDataSPError) {
+        throw e;
+      }
+
+      if (e?.toString?.().includes('File does not exist')) {
+        throw new RemoteFileNotFoundAPIError(targetPath);
+      }
+
+      pfLog(1, `${LocalFileSyncAndroid.name}.downloadFile error`, e);
+      throw e;
     }
-    if (!dataStr || dataStr.length <= 3) {
-      throw new InvalidDataSPError();
-    }
-    return {
-      rev: await this._getLocalRev(dataStr),
-      dataStr,
-    };
   }
 
   async uploadFile(
     targetPath: string,
     dataStr: string,
-    localRev: string | null,
-    isForceOverwrite?: boolean,
+    revToMatch: string | null,
+    isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    const filePath = await this._getFilePath(targetPath);
-    // TODO check matching ref and overwrite
-    await Filesystem.writeFile({
-      path: filePath,
-      data: dataStr,
-      directory: Directory.Data,
-      encoding: Encoding.UTF8,
+    pfLog(2, `${LocalFileSyncAndroid.name}.uploadFile`, {
+      targetPath,
+      dataLength: dataStr?.length,
+      revToMatch,
+      isForceOverwrite,
     });
-    return {
-      rev: await this._getLocalRev(dataStr),
-    };
+
+    try {
+      // Check if file exists and compare revs if not force overwrite
+      if (!isForceOverwrite && revToMatch) {
+        try {
+          const existingFile = await this.downloadFile(targetPath, revToMatch);
+          if (existingFile.rev !== revToMatch) {
+            pfLog(1, `${LocalFileSyncAndroid.name}.uploadFile rev mismatch`, {
+              existingFileRev: existingFile.rev,
+              revToMatch,
+            });
+            throw new UploadRevToMatchMismatchAPIError();
+          }
+        } catch (err) {
+          // File doesn't exist yet, that's fine for upload
+          if (!(err instanceof RemoteFileNotFoundAPIError)) {
+            throw err;
+          }
+        }
+      }
+
+      const filePath = await this._getFilePath(targetPath);
+      await Filesystem.writeFile({
+        path: filePath,
+        data: dataStr,
+        directory: this.fileDirectory,
+        encoding: Encoding.UTF8,
+      });
+
+      const newRev = await this._getLocalRev(dataStr);
+      return { rev: newRev };
+    } catch (e) {
+      pfLog(1, `${LocalFileSyncAndroid.name}.uploadFile error`, e);
+      throw e;
+    }
   }
 
-  async removeFile(filePath: string): Promise<void> {
-    await Filesystem.deleteFile({
-      path: filePath,
-      directory: Directory.Documents,
-    });
+  async removeFile(targetPath: string): Promise<void> {
+    pfLog(2, `${LocalFileSyncAndroid.name}.removeFile`, { targetPath });
+    try {
+      const filePath = await this._getFilePath(targetPath);
+      await Filesystem.deleteFile({
+        path: filePath,
+        directory: this.fileDirectory,
+      });
+    } catch (e) {
+      // Ignore file not found errors when removing
+      if (e?.toString?.().includes('File does not exist')) {
+        pfLog(2, `${LocalFileSyncAndroid.name}.removeFile - file doesn't exist`, {
+          targetPath,
+        });
+        return;
+      }
+      pfLog(1, `${LocalFileSyncAndroid.name}.removeFile error`, e);
+      throw e;
+    }
   }
 
   private async _getFilePath(targetPath: string): Promise<string> {
@@ -114,7 +186,6 @@ export class LocalFileSyncAndroid
         throw new NoRevAPIError();
       }
       console.log({ hash });
-
       return hash;
     } catch (e) {
       if (e instanceof WebCryptoNotAvailableError) {
