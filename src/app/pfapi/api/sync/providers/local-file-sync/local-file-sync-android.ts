@@ -2,7 +2,8 @@ import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { androidInterface } from '../../../../../features/android/android-interface';
-import { createSha1Hash } from '../../../../../util/create-sha-1-hash';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+
 import {
   FileHashCreationAPIError,
   InvalidDataSPError,
@@ -10,6 +11,7 @@ import {
   RemoteFileNotFoundAPIError,
   WebCryptoNotAvailableError,
 } from '../../../errors/errors';
+import { md5HashPromise } from '../../../../../util/md5-hash';
 
 export type LocalFileSyncAndroidPrivateCfg = undefined;
 
@@ -54,8 +56,11 @@ export class LocalFileSyncAndroid
   ): Promise<{ rev: string; dataStr: string }> {
     const filePath = await this._getFilePath(targetPath);
     const dataStr = androidInterface.readFile(filePath);
-    console.log({ dataStr });
-
+    await Filesystem.readFile({
+      path: targetPath,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+    });
     if (dataStr === '') {
       throw new RemoteFileNotFoundAPIError();
     }
@@ -75,16 +80,23 @@ export class LocalFileSyncAndroid
     isForceOverwrite?: boolean,
   ): Promise<{ rev: string }> {
     const filePath = await this._getFilePath(targetPath);
-    console.log(dataStr);
-
-    androidInterface.writeFile(filePath, dataStr);
+    // TODO check matching ref and overwrite
+    await Filesystem.writeFile({
+      path: filePath,
+      data: dataStr,
+      directory: Directory.Data,
+      encoding: Encoding.UTF8,
+    });
     return {
       rev: await this._getLocalRev(dataStr),
     };
   }
 
   async removeFile(filePath: string): Promise<void> {
-    androidInterface.removeFile(filePath);
+    await Filesystem.deleteFile({
+      path: filePath,
+      directory: Directory.Documents,
+    });
   }
 
   private async _getFilePath(targetPath: string): Promise<string> {
@@ -97,10 +109,12 @@ export class LocalFileSyncAndroid
     }
 
     try {
-      const hash = await createSha1Hash(dataStr);
+      const hash = await md5HashPromise(dataStr);
       if (!hash) {
         throw new NoRevAPIError();
       }
+      console.log({ hash });
+
       return hash;
     } catch (e) {
       if (e instanceof WebCryptoNotAvailableError) {
