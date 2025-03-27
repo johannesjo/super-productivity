@@ -155,12 +155,16 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   sync(): void {
     this.syncProviderService.sync().then((r) => {
       if (
-        r === SyncStatus.InSync ||
         r === SyncStatus.UpdateLocal ||
         r === SyncStatus.UpdateRemoteAll ||
         r === SyncStatus.UpdateRemote
       ) {
         this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON });
+      } else if (r === SyncStatus.InSync) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.SYNC.S.ALREADY_IN_SYNC,
+        });
       }
     });
   }
