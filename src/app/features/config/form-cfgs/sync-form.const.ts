@@ -4,7 +4,7 @@ import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
-import { androidInterface } from '../../android/android-interface';
+import { fileSyncElectron } from '../../../pfapi/pfapi-config';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -28,10 +28,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         options: [
           { label: LegacySyncProvider.Dropbox, value: LegacySyncProvider.Dropbox },
           { label: LegacySyncProvider.WebDAV, value: LegacySyncProvider.WebDAV },
-          ...(IS_ELECTRON ||
-          (IS_ANDROID_WEB_VIEW &&
-            (androidInterface as any).grantFilePermission &&
-            (androidInterface as any).isGrantedFilePermission)
+          ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
             ? [
                 {
                   label: LegacySyncProvider.LocalFile,
@@ -40,44 +37,44 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               ]
             : []),
         ],
-        change: (field, ev) => {
-          if (
-            IS_ANDROID_WEB_VIEW &&
-            field.model.syncProvider === LegacySyncProvider.LocalFile
-          ) {
-            // disable / enable is a workaround for the hide expression for the info file path info tpl
-            field.formControl?.disable();
-
-            androidInterface.grantFilePermissionWrapped().then(() => {
-              field.formControl?.enable();
-              console.log('Granted file access permission for android');
-              console.log(androidInterface?.allowedFolderPath());
-              field.formControl?.updateValueAndValidity();
-              field.formControl?.parent?.updateValueAndValidity();
-              field.formControl?.parent?.markAllAsTouched();
-              field.formControl?.markAllAsTouched();
-            });
-          }
-        },
+        // change: (field, ev) => {
+        //   if (
+        //     IS_ANDROID_WEB_VIEW &&
+        //     field.model.syncProvider === LegacySyncProvider.LocalFile
+        //   ) {
+        //     // disable / enable is a workaround for the hide expression for the info file path info tpl
+        //     field.formControl?.disable();
+        //
+        //     androidInterface.grantFilePermissionWrapped().then(() => {
+        //       field.formControl?.enable();
+        //       console.log('Granted file access permission for android');
+        //       console.log(androidInterface?.allowedFolderPath());
+        //       field.formControl?.updateValueAndValidity();
+        //       field.formControl?.parent?.updateValueAndValidity();
+        //       field.formControl?.parent?.markAllAsTouched();
+        //       field.formControl?.markAllAsTouched();
+        //     });
+        //   }
+        // },
       },
-      validators: {
-        validFileAccessPermission: {
-          expression: (c: any) => {
-            if (IS_ANDROID_WEB_VIEW && c.value === LegacySyncProvider.LocalFile) {
-              console.log(
-                'Checking file access permission for android',
-                androidInterface.isGrantedFilePermission(),
-              );
-              return androidInterface.isGrantedFilePermission();
-            }
-            return true;
-          },
-          message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
-        },
-      },
-      validation: {
-        show: true,
-      },
+      // validators: {
+      //   validFileAccessPermission: {
+      //     expression: (c: any) => {
+      //       if (IS_ANDROID_WEB_VIEW && c.value === LegacySyncProvider.LocalFile) {
+      //         console.log(
+      //           'Checking file access permission for android',
+      //           androidInterface.isGrantedFilePermission(),
+      //         );
+      //         return androidInterface.isGrantedFilePermission();
+      //       }
+      //       return true;
+      //     },
+      //     message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
+      //   },
+      // },
+      // validation: {
+      //   show: true,
+      // },
     },
     // TODO remove completely
     // {
@@ -96,27 +93,44 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     //     },
     //   ],
     // },
-    IS_ANDROID_WEB_VIEW
-      ? {
-          hideExpression: (m, v, field) => {
-            return (
-              !IS_ANDROID_WEB_VIEW ||
-              field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
-              !androidInterface?.isGrantedFilePermission() ||
-              !androidInterface?.allowedFolderPath()
-            );
-          },
-          type: 'tpl',
-          className: `tpl`,
-          expressionProperties: {
-            template: () =>
-              // NOTE: hard to translate here, that's why we don't
-              `<div>Granted file access permission:<br />${
-                androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
-              }</div>`,
-          },
-        }
-      : {},
+    // IS_ANDROID_WEB_VIEW
+    //   ? {
+    //       hideExpression: (m, v, field) => {
+    //         return (
+    //           !IS_ANDROID_WEB_VIEW ||
+    //           field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+    //           !androidInterface?.isGrantedFilePermission() ||
+    //           !androidInterface?.allowedFolderPath()
+    //         );
+    //       },
+    //       type: 'tpl',
+    //       className: `tpl`,
+    //       expressionProperties: {
+    //         template: () =>
+    //           // NOTE: hard to translate here, that's why we don't
+    //           `<div>Granted file access permission:<br />${
+    //             androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
+    //           }</div>`,
+    //       },
+    //     }
+    //   : {},
+    // {
+    //   hideExpression: (m, v, field) =>
+    //     field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+    //     // hide for android
+    //     IS_ANDROID_WEB_VIEW,
+    //   key: 'localFileSync',
+    //   fieldGroup: [
+    //     {
+    //       key: 'syncFolderPath',
+    //       type: 'input',
+    //       templateOptions: {
+    //         required: true,
+    //         label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
@@ -124,12 +138,24 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
+        // {
+        //   key: 'syncFolderPath',
+        //   type: 'input',
+        //   templateOptions: {
+        //     required: true,
+        //     label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+        //   },
+        // },
         {
-          key: 'syncFolderPath',
-          type: 'input',
+          type: 'btn',
+          key: 'folderPath',
           templateOptions: {
+            // TODO translate
+            text: `Select Sync Folder`,
             required: true,
-            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            onClick: () => {
+              fileSyncElectron.pickDirectory();
+            },
           },
         },
       ],

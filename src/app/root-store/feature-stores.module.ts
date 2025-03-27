@@ -88,7 +88,6 @@ import { FinishDayBeforeCloseEffects } from '../features/finish-day-before-close
 import { GitlabIssueEffects } from '../features/issue/providers/gitlab/gitlab-issue/gitlab-issue.effects';
 import { JiraIssueEffects } from '../features/issue/providers/jira/jira-issue/jira-issue.effects';
 import { LocalBackupEffects } from '../imex/local-backup/local-backup.effects';
-import { LocalFileSyncElectronEffects } from '../imex/sync/local-file-sync/store/local-file-sync-electron.effects';
 import { OpenProjectEffects } from '../features/issue/providers/open-project/open-project-issue/store/open-project.effects';
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
@@ -177,7 +176,6 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
     EffectsModule.forFeature([GitlabIssueEffects]),
     EffectsModule.forFeature([JiraIssueEffects]),
     EffectsModule.forFeature([LocalBackupEffects]),
-    EffectsModule.forFeature([LocalFileSyncElectronEffects]),
     EffectsModule.forFeature([OpenProjectEffects]),
     EffectsModule.forFeature([ReminderCountdownEffects]),
     EffectsModule.forFeature([SyncEffects]),

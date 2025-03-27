@@ -1,0 +1,9 @@
+@if (value) {
+  <div class="value">{{ value }}</div>
+}
+<button
+  mat-flat-button
+  (click)="onClick()"
+>
+  {{ (to.text | translate) || 'Click Me' }}
+</button>
