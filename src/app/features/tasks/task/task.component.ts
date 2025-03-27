@@ -739,7 +739,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   moveToToday(): void {
     const t = this.task();
-    if (t.projectId && !t.parentId) {
+    if (t.projectId) {
       this._projectService.moveTaskToTodayList(t.id, t.projectId);
       this.addToMyDay();
     }
@@ -899,13 +899,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks) && t.projectId) {
-      if (!t.parentId) {
-        ev.preventDefault();
-        // same default shortcut as schedule so we stop propagation
-        ev.stopPropagation();
-        this.focusNext(true, true);
-        this.moveToToday();
-      }
+      ev.preventDefault();
+      // same default shortcut as schedule so we stop propagation
+      ev.stopPropagation();
+      this.focusNext(true, true);
+      this.moveToToday();
     }
 
     // collapse sub tasks
