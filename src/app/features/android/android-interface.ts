@@ -55,6 +55,7 @@ export interface AndroidInterface {
   ): void;
 
   // WebDAV
+  // TODO remove
   makeHttpRequestWrapped(
     url: string,
     method: string,
@@ -64,6 +65,7 @@ export interface AndroidInterface {
     readResponse: boolean,
   ): Promise<object>;
 
+  // TODO remove
   makeHttpRequest?(
     rId: string,
     url: string,

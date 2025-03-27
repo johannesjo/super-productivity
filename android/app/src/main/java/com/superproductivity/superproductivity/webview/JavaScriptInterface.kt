@@ -465,11 +465,12 @@ class JavaScriptInterface(
             Log.d("SuperProductivity", "File created successfully: ${file.uri}")
         } else {
             Log.e("SuperProductivity", "Failed to create the file: $filePath")
+            return
         }
-        // file = file?.recreateFile(activity)  // erase content first by recreating file. For some reason, DocumentFileCompat.fromFullPath(requiresWriteAccess=true) and openOutputStream(append=false) only open the file in append mode, so we need to recreate the file to truncate its content first
+
         // Open a writer to an OutputStream to the file without append mode (so we write from the start of the file)
         Log.d("SuperProductivity", "writeFile: try to openOutputStream")
-        val writer: Writer = file?.openOutputStream(activity, append = false)!!.writer()
+        val writer: Writer = file.openOutputStream(activity, append = false)!!.writer()
         try {
             Log.d("SuperProductivity", "writeFile: try to write data into file: $data")
             writer.write(data)
