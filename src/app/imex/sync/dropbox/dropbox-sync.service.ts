@@ -7,7 +7,6 @@ import {
   DROPBOX_SYNC_MAIN_FILE_PATH,
 } from './dropbox.const';
 import { SyncGetRevResult } from '../sync.model';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   LegacySyncProvider,
@@ -15,21 +14,23 @@ import {
   SyncTarget,
 } from '../legacy-sync-provider.model';
 import { Store } from '@ngrx/store';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class DropboxSyncService implements SyncProviderServiceInterface {
   private _dropboxApiService = inject(DropboxApiService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _snackService = inject(SnackService);
   private _store = inject(Store);
 
   id: LegacySyncProvider = LegacySyncProvider.Dropbox;
   isUploadForcePossible: boolean = true;
 
-  isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    concatMap(() => this._dropboxApiService.isTokenAvailable$),
-    distinctUntilChanged(),
-  );
+  isReady$: Observable<boolean> =
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._dropboxApiService.isTokenAvailable$),
+      distinctUntilChanged(),
+    );
 
   async getFileRevAndLastClientUpdate(
     syncTarget: SyncTarget,

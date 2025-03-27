@@ -11,9 +11,9 @@ import { catchError, concatMap, map, switchMap, take } from 'rxjs/operators';
 import { WorkContextType } from './features/work-context/work-context.model';
 import { TagService } from './features/tag/tag.service';
 import { ProjectService } from './features/project/project.service';
-import { DataInitService } from './core/data-init/data-init.service';
 import { Store } from '@ngrx/store';
 import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
+import { DataInitStateService } from './core/data-init/data-init-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class ActiveWorkContextGuard {
@@ -41,14 +41,14 @@ export class ActiveWorkContextGuard {
 @Injectable({ providedIn: 'root' })
 export class ValidTagIdGuard {
   private _tagService = inject(TagService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
     const { id } = next.params;
-    return this._dataInitService.isAllDataLoadedInitially$.pipe(
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._tagService.getTagById$(id)),
       catchError(() => of(false)),
       take(1),
@@ -72,14 +72,14 @@ export class FocusOverlayOpenGuard {
 @Injectable({ providedIn: 'root' })
 export class ValidProjectIdGuard {
   private _projectService = inject(ProjectService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
     const { id } = next.params;
-    return this._dataInitService.isAllDataLoadedInitially$.pipe(
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._projectService.getByIdOnce$(id)),
       catchError(() => of(false)),
       map((project) => !!project),

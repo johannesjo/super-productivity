@@ -2,8 +2,8 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angu
 import { ShepherdService } from './shepherd.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { concatMap, first } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { ProjectService } from '../project/project.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 @Component({
   selector: 'shepherd',
@@ -14,12 +14,12 @@ import { ProjectService } from '../project/project.service';
 })
 export class ShepherdComponent implements AfterViewInit {
   private shepherdMyService = inject(ShepherdService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _projectService = inject(ProjectService);
 
   ngAfterViewInit(): void {
     if (!localStorage.getItem(LS.IS_SHOW_TOUR) && navigator.userAgent !== 'NIGHTWATCH') {
-      this._dataInitService.isAllDataLoadedInitially$
+      this._dataInitStateService.isAllDataLoadedInitially$
         .pipe(concatMap(() => this._projectService.list$.pipe(first())))
         .subscribe((projectList) => {
           if (projectList.length <= 2) {

@@ -4,9 +4,10 @@ import { AdditionalLogErrorBase } from '../core/errors/errors';
 import { Action } from '@ngrx/store';
 import { ActionReducer } from '@ngrx/store/src/models';
 import { MiniObservable } from './api/util/mini-observable';
-import { Observable } from 'rxjs';
+import { from, merge, Observable } from 'rxjs';
 import { PfapiEventPayloadMap, PfapiEvents } from './api/pfapi.model';
 import { PFEventEmitter } from './api/util/events';
+import { switchMap } from 'rxjs/operators';
 
 export class ModelNotFoundError extends AdditionalLogErrorBase {
   override name = ModelNotFoundError.name;
@@ -83,3 +84,22 @@ export const fromPfapiEvent = <K extends PfapiEvents>(
       target.removeEventListener(eventName, handler);
     };
   });
+
+export const pfapiEventAndInitial = <K extends PfapiEvents, O>(
+  target: PFEventEmitter,
+  eventName: K,
+  initialLoadFn: () => Promise<O | PfapiEventPayloadMap[K]>,
+): Observable<O | PfapiEventPayloadMap[K]> => {
+  return merge(fromPfapiEvent(target, eventName), from(initialLoadFn()));
+};
+
+export const pfapiEventAndInitialAfter = <K extends PfapiEvents, O>(
+  afterObs$: Observable<unknown>,
+  target: PFEventEmitter,
+  eventName: K,
+  initialLoadFn: () => Promise<O | PfapiEventPayloadMap[K]>,
+): Observable<O | PfapiEventPayloadMap[K]> => {
+  return afterObs$.pipe(
+    switchMap(() => pfapiEventAndInitial(target, eventName, initialLoadFn)),
+  );
+};

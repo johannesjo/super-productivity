@@ -26,18 +26,18 @@ import { TaskService } from '../tasks/task.service';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { getCompleteStateForWorkContext } from './util/get-complete-state-for-work-context.util';
 import { NavigationEnd, Router } from '@angular/router';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
 import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
   private readonly _pfapiService = inject(PfapiService);
   private readonly _workContextService = inject(WorkContextService);
-  private readonly _dataInitService = inject(DataInitService);
+  private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _taskService = inject(TaskService);
   private readonly _router = inject(Router);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
@@ -47,7 +47,7 @@ export class WorklogService {
     true,
   );
   _archiveUpdateTrigger$: Observable<any> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() =>
         merge(
           // this._workContextService.activeWorkContextOnceOnContextChange$,

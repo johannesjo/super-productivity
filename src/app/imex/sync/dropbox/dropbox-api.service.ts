@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { DROPBOX_APP_KEY } from './dropbox.const';
 import { first, map, switchMap, tap } from 'rxjs/operators';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { Observable, ReplaySubject } from 'rxjs';
 import axios, { AxiosResponse, Method } from 'axios';
 import { stringify } from 'query-string';
@@ -15,13 +14,14 @@ import { PersistenceLocalService } from '../../../core/persistence/persistence-l
 import { LegacySyncProvider } from '../legacy-sync-provider.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { environment } from '../../../../environments/environment';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
 @Injectable({ providedIn: 'root' })
 export class DropboxApiService {
   private _globalConfigService = inject(GlobalConfigService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _matDialog = inject(MatDialog);
   private _snackService = inject(SnackService);
   private _persistenceLocalService = inject(PersistenceLocalService);
@@ -39,7 +39,7 @@ export class DropboxApiService {
   );
 
   private _isReady$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this.isTokenAvailable$),
       tap((isTokenAvailable) => !isTokenAvailable && new Error('Dropbox API not ready')),
       first(),

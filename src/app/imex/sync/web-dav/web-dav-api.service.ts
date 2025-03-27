@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 
 import { WebDavHeadResponse } from './web-dav.model';
@@ -12,6 +11,7 @@ import { IncomingHttpHeaders } from 'http';
 // Get the Type, but keep the actual bundle payload out
 // import type { createClient } from 'webdav';
 import { createClient } from 'webdav/web';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 
 type CreateClientType = typeof createClient;
 
@@ -36,7 +36,7 @@ export interface AndroidWebDAVClientError extends Error {
 @Injectable({ providedIn: 'root' })
 export class WebDavApiService {
   private _globalConfigService = inject(GlobalConfigService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   private _cfg$: Observable<{
     baseUrl: string;
@@ -63,7 +63,7 @@ export class WebDavApiService {
   );
 
   private _isReady$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this.isAllConfigDataAvailable$),
       tap((isTokenAvailable) => !isTokenAvailable && new Error('WebDAV API not ready')),
       first(),

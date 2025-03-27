@@ -9,23 +9,24 @@ import { SyncGetRevResult } from '../sync.model';
 import { Observable } from 'rxjs';
 import { concatMap, distinctUntilChanged, first, map } from 'rxjs/operators';
 import { WebDavApiService } from './web-dav-api.service';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { WebDavConfig } from '../../../features/config/global-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { WebDavHeadResponse } from './web-dav.model';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class WebDavSyncService implements SyncProviderServiceInterface {
   private _webDavApiService = inject(WebDavApiService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _globalConfigService = inject(GlobalConfigService);
 
   id: LegacySyncProvider = LegacySyncProvider.WebDAV;
 
-  isReady$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    concatMap(() => this._webDavApiService.isAllConfigDataAvailable$),
-    distinctUntilChanged(),
-  );
+  isReady$: Observable<boolean> =
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._webDavApiService.isAllConfigDataAvailable$),
+      distinctUntilChanged(),
+    );
 
   private _cfg$: Observable<WebDavConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync.webDav),

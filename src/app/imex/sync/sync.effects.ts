@@ -14,7 +14,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { SyncTriggerService } from './sync-trigger.service';
 import {
   SYNC_BEFORE_CLOSE_ID,
@@ -32,6 +31,7 @@ import { SimpleCounterService } from '../../features/simple-counter/simple-count
 import { SyncService } from './sync.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-check.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 @Injectable()
 export class SyncEffects {
@@ -40,7 +40,7 @@ export class SyncEffects {
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
   private _simpleCounterService = inject(SimpleCounterService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _execBeforeCloseService = inject(ExecBeforeCloseService);
   private readonly _initialPwaUpdateCheckService = inject(InitialPwaUpdateCheckService);
 
@@ -48,7 +48,7 @@ export class SyncEffects {
     () =>
       !IS_ELECTRON
         ? EMPTY
-        : this._dataInitService.isAllDataLoadedInitially$.pipe(
+        : this._dataInitStateService.isAllDataLoadedInitially$.pipe(
             concatMap(() => this._syncService.isEnabledAndReady$),
             distinctUntilChanged(),
             tap((isEnabled) =>
@@ -88,7 +88,7 @@ export class SyncEffects {
   );
   // private _wasJustEnabled$: Observable<boolean> = of(false);
   private _wasJustEnabled$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       // NOTE: it is important that we don't use distinct until changed here
       switchMap(() => this._syncService.isEnabledAndReady$),
       pairwise(),
@@ -99,7 +99,7 @@ export class SyncEffects {
 
   triggerSync$: any = createEffect(
     () =>
-      this._dataInitService.isAllDataLoadedInitially$.pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         switchMap(() =>
           merge(
             // dynamic

@@ -25,7 +25,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { fromPfapiEvent } from './pfapi-helper';
+import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
+import { DataInitStateService } from '../core/data-init/data-init-state.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -34,6 +35,7 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 })
 export class PfapiService {
   private _translateService = inject(TranslateService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _imexViewService = inject(ImexViewService);
   private _store = inject(Store);
 
@@ -41,44 +43,33 @@ export class PfapiService {
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
   // NOTE: subscribing to this to early (e.g. in a constructor), might mess up due to share replay
-  // TODO instead of 2000 delay we should way for all data loaded initially
-  public readonly isSyncProviderEnabledAndReady$ = merge(
-    fromPfapiEvent(this.pf.ev, 'providerReady'),
-    of(null).pipe(
-      delay(2000),
-      switchMap(() => {
-        const activeProvider = this.pf.getActiveSyncProvider();
-        if (activeProvider) {
-          return from(activeProvider.isReady());
-        }
-        return of(false);
-      }),
-    ),
+  public readonly isSyncProviderEnabledAndReady$ = pfapiEventAndInitialAfter(
+    this._dataInitStateService.isAllDataLoadedInitially$,
+    this.pf.ev,
+    'providerReady',
+    async () => {
+      const activeProvider = this.pf.getActiveSyncProvider();
+      return activeProvider ? activeProvider.isReady() : Promise.resolve(false);
+    },
   ).pipe(
     shareReplay(1),
     distinctUntilChanged(),
     tap((v) => console.log(`isSyncProviderEnabledAndReady$`, v)),
   );
 
-  // TODO add helper for fromPfapiEventWithInitial
-  // TODO instead of 2000 delay we should way for all data loaded initially
-  public readonly currentProviderPrivateCfg$ = merge(
-    fromPfapiEvent(this.pf.ev, 'providerPrivateCfgChange'),
-    of(null).pipe(
-      delay(2000),
-      switchMap(() => {
-        const activeProvider = this.pf.getActiveSyncProvider();
-        if (activeProvider) {
-          return from(activeProvider.privateCfg.load()).pipe(
-            map((d) => ({
-              privateCfg: d,
-              providerId: activeProvider.id,
-            })),
-          );
-        }
-        return of(null);
-      }),
-    ),
+  public readonly currentProviderPrivateCfg$ = pfapiEventAndInitialAfter(
+    this._dataInitStateService.isAllDataLoadedInitially$,
+    this.pf.ev,
+    'providerPrivateCfgChange',
+    async () => {
+      const activeProvider = this.pf.getActiveSyncProvider();
+      return activeProvider
+        ? activeProvider.privateCfg.load().then((d) => ({
+            privateCfg: d,
+            providerId: activeProvider.id,
+          }))
+        : Promise.resolve(null);
+    },
   ).pipe(shareReplay(1));
 
   public readonly isCurrentProviderInSync$ = merge(

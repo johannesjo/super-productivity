@@ -24,8 +24,8 @@ import {
 } from './sync.model';
 import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { ReminderService } from '../../features/reminder/reminder.service';
+import { DataInitService } from '../../core/data-init/data-init.service';
 
 @Injectable({
   providedIn: 'root',

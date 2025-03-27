@@ -18,7 +18,6 @@ import {
   throttleTime,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
 import {
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
@@ -33,6 +32,7 @@ import { androidInterface } from '../../features/android/android-interface';
 import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -43,7 +43,7 @@ const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
 })
 export class SyncTriggerService {
   private readonly _globalConfigService = inject(GlobalConfigService);
-  private readonly _dataInitService = inject(DataInitService);
+  private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _idleService = inject(IdleService);
   private readonly _pfapiService = inject(PfapiService);
 
@@ -132,7 +132,7 @@ export class SyncTriggerService {
   // OTHER INITIAL SYNC STUFF
   // ------------------------
   private _isInitialSyncEnabled$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._globalConfigService.cfg$),
       map((cfg: GlobalConfigState) => cfg.sync.isEnabled),
       distinctUntilChanged(),
@@ -152,7 +152,7 @@ export class SyncTriggerService {
       filter((isDone) => isDone),
       take(1),
       // should normally be already loaded, but if there is NO initial sync we need to wait here
-      concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
+      concatMap(() => this._dataInitStateService.isAllDataLoadedInitially$),
     );
 
   // NOTE: can be called multiple times apparently

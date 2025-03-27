@@ -4,10 +4,10 @@ import { TagService } from '../tag/tag.service';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { map, switchMap } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { ProjectService } from '../project/project.service';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 interface TaskForAndroidWidgetWithCategoryText {
   id: string;
@@ -19,13 +19,13 @@ interface TaskForAndroidWidgetWithCategoryText {
 
 @Injectable({ providedIn: 'root' })
 export class AndroidService {
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _tagService = inject(TagService);
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
 
   private _todayTagTasksFlat$: Observable<TaskForAndroidWidgetWithCategoryText[]> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._tagService.getTagById$(TODAY_TAG.id)),
       switchMap((tag) => this._taskService.getByIdsLive$(tag.taskIds)),
       map(
