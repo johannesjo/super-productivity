@@ -173,6 +173,7 @@ export class PfapiService {
             timestamp: 1,
           }));
       this._imexViewService.setDataImportInProgress(false);
+      window.location.reload();
     } catch (e) {
       console.log(e);
       alert('importCompleteBackup error');
