@@ -6,7 +6,7 @@ import { pfLog } from '../../../util/log';
 import { ElectronAPI } from '../../../../../../../electron/electronAPI';
 
 export interface LocalFileSyncElectronPrivateCfg {
-  folderPath: string;
+  syncFolderPath: string;
 }
 
 export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectronPrivateCfg> {
@@ -19,7 +19,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
       throw new Error('LocalFileSyncElectron is only available in electron');
     }
     const privateCfg = await this.privateCfg.load();
-    return !!privateCfg?.folderPath;
+    return !!privateCfg?.syncFolderPath;
   }
 
   async setPrivateCfg(privateCfg: LocalFileSyncElectronPrivateCfg): Promise<void> {
@@ -61,7 +61,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
 
   private async _getFolderPath(): Promise<string> {
     const privateCfg = await this.privateCfg.load();
-    const folderPath = privateCfg?.folderPath;
+    const folderPath = privateCfg?.syncFolderPath;
     if (!folderPath) {
       // throw new Error('No folder path configured for local file sync');
       await this._checkDirAndOpenPickerIfNotExists();
@@ -82,15 +82,15 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
     }
   }
 
-  async pickDirectory(): Promise<void> {
+  async pickDirectory(): Promise<string | void> {
     pfLog(1, `${LocalFileSyncElectron.name}._pickDirectory - Not in Electron context`);
 
     try {
       const dir = await (window as any).ea.pickDirectory();
-      alert(dir);
       if (dir) {
-        await this.privateCfg.save({ folderPath: dir });
+        await this.privateCfg.save({ syncFolderPath: dir });
       }
+      return dir;
     } catch (e) {
       pfLog(1, `${LocalFileSyncElectron.name}._pickDirectory error`, e);
       throw e;

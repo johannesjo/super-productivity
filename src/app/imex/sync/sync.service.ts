@@ -72,6 +72,7 @@ export class SyncService {
   // TODO move someplace else
 
   async sync(): Promise<SyncStatus | 'USER_ABORT' | 'HANDLED_ERROR'> {
+    console.trace();
     const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
       //   // TODO handle different
@@ -139,6 +140,7 @@ export class SyncService {
       console.error(error);
 
       if (error instanceof AuthFailSPError) {
+        alert(1);
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',
@@ -224,10 +226,6 @@ export class SyncService {
     }
 
     if (!provider.getAuthHelper) {
-      this._snackService.open({
-        msg: T.F.SYNC.S.INCOMPLETE_CFG,
-        type: 'ERROR',
-      });
       return { wasConfigured: false };
     }
 

@@ -148,13 +148,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         // },
         {
           type: 'btn',
-          key: 'folderPath',
+          key: 'syncFolderPath',
           templateOptions: {
             // TODO translate
             text: `Select Sync Folder`,
             required: true,
             onClick: () => {
-              fileSyncElectron.pickDirectory();
+              return fileSyncElectron.pickDirectory();
             },
           },
         },

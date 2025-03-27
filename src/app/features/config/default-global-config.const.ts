@@ -184,7 +184,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     },
 
     localFileSync: {
-      syncFolderPath: 'super-productivity',
+      syncFolderPath: '',
     },
   },
 };
