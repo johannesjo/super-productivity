@@ -108,7 +108,7 @@ export class SyncEffects {
               this._syncService.syncInterval$,
             ]).pipe(
               switchMap(([isEnabledAndReady, syncInterval]) =>
-                isEnabledAndReady
+                isEnabledAndReady && syncInterval
                   ? this._syncTriggerService.getSyncTrigger$(
                       syncInterval,
                       SYNC_MIN_INTERVAL,

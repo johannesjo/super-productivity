@@ -41,9 +41,19 @@ export class PfapiService {
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
   // NOTE: subscribing to this to early (e.g. in a constructor), might mess up due to share replay
-  public readonly isSyncProviderEnabledAndReady$ = fromPfapiEvent(
-    this.pf.ev,
-    'providerReady',
+  // TODO instead of 2000 delay we should way for all data loaded initially
+  public readonly isSyncProviderEnabledAndReady$ = merge(
+    fromPfapiEvent(this.pf.ev, 'providerReady'),
+    of(null).pipe(
+      delay(2000),
+      switchMap(() => {
+        const activeProvider = this.pf.getActiveSyncProvider();
+        if (activeProvider) {
+          return from(activeProvider.isReady());
+        }
+        return of(false);
+      }),
+    ),
   ).pipe(
     shareReplay(1),
     distinctUntilChanged(),
@@ -51,7 +61,7 @@ export class PfapiService {
   );
 
   // TODO add helper for fromPfapiEventWithInitial
-  // TODO needs to contain all the credentials ideally
+  // TODO instead of 2000 delay we should way for all data loaded initially
   public readonly currentProviderPrivateCfg$ = merge(
     fromPfapiEvent(this.pf.ev, 'providerPrivateCfgChange'),
     of(null).pipe(
