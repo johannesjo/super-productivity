@@ -209,7 +209,7 @@ export class PfapiService {
 
   // TODO remove this later, since it only needed for legacy sync
   async getValidCompleteData(): Promise<AppDataCompleteNew> {
-    const d = (await this.getAllSyncModelData()) as AppDataCompleteNew;
+    const d = (await this.getAllSyncModelData(true)) as AppDataCompleteNew;
     // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
     if (isValidAppData(d)) {
       this._invalidDataCount = 0;

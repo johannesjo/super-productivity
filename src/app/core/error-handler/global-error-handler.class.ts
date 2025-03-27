@@ -12,6 +12,8 @@ import { error } from 'electron-log/renderer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
 
+let isErrorAlertShown = false;
+
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private injector = inject<Injector>(Injector);
@@ -24,7 +26,11 @@ export class GlobalErrorHandler implements ErrorHandler {
     console.error('GLOBAL_ERROR_HANDLER', err);
 
     // if not our custom error handler we have a critical error on our hands
-    if (!isHandledError(err)) {
+    if (!isHandledError(err) && !isErrorAlertShown) {
+      // we only show the alert for the very first error, as it probably is the most helpful one
+      // NOTE we need to set isErrorAlertShow before any async action, since errors thrown at the same time might
+      // still show multiple dialogs
+      isErrorAlertShown = true;
       const errorStr = this._getErrorStr(err) || errStr;
       saveBeforeLastErrorActionLog();
       createErrorAlert(errorStr, simpleStack, err, await this._getUserData());
@@ -42,7 +48,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     if (!isHandledError(err)) {
       // NOTE: rethrow the error otherwise it gets swallowed
-      throw new Error(err);
+      throw err;
     }
   }
 
@@ -59,9 +65,9 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private async _getUserData(): Promise<CompleteBackup<any> | undefined> {
     try {
-      return this.injector.get(PfapiService).getCompleteBackup();
+      return await this.injector.get(PfapiService).getCompleteBackup(true);
     } catch (e) {
-      console.log('Cannot load data');
+      console.warn('Cannot load user data for error modal');
       console.error(e);
       return undefined;
     }

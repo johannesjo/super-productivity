@@ -208,7 +208,6 @@ export class Pfapi<const MD extends ModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
-
     if (
       !isSkipValidityCheck &&
       this.cfg?.validate &&
@@ -222,15 +221,14 @@ export class Pfapi<const MD extends ModelCfgs> {
       }
       await promiseTimeout(1000);
       this._getAllSyncModelDataRetryCount++;
-      return this.getAllSyncModelData();
+      return this.getAllSyncModelData(isSkipValidityCheck);
     }
     this._getAllSyncModelDataRetryCount = 0;
     return allData as AllSyncModels<MD>;
   }
 
-  async loadCompleteBackup(): Promise<CompleteBackup<MD>> {
-    alert('loadCompleteBackup');
-    const d = await this.getAllSyncModelData();
+  async loadCompleteBackup(isSkipValidityCheck = false): Promise<CompleteBackup<MD>> {
+    const d = await this.getAllSyncModelData(isSkipValidityCheck);
     const meta = await this.metaModel.loadMetaModel();
     return {
       data: d,
@@ -268,7 +266,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
     // TODO migrations
-
     if (this.cfg?.validate && !this.cfg.validate(data)) {
       if (isAttemptRepair && this.cfg.repair) {
         data = this.cfg.repair(data);
@@ -277,7 +274,15 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
 
     if (isBackupData) {
-      await this.tmpBackupService.save(await this.getAllSyncModelData());
+      try {
+        await this.tmpBackupService.save(await this.getAllSyncModelData());
+      } catch (error) {
+        pfLog(1, this.importAllSycModelData.name, error);
+        console.warn(
+          'Could not create valid backup. Onwards on the highway throug the Danger Zone!',
+        );
+        console.error(error);
+      }
     }
 
     try {
@@ -327,10 +332,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (!this.cfg?.validate) {
       throw new NoValidateFunctionProvidedError();
     }
-    if (!this.cfg.validate(data)) {
-      throw new DataValidationFailedError();
-    }
-    return true;
+    return this.cfg.validate(data);
+    // we don't do this!!!! => throw new DataValidationFailedError();
   }
 
   repairCompleteData(data: unknown): AllSyncModels<MD> {

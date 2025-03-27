@@ -7,10 +7,12 @@ import { Task } from '../../features/tasks/task.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { environment } from '../../../environments/environment';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+let errorCount = 0;
 
 export const isValidAppData = (
   d: AppDataCompleteLegacy | AppDataCompleteNew,
 ): boolean => {
+  errorCount = 0;
   const dAny: any = d;
   const isValid =
     typeof dAny === 'object' &&
@@ -58,8 +60,16 @@ const _validityError = (errTxt: string, additionalInfo?: any): void => {
   if (additionalInfo) {
     console.log('Validity Error Info: ', additionalInfo);
   }
-  devError(errTxt);
+  if (errorCount <= 3) {
+    devError(errTxt);
+  } else {
+    if (errorCount === 4) {
+      console.warn('too many validity errors, only logging from now on');
+    }
+    console.error(errTxt);
+  }
   lastValidityError = errTxt;
+  errorCount++;
 };
 
 const _isAllRemindersAvailable = ({ reminders, task }: AppDataCompleteNew): boolean => {

@@ -11,7 +11,7 @@ export const devError = (errStr: any): void => {
       alert('devERR: ' + errStr);
       isShowAlert = false;
     }
-    if (confirm('Throw an error for error?')) {
+    if (confirm(`Throw an error for error? ––– ${errStr}`)) {
       throw new Error(errStr);
     }
   }
