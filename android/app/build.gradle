@@ -18,8 +18,8 @@ android {
     defaultConfig {
         applicationId "com.superproductivity.superproductivity"
         minSdkVersion 24
-        targetSdkVersion 34
-        compileSdk 34
+        targetSdkVersion 35
+        compileSdk 35
         versionCode 12_00_01_0000
         versionName "12.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -76,12 +76,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '21'
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     namespace "com.superproductivity.superproductivity"
 }
 
