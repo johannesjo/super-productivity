@@ -28,12 +28,12 @@ export class TmpBackupService<ALL> {
       backup,
     );
     this._inMemoryBackup = backup;
-    return this._db.save(TmpBackupService.DB_KEY, backup);
+    return this._db.save(TmpBackupService.DB_KEY, backup, true);
   }
 
   async clear(): Promise<void> {
     pfLog(2, `${TmpBackupService.name}.${this.clear.name}()`);
     this._inMemoryBackup = undefined;
-    await this._db.remove(TmpBackupService.DB_KEY);
+    await this._db.remove(TmpBackupService.DB_KEY, true);
   }
 }

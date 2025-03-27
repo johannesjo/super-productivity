@@ -50,7 +50,11 @@ export class MetaModelCtrl {
   }
 
   // TODO unit test
-  updateRevForModel<MT extends ModelBase>(modelId: string, modelCfg: ModelCfg<MT>): void {
+  updateRevForModel<MT extends ModelBase>(
+    modelId: string,
+    modelCfg: ModelCfg<MT>,
+    isIgnoreDBLock = false,
+  ): void {
     pfLog(2, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
@@ -68,31 +72,34 @@ export class MetaModelCtrl {
     const isModelVersionChange =
       metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
 
-    this.saveMetaModel({
-      ...metaModel,
-      lastUpdate: timestamp,
+    this.saveMetaModel(
+      {
+        ...metaModel,
+        lastUpdate: timestamp,
 
-      ...(modelCfg.isMainFileModel && this.IS_MAIN_FILE_MODE
-        ? {}
-        : {
-            revMap: {
-              ...metaModel.revMap,
-              [modelId]: timestamp.toString(),
-            },
-          }),
+        ...(modelCfg.isMainFileModel && this.IS_MAIN_FILE_MODE
+          ? {}
+          : {
+              revMap: {
+                ...metaModel.revMap,
+                [modelId]: timestamp.toString(),
+              },
+            }),
 
-      ...(isModelVersionChange
-        ? {
-            modelVersions: {
-              ...metaModel.modelVersions,
-              [modelId]: modelCfg.modelVersion,
-            },
-          }
-        : {}),
-    });
+        ...(isModelVersionChange
+          ? {
+              modelVersions: {
+                ...metaModel.modelVersions,
+                [modelId]: modelCfg.modelVersion,
+              },
+            }
+          : {}),
+      },
+      isIgnoreDBLock,
+    );
   }
 
-  saveMetaModel(metaModel: LocalMeta): Promise<unknown> {
+  saveMetaModel(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
     pfLog(2, `${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
     if (!metaModel.lastUpdate) {
       throw new InvalidMetaError(
@@ -104,7 +111,7 @@ export class MetaModelCtrl {
     // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
     this._ev.emit('metaModelChange', metaModel);
-    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel);
+    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
   }
 
   async loadMetaModel(): Promise<LocalMeta> {
@@ -145,7 +152,7 @@ export class MetaModelCtrl {
   private _saveClientId(clientId: string): Promise<unknown> {
     pfLog(2, `${MetaModelCtrl.name}.${this._saveClientId.name}()`, clientId);
     this._clientIdInMemory = clientId;
-    return this._db.save(MetaModelCtrl.CLIENT_ID, clientId);
+    return this._db.save(MetaModelCtrl.CLIENT_ID, clientId, true);
   }
 
   private _generateClientId(): string {

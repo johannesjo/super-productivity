@@ -286,6 +286,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
 
     try {
+      this.db.lock();
       const modelIds = Object.keys(data);
       const promises = modelIds.map((modelId) => {
         const modelData = data[modelId];
@@ -294,10 +295,15 @@ export class Pfapi<const MD extends ModelCfgs> {
           throw new ModelIdWithoutCtrlError(modelId, modelData);
         }
 
-        return modelCtrl.save(modelData, { isUpdateRevAndLastUpdate: false });
+        return modelCtrl.save(modelData, {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        });
       });
       await Promise.all(promises);
+      this.db.unlock();
     } catch (e) {
+      this.db.unlock();
       const backup = await this.tmpBackupService.load();
       if (backup) {
         try {

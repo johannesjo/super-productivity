@@ -4,12 +4,23 @@ import { pfLog } from '../util/log';
 export class Database {
   private _lastParams?: { a: string; key?: string; data?: unknown };
   private _adapter: DatabaseAdapter;
+  private _isLocked: boolean = false;
   private _onError: (e: Error) => void;
 
   constructor(cfg: { onError: (e: Error) => void; adapter: DatabaseAdapter }) {
     this._adapter = cfg.adapter;
     this._onError = cfg.onError;
     this._init().then();
+  }
+
+  lock(): void {
+    pfLog(2, `${Database.name}.${this.lock.name}()`);
+    this._isLocked = true;
+  }
+
+  unlock(): void {
+    pfLog(2, `${Database.name}.${this.unlock.name}()`);
+    this._isLocked = false;
   }
 
   async load(key: string): Promise<unknown> {
@@ -32,10 +43,14 @@ export class Database {
     }
   }
 
-  async save(key: string, data: unknown): Promise<unknown> {
+  async save(key: string, data: unknown, isIgnoreDBLock = false): Promise<unknown> {
     this._lastParams = { a: 'save', key, data };
     // disable saving during testing
     // return Promise.resolve();
+    if (this._isLocked && !isIgnoreDBLock) {
+      console.warn('Blocking write during lock');
+      return;
+    }
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
@@ -44,8 +59,12 @@ export class Database {
     }
   }
 
-  async remove(key: string): Promise<unknown> {
+  async remove(key: string, isIgnoreDBLock = false): Promise<unknown> {
     this._lastParams = { a: 'remove', key };
+    if (this._isLocked && !isIgnoreDBLock) {
+      console.warn('Blocking write during lock');
+      return;
+    }
     try {
       return await this._adapter.remove(key);
     } catch (e) {
@@ -54,7 +73,11 @@ export class Database {
     }
   }
 
-  async clearDatabase(): Promise<unknown> {
+  async clearDatabase(isIgnoreDBLock = false): Promise<unknown> {
+    if (this._isLocked && !isIgnoreDBLock) {
+      console.warn('Blocking write during lock');
+      return;
+    }
     this._lastParams = { a: 'clearDatabase' };
     try {
       return await this._adapter.clearDatabase();

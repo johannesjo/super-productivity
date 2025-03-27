@@ -27,17 +27,20 @@ export class ModelCtrl<MT extends ModelBase> {
   }
 
   // TODO improve on isUpdateRevAndLastUpdate
-  save(data: MT, p?: { isUpdateRevAndLastUpdate: boolean }): Promise<unknown> {
+  save(
+    data: MT,
+    p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
+  ): Promise<unknown> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
     if (!p?.isUpdateRevAndLastUpdate) {
-      return this._db.save(this.modelId, data);
+      return this._db.save(this.modelId, data, !!p?.isIgnoreDBLock);
     }
-    this._metaModel.updateRevForModel(this.modelId, this.modelCfg);
+    this._metaModel.updateRevForModel(this.modelId, this.modelCfg, !!p?.isIgnoreDBLock);
 
     // TODO check if making this "more sync" will solve the problem
-    return this._db.save(this.modelId, data);
+    return this._db.save(this.modelId, data, !!p?.isIgnoreDBLock);
   }
 
   async partialUpdate(data: Partial<MT>): Promise<unknown> {
