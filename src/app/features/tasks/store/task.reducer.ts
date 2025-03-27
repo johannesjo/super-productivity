@@ -67,7 +67,7 @@ import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { deleteProject } from '../../project/store/project.actions';
+import { deleteProject, toggleHideFromMenu } from '../../project/store/project.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -111,6 +111,24 @@ export const taskReducer = createReducer<TaskState>(
           ? null
           : state.currentTaskId,
     });
+  }),
+
+  on(toggleHideFromMenu, (state, { projectId, allTaskIds, isHiddenFromMenu }) => {
+    const updatedTasks = allTaskIds
+      .map((taskId) => {
+        const task = state.entities[taskId];
+        if (task && task.projectId === projectId) {
+          return {
+            id: task.id,
+            changes: {
+              unavailable: isHiddenFromMenu,
+            },
+          };
+        }
+        return null;
+      })
+      .filter((task) => task !== null);
+    return taskAdapter.updateMany(updatedTasks, state);
   }),
 
   // TODO check if working
