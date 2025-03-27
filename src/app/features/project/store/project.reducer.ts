@@ -153,12 +153,12 @@ export const projectReducer = createReducer<ProjectState>(
   // on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
   on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
 
-  on(toggleHideFromMenu, (state, { id }) =>
+  on(toggleHideFromMenu, (state, { projectId, isHiddenFromMenu }) =>
     projectAdapter.updateOne(
       {
-        id,
+        id: projectId,
         changes: {
-          isHiddenFromMenu: !state.entities[id]?.isHiddenFromMenu,
+          isHiddenFromMenu: isHiddenFromMenu,
         },
       },
       state,

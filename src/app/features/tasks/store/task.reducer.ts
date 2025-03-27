@@ -113,21 +113,6 @@ export const taskReducer = createReducer<TaskState>(
     });
   }),
 
-  on(TimeTrackingActions.addTimeSpent, (state, { task, date, duration }) => {
-    const currentTimeSpentForTickDay =
-      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
-    return updateTimeSpentForTask(
-      task.id,
-      {
-        ...task.timeSpentOnDay,
-        [date]: currentTimeSpentForTickDay + duration,
-      },
-      state,
-    );
-  }),
-
-  //--------------------------------
-
   // TODO check if working
   on(setCurrentTask, (state, { id }) => {
     if (id) {

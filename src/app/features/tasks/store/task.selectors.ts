@@ -334,3 +334,28 @@ export const selectAllTaskIssueIdsForIssueProvider = (issueProvider: IssueProvid
       .map((t) => t.issueId as string);
   });
 };
+
+export const selectAllAvailableTasks = createSelector(selectAllTasks, (tasks: Task[]) =>
+  tasks.filter((task) => !task.unavailable),
+);
+
+export const selectAllAvailableTasksWithSubTasks = createSelector(
+  selectAllTasks,
+  (tasks: Task[]) => {
+    const availableTasks = tasks.filter((task) => !task.unavailable);
+    return availableTasks
+      .filter((task) => !task.parentId)
+      .map((task) => {
+        if (task.subTaskIds && task.subTaskIds.length > 0) {
+          return {
+            ...task,
+            subTasks: task.subTaskIds
+              .map((subTaskId) => tasks.find((t) => t.id === subTaskId && !t.unavailable))
+              .filter((subTask) => !!subTask),
+          };
+        } else {
+          return task;
+        }
+      });
+  },
+);
