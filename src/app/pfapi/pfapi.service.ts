@@ -163,22 +163,24 @@ export class PfapiService {
   ): Promise<void> {
     try {
       this._imexViewService.setDataImportInProgress(true);
-      await ('crossModelVersion' in data && 'timestamp' in data
-        ? this.pf.importCompleteBackup(data)
-        : this.pf.importCompleteBackup({
-            data,
-            crossModelVersion: CROSS_MODEL_VERSION,
-            lastUpdate: 1,
-            modelVersions: {},
-            timestamp: 1,
-          }));
+      if ('crossModelVersion' in data && 'timestamp' in data) {
+        await this.pf.importCompleteBackup(data);
+      } else {
+        await this.pf.importCompleteBackup({
+          data,
+          crossModelVersion: CROSS_MODEL_VERSION,
+          lastUpdate: 1,
+          modelVersions: {},
+          timestamp: 1,
+        });
+      }
+
       this._imexViewService.setDataImportInProgress(false);
       window.location.reload();
     } catch (e) {
       console.log(e);
-      alert('importCompleteBackup error');
       this._imexViewService.setDataImportInProgress(false);
-      throw e;
+      alert('Importing Backup failed!!');
     }
   }
 
@@ -198,6 +200,7 @@ export class PfapiService {
           isBackupData: false,
           isAttemptRepair: false,
         });
+        await this.pf.tmpBackupService.clear();
         return true;
       } else {
         if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
