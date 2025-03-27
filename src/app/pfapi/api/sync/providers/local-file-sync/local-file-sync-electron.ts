@@ -1,9 +1,9 @@
 import { SyncProviderId } from '../../../pfapi.const';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
-import { createSha1Hash } from '../../../../../util/create-sha-1-hash';
 import { IS_ELECTRON } from '../../../../../app.constants';
 import { RemoteFileNotFoundAPIError } from '../../../errors/errors';
+import { md5HashPromise } from '../../../../../util/md5-hash';
 
 export interface LocalFileSyncElectronPrivateCfg {
   folderPath: string;
@@ -143,8 +143,9 @@ export class LocalFileSyncElectron
     return `${folderPath}/${targetPath}`;
   }
 
-  private _getLocalRev(dataStr: string): Promise<string> {
-    return createSha1Hash(dataStr);
+  private async _getLocalRev(dataStr: string): Promise<string> {
+    return await md5HashPromise(dataStr);
+    // return createSha1Hash(dataStr);
   }
 
   private async _checkDirExists(dirPath: string): Promise<boolean> {
