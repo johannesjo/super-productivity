@@ -6,8 +6,10 @@ import {
   ElementRef,
   inject,
   input,
+  OnChanges,
   OnDestroy,
   OnInit,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
@@ -25,7 +27,7 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, switchMap } from 'rxjs/operators';
+import { delay, filter, map, switchMap, take } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
@@ -85,7 +87,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     TranslatePipe,
   ],
 })
-export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
+export class WorkViewComponent implements OnInit, OnChanges, OnDestroy, AfterContentInit {
   taskService = inject(TaskService);
   takeABreakService = inject(TakeABreakService);
   planningModeService = inject(PlanningModeService);
@@ -177,6 +179,26 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         }
       }),
     );
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const undoneChanges = changes['undoneTasks'];
+    const doneChanges = changes['doneTasks'];
+
+    if ((undoneChanges || doneChanges) && this.taskService.selectedTaskId$) {
+      const undoneArr = this.undoneTasks();
+      const doneArr = this.doneTasks();
+      const allTasks = [...undoneArr, ...doneArr];
+
+      this.taskService.selectedTaskId$.pipe(take(1)).subscribe((selectedTaskId) => {
+        if (selectedTaskId) {
+          const isSelectedStillPresent = allTasks.some((t) => t.id === selectedTaskId);
+          if (!isSelectedStillPresent) {
+            this.taskService.setSelectedId(null);
+          }
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {

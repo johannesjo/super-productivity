@@ -1262,7 +1262,8 @@
         "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
         "TASK": "Görev",
         "TRACK_TO": "Takip et:",
-        "UNTRACKED_TIME": "İzlenmeyen süre:"
+        "UNTRACKED_TIME": "İzlenmeyen süre:",
+        "NOTIFICATION_TITLE": "Süre İzlemeyi Başlat!"
       }
     },
     "WORKLOG": {
@@ -1543,6 +1544,7 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
+      "TRACK_TIME_SOUND": "Zaman izleme hatırlatma sesi",
       "DONE_SOUND": "Görev tamamlandı sesi",
       "IS_INCREASE_DONE_PITCH": "Yapılan her görev için ses seviyesini artırın",
       "TITLE": "Ses",
@@ -1573,7 +1575,9 @@
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Zaman izleyiciyi mobil uygulamada göster",
       "L_TRACKING_INTERVAL": "Zaman izleme aralığı (DENEYSEL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Banner göstermeden önce bekleme süresi",
-      "TITLE": "Zaman İzleyici"
+      "TITLE": "Zaman İzleyici",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "İzleme hatırlatıcısı aktifken bildirim gönder",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "İzleme hatırlatıcısı aktifken uygulama penceresine odaklan"
     }
   },
   "GLOBAL_SNACK": {

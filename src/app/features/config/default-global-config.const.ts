@@ -140,6 +140,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isIncreaseDoneSoundPitch: true,
     doneSound: 'done2.mp3',
     breakReminderSound: null,
+    trackTimeSound: null,
   },
   timeTracking: {
     trackingInterval: TRACKING_INTERVAL,
@@ -150,6 +151,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTrackingReminderEnabled: false,
     isTrackingReminderShowOnMobile: false,
     trackingReminderMinTime: 5 * minute,
+    isTrackingReminderNotify: false, // Show desktop notification when tracking reminder is triggered
+    isTrackingReminderFocusWindow: false, // Focus the application window when tracking reminder is triggered
   },
   reminder: {
     isCountdownBannerEnabled: true,

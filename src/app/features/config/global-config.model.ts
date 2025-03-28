@@ -40,6 +40,8 @@ export type TimeTrackingConfig = Readonly<{
   isTrackingReminderEnabled: boolean;
   isTrackingReminderShowOnMobile: boolean;
   trackingReminderMinTime: number;
+  isTrackingReminderNotify: boolean;
+  isTrackingReminderFocusWindow: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{
@@ -112,6 +114,7 @@ export type SoundConfig = Readonly<{
   isIncreaseDoneSoundPitch: boolean;
   doneSound: string | null;
   breakReminderSound: string | null;
+  trackTimeSound: string | null;
   volume: number;
 }>;
 
