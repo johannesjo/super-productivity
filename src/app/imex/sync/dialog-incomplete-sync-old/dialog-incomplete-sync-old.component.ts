@@ -17,11 +17,12 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 import { T } from '../../../t.const';
 
 export interface DialogIncompleteSyncData {
-  modelId: string;
+  archiveRevInMainFile?: string;
+  archiveRevReal?: string;
 }
 
 @Component({
-  selector: 'dialog-incomplete-sync',
+  selector: 'dialog-incomplete-sync-old',
   imports: [
     MatDialogContent,
     TranslateModule,
@@ -30,22 +31,22 @@ export interface DialogIncompleteSyncData {
     MatDialogActions,
     MatButton,
   ],
-  templateUrl: './dialog-incomplete-sync.component.html',
-  styleUrl: './dialog-incomplete-sync.component.scss',
+  templateUrl: './dialog-incomplete-sync-old.component.html',
+  styleUrl: './dialog-incomplete-sync-old.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogIncompleteSyncComponent {
+export class DialogIncompleteSyncOldComponent {
   private _matDialogRef =
-    inject<MatDialogRef<DialogIncompleteSyncComponent>>(MatDialogRef);
+    inject<MatDialogRef<DialogIncompleteSyncOldComponent>>(MatDialogRef);
   private _pfapiService = inject(PfapiService);
-
-  data = inject<DialogIncompleteSyncData>(MAT_DIALOG_DATA);
+  data? = inject<DialogIncompleteSyncData>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
   IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
 
   constructor() {
     const _matDialogRef = this._matDialogRef;
+
     _matDialogRef.disableClose = true;
   }
 

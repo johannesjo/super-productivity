@@ -9,6 +9,8 @@ import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
   LockPresentError,
+  NoRemoteModelFile,
+  RevMismatchForModelError,
   SyncProviderId,
   SyncStatus,
 } from '../../pfapi/api';
@@ -24,6 +26,8 @@ import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-s
 import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
+import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
+import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 
 @Injectable({
   providedIn: 'root',
@@ -128,11 +132,29 @@ export class SyncService {
       console.error(error);
 
       if (error instanceof AuthFailSPError) {
-        alert(1);
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',
+          actionFn: async () => this._matDialog.open(DialogSyncInitialCfgComponent),
+          actionStr: 'Configure',
         });
+        return 'HANDLED_ERROR';
+      } else if (
+        error instanceof RevMismatchForModelError ||
+        error instanceof NoRemoteModelFile
+      ) {
+        console.log(error, Object.keys(error));
+        const modelId = error.additionalLog;
+        this._matDialog
+          .open(DialogIncompleteSyncComponent, {
+            data: { modelId },
+          })
+          .afterClosed()
+          .subscribe((res) => {
+            if (res === 'FORCE_UPDATE_REMOTE') {
+              this._forceUpload();
+            }
+          });
         return 'HANDLED_ERROR';
       } else if (error instanceof LockPresentError) {
         this._snackService.open({

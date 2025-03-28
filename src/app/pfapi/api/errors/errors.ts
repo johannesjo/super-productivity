@@ -1,11 +1,14 @@
 import { pfLog } from '../util/log';
 
-class AdditionalLogErrorBase extends Error {
+class AdditionalLogErrorBase<T = unknown> extends Error {
+  additionalLog: T;
+
   constructor(...additional: any) {
     super(...additional);
     if (additional.length > 0) {
       pfLog(1, this.name, ...additional);
     }
+    this.additionalLog = additional;
   }
 }
 
@@ -78,8 +81,8 @@ export class NoSyncProviderSetError extends Error {
   override name = NoSyncProviderSetError.name;
 }
 
-export class RevMismatchError extends AdditionalLogErrorBase {
-  override name = RevMismatchError.name;
+export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
+  override name = RevMismatchForModelError.name;
 }
 
 export class UnknownSyncStateError extends Error {
@@ -96,6 +99,10 @@ export class RevMapModelMismatchErrorOnDownload extends AdditionalLogErrorBase {
 
 export class RevMapModelMismatchErrorOnUpload extends AdditionalLogErrorBase {
   override name = RevMapModelMismatchErrorOnUpload.name;
+}
+
+export class NoRemoteModelFile extends AdditionalLogErrorBase<string> {
+  override name = NoRemoteModelFile.name;
 }
 
 export class NoRemoteMetaFile extends Error {

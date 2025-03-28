@@ -47,9 +47,9 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { PREPEND_STR_COMPRESSION, PREPEND_STR_ENCRYPTION } from './sync.const';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
-  DialogIncompleteSyncComponent,
+  DialogIncompleteSyncOldComponent,
   DialogIncompleteSyncData,
-} from './dialog-incomplete-sync/dialog-incomplete-sync.component';
+} from './dialog-incomplete-sync-old/dialog-incomplete-sync-old.component';
 import { PfapiService } from '../../pfapi/pfapi.service';
 
 const KNOWN_SYNC_ERROR_PREFIX = 'KNOWN_SYNC_ERROR_SUP_';
@@ -704,7 +704,7 @@ export class SyncProviderService {
         archiveRevInMainFile: remoteMainFileData?.archiveRev,
       };
       const res = await this._matDialog
-        .open(DialogIncompleteSyncComponent, {
+        .open(DialogIncompleteSyncOldComponent, {
           data,
         })
         .afterClosed()

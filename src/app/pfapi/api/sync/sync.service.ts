@@ -20,11 +20,12 @@ import {
   LockPresentError,
   ModelVersionToImportNewerThanLocalError,
   NoRemoteMetaFile,
+  NoRemoteModelFile,
   NoSyncProviderSetError,
   RemoteFileNotFoundAPIError,
   RevMapModelMismatchErrorOnDownload,
   RevMapModelMismatchErrorOnUpload,
-  RevMismatchError,
+  RevMismatchForModelError,
   UnknownSyncStateError,
 } from '../errors/errors';
 import { pfLog } from '../util/log';
@@ -164,7 +165,16 @@ export class SyncService<const MD extends ModelCfgs> {
       await this._downloadMetaFile();
     }
 
-    const local = await this._metaModelCtrl.loadMetaModel();
+    let local = await this._metaModelCtrl.loadMetaModel();
+    if (isForceUpload) {
+      // we need to change the lastUpdate timestamp to indicate a newer revision to other clients
+      await this._metaModelCtrl.saveMetaModel({
+        ...local,
+        lastUpdate: Date.now(),
+      });
+      local = await this._metaModelCtrl.loadMetaModel();
+    }
+
     try {
       return await this.uploadToRemote(
         {
@@ -495,15 +505,22 @@ export class SyncService<const MD extends ModelCfgs> {
       expectedRev,
     });
 
-    const syncProvider = this._syncProviderOrError;
-    const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
-    if (expectedRev) {
-      if (!rev || !this._isSameRev(rev, expectedRev)) {
-        throw new RevMismatchError(`Download Model Rev: ${modelId}`);
+    try {
+      const syncProvider = this._syncProviderOrError;
+      const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
+      if (expectedRev) {
+        if (!rev || !this._isSameRev(rev, expectedRev)) {
+          throw new RevMismatchForModelError(modelId);
+        }
       }
+      const data = await this._decompressAndDecryptData<T>(dataStr);
+      return { data, rev };
+    } catch (e) {
+      if (e instanceof RemoteFileNotFoundAPIError) {
+        throw new NoRemoteModelFile(modelId);
+      }
+      throw e;
     }
-    const data = await this._decompressAndDecryptData<T>(dataStr);
-    return { data, rev };
   }
 
   private async _removeModel(modelId: string): Promise<void> {
