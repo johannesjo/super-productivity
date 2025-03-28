@@ -25,16 +25,16 @@
     "NO_TASKS": "Atualmente não há tarefas pendentes"
   },
   "CONFIRM": {
-    "AUTO_FIX": "Seus dados parecem estar danificados (\" {{validityError} }\"). Deseja tentar corrigi-los automaticamente? Isso pode resultar em perda parcial de dados.",
+    "AUTO_FIX": "Seus dados parecem estar danificados (\" {{validityError}}\"). Deseja tentar corrigi-los automaticamente? Isso pode resultar em perda parcial de dados.",
     "DELETE_STRAY_BACKUP": "Deseja excluir o verso para não ver esta caixa de diálogo?",
     "RELOAD_AFTER_IDB_ERROR": "Não é possível acessar o banco de dados :( As possíveis causas são uma atualização do aplicativo em segundo plano ou pouco espaço em disco. Se você instalou o aplicativo no Linux como snap, você também deseja habilitar o reconhecimento de atualização 'snap set core experimental.refresh-app-awareness=true' até que eles corrijam esse problema. Pressione OK para recarregar o aplicativo (pode exigir a reinicialização manual do aplicativo em algumas plataformas).",
-    "RESTORE_FILE_BACKUP": "Parece que NÃO HÁ DADOS, mas há backups disponíveis em \" {{dir} }\". Deseja restaurar o backup mais recente de {{from} }?",
+    "RESTORE_FILE_BACKUP": "Parece que NÃO HÁ DADOS, mas há backups disponíveis em \" {{dir}}\". Deseja restaurar o backup mais recente de {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NÃO HÁ DADOS, mas há um backup disponível. Você quer carregá-lo?",
     "RESTORE_STRAY_BACKUP": "Durante a última sincronização pode ter ocorrido algum erro. Você quer restaurar o último backup?"
   },
   "DATETIME_INPUT": {
-    "IN": "em {{time} }",
-    "TOMORROW": "amanhã {{time} }"
+    "IN": "em {{time}}",
+    "TOMORROW": "amanhã {{time}}"
   },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mais tarde hoje",
@@ -121,17 +121,17 @@
         "ADD_AS_TASK": "Adicionar como tarefa",
         "FOCUS_TASK": "Tarefa de foco",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)",
         "TXT_PAST": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outros eventos estão atrasados)"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)"
       },
       "S": {
-        "CAL_PROVIDER_ERROR": "Erro do provedor de calendário: {{errTxt} }"
+        "CAL_PROVIDER_ERROR": "Erro do provedor de calendário: {{errTxt}}"
       }
     },
     "CONFIG": {
       "S": {
-        "UPDATE_SECTION": "Configurações atualizadas para <strong>{{sectionKey} }</strong>"
+        "UPDATE_SECTION": "Configurações atualizadas para <strong>{{sectionKey}}</strong>"
       }
     },
     "DOMINA_MODE": {
@@ -156,7 +156,7 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "Há {{nr} } tarefas concluídas na sua lista de hoje que ainda não foram movidas para o arquivo. Você realmente quer sair sem terminar seu dia?"
+        "FINISH_DAY_BEFORE_EXIT": "Há {{nr}} tarefas concluídas na sua lista de hoje que ainda não foram movidas para o arquivo. Você realmente quer sair sem terminar seu dia?"
       }
     },
     "FOCUS_MODE": {
@@ -216,7 +216,7 @@
         "WRITE_A_COMMENT": "Escreva um comentário"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Erro desconhecido {{statusCode} } {{errorMsg} }. Limite de taxa de API excedido?"
+        "ERR_UNKNOWN": "Gitea: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?"
       }
     },
     "GITHUB": {
@@ -249,7 +249,7 @@
       },
       "S": {
         "CONFIG_ERROR": "GitHub: Erro ao mapear dados. O nome do seu repositório está correto?",
-        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode} } {{errorMsg} }. Limite de taxa de API excedido?"
+        "ERR_UNKNOWN": "GitHub: Erro desconhecido {{statusCode}} {{errorMsg}}. Limite de taxa de API excedido?"
       }
     },
     "GITLAB": {
@@ -262,7 +262,7 @@
         "T_TITLE": "Título",
         "T_TO_BE_SUBMITTED": "A ser enviado",
         "TITLE": "Enviar tempo gasto em problemas para o GitLab",
-        "TOTAL_MSG": "Você enviará <em>{{totalTimeToSubmit} }</em> tempo de trabalho de hoje no total para <em>{{nrOfTasksToSubmit} }</em> problemas diferentes."
+        "TOTAL_MSG": "Você enviará <em>{{totalTimeToSubmit}}</em> tempo de trabalho de hoje no total para <em>{{nrOfTasksToSubmit}}</em> problemas diferentes."
       },
       "FORM": {
         "FILTER": "Filtro personalizado",
@@ -299,7 +299,7 @@
         "WRITE_A_COMMENT": "Escreva um comentário"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode} } {{errorMsg} }"
+        "ERR_UNKNOWN": "GitLab: Erro desconhecido {{statusCode}} {{errorMsg}}"
       }
     },
     "ISSUE": {
@@ -312,20 +312,20 @@
       "DEFAULT_PROJECT_LABEL": "Projeto de Super Produtividade  Padrão",
       "HOW_TO_GET_A_TOKEN": "Como obter um token?",
       "S": {
-        "ERR_GENERIC": "{{issueProviderName} } Erro: {{errTxt} }",
-        "ERR_NETWORK": "{{issueProviderName} }: A solicitação falhou devido a um erro de rede do lado do cliente",
-        "ERR_NOT_CONFIGURED": "{{issueProviderName} }: Não configurado corretamente",
-        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName} }: Importado {{nr} } novo {{issuesStr} }",
-        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName} }: Importado {{issueStr} } \" {{issueTitle}}\"",
-        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName} }: {{issueStrC} } \" {{issueTitle}}\" parece ter sido excluído ou fechado",
-        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName} }: Nenhuma atualização necessária",
-        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName} }: Dados atualizados para {{nr} } {{issuesStr} }",
-        "ISSUE_UPDATE_SINGLE": "{{issueProviderName} }: Dados atualizados para \" {{issueTitle} \"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName} }: Dados atualizados para \" {{issueTitle} \"",
-        "MISSING_ISSUE_DATA": "{{issueProviderName} }: Tarefas com dados {{issueStr} } ausentes encontradas. Recarregando.",
-        "NEW_COMMENT": "{{issueProviderName} }: Novo comentário para \" {{issueTitle} \"",
-        "POLLING_BACKLOG": "{{issueProviderName} }: Pesquisa para novo {{issuesStr} }",
-        "POLLING_CHANGES": "{{issueProviderName} }: Alterações de pesquisa para {{issuesStr} }"
+        "ERR_GENERIC": "{{issueProviderName}} Erro: {{errTxt}}",
+        "ERR_NETWORK": "{{issueProviderName}}: A solicitação falhou devido a um erro de rede do lado do cliente",
+        "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Não configurado corretamente",
+        "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: Importado {{nr}} novo {{issuesStr}}",
+        "IMPORTED_SINGLE_ISSUE": "{{issueProviderName}}: Importado {{issueStr}} \" {{issueTitle}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \" {{issueTitle}}\" parece ter sido excluído ou fechado",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Nenhuma atualização necessária",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Dados atualizados para {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Dados atualizados para \" {{issueTitle} \"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Dados atualizados para \" {{issueTitle} \"",
+        "MISSING_ISSUE_DATA": "{{issueProviderName}}: Tarefas com dados {{issueStr}} ausentes encontradas. Recarregando.",
+        "NEW_COMMENT": "{{issueProviderName}}: Novo comentário para \" {{issueTitle} \"",
+        "POLLING_BACKLOG": "{{issueProviderName}}: Pesquisa para novo {{issuesStr}}",
+        "POLLING_CHANGES": "{{issueProviderName}}: Alterações de pesquisa para {{issuesStr}}"
       }
     },
     "JIRA": {
@@ -349,7 +349,7 @@
         "TRANSITION": "Manipulação de Transição"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary} }</strong> está atualmente atribuído a <strong>{{assignee} }</strong> . Você quer atribuí-lo a você mesmo?",
+        "MSG": "<strong>{{summary}}</strong> está atualmente atribuído a <strong>{{assignee}}</strong> . Você quer atribuí-lo a você mesmo?",
         "OK": "Faça isso!"
       },
       "DIALOG_INITIAL": {
@@ -435,7 +435,7 @@
         "WRITE_A_COMMENT": "Escreva um comentário"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira: Adicionado registro de trabalho para {{issueKey} }",
+        "ADDED_WORKLOG_FOR": "Jira: Adicionado registro de trabalho para {{issueKey}}",
         "EXTENSION_NOT_LOADED": "A extensão Super Productivity não foi carregada. Recarregar a página pode ajudar",
         "INSUFFICIENT_SETTINGS": "Configurações insuficientes fornecidas para o Jira",
         "INVALID_RESPONSE": "Jira: A resposta continha dados inválidos",
@@ -446,7 +446,7 @@
         "NO_VALID_TRANSITION": "Jira: Nenhuma transição válida configurada",
         "TIMED_OUT": "Jira: Solicitação com tempo limite esgotado",
         "TRANSITION": "Jira: Defina o problema \" {{issueKey}}\" como \" {{name}}\"",
-        "TRANSITION_SUCCESS": "Jira: Defina o problema {{issueKey} } como <strong>{{chosenTransition} }</strong>",
+        "TRANSITION_SUCCESS": "Jira: Defina o problema {{issueKey}} como <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Jira: Transições carregadas. Use as seleções abaixo para atribuí-las",
         "UNABLE_TO_REASSIGN": "Jira: Não é possível reatribuir o ticket a você mesmo, porque você não especificou um nome de usuário. Visite as configurações."
       },
@@ -455,7 +455,7 @@
         "DONE": "Agora você terminou.",
         "LOGIN_SUCCESS": "Login efetuado com sucesso!",
         "TEST_CREDENTIALS": "Credenciais de teste",
-        "WELCOME_USER": "Bem-vindo {{user} }!"
+        "WELCOME_USER": "Bem-vindo {{user}}!"
       }
     },
     "METRIC": {
@@ -766,7 +766,7 @@
         "STATUS": "Status"
       },
       "S": {
-        "ERR_UNKNOWN": "Redmine: Erro desconhecido {{statusCode} } {{errorMsg} }."
+        "ERR_UNKNOWN": "Redmine: Erro desconhecido {{statusCode}} {{errorMsg}}."
       }
     },
     "REMINDER": {
@@ -774,7 +774,7 @@
         "HIDE": "Esconder",
         "START_NOW": "Comece agora",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão atrasados)"
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão atrasados)"
       },
       "S_ACTIVE_TASK_DUE": "A tarefa na qual você está trabalhando atualmente está atrasada!<br/> ( {{title}})",
       "S_REMINDER_ERR": "Erro na interface de lembrete"
@@ -853,7 +853,7 @@
         "FOLLOW_LINK": "Abra o link a seguir e copie o código de autenticação fornecido no campo de entrada abaixo.",
         "GET_AUTH_CODE": "Obter código de autorização",
         "L_AUTH_CODE": "Insira o código de autenticação",
-        "TITLE": "Login: {{provider} }"
+        "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
         "LAST_CHANGE": "Última alteração:",
@@ -922,8 +922,8 @@
         "INITIAL_SYNC_ERROR": "Falha na sincronização inicial",
         "SUCCESS_IMPORT": "Dados importados",
         "SUCCESS_VIA_BUTTON": "Dados sincronizados com sucesso",
-        "UNKNOWN_ERROR": "Erro de sincronização desconhecido: {{err} }",
-        "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err} }"
+        "UNKNOWN_ERROR": "Erro de sincronização desconhecido: {{err}}",
+        "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err}}"
       }
     },
     "TAG": {
@@ -952,7 +952,7 @@
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Adicionar tarefa existente \" {{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Adicionar problema nº {{issueNr} } de {{issueType} }",
+        "ADD_ISSUE_TASK": "Adicionar problema nº {{issueNr}} de {{issueType}}",
         "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Adicionar tarefa ao final das pendências",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Adicionar tarefa ao final da lista",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Adicionar tarefa ao topo das pendências",
@@ -966,7 +966,7 @@
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Adicionar anexo",
         "ADD_SUB_TASK": "Adicionar subtarefa",
-        "ATTACHMENTS": "Anexos ( {{nr} })",
+        "ATTACHMENTS": "Anexos ( {{nr}})",
         "FROM_PARENT": "(do pai)",
         "LOCAL_ATTACHMENTS": "Anexos locais",
         "NOTES": "Descrição",
@@ -975,7 +975,7 @@
         "REPEAT": "Repita",
         "SCHEDULE_TASK": "Agendar tarefa",
         "SCHEDULED_AT": "Programado para",
-        "SUB_TASKS": "Subtarefas ( {{nr} })",
+        "SUB_TASKS": "Subtarefas ( {{nr}})",
         "TIME": "Tempo",
         "TITLE_PLACEHOLDER": "Insira um título"
       },
@@ -1016,11 +1016,11 @@
         "UPDATE_ISSUE_DATA": "Atualizar dados do problema"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
-        "MSG": "Você deseja criar a nova etiqueta {{tagsTxt} }?",
+        "MSG": "Você deseja criar a nova etiqueta {{tagsTxt}}?",
         "OK": "Criar etiqueta"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Você deseja criar as novas etiquetas {{tagsTxt} }?",
+        "MSG": "Você deseja criar as novas etiquetas {{tagsTxt}}?",
         "OK": "Criar etiquetas"
       },
       "D_REMINDER_VIEW": {
@@ -1065,11 +1065,11 @@
         "DELETE_FOR": "Excluir entrada para o dia",
         "ESTIMATE": "Estimativa",
         "TIME_SPENT": "Tempo gasto",
-        "TIME_SPENT_ON": "Tempo gasto {{date} }",
+        "TIME_SPENT_ON": "Tempo gasto {{date}}",
         "TITLE": "Duração"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": "Adicionar nova entrada para {{date} }",
+        "ADD_ENTRY_FOR": "Adicionar nova entrada para {{date}}",
         "DATE": "Data para nova entrada",
         "HELP": "Exemplos:<br> 30m => 30 minutos<br> 2h => 2 horas<br> 2h 30m => 2 horas e 30 minutos",
         "TINE_SPENT": "Tempo gasto",
@@ -1081,14 +1081,14 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Não é possível atribuir projeto via sintaxe curta para tarefas repetíveis!",
-        "CREATED_FOR_PROJECT": "Tarefa movida \" {{taskTitle} }\" para o projeto \" {{projectTitle} \"",
+        "CREATED_FOR_PROJECT": "Tarefa movida \" {{taskTitle}}\" para o projeto \" {{projectTitle} \"",
         "CREATED_FOR_PROJECT_ACTION": "Ir para o Projeto",
         "DELETED": "Tarefa excluída \" {{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Tarefa movida <strong>{{title}}</strong> do backlog para a lista de tarefas de hoje",
         "FOUND_MOVE_FROM_OTHER_LIST": "Adicionada tarefa <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> à lista atual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarefa restaurada <strong>{{title}}</strong> relacionada ao problema do arquivo",
         "LAST_TAG_DELETION_WARNING": "Você está tentando remover a última etiqueta de uma tarefa que não é do projeto. Isso não é permitido!",
-        "MOVED_TO_PROJECT": "Tarefa movida \" {{taskTitle} }\" para o projeto \" {{projectTitle} \"",
+        "MOVED_TO_PROJECT": "Tarefa movida \" {{taskTitle}}\" para o projeto \" {{projectTitle} \"",
         "MOVED_TO_PROJECT_ACTION": "Ir para o Projeto",
         "REMINDER_ADDED": "Tarefa agendada \" {{title}}\"",
         "REMINDER_DELETED": "Lembrete excluído para tarefa",

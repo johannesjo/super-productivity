@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { EMPTY, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, switchMap, tap, withLatestFrom } from 'rxjs/operators';

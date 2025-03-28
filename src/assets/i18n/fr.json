@@ -157,12 +157,12 @@
         "ADD_AS_TASK": "Ajouter une Tâche",
         "FOCUS_TASK": "Tâche de concentration",
         "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)",
         "TXT_PAST": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres événements sont prévus)"
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)"
       },
       "S": {
-        "CAL_PROVIDER_ERROR": "Erreur du fournisseur de calendrier : {{errTxt} }"
+        "CAL_PROVIDER_ERROR": "Erreur du fournisseur de calendrier : {{errTxt}}"
       }
     },
     "CONFIG": {
@@ -306,7 +306,7 @@
         "T_TITLE": "Titre",
         "T_TO_BE_SUBMITTED": "A soumettre",
         "TITLE": "Soumettre sur GitLab le temps passé sur les tickets",
-        "TOTAL_MSG": "Vous allez soumettre <em>{{totalTimeToSubmit} }</em> comme temps de travail total d'aujourd'hui, passé sur <em>{{nrOfTasksToSubmit} }</em> tickets différents."
+        "TOTAL_MSG": "Vous allez soumettre <em>{{totalTimeToSubmit}}</em> comme temps de travail total d'aujourd'hui, passé sur <em>{{nrOfTasksToSubmit}}</em> tickets différents."
       },
       "FORM": {
         "FILTER": "Filtre personnalisé",
@@ -637,8 +637,8 @@
       "S": {
         "ERR_UNKNOWN": "OpenProject : erreur inconnue {{statusCode}} {{errorMsg}}. CORS est-il correctement configuré pour le serveur ?",
         "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}",
-        "TRANSITION": "OpenProject : définir le ticket \"{{issueKey} }\" sur \"{{name} }\"",
-        "TRANSITION_SUCCESS": "OpenProject : définir le ticket {{issueKey} } sur <strong>{{chosenTransition} }</strong>",
+        "TRANSITION": "OpenProject : définir le ticket \"{{issueKey}}\" sur \"{{name}}\"",
+        "TRANSITION_SUCCESS": "OpenProject : définir le ticket {{issueKey}} sur <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Transitions chargées. Utilisez les sélections ci-dessous pour les attribuer"
       }
     },
@@ -660,7 +660,7 @@
         "NO_SCHEDULED_ITEMS": "Aucun élément programmé"
       },
       "S": {
-        "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle} }\"",
+        "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle}}\"",
         "TASK_ALREADY_PLANNED": "La tâche est déjà plannifiée le {{date}",
         "TASK_PLANNED_FOR": "Tâche planifiée pour {date}"
       },
@@ -810,7 +810,7 @@
         "STATUS": "Statut"
       },
       "S": {
-        "ERR_UNKNOWN": "Redmine : erreur inconnue {{statusCode} } {{errorMsg} }."
+        "ERR_UNKNOWN": "Redmine : erreur inconnue {{statusCode}} {{errorMsg}}."
       }
     },
     "REMINDER": {
@@ -818,7 +818,7 @@
         "HIDE": "Réduire",
         "START_NOW": "Commencer maintenant",
         "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners} } autres tâches sont dues)"
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres tâches sont dues)"
       },
       "S_ACTIVE_TASK_DUE": "La tâche sur laquelle vous travaillez actuellement est arrivée à échéance !<br/> ({{title}})",
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
@@ -1157,15 +1157,15 @@
         "CUSTOM": "Configuration de répétition customisée",
         "CUSTOM_AND_TIME": "Customisé, {timeStr}",
         "CUSTOM_WEEKLY": "{daysStr}",
-        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr} }, {{timeStr} }",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
         "DAILY": "Chaque jour",
-        "DAILY_AND_TIME": "Chaque jour, {{timeStr} }",
-        "EVERY_X_DAILY": "Tous les {{x} } jours",
-        "EVERY_X_DAILY_AND_TIME": "Tous les {{x} } jours, {{timeStr} }",
-        "EVERY_X_MONTHLY": "Tous les {{x} } mois",
-        "EVERY_X_MONTHLY_AND_TIME": "Tous les {{x} } mois, {{timeStr} }",
-        "EVERY_X_YEARLY": "Tous les {{x} } ans",
-        "EVERY_X_YEARLY_AND_TIME": "Tous les {{x} } ans, {{timeStr} }",
+        "DAILY_AND_TIME": "Chaque jour, {{timeStr}}",
+        "EVERY_X_DAILY": "Tous les {{x}} jours",
+        "EVERY_X_DAILY_AND_TIME": "Tous les {{x}} jours, {{timeStr}}",
+        "EVERY_X_MONTHLY": "Tous les {{x}} mois",
+        "EVERY_X_MONTHLY_AND_TIME": "Tous les {{x}} mois, {{timeStr}}",
+        "EVERY_X_YEARLY": "Tous les {{x}} ans",
+        "EVERY_X_YEARLY_AND_TIME": "Tous les {{x}} ans, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Lun-Ven",
         "MONDAY_TO_FRIDAY_AND_TIME": "Lun-Ven, {timeStr}",
         "MONTHLY_CURRENT_DATE": "Le {{dateDayStr}} de chaque mois",
@@ -1176,7 +1176,7 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Chaque année le {dayAndMonthStr}, {timeStr}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "Il y a {{tasksNr}} instances créées pour cette tâche répétée. Voulez-vous toutes les déplacer vers le projet « {{projectName} } » ?",
+        "MSG": "Il y a {{tasksNr}} instances créées pour cette tâche répétée. Voulez-vous toutes les déplacer vers le projet « {{projectName}} » ?",
         "OK": "Mettre à jour toutes les instances"
       },
       "D_CONFIRM_REMOVE": {

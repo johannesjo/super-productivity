@@ -660,9 +660,9 @@
         "NO_SCHEDULED_ITEMS": "Nenhum item agendado"
       },
       "S": {
-        "REMOVED_PLAN_DATE": "Data do plano removida para a tarefa ' {{taskTitle} }'",
+        "REMOVED_PLAN_DATE": "Data do plano removida para a tarefa ' {{taskTitle}}'",
         "TASK_ALREADY_PLANNED": "A tarefa já está planeada para {{date}}",
-        "TASK_PLANNED_FOR": "Tarefa planejada para {{date} }"
+        "TASK_PLANNED_FOR": "Tarefa planejada para {{date}}"
       },
       "TASK_DRAWER": "Gaveta de trabalho"
     },
@@ -818,7 +818,7 @@
         "HIDE": "Esconder",
         "START_NOW": "Iniciar agora",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners} } outras tarefas estão pendentes)"
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão pendentes)"
       },
       "S_ACTIVE_TASK_DUE": "A tarefa em que está a trabalhar atualmente já tem prazo de validade!<br/> ({{title}})",
       "S_REMINDER_ERR": "Erro na interface do lembrete"
@@ -1064,11 +1064,11 @@
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
-        "MSG": "Você deseja criar a nova tag {{tagsTxt} }?",
+        "MSG": "Você deseja criar a nova tag {{tagsTxt}}?",
         "OK": "Criar Tag"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Você deseja criar as novas tags {{tagsTxt} }?",
+        "MSG": "Você deseja criar as novas tags {{tagsTxt}}?",
         "OK": "Criar Tags"
       },
       "D_REMINDER_VIEW": {
@@ -1171,8 +1171,8 @@
         "MONTHLY_CURRENT_DATE": "Mensalmente no dia {{dateDayStr}}",
         "MONTHLY_CURRENT_DATE_AND_TIME": "Mensalmente no dia {{dateDayStr}}, {{timeStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Semanalmente {{weekdayStr}",
-        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Semanalmente em {{weekdayStr} }, {{timeStr} }",
-        "YEARLY_CURRENT_DATE": "Anualmente em {{dayAndMonthStr} }",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Semanalmente em {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Anualmente em {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
@@ -1185,7 +1185,7 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "CANCEL": "Somente tarefas futuras",
-        "MSG": "Há {{tasksNr} } instâncias criadas para esta tarefa repetível. Você quer atualizar todas elas com os novos padrões ou apenas tarefas futuras?",
+        "MSG": "Há {{tasksNr}} instâncias criadas para esta tarefa repetível. Você quer atualizar todas elas com os novos padrões ou apenas tarefas futuras?",
         "OK": "Atualizar todas as instancias"
       },
       "D_EDIT": {
@@ -1214,8 +1214,8 @@
         "Q_DAILY": "Todos os dias",
         "Q_MONDAY_TO_FRIDAY": "De segunda a sexta",
         "Q_MONTHLY_CURRENT_DATE": "Todos os meses, no dia {{dateDayStr}}",
-        "Q_WEEKLY_CURRENT_WEEKDAY": "Toda semana em {{weekdayStr} }",
-        "Q_YEARLY_CURRENT_DATE": "Todos os anos em {{dayAndMonthStr} }",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Toda semana em {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "Todos os anos em {{dayAndMonthStr}}",
         "QUICK_SETTING": "Repita a configuração",
         "REMIND_AT": "Lembre-se em",
         "REMIND_AT_PLACEHOLDER": "Selecione quando lembrar",

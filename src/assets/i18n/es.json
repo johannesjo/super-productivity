@@ -1214,7 +1214,7 @@
         "Q_DAILY": "Cada día",
         "Q_MONDAY_TO_FRIDAY": "De lunes a viernes",
         "Q_MONTHLY_CURRENT_DATE": "El {{dateDayStr}}de cada mes",
-        "Q_WEEKLY_CURRENT_WEEKDAY": "Cada semana los {{weekdayStr} }",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Cada semana los {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Cada año, el {{dayAndMonthStr}}",
         "QUICK_SETTING": "Repetir configuración",
         "REMIND_AT": "Recordar en",

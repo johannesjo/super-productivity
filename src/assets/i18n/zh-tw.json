@@ -75,7 +75,7 @@
       "DEFAULT_PROJECT_LABEL": "預設Super Productivity項目",
       "HOW_TO_GET_A_TOKEN": "如何取得令牌？",
       "S": {
-        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName} }：無需更新"
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}：無需更新"
       }
     },
     "JIRA": {
