@@ -52,6 +52,11 @@ export class OpenProjectApiService {
       {
         // see https://www.openproject.org/docs/api/endpoints/work-packages/
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
+        params: {
+          pageSize: 100,
+          // Default: [["id", "asc"]]
+          sortBy: '[["updatedAt", "desc"]]',
+        },
       },
       cfg,
     ).pipe(
