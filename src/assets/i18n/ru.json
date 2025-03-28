@@ -201,7 +201,6 @@
         "TO_FOCUS_OVERLAY": "Для наложения фокуса"
       },
       "BACK_TO_PLANNING": "Вернуться к планированию",
-      "CANCEL_FOCUS_SESSION": "Отменить фокус-сеанс",
       "CONGRATS": "Поздравляю с завершением этого сеанса!",
       "CONTINUE_FOCUS_SESSION": "Продолжить фокус-сеанс",
       "COUNTDOWN": "Обратный отсчет",
@@ -227,7 +226,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Показать/скрыть заметки о задачах и вложениях",
       "START_FOCUS_SESSION": "Начать фокус-сеанс",
       "START_NEXT_FOCUS_SESSION": "Начать следующий фокус-сеанс",
-      "WORKED_FOR": "Вы работаете над"
+      "WORKED_FOR": "Вы работаете над",
+      "CANCEL_FOCUS_SESSION": "Отменить фокус-сеанс"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

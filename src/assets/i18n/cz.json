@@ -150,7 +150,6 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Zpět na plánování",
-      "CANCEL_FOCUS_SESSION": "Zrušit režim zaměření",
       "CONGRATS": "Gratulujeme k dokončení této relace!",
       "CONTINUE_FOCUS_SESSION": "Pokračovat v režimu zaměření",
       "FINISH_TASK_AND_SELECT_NEXT": "Dokončit úkol a vybrat další",
@@ -172,7 +171,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Zobrazit/skrýt poznámky a přílohy k úkolu",
       "START_FOCUS_SESSION": "Spustit relaci zaměření",
       "START_NEXT_FOCUS_SESSION": "Spustit další relaci zaměření",
-      "WORKED_FOR": "Pracovali jste"
+      "WORKED_FOR": "Pracovali jste",
+      "CANCEL_FOCUS_SESSION": "Zrušit režim zaměření"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
