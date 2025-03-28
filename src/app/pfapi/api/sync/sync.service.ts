@@ -517,7 +517,12 @@ export class SyncService<const MD extends ModelCfgs> {
         }
       }
       const data = await this._decompressAndDecryptData<T>(dataStr);
-      return { data, rev };
+      return {
+        data: this.m[modelId].modelCfg.transformBeforeDownload
+          ? (this.m[modelId].modelCfg.transformBeforeDownload(data) as T)
+          : data,
+        rev,
+      };
     } catch (e) {
       if (e instanceof RemoteFileNotFoundAPIError) {
         throw new NoRemoteModelFile(modelId);
@@ -739,9 +744,15 @@ export class SyncService<const MD extends ModelCfgs> {
       Object.keys(mainModelData).forEach((modelId) => {
         if (modelId in mainModelData) {
           // TODO better typing
-          this.m[modelId].save(mainModelData[modelId] as any, {
-            isUpdateRevAndLastUpdate: false,
-          });
+          // this.m[modelId].save(mainModelData[modelId] as any, {
+          this.m[modelId].save(
+            this.m[modelId].modelCfg.transformBeforeDownload
+              ? this.m[modelId].modelCfg.transformBeforeDownload(mainModelData[modelId])
+              : (mainModelData[modelId] as any),
+            {
+              isUpdateRevAndLastUpdate: false,
+            },
+          );
         }
       });
     } else {
