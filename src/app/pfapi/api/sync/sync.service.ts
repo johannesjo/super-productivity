@@ -275,10 +275,7 @@ export class SyncService<const MD extends ModelCfgs> {
         }),
     );
 
-    await loadBalancer(
-      downloadModelFns,
-      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
-    );
+    await loadBalancer(downloadModelFns, this._syncProviderOrError.maxConcurrentRequests);
 
     await this._updateLocalUpdatedModels(toUpdate, toDelete, dataMap);
 
@@ -384,10 +381,7 @@ export class SyncService<const MD extends ModelCfgs> {
     );
     // const toDeleteFns = toDelete.map((modelId) => () => this._removeModel(modelId));
 
-    await loadBalancer(
-      uploadModelFns,
-      this._getCurrentSyncProviderOrError().maxConcurrentRequests,
-    );
+    await loadBalancer(uploadModelFns, this._syncProviderOrError.maxConcurrentRequests);
     console.log({ realRevMap });
 
     const validatedRevMap = validateRevMap(realRevMap);
@@ -415,14 +409,14 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // --------------------------------------------------
   private _isReadyForSync(): Promise<boolean> {
-    return this._getCurrentSyncProviderOrError().isReady();
+    return this._syncProviderOrError.isReady();
   }
 
   private _getModelVersion(modelId: string): number {
     return this.m[modelId].modelCfg.modelVersion;
   }
 
-  private _getCurrentSyncProviderOrError(): SyncProviderServiceInterface<unknown> {
+  private get _syncProviderOrError(): SyncProviderServiceInterface<unknown> {
     const provider = this._currentSyncProvider$.value;
     if (!provider) {
       throw new NoSyncProviderSetError();
@@ -456,7 +450,7 @@ export class SyncService<const MD extends ModelCfgs> {
     });
 
     const target = this._getRemoteFilePathForModelId(modelId);
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
       data,
       modelVersion,
@@ -475,7 +469,7 @@ export class SyncService<const MD extends ModelCfgs> {
       expectedRev,
     });
 
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
     if (expectedRev) {
       if (!rev || !this._isSameRev(rev, expectedRev)) {
@@ -492,7 +486,7 @@ export class SyncService<const MD extends ModelCfgs> {
       modelId,
     });
 
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     await syncProvider.removeFile(modelId);
   }
 
@@ -534,7 +528,7 @@ export class SyncService<const MD extends ModelCfgs> {
       // encryptedAndCompressedData,
     });
 
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
 
     return (
       await syncProvider.uploadFile(
@@ -549,7 +543,7 @@ export class SyncService<const MD extends ModelCfgs> {
   // --------------------------------------------------
   private async _getMetaRev(localRev: string | null): Promise<string> {
     pfLog(2, `${SyncService.name}.${this._getMetaRev.name}()`, { localRev });
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     try {
       const r = await syncProvider.getFileRev(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
@@ -569,7 +563,7 @@ export class SyncService<const MD extends ModelCfgs> {
   ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
     pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, { localRev });
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     try {
       const r = await syncProvider.downloadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
@@ -605,7 +599,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
   private async _lockRemoteMetaFile(revToMatch: string | null = null): Promise<string> {
     pfLog(2, `${SyncService.name}.${this._lockRemoteMetaFile.name}()`, { revToMatch });
-    const syncProvider = this._getCurrentSyncProviderOrError();
+    const syncProvider = this._syncProviderOrError;
     const clientId = await this._metaModelCtrl.loadClientId();
     return (
       await syncProvider.uploadFile(
