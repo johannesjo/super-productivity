@@ -327,14 +327,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
   }
 
-  downloadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
-    pfLog(2, `${this.downloadAll.name}()`, { isSkipLockFileCheck });
-    return this._syncService.downloadAll(isSkipLockFileCheck);
+  downloadAll(): Promise<void> {
+    pfLog(2, `${this.downloadAll.name}()`);
+    return this._syncService.downloadAll();
   }
 
-  uploadAll(isSkipLockFileCheck: boolean = false): Promise<void> {
-    pfLog(2, `${this.uploadAll.name}()`, { isSkipLockFileCheck });
-    return this._syncService.uploadAll(isSkipLockFileCheck);
+  uploadAll(isForceUpload: boolean = false): Promise<void> {
+    pfLog(2, `${this.uploadAll.name}()`);
+    return this._syncService.uploadAll(isForceUpload);
   }
 
   isValidateComplete(data: AllSyncModels<MD>): boolean {

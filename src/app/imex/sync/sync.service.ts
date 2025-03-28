@@ -72,7 +72,6 @@ export class SyncService {
   // TODO move someplace else
 
   async sync(): Promise<SyncStatus | 'USER_ABORT' | 'HANDLED_ERROR'> {
-    console.trace();
     const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
       //   // TODO handle different

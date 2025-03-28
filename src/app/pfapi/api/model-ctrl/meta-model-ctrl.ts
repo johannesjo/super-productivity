@@ -25,6 +25,7 @@ export class MetaModelCtrl {
   static readonly META_MODEL_ID = DBNames.MetaModel;
   static readonly META_MODEL_REMOTE_FILE_NAME = DBNames.MetaModel;
   static readonly CLIENT_ID = DBNames.ClientId;
+  static readonly META_FILE_LOCK_CONTENT_PREFIX = 'SYNC_IN_PROGRESS__' as const;
 
   private readonly _db: Database;
   private _metaModelInMemory?: LocalMeta;

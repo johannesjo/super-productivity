@@ -163,7 +163,6 @@ export const PFAPI_SYNC_PROVIDERS = [
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   crossModelVersion: CROSS_MODEL_VERSION,
-  isMainFileMode: true,
   validate: (data) => {
     return isValidAppData(data);
   },
