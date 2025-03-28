@@ -103,20 +103,12 @@ export class NoRemoteMetaFile extends Error {
 }
 
 // --------------LOCKFILE ERRORS--------------
-export class LockFilePresentError extends Error {
-  override name = LockFilePresentError.name;
+export class LockPresentError extends Error {
+  override name = LockPresentError.name;
 }
 
-export class LockFileFromLocalClientPresentError extends Error {
-  override name = LockFileFromLocalClientPresentError.name;
-}
-
-export class UnableToWriteLockFileError extends Error {
-  override name = UnableToWriteLockFileError.name;
-}
-
-export class LockFileEmptyOrMessedUpError extends Error {
-  override name = LockFileEmptyOrMessedUpError.name;
+export class LockFromLocalClientPresentError extends Error {
+  override name = LockFromLocalClientPresentError.name;
 }
 
 // -----ENCRYPTION & COMPRESSION----

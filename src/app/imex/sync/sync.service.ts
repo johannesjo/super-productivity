@@ -9,10 +9,9 @@ import { SnackService } from '../../core/snack/snack.service';
 import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
   AuthFailSPError,
-  LockFilePresentError,
+  LockPresentError,
   SyncProviderId,
   SyncStatus,
-  UnableToWriteLockFileError,
 } from '../../pfapi/api';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
@@ -145,13 +144,9 @@ export class SyncService {
           type: 'ERROR',
         });
         return 'HANDLED_ERROR';
-      } else if (
-        error instanceof LockFilePresentError ||
-        error instanceof UnableToWriteLockFileError
-      ) {
-        // TODO improve handling
+      } else if (error instanceof LockPresentError) {
         this._snackService.open({
-          // msg: T.F.SYNC.S.INCOMPLETE_CFG,
+          // TODO translate
           msg: 'Remote Data is currently being written',
           type: 'ERROR',
           actionFn: async () => this._forceUpload(),
@@ -161,14 +156,6 @@ export class SyncService {
       } else {
         const errStr = getSyncErrorStr(error);
         alert('IMEXSyncService ERR: ' + errStr);
-        // TODO check if needed
-        // if (errStr.includes(KNOWN_SYNC_ERROR_PREFIX)) {
-        //   this._snackService.open({
-        //     msg: errStr.replace(KNOWN_SYNC_ERROR_PREFIX, ''),
-        //     type: 'ERROR',
-        //   });
-        //   return 'HANDLED_ERROR'
-        // } else {
         this._snackService.open({
           // msg: T.F.SYNC.S.UNKNOWN_ERROR,
           msg: errStr,

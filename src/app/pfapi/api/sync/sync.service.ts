@@ -2,6 +2,7 @@ import {
   AllSyncModels,
   ConflictData,
   EncryptAndCompressCfg,
+  ExtractModelCfgType,
   LocalMeta,
   MainModelData,
   ModelCfgs,
@@ -15,8 +16,8 @@ import { SyncStatus } from '../pfapi.const';
 import {
   CannotGetEncryptAndCompressCfg,
   ImpossibleError,
-  LockFileFromLocalClientPresentError,
-  LockFilePresentError,
+  LockFromLocalClientPresentError,
+  LockPresentError,
   ModelVersionToImportNewerThanLocalError,
   NoRemoteMetaFile,
   NoSyncProviderSetError,
@@ -41,6 +42,7 @@ import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-versio
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
+  private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
 
   constructor(
     public m: ModelCfgToModelCtrl<MD>,
@@ -144,9 +146,9 @@ export class SyncService<const MD extends ModelCfgs> {
       }
 
       // this indicates an incomplete sync, so we need to retry to upload all data
-      if (e instanceof LockFileFromLocalClientPresentError) {
+      if (e instanceof LockFromLocalClientPresentError) {
         alert('CATCH LockFileFromLocalClientPresentError 1');
-        await this.uploadAll();
+        await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
       console.error(e);
@@ -177,7 +179,7 @@ export class SyncService<const MD extends ModelCfgs> {
         null,
       );
     } catch (e) {
-      if (e instanceof LockFileFromLocalClientPresentError) {
+      if (e instanceof LockFromLocalClientPresentError) {
         alert('CATCH LockFileFromLocalClientPresentError 2 FORCE UPLOAD');
         return await this.uploadAll(true);
       }
@@ -511,15 +513,20 @@ export class SyncService<const MD extends ModelCfgs> {
     dataMap: { [key: string]: unknown },
   ): Promise<unknown> {
     return await Promise.all([
-      ...toUpdate.map((modelId) => this._updateLocalModel(modelId, dataMap[modelId])),
+      ...toUpdate.map((modelId) =>
+        // NOTE: needs to be cast as any
+        this._updateLocalModel(modelId, dataMap[modelId] as any),
+      ),
       // TODO delete local models
       // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
     ]);
   }
 
-  private async _updateLocalModel(modelId: string, modelData: unknown): Promise<void> {
-    // TODO better typing
-    await this.m[modelId].save(modelData as any);
+  private async _updateLocalModel<T extends keyof MD>(
+    modelId: T,
+    modelData: ExtractModelCfgType<MD[T]>,
+  ): Promise<void> {
+    await this.m[modelId].save(modelData);
   }
 
   // META MODEL
@@ -589,9 +596,9 @@ export class SyncService<const MD extends ModelCfgs> {
           .replace(/\n/g, '');
 
         if (lockClientId === (await this._metaModelCtrl.loadClientId())) {
-          throw new LockFileFromLocalClientPresentError();
+          throw new LockFromLocalClientPresentError();
         }
-        throw new LockFilePresentError();
+        throw new LockPresentError();
       }
       const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
 
@@ -739,7 +746,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {
       if (!this.m[modelId].modelCfg.isMainFileModel) {
-        revMap[modelId] = 'UPDATE_ALL_REV';
+        revMap[modelId] = SyncService.UPDATE_ALL_REV;
       }
     });
     return revMap;
