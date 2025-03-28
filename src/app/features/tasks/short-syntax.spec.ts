@@ -489,6 +489,82 @@ describe('shortSyntax', () => {
 
       expect(r).toEqual(undefined);
     });
+
+    it('should remove tag from title if task already has tag', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tag #testing',
+        tagIds: ['testing_id'],
+      };
+      const r = shortSyntax(t, CONFIG, [
+        ...ALL_TAGS,
+        { ...DEFAULT_TAG, id: 'testing_id', title: 'testing' },
+      ]);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Test tag',
+        },
+      });
+    });
+
+    it('should create new tag and remove both from title if task already has one given tag', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tag #testing #blu',
+        tagIds: ['blu_id'],
+      };
+      const r = shortSyntax(t, CONFIG, [
+        ...ALL_TAGS,
+        { ...DEFAULT_TAG, id: 'blu_id', title: 'blu' },
+      ]);
+
+      expect(r).toEqual({
+        newTagTitles: ['testing'],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Test tag',
+        },
+      });
+    });
+
+    it('should add existing tag and remove both from title if task already has one given tag', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tag #testing #blu',
+        tagIds: ['blu_id'],
+      };
+      const r = shortSyntax(t, CONFIG, [
+        ...ALL_TAGS,
+        { ...DEFAULT_TAG, id: 'blu_id', title: 'blu' },
+        { ...DEFAULT_TAG, id: 'testing_id', title: 'testing' },
+      ]);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Test tag',
+          tagIds: ['blu_id', 'testing_id'],
+        },
+      });
+    });
+
+    it('should not remove tag from title if task already has tag when disabled', () => {
+      const t = {
+        ...TASK,
+        title: 'Test tag #testing',
+        tagIds: ['testing_id'],
+      };
+      const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
   });
   describe('should work with tags and time estimates combined', () => {
     it('tag before time estimate', () => {

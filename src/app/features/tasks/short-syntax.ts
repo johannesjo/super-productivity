@@ -235,7 +235,11 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
       }
 
-      if (newTagTitlesToCreate.length || tagIdsToAdd.length) {
+      if (
+        newTagTitlesToCreate.length ||
+        tagIdsToAdd.length ||
+        regexTagTitlesTrimmedAndFiltered.length
+      ) {
         taskChanges.title = initialTitle;
         regexTagTitlesTrimmedAndFiltered.forEach((tagTitle) => {
           taskChanges.title = taskChanges.title?.replace(`#${tagTitle}`, '');
