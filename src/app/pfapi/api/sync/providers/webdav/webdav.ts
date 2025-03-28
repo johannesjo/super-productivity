@@ -22,13 +22,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
 
-  private readonly _api: WebdavApi;
+  private readonly _api: WebdavApi = new WebdavApi(() => this._cfgOrError());
 
   public privateCfg!: SyncProviderPrivateCfgStore<WebdavPrivateCfg>;
-
-  constructor() {
-    this._api = new WebdavApi(() => this._cfgOrError());
-  }
 
   async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();

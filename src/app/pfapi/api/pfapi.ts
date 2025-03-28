@@ -47,18 +47,16 @@ export class Pfapi<const MD extends ModelCfgs> {
     encryptKey: undefined,
   });
 
-  public readonly cfg?: PfapiBaseCfg<MD>;
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
   public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
-  public readonly syncProviders: SyncProviderServiceInterface<unknown>[];
   public readonly ev = new PFEventEmitter();
 
   constructor(
     modelCfgs: MD,
-    syncProviders: SyncProviderServiceInterface<unknown>[],
-    cfg?: PfapiBaseCfg<MD>,
+    public syncProviders: SyncProviderServiceInterface<unknown>[],
+    public cfg?: PfapiBaseCfg<MD>,
   ) {
     this.ev.on('syncStart', (v) => {});
     if (Pfapi._wasInstanceCreated) {

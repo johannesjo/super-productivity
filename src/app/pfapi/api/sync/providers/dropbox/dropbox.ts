@@ -40,7 +40,6 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     if (!cfg.appKey) {
       throw new Error('Missing appKey for Dropbox');
     }
-
     this._appKey = cfg.appKey;
     this._basePath = cfg.basePath || '/';
     this._api = new DropboxApi(this._appKey, this);

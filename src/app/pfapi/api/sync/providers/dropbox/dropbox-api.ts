@@ -35,13 +35,10 @@ interface TokenResponse {
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 export class DropboxApi {
-  private _appKey: string;
-  private _parent: SyncProviderServiceInterface<DropboxPrivateCfg>;
-
-  constructor(appKey: string, parent: SyncProviderServiceInterface<DropboxPrivateCfg>) {
-    this._appKey = appKey;
-    this._parent = parent;
-  }
+  constructor(
+    private _appKey: string,
+    private _parent: SyncProviderServiceInterface<DropboxPrivateCfg>,
+  ) {}
 
   async getMetaData(path: string, localRev: string): Promise<DropboxFileMetadata> {
     try {

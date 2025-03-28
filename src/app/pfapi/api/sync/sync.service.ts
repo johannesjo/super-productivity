@@ -41,34 +41,21 @@ import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-versio
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
-  public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
 
-  readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
-  readonly _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>;
-  readonly _metaModelCtrl: MetaModelCtrl;
-  readonly _encryptAndCompressHandler: EncryptAndCompressHandlerService;
-  readonly _pfapiMain: Pfapi<MD>;
-
   constructor(
-    m: ModelCfgToModelCtrl<MD>,
-    _pfapiMain: Pfapi<MD>,
-    _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
-    _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
-    _metaModelCtrl: MetaModelCtrl,
-    _encryptAndCompressHandler: EncryptAndCompressHandlerService,
+    public m: ModelCfgToModelCtrl<MD>,
+    private _pfapiMain: Pfapi<MD>,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
+    private _metaModelCtrl: MetaModelCtrl,
+    private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
     this.IS_DO_CROSS_MODEL_MIGRATIONS = !!(
       _pfapiMain.cfg?.crossModelVersion &&
       _pfapiMain.cfg?.crossModelMigrations &&
       Object.keys(_pfapiMain.cfg?.crossModelMigrations).length
     );
-    this.m = m;
-    this._pfapiMain = _pfapiMain;
-    this._currentSyncProvider$ = _currentSyncProvider$;
-    this._encryptAndCompressCfg$ = _encryptAndCompressCfg$;
-    this._metaModelCtrl = _metaModelCtrl;
-    this._encryptAndCompressHandler = _encryptAndCompressHandler;
   }
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {

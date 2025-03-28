@@ -29,11 +29,7 @@ interface FileMeta {
 }
 
 export class WebdavApi {
-  private _getCfgOrError: () => Promise<WebdavPrivateCfg>;
-
-  constructor(_getCfgOrError: () => Promise<WebdavPrivateCfg>) {
-    this._getCfgOrError = _getCfgOrError;
-  }
+  constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   async upload({
     data,
