@@ -211,21 +211,24 @@ export class ShortSyntaxEffects {
       // needed cause otherwise task gets the focus after blur & hide
       tap((v) => this._layoutService.hideAddTaskBar()),
       concatMap(({ taskId, newTitles }) => {
+        //Making sure the user isnt trying to create two tags with the same name
+        const uniqueNewTitles = [...new Set(newTitles)];
+
         return this._matDialog
           .open(DialogConfirmComponent, {
             restoreFocus: true,
             autoFocus: true,
             data: {
               okTxt:
-                newTitles.length > 1
+                uniqueNewTitles.length > 1
                   ? T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAGS.OK
                   : T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAG.OK,
               message:
-                newTitles.length > 1
+                uniqueNewTitles.length > 1
                   ? T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAGS.MSG
                   : T.F.TASK.D_CONFIRM_SHORT_SYNTAX_NEW_TAG.MSG,
               translateParams: {
-                tagsTxt: `<strong>${newTitles.join(', ')}</strong>`,
+                tagsTxt: `<strong>${uniqueNewTitles.join(', ')}</strong>`,
               },
             },
           })
@@ -237,7 +240,7 @@ export class ShortSyntaxEffects {
               const actions: any[] = [];
               if (isConfirm) {
                 const newTagIds = [...task.tagIds];
-                newTitles.forEach((newTagTitle) => {
+                uniqueNewTitles.forEach((newTagTitle) => {
                   const { action, id } = this._tagService.getAddTagActionAndId({
                     title: newTagTitle,
                   });

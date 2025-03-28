@@ -139,14 +139,17 @@ export const shortSyntaxToTags = ({
   }
 
   if (r.newTagTitles) {
-    r.newTagTitles.forEach((tagTitle) => {
-      shortSyntaxTags.push({
-        title: tagTitle,
-        color: DEFAULT_TODAY_TAG_COLOR,
-        icon: 'style',
+    r.newTagTitles
+      .filter((value, index, self) => self.indexOf(value) === index) // Filter out duplicates
+      .forEach((tagTitle) => {
+        shortSyntaxTags.push({
+          title: tagTitle,
+          color: DEFAULT_TODAY_TAG_COLOR,
+          icon: 'style',
+        });
       });
-    });
   }
+  
 
   return shortSyntaxTags;
 };
