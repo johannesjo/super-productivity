@@ -34,7 +34,6 @@ import { TmpBackupService } from './backup/tmp-backup.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 
-// export class <PCfg extends Cfg, Ms extends ModelCfg<any>[]> {
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
 
@@ -105,9 +104,9 @@ export class Pfapi<const MD extends ModelCfgs> {
     );
   }
 
-  async downloadAll(): Promise<void> {
+  async downloadAll(isSkipRevChange: boolean = false): Promise<void> {
     return await this._wrapSyncAction(`${this.downloadAll.name}()`, () =>
-      this._syncService.downloadAll(),
+      this._syncService.downloadAll(isSkipRevChange),
     );
   }
 

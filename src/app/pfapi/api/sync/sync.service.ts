@@ -187,7 +187,7 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  async downloadAll(): Promise<void> {
+  async downloadAll(isSkipModelRevMapCheck: boolean = false): Promise<void> {
     alert('DOWNLOAD ALL TO LOCAL');
     const local = await this._metaModelCtrl.loadMetaModel();
     const { remoteMeta, remoteMetaRev } = await this._downloadMetaFile();
@@ -200,7 +200,12 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: null,
       revMap: {},
     };
-    return await this.downloadToLocal(remoteMeta, fakeLocal, remoteMetaRev);
+    return await this.downloadToLocal(
+      remoteMeta,
+      fakeLocal,
+      remoteMetaRev,
+      isSkipModelRevMapCheck,
+    );
   }
 
   // --------------------------------------------------
@@ -209,6 +214,7 @@ export class SyncService<const MD extends ModelCfgs> {
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
+    isSkipModelRevMapCheck: boolean = false,
   ): Promise<void> {
     const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
@@ -249,13 +255,14 @@ export class SyncService<const MD extends ModelCfgs> {
     }
 
     // TODO make rev change to see if there were updates before lock file maybe
-    return this._downloadToLocalMULTI(remote, local, remoteRev);
+    return this._downloadToLocalMULTI(remote, local, remoteRev, isSkipModelRevMapCheck);
   }
 
   async _downloadToLocalMULTI(
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
+    isSkipModelRevMapCheck: boolean = false,
   ): Promise<void> {
     pfLog(2, `${SyncService.name}.${this._downloadToLocalMULTI.name}()`, {
       remoteMeta: remote,
@@ -268,16 +275,20 @@ export class SyncService<const MD extends ModelCfgs> {
       context: 'DOWNLOAD',
     });
 
-    const realRevMap: RevMap = {};
     const dataMap: { [key: string]: unknown } = {};
+    const realRemoteRevMap: RevMap = {};
 
     const downloadModelFns = toUpdate.map(
       (modelId) => () =>
-        this._downloadModel(modelId).then(({ rev, data }) => {
-          if (typeof rev === 'string') {
-            realRevMap[modelId] = rev;
-            dataMap[modelId] = data;
+        this._downloadModel(
+          modelId,
+          isSkipModelRevMapCheck ? null : remote.revMap[modelId],
+        ).then(({ rev, data }) => {
+          if (typeof rev !== 'string') {
+            throw new ImpossibleError('No rev found for modelId: ' + modelId);
           }
+          realRemoteRevMap[modelId] = rev;
+          dataMap[modelId] = data;
         }),
     );
 
@@ -298,7 +309,7 @@ export class SyncService<const MD extends ModelCfgs> {
       // TODO check if we need to extend the revMap and modelVersions???
       revMap: validateRevMap({
         ...local.revMap,
-        ...realRevMap,
+        ...realRemoteRevMap,
       }),
       modelVersions: remote.modelVersions,
       crossModelVersion: remote.crossModelVersion,
@@ -491,7 +502,6 @@ export class SyncService<const MD extends ModelCfgs> {
         throw new RevMismatchError(`Download Model Rev: ${modelId}`);
       }
     }
-    // TODO maybe validate
     const data = await this._decompressAndDecryptData<T>(dataStr);
     return { data, rev };
   }

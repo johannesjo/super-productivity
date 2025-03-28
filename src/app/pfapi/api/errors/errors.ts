@@ -78,7 +78,7 @@ export class NoSyncProviderSetError extends Error {
   override name = NoSyncProviderSetError.name;
 }
 
-export class RevMismatchError extends Error {
+export class RevMismatchError extends AdditionalLogErrorBase {
   override name = RevMismatchError.name;
 }
 
