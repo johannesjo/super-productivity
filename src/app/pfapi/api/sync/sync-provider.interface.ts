@@ -14,6 +14,7 @@ export interface SyncProviderAuthHelper {
 export interface SyncProviderServiceInterface<C> {
   id: SyncProviderId;
   isUploadForcePossible?: boolean;
+  isLimitedToSingleFileSync?: boolean;
   maxConcurrentRequests: number;
 
   privateCfg: SyncProviderPrivateCfgStore<C>;

@@ -99,6 +99,7 @@ export interface MetaFileBase {
 
 export interface RemoteMeta extends MetaFileBase {
   mainModelData: MainModelData;
+  isFullData?: boolean;
 }
 
 export interface LocalMeta extends MetaFileBase {

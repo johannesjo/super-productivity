@@ -14,6 +14,7 @@ import { MiniObservable } from '../util/mini-observable';
 import { SyncStatus } from '../pfapi.const';
 import {
   CannotGetEncryptAndCompressCfg,
+  ImpossibleError,
   LockFileFromLocalClientPresentError,
   LockFilePresentError,
   ModelVersionToImportNewerThanLocalError,
@@ -138,7 +139,7 @@ export class SyncService<const MD extends ModelCfgs> {
       alert(e);
       if (e instanceof NoRemoteMetaFile) {
         // if there is no remote meta file, we need to upload all data
-        await this.uploadAll();
+        await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
 
@@ -155,7 +156,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // --------------------------------------------------
   async uploadAll(isForceUpload: boolean = false): Promise<void> {
-    alert('UPLOAD ALL TO REMOTE');
+    alert('UPLOAD ALL TO REMOTE f' + isForceUpload);
     // we need to check meta file for being in locked mode
     if (!isForceUpload) {
       await this._downloadMetaFile();
@@ -221,8 +222,11 @@ export class SyncService<const MD extends ModelCfgs> {
       toDelete,
     });
 
-    if (toUpdate.length === 0 && toDelete.length === 0) {
-      await this._updateLocalMainModels(remote);
+    if (
+      (toUpdate.length === 0 && toDelete.length === 0) ||
+      this._syncProviderOrError.isLimitedToSingleFileSync
+    ) {
+      await this._updateLocalModelsFromMetaFile(remote);
       console.log('XXXXXXXXXXXXXXXXXXXXXXX', {
         isEqual: JSON.stringify(remote.revMap) === JSON.stringify(local.revMap),
         remoteRevMap: remote.revMap,
@@ -283,7 +287,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // since remote might hava an incomplete update
 
     // ON SUCCESS
-    await this._updateLocalMainModels(remote);
+    await this._updateLocalModelsFromMetaFile(remote);
 
     await this._saveLocalMetaFileContent({
       metaRev: remoteRev,
@@ -316,8 +320,13 @@ export class SyncService<const MD extends ModelCfgs> {
       context: 'UPLOAD',
     });
 
-    if (toUpdate.length === 0 && toDelete.length === 0) {
-      const mainModelData = await this._getMainFileModelData();
+    if (
+      (toUpdate.length === 0 && toDelete.length === 0) ||
+      this._syncProviderOrError.isLimitedToSingleFileSync
+    ) {
+      const mainModelData = this._syncProviderOrError.isLimitedToSingleFileSync
+        ? await this._pfapiMain.getAllSyncModelData()
+        : await this._getMainFileModelData();
 
       const metaRevAfterUpdate = await this._uploadMetaFile(
         {
@@ -326,6 +335,9 @@ export class SyncService<const MD extends ModelCfgs> {
           crossModelVersion: local.crossModelVersion,
           modelVersions: local.modelVersions,
           mainModelData,
+          ...(this._syncProviderOrError.isLimitedToSingleFileSync
+            ? { isFullData: true }
+            : {}),
         },
         lastRemoteRev,
       );
@@ -337,6 +349,7 @@ export class SyncService<const MD extends ModelCfgs> {
       });
       return;
     }
+
     // TODO maybe make rev check for meta file to see if there were updates before lock file maybe
     return this._uploadToRemoteMULTI(remote, local, lastRemoteRev);
   }
@@ -677,12 +690,12 @@ export class SyncService<const MD extends ModelCfgs> {
   // --------------------------------------------------
 
   // TODO make async work correctly
-  private async _updateLocalMainModels(remote: RemoteMeta): Promise<void> {
+  private async _updateLocalModelsFromMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
       pfLog(
         2,
-        `${SyncService.name}.${this._updateLocalMainModels.name}() updating mainModels`,
+        `${SyncService.name}.${this._updateLocalModelsFromMetaFile.name}() updating (main) models`,
         Object.keys(mainModelData),
       );
 
@@ -695,7 +708,7 @@ export class SyncService<const MD extends ModelCfgs> {
         }
       });
     } else {
-      console.warn('No remote.mainModelData!!! Is this correct?');
+      throw new ImpossibleError('No remote.mainModelData!!! Is this correct?');
     }
   }
 

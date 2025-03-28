@@ -18,6 +18,8 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
   readonly id: SyncProviderId = SyncProviderId.LocalFile;
   readonly isUploadForcePossible: boolean = false;
   readonly maxConcurrentRequests = 10;
+  // since we cannot guarantee the order of files, we need to mush all our data into a single file
+  readonly isLimitedToSingleFileSync = true;
 
   public privateCfg!: SyncProviderPrivateCfgStore<T>;
 
