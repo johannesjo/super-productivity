@@ -38,8 +38,8 @@ export interface ModelCfg<T extends ModelBase> {
   // MAYBE? TODO
   // transformBeforeSave?: <I>(data: I) => T;
   // transformBeforeLoad?: <I>(data: T) => I;
-  // transformBeforeUpload?: <I>(data: I) => T;
-  // transformBeforeDownload?: <I>(data: T) => I;
+  transformBeforeUpload?: <I>(data: I) => T;
+  transformBeforeDownload?: <I>(data: I) => T;
 
   defaultData?: T;
   // TODO decide to kick or not

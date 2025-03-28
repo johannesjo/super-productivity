@@ -349,7 +349,7 @@ export class SyncService<const MD extends ModelCfgs> {
     ) {
       const mainModelData = this._syncProviderOrError.isLimitedToSingleFileSync
         ? await this._pfapiMain.getAllSyncModelData()
-        : await this._getMainFileModelData();
+        : await this._getMainFileModelDataForUpload();
 
       const metaRevAfterUpdate = await this._uploadMetaFile(
         {
@@ -426,7 +426,7 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
-      mainModelData: await this._getMainFileModelData(completeData),
+      mainModelData: await this._getMainFileModelDataForUpload(completeData),
     });
 
     // ON AFTER SUCCESS
@@ -487,8 +487,11 @@ export class SyncService<const MD extends ModelCfgs> {
 
     const target = this._getRemoteFilePathForModelId(modelId);
     const syncProvider = this._syncProviderOrError;
+    const dataToUpload = this.m[modelId].modelCfg.transformBeforeUpload
+      ? this.m[modelId].modelCfg.transformBeforeUpload(data)
+      : data;
     const encryptedAndCompressedData = await this._compressAndeEncryptData(
-      data,
+      dataToUpload,
       modelVersion,
     );
     return (
@@ -746,7 +749,7 @@ export class SyncService<const MD extends ModelCfgs> {
     }
   }
 
-  private async _getMainFileModelData(
+  private async _getMainFileModelDataForUpload(
     completeModel?: AllSyncModels<MD>,
   ): Promise<MainModelData> {
     const mainFileModelIds = Object.keys(this.m).filter(
@@ -756,9 +759,14 @@ export class SyncService<const MD extends ModelCfgs> {
 
     completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
     const mainModelData: MainModelData = Object.fromEntries(
-      mainFileModelIds.map((modelId) => [modelId, completeModel[modelId]]),
+      mainFileModelIds.map((modelId) => [
+        modelId,
+        this.m[modelId].modelCfg.transformBeforeUpload
+          ? this.m[modelId].modelCfg.transformBeforeUpload(completeModel[modelId])
+          : completeModel[modelId],
+      ]),
     );
-    pfLog(2, `${SyncService.name}.${this._getMainFileModelData.name}()`, {
+    pfLog(2, `${SyncService.name}.${this._getMainFileModelDataForUpload.name}()`, {
       mainModelData,
     });
     return mainModelData;
