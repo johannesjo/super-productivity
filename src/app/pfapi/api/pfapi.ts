@@ -120,6 +120,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   private async _wrapSyncAction<T>(logPrefix: string, fn: () => Promise<T>): Promise<T> {
     try {
       pfLog(2, `${logPrefix}`);
+      this.ev.emit('syncStatusChange', 'SYNCING');
       const result = await fn();
       pfLog(2, `${logPrefix} result:`, result);
       this.ev.emit('syncDone', result);

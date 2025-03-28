@@ -177,7 +177,11 @@ export type PfapiEvents =
   | 'providerPrivateCfgChange'
   | 'providerReady';
 
-export type SyncStatusChangePayload = 'UNKNOWN_OR_CHANGED' | 'ERROR' | 'IN_SYNC';
+export type SyncStatusChangePayload =
+  | 'UNKNOWN_OR_CHANGED'
+  | 'ERROR'
+  | 'IN_SYNC'
+  | 'SYNCING';
 
 // Map each event name to its payload type
 export interface PfapiEventPayloadMap {

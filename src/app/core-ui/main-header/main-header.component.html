@@ -77,7 +77,7 @@
           @if (syncState === 'ERROR') {
             <mat-icon>sync_problem</mat-icon>
           } @else {
-            <mat-icon [class.spin]="syncService.isSyncing$ | async">sync</mat-icon>
+            <mat-icon [class.spin]="syncService.isSyncInProgress$ | async">sync</mat-icon>
           }
           @if (syncState === 'IN_SYNC') {
             <mat-icon class="sync-state-ico">check</mat-icon>

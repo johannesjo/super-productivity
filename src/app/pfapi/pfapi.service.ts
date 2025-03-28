@@ -23,9 +23,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { distinctUntilChanged, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
 import { pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
+import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
 
@@ -35,6 +36,7 @@ const MAX_INVALID_DATA_ATTEMPTS = 10;
 export class PfapiService {
   private _translateService = inject(TranslateService);
   private _dataInitStateService = inject(DataInitStateService);
+  private _globalProgressBarService = inject(GlobalProgressBarService);
   private _imexViewService = inject(ImexViewService);
   private _store = inject(Store);
 
@@ -79,6 +81,12 @@ export class PfapiService {
       async () => 'UNKNOWN_OR_CHANGED' as SyncStatusChangePayload,
     ).pipe();
 
+  public readonly isSyncInProgress$: Observable<boolean> = this.syncState$.pipe(
+    filter((state) => state !== 'UNKNOWN_OR_CHANGED'),
+    map((state) => state === 'SYNCING'),
+    distinctUntilChanged(),
+  );
+
   private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
 
   // TODO replace with pfapi event
@@ -108,6 +116,14 @@ export class PfapiService {
     this._isCheckForStrayLocalDBBackupAndImport();
 
     this.syncState$.subscribe((v) => console.log(`syncState$`, v));
+    this.isSyncInProgress$.subscribe((v) => {
+      console.log('isSyncInProgress$', v);
+      if (v) {
+        this._globalProgressBarService.countUp('SYNC');
+      } else {
+        this._globalProgressBarService.countDown();
+      }
+    });
 
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       // TODO handle android webdav

@@ -42,7 +42,7 @@ export class AndroidEffects {
         withLatestFrom(
           this._store$.pipe(select(selectCurrentTask)),
           this._globalConfigService.cfg$,
-          this._syncService.isSyncing$,
+          this._syncService.isSyncInProgress$,
         ),
         tap(([action, current, cfg, isSyncing]) => {
           if (isSyncing) {
@@ -72,7 +72,7 @@ export class AndroidEffects {
 
   syncNotification$ = createEffect(
     () =>
-      this._syncService.isSyncing$.pipe(
+      this._syncService.isSyncInProgress$.pipe(
         // skip first to avoid default message
         skip(1),
         distinctUntilChanged(),

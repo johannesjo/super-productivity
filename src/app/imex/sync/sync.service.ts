@@ -1,12 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
-import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 import {
   AuthFailSPError,
   LockPresentError,
@@ -37,7 +36,6 @@ export class SyncService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
-  private _globalProgressBarService = inject(GlobalProgressBarService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -55,10 +53,9 @@ export class SyncService {
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
+  isSyncInProgress$: Observable<boolean> = this._pfapiService.isSyncInProgress$.pipe();
 
-  isSyncing$ = new BehaviorSubject<boolean>(false);
-
-  _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncing$.pipe(
+  _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncInProgress$.pipe(
     filter((isSyncing) => !isSyncing),
   );
 
@@ -78,12 +75,7 @@ export class SyncService {
     }
 
     try {
-      this._globalProgressBarService.countUp('SYNC');
-      this.isSyncing$.next(true);
       const r = await this._pfapiService.sync();
-
-      this.isSyncing$.next(false);
-      this._globalProgressBarService.countDown();
 
       switch (r.status) {
         case SyncStatus.InSync:
@@ -133,8 +125,6 @@ export class SyncService {
           return r.status;
       }
     } catch (error: any) {
-      this._globalProgressBarService.countDown();
-      this.isSyncing$.next(false);
       console.error(error);
 
       if (error instanceof AuthFailSPError) {
@@ -180,16 +170,10 @@ export class SyncService {
     ) {
       return;
     }
-    this._globalProgressBarService.countUp('SYNC');
-    this.isSyncing$.next(true);
     try {
       await this._pfapiService.uploadAll(true);
-      this.isSyncing$.next(false);
-      this._globalProgressBarService.countDown();
     } catch (e) {
       const errStr = getSyncErrorStr(e);
-      this.isSyncing$.next(false);
-      this._globalProgressBarService.countDown();
       this._snackService.open({
         // msg: T.F.SYNC.S.UNKNOWN_ERROR,
         msg: errStr,
