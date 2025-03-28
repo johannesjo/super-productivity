@@ -65,7 +65,6 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
   dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
   pollInterval?: number;
-  isMainFileMode?: boolean;
   // TODO needs to be dynamically settable
   isEncryptData?: boolean;
   encryptKey?: string;
@@ -99,7 +98,7 @@ export interface MetaFileBase {
 }
 
 export interface RemoteMeta extends MetaFileBase {
-  mainModelData?: MainModelData;
+  mainModelData: MainModelData;
 }
 
 export interface LocalMeta extends MetaFileBase {

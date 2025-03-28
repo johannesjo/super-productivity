@@ -25,16 +25,14 @@ export class MetaModelCtrl {
   static readonly META_MODEL_ID = DBNames.MetaModel;
   static readonly META_MODEL_REMOTE_FILE_NAME = DBNames.MetaModel;
   static readonly CLIENT_ID = DBNames.ClientId;
-  public readonly IS_MAIN_FILE_MODE: boolean;
 
   private readonly _db: Database;
   private _metaModelInMemory?: LocalMeta;
   private _clientIdInMemory?: string;
   private _ev: PFEventEmitter;
 
-  constructor(db: Database, _IS_MAIN_FILE_MODE: boolean, ev: PFEventEmitter) {
+  constructor(db: Database, ev: PFEventEmitter) {
     this._db = db;
-    this.IS_MAIN_FILE_MODE = _IS_MAIN_FILE_MODE;
     this._ev = ev;
     //
     this.loadClientId().catch((e) => {
@@ -77,7 +75,7 @@ export class MetaModelCtrl {
         ...metaModel,
         lastUpdate: timestamp,
 
-        ...(modelCfg.isMainFileModel && this.IS_MAIN_FILE_MODE
+        ...(modelCfg.isMainFileModel
           ? {}
           : {
               revMap: {

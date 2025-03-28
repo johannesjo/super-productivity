@@ -67,7 +67,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     Pfapi._wasInstanceCreated = true;
 
     this.cfg = cfg;
-    const IS_MAIN_FILE_MODE = cfg?.isMainFileMode || false;
 
     this.db = new Database({
       onError: cfg?.onDbError || (() => undefined),
@@ -83,7 +82,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.tmpBackupService = new TmpBackupService<AllSyncModels<MD>>(this.db);
 
-    this.metaModel = new MetaModelCtrl(this.db, IS_MAIN_FILE_MODE, this.ev);
+    this.metaModel = new MetaModelCtrl(this.db, this.ev);
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
@@ -93,7 +92,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     });
 
     this._syncService = new SyncService<MD>(
-      IS_MAIN_FILE_MODE,
       this.m,
       this,
       this._activeSyncProvider$,

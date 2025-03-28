@@ -42,7 +42,6 @@ import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-versio
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly m: ModelCfgToModelCtrl<MD>;
-  public readonly IS_MAIN_FILE_MODE: boolean;
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
 
   readonly _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
@@ -52,7 +51,6 @@ export class SyncService<const MD extends ModelCfgs> {
   readonly _pfapiMain: Pfapi<MD>;
 
   constructor(
-    isMainFileMode: boolean,
     m: ModelCfgToModelCtrl<MD>,
     _pfapiMain: Pfapi<MD>,
     _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
@@ -60,7 +58,6 @@ export class SyncService<const MD extends ModelCfgs> {
     _metaModelCtrl: MetaModelCtrl,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
-    this.IS_MAIN_FILE_MODE = isMainFileMode;
     this.IS_DO_CROSS_MODEL_MIGRATIONS = !!(
       _pfapiMain.cfg?.crossModelVersion &&
       _pfapiMain.cfg?.crossModelMigrations &&
@@ -89,16 +86,9 @@ export class SyncService<const MD extends ModelCfgs> {
         }
       }
 
-      // NOTE: for cascading mode we don't need to check the lock file before
-      const [{ remoteMeta, remoteMetaRev }] = this.IS_MAIN_FILE_MODE
-        ? await Promise.all([this._downloadMetaFile(localMeta0.metaRev)])
-        : // since we delete the lock file only AFTER writing the meta file, we can safely execute these in parallel
-          // NOTE: a race condition introduced is, that one error might pop up before the other
-          // so we should re-check the lock file, when handling errors from downloading the meta file
-          await Promise.all([
-            this._downloadMetaFile(localMeta0.metaRev),
-            this._awaitLockFilePermissionAndWrite(),
-          ]);
+      const { remoteMeta, remoteMetaRev } = await this._downloadMetaFile(
+        localMeta0.metaRev,
+      );
 
       // we load again, to get the latest local changes for our checks and the data to upload
       const localMeta = await this._metaModelCtrl.loadMetaModel();
@@ -142,23 +132,11 @@ export class SyncService<const MD extends ModelCfgs> {
             }
           }
           // NOTE: also fallthrough for case ModelVersionCheckResult.RemoteModelEqualOrMinorUpdateOnly:
-          await this.updateLocal(
-            remoteMeta,
-            localMeta,
-            remoteMetaRev,
-            // NOTE: because we checked lock file above for multi file mode
-            !this.IS_MAIN_FILE_MODE,
-          );
+          await this.updateLocal(remoteMeta, localMeta, remoteMetaRev, false);
           return { status };
 
         case SyncStatus.UpdateRemote:
-          await this.updateRemote(
-            remoteMeta,
-            localMeta,
-            remoteMetaRev,
-            // NOTE: because we checked lock file above for multi file mode
-            !this.IS_MAIN_FILE_MODE,
-          );
+          await this.updateRemote(remoteMeta, localMeta, remoteMetaRev, false);
           return { status };
         case SyncStatus.InSync:
           return { status };
@@ -202,6 +180,8 @@ export class SyncService<const MD extends ModelCfgs> {
           crossModelVersion: local.crossModelVersion,
           lastUpdate: local.lastUpdate,
           revMap: {},
+          // NOTE: will be assigned later
+          mainModelData: {},
         },
         { ...local, revMap: this._fakeFullRevMap() },
         null,
@@ -245,11 +225,7 @@ export class SyncService<const MD extends ModelCfgs> {
     remoteRev: string,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    if (this.IS_MAIN_FILE_MODE) {
-      return this._updateLocalMAIN(remote, local, remoteRev, isSkipLockFileCheck);
-    } else {
-      return this._updateLocalMULTI(remote, local, remoteRev, isSkipLockFileCheck);
-    }
+    return this._updateLocalMAIN(remote, local, remoteRev, isSkipLockFileCheck);
   }
 
   async _updateLocalMAIN(
@@ -344,9 +320,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // since remote might hava an incomplete update
 
     // ON SUCCESS
-    if (this.IS_MAIN_FILE_MODE) {
-      await this._updateLocalMainModels(remote);
-    }
+    await this._updateLocalMainModels(remote);
 
     await this._saveLocalMetaFileContent({
       metaRev: remoteRev,
@@ -385,11 +359,7 @@ export class SyncService<const MD extends ModelCfgs> {
     lastRemoteRev: string | null = null,
     isSkipLockFileCheck = false,
   ): Promise<void> {
-    if (this.IS_MAIN_FILE_MODE) {
-      return this._updateRemoteMAIN(remote, local, lastRemoteRev, isSkipLockFileCheck);
-    } else {
-      return this._updateRemoteMULTI(remote, local, isSkipLockFileCheck);
-    }
+    return this._updateRemoteMAIN(remote, local, lastRemoteRev, isSkipLockFileCheck);
   }
 
   async _updateRemoteMAIN(
@@ -500,9 +470,7 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
-      mainModelData: this.IS_MAIN_FILE_MODE
-        ? await this._getMainFileModelData(completeData)
-        : undefined,
+      mainModelData: await this._getMainFileModelData(completeData),
     });
 
     // ON AFTER SUCCESS
@@ -728,21 +696,16 @@ export class SyncService<const MD extends ModelCfgs> {
   }): { toUpdate: string[]; toDelete: string[] } {
     const all = getModelIdsToUpdateFromRevMaps(revMapNewer, revMapToOverwrite);
     try {
-      return this.IS_MAIN_FILE_MODE
-        ? {
-            toUpdate: all.toUpdate.filter(
-              // NOTE: we are also filtering out all non-existing local models
-              (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
-            ),
-            toDelete: all.toDelete.filter(
-              // NOTE: we are also filtering out all non-existing local models
-              (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
-            ),
-          }
-        : {
-            toUpdate: all.toUpdate,
-            toDelete: all.toDelete,
-          };
+      return {
+        toUpdate: all.toUpdate.filter(
+          // NOTE: we are also filtering out all non-existing local models
+          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+        ),
+        toDelete: all.toDelete.filter(
+          // NOTE: we are also filtering out all non-existing local models
+          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+        ),
+      };
     } catch (e) {
       // TODO maybe remove error again
       if (context === 'UPLOAD') {
@@ -900,7 +863,7 @@ export class SyncService<const MD extends ModelCfgs> {
   private _fakeFullRevMap(): RevMap {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {
-      if (!this.IS_MAIN_FILE_MODE || !this.m[modelId].modelCfg.isMainFileModel) {
+      if (!this.m[modelId].modelCfg.isMainFileModel) {
         revMap[modelId] = 'UPDATE_ALL_REV';
       }
     });
