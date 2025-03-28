@@ -40,7 +40,7 @@ export class SyncService {
   private _reminderService = inject(ReminderService);
   private _globalProgressBarService = inject(GlobalProgressBarService);
 
-  isCurrentProviderInSync$ = this._pfapiService.isCurrentProviderInSync$;
+  syncState$ = this._pfapiService.syncState$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
     map((cfg) => cfg?.sync),

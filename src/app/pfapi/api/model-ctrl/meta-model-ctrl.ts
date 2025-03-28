@@ -110,6 +110,7 @@ export class MetaModelCtrl {
     // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
     this._ev.emit('metaModelChange', metaModel);
+    this._ev.emit('syncStatusChange', 'UNKNOWN_OR_CHANGED');
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
   }
 

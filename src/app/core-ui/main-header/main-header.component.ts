@@ -80,7 +80,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
   readonly simpleCounterService = inject(SimpleCounterService);
-  readonly syncProviderService = inject(SyncService);
+  readonly syncService = inject(SyncService);
   readonly globalConfigService = inject(GlobalConfigService);
   private readonly _tagService = inject(TagService);
   private readonly _renderer = inject(Renderer2);
@@ -153,7 +153,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   sync(): void {
-    this.syncProviderService.sync().then((r) => {
+    this.syncService.sync().then((r) => {
       if (
         r === SyncStatus.UpdateLocal ||
         r === SyncStatus.UpdateRemoteAll ||

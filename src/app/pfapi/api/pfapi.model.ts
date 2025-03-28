@@ -171,16 +171,20 @@ export type PfapiEvents =
   | 'syncDone'
   | 'syncStart'
   | 'syncError'
+  | 'syncStatusChange'
   | 'metaModelChange'
   | 'providerChange'
   | 'providerPrivateCfgChange'
   | 'providerReady';
+
+export type SyncStatusChangePayload = 'UNKNOWN_OR_CHANGED' | 'ERROR' | 'IN_SYNC';
 
 // Map each event name to its payload type
 export interface PfapiEventPayloadMap {
   syncDone: { status: SyncStatus; conflictData?: ConflictData } | unknown;
   syncStart: undefined;
   syncError: unknown;
+  syncStatusChange: SyncStatusChangePayload;
   metaModelChange: LocalMeta;
   providerChange: { id: string };
   providerReady: boolean;

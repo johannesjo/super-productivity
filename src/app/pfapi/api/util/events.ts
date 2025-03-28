@@ -10,6 +10,7 @@ export class PFEventEmitter {
     syncDone: [],
     syncStart: [],
     syncError: [],
+    syncStatusChange: [],
     metaModelChange: [],
     providerChange: [],
     providerReady: [],

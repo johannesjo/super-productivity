@@ -100,25 +100,37 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
-    pfLog(3, `${this.sync.name}()`);
-    this.ev.emit('syncStart', undefined);
+    return await this._wrapSyncAction(`${this.sync.name}()`, () =>
+      this._syncService.sync(),
+    );
+  }
+
+  async downloadAll(): Promise<void> {
+    return await this._wrapSyncAction(`${this.downloadAll.name}()`, () =>
+      this._syncService.downloadAll(),
+    );
+  }
+
+  async uploadAll(isForceUpload: boolean = false): Promise<void> {
+    return await this._wrapSyncAction(`${this.uploadAll.name}() f:${isForceUpload}`, () =>
+      this._syncService.uploadAll(isForceUpload),
+    );
+  }
+
+  private async _wrapSyncAction<T>(logPrefix: string, fn: () => Promise<T>): Promise<T> {
     try {
-      const result = await this._syncService.sync();
-      pfLog(2, `${this.sync.name}() result:`, result);
+      pfLog(2, `${logPrefix}`);
+      const result = await fn();
+      pfLog(2, `${logPrefix} result:`, result);
       this.ev.emit('syncDone', result);
+      this.ev.emit('syncStatusChange', 'IN_SYNC');
       return result;
     } catch (e) {
       this.ev.emit('syncError', e);
       this.ev.emit('syncDone', e);
+      this.ev.emit('syncStatusChange', 'ERROR');
       throw e;
     }
-  }
-
-  async forceUploadAll(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
-    pfLog(2, `${this.forceUploadAll.name}()`);
-    const result = await this._syncService.uploadAll(true);
-    pfLog(2, `${this.forceUploadAll.name}() result:`, result);
-    return { status: SyncStatus.UpdateRemoteAll };
   }
 
   setActiveSyncProvider(activeProviderId: SyncProviderId | null): void {
@@ -325,16 +337,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (isBackupData) {
       await this.tmpBackupService.clear();
     }
-  }
-
-  downloadAll(): Promise<void> {
-    pfLog(2, `${this.downloadAll.name}()`);
-    return this._syncService.downloadAll();
-  }
-
-  uploadAll(isForceUpload: boolean = false): Promise<void> {
-    pfLog(2, `${this.uploadAll.name}()`);
-    return this._syncService.uploadAll(isForceUpload);
   }
 
   isValidateComplete(data: AllSyncModels<MD>): boolean {

@@ -1,6 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { CompleteBackup, ModelCfgToModelCtrl, Pfapi, SyncProviderId } from './api';
-import { from, merge, of, Subject } from 'rxjs';
+import {
+  CompleteBackup,
+  ModelCfgToModelCtrl,
+  Pfapi,
+  SyncProviderId,
+  SyncStatusChangePayload,
+} from './api';
+import { Observable, Subject } from 'rxjs';
 import { AllowedDBKeys, LS } from '../core/persistence/storage-keys.const';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { devError } from '../util/dev-error';
@@ -17,15 +23,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import {
-  delay,
-  distinctUntilChanged,
-  map,
-  shareReplay,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
-import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
+import { distinctUntilChanged, shareReplay, tap } from 'rxjs/operators';
+import { pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 
 const MAX_INVALID_DATA_ATTEMPTS = 10;
@@ -72,14 +71,13 @@ export class PfapiService {
     },
   ).pipe(shareReplay(1));
 
-  public readonly isCurrentProviderInSync$ = merge(
-    fromPfapiEvent(this.pf.ev, 'metaModelChange'),
-    // delay initial check
-    of(null).pipe(
-      delay(2000),
-      switchMap(() => from(this.pf.metaModel.loadMetaModel())),
-    ),
-  ).pipe(map((d) => !!d.lastSyncedUpdate && d.lastSyncedUpdate === d.lastUpdate));
+  public readonly syncState$: Observable<SyncStatusChangePayload> =
+    pfapiEventAndInitialAfter(
+      this._dataInitStateService.isAllDataLoadedInitially$,
+      this.pf.ev,
+      'syncStatusChange',
+      async () => 'UNKNOWN_OR_CHANGED' as SyncStatusChangePayload,
+    ).pipe();
 
   private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
 
@@ -109,9 +107,7 @@ export class PfapiService {
   constructor() {
     this._isCheckForStrayLocalDBBackupAndImport();
 
-    this.isCurrentProviderInSync$.subscribe((v) =>
-      console.log(`isCurrentProviderInSync$`, v),
-    );
+    this.syncState$.subscribe((v) => console.log(`syncState$`, v));
 
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       // TODO handle android webdav
