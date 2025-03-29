@@ -1,9 +1,7 @@
 import {
-  AllSyncModels,
   ConflictData,
   EncryptAndCompressCfg,
   LocalMeta,
-  MainModelData,
   ModelCfgs,
   ModelCfgToModelCtrl,
   RemoteMeta,
@@ -17,15 +15,12 @@ import {
   LockFromLocalClientPresentError,
   ModelVersionToImportNewerThanLocalError,
   NoRemoteMetaFile,
-  RevMapModelMismatchErrorOnDownload,
-  RevMapModelMismatchErrorOnUpload,
   UnknownSyncStateError,
 } from '../errors/errors';
 import { pfLog } from '../util/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { cleanRev } from '../util/clean-rev';
-import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
@@ -50,13 +45,14 @@ export class SyncService<const MD extends ModelCfgs> {
   ) {
     this._metaFileSyncService = new MetaFileSyncService(
       _metaModelCtrl,
-      this._currentSyncProvider$,
+      _currentSyncProvider$,
       _encryptAndCompressHandler,
       _encryptAndCompressCfg$,
     );
     this._modelSyncService = new ModelSyncService(
       m,
-      this._currentSyncProvider$,
+      _pfapiMain,
+      _currentSyncProvider$,
       _encryptAndCompressHandler,
       _encryptAndCompressCfg$,
     );
@@ -234,10 +230,10 @@ export class SyncService<const MD extends ModelCfgs> {
     remoteRev: string,
     isSkipModelRevMapCheck: boolean = false,
   ): Promise<void> {
-    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+    const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
       revMapToOverwrite: local.revMap,
-      context: 'DOWNLOAD',
+      errorContext: 'DOWNLOAD',
     });
 
     pfLog(2, `${SyncService.name}.${this.downloadToLocal.name}()`, {
@@ -252,7 +248,7 @@ export class SyncService<const MD extends ModelCfgs> {
       (toUpdate.length === 0 && toDelete.length === 0) ||
       this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
-      await this._updateLocalModelsFromMetaFile(remote);
+      await this._modelSyncService.updateLocalFromRemoteMetaFile(remote);
       console.log('XXXXXXXXXXXXXXXXXXXXXXX', {
         isEqual: JSON.stringify(remote.revMap) === JSON.stringify(local.revMap),
         remoteRevMap: remote.revMap,
@@ -287,10 +283,10 @@ export class SyncService<const MD extends ModelCfgs> {
       localMeta: local,
     });
 
-    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+    const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
       revMapToOverwrite: local.revMap,
-      context: 'DOWNLOAD',
+      errorContext: 'DOWNLOAD',
     });
 
     const dataMap: { [key: string]: unknown } = {};
@@ -320,7 +316,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // since remote might hava an incomplete update
 
     // ON SUCCESS
-    await this._updateLocalModelsFromMetaFile(remote);
+    await this._modelSyncService.updateLocalFromRemoteMetaFile(remote);
 
     await this._metaFileSyncService.saveLocal({
       metaRev: remoteRev,
@@ -347,10 +343,10 @@ export class SyncService<const MD extends ModelCfgs> {
       localMeta: local,
     });
 
-    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+    const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
       revMapNewer: local.revMap,
       revMapToOverwrite: remote.revMap,
-      context: 'UPLOAD',
+      errorContext: 'UPLOAD',
     });
 
     if (
@@ -360,7 +356,7 @@ export class SyncService<const MD extends ModelCfgs> {
       const mainModelData = this._currentSyncProvider$.getOrError()
         .isLimitedToSingleFileSync
         ? await this._pfapiMain.getAllSyncModelData()
-        : await this._getMainFileModelDataForUpload();
+        : await this._modelSyncService.getMainFileModelDataForUpload();
 
       const metaRevAfterUpdate = await this._metaFileSyncService.upload(
         {
@@ -394,10 +390,10 @@ export class SyncService<const MD extends ModelCfgs> {
     local: LocalMeta,
     remoteMetaRev: string | null,
   ): Promise<void> {
-    const { toUpdate, toDelete } = this._getModelIdsToUpdateFromRevMaps({
+    const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
       revMapNewer: local.revMap,
       revMapToOverwrite: remote.revMap,
-      context: 'UPLOAD',
+      errorContext: 'UPLOAD',
     });
 
     pfLog(2, `${SyncService.name}.${this._uploadToRemoteMULTI.name}()`, {
@@ -436,7 +432,8 @@ export class SyncService<const MD extends ModelCfgs> {
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       modelVersions: local.modelVersions,
-      mainModelData: await this._getMainFileModelDataForUpload(completeData),
+      mainModelData:
+        await this._modelSyncService.getMainFileModelDataForUpload(completeData),
     });
 
     // ON AFTER SUCCESS
@@ -458,96 +455,6 @@ export class SyncService<const MD extends ModelCfgs> {
     return this._currentSyncProvider$.getOrError().isReady();
   }
 
-  // ---------------------------------------
-
-  private _getModelIdsToUpdateFromRevMaps({
-    revMapNewer,
-    revMapToOverwrite,
-    context,
-  }: {
-    revMapNewer: RevMap;
-    revMapToOverwrite: RevMap;
-    context: 'UPLOAD' | 'DOWNLOAD';
-  }): { toUpdate: string[]; toDelete: string[] } {
-    const all = getModelIdsToUpdateFromRevMaps(revMapNewer, revMapToOverwrite);
-    try {
-      return {
-        toUpdate: all.toUpdate.filter(
-          // NOTE: we are also filtering out all non-existing local models
-          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
-        ),
-        toDelete: all.toDelete.filter(
-          // NOTE: we are also filtering out all non-existing local models
-          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
-        ),
-      };
-    } catch (e) {
-      // TODO maybe remove error again
-      if (context === 'UPLOAD') {
-        throw new RevMapModelMismatchErrorOnUpload({ e, revMapNewer, revMapToOverwrite });
-      } else {
-        throw new RevMapModelMismatchErrorOnDownload({
-          e,
-          revMapNewer,
-          revMapToOverwrite,
-        });
-      }
-    }
-  }
-
-  // --------------------------------------------------
-  private async _updateLocalModelsFromMetaFile(remote: RemoteMeta): Promise<void> {
-    const mainModelData = remote.mainModelData;
-    if (typeof mainModelData === 'object' && mainModelData !== null) {
-      pfLog(
-        2,
-        `${SyncService.name}.${this._updateLocalModelsFromMetaFile.name}() updating (main) models`,
-        Object.keys(mainModelData),
-      );
-
-      Object.keys(mainModelData).forEach((modelId) => {
-        if (modelId in mainModelData) {
-          // TODO better typing
-          // this.m[modelId].save(mainModelData[modelId] as any, {
-          this.m[modelId].save(
-            this.m[modelId].modelCfg.transformBeforeDownload
-              ? this.m[modelId].modelCfg.transformBeforeDownload(mainModelData[modelId])
-              : (mainModelData[modelId] as any),
-            {
-              isUpdateRevAndLastUpdate: false,
-            },
-          );
-        }
-      });
-    } else {
-      throw new ImpossibleError('No remote.mainModelData!!! Is this correct?');
-    }
-  }
-
-  private async _getMainFileModelDataForUpload(
-    completeModel?: AllSyncModels<MD>,
-  ): Promise<MainModelData> {
-    const mainFileModelIds = Object.keys(this.m).filter(
-      (modelId) => this.m[modelId].modelCfg.isMainFileModel,
-    );
-    console.log('____________________________', mainFileModelIds);
-
-    completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
-    const mainModelData: MainModelData = Object.fromEntries(
-      mainFileModelIds.map((modelId) => [
-        modelId,
-        this.m[modelId].modelCfg.transformBeforeUpload
-          ? this.m[modelId].modelCfg.transformBeforeUpload(completeModel[modelId])
-          : completeModel[modelId],
-      ]),
-    );
-    pfLog(2, `${SyncService.name}.${this._getMainFileModelDataForUpload.name}()`, {
-      mainModelData,
-    });
-    return mainModelData;
-  }
-
-  // --------------------------------------------------
   private _fakeFullRevMap(): RevMap {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {

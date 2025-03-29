@@ -5,20 +5,29 @@ import {
   ImpossibleError,
   NoRemoteModelFile,
   RemoteFileNotFoundAPIError,
+  RevMapModelMismatchErrorOnDownload,
+  RevMapModelMismatchErrorOnUpload,
   RevMismatchForModelError,
 } from '../errors/errors';
 import {
+  AllSyncModels,
   EncryptAndCompressCfg,
   ExtractModelCfgType,
+  MainModelData,
   ModelCfgs,
   ModelCfgToModelCtrl,
+  RemoteMeta,
+  RevMap,
 } from '../pfapi.model';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { cleanRev } from '../util/clean-rev';
+import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
+import { Pfapi } from '../pfapi';
 
 export class ModelSyncService<MD extends ModelCfgs> {
   constructor(
     private m: ModelCfgToModelCtrl<MD>,
+    private _pfapiMain: Pfapi<MD>,
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
     private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
@@ -103,6 +112,92 @@ export class ModelSyncService<MD extends ModelCfgs> {
       // TODO delete local models
       // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
     ]);
+  }
+
+  async updateLocalFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
+    const mainModelData = remote.mainModelData;
+    if (typeof mainModelData === 'object' && mainModelData !== null) {
+      pfLog(
+        2,
+        `${ModelSyncService.name}.${this.updateLocalFromRemoteMetaFile.name}() updating (main) models`,
+        Object.keys(mainModelData),
+      );
+
+      Object.keys(mainModelData).forEach((modelId) => {
+        if (modelId in mainModelData) {
+          // TODO better typing
+          // this.m[modelId].save(mainModelData[modelId] as any, {
+          this.m[modelId].save(
+            this.m[modelId].modelCfg.transformBeforeDownload
+              ? this.m[modelId].modelCfg.transformBeforeDownload(mainModelData[modelId])
+              : (mainModelData[modelId] as any),
+            {
+              isUpdateRevAndLastUpdate: false,
+            },
+          );
+        }
+      });
+    } else {
+      throw new ImpossibleError('No remote.mainModelData!!! Is this correct?');
+    }
+  }
+
+  async getMainFileModelDataForUpload(
+    completeModel?: AllSyncModels<MD>,
+  ): Promise<MainModelData> {
+    const mainFileModelIds = Object.keys(this.m).filter(
+      (modelId) => this.m[modelId].modelCfg.isMainFileModel,
+    );
+    console.log('____________________________', mainFileModelIds);
+
+    completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
+    const mainModelData: MainModelData = Object.fromEntries(
+      mainFileModelIds.map((modelId) => [
+        modelId,
+        this.m[modelId].modelCfg.transformBeforeUpload
+          ? this.m[modelId].modelCfg.transformBeforeUpload(completeModel[modelId])
+          : completeModel[modelId],
+      ]),
+    );
+    pfLog(2, `${ModelSyncService.name}.${this.getMainFileModelDataForUpload.name}()`, {
+      mainModelData,
+    });
+    return mainModelData;
+  }
+
+  getModelIdsToUpdateFromRevMaps({
+    revMapNewer,
+    revMapToOverwrite,
+    errorContext,
+  }: {
+    revMapNewer: RevMap;
+    revMapToOverwrite: RevMap;
+    errorContext: 'UPLOAD' | 'DOWNLOAD';
+  }): { toUpdate: string[]; toDelete: string[] } {
+    const all = getModelIdsToUpdateFromRevMaps(revMapNewer, revMapToOverwrite);
+    try {
+      return {
+        toUpdate: all.toUpdate.filter(
+          // NOTE: we are also filtering out all non-existing local models
+          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+        ),
+        toDelete: all.toDelete.filter(
+          // NOTE: we are also filtering out all non-existing local models
+          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+        ),
+      };
+    } catch (e) {
+      // TODO maybe remove error again
+      if (errorContext === 'UPLOAD') {
+        throw new RevMapModelMismatchErrorOnUpload({ e, revMapNewer, revMapToOverwrite });
+      } else {
+        throw new RevMapModelMismatchErrorOnDownload({
+          e,
+          revMapNewer,
+          revMapToOverwrite,
+        });
+      }
+    }
   }
 
   private async _updateLocal<T extends keyof MD>(
