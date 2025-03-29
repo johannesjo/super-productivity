@@ -193,7 +193,7 @@ export class SyncTriggerService {
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
             tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
             auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
-            tap((ev) => alert('__trigger_sync after auditTime__')),
+            // tap((ev) => alert('__trigger_sync after auditTime__')),
           ),
         ),
       ),
