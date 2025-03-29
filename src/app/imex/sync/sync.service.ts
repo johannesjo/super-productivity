@@ -114,6 +114,7 @@ export class SyncService {
             return SyncStatus.UpdateRemoteAll;
           } else if (res === 'USE_REMOTE') {
             await this._pfapiService.downloadAll();
+            await this._reInitAppAfterDataModelChange();
           }
 
           console.log({ res });
