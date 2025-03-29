@@ -191,7 +191,7 @@ export class SyncTriggerService {
           // NOTE: interval changes are only ever executed, if local data was changed
           this._onUpdateLocalDataTrigger$.pipe(
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
-            tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
+            // tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
             auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
             // tap((ev) => alert('__trigger_sync after auditTime__')),
           ),

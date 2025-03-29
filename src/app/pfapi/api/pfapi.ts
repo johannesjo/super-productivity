@@ -307,12 +307,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     try {
       this.db.lock();
       const modelIds = Object.keys(data);
+      const SKIPPED_MODEL_IDS = ['lastLocalSyncModelChange', 'lastArchiveUpdate'];
       const promises = modelIds.map((modelId) => {
         const modelData = data[modelId];
         const modelCtrl = this.m[modelId];
         if (!modelCtrl) {
           console.warn('ModelId without Ctrl', modelId, modelData);
           if (
+            SKIPPED_MODEL_IDS.includes(modelId) ||
             isSkipLegacyWarnings ||
             confirm(
               `ModelId "${modelId}" was found in data. The model seems to be outdated. Ignore and proceed to import anyway?`,
