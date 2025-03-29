@@ -48,7 +48,7 @@ export class MetaModelCtrl {
     });
   }
 
-  // TODO unit test
+  // TODO think about if this should be async
   updateRevForModel<MT extends ModelBase>(
     modelId: string,
     modelCfg: ModelCfg<MT>,
