@@ -1,3 +1,5 @@
+// TODO compare with NEW-tracking.model.ts
+
 export interface TimeTrackingMapByEntryId<T> {
   [modelEntryId: string]: T;
 }

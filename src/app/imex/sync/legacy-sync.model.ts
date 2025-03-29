@@ -13,7 +13,7 @@ import { ProjectState } from '../../features/project/project.model';
 import { NoteState } from '../../features/note/note.model';
 import { LocalSyncMetaForProvider } from './sync.model';
 
-// TODO remove completely
+// TODO remove completely, if not migrating anymore
 
 /** @deprecated */
 export interface LegacyAppBaseData {

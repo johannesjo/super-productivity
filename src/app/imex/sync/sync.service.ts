@@ -18,12 +18,8 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
-import {
-  DialogConflictResolutionResult,
-  DialogPermissionResolutionResult,
-} from './sync.model';
-import { DialogSyncConflictComponent } from './dialog-dbx-sync-conflict/dialog-sync-conflict.component';
-import { DialogSyncPermissionComponent } from './dialog-sync-permission/dialog-sync-permission.component';
+import { DialogConflictResolutionResult } from './sync.model';
+import { DialogSyncConflictComponent } from './dialog-sync-conflict/dialog-sync-conflict.component';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
@@ -310,14 +306,5 @@ export class SyncService {
       },
     });
     return this.lastConflictDialog.afterClosed();
-  }
-
-  private _openPermissionDialog$(): Observable<DialogPermissionResolutionResult> {
-    return this._matDialog
-      .open(DialogSyncPermissionComponent, {
-        restoreFocus: true,
-        disableClose: true,
-      })
-      .afterClosed();
   }
 }
