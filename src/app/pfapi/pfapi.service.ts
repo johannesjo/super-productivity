@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import {
   CompleteBackup,
+  LocalMeta,
   ModelCfgToModelCtrl,
   Pfapi,
   SyncProviderId,
   SyncStatusChangePayload,
 } from './api';
-import { Observable, Subject } from 'rxjs';
-import { AllowedDBKeys, LS } from '../core/persistence/storage-keys.const';
+import { Observable } from 'rxjs';
+import { LS } from '../core/persistence/storage-keys.const';
 import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
 import { devError } from '../util/dev-error';
 import {
@@ -24,7 +25,7 @@ import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
 import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
-import { pfapiEventAndInitialAfter } from './pfapi-helper';
+import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 
@@ -89,14 +90,10 @@ export class PfapiService {
 
   private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
 
-  // TODO replace with pfapi event
-  onAfterSave$: Subject<{
-    appDataKey: AllowedDBKeys;
-    data: unknown;
-    isDataImport: boolean;
-    isUpdateRevAndLastUpdate: boolean;
-    projectId?: string;
-  }> = new Subject();
+  onLocalMetaUpdate$: Observable<LocalMeta> = fromPfapiEvent(
+    this.pf.ev,
+    'metaModelChange',
+  );
 
   private _invalidDataCount = 0;
 

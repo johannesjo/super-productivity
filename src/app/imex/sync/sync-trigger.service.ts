@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, timer } from 'rxjs';
 import {
   auditTime,
@@ -22,8 +22,8 @@ import { isOnline$ } from '../../util/is-online';
 import {
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
   SYNC_DEFAULT_AUDIT_TIME,
+  SYNC_MIN_INTERVAL,
 } from './sync.const';
-import { AllowedDBKeys } from '../../core/persistence/storage-keys.const';
 import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { GlobalConfigState } from '../../features/config/global-config.model';
@@ -47,17 +47,7 @@ export class SyncTriggerService {
   private readonly _idleService = inject(IdleService);
   private readonly _pfapiService = inject(PfapiService);
 
-  private _onUpdateLocalDataTrigger$: Observable<{
-    appDataKey: AllowedDBKeys;
-    data: any;
-    isDataImport: boolean;
-    projectId?: string;
-  }> = this._pfapiService.onAfterSave$.pipe(
-    filter(
-      ({ appDataKey, data, isDataImport, isUpdateRevAndLastUpdate }) =>
-        !!data && !isDataImport && isUpdateRevAndLastUpdate,
-    ),
-  );
+  private _onUpdateLocalDataTrigger$ = this._pfapiService.onLocalMetaUpdate$;
 
   // IMMEDIATE TRIGGERS
   // ----------------------
@@ -161,10 +151,7 @@ export class SyncTriggerService {
     timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
   ).pipe(first(), shareReplay(1));
 
-  getSyncTrigger$(
-    syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
-    minSyncInterval: number = 5000,
-  ): Observable<unknown> {
+  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME): Observable<unknown> {
     const _immediateSyncTrigger$: Observable<string> = IS_ANDROID_WEB_VIEW
       ? // ANDROID ONLY
         merge(
@@ -190,7 +177,6 @@ export class SyncTriggerService {
           this._onIdleTrigger$,
           this._onElectronResumeTrigger$,
         );
-
     return merge(
       // once immediately
       _immediateSyncTrigger$.pipe(tap((v) => console.log('immediate sync trigger', v))),
@@ -205,11 +191,9 @@ export class SyncTriggerService {
           // NOTE: interval changes are only ever executed, if local data was changed
           this._onUpdateLocalDataTrigger$.pipe(
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
-            tap((ev) => console.log('__trigger_sync__', ev.appDataKey)),
-            auditTime(Math.max(syncInterval, minSyncInterval)),
-            // tap((ev) =>
-            //   console.log('__trigger_sync after auditTime__', ev.appDataKey, ev),
-            // ),
+            tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
+            auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
+            tap((ev) => alert('__trigger_sync after auditTime__')),
           ),
         ),
       ),

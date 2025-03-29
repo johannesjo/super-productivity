@@ -18,7 +18,6 @@ import { SyncTriggerService } from './sync-trigger.service';
 import {
   SYNC_BEFORE_CLOSE_ID,
   SYNC_INITIAL_SYNC_TRIGGER,
-  SYNC_MIN_INTERVAL,
 } from '../../imex/sync/sync.const';
 import { combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
 import { isOnline$ } from '../../util/is-online';
@@ -109,10 +108,7 @@ export class SyncEffects {
             ]).pipe(
               switchMap(([isEnabledAndReady, syncInterval]) =>
                 isEnabledAndReady && syncInterval
-                  ? this._syncTriggerService.getSyncTrigger$(
-                      syncInterval,
-                      SYNC_MIN_INTERVAL,
-                    )
+                  ? this._syncTriggerService.getSyncTrigger$(syncInterval)
                   : EMPTY,
               ),
             ),
