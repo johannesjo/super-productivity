@@ -93,6 +93,10 @@ export class SyncService {
         case SyncStatus.UpdateLocalAll:
           // TODO dare to do more complicated stuff for UpdateLocal
           await this._reInitAppAfterDataModelChange();
+          this._snackService.open({
+            msg: T.F.SYNC.S.SUCCESS_DOWNLOAD,
+            type: 'SUCCESS',
+          });
           return r.status;
 
         case SyncStatus.NotConfigured:

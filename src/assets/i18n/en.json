@@ -948,6 +948,7 @@
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
+        "SUCCESS_DOWNLOAD": "Synced data from remote",
         "SUCCESS_IMPORT": "Data imported",
         "SUCCESS_VIA_BUTTON": "Data successfully synced",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
