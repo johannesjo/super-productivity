@@ -1,14 +1,25 @@
-export class MiniObservable<T> {
+export class MiniObservable<T, E extends typeof Error = typeof Error> {
   private _value: T;
   private _listeners: Array<(value: T) => void> = [];
   private _closed = false;
 
-  constructor(initialValue: T) {
+  constructor(
+    initialValue: T,
+    private getOrErrorError?: E,
+  ) {
     this._value = initialValue;
   }
 
   get value(): T {
     return this._value;
+  }
+
+  getOrError(err?: E): Exclude<T, null | undefined> {
+    const v = this._value;
+    if (v === undefined || v === null) {
+      throw new (err || this.getOrErrorError || Error)();
+    }
+    return v as Exclude<T, null | undefined>;
   }
 
   next(value: T): void {

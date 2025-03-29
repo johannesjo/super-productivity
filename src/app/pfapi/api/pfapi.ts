@@ -28,6 +28,7 @@ import {
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
   NoRepairFunctionProvidedError,
+  NoSyncProviderSetError,
   NoValidateFunctionProvidedError,
 } from './errors/errors';
 import { TmpBackupService } from './backup/tmp-backup.service';
@@ -39,7 +40,11 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private readonly _syncService: SyncService<MD>;
   private readonly _activeSyncProvider$ =
-    new MiniObservable<SyncProviderServiceInterface<unknown> | null>(null);
+    new MiniObservable<SyncProviderServiceInterface<unknown> | null>(
+      null,
+      NoSyncProviderSetError as typeof Error,
+    );
+
   private readonly _encryptAndCompressCfg$ = new MiniObservable<EncryptAndCompressCfg>({
     isCompress: false,
     isEncrypt: false,

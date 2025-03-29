@@ -9,8 +9,37 @@ import {
   compressWithGzipToString,
   decompressGzipFromString,
 } from '../compression/compression-handler';
+import { EncryptAndCompressCfg } from '../pfapi.model';
 
 export class EncryptAndCompressHandlerService {
+  async compressAndeEncryptData<T>(
+    cfg: EncryptAndCompressCfg,
+    data: T,
+    modelVersion: number,
+  ): Promise<string> {
+    const { isCompress, isEncrypt, encryptKey } = cfg;
+    return this.compressAndEncrypt({
+      data,
+      modelVersion,
+      isCompress,
+      isEncrypt,
+      encryptKey,
+    });
+  }
+
+  async decompressAndDecryptData<T>(
+    cfg: EncryptAndCompressCfg,
+    dataStr: string,
+  ): Promise<T> {
+    const { encryptKey } = cfg;
+    return (
+      await this.decompressAndDecrypt<T>({
+        dataStr,
+        encryptKey,
+      })
+    ).data;
+  }
+
   async compressAndEncrypt<T>({
     data,
     modelVersion,

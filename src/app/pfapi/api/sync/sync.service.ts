@@ -14,14 +14,11 @@ import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import { SyncStatus } from '../pfapi.const';
 import {
-  CannotGetEncryptAndCompressCfg,
   ImpossibleError,
   LockFromLocalClientPresentError,
-  LockPresentError,
   ModelVersionToImportNewerThanLocalError,
   NoRemoteMetaFile,
   NoRemoteModelFile,
-  NoSyncProviderSetError,
   RemoteFileNotFoundAPIError,
   RevMapModelMismatchErrorOnDownload,
   RevMapModelMismatchErrorOnUpload,
@@ -34,16 +31,17 @@ import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { getSyncStatusFromMetaFiles } from '../util/get-sync-status-from-meta-files';
-import { validateMetaBase } from '../util/validate-meta-base';
 import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
 import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
+import { MetaFileSyncService } from './meta-file-sync.service';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
   private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
+  private _metaFileSyncService: MetaFileSyncService;
 
   constructor(
     public m: ModelCfgToModelCtrl<MD>,
@@ -53,6 +51,13 @@ export class SyncService<const MD extends ModelCfgs> {
     private _metaModelCtrl: MetaModelCtrl,
     private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
+    this._metaFileSyncService = new MetaFileSyncService(
+      this._currentSyncProvider$,
+      _metaModelCtrl,
+      _encryptAndCompressHandler,
+      _encryptAndCompressCfg$,
+    );
+
     this.IS_DO_CROSS_MODEL_MIGRATIONS = !!(
       _pfapiMain.cfg?.crossModelVersion &&
       _pfapiMain.cfg?.crossModelMigrations &&
@@ -69,13 +74,13 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // quick pre-check for all synced
       if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
-        const metaRev = await this._getMetaRev(localMeta0.metaRev);
+        const metaRev = await this._metaFileSyncService.getRev(localMeta0.metaRev);
         if (metaRev === localMeta0.metaRev) {
           return { status: SyncStatus.InSync };
         }
       }
 
-      const { remoteMeta, remoteMetaRev } = await this._downloadMetaFile(
+      const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download(
         localMeta0.metaRev,
       );
 
@@ -162,7 +167,7 @@ export class SyncService<const MD extends ModelCfgs> {
     alert('UPLOAD ALL TO REMOTE f' + isForceUpload);
     // we need to check meta file for being in locked mode
     if (!isForceUpload) {
-      await this._downloadMetaFile();
+      await this._metaFileSyncService.download();
     }
 
     let local = await this._metaModelCtrl.loadMetaModel();
@@ -200,7 +205,7 @@ export class SyncService<const MD extends ModelCfgs> {
   async downloadAll(isSkipModelRevMapCheck: boolean = false): Promise<void> {
     alert('DOWNLOAD ALL TO LOCAL');
     const local = await this._metaModelCtrl.loadMetaModel();
-    const { remoteMeta, remoteMetaRev } = await this._downloadMetaFile();
+    const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download();
     const fakeLocal: LocalMeta = {
       // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
       crossModelVersion: local.crossModelVersion,
@@ -242,7 +247,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
     if (
       (toUpdate.length === 0 && toDelete.length === 0) ||
-      this._syncProviderOrError.isLimitedToSingleFileSync
+      this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
       await this._updateLocalModelsFromMetaFile(remote);
       console.log('XXXXXXXXXXXXXXXXXXXXXXX', {
@@ -302,7 +307,10 @@ export class SyncService<const MD extends ModelCfgs> {
         }),
     );
 
-    await loadBalancer(downloadModelFns, this._syncProviderOrError.maxConcurrentRequests);
+    await loadBalancer(
+      downloadModelFns,
+      this._currentSyncProvider$.getOrError().maxConcurrentRequests,
+    );
 
     await this._updateLocalUpdatedModels(toUpdate, toDelete, dataMap);
 
@@ -345,20 +353,21 @@ export class SyncService<const MD extends ModelCfgs> {
 
     if (
       (toUpdate.length === 0 && toDelete.length === 0) ||
-      this._syncProviderOrError.isLimitedToSingleFileSync
+      this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
-      const mainModelData = this._syncProviderOrError.isLimitedToSingleFileSync
+      const mainModelData = this._currentSyncProvider$.getOrError()
+        .isLimitedToSingleFileSync
         ? await this._pfapiMain.getAllSyncModelData()
         : await this._getMainFileModelDataForUpload();
 
-      const metaRevAfterUpdate = await this._uploadMetaFile(
+      const metaRevAfterUpdate = await this._metaFileSyncService.upload(
         {
           revMap: local.revMap,
           lastUpdate: local.lastUpdate,
           crossModelVersion: local.crossModelVersion,
           modelVersions: local.modelVersions,
           mainModelData,
-          ...(this._syncProviderOrError.isLimitedToSingleFileSync
+          ...(this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
             ? { isFullData: true }
             : {}),
         },
@@ -401,7 +410,7 @@ export class SyncService<const MD extends ModelCfgs> {
     };
     const completeData = await this._pfapiMain.getAllSyncModelData();
 
-    await this._lockRemoteMetaFile(remoteMetaRev);
+    await this._metaFileSyncService.lock(remoteMetaRev);
 
     const uploadModelFns = toUpdate.map(
       (modelId) => () =>
@@ -417,11 +426,14 @@ export class SyncService<const MD extends ModelCfgs> {
     );
     // const toDeleteFns = toDelete.map((modelId) => () => this._removeModel(modelId));
 
-    await loadBalancer(uploadModelFns, this._syncProviderOrError.maxConcurrentRequests);
+    await loadBalancer(
+      uploadModelFns,
+      this._currentSyncProvider$.getOrError().maxConcurrentRequests,
+    );
     console.log({ realRevMap });
 
     const validatedRevMap = validateRevMap(realRevMap);
-    const metaRevAfterUpdate = await this._uploadMetaFile({
+    const metaRevAfterUpload = await this._metaFileSyncService.upload({
       revMap: validatedRevMap,
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
@@ -439,33 +451,17 @@ export class SyncService<const MD extends ModelCfgs> {
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
       revMap: validatedRevMap,
-      metaRev: metaRevAfterUpdate,
+      metaRev: metaRevAfterUpload,
     });
   }
 
   // --------------------------------------------------
   private _isReadyForSync(): Promise<boolean> {
-    return this._syncProviderOrError.isReady();
+    return this._currentSyncProvider$.getOrError().isReady();
   }
 
   private _getModelVersion(modelId: string): number {
     return this.m[modelId].modelCfg.modelVersion;
-  }
-
-  private get _syncProviderOrError(): SyncProviderServiceInterface<unknown> {
-    const provider = this._currentSyncProvider$.value;
-    if (!provider) {
-      throw new NoSyncProviderSetError();
-    }
-    return provider;
-  }
-
-  private _getEncryptionAndCompressionSettings(): EncryptAndCompressCfg {
-    const cfg = this._encryptAndCompressCfg$.value;
-    if (!cfg) {
-      throw new CannotGetEncryptAndCompressCfg();
-    }
-    return cfg;
   }
 
   private _getRemoteFilePathForModelId(modelId: string): string {
@@ -486,14 +482,16 @@ export class SyncService<const MD extends ModelCfgs> {
     });
 
     const target = this._getRemoteFilePathForModelId(modelId);
-    const syncProvider = this._syncProviderOrError;
+    const syncProvider = this._currentSyncProvider$.getOrError();
     const dataToUpload = this.m[modelId].modelCfg.transformBeforeUpload
       ? this.m[modelId].modelCfg.transformBeforeUpload(data)
       : data;
-    const encryptedAndCompressedData = await this._compressAndeEncryptData(
-      dataToUpload,
-      modelVersion,
-    );
+    const encryptedAndCompressedData =
+      await this._encryptAndCompressHandler.compressAndeEncryptData(
+        this._encryptAndCompressCfg$.value,
+        dataToUpload,
+        modelVersion,
+      );
     return (
       await syncProvider.uploadFile(target, encryptedAndCompressedData, localRev, true)
     ).rev;
@@ -509,14 +507,17 @@ export class SyncService<const MD extends ModelCfgs> {
     });
 
     try {
-      const syncProvider = this._syncProviderOrError;
+      const syncProvider = this._currentSyncProvider$.getOrError();
       const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
       if (expectedRev) {
         if (!rev || !this._isSameRev(rev, expectedRev)) {
           throw new RevMismatchForModelError(modelId);
         }
       }
-      const data = await this._decompressAndDecryptData<T>(dataStr);
+      const data = await this._encryptAndCompressHandler.decompressAndDecryptData<T>(
+        this._encryptAndCompressCfg$.value,
+        dataStr,
+      );
       return {
         data: this.m[modelId].modelCfg.transformBeforeDownload
           ? (this.m[modelId].modelCfg.transformBeforeDownload(data) as T)
@@ -536,7 +537,7 @@ export class SyncService<const MD extends ModelCfgs> {
       modelId,
     });
 
-    const syncProvider = this._syncProviderOrError;
+    const syncProvider = this._currentSyncProvider$.getOrError();
     await syncProvider.removeFile(modelId);
   }
 
@@ -566,104 +567,11 @@ export class SyncService<const MD extends ModelCfgs> {
 
   // META MODEL
   // ----------
-  private async _uploadMetaFile(
-    meta: RemoteMeta,
-    revToMatch: string | null = null,
-  ): Promise<string> {
-    const encryptedAndCompressedData = await this._compressAndeEncryptData(
-      validateMetaBase(meta),
-      meta.crossModelVersion,
-    );
-    if (encryptedAndCompressedData.length > 200000) {
-      console.log('___________LAAARGE DATA UPLOAD');
-      alert('LAAARGE DATA UPLOAD');
-    }
-    pfLog(2, `${SyncService.name}.${this._uploadMetaFile.name}()`, {
-      meta,
-      // encryptedAndCompressedData,
-    });
-
-    const syncProvider = this._syncProviderOrError;
-
-    return (
-      await syncProvider.uploadFile(
-        MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        encryptedAndCompressedData,
-        revToMatch,
-        true,
-      )
-    ).rev;
-  }
-
-  // --------------------------------------------------
-  private async _getMetaRev(localRev: string | null): Promise<string> {
-    pfLog(2, `${SyncService.name}.${this._getMetaRev.name}()`, { localRev });
-    const syncProvider = this._syncProviderOrError;
-    try {
-      const r = await syncProvider.getFileRev(
-        MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        localRev || null,
-      );
-      return r.rev;
-    } catch (e) {
-      if (e instanceof RemoteFileNotFoundAPIError) {
-        throw new NoRemoteMetaFile();
-      }
-      throw e;
-    }
-  }
-
-  private async _downloadMetaFile(
-    localRev: string | null = null,
-  ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
-    // return {} as any as MetaFileContent;
-    pfLog(2, `${SyncService.name}.${this._downloadMetaFile.name}()`, { localRev });
-    const syncProvider = this._syncProviderOrError;
-    try {
-      const r = await syncProvider.downloadFile(
-        MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        localRev,
-      );
-      if (r.dataStr.startsWith(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX)) {
-        alert('LOCK PRESENT: ' + r.dataStr);
-        const lockClientId = r.dataStr
-          .slice(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX.length)
-          .replace(/\n/g, '');
-
-        if (lockClientId === (await this._metaModelCtrl.loadClientId())) {
-          throw new LockFromLocalClientPresentError();
-        }
-        throw new LockPresentError();
-      }
-      const data = await this._decompressAndDecryptData<RemoteMeta>(r.dataStr);
-
-      return { remoteMeta: validateMetaBase(data), remoteMetaRev: r.rev };
-    } catch (e) {
-      if (e instanceof RemoteFileNotFoundAPIError) {
-        throw new NoRemoteMetaFile();
-      }
-      throw e;
-    }
-  }
 
   private async _saveLocalMetaFileContent(
     localMetaFileContent: LocalMeta,
   ): Promise<unknown> {
     return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
-  }
-
-  private async _lockRemoteMetaFile(revToMatch: string | null = null): Promise<string> {
-    pfLog(2, `${SyncService.name}.${this._lockRemoteMetaFile.name}()`, { revToMatch });
-    const syncProvider = this._syncProviderOrError;
-    const clientId = await this._metaModelCtrl.loadClientId();
-    return (
-      await syncProvider.uploadFile(
-        MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX + clientId,
-        revToMatch,
-        true,
-      )
-    ).rev;
   }
 
   // ---------------------------------------
@@ -701,32 +609,6 @@ export class SyncService<const MD extends ModelCfgs> {
         });
       }
     }
-  }
-
-  // --------------------------------------------------
-  private async _compressAndeEncryptData<T>(
-    data: T,
-    modelVersion: number,
-  ): Promise<string> {
-    const { isCompress, isEncrypt, encryptKey } =
-      this._getEncryptionAndCompressionSettings();
-    return this._encryptAndCompressHandler.compressAndEncrypt({
-      data,
-      modelVersion,
-      isCompress,
-      isEncrypt,
-      encryptKey,
-    });
-  }
-
-  private async _decompressAndDecryptData<T>(dataStr: string): Promise<T> {
-    const { encryptKey } = this._getEncryptionAndCompressionSettings();
-    return (
-      await this._encryptAndCompressHandler.decompressAndDecrypt<T>({
-        dataStr,
-        encryptKey,
-      })
-    ).data;
   }
 
   // --------------------------------------------------
