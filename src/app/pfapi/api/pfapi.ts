@@ -252,13 +252,17 @@ export class Pfapi<const MD extends ModelCfgs> {
     };
   }
 
-  async importCompleteBackup(backup: CompleteBackup<MD>): Promise<void> {
+  async importCompleteBackup(
+    backup: CompleteBackup<MD>,
+    isSkipLegacyWarnings: boolean = false,
+  ): Promise<void> {
     return await this.importAllSycModelData({
       data: backup.data,
       crossModelVersion: backup.crossModelVersion,
       // TODO maybe also make model versions work
       isBackupData: true,
       isAttemptRepair: true,
+      isSkipLegacyWarnings,
     });
   }
 
@@ -270,11 +274,13 @@ export class Pfapi<const MD extends ModelCfgs> {
     crossModelVersion,
     isAttemptRepair = false,
     isBackupData = false,
+    isSkipLegacyWarnings = false,
   }: {
     data: AllSyncModels<MD>;
     crossModelVersion: number;
     isAttemptRepair?: boolean;
     isBackupData?: boolean;
+    isSkipLegacyWarnings?: boolean;
   }): Promise<void> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
@@ -307,6 +313,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         if (!modelCtrl) {
           console.warn('ModelId without Ctrl', modelId, modelData);
           if (
+            isSkipLegacyWarnings ||
             confirm(
               `ModelId "${modelId}" was found in data. The model seems to be outdated. Ignore and proceed to import anyway?`,
             )

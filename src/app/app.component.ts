@@ -54,6 +54,10 @@ import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
 import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
+import { PfapiService } from './pfapi/pfapi.service';
+import { PersistenceLegacyService } from './core/persistence/persistence-legacy.service';
+import { download } from './util/download';
+import { PersistenceLocalService } from './core/persistence/persistence-local.service';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -99,6 +103,10 @@ export class AppComponent implements OnDestroy {
   private _androidService = inject(AndroidService);
   private _startTrackingReminderService = inject(TrackingReminderService);
   private _activatedRoute = inject(ActivatedRoute);
+  private _pfapiService = inject(PfapiService);
+  private _persistenceLegacyService = inject(PersistenceLegacyService);
+  private _persistenceLocalService = inject(PersistenceLocalService);
+
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
   readonly workContextService = inject(WorkContextService);
@@ -133,6 +141,37 @@ export class AppComponent implements OnDestroy {
   constructor() {
     this._languageService.setDefault(LanguageCode.en);
     this._languageService.setFromBrowserLngIfAutoSwitchLng();
+
+    this._pfapiService
+      .isCheckForStrayLocalDBBackupAndImport()
+      .then(async (isImportingBackupOrNone) => {
+        if (isImportingBackupOrNone) {
+          return;
+        }
+        const MIGRATED_VAL = 0;
+        const lastLocalSyncModelChange =
+          await this._persistenceLocalService.loadLastSyncModelChange();
+        if (
+          typeof lastLocalSyncModelChange === 'number' &&
+          lastLocalSyncModelChange > MIGRATED_VAL
+        ) {
+          const legacyData = await this._persistenceLegacyService.loadComplete();
+          console.log({ legacyData: legacyData });
+          alert('Detected legacy data. We will migrate it for you! ');
+          if (confirm('Do you want to download a backup of your legacy data?')) {
+            download('sp-legacy-backup.json', JSON.stringify(legacyData));
+          }
+          try {
+            await this._pfapiService.importCompleteBackup(legacyData, true, true);
+            await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
+            alert('Migration all done! Restarting app now...');
+            window.location.reload();
+          } catch (error) {
+            console.error(error);
+            alert('Migration failed! with Error: ' + error?.toString());
+          }
+        }
+      });
 
     this._snackService.open({
       ico: 'lightbulb',

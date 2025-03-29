@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "resolveJsonModule": false,
+    "resolveJsonModule": true,
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,

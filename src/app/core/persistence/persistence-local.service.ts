@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { DB, LS } from './storage-keys.const';
+import { DB } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { LegacySyncProvider } from 'src/app/imex/sync/legacy-sync-provider.model';
@@ -67,12 +67,11 @@ export class PersistenceLocalService {
   }
 
   async loadLastSyncModelChange(): Promise<number> {
-    const r =
-      ((await this._databaseService.load(
-        DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
-        // get legacy value if non here
-        // TODO remove legacy value
-      )) as string) || localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+    const r = (await this._databaseService.load(
+      DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+      // get legacy value if non here
+      // TODO remove legacy value
+    )) as string;
     return this._parseTS(r);
   }
 
@@ -83,6 +82,8 @@ export class PersistenceLocalService {
   }
 
   async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
+    console.log(lastSyncModelChange);
+    console.trace();
     this.lastSnyModelChange$.next(lastSyncModelChange);
     return await this._databaseService.save(
       DB.LOCAL_LAST_SYNC_MODEL_CHANGE,

@@ -1,4 +1,5 @@
 import { PfapiEvents, PfapiEventPayloadMap } from '../pfapi.model';
+import { pfLog } from './log';
 
 type EventHandler<T> = (data: T) => void;
 
@@ -32,7 +33,7 @@ export class PFEventEmitter {
   }
 
   emit<K extends PfapiEvents>(event: K, data: PfapiEventPayloadMap[K]): void {
-    console.log(`______________Emitting event: ${event}`, data, this.events);
+    pfLog(2, `EV:${event}`, data, this.events);
     this.events[event].forEach((handler) => handler(data));
   }
 

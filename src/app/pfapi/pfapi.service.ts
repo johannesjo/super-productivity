@@ -110,8 +110,6 @@ export class PfapiService {
   getSyncProviderById = this.pf.getSyncProviderById.bind(this.pf);
 
   constructor() {
-    this._isCheckForStrayLocalDBBackupAndImport();
-
     this.syncState$.subscribe((v) => console.log(`syncState$`, v));
     this.isSyncInProgress$.subscribe((v) => {
       console.log('isSyncInProgress$', v);
@@ -170,23 +168,30 @@ export class PfapiService {
 
   async importCompleteBackup(
     data: AppDataCompleteNew | CompleteBackup<PfapiAllModelCfg>,
+    isSkipLegacyWarnings: boolean = false,
+    isSkipReload: boolean = false,
   ): Promise<void> {
     try {
       this._imexViewService.setDataImportInProgress(true);
       if ('crossModelVersion' in data && 'timestamp' in data) {
-        await this.pf.importCompleteBackup(data);
+        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings);
       } else {
-        await this.pf.importCompleteBackup({
-          data,
-          crossModelVersion: CROSS_MODEL_VERSION,
-          lastUpdate: 1,
-          modelVersions: {},
-          timestamp: 1,
-        });
+        await this.pf.importCompleteBackup(
+          {
+            data,
+            crossModelVersion: CROSS_MODEL_VERSION,
+            lastUpdate: 1,
+            modelVersions: {},
+            timestamp: 1,
+          },
+          isSkipLegacyWarnings,
+        );
       }
 
       this._imexViewService.setDataImportInProgress(false);
-      window.location.reload();
+      if (!isSkipReload) {
+        window.location.reload();
+      }
     } catch (e) {
       console.log(e);
       this._imexViewService.setDataImportInProgress(false);
@@ -194,7 +199,7 @@ export class PfapiService {
     }
   }
 
-  private async _isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
+  async isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
     const backup = await this.pf.tmpBackupService.load();
     if (!localStorage.getItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
