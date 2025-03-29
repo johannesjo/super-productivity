@@ -14,10 +14,13 @@ export class MiniObservable<T, E extends typeof Error = typeof Error> {
     return this._value;
   }
 
-  getOrError(err?: E): Exclude<T, null | undefined> {
+  getOrError(): Exclude<T, null | undefined> {
     const v = this._value;
     if (v === undefined || v === null) {
-      throw new (err || this.getOrErrorError || Error)();
+      if (this.getOrErrorError) {
+        throw new this.getOrErrorError();
+      }
+      throw new Error('Value is null or undefined');
     }
     return v as Exclude<T, null | undefined>;
   }

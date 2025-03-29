@@ -2,7 +2,6 @@ import {
   AllSyncModels,
   ConflictData,
   EncryptAndCompressCfg,
-  ExtractModelCfgType,
   LocalMeta,
   MainModelData,
   ModelCfgs,
@@ -18,11 +17,8 @@ import {
   LockFromLocalClientPresentError,
   ModelVersionToImportNewerThanLocalError,
   NoRemoteMetaFile,
-  NoRemoteModelFile,
-  RemoteFileNotFoundAPIError,
   RevMapModelMismatchErrorOnDownload,
   RevMapModelMismatchErrorOnUpload,
-  RevMismatchForModelError,
   UnknownSyncStateError,
 } from '../errors/errors';
 import { pfLog } from '../util/log';
@@ -36,24 +32,31 @@ import { loadBalancer } from '../util/load-balancer';
 import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 import { MetaFileSyncService } from './meta-file-sync.service';
+import { ModelSyncService } from './model-sync.service';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
   private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
   private _metaFileSyncService: MetaFileSyncService;
+  private _modelSyncService: ModelSyncService<MD>;
 
   constructor(
     public m: ModelCfgToModelCtrl<MD>,
     private _pfapiMain: Pfapi<MD>,
-    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
-    private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
     private _metaModelCtrl: MetaModelCtrl,
-    private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
+    _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
     this._metaFileSyncService = new MetaFileSyncService(
-      this._currentSyncProvider$,
       _metaModelCtrl,
+      this._currentSyncProvider$,
+      _encryptAndCompressHandler,
+      _encryptAndCompressCfg$,
+    );
+    this._modelSyncService = new ModelSyncService(
+      m,
+      this._currentSyncProvider$,
       _encryptAndCompressHandler,
       _encryptAndCompressCfg$,
     );
@@ -256,7 +259,7 @@ export class SyncService<const MD extends ModelCfgs> {
         localRevMap: local.revMap,
       });
 
-      await this._saveLocalMetaFileContent({
+      await this._metaFileSyncService.saveLocal({
         // shared
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
@@ -295,16 +298,15 @@ export class SyncService<const MD extends ModelCfgs> {
 
     const downloadModelFns = toUpdate.map(
       (modelId) => () =>
-        this._downloadModel(
-          modelId,
-          isSkipModelRevMapCheck ? null : remote.revMap[modelId],
-        ).then(({ rev, data }) => {
-          if (typeof rev !== 'string') {
-            throw new ImpossibleError('No rev found for modelId: ' + modelId);
-          }
-          realRemoteRevMap[modelId] = rev;
-          dataMap[modelId] = data;
-        }),
+        this._modelSyncService
+          .download(modelId, isSkipModelRevMapCheck ? null : remote.revMap[modelId])
+          .then(({ rev, data }) => {
+            if (typeof rev !== 'string') {
+              throw new ImpossibleError('No rev found for modelId: ' + modelId);
+            }
+            realRemoteRevMap[modelId] = rev;
+            dataMap[modelId] = data;
+          }),
     );
 
     await loadBalancer(
@@ -312,7 +314,7 @@ export class SyncService<const MD extends ModelCfgs> {
       this._currentSyncProvider$.getOrError().maxConcurrentRequests,
     );
 
-    await this._updateLocalUpdatedModels(toUpdate, toDelete, dataMap);
+    await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
 
     // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
     // since remote might hava an incomplete update
@@ -320,7 +322,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // ON SUCCESS
     await this._updateLocalModelsFromMetaFile(remote);
 
-    await this._saveLocalMetaFileContent({
+    await this._metaFileSyncService.saveLocal({
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
@@ -374,7 +376,7 @@ export class SyncService<const MD extends ModelCfgs> {
         lastRemoteRev,
       );
       // ON AFTER SUCCESS
-      await this._saveLocalMetaFileContent({
+      await this._metaFileSyncService.saveLocal({
         ...local,
         lastSyncedUpdate: local.lastUpdate,
         metaRev: metaRevAfterUpdate,
@@ -414,11 +416,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
     const uploadModelFns = toUpdate.map(
       (modelId) => () =>
-        this._uploadModel(
-          modelId,
-          this._getModelVersion(modelId),
-          completeData[modelId],
-        ).then((rev) => {
+        this._modelSyncService.upload(modelId, completeData[modelId]).then((rev) => {
           realRevMap[modelId] = cleanRev(rev);
         }),
       // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
@@ -442,7 +440,7 @@ export class SyncService<const MD extends ModelCfgs> {
     });
 
     // ON AFTER SUCCESS
-    await this._saveLocalMetaFileContent({
+    await this._metaFileSyncService.saveLocal({
       // leave as is basically
       lastUpdate: local.lastUpdate,
       modelVersions: local.modelVersions,
@@ -458,120 +456,6 @@ export class SyncService<const MD extends ModelCfgs> {
   // --------------------------------------------------
   private _isReadyForSync(): Promise<boolean> {
     return this._currentSyncProvider$.getOrError().isReady();
-  }
-
-  private _getModelVersion(modelId: string): number {
-    return this.m[modelId].modelCfg.modelVersion;
-  }
-
-  private _getRemoteFilePathForModelId(modelId: string): string {
-    return modelId;
-  }
-
-  // ------------------------------------------------
-  private async _uploadModel(
-    modelId: string,
-    modelVersion: number,
-    data: any,
-    localRev: string | null = null,
-  ): Promise<string> {
-    pfLog(2, `${SyncService.name}.${this._uploadModel.name}()`, modelId, {
-      modelVersion,
-      data,
-      localRev,
-    });
-
-    const target = this._getRemoteFilePathForModelId(modelId);
-    const syncProvider = this._currentSyncProvider$.getOrError();
-    const dataToUpload = this.m[modelId].modelCfg.transformBeforeUpload
-      ? this.m[modelId].modelCfg.transformBeforeUpload(data)
-      : data;
-    const encryptedAndCompressedData =
-      await this._encryptAndCompressHandler.compressAndeEncryptData(
-        this._encryptAndCompressCfg$.value,
-        dataToUpload,
-        modelVersion,
-      );
-    return (
-      await syncProvider.uploadFile(target, encryptedAndCompressedData, localRev, true)
-    ).rev;
-  }
-
-  private async _downloadModel<T>(
-    modelId: string,
-    expectedRev: string | null = null,
-  ): Promise<{ data: T; rev: string }> {
-    pfLog(2, `${SyncService.name}.${this._downloadModel.name}()`, {
-      modelId,
-      expectedRev,
-    });
-
-    try {
-      const syncProvider = this._currentSyncProvider$.getOrError();
-      const { rev, dataStr } = await syncProvider.downloadFile(modelId, expectedRev);
-      if (expectedRev) {
-        if (!rev || !this._isSameRev(rev, expectedRev)) {
-          throw new RevMismatchForModelError(modelId);
-        }
-      }
-      const data = await this._encryptAndCompressHandler.decompressAndDecryptData<T>(
-        this._encryptAndCompressCfg$.value,
-        dataStr,
-      );
-      return {
-        data: this.m[modelId].modelCfg.transformBeforeDownload
-          ? (this.m[modelId].modelCfg.transformBeforeDownload(data) as T)
-          : data,
-        rev,
-      };
-    } catch (e) {
-      if (e instanceof RemoteFileNotFoundAPIError) {
-        throw new NoRemoteModelFile(modelId);
-      }
-      throw e;
-    }
-  }
-
-  private async _removeModel(modelId: string): Promise<void> {
-    pfLog(2, `${SyncService.name}.${this._removeModel.name}()`, {
-      modelId,
-    });
-
-    const syncProvider = this._currentSyncProvider$.getOrError();
-    await syncProvider.removeFile(modelId);
-  }
-
-  // --------------------------------------------------
-
-  private async _updateLocalUpdatedModels(
-    toUpdate: string[],
-    toDelete: string[],
-    dataMap: { [key: string]: unknown },
-  ): Promise<unknown> {
-    return await Promise.all([
-      ...toUpdate.map((modelId) =>
-        // NOTE: needs to be cast as any
-        this._updateLocalModel(modelId, dataMap[modelId] as any),
-      ),
-      // TODO delete local models
-      // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
-    ]);
-  }
-
-  private async _updateLocalModel<T extends keyof MD>(
-    modelId: T,
-    modelData: ExtractModelCfgType<MD[T]>,
-  ): Promise<void> {
-    await this.m[modelId].save(modelData);
-  }
-
-  // META MODEL
-  // ----------
-
-  private async _saveLocalMetaFileContent(
-    localMetaFileContent: LocalMeta,
-  ): Promise<unknown> {
-    return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
   }
 
   // ---------------------------------------
@@ -612,8 +496,6 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   // --------------------------------------------------
-
-  // TODO make async work correctly
   private async _updateLocalModelsFromMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
@@ -666,10 +548,6 @@ export class SyncService<const MD extends ModelCfgs> {
   }
 
   // --------------------------------------------------
-  private _allModelIds(): string[] {
-    return Object.keys(this.m);
-  }
-
   private _fakeFullRevMap(): RevMap {
     const revMap: RevMap = {};
     this._allModelIds().forEach((modelId) => {
@@ -680,14 +558,7 @@ export class SyncService<const MD extends ModelCfgs> {
     return revMap;
   }
 
-  private _isSameRev(a: string | null, b: string | null): boolean {
-    if (!a || !b) {
-      console.warn(`Invalid revs a:${a} and b:${b} given`);
-      return false;
-    }
-    if (a === b) {
-      return true;
-    }
-    return cleanRev(a) === cleanRev(b);
+  private _allModelIds(): string[] {
+    return Object.keys(this.m);
   }
 }

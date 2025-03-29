@@ -96,9 +96,9 @@ export class Pfapi<const MD extends ModelCfgs> {
     this._syncService = new SyncService<MD>(
       this.m,
       this,
+      this.metaModel,
       this._activeSyncProvider$,
       this._encryptAndCompressCfg$,
-      this.metaModel,
       new EncryptAndCompressHandlerService(),
     );
   }

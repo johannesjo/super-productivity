@@ -1,4 +1,4 @@
-import { EncryptAndCompressCfg, RemoteMeta } from '../pfapi.model';
+import { EncryptAndCompressCfg, LocalMeta, RemoteMeta } from '../pfapi.model';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
 import {
@@ -14,11 +14,15 @@ import { validateMetaBase } from '../util/validate-meta-base';
 
 export class MetaFileSyncService {
   constructor(
-    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     private _metaModelCtrl: MetaModelCtrl,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
     private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
   ) {}
+
+  async saveLocal(localMetaFileContent: LocalMeta): Promise<unknown> {
+    return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
+  }
 
   async download(
     localRev: string | null = null,
