@@ -26,13 +26,13 @@ import { validateRevMap } from '../util/validate-rev-map';
 import { loadBalancer } from '../util/load-balancer';
 import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
-import { MetaFileSyncService } from './meta-file-sync.service';
+import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
 
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
   private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
-  private _metaFileSyncService: MetaFileSyncService;
+  private _metaFileSyncService: MetaSyncService;
   private _modelSyncService: ModelSyncService<MD>;
 
   constructor(
@@ -43,7 +43,7 @@ export class SyncService<const MD extends ModelCfgs> {
     _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {
-    this._metaFileSyncService = new MetaFileSyncService(
+    this._metaFileSyncService = new MetaSyncService(
       _metaModelCtrl,
       _currentSyncProvider$,
       _encryptAndCompressHandler,
@@ -69,7 +69,7 @@ export class SyncService<const MD extends ModelCfgs> {
       if (!(await this._isReadyForSync())) {
         return { status: SyncStatus.NotConfigured };
       }
-      const localMeta0 = await this._metaModelCtrl.loadMetaModel();
+      const localMeta0 = await this._metaModelCtrl.load();
 
       // quick pre-check for all synced
       if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
@@ -84,7 +84,7 @@ export class SyncService<const MD extends ModelCfgs> {
       );
 
       // we load again, to get the latest local changes for our checks and the data to upload
-      const localMeta = await this._metaModelCtrl.loadMetaModel();
+      const localMeta = await this._metaModelCtrl.load();
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
 
@@ -169,14 +169,14 @@ export class SyncService<const MD extends ModelCfgs> {
       await this._metaFileSyncService.download();
     }
 
-    let local = await this._metaModelCtrl.loadMetaModel();
+    let local = await this._metaModelCtrl.load();
     if (isForceUpload) {
       // we need to change the lastUpdate timestamp to indicate a newer revision to other clients
-      await this._metaModelCtrl.saveMetaModel({
+      await this._metaModelCtrl.save({
         ...local,
         lastUpdate: Date.now(),
       });
-      local = await this._metaModelCtrl.loadMetaModel();
+      local = await this._metaModelCtrl.load();
     }
 
     try {
@@ -203,7 +203,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
   async downloadAll(isSkipModelRevMapCheck: boolean = false): Promise<void> {
     alert('DOWNLOAD ALL TO LOCAL');
-    const local = await this._metaModelCtrl.loadMetaModel();
+    const local = await this._metaModelCtrl.load();
     const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download();
     const fakeLocal: LocalMeta = {
       // NOTE: we still need to use local modelVersions here, since they contain the latest model versions for migrations
@@ -415,13 +415,13 @@ export class SyncService<const MD extends ModelCfgs> {
         this._modelSyncService.upload(modelId, completeData[modelId]).then((rev) => {
           realRevMap[modelId] = cleanRev(rev);
         }),
-      // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually,
-      //  since remote might hava an incomplete update
     );
-    // const toDeleteFns = toDelete.map((modelId) => () => this._removeModel(modelId));
+    const toDeleteFns = toDelete.map(
+      (modelId) => () => this._modelSyncService.remove(modelId),
+    );
 
     await loadBalancer(
-      uploadModelFns,
+      [...uploadModelFns, ...toDeleteFns],
       this._currentSyncProvider$.getOrError().maxConcurrentRequests,
     );
     console.log({ realRevMap });

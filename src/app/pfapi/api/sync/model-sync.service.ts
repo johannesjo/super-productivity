@@ -144,6 +144,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
 
   async getMainFileModelDataForUpload(
     completeModel?: AllSyncModels<MD>,
+    // TODO maybe better return type
   ): Promise<MainModelData> {
     const mainFileModelIds = Object.keys(this.m).filter(
       (modelId) => this.m[modelId].modelCfg.isMainFileModel,
@@ -211,6 +212,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
     pfLog(2, `${ModelSyncService.name}.${this.remove.name}()`, {
       modelId,
     });
+    alert('REMOVE REMOTE ' + modelId.toString());
     const syncProvider = this._currentSyncProvider$.getOrError();
     await syncProvider.removeFile(this._filePathForModelId(modelId));
   }

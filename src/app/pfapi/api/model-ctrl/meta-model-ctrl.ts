@@ -43,7 +43,7 @@ export class MetaModelCtrl {
         this._saveClientId(clientIdI);
       }
     });
-    this.loadMetaModel().then((v) => {
+    this.load().then((v) => {
       this._metaModelInMemory = v;
     });
   }
@@ -71,7 +71,7 @@ export class MetaModelCtrl {
     const isModelVersionChange =
       metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
 
-    this.saveMetaModel(
+    this.save(
       {
         ...metaModel,
         lastUpdate: timestamp,
@@ -98,11 +98,11 @@ export class MetaModelCtrl {
     );
   }
 
-  saveMetaModel(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.name}.${this.saveMetaModel.name}()`, metaModel);
+  save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
+    pfLog(2, `${MetaModelCtrl.name}.${this.save.name}()`, metaModel);
     if (!metaModel.lastUpdate) {
       throw new InvalidMetaError(
-        `${MetaModelCtrl.name}.${this.saveMetaModel.name}()`,
+        `${MetaModelCtrl.name}.${this.save.name}()`,
         'lastUpdate not found',
       );
     }
@@ -114,12 +114,8 @@ export class MetaModelCtrl {
     return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
   }
 
-  async loadMetaModel(): Promise<LocalMeta> {
-    pfLog(
-      3,
-      `${MetaModelCtrl.name}.${this.loadMetaModel.name}()`,
-      this._metaModelInMemory,
-    );
+  async load(): Promise<LocalMeta> {
+    pfLog(3, `${MetaModelCtrl.name}.${this.load.name}()`, this._metaModelInMemory);
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
     }

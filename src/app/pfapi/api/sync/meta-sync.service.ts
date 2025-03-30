@@ -12,7 +12,7 @@ import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { validateMetaBase } from '../util/validate-meta-base';
 
-export class MetaFileSyncService {
+export class MetaSyncService {
   constructor(
     private _metaModelCtrl: MetaModelCtrl,
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
@@ -21,14 +21,14 @@ export class MetaFileSyncService {
   ) {}
 
   async saveLocal(localMetaFileContent: LocalMeta): Promise<unknown> {
-    return this._metaModelCtrl.saveMetaModel(localMetaFileContent);
+    return this._metaModelCtrl.save(localMetaFileContent);
   }
 
   async download(
     localRev: string | null = null,
   ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
-    pfLog(2, `${MetaFileSyncService.name}.${this.download.name}()`, { localRev });
+    pfLog(2, `${MetaSyncService.name}.${this.download.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
     try {
       const r = await syncProvider.downloadFile(
@@ -72,7 +72,7 @@ export class MetaFileSyncService {
       console.log('___________LAAARGE DATA UPLOAD');
       alert('LAAARGE DATA UPLOAD');
     }
-    pfLog(2, `${MetaFileSyncService.name}.${this.upload.name}()`, {
+    pfLog(2, `${MetaSyncService.name}.${this.upload.name}()`, {
       meta,
       // encryptedAndCompressedData,
     });
@@ -90,7 +90,7 @@ export class MetaFileSyncService {
   }
 
   async getRev(localRev: string | null): Promise<string> {
-    pfLog(2, `${MetaFileSyncService.name}.${this.getRev.name}()`, { localRev });
+    pfLog(2, `${MetaSyncService.name}.${this.getRev.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
     try {
       const r = await syncProvider.getFileRev(
@@ -107,7 +107,7 @@ export class MetaFileSyncService {
   }
 
   async lock(revToMatch: string | null = null): Promise<string> {
-    pfLog(2, `${MetaFileSyncService.name}.${this.lock.name}()`, { revToMatch });
+    pfLog(2, `${MetaSyncService.name}.${this.lock.name}()`, { revToMatch });
     const syncProvider = this._currentSyncProvider$.getOrError();
     const clientId = await this._metaModelCtrl.loadClientId();
     return (

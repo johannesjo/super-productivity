@@ -242,7 +242,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   async loadCompleteBackup(isSkipValidityCheck = false): Promise<CompleteBackup<MD>> {
     const d = await this.getAllSyncModelData(isSkipValidityCheck);
-    const meta = await this.metaModel.loadMetaModel();
+    const meta = await this.metaModel.load();
     return {
       data: d,
       crossModelVersion: meta.crossModelVersion,
