@@ -4,7 +4,6 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_BACKUP_READY } from '../../features/android/android-interface';
 
 @NgModule({
-  // TODO check if this is instantiated correctly
   providers: [LocalBackupService],
   imports: [],
 })
