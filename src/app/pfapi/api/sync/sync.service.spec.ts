@@ -7,11 +7,12 @@ import { MetaSyncService } from './meta-sync.service';
 import { AllSyncModels, LocalMeta, ModelCfg, RemoteMeta } from '../pfapi.model';
 import { Pfapi } from '../pfapi';
 import {
-  NoRemoteMetaFile,
   LockFromLocalClientPresentError,
   ModelVersionToImportNewerThanLocalError,
+  NoRemoteMetaFile,
   RevMismatchForModelError,
 } from '../errors/errors';
+import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 
 interface FakeModel {
   id: string;
@@ -49,7 +50,7 @@ describe('SyncService', () => {
   let mockSyncProvider$: MiniObservable<any>;
   let mockEncryptAndCompressCfg$: MiniObservable<any>;
   let mockMetaModelCtrl: jasmine.SpyObj<MetaModelCtrl>;
-  let mockEncryptAndCompressHandler: any;
+  let mockEncryptAndCompressHandler: jasmine.SpyObj<EncryptAndCompressHandlerService>;
   let mockSyncProvider: any;
   let mockMetaSyncService: jasmine.SpyObj<MetaSyncService>;
   let mockModelSyncService: jasmine.SpyObj<ModelSyncService<any>>;
@@ -156,14 +157,16 @@ describe('SyncService', () => {
 
     // Setup encryption handler
     mockEncryptAndCompressHandler = {
-      compressAndEncrypt: jasmine
-        .createSpy('compressAndEncrypt')
+      compressAndeEncryptData: jasmine
+        .createSpy('compressAndeEncryptData')
         .and.callFake(({ data }) => Promise.resolve(JSON.stringify(data))),
-      decompressAndDecrypt: jasmine
-        .createSpy('decompressAndDecrypt')
+      decompressAndDecryptData: jasmine
+        .createSpy('decompressAndDecryptData')
         .and.callFake(({ dataStr }) =>
           Promise.resolve({ data: JSON.parse(dataStr), version: 1 }),
         ),
+      compressAndEncrypt: jasmine.createSpy('compressAndEncrypt'),
+      decompressAndDecrypt: jasmine.createSpy('decompressAndDecrypt') as any,
     };
 
     // Setup MetaSyncService mock
