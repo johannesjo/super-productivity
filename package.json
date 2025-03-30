@@ -169,7 +169,7 @@
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
     "electron": "^34.0.0",
-    "electron-builder": "^25.1.8",
+    "electron-builder": "^26.0.12",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
