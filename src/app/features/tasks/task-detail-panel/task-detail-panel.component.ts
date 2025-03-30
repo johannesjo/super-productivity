@@ -558,7 +558,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       if (!itemEls) {
         throw new Error();
       }
-      this.focusItem(itemEls.at(0)!, 0);
+      if (itemEls.length) {
+        this.focusItem(itemEls[0], 0);
+      }
     }, 150);
   }
 
