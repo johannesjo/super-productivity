@@ -23,7 +23,7 @@ import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
-import { SyncService } from '../../imex/sync/sync.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -80,7 +80,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
   readonly simpleCounterService = inject(SimpleCounterService);
-  readonly syncService = inject(SyncService);
+  readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
   private readonly _tagService = inject(TagService);
   private readonly _renderer = inject(Renderer2);
@@ -153,7 +153,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   sync(): void {
-    this.syncService.sync().then((r) => {
+    this.syncWrapperService.sync().then((r) => {
       if (
         r === SyncStatus.UpdateLocal ||
         r === SyncStatus.UpdateRemoteAll ||

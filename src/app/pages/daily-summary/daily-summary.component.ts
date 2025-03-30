@@ -33,7 +33,7 @@ import moment from 'moment';
 import { T } from '../../t.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { SyncService } from '../../imex/sync/sync.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { isToday, isYesterday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
@@ -116,7 +116,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private readonly _worklogService = inject(WorklogService);
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _activatedRoute = inject(ActivatedRoute);
-  private readonly _syncService = inject(SyncService);
+  private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
   private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
@@ -374,7 +374,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private async _finishDayForGood(cb?: any): Promise<void> {
     const syncCfg = this.configService.cfg?.sync;
     if (syncCfg?.isEnabled) {
-      await this._syncService.sync();
+      await this._syncWrapperService.sync();
     }
     this._initSuccessAnimation(cb);
   }

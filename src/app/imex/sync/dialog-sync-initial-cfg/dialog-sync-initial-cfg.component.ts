@@ -15,7 +15,7 @@ import { FormlyConfigModule } from '../../../ui/formly-config.module';
 import { FormlyModule } from '@ngx-formly/core';
 import { SyncConfig } from '../../../features/config/global-config.model';
 import { SyncConfigService } from '../sync-config.service';
-import { SyncService } from '../sync.service';
+import { SyncWrapperService } from '../sync-wrapper.service';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SyncProviderId } from '../../../pfapi/api';
@@ -38,7 +38,7 @@ import { SyncProviderId } from '../../../pfapi/api';
 })
 export class DialogSyncInitialCfgComponent {
   syncConfigService = inject(SyncConfigService);
-  syncService = inject(SyncService);
+  syncWrapperService = inject(SyncWrapperService);
 
   T = T;
   SYNC_FORM = SYNC_FORM;
@@ -79,7 +79,7 @@ export class DialogSyncInitialCfgComponent {
         true,
       );
       if (this._tmpUpdatedCfg.syncProvider) {
-        this.syncService.configuredAuthForSyncProviderIfNecessary(
+        this.syncWrapperService.configuredAuthForSyncProviderIfNecessary(
           this._tmpUpdatedCfg.syncProvider as unknown as SyncProviderId,
         );
       }

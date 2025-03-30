@@ -28,7 +28,7 @@ import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-i
 @Injectable({
   providedIn: 'root',
 })
-export class SyncService {
+export class SyncWrapperService {
   private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _translateService = inject(TranslateService);

@@ -18,7 +18,7 @@ import {
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { androidInterface } from '../android-interface';
-import { SyncService } from '../../../imex/sync/sync.service';
+import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
@@ -32,7 +32,7 @@ export class AndroidEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _globalConfigService = inject(GlobalConfigService);
-  private _syncService = inject(SyncService);
+  private _syncWrapperService = inject(SyncWrapperService);
   private _translateService = inject(TranslateService);
 
   taskChangeNotification$: any = createEffect(
@@ -42,7 +42,7 @@ export class AndroidEffects {
         withLatestFrom(
           this._store$.pipe(select(selectCurrentTask)),
           this._globalConfigService.cfg$,
-          this._syncService.isSyncInProgress$,
+          this._syncWrapperService.isSyncInProgress$,
         ),
         tap(([action, current, cfg, isSyncing]) => {
           if (isSyncing) {
@@ -72,7 +72,7 @@ export class AndroidEffects {
 
   syncNotification$ = createEffect(
     () =>
-      this._syncService.isSyncInProgress$.pipe(
+      this._syncWrapperService.isSyncInProgress$.pipe(
         // skip first to avoid default message
         skip(1),
         distinctUntilChanged(),
