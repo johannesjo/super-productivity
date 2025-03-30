@@ -92,14 +92,12 @@ import { LocalFileSyncElectronEffects } from '../imex/sync/local-file-sync/store
 import { OpenProjectEffects } from '../features/issue/providers/open-project/open-project-issue/store/open-project.effects';
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
-import { LocalBackupService } from '../imex/local-backup/local-backup.service';
+import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { BoardsEffects } from '../features/boards/store/boards.effects';
 
 @NgModule({
   declarations: [],
-  // TODO remove when possible
-  providers: [LocalBackupService],
   imports: [
     StoreModule.forFeature(LAYOUT_FEATURE_NAME, layoutReducer),
     EffectsModule.forFeature([LayoutEffects]),
@@ -183,6 +181,8 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
     EffectsModule.forFeature([OpenProjectEffects]),
     EffectsModule.forFeature([ReminderCountdownEffects]),
     EffectsModule.forFeature([SyncEffects]),
+
+    LocalBackupModule,
   ],
 })
 export class FeatureStoresModule {}
