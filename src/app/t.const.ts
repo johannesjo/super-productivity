@@ -1738,6 +1738,7 @@ const T = {
   V: {
     E_1TO10: 'V.E_1TO10',
     E_DATETIME: 'V.E_DATETIME',
+    E_DURATION: 'V.E_DURATION',
     E_MAX: 'V.E_MAX',
     E_MAX_LENGTH: 'V.E_MAX_LENGTH',
     E_MIN: 'V.E_MIN',
