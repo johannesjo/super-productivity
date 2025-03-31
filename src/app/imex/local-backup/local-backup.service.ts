@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { interval, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
@@ -8,8 +8,10 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
 import { androidInterface } from '../../features/android/android-interface';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { T } from '../../t.const';
+import { TranslateService } from '@ngx-translate/core';
 
-const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
+const DEFAULT_BACKUP_INTERVAL = 5 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';
 
 // const DEFAULT_BACKUP_INTERVAL = 6 * 1000;
@@ -18,6 +20,7 @@ const ANDROID_DB_KEY = 'backup';
 export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
   private _pfapiService = inject(PfapiService);
+  private _translateService = inject(TranslateService);
 
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
@@ -44,6 +47,43 @@ export class LocalBackupService {
 
   loadBackupAndroid(): Promise<string> {
     return androidInterface.loadFromDbWrapped(ANDROID_DB_KEY).then((r) => r as string);
+  }
+
+  async askForFileStoreBackupIfAvailable(): Promise<void> {
+    if (!IS_ELECTRON || !IS_ANDROID_WEB_VIEW) {
+      return;
+    }
+
+    const backupMeta = await this.checkBackupAvailable();
+    // ELECTRON
+    // --------
+    if (IS_ELECTRON && typeof backupMeta !== 'boolean') {
+      if (
+        confirm(
+          this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
+            dir: backupMeta.folder,
+            from: new Date(backupMeta.created).toLocaleString(),
+          }),
+        )
+      ) {
+        const backupData = await this.loadBackupElectron(backupMeta.path);
+        console.log('backupData', backupData);
+        await this._pfapiService.importCompleteBackup(JSON.parse(backupData));
+      }
+
+      // ANDROID
+      // -------
+    } else if (IS_ANDROID_WEB_VIEW && backupMeta === true) {
+      if (
+        confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP_ANDROID))
+      ) {
+        const backupData = await this.loadBackupAndroid();
+        console.log('backupData', backupData);
+        const lineBreaksReplaced = backupData.replace(/\n/g, '\\n');
+        console.log('lineBreaksReplaced', lineBreaksReplaced);
+        await this._pfapiService.importCompleteBackup(JSON.parse(lineBreaksReplaced));
+      }
+    }
   }
 
   private async _backup(): Promise<void> {

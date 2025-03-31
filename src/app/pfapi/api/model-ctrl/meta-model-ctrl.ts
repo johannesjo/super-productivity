@@ -11,12 +11,11 @@ import {
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 
-const DEFAULT_META_MODEL: LocalMeta = {
+export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
   revMap: {},
   modelVersions: {},
-  // TODO make mandatory
-  lastUpdate: Date.now(),
+  lastUpdate: 0,
   metaRev: null,
   lastSyncedUpdate: null,
 };

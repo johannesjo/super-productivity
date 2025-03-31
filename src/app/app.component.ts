@@ -59,6 +59,9 @@ import { PersistenceLegacyService } from './core/persistence/persistence-legacy.
 import { download } from './util/download';
 import { PersistenceLocalService } from './core/persistence/persistence-local.service';
 import { SyncStatus } from './pfapi/api';
+import moment from 'moment/moment';
+import { LocalBackupService } from './imex/local-backup/local-backup.service';
+import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -107,6 +110,7 @@ export class AppComponent implements OnDestroy {
   private _pfapiService = inject(PfapiService);
   private _persistenceLegacyService = inject(PersistenceLegacyService);
   private _persistenceLocalService = inject(PersistenceLocalService);
+  private _localBackupService = inject(LocalBackupService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
@@ -143,50 +147,61 @@ export class AppComponent implements OnDestroy {
     this._languageService.setDefault(LanguageCode.en);
     this._languageService.setFromBrowserLngIfAutoSwitchLng();
 
-    this._pfapiService
-      .isCheckForStrayLocalDBBackupAndImport()
-      .then(async (isImportingBackupOrNone) => {
-        if (isImportingBackupOrNone) {
-          return;
-        }
-        const MIGRATED_VAL = 37;
-        const lastLocalSyncModelChange =
-          await this._persistenceLocalService.loadLastSyncModelChange();
+    (async () => {
+      const MIGRATED_VAL = 42;
+      const lastLocalSyncModelChange =
+        await this._persistenceLocalService.loadLastSyncModelChange();
+      // CHECK AND DO MIGRATION
+      // ---------------------
+      if (
+        typeof lastLocalSyncModelChange === 'number' &&
+        lastLocalSyncModelChange > MIGRATED_VAL
+      ) {
+        // disable sync until reload
+        this._pfapiService.sync = () => Promise.resolve({ status: SyncStatus.InSync });
+        this.imexMetaService.setDataImportInProgress(true);
+
+        const legacyData = await this._persistenceLegacyService.loadComplete();
+        console.log({ legacyData: legacyData });
+
+        alert('Detected legacy data. We will migrate it for you! ');
         if (
-          typeof lastLocalSyncModelChange === 'number' &&
-          lastLocalSyncModelChange > MIGRATED_VAL
+          !IS_ANDROID_WEB_VIEW &&
+          confirm(
+            'Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?',
+          )
         ) {
-          // disable sync until reload
-          this._pfapiService.sync = () => Promise.resolve({ status: SyncStatus.InSync });
-          this.imexMetaService.setDataImportInProgress(true);
-
-          const legacyData = await this._persistenceLegacyService.loadComplete();
-          console.log({ legacyData: legacyData });
-
-          alert('Detected legacy data. We will migrate it for you! ');
-          if (
-            confirm(
-              'Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?',
-            )
-          ) {
-            download('sp-legacy-backup.json', JSON.stringify(legacyData));
-          }
-          try {
-            await this._pfapiService.importCompleteBackup(legacyData, true, true);
-            this.imexMetaService.setDataImportInProgress(true);
-            await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
-            alert('Migration all done! Restarting app now...');
-            if (IS_ELECTRON) {
-              window.ea.relaunch();
-            }
-            window.location.reload();
-            window.setTimeout(() => window.location.reload());
-          } catch (error) {
-            console.error(error);
-            alert('Migration failed! with Error: ' + error?.toString());
-          }
+          download('sp-legacy-backup.json', JSON.stringify(legacyData));
         }
-      });
+        try {
+          await this._pfapiService.importCompleteBackup(legacyData, true, true);
+          this.imexMetaService.setDataImportInProgress(true);
+          await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
+          alert('Migration all done! Restarting app now...');
+          if (IS_ELECTRON) {
+            window.ea.relaunch();
+          }
+          window.location.reload();
+          window.setTimeout(() => window.location.reload());
+        } catch (error) {
+          console.error(error);
+          alert('Migration failed! with Error: ' + error?.toString());
+        }
+      } else {
+        // if everything is normal, check for TMP stray backup
+        await this._pfapiService.isCheckForStrayLocalTmpDBBackupAndImport();
+
+        // if completely fresh instance check for local backups
+        if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
+          const meta = await this._pfapiService.pf.metaModel.load();
+          if (!meta || meta.lastUpdate === DEFAULT_META_MODEL.lastUpdate) {
+            await this._localBackupService.askForFileStoreBackupIfAvailable();
+          }
+          // trigger backup init after
+          this._localBackupService.init();
+        }
+      }
+    })();
 
     this._snackService.open({
       ico: 'lightbulb',
@@ -455,6 +470,10 @@ export class AppComponent implements OnDestroy {
         });
       }
     }
+  }
+
+  private _formatDate(date: Date | string | number): string {
+    return moment(date).format('DD-MM-YYYY, hh:mm:ss');
   }
 
   /**

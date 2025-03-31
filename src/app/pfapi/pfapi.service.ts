@@ -9,8 +9,6 @@ import {
 } from './api';
 import { Observable } from 'rxjs';
 import { LS } from '../core/persistence/storage-keys.const';
-import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
-import { devError } from '../util/dev-error';
 import {
   AppDataCompleteNew,
   CROSS_MODEL_VERSION,
@@ -28,8 +26,6 @@ import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operat
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
-
-const MAX_INVALID_DATA_ATTEMPTS = 10;
 
 @Injectable({
   providedIn: 'root',
@@ -132,37 +128,6 @@ export class PfapiService {
         isEncrypt: cfg.isEncryptionEnabled,
         isCompress: cfg.isCompressionEnabled,
       });
-      // TODO re-implement
-      // if (
-      //   providerId === this._localFileSyncAndroidService &&
-      //   !androidInterface.isGrantedFilePermission()
-      // ) {
-      //   if (androidInterface.isGrantFilePermissionInProgress) {
-      //     return 'USER_ABORT';
-      //   }
-      //   const res = await this._openPermissionDialog$().toPromise();
-      //   if (res === 'DISABLED_SYNC') {
-      //     return 'USER_ABORT';
-      //   }
-      // }
-
-      // TODO better place
-      // console.log('_______________________', { v });
-      // this.syncCfg$.pipe(take(1)).subscribe((syncCfg) => {
-      //   console.log({ syncCfg });
-      //   // this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider(
-      //   //   v as unknown as SyncProviderId,
-      //   // );
-      //   // @ts-ignore
-      //   if (syncCfg.syncProvider === SyncProviderId.WebDAV) {
-      //     if (syncCfg.webDav) {
-      //       this._pfapiWrapperService.pf.setPrivateCfgForActiveProvider({
-      //         ...syncCfg.webDav,
-      //       });
-      //     }
-      //   }
-      // });
-      // this._persistenceLocalService.load().then((d) => {});
     });
   }
 
@@ -199,7 +164,7 @@ export class PfapiService {
     }
   }
 
-  async isCheckForStrayLocalDBBackupAndImport(): Promise<boolean> {
+  async isCheckForStrayLocalTmpDBBackupAndImport(): Promise<void> {
     const backup = await this.pf.tmpBackupService.load();
     if (!localStorage.getItem(LS.CHECK_STRAY_PERSISTENCE_BACKUP)) {
       if (backup) {
@@ -216,31 +181,13 @@ export class PfapiService {
           isAttemptRepair: false,
         });
         await this.pf.tmpBackupService.clear();
-        return true;
+        return;
       } else {
         if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
           await this.pf.tmpBackupService.clear();
         }
       }
     }
-    return false;
-  }
-
-  // TODO remove this later, since it only needed for legacy sync
-  async getValidCompleteData(): Promise<AppDataCompleteNew> {
-    const d = (await this.getAllSyncModelData(true)) as AppDataCompleteNew;
-    // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
-    if (isValidAppData(d)) {
-      this._invalidDataCount = 0;
-      return d;
-    } else {
-      // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
-      devError('Invalid data => RETRY getValidCompleteData');
-      this._invalidDataCount++;
-      if (this._invalidDataCount > MAX_INVALID_DATA_ATTEMPTS) {
-        throw new Error('Unable to get valid app data');
-      }
-      return this.getValidCompleteData();
-    }
+    return;
   }
 }
