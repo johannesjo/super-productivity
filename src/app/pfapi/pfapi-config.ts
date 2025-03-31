@@ -42,6 +42,7 @@ import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/loca
 import { IS_ELECTRON } from '../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { LocalFileSyncAndroid } from './api/sync/providers/local-file-sync/local-file-sync-android';
+import { environment } from '../../environments/environment';
 
 export const CROSS_MODEL_VERSION = 1 as const;
 
@@ -152,9 +153,9 @@ export const fileSyncElectron = new LocalFileSyncElectron();
 export const PFAPI_SYNC_PROVIDERS = [
   new Dropbox({
     appKey: DROPBOX_APP_KEY,
-    basePath: `/`,
+    basePath: environment.production ? `/` : `/DEV/`,
   }),
-  new Webdav(),
+  new Webdav(environment.production ? undefined : `/DEV`),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
   ...(IS_ANDROID_WEB_VIEW ? [new LocalFileSyncAndroid()] : []),
   // TODO android

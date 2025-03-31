@@ -26,6 +26,8 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
 
   public privateCfg!: SyncProviderPrivateCfgStore<WebdavPrivateCfg>;
 
+  constructor(private _extraPath?: string) {}
+
   async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();
     return !!(
@@ -72,11 +74,10 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
       });
     } catch (e) {
       // TODO test
-      alert(e);
       console.error(e);
       if (e instanceof RemoteFileNotFoundAPIError) {
         pfLog(2, `${Webdav.name}.uploadFile() creating parent folders and retrying`);
-
+        alert(`Creating missing parent folders for ${filePath}`);
         // Create necessary parent folders
         await this._ensureFolderExists(targetPath, cfg);
 
@@ -122,6 +123,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
   }
 
   private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
+    if (this._extraPath) {
+      return `${cfg.syncFolderPath}${this._extraPath}/${targetPath}`;
+    }
     return `${cfg.syncFolderPath}/${targetPath}`;
   }
 
@@ -140,6 +144,9 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
     // Extract the directory path from the target file path
     const pathParts = targetPath.split('/');
     pathParts.pop(); // Remove the filename part
+    if (this._extraPath) {
+      pathParts.unshift(this._extraPath);
+    }
 
     if (pathParts.length === 0) {
       return; // No folder needed, file is at root level

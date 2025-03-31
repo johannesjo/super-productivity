@@ -242,15 +242,14 @@ export class WebdavApi {
   private _checkCommonErrors(e: any, targetPath: string): void {
     pfLog(1, `${Webdav.name} API error for ${targetPath}`, e);
 
-    if ('status' in e) {
-      // Handle common HTTP error codes
-      switch (e.status) {
-        case 401:
-        case 403:
-          throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
-        case 404:
-          throw new RemoteFileNotFoundAPIError(targetPath);
-      }
+    const status = e?.status || e?.response?.status;
+    // Handle common HTTP error codes
+    switch (status) {
+      case 401:
+      case 403:
+        throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
+      case 404:
+        throw new RemoteFileNotFoundAPIError(targetPath);
     }
   }
 }

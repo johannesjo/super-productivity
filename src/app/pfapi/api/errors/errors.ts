@@ -57,7 +57,7 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
   response: Response;
 
   constructor(response: Response) {
-    super();
+    super(response);
     this.response = response;
   }
 }

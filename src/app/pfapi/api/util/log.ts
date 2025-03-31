@@ -4,7 +4,7 @@ import { LOG_PREFIX } from '../pfapi.const';
 2: normal
 3: verbose
  */
-const LOG_LEVEL = 1 as const;
+const LOG_LEVEL = 2 as const;
 
 export const pfLog = (logLevel: number, msg: unknown = '', ...args: unknown[]): void => {
   if (logLevel > LOG_LEVEL) {
