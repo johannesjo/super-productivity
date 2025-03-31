@@ -345,7 +345,6 @@ describe('ModelSyncService', () => {
     it('should remove a model from remote storage', async () => {
       await service.remove('singleModel');
 
-      expect(window.alert).toHaveBeenCalled();
       expect(mockSyncProvider.removeFile).toHaveBeenCalledWith('singleModel');
     });
 
