@@ -35,8 +35,6 @@ export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
     worklogExportSettings: WORKLOG_EXPORT_DEFAULTS,
   },
   theme: WORK_CONTEXT_DEFAULT_THEME,
-  workStart: {},
-  workEnd: {},
   breakTime: {},
   breakNr: {},
   taskIds: [],

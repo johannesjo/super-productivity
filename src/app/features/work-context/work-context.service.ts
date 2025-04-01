@@ -69,6 +69,7 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
 import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 @Injectable({
   providedIn: 'root',
@@ -82,6 +83,7 @@ export class WorkContextService {
   private _router = inject(Router);
   private _translateService = inject(TranslateService);
   private _pfapiService = inject(PfapiService);
+  private _timeTrackingService = inject(TimeTrackingService);
 
   // here because to avoid circular dependencies
   // should be treated as private
@@ -141,6 +143,10 @@ export class WorkContextService {
 
   activeWorkContext$: Observable<WorkContext> = this._afterDataLoadedOnce$.pipe(
     switchMap(() => this._store$.select(selectActiveWorkContext)),
+    shareReplay(1),
+  );
+  activeWorkContextTTData$ = this.activeWorkContext$.pipe(
+    switchMap((ac) => this._timeTrackingService.getWorkStartEndForWorkContext(ac)),
     shareReplay(1),
   );
 
@@ -435,18 +441,20 @@ export class WorkContextService {
   }
 
   getWorkStart$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(map((ctx) => ctx.workStart[day]));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day].start));
   }
 
   getWorkEnd$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContext$.pipe(map((ctx) => ctx.workEnd[day]));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day].end));
   }
 
   getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {
+    // TODO
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakTime[day]));
   }
 
   getBreakNr$(day: string = this._dateService.todayStr()): Observable<number> {
+    // TODO
     return this.activeWorkContext$.pipe(map((ctx) => ctx.breakNr[day]));
   }
 

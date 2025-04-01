@@ -32,6 +32,7 @@ import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -39,6 +40,7 @@ export class WorklogService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _taskService = inject(TaskService);
+  private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _router = inject(Router);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
 
@@ -221,16 +223,14 @@ export class WorklogService {
       getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
-    const startEnd = {
-      workStart: workContext.workStart,
-      workEnd: workContext.workEnd,
-    };
+    const workStartEndForWorkContext =
+      await this._timeTrackingService.getLegacyWorkStartEndForWorkContext(workContext);
 
     if (completeStateForWorkContext) {
       const { worklog, totalTimeSpent } = mapArchiveToWorklog(
         completeStateForWorkContext,
         nonArchiveTaskIds,
-        startEnd,
+        workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
       );
       return {
@@ -258,16 +258,14 @@ export class WorklogService {
       getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
-    const startEnd = {
-      workStart: workContext.workStart,
-      workEnd: workContext.workEnd,
-    };
+    const workStartEndForWorkContext =
+      await this._timeTrackingService.getLegacyWorkStartEndForWorkContext(workContext);
 
     if (completeStateForWorkContext) {
       return mapArchiveToWorklogWeeks(
         completeStateForWorkContext,
         nonArchiveTaskIds,
-        startEnd,
+        workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
       );
     }
