@@ -34,11 +34,6 @@ export const updateProject = createAction(
   props<{ project: Update<Project> }>(),
 );
 
-export const addToProjectBreakTime = createAction(
-  '[Project] Add to Break Time',
-  props<{ id: string; date: string; valToAdd: number }>(),
-);
-
 export const updateProjectAdvancedCfg = createAction(
   '[Project] Update Project Advanced Cfg',
   props<{

@@ -16,7 +16,6 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTag,
-  addToBreakTimeForTag,
   deleteTag,
   deleteTags,
   moveTaskInTagList,
@@ -93,7 +92,6 @@ export class TagEffects {
           updateTagOrder,
 
           updateAdvancedConfigForTag,
-          addToBreakTimeForTag,
           moveTaskInTagList,
 
           // TASK Actions

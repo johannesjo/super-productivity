@@ -3,19 +3,20 @@ import { TaskArchive } from '../tasks/task.model';
 
 export type TTModelIdMap<T> = Omit<
   Record<string, T>,
-  'start' | 'end' | 'nr' | 'time' | 'workStart' | 'workEnd'
+  keyof TTWorkContextData | keyof TimeTrackingState | 'workStart' | 'workEnd'
 >;
 export type TTDateMap<T> = Omit<
   Record<string, T>,
-  'start' | 'end' | 'nr' | 'time' | 'workStart' | 'workEnd'
+  keyof TTWorkContextData | keyof TimeTrackingState | 'workStart' | 'workEnd'
 >;
 
 // Core time tracking entities
 export interface TTWorkContextData {
+  // TODO maybe shorten prop names, since this is used often
   start: number;
   end: number;
-  nr: number;
-  time: number;
+  bNr: number;
+  bTime: number;
 }
 
 // Map of work session stats by date

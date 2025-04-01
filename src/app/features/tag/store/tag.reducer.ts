@@ -34,7 +34,6 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import {
   addTag,
-  addToBreakTimeForTag,
   deleteTag,
   deleteTags,
   moveTaskInTagList,
@@ -413,28 +412,6 @@ export const tagReducer = createReducer<TagState>(
   //     state,
   //   ),
   // ),
-
-  on(addToBreakTimeForTag, (state: TagState, { id, valToAdd, date }) => {
-    const oldTag = state.entities[id] as Tag;
-    const oldBreakTime = oldTag.breakTime[date] || 0;
-    const oldBreakNr = oldTag.breakNr[date] || 0;
-    return tagAdapter.updateOne(
-      {
-        id,
-        changes: {
-          breakNr: {
-            ...oldTag.breakNr,
-            [date]: oldBreakNr + 1,
-          },
-          breakTime: {
-            ...oldTag.breakTime,
-            [date]: oldBreakTime + valToAdd,
-          },
-        },
-      },
-      state,
-    );
-  }),
 
   on(updateAdvancedConfigForTag, (state: TagState, { tagId, sectionKey, data }) => {
     const tagToUpdate = state.entities[tagId] as Tag;

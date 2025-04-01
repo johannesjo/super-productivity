@@ -36,14 +36,8 @@ import {
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { WorklogExportSettings } from '../worklog/worklog.model';
-import {
-  addToProjectBreakTime,
-  updateProjectAdvancedCfg,
-} from '../project/store/project.actions';
-import {
-  addToBreakTimeForTag,
-  updateAdvancedConfigForTag,
-} from '../tag/store/tag.actions';
+import { updateProjectAdvancedCfg } from '../project/store/project.actions';
+import { updateAdvancedConfigForTag } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import {
   selectActiveContextId,
@@ -437,6 +431,7 @@ export class WorkContextService {
     );
   }
 
+  // TODO merge this stuff
   getWorkStart$(
     day: string = this._dateService.todayStr(),
   ): Observable<number | undefined> {
@@ -450,13 +445,11 @@ export class WorkContextService {
   }
 
   getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {
-    // TODO
-    return this.activeWorkContext$.pipe(map((ctx) => ctx.breakTime[day]));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bTime));
   }
 
   getBreakNr$(day: string = this._dateService.todayStr()): Observable<number> {
-    // TODO
-    return this.activeWorkContext$.pipe(map((ctx) => ctx.breakNr[day]));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bNr));
   }
 
   async load(): Promise<void> {
@@ -498,20 +491,23 @@ export class WorkContextService {
     );
   }
 
-  addToBreakTimeForActiveContext(
+  async addToBreakTimeForActiveContext(
     date: string = this._dateService.todayStr(),
     valToAdd: number,
-  ): void {
-    const payload: { id: string; date: string; valToAdd: number } = {
-      id: this.activeWorkContextId as string,
-      date,
-      valToAdd,
-    };
-    const action =
-      this.activeWorkContextType === WorkContextType.PROJECT
-        ? addToProjectBreakTime(payload)
-        : addToBreakTimeForTag(payload);
-    this._store$.dispatch(action);
+  ): Promise<void> {
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+    const currentBreakTime = (await this.getBreakTime$().pipe(first()).toPromise()) || 0;
+    const currentBreakNr = (await this.getBreakNr$().pipe(first()).toPromise()) || 0;
+
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { bNr: currentBreakNr + 1, bTime: currentBreakTime + valToAdd },
+      }),
+    );
   }
 
   private _updateAdvancedCfgForCurrentContext(

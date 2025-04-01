@@ -5,7 +5,6 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   addProject,
   addProjects,
-  addToProjectBreakTime,
   archiveProject,
   deleteProject,
   moveAllProjectBacklogTasksToRegularList,
@@ -81,7 +80,6 @@ export class ProjectEffects {
           deleteProject.type,
           updateProject.type,
           updateProjectAdvancedCfg.type,
-          addToProjectBreakTime.type,
           updateProjectOrder.type,
           archiveProject.type,
           unarchiveProject.type,

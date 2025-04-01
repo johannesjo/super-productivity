@@ -42,7 +42,6 @@ import { devError } from '../../../util/dev-error';
 import {
   addProject,
   addProjects,
-  addToProjectBreakTime,
   archiveProject,
   deleteProject,
   loadProjects,
@@ -189,29 +188,6 @@ export const projectReducer = createReducer<ProjectState>(
       state,
     ),
   ),
-
-  on(addToProjectBreakTime, (state, { id, date, valToAdd }) => {
-    const oldP = state.entities[id] as Project;
-    const oldBreakTime = oldP.breakTime[date] || 0;
-    const oldBreakNr = oldP.breakNr[date] || 0;
-
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          breakNr: {
-            ...oldP.breakNr,
-            [date]: oldBreakNr + 1,
-          },
-          breakTime: {
-            ...oldP.breakTime,
-            [date]: oldBreakTime + valToAdd,
-          },
-        },
-      },
-      state,
-    );
-  }),
 
   on(updateProjectAdvancedCfg, (state, { projectId, sectionKey, data }) => {
     const currentProject = state.entities[projectId] as Project;
