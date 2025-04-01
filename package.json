@@ -131,7 +131,7 @@
     "@csstools/stylelint-formatter-github": "^1.0.0",
     "@electron/notarize": "^2.5.0",
     "@fontsource/roboto": "^4.5.8",
-    "@nextcloud/cdav-library": "^1.1.0",
+    "@nextcloud/cdav-library": "^1.5.3",
     "@ngrx/effects": "^19.0.0",
     "@ngrx/entity": "^19.0.0",
     "@ngrx/schematics": "^19.0.0",
