@@ -13,9 +13,13 @@ export type TTDateMap<T> = Omit<
 // Core time tracking entities
 // NOTE: shortened to 1 letter to save disk space
 export interface TTWorkContextData {
+  // start
   s: number;
+  // end
   e: number;
+  // breakNr
   b: number;
+  // breakTime
   bt: number;
 }
 

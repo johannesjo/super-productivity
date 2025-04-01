@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { TimeTrackingState, TTDateMap, TTWorkContextData } from './time-tracking.model';
-import { first, map, shareReplay, switchMap } from 'rxjs/operators';
+import { first, map, shareReplay, switchMap, startWith } from 'rxjs/operators';
 import { mergeTimeTrackingStates } from './merge-time-tracking-states';
 import { Store } from '@ngrx/store';
 import { selectTimeTrackingState } from './store/time-tracking.selectors';
@@ -20,9 +20,9 @@ export class TimeTrackingService {
   private _archiveUpdateTrigger$ = new Subject();
   private _archiveOldUpdateTrigger$ = new Subject();
 
-  // todo this.store.select(selectTimeTrackingState) is not working
   current$: Observable<TimeTrackingState> = this._store.select(selectTimeTrackingState);
   archive$: Observable<TimeTrackingState> = this._archiveUpdateTrigger$.pipe(
+    startWith(null),
     switchMap(async () => {
       return (await this._pfapiService.m.archive.load()).timeTracking;
     }),
@@ -30,6 +30,7 @@ export class TimeTrackingService {
   );
 
   archiveOld$: Observable<TimeTrackingState> = this._archiveOldUpdateTrigger$.pipe(
+    startWith(null),
     switchMap(async () => {
       return (await this._pfapiService.m.archiveOld.load()).timeTracking;
     }),
@@ -46,17 +47,6 @@ export class TimeTrackingService {
     ),
     shareReplay(1),
   );
-
-  constructor() {
-    this.state$.subscribe((v) => console.log(`state$`, v));
-    // this.archive$.subscribe((v) => console.log(`archive$`, v));
-
-    // TODO check if this is enough
-    setTimeout(() => {
-      this._archiveUpdateTrigger$.next();
-      this._archiveOldUpdateTrigger$.next();
-    });
-  }
 
   getWorkStartEndForWorkContext$(ctx: {
     id: string;
