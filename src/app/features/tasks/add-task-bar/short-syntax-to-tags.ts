@@ -149,7 +149,5 @@ export const shortSyntaxToTags = ({
         });
       });
   }
-  
-
   return shortSyntaxTags;
 };
