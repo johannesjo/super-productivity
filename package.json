@@ -194,7 +194,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^1.6.0",
-    "lz-string": "1.4.4",
+    "lz-string": "1.5.0",
     "marked": "^12.0.2",
     "moment": "2.30.1",
     "moment-duration-format": "^2.2.2",
