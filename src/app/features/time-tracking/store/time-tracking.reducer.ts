@@ -37,9 +37,9 @@ export const timeTrackingReducer = createReducer(
                 ...state.project[task.projectId],
                 [date]: {
                   ...state.project[task.projectId]?.[date],
-                  end: roundTsToMinutes(Date.now()),
-                  start: roundTsToMinutes(
-                    state.project[task.projectId]?.[date]?.start || Date.now(),
+                  e: roundTsToMinutes(Date.now()),
+                  s: roundTsToMinutes(
+                    state.project[task.projectId]?.[date]?.s || Date.now(),
                   ),
                 },
               },
@@ -55,10 +55,8 @@ export const timeTrackingReducer = createReducer(
                   ...state.tag[tagId],
                   [date]: {
                     ...state.tag[tagId]?.[date],
-                    end: roundTsToMinutes(Date.now()),
-                    start: roundTsToMinutes(
-                      state.tag[tagId]?.[date]?.start || Date.now(),
-                    ),
+                    e: roundTsToMinutes(Date.now()),
+                    s: roundTsToMinutes(state.tag[tagId]?.[date]?.s || Date.now()),
                   },
                 };
                 return acc;

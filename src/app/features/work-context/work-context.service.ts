@@ -435,21 +435,21 @@ export class WorkContextService {
   getWorkStart$(
     day: string = this._dateService.todayStr(),
   ): Observable<number | undefined> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.start));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.s));
   }
 
   getWorkEnd$(
     day: string = this._dateService.todayStr(),
   ): Observable<number | undefined> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.end));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.e));
   }
 
   getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bTime));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bt));
   }
 
   getBreakNr$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bNr));
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.b));
   }
 
   async load(): Promise<void> {
@@ -473,7 +473,7 @@ export class WorkContextService {
       TimeTrackingActions.updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
-        updates: { start: newVal },
+        updates: { s: newVal },
       }),
     );
   }
@@ -486,7 +486,7 @@ export class WorkContextService {
       TimeTrackingActions.updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
-        updates: { end: newVal },
+        updates: { e: newVal },
       }),
     );
   }
@@ -505,7 +505,7 @@ export class WorkContextService {
       TimeTrackingActions.updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
-        updates: { bNr: currentBreakNr + 1, bTime: currentBreakTime + valToAdd },
+        updates: { b: currentBreakNr + 1, bt: currentBreakTime + valToAdd },
       }),
     );
   }

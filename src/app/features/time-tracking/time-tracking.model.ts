@@ -11,12 +11,12 @@ export type TTDateMap<T> = Omit<
 >;
 
 // Core time tracking entities
+// NOTE: shortened to 1 letter to save disk space
 export interface TTWorkContextData {
-  // TODO maybe shorten prop names, since this is used often
-  start: number;
-  end: number;
-  bNr: number;
-  bTime: number;
+  s: number;
+  e: number;
+  b: number;
+  bt: number;
 }
 
 // Map of work session stats by date
