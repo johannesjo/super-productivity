@@ -43,6 +43,11 @@ import { IS_ELECTRON } from '../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { LocalFileSyncAndroid } from './api/sync/providers/local-file-sync/local-file-sync-android';
 import { environment } from '../../environments/environment';
+import {
+  ArchiveModel,
+  TimeTrackingState,
+} from '../features/time-tracking/time-tracking.model';
+import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 
 export const CROSS_MODEL_VERSION = 1 as const;
 
@@ -66,12 +71,19 @@ export type PfapiAllModelCfg = {
 
   taskArchive: ModelCfg<TaskArchive>;
   reminders: ModelCfg<Reminder[]>;
+
+  timeTracking: ModelCfg<TimeTrackingState>;
+
+  archive: ModelCfg<ArchiveModel>;
+  archiveOld: ModelCfg<ArchiveModel>;
 };
 export type AppDataCompleteNew = AllModelData<PfapiAllModelCfg>;
 
+const TASK_MODEL_VERSION = 2 as const;
+
 export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   task: {
-    modelVersion: 1,
+    modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
   },
@@ -141,8 +153,28 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialObstructionState,
   },
 
+  timeTracking: {
+    modelVersion: TASK_MODEL_VERSION,
+    defaultData: initialTimeTrackingState,
+  },
+  archive: {
+    modelVersion: TASK_MODEL_VERSION,
+    defaultData: {
+      task: initialTaskState,
+      timeTracking: initialTimeTrackingState,
+    },
+  },
+  archiveOld: {
+    modelVersion: TASK_MODEL_VERSION,
+    defaultData: {
+      task: initialTaskState,
+      timeTracking: initialTimeTrackingState,
+    },
+  },
+
+  // TODO migrate and remove
   taskArchive: {
-    modelVersion: 1,
+    modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
   },
   // TODO task archive old
@@ -171,6 +203,6 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     if (!isDataRepairPossible(data)) {
       throw new DataRepairNotPossibleError(data);
     }
-    return dataRepair(data);
+    return dataRepair(data) as AppDataCompleteNew;
   },
 };

@@ -62,6 +62,7 @@ import { SyncStatus } from './pfapi/api';
 import moment from 'moment/moment';
 import { LocalBackupService } from './imex/local-backup/local-backup.service';
 import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
+import { AppDataCompleteNew } from './pfapi/pfapi-config';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -174,7 +175,11 @@ export class AppComponent implements OnDestroy {
           download('sp-legacy-backup.json', JSON.stringify(legacyData));
         }
         try {
-          await this._pfapiService.importCompleteBackup(legacyData, true, true);
+          await this._pfapiService.importCompleteBackup(
+            legacyData as any as AppDataCompleteNew,
+            true,
+            true,
+          );
           this.imexMetaService.setDataImportInProgress(true);
           await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
           alert('Migration all done! Restarting app now...');

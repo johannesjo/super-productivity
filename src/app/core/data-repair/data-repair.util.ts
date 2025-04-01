@@ -15,9 +15,7 @@ import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
 
-export const dataRepair = (
-  data: AppDataCompleteLegacy | AppDataCompleteNew,
-): AppDataCompleteLegacy | AppDataCompleteNew => {
+export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   if (!isDataRepairPossible(data)) {
     throw new Error('Data repair attempted but not possible');
   }

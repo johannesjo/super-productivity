@@ -13,9 +13,9 @@ import { DatabaseService } from './database.service';
 import { Project, ProjectState } from '../../features/project/project.model';
 import {
   PersistenceBaseEntityModel,
-  PersistenceLegacyBaseModel,
   PersistenceBaseModelCfg,
   PersistenceEntityModelCfg,
+  PersistenceLegacyBaseModel,
 } from './persistence.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import {
@@ -43,14 +43,11 @@ import { devError } from '../../util/dev-error';
 import { removeFromDb, saveToDb } from './persistence.actions';
 import { crossModelMigrations } from './cross-model-migrations';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { BASE_MODEL_CFGS, ENTITY_MODEL_CFGS } from './persistence.const';
 import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
 import { BoardsState } from '../../features/boards/store/boards.reducer';
-
-const MAX_INVALID_DATA_ATTEMPTS = 10;
 
 @Injectable({
   providedIn: 'root',
@@ -131,23 +128,6 @@ export class PersistenceLegacyService {
 
   private _isBlockSaving: boolean = false;
   private _invalidDataCount = 0;
-
-  async getValidCompleteData(): Promise<AppDataCompleteLegacy> {
-    const d = await this.loadComplete();
-    // if we are very unlucky (e.g. a task has updated but not the related tag changes) app data might not be valid. we never want to sync that! :)
-    if (isValidAppData(d)) {
-      this._invalidDataCount = 0;
-      return d;
-    } else {
-      // TODO remove as this is not a real error, and this is just a test to check if this ever occurs
-      devError('Invalid data => RETRY getValidCompleteData');
-      this._invalidDataCount++;
-      if (this._invalidDataCount > MAX_INVALID_DATA_ATTEMPTS) {
-        throw new Error('Unable to get valid app data');
-      }
-      return this.getValidCompleteData();
-    }
-  }
 
   // BACKUP AND SYNC RELATED
   // -----------------------
