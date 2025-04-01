@@ -37,100 +37,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               ]
             : []),
         ],
-        // change: (field, ev) => {
-        //   if (
-        //     IS_ANDROID_WEB_VIEW &&
-        //     field.model.syncProvider === LegacySyncProvider.LocalFile
-        //   ) {
-        //     // disable / enable is a workaround for the hide expression for the info file path info tpl
-        //     field.formControl?.disable();
-        //
-        //     androidInterface.grantFilePermissionWrapped().then(() => {
-        //       field.formControl?.enable();
-        //       console.log('Granted file access permission for android');
-        //       console.log(androidInterface?.allowedFolderPath());
-        //       field.formControl?.updateValueAndValidity();
-        //       field.formControl?.parent?.updateValueAndValidity();
-        //       field.formControl?.parent?.markAllAsTouched();
-        //       field.formControl?.markAllAsTouched();
-        //     });
-        //   }
-        // },
       },
-      // validators: {
-      //   validFileAccessPermission: {
-      //     expression: (c: any) => {
-      //       if (IS_ANDROID_WEB_VIEW && c.value === LegacySyncProvider.LocalFile) {
-      //         console.log(
-      //           'Checking file access permission for android',
-      //           androidInterface.isGrantedFilePermission(),
-      //         );
-      //         return androidInterface.isGrantedFilePermission();
-      //       }
-      //       return true;
-      //     },
-      //     message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
-      //   },
-      // },
-      // validation: {
-      //   show: true,
-      // },
     },
-    // TODO remove completely
-    // {
-    //   // TODO animation maybe
-    //   hideExpression: (m, v, field) =>
-    //     field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
-    //   key: 'dropboxSync',
-    //   fieldGroup: [
-    //     {
-    //       key: 'accessToken',
-    //       type: 'input',
-    //       hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
-    //       templateOptions: {
-    //         label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
-    //       },
-    //     },
-    //   ],
-    // },
-    // IS_ANDROID_WEB_VIEW
-    //   ? {
-    //       hideExpression: (m, v, field) => {
-    //         return (
-    //           !IS_ANDROID_WEB_VIEW ||
-    //           field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
-    //           !androidInterface?.isGrantedFilePermission() ||
-    //           !androidInterface?.allowedFolderPath()
-    //         );
-    //       },
-    //       type: 'tpl',
-    //       className: `tpl`,
-    //       expressionProperties: {
-    //         template: () =>
-    //           // NOTE: hard to translate here, that's why we don't
-    //           `<div>Granted file access permission:<br />${
-    //             androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
-    //           }</div>`,
-    //       },
-    //     }
-    //   : {},
-    // {
-    //   hideExpression: (m, v, field) =>
-    //     field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
-    //     // hide for android
-    //     IS_ANDROID_WEB_VIEW,
-    //   key: 'localFileSync',
-    //   fieldGroup: [
-    //     {
-    //       key: 'syncFolderPath',
-    //       type: 'input',
-    //       templateOptions: {
-    //         required: true,
-    //         label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
-    //       },
-    //     },
-    //   ],
-    // },
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
@@ -138,20 +46,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
-        // {
-        //   key: 'syncFolderPath',
-        //   type: 'input',
-        //   templateOptions: {
-        //     required: true,
-        //     label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
-        //   },
-        // },
         {
           type: 'btn',
           key: 'syncFolderPath',
           templateOptions: {
             // TODO translate
-            text: `Select Sync Folder`,
+            // text: `Select Sync Folder`,
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
             required: true,
             onClick: () => {
               return fileSyncElectron.pickDirectory();
@@ -171,7 +72,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
                 type: 'tpl',
                 templateOptions: {
                   tag: 'p',
-                  // text: `<p>Please open the following link and copy the auth code provided there</p>`,
                   text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
                 },
               },

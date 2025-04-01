@@ -3,7 +3,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { combineLatest, Observable } from 'rxjs';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { first, map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { SyncProviderId } from '../../pfapi/api';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
@@ -57,9 +57,6 @@ export class SyncConfigService {
     tap((v) => console.log('syncSettingsForm$', v)),
   );
 
-  readonly syncSettingsFormOnce$: Observable<SyncConfig> =
-    this.syncSettingsForm$.pipe(first());
-
   async updateSettingsFromForm(newSettings: SyncConfig, isForce = false): Promise<void> {
     // TODO this is just a work around for formly ending in a endless loop otherwise
     const isEqual = JSON.stringify(this._lastSettings) === JSON.stringify(newSettings);
@@ -67,7 +64,7 @@ export class SyncConfigService {
     if (isEqual && !isForce) {
       return;
     }
-    alert('UPDATE');
+    // alert('UPDATE');
     const providerId = newSettings.syncProvider as SyncProviderId | null;
     if (!providerId) {
       return this._globalConfigService.updateSection('sync', {
