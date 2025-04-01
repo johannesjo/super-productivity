@@ -1,5 +1,7 @@
 // TODO compare with NEW-tracking.model.ts
 
+import { TaskArchive } from '../tasks/task.model';
+
 export interface TimeTrackingMapByEntryId<T> {
   [modelEntryId: string]: T;
 }
@@ -18,7 +20,7 @@ export interface TimeTrackingBreakCount {
   time: number;
 }
 
-export interface TimeTracking {
+export interface TimeTrackingState {
   project: TimeTrackingMapByEntryId<TimeTrackingForDay<TimeTrackingWorkStartEnd>>;
   tag: TimeTrackingMapByEntryId<TimeTrackingForDay<TimeTrackingWorkStartEnd>>;
   task: TimeTrackingMapByEntryId<TimeTrackingForDay<number>>;
@@ -26,6 +28,7 @@ export interface TimeTracking {
   lastFlush: number;
 }
 
-export interface TimeTrackingArchive extends TimeTracking {
-  newestEntry: number;
+export interface ArchiveModel {
+  timeTracking: TimeTrackingState;
+  task: TaskArchive;
 }
