@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  concatMap,
   filter,
   first,
   map,
@@ -24,13 +23,10 @@ import {
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
-  updateWorkEndForTag,
-  updateWorkStartForTag,
   upsertTag,
 } from './tag.actions';
 import {
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -44,7 +40,6 @@ import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { Task, TaskArchive } from '../../tasks/task.model';
-import { Tag } from '../tag.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
@@ -98,8 +93,6 @@ export class TagEffects {
           updateTagOrder,
 
           updateAdvancedConfigForTag,
-          updateWorkStartForTag,
-          updateWorkEndForTag,
           addToBreakTimeForTag,
           moveTaskInTagList,
 
@@ -172,57 +165,6 @@ export class TagEffects {
         ),
       ),
     { dispatch: false },
-  );
-
-  updateWorkStart$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      concatMap(({ task }) =>
-        task.parentId
-          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
-          : of(task),
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) =>
-        this._tagService.getTagsByIds$(task.tagIds).pipe(first()),
-      ),
-      concatMap((tags: Tag[]) =>
-        tags
-          // only if not assigned for day already
-          .filter((tag) => !tag.workStart[this._dateService.todayStr()])
-          .map((tag) =>
-            updateWorkStartForTag({
-              id: tag.id,
-              date: this._dateService.todayStr(),
-              newVal: Date.now(),
-            }),
-          ),
-      ),
-    ),
-  );
-
-  updateWorkEnd$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      concatMap(({ task }) =>
-        task.parentId
-          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
-          : of(task),
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) =>
-        this._tagService.getTagsByIds$(task.tagIds).pipe(first()),
-      ),
-      concatMap((tags: Tag[]) =>
-        tags.map((tag) =>
-          updateWorkEndForTag({
-            id: tag.id,
-            date: this._dateService.todayStr(),
-            newVal: Date.now(),
-          }),
-        ),
-      ),
-    ),
   );
 
   deleteTagRelatedData: Observable<unknown> = createEffect(

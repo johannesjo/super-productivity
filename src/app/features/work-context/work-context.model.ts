@@ -18,6 +18,7 @@ type HueValue =
   | 'A400'
   | 'A700';
 
+// TODO REMOVE OR MOVE AND LEGACY RENAME ALL THESE
 export interface BreakTimeCopy {
   [key: string]: number;
 }
@@ -59,8 +60,6 @@ export enum WorkContextType {
 }
 
 export interface WorkContextCommon {
-  workStart: WorkStartEnd;
-  workEnd: WorkStartEnd;
   breakTime: BreakTime;
   breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;

@@ -41,11 +41,8 @@ import {
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
-  updateWorkEndForTag,
-  updateWorkStartForTag,
   upsertTag,
 } from './tag.actions';
-import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -387,35 +384,35 @@ export const tagReducer = createReducer<TagState>(
     };
   }),
 
-  on(updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
-    tagAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workStart: {
-            ...(state.entities[id] as Tag).workStart,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    ),
-  ),
+  // on(updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
+  //   tagAdapter.updateOne(
+  //     {
+  //       id,
+  //       changes: {
+  //         workStart: {
+  //           ...(state.entities[id] as Tag).workStart,
+  //           [date]: roundTsToMinutes(newVal),
+  //         },
+  //       },
+  //     },
+  //     state,
+  //   ),
+  // ),
 
-  on(updateWorkEndForTag, (state: TagState, { id, newVal, date }) =>
-    tagAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workEnd: {
-            ...(state.entities[id] as Tag).workEnd,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    ),
-  ),
+  // on(updateWorkEndForTag, (state: TagState, { id, newVal, date }) =>
+  //   tagAdapter.updateOne(
+  //     {
+  //       id,
+  //       changes: {
+  //         workEnd: {
+  //           ...(state.entities[id] as Tag).workEnd,
+  //           [date]: roundTsToMinutes(newVal),
+  //         },
+  //       },
+  //     },
+  //     state,
+  //   ),
+  // ),
 
   on(addToBreakTimeForTag, (state: TagState, { id, valToAdd, date }) => {
     const oldTag = state.entities[id] as Tag;

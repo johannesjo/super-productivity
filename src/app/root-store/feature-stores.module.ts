@@ -93,6 +93,7 @@ import { SyncEffects } from '../imex/sync/sync.effects';
 import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { BoardsEffects } from '../features/boards/store/boards.effects';
+import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
 
 @NgModule({
   declarations: [],
@@ -163,6 +164,9 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
 
     StoreModule.forFeature(boardsFeature),
     EffectsModule.forFeature([BoardsEffects]),
+
+    StoreModule.forFeature(timeTrackingFeature),
+    // EffectsModule.forFeature([BoardsEffects]),
 
     // EFFECTS ONLY
     EffectsModule.forFeature([...(IS_ANDROID_WEB_VIEW ? [AndroidEffects] : [])]),

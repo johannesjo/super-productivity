@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   addProject,
   addProjects,
@@ -22,14 +22,11 @@ import {
   updateProject,
   updateProjectAdvancedCfg,
   updateProjectOrder,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -84,8 +81,6 @@ export class ProjectEffects {
           deleteProject.type,
           updateProject.type,
           updateProjectAdvancedCfg.type,
-          updateProjectWorkStart.type,
-          updateProjectWorkEnd.type,
           addToProjectBreakTime.type,
           updateProjectOrder.type,
           archiveProject.type,
@@ -104,16 +99,7 @@ export class ProjectEffects {
           moveProjectTaskToRegularListAuto.type,
         ),
         switchMap((a) => {
-          // exclude ui only actions
-          if (
-            [updateProjectWorkStart.type, updateProjectWorkEnd.type].includes(
-              a.type as any,
-            )
-          ) {
-            return this.saveToLs$(false);
-          } else {
-            return this.saveToLs$(true);
-          }
+          return this.saveToLs$(true);
         }),
       ),
     { dispatch: false },
@@ -191,38 +177,6 @@ export class ProjectEffects {
         switchMap(() => this.saveToLs$(true)),
       ),
     { dispatch: false },
-  );
-
-  updateWorkStart$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      filter(({ task }) => !!task.projectId),
-      concatMap(({ task }) =>
-        this._projectService.getByIdOnce$(task.projectId as string).pipe(first()),
-      ),
-      filter((project: Project) => !project.workStart[this._dateService.todayStr()]),
-      map((project) => {
-        return updateProjectWorkStart({
-          id: project.id,
-          date: this._dateService.todayStr(),
-          newVal: Date.now(),
-        });
-      }),
-    ),
-  );
-
-  updateWorkEnd$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      filter(({ task }) => !!task.projectId),
-      map(({ task }) => {
-        return updateProjectWorkEnd({
-          id: task.projectId as string,
-          date: this._dateService.todayStr(),
-          newVal: Date.now(),
-        });
-      }),
-    ),
   );
 
   // TODO a solution for orphaned tasks might be needed

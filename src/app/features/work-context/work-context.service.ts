@@ -39,14 +39,10 @@ import { WorklogExportSettings } from '../worklog/worklog.model';
 import {
   addToProjectBreakTime,
   updateProjectAdvancedCfg,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
 } from '../project/store/project.actions';
 import {
   addToBreakTimeForTag,
   updateAdvancedConfigForTag,
-  updateWorkEndForTag,
-  updateWorkStartForTag,
 } from '../tag/store/tag.actions';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 import {
@@ -70,6 +66,7 @@ import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -472,29 +469,29 @@ export class WorkContextService {
   }
 
   updateWorkStartForActiveContext(date: string, newVal: number): void {
-    const payload: { id: string; date: string; newVal: number } = {
-      id: this.activeWorkContextId as string,
-      date,
-      newVal,
-    };
-    const action =
-      this.activeWorkContextType === WorkContextType.PROJECT
-        ? updateProjectWorkStart(payload)
-        : updateWorkStartForTag(payload);
-    this._store$.dispatch(action);
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { start: newVal },
+      }),
+    );
   }
 
   updateWorkEndForActiveContext(date: string, newVal: number): void {
-    const payload: { id: string; date: string; newVal: number } = {
-      id: this.activeWorkContextId as string,
-      date,
-      newVal,
-    };
-    const action =
-      this.activeWorkContextType === WorkContextType.PROJECT
-        ? updateProjectWorkEnd(payload)
-        : updateWorkEndForTag(payload);
-    this._store$.dispatch(action);
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { end: newVal },
+      }),
+    );
   }
 
   addToBreakTimeForActiveContext(

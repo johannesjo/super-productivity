@@ -61,8 +61,6 @@ import {
   updateProject,
   updateProjectAdvancedCfg,
   updateProjectOrder,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
 import {
@@ -72,7 +70,6 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
-import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -192,37 +189,6 @@ export const projectReducer = createReducer<ProjectState>(
       state,
     ),
   ),
-
-  on(updateProjectWorkStart, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workStart: {
-            ...oldP.workStart,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    );
-  }),
-  on(updateProjectWorkEnd, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workEnd: {
-            ...oldP.workEnd,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    );
-  }),
 
   on(addToProjectBreakTime, (state, { id, date, valToAdd }) => {
     const oldP = state.entities[id] as Project;
