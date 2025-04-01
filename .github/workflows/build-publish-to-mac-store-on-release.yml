@@ -61,7 +61,7 @@ jobs:
       - name: Build Frontend & Electron
         run: npm run build
 
-      - uses: apple-actions/import-codesign-certs@v3
+      - uses: apple-actions/import-codesign-certs@v5
         with:
           p12-file-base64: ${{ secrets.mac_certs }}
           p12-password: ${{ secrets.mac_certs_password }}
