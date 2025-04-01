@@ -47,6 +47,7 @@ export interface AndroidInterface {
   clearDbCallback?(rId: string): void;
 
   // permanent notification
+  // TODO remove
   updatePermanentNotification?(
     title: string,
     // because java sucks, we have to do this
@@ -81,14 +82,21 @@ export interface AndroidInterface {
   isGrantedFilePermission(): boolean;
 
   isGrantFilePermissionInProgress: boolean;
+
   allowedFolderPath(): string;
+
   grantFilePermissionWrapped(): Promise<object>;
+
   grantFilePermission(rId: string): void;
+
   grantFilePermissionCallBack(rId: string): void;
 
   getFileRev(filePath: string): string;
+
   readFile(filePath: string): string;
+
   writeFile(filePath: string, data: string): string;
+
   removeFile(filePath: string): undefined;
 
   // added here only
