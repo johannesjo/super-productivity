@@ -60,14 +60,18 @@ export enum WorkContextType {
 }
 
 export interface WorkContextCommon {
-  breakTime: BreakTime;
-  breakNr: BreakNr;
   advancedCfg: WorkContextAdvancedCfg;
   theme: WorkContextThemeCfg;
   icon: string | null;
   taskIds: string[];
   id: string;
   title: string;
+
+  // TODO remove legacy
+  breakTime?: BreakTime;
+  breakNr?: BreakNr;
+  workStart?: WorkStartEnd;
+  workEnd?: WorkStartEnd;
 }
 
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;

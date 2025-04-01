@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { select, Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
@@ -22,8 +22,6 @@ import {
 import { DEFAULT_PROJECT } from './project.const';
 import {
   selectArchivedProjects,
-  selectProjectBreakNrForProject,
-  selectProjectBreakTimeForProject,
   selectProjectById,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent,
@@ -63,11 +61,15 @@ export class ProjectService {
   }
 
   getBreakNrForProject$(projectId: string): Observable<BreakNr> {
-    return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
+    // TODO migrate
+    return EMPTY;
+    // return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
   }
 
   getBreakTimeForProject$(projectId: string): Observable<BreakTime> {
-    return this._store$.pipe(select(selectProjectBreakTimeForProject, { id: projectId }));
+    // TODO migrate
+    return EMPTY;
+    // return this._store$.pipe(select(selectProjectBreakTimeForProject, { id: projectId }));
   }
 
   archive(projectId: string): void {

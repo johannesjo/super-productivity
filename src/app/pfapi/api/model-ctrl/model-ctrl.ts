@@ -58,7 +58,9 @@ export class ModelCtrl<MT extends ModelBase> {
 
   // TODO implement isSkipMigration
   async load(isSkipMigration?: boolean): Promise<MT> {
-    pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, this._inMemoryData);
+    pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, {
+      inMemoryData: this._inMemoryData,
+    });
     return (
       this._inMemoryData ||
       ((await this._db.load(this.modelId)) as Promise<MT>) ||

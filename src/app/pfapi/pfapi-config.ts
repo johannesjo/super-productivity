@@ -48,8 +48,9 @@ import {
   TimeTrackingState,
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
+import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 
-export const CROSS_MODEL_VERSION = 1 as const;
+export const CROSS_MODEL_VERSION = 2 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
@@ -205,4 +206,5 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     }
     return dataRepair(data) as AppDataCompleteNew;
   },
+  crossModelMigrations: CROSS_MODEL_MIGRATIONS,
 };

@@ -51,14 +51,15 @@ export type ModelCfgs = {
   [modelId: string]: ModelCfg<ModelBase>;
 };
 
-export interface FullData<F> {
-  data: F;
-}
-
 // TODO better type
 // maybe Partial<AllModelData>
 export interface MainModelData {
   [modelId: string]: ModelBase;
+}
+
+export type CrossModelMigrateFn = <R, F>(fullData: F) => R;
+export interface CrossModelMigrations {
+  [version: number]: CrossModelMigrateFn;
 }
 
 export interface PfapiBaseCfg<T extends ModelCfgs> {
@@ -70,9 +71,7 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
   encryptKey?: string;
   isCreateBackups?: boolean;
   crossModelVersion?: number;
-  crossModelMigrations?: {
-    [version: number]: (arg: FullData<unknown>) => FullData<unknown>;
-  };
+  crossModelMigrations?: CrossModelMigrations;
   validate?: (data: AllModelData<T>) => boolean;
   repair?: <R>(data: R | unknown) => AllModelData<T>;
 

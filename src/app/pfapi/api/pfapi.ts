@@ -4,6 +4,7 @@ import {
   ConflictData,
   EncryptAndCompressCfg,
   ExtractModelCfgType,
+  LocalMeta,
   ModelBase,
   ModelCfgs,
   ModelCfgToModelCtrl,
@@ -24,6 +25,7 @@ import { SyncProviderPrivateCfgStore } from './sync/sync-provider-private-cfg-st
 import {
   BackupImportFailedError,
   DataValidationFailedError,
+  ImpossibleError,
   InvalidModelCfgError,
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
@@ -101,6 +103,8 @@ export class Pfapi<const MD extends ModelCfgs> {
       this._encryptAndCompressCfg$,
       new EncryptAndCompressHandlerService(),
     );
+
+    this.metaModel.load().then((metaModel) => this._checkAndMigrate(metaModel));
   }
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
@@ -385,5 +389,71 @@ export class Pfapi<const MD extends ModelCfgs> {
       );
     }
     return result as ModelCfgToModelCtrl<MD>;
+  }
+
+  private async _checkAndMigrate(meta: LocalMeta, data?: any): Promise<void> {
+    // TODO make flexible for migrating data imports and possibly sync data
+    const crossModelVersionInDB = meta.crossModelVersion;
+
+    const codeModelVersion = this.cfg?.crossModelVersion;
+    if (
+      typeof codeModelVersion !== 'number' ||
+      crossModelVersionInDB === codeModelVersion
+    ) {
+      pfLog(2, `${this._checkAndMigrate.name}() no migration needed`, {
+        modelVersionInDB: crossModelVersionInDB,
+        codeModelVersion,
+      });
+      return;
+    }
+    if (crossModelVersionInDB > codeModelVersion) {
+      throw new ImpossibleError('Saved model version is higher than current one');
+    }
+    if (!this.cfg?.crossModelMigrations) {
+      throw new ImpossibleError('No migration function provided');
+    }
+    const migrationKeys = Object.keys(this.cfg.crossModelMigrations).map((v) =>
+      Number(v),
+    );
+    const migrationsKeysToRun = migrationKeys.filter((v) => v > crossModelVersionInDB);
+    const migrationsToRun = migrationsKeysToRun.map(
+      (v) => this.cfg!.crossModelMigrations![v],
+    );
+    pfLog(2, `${this._checkAndMigrate.name}()`, {
+      migrationKeys,
+      migrationsKeysToRun,
+      migrationsToRun,
+      modelVersionInDB: crossModelVersionInDB,
+      codeModelVersion,
+    });
+
+    if (migrationsToRun.length === 0) {
+      return;
+    }
+
+    if (!data) {
+      data = await this.getAllSyncModelData(true);
+    }
+    migrationsToRun.forEach((migrateFn) => {
+      data = migrateFn(data);
+    });
+    await this.importAllSycModelData({
+      data,
+      crossModelVersion: codeModelVersion,
+      isBackupData: true,
+      isAttemptRepair: true,
+    });
+    await this.metaModel.save({
+      ...meta,
+      crossModelVersion: codeModelVersion,
+      lastUpdate: Date.now(),
+    });
+
+    // TODO single model migration
+    // const modelIds = Object.keys(this.m);
+    // for (const modelId of modelIds) {
+    //   const modelCtrl = this.m[modelId];
+    //
+    // }
   }
 }
