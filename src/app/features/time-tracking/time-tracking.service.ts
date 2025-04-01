@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { TimeTrackingState, TTDateMap, TTWorkContextData } from './time-tracking.model';
-import { first, map, switchMap } from 'rxjs/operators';
+import { first, map, shareReplay, switchMap } from 'rxjs/operators';
 import { mergeTimeTrackingStates } from './merge-time-tracking-states';
 import { Store } from '@ngrx/store';
 import { selectTimeTrackingState } from './store/time-tracking.selectors';
@@ -26,11 +26,14 @@ export class TimeTrackingService {
     switchMap(async () => {
       return (await this._pfapiService.m.archive.load()).timeTracking;
     }),
+    shareReplay(1),
   );
+
   archiveOld$: Observable<TimeTrackingState> = this._archiveOldUpdateTrigger$.pipe(
     switchMap(async () => {
       return (await this._pfapiService.m.archiveOld.load()).timeTracking;
     }),
+    shareReplay(1),
   );
 
   state$: Observable<TimeTrackingState> = combineLatest([
@@ -41,27 +44,43 @@ export class TimeTrackingService {
     map(([current, archive, oldArchive]) =>
       mergeTimeTrackingStates({ current, archive, oldArchive }),
     ),
+    shareReplay(1),
   );
 
   constructor() {
+    this.state$.subscribe((v) => console.log(`state$`, v));
+    // this.archive$.subscribe((v) => console.log(`archive$`, v));
+
     // TODO check if this is enough
-    this._archiveUpdateTrigger$.next();
-    this._archiveOldUpdateTrigger$.next();
+    setTimeout(() => {
+      this._archiveUpdateTrigger$.next();
+      this._archiveOldUpdateTrigger$.next();
+    });
+  }
+
+  getWorkStartEndForWorkContext$(ctx: {
+    id: string;
+    type: WorkContextType;
+  }): Observable<TTDateMap<TTWorkContextData>> {
+    const { id, type } = ctx;
+    return this.state$.pipe(
+      map((state) => {
+        if (type === 'PROJECT') {
+          return state.project[id] || ({} as TTDateMap<TTWorkContextData>);
+        }
+        if (type === 'TAG') {
+          return state.tag[id] || ({} as TTDateMap<TTWorkContextData>);
+        }
+        throw new ImpossibleError('Invalid work context type ' + type);
+      }),
+    );
   }
 
   async getWorkStartEndForWorkContext(ctx: {
     id: string;
     type: WorkContextType;
   }): Promise<TTDateMap<TTWorkContextData>> {
-    const { id, type } = ctx;
-    const state = await this.state$.pipe(first()).toPromise();
-    if (type === 'PROJECT') {
-      return state.project[id] || ({} as TTDateMap<TTWorkContextData>);
-    }
-    if (type === 'TAG') {
-      return state.tag[id] || ({} as TTDateMap<TTWorkContextData>);
-    }
-    throw new ImpossibleError('Invalid work context type ' + type);
+    return this.getWorkStartEndForWorkContext$(ctx).pipe(first()).toPromise();
   }
 
   async getLegacyWorkStartEndForWorkContext(ctx: {

@@ -106,9 +106,10 @@ export class PfapiService {
   getSyncProviderById = this.pf.getSyncProviderById.bind(this.pf);
 
   constructor() {
-    this.syncState$.subscribe((v) => console.log(`syncState$`, v));
+    // TODO check why it gets triggered twice always
+    // this.syncState$.subscribe((v) => console.log(`syncState$`, v));
     this.isSyncInProgress$.subscribe((v) => {
-      console.log('isSyncInProgress$', v);
+      // console.log('isSyncInProgress$', v);
       if (v) {
         this._globalProgressBarService.countUp('SYNC');
       } else {

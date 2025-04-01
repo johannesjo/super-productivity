@@ -143,7 +143,7 @@ export class WorkContextService {
     shareReplay(1),
   );
   activeWorkContextTTData$ = this.activeWorkContext$.pipe(
-    switchMap((ac) => this._timeTrackingService.getWorkStartEndForWorkContext(ac)),
+    switchMap((ac) => this._timeTrackingService.getWorkStartEndForWorkContext$(ac)),
     shareReplay(1),
   );
 
@@ -437,12 +437,16 @@ export class WorkContextService {
     );
   }
 
-  getWorkStart$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day].start));
+  getWorkStart$(
+    day: string = this._dateService.todayStr(),
+  ): Observable<number | undefined> {
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.start));
   }
 
-  getWorkEnd$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day].end));
+  getWorkEnd$(
+    day: string = this._dateService.todayStr(),
+  ): Observable<number | undefined> {
+    return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.end));
   }
 
   getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {

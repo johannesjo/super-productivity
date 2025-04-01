@@ -217,10 +217,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ),
   );
 
-  started$: Observable<number> = this.dayStr$.pipe(
+  started$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)),
   );
-  end$: Observable<number> = this.dayStr$.pipe(
+  end$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)),
   );
 
