@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { combineLatest, EMPTY, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { TimeTrackingState, TTDateMap, TTWorkContextData } from './time-tracking.model';
 import { first, map, switchMap } from 'rxjs/operators';
 import { mergeTimeTrackingStates } from './merge-time-tracking-states';
@@ -18,34 +18,36 @@ export class TimeTrackingService {
   private _pfapiService = inject(PfapiService);
 
   private _archiveUpdateTrigger$ = new Subject();
-  private _oldArchiveUpdateTrigger$ = new Subject();
+  private _archiveOldUpdateTrigger$ = new Subject();
 
   // todo this.store.select(selectTimeTrackingState) is not working
   current$: Observable<TimeTrackingState> = this._store.select(selectTimeTrackingState);
   archive$: Observable<TimeTrackingState> = this._archiveUpdateTrigger$.pipe(
-    switchMap(() => {
-      return EMPTY;
-      // return this._pfapiService.m.timeTrackingArchive;
+    switchMap(async () => {
+      return (await this._pfapiService.m.archive.load()).timeTracking;
     }),
   );
-  oldArchive$: Observable<TimeTrackingState> = this._oldArchiveUpdateTrigger$.pipe(
-    switchMap(() => {
-      return EMPTY;
-      // return this._pfapiService.m.timeTrackingOldArchive;
+  archiveOld$: Observable<TimeTrackingState> = this._archiveOldUpdateTrigger$.pipe(
+    switchMap(async () => {
+      return (await this._pfapiService.m.archiveOld.load()).timeTracking;
     }),
   );
 
   state$: Observable<TimeTrackingState> = combineLatest([
     this.current$,
     this.archive$,
-    this.oldArchive$,
+    this.archiveOld$,
   ]).pipe(
     map(([current, archive, oldArchive]) =>
       mergeTimeTrackingStates({ current, archive, oldArchive }),
     ),
   );
 
-  constructor() {}
+  constructor() {
+    // TODO check if this is enough
+    this._archiveUpdateTrigger$.next();
+    this._archiveOldUpdateTrigger$.next();
+  }
 
   async getWorkStartEndForWorkContext(ctx: {
     id: string;
