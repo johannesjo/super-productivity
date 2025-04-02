@@ -1,4 +1,3 @@
-import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { dataRepair } from './data-repair.util';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
@@ -10,10 +9,11 @@ import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { IssueProvider } from '../../features/issue/issue.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
 const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
-  let mock: AppDataCompleteLegacy;
+  let mock: AppDataCompleteNew;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     mock.project = {

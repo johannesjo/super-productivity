@@ -1,4 +1,3 @@
-import { AppDataCompleteLegacy } from './sync.model';
 import { isValidAppData } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
@@ -9,6 +8,7 @@ import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { Note } from '../../features/note/note.model';
 import { IssueProvider } from '../../features/issue/issue.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
@@ -26,7 +26,7 @@ import { IssueProvider } from '../../features/issue/issue.model';
 // ];
 
 describe('isValidAppData()', () => {
-  let mock: AppDataCompleteLegacy;
+  let mock: AppDataCompleteNew;
   beforeEach(() => {
     mock = createAppDataCompleteMock();
     spyOn(window, 'alert').and.stub();
