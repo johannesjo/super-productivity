@@ -1,12 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
-import { switchMap, take } from 'rxjs/operators';
+import { auditTime, switchMap, take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { selectTimeTrackingState } from './time-tracking.selectors';
 import { TimeTrackingActions } from './time-tracking.actions';
+import { TIME_TRACKING_TO_DB_INTERVAL } from '../../../app.constants';
 
 @Injectable()
 export class TimeTrackingEffects {
@@ -24,13 +25,23 @@ export class TimeTrackingEffects {
     ),
   );
 
-  updateTimeTrackingStorage$: Observable<unknown> = createEffect(
+  updateTimeTrackingStorageAuditTime$: any = createEffect(
     () =>
       this._actions$.pipe(
         ofType(
+          // TIME TRACKING
           TimeTrackingActions.addTimeSpent,
-          TimeTrackingActions.updateWorkContextData,
         ),
+        auditTime(TIME_TRACKING_TO_DB_INTERVAL),
+        switchMap(() => this.saveToLs$),
+      ),
+    { dispatch: false },
+  );
+
+  updateTimeTrackingStorage$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TimeTrackingActions.updateWorkContextData),
         switchMap(() => this.saveToLs$),
       ),
     { dispatch: false },

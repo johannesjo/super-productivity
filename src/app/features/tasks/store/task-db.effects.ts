@@ -19,7 +19,6 @@ import {
   restoreTask,
   roundTimeSpentForDay,
   scheduleTask,
-  toggleStart,
   toggleTaskShowSubTasks,
   undoDeleteTask,
   unScheduleTask,
@@ -28,7 +27,7 @@ import {
   updateTaskUi,
 } from './task.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { auditTime, first, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
 import { TaskState } from '../task.model';
 import { environment } from '../../../../environments/environment';
@@ -42,12 +41,27 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteProject } from '../../project/store/project.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import { TIME_TRACKING_TO_DB_INTERVAL } from '../../../app.constants';
 
 @Injectable()
 export class TaskDbEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _pfapiService = inject(PfapiService);
+
+  updateTaskAuditTime$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          // TIME TRACKING
+          TimeTrackingActions.addTimeSpent,
+        ),
+        auditTime(TIME_TRACKING_TO_DB_INTERVAL),
+        switchMap(() => this._store$.pipe(select(selectTaskFeatureState), first())),
+        tap((taskState) => this._saveToLs(taskState, true)),
+      ),
+    { dispatch: false },
+  );
 
   updateTask$: any = createEffect(
     () =>
@@ -62,6 +76,8 @@ export class TaskDbEffects {
           convertToMainTask,
           // setCurrentTask,
           // unsetCurrentTask,
+          // toggleStart,
+
           updateTask,
           __updateMultipleTaskSimple,
           updateTaskTags,
@@ -73,7 +89,6 @@ export class TaskDbEffects {
           moveSubTaskToBottom,
           moveToArchive_,
           moveToOtherProject,
-          toggleStart,
           roundTimeSpentForDay,
 
           // REMINDER
@@ -96,9 +111,6 @@ export class TaskDbEffects {
 
           // PROJECT
           deleteProject,
-
-          // TIME TRACKING
-          TimeTrackingActions.addTimeSpent,
         ),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState, true)),

@@ -1,7 +1,10 @@
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 
 export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
+
+// TODO merge and remove one of these
 export const TRACKING_INTERVAL = 1000;
+export const TIME_TRACKING_TO_DB_INTERVAL = 15000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
 export const DRAG_DELAY_FOR_TOUCH = 75;
