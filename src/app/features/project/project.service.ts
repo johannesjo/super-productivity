@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { EMPTY, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { select, Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
@@ -29,6 +29,7 @@ import {
 import { devError } from '../../util/dev-error';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +38,7 @@ export class ProjectService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _actions$ = inject(Actions);
+  private readonly _timeTrackingService = inject(TimeTrackingService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
 
@@ -62,13 +64,13 @@ export class ProjectService {
 
   getBreakNrForProject$(projectId: string): Observable<BreakNr> {
     // TODO migrate
-    return EMPTY;
+    return of({});
     // return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
   }
 
   getBreakTimeForProject$(projectId: string): Observable<BreakTime> {
     // TODO migrate
-    return EMPTY;
+    return of({});
     // return this._store$.pipe(select(selectProjectBreakTimeForProject, { id: projectId }));
   }
 
