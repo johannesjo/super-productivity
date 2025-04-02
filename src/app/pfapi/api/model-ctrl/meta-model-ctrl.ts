@@ -31,7 +31,11 @@ export class MetaModelCtrl {
   private _clientIdInMemory?: string;
   private _ev: PFEventEmitter;
 
-  constructor(db: Database, ev: PFEventEmitter) {
+  constructor(
+    db: Database,
+    ev: PFEventEmitter,
+    public crossModelVersion: number,
+  ) {
     this._db = db;
     this._ev = ev;
     //
@@ -122,7 +126,10 @@ export class MetaModelCtrl {
     const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as LocalMeta;
     // Initialize if not found
     if (!data) {
-      this._metaModelInMemory = { ...DEFAULT_META_MODEL };
+      this._metaModelInMemory = {
+        ...DEFAULT_META_MODEL,
+        crossModelVersion: this.crossModelVersion,
+      };
       return this._metaModelInMemory;
     }
     if (!data.revMap) {

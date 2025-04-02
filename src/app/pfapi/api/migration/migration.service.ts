@@ -8,22 +8,25 @@ export class MigrationService<MD extends ModelCfgs> {
 
   async checkAndMigrateLocalDB(): Promise<void> {
     const meta = await this._pfapiMain.metaModel.load();
+    pfLog(2, `${MigrationService.name}.${this.checkAndMigrateLocalDB.name}()`, {
+      meta,
+    });
 
     const r = await this.migrate(
       meta.crossModelVersion,
       await this._pfapiMain.getAllSyncModelData(true),
     );
-    if (r) {
-      const { migratedData, migratedVersion } = r;
+    if (r.wasMigrated) {
+      const { dataAfter, versionAfter } = r;
       await this._pfapiMain.importAllSycModelData({
-        data: migratedData,
-        crossModelVersion: migratedVersion,
+        data: dataAfter,
+        crossModelVersion: versionAfter,
         isBackupData: true,
         isAttemptRepair: true,
       });
       await this._pfapiMain.metaModel.save({
         ...meta,
-        crossModelVersion: migratedVersion,
+        crossModelVersion: versionAfter,
         lastUpdate: Date.now(),
       });
     }
@@ -32,7 +35,11 @@ export class MigrationService<MD extends ModelCfgs> {
   async migrate(
     dataInCrossModelVersion: number,
     dataIn: AllSyncModels<MD>,
-  ): Promise<{ migratedData: AllSyncModels<MD>; migratedVersion: number } | null> {
+  ): Promise<{
+    dataAfter: AllSyncModels<MD>;
+    versionAfter: number;
+    wasMigrated: boolean;
+  }> {
     const cfg = this._pfapiMain.cfg;
     const codeModelVersion = cfg?.crossModelVersion;
     if (
@@ -43,7 +50,11 @@ export class MigrationService<MD extends ModelCfgs> {
         dataInCrossModelVersion,
         codeModelVersion,
       });
-      return null;
+      return {
+        dataAfter: dataIn,
+        versionAfter: dataInCrossModelVersion,
+        wasMigrated: false,
+      };
     }
     if (dataInCrossModelVersion > codeModelVersion) {
       throw new ImpossibleError('Saved model version is higher than current one');
@@ -56,16 +67,28 @@ export class MigrationService<MD extends ModelCfgs> {
     const migrationsKeysToRun = migrationKeys.filter((v) => v > dataInCrossModelVersion);
     const migrationsToRun = migrationsKeysToRun.map((v) => cfg!.crossModelMigrations![v]);
 
-    pfLog(2, `${MigrationService.name}.${this.migrate.name}()`, {
-      migrationKeys,
-      migrationsKeysToRun,
-      migrationsToRun,
-      dataInCrossModelVersion,
-      codeModelVersion,
-    });
+    alert(
+      `MIGRATING cross model version from ${dataInCrossModelVersion} to ${codeModelVersion}`,
+    );
+
+    pfLog(
+      2,
+      `${MigrationService.name}.${this.migrate.name}() migrate ${dataInCrossModelVersion} to ${codeModelVersion}`,
+      {
+        migrationKeys,
+        migrationsKeysToRun,
+        migrationsToRun,
+        dataInCrossModelVersion,
+        codeModelVersion,
+      },
+    );
 
     if (migrationsToRun.length === 0) {
-      return null;
+      return {
+        dataAfter: dataIn,
+        versionAfter: dataInCrossModelVersion,
+        wasMigrated: false,
+      };
     }
 
     migrationsToRun.forEach((migrateFn) => {
@@ -79,6 +102,6 @@ export class MigrationService<MD extends ModelCfgs> {
     //
     // }
 
-    return { migratedData: dataIn, migratedVersion: codeModelVersion };
+    return { dataAfter: dataIn, versionAfter: codeModelVersion, wasMigrated: true };
   }
 }

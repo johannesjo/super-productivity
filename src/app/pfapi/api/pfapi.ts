@@ -70,8 +70,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
     Pfapi._wasInstanceCreated = true;
 
-    this.cfg = cfg;
-
     this.db = new Database({
       onError: cfg?.onDbError || (() => undefined),
       adapter:
@@ -86,7 +84,11 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.tmpBackupService = new TmpBackupService<AllSyncModels<MD>>(this.db);
 
-    this.metaModel = new MetaModelCtrl(this.db, this.ev);
+    this.metaModel = new MetaModelCtrl(
+      this.db,
+      this.ev,
+      this.cfg?.crossModelVersion || 0,
+    );
     this.m = this._createModels(modelCfgs);
     pfLog(2, `m`, this.m);
 
@@ -95,15 +97,17 @@ export class Pfapi<const MD extends ModelCfgs> {
       sp.privateCfg = new SyncProviderPrivateCfgStore<unknown>(sp.id, this.db, this.ev);
     });
 
+    this.migrationService = new MigrationService<MD>(this);
+
     this._syncService = new SyncService<MD>(
       this.m,
       this,
+      this.migrationService,
       this.metaModel,
       this._activeSyncProvider$,
       this._encryptAndCompressCfg$,
       new EncryptAndCompressHandlerService(),
     );
-    this.migrationService = new MigrationService<MD>(this);
 
     this.migrationService.checkAndMigrateLocalDB();
   }
@@ -271,9 +275,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     });
   }
 
-  // TODO
-  // async importCompleteBackup
-
   async importAllSycModelData({
     data,
     crossModelVersion,
@@ -289,7 +290,9 @@ export class Pfapi<const MD extends ModelCfgs> {
   }): Promise<void> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
-    // TODO migrations
+    const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
+    data = dataAfter;
+
     if (this.cfg?.validate && !this.cfg.validate(data)) {
       if (isAttemptRepair && this.cfg.repair) {
         data = this.cfg.repair(data);

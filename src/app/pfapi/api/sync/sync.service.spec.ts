@@ -13,6 +13,7 @@ import {
   RevMismatchForModelError,
 } from '../errors/errors';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
+import { MigrationService } from '../migration/migration.service';
 
 interface FakeModel {
   id: string;
@@ -50,6 +51,7 @@ describe('SyncService', () => {
   let mockSyncProvider$: MiniObservable<any>;
   let mockEncryptAndCompressCfg$: MiniObservable<any>;
   let mockMetaModelCtrl: jasmine.SpyObj<MetaModelCtrl>;
+  let mockMigrationService: jasmine.SpyObj<MigrationService<any>>;
   let mockEncryptAndCompressHandler: jasmine.SpyObj<EncryptAndCompressHandlerService>;
   let mockSyncProvider: any;
   let mockMetaSyncService: jasmine.SpyObj<MetaSyncService>;
@@ -144,6 +146,10 @@ describe('SyncService', () => {
       'load',
       'save',
     ]);
+    mockMigrationService = jasmine.createSpyObj<MigrationService<any>>(
+      'MigrationService',
+      ['checkAndMigrateLocalDB', 'migrate'],
+    );
     mockMetaModelCtrl.load.and.returnValue(
       Promise.resolve({
         revMap: {},
@@ -219,6 +225,7 @@ describe('SyncService', () => {
     service = new SyncService(
       mockModelControllers,
       mockPfapi,
+      mockMigrationService,
       mockMetaModelCtrl,
       mockSyncProvider$,
       mockEncryptAndCompressCfg$,

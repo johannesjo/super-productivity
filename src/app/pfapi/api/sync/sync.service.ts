@@ -28,6 +28,7 @@ import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
+import { MigrationService } from '../migration/migration.service';
 
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
@@ -38,6 +39,7 @@ export class SyncService<const MD extends ModelCfgs> {
   constructor(
     public m: ModelCfgToModelCtrl<MD>,
     private _pfapiMain: Pfapi<MD>,
+    private _migrationService: MigrationService<MD>,
     private _metaModelCtrl: MetaModelCtrl,
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
     _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
@@ -113,9 +115,11 @@ export class SyncService<const MD extends ModelCfgs> {
             switch (mcr) {
               case ModelVersionCheckResult.MinorUpdate:
               case ModelVersionCheckResult.MajorUpdate:
-                throw new Error('NOT IMPLEMENTED');
-              // TODO implement complete download of all (!! not just changed models)
-              // return { status: SyncStatus.UpdateLocalAll };
+                alert('Downloading all since cross model version changed');
+                await this.downloadAll();
+                // TODO could be more efficient by migrating before importing into database
+                await this._migrationService.checkAndMigrateLocalDB();
+                return { status: SyncStatus.UpdateLocalAll };
 
               case ModelVersionCheckResult.RemoteMajorAhead:
                 throw new ModelVersionToImportNewerThanLocalError({
@@ -279,8 +283,10 @@ export class SyncService<const MD extends ModelCfgs> {
     isSkipModelRevMapCheck: boolean = false,
   ): Promise<void> {
     pfLog(2, `${SyncService.name}.${this._downloadToLocalMULTI.name}()`, {
-      remoteMeta: remote,
-      localMeta: local,
+      remote,
+      local,
+      remoteRev,
+      isSkipModelRevMapCheck,
     });
 
     const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({

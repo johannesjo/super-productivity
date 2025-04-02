@@ -145,10 +145,11 @@ export class PfapiService {
         await this.pf.importCompleteBackup(
           {
             data,
-            crossModelVersion: CROSS_MODEL_VERSION,
             lastUpdate: 1,
             modelVersions: {},
             timestamp: 1,
+            // NOTE since this is legacy data, we start at 0
+            crossModelVersion: 0,
           },
           isSkipLegacyWarnings,
         );
