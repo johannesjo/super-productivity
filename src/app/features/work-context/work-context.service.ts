@@ -444,11 +444,15 @@ export class WorkContextService {
     return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.e));
   }
 
-  getBreakTime$(day: string = this._dateService.todayStr()): Observable<number> {
+  getBreakTime$(
+    day: string = this._dateService.todayStr(),
+  ): Observable<number | undefined> {
     return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.bt));
   }
 
-  getBreakNr$(day: string = this._dateService.todayStr()): Observable<number> {
+  getBreakNr$(
+    day: string = this._dateService.todayStr(),
+  ): Observable<number | undefined> {
     return this.activeWorkContextTTData$.pipe(map((byDateMap) => byDateMap[day]?.b));
   }
 

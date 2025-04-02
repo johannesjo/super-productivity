@@ -15,13 +15,13 @@ export type TTDateMap<T> = Omit<
 // TODO all members should be optional
 export interface TTWorkContextData {
   // start
-  s: number;
+  s?: number;
   // end
-  e: number;
+  e?: number;
   // breakNr
-  b: number;
+  b?: number;
   // breakTime
-  bt: number;
+  bt?: number;
 }
 
 /*

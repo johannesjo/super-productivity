@@ -224,10 +224,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)),
   );
 
-  breakTime$: Observable<number> = this.dayStr$.pipe(
+  breakTime$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getBreakTime$(dayStr)),
   );
-  breakNr$: Observable<number> = this.dayStr$.pipe(
+  breakNr$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getBreakNr$(dayStr)),
   );
 

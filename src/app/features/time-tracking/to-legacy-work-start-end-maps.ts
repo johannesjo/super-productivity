@@ -12,8 +12,12 @@ export const toLegacyWorkStartEndMaps = (
   const workEnd: WorkStartEndCopy = {};
 
   Object.entries(byDate).forEach(([date, d]) => {
-    workStart[date] = d.s;
-    workEnd[date] = d.e;
+    if (d.s) {
+      workStart[date] = d.s;
+    }
+    if (d.e) {
+      workEnd[date] = d.e;
+    }
   });
 
   return { workStart, workEnd };
