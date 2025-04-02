@@ -102,6 +102,7 @@ import {
 import { taskReducer } from './store/task.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
+import { ArchiveService } from '../time-tracking/archive.service';
 
 @Injectable({
   providedIn: 'root',
@@ -115,6 +116,7 @@ export class TaskService {
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);
   private readonly _dateService = inject(DateService);
   private readonly _router = inject(Router);
+  private readonly _archiveService = inject(ArchiveService);
 
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
@@ -700,6 +702,7 @@ export class TaskService {
       });
     }
     this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
+    this._archiveService.moveTasksToArchive(tasks);
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {

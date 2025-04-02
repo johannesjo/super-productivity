@@ -1,12 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { moveToArchive_, restoreTask, updateTask, updateTaskTags } from './task.actions';
+import { restoreTask, updateTask, updateTaskTags } from './task.actions';
 import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
-import { Task, TaskArchive, TaskCopy, TaskWithSubTasks } from '../task.model';
-import { ReminderService } from '../../reminder/reminder.service';
+import { Task, TaskArchive, TaskCopy } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
-import { taskAdapter } from './task.adapter';
-import { flattenTasks } from './task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
@@ -22,7 +19,6 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 @Injectable()
 export class TaskRelatedModelEffects {
   private _actions$ = inject(Actions);
-  private _reminderService = inject(ReminderService);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _pfapiService = inject(PfapiService);
@@ -30,15 +26,6 @@ export class TaskRelatedModelEffects {
 
   // EFFECTS ===> EXTERNAL
   // ---------------------
-
-  moveToArchive$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(moveToArchive_),
-        tap(({ tasks }) => this._moveToArchive(tasks)),
-      ),
-    { dispatch: false },
-  );
 
   restoreTask$: any = createEffect(
     () =>
@@ -235,45 +222,5 @@ export class TaskRelatedModelEffects {
       },
       { isUpdateRevAndLastUpdate: true },
     );
-  }
-
-  private async _moveToArchive(tasks: TaskWithSubTasks[]): Promise<unknown> {
-    const now = Date.now();
-    const flatTasks = flattenTasks(tasks);
-    if (!flatTasks.length) {
-      return;
-    }
-
-    const currentArchive: TaskArchive =
-      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
-
-    const newArchive = taskAdapter.addMany(
-      flatTasks.map(({ subTasks, ...task }) => ({
-        ...task,
-        reminderId: undefined,
-        isDone: true,
-        plannedAt: undefined,
-        doneOn:
-          task.isDone && task.doneOn
-            ? task.doneOn
-            : task.parentId
-              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
-              : now,
-      })),
-      currentArchive,
-    );
-
-    flatTasks
-      .filter((t) => !!t.reminderId)
-      .forEach((t) => {
-        if (!t.reminderId) {
-          throw new Error('No t.reminderId');
-        }
-        this._reminderService.removeReminder(t.reminderId);
-      });
-
-    return this._pfapiService.m.taskArchive.save(newArchive, {
-      isUpdateRevAndLastUpdate: true,
-    });
   }
 }

@@ -163,6 +163,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: {
       task: initialTaskState,
       timeTracking: initialTimeTrackingState,
+      lastFlush: 0,
     },
   },
   archiveOld: {
@@ -170,6 +171,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: {
       task: initialTaskState,
       timeTracking: initialTimeTrackingState,
+      lastFlush: 0,
     },
   },
 

@@ -136,6 +136,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
         tag: {},
         lastFlush: 0,
       },
+      lastFlush: 0,
     },
     archiveOld: {
       task: { ids: [], entities: {} },
@@ -144,6 +145,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
         tag: {},
         lastFlush: 0,
       },
+      lastFlush: 0,
     },
   };
 }) as CrossModelMigrateFn;

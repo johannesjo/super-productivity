@@ -56,4 +56,5 @@ export interface TimeTrackingState {
 export interface ArchiveModel {
   timeTracking: TimeTrackingState;
   task: TaskArchive;
+  lastFlush: number;
 }
