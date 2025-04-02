@@ -4,7 +4,6 @@ import {
   ConflictData,
   EncryptAndCompressCfg,
   ExtractModelCfgType,
-  LocalMeta,
   ModelBase,
   ModelCfgs,
   ModelCfgToModelCtrl,
@@ -25,7 +24,6 @@ import { SyncProviderPrivateCfgStore } from './sync/sync-provider-private-cfg-st
 import {
   BackupImportFailedError,
   DataValidationFailedError,
-  ImpossibleError,
   InvalidModelCfgError,
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
@@ -36,6 +34,7 @@ import {
 import { TmpBackupService } from './backup/tmp-backup.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
+import { MigrationService } from './migration/migration.service';
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
@@ -58,6 +57,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   public readonly metaModel: MetaModelCtrl;
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly ev = new PFEventEmitter();
+  public readonly migrationService: MigrationService<MD>;
 
   constructor(
     modelCfgs: MD,
@@ -103,8 +103,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       this._encryptAndCompressCfg$,
       new EncryptAndCompressHandlerService(),
     );
+    this.migrationService = new MigrationService<MD>(this);
 
-    this.metaModel.load().then((metaModel) => this._checkAndMigrate(metaModel));
+    this.migrationService.checkAndMigrateLocalDB();
   }
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
@@ -389,71 +390,5 @@ export class Pfapi<const MD extends ModelCfgs> {
       );
     }
     return result as ModelCfgToModelCtrl<MD>;
-  }
-
-  private async _checkAndMigrate(meta: LocalMeta, data?: any): Promise<void> {
-    // TODO make flexible for migrating data imports and possibly sync data
-    const crossModelVersionInDB = meta.crossModelVersion;
-
-    const codeModelVersion = this.cfg?.crossModelVersion;
-    if (
-      typeof codeModelVersion !== 'number' ||
-      crossModelVersionInDB === codeModelVersion
-    ) {
-      pfLog(2, `${this._checkAndMigrate.name}() no migration needed`, {
-        modelVersionInDB: crossModelVersionInDB,
-        codeModelVersion,
-      });
-      return;
-    }
-    if (crossModelVersionInDB > codeModelVersion) {
-      throw new ImpossibleError('Saved model version is higher than current one');
-    }
-    if (!this.cfg?.crossModelMigrations) {
-      throw new ImpossibleError('No migration function provided');
-    }
-    const migrationKeys = Object.keys(this.cfg.crossModelMigrations).map((v) =>
-      Number(v),
-    );
-    const migrationsKeysToRun = migrationKeys.filter((v) => v > crossModelVersionInDB);
-    const migrationsToRun = migrationsKeysToRun.map(
-      (v) => this.cfg!.crossModelMigrations![v],
-    );
-    pfLog(2, `${this._checkAndMigrate.name}()`, {
-      migrationKeys,
-      migrationsKeysToRun,
-      migrationsToRun,
-      modelVersionInDB: crossModelVersionInDB,
-      codeModelVersion,
-    });
-
-    if (migrationsToRun.length === 0) {
-      return;
-    }
-
-    if (!data) {
-      data = await this.getAllSyncModelData(true);
-    }
-    migrationsToRun.forEach((migrateFn) => {
-      data = migrateFn(data);
-    });
-    await this.importAllSycModelData({
-      data,
-      crossModelVersion: codeModelVersion,
-      isBackupData: true,
-      isAttemptRepair: true,
-    });
-    await this.metaModel.save({
-      ...meta,
-      crossModelVersion: codeModelVersion,
-      lastUpdate: Date.now(),
-    });
-
-    // TODO single model migration
-    // const modelIds = Object.keys(this.m);
-    // for (const modelId of modelIds) {
-    //   const modelCtrl = this.m[modelId];
-    //
-    // }
   }
 }
