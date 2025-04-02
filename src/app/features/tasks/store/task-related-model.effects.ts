@@ -1,12 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  addTimeSpent,
-  moveToArchive_,
-  restoreTask,
-  updateTask,
-  updateTaskTags,
-} from './task.actions';
+import { moveToArchive_, restoreTask, updateTask, updateTaskTags } from './task.actions';
 import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { Task, TaskArchive, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -23,6 +17,7 @@ import { moveProjectTaskToRegularList } from '../../project/store/project.action
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -62,7 +57,7 @@ export class TaskRelatedModelEffects {
   autoAddTodayTagOnTracking: any = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
-        ofType(addTimeSpent),
+        ofType(TimeTrackingActions.addTimeSpent),
         switchMap(({ task }) =>
           task.parentId
             ? this._taskService.getByIdOnce$(task.parentId).pipe(

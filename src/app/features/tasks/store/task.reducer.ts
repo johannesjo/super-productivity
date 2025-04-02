@@ -2,7 +2,6 @@ import {
   __updateMultipleTaskSimple,
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -68,6 +67,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -112,6 +112,21 @@ export const taskReducer = createReducer<TaskState>(
           : state.currentTaskId,
     });
   }),
+
+  on(TimeTrackingActions.addTimeSpent, (state, { task, date, duration }) => {
+    const currentTimeSpentForTickDay =
+      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+    return updateTimeSpentForTask(
+      task.id,
+      {
+        ...task.timeSpentOnDay,
+        [date]: currentTimeSpentForTickDay + duration,
+      },
+      state,
+    );
+  }),
+
+  //--------------------------------
 
   // TODO check if working
   on(setCurrentTask, (state, { id }) => {
@@ -390,19 +405,6 @@ export const taskReducer = createReducer<TaskState>(
         changes: {
           subTaskIds: arrayMoveToEnd(parentSubTaskIds, id),
         },
-      },
-      state,
-    );
-  }),
-
-  on(addTimeSpent, (state, { task, date, duration }) => {
-    const currentTimeSpentForTickDay =
-      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
-    return updateTimeSpentForTask(
-      task.id,
-      {
-        ...task.timeSpentOnDay,
-        [date]: currentTimeSpentForTickDay + duration,
       },
       state,
     );

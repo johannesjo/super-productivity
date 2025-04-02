@@ -19,7 +19,6 @@ import { select, Store } from '@ngrx/store';
 import {
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -102,6 +101,7 @@ import {
 } from '../../pfapi/pfapi-helper';
 import { taskReducer } from './store/task.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -637,7 +637,9 @@ export class TaskService {
     date: string = this._dateService.todayStr(),
     isFromTrackingReminder = false,
   ): void {
-    this._store.dispatch(addTimeSpent({ task, date, duration, isFromTrackingReminder }));
+    this._store.dispatch(
+      TimeTrackingActions.addTimeSpent({ task, date, duration, isFromTrackingReminder }),
+    );
   }
 
   removeTimeSpent(

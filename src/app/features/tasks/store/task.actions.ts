@@ -172,17 +172,6 @@ export const moveSubTaskToBottom = createAction(
   props<{ id: string; parentId: string }>(),
 );
 
-export const addTimeSpent = createAction(
-  TaskActionTypes.AddTimeSpent,
-
-  props<{
-    task: Task;
-    date: string;
-    duration: number;
-    isFromTrackingReminder: boolean;
-  }>(),
-);
-
 export const removeTimeSpent = createAction(
   TaskActionTypes.RemoveTimeSpent,
 

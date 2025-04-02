@@ -3,7 +3,6 @@ import { createFeature, createReducer, on } from '@ngrx/store';
 import { TimeTrackingState } from '../time-tracking.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
-import { addTimeSpent } from '../../tasks/store/task.actions';
 import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 
 export const TIME_TRACKING_FEATURE_KEY = 'timeTracking' as const;
@@ -24,7 +23,7 @@ export const timeTrackingReducer = createReducer(
       : state,
   ),
 
-  on(addTimeSpent, (state, { task, date }) => {
+  on(TimeTrackingActions.addTimeSpent, (state, { task, date }) => {
     const isUpdateProject = !!task.projectId;
     const isUpdateTags = task.tagIds && !!task.tagIds.length;
     return {

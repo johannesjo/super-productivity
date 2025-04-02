@@ -4,7 +4,6 @@ import {
   __updateMultipleTaskSimple,
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -42,6 +41,7 @@ import {
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteProject } from '../../project/store/project.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -55,7 +55,6 @@ export class TaskDbEffects {
         ofType(
           addTask,
           restoreTask,
-          addTimeSpent,
           deleteTask,
           deleteTasks,
           undoDeleteTask,
@@ -97,6 +96,9 @@ export class TaskDbEffects {
 
           // PROJECT
           deleteProject,
+
+          // TIME TRACKING
+          TimeTrackingActions.addTimeSpent,
         ),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState, true)),

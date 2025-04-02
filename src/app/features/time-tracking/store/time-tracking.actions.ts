@@ -2,6 +2,7 @@
 import { createActionGroup, props } from '@ngrx/store';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TTWorkContextData } from '../time-tracking.model';
+import { Task } from '../../tasks/task.model';
 
 export const TimeTrackingActions = createActionGroup({
   source: 'TimeTracking',
@@ -10,6 +11,12 @@ export const TimeTrackingActions = createActionGroup({
       ctx: { id: string; type: WorkContextType };
       date: string;
       updates: Partial<TTWorkContextData>;
+    }>(),
+    'Add time spent': props<{
+      task: Task;
+      date: string;
+      duration: number;
+      isFromTrackingReminder: boolean;
     }>(),
   },
 });

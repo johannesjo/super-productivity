@@ -7,7 +7,6 @@ import { select, Store } from '@ngrx/store';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { selectTimeTrackingState } from './time-tracking.selectors';
 import { TimeTrackingActions } from './time-tracking.actions';
-import { addTimeSpent } from '../../tasks/store/task.actions';
 
 @Injectable()
 export class TimeTrackingEffects {
@@ -28,7 +27,10 @@ export class TimeTrackingEffects {
   updateTimeTrackingStorage$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addTimeSpent, TimeTrackingActions.updateWorkContextData),
+        ofType(
+          TimeTrackingActions.addTimeSpent,
+          TimeTrackingActions.updateWorkContextData,
+        ),
         switchMap(() => this.saveToLs$),
       ),
     { dispatch: false },
