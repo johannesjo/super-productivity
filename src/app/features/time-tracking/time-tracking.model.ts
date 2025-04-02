@@ -12,6 +12,7 @@ export type TTDateMap<T> = Omit<
 
 // Core time tracking entities
 // NOTE: shortened to 1 letter to save disk space
+// TODO all members should be optional
 export interface TTWorkContextData {
   // start
   s: number;
@@ -22,6 +23,20 @@ export interface TTWorkContextData {
   // breakTime
   bt: number;
 }
+
+/*
+project:
+  [projectId]:
+    [date]:
+      s: number;
+      ...
+
+project: -> TTWorkContextSessionMap
+  [projectId]: -> TTWorkSessionByDateMap
+    [date]: -> TTWorkContextData
+      s: number;
+      ...
+ */
 
 // Map of work session stats by date
 export type TTWorkSessionByDateMap = TTDateMap<TTWorkContextData>;
