@@ -90,7 +90,6 @@ import { JiraIssueEffects } from '../features/issue/providers/jira/jira-issue/ji
 import { OpenProjectEffects } from '../features/issue/providers/open-project/open-project-issue/store/open-project.effects';
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
-import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { BoardsEffects } from '../features/boards/store/boards.effects';
 import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
@@ -182,8 +181,6 @@ import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracki
     EffectsModule.forFeature([OpenProjectEffects]),
     EffectsModule.forFeature([ReminderCountdownEffects]),
     EffectsModule.forFeature([SyncEffects]),
-
-    LocalBackupModule,
   ],
 })
 export class FeatureStoresModule {}
