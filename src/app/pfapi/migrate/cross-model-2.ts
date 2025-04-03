@@ -129,7 +129,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       tag: tagTimeTracking,
       lastFlush: 0,
     },
-    archive: {
+    archiveYoung: {
       task: taskArchive,
       timeTracking: {
         project: {},

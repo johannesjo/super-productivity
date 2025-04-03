@@ -2,30 +2,30 @@ import { ArchiveModel, TimeTrackingState } from './time-tracking.model';
 
 export const sortDataToFlush = ({
   timeTracking,
-  archive,
+  archiveYoung,
   archiveOld,
 }: {
   timeTracking: TimeTrackingState;
-  archive: ArchiveModel;
+  archiveYoung: ArchiveModel;
   archiveOld: ArchiveModel;
 }): {
   timeTracking: TimeTrackingState;
-  archive: ArchiveModel;
+  archiveYoung: ArchiveModel;
   archiveOld: ArchiveModel;
 } => {
-  return { timeTracking, archive, archiveOld };
+  return { timeTracking, archiveYoung, archiveOld };
 };
 
 export const sortTaskArchive = ({
-  archive,
+  archiveYoung,
   archiveOld,
 }: {
-  archive: ArchiveModel;
+  archiveYoung: ArchiveModel;
   archiveOld: ArchiveModel;
 }): {
-  archive: ArchiveModel;
+  archiveYoung: ArchiveModel;
   archiveOld: ArchiveModel;
 } => {
   // TODO sort all tasks with....
-  return { archive, archiveOld };
+  return { archiveYoung, archiveOld };
 };

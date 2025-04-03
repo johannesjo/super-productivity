@@ -24,8 +24,8 @@ export class ArchiveService {
       return;
     }
 
-    const currentArchive = await this._pfapiService.m.archive.load();
-    const taskArchiveState = currentArchive.task || createEmptyEntity();
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const newTaskArchive = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
@@ -43,9 +43,9 @@ export class ArchiveService {
       taskArchiveState,
     );
 
-    await this._pfapiService.m.archive.save(
+    await this._pfapiService.m.archiveYoung.save(
       {
-        ...currentArchive,
+        ...archiveYoung,
         task: newTaskArchive,
       },
       {
@@ -54,18 +54,18 @@ export class ArchiveService {
     );
 
     // if is more than 14 days since last flush, flush the archive
-    if (now - currentArchive.lastFlush > 1000 * 60 * 60 * 24 * 14) {
+    if (now - archiveYoung.lastFlush > 1000 * 60 * 60 * 24 * 14) {
       await this._flushToArchive();
     }
   }
 
   private async _flushToArchive(): Promise<void> {
     const timeTracking = await this._pfapiService.m.timeTracking.load();
-    const archive = await this._pfapiService.m.archive.load();
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const archiveOld = await this._pfapiService.m.archiveOld.load();
 
     const newVals = sortDataToFlush({
-      archive,
+      archiveYoung: archiveYoung,
       archiveOld,
       timeTracking,
     });

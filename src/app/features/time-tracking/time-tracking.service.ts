@@ -21,10 +21,10 @@ export class TimeTrackingService {
   private _archiveOldUpdateTrigger$ = new Subject();
 
   current$: Observable<TimeTrackingState> = this._store.select(selectTimeTrackingState);
-  archive$: Observable<TimeTrackingState> = this._archiveUpdateTrigger$.pipe(
+  archiveYoung$: Observable<TimeTrackingState> = this._archiveUpdateTrigger$.pipe(
     startWith(null),
     switchMap(async () => {
-      return (await this._pfapiService.m.archive.load()).timeTracking;
+      return (await this._pfapiService.m.archiveYoung.load()).timeTracking;
     }),
     shareReplay(1),
   );
@@ -39,7 +39,7 @@ export class TimeTrackingService {
 
   state$: Observable<TimeTrackingState> = combineLatest([
     this.current$,
-    this.archive$,
+    this.archiveYoung$,
     this.archiveOld$,
   ]).pipe(
     map(([current, archive, oldArchive]) =>

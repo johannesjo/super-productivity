@@ -75,7 +75,7 @@ export type PfapiAllModelCfg = {
 
   timeTracking: ModelCfg<TimeTrackingState>;
 
-  archive: ModelCfg<ArchiveModel>;
+  archiveYoung: ModelCfg<ArchiveModel>;
   archiveOld: ModelCfg<ArchiveModel>;
 };
 export type AppDataCompleteNew = AllModelData<PfapiAllModelCfg>;
@@ -158,7 +158,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTimeTrackingState,
   },
-  archive: {
+  archiveYoung: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: {
       task: initialTaskState,
