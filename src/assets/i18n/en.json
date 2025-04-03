@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "This board has no panels configured. Add some panels to it."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Add Bookmark",
-        "DROP": "Drop here to add a bookmark",
-        "EDIT": "Edit Bookmarks",
-        "NO_BOOKMARKS": "You have no project bookmarks. Add one via drag and drop or by clicking on the 'plus' button."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Add Bookmark",
-        "EDIT_BOOKMARK": "Edit Bookmark",
-        "LABELS": {
-          "COMMAND": "Command",
-          "FILE": "File Path",
-          "IMG": "Image",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Select an icon",
-        "SELECT_TYPE": "Select a type",
-        "TYPES": {
-          "COMMAND": "Command (custom shell command)",
-          "FILE": "File (opened by default system app)",
-          "IMG": "Image (shown as thumbnail)",
-          "LINK": "Link (opens in browser)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup CalDav for Project"
