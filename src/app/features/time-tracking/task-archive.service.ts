@@ -1,10 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import {
-  modelExecAction,
-  modelExecActions,
-  modelGetById,
-} from '../../pfapi/pfapi-helper';
-import {
   deleteTasks,
   removeTagsForAllTasks,
   roundTimeSpentForDay,
@@ -12,11 +7,11 @@ import {
 } from '../tasks/store/task.actions';
 import { taskReducer } from '../tasks/store/task.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import { Task, TaskArchive } from '../tasks/task.model';
+import { Task, TaskArchive, TaskState } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
 import { Update } from '@ngrx/entity';
-import { unique } from '../../util/unique';
 import { createEmptyEntity } from '../../util/create-empty-entity';
+import { Action } from '@ngrx/store';
 
 @Injectable({
   providedIn: 'root',
@@ -26,40 +21,53 @@ export class TaskArchiveService {
 
   constructor() {}
 
-  // TODO refactor to loadAll and loadRecent maybe
   async load(isSkipMigration = false): Promise<TaskArchive> {
-    return this._pfapiService.m.taskArchive.load(isSkipMigration);
+    // NOTE: these are already saved in memory to speed up things
+    const archive = await this._pfapiService.m.archive.load(isSkipMigration);
+    const archiveOld = await this._pfapiService.m.archiveOld.load(isSkipMigration);
+    return {
+      ids: [...archive.task.ids, ...archiveOld.task.ids],
+      entities: {
+        ...archive.task.entities,
+        ...archiveOld.task.entities,
+      },
+    };
   }
 
-  // TODO error
   async getById(id: string): Promise<Task> {
-    const r = await modelGetById(id, this._pfapiService.m.taskArchive);
-    if (!r) {
-      throw new Error('Archive task not found by id');
+    const archive = await this._pfapiService.m.archive.load();
+    if (archive.task.entities[id]) {
+      return archive.task.entities[id];
     }
-    return r as Task;
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    if (archiveOld.task.entities[id]) {
+      return archiveOld.task.entities[id];
+    }
+    throw new Error('Archive task not found by id');
   }
 
   async deleteTasks(archiveTaskIdsToDelete: string[]): Promise<void> {
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      deleteTasks({ taskIds: archiveTaskIdsToDelete }),
-      taskReducer as any,
-      true,
-    );
-
-    // TODO old archive also
-    // await modelExecAction(
-    //   this._taskArchiveService,
-    //   deleteTasks({ taskIds: archiveTaskIdsToDelete }),
-    //   taskReducer as any,
-    //   true,
-    // );
+    await this._execAction(deleteTasks({ taskIds: archiveTaskIdsToDelete }));
   }
 
-  async removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<any> {
+  async updateTask(id: string, changedFields: Partial<Task>): Promise<void> {
+    await this._execAction(
+      updateTask({
+        task: {
+          id,
+          changes: changedFields,
+        },
+      }),
+    );
+  }
+
+  async updateTasks(updates: Update<Task>[]): Promise<void> {
+    await this._execActions(updates.map((upd) => updateTask({ task: upd })));
+  }
+
+  // -----------------------------------------
+  async removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
-    // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
           const t = taskArchiveState.entities[id] as Task;
@@ -69,22 +77,11 @@ export class TaskArchiveService {
           return t.projectId === projectIdToDelete;
         })
       : [];
-    console.log(
-      'Archive TaskIds to remove/unique',
-      archiveTaskIdsToDelete,
-      unique(archiveTaskIdsToDelete),
-    );
     await this.deleteTasks(archiveTaskIdsToDelete);
   }
 
   async removeTagsFromAllTasks(tagIdsToRemove: string[]): Promise<void> {
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      removeTagsForAllTasks({ tagIdsToRemove }),
-      taskReducer as any,
-      true,
-    );
-    // TODO old archive also
+    await this._execAction(removeTagsForAllTasks({ tagIdsToRemove }));
 
     const isOrphanedParentTask = (t: Task): boolean =>
       !t.projectId && !t.tagIds.length && !t.parentId;
@@ -101,7 +98,7 @@ export class TaskArchiveService {
         archiveSubTaskIdsToDelete = archiveSubTaskIdsToDelete.concat(t.subTaskIds);
       }
     });
-    // TODO update to today tag instead
+    // TODO update to today tag instead maybe
     await this.deleteTasks([...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete]);
   }
 
@@ -124,31 +121,8 @@ export class TaskArchiveService {
           },
         };
       });
-      await this.updateArchiveTasks(updates);
+      await this.updateTasks(updates);
     }
-  }
-
-  async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      updateTask({
-        task: {
-          id,
-          changes: changedFields,
-        },
-      }),
-      taskReducer as any,
-      true,
-    );
-  }
-
-  async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    await modelExecActions(
-      this._pfapiService.m.taskArchive,
-      updates.map((upd) => updateTask({ task: upd })),
-      taskReducer as any,
-      true,
-    );
   }
 
   async roundTimeSpent({
@@ -164,11 +138,67 @@ export class TaskArchiveService {
     isRoundUp: boolean;
     projectId?: string | null;
   }): Promise<void> {
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
+    await this._execAction(
       roundTimeSpentForDay({ day, taskIds, roundTo, isRoundUp, projectId }),
-      taskReducer as any,
-      true,
+    );
+  }
+
+  // -----------------------------------------
+  private async _execAction(
+    action: Action,
+    isUpdateRevAndLastUpdate = true,
+  ): Promise<void> {
+    const archive = await this._pfapiService.m.archive.load();
+    const newTaskState = taskReducer(archive.task as TaskState, action);
+
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const newTaskStateArchiveOld = taskReducer(archiveOld.task as TaskState, action);
+
+    await this._pfapiService.m.archive.save(
+      {
+        ...archive,
+        task: newTaskState,
+      },
+      { isUpdateRevAndLastUpdate },
+    );
+    await this._pfapiService.m.archiveOld.save(
+      {
+        ...archive,
+        task: newTaskStateArchiveOld,
+      },
+      { isUpdateRevAndLastUpdate },
+    );
+  }
+
+  private async _execActions(
+    actions: Action[],
+    isUpdateRevAndLastUpdate = true,
+  ): Promise<void> {
+    const archive = await this._pfapiService.m.archive.load();
+    const newTaskState = actions.reduce(
+      (acc, act) => taskReducer(acc, act),
+      archive.task as TaskState,
+    );
+
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const newTaskStateArchiveOld = actions.reduce(
+      (acc, act) => taskReducer(acc, act),
+      archiveOld.task as TaskState,
+    );
+
+    await this._pfapiService.m.archive.save(
+      {
+        ...archive,
+        task: newTaskState,
+      },
+      { isUpdateRevAndLastUpdate },
+    );
+    await this._pfapiService.m.archiveOld.save(
+      {
+        ...archive,
+        task: newTaskStateArchiveOld,
+      },
+      { isUpdateRevAndLastUpdate },
     );
   }
 }

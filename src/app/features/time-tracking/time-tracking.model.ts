@@ -55,6 +55,7 @@ export interface TimeTrackingState {
 // Archive model
 export interface ArchiveModel {
   timeTracking: TimeTrackingState;
+  // TODO rename to taskArchive or similar
   task: TaskArchive;
   lastFlush: number;
 }

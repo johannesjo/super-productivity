@@ -69,7 +69,7 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
         };
       });
 
-    await this._taskArchiveService.updateArchiveTasks(archiveTaskUpdates);
+    await this._taskArchiveService.updateTasks(archiveTaskUpdates);
 
     console.log('unlinkAllTasksOnProviderDeletion$', {
       regularTasks,

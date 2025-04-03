@@ -902,12 +902,12 @@ export class TaskService {
   // TODO remove in favor of calling this directly
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    return this._taskArchiveService.updateArchiveTask(id, changedFields);
+    return this._taskArchiveService.updateTask(id, changedFields);
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    return this._taskArchiveService.updateArchiveTasks(updates);
+    return this._taskArchiveService.updateTasks(updates);
   }
 
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
