@@ -216,6 +216,7 @@ sudo snap set core experimental.refresh-app-awareness=true
 </a>
 
 #### Flatpak - Most distributions
+
 Must install Flatpak first. See [setup instructions for all distributions](https://flathub.org/setup).
 
 Install via command-line:
@@ -302,9 +303,9 @@ There are several ways to help.
 
 8. **[Translations](https://github.com/johannesjo/super-productivity/tree/master/src/assets/i18n), Icons, etc.**: You don't have to be a programmer to help. Some of the icons really need improvement and many of the translations could use some love.
 
-[![inlang status badge](https://badge.inlang.com/?url=github.com/johannesjo/super-productivity)](https://fink.inlang.com/github.com/johannesjo/super-productivity?ref=badge)
-
-You can use the Fink Localization Editor to edit, lint, and add translations for different languages. [Contribute via fink Guide](https://inlang.com/g/6ddyhpoi).
+[//]: # '[![inlang status badge](https://badge.inlang.com/?url=github.com/johannesjo/super-productivity)](https://fink.inlang.com/github.com/johannesjo/super-productivity?ref=badge)'
+[//]: #
+[//]: # 'You can use the Fink Localization Editor to edit, lint, and add translations for different languages. [Contribute via fink Guide](https://inlang.com/g/6ddyhpoi).'
 
 9. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
