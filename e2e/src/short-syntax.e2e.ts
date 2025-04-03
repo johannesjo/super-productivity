@@ -1,7 +1,7 @@
 import { NBrowser } from '../n-browser-interface';
-import { cssSelectors, WORK_VIEW_URL, BASE } from '../e2e.const';
+import { BASE, cssSelectors, WORK_VIEW_URL } from '../e2e.const';
 
-const { READY_TO_WORK_BTN } = cssSelectors;
+const { READY_TO_WORK_BTN, ADD_TASK_GLOBAL_SEL } = cssSelectors;
 const CONFIRM_CREATE_TAG_BTN = `dialog-confirm button[e2e="confirmBtn"]`;
 const BASIC_TAG_TITLE = 'task tag-list tag:last-of-type .tag-title';
 const TASK_TAG_SELECTOR = 'task tag-list tag';
@@ -28,8 +28,10 @@ module.exports = {
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
       .waitForElementVisible(READY_TO_WORK_BTN)
-
-      .addTaskWithRepeatedTags('some task <3 #duplicateTag')
+      .setValue('body', 'A')
+      .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
+      .setValue(ADD_TASK_GLOBAL_SEL, `Test creating new tag #duplicateTag #duplicateTag`)
+      .setValue(ADD_TASK_GLOBAL_SEL, browser.Keys.ENTER)
       .waitForElementPresent(CONFIRM_CREATE_TAG_BTN)
       .click(CONFIRM_CREATE_TAG_BTN)
       .waitForElementPresent(BASIC_TAG_TITLE)
@@ -39,14 +41,17 @@ module.exports = {
       .assert.textContains(BASIC_TAG_TITLE, 'duplicateTag')
 
       // Verify that only one tag is appended
-      .elements(`css selector`, `${TASK}:last-of-type ${TASK_TAG_SELECTOR}`, (result) => {
+      .elements(`css selector`, TASK_TAG_SELECTOR, (result) => {
         if (Array.isArray(result.value)) {
+          console.log(result);
+
           console.log('Number of tags found for this task:', result.value.length);
           // Assert that only one tag is appended to this task
           browser.assert.strictEqual(
             result.value.length,
-            1,
-            `Expected 1 tag for this task, but found ${result.value.length}`,
+            // NOTE: there is 1 "tag" for the default project
+            2,
+            `Expected 2 tags for this task, but found ${result.value.length}`,
           );
         } else {
           console.error('Unexpected result format:', result.value);
