@@ -3,13 +3,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  effect,
   ElementRef,
   inject,
   input,
-  OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
@@ -27,7 +26,7 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, switchMap, take } from 'rxjs/operators';
+import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
@@ -54,6 +53,7 @@ import { BacklogComponent } from './backlog/backlog.component';
 import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { flattenTasks } from '../tasks/store/task.selectors';
 
 @Component({
   selector: 'work-view',
@@ -87,7 +87,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     TranslatePipe,
   ],
 })
-export class WorkViewComponent implements OnInit, OnChanges, OnDestroy, AfterContentInit {
+export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   taskService = inject(TaskService);
   takeABreakService = inject(TakeABreakService);
   planningModeService = inject(PlanningModeService);
@@ -110,6 +110,7 @@ export class WorkViewComponent implements OnInit, OnChanges, OnDestroy, AfterCon
   todayRemainingInProject = toSignal(this.workContextService.todayRemainingInProject$);
   estimateRemainingToday = toSignal(this.workContextService.estimateRemainingToday$);
   workingToday = toSignal(this.workContextService.workingToday$);
+  selectedTaskId = toSignal(this.taskService.selectedTaskId$);
 
   isShowTimeWorkedWithoutBreak: boolean = true;
   splitInputPos: number = 100;
@@ -148,6 +149,23 @@ export class WorkViewComponent implements OnInit, OnChanges, OnDestroy, AfterCon
     }
   }
 
+  constructor() {
+    // Setup effect to track task changes
+    effect(() => {
+      const currentSelectedId = this.selectedTaskId();
+      if (!currentSelectedId) return;
+
+      const undoneArr = flattenTasks(this.undoneTasks());
+      if (undoneArr.some((t) => t.id === currentSelectedId)) return;
+
+      const doneArr = flattenTasks(this.doneTasks());
+      if (doneArr.some((t) => t.id === currentSelectedId)) return;
+
+      // if task really is gone
+      this.taskService.setSelectedId(null);
+    });
+  }
+
   ngOnInit(): void {
     // eslint-disable-next-line no-mixed-operators
     this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
@@ -179,26 +197,6 @@ export class WorkViewComponent implements OnInit, OnChanges, OnDestroy, AfterCon
         }
       }),
     );
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    const undoneChanges = changes['undoneTasks'];
-    const doneChanges = changes['doneTasks'];
-
-    if ((undoneChanges || doneChanges) && this.taskService.selectedTaskId$) {
-      const undoneArr = this.undoneTasks();
-      const doneArr = this.doneTasks();
-      const allTasks = [...undoneArr, ...doneArr];
-
-      this.taskService.selectedTaskId$.pipe(take(1)).subscribe((selectedTaskId) => {
-        if (selectedTaskId) {
-          const isSelectedStillPresent = allTasks.some((t) => t.id === selectedTaskId);
-          if (!isSelectedStillPresent) {
-            this.taskService.setSelectedId(null);
-          }
-        }
-      });
-    }
   }
 
   ngOnDestroy(): void {
