@@ -8,16 +8,14 @@ import { Observable } from 'rxjs';
 import { Update } from '@ngrx/entity/src/models';
 import { Store } from '@ngrx/store';
 import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
-import { modelExecAction } from '../../../pfapi/pfapi-helper';
-import { taskReducer } from '../../tasks/store/task.reducer';
-import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
-  private _pfapiService = inject(PfapiService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
     issueId: undefined,
@@ -71,12 +69,7 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
         };
       });
 
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
-      taskReducer as any,
-      true,
-    );
+    await this._taskArchiveService.updateArchiveTasks(archiveTaskUpdates);
 
     console.log('unlinkAllTasksOnProviderDeletion$', {
       regularTasks,

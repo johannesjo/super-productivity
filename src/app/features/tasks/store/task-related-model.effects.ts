@@ -2,27 +2,26 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { restoreTask, updateTask, updateTaskTags } from './task.actions';
 import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
-import { Task, TaskArchive, TaskCopy } from '../task.model';
+import { Task, TaskCopy } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
 import { EMPTY, Observable, of } from 'rxjs';
-import { createEmptyEntity } from '../../../util/create-empty-entity';
 import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class TaskRelatedModelEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   // EFFECTS ===> EXTERNAL
   // ---------------------
@@ -203,24 +202,6 @@ export class TaskRelatedModelEffects {
 
   private async _removeFromArchive(task: Task): Promise<unknown> {
     const taskIds = [task.id, ...task.subTaskIds];
-    const currentArchive: TaskArchive =
-      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
-    const allIds = (currentArchive.ids as string[]) || [];
-    const idsToRemove: string[] = [];
-
-    taskIds.forEach((taskId) => {
-      if (allIds.indexOf(taskId) > -1) {
-        delete currentArchive.entities[taskId];
-        idsToRemove.push(taskId);
-      }
-    });
-
-    return this._pfapiService.m.taskArchive.save(
-      {
-        ...currentArchive,
-        ids: allIds.filter((id) => !idsToRemove.includes(id)),
-      },
-      { isUpdateRevAndLastUpdate: true },
-    );
+    return this._taskArchiveService.deleteTasks(taskIds);
   }
 }

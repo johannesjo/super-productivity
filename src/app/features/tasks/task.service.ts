@@ -94,15 +94,11 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
-import {
-  modelExecAction,
-  modelExecActions,
-  modelGetById,
-} from '../../pfapi/pfapi-helper';
-import { taskReducer } from './store/task.reducer';
+import { modelGetById } from '../../pfapi/pfapi-helper';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
 
 @Injectable({
   providedIn: 'root',
@@ -117,6 +113,7 @@ export class TaskService {
   private readonly _dateService = inject(DateService);
   private readonly _router = inject(Router);
   private readonly _archiveService = inject(ArchiveService);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
 
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
@@ -760,12 +757,13 @@ export class TaskService {
     );
 
     // archive
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
-      taskReducer as any,
-      true,
-    );
+    await this._taskArchiveService.roundTimeSpent({
+      day,
+      taskIds: archivedIds,
+      roundTo,
+      isRoundUp,
+      projectId,
+    });
   }
 
   // REMINDER
@@ -901,41 +899,27 @@ export class TaskService {
     }
   }
 
+  // TODO remove in favor of calling this directly
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      updateTask({
-        task: {
-          id,
-          changes: changedFields,
-        },
-      }),
-      taskReducer as any,
-      true,
-    );
+    return this._taskArchiveService.updateArchiveTask(id, changedFields);
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    await modelExecActions(
-      this._pfapiService.m.taskArchive,
-      updates.map((upd) => updateTask({ task: upd })),
-      taskReducer as any,
-      true,
-    );
+    return this._taskArchiveService.updateArchiveTasks(updates);
   }
 
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
       return (
         (await modelGetById(id, this._pfapiService.m.task)) ||
-        (await modelGetById(id, this._pfapiService.m.taskArchive))
+        this._taskArchiveService.getById(id)
       );
     }
 
     if (isArchive) {
-      return await modelGetById(id, this._pfapiService.m.taskArchive);
+      return await this._taskArchiveService.getById(id);
     } else {
       return await modelGetById(id, this._pfapiService.m.task);
     }
@@ -943,7 +927,7 @@ export class TaskService {
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -952,7 +936,7 @@ export class TaskService {
   }
 
   async getArchiveTasksForRepeatCfgId(repeatCfgId: string): Promise<Task[]> {
-    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return archiveTasks.filter(
@@ -961,8 +945,7 @@ export class TaskService {
   }
 
   async getArchivedTasks(): Promise<Task[]> {
-    const archiveTaskState: TaskArchive =
-      await this._pfapiService.m.taskArchive.load(true);
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load(true);
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;
@@ -987,7 +970,7 @@ export class TaskService {
 
   async getAllTasksEverywhere(): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks] as Task[];
@@ -1023,7 +1006,7 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive = await this._pfapiService.m.taskArchive.load();
+      const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids

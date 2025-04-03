@@ -28,12 +28,10 @@ import {
   addTask,
   convertToMainTask,
   deleteTask,
-  deleteTasks,
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
 } from '../../tasks/store/task.actions';
-import { ProjectService } from '../project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
 import {
@@ -53,21 +51,18 @@ import {
   moveNoteToOtherProject,
   updateNoteOrder,
 } from '../../note/store/note.actions';
-import { DateService } from 'src/app/core/date/date.service';
 import { ReminderService } from '../../reminder/reminder.service';
-import { modelExecAction } from '../../../pfapi/pfapi-helper';
-import { taskReducer } from '../../tasks/store/task.reducer';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class ProjectEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _snackService = inject(SnackService);
-  private _projectService = inject(ProjectService);
+  private _taskArchiveService = inject(TaskArchiveService);
   private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _dateService = inject(DateService);
   private _reminderService = inject(ReminderService);
 
   syncProjectToLs$: Observable<unknown> = createEffect(
@@ -294,7 +289,7 @@ export class ProjectEffects {
   private async _removeAllArchiveTasksForProject(
     projectIdToDelete: string,
   ): Promise<any> {
-    const taskArchiveState: TaskArchive = await this._pfapiService.m.taskArchive.load();
+    const taskArchiveState: TaskArchive = await this._taskArchiveService.load();
     // NOTE: task archive might not if there never was a day completed
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
@@ -310,13 +305,7 @@ export class ProjectEffects {
       archiveTaskIdsToDelete,
       unique(archiveTaskIdsToDelete),
     );
-    // remove archive
-    await modelExecAction(
-      this._pfapiService.m.taskArchive,
-      deleteTasks({ taskIds: archiveTaskIdsToDelete }),
-      taskReducer as any,
-      true,
-    );
+    await this._taskArchiveService.deleteTasks(archiveTaskIdsToDelete);
   }
 
   private saveToLs$(isUpdateRevAndLastUpdate: boolean): Observable<unknown> {

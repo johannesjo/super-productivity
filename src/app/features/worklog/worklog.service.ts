@@ -33,6 +33,7 @@ import { DateAdapter } from '@angular/material/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -43,6 +44,7 @@ export class WorklogService {
   private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _router = inject(Router);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   // treated as private but needs to be assigned first
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
@@ -212,8 +214,7 @@ export class WorklogService {
   private async _loadWorklogForWorkContext(
     workContext: WorkContext,
   ): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive =
-      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
+    const archive = (await this._taskArchiveService.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();
@@ -247,8 +248,7 @@ export class WorklogService {
   private async _loadQuickHistoryForWorkContext(
     workContext: WorkContext,
   ): Promise<WorklogYearsWithWeeks | null> {
-    const archive =
-      (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
+    const archive = (await this._taskArchiveService.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();

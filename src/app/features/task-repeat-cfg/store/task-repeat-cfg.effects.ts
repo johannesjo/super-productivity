@@ -22,7 +22,7 @@ import {
   upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
-import { Task, TaskArchive, TaskCopy } from '../../tasks/task.model';
+import { Task, TaskCopy } from '../../tasks/task.model';
 import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
@@ -45,6 +45,7 @@ import { isToday } from '../../../util/is-today.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { deleteProject } from '../../project/store/project.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -57,6 +58,7 @@ export class TaskRepeatCfgEffects {
   private _syncTriggerService = inject(SyncTriggerService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _matDialog = inject(MatDialog);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   updateTaskRepeatCfgs$: any = createEffect(
     () =>
@@ -325,25 +327,6 @@ export class TaskRepeatCfgEffects {
   }
 
   private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
-    this._pfapiService.m.taskArchive.load().then((taskArchive: TaskArchive) => {
-      // if not yet initialized for project
-      if (!taskArchive) {
-        return;
-      }
-
-      const newState = { ...taskArchive };
-      const ids = newState.ids as string[];
-
-      const tasksWithRepeatCfgId = ids
-        .map((id) => newState.entities[id] as Task)
-        .filter((task) => task.repeatCfgId === repeatConfigId);
-
-      if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
-        tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
-        this._pfapiService.m.taskArchive.save(newState, {
-          isUpdateRevAndLastUpdate: true,
-        });
-      }
-    });
+    this._taskArchiveService.removeRepeatCfgFromArchiveTasks(repeatConfigId);
   }
 }

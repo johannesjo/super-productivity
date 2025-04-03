@@ -31,7 +31,6 @@ import {
   deleteTasks,
   moveToArchive_,
   moveToOtherProject,
-  removeTagsForAllTasks,
   restoreTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
@@ -50,14 +49,12 @@ import {
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { DateService } from 'src/app/core/date/date.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
-import { modelExecAction } from '../../../pfapi/pfapi-helper';
-import { taskReducer } from '../../tasks/store/task.reducer';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class TagEffects {
@@ -70,7 +67,7 @@ export class TagEffects {
   private _taskService = inject(TaskService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _router = inject(Router);
-  private _dateService = inject(DateService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
@@ -174,12 +171,7 @@ export class TagEffects {
           // remove from all tasks
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
-          await modelExecAction(
-            this._pfapiService.m.taskArchive,
-            removeTagsForAllTasks({ tagIdsToRemove }),
-            taskReducer as any,
-            true,
-          );
+          await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
 
           const isOrphanedParentTask = (t: Task): boolean =>
             !t.projectId && !t.tagIds.length && !t.parentId;
@@ -193,7 +185,7 @@ export class TagEffects {
 
           // remove orphaned for archive
           const taskArchiveState: TaskArchive =
-            (await this._pfapiService.m.taskArchive.load()) || createEmptyEntity();
+            (await this._taskArchiveService.load()) || createEmptyEntity();
 
           let archiveSubTaskIdsToDelete: string[] = [];
           const archiveMainTaskIdsToDelete: string[] = [];
@@ -205,14 +197,10 @@ export class TagEffects {
             }
           });
 
-          await modelExecAction(
-            this._pfapiService.m.taskArchive,
-            deleteTasks({
-              taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
-            }),
-            taskReducer as any,
-            true,
-          );
+          await this._taskArchiveService.deleteTasks([
+            ...archiveMainTaskIdsToDelete,
+            ...archiveSubTaskIdsToDelete,
+          ]);
 
           // remove from task repeat
           const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$

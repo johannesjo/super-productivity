@@ -58,9 +58,9 @@ import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
 
 @Injectable({
   providedIn: 'root',
@@ -73,8 +73,8 @@ export class WorkContextService {
   private _dateService = inject(DateService);
   private _router = inject(Router);
   private _translateService = inject(TranslateService);
-  private _pfapiService = inject(PfapiService);
   private _timeTrackingService = inject(TimeTrackingService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   // here because to avoid circular dependencies
   // should be treated as private
@@ -386,7 +386,7 @@ export class WorkContextService {
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
-    const taskArchiveState = await this._pfapiService.m.taskArchive.load();
+    const taskArchiveState = await this._taskArchiveService.load();
 
     const { ids, entities } = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids

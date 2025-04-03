@@ -16,7 +16,9 @@ const ANDROID_DB_KEY = 'backup';
 
 // const DEFAULT_BACKUP_INTERVAL = 6 * 1000;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
   private _pfapiService = inject(PfapiService);

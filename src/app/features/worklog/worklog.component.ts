@@ -35,6 +35,7 @@ import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { NumberToMonthPipe } from '../../ui/pipes/number-to-month.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
 
 @Component({
   selector: 'worklog',
@@ -73,6 +74,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
   private readonly _store = inject(Store);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
 
   T: typeof T = T;
   expanded: { [key: string]: boolean } = {};
@@ -133,7 +135,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
         if (isConfirm) {
           let subTasks;
           if (task.subTaskIds && task.subTaskIds.length) {
-            const archiveState = await this._pfapiService.m.taskArchive.load();
+            const archiveState = await this._taskArchiveService.load();
             subTasks = task.subTaskIds
               .map((id) => archiveState.entities[id])
               .filter((v) => !!v);

@@ -69,8 +69,8 @@ import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { promiseTimeout } from '../../util/promise-timeout';
+import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -112,7 +112,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private readonly _taskService = inject(TaskService);
   private readonly _router = inject(Router);
   private readonly _matDialog = inject(MatDialog);
-  private readonly _pfapiService = inject(PfapiService);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _worklogService = inject(WorklogService);
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _activatedRoute = inject(ActivatedRoute);
@@ -494,11 +494,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     };
 
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
-      from(this._pfapiService.m.taskArchive.load()),
+      from(this._taskArchiveService.load()),
       this._worklogService.archiveUpdateManualTrigger$.pipe(
         // hacky wait for save
         delay(70),
-        switchMap(() => this._pfapiService.m.taskArchive.load()),
+        switchMap(() => this._taskArchiveService.load()),
       ),
     ).pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),
