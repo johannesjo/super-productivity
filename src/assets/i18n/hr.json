@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Tablo sa a pa gen okenn panno konfigirasyon. Ajoute kèk panno nan li."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Dodaj straničnik",
-        "DROP": "Za dodavanje straničnika povuci poveznicu ovamo",
-        "EDIT": "Uredi straničnike",
-        "NO_BOOKMARKS": "Nemaš straničnike za projekt. Dodaj straničnik putem povuci-i-otpusti ili pritisni gumb „plus”."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Dodaj straničnik",
-        "EDIT_BOOKMARK": "Uredi straničnik",
-        "LABELS": {
-          "COMMAND": "Naredba",
-          "FILE": "Staza datoteke",
-          "IMG": "Slika",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Odaberi ikonu",
-        "SELECT_TYPE": "Odaberi vrstu",
-        "TYPES": {
-          "COMMAND": "Naredba (prilagođena naredba)",
-          "FILE": "Datoteka (otvara se sa standardnim programom sustava)",
-          "IMG": "Slika (prikazuje se kao sličica)",
-          "LINK": "Poveznica (otvara se u pregledniku)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Postavi CalDav za projekt"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Konsantre sou sipriz"
       },
       "BACK_TO_PLANNING": "Natrag na planiranje",
-      "CANCEL_FOCUS_SESSION": "Otkaži sesiju fokusa",
       "CONGRATS": "Čestitamo na obavljanju ove sesije!",
       "CONTINUE_FOCUS_SESSION": "Nastavi sesiju fokusa",
       "COUNTDOWN": "Dekont",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Ajoute jodi a",
+          "RE_PLAN_ALL": "Repwodiksyon tout",
           "TITLE": "Ajoute travay ki planifye jodi a"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Postavke oznaka su aktualizirane"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Ajoute nouvo Tag"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Prikaži/Sakrij dodatne informacije",
         "TOGGLE_DONE": "Označi kao obavljen/neobavljen",
         "TOGGLE_SUB_TASK_VISIBILITY": "Uključi/Isključi vidljivost podzadataka",
+        "TOGGLE_TAGS": "Togle Tags",
         "TRACK_TIME": "Počni pratiti vrijeme",
         "TRACK_TIME_STOP": "Zaustavi praćenje vremena",
         "UPDATE_ISSUE_DATA": "Aktualiziraj podatke problema"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stvori</em> i prati do",
         "IDLE_FOR": "Vrijeme tvoje neaktivnosti:",
+        "NOTIFICATION_TITLE": "Swiv tan ou!",
         "TASK": "Zadatak",
         "TRACK_TO": "Prati do:",
         "UNTRACKED_TIME": "Nepraćeno vrijeme:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Zvuk za obavljeni zadatak",
       "IS_INCREASE_DONE_PITCH": "Pojačaj visinu zvuka za svaki obavljeni zadatak",
       "TITLE": "Zvuk",
+      "TRACK_TIME_SOUND": "Track tan rapèl son",
       "VOLUME": "Glasnoća"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Kòmanse swiv pwochen travay lè make aktyèl kòm fè",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifye lè estimasyon tan yo te depase",
       "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Rapèl Pèmèt",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Konsantre app fenèt lè rapèl se aktif (Desktop sèlman)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Notifye lè lè rapèl swiv tan yo montre",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Montre rapèl swiv sou aplikasyon mobil",
       "L_TRACKING_INTERVAL": "Entèval pou swiv tan (ESPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tan pou tann anvan ou montre Bannè rapèl Suivi",

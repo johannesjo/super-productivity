@@ -156,7 +156,6 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "返回到计划",
-      "CANCEL_FOCUS_SESSION": "取消聚焦会话",
       "CONGRATS": "恭喜您完成本次聚焦会话!",
       "CONTINUE_FOCUS_SESSION": "继续聚焦会话",
       "FINISH_TASK_AND_SELECT_NEXT": "完成聚焦会话，选择下一个",

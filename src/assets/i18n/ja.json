@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "このボードにはパネルが設定されていません。それにいくつかのパネルを追加します。"
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "ブックマークを追加",
-        "DROP": "ブックマークを追加するには、ここにドロップしてください",
-        "EDIT": "ブックマークを編集",
-        "NO_BOOKMARKS": "プロジェクトのブックマークがありません。ドラッグアンドドロップ、またはアイコンをクリックして追加してください。"
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "ブックマークを追加",
-        "EDIT_BOOKMARK": "ブックマークを編集",
-        "LABELS": {
-          "COMMAND": "コマンド",
-          "FILE": "ファイルパス",
-          "IMG": "画像",
-          "LINK": "URL"
-        },
-        "SELECT_ICON": "アイコンを選択",
-        "SELECT_TYPE": "タイプを選択",
-        "TYPES": {
-          "COMMAND": "コマンド（カスタムシェルコマンド）",
-          "FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
-          "IMG": "画像（サムネイル表示）",
-          "LINK": "リンク（ブラウザで開きます）"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "プロジェクトのCalDavを設定する"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
       },
       "BACK_TO_PLANNING": "計画に戻る",
-      "CANCEL_FOCUS_SESSION": "フォーカスセッションをキャンセル",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
       "COUNTDOWN": "カウントダウン",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "今日に追加",
+          "RE_PLAN_ALL": "すべて再スケジュール",
           "TITLE": "今日の予定タスクを追加する"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "タグ設定が更新されました"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "新しいタグを追加"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "追加情報を表示/非表示",
         "TOGGLE_DONE": "完了/未完了としてマーク",
         "TOGGLE_SUB_TASK_VISIBILITY": "サブタスクの表示/非表示",
+        "TOGGLE_TAGS": "トグルタグ",
         "TRACK_TIME": "タイムトラッキングの開始",
         "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
         "UPDATE_ISSUE_DATA": "課題データを更新"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
         "IDLE_FOR": "アイドル状態になっている時間：",
+        "NOTIFICATION_TITLE": "あなたの時間を追跡してください!",
         "TASK": "タスク",
         "TRACK_TO": "以下に追加する：",
         "UNTRACKED_TIME": "トラッキングしていない時間："
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "タスク完了音",
       "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
       "TITLE": "音",
+      "TRACK_TIME_SOUND": "時間リマインダー音を追跡",
       "VOLUME": "ボリューム"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "現在のタスクに完了マークを付けると、次のタスクのトラッキングを開始",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超過した場合に通知",
       "L_IS_TRACKING_REMINDER_ENABLED": "トラッキング・リマインダー有効",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "リマインダーがアクティブなときにフォーカス アプリ ウィンドウ (デスクトップのみ)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "タイムトラッキングリマインダーが表示されたときに通知",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "モバイルアプリにトラッキングリマインダーを表示",
       "L_TRACKING_INTERVAL": "時間追跡間隔（実験的）",
       "L_TRACKING_REMINDER_MIN_TIME": "追跡リマインダーを表示するまでの待ち時間 バナー",

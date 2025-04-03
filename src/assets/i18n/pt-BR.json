@@ -161,7 +161,6 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Voltar ao Planejamento",
-      "CANCEL_FOCUS_SESSION": "Cancelar sessão de foco",
       "CONGRATS": "Parabéns por concluir esta sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar a sessão de foco",
       "FINISH_TASK_AND_SELECT_NEXT": "Conclua a tarefa e selecione a próxima",

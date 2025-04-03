@@ -150,7 +150,6 @@
     },
     "FOCUS_MODE": {
       "BACK_TO_PLANNING": "Zpět na plánování",
-      "CANCEL_FOCUS_SESSION": "Zrušit režim zaměření",
       "CONGRATS": "Gratulujeme k dokončení této relace!",
       "CONTINUE_FOCUS_SESSION": "Pokračovat v režimu zaměření",
       "FINISH_TASK_AND_SELECT_NEXT": "Dokončit úkol a vybrat další",

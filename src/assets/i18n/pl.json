@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Ta tablica nie ma skonfigurowanych paneli. Dodaj do niej kilka paneli."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Dodaj Zakładkę",
-        "DROP": "Upuść tutaj, aby dodać zakładkę",
-        "EDIT": "Edytuj Zakładkę",
-        "NO_BOOKMARKS": "Nie masz projektów w zakładkach. Dodaj projekt za pomocą 'złap i upuść' lub poprzez kliknięcie przycisku dodaj"
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Dodaj zakładkę",
-        "EDIT_BOOKMARK": "Edytuj zakładkę",
-        "LABELS": {
-          "COMMAND": "Command",
-          "FILE": "Ścieżka pliku",
-          "IMG": "Obraz",
-          "LINK": "Link"
-        },
-        "SELECT_ICON": "Wybierz ikonę",
-        "SELECT_TYPE": "Wybierz typ",
-        "TYPES": {
-          "COMMAND": "Komenda (niestandardowe polecenie powłoki)",
-          "FILE": "Plik (otierany przy pomocy systemowej aplikacji)",
-          "IMG": "Zdjęcie (miniaturka)",
-          "LINK": "Link (otwiera w przeglądarce)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Ustaiwenia synchronizacji kalendarza (CalDav) dla projektu"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Do nakładki skupienia"
       },
       "BACK_TO_PLANNING": "Powrót do planowania",
-      "CANCEL_FOCUS_SESSION": "Anuluj sesję fokusową",
       "CONGRATS": "Gratulacje za ukończenie tej sesji!",
       "CONTINUE_FOCUS_SESSION": "Kontynuacja sesji fokusowej",
       "COUNTDOWN": "Odmierzanie czasu",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Dodaj do Dzisiaj",
+          "RE_PLAN_ALL": "Zmień termin wszystkiego",
           "TITLE": "Dodawanie zaplanowanych zadań do Dzisiaj"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Tag Settings were updated"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Dodaj nowy tag"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
+        "TOGGLE_TAGS": "Przełącz tagi",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Stwórz</em> i przypisz do",
         "IDLE_FOR": "Nie pracowałeś przez:",
+        "NOTIFICATION_TITLE": "Śledź swój czas!",
         "TASK": "Zadanie",
         "TRACK_TO": "Przypisz do:",
         "UNTRACKED_TIME": "Czas nie przypisany:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Dźwięk zrobionego zadania",
       "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację dla każdego wykonanego zadania",
       "TITLE": "Dźwięk",
+      "TRACK_TIME_SOUND": "Dźwięk przypomnienia o czasie utworu",
       "VOLUME": "Głośność"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Rozpoczęcie śledzenia następnego zadania po oznaczeniu bieżącego jako wykonanego",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Powiadomienie o przekroczeniu szacowanego czasu",
       "L_IS_TRACKING_REMINDER_ENABLED": "Przypomnienie o śledzeniu włączone",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Okno aplikacji Focus, gdy przypomnienie jest aktywne (tylko komputery)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Powiadom, gdy pojawi się przypomnienie o śledzeniu czasu",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Wyświetlanie przypomnienia o śledzeniu w aplikacji mobilnej",
       "L_TRACKING_INTERVAL": "Interwał śledzenia czasu (EKSPERYMENTALNY)",
       "L_TRACKING_REMINDER_MIN_TIME": "Czas oczekiwania przed wyświetleniem banera przypominającego o śledzeniu",

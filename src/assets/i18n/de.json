@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Dieses Board hat keine konfigurierten Panels. Fügen Sie einige Panels hinzu."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Lesezeichen hinzufügen",
-        "DROP": "Fügen Sie hier ein Lesezeichen hinzu",
-        "EDIT": "Lesezeichen bearbeiten",
-        "NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eines per Drag & Drop oder durch Klicken auf die 'Plus'-Schaltfläche hinzu."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Lesezeichen hinzufügen",
-        "EDIT_BOOKMARK": "Lesezeichen bearbeiten",
-        "LABELS": {
-          "COMMAND": "Befehl",
-          "FILE": "Dateipfad",
-          "IMG": "Bild",
-          "LINK": "URL"
-        },
-        "SELECT_ICON": "Wählen Sie ein Symbol",
-        "SELECT_TYPE": "Wählen Sie einen Typ",
-        "TYPES": {
-          "COMMAND": "Befehl (benutzerdefinierter Shell-Befehl)",
-          "FILE": "Datei (öffnet in Standard-System-App)",
-          "IMG": "Bild (als Thumbnail angezeigt)",
-          "LINK": "Link (öffnet im Browser)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Richten Sie CalDav für Project ein"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Zur Fokussierungsüberlagerung"
       },
       "BACK_TO_PLANNING": "Zurück zur Planung",
-      "CANCEL_FOCUS_SESSION": "Fokussitzung abbrechen",
       "CONGRATS": "Herzlichen Glückwunsch zum Abschluss dieser Sitzung!",
       "CONTINUE_FOCUS_SESSION": "Fokussitzung fortsetzen",
       "COUNTDOWN": "Countdown",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Zu Heute hinzufügen",
+          "RE_PLAN_ALL": "Alle verschieben",
           "TITLE": "Geplante Aufgaben zu Heute hinzufügen"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Die Stichwort-Einstellungen wurden aktualisiert"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Neues Tag hinzufügen"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Zusätzliche Informationen ein- / ausblenden",
         "TOGGLE_DONE": "Als erledigt / unerledigt markieren",
         "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
+        "TOGGLE_TAGS": "Tags umschalten",
         "TRACK_TIME": "Starten Sie die Erfassung der Zeit",
         "TRACK_TIME_STOP": "Erfassung der Zeit anhalten",
         "UPDATE_ISSUE_DATA": "Issuedaten aktualisieren"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Erstelle</em> und erfasse zu",
         "IDLE_FOR": "Sie waren untätig wegen:",
+        "NOTIFICATION_TITLE": "Erfassen Sie Ihre Zeit!",
         "TASK": "Aufgabe",
         "TRACK_TO": "Erfassen nach:",
         "UNTRACKED_TIME": "Nicht erfasste Zeit:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Aufgabe erledigt Ton",
       "IS_INCREASE_DONE_PITCH": "Erhöht die Tonhöhe für jede erledigte Aufgabe",
       "TITLE": "Sound",
+      "TRACK_TIME_SOUND": "Ton der Zeiterinnerung verfolgen",
       "VOLUME": "Volumen"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Beginn der Verfolgung der nächsten Aufgabe, wenn die aktuelle als erledigt markiert wird",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigung, wenn die geschätzte Zeit überschritten wurde",
       "L_IS_TRACKING_REMINDER_ENABLED": "Verfolgungserinnerung Aktiviert",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "App-Fenster fokussieren, wenn Erinnerung aktiv ist (nur Desktop)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Benachrichtigen, wenn eine Zeiterfassungserinnerung angezeigt wird",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Tracking-Erinnerung in der mobilen App anzeigen",
       "L_TRACKING_INTERVAL": "Zeiterfassungsintervall (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Wartezeit bis zur Anzeige des Tracking-Erinnerungsbanners",

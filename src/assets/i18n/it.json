@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Ამ დაფას არ აქვს კონფიგურირებული პანელები. დაამატეთ რამდენიმე პანელი."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Aggiungi segnalibro",
-        "DROP": "Trascina qui per aggiungere un segnalibro",
-        "EDIT": "Modifica segnalibro",
-        "NO_BOOKMARKS": "Non hai segnalibri nel progetto. Aggiungine uno tramite drag-and-drop oppure facendo clic sul pulsante 'più'."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Aggiungi segnalibro",
-        "EDIT_BOOKMARK": "Modifica segnalibro",
-        "LABELS": {
-          "COMMAND": "Comando",
-          "FILE": "Percorso del file",
-          "IMG": "Immagine",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Seleziona un'icona",
-        "SELECT_TYPE": "Seleziona un tipo",
-        "TYPES": {
-          "COMMAND": "Comando (comando da shell)",
-          "FILE": "File (aperto con l'app predefinita di sistema)",
-          "IMG": "Image (mostrata nella miniatura)",
-          "LINK": "Link (aperto nel browser)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Imposta CalDav per il progetto"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Გადახურვაზე ფოკუსირება"
       },
       "BACK_TO_PLANNING": "Torna alla pianificazione",
-      "CANCEL_FOCUS_SESSION": "Annulla Sessione Concentrazione",
       "CONGRATS": "Congratulazione per avere completato questa sessione!",
       "CONTINUE_FOCUS_SESSION": "Continua Sessione Concentrazione",
       "COUNTDOWN": "Countdown",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Aggiungi a oggi",
+          "RE_PLAN_ALL": "Ყველა გადაიგეგილეთ",
           "TITLE": "Aggiungi attività pianificata a Oggi"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Impostazioni dell'etichetta aggiornate"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Ახალი ტეგის დამატება"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Mostra/nascondi informazioni aggiuntive",
         "TOGGLE_DONE": "Segna come completato/non completato",
         "TOGGLE_SUB_TASK_VISIBILITY": "Cambia visibilità sotto-attività",
+        "TOGGLE_TAGS": "Ტეგების გადართვა",
         "TRACK_TIME": "Inizia a tracciare il tempo",
         "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Crea</em> e monitora in",
         "IDLE_FOR": "Sei stato inattivo per:",
+        "NOTIFICATION_TITLE": "Თვალყური ადევნეთ თქვენს დროს!",
         "TASK": "Attività",
         "TRACK_TO": "Traccia a:",
         "UNTRACKED_TIME": "Tempo non tracciato:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Suono per il completamento attività",
       "IS_INCREASE_DONE_PITCH": "Aumenta il tono per ogni attività svolta",
       "TITLE": "Suono",
+      "TRACK_TIME_SOUND": "Თვალყური ადევნეთ დროის შეხსენების ხმას",
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Iniziare a tracciare l'attività successiva quando si contrassegna l'attività corrente come completata",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifica quando il tempo stimato viene superato",
       "L_IS_TRACKING_REMINDER_ENABLED": "Promemoria tracciamento abilitato",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Ფოკუსი აპლიკაციის ფანჯარა, როდესაც შეხსენება აქტიურია (მხოლოდ სამუშაო მაგიდა)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Აცნობეთ, როდის გამოჩნდება დროის თვალთვალის შეხსენება",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostra promemoria tracciamento su app mobile",
       "L_TRACKING_INTERVAL": "Intervallo di monitoraggio del tempo (SPERIMENTALE)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tempo di attesa prima di mostrare il banner di promemoria tracciamento",

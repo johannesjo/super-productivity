@@ -175,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
       "BACK_TO_PLANNING": "Back to Planning",
-      "CANCEL_FOCUS_SESSION": "",
       "CONGRATS": "Congrats for completing this session!",
       "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "COUNTDOWN": "Countdown",
@@ -968,11 +967,11 @@
         "L_TITLE": "Tag Name",
         "TITLE": "Basic Settings"
       },
-      "TTL": {
-        "ADD_NEW_TAG": "Add new Tag"
-      },
       "S": {
         "UPDATED": "Tag Settings were updated"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Add new Tag"
       }
     },
     "TASK": {
@@ -1036,8 +1035,8 @@
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/Hide additional info",
         "TOGGLE_DONE": "Mark as done/undone",
-        "TOGGLE_TAGS": "Toggle Tags",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
+        "TOGGLE_TAGS": "Toggle Tags",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
         "UPDATE_ISSUE_DATA": "Update issue data"
@@ -1239,10 +1238,10 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
         "IDLE_FOR": "You have been idle for:",
+        "NOTIFICATION_TITLE": "Track your time!",
         "TASK": "Task",
         "TRACK_TO": "Track to:",
-        "UNTRACKED_TIME": "Untracked time:",
-        "NOTIFICATION_TITLE": "Track your time!"
+        "UNTRACKED_TIME": "Untracked time:"
       }
     },
     "WORKLOG": {
@@ -1523,10 +1522,10 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
-      "TRACK_TIME_SOUND": "Track time reminder sound",
       "DONE_SOUND": "Task marked done sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task done",
       "TITLE": "Sound",
+      "TRACK_TIME_SOUND": "Track time reminder sound",
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
@@ -1551,12 +1550,12 @@
       "L_IS_AUTO_START_NEXT_TASK": "Start tracking next task when marking current as done",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
       "L_IS_TRACKING_REMINDER_ENABLED": "Tracking Reminder Enabled",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Notify when time tracking reminder is shown",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Show tracking reminder on mobile app",
       "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
-      "TITLE": "Time Tracking",
-      "L_IS_TRACKING_REMINDER_NOTIFY": "Notify when time tracking reminder is shown",
-      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)"
+      "TITLE": "Time Tracking"
     }
   },
   "GLOBAL_SNACK": {

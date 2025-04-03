@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Denne tavlen har ingen konfigurerte paneler. Legg til noen paneler."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Legg til bokmerke",
-        "DROP": "Slipp her for å legge til et bokmerke",
-        "EDIT": "Rediger bokmerker",
-        "NO_BOOKMARKS": "Du har ingen prosjektbokmerker. Legg til en med dra og slipp eller ved å klikke på 'pluss'-knappen."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Legg til bokmerke",
-        "EDIT_BOOKMARK": "Rediger bokmerke",
-        "LABELS": {
-          "COMMAND": "Kommando",
-          "FILE": "Filbane",
-          "IMG": "Bilde",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Velg et ikon",
-        "SELECT_TYPE": "Velg en type",
-        "TYPES": {
-          "COMMAND": "Kommando (tilpasset skallkommando)",
-          "FILE": "Fil (åpnet som standard systemapp)",
-          "IMG": "Bilde (vist som miniatyrbilde)",
-          "LINK": "Link (åpnes i nettleser)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Konfigurere CalDav for prosjektet"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
       },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
-      "CANCEL_FOCUS_SESSION": "Avlys fokusøkten",
       "CONGRATS": "Gratulerer med å ha fullført denne økten!",
       "CONTINUE_FOCUS_SESSION": "Fortsett fokusøkten",
       "COUNTDOWN": "Nedtelling",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Legg til i dag",
+          "RE_PLAN_ALL": "Planlegg alle på nytt",
           "TITLE": "Legg til planlagte oppgaver i I dag"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Tag-innstillinger ble oppdatert"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Legg til ny tag"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Vis / skjul tilleggsinformasjon",
         "TOGGLE_DONE": "Merk som ferdig / angre",
         "TOGGLE_SUB_TASK_VISIBILITY": "Bytt synlighet av underoppgave",
+        "TOGGLE_TAGS": "Veksle tagger",
         "TRACK_TIME": "Begynn å spore tid",
         "TRACK_TIME_STOP": "Sett sporingstid på pause",
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
         "IDLE_FOR": "Du har vært inaktiv for:",
+        "NOTIFICATION_TITLE": "Spor tiden din!",
         "TASK": "Oppgave",
         "TRACK_TO": "Spor til:",
         "UNTRACKED_TIME": "Usporet tid:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Oppgavelyd",
       "IS_INCREASE_DONE_PITCH": "Øk tonehøyde for hver oppgave",
       "TITLE": "Lyd",
+      "TRACK_TIME_SOUND": "Spor tidspåminnelseslyd",
       "VOLUME": "Volum"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Start sporing av neste oppgave når du markerer den nåværende som utført",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Varsle når tidsestimatet ble overskredet",
       "L_IS_TRACKING_REMINDER_ENABLED": "Påminnelse om sporing aktivert",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Fokus-appvindu når påminnelsen er aktiv (kun datamaskin)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Varsle når påminnelse om tidssporing vises",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Vis påminnelse om sporing i mobilappen",
       "L_TRACKING_INTERVAL": "Tidssporingsintervall (EKSPERIMENTELT)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tid til å vente før sporingspåminnelse vises Banner",

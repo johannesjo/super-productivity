@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Este quadro não tem painéis configurados. Adicione alguns painéis a ele."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Adicionar marcador",
-        "DROP": "Solte aqui para adicionar um marcador",
-        "EDIT": "Editar marcadores",
-        "NO_BOOKMARKS": "Você não tem marcadores de projeto. Adicione uma via arrastar e soltar ou clicando no botão 'mais'."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Adicionar Marcador",
-        "EDIT_BOOKMARK": "Editar Marcador",
-        "LABELS": {
-          "COMMAND": "Comando",
-          "FILE": "Caminho do arquivo",
-          "IMG": "Imagem",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Selecione um ícone",
-        "SELECT_TYPE": "Selecione um tipo",
-        "TYPES": {
-          "COMMAND": "Comando (Comando shell personalizado)",
-          "FILE": "Arquivo (Abrir pelo aplicativo padrão do sistema)",
-          "IMG": "Imagem (mostrar como miniatura)",
-          "LINK": "Link (abre no navegador)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Configurar CalDav para o projeto"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
       },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
-      "CANCEL_FOCUS_SESSION": "Cancelar Sessão de Foco",
       "CONGRATS": "Parabéns por completar essa sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
       "COUNTDOWN": "Contagem regressiva",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Adicionar a Hoje",
+          "RE_PLAN_ALL": "Reagendar tudo",
           "TITLE": "Adicionar tarefas planejadas para Hoje"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "As configurações de tag foram atualizadas"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Adicionar nova tag"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Mostrar/ocultar informações adicionais",
         "TOGGLE_DONE": "Marcar como concluído/desfeito",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alternar visibilidade da subtarefa",
+        "TOGGLE_TAGS": "Alternar tags",
         "TRACK_TIME": "Comece a rastrear o tempo",
         "TRACK_TIME_STOP": "Pausar o tempo de rastreamento",
         "UPDATE_ISSUE_DATA": "Atualizar dados da issue"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Crie</em> e rastreie para",
         "IDLE_FOR": "Você está ocioso por:",
+        "NOTIFICATION_TITLE": "Acompanhe seu tempo!",
         "TASK": "Tarefa",
         "TRACK_TO": "Rastrear para:",
         "UNTRACKED_TIME": "Tempo não rastreado:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Som de tarefa concluída",
       "IS_INCREASE_DONE_PITCH": "Aumente o tom para cada tarefa realizada",
       "TITLE": "Som",
+      "TRACK_TIME_SOUND": "Som de lembrete de tempo de rastreamento",
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Iniciar o acompanhamento da tarefa seguinte ao marcar a atual como concluída",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar quando o tempo estimado foi excedido",
       "L_IS_TRACKING_REMINDER_ENABLED": "Lembrete de rastreio ativado",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Janela do app Foco quando o lembrete está ativo (somente desktop)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Notificar quando o lembrete de controle de tempo for exibido",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Mostrar lembrete de seguimento na aplicação móvel",
       "L_TRACKING_INTERVAL": "Intervalo de controlo do tempo (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Tempo de espera antes de mostrar o lembrete de seguimento Banner",

@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "Táto tabuľa nemá nakonfigurované panely. Pridajte niektoré panely."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Pridať záložku",
-        "DROP": "Tu môžete pridať záložku",
-        "EDIT": "Upraviť Záložku",
-        "NO_BOOKMARKS": "Nemáte žiadne záložky projektu. Pridajte si ju pomocou funkcie drag and drop, alebo kliknutím na tlačidlo plus."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Pridať záložku",
-        "EDIT_BOOKMARK": "Upraviť Záložku",
-        "LABELS": {
-          "COMMAND": "Príkaz",
-          "FILE": "Cesta k súboru",
-          "IMG": "Obrázok",
-          "LINK": "Odkaz"
-        },
-        "SELECT_ICON": "Vyberte ikonu",
-        "SELECT_TYPE": "Vyberte typ",
-        "TYPES": {
-          "COMMAND": "Príkaz (vlastný shell príkaz)",
-          "FILE": "Súbor (otvorený predvolenou systémovou aplikáciou)",
-          "IMG": "Obrázok (zobrazený ako miniatúra)",
-          "LINK": "Odkaz (otvorí sa v prehliadači)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Nastavenie aplikácie CalDav pre projekt"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "Na prekrytie zamerania"
       },
       "BACK_TO_PLANNING": "Späť na plánovanie",
-      "CANCEL_FOCUS_SESSION": "Zrušenie Focus Session",
       "CONGRATS": "Gratulujeme k dokončeniu tejto relácie!",
       "CONTINUE_FOCUS_SESSION": "Pokračovanie sústredenia",
       "COUNTDOWN": "Odpočítavanie",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Pridať do Dnes",
+          "RE_PLAN_ALL": "Zmeniť termín všetkých",
           "TITLE": "Pridanie plánovaných úloh do položky Dnes"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "Nastavenia štítkov boli aktualizované"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Pridať novú značku"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "Zobraziť/skryť ďalšie informácie",
         "TOGGLE_DONE": "Označiť ako hotové/nedokončené",
         "TOGGLE_SUB_TASK_VISIBILITY": "Prepnúť viditeľnosť podúloh",
+        "TOGGLE_TAGS": "Prepnúť značky",
         "TRACK_TIME": "Začať sledovanie času",
         "TRACK_TIME_STOP": "Pozastaviť sledovanie času",
         "UPDATE_ISSUE_DATA": "Aktualizujte údaje o probléme"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Vytvoriť</em> a sledovať na",
         "IDLE_FOR": "You have been idle for:",
+        "NOTIFICATION_TITLE": "Sledujte svoj čas!",
         "TASK": "Úloha",
         "TRACK_TO": "Track to:",
         "UNTRACKED_TIME": "Nesledovaný čas:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "Zvuk dokončenia úlohy",
       "IS_INCREASE_DONE_PITCH": "Zvýšiť výšku tónu za každú vykonanú úlohu",
       "TITLE": "Zvuk",
+      "TRACK_TIME_SOUND": "Zvuk pripomenutia času skladby",
       "VOLUME": "Volume"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "Spustenie sledovania ďalšej úlohy po označení aktuálnej ako hotovej",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozorniť na prekročenie odhadovaného času",
       "L_IS_TRACKING_REMINDER_ENABLED": "Zapnuté pripomínanie sledovania",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "Okno apky Môj čas, keď je pripomienka aktívna (len na pracovnej ploche)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "Upozorniť na zobrazenie pripomenutia sledovania času",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Zobrazenie pripomenutia sledovania v mobilnej aplikácii",
       "L_TRACKING_INTERVAL": "Interval sledovania času (EXPERIMENTÁLNE)",
       "L_TRACKING_REMINDER_MIN_TIME": "Čas čakania pred zobrazením upozornenia na sledovanie Banner",

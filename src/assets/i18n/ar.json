@@ -97,32 +97,6 @@
         "NO_PANELS_MSG": "لا تحتوي هذه اللوحة على لوحات مهيأة. أضف بعض اللوحات إليه."
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "اضافة للمفضلة",
-        "DROP": "إسقاط هنا لإضافة إشارة مرجعية",
-        "EDIT": "تحرير الإشارات المرجعية",
-        "NO_BOOKMARKS": "’ليس لديك أي إشارات مرجعية للمشروع. أضف واحدة عبر السحب والإفلات أو بالنقر على أيقونة 'زائد"
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "اضافة للمفضلة",
-        "EDIT_BOOKMARK": "تحرير إشارة مرجعية",
-        "LABELS": {
-          "COMMAND": "أمر",
-          "FILE": "مسار الملف",
-          "IMG": "صورة",
-          "LINK": "رابط"
-        },
-        "SELECT_ICON": "اختر أيقونة",
-        "SELECT_TYPE": "اختر نوع",
-        "TYPES": {
-          "COMMAND": "أمر (أمر ’شيل’ مخصص)",
-          "FILE": "ملف (يتم فتحه بواسطة تطبيق النظام الافتراضي)",
-          "IMG": "صورة (تظهر كصورة مصغرة)",
-          "LINK": "رابط (يفتح في المتصفح)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "إعداد ’كالداف’ للمشروع"
@@ -201,7 +175,6 @@
         "TO_FOCUS_OVERLAY": "لتراكب التركيز"
       },
       "BACK_TO_PLANNING": "الرجوع الى التخطيط",
-      "CANCEL_FOCUS_SESSION": "مغادرة جلسة التركيز",
       "CONGRATS": "!هنيئا لك على إكمال هذه الجلسة!",
       "CONTINUE_FOCUS_SESSION": "ألإستمرار في وضع التركيز",
       "COUNTDOWN": "العد التنازلي",
@@ -646,6 +619,7 @@
       "D": {
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "أضف إلى اليوم",
+          "RE_PLAN_ALL": "إعادة جدولة الكل",
           "TITLE": "إضافة المهام المخطط لها إلى اليوم"
         },
         "PLAN_FOR_DAY": {
@@ -995,6 +969,9 @@
       },
       "S": {
         "UPDATED": "تم تحديث إعدادات العلامات"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "إضافة علامة جديدة"
       }
     },
     "TASK": {
@@ -1059,6 +1036,7 @@
         "TOGGLE_DETAIL_PANEL": "إظهار / إخفاء معلومات إضافية",
         "TOGGLE_DONE": "علامة كما فعلت / التراجع",
         "TOGGLE_SUB_TASK_VISIBILITY": "تبديل وضوح المهمة الفرعية",
+        "TOGGLE_TAGS": "تبديل العلامات",
         "TRACK_TIME": "بدء تتبع الوقت",
         "TRACK_TIME_STOP": "وقفة تتبع الوقت",
         "UPDATE_ISSUE_DATA": "تحديث بيانات القضية"
@@ -1260,6 +1238,7 @@
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>أنشئ</em> وتتبع إلى",
         "IDLE_FOR": "لقد كنت خاملاً عن:",
+        "NOTIFICATION_TITLE": "تتبع وقتك!",
         "TASK": "مهمة",
         "TRACK_TO": "تتبع إلى:",
         "UNTRACKED_TIME": "الوقت الذي لم يتم تعقبه:"
@@ -1546,6 +1525,7 @@
       "DONE_SOUND": "المهمة تمت الصوت",
       "IS_INCREASE_DONE_PITCH": "زيادة الملعب لكل مهمة يتم القيام بها",
       "TITLE": "صوت",
+      "TRACK_TIME_SOUND": "تتبع صوت تذكير الوقت",
       "VOLUME": "الصوت"
     },
     "TAKE_A_BREAK": {
@@ -1570,6 +1550,8 @@
       "L_IS_AUTO_START_NEXT_TASK": "ابدأ في تتبع المهمة التالية عند وضع علامة على المهمة الحالية على أنها منتهية",
       "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "إعلام عند تجاوز تقدير الوقت",
       "L_IS_TRACKING_REMINDER_ENABLED": "تم تمكين تذكير التتبع",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "نافذة تطبيق التركيز عندما يكون التذكير نشطا (سطح المكتب فقط)",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "إعلام عند عرض تذكير تتبع الوقت",
       "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "إظهار تذكير التتبع على تطبيق الهاتف المحمول",
       "L_TRACKING_INTERVAL": "فترة تتبع الوقت (تجريبي)",
       "L_TRACKING_REMINDER_MIN_TIME": "الوقت المستغرق للانتظار قبل عرض لافتة تذكير التتبع",
