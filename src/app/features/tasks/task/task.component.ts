@@ -270,7 +270,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   isShowRemoveFromToday(): boolean {
-    return isShowRemoveFromToday(this.task());
+    return !this.workContextService.isToday && isShowRemoveFromToday(this.task());
   }
 
   isShowAddToToday(): boolean {
