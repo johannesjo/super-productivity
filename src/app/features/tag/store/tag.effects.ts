@@ -37,12 +37,11 @@ import {
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, of } from 'rxjs';
-import { Task, TaskArchive } from '../../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
-import { createEmptyEntity } from '../../../util/create-empty-entity';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -182,25 +181,6 @@ export class TagEffects {
             .filter(isOrphanedParentTask)
             .map((t) => t.id);
           this._taskService.removeMultipleTasks(taskIdsToRemove);
-
-          // remove orphaned for archive
-          const taskArchiveState: TaskArchive =
-            (await this._taskArchiveService.load()) || createEmptyEntity();
-
-          let archiveSubTaskIdsToDelete: string[] = [];
-          const archiveMainTaskIdsToDelete: string[] = [];
-          (taskArchiveState.ids as string[]).forEach((id) => {
-            const t = taskArchiveState.entities[id] as Task;
-            if (isOrphanedParentTask(t)) {
-              archiveMainTaskIdsToDelete.push(id);
-              archiveSubTaskIdsToDelete = archiveSubTaskIdsToDelete.concat(t.subTaskIds);
-            }
-          });
-
-          await this._taskArchiveService.deleteTasks([
-            ...archiveMainTaskIdsToDelete,
-            ...archiveSubTaskIdsToDelete,
-          ]);
 
           // remove from task repeat
           const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$

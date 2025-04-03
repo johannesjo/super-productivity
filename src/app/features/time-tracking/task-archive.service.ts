@@ -15,6 +15,8 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
 import { Update } from '@ngrx/entity';
+import { unique } from '../../util/unique';
+import { createEmptyEntity } from '../../util/create-empty-entity';
 
 @Injectable({
   providedIn: 'root',
@@ -55,6 +57,26 @@ export class TaskArchiveService {
     // );
   }
 
+  async removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<any> {
+    const taskArchiveState: TaskArchive = await this.load();
+    // NOTE: task archive might not if there never was a day completed
+    const archiveTaskIdsToDelete = !!taskArchiveState
+      ? (taskArchiveState.ids as string[]).filter((id) => {
+          const t = taskArchiveState.entities[id] as Task;
+          if (!t) {
+            throw new Error('No task');
+          }
+          return t.projectId === projectIdToDelete;
+        })
+      : [];
+    console.log(
+      'Archive TaskIds to remove/unique',
+      archiveTaskIdsToDelete,
+      unique(archiveTaskIdsToDelete),
+    );
+    await this.deleteTasks(archiveTaskIdsToDelete);
+  }
+
   async removeTagsFromAllTasks(tagIdsToRemove: string[]): Promise<void> {
     await modelExecAction(
       this._pfapiService.m.taskArchive,
@@ -63,6 +85,24 @@ export class TaskArchiveService {
       true,
     );
     // TODO old archive also
+
+    const isOrphanedParentTask = (t: Task): boolean =>
+      !t.projectId && !t.tagIds.length && !t.parentId;
+
+    // remove orphaned for archive
+    const taskArchiveState: TaskArchive = (await this.load()) || createEmptyEntity();
+
+    let archiveSubTaskIdsToDelete: string[] = [];
+    const archiveMainTaskIdsToDelete: string[] = [];
+    (taskArchiveState.ids as string[]).forEach((id) => {
+      const t = taskArchiveState.entities[id] as Task;
+      if (isOrphanedParentTask(t)) {
+        archiveMainTaskIdsToDelete.push(id);
+        archiveSubTaskIdsToDelete = archiveSubTaskIdsToDelete.concat(t.subTaskIds);
+      }
+    });
+    // TODO update to today tag instead
+    await this.deleteTasks([...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete]);
   }
 
   async removeRepeatCfgFromArchiveTasks(repeatConfigId: string): Promise<void> {

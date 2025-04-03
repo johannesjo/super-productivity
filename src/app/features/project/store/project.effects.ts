@@ -41,8 +41,6 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../project.model';
-import { Task, TaskArchive } from '../../tasks/task.model';
-import { unique } from '../../../util/unique';
 import { EMPTY, Observable, of } from 'rxjs';
 import { selectProjectFeatureState } from './project.selectors';
 import {
@@ -181,7 +179,7 @@ export class ProjectEffects {
         tap(async ({ project, allTaskIds }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
-          this._removeAllArchiveTasksForProject(id);
+          this._taskArchiveService.removeAllArchiveTasksForProject(id);
           this._reminderService.removeRemindersByRelatedIds(allTaskIds);
 
           // we also might need to account for this unlikely but very nasty scenario
@@ -285,28 +283,6 @@ export class ProjectEffects {
       ),
     { dispatch: false },
   );
-
-  private async _removeAllArchiveTasksForProject(
-    projectIdToDelete: string,
-  ): Promise<any> {
-    const taskArchiveState: TaskArchive = await this._taskArchiveService.load();
-    // NOTE: task archive might not if there never was a day completed
-    const archiveTaskIdsToDelete = !!taskArchiveState
-      ? (taskArchiveState.ids as string[]).filter((id) => {
-          const t = taskArchiveState.entities[id] as Task;
-          if (!t) {
-            throw new Error('No task');
-          }
-          return t.projectId === projectIdToDelete;
-        })
-      : [];
-    console.log(
-      'Archive TaskIds to remove/unique',
-      archiveTaskIdsToDelete,
-      unique(archiveTaskIdsToDelete),
-    );
-    await this._taskArchiveService.deleteTasks(archiveTaskIdsToDelete);
-  }
 
   private saveToLs$(isUpdateRevAndLastUpdate: boolean): Observable<unknown> {
     return this._store$.pipe(

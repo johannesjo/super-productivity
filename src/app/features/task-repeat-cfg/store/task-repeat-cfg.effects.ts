@@ -145,7 +145,7 @@ export class TaskRepeatCfgEffects {
       this._actions$.pipe(
         ofType(deleteTaskRepeatCfg),
         tap(({ id }) => {
-          this._removeRepeatCfgFromArchiveTasks(id);
+          this._taskArchiveService.removeRepeatCfgFromArchiveTasks(id);
         }),
       ),
     { dispatch: false },
@@ -324,9 +324,5 @@ export class TaskRepeatCfgEffects {
     this._pfapiService.m.taskRepeatCfg.save(taskRepeatCfgState, {
       isUpdateRevAndLastUpdate: true,
     });
-  }
-
-  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
-    this._taskArchiveService.removeRepeatCfgFromArchiveTasks(repeatConfigId);
   }
 }
