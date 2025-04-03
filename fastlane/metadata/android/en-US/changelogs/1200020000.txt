@@ -1,0 +1,12 @@
+
+### Bug Fixes
+
+* invalid translation variables #4179 {{}}
+* LocalBackupService not instantiating #4137
+* t.at is not a function #4162
+* unable to select subtasks anymore
+### Features
+
+* add track time sound configuration and notifications
+* hide remove from today button for today list #4101
+* update translations
