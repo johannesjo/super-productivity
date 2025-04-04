@@ -36,8 +36,13 @@ taskArchive:
 => 21 days is maybe a good middle ground for this, since it allows us to write data from the last month
  */
 
-export const ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 14;
-export const ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 21;
+// export const ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 14;
+// export const ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 21;
+
+// ADJUSTED FOR TESTING
+// TODO adjust back
+export const ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 12;
+export const ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 7;
 
 @Injectable({
   providedIn: 'root',
@@ -102,8 +107,6 @@ export class ArchiveService {
     const archiveOld = await this._pfapiService.m.archiveOld.load();
     const isFlushArchiveOld =
       now - archiveOld.lastTimeTrackingFlush > ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD;
-
-    alert('FLUSHED TIME TRACKING TO ARCHIVE YOUNG');
 
     if (!isFlushArchiveOld) {
       return;
