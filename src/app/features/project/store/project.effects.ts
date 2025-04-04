@@ -52,6 +52,7 @@ import {
 import { ReminderService } from '../../reminder/reminder.service';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -62,6 +63,7 @@ export class ProjectEffects {
   private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _reminderService = inject(ReminderService);
+  private _timeTrackingService = inject(TimeTrackingService);
 
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
@@ -181,6 +183,7 @@ export class ProjectEffects {
           const id = project.id as string;
           this._taskArchiveService.removeAllArchiveTasksForProject(id);
           this._reminderService.removeRemindersByRelatedIds(allTaskIds);
+          this._timeTrackingService.cleanupDataEverywhereForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
           const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();

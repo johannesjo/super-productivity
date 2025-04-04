@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { TimeTrackingState, TTDateMap, TTWorkContextData } from './time-tracking.model';
-import { first, map, shareReplay, switchMap, startWith } from 'rxjs/operators';
+import { first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 import { mergeTimeTrackingStates } from './merge-time-tracking-states';
 import { Store } from '@ngrx/store';
 import { selectTimeTrackingState } from './store/time-tracking.selectors';
@@ -9,6 +9,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { WorkContextType, WorkStartEnd } from '../work-context/work-context.model';
 import { ImpossibleError } from '../../pfapi/api';
 import { toLegacyWorkStartEndMaps } from './to-legacy-work-start-end-maps';
+import { TimeTrackingActions } from './store/time-tracking.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -64,6 +65,60 @@ export class TimeTrackingService {
         throw new ImpossibleError('Invalid work context type ' + type);
       }),
     );
+  }
+
+  async cleanupDataEverywhereForProject(projectId: string): Promise<void> {
+    const current = await this.current$.pipe(first()).toPromise();
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
+
+    if (current.project[projectId]) {
+      delete current.project[projectId];
+      this._store.dispatch(TimeTrackingActions.updateWholeState({ newState: current }));
+    }
+
+    if (archiveYoung.timeTracking.project[projectId]) {
+      delete archiveYoung.timeTracking.project[projectId];
+      await this._pfapiService.m.archiveYoung.save(archiveYoung, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveUpdateTrigger$.next();
+    }
+
+    if (archiveOld.timeTracking.project[projectId]) {
+      delete archiveOld.timeTracking.project[projectId];
+      await this._pfapiService.m.archiveOld.save(archiveOld, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveUpdateTrigger$.next();
+    }
+  }
+
+  async cleanupDataEverywhereForTag(tagId: string): Promise<void> {
+    const current = await this.current$.pipe(first()).toPromise();
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
+
+    if (current.tag[tagId]) {
+      delete current.tag[tagId];
+      this._store.dispatch(TimeTrackingActions.updateWholeState({ newState: current }));
+    }
+
+    if (archiveYoung.timeTracking.tag[tagId]) {
+      delete archiveYoung.timeTracking.tag[tagId];
+      await this._pfapiService.m.archiveYoung.save(archiveYoung, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveUpdateTrigger$.next();
+    }
+
+    if (archiveOld.timeTracking.tag[tagId]) {
+      delete archiveOld.timeTracking.tag[tagId];
+      await this._pfapiService.m.archiveOld.save(archiveOld, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveUpdateTrigger$.next();
+    }
   }
 
   async getWorkStartEndForWorkContext(ctx: {

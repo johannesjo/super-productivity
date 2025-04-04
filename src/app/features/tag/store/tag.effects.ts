@@ -54,6 +54,7 @@ import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Injectable()
 export class TagEffects {
@@ -67,6 +68,7 @@ export class TagEffects {
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _router = inject(Router);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _timeTrackingService = inject(TimeTrackingService);
 
   saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
@@ -181,6 +183,10 @@ export class TagEffects {
             .filter(isOrphanedParentTask)
             .map((t) => t.id);
           this._taskService.removeMultipleTasks(taskIdsToRemove);
+
+          tagIdsToRemove.forEach((id) => {
+            this._timeTrackingService.cleanupDataEverywhereForTag(id);
+          });
 
           // remove from task repeat
           const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$
