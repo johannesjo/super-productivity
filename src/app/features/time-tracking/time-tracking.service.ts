@@ -72,12 +72,21 @@ export class TimeTrackingService {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const archiveOld = await this._pfapiService.m.archiveOld.load();
 
-    if (current.project[projectId]) {
-      delete current.project[projectId];
-      this._store.dispatch(TimeTrackingActions.updateWholeState({ newState: current }));
-    }
+    console.log({ current, archiveYoung, archiveOld });
 
-    if (archiveYoung.timeTracking.project[projectId]) {
+    if (current.project[projectId]) {
+      const newProject = { ...current.project };
+      delete newProject[projectId];
+      this._store.dispatch(
+        TimeTrackingActions.updateWholeState({
+          newState: {
+            ...current,
+            project: { ...newProject },
+          },
+        }),
+      );
+    }
+    if (projectId in archiveYoung.timeTracking.project) {
       delete archiveYoung.timeTracking.project[projectId];
       await this._pfapiService.m.archiveYoung.save(archiveYoung, {
         isUpdateRevAndLastUpdate: true,
@@ -85,7 +94,7 @@ export class TimeTrackingService {
       this._archiveUpdateTrigger$.next();
     }
 
-    if (archiveOld.timeTracking.project[projectId]) {
+    if (projectId in archiveOld.timeTracking.project) {
       delete archiveOld.timeTracking.project[projectId];
       await this._pfapiService.m.archiveOld.save(archiveOld, {
         isUpdateRevAndLastUpdate: true,
@@ -100,8 +109,16 @@ export class TimeTrackingService {
     const archiveOld = await this._pfapiService.m.archiveOld.load();
 
     if (current.tag[tagId]) {
-      delete current.tag[tagId];
-      this._store.dispatch(TimeTrackingActions.updateWholeState({ newState: current }));
+      const newTag = { ...current.tag };
+      delete newTag[tagId];
+      this._store.dispatch(
+        TimeTrackingActions.updateWholeState({
+          newState: {
+            ...current,
+            tag: { ...newTag },
+          },
+        }),
+      );
     }
 
     if (archiveYoung.timeTracking.tag[tagId]) {
