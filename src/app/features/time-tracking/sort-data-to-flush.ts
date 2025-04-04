@@ -1,6 +1,12 @@
-import { ArchiveModel, TimeTrackingState } from './time-tracking.model';
+import {
+  ArchiveModel,
+  TimeTrackingState,
+  TTWorkContextSessionMap,
+} from './time-tracking.model';
 import { ArchiveTask, TaskArchive } from '../tasks/task.model';
 import { ImpossibleError } from '../../pfapi/api';
+
+const TIME_TRACKING_CATEGORIES = ['project', 'tag'] as const;
 
 export const sortTimeTrackingDataToArchiveYoung = ({
   timeTracking,
@@ -19,7 +25,7 @@ export const sortTimeTrackingDataToArchiveYoung = ({
 
   // Find dates that are not today and move them to archive
   // First iterate over categories (project, tag)
-  Object.keys(timeTracking).forEach((category) => {
+  TIME_TRACKING_CATEGORIES.forEach((category) => {
     if (!currTT[category]) currTT[category] = {};
     if (!archiveTT[category]) archiveTT[category] = {};
 
@@ -77,33 +83,15 @@ export const sortTimeTrackingAndTasksFromArchiveYoungToOld = ({
   // Move all timeTracking data from young to old archive
   // Deep merge time tracking data from young to old archive
   const mergedTimeTracking = {
-    project: { ...archiveOld.timeTracking.project },
-    tag: { ...archiveOld.timeTracking.tag },
+    project: mergeTimeTrackingCategory(
+      archiveYoung.timeTracking.project,
+      archiveOld.timeTracking.project,
+    ),
+    tag: mergeTimeTrackingCategory(
+      archiveYoung.timeTracking.tag,
+      archiveOld.timeTracking.tag,
+    ),
   };
-
-  // Merge project data
-  Object.entries(archiveYoung.timeTracking.project || {}).forEach(
-    ([projectId, projectData]) => {
-      if (!mergedTimeTracking.project[projectId]) {
-        mergedTimeTracking.project[projectId] = {};
-      }
-      // Copy all date entries for this project
-      Object.entries(projectData).forEach(([dateStr, entry]) => {
-        mergedTimeTracking.project[projectId][dateStr] = entry;
-      });
-    },
-  );
-
-  // Merge tag data
-  Object.entries(archiveYoung.timeTracking.tag || {}).forEach(([tagId, tagData]) => {
-    if (!mergedTimeTracking.tag[tagId]) {
-      mergedTimeTracking.tag[tagId] = {};
-    }
-    // Copy all date entries for this tag
-    Object.entries(tagData).forEach(([dateStr, entry]) => {
-      mergedTimeTracking.tag[tagId][dateStr] = entry;
-    });
-  });
 
   return {
     archiveYoung: {
@@ -121,6 +109,25 @@ export const sortTimeTrackingAndTasksFromArchiveYoungToOld = ({
       timeTracking: mergedTimeTracking,
     },
   };
+};
+
+const mergeTimeTrackingCategory = (
+  source: TTWorkContextSessionMap,
+  target: TTWorkContextSessionMap,
+): TTWorkContextSessionMap => {
+  const result = { ...target };
+
+  Object.entries(source || {}).forEach(([contextId, contextData]) => {
+    if (!result[contextId]) {
+      result[contextId] = {};
+    }
+
+    Object.entries(contextData).forEach(([dateStr, entry]) => {
+      result[contextId][dateStr] = entry;
+    });
+  });
+
+  return result;
 };
 
 export const splitArchiveTasksByDoneOnThreshold = ({
