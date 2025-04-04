@@ -71,7 +71,7 @@ describe('dataRepair()', () => {
       task: taskState,
       // TODO fix
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...createEmptyEntity(),
@@ -297,7 +297,7 @@ describe('dataRepair()', () => {
         ...mock,
         project: projectState,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchiveState,
         },
@@ -305,7 +305,7 @@ describe('dataRepair()', () => {
     ).toEqual({
       ...mock,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: taskArchiveState,
       },
@@ -512,7 +512,7 @@ describe('dataRepair()', () => {
         dataRepair({
           ...mock,
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: {
               ids: ['AAA, XXX', 'YYY'],
@@ -526,7 +526,7 @@ describe('dataRepair()', () => {
       ).toEqual({
         ...mock,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: {
             ids: ['AAA', 'CCC'],
@@ -576,7 +576,7 @@ describe('dataRepair()', () => {
         ...mock,
         project: projectState,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchiveState,
         },
@@ -737,7 +737,7 @@ describe('dataRepair()', () => {
         ...mock,
         task: taskStateBefore,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchiveStateBefore,
         },
@@ -772,7 +772,7 @@ describe('dataRepair()', () => {
         ]),
       } as any,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...mock.archiveYoung.task,
@@ -820,7 +820,7 @@ describe('dataRepair()', () => {
         ...mock,
         task: taskStateBefore,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchiveStateBefore,
         },
@@ -832,7 +832,7 @@ describe('dataRepair()', () => {
         ...fakeEntityStateFromArray<Task>([]),
       } as any,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...mock.archiveYoung.task,
@@ -1000,7 +1000,7 @@ describe('dataRepair()', () => {
     ).toEqual({
       ...mock,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...taskArchiveState,
@@ -1393,7 +1393,7 @@ describe('dataRepair()', () => {
         ...mock,
         task,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchive,
         },
@@ -1418,7 +1418,7 @@ describe('dataRepair()', () => {
         ]),
       } as any,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...mock.archiveYoung.task,
@@ -1471,7 +1471,7 @@ describe('dataRepair()', () => {
         ...mock,
         task,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchive,
         },
@@ -1490,7 +1490,7 @@ describe('dataRepair()', () => {
         ]),
       } as any,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...mock.archiveYoung.task,
@@ -1544,7 +1544,7 @@ describe('dataRepair()', () => {
         ...mock,
         task,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchive,
         },
@@ -1573,7 +1573,7 @@ describe('dataRepair()', () => {
         ]),
       } as any,
       archiveYoung: {
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
         task: {
           ...mock.archiveYoung.task,

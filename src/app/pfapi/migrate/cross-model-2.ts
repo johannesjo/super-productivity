@@ -127,25 +127,25 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
     timeTracking: {
       project: projectTimeTracking,
       tag: tagTimeTracking,
-      lastFlush: 0,
+      // lastFlush: 0,
     },
     archiveYoung: {
       task: taskArchive,
       timeTracking: {
         project: {},
         tag: {},
-        lastFlush: 0,
+        // lastFlush: 0,
       },
-      lastFlush: 0,
+      lastTimeTrackingFlush: 0,
     },
     archiveOld: {
       task: { ids: [], entities: {} },
       timeTracking: {
         project: {},
         tag: {},
-        lastFlush: 0,
+        // lastFlush: 0,
       },
-      lastFlush: 0,
+      lastTimeTrackingFlush: 0,
     },
   };
 }) as CrossModelMigrateFn;

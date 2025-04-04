@@ -50,11 +50,11 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   archiveYoung: {
     task: createEmptyEntity(),
     timeTracking: initialTimeTrackingState,
-    lastFlush: 0,
+    lastTimeTrackingFlush: 0,
   },
   archiveOld: {
     task: createEmptyEntity(),
     timeTracking: initialTimeTrackingState,
-    lastFlush: 0,
+    lastTimeTrackingFlush: 0,
   },
 });

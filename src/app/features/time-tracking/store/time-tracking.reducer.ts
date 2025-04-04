@@ -11,7 +11,7 @@ export const TIME_TRACKING_FEATURE_KEY = 'timeTracking' as const;
 export const initialTimeTrackingState: TimeTrackingState = {
   tag: {},
   project: {},
-  lastFlush: 0,
+  // lastFlush: 0,
 } as const;
 
 export const timeTrackingReducer = createReducer(
@@ -22,6 +22,7 @@ export const timeTrackingReducer = createReducer(
       ? (appDataComplete as AppDataCompleteNew).timeTracking
       : state,
   ),
+  on(TimeTrackingActions.updateWholeState, (state, { newState }) => newState),
 
   on(TimeTrackingActions.addTimeSpent, (state, { task, date }) => {
     const isUpdateProject = !!task.projectId;

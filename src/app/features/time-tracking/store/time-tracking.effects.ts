@@ -41,7 +41,10 @@ export class TimeTrackingEffects {
   updateTimeTrackingStorage$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TimeTrackingActions.updateWorkContextData),
+        ofType(
+          TimeTrackingActions.updateWorkContextData,
+          TimeTrackingActions.updateWholeState,
+        ),
         switchMap(() => this.saveToLs$),
       ),
     { dispatch: false },

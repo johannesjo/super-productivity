@@ -87,6 +87,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialTaskState,
     isMainFileModel: true,
   },
+  timeTracking: {
+    modelVersion: TASK_MODEL_VERSION,
+    defaultData: initialTimeTrackingState,
+    isMainFileModel: true,
+  },
+
   project: {
     modelVersion: 1,
     defaultData: initialProjectState,
@@ -153,16 +159,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialObstructionState,
   },
 
-  timeTracking: {
-    modelVersion: TASK_MODEL_VERSION,
-    defaultData: initialTimeTrackingState,
-  },
   archiveYoung: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: {
       task: initialTaskState,
       timeTracking: initialTimeTrackingState,
-      lastFlush: 0,
+      lastTimeTrackingFlush: 0,
     },
   },
   archiveOld: {
@@ -170,7 +172,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: {
       task: initialTaskState,
       timeTracking: initialTimeTrackingState,
-      lastFlush: 0,
+      lastTimeTrackingFlush: 0,
     },
   },
 

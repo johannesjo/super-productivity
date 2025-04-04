@@ -48,7 +48,7 @@ describe('crossModelMigration2()', () => {
         timeTracking: {
           project: {},
           tag: {},
-          lastFlush: 0,
+          // lastFlush: 0,
         },
         lastFlush: 0,
       },
@@ -57,7 +57,7 @@ describe('crossModelMigration2()', () => {
         timeTracking: {
           project: {},
           tag: {},
-          lastFlush: 0,
+          // lastFlush: 0,
         },
         lastFlush: 0,
       },
@@ -139,7 +139,7 @@ describe('crossModelMigration2()', () => {
         timeTracking: {
           project: {},
           tag: {},
-          lastFlush: 0,
+          // lastFlush: 0,
         },
         lastFlush: 0,
       },
@@ -148,7 +148,7 @@ describe('crossModelMigration2()', () => {
         timeTracking: {
           project: {},
           tag: {},
-          lastFlush: 0,
+          // lastFlush: 0,
         },
         lastFlush: 0,
       },

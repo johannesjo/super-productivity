@@ -20,7 +20,7 @@ export const mergeTimeTrackingStates = ({
       archive: archive.tag,
       oldArchive: oldArchive.tag,
     }),
-    lastFlush: current.lastFlush,
+    // lastFlush: current.lastFlush,
     // task: current.task,
   };
 };

@@ -49,13 +49,14 @@ export interface TimeTrackingState {
   project: TTWorkContextSessionMap;
   tag: TTWorkContextSessionMap;
   // somehow can't be optional for ngrx
-  lastFlush: number | undefined;
 }
 
 // Archive model
 export interface ArchiveModel {
+  // should not be written apart from flushing!
   timeTracking: TimeTrackingState;
   // TODO rename to taskArchive or similar
   task: TaskArchive;
-  lastFlush: number;
+  // TODO rename to lastFlushTimeTracking
+  lastTimeTrackingFlush: number;
 }

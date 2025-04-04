@@ -37,12 +37,12 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
     },
     // NOTE only taskArchive data for now
     timeTracking: dataOut.archiveYoung.timeTracking,
-    lastFlush: dataOut.archiveYoung.lastFlush,
+    lastTimeTrackingFlush: dataOut.archiveYoung.lastTimeTrackingFlush,
   };
   dataOut.archiveOld = {
     task: { ids: [], entities: {} },
     timeTracking: dataOut.archiveOld.timeTracking,
-    lastFlush: dataOut.archiveOld.lastFlush,
+    lastTimeTrackingFlush: dataOut.archiveOld.lastTimeTrackingFlush,
   };
 
   dataOut = _fixEntityStates(dataOut);

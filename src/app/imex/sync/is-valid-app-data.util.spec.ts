@@ -212,7 +212,7 @@ describe('isValidAppData()', () => {
           // NOTE: it's empty
           task: taskState,
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: taskArchiveState,
           },
@@ -260,7 +260,7 @@ describe('isValidAppData()', () => {
           // NOTE: it's empty
           task: taskState,
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: taskArchiveState,
           },
@@ -310,7 +310,7 @@ describe('isValidAppData()', () => {
           ...mock,
           // NOTE: it's empty
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: taskArchiveState,
           },
@@ -342,7 +342,7 @@ describe('isValidAppData()', () => {
         isValidAppData({
           ...mock,
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: {
               ...mock.archiveYoung.task,
@@ -396,7 +396,7 @@ describe('isValidAppData()', () => {
         isValidAppData({
           ...mock,
           archiveYoung: {
-            lastFlush: 0,
+            lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: {
               ...mock.archiveYoung.task,

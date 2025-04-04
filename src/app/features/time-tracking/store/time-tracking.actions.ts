@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { createActionGroup, props } from '@ngrx/store';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { TTWorkContextData } from '../time-tracking.model';
+import { TimeTrackingState, TTWorkContextData } from '../time-tracking.model';
 import { Task } from '../../tasks/task.model';
 
 export const TimeTrackingActions = createActionGroup({
@@ -17,6 +17,9 @@ export const TimeTrackingActions = createActionGroup({
       date: string;
       duration: number;
       isFromTrackingReminder: boolean;
+    }>(),
+    'Update whole State': props<{
+      newState: TimeTrackingState;
     }>(),
   },
 });

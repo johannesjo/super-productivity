@@ -699,7 +699,7 @@ export class TaskService {
       });
     }
     this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
-    this._archiveService.moveTasksToArchive(tasks);
+    this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
