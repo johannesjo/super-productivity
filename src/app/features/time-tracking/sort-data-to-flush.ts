@@ -142,7 +142,7 @@ export const splitArchiveTasksByDoneOnThreshold = ({
     if (!task) {
       throw new ImpossibleError('splitArchiveTasksByDoneOnThreshold(): Task not found');
     }
-    return task.doneOn && now - task.doneOn > threshold;
+    return !task.parentId && task.doneOn && now - task.doneOn > threshold;
   }) as ArchiveTask[];
 
   // Exit early if no tasks to move
@@ -158,6 +158,15 @@ export const splitArchiveTasksByDoneOnThreshold = ({
   tasksToMove.forEach((task) => {
     delete newYoungEntities[task.id];
     newOldEntities[task.id] = task;
+    if (task.subTaskIds) {
+      task.subTaskIds.forEach((subTaskId) => {
+        const subTask = newYoungEntities[subTaskId];
+        if (subTask) {
+          delete newYoungEntities[subTaskId];
+          newOldEntities[subTaskId] = subTask;
+        }
+      });
+    }
   });
 
   return {

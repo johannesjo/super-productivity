@@ -222,6 +222,68 @@ describe('sort-data-to-flush', () => {
       expect(Object.keys(result.oldTaskState.entities)).toEqual(['3']);
     });
 
+    it('should migrate parent and sub tasks together', () => {
+      // Arrange
+      const youngTaskState = {
+        ids: ['1', '2'],
+        entities: {
+          '1': {
+            ...BASE_TASK,
+            id: '1',
+            doneOn: now - 1000,
+          },
+          '2P': {
+            ...BASE_TASK,
+            id: '2P',
+            // eslint-disable-next-line no-mixed-operators
+            doneOn: now - threshold * 2,
+            subTaskIds: ['3S', '4S'],
+          },
+          '3S': {
+            ...BASE_TASK,
+            id: '3S',
+            parentId: '2P',
+            doneOn: now - 2000,
+          },
+          '4S': {
+            ...BASE_TASK,
+            id: '4S',
+            parentId: '2P',
+            doneOn: now - 2000,
+          },
+        },
+      };
+
+      const oldTaskState = {
+        ids: ['5'],
+        entities: {
+          '5': {
+            ...BASE_TASK,
+            id: '5',
+            // eslint-disable-next-line no-mixed-operators
+            doneOn: now - threshold * 2,
+          },
+        },
+      };
+
+      // Act
+      const result = splitArchiveTasksByDoneOnThreshold({
+        youngTaskState,
+        oldTaskState,
+        threshold,
+        now,
+      });
+
+      // Assert
+      expect(Object.keys(result.youngTaskState.entities)).toEqual(['1']);
+      expect(Object.keys(result.oldTaskState.entities).sort()).toEqual([
+        '2P',
+        '3S',
+        '4S',
+        '5',
+      ]);
+    });
+
     it('should throw error if task is undefined', () => {
       // Arrange
       const youngTaskState = {
