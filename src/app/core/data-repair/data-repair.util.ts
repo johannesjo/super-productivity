@@ -13,6 +13,7 @@ import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
+// TODO improve later
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
 
 export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
@@ -24,6 +25,26 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   // NOTE copy is important to prevent readonly errors
   let dataOut: AppDataCompleteNew = { ...data };
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
+
+  // move all taskArchive data into young to make things easier for us
+  dataOut.archiveYoung = {
+    task: {
+      ids: [...dataOut.archiveOld.task.ids, ...dataOut.archiveYoung.task.ids],
+      entities: {
+        ...dataOut.archiveOld.task.entities,
+        ...dataOut.archiveYoung.task.entities,
+      },
+    },
+    // NOTE only taskArchive data for now
+    timeTracking: dataOut.archiveYoung.timeTracking,
+    lastFlush: dataOut.archiveYoung.lastFlush,
+  };
+  dataOut.archiveOld = {
+    task: { ids: [], entities: {} },
+    timeTracking: dataOut.archiveOld.timeTracking,
+    lastFlush: dataOut.archiveOld.lastFlush,
+  };
+
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeNonExistentProjectIdsFromIssueProviders(dataOut);
@@ -52,20 +73,26 @@ const _fixEntityStates = (data: AppDataCompleteNew): AppDataCompleteNew => {
       data[key] as AppBaseDataEntityLikeStates,
     ) as any;
   });
+  // TODO improve typing for helper fn _resetEntityIdsFromObjects
+  data.archiveYoung.task = _resetEntityIdsFromObjects(
+    data.archiveYoung.task as any,
+  ) as any;
 
   return data;
 };
 
 const _removeDuplicatesFromArchive = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const taskIds = data.task.ids as string[];
-  const archiveTaskIds = data.taskArchive.ids as string[];
+  const archiveTaskIds = data.archiveYoung.task.ids as string[];
   const duplicateIds = taskIds.filter((id) => archiveTaskIds.includes(id));
 
   if (duplicateIds.length) {
-    data.taskArchive.ids = archiveTaskIds.filter((id) => !duplicateIds.includes(id));
+    data.archiveYoung.task.ids = archiveTaskIds.filter(
+      (id) => !duplicateIds.includes(id),
+    );
     duplicateIds.forEach((id) => {
-      if (data.taskArchive.entities[id]) {
-        delete data.taskArchive.entities[id];
+      if (data.archiveYoung.task.entities[id]) {
+        delete data.archiveYoung.task.entities[id];
       }
     });
     if (duplicateIds.length > 0) {
@@ -94,13 +121,13 @@ const _moveArchivedSubTasksToUnarchivedParents = (
 ): AppDataCompleteNew => {
   // to avoid ambiguity
   const taskState: TaskState = data.task;
-  const taskArchiveState: TaskArchive = data.taskArchive;
-  const orhphanedArchivedSubTasks: TaskCopy[] = taskArchiveState.ids
+  const taskArchiveState: TaskArchive = data.archiveYoung.task;
+  const orphanArchivedSubTasks: TaskCopy[] = taskArchiveState.ids
     .map((id: string) => taskArchiveState.entities[id] as TaskCopy)
     .filter((t: TaskCopy) => t.parentId && !taskArchiveState.ids.includes(t.parentId));
 
-  console.log('orhphanedArchivedSubTasks', orhphanedArchivedSubTasks);
-  orhphanedArchivedSubTasks.forEach((t: TaskCopy) => {
+  console.log('orphanArchivedSubTasks', orphanArchivedSubTasks);
+  orphanArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete archived if duplicate
     if (taskState.ids.includes(t.id as string)) {
       taskArchiveState.ids = taskArchiveState.ids.filter((id) => t.id !== id);
@@ -138,13 +165,13 @@ const _moveUnArchivedSubTasksToArchivedParents = (
 ): AppDataCompleteNew => {
   // to avoid ambiguity
   const taskState: TaskState = data.task;
-  const taskArchiveState: TaskArchive = data.taskArchive;
-  const orhphanedUnArchivedSubTasks: TaskCopy[] = taskState.ids
+  const taskArchiveState: TaskArchive = data.archiveYoung.task;
+  const orphanUnArchivedSubTasks: TaskCopy[] = taskState.ids
     .map((id: string) => taskState.entities[id] as TaskCopy)
     .filter((t: TaskCopy) => t.parentId && !taskState.ids.includes(t.parentId));
 
-  console.log('orhphanedUnArchivedSubTasks', orhphanedUnArchivedSubTasks);
-  orhphanedUnArchivedSubTasks.forEach((t: TaskCopy) => {
+  console.log('orphanUnArchivedSubTasks', orphanUnArchivedSubTasks);
+  orphanUnArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete un-archived if duplicate
     if (taskArchiveState.ids.includes(t.id as string)) {
       taskState.ids = taskState.ids.filter((id) => t.id !== id);
@@ -179,9 +206,9 @@ const _moveUnArchivedSubTasksToArchivedParents = (
 const _removeMissingTasksFromListsOrRestoreFromArchive = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
-  const { task, project, tag, taskArchive } = data;
+  const { task, project, tag, archiveYoung } = data;
   const taskIds: string[] = task.ids;
-  const taskArchiveIds: string[] = taskArchive.ids as string[];
+  const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
   const taskIdsToRestoreFromArchive: string[] = [];
 
   project.ids.forEach((pId: string | number) => {
@@ -212,11 +239,11 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   });
 
   taskIdsToRestoreFromArchive.forEach((id) => {
-    task.entities[id] = taskArchive.entities[id];
-    delete taskArchive.entities[id];
+    task.entities[id] = archiveYoung.task.entities[id];
+    delete archiveYoung.task.entities[id];
   });
   task.ids = [...taskIds, ...taskIdsToRestoreFromArchive];
-  taskArchive.ids = taskArchiveIds.filter(
+  archiveYoung.task.ids = taskArchiveIds.filter(
     (id) => !taskIdsToRestoreFromArchive.includes(id),
   );
 
@@ -228,9 +255,9 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   return data;
 };
 
-const _resetEntityIdsFromObjects = (
-  data: AppBaseDataEntityLikeStates,
-): AppBaseDataEntityLikeStates => {
+const _resetEntityIdsFromObjects = <T extends AppBaseDataEntityLikeStates>(
+  data: T,
+): T => {
   return {
     ...data,
     entities: (data.entities as any) || {},
@@ -281,10 +308,10 @@ const _addOrphanedTasksToProjectLists = (
 const _removeNonExistentProjectIdsFromTasks = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
-  const { task, project, taskArchive } = data;
+  const { task, project, archiveYoung } = data;
   const projectIds: string[] = project.ids as string[];
   const taskIds: string[] = task.ids;
-  const taskArchiveIds: string[] = taskArchive.ids as string[];
+  const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
   taskIds.forEach((id) => {
     const t = task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
@@ -293,8 +320,11 @@ const _removeNonExistentProjectIdsFromTasks = (
     }
   });
 
+  console.log(taskArchiveIds);
+  console.log(Object.keys(archiveYoung.task.entities));
+
   taskArchiveIds.forEach((id) => {
-    const t = taskArchive.entities[id] as TaskCopy;
+    const t = archiveYoung.task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
       console.log('Delete missing project id from archive task ' + t.projectId);
       delete t.projectId;
@@ -485,9 +515,9 @@ const _addTodayTagIfNoProjectIdOrTagId = (
       }
     });
 
-  const archivedTaskIds: string[] = data.taskArchive.ids as string[];
+  const archivedTaskIds: string[] = data.archiveYoung.task.ids as string[];
   archivedTaskIds
-    .map((id) => data.taskArchive.entities[id])
+    .map((id) => data.archiveYoung.task.entities[id])
     .forEach((task) => {
       if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
         (task as any).tagIds = [TODAY_TAG.id];
@@ -522,18 +552,18 @@ const _setTaskProjectIdAccordingToParent = (
       }
     });
 
-  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  const archiveTaskIds: string[] = data.archiveYoung.task.ids as string[];
   archiveTaskIds
-    .map((id) => data.taskArchive.entities[id])
+    .map((id) => data.archiveYoung.task.entities[id])
     .forEach((taskItem) => {
       if (!taskItem) {
-        console.log(data.taskArchive);
+        console.log(data.archiveYoung.task);
         throw new Error('No archive task');
       }
       if (taskItem.subTaskIds) {
         const parentProjectId = taskItem.projectId;
         taskItem.subTaskIds.forEach((stid) => {
-          const subTask = data.taskArchive.entities[stid];
+          const subTask = data.archiveYoung.task.entities[stid];
           if (!subTask) {
             throw new Error('Archived Task data not found');
           }
@@ -570,12 +600,12 @@ const _cleanupOrphanedSubTasks = (data: AppDataCompleteNew): AppDataCompleteNew 
       }
     });
 
-  const archiveTaskIds: string[] = data.taskArchive.ids as string[];
+  const archiveTaskIds: string[] = data.archiveYoung.task.ids as string[];
   archiveTaskIds
-    .map((id) => data.taskArchive.entities[id])
+    .map((id) => data.archiveYoung.task.entities[id])
     .forEach((taskItem) => {
       if (!taskItem) {
-        console.log(data.taskArchive);
+        console.log(data.archiveYoung.task);
         throw new Error('No archive task');
       }
 
@@ -583,7 +613,7 @@ const _cleanupOrphanedSubTasks = (data: AppDataCompleteNew): AppDataCompleteNew 
         let i = taskItem.subTaskIds.length - 1;
         while (i >= 0) {
           const sid = taskItem.subTaskIds[i];
-          if (!data.taskArchive.entities[sid]) {
+          if (!data.archiveYoung.task.entities[sid]) {
             console.log('Delete orphaned archive sub task for ', taskItem);
             taskItem.subTaskIds.splice(i, 1);
           }

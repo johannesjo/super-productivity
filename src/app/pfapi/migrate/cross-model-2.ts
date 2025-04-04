@@ -123,7 +123,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
   return {
     ...copy,
     // TODO remove
-    taskArchive,
+    // taskArchive,
     timeTracking: {
       project: projectTimeTracking,
       tag: tagTimeTracking,

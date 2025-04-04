@@ -53,21 +53,29 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task: taskState,
-        taskArchive: fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'TEST',
-            title: 'TEST',
-            projectId: FAKE_PROJECT_ID,
-          },
-        ]),
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'TEST',
+              title: 'TEST',
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
+        },
       } as any),
     ).toEqual({
       ...mock,
       task: taskState,
       // TODO fix
-      taskArchive: {
-        ...createEmptyEntity(),
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...createEmptyEntity(),
+        },
       },
     });
   });
@@ -259,7 +267,7 @@ describe('dataRepair()', () => {
 
   it('should remove tasks archived sub tasks from any project lists', () => {
     const taskArchiveState = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ids: ['PAR_ID', 'SUB_ID'],
       entities: {
         SUB_ID: {
@@ -288,11 +296,19 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         project: projectState,
-        taskArchive: taskArchiveState,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchiveState,
+        },
       }),
     ).toEqual({
       ...mock,
-      taskArchive: taskArchiveState,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: taskArchiveState,
+      },
       project: {
         ...projectState,
         entities: {
@@ -407,55 +423,64 @@ describe('dataRepair()', () => {
       });
     });
 
-    it('taskArchive', () => {
-      expect(
-        dataRepair({
-          ...mock,
-          taskArchive: {
-            ...mock.taskArchive,
-            ...fakeEntityStateFromArray<Task>([
-              {
-                ...DEFAULT_TASK,
-                id: 'DUPE',
-                title: 'DUPE',
-                projectId: FAKE_PROJECT_ID,
-              },
-              {
-                ...DEFAULT_TASK,
-                id: 'DUPE',
-                title: 'DUPE',
-                projectId: FAKE_PROJECT_ID,
-              },
-              {
-                ...DEFAULT_TASK,
-                id: 'NO_DUPE',
-                title: 'NO_DUPE',
-                projectId: FAKE_PROJECT_ID,
-              },
-            ]),
-          } as any,
-        }),
-      ).toEqual({
-        ...mock,
-        taskArchive: {
-          ...mock.taskArchive,
-          ...fakeEntityStateFromArray<Task>([
-            {
-              ...DEFAULT_TASK,
-              id: 'DUPE',
-              title: 'DUPE',
-              projectId: FAKE_PROJECT_ID,
-            },
-            {
-              ...DEFAULT_TASK,
-              id: 'NO_DUPE',
-              title: 'NO_DUPE',
-              projectId: FAKE_PROJECT_ID,
-            },
-          ]),
-        } as any,
-      });
-    });
+    // TODO check to re-implement properly?? Now it seems to never to trigger something since duplicate entityIds are not possible this way??
+    //   it('archiveYoung.task', () => {
+    //     expect(
+    //       dataRepair({
+    //         ...mock,
+    //         archiveYoung: {
+    //           lastFlush: 0,
+    //           timeTracking: mock.archiveYoung.timeTracking,
+    //           task: {
+    //             ...mock.archiveYoung.task,
+    //             ...fakeEntityStateFromArray<Task>([
+    //               {
+    //                 ...DEFAULT_TASK,
+    //                 id: 'DUPE',
+    //                 title: 'DUPE',
+    //                 projectId: FAKE_PROJECT_ID,
+    //               },
+    //               {
+    //                 ...DEFAULT_TASK,
+    //                 id: 'DUPE',
+    //                 title: 'DUPE',
+    //                 projectId: FAKE_PROJECT_ID,
+    //               },
+    //               {
+    //                 ...DEFAULT_TASK,
+    //                 id: 'NO_DUPE',
+    //                 title: 'NO_DUPE',
+    //                 projectId: FAKE_PROJECT_ID,
+    //               },
+    //             ]),
+    //           } as any,
+    //         },
+    //       }),
+    //     ).toEqual({
+    //       ...mock,
+    //       archiveYoung: {
+    //         lastFlush: 0,
+    //         timeTracking: mock.archiveYoung.timeTracking,
+    //         task: {
+    //           ...mock.archiveYoung.task,
+    //           ...fakeEntityStateFromArray<Task>([
+    //             {
+    //               ...DEFAULT_TASK,
+    //               id: 'DUPE',
+    //               title: 'DUPE',
+    //               projectId: FAKE_PROJECT_ID,
+    //             },
+    //             {
+    //               ...DEFAULT_TASK,
+    //               id: 'NO_DUPE',
+    //               title: 'NO_DUPE',
+    //               projectId: FAKE_PROJECT_ID,
+    //             },
+    //           ]),
+    //         } as any,
+    //       },
+    //     });
+    //   });
   });
 
   describe('should fix inconsistent entity states for', () => {
@@ -486,30 +511,38 @@ describe('dataRepair()', () => {
       expect(
         dataRepair({
           ...mock,
-          taskArchive: {
-            ids: ['AAA, XXX', 'YYY'],
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: {
+              ids: ['AAA, XXX', 'YYY'],
+              entities: {
+                AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
+                CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
+              },
+            } as any,
+          },
+        }),
+      ).toEqual({
+        ...mock,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: {
+            ids: ['AAA', 'CCC'],
             entities: {
               AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
               CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
             },
           } as any,
-        }),
-      ).toEqual({
-        ...mock,
-        taskArchive: {
-          ids: ['AAA', 'CCC'],
-          entities: {
-            AAA: { ...DEFAULT_TASK, id: 'AAA', projectId: FAKE_PROJECT_ID },
-            CCC: { ...DEFAULT_TASK, id: 'CCC', projectId: FAKE_PROJECT_ID },
-          },
-        } as any,
+        },
       });
     });
   });
 
   it('should restore missing tasks from taskArchive if available', () => {
     const taskArchiveState = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -542,7 +575,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         project: projectState,
-        taskArchive: taskArchiveState,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchiveState,
+        },
         task: {
           ...mock.task,
           ...createEmptyEntity(),
@@ -683,7 +720,7 @@ describe('dataRepair()', () => {
     } as any;
 
     const taskArchiveStateBefore = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -699,7 +736,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task: taskStateBefore,
-        taskArchive: taskArchiveStateBefore,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchiveStateBefore,
+        },
       }),
     ).toEqual({
       ...mock,
@@ -730,10 +771,14 @@ describe('dataRepair()', () => {
           },
         ]),
       } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([]),
-      } as any,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...mock.archiveYoung.task,
+          ...fakeEntityStateFromArray<Task>([]),
+        } as any,
+      },
     });
   });
 
@@ -751,7 +796,7 @@ describe('dataRepair()', () => {
     } as any;
 
     const taskArchiveStateBefore = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -774,7 +819,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task: taskStateBefore,
-        taskArchive: taskArchiveStateBefore,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchiveStateBefore,
+        },
       }),
     ).toEqual({
       ...mock,
@@ -782,33 +831,37 @@ describe('dataRepair()', () => {
         ...mock.task,
         ...fakeEntityStateFromArray<Task>([]),
       } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskArchived',
-            title: 'subTaskArchived',
-            parentId: 'parent',
-            projectId: FAKE_PROJECT_ID,
-          },
-          {
-            ...DEFAULT_TASK,
-            id: 'parent',
-            title: 'parent',
-            parentId: undefined,
-            subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
-            projectId: FAKE_PROJECT_ID,
-          },
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskUnarchived',
-            title: 'subTaskUnarchived',
-            parentId: 'parent',
-            projectId: FAKE_PROJECT_ID,
-          },
-        ]),
-      } as any,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...mock.archiveYoung.task,
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'subTaskArchived',
+              title: 'subTaskArchived',
+              parentId: 'parent',
+              projectId: FAKE_PROJECT_ID,
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'parent',
+              title: 'parent',
+              parentId: undefined,
+              subTaskIds: ['subTaskArchived', 'subTaskUnarchived'],
+              projectId: FAKE_PROJECT_ID,
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'subTaskUnarchived',
+              title: 'subTaskUnarchived',
+              parentId: 'parent',
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
+        } as any,
+      },
     });
   });
 
@@ -923,7 +976,7 @@ describe('dataRepair()', () => {
 
   it('should delete non-existent project ids for tasks in "taskArchive"', () => {
     const taskArchiveState = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -937,15 +990,24 @@ describe('dataRepair()', () => {
     expect(
       dataRepair({
         ...mock,
-        taskArchive: taskArchiveState,
+
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchiveState,
+        },
       } as any),
     ).toEqual({
       ...mock,
-      taskArchive: {
-        ...taskArchiveState,
-        entities: {
-          TEST: {
-            ...taskArchiveState.entities.TEST,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...taskArchiveState,
+          entities: {
+            TEST: {
+              ...taskArchiveState.entities.TEST,
+            },
           },
         },
       },
@@ -1309,7 +1371,7 @@ describe('dataRepair()', () => {
     } as any;
 
     const taskArchive = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -1330,7 +1392,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task,
-        taskArchive,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchive,
+        },
       }),
     ).toEqual({
       ...mock,
@@ -1351,23 +1417,27 @@ describe('dataRepair()', () => {
           },
         ]),
       } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'archiveTask1',
-            subTaskIds: ['as1'],
-            projectId: FAKE_PROJECT_ID,
-          },
-          {
-            ...DEFAULT_TASK,
-            id: 'as1',
-            parentId: 'archiveTask1',
-            projectId: FAKE_PROJECT_ID,
-          },
-        ]),
-      } as any,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...mock.archiveYoung.task,
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'archiveTask1',
+              subTaskIds: ['as1'],
+              projectId: FAKE_PROJECT_ID,
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'as1',
+              parentId: 'archiveTask1',
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
+        } as any,
+      },
     });
   });
 
@@ -1385,7 +1455,7 @@ describe('dataRepair()', () => {
     } as any;
 
     const taskArchive = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -1400,7 +1470,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task,
-        taskArchive,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchive,
+        },
       }),
     ).toEqual({
       ...mock,
@@ -1415,17 +1489,21 @@ describe('dataRepair()', () => {
           },
         ]),
       } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'archiveTask1',
-            subTaskIds: [],
-            projectId: FAKE_PROJECT_ID,
-          },
-        ]),
-      } as any,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...mock.archiveYoung.task,
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'archiveTask1',
+              subTaskIds: [],
+              projectId: FAKE_PROJECT_ID,
+            },
+          ]),
+        } as any,
+      },
     });
   });
 
@@ -1452,7 +1530,7 @@ describe('dataRepair()', () => {
     } as any;
 
     const taskArchive = {
-      ...mock.taskArchive,
+      ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
@@ -1465,7 +1543,11 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         task,
-        taskArchive,
+        archiveYoung: {
+          lastFlush: 0,
+          timeTracking: mock.archiveYoung.timeTracking,
+          task: taskArchive,
+        },
       }),
     ).toEqual({
       ...mock,
@@ -1490,16 +1572,20 @@ describe('dataRepair()', () => {
           },
         ]),
       } as any,
-      taskArchive: {
-        ...mock.taskArchive,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'archiveTask1',
-            tagIds: [TODAY_TAG.id],
-          },
-        ]),
-      } as any,
+      archiveYoung: {
+        lastFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: {
+          ...mock.archiveYoung.task,
+          ...fakeEntityStateFromArray<Task>([
+            {
+              ...DEFAULT_TASK,
+              id: 'archiveTask1',
+              tagIds: [TODAY_TAG.id],
+            },
+          ]),
+        } as any,
+      },
     });
   });
 

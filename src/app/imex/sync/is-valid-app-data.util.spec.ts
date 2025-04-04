@@ -47,7 +47,6 @@ describe('isValidAppData()', () => {
       'task',
       'tag',
       'globalConfig',
-      'taskArchive',
       // TODO add issueProvider later
     ].forEach((prop) => {
       it('missing prop ' + prop, () => {
@@ -63,22 +62,20 @@ describe('isValidAppData()', () => {
 
   describe('should error for', () => {
     describe('inconsistent entity state', () => {
-      ['task', 'taskArchive', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'].forEach(
-        (prop) => {
-          it(prop, () => {
-            expect(() =>
-              isValidAppData({
-                ...mock,
-                [prop]: {
-                  ...mock[prop],
-                  entities: {},
-                  ids: ['asasdasd'],
-                },
-              }),
-            ).toThrowError(`Inconsistent entity state "${prop}"`);
-          });
-        },
-      );
+      ['task', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'].forEach((prop) => {
+        it(prop, () => {
+          expect(() =>
+            isValidAppData({
+              ...mock,
+              [prop]: {
+                ...mock[prop],
+                entities: {},
+                ids: ['asasdasd'],
+              },
+            }),
+          ).toThrowError(`Inconsistent entity state "${prop}"`);
+        });
+      });
     });
 
     it('inconsistent task state', () => {
@@ -198,7 +195,7 @@ describe('isValidAppData()', () => {
       } as any;
 
       const taskArchiveState = {
-        ...mock.taskArchive,
+        ...mock.archiveYoung.task,
         ...fakeEntityStateFromArray<Task>([
           {
             ...DEFAULT_TASK,
@@ -214,7 +211,11 @@ describe('isValidAppData()', () => {
           ...mock,
           // NOTE: it's empty
           task: taskState,
-          taskArchive: taskArchiveState,
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: taskArchiveState,
+          },
         }),
       ).toThrowError(
         `Inconsistent Task State: Lonely Sub Task in Archive subTaskArchived`,
@@ -235,7 +236,7 @@ describe('isValidAppData()', () => {
       } as any;
 
       const taskArchiveState = {
-        ...mock.taskArchive,
+        ...mock.archiveYoung.task,
         ...fakeEntityStateFromArray<Task>([
           {
             ...DEFAULT_TASK,
@@ -258,7 +259,11 @@ describe('isValidAppData()', () => {
           ...mock,
           // NOTE: it's empty
           task: taskState,
-          taskArchive: taskArchiveState,
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: taskArchiveState,
+          },
         }),
       ).toThrowError(
         `Inconsistent Task State: Lonely Sub Task in Today subTaskUnarchived`,
@@ -290,7 +295,7 @@ describe('isValidAppData()', () => {
 
     it('missing archive sub tasks data', () => {
       const taskArchiveState = {
-        ...mock.taskArchive,
+        ...mock.archiveYoung.task,
         ...fakeEntityStateFromArray<Task>([
           {
             ...DEFAULT_TASK,
@@ -304,7 +309,11 @@ describe('isValidAppData()', () => {
         isValidAppData({
           ...mock,
           // NOTE: it's empty
-          taskArchive: taskArchiveState,
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: taskArchiveState,
+          },
         }),
       ).toThrowError(
         `Inconsistent Task State: Missing sub task data in archive NOOT_THERE`,
@@ -332,15 +341,19 @@ describe('isValidAppData()', () => {
       expect(() =>
         isValidAppData({
           ...mock,
-          taskArchive: {
-            ...mock.taskArchive,
-            ...fakeEntityStateFromArray<Task>([
-              {
-                ...DEFAULT_TASK,
-                tagIds: ['Non existent'],
-              },
-            ]),
-          } as any,
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: {
+              ...mock.archiveYoung.task,
+              ...fakeEntityStateFromArray<Task>([
+                {
+                  ...DEFAULT_TASK,
+                  tagIds: ['Non existent'],
+                },
+              ]),
+            } as any,
+          },
         }),
       ).toThrowError(`tagId "Non existent" from task archive not existing`);
     });
@@ -382,15 +395,19 @@ describe('isValidAppData()', () => {
       expect(() =>
         isValidAppData({
           ...mock,
-          taskArchive: {
-            ...mock.taskArchive,
-            ...fakeEntityStateFromArray<Task>([
-              {
-                ...DEFAULT_TASK,
-                projectId: 'NON_EXISTENT',
-              },
-            ]),
-          } as any,
+          archiveYoung: {
+            lastFlush: 0,
+            timeTracking: mock.archiveYoung.timeTracking,
+            task: {
+              ...mock.archiveYoung.task,
+              ...fakeEntityStateFromArray<Task>([
+                {
+                  ...DEFAULT_TASK,
+                  projectId: 'NON_EXISTENT',
+                },
+              ]),
+            } as any,
+          },
         }),
       ).toThrowError(`projectId NON_EXISTENT from archive task not existing`);
     });

@@ -25,7 +25,6 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
     ...createEmptyEntity(),
     ids: [],
   },
-  taskArchive: createEmptyEntity(),
   taskRepeatCfg: createEmptyEntity(),
 
   // OPTIONAL though they are really not

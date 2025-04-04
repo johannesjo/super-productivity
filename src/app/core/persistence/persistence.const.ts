@@ -184,6 +184,12 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     migrateFn: migrateTaskRepeatCfgState,
   },
 };
+
+// TODO remove later
 export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
   ENTITY_MODEL_CFGS,
-).map(([, entry]) => entry.appDataKey);
+)
+  .map(([, entry]) => entry.appDataKey)
+  .filter((key) => key !== 'taskArchive');
+
+console.log(ALL_ENTITY_MODEL_KEYS);

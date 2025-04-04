@@ -18,7 +18,7 @@ import { IssueProviderState } from '../features/issue/issue.model';
 import { MetricState } from '../features/metric/metric.model';
 import { ImprovementState } from '../features/metric/improvement/improvement.model';
 import { ObstructionState } from '../features/metric/obstruction/obstruction.model';
-import { TaskArchive, TaskState } from '../features/tasks/task.model';
+import { TaskState } from '../features/tasks/task.model';
 import { TagState } from '../features/tag/tag.model';
 import { SimpleCounterState } from '../features/simple-counter/simple-counter.model';
 import { TaskRepeatCfgState } from '../features/task-repeat-cfg/task-repeat-cfg.model';
@@ -70,7 +70,6 @@ export type PfapiAllModelCfg = {
   simpleCounter: ModelCfg<SimpleCounterState>;
   taskRepeatCfg: ModelCfg<TaskRepeatCfgState>;
 
-  taskArchive: ModelCfg<TaskArchive>;
   reminders: ModelCfg<Reminder[]>;
 
   timeTracking: ModelCfg<TimeTrackingState>;
@@ -176,10 +175,10 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   },
 
   // TODO migrate and remove
-  taskArchive: {
-    modelVersion: TASK_MODEL_VERSION,
-    defaultData: initialTaskState,
-  },
+  // taskArchive: {
+  //   modelVersion: TASK_MODEL_VERSION,
+  //   defaultData: initialTaskState,
+  // },
   // TODO task archive old
 } as const;
 

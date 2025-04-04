@@ -30,8 +30,15 @@ export const isValidAppData = (d: AppDataCompleteNew): boolean => {
     dAny.tag !== null &&
     typeof dAny.globalConfig === 'object' &&
     dAny.globalConfig !== null &&
-    typeof dAny.taskArchive === 'object' &&
-    dAny.taskArchive !== null &&
+    typeof dAny.archiveYoung?.task === 'object' &&
+    dAny.archiveYoung?.task !== null &&
+    typeof dAny.archiveOld?.task === 'object' &&
+    dAny.archiveOld?.task !== null &&
+    typeof dAny.archiveYoung?.timeTracking === 'object' &&
+    dAny.archiveYoung?.timeTracking !== null &&
+    typeof dAny.archiveOld?.timeTracking === 'object' &&
+    dAny.archiveOld?.timeTracking !== null &&
+    // TODO add more checks
     // TODO add check later
     // typeof dAny.issueProvider === 'object' &&
     // dAny.issueProvider !== null &&
@@ -105,8 +112,8 @@ const _isAllProjectsAvailableForTasks = (data: AppDataCompleteNew): boolean => {
       isValid = false;
     }
   });
-  data.taskArchive.ids.forEach((id: string) => {
-    const t: Task = data.taskArchive.entities[id] as Task;
+  data.archiveYoung.task.ids.forEach((id: string) => {
+    const t: Task = data.archiveYoung.task.entities[id] as Task;
     if (t.projectId && !pids.includes(t.projectId)) {
       console.log(t);
       _validityError(`projectId ${t.projectId} from archive task not existing`, {
@@ -150,8 +157,8 @@ const _isAllTagsAvailable = (data: AppDataCompleteNew): boolean => {
       isValid = false;
     }
   });
-  data.taskArchive.ids.forEach((id: string) => {
-    const t: Task = data.taskArchive.entities[id] as Task;
+  data.archiveYoung.task.ids.forEach((id: string) => {
+    const t: Task = data.archiveYoung.task.entities[id] as Task;
     const missingTagId = t.tagIds.find((tagId) => !allTagIds.includes(tagId));
     if (missingTagId) {
       console.log(t);
@@ -304,7 +311,6 @@ const _isAllNotesAvailableAndListConsistent = (data: AppDataCompleteNew): boolea
 const _isEntityStatesConsistent = (data: AppDataCompleteNew): boolean => {
   const baseStateKeys: (keyof AppBaseData)[] = [
     'task',
-    'taskArchive',
     'taskRepeatCfg',
     'tag',
     'project',
@@ -343,9 +349,9 @@ const _isNoLonelySubTasks = (data: AppDataCompleteNew): boolean => {
     }
   });
 
-  data.taskArchive.ids.forEach((id: string) => {
-    const t: Task = data.taskArchive.entities[id] as Task;
-    if (t.parentId && !data.taskArchive.entities[t.parentId]) {
+  data.archiveYoung.task.ids.forEach((id: string) => {
+    const t: Task = data.archiveYoung.task.entities[id] as Task;
+    if (t.parentId && !data.archiveYoung.task.entities[t.parentId]) {
       console.log(t);
       _validityError(`Inconsistent Task State: Lonely Sub Task in Archive ${t.id}`, {
         t,
@@ -376,11 +382,11 @@ const _isNoMissingSubTasks = (data: AppDataCompleteNew): boolean => {
     }
   });
 
-  data.taskArchive.ids.forEach((id: string) => {
-    const t: Task = data.taskArchive.entities[id] as Task;
+  data.archiveYoung.task.ids.forEach((id: string) => {
+    const t: Task = data.archiveYoung.task.entities[id] as Task;
     if (t.subTaskIds.length) {
       t.subTaskIds.forEach((subId) => {
-        if (!data.taskArchive.entities[subId]) {
+        if (!data.archiveYoung.task.entities[subId]) {
           console.log(t);
           _validityError(
             `Inconsistent Task State: Missing sub task data in archive ${subId}`,

@@ -3,7 +3,7 @@ import { crossModelMigration2 } from './cross-model-2';
 describe('crossModelMigration2()', () => {
   it('should work and migrate projects', () => {
     const r = crossModelMigration2({
-      taskArchive: { ids: [], entities: {} },
+      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
       project: {
         entities: {
           P1: {
@@ -18,7 +18,6 @@ describe('crossModelMigration2()', () => {
       tag: { entities: {} },
     } as any);
     expect(r).toEqual({
-      taskArchive: { ids: [], entities: {} },
       project: {
         entities: {
           P1: {
@@ -44,13 +43,14 @@ describe('crossModelMigration2()', () => {
         tag: {},
         lastFlush: 0,
       },
-      archive: {
-        task: { ids: [], entities: {} },
+      archiveYoung: {
+        task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
         timeTracking: {
           project: {},
           tag: {},
           lastFlush: 0,
         },
+        lastFlush: 0,
       },
       archiveOld: {
         task: { ids: [], entities: {} },
@@ -59,13 +59,14 @@ describe('crossModelMigration2()', () => {
           tag: {},
           lastFlush: 0,
         },
+        lastFlush: 0,
       },
     } as any as any);
   });
 
   it('should work and migrate tags too', () => {
     const r = crossModelMigration2({
-      taskArchive: { ids: [], entities: {} },
+      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
       project: {
         entities: {
           P1: {
@@ -90,7 +91,6 @@ describe('crossModelMigration2()', () => {
       },
     } as any);
     expect(r).toEqual({
-      taskArchive: { ids: [], entities: {} },
       project: {
         entities: {
           P1: {
@@ -134,13 +134,14 @@ describe('crossModelMigration2()', () => {
         },
         lastFlush: 0,
       },
-      archive: {
-        task: { ids: [], entities: {} },
+      archiveYoung: {
+        task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
         timeTracking: {
           project: {},
           tag: {},
           lastFlush: 0,
         },
+        lastFlush: 0,
       },
       archiveOld: {
         task: { ids: [], entities: {} },
@@ -149,6 +150,7 @@ describe('crossModelMigration2()', () => {
           tag: {},
           lastFlush: 0,
         },
+        lastFlush: 0,
       },
     } as any as any);
   });
