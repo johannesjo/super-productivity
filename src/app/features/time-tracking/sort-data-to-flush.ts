@@ -1,30 +1,45 @@
 import { ArchiveModel, TimeTrackingState } from './time-tracking.model';
 import { ArchiveTask, TaskArchive } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
 import { ImpossibleError } from '../../pfapi/api';
 
 export const sortTimeTrackingDataToArchiveYoung = ({
   timeTracking,
   archiveYoung,
+  todayStr,
 }: {
   timeTracking: TimeTrackingState;
   archiveYoung: ArchiveModel;
+  todayStr: string;
 }): {
   timeTracking: TimeTrackingState;
   archiveYoung: ArchiveModel;
 } => {
-  const todayStr = getWorklogStr();
-
   const currTT = { ...timeTracking };
   const archiveTT = { ...archiveYoung.timeTracking };
 
   // Find dates that are not today and move them to archive
-  Object.keys(timeTracking).forEach((projectOrTag) => {
-    Object.keys(timeTracking[projectOrTag]).forEach((dateStr) => {
-      if (dateStr !== todayStr) {
-        archiveTT[projectOrTag][dateStr] = currTT[projectOrTag][dateStr];
-        delete currTT[projectOrTag][dateStr];
-      }
+  // First iterate over categories (project, tag)
+  Object.keys(timeTracking).forEach((category) => {
+    if (!currTT[category]) currTT[category] = {};
+    if (!archiveTT[category]) archiveTT[category] = {};
+
+    // Then iterate over each project/tag within the category
+    Object.keys(timeTracking[category]).forEach((contextId) => {
+      if (!currTT[category][contextId]) currTT[category][contextId] = {};
+      if (!archiveTT[category][contextId]) archiveTT[category][contextId] = {};
+
+      // Finally iterate over dates for each project/tag
+      Object.keys(timeTracking[category][contextId]).forEach((dateStr) => {
+        if (dateStr !== todayStr) {
+          // Move to archive
+          if (!archiveTT[category][contextId]) {
+            archiveTT[category][contextId] = {};
+          }
+          archiveTT[category][contextId][dateStr] =
+            timeTracking[category][contextId][dateStr];
+          delete currTT[category][contextId][dateStr];
+        }
+      });
     });
   });
 
@@ -60,10 +75,35 @@ export const sortTimeTrackingAndTasksFromArchiveYoungToOld = ({
   });
 
   // Move all timeTracking data from young to old archive
+  // Deep merge time tracking data from young to old archive
   const mergedTimeTracking = {
-    ...archiveOld.timeTracking,
-    ...archiveYoung.timeTracking,
+    project: { ...archiveOld.timeTracking.project },
+    tag: { ...archiveOld.timeTracking.tag },
   };
+
+  // Merge project data
+  Object.entries(archiveYoung.timeTracking.project || {}).forEach(
+    ([projectId, projectData]) => {
+      if (!mergedTimeTracking.project[projectId]) {
+        mergedTimeTracking.project[projectId] = {};
+      }
+      // Copy all date entries for this project
+      Object.entries(projectData).forEach(([dateStr, entry]) => {
+        mergedTimeTracking.project[projectId][dateStr] = entry;
+      });
+    },
+  );
+
+  // Merge tag data
+  Object.entries(archiveYoung.timeTracking.tag || {}).forEach(([tagId, tagData]) => {
+    if (!mergedTimeTracking.tag[tagId]) {
+      mergedTimeTracking.tag[tagId] = {};
+    }
+    // Copy all date entries for this tag
+    Object.entries(tagData).forEach(([dateStr, entry]) => {
+      mergedTimeTracking.tag[tagId][dateStr] = entry;
+    });
+  });
 
   return {
     archiveYoung: {

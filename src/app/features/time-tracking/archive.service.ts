@@ -10,6 +10,7 @@ import {
 } from './sort-data-to-flush';
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 /*
 # Considerations for flush architecture:
@@ -99,6 +100,7 @@ export class ArchiveService {
       // TODO think if it is better to get this from store as it is fresher potentially
       timeTracking: await this._pfapiService.m.timeTracking.load(),
       archiveYoung,
+      todayStr: getWorklogStr(now),
     });
     const newArchiveYoung = {
       ...newSorted1.archiveYoung,
