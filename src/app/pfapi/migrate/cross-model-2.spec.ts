@@ -41,25 +41,22 @@ describe('crossModelMigration2()', () => {
           },
         },
         tag: {},
-        lastFlush: 0,
       },
       archiveYoung: {
         task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
         timeTracking: {
           project: {},
           tag: {},
-          // lastFlush: 0,
         },
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
       },
       archiveOld: {
         task: { ids: [], entities: {} },
         timeTracking: {
           project: {},
           tag: {},
-          // lastFlush: 0,
         },
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
       },
     } as any as any);
   });
@@ -132,25 +129,22 @@ describe('crossModelMigration2()', () => {
             },
           },
         },
-        lastFlush: 0,
       },
       archiveYoung: {
         task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
         timeTracking: {
           project: {},
           tag: {},
-          // lastFlush: 0,
         },
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
       },
       archiveOld: {
         task: { ids: [], entities: {} },
         timeTracking: {
           project: {},
           tag: {},
-          // lastFlush: 0,
         },
-        lastFlush: 0,
+        lastTimeTrackingFlush: 0,
       },
     } as any as any);
   });

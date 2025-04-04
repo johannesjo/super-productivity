@@ -54,7 +54,7 @@ describe('dataRepair()', () => {
         ...mock,
         task: taskState,
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: fakeEntityStateFromArray<Task>([
             {
@@ -429,7 +429,7 @@ describe('dataRepair()', () => {
     //       dataRepair({
     //         ...mock,
     //         archiveYoung: {
-    //           lastFlush: 0,
+    //           lastTimeTrackingFlush: 0,
     //           timeTracking: mock.archiveYoung.timeTracking,
     //           task: {
     //             ...mock.archiveYoung.task,
@@ -459,7 +459,7 @@ describe('dataRepair()', () => {
     //     ).toEqual({
     //       ...mock,
     //       archiveYoung: {
-    //         lastFlush: 0,
+    //         lastTimeTrackingFlush: 0,
     //         timeTracking: mock.archiveYoung.timeTracking,
     //         task: {
     //           ...mock.archiveYoung.task,
@@ -992,7 +992,7 @@ describe('dataRepair()', () => {
         ...mock,
 
         archiveYoung: {
-          lastFlush: 0,
+          lastTimeTrackingFlush: 0,
           timeTracking: mock.archiveYoung.timeTracking,
           task: taskArchiveState,
         },

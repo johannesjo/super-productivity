@@ -44,7 +44,6 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   timeTracking: {
     project: {},
     tag: {},
-    lastFlush: 0,
   },
 
   archiveYoung: {
