@@ -284,6 +284,44 @@ describe('sort-data-to-flush', () => {
       ]);
     });
 
+    it('should also migrate legacy tasks without doneOn', () => {
+      // Arrange
+      const youngTaskState = {
+        ids: ['1'],
+        entities: {
+          '1': {
+            ...BASE_TASK,
+            id: '1',
+            doneOn: undefined,
+          },
+        },
+      };
+
+      const oldTaskState = {
+        ids: ['5'],
+        entities: {
+          '5': {
+            ...BASE_TASK,
+            id: '5',
+            // eslint-disable-next-line no-mixed-operators
+            doneOn: now - threshold * 2,
+          },
+        },
+      };
+
+      // Act
+      const result = splitArchiveTasksByDoneOnThreshold({
+        youngTaskState,
+        oldTaskState,
+        threshold,
+        now,
+      });
+
+      // Assert
+      expect(Object.keys(result.youngTaskState.entities)).toEqual([]);
+      expect(Object.keys(result.oldTaskState.entities).sort()).toEqual(['1', '5']);
+    });
+
     it('should throw error if task is undefined', () => {
       // Arrange
       const youngTaskState = {

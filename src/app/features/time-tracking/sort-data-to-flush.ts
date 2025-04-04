@@ -142,7 +142,8 @@ export const splitArchiveTasksByDoneOnThreshold = ({
     if (!task) {
       throw new ImpossibleError('splitArchiveTasksByDoneOnThreshold(): Task not found');
     }
-    return !task.parentId && task.doneOn && now - task.doneOn > threshold;
+    // NOTE: we also need to consider legacy tasks without doneOn
+    return !task.parentId && (task.doneOn ? now - task.doneOn > threshold : true);
   }) as ArchiveTask[];
 
   // Exit early if no tasks to move
