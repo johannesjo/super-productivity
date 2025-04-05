@@ -1,26 +1,30 @@
 // Base mapped types with clearer names
 import { TaskArchive } from '../tasks/task.model';
 
+export type TTModelId = string;
+export type TTDate = string;
+
 export type TTModelIdMap<T> = Omit<
-  Record<string, T>,
+  Record<TTModelId, T>,
   keyof TTWorkContextData | keyof TimeTrackingState | 'workStart' | 'workEnd'
 >;
 export type TTDateMap<T> = Omit<
-  Record<string, T>,
+  Record<TTDate, T>,
   keyof TTWorkContextData | keyof TimeTrackingState | 'workStart' | 'workEnd'
 >;
 
-// Core time tracking entities
-// NOTE: shortened to 1 letter to save disk space
-// TODO all members should be optional
+/**
+ * Time Tracking work context data
+ * Uses shortened property names to reduce storage size
+ * s: start time
+ * e: end time
+ * b: break number
+ * bt: break time
+ */
 export interface TTWorkContextData {
-  // start
   s?: number;
-  // end
   e?: number;
-  // breakNr
   b?: number;
-  // breakTime
   bt?: number;
 }
 
@@ -55,8 +59,11 @@ export interface TimeTrackingState {
 export interface ArchiveModel {
   // should not be written apart from flushing!
   timeTracking: TimeTrackingState;
-  // TODO rename to taskArchive or similar
   task: TaskArchive;
-  // TODO rename to lastFlushTimeTracking
   lastTimeTrackingFlush: number;
 }
+
+export const isWorkContextData = (obj: unknown): obj is TTWorkContextData =>
+  typeof obj === 'object' &&
+  obj !== null &&
+  ('s' in obj || 'e' in obj || 'b' in obj || 'bt' in obj);
