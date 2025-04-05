@@ -185,10 +185,19 @@ export class AppComponent implements OnDestroy {
           alert('Migration all done! Restarting app now...');
           if (IS_ELECTRON) {
             window.ea.relaunch();
+            // if relaunch fails we hard close the app
+            window.setTimeout(() => window.ea.exit(1234), 1000);
           }
           window.location.reload();
           window.setTimeout(() => window.location.reload());
+          // fallback
+          window.setTimeout(
+            () => alert('Automatic restart failed. Please restart the app manually!'),
+            2000,
+          );
         } catch (error) {
+          // prevent any interaction with the app on after failure
+          this.imexMetaService.setDataImportInProgress(true);
           console.error(error);
           alert('Migration failed! with Error: ' + error?.toString());
         }
