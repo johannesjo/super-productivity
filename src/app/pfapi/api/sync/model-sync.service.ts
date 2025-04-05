@@ -111,8 +111,8 @@ export class ModelSyncService<MD extends ModelCfgs> {
   ): Promise<unknown> {
     return await Promise.all([
       ...toUpdate.map((modelId) =>
-        // NOTE: needs to be cast as any
-        this._updateLocal(modelId, dataMap[modelId] as any),
+        // NOTE: needs to be cast to a generic type, since dataMap is a generic object
+        this._updateLocal(modelId, dataMap[modelId] as ExtractModelCfgType<MD[string]>),
       ),
       // TODO delete local models
       // ...toDelete.map((id) => this._deleteLocalModel(id, 'aaa')),
@@ -130,12 +130,10 @@ export class ModelSyncService<MD extends ModelCfgs> {
 
       Object.keys(mainModelData).forEach((modelId) => {
         if (modelId in mainModelData) {
-          // TODO better typing
-          // this.m[modelId].save(mainModelData[modelId] as any, {
           this.m[modelId].save(
             this.m[modelId].modelCfg.transformBeforeDownload
               ? this.m[modelId].modelCfg.transformBeforeDownload(mainModelData[modelId])
-              : (mainModelData[modelId] as any),
+              : (mainModelData[modelId] as ExtractModelCfgType<MD[string]>),
             {
               isUpdateRevAndLastUpdate: false,
             },
