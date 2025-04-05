@@ -44,7 +44,7 @@ export class TimeTrackingService {
     this.archiveOld$,
   ]).pipe(
     map(([current, archive, oldArchive]) =>
-      mergeTimeTrackingStates({ current, archive, oldArchive }),
+      mergeTimeTrackingStates({ current, archiveYoung: archive, archiveOld: oldArchive }),
     ),
     shareReplay(1),
   );

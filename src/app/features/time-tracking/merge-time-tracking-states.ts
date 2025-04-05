@@ -2,73 +2,83 @@ import { TimeTrackingState, TTWorkContextSessionMap } from './time-tracking.mode
 
 export const mergeTimeTrackingStates = ({
   current,
-  archive,
-  oldArchive,
+  archiveYoung,
+  archiveOld,
 }: {
   current: TimeTrackingState;
-  archive: TimeTrackingState;
-  oldArchive: TimeTrackingState;
+  archiveYoung: TimeTrackingState;
+  archiveOld: TimeTrackingState;
 }): TimeTrackingState => {
   return {
     project: mergeTimeTrackingStatesForWorkContext({
       current: current.project,
-      archive: archive.project,
-      oldArchive: oldArchive.project,
+      archiveYoung: archiveYoung.project,
+      archiveOld: archiveOld.project,
     }),
     tag: mergeTimeTrackingStatesForWorkContext({
       current: current.tag,
-      archive: archive.tag,
-      oldArchive: oldArchive.tag,
+      archiveYoung: archiveYoung.tag,
+      archiveOld: archiveOld.tag,
     }),
     // lastFlush: current.lastFlush,
     // task: current.task,
   };
 };
 
-// WARNING: shouldn't be executed to often!!!
+/**
+ * Merges time tracking data from three sources with priority: current > archiveYoung > oldArchive
+ * WARNING: Performance-intensive operation, use sparingly!
+ */
 export const mergeTimeTrackingStatesForWorkContext = ({
   current,
-  archive,
-  oldArchive,
+  archiveYoung,
+  archiveOld,
 }: {
   current: TTWorkContextSessionMap;
-  archive: TTWorkContextSessionMap;
-  oldArchive: TTWorkContextSessionMap;
+  archiveYoung: TTWorkContextSessionMap;
+  archiveOld: TTWorkContextSessionMap;
 }): TTWorkContextSessionMap => {
   const result: TTWorkContextSessionMap = {};
 
   // Get all unique work context IDs from all three sources
   const allContextIds = new Set([
-    ...Object.keys(oldArchive || {}),
-    ...Object.keys(archive || {}),
+    ...Object.keys(archiveOld || {}),
+    ...Object.keys(archiveYoung || {}),
     ...Object.keys(current || {}),
   ]);
 
   // For each work context ID
   for (const contextId of allContextIds) {
-    result[contextId] = {};
-    const oldDates = oldArchive?.[contextId] || {};
-    const archiveDates = archive?.[contextId] || {};
+    const archiveOldDates = archiveOld?.[contextId] || {};
+    const archiveYoungDates = archiveYoung?.[contextId] || {};
     const currentDates = current?.[contextId] || {};
 
     // Get all unique dates for this context
-    const allDates = new Set([
-      ...Object.keys(oldDates),
-      ...Object.keys(archiveDates),
-      ...Object.keys(currentDates),
-    ]);
+    const allDates = Array.from(
+      new Set([
+        ...Object.keys(archiveOldDates),
+        ...Object.keys(archiveYoungDates),
+        ...Object.keys(currentDates),
+      ]),
+    );
 
-    // For each date
+    if (allDates.length === 0) {
+      continue;
+    }
+
     for (const date of allDates) {
-      // Merge in order of priority: current > archive > oldArchive
-      result[contextId][date] = {
-        // First take from oldArchive
-        ...oldDates[date],
-        // Then override with archive
-        ...archiveDates[date],
-        // Finally override with current
+      const newData = {
+        // Merge in order of priority: current > archiveYoung > archiveOld
+        ...archiveOldDates[date],
+        ...archiveYoungDates[date],
         ...currentDates[date],
       };
+      if (Object.keys(newData).length > 0) {
+        if (!result[contextId]) {
+          result[contextId] = {};
+        }
+        result[contextId][date] = newData;
+      }
     }
   }
   return result;
