@@ -322,6 +322,27 @@ describe('ModelSyncService', () => {
       expect(result.toDelete).toEqual([]);
     });
 
+    it('should filter out non existing models (maybe local data is not up to date)', () => {
+      const revMapNewer = {
+        mainModel: 'rev-1-new',
+        singleModel: 'rev-2-new',
+        nonExistingModel: 'rev-3-new',
+        nonExistingModel2: 'rev-3-new',
+      };
+      const revMapToOverwrite = {
+        mainModel: 'rev-1',
+        singleModel: 'rev-2',
+      };
+      const result = service.getModelIdsToUpdateFromRevMaps({
+        revMapNewer,
+        revMapToOverwrite,
+        errorContext: 'UPLOAD',
+      });
+
+      expect(result.toUpdate).toEqual(['singleModel']);
+      expect(result.toDelete).toEqual([]);
+    });
+
     it('should identify models that need to be deleted', () => {
       const revMapNewer = {
         mainModel: 'rev-1',

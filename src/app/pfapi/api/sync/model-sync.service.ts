@@ -3,6 +3,7 @@ import { MiniObservable } from '../util/mini-observable';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import {
   ImpossibleError,
+  ModelIdWithoutCtrlError,
   NoRemoteModelFile,
   RemoteFileNotFoundAPIError,
   RevMapModelMismatchErrorOnDownload,
@@ -84,6 +85,10 @@ export class ModelSyncService<MD extends ModelCfgs> {
       const data = await this._encryptAndCompressHandler.decompressAndDecryptData<
         ExtractModelCfgType<MD[T]>
       >(this._encryptAndCompressCfg$.value, dataStr);
+
+      if (!this.m[modelId]?.modelCfg) {
+        throw new ModelIdWithoutCtrlError({ modelId });
+      }
 
       return {
         data: this.m[modelId].modelCfg.transformBeforeDownload
@@ -179,12 +184,12 @@ export class ModelSyncService<MD extends ModelCfgs> {
     try {
       return {
         toUpdate: all.toUpdate.filter(
-          // NOTE: we are also filtering out all non-existing local models
-          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+          // NOTE: we are also filtering out all non-existing local models, since revMaps might contain legacy models
+          (modelId) => this.m[modelId] && !this.m[modelId].modelCfg.isMainFileModel,
         ),
         toDelete: all.toDelete.filter(
-          // NOTE: we are also filtering out all non-existing local models
-          (modelId) => !this.m[modelId]?.modelCfg.isMainFileModel,
+          // NOTE: we are also filtering out all non-existing local models, since revMaps might contain legacy models
+          (modelId) => this.m[modelId] && !this.m[modelId].modelCfg.isMainFileModel,
         ),
       };
     } catch (e) {
