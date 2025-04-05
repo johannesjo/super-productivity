@@ -18,11 +18,11 @@ export class TimeTrackingService {
   private _store = inject(Store);
   private _pfapiService = inject(PfapiService);
 
-  private _archiveUpdateTrigger$ = new Subject();
+  private _archiveYoungUpdateTrigger$ = new Subject();
   private _archiveOldUpdateTrigger$ = new Subject();
 
   current$: Observable<TimeTrackingState> = this._store.select(selectTimeTrackingState);
-  archiveYoung$: Observable<TimeTrackingState> = this._archiveUpdateTrigger$.pipe(
+  archiveYoung$: Observable<TimeTrackingState> = this._archiveYoungUpdateTrigger$.pipe(
     startWith(null),
     switchMap(async () => {
       return (await this._pfapiService.m.archiveYoung.load()).timeTracking;
@@ -74,7 +74,7 @@ export class TimeTrackingService {
 
     console.log({ current, archiveYoung, archiveOld });
 
-    if (current.project[projectId]) {
+    if (projectId in current.project) {
       const newProject = { ...current.project };
       delete newProject[projectId];
       this._store.dispatch(
@@ -91,7 +91,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveYoung.save(archiveYoung, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveUpdateTrigger$.next();
+      this._archiveYoungUpdateTrigger$.next();
     }
 
     if (projectId in archiveOld.timeTracking.project) {
@@ -99,7 +99,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveOld.save(archiveOld, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveUpdateTrigger$.next();
+      this._archiveOldUpdateTrigger$.next();
     }
   }
 
@@ -108,7 +108,7 @@ export class TimeTrackingService {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const archiveOld = await this._pfapiService.m.archiveOld.load();
 
-    if (current.tag[tagId]) {
+    if (tagId in current.tag) {
       const newTag = { ...current.tag };
       delete newTag[tagId];
       this._store.dispatch(
@@ -121,20 +121,20 @@ export class TimeTrackingService {
       );
     }
 
-    if (archiveYoung.timeTracking.tag[tagId]) {
+    if (tagId in archiveYoung.timeTracking.tag) {
       delete archiveYoung.timeTracking.tag[tagId];
       await this._pfapiService.m.archiveYoung.save(archiveYoung, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveUpdateTrigger$.next();
+      this._archiveYoungUpdateTrigger$.next();
     }
 
-    if (archiveOld.timeTracking.tag[tagId]) {
+    if (tagId in archiveOld.timeTracking.tag) {
       delete archiveOld.timeTracking.tag[tagId];
       await this._pfapiService.m.archiveOld.save(archiveOld, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveUpdateTrigger$.next();
+      this._archiveOldUpdateTrigger$.next();
     }
   }
 
