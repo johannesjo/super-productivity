@@ -29,10 +29,10 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   // move all taskArchive data into young to make things easier for us
   dataOut.archiveYoung = {
     task: {
-      ids: [...dataOut.archiveOld.task.ids, ...dataOut.archiveYoung.task.ids],
+      ids: [...dataOut.archiveOld.task?.ids, ...dataOut.archiveYoung.task?.ids],
       entities: {
-        ...dataOut.archiveOld.task.entities,
-        ...dataOut.archiveYoung.task.entities,
+        ...dataOut.archiveOld.task?.entities,
+        ...dataOut.archiveYoung.task?.entities,
       },
     },
     // NOTE only taskArchive data for now
