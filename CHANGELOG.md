@@ -1,3 +1,9 @@
+## [12.0.3](https://github.com/johannesjo/super-productivity/compare/v12.0.2...v12.0.3) (2025-04-05)
+
+### Bug Fixes
+
+- **android:** status bar for android sdk 35 [#4205](https://github.com/johannesjo/super-productivity/issues/4205) ([0d853f2](https://github.com/johannesjo/super-productivity/commit/0d853f21e6822e3ed1326da9b095abd0e744f3d1))
+
 ## [12.0.2](https://github.com/johannesjo/super-productivity/compare/v12.0.1...v12.0.2) (2025-04-03)
 
 ### Bug Fixes
