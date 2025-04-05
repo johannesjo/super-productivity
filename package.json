@@ -128,6 +128,7 @@
     "@capacitor/app": "^7.0.0",
     "@capacitor/cli": "^7.1.0",
     "@capacitor/core": "^7.1.0",
+    "@capacitor/status-bar": "^7.0.1",
     "@csstools/stylelint-formatter-github": "^1.0.0",
     "@electron/notarize": "^2.5.0",
     "@fontsource/roboto": "^4.5.8",

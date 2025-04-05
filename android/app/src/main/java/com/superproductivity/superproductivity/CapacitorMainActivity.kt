@@ -1,7 +1,9 @@
 package com.superproductivity.superproductivity
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,6 +14,8 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
@@ -33,6 +37,14 @@ class CapacitorMainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         printWebViewVersion(bridge.webView)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+            window.decorView.systemUiVisibility = 0 // Reset system UI flags
+            window.statusBarColor = Color.BLACK
+            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
+                false
+        }
 
         // Register Plugin
         // TODO: The changes to the compatible logic are too complex, so they will not be added for now
@@ -89,7 +101,8 @@ class CapacitorMainActivity : BridgeActivity() {
                 override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
                     Log.v("TW", "SW Intercepting request: ${request.url}")
                     val interceptedResponse = webViewRequestHandler.interceptWebRequest(request)
-                    return interceptedResponse ?: bridge.webViewClient.shouldInterceptRequest(bridge.webView, request)
+                    return interceptedResponse
+                        ?: bridge.webViewClient.shouldInterceptRequest(bridge.webView, request)
                 }
             })
 
@@ -148,8 +161,13 @@ class CapacitorMainActivity : BridgeActivity() {
         callJSInterfaceFunctionIfExists("next", "onResume$")
     }
 
-    private fun callJSInterfaceFunctionIfExists(fnName: String, objectPath: String, fnParam: String = "") {
-        val fnFullName = "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath.$fnName"
+    private fun callJSInterfaceFunctionIfExists(
+        fnName: String,
+        objectPath: String,
+        fnParam: String = ""
+    ) {
+        val fnFullName =
+            "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath.$fnName"
         val fullObjectPath = "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath"
         javaScriptInterface.callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
