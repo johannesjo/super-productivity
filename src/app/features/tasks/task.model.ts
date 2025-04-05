@@ -67,6 +67,7 @@ export interface TaskCopy extends IssueFieldsForTask {
   id: string;
   projectId?: string;
   title: string;
+  unavailable: boolean;
 
   subTaskIds: string[];
   timeSpentOnDay: TimeSpentOnDay;
@@ -148,6 +149,7 @@ export const DEFAULT_TASK: Task = {
   notes: '',
   tagIds: [],
   created: Date.now(),
+  unavailable: false,
 
   _showSubTasksMode: ShowSubTasksMode.Show,
 
