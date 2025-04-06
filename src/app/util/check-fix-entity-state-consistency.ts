@@ -13,7 +13,10 @@ export const checkFixEntityStateConsistency = <T extends Dictionary<any>>(
   return data;
 };
 
-export const isEntityStateConsistent = (data: any, additionalStr = ''): boolean => {
+export const isEntityStateConsistent = <T extends Dictionary<any>>(
+  data: T,
+  additionalStr = '',
+): boolean => {
   if (
     !data ||
     !data.entities ||

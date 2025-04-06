@@ -53,6 +53,7 @@ import {
   fixEntityStateConsistency,
   isEntityStateConsistent,
 } from '../util/check-fix-entity-state-consistency';
+import { validateArchive } from './validate/validate-archive';
 
 export const CROSS_MODEL_VERSION = 2 as const;
 
@@ -90,7 +91,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as TaskState),
     repair: (d) => fixEntityStateConsistency(d),
   },
   timeTracking: {
@@ -103,20 +104,22 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialProjectState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as ProjectState),
     repair: (d) => fixEntityStateConsistency(d),
   },
   tag: {
     modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as TagState),
     repair: (d) => fixEntityStateConsistency(d),
   },
   simpleCounter: {
     modelVersion: 1,
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d as SimpleCounterState),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   reminders: {
     modelVersion: 1,
@@ -137,7 +140,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialNoteState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as NoteState),
     repair: (d) => fixEntityStateConsistency(d),
   },
   taskRepeatCfg: {
@@ -145,7 +148,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialTaskRepeatCfgState,
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as TaskRepeatCfgState),
     repair: (d) => fixEntityStateConsistency(d),
   },
 
@@ -157,7 +160,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   issueProvider: {
     modelVersion: 1,
     defaultData: issueProviderInitialState,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as IssueProviderState),
     repair: (d) => fixEntityStateConsistency(d),
   },
 
@@ -169,39 +172,34 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   improvement: {
     modelVersion: 1,
     defaultData: initialImprovementState,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as ImprovementState),
     repair: (d) => fixEntityStateConsistency(d),
   },
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
-    validate: (d) => isEntityStateConsistent(d),
+    validate: (d) => isEntityStateConsistent(d as ObstructionState),
     repair: (d) => fixEntityStateConsistency(d),
   },
 
   archiveYoung: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: {
-      task: initialTaskState,
+      task: { ids: [], entities: {} },
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
+    validate: validateArchive,
   },
   archiveOld: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: {
-      task: initialTaskState,
+      task: { ids: [], entities: {} },
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
+    validate: validateArchive,
   },
-
-  // TODO migrate and remove
-  // taskArchive: {
-  //   modelVersion: TASK_MODEL_VERSION,
-  //   defaultData: initialTaskState,
-  // },
-  // TODO task archive old
 } as const;
 
 export const fileSyncElectron = new LocalFileSyncElectron();
