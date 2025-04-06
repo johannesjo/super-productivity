@@ -45,3 +45,21 @@ export const fixEntityStateConsistency = <T extends Dictionary<any>>(data: T): T
   }
   return data;
 };
+
+export const fixEntityStateConsistencyOrError = <T extends Dictionary<any>>(
+  data: T,
+): T => {
+  if (Object.keys(data.entities).length !== data.ids.length) {
+    console.log({
+      ...data,
+      ids: Object.keys(data.entities),
+    });
+
+    return {
+      ...data,
+      ids: Object.keys(data.entities),
+    };
+  }
+
+  throw new Error('Could not fix entity state');
+};

@@ -50,10 +50,14 @@ import {
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 import {
-  fixEntityStateConsistency,
+  fixEntityStateConsistencyOrError,
   isEntityStateConsistent,
 } from '../util/check-fix-entity-state-consistency';
-import { validateArchive } from './validate/validate-archive';
+import {
+  validateArchiveModel,
+  validateProjectModel,
+  validateTaskModel,
+} from './validate/validation-fn';
 
 export const CROSS_MODEL_VERSION = 2 as const;
 
@@ -91,8 +95,8 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as TaskState),
-    repair: (d) => fixEntityStateConsistency(d),
+    validate: validateTaskModel,
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   timeTracking: {
     modelVersion: TASK_MODEL_VERSION,
@@ -104,22 +108,22 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialProjectState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as ProjectState),
-    repair: (d) => fixEntityStateConsistency(d),
+    validate: validateProjectModel,
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   tag: {
     modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
     validate: (d) => isEntityStateConsistent(d as TagState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   simpleCounter: {
     modelVersion: 1,
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
     validate: (d) => isEntityStateConsistent(d as SimpleCounterState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   reminders: {
     modelVersion: 1,
@@ -141,7 +145,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialNoteState,
     isMainFileModel: true,
     validate: (d) => isEntityStateConsistent(d as NoteState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   taskRepeatCfg: {
     modelVersion: 1,
@@ -149,7 +153,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
     validate: (d) => isEntityStateConsistent(d as TaskRepeatCfgState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
 
   //-------------------------------
@@ -161,7 +165,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: issueProviderInitialState,
     validate: (d) => isEntityStateConsistent(d as IssueProviderState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
 
   // Metric models
@@ -173,13 +177,13 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialImprovementState,
     validate: (d) => isEntityStateConsistent(d as ImprovementState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
     validate: (d) => isEntityStateConsistent(d as ObstructionState),
-    repair: (d) => fixEntityStateConsistency(d),
+    repair: (d) => fixEntityStateConsistencyOrError(d),
   },
 
   archiveYoung: {
@@ -189,7 +193,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
-    validate: validateArchive,
+    validate: validateArchiveModel,
   },
   archiveOld: {
     modelVersion: TASK_MODEL_VERSION,
@@ -198,7 +202,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
-    validate: validateArchive,
+    validate: validateArchiveModel,
   },
 } as const;
 

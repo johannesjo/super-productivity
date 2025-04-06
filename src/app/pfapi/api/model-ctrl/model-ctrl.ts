@@ -37,7 +37,12 @@ export class ModelCtrl<MT extends ModelBase> {
 
     if (this.modelCfg.validate && !this.modelCfg.validate(data)) {
       if (this.modelCfg.repair) {
-        data = this.modelCfg.repair(data);
+        try {
+          data = this.modelCfg.repair(data);
+        } catch (e) {
+          console.error(e);
+          throw new ModelValidationError({ id: this.modelId, data, e });
+        }
       } else {
         throw new ModelValidationError({ id: this.modelId, data });
       }
