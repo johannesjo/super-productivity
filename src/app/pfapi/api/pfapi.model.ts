@@ -31,9 +31,8 @@ export interface ModelCfg<T extends ModelBase> {
   // for cascading only
   isMainFileModel?: boolean;
 
-  // MAYBE? TODO
-  // validate?: (data: any) => boolean;
-  // repair?: (data: any) => T;
+  validate?: <R>(data: R | T) => boolean;
+  repair?: <R>(data: R | unknown | any) => T;
 
   // MAYBE? TODO
   // transformBeforeSave?: <I>(data: I) => T;

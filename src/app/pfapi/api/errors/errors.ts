@@ -160,6 +160,14 @@ export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
   override name = ModelIdWithoutCtrlError.name;
 }
 
+export class ModelValidationError extends AdditionalLogErrorBase {
+  override name = ModelIdWithoutCtrlError.name;
+}
+
+export class ModelRepairError extends AdditionalLogErrorBase {
+  override name = ModelIdWithoutCtrlError.name;
+}
+
 export class InvalidModelCfgError extends AdditionalLogErrorBase {
   override name = InvalidModelCfgError.name;
 }

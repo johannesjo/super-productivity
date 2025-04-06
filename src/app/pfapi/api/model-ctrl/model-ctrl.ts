@@ -2,6 +2,7 @@ import { ModelCfg, ModelBase } from '../pfapi.model';
 import { Database } from '../db/database';
 import { MetaModelCtrl } from './meta-model-ctrl';
 import { pfLog } from '../util/log';
+import { ModelValidationError } from '../errors/errors';
 
 // type ExtractModelCfgType<T extends ModelCfg<unknown>> =
 //   T extends ModelCfg<infer U> ? U : never;
@@ -33,6 +34,14 @@ export class ModelCtrl<MT extends ModelBase> {
   ): Promise<unknown> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
+
+    if (this.modelCfg.validate && !this.modelCfg.validate(data)) {
+      if (this.modelCfg.repair) {
+        data = this.modelCfg.repair(data);
+      } else {
+        throw new ModelValidationError({ id: this.modelId, data });
+      }
+    }
 
     if (!p?.isUpdateRevAndLastUpdate) {
       return this._db.save(this.modelId, data, !!p?.isIgnoreDBLock);

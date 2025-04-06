@@ -49,6 +49,10 @@ import {
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
+import {
+  fixEntityStateConsistency,
+  isEntityStateConsistent,
+} from '../util/check-fix-entity-state-consistency';
 
 export const CROSS_MODEL_VERSION = 2 as const;
 
@@ -86,6 +90,8 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   timeTracking: {
     modelVersion: TASK_MODEL_VERSION,
@@ -97,11 +103,15 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialProjectState,
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   tag: {
     modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   simpleCounter: {
     modelVersion: 1,
@@ -127,12 +137,16 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: 1,
     defaultData: initialNoteState,
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   taskRepeatCfg: {
     modelVersion: 1,
     defaultData: initialTaskRepeatCfgState,
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
 
   //-------------------------------
@@ -143,6 +157,8 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   issueProvider: {
     modelVersion: 1,
     defaultData: issueProviderInitialState,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
 
   // Metric models
@@ -153,10 +169,14 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   improvement: {
     modelVersion: 1,
     defaultData: initialImprovementState,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
+    validate: (d) => isEntityStateConsistent(d),
+    repair: (d) => fixEntityStateConsistency(d),
   },
 
   archiveYoung: {

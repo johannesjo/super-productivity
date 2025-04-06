@@ -33,7 +33,6 @@ import {
 import { Note, NoteState } from '../../features/note/note.model';
 import { Action, Store } from '@ngrx/store';
 import { Tag, TagState } from '../../features/tag/tag.model';
-import { checkFixEntityStateConsistency } from '../../util/check-fix-entity-state-consistency';
 import {
   SimpleCounter,
   SimpleCounterState,
@@ -270,9 +269,10 @@ export class PersistenceLegacyService {
           isSyncModelChange,
         }: { isDataImport?: boolean; isSyncModelChange: boolean },
       ) => {
-        if (data && data.ids && data.entities) {
-          data = checkFixEntityStateConsistency(data, appDataKey);
-        }
+        // removed because of performance impact and since we deal with legacy data anyway
+        // if (data && data.ids && data.entities) {
+        //   data = checkFixEntityStateConsistency(data, appDataKey);
+        // }
         return this._saveToDb({
           dbKey: appDataKey,
           data,
