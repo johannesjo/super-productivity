@@ -191,5 +191,3 @@ export const ALL_ENTITY_MODEL_KEYS: (keyof AppBaseData)[] = Object.entries(
 )
   .map(([, entry]) => entry.appDataKey)
   .filter((key) => key !== 'taskArchive');
-
-console.log(ALL_ENTITY_MODEL_KEYS);

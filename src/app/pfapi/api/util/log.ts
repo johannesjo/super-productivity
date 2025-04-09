@@ -1,10 +1,11 @@
 import { LOG_PREFIX } from '../pfapi.const';
+import { environment } from '../../../../environments/environment';
 /*
 1: critical
 2: normal
 3: verbose
  */
-const LOG_LEVEL = 2 as const;
+const LOG_LEVEL = environment.production ? 2 : 1;
 
 export const pfLog = (logLevel: number, msg: unknown = '', ...args: unknown[]): void => {
   if (logLevel > LOG_LEVEL) {

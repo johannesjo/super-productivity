@@ -22,7 +22,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
@@ -52,7 +52,7 @@ export class PfapiService {
   ).pipe(
     shareReplay(1),
     distinctUntilChanged(),
-    tap((v) => console.log(`isSyncProviderEnabledAndReady$`, v)),
+    // tap((v) => console.log(`isSyncProviderEnabledAndReady$`, v)),
   );
 
   public readonly currentProviderPrivateCfg$ = pfapiEventAndInitialAfter(
@@ -119,7 +119,7 @@ export class PfapiService {
 
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       // TODO handle android webdav
-      console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider);
+      // console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider);
 
       this.pf.setActiveSyncProvider(
         cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,

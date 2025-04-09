@@ -4,7 +4,6 @@ import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
 import { TRACKING_INTERVAL } from '../../app.constants';
 const minute = 60 * 1000;
 const defaultVoice = getDefaultVoice();
-console.log('Setting default voice as' + defaultVoice);
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
