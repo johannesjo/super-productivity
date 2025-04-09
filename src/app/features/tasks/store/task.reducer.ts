@@ -251,7 +251,7 @@ export const taskReducer = createReducer<TaskState>(
     const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
     const doneTasksLength = subTasks.filter((t) => t.isDone).length;
     const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
-    const oldVal = +task._showSubTasksMode;
+    const oldVal = +(task._showSubTasksMode || 0);
     let newVal;
 
     if (isDoneTaskCaseNeeded) {

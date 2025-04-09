@@ -5,7 +5,12 @@ import { CrossModelMigrateFn, ImpossibleError } from '../api';
 import { TTWorkContextSessionMap } from '../../features/time-tracking/time-tracking.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { TagCopy } from '../../features/tag/tag.model';
-import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
+import {
+  TaskArchive,
+  TaskCopy,
+  TaskState,
+  TimeSpentOnDayCopy,
+} from '../../features/tasks/task.model';
 import { Dictionary } from '@ngrx/entity';
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
@@ -172,15 +177,46 @@ const migrateTaskDictionary = (taskDict: Dictionary<TaskCopy>): void => {
     // fix weird legacy issues
     if (task.timeEstimate === null || task.timeEstimate === undefined) {
       taskDict[taskId] = {
-        ...taskDict[taskId]!,
+        ...taskDict[taskId],
         timeEstimate: 0,
       };
     }
     if (typeof (task.issueId as unknown) === 'number') {
       taskDict[taskId] = {
-        ...taskDict[taskId]!,
+        ...taskDict[taskId],
         issueId: (task.issueId as unknown as number).toString(),
       };
+    }
+    if (task.created === null || task.created === undefined) {
+      taskDict[taskId] = {
+        ...taskDict[taskId],
+        created: 0,
+      };
+    }
+    if (task.repeatCfgId === null) {
+      taskDict[taskId] = {
+        ...taskDict[taskId],
+        repeatCfgId: undefined,
+      };
+    }
+    // Remove null and undefined values from task.timeSpentOnDay
+    if (task.timeSpentOnDay) {
+      const cleanTimeSpent: TimeSpentOnDayCopy = {};
+      let hasInvalidValues = false;
+
+      Object.entries(task.timeSpentOnDay).forEach(([date, timeSpent]) => {
+        if (timeSpent !== null && timeSpent !== undefined) {
+          cleanTimeSpent[date] = timeSpent;
+        } else {
+          hasInvalidValues = true;
+        }
+      });
+      if (hasInvalidValues) {
+        taskDict[taskId] = {
+          ...taskDict[taskId],
+          timeSpentOnDay: cleanTimeSpent,
+        };
+      }
     }
   });
 };

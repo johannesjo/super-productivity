@@ -4,22 +4,16 @@ import { ProjectState } from '../../features/project/project.model';
 import { TaskState } from '../../features/tasks/task.model';
 import { validate } from 'typia';
 
-export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean =>
-  typeof d === 'object' &&
-  d !== null &&
-  'task' in d &&
-  isEntityStateConsistent(d.task) &&
-  // validateTaskModel(d.task) &&
-  typeof d.lastTimeTrackingFlush === 'number' &&
-  typeof d.timeTracking.project === 'object' &&
-  typeof d.timeTracking.tag === 'object';
-// NOTE deep validation of all tasks might be too resource intensive
-
-// export const validateProjectModel = <R>(d: ProjectState | R): boolean =>
-//   typeof d === 'object' &&
-//   d !== null &&
-//   isEntityStateConsistent(d as any) &&
-//   Object.values((d as ProjectState).entities).every((v) => validateSingleProject(v));
+export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean => {
+  const r = validate<ArchiveModel>(d);
+  if (!r.success) {
+    console.log('Validation failed', r.errors, r.data);
+  }
+  if (!isEntityStateConsistent((d as ArchiveModel).task)) {
+    return false;
+  }
+  return r.success;
+};
 
 export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
   const r = validate<ProjectState>(d);

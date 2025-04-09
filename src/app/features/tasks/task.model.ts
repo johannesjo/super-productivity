@@ -94,7 +94,7 @@ export interface TaskCopy extends IssueFieldsForTask {
 
   // ui model
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
-  _showSubTasksMode: ShowSubTasksMode;
+  _showSubTasksMode?: ShowSubTasksMode;
 }
 
 /**
