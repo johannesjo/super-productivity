@@ -1,12 +1,11 @@
-import { pfLog } from '../util/log';
-
 class AdditionalLogErrorBase<T = unknown> extends Error {
   additionalLog: T;
 
   constructor(...additional: any) {
     super(...additional);
     if (additional.length > 0) {
-      pfLog(1, this.name, ...additional);
+      // pfLog(1, this.name, ...additional);
+      console.log(this.name, ...additional);
     }
     this.additionalLog = additional;
   }
@@ -44,6 +43,7 @@ export class MissingRefreshTokenAPIError extends Error {
 export class FileHashCreationAPIError extends AdditionalLogErrorBase {
   override name = FileHashCreationAPIError.name;
 }
+
 export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
   override name = UploadRevToMatchMismatchAPIError.name;
 }

@@ -33,6 +33,7 @@ import {
 } from '@angular/material/menu';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 
 @Component({
   selector: 'note',
@@ -93,7 +94,11 @@ export class NoteComponent implements OnChanges {
                         (project) =>
                           project && {
                             ...project,
+                            color: project.theme.primary || DEFAULT_PROJECT_COLOR,
                             icon: 'list',
+                            theme: {
+                              primary: project.theme.primary || DEFAULT_PROJECT_COLOR,
+                            },
                           },
                       ),
                     )

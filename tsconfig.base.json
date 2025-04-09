@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strict": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
@@ -20,6 +21,11 @@
     "target": "ES2022",
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"],
-    "lib": ["es2022", "dom"]
+    "lib": ["es2022", "dom"],
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ]
   }
 }

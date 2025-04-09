@@ -41,17 +41,18 @@ export type WorkContextAdvancedCfg = Readonly<{
   worklogExportSettings: WorklogExportSettings;
 }>;
 
+// TODO handle more strictly
 export type WorkContextThemeCfg = Readonly<{
-  isAutoContrast: boolean;
-  isDisableBackgroundGradient: boolean;
-  primary: string;
-  huePrimary: HueValue;
-  accent: string;
-  hueAccent: HueValue;
-  warn: string;
-  hueWarn: HueValue;
-  backgroundImageDark: string | null;
-  backgroundImageLight: string | null;
+  isAutoContrast?: boolean;
+  isDisableBackgroundGradient?: boolean;
+  primary?: string;
+  huePrimary?: HueValue;
+  accent?: string;
+  hueAccent?: HueValue;
+  warn?: string;
+  hueWarn?: HueValue;
+  backgroundImageDark?: string | null;
+  backgroundImageLight?: string | null;
 }>;
 
 export enum WorkContextType {

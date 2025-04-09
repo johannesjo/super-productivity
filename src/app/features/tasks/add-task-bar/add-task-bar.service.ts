@@ -30,6 +30,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
 import { assertTruthy } from '../../../util/assert-truthy';
+import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 
 @Injectable({
   providedIn: 'root',
@@ -128,7 +129,7 @@ export class AddTaskBarService {
           val,
           tags,
           projects,
-          defaultColor: activeWorkContext.theme.primary,
+          defaultColor: activeWorkContext.theme.primary || DEFAULT_PROJECT_COLOR,
           shortSyntaxConfig,
         }),
       ),

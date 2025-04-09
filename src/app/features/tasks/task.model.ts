@@ -69,9 +69,12 @@ export interface TaskCopy extends IssueFieldsForTask {
   title: string;
 
   subTaskIds: string[];
+
   timeSpentOnDay: TimeSpentOnDay;
+  // todo make optional
   timeSpent: number;
   timeEstimate: number;
+  notes: string;
 
   created: number;
   isDone: boolean;
@@ -79,8 +82,6 @@ export interface TaskCopy extends IssueFieldsForTask {
   plannedAt?: number;
   hasPlannedTime?: boolean;
   // remindCfg: TaskReminderOptionId;
-
-  notes: string;
 
   parentId?: string;
   reminderId?: string;

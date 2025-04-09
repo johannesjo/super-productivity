@@ -52,7 +52,7 @@ export class GlobalThemeService {
     distinctUntilChanged(),
   );
 
-  backgroundImg$: Observable<string | null> = combineLatest([
+  backgroundImg$: Observable<string | null | undefined> = combineLatest([
     this._workContextService.currentTheme$,
     this.isDarkTheme$,
   ]).pipe(
@@ -78,18 +78,19 @@ export class GlobalThemeService {
   }
 
   private _setColorTheme(theme: WorkContextThemeCfg): void {
-    this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
-    this._setBackgroundGradient(theme.isDisableBackgroundGradient);
+    this._materialCssVarsService.setAutoContrastEnabled(!!theme.isAutoContrast);
+    this._setBackgroundGradient(!!theme.isDisableBackgroundGradient);
 
+    // NOTE: setting undefined values does not seem to be a problem so we use !
     if (!theme.isAutoContrast) {
-      this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary);
-      this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent);
-      this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn);
+      this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary!);
+      this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent!);
+      this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn!);
     }
 
-    this._materialCssVarsService.setPrimaryColor(theme.primary);
-    this._materialCssVarsService.setAccentColor(theme.accent);
-    this._materialCssVarsService.setWarnColor(theme.warn);
+    this._materialCssVarsService.setPrimaryColor(theme.primary!);
+    this._materialCssVarsService.setAccentColor(theme.accent!);
+    this._materialCssVarsService.setWarnColor(theme.warn!);
   }
 
   private _setBackgroundGradient(isDisableBackgroundGradient: boolean): void {

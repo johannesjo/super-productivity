@@ -1,10 +1,12 @@
 import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { CrossModelMigrateFn } from '../api';
+import { CrossModelMigrateFn, ImpossibleError } from '../api';
 import { TTWorkContextSessionMap } from '../../features/time-tracking/time-tracking.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { TagCopy } from '../../features/tag/tag.model';
+import { TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
+import { Dictionary } from '@ngrx/entity';
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
   fullData: AppDataCompleteLegacy,
@@ -130,7 +132,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       // lastFlush: 0,
     },
     archiveYoung: {
-      task: taskArchive,
+      task: migrateTaskArchive(taskArchive),
       timeTracking: {
         project: {},
         tag: {},
@@ -147,5 +149,38 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       },
       lastTimeTrackingFlush: 0,
     },
+    task: migrateTaskState(copy.task),
   };
 }) as CrossModelMigrateFn;
+
+const migrateTaskArchive = (taskArchive: TaskArchive): TaskArchive => {
+  migrateTaskDictionary(taskArchive.entities);
+  return taskArchive;
+};
+
+const migrateTaskState = (taskState: TaskState): TaskState => {
+  migrateTaskDictionary(taskState.entities);
+  return taskState;
+};
+
+const migrateTaskDictionary = (taskDict: Dictionary<TaskCopy>): void => {
+  Object.keys(taskDict).forEach((taskId) => {
+    if (!taskDict[taskId]) {
+      throw new ImpossibleError('Task not defined');
+    }
+    const task = taskDict[taskId];
+    // fix weird legacy issues
+    if (task.timeEstimate === null || task.timeEstimate === undefined) {
+      taskDict[taskId] = {
+        ...taskDict[taskId]!,
+        timeEstimate: 0,
+      };
+    }
+    if (typeof (task.issueId as unknown) === 'number') {
+      taskDict[taskId] = {
+        ...taskDict[taskId]!,
+        issueId: (task.issueId as unknown as number).toString(),
+      };
+    }
+  });
+};
