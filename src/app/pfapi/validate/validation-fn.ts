@@ -1,8 +1,91 @@
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
-import { ArchiveModel } from '../../features/time-tracking/time-tracking.model';
+import {
+  ArchiveModel,
+  TimeTrackingState,
+} from '../../features/time-tracking/time-tracking.model';
 import { ProjectState } from '../../features/project/project.model';
 import { TaskState } from '../../features/tasks/task.model';
-import { validate } from 'typia';
+import { IValidation, validate } from 'typia';
+import { TagState } from '../../features/tag/tag.model';
+import { SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
+import { Reminder } from '../../features/reminder/reminder.model';
+import { PlannerState } from '../../features/planner/store/planner.reducer';
+import { NoteState } from '../../features/note/note.model';
+import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
+import { IssueProviderState } from '../../features/issue/issue.model';
+import { MetricState } from '../../features/metric/metric.model';
+import { ImprovementState } from '../../features/metric/improvement/improvement.model';
+import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
+import { GlobalConfigState } from '../../features/config/global-config.model';
+
+export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
+  return _wrapValidate(validate<ProjectState>(d), d, true);
+};
+
+export const validateTagModel = <R>(d: TagState | R): boolean => {
+  return _wrapValidate(validate<TagState>(d), d, true);
+};
+
+export const validateTaskModel = <R>(d: TaskState | R): boolean => {
+  return _wrapValidate(validate<TaskState>(d), d, true);
+};
+
+export const validateSimpleCounterModel = <R>(d: SimpleCounterState | R): boolean => {
+  return _wrapValidate(validate<SimpleCounterState>(d), d, true);
+};
+
+export const validateNoteModel = <R>(d: NoteState | R): boolean => {
+  return _wrapValidate(validate<NoteState>(d), d, true);
+};
+
+export const validateTaskRepeatCfgStateModel = <R>(
+  d: TaskRepeatCfgState | R,
+): boolean => {
+  return _wrapValidate(validate<TaskRepeatCfgState>(d), d, true);
+};
+// -------------------------------
+
+export const validateReminderModel = <R>(d: Reminder[] | R): boolean => {
+  return _wrapValidate(validate<Reminder[]>(d));
+};
+
+export const validatePlannerModel = <R>(d: PlannerState | R): boolean => {
+  return _wrapValidate(validate<PlannerState>(d));
+};
+
+export const validateBoardsModel = <R>(d: BoardsState | R): boolean => {
+  return _wrapValidate(validate<BoardsState>(d));
+};
+// -------------------------------
+
+// entity states
+export const validateIssueProviderModel = <R>(d: IssueProviderState | R): boolean => {
+  return _wrapValidate(validate<IssueProviderState>(d), d, true);
+};
+
+export const validateMetricModel = <R>(d: MetricState | R): boolean => {
+  return _wrapValidate(validate<MetricState>(d), d, true);
+};
+
+export const validateImprovementModel = <R>(d: ImprovementState | R): boolean => {
+  return _wrapValidate(validate<ImprovementState>(d), d, true);
+};
+
+export const validateObstructionModel = <R>(d: ObstructionState | R): boolean => {
+  return _wrapValidate(validate<ObstructionState>(d), d, true);
+};
+
+// -------------------------------
+export const validateGlobalConfigModel = <R>(d: GlobalConfigState | R): boolean => {
+  return _wrapValidate(validate<GlobalConfigState>(d));
+};
+
+export const validateTimeTrackingModel = <R>(d: TimeTrackingState | R): boolean => {
+  return _wrapValidate(validate<TimeTrackingState>(d));
+};
+
+// -------------------------------
 
 export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean => {
   const r = validate<ArchiveModel>(d);
@@ -15,32 +98,13 @@ export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean => {
   return r.success;
 };
 
-export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
-  const r = validate<ProjectState>(d);
-  if (!r.success) {
-    console.log('Validation failed', (r as any)?.errors, r.data);
+const _wrapValidate = <R>(
+  result: IValidation<any>,
+  d?: R,
+  isEntityCheck = false,
+): boolean => {
+  if (!result.success) {
+    console.log('Validation failed', (result as any)?.errors, result.data);
   }
-  if (!isEntityStateConsistent(d as any)) {
-    return false;
-  }
-  return r.success;
+  return result.success && (!isEntityCheck || isEntityStateConsistent(d as any));
 };
-
-export const validateTaskModel = <R>(d: TaskState | R): boolean => {
-  const r = validate<TaskState>(d);
-  if (!r.success) {
-    console.log('Validation failed', (r as any)?.errors, r.data);
-  }
-  if (!isEntityStateConsistent(d as any)) {
-    return false;
-  }
-  return r.success;
-};
-
-// const wrapValidate = <R>(d: R, isEntityCheck = false): boolean => {
-//   const r = validate<R>(d);
-//   if (!r.success) {
-//     console.log('Validation failed', (r as any)?.errors, r.data);
-//   }
-//   return r.success;
-// };

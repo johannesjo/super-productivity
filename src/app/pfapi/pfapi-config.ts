@@ -49,11 +49,23 @@ import {
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
-import { isEntityStateConsistent } from '../util/check-fix-entity-state-consistency';
 import {
   validateArchiveModel,
+  validateBoardsModel,
+  validateGlobalConfigModel,
+  validateImprovementModel,
+  validateIssueProviderModel,
+  validateMetricModel,
+  validateNoteModel,
+  validateObstructionModel,
+  validatePlannerModel,
   validateProjectModel,
+  validateReminderModel,
+  validateSimpleCounterModel,
+  validateTagModel,
   validateTaskModel,
+  validateTaskRepeatCfgStateModel,
+  validateTimeTrackingModel,
 } from './validate/validation-fn';
 
 export const CROSS_MODEL_VERSION = 2 as const;
@@ -93,12 +105,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialTaskState,
     isMainFileModel: true,
     validate: validateTaskModel,
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   timeTracking: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTimeTrackingState,
     isMainFileModel: true,
+    validate: validateTimeTrackingModel,
   },
 
   project: {
@@ -106,81 +118,81 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: validateProjectModel,
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   tag: {
     modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as TagState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateTagModel,
   },
   simpleCounter: {
     modelVersion: 1,
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as SimpleCounterState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
-  },
-  reminders: {
-    modelVersion: 1,
-    defaultData: [],
-    isMainFileModel: true,
-  },
-  planner: {
-    modelVersion: 1,
-    defaultData: plannerInitialState,
-    isMainFileModel: true,
-  },
-  boards: {
-    modelVersion: 1,
-    defaultData: initialBoardsState,
-    isMainFileModel: true,
+    validate: validateSimpleCounterModel,
   },
   note: {
     modelVersion: 1,
     defaultData: initialNoteState,
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as NoteState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateNoteModel,
   },
   taskRepeatCfg: {
     modelVersion: 1,
     defaultData: initialTaskRepeatCfgState,
+    // TODO check if still necessary
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
-    validate: (d) => isEntityStateConsistent(d as TaskRepeatCfgState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateTaskRepeatCfgStateModel,
+  },
+
+  reminders: {
+    modelVersion: 1,
+    defaultData: [],
+    isMainFileModel: true,
+    validate: validateReminderModel,
+  },
+  planner: {
+    modelVersion: 1,
+    defaultData: plannerInitialState,
+    isMainFileModel: true,
+    validate: validatePlannerModel,
+  },
+  boards: {
+    modelVersion: 1,
+    defaultData: initialBoardsState,
+    isMainFileModel: true,
+    validate: validateBoardsModel,
   },
 
   //-------------------------------
   globalConfig: {
     modelVersion: 1,
     defaultData: DEFAULT_GLOBAL_CONFIG,
+    validate: validateGlobalConfigModel,
   },
+
   issueProvider: {
     modelVersion: 1,
     defaultData: issueProviderInitialState,
-    validate: (d) => isEntityStateConsistent(d as IssueProviderState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateIssueProviderModel,
   },
 
   // Metric models
   metric: {
     modelVersion: 1,
     defaultData: initialMetricState,
+    validate: validateMetricModel,
   },
   improvement: {
     modelVersion: 1,
     defaultData: initialImprovementState,
-    validate: (d) => isEntityStateConsistent(d as ImprovementState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateImprovementModel,
   },
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
-    validate: (d) => isEntityStateConsistent(d as ObstructionState),
-    // repair: (d) => fixEntityStateConsistencyOrError(d),
+    validate: validateObstructionModel,
   },
 
   archiveYoung: {
