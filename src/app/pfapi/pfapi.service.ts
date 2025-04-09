@@ -185,9 +185,7 @@ export class PfapiService {
         await this.pf.tmpBackupService.clear();
         return;
       } else {
-        if (confirm(this._translateService.instant(T.CONFIRM.DELETE_STRAY_BACKUP))) {
-          await this.pf.tmpBackupService.clear();
-        }
+        await this.pf.tmpBackupService.clear();
       }
     }
     return;

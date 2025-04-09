@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Your data seems to be damaged (\"{{validityError}}\"). Do you want to try to automatically fix it? This might result in partial data loss.",
-    "DELETE_STRAY_BACKUP": "Do you want to delete the back to avoid seeing this dialog?",
     "RELOAD_AFTER_IDB_ERROR": "Cannot access database :( Possible causes are an app update to the app in the background or low disk space. If you installed the app on linux as snap you also want to enable refresh awareness 'snap set core experimental.refresh-app-awareness=true' until they fix this issue on their side. Press OK to reload the app (might require manual restarting the app on some platforms).",
     "RESTORE_FILE_BACKUP": "There seems to be NO DATA, but there are backups available at \"{{dir}}\". Do you want to restore the latest backup from {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "There seems to be NO DATA, but there is a backup available. Do you want to load it?",
