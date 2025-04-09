@@ -281,12 +281,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     isAttemptRepair = false,
     isBackupData = false,
     isSkipLegacyWarnings = false,
+    isBackupImport = false,
   }: {
     data: AllSyncModels<MD>;
     crossModelVersion: number;
     isAttemptRepair?: boolean;
     isBackupData?: boolean;
     isSkipLegacyWarnings?: boolean;
+    isBackupImport?: boolean;
   }): Promise<void> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
@@ -343,11 +345,14 @@ export class Pfapi<const MD extends ModelCfgs> {
     } catch (e) {
       this.db.unlock();
       const backup = await this.tmpBackupService.load();
-      if (backup) {
+      // isBackupImport is used to prevent endless loop
+      if (backup && !isBackupImport) {
+        // TODO fix endless loop
         try {
           await this.importAllSycModelData({
             data: backup,
             crossModelVersion: this.cfg?.crossModelVersion || 0,
+            isBackupImport: true,
           });
         } catch (eII) {
           throw new BackupImportFailedError(eII);
