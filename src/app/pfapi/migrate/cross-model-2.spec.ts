@@ -3,7 +3,8 @@ import { crossModelMigration2 } from './cross-model-2';
 describe('crossModelMigration2()', () => {
   it('should work and migrate projects', () => {
     const r = crossModelMigration2({
-      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
+      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: {} } },
+      task: { ids: [], entities: {} },
       project: {
         entities: {
           P1: {
@@ -18,6 +19,7 @@ describe('crossModelMigration2()', () => {
       tag: { entities: {} },
     } as any);
     expect(r).toEqual({
+      task: { ids: [], entities: {} },
       project: {
         entities: {
           P1: {
@@ -43,7 +45,15 @@ describe('crossModelMigration2()', () => {
         tag: {},
       },
       archiveYoung: {
-        task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
+        task: {
+          ids: ['ARCHIE_TASK_ID'],
+          entities: {
+            ARCHIE_TASK_ID: {
+              created: 0,
+              timeEstimate: 0,
+            },
+          },
+        },
         timeTracking: {
           project: {},
           tag: {},
@@ -63,7 +73,8 @@ describe('crossModelMigration2()', () => {
 
   it('should work and migrate tags too', () => {
     const r = crossModelMigration2({
-      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
+      task: { ids: [], entities: {} },
+      taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: {} } },
       project: {
         entities: {
           P1: {
@@ -88,6 +99,7 @@ describe('crossModelMigration2()', () => {
       },
     } as any);
     expect(r).toEqual({
+      task: { ids: [], entities: {} },
       project: {
         entities: {
           P1: {
@@ -131,7 +143,10 @@ describe('crossModelMigration2()', () => {
         },
       },
       archiveYoung: {
-        task: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: 'AAA' } },
+        task: {
+          ids: ['ARCHIE_TASK_ID'],
+          entities: { ARCHIE_TASK_ID: { created: 0, timeEstimate: 0 } },
+        },
         timeTracking: {
           project: {},
           tag: {},

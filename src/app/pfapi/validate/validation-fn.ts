@@ -7,7 +7,7 @@ import { validate } from 'typia';
 export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean => {
   const r = validate<ArchiveModel>(d);
   if (!r.success) {
-    console.log('Validation failed', r.errors, r.data);
+    console.log('Validation failed', (r as any)?.errors, r.data);
   }
   if (!isEntityStateConsistent((d as ArchiveModel).task)) {
     return false;
@@ -18,7 +18,7 @@ export const validateArchiveModel = <R>(d: ArchiveModel | R): boolean => {
 export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
   const r = validate<ProjectState>(d);
   if (!r.success) {
-    console.log('Validation failed', r.errors, r.data);
+    console.log('Validation failed', (r as any)?.errors, r.data);
   }
   if (!isEntityStateConsistent(d as any)) {
     return false;
@@ -29,7 +29,7 @@ export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
 export const validateTaskModel = <R>(d: TaskState | R): boolean => {
   const r = validate<TaskState>(d);
   if (!r.success) {
-    console.log('Validation failed', r.errors, r.data);
+    console.log('Validation failed', (r as any)?.errors, r.data);
   }
   if (!isEntityStateConsistent(d as any)) {
     return false;
@@ -40,7 +40,7 @@ export const validateTaskModel = <R>(d: TaskState | R): boolean => {
 // const wrapValidate = <R>(d: R, isEntityCheck = false): boolean => {
 //   const r = validate<R>(d);
 //   if (!r.success) {
-//     console.log('Validation failed', r.errors, r.data);
+//     console.log('Validation failed', (r as any)?.errors, r.data);
 //   }
 //   return r.success;
 // };

@@ -43,9 +43,9 @@ describe('getSimpleCounterStreakDuration()', () => {
       },
     },
   ];
-  T1.forEach((sc: SimpleCounterCopy) => {
+  T1.forEach((sc: Partial<SimpleCounterCopy>) => {
     it('should return 0 if no streak', () => {
-      expect(getSimpleCounterStreakDuration(sc)).toBe(0);
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(0);
     });
   });
 
@@ -83,9 +83,9 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
   ];
 
-  T2.forEach((sc: SimpleCounterCopy) => {
+  T2.forEach((sc: Partial<SimpleCounterCopy>) => {
     it('should return 1 if streak', () => {
-      expect(getSimpleCounterStreakDuration(sc)).toBe(1);
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(1);
     });
   });
 
@@ -124,9 +124,9 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
   ];
 
-  T3.forEach((sc: SimpleCounterCopy) => {
+  T3.forEach((sc: Partial<SimpleCounterCopy>) => {
     it('should return 2 if streak', () => {
-      expect(getSimpleCounterStreakDuration(sc)).toBe(2);
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(2);
     });
   });
 
@@ -197,9 +197,9 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
   ];
 
-  T4.forEach((sc: SimpleCounterCopy) => {
+  T4.forEach((sc: Partial<SimpleCounterCopy>) => {
     it('should return 14 if streak', () => {
-      expect(getSimpleCounterStreakDuration(sc)).toBe(14);
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(14);
     });
   });
 
@@ -269,9 +269,9 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
   ];
 
-  T5.forEach((sc: SimpleCounterCopy) => {
+  T5.forEach((sc: Partial<SimpleCounterCopy>) => {
     it('should start counting at yesterday not today', () => {
-      expect(getSimpleCounterStreakDuration(sc)).toBe(13);
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
     });
   });
 });

@@ -93,7 +93,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialTaskState,
     isMainFileModel: true,
     validate: validateTaskModel,
-
     // repair: (d) => fixEntityStateConsistencyOrError(d),
   },
   timeTracking: {
