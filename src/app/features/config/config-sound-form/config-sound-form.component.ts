@@ -96,7 +96,10 @@ export class ConfigSoundFormComponent {
         .patchValue(this.config.breakReminderSound, { emitEvent: false, onlySelf: true });
       this.soundForm
         .get('trackTimeSound')!
-        .patchValue(this.config.trackTimeSound, { emitEvent: false, onlySelf: true });
+        .patchValue(this.config.trackTimeSound || null, {
+          emitEvent: false,
+          onlySelf: true,
+        });
       this.soundForm
         .get('isIncreaseDoneSoundPitch')!
         .patchValue(this.config.isIncreaseDoneSoundPitch, {

@@ -113,7 +113,7 @@ export type SoundConfig = Readonly<{
   isIncreaseDoneSoundPitch: boolean;
   doneSound: string | null;
   breakReminderSound: string | null;
-  trackTimeSound: string | null;
+  trackTimeSound?: string | null;
   volume: number;
 }>;
 
