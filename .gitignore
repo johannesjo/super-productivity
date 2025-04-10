@@ -73,3 +73,5 @@ electron-builder.win-store.yaml
 
 # ignore changes
 ./src/environments/versions.ts
+/src/environments/environment.js
+/src/environments/environment.js.map
