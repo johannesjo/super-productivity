@@ -1,51 +1,16 @@
-import { AppBaseData } from './sync.model';
-import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import { devError } from '../../util/dev-error';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { Task } from '../../features/tasks/task.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { environment } from '../../../environments/environment';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { AppDataCompleteNew } from '../pfapi-config';
 
 let errorCount = 0;
 
-export const isValidAppData = (d: AppDataCompleteNew): boolean => {
+export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   errorCount = 0;
-  const dAny: any = d;
   const isValid =
-    typeof dAny === 'object' &&
-    dAny !== null &&
-    typeof dAny.note === 'object' &&
-    dAny.note !== null &&
-    typeof dAny.improvement === 'object' &&
-    dAny.improvement !== null &&
-    typeof dAny.obstruction === 'object' &&
-    dAny.obstruction !== null &&
-    typeof dAny.metric === 'object' &&
-    dAny.metric !== null &&
-    typeof dAny.task === 'object' &&
-    dAny.task !== null &&
-    typeof dAny.tag === 'object' &&
-    dAny.tag !== null &&
-    typeof dAny.globalConfig === 'object' &&
-    dAny.globalConfig !== null &&
-    typeof dAny.archiveYoung?.task === 'object' &&
-    dAny.archiveYoung?.task !== null &&
-    typeof dAny.archiveOld?.task === 'object' &&
-    dAny.archiveOld?.task !== null &&
-    typeof dAny.archiveYoung?.timeTracking === 'object' &&
-    dAny.archiveYoung?.timeTracking !== null &&
-    typeof dAny.archiveOld?.timeTracking === 'object' &&
-    dAny.archiveOld?.timeTracking !== null &&
-    // TODO add more checks
-    // TODO add check later
-    // typeof dAny.issueProvider === 'object' &&
-    // dAny.issueProvider !== null &&
-    typeof dAny.project === 'object' &&
-    dAny.project !== null &&
-    Array.isArray(d.reminders) &&
-    _isEntityStatesConsistent(d) &&
     _isAllTasksAvailableAndListConsistent(d) &&
     _isAllNotesAvailableAndListConsistent(d) &&
     _isNoLonelySubTasks(d) &&
@@ -306,33 +271,6 @@ const _isAllNotesAvailableAndListConsistent = (data: AppDataCompleteNew): boolea
   }
 
   return !idNotFound && !isInconsistentProjectId && !isMissingNoteData;
-};
-
-const _isEntityStatesConsistent = (data: AppDataCompleteNew): boolean => {
-  const baseStateKeys: (keyof AppBaseData)[] = [
-    'task',
-    'taskRepeatCfg',
-    'tag',
-    'project',
-    'note',
-    'simpleCounter',
-
-    // TODO include later after everybody is migrated
-    // 'metric',
-    // 'improvement',
-    // 'obstruction',
-  ];
-
-  const brokenBaseItem = baseStateKeys.find((key) => {
-    if (!isEntityStateConsistent(data[key], key)) {
-      console.log(key, data[key]);
-      _validityError('Inconsistent entity state for ' + key, { key, data });
-      return true;
-    }
-    return false;
-  });
-
-  return !brokenBaseItem;
 };
 
 const _isNoLonelySubTasks = (data: AppDataCompleteNew): boolean => {

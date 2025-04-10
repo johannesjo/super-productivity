@@ -270,7 +270,10 @@ export class JiraIssueEffects {
             concatMap((issue) => this._openTransitionDialog(issue, localState, task)),
           );
       default:
-        if (!chosenTransition || !chosenTransition.id) {
+        if (
+          !chosenTransition ||
+          !(typeof chosenTransition === 'object' && chosenTransition?.id)
+        ) {
           this._snackService.open({
             msg: T.F.JIRA.S.NO_VALID_TRANSITION,
             type: 'ERROR',

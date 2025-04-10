@@ -36,7 +36,7 @@ import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/tas
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
 import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
-import { isValidAppData } from '../imex/sync/is-valid-app-data.util';
+import { isRelatedModelDataValid } from './validate/is-valid-app-data.util';
 import { dataRepair } from '../core/data-repair/data-repair.util';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
@@ -50,6 +50,7 @@ import {
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 import {
+  validateAllData,
   validateArchiveModel,
   validateBoardsModel,
   validateGlobalConfigModel,
@@ -232,7 +233,10 @@ export const PFAPI_SYNC_PROVIDERS = [
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   crossModelVersion: CROSS_MODEL_VERSION,
   validate: (data) => {
-    return isValidAppData(data);
+    console.time('validateAllData');
+    const r = validateAllData(data) && isRelatedModelDataValid(data);
+    console.timeEnd('validateAllData');
+    return r;
   },
   repair: (data: any) => {
     if (!isDataRepairPossible(data)) {

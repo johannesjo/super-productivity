@@ -1,4 +1,4 @@
-import { isValidAppData } from './is-valid-app-data.util';
+import { isRelatedModelDataValid } from './is-valid-app-data.util';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
@@ -8,7 +8,7 @@ import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { Note } from '../../features/note/note.model';
 import { IssueProvider } from '../../features/issue/issue.model';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { AppDataCompleteNew } from '../pfapi-config';
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
@@ -35,7 +35,7 @@ describe('isValidAppData()', () => {
   });
 
   it('should work for valid data', () => {
-    expect(isValidAppData(mock)).toBe(true);
+    expect(isRelatedModelDataValid(mock)).toBe(true);
   });
 
   describe('should return false for', () => {
@@ -51,7 +51,7 @@ describe('isValidAppData()', () => {
     ].forEach((prop) => {
       it('missing prop ' + prop, () => {
         expect(
-          isValidAppData({
+          isRelatedModelDataValid({
             ...mock,
             [prop]: null,
           }),
@@ -65,7 +65,7 @@ describe('isValidAppData()', () => {
       ['task', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'].forEach((prop) => {
         it(prop, () => {
           expect(() =>
-            isValidAppData({
+            isRelatedModelDataValid({
               ...mock,
               [prop]: {
                 ...mock[prop],
@@ -80,7 +80,7 @@ describe('isValidAppData()', () => {
 
     it('inconsistent task state', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           task: {
             ...mock.task,
@@ -93,7 +93,7 @@ describe('isValidAppData()', () => {
 
     it('missing today task data for projects', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: mock.task,
@@ -113,7 +113,7 @@ describe('isValidAppData()', () => {
 
     it('missing reminder data', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: {
@@ -133,7 +133,7 @@ describe('isValidAppData()', () => {
 
     it('missing backlog task data for projects', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: mock.task,
@@ -154,7 +154,7 @@ describe('isValidAppData()', () => {
 
     it('missing today task data for tags', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: mock.task,
@@ -207,7 +207,7 @@ describe('isValidAppData()', () => {
       } as any;
 
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: taskState,
@@ -255,7 +255,7 @@ describe('isValidAppData()', () => {
       } as any;
 
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: taskState,
@@ -283,7 +283,7 @@ describe('isValidAppData()', () => {
         ]),
       } as any;
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           task: taskState,
@@ -306,7 +306,7 @@ describe('isValidAppData()', () => {
         ]),
       } as any;
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           // NOTE: it's empty
           archiveYoung: {
@@ -322,7 +322,7 @@ describe('isValidAppData()', () => {
 
     it('missing tag for task', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           task: {
             ...mock.task,
@@ -339,7 +339,7 @@ describe('isValidAppData()', () => {
 
     it('missing tag for task in archive', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           archiveYoung: {
             lastTimeTrackingFlush: 0,
@@ -360,7 +360,7 @@ describe('isValidAppData()', () => {
 
     it('missing projectIds for task', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           task: {
             ...mock.task,
@@ -377,7 +377,7 @@ describe('isValidAppData()', () => {
 
     it('missing defaultProjectId for issueProvider', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           issueProvider: {
             ...mock.issueProvider,
@@ -393,7 +393,7 @@ describe('isValidAppData()', () => {
 
     it('wrong projectIds for listed tasks', () => {
       expect(() =>
-        isValidAppData({
+        isRelatedModelDataValid({
           ...mock,
           archiveYoung: {
             lastTimeTrackingFlush: 0,
@@ -415,7 +415,7 @@ describe('isValidAppData()', () => {
 
   it('missing projectIds for task', () => {
     expect(() =>
-      isValidAppData({
+      isRelatedModelDataValid({
         ...mock,
         project: {
           ...mock.project,
@@ -453,7 +453,7 @@ describe('isValidAppData()', () => {
 
   it('missing task data', () => {
     expect(() =>
-      isValidAppData({
+      isRelatedModelDataValid({
         ...mock,
         project: {
           ...mock.project,
@@ -503,7 +503,7 @@ describe('isValidAppData()', () => {
     } as any;
 
     expect(() =>
-      isValidAppData({
+      isRelatedModelDataValid({
         ...mock,
         // NOTE: it's empty
         task: taskState,
@@ -524,7 +524,7 @@ describe('isValidAppData()', () => {
     } as any;
 
     expect(() =>
-      isValidAppData({
+      isRelatedModelDataValid({
         ...mock,
         // NOTE: it's empty
         note: noteState,
@@ -549,7 +549,7 @@ describe('isValidAppData()', () => {
     } as any;
 
     expect(() =>
-      isValidAppData({
+      isRelatedModelDataValid({
         ...mock,
         // NOTE: it's empty
         project: projectState,

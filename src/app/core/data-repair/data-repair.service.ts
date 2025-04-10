@@ -3,7 +3,7 @@ import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
-import { getLastValidityError } from '../../imex/sync/is-valid-app-data.util';
+import { getLastValidityError } from '../../pfapi/validate/is-valid-app-data.util';
 import { IS_ELECTRON } from '../../app.constants';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 

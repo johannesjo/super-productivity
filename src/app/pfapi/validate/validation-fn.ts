@@ -18,6 +18,35 @@ import { MetricState } from '../../features/metric/metric.model';
 import { ImprovementState } from '../../features/metric/improvement/improvement.model';
 import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
+import { AppDataCompleteNew } from '../pfapi-config';
+
+export const validateAllData = <R>(d: AppDataCompleteNew | R): boolean => {
+  // console.time('validateAllData');
+  const r = _wrapValidate(validate<AppDataCompleteNew>(d));
+  // console.timeEnd('validateAllData');
+  // const dd = d as AppDataCompleteNew;
+  // console.time('validateAllData2');
+  // const r2 =
+  //   validateProjectModel(dd.project) &&
+  //   validateTagModel(dd.tag) &&
+  //   validateTaskModel(dd.task) &&
+  //   validateSimpleCounterModel(dd.simpleCounter) &&
+  //   validateNoteModel(dd.note) &&
+  //   validateTaskRepeatCfgStateModel(dd.taskRepeatCfg) &&
+  //   validateReminderModel(dd.reminders) &&
+  //   validatePlannerModel(dd.planner) &&
+  //   validateBoardsModel(dd.boards) &&
+  //   validateIssueProviderModel(dd.issueProvider) &&
+  //   validateMetricModel(dd.metric) &&
+  //   validateImprovementModel(dd.improvement) &&
+  //   validateObstructionModel(dd.obstruction) &&
+  //   validateGlobalConfigModel(dd.globalConfig) &&
+  //   validateArchiveModel(dd.archiveYoung) &&
+  //   validateArchiveModel(dd.archiveOld) &&
+  //   validateTimeTrackingModel(dd.timeTracking);
+  // console.timeEnd('validateAllData2');
+  return r;
+};
 
 export const validateProjectModel = <R>(d: ProjectState | R): boolean => {
   return _wrapValidate(validate<ProjectState>(d), d, true);

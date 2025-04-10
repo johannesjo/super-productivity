@@ -34,14 +34,14 @@ export type ShortSyntaxConfig = Readonly<{
 export type TimeTrackingConfig = Readonly<{
   trackingInterval: number;
   defaultEstimate: number;
-  defaultEstimateSubTasks: number;
+  defaultEstimateSubTasks?: number | null;
   isAutoStartNextTask: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTrackingReminderEnabled: boolean;
   isTrackingReminderShowOnMobile: boolean;
   trackingReminderMinTime: number;
-  isTrackingReminderNotify: boolean;
-  isTrackingReminderFocusWindow: boolean;
+  isTrackingReminderNotify?: boolean;
+  isTrackingReminderFocusWindow?: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{

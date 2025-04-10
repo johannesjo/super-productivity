@@ -76,7 +76,7 @@ export class TaskInternalEffects {
       filter(
         ([{ task }, cfg]) =>
           (!task.timeEstimate && cfg.timeTracking.defaultEstimate > 0) ||
-          cfg.timeTracking.defaultEstimateSubTasks > 0,
+          (cfg.timeTracking.defaultEstimateSubTasks || 0) > 0,
       ),
       map(([action, cfg]) =>
         updateTask({
@@ -85,7 +85,7 @@ export class TaskInternalEffects {
             changes: {
               timeEstimate:
                 action.task.parentId || (action as any).parentId
-                  ? cfg.timeTracking.defaultEstimateSubTasks
+                  ? cfg.timeTracking.defaultEstimateSubTasks || undefined
                   : cfg.timeTracking.defaultEstimate,
             },
           },
