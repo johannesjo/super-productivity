@@ -21,36 +21,19 @@ import { GlobalConfigState } from '../../features/config/global-config.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { ValidationResult } from '../api/pfapi.model';
 
+// for more speed
 // type DataToValidate = Omit<AppDataCompleteNew, 'archiveOld' | 'archiveYoung'>;
+// to test broken validation
+// type DataToValidate = AppDataCompleteNew & {
+//   NOT_THERE: boolean;
+// };
+type DataToValidate = AppDataCompleteNew;
 
 export const validateAllData = <R>(
   d: AppDataCompleteNew | R,
 ): ValidationResult<AppDataCompleteNew> => {
-  // console.time('validateAllData');
-  const r = _wrapValidate(validate<AppDataCompleteNew>(d));
-  // console.timeEnd('validateAllData');
-  // const dd = d as AppDataCompleteNew;
-  // console.time('validateAllData2');
-  // const r2 =
-  //   validateProjectModel(dd.project) &&
-  //   validateTagModel(dd.tag) &&
-  //   validateTaskModel(dd.task) &&
-  //   validateSimpleCounterModel(dd.simpleCounter) &&
-  //   validateNoteModel(dd.note) &&
-  //   validateTaskRepeatCfgStateModel(dd.taskRepeatCfg) &&
-  //   validateReminderModel(dd.reminders) &&
-  //   validatePlannerModel(dd.planner) &&
-  //   validateBoardsModel(dd.boards) &&
-  //   validateIssueProviderModel(dd.issueProvider) &&
-  //   validateMetricModel(dd.metric) &&
-  //   validateImprovementModel(dd.improvement) &&
-  //   validateObstructionModel(dd.obstruction) &&
-  //   validateGlobalConfigModel(dd.globalConfig) &&
-  //   validateArchiveModel(dd.archiveYoung) &&
-  //   validateArchiveModel(dd.archiveOld) &&
-  //   validateTimeTrackingModel(dd.timeTracking);
-  // console.timeEnd('validateAllData2');
-  return r;
+  const r = _wrapValidate(validate<DataToValidate>(d));
+  return r as ValidationResult<AppDataCompleteNew>;
 };
 
 export const validateProjectModel = <R>(
@@ -170,7 +153,7 @@ const _wrapValidate = <R>(
   isEntityCheck = false,
 ): ValidationResult<R> => {
   if (!result.success) {
-    console.log('Validation failed', (result as any)?.errors, result.data);
+    console.log('Validation failed', (result as any)?.errors, result);
   }
   if (isEntityCheck && !isEntityStateConsistent(d as any)) {
     return {

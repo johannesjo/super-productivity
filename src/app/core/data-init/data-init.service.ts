@@ -51,6 +51,8 @@ export class DataInitService {
           data: fixedData,
           // TODO decide if this or to reapply all migrations??
           crossModelVersion: CROSS_MODEL_VERSION,
+          // since we already did try
+          isAttemptRepair: false,
         });
       }
       // TODO handle start fresh case

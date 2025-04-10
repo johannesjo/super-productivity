@@ -296,11 +296,22 @@ export class Pfapi<const MD extends ModelCfgs> {
     const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
     data = dataAfter;
 
-    if (this.cfg?.validate && !this.cfg.validate(data).success) {
-      if (isAttemptRepair && this.cfg.repair) {
-        data = this.cfg.repair(data);
+    if (this.cfg?.validate) {
+      const validationResult = this.cfg.validate(data);
+      if (!validationResult.success) {
+        pfLog(1, `${this.importAllSycModelData.name}() data not valid`, validationResult);
+        if (isAttemptRepair && this.cfg.repair) {
+          pfLog(1, `${this.importAllSycModelData.name}() attempting repair`);
+          data = this.cfg.repair(data);
+
+          const r2 = this.cfg.validate(data);
+          if (!r2.success) {
+            throw new DataValidationFailedError(r2);
+          }
+        } else {
+          throw new DataValidationFailedError(validationResult);
+        }
       }
-      throw new DataValidationFailedError();
     }
 
     if (isBackupData) {
