@@ -12,6 +12,8 @@ import {
   TimeSpentOnDayCopy,
 } from '../../features/tasks/task.model';
 import { Dictionary } from '@ngrx/entity';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
+import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../../features/boards/boards.const';
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
   fullData: AppDataCompleteLegacy,
@@ -155,8 +157,26 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       lastTimeTrackingFlush: 0,
     },
     task: migrateTaskState(copy.task),
+    boards: migrateBoards(copy.boards),
   };
 }) as CrossModelMigrateFn;
+
+// TODO remove later
+const migrateBoards = (boardsState: BoardsState): BoardsState => {
+  return {
+    ...boardsState,
+    boardCfgs: boardsState.boardCfgs.map((boardCfg) => {
+      return {
+        ...DEFAULT_BOARD_CFG,
+        ...boardCfg,
+        panels: boardCfg.panels.map((panel) => ({
+          ...DEFAULT_PANEL_CFG,
+          ...panel,
+        })),
+      };
+    }),
+  };
+};
 
 const migrateTaskArchive = (taskArchive: TaskArchive): TaskArchive => {
   migrateTaskDictionary(taskArchive.entities);
