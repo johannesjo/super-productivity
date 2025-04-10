@@ -35,7 +35,7 @@ export class ModelCtrl<MT extends ModelBase> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
-    if (this.modelCfg.validate && !this.modelCfg.validate(data)) {
+    if (this.modelCfg.validate && !this.modelCfg.validate(data).success) {
       if (this.modelCfg.repair) {
         try {
           data = this.modelCfg.repair(data);

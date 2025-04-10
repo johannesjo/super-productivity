@@ -234,7 +234,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (
       !isSkipValidityCheck &&
       this.cfg?.validate &&
-      !this.cfg.validate(allData as AllSyncModels<MD>)
+      !this.cfg.validate(allData as AllSyncModels<MD>).success
     ) {
       alert('Ohhhh!!! actually got one!!! ' + this._getAllSyncModelDataRetryCount);
       if (this._getAllSyncModelDataRetryCount >= 1) {
@@ -296,7 +296,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
     data = dataAfter;
 
-    if (this.cfg?.validate && !this.cfg.validate(data)) {
+    if (this.cfg?.validate && !this.cfg.validate(data).success) {
       if (isAttemptRepair && this.cfg.repair) {
         data = this.cfg.repair(data);
       }
@@ -372,7 +372,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (!this.cfg?.validate) {
       throw new NoValidateFunctionProvidedError();
     }
-    return this.cfg.validate(data);
+    return this.cfg.validate(data).success;
     // we don't do this!!!! => throw new DataValidationFailedError();
   }
 

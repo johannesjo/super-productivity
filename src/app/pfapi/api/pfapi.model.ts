@@ -4,6 +4,7 @@ import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
 import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
 import { WebdavPrivateCfg } from './sync/providers/webdav/webdav';
 import { LocalFileSyncElectronPrivateCfg } from './sync/providers/local-file-sync/local-file-sync-electron';
+import { IValidation } from 'typia';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -13,6 +14,8 @@ interface SerializableObject {
   // [key: string]: Serializable;
   [key: string]: any;
 }
+
+export type ValidationResult<T> = IValidation<T>;
 
 type SerializableArray = Array<Serializable>;
 
@@ -31,7 +34,7 @@ export interface ModelCfg<T extends ModelBase> {
   // for cascading only
   isMainFileModel?: boolean;
 
-  validate?: <R>(data: R | T) => boolean;
+  validate?: <R>(data: R | T) => IValidation<R | T>;
   repair?: <R>(data: R | unknown | any) => T;
 
   // MAYBE? TODO
@@ -71,7 +74,7 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
   isCreateBackups?: boolean;
   crossModelVersion?: number;
   crossModelMigrations?: CrossModelMigrations;
-  validate?: (data: AllModelData<T>) => boolean;
+  validate?: (data: AllModelData<T>) => IValidation<AllModelData<T>>;
   repair?: <R>(data: R | unknown) => AllModelData<T>;
 
   // TODO

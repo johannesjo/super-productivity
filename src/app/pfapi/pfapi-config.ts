@@ -234,7 +234,14 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   crossModelVersion: CROSS_MODEL_VERSION,
   validate: (data) => {
     console.time('validateAllData');
-    const r = validateAllData(data) && isRelatedModelDataValid(data);
+    const r = validateAllData(data);
+    if (r.success && !isRelatedModelDataValid(data)) {
+      return {
+        success: false,
+        data,
+        errors: [{ expected: 'Valid Cross Model Relations', path: '.', value: data }],
+      };
+    }
     console.timeEnd('validateAllData');
     return r;
   },
