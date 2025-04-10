@@ -86,6 +86,7 @@
     "start": "npm run electron:build && cross-env NODE_ENV=DEV electron .",
     "startFrontend": "ng serve",
     "sync:android": "npx cap sync android",
+    "stats": "ng build --configuration production --source-map --stats-json && npx esbuild-visualizer --metadata dist/stats.json && xdg-open stats.html",
     "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
     "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
     "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
