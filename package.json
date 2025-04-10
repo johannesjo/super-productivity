@@ -130,6 +130,7 @@
     "@capacitor/cli": "^7.2.0",
     "@capacitor/core": "^7.2.0",
     "@capacitor/filesystem": "^7.0.1",
+    "@capawesome/capacitor-background-task": "^7.0.1",
     "@csstools/stylelint-formatter-github": "^1.0.0",
     "@electron/notarize": "^2.5.0",
     "@fontsource/roboto": "^4.5.8",

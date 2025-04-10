@@ -53,6 +53,8 @@ import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BackgroundTask } from '@capawesome/capacitor-background-task';
+import { promiseTimeout } from './app/util/promise-timeout';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -206,5 +208,21 @@ if (IS_ANDROID_WEB_VIEW) {
     } else {
       window.history.back();
     }
+  });
+
+  CapacitorApp.addListener('appStateChange', async ({ isActive }) => {
+    if (isActive) {
+      return;
+    }
+    // The app state has been changed to inactive.
+    // Start the background task by calling `beforeExit`.
+    const taskId = await BackgroundTask.beforeExit(async () => {
+      // Run your code...
+      // Finish the background task as soon as everything is done.
+      console.log('Time window for completing sync started');
+      await promiseTimeout(20000);
+      console.log('Time window for completing sync ended. Closing app!');
+      BackgroundTask.finish({ taskId });
+    });
   });
 }
