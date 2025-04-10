@@ -36,103 +36,40 @@ export const validateAllData = <R>(
   return r as ValidationResult<AppDataCompleteNew>;
 };
 
-export const validateProjectModel = <R>(
-  d: ProjectState | R,
-): ValidationResult<R | ProjectState> => {
-  return _wrapValidate(validate<ProjectState>(d), d, true);
-};
+/**
+ * Maps each property of AppDataCompleteNew to its corresponding validation function
+ */
+export const appDataValidators: {
+  [K in keyof AppDataCompleteNew]: <R>(
+    data: AppDataCompleteNew[K] | R,
+  ) => ValidationResult<AppDataCompleteNew[K] | R>;
+} = {
+  task: <R>(d: R | TaskState) => _wrapValidate(validate<TaskState>(d), d, true),
+  taskRepeatCfg: <R>(d: R | TaskRepeatCfgState) =>
+    _wrapValidate(validate<TaskRepeatCfgState>(d), d, true),
+  archiveYoung: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
+  archiveOld: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
+  project: <R>(d: R | ProjectState) => _wrapValidate(validate<ProjectState>(d), d, true),
+  tag: <R>(d: R | TagState) => _wrapValidate(validate<TagState>(d), d, true),
+  simpleCounter: <R>(d: R | SimpleCounterState) =>
+    _wrapValidate(validate<SimpleCounterState>(d), d, true),
+  note: (d) => _wrapValidate(validate<NoteState>(d), d, true),
+  reminders: <R>(d: R | Reminder[]) => _wrapValidate(validate<Reminder[]>(d)),
+  planner: <R>(d: R | PlannerState) => _wrapValidate(validate<PlannerState>(d)),
+  boards: <R>(d: R | BoardsState) => _wrapValidate(validate<BoardsState>(d)),
+  issueProvider: (d) => _wrapValidate(validate<IssueProviderState>(d), d, true),
+  metric: <R>(d: R | MetricState) => _wrapValidate(validate<MetricState>(d), d, true),
+  improvement: <R>(d: R | ImprovementState) =>
+    _wrapValidate(validate<ImprovementState>(d), d, true),
+  obstruction: <R>(d: R | ObstructionState) =>
+    _wrapValidate(validate<ObstructionState>(d), d, true),
+  globalConfig: <R>(d: R | GlobalConfigState) =>
+    _wrapValidate(validate<GlobalConfigState>(d)),
+  timeTracking: <R>(d: R | TimeTrackingState) =>
+    _wrapValidate(validate<TimeTrackingState>(d)),
+} as const;
 
-export const validateTagModel = <R>(d: TagState | R): ValidationResult<R | TagState> => {
-  return _wrapValidate(validate<TagState>(d), d, true);
-};
-
-export const validateTaskModel = <R>(
-  d: TaskState | R,
-): ValidationResult<R | TaskState> => {
-  return _wrapValidate(validate<TaskState>(d), d, true);
-};
-
-export const validateSimpleCounterModel = <R>(
-  d: SimpleCounterState | R,
-): ValidationResult<R | SimpleCounterState> => {
-  return _wrapValidate(validate<SimpleCounterState>(d), d, true);
-};
-
-export const validateNoteModel = <R>(
-  d: NoteState | R,
-): ValidationResult<R | NoteState> => {
-  return _wrapValidate(validate<NoteState>(d), d, true);
-};
-
-export const validateTaskRepeatCfgStateModel = <R>(
-  d: TaskRepeatCfgState | R,
-): ValidationResult<R | TaskRepeatCfgState> => {
-  return _wrapValidate(validate<TaskRepeatCfgState>(d), d, true);
-};
-// -------------------------------
-
-export const validateReminderModel = <R>(
-  d: Reminder[] | R,
-): ValidationResult<R | Reminder[]> => {
-  return _wrapValidate(validate<Reminder[]>(d));
-};
-
-export const validatePlannerModel = <R>(
-  d: PlannerState | R,
-): ValidationResult<R | PlannerState> => {
-  return _wrapValidate(validate<PlannerState>(d));
-};
-
-export const validateBoardsModel = <R>(
-  d: BoardsState | R,
-): ValidationResult<R | BoardsState> => {
-  return _wrapValidate(validate<BoardsState>(d));
-};
-// -------------------------------
-
-// entity states
-export const validateIssueProviderModel = <R>(
-  d: IssueProviderState | R,
-): ValidationResult<R | IssueProviderState> => {
-  return _wrapValidate(validate<IssueProviderState>(d), d, true);
-};
-
-export const validateMetricModel = <R>(
-  d: MetricState | R,
-): ValidationResult<R | MetricState> => {
-  return _wrapValidate(validate<MetricState>(d), d, true);
-};
-
-export const validateImprovementModel = <R>(
-  d: ImprovementState | R,
-): ValidationResult<R | ImprovementState> => {
-  return _wrapValidate(validate<ImprovementState>(d), d, true);
-};
-
-export const validateObstructionModel = <R>(
-  d: ObstructionState | R,
-): ValidationResult<R | ObstructionState> => {
-  return _wrapValidate(validate<ObstructionState>(d), d, true);
-};
-
-// -------------------------------
-export const validateGlobalConfigModel = <R>(
-  d: GlobalConfigState | R,
-): ValidationResult<R | GlobalConfigState> => {
-  return _wrapValidate(validate<GlobalConfigState>(d));
-};
-
-export const validateTimeTrackingModel = <R>(
-  d: TimeTrackingState | R,
-): ValidationResult<R | TimeTrackingState> => {
-  return _wrapValidate(validate<TimeTrackingState>(d));
-};
-
-// -------------------------------
-
-export const validateArchiveModel = <R>(
-  d: ArchiveModel | R,
-): ValidationResult<ArchiveModel> => {
+const validateArchiveModel = <R>(d: ArchiveModel | R): ValidationResult<ArchiveModel> => {
   const r = validate<ArchiveModel>(d);
   if (!r.success) {
     console.log('Validation failed', (r as any)?.errors, r.data);
@@ -145,6 +82,16 @@ export const validateArchiveModel = <R>(
     };
   }
   return r;
+};
+
+/**
+ * Validates a specific property of the app data
+ */
+export const validateAppDataProperty = <K extends keyof AppDataCompleteNew>(
+  key: K,
+  data: AppDataCompleteNew[K],
+): ValidationResult<AppDataCompleteNew[K]> => {
+  return appDataValidators[key](data);
 };
 
 const _wrapValidate = <R>(

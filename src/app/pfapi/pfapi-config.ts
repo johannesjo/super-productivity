@@ -49,25 +49,7 @@ import {
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
-import {
-  validateAllData,
-  validateArchiveModel,
-  validateBoardsModel,
-  validateGlobalConfigModel,
-  validateImprovementModel,
-  validateIssueProviderModel,
-  validateMetricModel,
-  validateNoteModel,
-  validateObstructionModel,
-  validatePlannerModel,
-  validateProjectModel,
-  validateReminderModel,
-  validateSimpleCounterModel,
-  validateTagModel,
-  validateTaskModel,
-  validateTaskRepeatCfgStateModel,
-  validateTimeTrackingModel,
-} from './validate/validation-fn';
+import { validateAllData, appDataValidators } from './validate/validation-fn';
 
 export const CROSS_MODEL_VERSION = 2 as const;
 
@@ -105,38 +87,38 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
-    validate: validateTaskModel,
+    validate: appDataValidators.task,
   },
   timeTracking: {
     modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTimeTrackingState,
     isMainFileModel: true,
-    validate: validateTimeTrackingModel,
+    validate: appDataValidators.timeTracking,
   },
 
   project: {
     modelVersion: 1,
     defaultData: initialProjectState,
     isMainFileModel: true,
-    validate: validateProjectModel,
+    validate: appDataValidators.project,
   },
   tag: {
     modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
-    validate: validateTagModel,
+    validate: appDataValidators.tag,
   },
   simpleCounter: {
     modelVersion: 1,
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
-    validate: validateSimpleCounterModel,
+    validate: appDataValidators.simpleCounter,
   },
   note: {
     modelVersion: 1,
     defaultData: initialNoteState,
     isMainFileModel: true,
-    validate: validateNoteModel,
+    validate: appDataValidators.note,
   },
   taskRepeatCfg: {
     modelVersion: 1,
@@ -144,56 +126,56 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     // TODO check if still necessary
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
-    validate: validateTaskRepeatCfgStateModel,
+    validate: appDataValidators.taskRepeatCfg,
   },
 
   reminders: {
     modelVersion: 1,
     defaultData: [],
     isMainFileModel: true,
-    validate: validateReminderModel,
+    validate: appDataValidators.reminders,
   },
   planner: {
     modelVersion: 1,
     defaultData: plannerInitialState,
     isMainFileModel: true,
-    validate: validatePlannerModel,
+    validate: appDataValidators.planner,
   },
   boards: {
     modelVersion: 1,
     defaultData: initialBoardsState,
     isMainFileModel: true,
-    validate: validateBoardsModel,
+    validate: appDataValidators.boards,
   },
 
   //-------------------------------
   globalConfig: {
     modelVersion: 1,
     defaultData: DEFAULT_GLOBAL_CONFIG,
-    validate: validateGlobalConfigModel,
+    validate: appDataValidators.globalConfig,
   },
 
   issueProvider: {
     modelVersion: 1,
     defaultData: issueProviderInitialState,
-    validate: validateIssueProviderModel,
+    validate: appDataValidators.issueProvider,
   },
 
   // Metric models
   metric: {
     modelVersion: 1,
     defaultData: initialMetricState,
-    validate: validateMetricModel,
+    validate: appDataValidators.metric,
   },
   improvement: {
     modelVersion: 1,
     defaultData: initialImprovementState,
-    validate: validateImprovementModel,
+    validate: appDataValidators.improvement,
   },
   obstruction: {
     modelVersion: 1,
     defaultData: initialObstructionState,
-    validate: validateObstructionModel,
+    validate: appDataValidators.obstruction,
   },
 
   archiveYoung: {
@@ -203,7 +185,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
-    validate: validateArchiveModel,
+    validate: appDataValidators.archiveYoung,
   },
   archiveOld: {
     modelVersion: TASK_MODEL_VERSION,
@@ -212,7 +194,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       timeTracking: initialTimeTrackingState,
       lastTimeTrackingFlush: 0,
     },
-    validate: validateArchiveModel,
+    validate: appDataValidators.archiveOld,
   },
 } as const;
 

@@ -24,11 +24,11 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
     dirtyDeepCopy(fullData);
 
   if (
-    (fullData as any).archive &&
-    (fullData as any).archiveOld &&
-    (fullData as any).timeTracking &&
-    (fullData as any).timeTracking.project &&
-    Object.keys((fullData as any).timeTracking.project).length
+    (fullData as any as AppDataCompleteNew).archiveYoung &&
+    (fullData as any as AppDataCompleteNew).archiveOld &&
+    (fullData as any as AppDataCompleteNew).timeTracking &&
+    (fullData as any as AppDataCompleteNew).timeTracking.project &&
+    Object.keys((fullData as any as AppDataCompleteNew).timeTracking.project).length
   ) {
     // If time tracking is already migrated, return the original data
     console.warn('already migrated despite old model version!!!');
