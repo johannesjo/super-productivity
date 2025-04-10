@@ -6,6 +6,7 @@ import { TTWorkContextSessionMap } from '../../features/time-tracking/time-track
 import { ProjectCopy } from '../../features/project/project.model';
 import { TagCopy } from '../../features/tag/tag.model';
 import {
+  HideSubTasksMode,
   TaskArchive,
   TaskCopy,
   TaskState,
@@ -219,6 +220,27 @@ const migrateTaskDictionary = (taskDict: Dictionary<TaskCopy>): void => {
         repeatCfgId: undefined,
       };
     }
+
+    if (!task._hideSubTasksMode) {
+      const oldValue = (task as any)._showSubTasksMode as number;
+      let newValue: HideSubTasksMode | undefined;
+      if (oldValue === 1) {
+        newValue = 1;
+      } else if (oldValue === 0) {
+        newValue = 2;
+      }
+      if ('_showSubTasksMode' in (taskDict[taskId] as any)) {
+        delete (taskDict[taskId] as any)._showSubTasksMode;
+      }
+
+      if (newValue) {
+        taskDict[taskId] = {
+          ...taskDict[taskId],
+          _hideSubTasksMode: newValue as HideSubTasksMode,
+        };
+      }
+    }
+
     // Remove null and undefined values from task.timeSpentOnDay
     if (task.timeSpentOnDay) {
       const cleanTimeSpent: TimeSpentOnDayCopy = {};

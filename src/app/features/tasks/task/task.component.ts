@@ -16,7 +16,7 @@ import {
 import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, of } from 'rxjs';
 import {
-  ShowSubTasksMode,
+  HideSubTasksMode,
   TaskCopy,
   TaskDetailTargetPanel,
   TaskWithSubTasks,
@@ -169,7 +169,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isLockPanRight: boolean = false;
   isPreventPointerEventsWhilePanning: boolean = false;
   isActionTriggered: boolean = false;
-  ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
+  ShowSubTasksMode: typeof HideSubTasksMode = HideSubTasksMode;
   isFirstLineHover: boolean = false;
 
   readonly taskTitleEditEl = viewChild<TaskTitleComponent>('taskTitleEditEl');
@@ -911,7 +911,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
       if (this.isSelected()) {
         this.hideDetailPanel();
-      } else if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+      } else if (hasSubTasks && t._hideSubTasksMode !== HideSubTasksMode.HideAll) {
         this._taskService.toggleSubTaskMode(t.id, true, false);
         // TODO find a solution
         // } else if (this.task.parentId) {
@@ -924,7 +924,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     // expand sub tasks
     if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
       const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
-      if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.Show) {
+      if (hasSubTasks && t._hideSubTasksMode !== undefined) {
         this._taskService.toggleSubTaskMode(t.id, false, false);
       } else if (!this.isSelected()) {
         this.showDetailPanel();

@@ -22,7 +22,7 @@ const BASE_TASK: TaskCopy = {
   notes: '',
   tagIds: [],
   created: 0,
-  _showSubTasksMode: 2,
+  _hideSubTasksMode: 2,
   attachments: [],
 } as Partial<TaskCopy> as TaskCopy;
 

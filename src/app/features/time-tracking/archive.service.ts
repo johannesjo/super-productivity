@@ -69,7 +69,7 @@ export class ArchiveService {
         reminderId: undefined,
         isDone: true,
         plannedAt: undefined,
-        _showSubTasksMode: undefined,
+        _hideSubTasksMode: undefined,
         doneOn:
           task.isDone && task.doneOn
             ? task.doneOn

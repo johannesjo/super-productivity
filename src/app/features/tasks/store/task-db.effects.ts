@@ -19,7 +19,7 @@ import {
   restoreTask,
   roundTimeSpentForDay,
   scheduleTask,
-  toggleTaskShowSubTasks,
+  toggleTaskHideSubTasks,
   undoDeleteTask,
   unScheduleTask,
   updateTask,
@@ -121,7 +121,7 @@ export class TaskDbEffects {
   updateTaskUi$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTaskUi, toggleTaskShowSubTasks),
+        ofType(updateTaskUi, toggleTaskHideSubTasks),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState)),
       ),

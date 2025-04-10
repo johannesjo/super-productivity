@@ -291,12 +291,12 @@
           color=""
           mat-mini-fab
         >
-          @if (t._showSubTasksMode === ShowSubTasksMode.HideAll) {
+          @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
             <mat-icon>add </mat-icon>
           }
-          @if (t._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+          @if (t._hideSubTasksMode !== ShowSubTasksMode.HideAll) {
             <mat-icon
-              [class.isHideDoneTasks]="t._showSubTasksMode === ShowSubTasksMode.HideDone"
+              [class.isHideDoneTasks]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
               >remove
             </mat-icon>
           }
@@ -305,8 +305,8 @@
       @if (t.subTasks?.length) {
         <task-list
           [@expand]
-          [isHideAll]="t._showSubTasksMode !== ShowSubTasksMode.Show"
-          [isHideDone]="t._showSubTasksMode === ShowSubTasksMode.HideDone"
+          [isHideAll]="t._hideSubTasksMode !== ShowSubTasksMode.Show"
+          [isHideDone]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
           [isSubTaskList]="true"
           [listModelId]="t.id"
           [parentId]="t.id"

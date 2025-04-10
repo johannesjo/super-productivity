@@ -6,7 +6,7 @@ import {
   ArchiveTask,
   DEFAULT_TASK,
   DropListModelSource,
-  ShowSubTasksMode,
+  HideSubTasksMode,
   Task,
   TaskArchive,
   TaskCopy,
@@ -38,7 +38,7 @@ import {
   setCurrentTask,
   setSelectedTask,
   toggleStart,
-  toggleTaskShowSubTasks,
+  toggleTaskHideSubTasks,
   unScheduleTask,
   unsetCurrentTask,
   updateTask,
@@ -865,7 +865,7 @@ export class TaskService {
   }
 
   showSubTasks(id: string): void {
-    this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.Show });
+    this.updateUi(id, { _hideSubTasksMode: undefined });
   }
 
   toggleSubTaskMode(
@@ -873,11 +873,11 @@ export class TaskService {
     isShowLess: boolean = true,
     isEndless: boolean = false,
   ): void {
-    this._store.dispatch(toggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
+    this._store.dispatch(toggleTaskHideSubTasks({ taskId, isShowLess, isEndless }));
   }
 
   hideSubTasks(id: string): void {
-    this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.HideAll });
+    this.updateUi(id, { _hideSubTasksMode: HideSubTasksMode.HideAll });
   }
 
   async convertToMainTask(task: Task): Promise<void> {

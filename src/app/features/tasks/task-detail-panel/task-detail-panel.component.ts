@@ -13,7 +13,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { ShowSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
+import { HideSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import {
@@ -154,7 +154,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   _onDestroy$ = new Subject<void>();
 
-  ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
+  ShowSubTasksMode: typeof HideSubTasksMode = HideSubTasksMode;
   selectedItemIndex: number = 0;
   isFocusNotes: boolean = false;
   isDragOver: boolean = false;

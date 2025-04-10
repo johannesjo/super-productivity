@@ -117,7 +117,7 @@ export class SearchBarComponent implements AfterViewInit, OnDestroy {
       return {
         id: task.id,
         title: task.title.toLowerCase(),
-        taskNotes: task.notes.toLowerCase(),
+        taskNotes: task.notes?.toLowerCase() || '',
         projectId: task.projectId || null,
         parentId: task.parentId || null,
         tagId,
