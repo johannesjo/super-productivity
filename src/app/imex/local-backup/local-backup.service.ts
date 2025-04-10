@@ -89,7 +89,7 @@ export class LocalBackupService {
   }
 
   private async _backup(): Promise<void> {
-    const data = await this._pfapiService.getAllSyncModelData();
+    const data = await this._pfapiService.pf.getAllSyncModelData();
     if (IS_ELECTRON) {
       window.ea.backupAppData(data);
     }

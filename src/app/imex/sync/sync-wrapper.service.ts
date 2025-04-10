@@ -75,7 +75,7 @@ export class SyncWrapperService {
     }
 
     try {
-      const r = await this._pfapiService.sync();
+      const r = await this._pfapiService.pf.sync();
 
       switch (r.status) {
         case SyncStatus.InSync:
@@ -110,10 +110,10 @@ export class SyncWrapperService {
           }).toPromise();
 
           if (res === 'USE_LOCAL') {
-            await this._pfapiService.uploadAll();
+            await this._pfapiService.pf.uploadAll();
             return SyncStatus.UpdateRemoteAll;
           } else if (res === 'USE_REMOTE') {
-            await this._pfapiService.downloadAll();
+            await this._pfapiService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
           }
 
@@ -194,7 +194,7 @@ export class SyncWrapperService {
       return;
     }
     try {
-      await this._pfapiService.uploadAll(true);
+      await this._pfapiService.pf.uploadAll(true);
     } catch (e) {
       const errStr = getSyncErrorStr(e);
       this._snackService.open({
@@ -211,7 +211,7 @@ export class SyncWrapperService {
   async configuredAuthForSyncProviderIfNecessary(
     providerId: SyncProviderId,
   ): Promise<{ wasConfigured: boolean }> {
-    const provider = await this._pfapiService.getSyncProviderById(providerId);
+    const provider = await this._pfapiService.pf.getSyncProviderById(providerId);
     console.log(provider);
 
     if (!provider) {
@@ -238,7 +238,7 @@ export class SyncWrapperService {
           .toPromise();
         if (authCode) {
           const r = await verifyCodeChallenge(authCode);
-          await this._pfapiService.setPrivateCfgForSyncProvider(provider.id, r);
+          await this._pfapiService.pf.setPrivateCfgForSyncProvider(provider.id, r);
           // NOTE: exec sync afterward; promise not awaited
           setTimeout(() => {
             this.sync();

@@ -50,7 +50,7 @@ export class DialogIncompleteSyncComponent {
   }
 
   async downloadBackup(): Promise<void> {
-    const data = await this._pfapiService.getCompleteBackup();
+    const data = await this._pfapiService.pf.loadCompleteBackup();
     download('super-productivity-backup.json', JSON.stringify(data));
     // download('super-productivity-backup.json', privacyExport(data));
   }

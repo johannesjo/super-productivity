@@ -3,6 +3,7 @@ import { crossModelMigration2 } from './cross-model-2';
 describe('crossModelMigration2()', () => {
   it('should work and migrate projects', () => {
     const r = crossModelMigration2({
+      boards: { boardCfgs: [] },
       taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: {} } },
       task: { ids: [], entities: {} },
       project: {
@@ -19,6 +20,7 @@ describe('crossModelMigration2()', () => {
       tag: { entities: {} },
     } as any);
     expect(r).toEqual({
+      boards: { boardCfgs: [] },
       task: { ids: [], entities: {} },
       project: {
         entities: {
@@ -73,6 +75,7 @@ describe('crossModelMigration2()', () => {
 
   it('should work and migrate tags too', () => {
     const r = crossModelMigration2({
+      boards: { boardCfgs: [] },
       task: { ids: [], entities: {} },
       taskArchive: { ids: ['ARCHIE_TASK_ID'], entities: { ARCHIE_TASK_ID: {} } },
       project: {
@@ -99,6 +102,7 @@ describe('crossModelMigration2()', () => {
       },
     } as any);
     expect(r).toEqual({
+      boards: { boardCfgs: [] },
       task: { ids: [], entities: {} },
       project: {
         entities: {

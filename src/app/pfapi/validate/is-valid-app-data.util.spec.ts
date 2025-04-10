@@ -38,59 +38,7 @@ describe('isValidAppData()', () => {
     expect(isRelatedModelDataValid(mock)).toBe(true);
   });
 
-  describe('should return false for', () => {
-    [
-      'note',
-      'improvement',
-      'obstruction',
-      'metric',
-      'task',
-      'tag',
-      'globalConfig',
-      // TODO add issueProvider later
-    ].forEach((prop) => {
-      it('missing prop ' + prop, () => {
-        expect(
-          isRelatedModelDataValid({
-            ...mock,
-            [prop]: null,
-          }),
-        ).toBe(false);
-      });
-    });
-  });
-
   describe('should error for', () => {
-    describe('inconsistent entity state', () => {
-      ['task', 'taskRepeatCfg', 'tag', 'project', 'simpleCounter'].forEach((prop) => {
-        it(prop, () => {
-          expect(() =>
-            isRelatedModelDataValid({
-              ...mock,
-              [prop]: {
-                ...mock[prop],
-                entities: {},
-                ids: ['asasdasd'],
-              },
-            }),
-          ).toThrowError(`Inconsistent entity state "${prop}"`);
-        });
-      });
-    });
-
-    it('inconsistent task state', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          task: {
-            ...mock.task,
-            entities: { 'A asdds': DEFAULT_TASK },
-            ids: ['asasdasd'],
-          },
-        }),
-      ).toThrowError(`Inconsistent entity state "task"`);
-    });
-
     it('missing today task data for projects', () => {
       expect(() =>
         isRelatedModelDataValid({

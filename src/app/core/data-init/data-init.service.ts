@@ -32,22 +32,22 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
-    const appDataComplete = await this._pfapiService.getAllSyncModelData(true);
-    const isValid = this._pfapiService.isValidateComplete(appDataComplete);
+    const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
+    const isValid = this._pfapiService.pf.isValidateComplete(appDataComplete);
     if (isValid) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
       // DATA REPAIR CASE
       // ----------------
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
-        const fixedData = this._pfapiService.repairCompleteData(appDataComplete);
+        const fixedData = this._pfapiService.pf.repairCompleteData(appDataComplete);
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,
             isOmitTokens,
           }),
         );
-        await this._pfapiService.importAllSycModelData({
+        await this._pfapiService.pf.importAllSycModelData({
           data: fixedData,
           // TODO decide if this or to reapply all migrations??
           crossModelVersion: CROSS_MODEL_VERSION,

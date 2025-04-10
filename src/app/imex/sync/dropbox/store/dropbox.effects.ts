@@ -31,7 +31,7 @@ export class DropboxEffects {
               return;
             }
             alert('Delete tokens');
-            this._pfapiService.setPrivateCfgForSyncProvider(SyncProviderId.Dropbox, {
+            this._pfapiService.pf.setPrivateCfgForSyncProvider(SyncProviderId.Dropbox, {
               accessToken: '',
               refreshToken: '',
             });

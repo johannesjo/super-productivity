@@ -65,7 +65,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private async _getUserData(): Promise<CompleteBackup<any> | undefined> {
     try {
-      return await this.injector.get(PfapiService).getCompleteBackup(true);
+      return await this.injector.get(PfapiService).pf.loadCompleteBackup(true);
     } catch (e) {
       console.warn('Cannot load user data for error modal');
       console.error(e);

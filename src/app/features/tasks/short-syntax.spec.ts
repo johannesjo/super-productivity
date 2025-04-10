@@ -1,4 +1,4 @@
-import { HideSubTasksMode, TaskCopy } from './task.model';
+import { TaskCopy } from './task.model';
 import { shortSyntax } from './short-syntax';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { Tag } from '../tag/tag.model';
@@ -23,8 +23,6 @@ const TASK: TaskCopy = {
   created: Date.now(),
   repeatCfgId: undefined,
   plannedAt: undefined,
-
-  _hideSubTasksMode: HideSubTasksMode.Show,
 
   attachments: [],
 

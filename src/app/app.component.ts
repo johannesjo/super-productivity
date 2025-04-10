@@ -159,7 +159,7 @@ export class AppComponent implements OnDestroy {
         lastLocalSyncModelChange > MIGRATED_VAL
       ) {
         // disable sync until reload
-        this._pfapiService.sync = () => Promise.resolve({ status: SyncStatus.InSync });
+        this._pfapiService.pf.sync = () => Promise.resolve({ status: SyncStatus.InSync });
         this.imexMetaService.setDataImportInProgress(true);
 
         const legacyData = await this._persistenceLegacyService.loadComplete();

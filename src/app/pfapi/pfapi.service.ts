@@ -93,18 +93,6 @@ export class PfapiService {
 
   private _invalidDataCount = 0;
 
-  sync = this.pf.sync.bind(this.pf);
-  uploadAll = this.pf.uploadAll.bind(this.pf);
-  downloadAll = this.pf.downloadAll.bind(this.pf);
-  getAllSyncModelData = this.pf.getAllSyncModelData.bind(this.pf);
-  importAllSycModelData = this.pf.importAllSycModelData.bind(this.pf);
-  isValidateComplete = this.pf.isValidateComplete.bind(this.pf);
-  repairCompleteData = this.pf.repairCompleteData.bind(this.pf);
-  getCompleteBackup = this.pf.loadCompleteBackup.bind(this.pf);
-  setPrivateCfgForSyncProvider = this.pf.setPrivateCfgForSyncProvider.bind(this.pf);
-  getSyncProviderPrivateCfg = this.pf.getSyncProviderPrivateCfg.bind(this.pf);
-  getSyncProviderById = this.pf.getSyncProviderById.bind(this.pf);
-
   constructor() {
     // TODO check why it gets triggered twice always
     // this.syncState$.subscribe((v) => console.log(`syncState$`, v));
@@ -176,7 +164,7 @@ export class PfapiService {
     }
     if (backup) {
       if (confirm(this._translateService.instant(T.CONFIRM.RESTORE_STRAY_BACKUP))) {
-        await this.importAllSycModelData({
+        await this.pf.importAllSycModelData({
           data: backup,
           crossModelVersion: CROSS_MODEL_VERSION,
           isBackupData: false,

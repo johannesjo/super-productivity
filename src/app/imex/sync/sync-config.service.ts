@@ -85,6 +85,9 @@ export class SyncConfigService {
       ...newSettings,
       [prop]: DEFAULT_GLOBAL_CONFIG.sync[prop],
     });
-    await this._pfapiService.setPrivateCfgForSyncProvider(providerId, privateCfg as any);
+    await this._pfapiService.pf.setPrivateCfgForSyncProvider(
+      providerId,
+      privateCfg as any,
+    );
   }
 }
