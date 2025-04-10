@@ -315,7 +315,13 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
       if (!start.isCertain('hour')) {
         hasPlannedTime = false;
       }
-      const inputDate = parsedDateResult.text;
+      let inputDate = parsedDateResult.text;
+      // Hacky way to strip short syntax for time estimate that was
+      // accidentally included in the date parser
+      // For example: the task is "Task @14/4 90m" and we don't want "90m"
+      if (inputDate.match(/ [0-9]{1,}m/g)) {
+        inputDate += 'm';
+      }
       return {
         plannedAt,
         // Strip out the short syntax for scheduled date and given date
