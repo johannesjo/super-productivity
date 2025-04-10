@@ -230,12 +230,13 @@ export class Pfapi<const MD extends ModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
+    // TODO maybe remove validation check
     if (
       !isSkipValidityCheck &&
       this.cfg?.validate &&
       !this.cfg.validate(allData as AllSyncModels<MD>)
     ) {
-      alert('actually got one!!! ' + this._getAllSyncModelDataRetryCount);
+      alert('Ohhhh!!! actually got one!!! ' + this._getAllSyncModelDataRetryCount);
       if (this._getAllSyncModelDataRetryCount >= 1) {
         alert('THROW');
         this._getAllSyncModelDataRetryCount = 0;
