@@ -29,6 +29,35 @@ const CH_DUE = '@';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE})`;
 
 const customDateParser = casual.clone();
+customDateParser.refiners.push({
+  refine: (context, results) => {
+    results.forEach((result) => {
+      const { refDate, text, start } = result;
+      const regex =
+        /[0-9]{1,2}[\/\-\.][0-9]{1,2}( (1[0-9]|0?[1-9]|2[0-3])(:[0-5][0-9])?([AaPp][Mm])?)? ([0-9]{2})/;
+      const matched = text.match(regex);
+      // Match 14/5 90, 14.5 90, 14-5 90, 14/5 2:30pm 90,
+      // 14/4 23:00 90
+      if (matched) {
+        if (matched[matched.length - 1]) {
+          const twoDigits = matched[matched.length - 1];
+          result.text = text.replace(twoDigits, '');
+        }
+        const current = new Date();
+        let year = current.getFullYear();
+        // If the parsed month is smaller than the current month,
+        // it means the time is for next year. For example, parsed month is March
+        // and it is currently April
+        const impliedMonth = start.get('month');
+        if (impliedMonth && impliedMonth < refDate.getMonth() + 1) {
+          year += 1;
+        }
+        result.start.assign('year', year);
+      }
+    });
+    return results;
+  },
+});
 
 const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
 const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`, 'gi');
