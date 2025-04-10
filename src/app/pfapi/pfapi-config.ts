@@ -36,7 +36,10 @@ import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/tas
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
 import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
-import { isRelatedModelDataValid } from './validate/is-valid-app-data.util';
+import {
+  isRelatedModelDataValid,
+  getLastValidityError,
+} from './validate/is-related-model-data-valid';
 import { dataRepair } from '../core/data-repair/data-repair.util';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
@@ -221,7 +224,13 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
       return {
         success: false,
         data,
-        errors: [{ expected: 'Valid Cross Model Relations', path: '.', value: data }],
+        errors: [
+          {
+            expected: getLastValidityError() || 'Valid Cross Model Relations',
+            path: '.',
+            value: data,
+          },
+        ],
       };
     }
     console.timeEnd('validateAllData');

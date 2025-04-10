@@ -1,4 +1,4 @@
-import { isRelatedModelDataValid } from './is-valid-app-data.util';
+import { isRelatedModelDataValid } from './is-related-model-data-valid';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
