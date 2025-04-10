@@ -96,13 +96,13 @@
     }
 
     <div class="day-end-note">
-      @if (typeof cfg?.dailySummaryNote?.txt === 'string') {
+      @if (typeof dailySummaryNoteTxt() === 'string') {
         <inline-markdown
           [@expand]
           [isShowControls]="true"
           [isShowChecklistToggle]="true"
           (changed)="updateDailySummaryTxt($event)"
-          [model]="cfg?.dailySummaryNote?.txt || ''"
+          [model]="dailySummaryNoteTxt()"
         >
           <button
             [matTooltip]="'Remove daily summary note'"

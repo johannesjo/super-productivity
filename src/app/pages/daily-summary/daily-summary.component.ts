@@ -6,6 +6,7 @@ import {
   Component,
   computed,
   inject,
+  linkedSignal,
   OnDestroy,
   OnInit,
   Signal,
@@ -237,6 +238,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   actionsToExecuteBeforeFinishDay: Action[] = [{ type: 'FINISH_DAY' }];
 
+  cfg = toSignal(this.cfg$);
+  dailySummaryNoteTxt = linkedSignal(() => this.cfg()?.dailySummaryNote?.txt);
+
   private _successAnimationTimeout?: number;
   private _startCelebrationTimeout?: number;
   private _celebrationIntervalId?: number;
@@ -252,9 +256,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       this.configService.cfg?.dailySummaryNote?.lastUpdateDayStr !==
         this._dateService.todayStr()
     ) {
-      this.configService.updateSection('dailySummaryNote', {
-        txt: unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
-      });
+      this.dailySummaryNoteTxt.set(
+        unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
+      );
     }
   }
 
