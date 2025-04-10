@@ -31,7 +31,7 @@
             @if (task.subTasks?.length) {
               <task-list
                 [@expand]
-                [isHideAll]="task._hideSubTasksMode !== ShowSubTasksMode.Show"
+                [isHideAll]="!!task._hideSubTasksMode"
                 [isHideDone]="task._hideSubTasksMode === ShowSubTasksMode.HideDone"
                 [listModelId]="task.id"
                 [parentId]="task.id"
