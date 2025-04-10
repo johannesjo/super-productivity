@@ -221,6 +221,10 @@ const migrateTaskDictionary = (taskDict: Dictionary<TaskCopy>): void => {
       };
     }
 
+    if (task.notes === '') {
+      delete taskDict[taskId].notes;
+    }
+
     if (!task._hideSubTasksMode) {
       const oldValue = (task as any)._showSubTasksMode as number;
       let newValue: HideSubTasksMode | undefined;
