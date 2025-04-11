@@ -103,4 +103,14 @@ export class ModelCtrl<MT extends ModelBase> {
       (this.modelCfg.defaultData as MT)
     );
   }
+
+  /**
+   * Deletes model data from database
+   * @returns Promise resolving after remove operation
+   */
+  async remove(): Promise<unknown> {
+    pfLog(2, `${ModelCtrl.name}.${this.remove.name}()`, this.modelId);
+    this._inMemoryData = null;
+    return this._db.remove(this.modelId);
+  }
 }

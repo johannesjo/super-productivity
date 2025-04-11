@@ -63,7 +63,7 @@ export class MetaSyncService {
 
   async upload(meta: RemoteMeta, revToMatch: string | null = null): Promise<string> {
     const encryptedAndCompressedData =
-      await this._encryptAndCompressHandler.compressAndeEncryptData(
+      await this._encryptAndCompressHandler.compressAndEncryptData(
         this._encryptAndCompressCfg$.value,
         validateMetaBase(meta),
         meta.crossModelVersion,

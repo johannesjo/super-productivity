@@ -172,8 +172,8 @@ describe('SyncService', () => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
   function setupEncryptAndCompressHandler() {
     return {
-      compressAndeEncryptData: jasmine
-        .createSpy('compressAndeEncryptData')
+      compressAndEncryptData: jasmine
+        .createSpy('compressAndEncryptData')
         .and.callFake(({ data }) => Promise.resolve(JSON.stringify(data))),
       decompressAndDecryptData: jasmine
         .createSpy('decompressAndDecryptData')

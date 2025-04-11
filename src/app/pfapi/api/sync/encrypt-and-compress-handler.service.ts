@@ -12,7 +12,7 @@ import {
 import { EncryptAndCompressCfg } from '../pfapi.model';
 
 export class EncryptAndCompressHandlerService {
-  async compressAndeEncryptData<T>(
+  async compressAndEncryptData<T>(
     cfg: EncryptAndCompressCfg,
     data: T,
     modelVersion: number,

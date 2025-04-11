@@ -90,8 +90,8 @@ describe('ModelSyncService', () => {
 
     // Setup encryption handler
     mockEncryptAndCompressHandler = {
-      compressAndeEncryptData: jasmine
-        .createSpy('compressAndeEncryptData')
+      compressAndEncryptData: jasmine
+        .createSpy('compressAndEncryptData')
         .and.callFake((cfg, data) => Promise.resolve(JSON.stringify(data))),
       decompressAndDecryptData: jasmine
         .createSpy('decompressAndDecryptData')
@@ -124,7 +124,7 @@ describe('ModelSyncService', () => {
       expect(
         mockModelControllers.singleModel.modelCfg.transformBeforeUpload,
       ).toHaveBeenCalledWith(modelData);
-      expect(mockEncryptAndCompressHandler.compressAndeEncryptData).toHaveBeenCalledWith(
+      expect(mockEncryptAndCompressHandler.compressAndEncryptData).toHaveBeenCalledWith(
         mockEncryptAndCompressCfg$.value,
         modelData,
         33, // single model version
