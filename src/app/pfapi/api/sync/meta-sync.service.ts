@@ -12,6 +12,9 @@ import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { validateMetaBase } from '../util/validate-meta-base';
 
+/**
+ * Service responsible for synchronizing metadata between local and remote storage
+ */
 export class MetaSyncService {
   constructor(
     private _metaModelCtrl: MetaModelCtrl,
@@ -20,32 +23,52 @@ export class MetaSyncService {
     private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
   ) {}
 
+  /**
+   * Save metadata to local storage
+   * @param localMetaFileContent The metadata to save locally
+   * @returns Promise resolving when save is complete
+   */
   async saveLocal(localMetaFileContent: LocalMeta): Promise<unknown> {
     return this._metaModelCtrl.save(localMetaFileContent);
   }
 
+  /**
+   * Download metadata from remote storage
+   * @param localRev Optional local revision for conditional download
+   * @returns Promise with the remote metadata and its revision
+   * @throws NoRemoteMetaFile if the remote file doesn't exist
+   * @throws LockPresentError if a lock is present from another client
+   * @throws LockFromLocalClientPresentError if a lock is present from this client
+   */
   async download(
     localRev: string | null = null,
   ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
     pfLog(2, `${MetaSyncService.name}.${this.download.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
+
     try {
       const r = await syncProvider.downloadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
         localRev,
       );
+
+      // Check if file is locked
       if (r.dataStr.startsWith(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX)) {
         alert('LOCK PRESENT: ' + r.dataStr);
         const lockClientId = r.dataStr
           .slice(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX.length)
           .replace(/\n/g, '');
 
-        if (lockClientId === (await this._metaModelCtrl.loadClientId())) {
+        // Check if lock is from this client
+        const currentClientId = await this._metaModelCtrl.loadClientId();
+        if (lockClientId === currentClientId) {
           throw new LockFromLocalClientPresentError();
         }
-        throw new LockPresentError();
+        throw new LockPresentError(lockClientId);
       }
+
+      // Process data
       const data =
         await this._encryptAndCompressHandler.decompressAndDecryptData<RemoteMeta>(
           this._encryptAndCompressCfg$.value,
@@ -61,24 +84,27 @@ export class MetaSyncService {
     }
   }
 
+  /**
+   * Upload metadata to remote storage
+   * @param meta The metadata to upload
+   * @param revToMatch Optional revision that the remote file must match for the upload to succeed
+   * @returns Promise resolving to the new revision string
+   */
   async upload(meta: RemoteMeta, revToMatch: string | null = null): Promise<string> {
+    // Validate and prepare data
+    const validatedMeta = validateMetaBase(meta);
     const encryptedAndCompressedData =
       await this._encryptAndCompressHandler.compressAndEncryptData(
         this._encryptAndCompressCfg$.value,
-        validateMetaBase(meta),
+        validatedMeta,
         meta.crossModelVersion,
       );
-    if (encryptedAndCompressedData.length > 200000) {
-      console.log('___________LAAARGE DATA UPLOAD');
-      alert('LAAARGE DATA UPLOAD');
-    }
-    pfLog(2, `${MetaSyncService.name}.${this.upload.name}()`, {
-      meta,
-      // encryptedAndCompressedData,
-    });
+
+    pfLog(2, `${MetaSyncService.name}.${this.upload.name}()`, { meta });
 
     const syncProvider = this._currentSyncProvider$.getOrError();
 
+    // Upload the data
     return (
       await syncProvider.uploadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
@@ -89,9 +115,16 @@ export class MetaSyncService {
     ).rev;
   }
 
+  /**
+   * Get the revision of the remote metadata file
+   * @param localRev Optional local revision for comparison
+   * @returns Promise resolving to the remote revision string
+   * @throws NoRemoteMetaFile if the remote file doesn't exist
+   */
   async getRev(localRev: string | null): Promise<string> {
     pfLog(2, `${MetaSyncService.name}.${this.getRev.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
+
     try {
       const r = await syncProvider.getFileRev(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
@@ -106,10 +139,16 @@ export class MetaSyncService {
     }
   }
 
+  /**
+   * Create a lock on the remote metadata file
+   * @param revToMatch Optional revision that the remote file must match for the lock to succeed
+   * @returns Promise resolving to the new revision string
+   */
   async lock(revToMatch: string | null = null): Promise<string> {
     pfLog(2, `${MetaSyncService.name}.${this.lock.name}()`, { revToMatch });
     const syncProvider = this._currentSyncProvider$.getOrError();
     const clientId = await this._metaModelCtrl.loadClientId();
+
     return (
       await syncProvider.uploadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
