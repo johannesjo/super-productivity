@@ -63,8 +63,8 @@ export type TakeABreakConfig = Readonly<{
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
   takeABreakSnoozeTime: number;
-  // due to formly inconsistency they also can be undefined
-  motivationalImgs: (string | undefined)[];
+  // due to ngx-formly inconsistency they also can be undefined or null even
+  motivationalImgs: (string | undefined | null)[];
 }>;
 
 export type PomodoroConfig = Readonly<{
