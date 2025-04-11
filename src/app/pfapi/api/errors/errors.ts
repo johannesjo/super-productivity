@@ -48,9 +48,9 @@ export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
   override name = UploadRevToMatchMismatchAPIError.name;
 }
 
-export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
-  override name = CannotCreateFolderAPIError.name;
-}
+// export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
+//   override name = CannotCreateFolderAPIError.name;
+// }
 
 export class HttpNotOkAPIError extends AdditionalLogErrorBase {
   override name = HttpNotOkAPIError.name;
@@ -121,10 +121,6 @@ export class LockFromLocalClientPresentError extends Error {
 // -----ENCRYPTION & COMPRESSION----
 export class DecryptNoPasswordError extends AdditionalLogErrorBase {
   override name = DecryptNoPasswordError.name;
-}
-
-export class CannotGetEncryptAndCompressCfg extends AdditionalLogErrorBase {
-  override name = CannotGetEncryptAndCompressCfg.name;
 }
 
 export class CompressError extends AdditionalLogErrorBase {

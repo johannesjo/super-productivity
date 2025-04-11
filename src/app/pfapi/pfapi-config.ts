@@ -236,6 +236,10 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     console.timeEnd('validateAllData');
     return r;
   },
+  onDbError: (err) => {
+    console.error(err);
+    alert('DB ERROR: ' + err);
+  },
   repair: (data: any) => {
     if (!isDataRepairPossible(data)) {
       throw new DataRepairNotPossibleError(data);

@@ -2,25 +2,31 @@ import { DBNames } from '../pfapi.const';
 import { Database } from '../db/database';
 import { pfLog } from '../util/log';
 
-export class TmpBackupService<ALL> {
+export class TmpBackupService<BD extends Record<string, any>> {
   public static readonly DB_KEY = DBNames.TmpBackup;
-  private readonly _db: Database;
-  private _inMemoryBackup?: ALL;
+  private _inMemoryBackup?: BD;
 
-  constructor(private db: Database) {
-    this._db = db;
-  }
+  constructor(private readonly _db: Database) {}
 
-  async load(): Promise<ALL | null> {
-    pfLog(3, `${TmpBackupService.name}.${this.load.name}`);
+  /**
+   * Loads the backup from memory or database.
+   * @returns The backup data or null if not found.
+   */
+  async load(): Promise<BD | null> {
+    pfLog(3, `${TmpBackupService.name}.${this.load.name}()`);
     return (
       this._inMemoryBackup ||
-      ((await this._db.load(TmpBackupService.DB_KEY)) as any) ||
+      ((await this._db.load(TmpBackupService.DB_KEY)) as BD) ||
       null
     );
   }
 
-  async save(backup: ALL): Promise<unknown> {
+  /**
+   * Saves the backup to memory and database.
+   * @param backup The backup data to save.
+   * @returns A promise resolving when the save is complete.
+   */
+  async save(backup: BD): Promise<unknown> {
     pfLog(
       2,
       `${TmpBackupService.name}.${this.save.name}()`,
@@ -31,6 +37,9 @@ export class TmpBackupService<ALL> {
     return this._db.save(TmpBackupService.DB_KEY, backup, true);
   }
 
+  /**
+   * Clears the backup from memory and database.
+   */
   async clear(): Promise<void> {
     pfLog(2, `${TmpBackupService.name}.${this.clear.name}()`);
     this._inMemoryBackup = undefined;

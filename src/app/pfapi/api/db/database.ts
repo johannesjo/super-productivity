@@ -3,14 +3,14 @@ import { pfLog } from '../util/log';
 
 export class Database {
   private _lastParams?: { a: string; key?: string; data?: unknown };
-  private _adapter: DatabaseAdapter;
   private _isLocked: boolean = false;
-  private _onError: (e: Error) => void;
+  private readonly _adapter: DatabaseAdapter;
+  private readonly _onError: (e: Error) => void;
 
-  constructor(cfg: { onError: (e: Error) => void; adapter: DatabaseAdapter }) {
-    this._adapter = cfg.adapter;
-    this._onError = cfg.onError;
-    this._init().then();
+  constructor(_cfg: { onError: (e: Error) => void; adapter: DatabaseAdapter }) {
+    this._adapter = _cfg.adapter;
+    this._onError = _cfg.onError;
+    this._init().catch((e) => this._onError(e));
   }
 
   lock(): void {
@@ -23,39 +23,37 @@ export class Database {
     this._isLocked = false;
   }
 
-  async load(key: string): Promise<unknown> {
+  async load<T = unknown>(key: string): Promise<T | void> {
     this._lastParams = { a: 'load', key };
     try {
-      return await this._adapter.load(key);
+      return await this._adapter.load<T>(key);
     } catch (e) {
-      console.warn('DB Load Error: Last Params,', this._lastParams);
-      return this._errorHandler(e, this.load, [key]);
+      pfLog(1, 'DB Load Error', { lastParams: this._lastParams, error: e });
+      return this._errorHandler(e as Error, this.load, [key]);
     }
   }
 
-  async loadAll(): Promise<unknown> {
+  async loadAll<T extends Record<string, unknown>>(): Promise<T | void> {
     this._lastParams = { a: 'loadAll' };
     try {
-      return await this._adapter.loadAll();
+      return await this._adapter.loadAll<T>();
     } catch (e) {
-      console.warn('DB LoadAll Error: Last Params,', this._lastParams);
-      return this._errorHandler(e, this.loadAll, []);
+      pfLog(1, 'DB LoadAll Error', { lastParams: this._lastParams, error: e });
+      return this._errorHandler(e as Error, this.loadAll, []);
     }
   }
 
-  async save(key: string, data: unknown, isIgnoreDBLock = false): Promise<unknown> {
+  async save<T>(key: string, data: T, isIgnoreDBLock = false): Promise<void> {
     this._lastParams = { a: 'save', key, data };
-    // disable saving during testing
-    // return Promise.resolve();
     if (this._isLocked && !isIgnoreDBLock) {
-      console.warn('Blocking write during lock');
+      pfLog(2, 'Blocking write during lock');
       return;
     }
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      console.warn('DB Save Error: Last Params,', this._lastParams);
-      return this._errorHandler(e, this.save, [key, data]);
+      pfLog(1, 'DB Save Error', { lastParams: this._lastParams, error: e });
+      return this._errorHandler(e as Error, this.save, [key, data]);
     }
   }
 
@@ -69,7 +67,7 @@ export class Database {
       return await this._adapter.remove(key);
     } catch (e) {
       console.warn('DB Remove Error: Last Params,', this._lastParams);
-      return this._errorHandler(e, this.remove, [key]);
+      return this._errorHandler(e as Error, this.remove, [key]);
     }
   }
 
@@ -83,7 +81,7 @@ export class Database {
       return await this._adapter.clearDatabase();
     } catch (e) {
       console.warn('DB Clear Error: Last Params,', this._lastParams);
-      return this._errorHandler(e, this.clearDatabase, []);
+      return this._errorHandler(e as Error, this.clearDatabase, []);
     }
   }
 
@@ -91,32 +89,22 @@ export class Database {
     try {
       await this._adapter.init();
     } catch (e) {
-      console.error('Database initialization failed');
-      console.error('_lastParams', this._lastParams);
       console.error(e);
-      alert('DB INIT Error');
-      throw new Error(e as any);
+      pfLog(0, 'Database initialization failed', {
+        lastParams: this._lastParams,
+        error: e,
+      });
+      throw e instanceof Error ? e : new Error(String(e));
     }
   }
 
   private async _errorHandler(
-    e: Error | unknown,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    fn: Function,
+    e: Error,
+    fn: (...args: any[]) => Promise<any>,
     args: any[],
   ): Promise<void> {
-    pfLog(1, `${Database.name}.${this._errorHandler.name}()`, e, fn, args);
-    this._onError(e as Error);
-
-    // TODO maybe
-    // devError(e);
-    // if (confirm(this._translateService.instant(T.CONFIRM.RELOAD_AFTER_IDB_ERROR))) {
-    //   this._restartApp();
-    // } else {
-    //   await this._adapter.teardown();
-    //   await this._init();
-    //   // retry after init
-    //   return fn(...args);
-    // }
+    pfLog(1, `${Database.name}.${this._errorHandler.name}()`, e, fn.name, args);
+    this._onError(e);
+    throw e; // Rethrow to allow caller to handle
   }
 }

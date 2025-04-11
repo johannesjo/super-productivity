@@ -3,13 +3,13 @@ export interface DatabaseAdapter {
 
   teardown(): Promise<void>;
 
-  load(key: string): Promise<unknown>;
+  load<T>(key: string): Promise<T>;
 
-  save(key: string, data: unknown): Promise<unknown>;
+  save(key: string, data: unknown): Promise<void>;
 
   remove(key: string): Promise<unknown>;
 
-  loadAll(): Promise<unknown>;
+  loadAll<A extends Record<string, unknown>>(): Promise<A>;
 
-  clearDatabase(): Promise<unknown>;
+  clearDatabase(): Promise<void>;
 }

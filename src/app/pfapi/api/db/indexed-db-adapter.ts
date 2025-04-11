@@ -66,37 +66,34 @@ export class IndexedDbAdapter implements DatabaseAdapter {
     this._db?.close();
   }
 
-  async load(key: string): Promise<unknown> {
+  async load<T>(key: string): Promise<T> {
     await this._afterReady();
-    // TODO
     return await this._db.get(this._dbMainName as typeof FAKE, key);
   }
 
-  async save(key: string, data: unknown): Promise<unknown> {
+  async save<T>(key: string, data: T): Promise<void> {
     await this._afterReady();
-    // TODO
     return await this._db.put(this._dbMainName as typeof FAKE, data, key);
   }
 
   async remove(key: string): Promise<unknown> {
     await this._afterReady();
-    // TODO
     return await this._db.delete(this._dbMainName as typeof FAKE, key);
   }
 
-  async loadAll(): Promise<Record<string, unknown>> {
+  async loadAll<A extends Record<string, unknown>>(): Promise<A> {
     const data = await this._db.getAll(this._dbMainName as typeof FAKE);
     const keys = await this._db.getAllKeys(this._dbMainName as typeof FAKE);
 
     return keys.reduce<Record<string, unknown>>((acc, key, idx) => {
       acc[key as string] = data[idx]; // Ensure key is a string
       return acc;
-    }, {});
+    }, {}) as A;
   }
 
-  async clearDatabase(): Promise<unknown> {
+  async clearDatabase(): Promise<void> {
     await this._afterReady();
-    return await this._db.clear(this._dbMainName as typeof FAKE);
+    await this._db.clear(this._dbMainName as typeof FAKE);
   }
 
   private async _afterReady(): Promise<void> {
