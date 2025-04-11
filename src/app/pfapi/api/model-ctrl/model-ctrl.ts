@@ -1,12 +1,15 @@
-import { ModelCfg, ModelBase } from '../pfapi.model';
+import { ModelBase, ModelCfg } from '../pfapi.model';
 import { Database } from '../db/database';
 import { MetaModelCtrl } from './meta-model-ctrl';
 import { pfLog } from '../util/log';
 import { ModelValidationError } from '../errors/errors';
 
-// type ExtractModelCfgType<T extends ModelCfg<unknown>> =
-//   T extends ModelCfg<infer U> ? U : never;
+// type ExtractModelType<T extends ModelCfg<unknown>> = T extends ModelCfg<infer U> ? U : never;
 
+/**
+ * Controller for handling model data operations
+ * @template MT - Model type that extends ModelBase
+ */
 export class ModelCtrl<MT extends ModelBase> {
   public readonly modelId: string;
   public readonly modelCfg: ModelCfg<MT>;
@@ -27,7 +30,12 @@ export class ModelCtrl<MT extends ModelBase> {
     this.modelId = modelId;
   }
 
-  // TODO improve on isUpdateRevAndLastUpdate
+  /**
+   * Saves the model data to database
+   * @param data Model data to save
+   * @param options Save options
+   * @returns Promise resolving after save operation
+   */
   save(
     data: MT,
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
@@ -35,6 +43,7 @@ export class ModelCtrl<MT extends ModelBase> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
+    // Validate data if validator is available
     if (this.modelCfg.validate && !this.modelCfg.validate(data).success) {
       if (this.modelCfg.repair) {
         try {
@@ -48,29 +57,42 @@ export class ModelCtrl<MT extends ModelBase> {
       }
     }
 
-    if (!p?.isUpdateRevAndLastUpdate) {
-      return this._db.save(this.modelId, data, !!p?.isIgnoreDBLock);
+    // Update revision if requested
+    const isIgnoreDBLock = !!p?.isIgnoreDBLock;
+    if (p?.isUpdateRevAndLastUpdate) {
+      this._metaModel.updateRevForModel(this.modelId, this.modelCfg, isIgnoreDBLock);
     }
-    this._metaModel.updateRevForModel(this.modelId, this.modelCfg, !!p?.isIgnoreDBLock);
 
-    // TODO check if making this "more sync" will solve the problem
-    return this._db.save(this.modelId, data, !!p?.isIgnoreDBLock);
+    // Save data to database
+    return this._db.save(this.modelId, data, isIgnoreDBLock);
   }
 
+  /**
+   * Updates part of the model data
+   * @param data Partial data to update
+   * @returns Promise resolving after update operation
+   */
   async partialUpdate(data: Partial<MT>): Promise<unknown> {
     if (typeof data !== 'object' || data === null) {
       throw new Error(`${ModelCtrl.name}:${this.modelId}: data is not an object`);
     }
+
+    // Load current data and merge with partial update
+    const currentData = (await this.load()) || {};
     const newData = {
-      // TODO fix
-      // @ts-ignore
-      ...(await this.load()),
+      ...currentData,
       ...data,
-    };
+    } as MT;
+
     return this.save(newData);
   }
 
   // TODO implement isSkipMigration
+  /**
+   * Loads model data from memory cache or database
+   * @param isSkipMigration Whether to skip migration (if applicable)
+   * @returns Promise resolving to model data
+   */
   async load(isSkipMigration?: boolean): Promise<MT> {
     pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, {
       inMemoryData: this._inMemoryData,
