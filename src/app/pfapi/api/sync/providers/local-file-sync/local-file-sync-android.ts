@@ -1,7 +1,7 @@
 // src/app/pfapi/api/sync/providers/local-file-sync/capacitor-file-adapter.ts
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Directory } from '@capacitor/filesystem';
 import { LocalFileSyncBase } from './local-file-sync-base';
-import { FileAdapter } from './file-adapter.interface';
+import { CapacitorFileAdapter } from './capacitor-file-adapter';
 
 export type LocalFileSyncAndroidPrivateCfg = undefined;
 
@@ -19,47 +19,6 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase<LocalFileSyncAndroid
   }
 
   async getFilePath(targetPath: string): Promise<string> {
-    return `${targetPath}`;
-  }
-}
-
-// -------------------------------------------------
-// -------------------------------------------------
-// -------------------------------------------------
-
-class CapacitorFileAdapter implements FileAdapter {
-  constructor(private readonly directory = Directory.Data) {}
-
-  async readFile(filePath: string): Promise<string> {
-    const res = await Filesystem.readFile({
-      path: filePath,
-      directory: this.directory,
-      encoding: Encoding.UTF8,
-    });
-
-    if (typeof res.data === 'string') {
-      return res.data;
-    } else if (res.data instanceof Blob) {
-      return await res.data.text();
-    } else {
-      throw new Error('Unexpected data type');
-    }
-    // return String(res.data);
-  }
-
-  async writeFile(filePath: string, dataStr: string): Promise<void> {
-    await Filesystem.writeFile({
-      path: filePath,
-      data: dataStr,
-      directory: this.directory,
-      encoding: Encoding.UTF8,
-    });
-  }
-
-  async deleteFile(filePath: string): Promise<void> {
-    await Filesystem.deleteFile({
-      path: filePath,
-      directory: this.directory,
-    });
+    return targetPath;
   }
 }

@@ -1,4 +1,3 @@
-// src/app/pfapi/api/sync/providers/local-file-sync/file-adapter.interface.ts
 export interface FileAdapter {
   readFile(filePath: string): Promise<string>;
   writeFile(filePath: string, dataStr: string): Promise<void>;

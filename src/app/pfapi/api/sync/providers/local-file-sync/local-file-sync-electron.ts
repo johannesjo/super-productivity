@@ -1,9 +1,8 @@
 // src/app/pfapi/api/sync/providers/local-file-sync/electron-file-adapter.ts
 import { LocalFileSyncBase } from './local-file-sync-base';
-import { FileAdapter } from './file-adapter.interface';
 import { IS_ELECTRON } from '../../../../../app.constants';
 import { pfLog } from '../../../util/log';
-import { ElectronAPI } from '../../../../../../../electron/electronAPI';
+import { ElectronFileAdapter } from './electron-file-adapter';
 
 export interface LocalFileSyncElectronPrivateCfg {
   syncFolderPath: string;
@@ -63,10 +62,11 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
     const privateCfg = await this.privateCfg.load();
     const folderPath = privateCfg?.syncFolderPath;
     if (!folderPath) {
-      // throw new Error('No folder path configured for local file sync');
       await this._checkDirAndOpenPickerIfNotExists();
+      const updatedCfg = await this.privateCfg.load();
+      return updatedCfg?.syncFolderPath as string;
     }
-    return folderPath as string;
+    return folderPath;
   }
 
   private async _checkDirExists(dirPath: string): Promise<boolean> {
@@ -83,7 +83,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
   }
 
   async pickDirectory(): Promise<string | void> {
-    pfLog(0, `${LocalFileSyncElectron.name}._pickDirectory - Not in Electron context`);
+    pfLog(2, `${LocalFileSyncElectron.name}.pickDirectory()`);
 
     try {
       const dir = await (window as any).ea.pickDirectory();
@@ -92,58 +92,8 @@ export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectr
       }
       return dir;
     } catch (e) {
-      pfLog(0, `${LocalFileSyncElectron.name}._pickDirectory error`, e);
+      pfLog(0, `${LocalFileSyncElectron.name}.pickDirectory() error`, e);
       throw e;
     }
-  }
-}
-
-// -------------------------------------------------
-// -------------------------------------------------
-// -------------------------------------------------
-
-class ElectronFileAdapter implements FileAdapter {
-  private readonly ea = (window as any).ea as ElectronAPI;
-
-  async readFile(filePath: string): Promise<string> {
-    const result = await this.ea.fileSyncLoad({
-      filePath,
-      localRev: null,
-    });
-    if (result instanceof Error) {
-      throw result;
-    }
-
-    return result.dataStr as string;
-  }
-
-  async writeFile(filePath: string, dataStr: string): Promise<void> {
-    const result = await this.ea.fileSyncSave({
-      localRev: null,
-      filePath,
-      dataStr,
-    });
-    if (result instanceof Error) {
-      throw result;
-    }
-  }
-
-  async deleteFile(filePath: string): Promise<void> {
-    const result = await this.ea.fileSyncRemove({
-      filePath,
-    });
-    if (result instanceof Error) {
-      throw result;
-    }
-  }
-
-  async checkDirExists(dirPath: string): Promise<boolean> {
-    const result = await this.ea.checkDirExists({
-      dirPath,
-    });
-    if (result instanceof Error) {
-      throw result;
-    }
-    return result;
   }
 }
