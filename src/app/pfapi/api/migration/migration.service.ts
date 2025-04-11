@@ -1,6 +1,6 @@
 import { AllSyncModels, ModelCfgs } from '../pfapi.model';
 import { pfLog } from '../util/log';
-import { ImpossibleError } from '../errors/errors';
+import { ImpossibleError, ModelMigrationError } from '../errors/errors';
 import { Pfapi } from '../pfapi';
 
 export class MigrationService<MD extends ModelCfgs> {
@@ -18,17 +18,27 @@ export class MigrationService<MD extends ModelCfgs> {
     );
     if (r.wasMigrated) {
       const { dataAfter, versionAfter } = r;
-      await this._pfapiMain.importAllSycModelData({
-        data: dataAfter,
-        crossModelVersion: versionAfter,
-        isBackupData: true,
-        isAttemptRepair: true,
-      });
-      await this._pfapiMain.metaModel.save({
-        ...meta,
-        crossModelVersion: versionAfter,
-        lastUpdate: Date.now(),
-      });
+      try {
+        await this._pfapiMain.importAllSycModelData({
+          data: dataAfter,
+          crossModelVersion: versionAfter,
+          isBackupData: true,
+          isAttemptRepair: true,
+        });
+        await this._pfapiMain.metaModel.save({
+          ...meta,
+          crossModelVersion: versionAfter,
+          lastUpdate: Date.now(),
+        });
+        pfLog(2, `Migration successful: ${meta.crossModelVersion} → ${versionAfter}`);
+      } catch (error) {
+        pfLog(1, `Migration failed`, {
+          error,
+          fromVersion: meta.crossModelVersion,
+          toVersion: versionAfter,
+        });
+        throw new ModelMigrationError(error);
+      }
     }
   }
 
@@ -91,9 +101,20 @@ export class MigrationService<MD extends ModelCfgs> {
       };
     }
 
-    migrationsToRun.forEach((migrateFn) => {
-      dataIn = migrateFn(dataIn);
-    });
+    try {
+      let migratedData = { ...dataIn };
+      migrationsToRun.forEach((migrateFn) => {
+        migratedData = migrateFn(migratedData);
+      });
+      return {
+        dataAfter: migratedData,
+        versionAfter: codeModelVersion,
+        wasMigrated: true,
+      };
+    } catch (error) {
+      pfLog(0, `Migration functions failed to execute`, { error });
+      throw new ModelMigrationError('Error running migration functions', error);
+    }
 
     // TODO single model migration
     // const modelIds = Object.keys(this.m);
@@ -101,7 +122,5 @@ export class MigrationService<MD extends ModelCfgs> {
     //   const modelCtrl = this.m[modelId];
     //
     // }
-
-    return { dataAfter: dataIn, versionAfter: codeModelVersion, wasMigrated: true };
   }
 }

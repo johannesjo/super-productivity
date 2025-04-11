@@ -160,6 +160,10 @@ export class ModelValidationError extends AdditionalLogErrorBase {
   override name = ModelValidationError.name;
 }
 
+export class ModelMigrationError extends AdditionalLogErrorBase {
+  override name = ModelMigrationError.name;
+}
+
 export class ModelRepairError extends AdditionalLogErrorBase {
   override name = ModelRepairError.name;
 }
