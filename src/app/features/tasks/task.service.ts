@@ -94,8 +94,6 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
-import { modelGetById } from '../../pfapi/pfapi-helper';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
@@ -105,7 +103,6 @@ import { TaskArchiveService } from '../time-tracking/task-archive.service';
 })
 export class TaskService {
   private readonly _store = inject<Store<any>>(Store);
-  private readonly _pfapiService = inject(PfapiService);
   private readonly _tagService = inject(TagService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _imexMetaService = inject(ImexViewService);
@@ -912,16 +909,13 @@ export class TaskService {
 
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
-      return (
-        (await modelGetById(id, this._pfapiService.m.task)) ||
-        this._taskArchiveService.getById(id)
-      );
+      return this.getByIdOnce$(id).toPromise() || this._taskArchiveService.getById(id);
     }
 
     if (isArchive) {
       return await this._taskArchiveService.getById(id);
     } else {
-      return await modelGetById(id, this._pfapiService.m.task);
+      return await this.getByIdOnce$(id).toPromise();
     }
   }
 
