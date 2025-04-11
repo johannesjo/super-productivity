@@ -73,26 +73,31 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         isOverwrite: isForceOverwrite,
       });
     } catch (e) {
-      // TODO test
-      console.error(e);
+      pfLog(0, `${Webdav.name}.uploadFile() error during upload`, e);
       if (e instanceof RemoteFileNotFoundAPIError) {
         pfLog(2, `${Webdav.name}.uploadFile() creating parent folders and retrying`);
         alert(`Creating missing parent folders for ${filePath}`);
-        // Create necessary parent folders
-        await this._ensureFolderExists(targetPath, cfg);
+        try {
+          // Create necessary parent folders
+          await this._ensureFolderExists(targetPath, cfg);
 
-        // Retry upload after folder creation
-        await this._api.upload({
-          path: filePath,
-          data: dataStr,
-          isOverwrite: isForceOverwrite,
-        });
+          // Retry upload after folder creation
+          await this._api.upload({
+            path: filePath,
+            data: dataStr,
+            isOverwrite: isForceOverwrite,
+          });
+        } catch (retryError) {
+          pfLog(0, `${Webdav.name}.uploadFile() retry failed`, retryError);
+          throw retryError;
+        }
       } else {
         throw e;
       }
     }
     const { etag } = await this._api.getFileMeta(filePath, null);
     if (!etag) {
+      pfLog(0, `${Webdav.name}.uploadFile() no etag returned after upload`);
       throw new NoRevAPIError();
     }
     return { rev: etag };
@@ -165,7 +170,10 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         // Ignore 405 Method Not Allowed (folder likely exists)
         // Ignore 409 Conflict (folder already exists)
         if (e?.status !== 405 && e?.status !== 409) {
-          pfLog(0, `${Webdav.name}.ensureFolderExists() error creating folder`, e);
+          pfLog(0, `${Webdav.name}.ensureFolderExists() error creating folder`, {
+            folderPath: currentPath,
+            error: e,
+          });
           throw e;
         }
       }

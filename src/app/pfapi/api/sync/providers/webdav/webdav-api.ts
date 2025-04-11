@@ -49,6 +49,7 @@ export class WebdavApi {
         ifNoneMatch: isOverwrite ? null : '*',
       });
     } catch (e: any) {
+      pfLog(0, `${WebdavApi.name}.upload() error`, { path, error: e });
       if (e?.status === 412) {
         throw new FileExistsAPIError();
       }
@@ -150,14 +151,23 @@ export class WebdavApi {
         path: folderPath,
       });
     } catch (e: any) {
+      pfLog(0, `${WebdavApi.name}.createFolder() error`, { folderPath, error: e });
       // If MKCOL is not supported, try alternative approach with PUT
       if (e?.message?.includes('Method not allowed') || e?.status === 405) {
         pfLog(2, `${Webdav.name}.createFolder() MKCOL not supported, trying PUT`);
-        await this._makeRequest({
-          method: 'PUT',
-          path: `${folderPath}/.folder`,
-          body: '',
-        });
+        try {
+          await this._makeRequest({
+            method: 'PUT',
+            path: `${folderPath}/.folder`,
+            body: '',
+          });
+        } catch (putError) {
+          pfLog(0, `${WebdavApi.name}.createFolder() PUT fallback failed`, {
+            folderPath,
+            error: putError,
+          });
+          throw putError;
+        }
       } else {
         throw e;
       }
@@ -191,10 +201,21 @@ export class WebdavApi {
       });
 
       if (!response.ok) {
+        pfLog(0, `${WebdavApi.name}._makeRequest() HTTP error`, {
+          method,
+          path,
+          status: response.status,
+          statusText: response.statusText,
+        });
         throw new HttpNotOkAPIError(response);
       }
       return response;
     } catch (e) {
+      pfLog(0, `${WebdavApi.name}._makeRequest() network error`, {
+        method,
+        path,
+        error: e,
+      });
       this._checkCommonErrors(e, path);
       throw e;
     }
