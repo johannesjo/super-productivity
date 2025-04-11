@@ -26,24 +26,27 @@ type PfapiAllModelCfg = {
   singleModel1: ModelCfg<FakeModel>;
   singleModel2: ModelCfg<FakeModel>;
 };
+
 describe('SyncService', () => {
-  // const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
-  //   mainModel1: {
-  //     modelVersion: 1,
-  //     isMainFileModel: true,
-  //   },
-  //   mainModel2: {
-  //     modelVersion: 1,
-  //     isMainFileModel: true,
-  //   },
-  //
-  //   singleModel1: {
-  //     modelVersion: 1,
-  //   },
-  //   singleModel2: {
-  //     modelVersion: 1,
-  //   },
-  // } as const;
+  // Helper functions for common test setups
+  const createDefaultLocalMeta = (overrides = {}): LocalMeta => ({
+    revMap: {},
+    lastUpdate: 1000,
+    lastSyncedUpdate: 1000,
+    metaRev: 'meta-rev-1',
+    modelVersions: {},
+    crossModelVersion: 1,
+    ...overrides,
+  });
+
+  const createDefaultRemoteMeta = (overrides = {}): RemoteMeta => ({
+    revMap: {},
+    lastUpdate: 1000,
+    modelVersions: {},
+    crossModelVersion: 1,
+    mainModelData: {},
+    ...overrides,
+  });
 
   let service: SyncService<PfapiAllModelCfg>;
   let mockModelControllers: any;
@@ -59,167 +62,27 @@ describe('SyncService', () => {
 
   beforeEach(() => {
     // Setup mock model controllers
-    mockModelControllers = {
-      mainModel1: {
-        modelCfg: {
-          isMainFileModel: true,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
-        },
-        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-      },
-      mainModel2: {
-        modelCfg: {
-          isMainFileModel: true,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
-        },
-        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-      },
-      singleModel1: {
-        modelCfg: {
-          isMainFileModel: false,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
-        },
-        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-      },
-      singleModel2: {
-        modelCfg: {
-          isMainFileModel: false,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
-        },
-        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-      },
-    };
+    mockModelControllers = setupModelControllers();
 
     // Setup mock PFAPI
-    mockPfapi = {
-      getAllSyncModelData: jasmine.createSpy('getAllSyncModelData').and.returnValue(
-        Promise.resolve({
-          mainModel1: { id: 'mainModel1-data-id' },
-          mainModel2: { id: 'mainModel2-data-id' },
-          singleModel1: { id: 'singleModel1-data-id' },
-          singleModel2: { id: 'singleModel2-data-id' },
-        } satisfies AllSyncModels<PfapiAllModelCfg>),
-      ),
-      cfg: {
-        crossModelVersion: 1,
-      },
-    } as unknown as Pfapi<PfapiAllModelCfg>;
+    mockPfapi = setupMockPfapi();
 
     // Setup sync provider
-    mockSyncProvider = {
-      id: SyncProviderId.Dropbox,
-      isReady: jasmine.createSpy('isReady').and.returnValue(Promise.resolve(true)),
-      isLimitedToSingleFileSync: false,
-      maxConcurrentRequests: 3,
-    };
+    mockSyncProvider = setupMockSyncProvider();
     mockSyncProvider$ = new MiniObservable(mockSyncProvider);
 
     // Setup encrypt/compress config
-    mockEncryptAndCompressCfg$ = new MiniObservable({
-      isEncrypt: false,
-      isCompress: true,
-      encryptKey: 'test-key',
-    });
+    mockEncryptAndCompressCfg$ = setupEncryptCompressCfg();
 
-    // Setup meta model controller
-    mockMetaModelCtrl = jasmine.createSpyObj<MetaModelCtrl>('MetaModelCtrl', [
-      'load',
-      'save',
-    ]);
+    // Setup mock services
+    mockMetaModelCtrl = setupMetaModelCtrl();
     mockMigrationService = jasmine.createSpyObj<MigrationService<any>>(
       'MigrationService',
       ['checkAndMigrateLocalDB', 'migrate'],
     );
-    mockMetaModelCtrl.load.and.returnValue(
-      Promise.resolve({
-        revMap: {},
-        lastUpdate: 1000,
-        lastSyncedUpdate: 1000,
-        metaRev: 'meta-rev-1',
-        modelVersions: {},
-        crossModelVersion: 1,
-      } satisfies LocalMeta),
-    );
-
-    // Setup encryption handler
-    mockEncryptAndCompressHandler = {
-      compressAndeEncryptData: jasmine
-        .createSpy('compressAndeEncryptData')
-        .and.callFake(({ data }) => Promise.resolve(JSON.stringify(data))),
-      decompressAndDecryptData: jasmine
-        .createSpy('decompressAndDecryptData')
-        .and.callFake(({ dataStr }) =>
-          Promise.resolve({ data: JSON.parse(dataStr), version: 1 }),
-        ),
-      compressAndEncrypt: jasmine.createSpy('compressAndEncrypt'),
-      decompressAndDecrypt: jasmine.createSpy('decompressAndDecrypt') as any,
-    };
-
-    // Setup MetaSyncService mock
-    mockMetaSyncService = jasmine.createSpyObj('MetaSyncService', [
-      'download',
-      'upload',
-      'getRev',
-      'lock',
-      'saveLocal',
-    ]);
-    mockMetaSyncService.getRev.and.returnValue(Promise.resolve('remote-meta-rev-1'));
-    mockMetaSyncService.download.and.returnValue(
-      Promise.resolve({
-        remoteMeta: {
-          revMap: {},
-          lastUpdate: 1000,
-          modelVersions: {},
-          crossModelVersion: 1,
-          mainModelData: { mainModel1: { id: 'main-model1-data-id' } },
-        },
-        remoteMetaRev: 'remote-meta-rev-1',
-      } satisfies { remoteMeta: RemoteMeta; remoteMetaRev: string }),
-    );
-
-    mockMetaSyncService.upload.and.returnValue(
-      Promise.resolve('new-meta-rev-after-upload'),
-    );
-
-    // Setup ModelSyncService mock
-    mockModelSyncService = jasmine.createSpyObj('ModelSyncService', [
-      'upload',
-      'download',
-      'remove',
-      'getModelIdsToUpdateFromRevMaps',
-      'updateLocalFromRemoteMetaFile',
-      'updateLocalUpdated',
-      'getMainFileModelDataForUpload',
-    ]);
-    mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
-      toUpdate: [],
-      toDelete: [],
-    });
-    mockModelSyncService.getMainFileModelDataForUpload.and.returnValue(
-      Promise.resolve({
-        mainModel1: { id: 'mainModel1-data-id' },
-      }),
-    );
+    mockEncryptAndCompressHandler = setupEncryptAndCompressHandler();
+    mockMetaSyncService = setupMetaSyncService();
+    mockModelSyncService = setupModelSyncService();
 
     // Create service with spies for internal services
     service = new SyncService(
@@ -237,6 +100,136 @@ describe('SyncService', () => {
     service['_modelSyncService'] = mockModelSyncService;
   });
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupModelControllers() {
+    return {
+      mainModel1: createModelController(true),
+      mainModel2: createModelController(true),
+      singleModel1: createModelController(false),
+      singleModel2: createModelController(false),
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function createModelController(isMainFileModel: boolean) {
+    return {
+      modelCfg: {
+        isMainFileModel,
+        transformBeforeUpload: jasmine
+          .createSpy('transformBeforeUpload')
+          .and.callFake((data) => data),
+        transformBeforeDownload: jasmine
+          .createSpy('transformBeforeDownload')
+          .and.callFake((data) => data),
+      },
+      save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupMockPfapi() {
+    return {
+      getAllSyncModelData: jasmine.createSpy('getAllSyncModelData').and.returnValue(
+        Promise.resolve({
+          mainModel1: { id: 'mainModel1-data-id' },
+          mainModel2: { id: 'mainModel2-data-id' },
+          singleModel1: { id: 'singleModel1-data-id' },
+          singleModel2: { id: 'singleModel2-data-id' },
+        } satisfies AllSyncModels<PfapiAllModelCfg>),
+      ),
+      cfg: {
+        crossModelVersion: 1,
+      },
+    } as unknown as Pfapi<PfapiAllModelCfg>;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupMockSyncProvider() {
+    return {
+      id: SyncProviderId.Dropbox,
+      isReady: jasmine.createSpy('isReady').and.returnValue(Promise.resolve(true)),
+      isLimitedToSingleFileSync: false,
+      maxConcurrentRequests: 3,
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupEncryptCompressCfg() {
+    return new MiniObservable({
+      isEncrypt: false,
+      isCompress: true,
+      encryptKey: 'test-key',
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupMetaModelCtrl() {
+    const ctrl = jasmine.createSpyObj<MetaModelCtrl>('MetaModelCtrl', ['load', 'save']);
+    ctrl.load.and.returnValue(Promise.resolve(createDefaultLocalMeta()));
+    return ctrl;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupEncryptAndCompressHandler() {
+    return {
+      compressAndeEncryptData: jasmine
+        .createSpy('compressAndeEncryptData')
+        .and.callFake(({ data }) => Promise.resolve(JSON.stringify(data))),
+      decompressAndDecryptData: jasmine
+        .createSpy('decompressAndDecryptData')
+        .and.callFake(({ dataStr }) =>
+          Promise.resolve({ data: JSON.parse(dataStr), version: 1 }),
+        ),
+      compressAndEncrypt: jasmine.createSpy('compressAndEncrypt'),
+      decompressAndDecrypt: jasmine.createSpy('decompressAndDecrypt') as any,
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupMetaSyncService() {
+    const service2 = jasmine.createSpyObj('MetaSyncService', [
+      'download',
+      'upload',
+      'getRev',
+      'lock',
+      'saveLocal',
+    ]);
+    service2.getRev.and.returnValue(Promise.resolve('remote-meta-rev-1'));
+    service2.download.and.returnValue(
+      Promise.resolve({
+        remoteMeta: createDefaultRemoteMeta({
+          mainModelData: { mainModel1: { id: 'main-model1-data-id' } },
+        }),
+        remoteMetaRev: 'remote-meta-rev-1',
+      }),
+    );
+    service2.upload.and.returnValue(Promise.resolve('new-meta-rev-after-upload'));
+    return service2;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
+  function setupModelSyncService() {
+    const service3 = jasmine.createSpyObj('ModelSyncService', [
+      'upload',
+      'download',
+      'remove',
+      'getModelIdsToUpdateFromRevMaps',
+      'updateLocalFromRemoteMetaFile',
+      'updateLocalUpdated',
+      'getMainFileModelDataForUpload',
+    ]);
+    service3.getModelIdsToUpdateFromRevMaps.and.returnValue({
+      toUpdate: [],
+      toDelete: [],
+    });
+    service3.getMainFileModelDataForUpload.and.returnValue(
+      Promise.resolve({
+        mainModel1: { id: 'mainModel1-data-id' },
+      }),
+    );
+    return service3;
+  }
+
   describe('initialization', () => {
     it('should initialize with the correct dependencies', () => {
       expect(service).toBeTruthy();
@@ -250,14 +243,11 @@ describe('SyncService', () => {
     it('should detect already in sync state', async () => {
       // Setup for in-sync state
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 1000,
-          lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev-123',
-          revMap: {},
-          modelVersions: {},
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            metaRev: 'meta-rev-123',
+          }),
+        ),
       );
       mockMetaSyncService.getRev.and.returnValue(Promise.resolve('meta-rev-123'));
 
@@ -268,27 +258,21 @@ describe('SyncService', () => {
     });
 
     it('should return inSync if revs match special case', async () => {
-      // rev for some unlikely reason different to local (maybe due to the other client is not just ready with its sync)
+      // Rev different but timestamps match
       mockMetaSyncService.getRev.and.returnValue(Promise.resolve('meta-rev-1X'));
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 2000,
-          lastSyncedUpdate: 2000,
-          metaRev: 'meta-rev-1',
-          revMap: {},
-          modelVersions: {},
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            lastUpdate: 2000,
+            lastSyncedUpdate: 2000,
+          }),
+        ),
       );
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
-            revMap: {},
+          remoteMeta: createDefaultRemoteMeta({
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
+          }),
           remoteMetaRev: 'meta-rev-1',
         }),
       );
@@ -302,24 +286,17 @@ describe('SyncService', () => {
     it('should update local data when remote is newer', async () => {
       // Setup for remote newer
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 1000,
-          lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev-local-1',
-          revMap: {},
-          modelVersions: {},
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            metaRev: 'meta-rev-local-1',
+          }),
+        ),
       );
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
-            revMap: {},
+          remoteMeta: createDefaultRemoteMeta({
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
+          }),
           remoteMetaRev: 'meta-rev-remote-2',
         }),
       );
@@ -334,24 +311,16 @@ describe('SyncService', () => {
     it('should update remote when local is newer even if rev is equal', async () => {
       // Setup for local newer
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 2000,
-          lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev-1',
-          revMap: {},
-          modelVersions: {},
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            lastUpdate: 2000,
+            lastSyncedUpdate: 1000,
+          }),
+        ),
       );
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
-            revMap: {},
-            lastUpdate: 1000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
+          remoteMeta: createDefaultRemoteMeta(),
           remoteMetaRev: 'meta-rev-1',
         }),
       );
@@ -365,24 +334,18 @@ describe('SyncService', () => {
     it('should handle conflicts', async () => {
       // Setup for conflict
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 2000,
-          lastSyncedUpdate: 1000,
-          revMap: {},
-          metaRev: 'meta-rev-1',
-          modelVersions: {},
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            lastUpdate: 2000,
+            lastSyncedUpdate: 1000,
+          }),
+        ),
       );
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
-            revMap: {},
+          remoteMeta: createDefaultRemoteMeta({
             lastUpdate: 1500,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
+          }),
           remoteMetaRev: 'meta-rev-2',
         }),
       );
@@ -404,17 +367,16 @@ describe('SyncService', () => {
     it('should upload all data with force flag', async () => {
       spyOn(Date, 'now').and.returnValue(12345);
       await service.uploadAll(true);
-      expect(mockMetaModelCtrl.save).toHaveBeenCalled();
-      expect(mockMetaSyncService.upload).toHaveBeenCalled();
+
       expect(mockMetaModelCtrl.save).toHaveBeenCalledWith({
         revMap: {},
-        // lastUpdate: jasmine.any(Number),
         lastUpdate: 12345,
         lastSyncedUpdate: 1000,
         metaRev: 'meta-rev-1',
         modelVersions: {},
         crossModelVersion: 1,
       });
+
       expect(mockMetaSyncService.upload).toHaveBeenCalledWith(
         {
           revMap: {
@@ -434,21 +396,12 @@ describe('SyncService', () => {
       mockSyncProvider.isLimitedToSingleFileSync = true;
 
       await service.uploadToRemote(
-        {
-          revMap: {},
-          lastUpdate: 1000,
-          modelVersions: {},
-          crossModelVersion: 1,
-          mainModelData: {},
-        },
-        {
+        createDefaultRemoteMeta(),
+        createDefaultLocalMeta({
           revMap: { tasks: 'rev1' },
           lastUpdate: 2000,
-          modelVersions: {},
-          crossModelVersion: 1,
           lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev',
-        },
+        }),
         'meta-rev',
       );
 
@@ -466,21 +419,11 @@ describe('SyncService', () => {
       );
 
       await service._uploadToRemoteMULTI(
-        {
-          revMap: {},
-          lastUpdate: 1000,
-          modelVersions: {},
-          crossModelVersion: 1,
-          mainModelData: {},
-        },
-        {
-          revMap: {},
+        createDefaultRemoteMeta(),
+        createDefaultLocalMeta({
           lastUpdate: 2000,
-          modelVersions: {},
-          crossModelVersion: 1,
           lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev',
-        },
+        }),
         'meta-rev',
       );
 
@@ -508,32 +451,24 @@ describe('SyncService', () => {
 
     it('should download only data in meta file for single file sync', async () => {
       mockSyncProvider.isLimitedToSingleFileSync = true;
+
       await service.downloadToLocal(
-        {
-          revMap: {},
+        createDefaultRemoteMeta({
           lastUpdate: 2000,
-          modelVersions: {},
-          crossModelVersion: 1,
-          mainModelData: {},
-        },
-        {
-          revMap: {},
-          lastUpdate: 1000,
-          modelVersions: {},
-          crossModelVersion: 1,
+        }),
+        createDefaultLocalMeta({
           lastSyncedUpdate: 1000,
           metaRev: 'local-meta-rev',
-        },
+        }),
         'expected-new-meta-rev',
       );
 
-      expect(mockModelSyncService.updateLocalFromRemoteMetaFile).toHaveBeenCalledWith({
-        revMap: {},
-        lastUpdate: 2000,
-        modelVersions: {},
-        crossModelVersion: 1,
-        mainModelData: {},
-      });
+      expect(mockModelSyncService.updateLocalFromRemoteMetaFile).toHaveBeenCalledWith(
+        createDefaultRemoteMeta({
+          lastUpdate: 2000,
+        }),
+      );
+
       expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith({
         lastUpdate: 2000,
         crossModelVersion: 1,
@@ -557,21 +492,13 @@ describe('SyncService', () => {
       );
 
       await service._downloadToLocalMULTI(
-        {
+        createDefaultRemoteMeta({
           revMap: { tasks: 'tasks-rev' },
           lastUpdate: 2000,
-          modelVersions: {},
-          crossModelVersion: 1,
-          mainModelData: {},
-        },
-        {
-          revMap: {},
-          lastUpdate: 1000,
-          modelVersions: {},
-          crossModelVersion: 1,
+        }),
+        createDefaultLocalMeta({
           lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev',
-        },
+        }),
         'new-meta-rev',
       );
 
@@ -581,8 +508,6 @@ describe('SyncService', () => {
     });
   });
 
-  // -----------------------------------------------------
-  // -----------------------------------------------------
   describe('error handling and conflicts', () => {
     it('should handle NoRemoteMetaFile errors by setting up a new remote file', async () => {
       const noRemoteMetaFileError = new NoRemoteMetaFile();
@@ -612,38 +537,31 @@ describe('SyncService', () => {
 
     it('should reject with ModelVersionToImportNewerThanLocalError when remote has newer version', async () => {
       (service as any).IS_DO_CROSS_MODEL_MIGRATIONS = true;
-      // Setup for version mismatch
+
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 1000,
-          lastSyncedUpdate: 1000,
-          metaRev: 'meta-rev-1',
-          revMap: {},
-          modelVersions: {},
-          crossModelVersion: 1, // Local version
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            crossModelVersion: 1, // Local version
+          }),
+        ),
       );
+
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
-            revMap: {},
+          remoteMeta: createDefaultRemoteMeta({
             lastUpdate: 2000,
-            modelVersions: {},
             crossModelVersion: 2, // Remote version is newer
-            mainModelData: {},
-          },
+          }),
           remoteMetaRev: 'meta-rev-2',
         }),
       );
 
-      // Execute & Verify
       await expectAsync(service.sync()).toBeRejectedWithError(
         ModelVersionToImportNewerThanLocalError,
       );
     });
 
     it('should handle RevMismatchForModelError during download', async () => {
-      // Setup for a rev mismatch error
       mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
         toUpdate: ['singleModel1'],
         toDelete: [],
@@ -652,156 +570,98 @@ describe('SyncService', () => {
         new RevMismatchForModelError('singleModel1'),
       );
 
-      // Execute & Verify
       await expectAsync(
         service._downloadToLocalMULTI(
-          {
+          createDefaultRemoteMeta({
             revMap: { singleModel1: 'rev-wrong' },
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
-          {
-            revMap: {},
-            lastUpdate: 1000,
-            modelVersions: {},
-            crossModelVersion: 1,
+          }),
+          createDefaultLocalMeta({
             lastSyncedUpdate: 1000,
-            metaRev: 'meta-rev',
-          },
+          }),
           'meta-rev-2',
         ),
       ).toBeRejectedWithError();
     });
 
     it('should handle connection errors during sync', async () => {
-      // Setup for network error
       const connectionError = new Error('Network error');
       mockMetaSyncService.getRev.and.throwError(connectionError);
 
-      // Execute & Verify
       await expectAsync(service.sync()).toBeRejected();
     });
 
     it('should handle errors when sync provider is not set', async () => {
-      // Setup missing sync provider
       mockSyncProvider$.next(null);
 
-      // Execute & Verify
       await expectAsync(service.sync()).toBeRejected();
     });
 
     it('should handle errors when sync provider is not ready', async () => {
-      // Setup provider not ready
       mockSyncProvider.isReady.and.returnValue(Promise.resolve(false));
 
-      // Execute & Verify
-      await expectAsync(service.sync()).toBeResolvedTo({
-        status: SyncStatus.NotConfigured,
-      });
+      const result = await service.sync();
+      expect(result.status).toBe(SyncStatus.NotConfigured);
     });
 
     it('should reject when trying to upload with no provider', async () => {
-      // Setup
       mockSyncProvider$.next(null);
 
-      // Execute & Verify
       await expectAsync(service.uploadAll()).toBeRejectedWithError();
     });
+  });
 
-    it('should return conflict for conflict', async () => {
-      // Setup conflict
+  describe('conflict handling', () => {
+    beforeEach(() => {
       mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 2000,
-          lastSyncedUpdate: 1000,
-          revMap: { singleModel1: 'local-rev' },
-          metaRev: 'meta-rev-1',
-          modelVersions: { singleModel1: 1 },
-          crossModelVersion: 1,
-        }),
+        Promise.resolve(
+          createDefaultLocalMeta({
+            lastUpdate: 2000,
+            lastSyncedUpdate: 1000,
+            revMap: { singleModel1: 'local-rev' },
+            modelVersions: { singleModel1: 1 },
+          }),
+        ),
       );
+
       mockMetaSyncService.download.and.returnValue(
         Promise.resolve({
-          remoteMeta: {
+          remoteMeta: createDefaultRemoteMeta({
             revMap: { singleModel1: 'remote-rev' },
             lastUpdate: 1500,
             modelVersions: { singleModel1: 1 },
-            crossModelVersion: 1,
             mainModelData: { mainModel1: { id: 'remote-data' } },
-          },
+          }),
           remoteMetaRev: 'meta-rev-2',
         }),
       );
-
-      // First detect conflict
-      const syncResult = await service.sync();
-      expect(syncResult.status).toBe(SyncStatus.Conflict);
-
-      // Then resolve with local
-      spyOn(service, 'uploadToRemote').and.returnValue(Promise.resolve());
     });
 
-    it('should return conflict for conflict 2', async () => {
-      // Setup conflict
-      mockMetaModelCtrl.load.and.returnValue(
-        Promise.resolve({
-          lastUpdate: 2000,
-          lastSyncedUpdate: 1000,
-          revMap: { singleModel1: 'local-rev' },
-          metaRev: 'meta-rev-1',
-          modelVersions: { singleModel1: 1 },
-          crossModelVersion: 1,
-        }),
-      );
-      mockMetaSyncService.download.and.returnValue(
-        Promise.resolve({
-          remoteMeta: {
-            revMap: { singleModel1: 'remote-rev' },
-            lastUpdate: 1500,
-            modelVersions: { singleModel1: 1 },
-            crossModelVersion: 1,
-            mainModelData: { mainModel1: { id: 'remote-data' } },
-          },
-          remoteMetaRev: 'meta-rev-2',
-        }),
-      );
-
-      // First detect conflict
+    it('should detect conflicts correctly', async () => {
       const syncResult = await service.sync();
+
       expect(syncResult.status).toBe(SyncStatus.Conflict);
+      expect(syncResult.conflictData).toBeDefined();
+      // expect(syncResult.conflictData?.localLastUpdate).toBe(2000);
+      // expect(syncResult.conflictData?.remoteLastUpdate).toBe(1500);
     });
   });
 
   describe('upload error handling', () => {
     it('should handle errors during upload by rolling back', async () => {
-      // Setup for error during upload
       mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
         toUpdate: ['singleModel1'],
         toDelete: [],
       });
-      const uploadError = new Error('Upload failed');
-      mockModelSyncService.upload.and.throwError(uploadError);
+      mockModelSyncService.upload.and.throwError(new Error('Upload failed'));
 
-      // Execute & Verify
       await expectAsync(
         service._uploadToRemoteMULTI(
-          {
-            revMap: {},
-            lastUpdate: 1000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
-          {
-            revMap: {},
+          createDefaultRemoteMeta(),
+          createDefaultLocalMeta({
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
             lastSyncedUpdate: 1000,
-            metaRev: 'meta-rev',
-          },
+          }),
           'meta-rev',
         ),
       ).toBeRejected();
@@ -811,46 +671,32 @@ describe('SyncService', () => {
     });
 
     it('should handle meta file upload failures', async () => {
-      // Setup error on meta file upload
       mockMetaSyncService.upload.and.throwError(new Error('Meta upload failed'));
-
-      // Execute & Verify
       await expectAsync(service.uploadAll()).toBeRejected();
     });
   });
 
   describe('download error handling', () => {
     it('should handle errors during download of individual models', async () => {
-      // Setup for download error
       mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
         toUpdate: ['singleModel1'],
         toDelete: [],
       });
       mockModelSyncService.download.and.throwError(new Error('Download failed'));
 
-      // Execute & Verify
       await expectAsync(
         service._downloadToLocalMULTI(
-          {
+          createDefaultRemoteMeta({
             revMap: { singleModel1: 'rev1' },
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
-          {
-            revMap: {},
-            lastUpdate: 1000,
-            modelVersions: {},
-            crossModelVersion: 1,
+          }),
+          createDefaultLocalMeta({
             lastSyncedUpdate: 1000,
-            metaRev: 'meta-rev',
-          },
+          }),
           'meta-rev-2',
         ),
-      ).toBeRejected();
+      ).toBeRejectedWithError();
 
-      // Verify local state wasn't updated
       expect(mockMetaSyncService.saveLocal).not.toHaveBeenCalled();
     });
 
@@ -862,21 +708,12 @@ describe('SyncService', () => {
 
       await expectAsync(
         service.downloadToLocal(
-          {
-            revMap: {},
+          createDefaultRemoteMeta({
             lastUpdate: 2000,
-            modelVersions: {},
-            crossModelVersion: 1,
-            mainModelData: {},
-          },
-          {
-            revMap: {},
-            lastUpdate: 1000,
-            modelVersions: {},
-            crossModelVersion: 1,
+          }),
+          createDefaultLocalMeta({
             lastSyncedUpdate: 1000,
-            metaRev: 'meta-rev',
-          },
+          }),
           'meta-rev-2',
         ),
       ).toBeRejected();
