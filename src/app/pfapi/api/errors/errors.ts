@@ -4,7 +4,7 @@ class AdditionalLogErrorBase<T = unknown> extends Error {
   constructor(...additional: any) {
     super(...additional);
     if (additional.length > 0) {
-      // pfLog(1, this.name, ...additional);
+      // pfLog(0, this.name, ...additional);
       console.log(this.name, ...additional);
     }
     this.additionalLog = additional;

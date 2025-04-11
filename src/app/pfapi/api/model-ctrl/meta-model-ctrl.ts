@@ -192,7 +192,7 @@ export class MetaModelCtrl {
         pfLog(2, `${MetaModelCtrl.name} Create clientId ${clientId}`);
         await this._saveClientId(clientId);
       } else {
-        pfLog(1, `${MetaModelCtrl.name} Error initializing clientId:`, e);
+        pfLog(0, `${MetaModelCtrl.name} Error initializing clientId:`, e);
       }
     }
   }

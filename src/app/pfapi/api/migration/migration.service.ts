@@ -32,7 +32,7 @@ export class MigrationService<MD extends ModelCfgs> {
         });
         pfLog(2, `Migration successful: ${meta.crossModelVersion} → ${versionAfter}`);
       } catch (error) {
-        pfLog(1, `Migration failed`, {
+        pfLog(0, `Migration failed`, {
           error,
           fromVersion: meta.crossModelVersion,
           toVersion: versionAfter,

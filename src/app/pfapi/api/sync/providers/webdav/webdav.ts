@@ -165,7 +165,7 @@ export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
         // Ignore 405 Method Not Allowed (folder likely exists)
         // Ignore 409 Conflict (folder already exists)
         if (e?.status !== 405 && e?.status !== 409) {
-          pfLog(1, `${Webdav.name}.ensureFolderExists() error creating folder`, e);
+          pfLog(0, `${Webdav.name}.ensureFolderExists() error creating folder`, e);
           throw e;
         }
       }

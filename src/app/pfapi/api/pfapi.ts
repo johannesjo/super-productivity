@@ -299,9 +299,9 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (this.cfg?.validate) {
       const validationResult = this.cfg.validate(data);
       if (!validationResult.success) {
-        pfLog(1, `${this.importAllSycModelData.name}() data not valid`, validationResult);
+        pfLog(0, `${this.importAllSycModelData.name}() data not valid`, validationResult);
         if (isAttemptRepair && this.cfg.repair) {
-          pfLog(1, `${this.importAllSycModelData.name}() attempting repair`);
+          pfLog(0, `${this.importAllSycModelData.name}() attempting repair`);
           data = this.cfg.repair(data);
 
           const r2 = this.cfg.validate(data);
@@ -318,7 +318,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       try {
         await this.tmpBackupService.save(await this.getAllSyncModelData());
       } catch (error) {
-        pfLog(1, this.importAllSycModelData.name, error);
+        pfLog(0, this.importAllSycModelData.name, error);
         console.warn(
           'Could not create valid backup. Onwards on the highway throug the Danger Zone!',
         );

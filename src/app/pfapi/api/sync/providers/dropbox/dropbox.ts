@@ -74,7 +74,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
           (e as any).response.data?.error_summary?.includes('expired_access_token') ||
           (e as any).response.data?.error_summary?.includes('invalid_access_token')
         ) {
-          pfLog(1, 'EXPIRED or INVALID TOKEN, trying to refresh');
+          pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
           await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
           return this.getFileRev(targetPath, localRev);
         }
@@ -103,7 +103,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     }
 
     if (typeof r.data !== 'string') {
-      pfLog(1, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
+      pfLog(0, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
       throw new InvalidDataSPError(r.data);
     }
 

@@ -131,7 +131,7 @@ const _checkForUpdate = (params: {
     }
   } else if (local > remote) {
     if (lastSync < remote) {
-      pfLog(1, 'DATA DIVERGED: local > remote && lastSync < remote');
+      pfLog(0, 'DATA DIVERGED: local > remote && lastSync < remote');
       return UpdateCheckResult.DataDiverged;
     } else if (lastSync < local) {
       return UpdateCheckResult.RemoteUpdateRequired;
@@ -140,7 +140,7 @@ const _checkForUpdate = (params: {
     }
   } else if (local < remote) {
     if (lastSync !== local) {
-      pfLog(1, 'DATA DIVERGED: local < remote && lastSync !== local');
+      pfLog(0, 'DATA DIVERGED: local < remote && lastSync !== local');
       return UpdateCheckResult.DataDiverged;
     } else {
       return UpdateCheckResult.LocalUpdateRequired;

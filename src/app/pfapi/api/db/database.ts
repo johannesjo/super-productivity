@@ -28,7 +28,7 @@ export class Database {
     try {
       return await this._adapter.load<T>(key);
     } catch (e) {
-      pfLog(1, 'DB Load Error', { lastParams: this._lastParams, error: e });
+      pfLog(0, 'DB Load Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.load, [key]);
     }
   }
@@ -38,7 +38,7 @@ export class Database {
     try {
       return await this._adapter.loadAll<T>();
     } catch (e) {
-      pfLog(1, 'DB LoadAll Error', { lastParams: this._lastParams, error: e });
+      pfLog(0, 'DB LoadAll Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.loadAll, []);
     }
   }
@@ -52,7 +52,7 @@ export class Database {
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      pfLog(1, 'DB Save Error', { lastParams: this._lastParams, error: e });
+      pfLog(0, 'DB Save Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.save, [key, data]);
     }
   }
@@ -103,7 +103,7 @@ export class Database {
     fn: (...args: any[]) => Promise<any>,
     args: any[],
   ): Promise<void> {
-    pfLog(1, `${Database.name}.${this._errorHandler.name}()`, e, fn.name, args);
+    pfLog(0, `${Database.name}.${this._errorHandler.name}()`, e, fn.name, args);
     this._onError(e);
     throw e; // Rethrow to allow caller to handle
   }

@@ -53,7 +53,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.getMetaData() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.name}.getMetaData() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -91,7 +91,7 @@ export class DropboxApi {
 
       return { meta, data: data as unknown as T };
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.download() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.name}.download() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -139,7 +139,7 @@ export class DropboxApi {
 
       return result;
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.upload() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.name}.upload() error for path: ${path}`, e);
       // TODO maybe throw proper for case
       // if(xyz){throw new UploadRevToMatchMismatchAPIError();}
 
@@ -158,7 +158,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.remove() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.name}.remove() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -174,7 +174,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.checkUser() error`, e);
+      pfLog(0, `${DropboxApi.name}.checkUser() error`, e);
       this._checkCommonErrors(e, 'check/user');
       throw e;
     }
@@ -187,7 +187,7 @@ export class DropboxApi {
     const refreshToken = privateCfg?.refreshToken;
 
     if (!refreshToken) {
-      pfLog(1, 'Dropbox: No refresh token available');
+      pfLog(0, 'Dropbox: No refresh token available');
       throw new MissingRefreshTokenAPIError();
     }
 
@@ -262,7 +262,7 @@ export class DropboxApi {
         expiresAt: +data.expires_in * 1000 + Date.now(),
       };
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}.getTokensFromAuthCode() error`, e);
+      pfLog(0, `${DropboxApi.name}.getTokensFromAuthCode() error`, e);
       throw e;
     }
   }
@@ -345,7 +345,7 @@ export class DropboxApi {
 
       return response;
     } catch (e) {
-      pfLog(1, `${DropboxApi.name}._request() error for ${url}`, e);
+      pfLog(0, `${DropboxApi.name}._request() error for ${url}`, e);
       this._checkCommonErrors(e, url);
       throw e;
     }

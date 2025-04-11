@@ -136,7 +136,7 @@ export class WebdavApi {
       return this._cleanRev(d[etagKey]);
     }
 
-    pfLog(1, `${Webdav.name}.getRevFromMeta() No etag found in metadata`, {
+    pfLog(0, `${Webdav.name}.getRevFromMeta() No etag found in metadata`, {
       availableKeys: Object.keys(d),
       metadata: d,
     });
@@ -240,7 +240,7 @@ export class WebdavApi {
   }
 
   private _checkCommonErrors(e: any, targetPath: string): void {
-    pfLog(1, `${Webdav.name} API error for ${targetPath}`, e);
+    pfLog(0, `${Webdav.name} API error for ${targetPath}`, e);
 
     const status = e?.status || e?.response?.status;
     // Handle common HTTP error codes

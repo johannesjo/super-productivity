@@ -8,7 +8,7 @@ export const isSameRevMap = (revMap1: RevMap, revMap2: RevMap): boolean => {
 
   for (const key in revMap1) {
     if (revMap1[key] !== revMap2[key]) {
-      pfLog(1, `${isSameRevMap.name}(): ${key} is different`, { revMap1, revMap2 });
+      pfLog(0, `${isSameRevMap.name}(): ${key} is different`, { revMap1, revMap2 });
       return false;
     }
   }

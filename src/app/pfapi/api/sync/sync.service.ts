@@ -146,7 +146,7 @@ export class SyncService<const MD extends ModelCfgs> {
           throw new UnknownSyncStateError();
       }
     } catch (e) {
-      pfLog(1, `${SyncService.name}.${this.sync.name}()`, e);
+      pfLog(0, `${SyncService.name}.${this.sync.name}()`, e);
       alert(e);
       if (e instanceof NoRemoteMetaFile) {
         // if there is no remote meta file, we need to upload all data

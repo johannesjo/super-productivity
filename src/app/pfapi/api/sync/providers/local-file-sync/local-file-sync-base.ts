@@ -40,7 +40,7 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
       const r = await this.downloadFile(targetPath, localRev);
       return { rev: r.rev };
     } catch (e) {
-      pfLog(1, `${this.constructor.name}.${this.getFileRev.name} error`, e);
+      pfLog(0, `${this.constructor.name}.${this.getFileRev.name} error`, e);
       throw e;
     }
   }
@@ -79,7 +79,7 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
         throw new RemoteFileNotFoundAPIError(targetPath);
       }
 
-      pfLog(1, `${this.constructor.name}.${this.downloadFile.name}() error`, e);
+      pfLog(0, `${this.constructor.name}.${this.downloadFile.name}() error`, e);
       throw e;
     }
   }
@@ -103,7 +103,7 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
         try {
           const existingFile = await this.downloadFile(targetPath, revToMatch);
           if (existingFile.rev !== revToMatch) {
-            pfLog(1, `${this.constructor.name}.${this.uploadFile.name}() rev mismatch`, {
+            pfLog(0, `${this.constructor.name}.${this.uploadFile.name}() rev mismatch`, {
               existingFileRev: existingFile.rev,
               revToMatch,
             });
@@ -123,7 +123,7 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
       const newRev = await this._getLocalRev(dataStr);
       return { rev: newRev };
     } catch (e) {
-      pfLog(1, `${this.constructor.name}.${this.uploadFile.name}() error`, e);
+      pfLog(0, `${this.constructor.name}.${this.uploadFile.name}() error`, e);
       throw e;
     }
   }
@@ -150,7 +150,7 @@ export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterfa
         return;
       }
 
-      pfLog(1, `${this.constructor.name}.${this.removeFile.name} error`, e);
+      pfLog(0, `${this.constructor.name}.${this.removeFile.name} error`, e);
       throw e;
     }
   }
