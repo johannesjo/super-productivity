@@ -34,12 +34,22 @@ interface TokenResponse {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
+/**
+ * API class for Dropbox integration
+ */
 export class DropboxApi {
   constructor(
     private _appKey: string,
     private _parent: SyncProviderServiceInterface<DropboxPrivateCfg>,
   ) {}
 
+  // ==============================
+  // File Operations
+  // ==============================
+
+  /**
+   * Retrieve metadata for a file or folder
+   */
   async getMetaData(path: string, localRev: string): Promise<DropboxFileMetadata> {
     try {
       const response = await this._request({
@@ -59,6 +69,9 @@ export class DropboxApi {
     }
   }
 
+  /**
+   * Download a file from Dropbox
+   */
   async download<T>({
     path,
     localRev,
@@ -97,6 +110,9 @@ export class DropboxApi {
     }
   }
 
+  /**
+   * Upload a file to Dropbox
+   */
   async upload({
     path,
     revToMatch,
@@ -140,14 +156,14 @@ export class DropboxApi {
       return result;
     } catch (e) {
       pfLog(0, `${DropboxApi.name}.upload() error for path: ${path}`, e);
-      // TODO maybe throw proper for case
-      // if(xyz){throw new UploadRevToMatchMismatchAPIError();}
-
       this._checkCommonErrors(e, path);
       throw e;
     }
   }
 
+  /**
+   * Delete a file from Dropbox
+   */
   async remove(path: string): Promise<unknown> {
     try {
       const response = await this._request({
@@ -164,6 +180,13 @@ export class DropboxApi {
     }
   }
 
+  // ==============================
+  // Authentication Methods
+  // ==============================
+
+  /**
+   * Check user authentication status
+   */
   async checkUser(accessToken: string): Promise<unknown> {
     try {
       const response = await this._request({
@@ -180,6 +203,9 @@ export class DropboxApi {
     }
   }
 
+  /**
+   * Refresh access token using refresh token
+   */
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<void> {
     pfLog(2, `${DropboxApi.name}.updateAccessTokenFromRefreshTokenIfAvailable()`);
 
@@ -191,31 +217,39 @@ export class DropboxApi {
       throw new MissingRefreshTokenAPIError();
     }
 
-    const response = await fetch('https://api.dropbox.com/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: stringify({
-        refresh_token: refreshToken,
-        grant_type: 'refresh_token',
-        client_id: this._appKey,
-      }),
-    });
+    try {
+      const response = await fetch('https://api.dropbox.com/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: stringify({
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token',
+          client_id: this._appKey,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new HttpNotOkAPIError(response);
+      if (!response.ok) {
+        throw new HttpNotOkAPIError(response);
+      }
+
+      const data = (await response.json()) as TokenResponse;
+      pfLog(2, 'Dropbox: Refresh access token Response', data);
+
+      await this._parent.privateCfg.save({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token || privateCfg?.refreshToken,
+      });
+    } catch (e) {
+      pfLog(0, 'Failed to refresh Dropbox access token', e);
+      throw e;
     }
-
-    const data = (await response.json()) as TokenResponse;
-    pfLog(2, 'Dropbox: Refresh access token Response', data);
-
-    await this._parent.privateCfg.save({
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token || privateCfg?.refreshToken,
-    });
   }
 
+  /**
+   * Get access and refresh tokens from authorization code
+   */
   async getTokensFromAuthCode(
     authCode: string,
     codeVerifier: string,
@@ -267,6 +301,13 @@ export class DropboxApi {
     }
   }
 
+  // ==============================
+  // Core Request Logic
+  // ==============================
+
+  /**
+   * Make an authenticated request to the Dropbox API
+   */
   async _request(options: DropboxApiOptions): Promise<Response> {
     const {
       url,
@@ -351,6 +392,9 @@ export class DropboxApi {
     }
   }
 
+  /**
+   * Handle error responses from the API
+   */
   private async _handleErrorResponse(
     response: Response,
     headers: Record<string, any>,
@@ -403,6 +447,9 @@ export class DropboxApi {
     };
   }
 
+  /**
+   * Handle rate limiting by waiting and retrying
+   */
   private _handleRateLimit(
     retryAfter: number,
     path: string,
@@ -420,6 +467,9 @@ export class DropboxApi {
     });
   }
 
+  /**
+   * Check for common API errors and convert to appropriate custom errors
+   */
   private _checkCommonErrors(e: any, targetPath: string): void {
     if (
       e instanceof RemoteFileNotFoundAPIError ||

@@ -11,7 +11,6 @@ import {
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
 import { DropboxApi } from './dropbox-api';
-// TODO move over here
 import { generatePKCECodes } from './generate-pkce-codes';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 
@@ -54,6 +53,12 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     await this.privateCfg.save(privateCfg);
   }
 
+  /**
+   * Gets the revision information for a file from Dropbox
+   * @param targetPath Path to the target file
+   * @param localRev Local revision to compare against
+   * @returns Promise with the remote revision
+   */
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
     try {
       const r = await this._api.getMetaData(this._getPath(targetPath), localRev);
@@ -85,6 +90,12 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     }
   }
 
+  /**
+   * Downloads a file from Dropbox
+   * @param targetPath Path to the target file
+   * @param localRev Local revision to validate against
+   * @returns Promise with the file data and revision
+   */
   async downloadFile(
     targetPath: string,
     localRev: string,
@@ -113,6 +124,14 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     };
   }
 
+  /**
+   * Uploads a file to Dropbox
+   * @param targetPath Path to the target file
+   * @param dataStr Data to upload
+   * @param revToMatch Revision to match for conflict prevention
+   * @param isForceOverwrite Whether to force overwrite the file
+   * @returns Promise with the new revision
+   */
   async uploadFile(
     targetPath: string,
     dataStr: string,
@@ -135,6 +154,10 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     };
   }
 
+  /**
+   * Removes a file from Dropbox
+   * @param targetPath Path to the target file
+   */
   async removeFile(targetPath: string): Promise<void> {
     try {
       await this._api.remove(this._getPath(targetPath));
@@ -144,6 +167,10 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     // TODO error handling
   }
 
+  /**
+   * Gets authentication helper for OAuth flow
+   * @returns Promise with auth helper object
+   */
   async getAuthHelper(): Promise<SyncProviderAuthHelper> {
     const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
 
@@ -162,6 +189,11 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
     };
   }
 
+  /**
+   * Gets the full path including base path
+   * @param path The relative path
+   * @returns The full path
+   */
   private _getPath(path: string): string {
     return this._basePath + path;
   }

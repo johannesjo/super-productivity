@@ -23,12 +23,9 @@ export enum ConflictReason {
   UnexpectedRevMismatch = 'UnexpectedRevMismatch',
 }
 
-export const LOCK_FILE_CHECK_INTERVAL = 5000;
-
 export const LOG_PREFIX = (window as any).PF_LOG_PREFIX || ('_' as const);
 
 export const REMOTE_FILE_CONTENT_PREFIX = 'pf_' as const;
-export const LOCK_FILE_NAME = '__lock' as const;
 
 export enum DBNames {
   PrivateCfgStorePrefix = '__sp_cred_',
