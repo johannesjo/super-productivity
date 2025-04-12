@@ -12,6 +12,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.view.WindowCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
@@ -33,6 +34,8 @@ class CapacitorMainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         printWebViewVersion(bridge.webView)
+        // prevent android status bar from overlapping
+        WindowCompat.setDecorFitsSystemWindows(window, true);
 
         // Register Plugin
         // TODO: The changes to the compatible logic are too complex, so they will not be added for now

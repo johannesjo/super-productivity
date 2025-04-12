@@ -2,12 +2,5 @@
   "webDir": "dist/browser",
   "android": {
     "path": "android"
-  },
-  "plugins": {
-    "StatusBar": {
-      "overlaysWebView": false,
-      "style": "DEFAULT",
-      "backgroundColor": "#000000"
-    }
   }
 }
