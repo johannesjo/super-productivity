@@ -1,3 +1,9 @@
+## [12.0.5](https://github.com/johannesjo/super-productivity/compare/v12.0.4...v12.0.5) (2025-04-12)
+
+### Bug Fixes
+
+- **android:** status bar for all ([6d62706](https://github.com/johannesjo/super-productivity/commit/6d6270638c4427d84a51fbe1222ba6d3158010e5))
+
 ## [12.0.4](https://github.com/johannesjo/super-productivity/compare/v12.0.3...v12.0.4) (2025-04-12)
 
 ### Bug Fixes
