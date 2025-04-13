@@ -5,6 +5,24 @@ export const stringToMs = (strValue: string, args?: any): number => {
     return 0;
   }
 
+  // First try to parse simple formats like "1.5h", "30m", etc.
+  const simpleFormatMatch = strValue.trim().match(/^([0-9]*\.?[0-9]+)([smhd])$/i);
+  if (simpleFormatMatch) {
+    const amount = parseFloat(simpleFormatMatch[1]);
+    const unit = simpleFormatMatch[2].toLowerCase();
+
+    switch (unit) {
+      case 's':
+        return amount * 1000;
+      case 'm':
+        return amount * 1000 * 60;
+      case 'h':
+        return amount * 1000 * 60 * 60;
+      case 'd':
+        return amount * 1000 * 60 * 60 * 24;
+    }
+  }
+
   let d: number | undefined;
   let h: number | undefined;
   let m: number | undefined;
