@@ -171,6 +171,44 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title whatever 1.5h',
+      };
+      const r = shortSyntax(t, CONFIG);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title whatever',
+          timeEstimate: 5400000,
+        },
+      });
+    });
+
+    it('', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title whatever 1.5h/2.5h',
+      };
+      const r = shortSyntax(t, CONFIG);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title whatever',
+          // timeSpent: 7200000,
+          timeSpentOnDay: {
+            [getWorklogStr()]: 5400000,
+          },
+          timeEstimate: 9000000,
+        },
+      });
+    });
+
     it('should ignore time short syntax when disabled', () => {
       const t = {
         ...TASK,
