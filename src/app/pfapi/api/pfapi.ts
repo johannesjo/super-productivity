@@ -49,7 +49,6 @@ export class Pfapi<const MD extends ModelCfgs> {
   private readonly _encryptAndCompressCfg$ = new MiniObservable<EncryptAndCompressCfg>({
     isCompress: false,
     isEncrypt: false,
-    encryptKey: undefined,
   });
 
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;

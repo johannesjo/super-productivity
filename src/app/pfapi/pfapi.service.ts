@@ -91,8 +91,6 @@ export class PfapiService {
     'metaModelChange',
   );
 
-  private _invalidDataCount = 0;
-
   constructor() {
     // TODO check why it gets triggered twice always
     // this.syncState$.subscribe((v) => console.log(`syncState$`, v));
@@ -105,18 +103,19 @@ export class PfapiService {
       }
     });
 
-    this._commonAndLegacySyncConfig$.subscribe((cfg) => {
+    this._commonAndLegacySyncConfig$.subscribe(async (cfg) => {
       // TODO handle android webdav
-      // console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider);
+      console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider, cfg);
 
       this.pf.setActiveSyncProvider(
         cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
       );
-      this.pf.setEncryptAndCompressCfg({
-        encryptKey: cfg.encryptionPassword || undefined,
-        isEncrypt: cfg.isEncryptionEnabled,
-        isCompress: cfg.isCompressionEnabled,
-      });
+      if (cfg.isEnabled) {
+        this.pf.setEncryptAndCompressCfg({
+          isEncrypt: cfg.isEncryptionEnabled,
+          isCompress: cfg.isCompressionEnabled,
+        });
+      }
     });
   }
 

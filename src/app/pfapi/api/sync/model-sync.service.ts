@@ -67,6 +67,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
     const encryptedAndCompressedData =
       await this._encryptAndCompressHandler.compressAndEncryptData(
         this._encryptAndCompressCfg$.value,
+        (await syncProvider.privateCfg.load())?.encryptKey,
         dataToUpload,
         modelVersion,
       );
@@ -110,7 +111,11 @@ export class ModelSyncService<MD extends ModelCfgs> {
       }
       const data = await this._encryptAndCompressHandler.decompressAndDecryptData<
         ExtractModelCfgType<MD[T]>
-      >(this._encryptAndCompressCfg$.value, dataStr);
+      >(
+        this._encryptAndCompressCfg$.value,
+        (await syncProvider.privateCfg.load())?.encryptKey,
+        dataStr,
+      );
 
       if (!this.m[modelId]?.modelCfg) {
         throw new ModelIdWithoutCtrlError({ modelId });

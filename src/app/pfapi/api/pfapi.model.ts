@@ -153,7 +153,7 @@ export interface CompleteExport<T extends ModelCfgs> {
 }
 
 export interface SyncProviderPrivateCfgBase {
-  encryptionPassword?: string;
+  encryptKey?: string;
 }
 
 // TODO better dynamic typing
@@ -207,5 +207,4 @@ export interface PfapiEventPayloadMap {
 export interface EncryptAndCompressCfg {
   isEncrypt: boolean;
   isCompress: boolean;
-  encryptKey?: string;
 }

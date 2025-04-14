@@ -51,6 +51,7 @@ export class SyncConfigService {
         ...syncCfg,
         localFileSync: DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
         webDav: DEFAULT_GLOBAL_CONFIG.sync.webDav,
+        // encryptionPassword: currentProviderCfg.privateCfg.encryptionPassword,
         [prop]: currentProviderCfg.privateCfg,
       };
     }),
@@ -58,12 +59,18 @@ export class SyncConfigService {
   );
 
   async updateEncryptionPassword(pwd: string): Promise<void> {
-    // await this._pfapiService.pf.setPrivateCfgForSyncProvider(
-    //   providerId,
-    //   privateCfg as any,
-    // );
-    this._globalConfigService.updateSection('sync', {
-      ...this._globalConfigService.cfg?.sync,
+    const activeProvider = this._pfapiService.pf.getActiveSyncProvider();
+    if (!activeProvider) {
+      throw new Error('No active sync provider');
+    }
+    const old: any = await activeProvider.privateCfg.load();
+    console.log({
+      ...old,
+      encryptionPassword: pwd,
+    });
+
+    await this._pfapiService.pf.setPrivateCfgForSyncProvider(activeProvider.id, {
+      ...old,
       encryptionPassword: pwd,
     });
   }

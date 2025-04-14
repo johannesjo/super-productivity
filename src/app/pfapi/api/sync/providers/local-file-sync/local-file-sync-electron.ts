@@ -7,7 +7,6 @@ import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
 export interface LocalFileSyncElectronPrivateCfg extends SyncProviderPrivateCfgBase {
   syncFolderPath: string;
-  encryptionPassword?: string;
 }
 
 export class LocalFileSyncElectron extends LocalFileSyncBase {

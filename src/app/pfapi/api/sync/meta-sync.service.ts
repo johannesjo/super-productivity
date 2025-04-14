@@ -73,6 +73,7 @@ export class MetaSyncService {
       const data =
         await this._encryptAndCompressHandler.decompressAndDecryptData<RemoteMeta>(
           this._encryptAndCompressCfg$.value,
+          (await syncProvider.privateCfg.load())?.encryptKey,
           r.dataStr,
         );
 
@@ -92,18 +93,19 @@ export class MetaSyncService {
    * @returns Promise resolving to the new revision string
    */
   async upload(meta: RemoteMeta, revToMatch: string | null = null): Promise<string> {
+    const syncProvider = this._currentSyncProvider$.getOrError();
+
     // Validate and prepare data
     const validatedMeta = validateMetaBase(meta);
     const encryptedAndCompressedData =
       await this._encryptAndCompressHandler.compressAndEncryptData(
         this._encryptAndCompressCfg$.value,
+        (await syncProvider.privateCfg.load())?.encryptKey,
         validatedMeta,
         meta.crossModelVersion,
       );
 
     pfLog(2, `${MetaSyncService.name}.${this.upload.name}()`, { meta });
-
-    const syncProvider = this._currentSyncProvider$.getOrError();
 
     // Upload the data
     return (

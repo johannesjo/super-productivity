@@ -14,12 +14,11 @@ import { EncryptAndCompressCfg } from '../pfapi.model';
 export class EncryptAndCompressHandlerService {
   async compressAndEncryptData<T>(
     cfg: EncryptAndCompressCfg,
+    encryptKey: string | undefined,
     data: T,
     modelVersion: number,
   ): Promise<string> {
-    const { isCompress, isEncrypt, encryptKey } = cfg;
-    console.log({ isCompress, isEncrypt, encryptKey });
-
+    const { isCompress, isEncrypt } = cfg;
     return this.compressAndEncrypt({
       data,
       modelVersion,
@@ -31,9 +30,9 @@ export class EncryptAndCompressHandlerService {
 
   async decompressAndDecryptData<T>(
     cfg: EncryptAndCompressCfg,
+    encryptKey: string | undefined,
     dataStr: string,
   ): Promise<T> {
-    const { encryptKey } = cfg;
     return (
       await this.decompressAndDecrypt<T>({
         dataStr,
