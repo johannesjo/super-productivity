@@ -3,12 +3,14 @@ import { LocalFileSyncBase } from './local-file-sync-base';
 import { IS_ELECTRON } from '../../../../../app.constants';
 import { pfLog } from '../../../util/log';
 import { ElectronFileAdapter } from './electron-file-adapter';
+import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
-export interface LocalFileSyncElectronPrivateCfg {
+export interface LocalFileSyncElectronPrivateCfg extends SyncProviderPrivateCfgBase {
   syncFolderPath: string;
+  encryptionPassword?: string;
 }
 
-export class LocalFileSyncElectron extends LocalFileSyncBase<LocalFileSyncElectronPrivateCfg> {
+export class LocalFileSyncElectron extends LocalFileSyncBase {
   constructor() {
     super(new ElectronFileAdapter());
   }

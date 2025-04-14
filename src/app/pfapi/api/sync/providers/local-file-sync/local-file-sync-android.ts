@@ -2,10 +2,10 @@
 import { Directory } from '@capacitor/filesystem';
 import { LocalFileSyncBase } from './local-file-sync-base';
 import { CapacitorFileAdapter } from './capacitor-file-adapter';
+import { PrivateCfgByProviderId } from '../../../pfapi.model';
+import { SyncProviderId } from '../../../pfapi.const';
 
-export type LocalFileSyncAndroidPrivateCfg = undefined;
-
-export class LocalFileSyncAndroid extends LocalFileSyncBase<LocalFileSyncAndroidPrivateCfg> {
+export class LocalFileSyncAndroid extends LocalFileSyncBase {
   constructor() {
     super(new CapacitorFileAdapter(Directory.Data));
   }
@@ -14,7 +14,9 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase<LocalFileSyncAndroid
     return true;
   }
 
-  async setPrivateCfg(privateCfg: LocalFileSyncAndroidPrivateCfg): Promise<void> {
+  async setPrivateCfg(
+    privateCfg: PrivateCfgByProviderId<SyncProviderId.LocalFile>,
+  ): Promise<void> {
     await this.privateCfg.save(privateCfg);
   }
 

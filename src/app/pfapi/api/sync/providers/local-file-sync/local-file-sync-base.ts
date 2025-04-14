@@ -13,21 +13,26 @@ import {
 } from '../../../errors/errors';
 import { md5HashPromise } from '../../../../../util/md5-hash';
 import { pfLog } from '../../../util/log';
+import { PrivateCfgByProviderId } from '../../../pfapi.model';
 
-export abstract class LocalFileSyncBase<T> implements SyncProviderServiceInterface<T> {
-  readonly id: SyncProviderId = SyncProviderId.LocalFile;
+export abstract class LocalFileSyncBase
+  implements SyncProviderServiceInterface<SyncProviderId.LocalFile>
+{
+  readonly id = SyncProviderId.LocalFile;
   readonly isUploadForcePossible: boolean = false;
   readonly maxConcurrentRequests = 10;
   // since we cannot guarantee the order of files, we need to mush all our data into a single file
   readonly isLimitedToSingleFileSync = true;
 
-  public privateCfg!: SyncProviderPrivateCfgStore<T>;
+  public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.LocalFile>;
 
-  constructor(protected fileAdapter: FileAdapter) {}
+  protected constructor(protected fileAdapter: FileAdapter) {}
 
   abstract isReady(): Promise<boolean>;
 
-  abstract setPrivateCfg(privateCfg: T): Promise<void>;
+  abstract setPrivateCfg(
+    privateCfg: PrivateCfgByProviderId<SyncProviderId.LocalFile>,
+  ): Promise<void>;
 
   protected abstract getFilePath(targetPath: string): Promise<string>;
 

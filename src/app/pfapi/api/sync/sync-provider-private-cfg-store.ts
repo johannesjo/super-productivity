@@ -2,28 +2,20 @@ import { DBNames, SyncProviderId } from '../pfapi.const';
 import { Database } from '../db/database';
 import { pfLog } from '../util/log';
 import { PFEventEmitter } from '../util/events';
-
-/**
- * Event payload for configuration changes
- */
-export interface ProviderConfigChangeEvent<T> {
-  providerId: SyncProviderId;
-  privateCfg: T;
-}
+import { PrivateCfgByProviderId } from '../pfapi.model';
 
 /**
  * Store for managing sync provider private configuration
  * Handles persistence and change notifications
  */
-export class SyncProviderPrivateCfgStore<T> {
+export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   public static readonly DB_KEY_PREFIX = DBNames.PrivateCfgStorePrefix;
 
   private readonly _dbKey: string;
-
-  private _privateCfgInMemory?: T;
+  private _privateCfgInMemory?: PrivateCfgByProviderId<PID>;
 
   constructor(
-    private readonly _providerId: SyncProviderId,
+    private readonly _providerId: PID,
     private readonly _db: Database,
     private readonly _ev: PFEventEmitter,
   ) {
@@ -35,7 +27,7 @@ export class SyncProviderPrivateCfgStore<T> {
    * @returns The private configuration or null if not found
    * @throws Error if database load operation fails
    */
-  async load(): Promise<T | null> {
+  async load(): Promise<PrivateCfgByProviderId<PID> | null> {
     pfLog(
       3,
       `${SyncProviderPrivateCfgStore.name}.${this.load.name}`,
@@ -48,7 +40,9 @@ export class SyncProviderPrivateCfgStore<T> {
     }
 
     try {
-      const loadedConfig = (await this._db.load(this._dbKey)) as T;
+      const loadedConfig = (await this._db.load(
+        this._dbKey,
+      )) as PrivateCfgByProviderId<PID>;
       if (loadedConfig) {
         this._privateCfgInMemory = loadedConfig;
       }
@@ -65,7 +59,7 @@ export class SyncProviderPrivateCfgStore<T> {
    * @returns Promise resolving after save completes
    * @throws Error if database save operation fails
    */
-  async save(privateCfg: T): Promise<unknown> {
+  async save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
     const key = this._providerId;
     pfLog(2, `${SyncProviderPrivateCfgStore.name}.${this.save.name}()`, key, privateCfg);
 
@@ -74,7 +68,7 @@ export class SyncProviderPrivateCfgStore<T> {
     // Emit configuration change event
     this._ev.emit('providerPrivateCfgChange', {
       providerId: this._providerId,
-      privateCfg: privateCfg as any,
+      privateCfg,
     });
 
     try {

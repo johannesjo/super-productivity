@@ -11,6 +11,7 @@ import { pfLog } from '../util/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { validateMetaBase } from '../util/validate-meta-base';
+import { SyncProviderId } from '../pfapi.const';
 
 /**
  * Service responsible for synchronizing metadata between local and remote storage
@@ -18,7 +19,7 @@ import { validateMetaBase } from '../util/validate-meta-base';
 export class MetaSyncService {
   constructor(
     private _metaModelCtrl: MetaModelCtrl,
-    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
     private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
     private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
   ) {}

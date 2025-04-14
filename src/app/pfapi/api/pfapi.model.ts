@@ -152,6 +152,10 @@ export interface CompleteExport<T extends ModelCfgs> {
   };
 }
 
+export interface SyncProviderPrivateCfgBase {
+  encryptionPassword?: string;
+}
+
 // TODO better dynamic typing
 export type SyncProviderPrivateCfg =
   | DropboxPrivateCfg

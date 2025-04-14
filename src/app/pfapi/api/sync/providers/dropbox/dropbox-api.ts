@@ -2,7 +2,6 @@
 
 import { stringify } from 'query-string';
 import { DropboxFileMetadata } from '../../../../../imex/sync/dropbox/dropbox.model';
-import { DropboxPrivateCfg } from './dropbox';
 import {
   AuthFailSPError,
   HttpNotOkAPIError,
@@ -15,6 +14,7 @@ import {
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
+import { SyncProviderId } from '../../../pfapi.const';
 
 interface DropboxApiOptions {
   method: HttpMethod;
@@ -40,7 +40,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTION
 export class DropboxApi {
   constructor(
     private _appKey: string,
-    private _parent: SyncProviderServiceInterface<DropboxPrivateCfg>,
+    private _parent: SyncProviderServiceInterface<SyncProviderId.Dropbox>,
   ) {}
 
   // ==============================

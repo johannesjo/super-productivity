@@ -24,12 +24,13 @@ import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { Pfapi } from '../pfapi';
+import { SyncProviderId } from '../pfapi.const';
 
 export class ModelSyncService<MD extends ModelCfgs> {
   constructor(
     private m: ModelCfgToModelCtrl<MD>,
     private _pfapiMain: Pfapi<MD>,
-    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
     private _encryptAndCompressHandler: EncryptAndCompressHandlerService,
     private _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
   ) {}

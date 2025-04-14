@@ -41,7 +41,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private readonly _syncService: SyncService<MD>;
   private readonly _activeSyncProvider$ =
-    new MiniObservable<SyncProviderServiceInterface<unknown> | null>(
+    new MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>(
       null,
       NoSyncProviderSetError as typeof Error,
     );
@@ -61,7 +61,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   constructor(
     modelCfgs: MD,
-    public syncProviders: SyncProviderServiceInterface<unknown>[],
+    public syncProviders: SyncProviderServiceInterface<SyncProviderId>[],
     public cfg?: PfapiBaseCfg<MD>,
   ) {
     this.ev.on('syncStart', (v) => {});
@@ -94,7 +94,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     this.syncProviders = syncProviders;
     this.syncProviders.forEach((sp) => {
-      sp.privateCfg = new SyncProviderPrivateCfgStore<unknown>(sp.id, this.db, this.ev);
+      sp.privateCfg = new SyncProviderPrivateCfgStore(sp.id, this.db, this.ev);
     });
 
     this.migrationService = new MigrationService<MD>(this);
@@ -164,7 +164,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
   }
 
-  getActiveSyncProvider(): SyncProviderServiceInterface<unknown> | null {
+  getActiveSyncProvider(): SyncProviderServiceInterface<SyncProviderId> | null {
     return this._activeSyncProvider$.value;
   }
 
@@ -189,7 +189,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       throw new InvalidSyncProviderError();
     }
     // TODO typing
-    return (await provider.privateCfg.load()) as Promise<PrivateCfgByProviderId<T>>;
+    return (await provider.privateCfg.load()) as PrivateCfgByProviderId<T>;
   }
 
   // TODO typing

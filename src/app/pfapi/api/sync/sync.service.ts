@@ -9,7 +9,7 @@ import {
 } from '../pfapi.model';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
-import { SyncStatus } from '../pfapi.const';
+import { SyncProviderId, SyncStatus } from '../pfapi.const';
 import {
   ImpossibleError,
   LockFromLocalClientPresentError,
@@ -41,7 +41,7 @@ export class SyncService<const MD extends ModelCfgs> {
     private _pfapiMain: Pfapi<MD>,
     private _migrationService: MigrationService<MD>,
     private _metaModelCtrl: MetaModelCtrl,
-    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>,
+    private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
     _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
   ) {

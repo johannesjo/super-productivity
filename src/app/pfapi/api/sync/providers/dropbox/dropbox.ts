@@ -13,19 +13,20 @@ import { pfLog } from '../../../util/log';
 import { DropboxApi } from './dropbox-api';
 import { generatePKCECodes } from './generate-pkce-codes';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
+import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
 export interface DropboxCfg {
   appKey: string;
   basePath: string;
 }
 
-export interface DropboxPrivateCfg {
+export interface DropboxPrivateCfg extends SyncProviderPrivateCfgBase {
   accessToken: string;
   refreshToken: string;
 }
 
-export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> {
-  readonly id: SyncProviderId = SyncProviderId.Dropbox;
+export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Dropbox> {
+  readonly id = SyncProviderId.Dropbox;
   readonly isUploadForcePossible = true;
   readonly maxConcurrentRequests = 4;
 
@@ -33,7 +34,7 @@ export class Dropbox implements SyncProviderServiceInterface<DropboxPrivateCfg> 
   private readonly _appKey: string;
   private readonly _basePath: string;
 
-  public privateCfg!: SyncProviderPrivateCfgStore<DropboxPrivateCfg>;
+  public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.Dropbox>;
 
   constructor(cfg: DropboxCfg) {
     if (!cfg.appKey) {

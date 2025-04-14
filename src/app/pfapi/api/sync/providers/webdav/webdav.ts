@@ -9,22 +9,23 @@ import {
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
+import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
-export interface WebdavPrivateCfg {
+export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
   baseUrl: string;
   userName: string;
   password: string;
   syncFolderPath: string;
 }
 
-export class Webdav implements SyncProviderServiceInterface<WebdavPrivateCfg> {
-  readonly id: SyncProviderId = SyncProviderId.WebDAV;
+export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
+  readonly id = SyncProviderId.WebDAV;
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
 
   private readonly _api: WebdavApi = new WebdavApi(() => this._cfgOrError());
 
-  public privateCfg!: SyncProviderPrivateCfgStore<WebdavPrivateCfg>;
+  public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.WebDAV>;
 
   constructor(private _extraPath?: string) {}
 

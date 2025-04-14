@@ -1,5 +1,6 @@
 import { SyncProviderId } from '../pfapi.const';
 import { SyncProviderPrivateCfgStore } from './sync-provider-private-cfg-store';
+import { PrivateCfgByProviderId } from '../pfapi.model';
 
 /**
  * Authentication helper interface for OAuth flows
@@ -25,9 +26,9 @@ export interface SyncProviderAuthHelper {
 /**
  * Core sync provider service interface
  */
-export interface SyncProviderServiceInterface<TConfig> {
+export interface SyncProviderServiceInterface<PID extends SyncProviderId> {
   /** Unique identifier for this sync provider */
-  id: SyncProviderId;
+  id: PID;
 
   /** Whether this provider supports force upload (overwriting conflicts) */
   isUploadForcePossible?: boolean;
@@ -39,7 +40,7 @@ export interface SyncProviderServiceInterface<TConfig> {
   maxConcurrentRequests: number;
 
   /** Store for provider-specific private configuration */
-  privateCfg: SyncProviderPrivateCfgStore<TConfig>;
+  privateCfg: SyncProviderPrivateCfgStore<PID>;
 
   /**
    * Gets the current revision for a file
@@ -101,7 +102,7 @@ export interface SyncProviderServiceInterface<TConfig> {
    * Updates the provider's private configuration
    * @param privateCfg New configuration to store
    */
-  setPrivateCfg(privateCfg: TConfig): Promise<void>;
+  setPrivateCfg(privateCfg: PrivateCfgByProviderId<PID>): Promise<void>;
 }
 
 /**
