@@ -10,6 +10,8 @@ import { androidInterface } from '../../features/android/android-interface';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { SnackService } from '../../core/snack/snack.service';
 
 const DEFAULT_BACKUP_INTERVAL = 5 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';
@@ -22,6 +24,7 @@ const ANDROID_DB_KEY = 'backup';
 export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
   private _pfapiService = inject(PfapiService);
+  private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
 
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
@@ -70,7 +73,7 @@ export class LocalBackupService {
       ) {
         const backupData = await this.loadBackupElectron(backupMeta.path);
         console.log('backupData', backupData);
-        await this._pfapiService.importCompleteBackup(JSON.parse(backupData));
+        await this._importBackup(backupData);
       }
 
       // ANDROID
@@ -83,7 +86,7 @@ export class LocalBackupService {
         console.log('backupData', backupData);
         const lineBreaksReplaced = backupData.replace(/\n/g, '\\n');
         console.log('lineBreaksReplaced', lineBreaksReplaced);
-        await this._pfapiService.importCompleteBackup(JSON.parse(lineBreaksReplaced));
+        await this._importBackup(lineBreaksReplaced);
       }
     }
   }
@@ -95,6 +98,20 @@ export class LocalBackupService {
     }
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));
+    }
+  }
+
+  private async _importBackup(backupData: string): Promise<void> {
+    try {
+      await this._pfapiService.importCompleteBackup(
+        JSON.parse(backupData) as AppDataCompleteNew,
+      );
+    } catch (e) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
+      });
+      return;
     }
   }
 }

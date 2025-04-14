@@ -55,7 +55,15 @@ export class FileImexComponent {
         alert('V1 Data. Migration not supported any more.');
       } else {
         await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
+        try {
+          await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
+        } catch (e) {
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
+          });
+          return;
+        }
       }
 
       const fileInputRef = this.fileInputRef();

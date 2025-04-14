@@ -22,7 +22,7 @@ export interface ProjectBasicCfg {
 export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
   id: string;
   // TODO legacy remove
-  issueIntegrationCfgs?: IssueIntegrationCfgs;
+  issueIntegrationCfgs?: IssueIntegrationCfgs | { [key: string]: any };
 }
 
 export type Project = Readonly<ProjectCopy>;

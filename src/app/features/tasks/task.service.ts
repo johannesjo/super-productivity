@@ -144,7 +144,7 @@ export class TaskService {
       map((tasks) => tasks[0]),
     );
 
-  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null> =
+  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null | undefined> =
     this._store.pipe(
       select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value

@@ -147,9 +147,8 @@ export class PfapiService {
         window.location.reload();
       }
     } catch (e) {
-      console.log(e);
       this._imexViewService.setDataImportInProgress(false);
-      alert('Importing Backup failed!!');
+      throw e;
     }
   }
 

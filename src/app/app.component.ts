@@ -199,7 +199,16 @@ export class AppComponent implements OnDestroy {
           // prevent any interaction with the app on after failure
           this.imexMetaService.setDataImportInProgress(true);
           console.error(error);
-          alert('Migration failed! with Error: ' + error?.toString());
+
+          try {
+            alert(
+              'Migration failed! with Error:\n\n' +
+                JSON.stringify((error as any).additionalLog[0].errors),
+            );
+          } catch (e) {
+            alert('Migration failed! with Error: ' + error?.toString());
+          }
+          return;
         }
       } else {
         // if everything is normal, check for TMP stray backup
