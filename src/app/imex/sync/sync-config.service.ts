@@ -62,8 +62,13 @@ export class SyncConfigService {
     tap((v) => console.log('syncSettingsForm$', v)),
   );
 
-  async updateEncryptionPassword(pwd: string): Promise<void> {
-    const activeProvider = this._pfapiService.pf.getActiveSyncProvider();
+  async updateEncryptionPassword(
+    pwd: string,
+    syncProviderId?: SyncProviderId,
+  ): Promise<void> {
+    const activeProvider = syncProviderId
+      ? await this._pfapiService.pf.getSyncProviderById(syncProviderId)
+      : this._pfapiService.pf.getActiveSyncProvider();
     if (!activeProvider) {
       throw new Error('No active sync provider');
     }
@@ -85,12 +90,12 @@ export class SyncConfigService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { encryptKey, webDav, localFileSync, ...newSettingsClean } = newSettings;
 
-    if (this._lastSettings?.encryptKey !== newSettings.encryptKey) {
-      await this.updateEncryptionPassword(newSettings.encryptKey || '');
+    const providerId = newSettingsClean.syncProvider as SyncProviderId | null;
+    if (providerId && this._lastSettings?.encryptKey !== newSettings.encryptKey) {
+      await this.updateEncryptionPassword(newSettings.encryptKey || '', providerId);
     }
     this._lastSettings = newSettings;
 
-    const providerId = newSettingsClean.syncProvider as SyncProviderId | null;
     // Update global config
     this._globalConfigService.updateSection('sync', newSettingsClean);
 
