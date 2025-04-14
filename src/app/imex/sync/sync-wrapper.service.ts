@@ -26,8 +26,8 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
-import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import { SyncConfigService } from './sync-config.service';
+import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 
 @Injectable({
   providedIn: 'root',
@@ -175,7 +175,7 @@ export class SyncWrapperService {
         error instanceof DecryptNoPasswordError ||
         error instanceof DecryptError
       ) {
-        this._promptForPassword();
+        this._handleDecryptionError();
         return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
@@ -274,22 +274,16 @@ export class SyncWrapperService {
     return { wasConfigured: false };
   }
 
-  private _promptForPassword(): void {
+  private _handleDecryptionError(): void {
     this._matDialog
-      .open(DialogPromptComponent, {
-        data: {
-          type: 'password',
-          // placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
-          placeholder: 'Password',
-          message:
-            'Your data is encrypted and decryption failed. Please enter the correct password!',
-        },
-      })
+      .open(DialogHandleDecryptErrorComponent)
       .afterClosed()
-      .subscribe((val) => {
-        if (val !== undefined) {
-          this._syncConfigService.updateEncryptionPassword(val);
+      .subscribe(({ isReSync, isForceUpload }) => {
+        if (isReSync) {
           this.sync();
+        }
+        if (isForceUpload) {
+          this._forceUpload();
         }
       });
   }
