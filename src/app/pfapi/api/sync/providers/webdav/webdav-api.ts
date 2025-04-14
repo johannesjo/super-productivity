@@ -39,15 +39,28 @@ export class WebdavApi {
     data: string;
     path: string;
     isOverwrite?: boolean;
-  }): Promise<void> {
+  }): Promise<string | undefined> {
     try {
-      await this._makeRequest({
+      const r = await this._makeRequest({
         method: 'PUT',
         path,
         body: data,
         headers: { 'Content-Type': 'application/octet-stream' },
         ifNoneMatch: isOverwrite ? null : '*',
       });
+      try {
+        const responseHeaderObj: Record<string, string> = {};
+        r.headers.forEach((value, key) => {
+          responseHeaderObj[key.toLowerCase()] = value;
+        });
+        return this._findEtagInHeaders(responseHeaderObj);
+      } catch (e) {
+        pfLog(0, `${WebdavApi.name}.upload() direct etag parsing failed`, {
+          path,
+          error: e,
+        });
+        return undefined;
+      }
     } catch (e: any) {
       pfLog(0, `${WebdavApi.name}.upload() error`, { path, error: e });
       if (e?.status === 412) {

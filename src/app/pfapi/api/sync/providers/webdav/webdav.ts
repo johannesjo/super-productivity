@@ -67,12 +67,14 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     const cfg = await this._cfgOrError();
     const filePath = this._getFilePath(targetPath, cfg);
     try {
-      // TODO get rev from upload directly!!!
-      await this._api.upload({
+      const rev = await this._api.upload({
         path: filePath,
         data: dataStr,
         isOverwrite: isForceOverwrite,
       });
+      if (rev) {
+        return { rev };
+      }
     } catch (e) {
       pfLog(0, `${Webdav.name}.uploadFile() error during upload`, e);
       if (e instanceof RemoteFileNotFoundAPIError) {
