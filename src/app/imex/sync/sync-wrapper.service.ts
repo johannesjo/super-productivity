@@ -287,7 +287,7 @@ export class SyncWrapperService {
       })
       .afterClosed()
       .subscribe((val) => {
-        if (val) {
+        if (val !== undefined) {
           this._syncConfigService.updateEncryptionPassword(val);
           this.sync();
         }
