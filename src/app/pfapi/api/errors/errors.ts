@@ -123,6 +123,10 @@ export class DecryptNoPasswordError extends AdditionalLogErrorBase {
   override name = DecryptNoPasswordError.name;
 }
 
+export class DecryptError extends AdditionalLogErrorBase {
+  override name = DecryptError.name;
+}
+
 export class CompressError extends AdditionalLogErrorBase {
   override name = CompressError.name;
 }

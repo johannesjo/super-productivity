@@ -57,6 +57,17 @@ export class SyncConfigService {
     tap((v) => console.log('syncSettingsForm$', v)),
   );
 
+  async updateEncryptionPassword(pwd: string): Promise<void> {
+    // await this._pfapiService.pf.setPrivateCfgForSyncProvider(
+    //   providerId,
+    //   privateCfg as any,
+    // );
+    this._globalConfigService.updateSection('sync', {
+      ...this._globalConfigService.cfg?.sync,
+      encryptionPassword: pwd,
+    });
+  }
+
   async updateSettingsFromForm(newSettings: SyncConfig, isForce = false): Promise<void> {
     // TODO this is just a work around for formly ending in a endless loop otherwise
     const isEqual = JSON.stringify(this._lastSettings) === JSON.stringify(newSettings);

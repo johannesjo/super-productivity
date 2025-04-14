@@ -4,7 +4,7 @@ import {
 } from '../util/sync-file-prefix';
 import { pfLog } from '../util/log';
 import { decrypt, encrypt } from '../encryption/encryption';
-import { DecryptNoPasswordError } from '../errors/errors';
+import { DecryptError, DecryptNoPasswordError } from '../errors/errors';
 import {
   compressWithGzipToString,
   decompressGzipFromString,
@@ -18,6 +18,8 @@ export class EncryptAndCompressHandlerService {
     modelVersion: number,
   ): Promise<string> {
     const { isCompress, isEncrypt, encryptKey } = cfg;
+    console.log({ isCompress, isEncrypt, encryptKey });
+
     return this.compressAndEncrypt({
       data,
       modelVersion,
@@ -96,9 +98,7 @@ export class EncryptAndCompressHandlerService {
       { isCompressed, isEncrypted, modelVersion },
     );
     let outStr = cleanDataStr;
-    if (isCompressed) {
-      outStr = await decompressGzipFromString(outStr);
-    }
+
     if (isEncrypted) {
       if (!encryptKey) {
         throw new DecryptNoPasswordError({
@@ -109,7 +109,15 @@ export class EncryptAndCompressHandlerService {
           modelVersion,
         });
       }
-      outStr = await decrypt(outStr, encryptKey);
+      try {
+        outStr = await decrypt(outStr, encryptKey);
+      } catch (e) {
+        throw new DecryptError(e);
+      }
+    }
+
+    if (isCompressed) {
+      outStr = await decompressGzipFromString(outStr);
     }
 
     return {

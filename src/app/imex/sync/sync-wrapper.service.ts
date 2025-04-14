@@ -8,6 +8,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
+  DecryptError,
+  DecryptNoPasswordError,
   LockPresentError,
   NoRemoteModelFile,
   RevMismatchForModelError,
@@ -24,6 +26,8 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
+import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
+import { SyncConfigService } from './sync-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +40,7 @@ export class SyncWrapperService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
+  private _syncConfigService = inject(SyncConfigService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -166,6 +171,12 @@ export class SyncWrapperService {
           actionStr: 'Force Overwrite',
         });
         return 'HANDLED_ERROR';
+      } else if (
+        error instanceof DecryptNoPasswordError ||
+        error instanceof DecryptError
+      ) {
+        this._promptForPassword();
+        return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
         alert('IMEXSyncService ERR: ' + errStr);
@@ -261,6 +272,26 @@ export class SyncWrapperService {
       return { wasConfigured: false };
     }
     return { wasConfigured: false };
+  }
+
+  private _promptForPassword(): void {
+    this._matDialog
+      .open(DialogPromptComponent, {
+        data: {
+          type: 'password',
+          // placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
+          placeholder: 'Password',
+          message:
+            'Your data is encrypted and decryption failed. Please enter the correct password!',
+        },
+      })
+      .afterClosed()
+      .subscribe((val) => {
+        if (val) {
+          this._syncConfigService.updateEncryptionPassword(val);
+          this.sync();
+        }
+      });
   }
 
   private async _reInitAppAfterDataModelChange(): Promise<void> {
