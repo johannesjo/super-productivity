@@ -15,6 +15,11 @@ import { generatePKCECodes } from './generate-pkce-codes';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
+const DROPBOX_AUTH_URL = 'https://www.dropbox.com/oauth2/authorize' as const;
+const PATH_NOT_FOUND_ERROR = 'path/not_found' as const;
+const EXPIRED_TOKEN_ERROR = 'expired_access_token' as const;
+const INVALID_TOKEN_ERROR = 'invalid_access_token' as const;
+
 export interface DropboxCfg {
   appKey: string;
   basePath: string;
@@ -23,6 +28,15 @@ export interface DropboxCfg {
 export interface DropboxPrivateCfg extends SyncProviderPrivateCfgBase {
   accessToken: string;
   refreshToken: string;
+}
+
+interface DropboxApiError {
+  response?: {
+    status: number;
+    data?: {
+      error_summary?: string;
+    };
+  };
 }
 
 export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Dropbox> {
@@ -59,6 +73,8 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
    * @param targetPath Path to the target file
    * @param localRev Local revision to compare against
    * @returns Promise with the remote revision
+   * @throws RemoteFileNotFoundAPIError if the file doesn't exist
+   * @throws AuthFailSPError if authentication fails
    */
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
     try {
@@ -67,27 +83,21 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
         rev: r.rev,
       };
     } catch (e) {
-      const isAxiosError = !!(e && (e as any).response && (e as any).response.status);
-      if (
-        isAxiosError &&
-        (e as any).response.data &&
-        // NOTE: sometimes 'path/not_found/..' and sometimes 'path/not_found/...'
-        (e as any).response.data.error_summary?.includes('path/not_found')
-      ) {
-        throw new RemoteFileNotFoundAPIError(targetPath);
-      } else if (isAxiosError && (e as any).response.status === 401) {
-        if (
-          (e as any).response.data?.error_summary?.includes('expired_access_token') ||
-          (e as any).response.data?.error_summary?.includes('invalid_access_token')
-        ) {
-          pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
-          await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
-          return this.getFileRev(targetPath, localRev);
-        }
-        throw new AuthFailSPError('Dropbox 401 getFileRev', targetPath);
-      } else {
-        throw e;
+      if (this._isTokenError(e)) {
+        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this.getFileRev(targetPath, localRev);
       }
+
+      if (this._isPathNotFoundError(e)) {
+        throw new RemoteFileNotFoundAPIError(targetPath);
+      }
+
+      if (this._isUnauthorizedError(e)) {
+        throw new AuthFailSPError('Dropbox 401 getFileRev', targetPath);
+      }
+
+      throw e;
     }
   }
 
@@ -96,33 +106,45 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
    * @param targetPath Path to the target file
    * @param localRev Local revision to validate against
    * @returns Promise with the file data and revision
+   * @throws NoRevAPIError if no revision is returned
+   * @throws RemoteFileNotFoundAPIError if the file doesn't exist
+   * @throws InvalidDataSPError if the data is invalid
    */
   async downloadFile(
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    const r = await this._api.download({
-      path: this._getPath(targetPath),
-      localRev,
-    });
+    try {
+      const r = await this._api.download({
+        path: this._getPath(targetPath),
+        localRev,
+      });
 
-    if (!r.meta.rev) {
-      throw new NoRevAPIError();
+      if (!r.meta.rev) {
+        throw new NoRevAPIError();
+      }
+
+      if (!r.data) {
+        throw new RemoteFileNotFoundAPIError(targetPath);
+      }
+
+      if (typeof r.data !== 'string') {
+        pfLog(0, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
+        throw new InvalidDataSPError(r.data);
+      }
+
+      return {
+        rev: r.meta.rev,
+        dataStr: r.data,
+      };
+    } catch (e) {
+      if (this._isTokenError(e)) {
+        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this.downloadFile(targetPath, localRev);
+      }
+      throw e;
     }
-
-    if (!r.data) {
-      throw new RemoteFileNotFoundAPIError(targetPath);
-    }
-
-    if (typeof r.data !== 'string') {
-      pfLog(0, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
-      throw new InvalidDataSPError(r.data);
-    }
-
-    return {
-      rev: r.meta.rev,
-      dataStr: r.data,
-    };
   }
 
   /**
@@ -132,6 +154,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
    * @param revToMatch Revision to match for conflict prevention
    * @param isForceOverwrite Whether to force overwrite the file
    * @returns Promise with the new revision
+   * @throws NoRevAPIError if no revision is returned
    */
   async uploadFile(
     targetPath: string,
@@ -139,33 +162,57 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
     revToMatch: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    const r = await this._api.upload({
-      path: this._getPath(targetPath),
-      data: dataStr,
-      revToMatch,
-      isForceOverwrite,
-    });
+    try {
+      const r = await this._api.upload({
+        path: this._getPath(targetPath),
+        data: dataStr,
+        revToMatch,
+        isForceOverwrite,
+      });
 
-    if (!r.rev) {
-      throw new NoRevAPIError();
+      if (!r.rev) {
+        throw new NoRevAPIError();
+      }
+
+      return {
+        rev: r.rev,
+      };
+    } catch (e) {
+      if (this._isTokenError(e)) {
+        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this.uploadFile(targetPath, dataStr, revToMatch, isForceOverwrite);
+      }
+      throw e;
     }
-
-    return {
-      rev: r.rev,
-    };
   }
 
   /**
    * Removes a file from Dropbox
    * @param targetPath Path to the target file
+   * @throws RemoteFileNotFoundAPIError if the file doesn't exist
+   * @throws AuthFailSPError if authentication fails
    */
   async removeFile(targetPath: string): Promise<void> {
     try {
       await this._api.remove(this._getPath(targetPath));
     } catch (e) {
+      if (this._isTokenError(e)) {
+        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this.removeFile(targetPath);
+      }
+
+      if (this._isPathNotFoundError(e)) {
+        throw new RemoteFileNotFoundAPIError(targetPath);
+      }
+
+      if (this._isUnauthorizedError(e)) {
+        throw new AuthFailSPError('Dropbox 401 removeFile', targetPath);
+      }
+
       throw e;
     }
-    // TODO error handling
   }
 
   /**
@@ -176,11 +223,12 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
     const { codeVerifier, codeChallenge } = await generatePKCECodes(128);
 
     const authCodeUrl =
-      `https://www.dropbox.com/oauth2/authorize` +
+      `${DROPBOX_AUTH_URL}` +
       `?response_type=code&client_id=${this._appKey}` +
       '&code_challenge_method=S256' +
       '&token_access_type=offline' +
       `&code_challenge=${codeChallenge}`;
+
     return {
       authUrl: authCodeUrl,
       codeVerifier,
@@ -197,5 +245,39 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
    */
   private _getPath(path: string): string {
     return this._basePath + path;
+  }
+
+  /**
+   * Checks if an error is a path not found error
+   * @param e The error to check
+   * @returns True if it's a path not found error
+   */
+  private _isPathNotFoundError(e: unknown): boolean {
+    const apiError = e as DropboxApiError;
+    return !!apiError?.response?.data?.error_summary?.includes(PATH_NOT_FOUND_ERROR);
+  }
+
+  /**
+   * Checks if an error is an unauthorized error
+   * @param e The error to check
+   * @returns True if it's an unauthorized error
+   */
+  private _isUnauthorizedError(e: unknown): boolean {
+    const apiError = e as DropboxApiError;
+    return apiError?.response?.status === 401;
+  }
+
+  /**
+   * Checks if an error is related to expired or invalid tokens
+   * @param e The error to check
+   * @returns True if it's a token-related error
+   */
+  private _isTokenError(e: unknown): boolean {
+    const apiError = e as DropboxApiError;
+    return !!(
+      apiError?.response?.status === 401 &&
+      (apiError.response.data?.error_summary?.includes(EXPIRED_TOKEN_ERROR) ||
+        apiError.response.data?.error_summary?.includes(INVALID_TOKEN_ERROR))
+    );
   }
 }
