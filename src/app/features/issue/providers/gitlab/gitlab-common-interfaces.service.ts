@@ -175,6 +175,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated_at).getTime(),
       issueId: issue.id,
+      isDone: this._isIssueDone(issue),
     };
   }
 
@@ -196,5 +197,9 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGitlab> {
     return this._issueProviderService.getCfgOnce$(issueProviderId, 'GITLAB');
+  }
+
+  private _isIssueDone(issue: GitlabIssue): boolean {
+    return issue.state === 'closed';
   }
 }
