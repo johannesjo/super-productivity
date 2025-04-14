@@ -121,13 +121,12 @@ export type SoundConfig = Readonly<{
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled: boolean;
-  encryptionPassword: string | null;
   isCompressionEnabled: boolean;
   syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
   /* NOTE: view model for form only*/
-  // dropboxSync?: DropboxSyncConfig;
+  encryptKey?: string | null;
   /* NOTE: view model for form only*/
   webDav?: WebDavConfig;
   /* NOTE: view model for form only*/

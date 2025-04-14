@@ -171,7 +171,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
     isEncryptionEnabled: false,
-    encryptionPassword: null,
+    encryptKey: null,
     syncProvider: null,
     syncInterval: minute,
 

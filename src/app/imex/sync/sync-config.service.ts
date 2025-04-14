@@ -4,7 +4,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { combineLatest, Observable } from 'rxjs';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { map, tap } from 'rxjs/operators';
-import { SyncProviderId } from '../../pfapi/api';
+import { PrivateCfgByProviderId, SyncProviderId } from '../../pfapi/api';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
@@ -27,33 +27,37 @@ export class SyncConfigService {
     this._pfapiService.currentProviderPrivateCfg$,
   ]).pipe(
     map(([syncCfg, currentProviderCfg]) => {
-      console.log({ syncCfg }, syncCfg.encryptionPassword);
+      // Base config with defaults
+      const baseConfig = {
+        ...DEFAULT_GLOBAL_CONFIG.sync,
+        ...syncCfg,
+      };
 
-      // TODO ???
+      // If no provider is active, return base config with empty encryption key
       if (!currentProviderCfg) {
         return {
-          ...DEFAULT_GLOBAL_CONFIG.sync,
-          ...syncCfg,
+          ...baseConfig,
+          encryptKey: '',
         };
       }
 
       const prop = PROP_MAP_TO_FORM[currentProviderCfg.providerId];
-      console.log({ prop });
 
-      if (!prop) {
-        return {
-          ...DEFAULT_GLOBAL_CONFIG.sync,
-          ...syncCfg,
-        };
-      }
-      return {
-        ...DEFAULT_GLOBAL_CONFIG.sync,
-        ...syncCfg,
+      // Create config with provider-specific settings
+      const result = {
+        ...baseConfig,
+        encryptKey: currentProviderCfg?.privateCfg?.encryptKey || '',
+        // Reset provider-specific configs to defaults first
         localFileSync: DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
         webDav: DEFAULT_GLOBAL_CONFIG.sync.webDav,
-        // encryptionPassword: currentProviderCfg.privateCfg.encryptionPassword,
-        [prop]: currentProviderCfg.privateCfg,
       };
+
+      // Add current provider config if applicable
+      if (prop && currentProviderCfg.privateCfg) {
+        result[prop] = currentProviderCfg.privateCfg;
+      }
+
+      return result;
     }),
     tap((v) => console.log('syncSettingsForm$', v)),
   );
@@ -63,49 +67,63 @@ export class SyncConfigService {
     if (!activeProvider) {
       throw new Error('No active sync provider');
     }
-    const old: any = await activeProvider.privateCfg.load();
-    console.log({
-      ...old,
-      encryptionPassword: pwd,
-    });
+    const oldConfig = await activeProvider.privateCfg.load();
 
     await this._pfapiService.pf.setPrivateCfgForSyncProvider(activeProvider.id, {
-      ...old,
-      encryptionPassword: pwd,
-    });
+      ...oldConfig,
+      encryptKey: pwd,
+    } as PrivateCfgByProviderId<SyncProviderId>);
   }
 
   async updateSettingsFromForm(newSettings: SyncConfig, isForce = false): Promise<void> {
     // TODO this is just a work around for formly ending in a endless loop otherwise
+    // Prevent unnecessary updates
     const isEqual = JSON.stringify(this._lastSettings) === JSON.stringify(newSettings);
-    this._lastSettings = newSettings;
     if (isEqual && !isForce) {
       return;
     }
-    // alert('UPDATE');
-    const providerId = newSettings.syncProvider as SyncProviderId | null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { encryptKey, webDav, localFileSync, ...newSettingsClean } = newSettings;
+
+    if (this._lastSettings?.encryptKey !== newSettings.encryptKey) {
+      await this.updateEncryptionPassword(newSettings.encryptKey || '');
+    }
+    this._lastSettings = newSettings;
+
+    const providerId = newSettingsClean.syncProvider as SyncProviderId | null;
+    // Update global config
+    this._globalConfigService.updateSection('sync', newSettingsClean);
+
     if (!providerId) {
-      return this._globalConfigService.updateSection('sync', {
-        ...newSettings,
-      });
+      return;
     }
     const prop = PROP_MAP_TO_FORM[providerId];
     if (!prop) {
-      return this._globalConfigService.updateSection('sync', {
-        ...newSettings,
-      });
+      return;
     }
-    const privateCfg = newSettings[prop];
-    if (typeof privateCfg !== 'object') {
+
+    // Update provider-specific config
+    if (typeof newSettings[prop] !== 'object' || newSettings[prop] === null) {
       throw new Error('Invalid mapping for privateCfg for sync provider');
     }
-    this._globalConfigService.updateSection('sync', {
-      ...newSettings,
-      [prop]: DEFAULT_GLOBAL_CONFIG.sync[prop],
-    });
-    await this._pfapiService.pf.setPrivateCfgForSyncProvider(
-      providerId,
-      privateCfg as any,
-    );
+
+    const privateCfg = { ...newSettings[prop], encryptKey };
+
+    // Handle WebDAV provider specially
+    if (providerId === SyncProviderId.WebDAV) {
+      const webDavCfg = privateCfg as PrivateCfgByProviderId<SyncProviderId.WebDAV>;
+      await this._pfapiService.pf.setPrivateCfgForSyncProvider(providerId, {
+        ...webDavCfg,
+        baseUrl: webDavCfg.baseUrl || '',
+        userName: webDavCfg.userName || '',
+        password: webDavCfg.password || '',
+        syncFolderPath: webDavCfg.syncFolderPath || '',
+      });
+    } else {
+      await this._pfapiService.pf.setPrivateCfgForSyncProvider(
+        providerId,
+        privateCfg as PrivateCfgByProviderId<SyncProviderId>,
+      );
+    }
   }
 }
