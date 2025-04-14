@@ -294,7 +294,6 @@ export class SyncService<const MD extends ModelCfgs> {
       return;
     }
 
-    // TODO make rev change to see if there were updates before lock file maybe
     return this._downloadToLocalMULTI(remote, local, remoteRev, isSkipModelRevMapCheck);
   }
 
@@ -344,9 +343,6 @@ export class SyncService<const MD extends ModelCfgs> {
 
     await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
 
-    // TODO double check remote revs with remoteMetaFileContent.revMap and retry a couple of times for each promise individually
-    // since remote might hava an incomplete update
-
     // ON SUCCESS
     await this._modelSyncService.updateLocalFromRemoteMetaFile(remote);
 
@@ -354,7 +350,6 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
-      // TODO check if we need to extend the revMap and modelVersions???
       revMap: validateRevMap({
         ...local.revMap,
         ...realRemoteRevMap,
@@ -416,7 +411,6 @@ export class SyncService<const MD extends ModelCfgs> {
       return;
     }
 
-    // TODO maybe make rev check for meta file to see if there were updates before lock file maybe
     return this._uploadToRemoteMULTI(remote, local, lastRemoteRev);
   }
 
