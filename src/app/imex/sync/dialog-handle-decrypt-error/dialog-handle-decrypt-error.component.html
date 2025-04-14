@@ -1,9 +1,6 @@
 <mat-dialog-content>
   <div class="content">
-    <!--TODO translate -->
-    <p>
-      Your data is encrypted and decryption failed. Please enter the correct password!
-    </p>
+    <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P1 | translate }}</p>
   </div>
 
   <form
@@ -26,15 +23,15 @@
     class="content"
     style="margin-top: 24px"
   >
-    <!--TODO translate -->
-    <p>You can also change your password, which will overwrite all remote data.</p>
+    <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P2 | translate }}</p>
+
     <button
       mat-stroked-button
       color="warn"
       type="button"
       (click)="updatePWAndForceUpload()"
     >
-      Change and overwrite remote
+      {{ T.F.SYNC.D_DECRYPT_ERROR.BTN_OVER_WRITE_REMOTE | translate }}
     </button>
   </div>
 </mat-dialog-content>

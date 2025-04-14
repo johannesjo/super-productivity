@@ -26,7 +26,6 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
-import { SyncConfigService } from './sync-config.service';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 
 @Injectable({
@@ -40,7 +39,6 @@ export class SyncWrapperService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
-  private _syncConfigService = inject(SyncConfigService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -48,7 +46,6 @@ export class SyncWrapperService {
     map((cfg) => cfg?.sync),
   );
   syncProviderId$: Observable<SyncProviderId | null> = this.syncCfg$.pipe(
-    // TODO local file sync for electron and android provider interface
     // NOTE: types are compatible
     map((cfg) => cfg.syncProvider as SyncProviderId | null),
   );
@@ -72,10 +69,9 @@ export class SyncWrapperService {
 
   // TODO move someplace else
 
-  async sync(): Promise<SyncStatus | 'USER_ABORT' | 'HANDLED_ERROR'> {
+  async sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
     const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
-      //   // TODO handle different
       throw new Error('No Sync Provider for sync()');
     }
 
@@ -92,7 +88,6 @@ export class SyncWrapperService {
 
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateLocalAll:
-          // TODO dare to do more complicated stuff for UpdateLocal
           await this._reInitAppAfterDataModelChange();
           this._snackService.open({
             msg: T.F.SYNC.S.SUCCESS_DOWNLOAD,
@@ -121,17 +116,8 @@ export class SyncWrapperService {
             await this._pfapiService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
           }
-
           console.log({ res });
-          // TODO implement and test force cases
-          // if (!this._c(T.F.SYNC.C.EMPTY_SYNC)) {
-          // TODO implement and test force cases
-          // this._pfapiWrapperService.pf
-          // switch (r.conflictData?.reason) {
-          //   case ConflictReason.NoLastSync:
-          // }
-          // }
-          // return 'USER_ABORT';
+
           return r.status;
       }
     } catch (error: any) {
@@ -142,7 +128,7 @@ export class SyncWrapperService {
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',
           actionFn: async () => this._matDialog.open(DialogSyncInitialCfgComponent),
-          actionStr: 'Configure',
+          actionStr: T.F.SYNC.S.BTN_CONFIGURE,
         });
         return 'HANDLED_ERROR';
       } else if (
@@ -165,10 +151,10 @@ export class SyncWrapperService {
       } else if (error instanceof LockPresentError) {
         this._snackService.open({
           // TODO translate
-          msg: 'Remote Data is currently being written',
+          msg: T.F.SYNC.S.ERROR_DATA_IS_CURRENTLY_WRITTEN,
           type: 'ERROR',
           actionFn: async () => this._forceUpload(),
-          actionStr: 'Force Overwrite',
+          actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
       } else if (
@@ -190,18 +176,11 @@ export class SyncWrapperService {
         });
         return 'HANDLED_ERROR';
       }
-      throw new Error('unhandled sync error');
     }
   }
 
   private async _forceUpload(): Promise<void> {
-    if (
-      !this._c(
-        this._translateService.instant(
-          'Forcing an upload of your data could lead to data loss. Continue?',
-        ),
-      )
-    ) {
+    if (!this._c(this._translateService.instant(T.F.SYNC.C.FORCE_UPLOAD))) {
       return;
     }
     try {
@@ -223,7 +202,6 @@ export class SyncWrapperService {
     providerId: SyncProviderId,
   ): Promise<{ wasConfigured: boolean }> {
     const provider = await this._pfapiService.pf.getSyncProviderById(providerId);
-    console.log(provider);
 
     if (!provider) {
       return { wasConfigured: false };
@@ -256,9 +234,6 @@ export class SyncWrapperService {
           }, 1000);
           return { wasConfigured: true };
         } else {
-          // this._globalConfigService.updateSection('sync', {
-          //   isEnabled: false,
-          // });
           return { wasConfigured: false };
         }
       }
@@ -289,18 +264,11 @@ export class SyncWrapperService {
   }
 
   private async _reInitAppAfterDataModelChange(): Promise<void> {
-    // TODO maybe do it more elegantly with pfapi.events
-    // this._imexViewService.setDataImportInProgress(true);
     await Promise.all([
       // reload view model from ls
       this._dataInitService.reInit(true),
       this._reminderService.reloadFromDatabase(),
     ]);
-    // this._imexViewService.setDataImportInProgress(false);
-    // TODO better solution, unclear why needed
-    // setTimeout(() => {
-    // this._imexViewService.setDataImportInProgress(false);
-    // });
   }
 
   private _c(str: string): boolean {

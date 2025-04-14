@@ -50,8 +50,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           type: 'btn',
           key: 'syncFolderPath',
           templateOptions: {
-            // TODO translate
-            // text: `Select Sync Folder`,
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
             required: true,
             onClick: () => {

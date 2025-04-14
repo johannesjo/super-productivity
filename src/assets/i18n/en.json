@@ -858,8 +858,7 @@
       },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
-        "FORCE_IMPORT": "Import remote data anyway?",
-        "FORCE_UPLOAD": "Upload local data anyway?",
+        "FORCE_UPLOAD": "Forcing an upload of your data could lead to data loss. Continue?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "MIGRATE_LEGACY": "Legacy data detected while importing, do you want to try to migrate it?",
         "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
@@ -882,6 +881,11 @@
         "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Keep local",
         "USE_REMOTE": "Keep remote"
+      },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Change and overwrite remote",
+        "P1": "Your data is encrypted and decryption failed. Please enter the correct password!",
+        "P2": "You can also change your password, which will overwrite all remote data."
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Close App",
@@ -940,6 +944,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Already in sync",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "No local changes – Already in sync",
+        "BTN_CONFIGURE": "Configure",
+        "BTN_FORCE_OVERWRITE": "Force Overwrite",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Remote Data is currently being written",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "ERROR_NO_REV": "No valid rev for remote file",
@@ -1632,6 +1639,14 @@
     "TRIGGER_SYNC": "Sync!",
     "WORKLOG": "Worklog"
   },
+  "MIGRATE": {
+    "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
+    "SUCCESS": "Migration all done! Restarting app now...",
+    "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "E_MIGRATION_FAILED": "Migration failed! with Error:",
+    "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!"
+  },
+
   "PDS": {
     "BACK": "Wait I forgot something!",
     "BREAK_LABEL": "Breaks (nr / time)",

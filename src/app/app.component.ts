@@ -63,6 +63,7 @@ import moment from 'moment/moment';
 import { LocalBackupService } from './imex/local-backup/local-backup.service';
 import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
 import { AppDataCompleteNew } from './pfapi/pfapi-config';
+import { TranslateService } from '@ngx-translate/core';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -97,6 +98,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   ],
 })
 export class AppComponent implements OnDestroy {
+  private _translateService = inject(TranslateService);
   private _globalConfigService = inject(GlobalConfigService);
   private _shortcutService = inject(ShortcutService);
   private _bannerService = inject(BannerService);
@@ -165,12 +167,11 @@ export class AppComponent implements OnDestroy {
         const legacyData = await this._persistenceLegacyService.loadComplete();
         console.log({ legacyData: legacyData });
 
-        alert('Detected legacy data. We will migrate it for you! ');
+        alert(this._translateService.instant(T.MIGRATE.DETECTED_LEGACY));
+
         if (
           !IS_ANDROID_WEB_VIEW &&
-          confirm(
-            'Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?',
-          )
+          confirm(this._translateService.instant(T.MIGRATE.C_DOWNLOAD_BACKUP))
         ) {
           download('sp-legacy-backup.json', JSON.stringify(legacyData));
         }
@@ -182,7 +183,9 @@ export class AppComponent implements OnDestroy {
           );
           this.imexMetaService.setDataImportInProgress(true);
           await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
-          alert('Migration all done! Restarting app now...');
+
+          alert(this._translateService.instant(T.MIGRATE.SUCCESS));
+
           if (IS_ELECTRON) {
             window.ea.relaunch();
             // if relaunch fails we hard close the app
@@ -192,7 +195,7 @@ export class AppComponent implements OnDestroy {
           window.setTimeout(() => window.location.reload());
           // fallback
           window.setTimeout(
-            () => alert('Automatic restart failed. Please restart the app manually!'),
+            () => alert(this._translateService.instant(T.MIGRATE.E_RESTART_FAILED)),
             2000,
           );
         } catch (error) {
@@ -202,11 +205,16 @@ export class AppComponent implements OnDestroy {
 
           try {
             alert(
-              'Migration failed! with Error:\n\n' +
+              this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
+                '\n\n' +
                 JSON.stringify((error as any).additionalLog[0].errors),
             );
           } catch (e) {
-            alert('Migration failed! with Error: ' + error?.toString());
+            alert(
+              this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
+                '\n\n' +
+                error?.toString(),
+            );
           }
           return;
         }
