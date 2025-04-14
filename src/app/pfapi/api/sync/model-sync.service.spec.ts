@@ -9,6 +9,7 @@ import {
   RevMismatchForModelError,
 } from '../errors/errors';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
+import { SyncProviderId } from '../pfapi.const';
 
 interface TestModel {
   data?: any;
@@ -23,7 +24,7 @@ describe('ModelSyncService', () => {
   let service: ModelSyncService<TestModelCfgs>;
   let mockModelControllers: any;
   let mockPfapi: Pfapi<TestModelCfgs>;
-  let mockSyncProvider$: MiniObservable<SyncProviderServiceInterface<unknown> | null>;
+  let mockSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>;
   let mockEncryptAndCompressCfg$: MiniObservable<any>;
   let mockEncryptAndCompressHandler: jasmine.SpyObj<EncryptAndCompressHandlerService>;
   let mockSyncProvider: any;
@@ -78,6 +79,9 @@ describe('ModelSyncService', () => {
         .createSpy('downloadFile')
         .and.returnValue(Promise.resolve('{"data":{"id":"downloaded-data"}}')),
       removeFile: jasmine.createSpy('removeFile').and.returnValue(Promise.resolve()),
+      privateCfg: {
+        load: jasmine.createSpy('load').and.returnValue(Promise.resolve({})),
+      },
     };
     mockSyncProvider$ = new MiniObservable(mockSyncProvider);
 
@@ -92,10 +96,10 @@ describe('ModelSyncService', () => {
     mockEncryptAndCompressHandler = {
       compressAndEncryptData: jasmine
         .createSpy('compressAndEncryptData')
-        .and.callFake((cfg, data) => Promise.resolve(JSON.stringify(data))),
+        .and.callFake((cfg, pwd, data) => Promise.resolve(JSON.stringify(data))),
       decompressAndDecryptData: jasmine
         .createSpy('decompressAndDecryptData')
-        .and.callFake((cfg, dataStr) => Promise.resolve(JSON.parse(dataStr))),
+        .and.callFake((cfg, pwd, dataStr) => Promise.resolve(JSON.parse(dataStr))),
       compressAndEncrypt: jasmine.createSpy('compressAndEncrypt'),
       decompressAndDecrypt: jasmine.createSpy('decompressAndDecrypt') as any,
     };
@@ -126,6 +130,7 @@ describe('ModelSyncService', () => {
       ).toHaveBeenCalledWith(modelData);
       expect(mockEncryptAndCompressHandler.compressAndEncryptData).toHaveBeenCalledWith(
         mockEncryptAndCompressCfg$.value,
+        undefined,
         modelData,
         33, // single model version
       );
