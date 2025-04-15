@@ -240,6 +240,9 @@ git clone https://aur.archlinux.org/superproductivity-bin.git
 cd superproductivity-bin
 makepkg -si
 ```
+#### AppImage
+If you encounter problems, please have a look here:
+https://github.com/johannesjo/super-productivity/issues/3193#issuecomment-2131315513
 
 ### MacOS
 
