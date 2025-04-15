@@ -83,7 +83,8 @@ const ea: ElectronAPI = {
 
   backupAppData: (appData) => _send('BACKUP', appData),
 
-  updateCurrentTask: (task) => _send('CURRENT_TASK_UPDATED', task),
+  updateCurrentTask: (task, isPomodoroEnabled, currentPomodoroSessionTime) =>
+    _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
 
   exec: (command: string) => _send('EXEC', command),
 };

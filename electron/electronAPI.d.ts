@@ -111,7 +111,11 @@ export interface ElectronAPI {
 
   backupAppData(appData: AppDataCompleteLegacy | AppDataCompleteNew): void;
 
-  updateCurrentTask(task: Task | null);
+  updateCurrentTask(
+    task: Task | null,
+    isPomodoroEnabled: boolean,
+    currentPomodoroSessionTime: number,
+  );
 
   exec(command: string): void;
 }
