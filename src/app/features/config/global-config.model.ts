@@ -23,6 +23,8 @@ export type MiscConfig = Readonly<{
   taskNotesTpl: string;
   isUseMinimalNav: boolean;
   isDisableAnimations: boolean;
+  // optional because it was added later
+  isShowTipLonger?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{

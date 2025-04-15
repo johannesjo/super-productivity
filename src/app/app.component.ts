@@ -149,18 +149,6 @@ export class AppComponent implements OnDestroy {
 
     this._checkMigrationAndInitBackups();
 
-    this._snackService.open({
-      ico: 'lightbulb',
-      config: {
-        duration: 14000,
-      },
-      msg:
-        '<strong>' +
-        (window as any).productivityTips[(window as any).randomIndex][0] +
-        ':</strong> ' +
-        (window as any).productivityTips[(window as any).randomIndex][1],
-    });
-
     this._subs = this._languageService.isLangRTL.subscribe((val) => {
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
@@ -191,6 +179,20 @@ export class AppComponent implements OnDestroy {
       this._checkAvailableStorage();
       // init offline banner in lack of a better place for it
       this._initOfflineBanner();
+
+      if (this._globalConfigService.cfg?.misc.isShowTipLonger) {
+        this._snackService.open({
+          ico: 'lightbulb',
+          config: {
+            duration: 16000,
+          },
+          msg:
+            '<strong>' +
+            (window as any).productivityTips[(window as any).randomIndex][0] +
+            ':</strong> ' +
+            (window as any).productivityTips[(window as any).randomIndex][1],
+        });
+      }
     }, 1000);
 
     if (IS_ELECTRON) {

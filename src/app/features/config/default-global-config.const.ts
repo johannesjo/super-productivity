@@ -24,6 +24,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     startOfNextDay: 0,
     isUseMinimalNav: false,
     isDisableAnimations: false,
+    isShowTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
 **What do I want?**
