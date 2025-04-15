@@ -192,7 +192,6 @@ export class AppComponent implements OnDestroy {
             window.setTimeout(() => window.ea.exit(1234), 1000);
           }
           window.location.reload();
-          window.setTimeout(() => window.location.reload());
           // fallback
           window.setTimeout(
             () => alert(this._translateService.instant(T.MIGRATE.E_RESTART_FAILED)),
