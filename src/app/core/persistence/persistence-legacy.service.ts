@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AllowedDBKeys, DB } from './storage-keys.const';
+import { AllowedDBKeys } from './storage-keys.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import {
   ArchiveTask,
@@ -37,10 +37,7 @@ import {
   SimpleCounter,
   SimpleCounterState,
 } from '../../features/simple-counter/simple-counter.model';
-import { Subject } from 'rxjs';
-import { devError } from '../../util/dev-error';
-import { removeFromDb, saveToDb } from './persistence.actions';
-import { crossModelMigrations } from './cross-model-migrations';
+import { saveToDb } from './persistence.actions';
 import { DEFAULT_APP_BASE_DATA } from '../../imex/sync/sync.const';
 import { BASE_MODEL_CFGS, ENTITY_MODEL_CFGS } from './persistence.const';
 import { PersistenceLocalService } from './persistence-local.service';
@@ -117,55 +114,22 @@ export class PersistenceLegacyService {
       ENTITY_MODEL_CFGS.taskRepeatCfg,
     );
 
-  onAfterSave$: Subject<{
-    appDataKey: AllowedDBKeys;
-    data: unknown;
-    isDataImport: boolean;
-    isUpdateRevAndLastUpdate: boolean;
-    projectId?: string;
-  }> = new Subject();
-
   private _isBlockSaving: boolean = false;
-  private _invalidDataCount = 0;
-
-  // BACKUP AND SYNC RELATED
-  // -----------------------
-  async loadBackup(): Promise<AppDataCompleteLegacy> {
-    return this._loadFromDb({ dbKey: DB.BACKUP });
-  }
-
-  async saveBackup(backup?: AppDataCompleteLegacy): Promise<unknown> {
-    const data: AppDataCompleteLegacy = backup || (await this.loadComplete());
-    return this._saveToDb({
-      dbKey: DB.BACKUP,
-      data,
-      isDataImport: true,
-      isSyncModelChange: true,
-    });
-  }
-
-  async clearBackup(): Promise<unknown> {
-    return this._removeFromDb({ dbKey: DB.BACKUP });
-  }
 
   // NOTE: not including backup
   // async loadCompleteWithPrivate(): Promise<AppDataComplete> {
   // }
 
-  async loadComplete(isMigrate = false): Promise<AppDataCompleteLegacy> {
+  async loadComplete(): Promise<AppDataCompleteLegacy> {
     const projectState = await this.project.loadState();
     const pids = projectState ? (projectState.ids as string[]) : [];
     if (!pids) {
       throw new Error('Project State is broken');
     }
 
-    const r = isMigrate
-      ? crossModelMigrations({
-          ...(await this._loadAppBaseData()),
-        } as AppDataCompleteLegacy)
-      : {
-          ...(await this._loadAppBaseData()),
-        };
+    const r = {
+      ...(await this._loadAppBaseData()),
+    };
 
     return {
       ...r,
@@ -173,50 +137,6 @@ export class PersistenceLegacyService {
         await this._persistenceLocalService.loadLastSyncModelChange(),
       lastArchiveUpdate: await this._persistenceLocalService.loadLastArchiveChange(),
     };
-  }
-
-  async importComplete(data: AppDataCompleteLegacy): Promise<unknown> {
-    console.log('IMPORT--->', data);
-    this._isBlockSaving = true;
-
-    const forBase = Promise.all(
-      this._baseModels.map(async (modelCfg: PersistenceLegacyBaseModel<any>) => {
-        return await modelCfg.saveState(data[modelCfg.appDataKey], {
-          isDataImport: true,
-        });
-      }),
-    );
-
-    return await Promise.all([forBase])
-      .then(() => {
-        if (typeof data.lastLocalSyncModelChange !== 'number') {
-          // not necessarily a critical error as there might be other reasons for this error to popup
-          devError('No lastLocalSyncModelChange for imported data');
-          data.lastLocalSyncModelChange = Date.now();
-        }
-
-        return Promise.all([
-          this._persistenceLocalService.updateLastSyncModelChange(
-            data.lastLocalSyncModelChange,
-          ),
-          this._persistenceLocalService.updateLastArchiveChange(
-            data.lastArchiveUpdate || 0,
-          ),
-        ]);
-      })
-      .finally(() => {
-        this._isBlockSaving = false;
-      });
-  }
-
-  async clearDatabaseExceptBackupAndLocalOnlyModel(): Promise<void> {
-    const backup: AppDataCompleteLegacy = await this.loadBackup();
-    const localOnlyModel = await this._persistenceLocalService.load();
-    await this._databaseService.clearDatabase();
-    await this._persistenceLocalService.save(localOnlyModel);
-    if (backup) {
-      await this.saveBackup(backup);
-    }
   }
 
   async _loadAppBaseData(): Promise<AppBaseData> {
@@ -360,37 +280,10 @@ export class PersistenceLegacyService {
         await this._persistenceLocalService.updateLastArchiveChange(now);
       }
 
-      this.onAfterSave$.next({
-        appDataKey: dbKey,
-        data,
-        isDataImport,
-        projectId,
-        isUpdateRevAndLastUpdate: isSyncModelChange,
-      });
-
       return r;
     } else {
       console.warn('BLOCKED SAVING for ', dbKey);
       return Promise.reject('Data import currently in progress. Saving disabled');
-    }
-  }
-
-  private async _removeFromDb({
-    dbKey,
-    isDataImport = false,
-    projectId,
-  }: {
-    dbKey: AllowedDBKeys;
-    projectId?: string;
-    isDataImport?: boolean;
-  }): Promise<any> {
-    const idbKey = this._getIDBKey(dbKey, projectId);
-    if (!this._isBlockSaving || isDataImport === true) {
-      this._store.dispatch(removeFromDb({ dbKey }));
-      return this._databaseService.remove(idbKey);
-    } else {
-      console.warn('BLOCKED SAVING for ', dbKey);
-      return Promise.reject('Data import currently in progress. Removing disabled');
     }
   }
 
