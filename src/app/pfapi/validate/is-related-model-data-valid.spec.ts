@@ -51,6 +51,7 @@ describe('isValidAppData()', () => {
                 title: 'TEST_T',
                 id: 'TEST_ID',
                 taskIds: ['gone'],
+                backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
             [MODEL_VERSION_KEY]: 5,
@@ -72,8 +73,20 @@ describe('isValidAppData()', () => {
                 ...DEFAULT_TASK,
                 id: 't1',
                 reminderId: 'rid',
+                projectId: 'p1',
               },
             },
+          },
+          project: {
+            ...fakeEntityStateFromArray([
+              {
+                ...DEFAULT_PROJECT,
+                title: 'p1',
+                id: 'p1',
+                taskIds: ['t1'],
+              },
+            ] as Partial<Project>[]),
+            [MODEL_VERSION_KEY]: 5,
           },
         }),
       ).toThrowError(`Missing reminder rid from task not existing`);
@@ -117,9 +130,7 @@ describe('isValidAppData()', () => {
             [MODEL_VERSION_KEY]: 5,
           },
         }),
-      ).toThrowError(
-        `Inconsistent Task State: Missing task id goneTag for Project/Tag TEST_TAG`,
-      );
+      ).toThrowError(`Inconsistent Task State: Missing task id goneTag for Tag TEST_TAG`);
     });
 
     it('orphaned archived sub tasks', () => {
@@ -131,6 +142,7 @@ describe('isValidAppData()', () => {
             id: 'subTaskUnarchived',
             title: 'subTaskUnarchived',
             parentId: 'parent',
+            projectId: 'p1',
           },
           {
             ...DEFAULT_TASK,
@@ -138,6 +150,7 @@ describe('isValidAppData()', () => {
             title: 'parent',
             parentId: undefined,
             subTaskIds: ['subTaskUnarchived'],
+            projectId: 'p1',
           },
         ]),
       } as any;
@@ -150,6 +163,7 @@ describe('isValidAppData()', () => {
             id: 'subTaskArchived',
             title: 'subTaskArchived',
             parentId: 'parent',
+            projectId: 'p1',
           },
         ]),
       } as any;
@@ -163,6 +177,16 @@ describe('isValidAppData()', () => {
             lastTimeTrackingFlush: 0,
             timeTracking: mock.archiveYoung.timeTracking,
             task: taskArchiveState,
+          },
+          project: {
+            ...mock.project,
+            ...fakeEntityStateFromArray<Project>([
+              {
+                ...DEFAULT_PROJECT,
+                id: 'p1',
+                taskIds: ['parent'],
+              },
+            ]),
           },
         }),
       ).toThrowError(
@@ -227,6 +251,7 @@ describe('isValidAppData()', () => {
             id: 'subTaskUnarchived',
             title: 'subTaskUnarchived',
             subTaskIds: ['NOOT_THERE'],
+            projectId: 'p1',
           },
         ]),
       } as any;
@@ -235,6 +260,16 @@ describe('isValidAppData()', () => {
           ...mock,
           // NOTE: it's empty
           task: taskState,
+          project: {
+            ...mock.project,
+            ...fakeEntityStateFromArray<Project>([
+              {
+                ...DEFAULT_PROJECT,
+                id: 'p1',
+                taskIds: ['subTaskUnarchived'],
+              },
+            ]),
+          },
         }),
       ).toThrowError(
         `Inconsistent Task State: Missing sub task data in today NOOT_THERE`,

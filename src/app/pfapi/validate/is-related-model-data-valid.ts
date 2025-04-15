@@ -212,7 +212,7 @@ const _isAllTasksAvailableAndListConsistent = (data: AppDataCompleteNew): boolea
     _validityError(
       'Inconsistent Task State: Missing task id ' +
         idNotFound +
-        ' for Project/Tag ' +
+        ` for ${tag ? 'Tag' : 'Project'} ` +
         ((tag as Tag) || (project as Project)).title,
       { tag, project, data },
     );
