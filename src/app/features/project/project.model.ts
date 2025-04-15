@@ -1,4 +1,4 @@
-import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue.model';
+import { IssueProviderKey } from '../issue/issue.model';
 import {
   WorkContextAdvancedCfgKey,
   WorkContextCommon,
@@ -22,7 +22,9 @@ export interface ProjectBasicCfg {
 export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
   id: string;
   // TODO legacy remove
-  issueIntegrationCfgs?: IssueIntegrationCfgs | { [key: string]: any };
+  // issueIntegrationCfgs?: IssueIntegrationCfgs | { [key: string]: any };
+  // to make it simpler for validation
+  issueIntegrationCfgs?: any;
 }
 
 export type Project = Readonly<ProjectCopy>;

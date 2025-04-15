@@ -69,10 +69,15 @@ export interface WorkContextCommon {
   title: string;
 
   // TODO remove legacy
-  breakTime?: BreakTime;
-  breakNr?: BreakNr;
-  workStart?: WorkStartEnd;
-  workEnd?: WorkStartEnd;
+  // breakTime?: BreakTime;
+  // breakNr?: BreakNr;
+  // workStart?: WorkStartEnd;
+  // workEnd?: WorkStartEnd;
+  // to make it simpler for validation
+  breakTime?: any;
+  breakNr?: any;
+  workStart?: any;
+  workEnd?: any;
 }
 
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;
