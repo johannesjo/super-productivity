@@ -1,156 +1,206 @@
 import { Routes } from '@angular/router';
-import { ProjectTaskPageComponent } from './pages/project-task-page/project-task-page.component';
-import { ConfigPageComponent } from './pages/config-page/config-page.component';
-import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
-import { WorklogComponent } from './features/worklog/worklog.component';
-import { MetricPageComponent } from './pages/metric-page/metric-page.component';
-import { ScheduledListPageComponent } from './pages/scheduled-list-page/scheduled-list-page.component';
-import { ProjectSettingsPageComponent } from './pages/project-settings-page/project-settings-page.component';
-import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
+
 import {
   ActiveWorkContextGuard,
   FocusOverlayOpenGuard,
   ValidProjectIdGuard,
   ValidTagIdGuard,
 } from './app.guard';
-import { TagSettingsPageComponent } from './pages/tag-settings-page/tag-settings-page.component';
+
 import { TODAY_TAG } from './features/tag/tag.const';
-import { QuickHistoryComponent } from './features/quick-history/quick-history.component';
-import { PlannerComponent } from './features/planner/planner.component';
-import { ScheduleComponent } from './features/schedule/schedule/schedule.component';
-import { BoardsComponent } from './features/boards/boards.component';
+import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
 
 export const APP_ROUTES: Routes = [
   {
     path: 'config',
-    component: ConfigPageComponent,
+    loadComponent: () =>
+      import('./pages/config-page/config-page.component').then(
+        (m) => m.ConfigPageComponent,
+      ),
     data: { page: 'config' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
     path: 'scheduled-list',
-    component: ScheduledListPageComponent,
+    loadComponent: () =>
+      import('./pages/scheduled-list-page/scheduled-list-page.component').then(
+        (m) => m.ScheduledListPageComponent,
+      ),
     data: { page: 'scheduled-list' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
     path: 'planner',
-    component: PlannerComponent,
+    loadComponent: () =>
+      import('./features/planner/planner.component').then((m) => m.PlannerComponent),
     data: { page: 'planner' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
     path: 'schedule',
-    component: ScheduleComponent,
+    loadComponent: () =>
+      import('./features/schedule/schedule/schedule.component').then(
+        (m) => m.ScheduleComponent,
+      ),
     data: { page: 'schedule' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
     path: 'boards',
-    component: BoardsComponent,
+    loadComponent: () =>
+      import('./features/boards/boards.component').then((m) => m.BoardsComponent),
     data: { page: 'boards' },
     canActivate: [FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/tasks',
+    // eagerly loaded
     component: TagTaskPageComponent,
+    // loadComponent: () =>
+    //   import('./pages/tag-task-page/tag-task-page.component').then(
+    //     (m) => m.TagTaskPageComponent,
+    //   ),
     data: { page: 'tag-tasks' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/settings',
-    component: TagSettingsPageComponent,
+    loadComponent: () =>
+      import('./pages/tag-settings-page/tag-settings-page.component').then(
+        (m) => m.TagSettingsPageComponent,
+      ),
     data: { page: 'tag-settings' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/worklog',
-    component: WorklogComponent,
+    loadComponent: () =>
+      import('./features/worklog/worklog.component').then((m) => m.WorklogComponent),
     data: { page: 'worklog' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/quick-history',
-    component: QuickHistoryComponent,
+    loadComponent: () =>
+      import('./features/quick-history/quick-history.component').then(
+        (m) => m.QuickHistoryComponent,
+      ),
     data: { page: 'quick-history' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   // {path: 'tag/:id/metrics', component: MetricPageComponent, data: {page: 'metrics'}, canActivate: [ValidContextIdGuard, FocusOverlayOpenGuard]},
   {
     path: 'tag/:id/daily-summary',
-    component: DailySummaryComponent,
+    loadComponent: () =>
+      import('./pages/daily-summary/daily-summary.component').then(
+        (m) => m.DailySummaryComponent,
+      ),
     data: { page: 'daily-summary' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/daily-summary/:dayStr',
-    component: DailySummaryComponent,
+    loadComponent: () =>
+      import('./pages/daily-summary/daily-summary.component').then(
+        (m) => m.DailySummaryComponent,
+      ),
     data: { page: 'daily-summary' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'tag/:id/metrics',
-    component: MetricPageComponent,
+    loadComponent: () =>
+      import('./pages/metric-page/metric-page.component').then(
+        (m) => m.MetricPageComponent,
+      ),
     data: { page: 'metrics' },
     canActivate: [ValidTagIdGuard, FocusOverlayOpenGuard],
   },
 
   {
     path: 'project/:id/tasks',
-    component: ProjectTaskPageComponent,
+    loadComponent: () =>
+      import('./pages/project-task-page/project-task-page.component').then(
+        (m) => m.ProjectTaskPageComponent,
+      ),
     data: { page: 'project-tasks' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/settings',
-    component: ProjectSettingsPageComponent,
+    loadComponent: () =>
+      import('./pages/project-settings-page/project-settings-page.component').then(
+        (m) => m.ProjectSettingsPageComponent,
+      ),
     data: { page: 'project-settings' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/worklog',
-    component: WorklogComponent,
+    loadComponent: () =>
+      import('./features/worklog/worklog.component').then((m) => m.WorklogComponent),
     data: { page: 'worklog' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/quick-history',
-    component: QuickHistoryComponent,
+    loadComponent: () =>
+      import('./features/quick-history/quick-history.component').then(
+        (m) => m.QuickHistoryComponent,
+      ),
     data: { page: 'quick-history' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/metrics',
-    component: MetricPageComponent,
+    loadComponent: () =>
+      import('./pages/metric-page/metric-page.component').then(
+        (m) => m.MetricPageComponent,
+      ),
     data: { page: 'metrics' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/daily-summary',
-    component: DailySummaryComponent,
+    loadComponent: () =>
+      import('./pages/daily-summary/daily-summary.component').then(
+        (m) => m.DailySummaryComponent,
+      ),
     data: { page: 'daily-summary' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'project/:id/daily-summary/:dayStr',
-    component: DailySummaryComponent,
+    loadComponent: () =>
+      import('./pages/daily-summary/daily-summary.component').then(
+        (m) => m.DailySummaryComponent,
+      ),
     data: { page: 'daily-summary' },
     canActivate: [ValidProjectIdGuard, FocusOverlayOpenGuard],
   },
   {
     path: 'active/:subPageType',
     canActivate: [ActiveWorkContextGuard, FocusOverlayOpenGuard],
-    component: ConfigPageComponent,
+    loadComponent: () =>
+      import('./pages/config-page/config-page.component').then(
+        (m) => m.ConfigPageComponent,
+      ),
   },
   {
     path: 'active/:subPageType/:param',
     canActivate: [ActiveWorkContextGuard, FocusOverlayOpenGuard],
-    component: ConfigPageComponent,
+    loadComponent: () =>
+      import('./pages/config-page/config-page.component').then(
+        (m) => m.ConfigPageComponent,
+      ),
   },
   {
     path: 'active',
     canActivate: [ActiveWorkContextGuard, FocusOverlayOpenGuard],
-    component: ConfigPageComponent,
+    loadComponent: () =>
+      import('./pages/config-page/config-page.component').then(
+        (m) => m.ConfigPageComponent,
+      ),
   },
 
   { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },

@@ -37,7 +37,12 @@ import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { ReminderModule } from './app/features/reminder/reminder.module';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, withHashLocation } from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withHashLocation,
+  withPreloading,
+} from '@angular/router';
 import { APP_ROUTES } from './app/app.routes';
 import { StoreModule } from '@ngrx/store';
 import { reducers } from './app/root-store';
@@ -158,7 +163,7 @@ bootstrapApplication(AppComponent, {
     },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
-    provideRouter(APP_ROUTES, withHashLocation()),
+    provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
   ],
 }).then(() => {
   // TODO make asset caching work for electron
