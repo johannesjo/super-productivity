@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "typeRoots": ["node_modules/@types"],
+    "downlevelIteration": true,
     "lib": ["dom"]
   },
   "include": ["main.ts", "**/*.ts"],
