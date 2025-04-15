@@ -33,10 +33,7 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
-import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
-import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ProjectService } from '../project/project.service';
-import { AddTasksForTomorrowService } from '../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RightPanelComponent } from '../right-panel/right-panel.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -94,11 +91,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   improvementService = inject(ImprovementService);
   layoutService = inject(LayoutService);
   workContextService = inject(WorkContextService);
-  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _activatedRoute = inject(ActivatedRoute);
   private _projectService = inject(ProjectService);
   private _cd = inject(ChangeDetectorRef);
-  private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
 
   // TODO refactor all to signals
   undoneTasks = input<TaskWithSubTasks[]>([]);
@@ -133,11 +128,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       switchMap((el) => fromEvent(el, 'scroll')),
     );
 
-  // eslint-disable-next-line no-mixed-operators
-  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
-  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
-    this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(this._tomorrow);
-
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
 
@@ -167,9 +157,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnInit(): void {
-    // eslint-disable-next-line no-mixed-operators
-    this._tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-
     // preload
     // TODO check
     // this._subs.add(this.workContextService.backlogTasks$.subscribe());
