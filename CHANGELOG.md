@@ -1,3 +1,5 @@
+## [12.0.6-rc.1](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.0...v12.0.6-rc.1) (2025-04-15)
+
 ## [12.0.6-rc.0](https://github.com/johannesjo/super-productivity/compare/v12.0.5...v12.0.6-rc.0) (2025-04-15)
 
 ### Bug Fixes
