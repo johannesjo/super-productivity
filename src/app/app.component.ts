@@ -26,14 +26,13 @@ import { UiHelperService } from './features/ui-helper/ui-helper.service';
 import { LanguageService } from './core/language/language.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { ImexViewService } from './imex/imex-meta/imex-view.service';
-import { AndroidService } from './features/android/android.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { map, skip, take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
@@ -59,7 +58,6 @@ import { PersistenceLegacyService } from './core/persistence/persistence-legacy.
 import { download } from './util/download';
 import { PersistenceLocalService } from './core/persistence/persistence-local.service';
 import { SyncStatus } from './pfapi/api';
-import moment from 'moment/moment';
 import { LocalBackupService } from './imex/local-backup/local-backup.service';
 import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
 import { AppDataCompleteNew } from './pfapi/pfapi-config';
@@ -107,7 +105,6 @@ export class AppComponent implements OnDestroy {
   private _globalThemeService = inject(GlobalThemeService);
   private _uiHelperService = inject(UiHelperService);
   private _languageService = inject(LanguageService);
-  private _androidService = inject(AndroidService);
   private _startTrackingReminderService = inject(TrackingReminderService);
   private _activatedRoute = inject(ActivatedRoute);
   private _pfapiService = inject(PfapiService);
@@ -150,88 +147,7 @@ export class AppComponent implements OnDestroy {
     this._languageService.setDefault(LanguageCode.en);
     this._languageService.setFromBrowserLngIfAutoSwitchLng();
 
-    (async () => {
-      const MIGRATED_VAL = 42;
-      const lastLocalSyncModelChange =
-        await this._persistenceLocalService.loadLastSyncModelChange();
-      // CHECK AND DO MIGRATION
-      // ---------------------
-      if (
-        typeof lastLocalSyncModelChange === 'number' &&
-        lastLocalSyncModelChange > MIGRATED_VAL
-      ) {
-        // disable sync until reload
-        this._pfapiService.pf.sync = () => Promise.resolve({ status: SyncStatus.InSync });
-        this.imexMetaService.setDataImportInProgress(true);
-
-        const legacyData = await this._persistenceLegacyService.loadComplete();
-        console.log({ legacyData: legacyData });
-
-        alert(this._translateService.instant(T.MIGRATE.DETECTED_LEGACY));
-
-        if (
-          !IS_ANDROID_WEB_VIEW &&
-          confirm(this._translateService.instant(T.MIGRATE.C_DOWNLOAD_BACKUP))
-        ) {
-          download('sp-legacy-backup.json', JSON.stringify(legacyData));
-        }
-        try {
-          await this._pfapiService.importCompleteBackup(
-            legacyData as any as AppDataCompleteNew,
-            true,
-            true,
-          );
-          this.imexMetaService.setDataImportInProgress(true);
-          await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
-
-          alert(this._translateService.instant(T.MIGRATE.SUCCESS));
-
-          if (IS_ELECTRON) {
-            window.ea.relaunch();
-            // if relaunch fails we hard close the app
-            window.setTimeout(() => window.ea.exit(1234), 1000);
-          }
-          window.location.reload();
-          // fallback
-          window.setTimeout(
-            () => alert(this._translateService.instant(T.MIGRATE.E_RESTART_FAILED)),
-            2000,
-          );
-        } catch (error) {
-          // prevent any interaction with the app on after failure
-          this.imexMetaService.setDataImportInProgress(true);
-          console.error(error);
-
-          try {
-            alert(
-              this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
-                '\n\n' +
-                JSON.stringify((error as any).additionalLog[0].errors),
-            );
-          } catch (e) {
-            alert(
-              this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
-                '\n\n' +
-                error?.toString(),
-            );
-          }
-          return;
-        }
-      } else {
-        // if everything is normal, check for TMP stray backup
-        await this._pfapiService.isCheckForStrayLocalTmpDBBackupAndImport();
-
-        // if completely fresh instance check for local backups
-        if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
-          const meta = await this._pfapiService.pf.metaModel.load();
-          if (!meta || meta.lastUpdate === DEFAULT_META_MODEL.lastUpdate) {
-            await this._localBackupService.askForFileStoreBackupIfAvailable();
-          }
-          // trigger backup init after
-          this._localBackupService.init();
-        }
-      }
-    })();
+    this._checkMigrationAndInitBackups();
 
     this._snackService.open({
       ico: 'lightbulb',
@@ -266,26 +182,16 @@ export class AppComponent implements OnDestroy {
     // init theme and body class handlers
     this._globalThemeService.init();
 
-    // init offline banner in lack of a better place for it
-    this._initOfflineBanner();
-
     // basically init
-    this._startTrackingReminderService.init();
-
     this._requestPersistence();
-    this._checkAvailableStorage();
 
-    if (IS_ANDROID_WEB_VIEW) {
-      this._androidService.init();
-    }
-
-    this._globalConfigService.cfg$.pipe(skip(1), take(1)).subscribe((v) => {
-      if ((v.sync.syncProvider as any) === 'GoogleDrive') {
-        alert(
-          'Please note that synchronization wia google drive is removed in this release. You can use the file sync provider as an alternative and configure syncing in the background yourself',
-        );
-      }
-    });
+    // deferred init
+    window.setTimeout(() => {
+      this._startTrackingReminderService.init();
+      this._checkAvailableStorage();
+      // init offline banner in lack of a better place for it
+      this._initOfflineBanner();
+    }, 1000);
 
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
@@ -370,6 +276,89 @@ export class AppComponent implements OnDestroy {
   ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);
+  }
+
+  private async _checkMigrationAndInitBackups(): Promise<void> {
+    const MIGRATED_VAL = 42;
+    const lastLocalSyncModelChange =
+      await this._persistenceLocalService.loadLastSyncModelChange();
+    // CHECK AND DO MIGRATION
+    // ---------------------
+    if (
+      typeof lastLocalSyncModelChange === 'number' &&
+      lastLocalSyncModelChange > MIGRATED_VAL
+    ) {
+      // disable sync until reload
+      this._pfapiService.pf.sync = () => Promise.resolve({ status: SyncStatus.InSync });
+      this.imexMetaService.setDataImportInProgress(true);
+
+      const legacyData = await this._persistenceLegacyService.loadComplete();
+      console.log({ legacyData: legacyData });
+
+      alert(this._translateService.instant(T.MIGRATE.DETECTED_LEGACY));
+
+      if (
+        !IS_ANDROID_WEB_VIEW &&
+        confirm(this._translateService.instant(T.MIGRATE.C_DOWNLOAD_BACKUP))
+      ) {
+        download('sp-legacy-backup.json', JSON.stringify(legacyData));
+      }
+      try {
+        await this._pfapiService.importCompleteBackup(
+          legacyData as any as AppDataCompleteNew,
+          true,
+          true,
+        );
+        this.imexMetaService.setDataImportInProgress(true);
+        await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
+
+        alert(this._translateService.instant(T.MIGRATE.SUCCESS));
+
+        if (IS_ELECTRON) {
+          window.ea.relaunch();
+          // if relaunch fails we hard close the app
+          window.setTimeout(() => window.ea.exit(1234), 1000);
+        }
+        window.location.reload();
+        // fallback
+        window.setTimeout(
+          () => alert(this._translateService.instant(T.MIGRATE.E_RESTART_FAILED)),
+          2000,
+        );
+      } catch (error) {
+        // prevent any interaction with the app on after failure
+        this.imexMetaService.setDataImportInProgress(true);
+        console.error(error);
+
+        try {
+          alert(
+            this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
+              '\n\n' +
+              JSON.stringify((error as any).additionalLog[0].errors),
+          );
+        } catch (e) {
+          alert(
+            this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
+              '\n\n' +
+              error?.toString(),
+          );
+        }
+        return;
+      }
+    } else {
+      // if everything is normal, check for TMP stray backup
+      await this._pfapiService.isCheckForStrayLocalTmpDBBackupAndImport();
+
+      // if completely fresh instance check for local backups
+      if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
+        const meta = await this._pfapiService.pf.metaModel.load();
+        if (!meta || meta.lastUpdate === DEFAULT_META_MODEL.lastUpdate) {
+          await this._localBackupService.askForFileStoreBackupIfAvailable();
+        }
+        // trigger backup init after
+        this._localBackupService.init();
+      }
+    }
   }
 
   private _initMultiInstanceWarning(): void {
@@ -500,10 +489,6 @@ export class AppComponent implements OnDestroy {
         });
       }
     }
-  }
-
-  private _formatDate(date: Date | string | number): string {
-    return moment(date).format('DD-MM-YYYY, hh:mm:ss');
   }
 
   /**
