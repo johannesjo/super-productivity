@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
@@ -338,6 +338,8 @@ export class JiraApiService {
   }): Observable<any> {
     const worklog = {
       started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
+      // TODO check if this can be replaced with this
+      // started: formatISODateWithOffset(new Date(started)),
       timeSpentSeconds: Math.floor(timeSpent / 1000),
       comment,
     };
