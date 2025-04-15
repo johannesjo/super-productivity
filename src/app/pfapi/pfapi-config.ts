@@ -220,6 +220,7 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   validate: (data) => {
     console.time('validateAllData');
     const r = validateAllData(data);
+    console.time('relatedDataValidation');
     if (r.success && !isRelatedModelDataValid(data)) {
       return {
         success: false,
@@ -233,6 +234,7 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
         ],
       };
     }
+    console.timeEnd('relatedDataValidation');
     console.timeEnd('validateAllData');
     return r;
   },
