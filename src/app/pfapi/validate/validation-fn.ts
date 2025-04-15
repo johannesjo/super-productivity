@@ -5,7 +5,7 @@ import {
 } from '../../features/time-tracking/time-tracking.model';
 import { ProjectState } from '../../features/project/project.model';
 import { TaskState } from '../../features/tasks/task.model';
-import { validate } from 'typia';
+import { createValidate } from 'typia';
 import { TagState } from '../../features/tag/tag.model';
 import { SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
 import { Reminder } from '../../features/reminder/reminder.model';
@@ -29,11 +29,41 @@ import { ValidationResult } from '../api/pfapi.model';
 // };
 type DataToValidate = AppDataCompleteNew;
 
+// Create reusable validation functions
+const _validateAllData = createValidate<DataToValidate>();
+const _validateTask = createValidate<TaskState>();
+const _validateTaskRepeatCfg = createValidate<TaskRepeatCfgState>();
+const _validateArchive = createValidate<ArchiveModel>();
+const _validateProject = createValidate<ProjectState>();
+const _validateTag = createValidate<TagState>();
+const _validateSimpleCounter = createValidate<SimpleCounterState>();
+const _validateNote = createValidate<NoteState>();
+const _validateReminders = createValidate<Reminder[]>();
+const _validatePlanner = createValidate<PlannerState>();
+const _validateBoards = createValidate<BoardsState>();
+const _validateIssueProvider = createValidate<IssueProviderState>();
+const _validateMetric = createValidate<MetricState>();
+const _validateImprovement = createValidate<ImprovementState>();
+const _validateObstruction = createValidate<ObstructionState>();
+const _validateGlobalConfig = createValidate<GlobalConfigState>();
+const _validateTimeTracking = createValidate<TimeTrackingState>();
+
 export const validateAllData = <R>(
   d: AppDataCompleteNew | R,
 ): ValidationResult<AppDataCompleteNew> => {
-  const r = _wrapValidate(validate<DataToValidate>(d));
+  const r = _wrapValidate(_validateAllData(d));
   return r as ValidationResult<AppDataCompleteNew>;
+
+  // unfortunately that is quite a bit slower
+  // let r;
+  // for (const key in appDataValidators) {
+  //   const validator = appDataValidators[key];
+  //   r = validator(d[key]);
+  //   if (!r.success) {
+  //     return r;
+  //   }
+  // }
+  // return r;
 };
 
 /**
@@ -44,33 +74,31 @@ export const appDataValidators: {
     data: AppDataCompleteNew[K] | R,
   ) => ValidationResult<AppDataCompleteNew[K] | R>;
 } = {
-  task: <R>(d: R | TaskState) => _wrapValidate(validate<TaskState>(d), d, true),
+  task: <R>(d: R | TaskState) => _wrapValidate(_validateTask(d), d, true),
   taskRepeatCfg: <R>(d: R | TaskRepeatCfgState) =>
-    _wrapValidate(validate<TaskRepeatCfgState>(d), d, true),
+    _wrapValidate(_validateTaskRepeatCfg(d), d, true),
   archiveYoung: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   archiveOld: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
-  project: <R>(d: R | ProjectState) => _wrapValidate(validate<ProjectState>(d), d, true),
-  tag: <R>(d: R | TagState) => _wrapValidate(validate<TagState>(d), d, true),
+  project: <R>(d: R | ProjectState) => _wrapValidate(_validateProject(d), d, true),
+  tag: <R>(d: R | TagState) => _wrapValidate(_validateTag(d), d, true),
   simpleCounter: <R>(d: R | SimpleCounterState) =>
-    _wrapValidate(validate<SimpleCounterState>(d), d, true),
-  note: (d) => _wrapValidate(validate<NoteState>(d), d, true),
-  reminders: <R>(d: R | Reminder[]) => _wrapValidate(validate<Reminder[]>(d)),
-  planner: <R>(d: R | PlannerState) => _wrapValidate(validate<PlannerState>(d)),
-  boards: <R>(d: R | BoardsState) => _wrapValidate(validate<BoardsState>(d)),
-  issueProvider: (d) => _wrapValidate(validate<IssueProviderState>(d), d, true),
-  metric: <R>(d: R | MetricState) => _wrapValidate(validate<MetricState>(d), d, true),
+    _wrapValidate(_validateSimpleCounter(d), d, true),
+  note: (d) => _wrapValidate(_validateNote(d), d, true),
+  reminders: <R>(d: R | Reminder[]) => _wrapValidate(_validateReminders(d)),
+  planner: <R>(d: R | PlannerState) => _wrapValidate(_validatePlanner(d)),
+  boards: <R>(d: R | BoardsState) => _wrapValidate(_validateBoards(d)),
+  issueProvider: (d) => _wrapValidate(_validateIssueProvider(d), d, true),
+  metric: <R>(d: R | MetricState) => _wrapValidate(_validateMetric(d), d, true),
   improvement: <R>(d: R | ImprovementState) =>
-    _wrapValidate(validate<ImprovementState>(d), d, true),
+    _wrapValidate(_validateImprovement(d), d, true),
   obstruction: <R>(d: R | ObstructionState) =>
-    _wrapValidate(validate<ObstructionState>(d), d, true),
-  globalConfig: <R>(d: R | GlobalConfigState) =>
-    _wrapValidate(validate<GlobalConfigState>(d)),
-  timeTracking: <R>(d: R | TimeTrackingState) =>
-    _wrapValidate(validate<TimeTrackingState>(d)),
+    _wrapValidate(_validateObstruction(d), d, true),
+  globalConfig: <R>(d: R | GlobalConfigState) => _wrapValidate(_validateGlobalConfig(d)),
+  timeTracking: <R>(d: R | TimeTrackingState) => _wrapValidate(_validateTimeTracking(d)),
 } as const;
 
 const validateArchiveModel = <R>(d: ArchiveModel | R): ValidationResult<ArchiveModel> => {
-  const r = validate<ArchiveModel>(d);
+  const r = _validateArchive(d);
   if (!r.success) {
     console.log('Validation failed', (r as any)?.errors, r.data);
   }
@@ -84,9 +112,6 @@ const validateArchiveModel = <R>(d: ArchiveModel | R): ValidationResult<ArchiveM
   return r;
 };
 
-/**
- * Validates a specific property of the app data
- */
 export const validateAppDataProperty = <K extends keyof AppDataCompleteNew>(
   key: K,
   data: AppDataCompleteNew[K],
