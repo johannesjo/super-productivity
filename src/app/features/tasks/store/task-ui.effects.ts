@@ -165,7 +165,11 @@ export class TaskUiEffects {
           ({ targetProjectId }) =>
             targetProjectId !== this._workContextService.activeWorkContextId,
         ),
-        switchMap(({ targetProjectId, task }) =>
+        withLatestFrom(this._workContextService.todaysTaskIds$),
+        filter(
+          ([{ task }, activeContextTaskIds]) => !activeContextTaskIds.includes(task.id),
+        ),
+        switchMap(([{ targetProjectId, task }]) =>
           this._store$.select(selectProjectById, { id: targetProjectId }).pipe(
             first(),
             map((project) => ({ project, task })),
