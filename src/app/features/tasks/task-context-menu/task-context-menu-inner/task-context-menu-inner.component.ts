@@ -111,6 +111,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly T = T;
 
   isAdvancedControls = input<boolean>(false);
+  // eslint-disable-next-line @angular-eslint/no-output-native
   close = output();
 
   contextMenuPosition: { x: string; y: string } = { x: '100px', y: '100px' };
