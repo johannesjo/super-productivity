@@ -61,9 +61,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
 
     const target = this._filePathForModelId(modelId);
     const syncProvider = this._currentSyncProvider$.getOrError();
-    const dataToUpload = this.m[modelId].modelCfg.transformBeforeUpload
-      ? this.m[modelId].modelCfg.transformBeforeUpload(data)
-      : data;
+    const dataToUpload = data;
     const encryptedAndCompressedData =
       await this._encryptAndCompressHandler.compressAndEncryptData(
         this._encryptAndCompressCfg$.value,
@@ -122,9 +120,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
       }
 
       return {
-        data: this.m[modelId].modelCfg.transformBeforeDownload
-          ? this.m[modelId].modelCfg.transformBeforeDownload(data)
-          : data,
+        data,
         rev,
       };
     } catch (e) {
@@ -193,9 +189,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
       Object.keys(mainModelData).forEach((modelId) => {
         if (modelId in mainModelData) {
           this.m[modelId].save(
-            this.m[modelId].modelCfg.transformBeforeDownload
-              ? this.m[modelId].modelCfg.transformBeforeDownload(mainModelData[modelId])
-              : (mainModelData[modelId] as ExtractModelCfgType<MD[string]>),
+            mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
             {
               isUpdateRevAndLastUpdate: false,
             },
@@ -222,12 +216,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
 
     completeModel = completeModel || (await this._pfapiMain.getAllSyncModelData());
     const mainModelData: MainModelData = Object.fromEntries(
-      mainFileModelIds.map((modelId) => [
-        modelId,
-        this.m[modelId].modelCfg.transformBeforeUpload
-          ? this.m[modelId].modelCfg.transformBeforeUpload(completeModel[modelId])
-          : completeModel[modelId],
-      ]),
+      mainFileModelIds.map((modelId) => [modelId, completeModel[modelId]]),
     );
     pfLog(2, `${ModelSyncService.name}.${this.getMainFileModelDataForUpload.name}()`, {
       mainModelData,

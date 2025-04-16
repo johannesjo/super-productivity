@@ -31,21 +31,18 @@ export interface ModelCfg<T extends ModelBase> {
   // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
-  // for cascading only
   isMainFileModel?: boolean;
 
   validate?: <R>(data: R | T) => IValidation<R | T>;
   repair?: <R>(data: R | unknown | any) => T;
 
-  // MAYBE? TODO
+  // MAYBE?
   // transformBeforeSave?: <I>(data: I) => T;
   // transformBeforeLoad?: <I>(data: T) => I;
-  transformBeforeUpload?: <I>(data: I) => T;
-  transformBeforeDownload?: <I>(data: I) => T;
+  // transformBeforeUpload?: <I>(data: I) => T;
+  // transformBeforeDownload?: <I>(data: I) => T;
 
   defaultData?: T;
-  // TODO decide to kick or not
-  // modelFileGroup?: string;
 }
 
 // export type ModelCfgs = readonly ModelCfg<unknown>[];

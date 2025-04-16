@@ -36,12 +36,6 @@ describe('ModelSyncService', () => {
         modelCfg: {
           modelVersion: 1,
           isMainFileModel: true,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
         },
         save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
       },
@@ -49,12 +43,6 @@ describe('ModelSyncService', () => {
         modelCfg: {
           modelVersion: 33,
           isMainFileModel: false,
-          transformBeforeUpload: jasmine
-            .createSpy('transformBeforeUpload')
-            .and.callFake((data) => data),
-          transformBeforeDownload: jasmine
-            .createSpy('transformBeforeDownload')
-            .and.callFake((data) => data),
         },
         save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
       },
@@ -125,9 +113,7 @@ describe('ModelSyncService', () => {
       const result = await service.upload('singleModel', modelData);
 
       expect(result).toBe('new-rev-123');
-      expect(
-        mockModelControllers.singleModel.modelCfg.transformBeforeUpload,
-      ).toHaveBeenCalledWith(modelData);
+
       expect(mockEncryptAndCompressHandler.compressAndEncryptData).toHaveBeenCalledWith(
         mockEncryptAndCompressCfg$.value,
         undefined,
@@ -192,9 +178,6 @@ describe('ModelSyncService', () => {
         'singleModel',
         'rev-123',
       );
-      expect(
-        mockModelControllers.singleModel.modelCfg.transformBeforeDownload,
-      ).toHaveBeenCalled();
     });
 
     it('should handle NoRemoteModelFile error', async () => {

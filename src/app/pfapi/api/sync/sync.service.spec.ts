@@ -115,12 +115,6 @@ describe('SyncService', () => {
     return {
       modelCfg: {
         isMainFileModel,
-        transformBeforeUpload: jasmine
-          .createSpy('transformBeforeUpload')
-          .and.callFake((data) => data),
-        transformBeforeDownload: jasmine
-          .createSpy('transformBeforeDownload')
-          .and.callFake((data) => data),
       },
       save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
     };
