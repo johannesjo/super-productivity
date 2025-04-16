@@ -11,7 +11,7 @@ body: # Ensure indentation uses regular spaces
     attributes:
       label: Version Used
       description: Version number and package type (e.g., exe, snap, deb, installer).
-      placeholder: "e.g. 'v7.12.0 snap' or 'v2.2.1 firefox"
+      placeholder: "e.g. 'v7.12.0 snap' or 'v2.2.1 firefox'"
     validations:
       required: true
 
