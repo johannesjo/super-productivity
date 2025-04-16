@@ -181,12 +181,12 @@ export class ModelSyncService<MD extends ModelCfgs> {
    *
    * @param remote - Remote metadata containing model data
    */
-  async updateLocalFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
+  async updateLocalMainModelsFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
       pfLog(
         2,
-        `${ModelSyncService.name}.${this.updateLocalFromRemoteMetaFile.name}() updating (main) models`,
+        `${ModelSyncService.name}.${this.updateLocalMainModelsFromRemoteMetaFile.name}() updating (main) models`,
         Object.keys(mainModelData),
       );
 

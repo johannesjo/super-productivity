@@ -214,7 +214,7 @@ describe('SyncService', () => {
       'download',
       'remove',
       'getModelIdsToUpdateFromRevMaps',
-      'updateLocalFromRemoteMetaFile',
+      'updateLocalMainModelsFromRemoteMetaFile',
       'updateLocalUpdated',
       'getMainFileModelDataForUpload',
     ]);
@@ -463,7 +463,9 @@ describe('SyncService', () => {
         'expected-new-meta-rev',
       );
 
-      expect(mockModelSyncService.updateLocalFromRemoteMetaFile).toHaveBeenCalledWith(
+      expect(
+        mockModelSyncService.updateLocalMainModelsFromRemoteMetaFile,
+      ).toHaveBeenCalledWith(
         createDefaultRemoteMeta({
           lastUpdate: 2000,
         }),
@@ -700,9 +702,9 @@ describe('SyncService', () => {
       expect(mockMetaSyncService.saveLocal).not.toHaveBeenCalled();
     });
 
-    it('should handle updateLocalFromRemoteMetaFile errors', async () => {
+    it('should handle updateLocalMainModelsFromRemoteMetaFile errors', async () => {
       mockSyncProvider.isLimitedToSingleFileSync = true;
-      mockModelSyncService.updateLocalFromRemoteMetaFile.and.throwError(
+      mockModelSyncService.updateLocalMainModelsFromRemoteMetaFile.and.throwError(
         new Error('Update from meta failed'),
       );
 

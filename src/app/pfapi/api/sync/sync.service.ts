@@ -285,7 +285,7 @@ export class SyncService<const MD extends ModelCfgs> {
       (toUpdate.length === 0 && toDelete.length === 0) ||
       this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
-      await this._modelSyncService.updateLocalFromRemoteMetaFile(remote);
+      await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
       pfLog(3, 'RevMap comparison', {
         isEqual: JSON.stringify(remote.revMap) === JSON.stringify(local.revMap),
         remoteRevMap: remote.revMap,
@@ -355,7 +355,7 @@ export class SyncService<const MD extends ModelCfgs> {
     await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
 
     // ON SUCCESS
-    await this._modelSyncService.updateLocalFromRemoteMetaFile(remote);
+    await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
 
     await this._metaFileSyncService.saveLocal({
       metaRev: remoteRev,
