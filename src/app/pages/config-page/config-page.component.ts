@@ -36,6 +36,8 @@ import { MatIcon } from '@angular/material/icon';
 import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
 import { ConfigSoundFormComponent } from '../../features/config/config-sound-form/config-sound-form.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { GlobalThemeService } from '../../core/theme/global-theme.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'config-page',
@@ -49,11 +51,13 @@ import { TranslatePipe } from '@ngx-translate/core';
     ConfigSectionComponent,
     ConfigSoundFormComponent,
     TranslatePipe,
+    AsyncPipe,
   ],
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _cd = inject(ChangeDetectorRef);
   readonly configService = inject(GlobalConfigService);
+  readonly globalThemeService = inject(GlobalThemeService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -125,9 +129,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   }
 
   updateDarkMode(ev: MatButtonToggleChange): void {
-    console.log(ev.value);
     if (ev.value) {
-      this.configService.updateSection('misc', { darkMode: ev.value });
+      this.globalThemeService.darkMode$.next(ev.value);
     }
   }
 

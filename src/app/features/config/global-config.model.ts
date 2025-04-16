@@ -5,10 +5,7 @@ import { SyncProvider } from '../../imex/sync/sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 import { LegacyCalendarProvider } from '../issue/providers/calendar/calendar.model';
 
-export type DarkModeCfg = 'dark' | 'light' | 'system';
-
 export type MiscConfig = Readonly<{
-  darkMode: DarkModeCfg;
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;

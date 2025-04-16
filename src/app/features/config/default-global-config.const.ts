@@ -12,7 +12,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     lng: null,
   },
   misc: {
-    darkMode: 'system',
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isAutMarkParentAsDone: false,
