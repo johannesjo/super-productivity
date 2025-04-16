@@ -1,3 +1,25 @@
+## [12.0.6-rc.3](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.2...v12.0.6-rc.3) (2025-04-16)
+
+### Bug Fixes
+
+- cannot convert null or undefined to object when opening metrics with no completed tasks [#4262](https://github.com/johannesjo/super-productivity/issues/4262) ([65a179e](https://github.com/johannesjo/super-productivity/commit/65a179e18f2c843d2171232409961c267122b383))
+- minor fixes to italian translation ([d826778](https://github.com/johannesjo/super-productivity/commit/d8267789f6e810a07ae9e376c4e3bd590c236e0f))
+
+### Features
+
+- add countdown message to the indicator ([33d7a3f](https://github.com/johannesjo/super-productivity/commit/33d7a3f7586955c77412c3df6a8fe4e56e400303))
+- don't show go to project snack if task is in current list ([04f2d97](https://github.com/johannesjo/super-productivity/commit/04f2d97e14637d514601944bbd40d2b8a508eddb))
+- enhance updateCurrentTask to include Pomodoro state and session time ([7f9fa07](https://github.com/johannesjo/super-productivity/commit/7f9fa07559561c0f3b3803b2b638822a4156ba13))
+- **pfapi:** do cross model migration properly [#4264](https://github.com/johannesjo/super-productivity/issues/4264) ([d1a77c9](https://github.com/johannesjo/super-productivity/commit/d1a77c9ac3a697d1606adc05dd26f225b646ffa6))
+- **pfapi:** prepare backwards migrations ([1b58861](https://github.com/johannesjo/super-productivity/commit/1b588610535db209a768c60b79f21364f84be2b2))
+- **pfapi:** remove legacy calendar data ([d202395](https://github.com/johannesjo/super-productivity/commit/d202395b23eb33f6eb29375e3d99f568979bc8bf))
+- **pfapi:** remove single model model-version stuff as it is too complicated ([91df97a](https://github.com/johannesjo/super-productivity/commit/91df97af114656c181f05a82b04587541b9736cd))
+- **pfapi:** remove transform functions since currently they don't work and add noise ([8e01f3b](https://github.com/johannesjo/super-productivity/commit/8e01f3b7770edeff1b5f61aa8e24b8ff526264d5))
+- **pfapi:** return cross model version for single model files ([9a4f42e](https://github.com/johannesjo/super-productivity/commit/9a4f42ede96ab1dbbd3fd412320a0933487d5770))
+- remove task drawer since it is not working at the moment anyway ([0e1e758](https://github.com/johannesjo/super-productivity/commit/0e1e75837715b02ae9b4cada8bc0d0b60f633873))
+- update indicator to use time estimate for countdown message ([924844c](https://github.com/johannesjo/super-productivity/commit/924844cae9b97ba51be8f01eca3d72bb39a2fdc8))
+- updated italian translations ([10e3a9f](https://github.com/johannesjo/super-productivity/commit/10e3a9f9b97a09e9ab7f525b78972cc4123f6587))
+
 ## [12.0.6-rc.2](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.1...v12.0.6-rc.2) (2025-04-15)
 
 ## [12.0.6-rc.1](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.0...v12.0.6-rc.1) (2025-04-15)
