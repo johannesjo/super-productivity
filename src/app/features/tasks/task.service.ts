@@ -939,7 +939,7 @@ export class TaskService {
   }
 
   async getArchivedTasks(): Promise<Task[]> {
-    const archiveTaskState: TaskArchive = await this._taskArchiveService.load(true);
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;

@@ -100,7 +100,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   },
 
   project: {
-    modelVersion: 1,
+    modelVersion: 1.2,
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: appDataValidators.project,

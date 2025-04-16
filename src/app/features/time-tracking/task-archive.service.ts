@@ -26,11 +26,11 @@ export class TaskArchiveService {
 
   constructor() {}
 
-  async load(isSkipMigration = false): Promise<TaskArchive> {
+  async load(): Promise<TaskArchive> {
     // NOTE: these are already saved in memory to speed up things
     const [archiveYoung, archiveOld] = await Promise.all([
-      this._pfapiService.m.archiveYoung.load(isSkipMigration),
-      this._pfapiService.m.archiveOld.load(isSkipMigration),
+      this._pfapiService.m.archiveYoung.load(),
+      this._pfapiService.m.archiveOld.load(),
     ]);
 
     return {

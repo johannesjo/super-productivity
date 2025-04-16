@@ -90,10 +90,9 @@ export class ModelCtrl<MT extends ModelBase> {
   // TODO implement isSkipMigration
   /**
    * Loads model data from memory cache or database
-   * @param isSkipMigration Whether to skip migration (if applicable)
    * @returns Promise resolving to model data
    */
-  async load(isSkipMigration?: boolean): Promise<MT> {
+  async load(): Promise<MT> {
     pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, {
       inMemoryData: this._inMemoryData,
     });
