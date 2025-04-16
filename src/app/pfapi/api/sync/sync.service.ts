@@ -28,7 +28,6 @@ import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
-import { MigrationService } from '../migration/migration.service';
 
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
@@ -41,7 +40,6 @@ export class SyncService<const MD extends ModelCfgs> {
   constructor(
     public m: ModelCfgToModelCtrl<MD>,
     private _pfapiMain: Pfapi<MD>,
-    private _migrationService: MigrationService<MD>,
     private _metaModelCtrl: MetaModelCtrl,
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
     _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
