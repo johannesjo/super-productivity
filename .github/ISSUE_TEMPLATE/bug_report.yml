@@ -1,6 +1,6 @@
 name: 🚨 Bug Report
 description: Report a bug you encountered
-title: 'bug: '
+title: '🚨 '
 labels: [bug]
 assignees:
   - '' # Ensure indentation uses regular spaces
