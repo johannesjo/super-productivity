@@ -12,8 +12,8 @@
   },
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "Görmezden gel",
-      "INSTALL": "Kur",
+      "IGNORE": "Yoksay",
+      "INSTALL": "Yükle",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
     "B_OFFLINE": "İnternet bağlantınız kesildi. Verileri senkronize etmek ve sağlayıcıdan sorunları istemek işe yaramaz.",
@@ -46,16 +46,16 @@
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "Eklenti ekle",
+        "ADD_ATTACHMENT": "Ek Ekle",
         "EDIT_ATTACHMENT": "Eki Düzenle",
         "LABELS": {
-          "FILE": "Dosya yolu",
+          "FILE": "Dosya Yolu",
           "IMG": "Resim",
-          "LINK": "Url"
+          "LINK": "Bağlantı"
         },
         "SELECT_TYPE": "Bir tür seçin",
         "TYPES": {
-          "FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+          "FILE": "Dosya (varsayılan sistem uygulaması ile açılır)",
           "IMG": "Resim (küçük resim olarak gösterilir)",
           "LINK": "Bağlantı (tarayıcıda açılır)"
         }
@@ -63,14 +63,14 @@
     },
     "BOARDS": {
       "DEFAULT": {
-        "DONE": "TAMAM",
+        "DONE": "Tamamlandı",
         "EISENHAUER_MATRIX": "Eisenhower Matrisi",
         "IMPORTANT": "Önemli",
-        "IN_PROGRESS": "Devam ediyor",
+        "IN_PROGRESS": "Devam Ediyor",
         "KANBAN": "Kanban",
-        "NOT_URGENT_IMPORTANT": "Acil değil & Önemli",
-        "NOT_URGENT_NOT_IMPORTANT": "Acil değil & Önemsiz",
-        "TO_DO": "Yapılacaklar",
+        "NOT_URGENT_IMPORTANT": "Acil Değil & Önemli",
+        "NOT_URGENT_NOT_IMPORTANT": "Acil Değil & Önemli Değil",
+        "TO_DO": "Yapılacak",
         "URGENT": "Acil",
         "URGENT_IMPORTANT": "Acil & Önemli",
         "URGENT_NOT_IMPORTANT": "Acil & Önemsiz"
@@ -81,8 +81,8 @@
         "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
         "TAGS_REQUIRED": "Gerekli Etiketler",
         "TASK_DONE_STATE": "Görev Tamamlandı Durumu",
-        "TASK_DONE_STATE_ALL": "Hepsi",
-        "TASK_DONE_STATE_DONE": "TAMAM",
+        "TASK_DONE_STATE_ALL": "Tümü",
+        "TASK_DONE_STATE_DONE": "Tamamlandı",
         "TASK_DONE_STATE_UNDONE": "Tamamlanmadı"
       },
       "V": {
@@ -181,7 +181,7 @@
       "FINISH_TASK_AND_SELECT_NEXT": "Görevi bitirin ve sonrakini seçin",
       "FLOWTIME": "Akış Zamanı",
       "FOR_TASK": "görev için",
-      "GET_READY": "Odaklanma oturumunuza hazır olun!!!",
+      "GET_READY": "Odaklanma oturumunuza hazır olun!",
       "GO_TO_PROCRASTINATION": "Ertelediğinizde yardım alın",
       "GOGOGO": "Hadi hadi hadi!!!",
       "NEXT": "Sonraki",
