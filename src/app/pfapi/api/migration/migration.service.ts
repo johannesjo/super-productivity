@@ -67,8 +67,28 @@ export class MigrationService<MD extends ModelCfgs> {
       };
     }
     if (dataInCrossModelVersion > codeModelVersion) {
-      throw new ImpossibleError('Saved model version is higher than current one');
+      // TODO implement migrate down
+      // if (cfg?.crossModelBackwardMigrations) {
+      //   // ...
+      // }
+      throw new ImpossibleError(
+        'Saved model version is higher than current one and no backwards migrations available',
+      );
     }
+
+    return this._migrateUp(codeModelVersion, dataInCrossModelVersion, dataIn);
+  }
+
+  private async _migrateUp(
+    codeModelVersion: number,
+    dataInCrossModelVersion: number,
+    dataIn: AllSyncModels<MD>,
+  ): Promise<{
+    dataAfter: AllSyncModels<MD>;
+    versionAfter: number;
+    wasMigrated: boolean;
+  }> {
+    const cfg = this._pfapiMain.cfg;
     if (!cfg?.crossModelMigrations) {
       throw new ImpossibleError('No migration function provided');
     }
@@ -115,12 +135,5 @@ export class MigrationService<MD extends ModelCfgs> {
       pfLog(0, `Migration functions failed to execute`, { error });
       throw new ModelMigrationError('Error running migration functions', error);
     }
-
-    // TODO single model migration
-    // const modelIds = Object.keys(this.m);
-    // for (const modelId of modelIds) {
-    //   const modelCtrl = this.m[modelId];
-    //
-    // }
   }
 }

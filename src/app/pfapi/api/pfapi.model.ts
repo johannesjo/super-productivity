@@ -56,6 +56,11 @@ export interface CrossModelMigrations {
   [version: number]: CrossModelMigrateFn;
 }
 
+export type CrossModelBackwardsMigrateFn = <R, F>(fullData: F) => R;
+export interface CrossModelBackwardsMigrations {
+  [version: number]: CrossModelBackwardsMigrateFn;
+}
+
 export interface PfapiBaseCfg<T extends ModelCfgs> {
   dbAdapter?: DatabaseAdapter;
   onDbError?: (err: any) => void;
@@ -66,6 +71,7 @@ export interface PfapiBaseCfg<T extends ModelCfgs> {
   isCreateBackups?: boolean;
   crossModelVersion?: number;
   crossModelMigrations?: CrossModelMigrations;
+  crossModelBackwardMigrations?: CrossModelBackwardsMigrations;
   validate?: (data: AllModelData<T>) => IValidation<AllModelData<T>>;
   repair?: <R>(data: R | unknown) => AllModelData<T>;
 

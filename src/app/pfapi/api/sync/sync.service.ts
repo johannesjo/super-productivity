@@ -111,13 +111,13 @@ export class SyncService<const MD extends ModelCfgs> {
       switch (status) {
         case SyncStatus.UpdateLocal:
           if (this.IS_DO_CROSS_MODEL_MIGRATIONS) {
-            const mcr = modelVersionCheck({
+            const mvcR = modelVersionCheck({
               // TODO check for problems
               clientVersion:
                 this._pfapiMain.cfg?.crossModelVersion || localMeta.crossModelVersion,
               toImport: remoteMeta.crossModelVersion,
             });
-            switch (mcr) {
+            switch (mvcR) {
               case ModelVersionCheckResult.MinorUpdate:
               case ModelVersionCheckResult.MajorUpdate:
                 alert('Downloading all since cross model version changed');
