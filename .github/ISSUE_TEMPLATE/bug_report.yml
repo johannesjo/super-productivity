@@ -1,7 +1,7 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🚨 Bug Report
 description: Report a bug you encountered
-title: "[BUG] "
+title: ''
 labels: [bug]
 assignees:
   - '' # Ensure indentation uses regular spaces
@@ -51,9 +51,9 @@ body: # Ensure indentation uses regular spaces
       label: Can you reproduce this reliably?
       description: Was this a one-time occurrence, or can you make it happen every time by following the steps?
       options:
-        - "Yes, I can reproduce it reliably."
+        - 'Yes, I can reproduce it reliably.'
         - "Sometimes, it's intermittent."
-        - "No, it only happened once."
+        - 'No, it only happened once.'
     validations:
       required: true
   - type: textarea
@@ -61,11 +61,10 @@ body: # Ensure indentation uses regular spaces
     attributes:
       label: Console Output
       description: Is there any output if you press `Ctrl+Shift+i` (or `Cmd+Alt+i` on Mac) and check the 'Console' tab? If so, please paste it here.
-      placeholder: "Paste any relevant console logs here..."
+      placeholder: 'Paste any relevant console logs here...'
       render: shell # Use 'shell' or 'log' for better formatting of code/logs
     validations:
       required: false
-      
 #  - type: textarea
 #    id: error-log-info # ID is optional for markdown but kept for consistency
 #    attributes:
