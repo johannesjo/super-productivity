@@ -377,7 +377,12 @@ export class SyncService<const MD extends ModelCfgs> {
         isSkipLegacyWarnings: false,
       });
     } else {
-      await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
+      await this._modelSyncService.updateLocalUpdated(
+        toUpdate,
+        toDelete,
+        remote.modelVersions,
+        dataMap,
+      );
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
     }
 

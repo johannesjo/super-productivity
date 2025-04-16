@@ -17,6 +17,7 @@ import {
   MainModelData,
   ModelCfgs,
   ModelCfgToModelCtrl,
+  ModelVersionMap,
   RemoteMeta,
   RevMap,
 } from '../pfapi.model';
@@ -155,18 +156,24 @@ export class ModelSyncService<MD extends ModelCfgs> {
    *
    * @param toUpdate - Array of model IDs to update
    * @param toDelete - Array of model IDs to delete
+   * @param modelVersionMap - Map of the model versions
    * @param dataMap - Map of model data indexed by model ID
    * @returns Promise resolving once all operations are complete
    */
   async updateLocalUpdated(
     toUpdate: string[],
     toDelete: string[],
+    modelVersionMap: ModelVersionMap,
     dataMap: { [key: string]: unknown },
   ): Promise<unknown> {
     return await Promise.all([
       ...toUpdate.map((modelId) =>
         // NOTE: needs to be cast to a generic type, since dataMap is a generic object
-        this._updateLocal(modelId, dataMap[modelId] as ExtractModelCfgType<MD[string]>),
+        this._updateLocal(
+          modelId,
+          dataMap[modelId] as ExtractModelCfgType<MD[string]>,
+          modelVersionMap[modelId],
+        ),
       ),
       ...toDelete.map((modelId) => this._removeLocal(modelId)),
     ]);
@@ -179,6 +186,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
    */
   async updateLocalMainModelsFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
+
     if (typeof mainModelData === 'object' && mainModelData !== null) {
       pfLog(
         2,
@@ -193,6 +201,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
             {
               isUpdateRevAndLastUpdate: false,
             },
+            remote.modelVersions[modelId],
           );
         }
       });
@@ -275,13 +284,15 @@ export class ModelSyncService<MD extends ModelCfgs> {
    *
    * @param modelId - The ID of the model to update
    * @param modelData - The data to update the model with
+   * @param sourceModelVersion
    * @private
    */
   private async _updateLocal<T extends keyof MD>(
     modelId: T,
     modelData: ExtractModelCfgType<MD[T]>,
+    sourceModelVersion?: number,
   ): Promise<void> {
-    await this.m[modelId].save(modelData);
+    await this.m[modelId].save(modelData, undefined, sourceModelVersion);
   }
 
   /**

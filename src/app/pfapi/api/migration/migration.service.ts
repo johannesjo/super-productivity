@@ -1,10 +1,18 @@
-import { AllSyncModels, ModelCfgs } from '../pfapi.model';
+import {
+  AllSyncModels,
+  ModelCfgs,
+  ModelCfgToModelCtrl,
+  ModelVersionMap,
+} from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { ImpossibleError, ModelMigrationError } from '../errors/errors';
 import { Pfapi } from '../pfapi';
 
 export class MigrationService<MD extends ModelCfgs> {
-  constructor(private _pfapiMain: Pfapi<MD>) {}
+  constructor(
+    private _pfapiMain: Pfapi<MD>,
+    public m: ModelCfgToModelCtrl<MD>,
+  ) {}
 
   async checkAndMigrateLocalDB(): Promise<void> {
     const meta = await this._pfapiMain.metaModel.load();
@@ -15,6 +23,7 @@ export class MigrationService<MD extends ModelCfgs> {
     const r = await this.migrate(
       meta.crossModelVersion,
       await this._pfapiMain.getAllSyncModelData(true),
+      meta.modelVersions,
     );
     if (r.wasMigrated) {
       const { dataAfter, versionAfter } = r;
@@ -45,6 +54,7 @@ export class MigrationService<MD extends ModelCfgs> {
   async migrate(
     dataInCrossModelVersion: number,
     dataIn: AllSyncModels<MD>,
+    modelVersionMap: ModelVersionMap,
   ): Promise<{
     dataAfter: AllSyncModels<MD>;
     versionAfter: number;
@@ -52,6 +62,8 @@ export class MigrationService<MD extends ModelCfgs> {
   }> {
     const cfg = this._pfapiMain.cfg;
     const codeModelVersion = cfg?.crossModelVersion;
+    // const singleModelsToMigrate = Object.keys(modelVersionMap).filter();
+
     if (
       typeof codeModelVersion !== 'number' ||
       dataInCrossModelVersion === codeModelVersion
@@ -106,6 +118,7 @@ export class MigrationService<MD extends ModelCfgs> {
       migrationsToRun.forEach((migrateFn) => {
         migratedData = migrateFn(migratedData);
       });
+
       return {
         dataAfter: migratedData,
         versionAfter: codeModelVersion,
@@ -115,12 +128,25 @@ export class MigrationService<MD extends ModelCfgs> {
       pfLog(0, `Migration functions failed to execute`, { error });
       throw new ModelMigrationError('Error running migration functions', error);
     }
-
-    // TODO single model migration
-    // const modelIds = Object.keys(this.m);
-    // for (const modelId of modelIds) {
-    //   const modelCtrl = this.m[modelId];
-    //
-    // }
   }
+
+  // private _getSingleModelIdsToMigrate(modelVersionMap: ModelVersionMap): string[] {
+  //   return Object.keys(modelVersionMap).filter((modelId) => {
+  //     const modelCtrl = this.m[modelId];
+  //     // if (!modelCtrl) {
+  //     //   throw new ImpossibleError(`Model controller not found for ${modelId}`);
+  //     // }
+  //     return modelCtrl.modelCfg.modelVersion > modelVersionMap[modelId];
+  //   });
+  // }
+  //
+  // private _migrateSingleModels(migratedData: any) {
+  //   const modelIds = Object.keys(this.m);
+  //   for (const modelId of modelIds) {
+  //     const modelCtrl = this.m[modelId];
+  //     // TODO fix
+  //     // @ts-ignore
+  //     migratedData[modelId] = modelCtrl.migrate(migratedData, modelVersionMap[modelId]);
+  //   }
+  // }
 }

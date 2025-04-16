@@ -21,18 +21,19 @@ type SerializableArray = Array<Serializable>;
 
 export type ModelBase = SerializableObject | SerializableArray | unknown;
 
+export type ModelMigrateFn<T> = <F>(modelData: F | T) => T;
+export interface ModelMigrations<T> {
+  [version: number]: ModelMigrateFn<T>;
+}
+
 export interface ModelCfg<T extends ModelBase> {
   modelVersion: number;
   isLocalOnly?: boolean;
-  // migrations?: {
-  //   [version: string]: (arg: T) => T;
-  // };
-  // TODO fix typing
-  // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
   isMainFileModel?: boolean;
 
+  migrations?: ModelMigrations<T>;
   validate?: <R>(data: R | T) => IValidation<R | T>;
   repair?: <R>(data: R | unknown | any) => T;
 

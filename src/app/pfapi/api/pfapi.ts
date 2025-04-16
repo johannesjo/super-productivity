@@ -7,6 +7,7 @@ import {
   ModelBase,
   ModelCfgs,
   ModelCfgToModelCtrl,
+  ModelVersionMap,
   PfapiBaseCfg,
   PrivateCfgByProviderId,
 } from './pfapi.model';
@@ -96,7 +97,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       sp.privateCfg = new SyncProviderPrivateCfgStore(sp.id, this.db, this.ev);
     });
 
-    this.migrationService = new MigrationService<MD>(this);
+    this.migrationService = new MigrationService<MD>(this, this.m);
 
     this._syncService = new SyncService<MD>(
       this.m,
@@ -267,6 +268,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     return await this.importAllSycModelData({
       data: backup.data,
       crossModelVersion: backup.crossModelVersion,
+      modelVersionMap: backup.modelVersions,
       // TODO maybe also make model versions work
       isBackupData: true,
       isAttemptRepair: true,
@@ -277,6 +279,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   async importAllSycModelData({
     data,
     crossModelVersion,
+    modelVersionMap = {},
     isAttemptRepair = false,
     isBackupData = false,
     isSkipLegacyWarnings = false,
@@ -284,6 +287,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }: {
     data: AllSyncModels<MD>;
     crossModelVersion: number;
+    modelVersionMap?: ModelVersionMap;
     isAttemptRepair?: boolean;
     isBackupData?: boolean;
     isSkipLegacyWarnings?: boolean;
@@ -291,7 +295,11 @@ export class Pfapi<const MD extends ModelCfgs> {
   }): Promise<void> {
     pfLog(2, `${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
-    const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
+    const { dataAfter } = await this.migrationService.migrate(
+      crossModelVersion,
+      data,
+      modelVersionMap,
+    );
     data = dataAfter;
 
     if (this.cfg?.validate) {
@@ -345,10 +353,14 @@ export class Pfapi<const MD extends ModelCfgs> {
           throw new ModelIdWithoutCtrlError(modelId, modelData);
         }
 
-        return modelCtrl.save(modelData, {
-          isUpdateRevAndLastUpdate: false,
-          isIgnoreDBLock: true,
-        });
+        return modelCtrl.save(
+          modelData,
+          {
+            isUpdateRevAndLastUpdate: false,
+            isIgnoreDBLock: true,
+          },
+          modelVersionMap[modelId],
+        );
       });
       await Promise.all(promises);
       this.db.unlock();

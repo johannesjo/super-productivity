@@ -100,10 +100,18 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   },
 
   project: {
-    modelVersion: 1.2,
+    modelVersion: 1.4,
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: appDataValidators.project,
+    migrations: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      1.4: (data) => {
+        alert('Migrating project data to new version');
+        throw new Error('aaa');
+        return data as ProjectState;
+      },
+    },
   },
   tag: {
     modelVersion: 1,

@@ -39,9 +39,18 @@ export class ModelCtrl<MT extends ModelBase> {
   save(
     data: MT,
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
+    sourceModelVersion?: number,
   ): Promise<unknown> {
     this._inMemoryData = data;
     pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
+
+    if (typeof sourceModelVersion === 'string') {
+      sourceModelVersion = +sourceModelVersion;
+    }
+    if (typeof sourceModelVersion === 'number') {
+      console.log(sourceModelVersion);
+      data = this.migrate(data, sourceModelVersion);
+    }
 
     // Validate data if validator is available
     if (this.modelCfg.validate && !this.modelCfg.validate(data).success) {
@@ -67,6 +76,32 @@ export class ModelCtrl<MT extends ModelBase> {
     return this._db.save(this.modelId, data, isIgnoreDBLock);
   }
 
+  // TODO
+  /**
+   * Saves the model data to database
+   * @param data Model data to save
+   * @returns migrated data
+   */
+  migrate<T>(data: MT | T, sourceModelVersion: number): MT {
+    if (
+      typeof this.modelCfg.migrations === 'object' &&
+      this.modelCfg.migrations !== null
+    ) {
+      Object.keys(this.modelCfg.migrations)
+        .sort()
+        .forEach((key) => {
+          const version = +key;
+          console.log(version);
+
+          if (version > sourceModelVersion) {
+            alert('MIGRATE');
+            console.log('migration script version', version);
+            data = this.modelCfg.migrations![key](data);
+          }
+        });
+    }
+    return data as MT;
+  }
   /**
    * Updates part of the model data
    * @param data Partial data to update
