@@ -1,7 +1,6 @@
-# .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🚨 Bug Report
 description: Report a bug you encountered
-title: ''
+title: 'bug: '
 labels: [bug]
 assignees:
   - '' # Ensure indentation uses regular spaces
