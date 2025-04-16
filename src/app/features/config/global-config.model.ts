@@ -3,7 +3,6 @@ import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
-import { LegacyCalendarProvider } from '../issue/providers/calendar/calendar.model';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
@@ -124,6 +123,7 @@ export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled: boolean;
   isCompressionEnabled: boolean;
+  // TODO migrate to SyncProviderId
   syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
@@ -133,9 +133,6 @@ export type SyncConfig = Readonly<{
   webDav?: WebDavConfig;
   /* NOTE: view model for form only*/
   localFileSync?: LocalFileSyncConfig;
-}>;
-export type LegacyCalendarIntegrationConfig = Readonly<{
-  calendarProviders: LegacyCalendarProvider[];
 }>;
 
 export type ScheduleConfig = Readonly<{
@@ -189,7 +186,6 @@ export type GlobalConfigState = Readonly<{
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   timeTracking: TimeTrackingConfig;
-  calendarIntegration?: LegacyCalendarIntegrationConfig;
   reminder: ReminderConfig;
   schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;
