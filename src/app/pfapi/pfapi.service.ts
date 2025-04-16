@@ -133,7 +133,6 @@ export class PfapiService {
           {
             data,
             lastUpdate: 1,
-            modelVersions: {},
             timestamp: 1,
             // NOTE since this is legacy data, we start at 0
             crossModelVersion: 0,

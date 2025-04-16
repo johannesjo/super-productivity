@@ -24,7 +24,6 @@ import { SyncProviderPrivateCfgStore } from './sync/sync-provider-private-cfg-st
 import {
   BackupImportFailedError,
   DataValidationFailedError,
-  InvalidModelCfgError,
   InvalidSyncProviderError,
   ModelIdWithoutCtrlError,
   NoRepairFunctionProvidedError,
@@ -254,7 +253,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     return {
       data: d,
       crossModelVersion: meta.crossModelVersion,
-      modelVersions: meta.modelVersions,
       lastUpdate: meta.lastUpdate,
       timestamp: Date.now(),
     };
@@ -397,9 +395,6 @@ export class Pfapi<const MD extends ModelCfgs> {
     const result = {} as Record<string, ModelCtrl<ModelBase>>;
     // TODO validate modelCfgs
     for (const [id, item] of Object.entries(modelCfgs)) {
-      if (!item.modelVersion) {
-        throw new InvalidModelCfgError({ modelCfgs });
-      }
       result[id] = new ModelCtrl<ExtractModelCfgType<typeof item>>(
         id,
         item,

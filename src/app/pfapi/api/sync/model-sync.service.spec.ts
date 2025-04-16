@@ -34,14 +34,12 @@ describe('ModelSyncService', () => {
     mockModelControllers = {
       mainModel: {
         modelCfg: {
-          modelVersion: 1,
           isMainFileModel: true,
         },
         save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
       },
       singleModel: {
         modelCfg: {
-          modelVersion: 33,
           isMainFileModel: false,
         },
         save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
@@ -118,7 +116,7 @@ describe('ModelSyncService', () => {
         mockEncryptAndCompressCfg$.value,
         undefined,
         modelData,
-        33, // single model version
+        1,
       );
       expect(mockSyncProvider.uploadFile).toHaveBeenCalledWith(
         'singleModel',
@@ -234,7 +232,6 @@ describe('ModelSyncService', () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
-        modelVersions: {},
         crossModelVersion: 1,
         mainModelData: {
           mainModel: { data: 'meta-main-model-data' },
@@ -256,7 +253,6 @@ describe('ModelSyncService', () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
-        modelVersions: {},
         crossModelVersion: 1,
         mainModelData: {},
       };

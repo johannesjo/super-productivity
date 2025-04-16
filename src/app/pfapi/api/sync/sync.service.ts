@@ -198,7 +198,6 @@ export class SyncService<const MD extends ModelCfgs> {
     try {
       return await this.uploadToRemote(
         {
-          modelVersions: local.modelVersions,
           crossModelVersion: local.crossModelVersion,
           lastUpdate: local.lastUpdate,
           revMap: {},
@@ -234,7 +233,6 @@ export class SyncService<const MD extends ModelCfgs> {
     const fakeLocal: LocalMeta = {
       // We still need local modelVersions here as they contain latest model versions for migrations
       crossModelVersion: local.crossModelVersion,
-      modelVersions: local.modelVersions,
       lastUpdate: 1,
       lastSyncedUpdate: null,
       metaRev: null,
@@ -297,7 +295,6 @@ export class SyncService<const MD extends ModelCfgs> {
         // shared
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
-        modelVersions: remote.modelVersions,
         revMap: remote.revMap,
         // local meta
         lastSyncedUpdate: remote.lastUpdate,
@@ -389,7 +386,6 @@ export class SyncService<const MD extends ModelCfgs> {
         ...local.revMap,
         ...realRemoteRevMap,
       }),
-      modelVersions: remote.modelVersions,
       crossModelVersion: remote.crossModelVersion,
     });
   }
@@ -431,7 +427,6 @@ export class SyncService<const MD extends ModelCfgs> {
           revMap: local.revMap,
           lastUpdate: local.lastUpdate,
           crossModelVersion: local.crossModelVersion,
-          modelVersions: local.modelVersions,
           mainModelData,
           ...(syncProvider.isLimitedToSingleFileSync ? { isFullData: true } : {}),
         },
@@ -508,7 +503,6 @@ export class SyncService<const MD extends ModelCfgs> {
       revMap: validatedRevMap,
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
-      modelVersions: local.modelVersions,
       mainModelData:
         await this._modelSyncService.getMainFileModelDataForUpload(completeData),
     });
@@ -517,7 +511,6 @@ export class SyncService<const MD extends ModelCfgs> {
     await this._metaFileSyncService.saveLocal({
       // leave as is basically
       lastUpdate: local.lastUpdate,
-      modelVersions: local.modelVersions,
       crossModelVersion: local.crossModelVersion,
 
       // actual updates

@@ -83,48 +83,39 @@ export type PfapiAllModelCfg = {
 };
 export type AppDataCompleteNew = AllModelData<PfapiAllModelCfg>;
 
-const TASK_MODEL_VERSION = 2 as const;
-
 export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   task: {
-    modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTaskState,
     isMainFileModel: true,
     validate: appDataValidators.task,
   },
   timeTracking: {
-    modelVersion: TASK_MODEL_VERSION,
     defaultData: initialTimeTrackingState,
     isMainFileModel: true,
     validate: appDataValidators.timeTracking,
   },
 
   project: {
-    modelVersion: 1.2,
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: appDataValidators.project,
   },
   tag: {
-    modelVersion: 1,
     defaultData: initialTagState,
     isMainFileModel: true,
     validate: appDataValidators.tag,
   },
   simpleCounter: {
-    modelVersion: 1,
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
     validate: appDataValidators.simpleCounter,
   },
   note: {
-    modelVersion: 1,
     defaultData: initialNoteState,
     isMainFileModel: true,
     validate: appDataValidators.note,
   },
   taskRepeatCfg: {
-    modelVersion: 1,
     defaultData: initialTaskRepeatCfgState,
     // TODO check if still necessary
     // needs to be due to last creation data being saved to model
@@ -133,19 +124,16 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   },
 
   reminders: {
-    modelVersion: 1,
     defaultData: [],
     isMainFileModel: true,
     validate: appDataValidators.reminders,
   },
   planner: {
-    modelVersion: 1,
     defaultData: plannerInitialState,
     isMainFileModel: true,
     validate: appDataValidators.planner,
   },
   boards: {
-    modelVersion: 1,
     defaultData: initialBoardsState,
     isMainFileModel: true,
     validate: appDataValidators.boards,
@@ -153,36 +141,30 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
 
   //-------------------------------
   globalConfig: {
-    modelVersion: 1,
     defaultData: DEFAULT_GLOBAL_CONFIG,
     validate: appDataValidators.globalConfig,
   },
 
   issueProvider: {
-    modelVersion: 1,
     defaultData: issueProviderInitialState,
     validate: appDataValidators.issueProvider,
   },
 
   // Metric models
   metric: {
-    modelVersion: 1,
     defaultData: initialMetricState,
     validate: appDataValidators.metric,
   },
   improvement: {
-    modelVersion: 1,
     defaultData: initialImprovementState,
     validate: appDataValidators.improvement,
   },
   obstruction: {
-    modelVersion: 1,
     defaultData: initialObstructionState,
     validate: appDataValidators.obstruction,
   },
 
   archiveYoung: {
-    modelVersion: TASK_MODEL_VERSION,
     defaultData: {
       task: { ids: [], entities: {} },
       timeTracking: initialTimeTrackingState,
@@ -191,7 +173,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     validate: appDataValidators.archiveYoung,
   },
   archiveOld: {
-    modelVersion: TASK_MODEL_VERSION,
     defaultData: {
       task: { ids: [], entities: {} },
       timeTracking: initialTimeTrackingState,
@@ -211,8 +192,6 @@ export const PFAPI_SYNC_PROVIDERS = [
   new Webdav(environment.production ? undefined : `/DEV`),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
   ...(IS_ANDROID_WEB_VIEW ? [new LocalFileSyncAndroid()] : []),
-  // TODO android
-  // ...(IS_ELECTRON ? [fileSyncElectron] : []),
 ];
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {

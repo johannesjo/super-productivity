@@ -22,13 +22,8 @@ type SerializableArray = Array<Serializable>;
 export type ModelBase = SerializableObject | SerializableArray | unknown;
 
 export interface ModelCfg<T extends ModelBase> {
-  modelVersion: number;
+  // modelVersion: number;
   isLocalOnly?: boolean;
-  // migrations?: {
-  //   [version: string]: (arg: T) => T;
-  // };
-  // TODO fix typing
-  // migrations?: Record<string, (arg: T) => T>;
   isAlwaysReApplyOldMigrations?: boolean;
   debounceDbWrite?: number;
   isMainFileModel?: boolean;
@@ -84,15 +79,10 @@ export interface RevMap {
   [modelOrFileGroupId: string]: string;
 }
 
-export interface ModelVersionMap {
-  [modelId: string]: number;
-}
-
 export interface MetaFileBase {
   lastUpdate: number;
   revMap: RevMap;
   crossModelVersion: number;
-  modelVersions: ModelVersionMap;
 }
 
 export interface RemoteMeta extends MetaFileBase {
@@ -116,7 +106,6 @@ export interface CompleteBackup<T extends ModelCfgs> {
   timestamp: number;
   lastUpdate: number;
   crossModelVersion: number;
-  modelVersions: ModelVersionMap;
   data: AllModelData<T>;
 }
 

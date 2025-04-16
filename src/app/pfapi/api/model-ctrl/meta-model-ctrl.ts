@@ -14,7 +14,6 @@ import { PFEventEmitter } from '../util/events';
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
   revMap: {},
-  modelVersions: {},
   lastUpdate: 0,
   metaRev: null,
   lastSyncedUpdate: null,
@@ -75,8 +74,6 @@ export class MetaModelCtrl {
 
     const metaModel = this._getMetaModelOrThrow(modelId, modelCfg);
     const timestamp = Date.now();
-    const isModelVersionChange =
-      metaModel.modelVersions[modelId] !== modelCfg.modelVersion;
 
     this.save(
       {
@@ -91,15 +88,6 @@ export class MetaModelCtrl {
                 [modelId]: timestamp.toString(),
               },
             }),
-
-        ...(isModelVersionChange
-          ? {
-              modelVersions: {
-                ...metaModel.modelVersions,
-                [modelId]: modelCfg.modelVersion,
-              },
-            }
-          : {}),
       },
       isIgnoreDBLock,
     );

@@ -33,7 +33,6 @@ describe('SyncService', () => {
     lastUpdate: 1000,
     lastSyncedUpdate: 1000,
     metaRev: 'meta-rev-1',
-    modelVersions: {},
     crossModelVersion: 1,
     ...overrides,
   });
@@ -41,7 +40,6 @@ describe('SyncService', () => {
   const createDefaultRemoteMeta = (overrides = {}): RemoteMeta => ({
     revMap: {},
     lastUpdate: 1000,
-    modelVersions: {},
     crossModelVersion: 1,
     mainModelData: {},
     ...overrides,
@@ -367,7 +365,6 @@ describe('SyncService', () => {
         lastUpdate: 12345,
         lastSyncedUpdate: 1000,
         metaRev: 'meta-rev-1',
-        modelVersions: {},
         crossModelVersion: 1,
       });
 
@@ -380,7 +377,6 @@ describe('SyncService', () => {
           },
           lastUpdate: 1000,
           crossModelVersion: 1,
-          modelVersions: {},
           mainModelData: { mainModel1: { id: 'mainModel1-data-id' } },
         },
         null,
@@ -428,7 +424,6 @@ describe('SyncService', () => {
       expect(mockModelSyncService.remove).toHaveBeenCalledWith('singleModel2');
       expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith({
         lastUpdate: 2000,
-        modelVersions: {},
         crossModelVersion: 1,
         lastSyncedUpdate: 2000,
         revMap: { singleModel1: 'new-single-model-rev' },
@@ -507,7 +502,6 @@ describe('SyncService', () => {
       expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith({
         lastUpdate: 2000,
         crossModelVersion: 1,
-        modelVersions: {},
         revMap: {},
         lastSyncedUpdate: 2000,
         metaRev: 'expected-new-meta-rev',
@@ -654,7 +648,6 @@ describe('SyncService', () => {
             lastUpdate: 2000,
             lastSyncedUpdate: 1000,
             revMap: { singleModel1: 'local-rev' },
-            modelVersions: { singleModel1: 1 },
           }),
         ),
       );
@@ -664,7 +657,6 @@ describe('SyncService', () => {
           remoteMeta: createDefaultRemoteMeta({
             revMap: { singleModel1: 'remote-rev' },
             lastUpdate: 1500,
-            modelVersions: { singleModel1: 1 },
             mainModelData: { mainModel1: { id: 'remote-data' } },
           }),
           remoteMetaRev: 'meta-rev-2',
