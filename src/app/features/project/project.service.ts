@@ -73,12 +73,14 @@ export class ProjectService {
       map((current) => {
         const dataForProject = current.project[projectId];
         const breakNr: BreakNrCopy = {};
-        Object.keys(dataForProject).forEach((dateStr) => {
-          const dateData = dataForProject[dateStr];
-          if (typeof dateData?.b === 'number') {
-            breakNr[dateStr] = dateData.b;
-          }
-        });
+        if (dataForProject) {
+          Object.keys(dataForProject).forEach((dateStr) => {
+            const dateData = dataForProject[dateStr];
+            if (typeof dateData?.b === 'number') {
+              breakNr[dateStr] = dateData.b;
+            }
+          });
+        }
         return breakNr;
       }),
     );
@@ -91,12 +93,14 @@ export class ProjectService {
       map((current) => {
         const dataForProject = current.project[projectId];
         const breakTime: BreakTimeCopy = {};
-        Object.keys(dataForProject).forEach((dateStr) => {
-          const dateData = dataForProject[dateStr];
-          if (typeof dateData?.bt === 'number') {
-            breakTime[dateStr] = dateData.bt;
-          }
-        });
+        if (dataForProject) {
+          Object.keys(dataForProject).forEach((dateStr) => {
+            const dateData = dataForProject[dateStr];
+            if (typeof dateData?.bt === 'number') {
+              breakTime[dateStr] = dateData.bt;
+            }
+          });
+        }
         return breakTime;
       }),
     );
