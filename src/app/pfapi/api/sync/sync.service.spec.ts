@@ -137,6 +137,9 @@ describe('SyncService', () => {
           singleModel2: { id: 'singleModel2-data-id' },
         } satisfies AllSyncModels<PfapiAllModelCfg>),
       ),
+      importAllSycModelData: jasmine
+        .createSpy('importAllSycModelData')
+        .and.returnValue(Promise.resolve()),
       cfg: {
         crossModelVersion: 1,
       },
@@ -198,7 +201,10 @@ describe('SyncService', () => {
     service2.download.and.returnValue(
       Promise.resolve({
         remoteMeta: createDefaultRemoteMeta({
-          mainModelData: { mainModel1: { id: 'main-model1-data-id' } },
+          mainModelData: {
+            mainModel1: { id: 'main-model1-data-id' },
+            mainModel2: { id: 'main-model2-data-id' },
+          },
         }),
         remoteMetaRev: 'remote-meta-rev-1',
       }),
@@ -379,6 +385,7 @@ describe('SyncService', () => {
 
       expect(mockMetaSyncService.upload).toHaveBeenCalledWith(
         {
+          // TODO check this case
           revMap: {
             singleModel1: 'UPDATE_ALL_REV',
             singleModel2: 'UPDATE_ALL_REV',
@@ -444,9 +451,47 @@ describe('SyncService', () => {
 
   describe('download operations', () => {
     it('should download all data from remote', async () => {
+      mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
+        toUpdate: ['singleModel1', 'singleModel2'],
+        toDelete: [],
+      });
+      mockModelSyncService.download.and.returnValue(
+        Promise.resolve({
+          data: { id: 'dataX' },
+          rev: 'revX',
+        }),
+      );
+      mockMetaSyncService.download.and.returnValue(
+        Promise.resolve({
+          remoteMeta: createDefaultRemoteMeta({
+            revMap: {
+              singleModel1: 'remote-rev-1',
+              singleModel2: 'remote-rev-2',
+            },
+            mainModelData: {
+              mainModel1: { id: 'main-model1-data-id' },
+              mainModel2: { id: 'main-model2-data-id' },
+            },
+          }),
+          remoteMetaRev: 'meta-rev-2',
+        }),
+      );
+
       await service.downloadAll();
       expect(mockMetaSyncService.download).toHaveBeenCalled();
       expect(mockMetaSyncService.saveLocal).toHaveBeenCalled();
+      expect(mockPfapi.importAllSycModelData).toHaveBeenCalledWith({
+        data: {
+          mainModel1: { id: 'main-model1-data-id' },
+          mainModel2: { id: 'main-model2-data-id' },
+          singleModel1: { id: 'dataX' },
+          singleModel2: { id: 'dataX' },
+        },
+        crossModelVersion: 1,
+        isAttemptRepair: true,
+        isBackupData: true,
+        isSkipLegacyWarnings: false,
+      });
     });
 
     it('should download only data in meta file for single file sync', async () => {

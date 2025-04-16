@@ -124,8 +124,6 @@ export class SyncService<const MD extends ModelCfgs> {
               case ModelVersionCheckResult.MajorUpdate:
                 alert('Downloading all since cross model version changed');
                 await this.downloadAll();
-                // TODO could be more efficient by migrating before importing into database
-                await this._migrationService.checkAndMigrateLocalDB();
                 return { status: SyncStatus.UpdateLocalAll };
 
               case ModelVersionCheckResult.RemoteMajorAhead:
@@ -250,6 +248,7 @@ export class SyncService<const MD extends ModelCfgs> {
       fakeLocal,
       remoteMetaRev,
       isSkipModelRevMapCheck,
+      true,
     );
   }
 
@@ -259,12 +258,14 @@ export class SyncService<const MD extends ModelCfgs> {
    * @param local Local metadata
    * @param remoteRev Remote revision
    * @param isSkipModelRevMapCheck Whether to skip revision map checks
+   * @param isDownloadAll Whether attempting to download all the data
    */
   async downloadToLocal(
     remote: RemoteMeta,
     local: LocalMeta,
     remoteRev: string,
     isSkipModelRevMapCheck: boolean = false,
+    isDownloadAll: boolean = false,
   ): Promise<void> {
     const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
       revMapNewer: remote.revMap,
@@ -278,12 +279,14 @@ export class SyncService<const MD extends ModelCfgs> {
       remoteRev,
       toUpdate,
       toDelete,
+      isDownloadAll,
     });
 
     // If nothing to update or provider limited to single file sync
     if (
-      (toUpdate.length === 0 && toDelete.length === 0) ||
-      this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
+      !isDownloadAll &&
+      ((toUpdate.length === 0 && toDelete.length === 0) ||
+        this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync)
     ) {
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
       pfLog(3, 'RevMap comparison', {
@@ -305,7 +308,13 @@ export class SyncService<const MD extends ModelCfgs> {
       return;
     }
 
-    return this._downloadToLocalMULTI(remote, local, remoteRev, isSkipModelRevMapCheck);
+    return this._downloadToLocalMULTI(
+      remote,
+      local,
+      remoteRev,
+      isSkipModelRevMapCheck,
+      isDownloadAll,
+    );
   }
 
   /**
@@ -317,12 +326,14 @@ export class SyncService<const MD extends ModelCfgs> {
     local: LocalMeta,
     remoteRev: string,
     isSkipModelRevMapCheck: boolean = false,
+    isDownloadAll: boolean = false,
   ): Promise<void> {
     pfLog(2, `${SyncService.LT}.${this._downloadToLocalMULTI.name}()`, {
       remote,
       local,
       remoteRev,
       isSkipModelRevMapCheck,
+      isDownloadAll,
     });
 
     const { toUpdate, toDelete } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
@@ -352,10 +363,25 @@ export class SyncService<const MD extends ModelCfgs> {
       this._currentSyncProvider$.getOrError().maxConcurrentRequests,
     );
 
-    await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
-
-    // ON SUCCESS
-    await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
+    if (isDownloadAll) {
+      const fullData = { ...dataMap, ...remote.mainModelData } as any;
+      pfLog(2, `${SyncService.LT}.${this._downloadToLocalMULTI.name}()`, {
+        fullData,
+        dataMap,
+        realRemoteRevMap,
+        toUpdate,
+      });
+      await this._pfapiMain.importAllSycModelData({
+        data: fullData,
+        crossModelVersion: remote.crossModelVersion,
+        isAttemptRepair: true,
+        isBackupData: true,
+        isSkipLegacyWarnings: false,
+      });
+    } else {
+      await this._modelSyncService.updateLocalUpdated(toUpdate, toDelete, dataMap);
+      await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
+    }
 
     await this._metaFileSyncService.saveLocal({
       metaRev: remoteRev,
