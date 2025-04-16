@@ -210,6 +210,18 @@
 
   @if (isAdvancedControls() && !task.parentId && !task.isDone) {
     <button
+      (click)="moveToTop()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_upward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_TOP | translate }}
+      </span>
+    </button>
+  }
+
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
       (click)="addSubTask()"
       mat-menu-item
     >
