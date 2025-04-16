@@ -341,6 +341,6 @@ export class ModelSyncService<MD extends ModelCfgs> {
    */
   private _getModelVersion<T extends keyof MD>(modelId: T): number {
     // return this.m[modelId].modelCfg.modelVersion;
-    return 1;
+    return this._pfapiMain.cfg?.crossModelVersion || 0;
   }
 }

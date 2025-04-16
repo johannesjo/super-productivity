@@ -116,7 +116,7 @@ describe('ModelSyncService', () => {
         mockEncryptAndCompressCfg$.value,
         undefined,
         modelData,
-        1,
+        0,
       );
       expect(mockSyncProvider.uploadFile).toHaveBeenCalledWith(
         'singleModel',
