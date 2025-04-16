@@ -12,7 +12,7 @@ import { ThemeService as NgChartThemeService } from 'ng2-charts';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { combineLatest, fromEvent, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
@@ -20,6 +20,9 @@ import { ChartConfiguration } from 'chart.js';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
+import { LS } from '../persistence/storage-keys.const';
+
+export type DarkModeCfg = 'dark' | 'light' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -34,9 +37,13 @@ export class GlobalThemeService {
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
 
-  isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(
-    switchMap((cfg) => {
-      switch (cfg.darkMode) {
+  darkMode$ = new BehaviorSubject<DarkModeCfg>(
+    (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
+  );
+
+  isDarkTheme$: Observable<boolean> = this.darkMode$.pipe(
+    switchMap((darkMode) => {
+      switch (darkMode) {
         case 'dark':
           return of(true);
         case 'light':

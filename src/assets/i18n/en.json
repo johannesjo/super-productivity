@@ -1038,6 +1038,7 @@
         "MOVE_TO_BACKLOG": "Move to backlog",
         "MOVE_TO_OTHER_PROJECT": "Move to other Project",
         "MOVE_TO_TODAY": "Move to today's list",
+        "MOVE_TO_TOP": "Move to top of the list",
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TIME": "Time Tracking",

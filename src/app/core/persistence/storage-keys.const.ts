@@ -38,6 +38,8 @@ export enum LS {
 
   FOCUS_MODE_MODE = 'FOCUS_MODE_MODE',
 
+  DARK_MODE = 'DARK_MODE',
+
   SELECTED_BOARD = 'SELECTED_BOARD',
 }
 

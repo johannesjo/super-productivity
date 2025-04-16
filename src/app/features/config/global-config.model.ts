@@ -4,10 +4,7 @@ import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
-export type DarkModeCfg = 'dark' | 'light' | 'system';
-
 export type MiscConfig = Readonly<{
-  darkMode: DarkModeCfg;
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;

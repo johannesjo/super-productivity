@@ -317,6 +317,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
+  moveToTop(): void {
+    this._taskService.moveToTop(this.task.id, this.task.parentId, false);
+  }
+
   @throttle(200, { leading: true, trailing: false })
   toggleDoneKeyboard(): void {
     this.toggleTaskDone();

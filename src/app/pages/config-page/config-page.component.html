@@ -12,7 +12,7 @@
             <mat-button-toggle-group
               name="darkMode"
               aria-label="darkMode"
-              [value]="globalCfg?.misc.darkMode"
+              [value]="globalThemeService.darkMode$ | async"
               (change)="updateDarkMode($event)"
             >
               <mat-button-toggle value="system">

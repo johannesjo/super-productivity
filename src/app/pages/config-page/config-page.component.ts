@@ -36,11 +36,12 @@ import { MatIcon } from '@angular/material/icon';
 import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
 import { ConfigSoundFormComponent } from '../../features/config/config-sound-form/config-sound-form.component';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AsyncPipe } from '@angular/common';
 import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
+import { GlobalThemeService } from '../../core/theme/global-theme.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'config-page',
@@ -62,6 +63,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _pfapiService = inject(PfapiService);
   readonly configService = inject(GlobalConfigService);
   readonly syncSettingsService = inject(SyncConfigService);
+  readonly globalThemeService = inject(GlobalThemeService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -153,9 +155,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   saveSyncFormCfg($event: { config: any }): void {}
 
   updateDarkMode(ev: MatButtonToggleChange): void {
-    console.log(ev.value);
     if (ev.value) {
-      this.configService.updateSection('misc', { darkMode: ev.value });
+      this.globalThemeService.darkMode$.next(ev.value);
     }
   }
 
