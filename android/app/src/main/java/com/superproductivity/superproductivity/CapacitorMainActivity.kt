@@ -27,7 +27,6 @@ import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 class CapacitorMainActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
 
-    private var webViewRequestHandler = WebViewRequestHandler(this, "localhost")
     private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
 
@@ -35,11 +34,8 @@ class CapacitorMainActivity : BridgeActivity() {
         super.onCreate(savedInstanceState)
         printWebViewVersion(bridge.webView)
         // prevent android status bar from overlapping
-        WindowCompat.setDecorFitsSystemWindows(window, true);
+//        WindowCompat.setDecorFitsSystemWindows(window, true);
 
-        // Register Plugin
-        // TODO: The changes to the compatible logic are too complex, so they will not be added for now
-        //  (separate branch, there will be opportunities to add it later)
         // DEBUG ONLY
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
@@ -65,37 +61,8 @@ class CapacitorMainActivity : BridgeActivity() {
                 javaScriptInterface,
                 WINDOW_PROPERTY_F_DROID
             )
-            // not ready in time, that's why we create a second JS interface just to fill the prop
-            // callJavaScriptFunction("window.$WINDOW_PROPERTY_F_DROID=true")
         }
 
-        // Set custom SP WebViewClient & ServiceWorkerController
-        // No need to set up WebChromeClient, as most of the processes have been implemented in Bridge
-        bridge.webViewClient = object : BridgeWebViewClient(bridge) {
-            @Deprecated("Deprecated in Java")
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                return webViewRequestHandler.handleUrlLoading(view, url)
-            }
-
-            override fun shouldInterceptRequest(
-                view: WebView?,
-                request: WebResourceRequest?
-            ): WebResourceResponse? {
-                Log.v("TW", "Regular Request Intercepting request: ${request?.url}")
-                val interceptedResponse = webViewRequestHandler.interceptWebRequest(request)
-                return interceptedResponse ?: super.shouldInterceptRequest(view, request)
-            }
-        }
-        val swController = ServiceWorkerController.getInstance()
-        swController.setServiceWorkerClient(
-            object : ServiceWorkerClient() {
-                override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
-                    Log.v("TW", "SW Intercepting request: ${request.url}")
-                    val interceptedResponse = webViewRequestHandler.interceptWebRequest(request)
-                    return interceptedResponse
-                        ?: bridge.webViewClient.shouldInterceptRequest(bridge.webView, request)
-                }
-            })
 
         // Register OnBackPressedCallback to handle back button press
         onBackPressedDispatcher.addCallback(this) {
