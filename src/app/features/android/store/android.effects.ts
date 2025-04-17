@@ -1,12 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
-import { setCurrentTask, updateTask } from '../../tasks/store/task.actions';
 import { Store } from '@ngrx/store';
-import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { selectCurrentTask } from '../../tasks/store/task.selectors';
-import { androidInterface } from '../android-interface';
-import { TaskCopy } from '../../tasks/task.model';
-import { showAddTaskBar } from '../../../core-ui/layout/store/layout.actions';
+import { switchMap, tap } from 'rxjs/operators';
 import { timer } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -111,27 +106,26 @@ export class AndroidEffects {
       },
     );
 
-  markTaskAsDone$ = createEffect(() =>
-    androidInterface.onMarkCurrentTaskAsDone$.pipe(
-      withLatestFrom(this._store$.select(selectCurrentTask)),
-      filter(([, currentTask]) => !!currentTask),
-      map(([, currentTask]) =>
-        updateTask({
-          task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
-        }),
-      ),
-    ),
-  );
-
-  pauseTracking$ = createEffect(() =>
-    androidInterface.onPauseCurrentTask$.pipe(
-      withLatestFrom(this._store$.select(selectCurrentTask)),
-      filter(([, currentTask]) => !!currentTask),
-      map(([, currentTask]) => setCurrentTask({ id: null })),
-    ),
-  );
-
-  showAddTaskBar$ = createEffect(() =>
-    androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
-  );
+  // markTaskAsDone$ = createEffect(() =>
+  //   androidInterface.onMarkCurrentTaskAsDone$.pipe(
+  //     withLatestFrom(this._store$.select(selectCurrentTask)),
+  //     filter(([, currentTask]) => !!currentTask),
+  //     map(([, currentTask]) =>
+  //       updateTask({
+  //         task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
+  //       }),
+  //     ),
+  //   ),
+  // );
+  //
+  // pauseTracking$ = createEffect(() =>
+  //   androidInterface.onPauseCurrentTask$.pipe(
+  //     withLatestFrom(this._store$.select(selectCurrentTask)),
+  //     filter(([, currentTask]) => !!currentTask),
+  //     map(([, currentTask]) => setCurrentTask({ id: null })),
+  //   ),
+  // );
+  // showAddTaskBar$ = createEffect(() =>
+  //   androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
+  // );
 }

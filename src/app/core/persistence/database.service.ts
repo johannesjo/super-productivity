@@ -17,7 +17,7 @@ export class DatabaseService {
 
   private _lastParams?: { a: string; key?: string; data?: unknown };
   // private _adapter: DBAdapter =
-  //   IS_ANDROID_WEB_VIEW && androidInterface.saveToDbNew && androidInterface.loadFromDb
+  //   IS_ANDROID_WEB_VIEW && androidInterface.saveToDb && androidInterface.loadFromDb
   //     ? this._androidDbAdapterService
   //     : this._indexedDbAdapterService;
   private _adapter: DBAdapter = this._indexedDbAdapterService;

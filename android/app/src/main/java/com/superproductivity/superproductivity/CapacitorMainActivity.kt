@@ -38,7 +38,7 @@ class CapacitorMainActivity : BridgeActivity() {
         supportActionBar?.hide()
 
         // Initialize JavaScriptInterface
-        javaScriptInterface = JavaScriptInterface(this, bridge.webView, storageHelper)
+        javaScriptInterface = JavaScriptInterface(this, bridge.webView)
 
         // Initialize WebView
         WebHelper().setupView(bridge.webView, false)
@@ -122,14 +122,6 @@ class CapacitorMainActivity : BridgeActivity() {
         javaScriptInterface.callJavaScriptFunction("if($fullObjectPath && $fnFullName)$fnFullName($fnParam)")
     }
 
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (data != null) {
-            javaScriptInterface.onActivityResult(requestCode, resultCode, data)
-        }
-    }
 
     companion object {
         const val WINDOW_INTERFACE_PROPERTY: String = "SUPAndroid"

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { NotifyModel } from './notify.model';
 import { environment } from '../../../environments/environment';
 import { IS_ELECTRON } from '../../app.constants';
@@ -6,7 +6,6 @@ import { IS_MOBILE } from '../../util/is-mobile';
 import { TranslateService } from '@ngx-translate/core';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { androidInterface } from '../../features/android/android-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +51,7 @@ export class NotifyService {
         });
       }
     } else if (IS_ANDROID_WEB_VIEW) {
-      androidInterface.showNotification(title || 'NO_TITLE', body);
+      // TODO maybe use capacitor plugin here as well though it probably doesn't make sense for most cases
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them

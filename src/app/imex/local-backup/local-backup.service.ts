@@ -97,7 +97,7 @@ export class LocalBackupService {
       window.ea.backupAppData(data);
     }
     if (IS_ANDROID_WEB_VIEW) {
-      androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));
+      await androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));
     }
   }
 
