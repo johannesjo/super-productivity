@@ -11,6 +11,8 @@ import { Task, TaskArchive, TaskState } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
 import { Update } from '@ngrx/entity';
 import { ArchiveModel } from './time-tracking.model';
+import { ModelCfgToModelCtrl } from '../../pfapi/api';
+import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
 
 type TaskArchiveAction =
   | ReturnType<typeof updateTask>
@@ -97,7 +99,7 @@ export class TaskArchiveService {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
       return await this._execAction(
-        'archive',
+        'archiveYoung',
         archiveYoung,
         updateTask({ task: { id, changes: changedFields } }),
       );
@@ -277,7 +279,10 @@ export class TaskArchiveService {
   // -----------------------------------------
 
   private async _execAction(
-    target: 'archive' | 'archiveOld',
+    target: Extract<
+      keyof ModelCfgToModelCtrl<PfapiAllModelCfg>,
+      'archiveYoung' | 'archiveOld'
+    >,
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
   ): Promise<void> {
