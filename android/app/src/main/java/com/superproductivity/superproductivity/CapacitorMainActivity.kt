@@ -2,24 +2,18 @@ package com.superproductivity.superproductivity
 
 import android.content.Intent
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.webkit.ServiceWorkerClient
-import android.webkit.ServiceWorkerController
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.core.view.WindowCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
-import com.getcapacitor.BridgeWebViewClient
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
-import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 /**
  * All new Super-Productivity main activity, based on Capacitor to support offline use of the entire application
@@ -33,14 +27,13 @@ class CapacitorMainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         printWebViewVersion(bridge.webView)
-        // prevent android status bar from overlapping
-//        WindowCompat.setDecorFitsSystemWindows(window, true);
 
         // DEBUG ONLY
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
             WebView.setWebContentsDebuggingEnabled(true)
         }
+        Toast.makeText(this, "hihihihi", Toast.LENGTH_SHORT).show()
 
         // Hide the action bar
         supportActionBar?.hide()
