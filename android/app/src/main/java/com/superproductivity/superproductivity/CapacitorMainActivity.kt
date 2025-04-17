@@ -33,7 +33,6 @@ class CapacitorMainActivity : BridgeActivity() {
             Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
             WebView.setWebContentsDebuggingEnabled(true)
         }
-        Toast.makeText(this, "hihihihi", Toast.LENGTH_SHORT).show()
 
         // Hide the action bar
         supportActionBar?.hide()
