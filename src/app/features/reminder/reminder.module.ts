@@ -28,6 +28,7 @@ import { T } from 'src/app/t.const';
   declarations: [],
   imports: [CommonModule],
 })
+// TODO move to effect
 export class ReminderModule {
   private readonly _reminderService = inject(ReminderService);
   private readonly _matDialog = inject(MatDialog);
