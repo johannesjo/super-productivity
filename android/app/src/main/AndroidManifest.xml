@@ -29,7 +29,7 @@
       android:hardwareAccelerated="true"
       android:label="@string/title_activity_fullscreen"
       android:launchMode="singleTask"
-      android:theme="@style/FullscreenTheme"
+      android:theme="@style/AppTheme.NoActionBarLaunch"
       android:windowSoftInputMode="adjustResize">
 
       <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
@@ -51,7 +51,7 @@
       android:hardwareAccelerated="true"
       android:label="@string/title_activity_fullscreen"
       android:launchMode="singleTask"
-      android:theme="@style/FullscreenTheme"
+      android:theme="@style/AppTheme.NoActionBarLaunch"
       android:windowSoftInputMode="adjustResize" />
   </application>
 </manifest>

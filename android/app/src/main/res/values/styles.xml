@@ -9,13 +9,19 @@
   </style>
 
 
-  <style name="FullscreenTheme" parent="AppTheme">
+  <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:background">@null</item>
+  </style>
+
+
+  <style name="AppTheme.NoActionBarLaunch" >
     <item name="android:windowActionBarOverlay">true</item>
     <item name="android:windowBackground">@null</item>
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
     <item name="android:background">@null</item>
   </style>
-
 
 </resources>
