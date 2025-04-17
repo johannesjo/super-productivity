@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { setCurrentTask, updateTask } from '../../tasks/store/task.actions';
 import { Store } from '@ngrx/store';
-import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { androidInterface } from '../android-interface';
 import { TaskCopy } from '../../tasks/task.model';
@@ -15,6 +15,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
 // TODO send message to electron when current task changes here
 
+const DELAY_PERMISSIONS = 2000;
+const DELAY_SCHEDULE = 5000;
+
 @Injectable()
 export class AndroidEffects {
   private _actions$ = inject(Actions);
@@ -26,18 +29,13 @@ export class AndroidEffects {
     IS_ANDROID_WEB_VIEW &&
     createEffect(
       () =>
-        timer(1000).pipe(
+        timer(DELAY_PERMISSIONS).pipe(
           tap(async (v) => {
-            console.log('XXXXXXXXXX I am here!');
-
-            alert('AAA');
             try {
               const checkResult = await LocalNotifications.checkPermissions();
               if (checkResult.display === 'denied') {
-                const r = await LocalNotifications.requestPermissions();
-                console.log(r);
-                const r2 = await LocalNotifications.changeExactNotificationSetting();
-                console.log(r2);
+                console.log(await LocalNotifications.requestPermissions());
+                console.log(await LocalNotifications.changeExactNotificationSetting());
               }
             } catch (error) {
               console.error(error);
@@ -53,28 +51,50 @@ export class AndroidEffects {
       },
     );
 
+  private _reminderIdMap: Record<string, number> = {};
+
   scheduleNotifications$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
       () =>
-        timer(2000, 20000).pipe(
-          tap(async (v) => {
+        timer(DELAY_SCHEDULE).pipe(
+          switchMap(() => this._reminderService.reminders$),
+          tap(async (reminders) => {
             try {
               const checkResult = await LocalNotifications.checkPermissions();
               if (checkResult.display === 'granted') {
+                const pendingNotifications = await LocalNotifications.getPending();
+                console.log({ pendingNotifications });
+                if (pendingNotifications.notifications.length > 0) {
+                  await LocalNotifications.cancel({
+                    notifications: pendingNotifications.notifications.map((n) => ({
+                      id: n.id,
+                    })),
+                  });
+                }
                 await LocalNotifications.schedule({
-                  notifications: [
-                    {
-                      id: v,
-                      title: 'reminder.title' + v,
-                      body: 'reminder.body' + v,
+                  notifications: reminders.map((reminder) => {
+                    // since they are temporary we can use just Math.random()
+                    const id =
+                      this._reminderIdMap[reminder.id] ||
+                      Math.round(Math.random() * 10000000);
+                    this._reminderIdMap[reminder.id] = id;
+                    console.log({ id });
+
+                    return {
+                      id,
+                      title: reminder.title,
+                      body: '',
+                      extra: {
+                        reminder,
+                      },
                       schedule: {
                         // eslint-disable-next-line no-mixed-operators
-                        at: new Date(Date.now() + 5000),
+                        at: new Date(reminder.remindAt),
                         allowWhileIdle: true,
                       },
-                    },
-                  ],
+                    };
+                  }),
                 });
               }
             } catch (error) {
