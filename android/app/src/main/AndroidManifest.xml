@@ -13,27 +13,22 @@
   <application
     android:name=".App"
     android:allowBackup="true"
-    android:dataExtractionRules="@xml/data_extraction_rules"
-    android:fullBackupContent="true"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:networkSecurityConfig="@xml/network_security_config"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/AppTheme"
-    tools:ignore="UnusedAttribute">
+    android:theme="@style/AppTheme">
 
     <!-- Set FullscreenActivity as the default launcher -->
     <activity
       android:name=".FullscreenActivity"
       android:allowTaskReparenting="true"
-      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
       android:exported="true"
       android:hardwareAccelerated="true"
       android:label="@string/title_activity_fullscreen"
       android:launchMode="singleTask"
-      android:lockTaskMode="never"
-      android:persistableMode="persistNever"
       android:theme="@style/FullscreenTheme"
       android:windowSoftInputMode="adjustResize">
 
@@ -51,13 +46,11 @@
     <activity
       android:name=".CapacitorMainActivity"
       android:allowTaskReparenting="true"
-      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
       android:exported="true"
       android:hardwareAccelerated="true"
       android:label="@string/title_activity_fullscreen"
       android:launchMode="singleTask"
-      android:lockTaskMode="never"
-      android:persistableMode="persistNever"
       android:theme="@style/FullscreenTheme"
       android:windowSoftInputMode="adjustResize" />
   </application>
