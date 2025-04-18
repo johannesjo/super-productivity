@@ -1,6 +1,7 @@
 import confetti from 'canvas-confetti';
 
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -72,6 +73,7 @@ import {
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -107,7 +109,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   ],
   animations: [expandAnimation],
 })
-export class DailySummaryComponent implements OnInit, OnDestroy {
+export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly configService = inject(GlobalConfigService);
   readonly workContextService = inject(WorkContextService);
   private readonly _taskService = inject(TaskService);
@@ -282,10 +284,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
           this.dayStr = s.params.dayStr;
         }
       });
+  }
 
-    this._startCelebrationTimeout = window.setTimeout(() => {
-      this._celebrate();
-    }, 750);
+  ngAfterViewInit(): void {
+    this._startCelebrationTimeout = window.setTimeout(
+      () => {
+        this._celebrate();
+      },
+      IS_TOUCH_ONLY ? 1500 : 500,
+    );
   }
 
   ngOnDestroy(): void {
