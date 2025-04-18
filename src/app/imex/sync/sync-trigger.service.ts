@@ -16,6 +16,7 @@ import {
   take,
   tap,
   throttleTime,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { isOnline$ } from '../../util/is-online';
@@ -33,6 +34,8 @@ import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { Store } from '@ngrx/store';
+import { selectCurrentTaskId } from '../../features/tasks/store/task.selectors';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -46,6 +49,7 @@ export class SyncTriggerService {
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _idleService = inject(IdleService);
   private readonly _pfapiService = inject(PfapiService);
+  private readonly _store = inject(Store);
 
   private _onUpdateLocalDataTrigger$ = this._pfapiService.onLocalMetaUpdate$;
 
@@ -75,7 +79,7 @@ export class SyncTriggerService {
           IS_TOUCH_PRIMARY
           ? merge(
               fromEvent(window, 'touchstart'),
-              fromEvent(window, 'visibilitychange'),
+              fromEvent(document, 'visibilitychange'),
             ).pipe(
               mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
               throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
@@ -97,7 +101,6 @@ export class SyncTriggerService {
     ),
   );
 
-  // TODO check if those two work as expected
   private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
     ? ipcResume$.pipe(
         // because ipcEvents live forever
@@ -111,6 +114,17 @@ export class SyncTriggerService {
         throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME),
       )
     : EMPTY;
+
+  private _onBlurWhenNotTracking$: Observable<string | never> = fromEvent(
+    window,
+    'blur',
+  ).pipe(
+    withLatestFrom(this._store.select(selectCurrentTaskId)),
+    filter(([, currentTaskId]) => !currentTaskId),
+    mapTo('I_BLUR_WHILE_NOT_TRACKING'),
+    // we throttle this to prevent lots of updates
+    throttleTime(10 * 60 * 1000),
+  );
 
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
@@ -176,6 +190,7 @@ export class SyncTriggerService {
           this._isOnlineTrigger$,
           this._onIdleTrigger$,
           this._onElectronResumeTrigger$,
+          this._onBlurWhenNotTracking$,
         );
     return merge(
       // once immediately
@@ -193,7 +208,7 @@ export class SyncTriggerService {
             // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
             // tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
             auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
-            // tap((ev) => alert('__trigger_sync after auditTime__')),
+            tap((ev) => alert('__trigger_sync after auditTime__')),
           ),
         ),
       ),
