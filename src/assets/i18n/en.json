@@ -163,6 +163,12 @@
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Unable to generate PKCE challenge."
       }
     },
+    "D_RATE": {
+      "A_HOW": "How and where to rate",
+      "BTN_DONT_BOTHER": "Don't bother me again",
+      "TITLE": "\uD83D\uDE48 Please forgive us, but...",
+      "TXT": "You would help the project immensely by <strong>giving it a good rating, if you like it!</strong>"
+    },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "There are {{nr}} done tasks in your today list not yet moved to the archive. Do you really want to quit without finishing your day?"
