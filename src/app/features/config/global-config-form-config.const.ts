@@ -38,7 +38,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
 
 export const GLOBAL_IMEX_FORM_CONFIG: ConfigFormConfig = [
   // NOTE: the backup form is added dynamically due to async prop required
-  ...(IS_ANDROID_WEB_VIEW ? [] : [IMEX_FORM]),
+  IMEX_FORM,
 ].filter(filterGlobalConfigForm);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [

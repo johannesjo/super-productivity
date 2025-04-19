@@ -17,6 +17,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { PfapiService } from 'src/app/pfapi/pfapi.service';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Component({
   selector: 'file-imex',
@@ -82,11 +83,23 @@ export class FileImexComponent {
   async downloadBackup(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
     download('super-productivity-backup.json', JSON.stringify(data));
+    if (IS_ANDROID_WEB_VIEW) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+      });
+    }
     // download('super-productivity-backup.json', privacyExport(data));
   }
 
   async privacyAppDataDownload(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
     download('super-productivity-backup.json', privacyExport(data));
+    if (IS_ANDROID_WEB_VIEW) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+      });
+    }
   }
 }
