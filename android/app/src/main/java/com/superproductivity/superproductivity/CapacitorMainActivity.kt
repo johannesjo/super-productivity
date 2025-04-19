@@ -1,8 +1,6 @@
 package com.superproductivity.superproductivity
 
-import android.content.Intent
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View

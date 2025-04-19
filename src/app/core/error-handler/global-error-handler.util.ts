@@ -30,7 +30,11 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
   return Promise.resolve('');
 };
 
-const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
+const throttle = pThrottle({
+  limit: 2,
+  interval: 5000,
+});
+const _getStacktraceThrottled = throttle(_getStacktrace);
 
 export const logAdvancedStacktrace = (
   origErr: unknown,
