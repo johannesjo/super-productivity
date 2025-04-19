@@ -480,14 +480,17 @@ export class JiraApiService {
     });
 
     // save to request log (also sets up timeout)
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem({
-      promiseResolve,
-      promiseReject,
-      requestId,
-      requestInit,
-      transform,
-      jiraCfg,
-    });
+    // since we don't use the requestLog anyway on android web view we can just use the requestId
+    if (!IS_ANDROID_WEB_VIEW) {
+      this._requestsLog[requestId] = this._makeJiraRequestLogItem({
+        promiseResolve,
+        promiseReject,
+        requestId,
+        requestInit,
+        transform,
+        jiraCfg,
+      });
+    }
 
     const requestToSend = { requestId, requestInit, url };
     if (IS_ELECTRON) {
