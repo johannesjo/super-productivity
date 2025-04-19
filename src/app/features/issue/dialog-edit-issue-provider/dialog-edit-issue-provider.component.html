@@ -71,7 +71,6 @@
                 >How to get the iCal url for Google Calendar (view only)?</a
               >
             </p>
-            <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
           </div>
         }
         <!-- -->
@@ -84,17 +83,15 @@
                 >How to get the iCal url for Outlook 365 (ICS)?</a
               >
             </p>
-            <!--      <p [innerHTML]="T.G.EXTENSION_INFO|translate"></p>-->
           </div>
         }
       }
       <!-- -->
-      @if (issueProviderKey === 'JIRA') {
+      @if (issueProviderKey === 'JIRA' && IS_WEB_EXTENSION_REQUIRED_FOR_JIRA) {
         <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
           <p [innerHTML]="T.G.EXTENSION_INFO | translate"></p>
         </div>
       }
-
       <formly-form
         [model]="model"
         (modelChange)="formlyModelChange($event)"

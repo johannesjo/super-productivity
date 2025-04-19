@@ -1,6 +1,8 @@
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 
 export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
+// effectively IS_BROWSER
+export const IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = !IS_ELECTRON && !IS_ANDROID_WEB_VIEW;
 
 // TODO merge and remove one of these
 export const TRACKING_INTERVAL = 1000;
