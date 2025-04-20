@@ -62,9 +62,26 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
   dataOut = _removeMissingReminderIds(dataOut);
+  dataOut = _fixTaskRepeatMissingWeekday(dataOut);
 
   // console.timeEnd('dataRepair');
   return dataOut;
+};
+
+const _fixTaskRepeatMissingWeekday = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  if (data.taskRepeatCfg && data.taskRepeatCfg.entities) {
+    Object.keys(data.taskRepeatCfg.entities).forEach((key) => {
+      const cfg = data.taskRepeatCfg.entities[key] as TaskRepeatCfgCopy;
+      cfg.monday = true;
+      cfg.tuesday = true;
+      cfg.wednesday = true;
+      cfg.thursday = true;
+      cfg.friday = true;
+      cfg.saturday = true;
+      cfg.sunday = true;
+    });
+  }
+  return data;
 };
 
 const _fixEntityStates = (data: AppDataCompleteNew): AppDataCompleteNew => {
