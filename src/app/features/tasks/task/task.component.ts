@@ -83,7 +83,6 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
-import { TagService } from '../../tag/tag.service';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 
 @Component({
@@ -136,7 +135,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _elementRef = inject(ElementRef);
   private readonly _renderer = inject(Renderer2);
   private readonly _projectService = inject(ProjectService);
-  private readonly _tagService = inject(TagService);
   readonly plannerService = inject(PlannerService);
   readonly workContextService = inject(WorkContextService);
 

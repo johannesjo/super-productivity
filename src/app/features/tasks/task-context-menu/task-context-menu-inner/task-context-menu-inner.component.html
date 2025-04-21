@@ -88,6 +88,19 @@
     >
       <mat-icon>today</mat-icon>
     </button>
+
+    @if (
+      task.reminderId || ((plannerService.plannedTaskDayMap$ | async) || {})[task.id]
+    ) {
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="unscheduleTask()"
+        [matTooltip]="T.F.TASK.CMP.UNSCHEDULE_TASK | translate"
+      >
+        <mat-icon>event_busy</mat-icon>
+      </button>
+    }
   </div>
 
   @if (

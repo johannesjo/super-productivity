@@ -104,8 +104,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
-  private readonly _plannerService = inject(PlannerService);
   private readonly _tagService = inject(TagService);
+  readonly plannerService = inject(PlannerService);
 
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
@@ -589,7 +589,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
           msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
           translateParams: {
             date: formattedDate,
-            extra: await this._plannerService.getSnackExtraStr(newDay),
+            extra: await this.plannerService.getSnackExtraStr(newDay),
           },
         });
       }
@@ -602,9 +602,17 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
         translateParams: {
           date: formattedDate,
-          extra: await this._plannerService.getSnackExtraStr(newDay),
+          extra: await this.plannerService.getSnackExtraStr(newDay),
         },
       });
+    }
+  }
+
+  unscheduleTask(): void {
+    if (this.task.reminderId) {
+      this._taskService.unScheduleTask(this.task.id, this.task.reminderId);
+    } else {
+      this._store.dispatch(PlannerActions.removeTaskFromDays({ taskId: this.task.id }));
     }
   }
 

@@ -1059,6 +1059,7 @@
         "TOGGLE_TAGS": "Toggle Tags",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
+        "UNSCHEDULE_TASK": "Unschedule task",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
