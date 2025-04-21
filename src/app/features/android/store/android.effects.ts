@@ -7,6 +7,7 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
 
 // TODO send message to electron when current task changes here
 
@@ -46,8 +47,6 @@ export class AndroidEffects {
       },
     );
 
-  private _reminderIdMap: Record<string, number> = {};
-
   scheduleNotifications$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
@@ -69,14 +68,9 @@ export class AndroidEffects {
                 }
                 await LocalNotifications.schedule({
                   notifications: reminders.map((reminder) => {
-                    // since they are temporary we can use just Math.random()
-                    const id =
-                      this._reminderIdMap[reminder.id] ||
-                      Math.round(Math.random() * 10000000);
-                    this._reminderIdMap[reminder.id] = id;
-                    console.log({ id });
-
-                    return {
+                    // since the ids are temporary we can use just Math.random()
+                    const id = Math.round(Math.random() * 10000000);
+                    const mapped: LocalNotificationSchema = {
                       id,
                       title: reminder.title,
                       body: '',
@@ -87,8 +81,11 @@ export class AndroidEffects {
                         // eslint-disable-next-line no-mixed-operators
                         at: new Date(reminder.remindAt),
                         allowWhileIdle: true,
+                        repeats: false,
+                        every: undefined,
                       },
                     };
+                    return mapped;
                   }),
                 });
               }
