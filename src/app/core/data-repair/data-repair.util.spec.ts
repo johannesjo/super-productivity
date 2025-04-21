@@ -7,7 +7,10 @@ import { Tag, TagState } from '../../features/tag/tag.model';
 import { Project, ProjectState } from '../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
-import { TaskRepeatCfg } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
@@ -1631,6 +1634,103 @@ describe('dataRepair()', () => {
             ...taskState.entities.TEST2,
             reminderId: undefined,
             plannedAt: undefined,
+          },
+        },
+      },
+    });
+  });
+  it('should add defaults to taskRepeatCfgs', () => {
+    const taskRepeatCfg = {
+      ...mock.taskRepeatCfg,
+      ...fakeEntityStateFromArray<TaskRepeatCfg>([
+        {
+          ...DEFAULT_TASK_REPEAT_CFG,
+          id: 'TEST',
+          title: 'TEST',
+          wednesday: undefined,
+        },
+        {
+          ...DEFAULT_TASK_REPEAT_CFG,
+          id: 'TEST2',
+          title: 'TEST2',
+          monday: undefined,
+          tuesday: undefined,
+          wednesday: undefined,
+          friday: undefined,
+          thursday: undefined,
+          saturday: undefined,
+          sunday: undefined,
+        },
+        {
+          ...DEFAULT_TASK_REPEAT_CFG,
+          id: 'TEST3',
+          title: 'TEST3',
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
+          saturday: false,
+          sunday: false,
+        },
+        {
+          ...DEFAULT_TASK_REPEAT_CFG,
+          id: 'TEST4',
+          title: 'TEST4',
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: true,
+          sunday: true,
+        },
+      ]),
+    } as any;
+
+    expect(
+      dataRepair({
+        ...mock,
+        taskRepeatCfg: taskRepeatCfg,
+      } as any),
+    ).toEqual({
+      ...mock,
+      taskRepeatCfg: {
+        ...taskRepeatCfg,
+        entities: {
+          TEST: {
+            ...taskRepeatCfg.entities.TEST,
+            wednesday: false,
+          },
+          TEST2: {
+            ...taskRepeatCfg.entities.TEST2,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+          },
+          TEST3: {
+            ...taskRepeatCfg.entities.TEST3,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+          },
+          TEST4: {
+            ...taskRepeatCfg.entities.TEST4,
+            monday: true,
+            tuesday: true,
+            wednesday: true,
+            thursday: true,
+            friday: true,
+            saturday: true,
+            sunday: true,
           },
         },
       },
