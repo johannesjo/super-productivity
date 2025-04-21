@@ -164,7 +164,7 @@
     !task.parentId &&
     !task.isDone &&
     isTodayTag &&
-    (task.projectId || task.tagIds?.length > 1)
+    (task.projectId || task.tagIds.length > 1)
   ) {
     <button
       (click)="removeFromMyDay()"
@@ -314,7 +314,7 @@
     <span class="key-i">{{ kb.taskEditTags }}</span>
   </button>
 
-  @if (!task.parentId && (moveToProjectList$ | async)?.length > 0) {
+  @if (!task.parentId && ((moveToProjectList$ | async)?.length || 0) > 0) {
     <button
       [matMenuTriggerFor]="projectMenu"
       mat-menu-item

@@ -64,6 +64,7 @@ import { AppDataCompleteNew } from './pfapi/pfapi-config';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
+import { getWorklogStr } from './util/get-work-log-str';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -198,10 +199,15 @@ export class AppComponent implements OnDestroy {
       }
 
       const appStarts = +(localStorage.getItem(LS.APP_START_COUNT) || 0);
-      if (appStarts === 45 || appStarts === 120) {
+      const lastStartDay = localStorage.getItem(LS.APP_START_COUNT_LAST_START_DAY);
+      const todayStr = getWorklogStr();
+      if (appStarts === 32 || appStarts === 96) {
         this._matDialog.open(DialogPleaseRateComponent);
-      } else {
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
+      }
+      if (lastStartDay !== todayStr) {
+        localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
+        localStorage.setItem(LS.APP_START_COUNT_LAST_START_DAY, todayStr);
       }
     }, 1000);
 
