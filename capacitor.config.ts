@@ -8,6 +8,9 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: true,
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_sp',
+    },
   },
 };
 
