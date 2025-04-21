@@ -1,3 +1,50 @@
+## [12.0.6-rc.4](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.3...v12.0.6-rc.4) (2025-04-21)
+
+### Bug Fixes
+
+- avoid validation errors ([2a7d56f](https://github.com/johannesjo/super-productivity/commit/2a7d56f319a786ed56b38fa60ed764942f7c8ade))
+- how to rate link ([a1c35e4](https://github.com/johannesjo/super-productivity/commit/a1c35e47d3b1287a3b5870151f5ba9500d4e31c9))
+- Import fails when weekdays not defined ([f136fbd](https://github.com/johannesjo/super-productivity/commit/f136fbd7e7523c1f5bdb500cff5271d85647c99c))
+- initial sync state shown wrong ([b71ce9a](https://github.com/johannesjo/super-productivity/commit/b71ce9a78da927c6499141bd4678e1a8e172d1d8))
+- **jira:** extension info shown at the wrong places ([7eaa7a4](https://github.com/johannesjo/super-productivity/commit/7eaa7a48fb531bf19441f9c599c3e43d5bad08f7))
+- **jira:** prevent request timeout error on android ([1d5e62d](https://github.com/johannesjo/super-productivity/commit/1d5e62d2a550440bad98d1fa1abd1f57a678603c))
+- make data repair script work for taskRepeatCfg2 [#4272](https://github.com/johannesjo/super-productivity/issues/4272) ([8e81917](https://github.com/johannesjo/super-productivity/commit/8e81917c16b99e53709fd9dfed60755139062b6c))
+- note drag and drop not working as expected on mobile ([ae859c8](https://github.com/johannesjo/super-productivity/commit/ae859c8a6f49a2c23e86295c976915e62b17655b))
+- **planner:** drag and drop not working anymore ([3383835](https://github.com/johannesjo/super-productivity/commit/33838351cc68d6b228cb74211dce6de7df2c62cb))
+- prevent context menu on right click on sync button ([b47dfc0](https://github.com/johannesjo/super-productivity/commit/b47dfc01eb2371c896bc0411aec487909bc1e9c9))
+- remove alert ([c5c7957](https://github.com/johannesjo/super-productivity/commit/c5c7957abda375ead8099fa24c5e819b0a8e1375))
+- update Turkish translations for clarity and consistency ([b0a6d6f](https://github.com/johannesjo/super-productivity/commit/b0a6d6f51ea4deeca51a6bef5e31a7d60c9c854c))
+- updating archive task leading to error ([e159de8](https://github.com/johannesjo/super-productivity/commit/e159de83459c85344b97347f94d3fc71366c06cb))
+
+### Features
+
+- add "start tracking time" button for schedule and planner ([980f316](https://github.com/johannesjo/super-productivity/commit/980f3167d9fc2347d811398a37f2d51fa59e52f1))
+- add context menu entry for moving task to top of list on mobile ([4d9c7d1](https://github.com/johannesjo/super-productivity/commit/4d9c7d1fd2df73d36449ede8a551c4e9f98ef28b))
+- add new done sounds ([da7291b](https://github.com/johannesjo/super-productivity/commit/da7291b71d842e652dd956514b061662c013583e))
+- adjust celebration timing for mobile and desktop ([a80b090](https://github.com/johannesjo/super-productivity/commit/a80b090633ea3f8045f934da4f0bd3d50bb46db6))
+- adjust default today theme for better day readability ([c5488a4](https://github.com/johannesjo/super-productivity/commit/c5488a4c3ba79ea64b10c19172eb940bb1a2dc9d))
+- **android:** adjust android notification icon ([da2eed1](https://github.com/johannesjo/super-productivity/commit/da2eed1fd2b29e00ce96f8f2472b5929c345cc30))
+- **android:** cleanup ([53e866b](https://github.com/johannesjo/super-productivity/commit/53e866bcd378adfb8f4c68bd549bc3356125a96c))
+- **android:** cleanup old javascript interfaces ([68e284f](https://github.com/johannesjo/super-productivity/commit/68e284fc91390e476f093739aba52aa730f561a3))
+- **android:** cleanup request interceptor ([6136cbf](https://github.com/johannesjo/super-productivity/commit/6136cbf6eacd1b8fdc59a497e198dcea490f8368))
+- **android:** cleanup styles and manifest ([7bb6735](https://github.com/johannesjo/super-productivity/commit/7bb6735049231b7a195b713f6b2782ab05bb4d5c))
+- **android:** cleanup unused resources ([ce40f44](https://github.com/johannesjo/super-productivity/commit/ce40f446062a3929b8eae9517dbe7314a80e8d70))
+- **android:** darken status bar ([8770d92](https://github.com/johannesjo/super-productivity/commit/8770d92c76a408414e488c45c5d16b1363956a2a))
+- **android:** make auto dark mode switch work for android API 35 ([2a825e5](https://github.com/johannesjo/super-productivity/commit/2a825e50f2ef250c758ae3ed78a71a1a32cb1c6f))
+- **android:** make file imex work on android [#3816](https://github.com/johannesjo/super-productivity/issues/3816) ([86a793a](https://github.com/johannesjo/super-productivity/commit/86a793a9e64634f5dcc0966af93c5b168bd66624))
+- **android:** make most basic notifications work ([6173a2d](https://github.com/johannesjo/super-productivity/commit/6173a2da6e864db1de4560ec634c36e66b64474e))
+- **android:** make re-schedule notifications work ([84db0b6](https://github.com/johannesjo/super-productivity/commit/84db0b6eea8f1d1d49be257c6cb18ca0bb8898c2))
+- **android:** re-add missing resource ([11bfbe2](https://github.com/johannesjo/super-productivity/commit/11bfbe261b55f1f0c003478663cb920e29abcd6e))
+- **android:** update dependencies ([cb60bf2](https://github.com/johannesjo/super-productivity/commit/cb60bf2600a9830dc6c6f65338fb45500e7a989e))
+- don't show go to project snack if task is in current list ([6885f64](https://github.com/johannesjo/super-productivity/commit/6885f647e112cc4fbcbb7b1412c18a6c0daa85d1))
+- improve on sync cfg dialog ([1db0f5a](https://github.com/johannesjo/super-productivity/commit/1db0f5a3228c24c202ea000d6ae6fa17a58ded6b))
+- make app start counter work better ([086845a](https://github.com/johannesjo/super-productivity/commit/086845add25fdc93a283c83573ffc793b8b26043))
+- move dark mode setting to local storage ([39c176b](https://github.com/johannesjo/super-productivity/commit/39c176b2e5c08f4bf75683fecaa5a6c091eda25c))
+- **pfapi:** remove all pfapi alerts ([98f0e47](https://github.com/johannesjo/super-productivity/commit/98f0e4737de3a2b0b90fd1d56dc255e60249dc26))
+- remove task drawer since it is not working at the moment anyway ([7fbe4ae](https://github.com/johannesjo/super-productivity/commit/7fbe4ae55605c3322aedaf397a770b57bd437d2c))
+- **sync:** add new sync trigger to sync on blur when currently not tracking time ([7714293](https://github.com/johannesjo/super-productivity/commit/7714293543ada4565eec9186cecdb648c2970041))
+- **task:** add remove schedule quick access button ([b0af3ef](https://github.com/johannesjo/super-productivity/commit/b0af3eff83f6483eb171dfedd5dd7a1c12ce658a))
+
 ## [12.0.6-rc.3](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.2...v12.0.6-rc.3) (2025-04-16)
 
 ### Bug Fixes
