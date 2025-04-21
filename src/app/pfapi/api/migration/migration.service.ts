@@ -97,10 +97,6 @@ export class MigrationService<MD extends ModelCfgs> {
     const migrationsKeysToRun = migrationKeys.filter((v) => v > dataInCrossModelVersion);
     const migrationsToRun = migrationsKeysToRun.map((v) => cfg!.crossModelMigrations![v]);
 
-    alert(
-      `MIGRATING cross model version from ${dataInCrossModelVersion} to ${codeModelVersion}`,
-    );
-
     pfLog(
       2,
       `${MigrationService.name}.${this.migrate.name}() migrate ${dataInCrossModelVersion} to ${codeModelVersion}`,

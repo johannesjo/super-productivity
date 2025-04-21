@@ -145,7 +145,6 @@ export class ModelSyncService<MD extends ModelCfgs> {
     pfLog(2, `${ModelSyncService.name}.${this.remove.name}()`, {
       modelId,
     });
-    alert('REMOVE REMOTE ' + modelId.toString());
     const syncProvider = this._currentSyncProvider$.getOrError();
     await syncProvider.removeFile(this._filePathForModelId(modelId));
   }
@@ -291,7 +290,6 @@ export class ModelSyncService<MD extends ModelCfgs> {
    * @private
    */
   private async _removeLocal<T extends keyof MD>(modelId: T): Promise<void> {
-    alert('REMOVE LOCAL ' + modelId.toString());
     pfLog(
       2,
       `${ModelSyncService.name}.${this._removeLocal.name}: Delete local model ${String(modelId)}`,

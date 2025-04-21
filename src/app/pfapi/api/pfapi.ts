@@ -233,9 +233,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.cfg?.validate &&
       !this.cfg.validate(allData as AllSyncModels<MD>).success
     ) {
-      alert('Ohhhh!!! actually got one!!! ' + this._getAllSyncModelDataRetryCount);
+      pfLog(1, 'ACTUALLY GOT ONE!!');
       if (this._getAllSyncModelDataRetryCount >= 1) {
-        alert('THROW');
+        pfLog(1, 'ACTUALLY GOT ONE 2!! ERROR');
         this._getAllSyncModelDataRetryCount = 0;
         throw new DataValidationFailedError();
       }

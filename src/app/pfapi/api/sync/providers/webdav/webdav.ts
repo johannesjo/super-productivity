@@ -79,7 +79,6 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       pfLog(0, `${Webdav.name}.uploadFile() error during upload`, e);
       if (e instanceof RemoteFileNotFoundAPIError) {
         pfLog(2, `${Webdav.name}.uploadFile() creating parent folders and retrying`);
-        alert(`Creating missing parent folders for ${filePath}`);
         try {
           // Create necessary parent folders
           await this._ensureFolderExists(targetPath, cfg);

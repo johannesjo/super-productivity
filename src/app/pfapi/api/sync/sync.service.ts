@@ -120,7 +120,7 @@ export class SyncService<const MD extends ModelCfgs> {
             switch (mvcR) {
               case ModelVersionCheckResult.MinorUpdate:
               case ModelVersionCheckResult.MajorUpdate:
-                alert('Downloading all since cross model version changed');
+                pfLog(2, 'Downloading all since model version changed');
                 await this.downloadAll();
                 return { status: SyncStatus.UpdateLocalAll };
 
@@ -160,7 +160,6 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // This indicates an incomplete sync, retry upload
       if (e instanceof LockFromLocalClientPresentError) {
-        alert('CATCH LockFileFromLocalClientPresentError 1');
         pfLog(0, 'Lock from local client present, forcing upload of all data');
         await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
@@ -179,7 +178,6 @@ export class SyncService<const MD extends ModelCfgs> {
       `${SyncService.LT}.${this.uploadAll.name}(): Uploading all data to remote, force=${isForceUpload}`,
     );
 
-    alert('UPLOAD ALL TO REMOTE f' + isForceUpload);
     // we need to check meta file for being in locked mode
     if (!isForceUpload) {
       await this._metaFileSyncService.download();
@@ -210,7 +208,6 @@ export class SyncService<const MD extends ModelCfgs> {
     } catch (e) {
       if (e instanceof LockFromLocalClientPresentError) {
         pfLog(0, 'Lock from local client detected during uploadAll, forcing upload');
-        alert('CATCH LockFileFromLocalClientPresentError 2 FORCE UPLOAD');
         return await this.uploadAll(true);
       }
       throw e;
@@ -222,7 +219,6 @@ export class SyncService<const MD extends ModelCfgs> {
    * @param isSkipModelRevMapCheck Whether to skip revision map checks
    */
   async downloadAll(isSkipModelRevMapCheck: boolean = false): Promise<void> {
-    alert('DOWNLOAD ALL TO LOCAL');
     pfLog(
       2,
       `${SyncService.LT}.${this.downloadAll.name}(): Downloading all data from remote`,

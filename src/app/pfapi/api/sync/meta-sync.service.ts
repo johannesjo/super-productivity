@@ -56,7 +56,6 @@ export class MetaSyncService {
 
       // Check if file is locked
       if (r.dataStr.startsWith(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX)) {
-        alert('LOCK PRESENT: ' + r.dataStr);
         const lockClientId = r.dataStr
           .slice(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX.length)
           .replace(/\n/g, '');

@@ -165,7 +165,6 @@ export class SyncWrapperService {
         return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
-        alert('IMEXSyncService ERR: ' + errStr);
         this._snackService.open({
           // msg: T.F.SYNC.S.UNKNOWN_ERROR,
           msg: errStr,
