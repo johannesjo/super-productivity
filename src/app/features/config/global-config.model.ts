@@ -86,18 +86,18 @@ export type PomodoroConfig = Readonly<{
 // export type DropboxSyncConfig = object;
 
 export interface WebDavConfig {
-  baseUrl: string | null;
-  userName: string | null;
-  password: string | null;
+  baseUrl?: string | null;
+  userName?: string | null;
+  password?: string | null;
   // TODO remove and migrate
   syncFilePath?: string | null;
-  syncFolderPath: string | null;
+  syncFolderPath?: string | null;
 }
 
 export interface LocalFileSyncConfig {
   // TODO remove and migrate
   syncFilePath?: string | null;
-  syncFolderPath: string | null;
+  syncFolderPath?: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{
@@ -157,7 +157,7 @@ export type DominaModeConfig = Readonly<{
   text: string;
   interval: number;
   volume: number;
-  voice: string;
+  voice?: string | null;
 }>;
 
 export type FocusModeConfig = Readonly<{

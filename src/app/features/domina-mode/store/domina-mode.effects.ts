@@ -17,7 +17,7 @@ export class DominaModeEffects {
       this._store$.select(selectIsDominaModeConfig).pipe(
         distinctUntilChanged(),
         switchMap((cfg) =>
-          cfg.isEnabled
+          cfg.isEnabled && cfg.voice
             ? timer(1000, cfg.interval || 10000).pipe(
                 withLatestFrom(this._store$.select(selectCurrentTask)),
                 tap(([, currentTask]) => {
@@ -26,7 +26,9 @@ export class DominaModeEffects {
                     if (txt.length <= 1) {
                       txt = currentTask.title;
                     }
-                    speak(txt, cfg.volume, cfg.voice);
+                    if (cfg.voice) {
+                      speak(txt, cfg.volume, cfg.voice);
+                    }
                   }
                 }),
               )
