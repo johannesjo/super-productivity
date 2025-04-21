@@ -47,7 +47,7 @@ export class SyncWrapperService {
   );
   syncProviderId$: Observable<SyncProviderId | null> = this.syncCfg$.pipe(
     // NOTE: types are compatible
-    map((cfg) => cfg.syncProvider as SyncProviderId | null),
+    map((cfg) => cfg.syncProvider as unknown as SyncProviderId | null),
   );
 
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
