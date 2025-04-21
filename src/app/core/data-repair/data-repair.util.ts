@@ -72,13 +72,13 @@ const _fixTaskRepeatMissingWeekday = (data: AppDataCompleteNew): AppDataComplete
   if (data.taskRepeatCfg && data.taskRepeatCfg.entities) {
     Object.keys(data.taskRepeatCfg.entities).forEach((key) => {
       const cfg = data.taskRepeatCfg.entities[key] as TaskRepeatCfgCopy;
-      cfg.monday = true;
-      cfg.tuesday = true;
-      cfg.wednesday = true;
-      cfg.thursday = true;
-      cfg.friday = true;
-      cfg.saturday = true;
-      cfg.sunday = true;
+      cfg.monday = cfg.monday ?? true;
+      cfg.tuesday = cfg.tuesday ?? true;
+      cfg.wednesday = cfg.wednesday ?? true;
+      cfg.thursday = cfg.thursday ?? true;
+      cfg.friday = cfg.friday ?? true;
+      cfg.saturday = cfg.saturday ?? true;
+      cfg.sunday = cfg.sunday ?? true;
     });
   }
   return data;
