@@ -76,12 +76,13 @@ export class PfapiService {
       this.pf.ev,
       'syncStatusChange',
       async () => 'UNKNOWN_OR_CHANGED' as SyncStatusChangePayload,
-    ).pipe();
+    ).pipe(shareReplay(1));
 
   public readonly isSyncInProgress$: Observable<boolean> = this.syncState$.pipe(
     filter((state) => state !== 'UNKNOWN_OR_CHANGED'),
     map((state) => state === 'SYNCING'),
     distinctUntilChanged(),
+    shareReplay(1),
   );
 
   private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
