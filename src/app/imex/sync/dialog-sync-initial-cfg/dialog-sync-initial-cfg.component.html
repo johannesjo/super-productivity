@@ -6,7 +6,7 @@
     <form [formGroup]="form">
       <formly-form
         (modelChange)="updateTmpCfg($event)"
-        [fields]="fields"
+        [fields]="fields()"
         [form]="form"
         [model]="_tmpUpdatedCfg"
       >
@@ -31,8 +31,10 @@
       mat-stroked-button
     >
       <mat-icon>save</mat-icon>
-
-      {{ T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE | translate }}
+      {{
+        (this.isWasEnabled() ? T.G.SAVE : T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE)
+          | translate
+      }}
     </button>
   </div>
 </mat-dialog-actions>

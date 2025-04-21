@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
   MatDialogActions,
   MatDialogContent,
@@ -41,11 +41,8 @@ export class DialogSyncInitialCfgComponent {
   syncWrapperService = inject(SyncWrapperService);
 
   T = T;
-  SYNC_FORM = SYNC_FORM;
-  fields = [
-    SYNC_FORM.items!.find((it) => it.key === 'syncProvider'),
-    ...SYNC_FORM.items!.filter((f) => f.key !== 'isEnabled' && f.key !== 'syncProvider'),
-  ];
+  isWasEnabled = signal(false);
+  fields = signal([...SYNC_FORM.items!.filter((f) => f.key !== 'isEnabled')]);
   form = new FormGroup({});
   _tmpUpdatedCfg?: SyncConfig;
 
@@ -57,6 +54,10 @@ export class DialogSyncInitialCfgComponent {
   constructor() {
     this._subs.add(
       this.syncConfigService.syncSettingsForm$.pipe(first()).subscribe((v) => {
+        if (v.isEnabled) {
+          this.isWasEnabled.set(true);
+          this.fields.set([...SYNC_FORM.items!]);
+        }
         this.updateTmpCfg({
           ...v,
           isEnabled: true,
@@ -74,11 +75,11 @@ export class DialogSyncInitialCfgComponent {
       await this.syncConfigService.updateSettingsFromForm(
         {
           ...this._tmpUpdatedCfg,
-          isEnabled: true,
+          isEnabled: this._tmpUpdatedCfg.isEnabled || !this.isWasEnabled(),
         },
         true,
       );
-      if (this._tmpUpdatedCfg.syncProvider) {
+      if (this._tmpUpdatedCfg.syncProvider && this._tmpUpdatedCfg.isEnabled) {
         this.syncWrapperService.configuredAuthForSyncProviderIfNecessary(
           this._tmpUpdatedCfg.syncProvider as unknown as SyncProviderId,
         );
