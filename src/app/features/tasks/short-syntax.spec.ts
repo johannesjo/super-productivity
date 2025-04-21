@@ -34,7 +34,6 @@ const TASK: TaskCopy = {
   issueLastUpdated: undefined,
   issueWasUpdated: undefined,
   issueTimeTracked: undefined,
-  unavailable: false,
 };
 const ALL_TAGS: Tag[] = [
   { ...DEFAULT_TAG, id: 'blu_id', title: 'blu' },

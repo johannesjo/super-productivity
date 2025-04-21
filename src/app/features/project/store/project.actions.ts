@@ -72,7 +72,6 @@ export const toggleHideFromMenu = createAction(
   '[Project] Toggle hide from menu',
   props<{
     projectId: string;
-    allTaskIds: string[];
     isHiddenFromMenu: boolean;
   }>(),
 );

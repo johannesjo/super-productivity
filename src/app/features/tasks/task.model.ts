@@ -67,7 +67,6 @@ export interface TaskCopy extends IssueFieldsForTask {
   id: string;
   projectId?: string;
   title: string;
-  unavailable: boolean;
 
   subTaskIds: string[];
 
@@ -149,7 +148,6 @@ export const DEFAULT_TASK: Task = {
   title: '',
   tagIds: [],
   created: Date.now(),
-  unavailable: false,
 
   attachments: [],
 };

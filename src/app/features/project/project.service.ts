@@ -216,27 +216,11 @@ export class ProjectService {
   }
 
   async projectHideFromMenu(project: Project): Promise<void> {
-    const taskState = await this._store$
-      .select(selectTaskFeatureState)
-      .pipe(take(1))
-      .toPromise();
-    const subTaskIdsForProject: string[] = [];
-    project.taskIds.forEach((id) => {
-      const task = getTaskById(id, taskState);
-      if (task.projectId && task.subTaskIds.length > 0) {
-        subTaskIdsForProject.push(...task.subTaskIds);
-      }
-    });
-    const allTaskIds = [
-      ...project.taskIds,
-      ...project.backlogTaskIds,
-      ...subTaskIdsForProject,
-    ];
     const newVisibilityState = !project.isHiddenFromMenu;
+
     this._store$.dispatch(
       toggleHideFromMenu({
         projectId: project.id,
-        allTaskIds,
         isHiddenFromMenu: newVisibilityState,
       }),
     );
