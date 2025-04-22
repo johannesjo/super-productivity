@@ -2,6 +2,9 @@
   <img align="center" alt="Banner" src="screens/banner.png" />
 </a>
 
+<br>
+<br>
+
 <p align="center">
 <strong>An advanced todo list app with timeboxing & time tracking capabilities that supports importing tasks from your calendar, Jira, GitHub and others</strong>
 <p>
@@ -16,11 +19,17 @@
 </a>
 </p>
 <br>
+
+<p align="center">
+      <img src="https://repobeats.axiom.co/api/embed/61f9b9de1bc34a2b526faf6d356120bdae7f4249.svg" alt="analytics" />
+</p>
+
+<br>
 <br>
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
 
-![Alt](https://repobeats.axiom.co/api/embed/61f9b9de1bc34a2b526faf6d356120bdae7f4249.svg 'Repobeats analytics image')
+
 
 <p align="center" style="text-align: center;">
 <a href="https://lbesson.mit-license.org">
