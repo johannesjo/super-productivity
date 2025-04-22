@@ -111,7 +111,45 @@
               @expandFade
               class="add-more-or-finish"
             >
-              <h2>{{ T.WW.NO_PLANNED_TASKS | translate }}</h2>
+              <div style="position: relative; padding: 24px; opacity: 0.7">
+                <div
+                  style="
+                    display: inline-block;
+                    border-radius: 20px;
+                    overflow: hidden;
+                    position: relative;
+                  "
+                >
+                  <img
+                    src="assets/aaa2.png"
+                    style="width: 400px; display: block; margin: auto; max-width: 100%"
+                  />
+                  <div
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      position: absolute;
+                      left: 0;
+                      top: 0;
+                      background-color: var(--palette-primary-500);
+                      mix-blend-mode: multiply;
+                    "
+                  ></div>
+                </div>
+                <h2
+                  style="
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    width: 90%;
+                    transform: translate(-50%, -50%);
+                  "
+                >
+                  <!--                  {{ T.WW.NO_PLANNED_TASKS | translate }}-->
+                  No tasks planned
+                </h2>
+              </div>
+
               <div class="btn-wrapper">
                 <button
                   (click)="planMore()"
