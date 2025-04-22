@@ -205,6 +205,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   private _dragEnterTarget?: HTMLElement;
   private _currentPanTimeout?: number;
+  private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
 
   // methods come last
@@ -265,6 +266,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
+    window.clearTimeout(this._doubleClickTimeout);
   }
 
   isShowRemoveFromToday(): boolean {
@@ -394,7 +396,20 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  private _wasClickedInDoubleClickRange = false;
+
   toggleShowDetailPanel(ev?: MouseEvent): void {
+    const isInTaskDetailPanel =
+      this._elementRef.nativeElement.closest('task-detail-panel');
+    if (isInTaskDetailPanel && !this._wasClickedInDoubleClickRange) {
+      this._wasClickedInDoubleClickRange = true;
+      window.clearTimeout(this._doubleClickTimeout);
+      this._doubleClickTimeout = window.setTimeout(() => {
+        this._wasClickedInDoubleClickRange = false;
+      }, 400);
+      return;
+    }
+
     if (this.isSelected()) {
       this._taskService.setSelectedId(null);
     } else {
