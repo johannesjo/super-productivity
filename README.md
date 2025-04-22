@@ -1,5 +1,5 @@
 <a href="https://super-productivity.com/">
-  <img align="center" alt="Banner" src="screens/banner-bw.png" />
+  <img align="center" alt="Banner" src="screens/banner.png" />
 </a>
 
 <p align="center">
@@ -20,8 +20,7 @@
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
 
-
-![Alt](https://repobeats.axiom.co/api/embed/61f9b9de1bc34a2b526faf6d356120bdae7f4249.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/61f9b9de1bc34a2b526faf6d356120bdae7f4249.svg 'Repobeats analytics image')
 
 <p align="center" style="text-align: center;">
 <a href="https://lbesson.mit-license.org">
