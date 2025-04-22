@@ -159,10 +159,12 @@
       >
         @if (!t.subTasks?.length) {
           <div class="time">
-            <div class="time-val">
-              <span [innerHTML]="t.timeSpent | msToString"></span>
-            </div>
-            <div class="separator">/</div>
+            @if (t.timeSpent) {
+              <div class="time-val">
+                <span [innerHTML]="t.timeSpent | msToString"></span>
+              </div>
+              <div class="separator">/</div>
+            }
             <div
               [innerHTML]="t.timeEstimate | msToString"
               class="time-val"
