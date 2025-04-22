@@ -10,6 +10,75 @@
         class="today"
         cdkScrollable
       >
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 8px;
+            margin-top: 16px;
+          "
+        >
+          <h2
+            class="mat-h2 completed-tasks-heading"
+            style="margin: 0; padding: 0"
+          >
+            Overdue
+            <!--          {{ T.WW.COMPLETED_TASKS | translate }}-->
+          </h2>
+          <!--          <button mat-button>Reschedule</button>-->
+        </div>
+
+        <div
+          class="task-list-wrapper"
+          style="padding-bottom: 16px"
+        >
+          <task-list
+            class="tour-undoneList"
+            [tasks]="undoneTasks()"
+            listId="PARENT"
+            listModelId="UNDONE"
+          ></task-list>
+        </div>
+
+        <div
+          class=""
+          style="display: flex; gap: 16px; justify-content: center; align-items: center"
+        >
+          <button
+            [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+            mat-flat-button
+            color="primary"
+            routerLink="/active/daily-summary"
+            tabindex="1"
+          >
+            <mat-icon>wb_sunny</mat-icon>
+            <!--            {{ T.WW.FINISH_DAY | translate }}-->
+            Add to Today
+            <!--            Add all to Today-->
+          </button>
+          <button
+            [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+            mat-flat-button
+            color="primary"
+            routerLink="/active/daily-summary"
+            tabindex="1"
+          >
+            <mat-icon>edit_calendar</mat-icon>
+            Reschedule
+            <!--            Reschedule all-->
+            <!--            {{ T.WW.FINISH_DAY | translate }}-->
+          </button>
+        </div>
+
+        <h2
+          class="mat-h2 completed-tasks-heading"
+          style="margin: 8px; margin-top: 16px; margin-bottom: 0"
+        >
+          <!--          {{ T.WW.COMPLETED_TASKS | translate }}-->
+          Today
+        </h2>
+
         <header class="work-view-header">
           @if (!isPlanningMode() && (estimateRemainingToday() || workingToday())) {
             <div
