@@ -288,7 +288,7 @@ export class TaskRepeatCfgEffects {
       if (task.reminderId) {
         this._taskService.reScheduleTask({
           task,
-          plannedAt: dateTime,
+          due: dateTime,
           remindCfg: completeCfg.remindAt,
           isMoveToBacklog: false,
         });

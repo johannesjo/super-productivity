@@ -311,9 +311,9 @@ const getScheduledTaskItems = (
   currentDayDate: Date,
 ): ScheduleItemTask[] =>
   allPlannedTasks
-    .filter((task) => isSameDay(task.plannedAt, currentDayDate))
+    .filter((task) => isSameDay(task.due, currentDayDate))
     .map((task) => {
-      const start = task.plannedAt;
+      const start = task.due;
       const end = start + Math.max(task.timeEstimate - task.timeSpent, 0);
       return {
         id: task.id,

@@ -63,7 +63,7 @@ describe('workContext selectors', () => {
         id: 'M2',
         subTaskIds: [],
         tagIds: [TODAY_TAG.id],
-        plannedAt: 1234,
+        due: 1234,
         reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
       const ctx: Partial<WorkContext> = {
@@ -78,7 +78,7 @@ describe('workContext selectors', () => {
         { id: 'M1', subTaskIds: [], tagIds: ['TODAY'] },
         {
           id: 'M2',
-          plannedAt: 1234,
+          due: 1234,
           reminderId: 'asd',
           subTaskIds: [],
           tagIds: ['TODAY'],
@@ -99,7 +99,7 @@ describe('workContext selectors', () => {
         id: 'M2',
         subTaskIds: [],
         tagIds: [TODAY_TAG.id],
-        plannedAt: 1234,
+        due: 1234,
         reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -107,7 +107,7 @@ describe('workContext selectors', () => {
       expect(result).toEqual([
         {
           id: 'M2',
-          plannedAt: 1234,
+          due: 1234,
           reminderId: 'asd',
           subTaskIds: [],
           tagIds: ['TODAY'],
@@ -128,7 +128,7 @@ describe('workContext selectors', () => {
     //     id: 'P2',
     //     subTaskIds: [],
     //     tagIds: [TODAY_TAG.id],
-    //     plannedAt: 1234,
+    //     due: 1234,
     //     reminderId: 'asd',
     //   } as Partial<TaskCopy> as TaskCopy;
     //   const taskState = fakeEntityStateFromArray([P1, P2]) as any;
@@ -153,7 +153,7 @@ describe('workContext selectors', () => {
     //   } as Partial<TaskCopy> as TaskCopy;
     //   const SUB_S = {
     //     id: 'SUB_S',
-    //     plannedAt: 1234,
+    //     due: 1234,
     //     reminderId: 'HA',
     //     parentId: P.id,
     //     subTaskIds: [],
@@ -173,7 +173,7 @@ describe('workContext selectors', () => {
     //     id: 'P',
     //     subTaskIds: ['SUB1', 'SUB_S'],
     //     tagIds: [],
-    //     plannedAt: 12345,
+    //     due: 12345,
     //     reminderId: 'HAXX',
     //   } as Partial<TaskCopy> as TaskCopy;
     //   const SUB1 = {
@@ -184,7 +184,7 @@ describe('workContext selectors', () => {
     //   } as Partial<TaskCopy> as TaskCopy;
     //   const SUB_S = {
     //     id: 'SUB_S',
-    //     plannedAt: 1234,
+    //     due: 1234,
     //     reminderId: 'HA',
     //     parentId: P.id,
     //     subTaskIds: [],
@@ -195,7 +195,7 @@ describe('workContext selectors', () => {
     //   const result = selectTimelineTasks.projector([SUB1.id, SUB_S.id], taskState);
     //   expect(result).toEqual({
     //     unPlanned: [],
-    //     planned: [{ ...SUB1, plannedAt: P.plannedAt }, SUB_S],
+    //     planned: [{ ...SUB1, due: P.due }, SUB_S],
     //   } as any);
     // });
 
@@ -214,7 +214,7 @@ describe('workContext selectors', () => {
       } as Partial<TaskCopy> as TaskCopy;
       const SUB_S = {
         id: 'SUB_S',
-        plannedAt: 1234,
+        due: 1234,
         reminderId: 'HA',
         parentId: P.id,
         subTaskIds: [],

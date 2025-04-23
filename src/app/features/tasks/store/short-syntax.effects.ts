@@ -133,10 +133,10 @@ export class ShortSyntaxEffects {
             isIgnoreShortSyntax: true,
           }),
         );
-        if (taskChanges.plannedAt && !taskChanges.reminderId) {
-          const { plannedAt } = taskChanges;
+        if (taskChanges.due && !taskChanges.reminderId) {
+          const { due } = taskChanges;
           if (taskChanges.hasPlannedTime === false) {
-            const plannedDay = new Date(plannedAt);
+            const plannedDay = new Date(due);
             const plannedDayInIsoFormat = getWorklogStr(plannedDay);
             const plan = PlannerActions.planTaskForDay({
               task,
@@ -146,11 +146,8 @@ export class ShortSyntaxEffects {
           } else {
             const schedule = scheduleTask({
               task,
-              plannedAt,
-              remindAt: remindOptionToMilliseconds(
-                plannedAt,
-                TaskReminderOptionId.AtStart,
-              ),
+              due: due,
+              remindAt: remindOptionToMilliseconds(due, TaskReminderOptionId.AtStart),
               isMoveToBacklog: false,
             });
             actions.push(schedule);

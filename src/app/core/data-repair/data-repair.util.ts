@@ -126,7 +126,7 @@ const _removeMissingReminderIds = (data: AppDataCompleteNew): AppDataCompleteNew
       data.task.entities[id] = {
         ...t,
         reminderId: undefined,
-        plannedAt: undefined,
+        due: undefined,
       };
     }
   });

@@ -16,7 +16,7 @@ const BASE_REMINDER_TASK = (startTime: string, note?: string): any => ({
   timeSpent: 0,
   subTaskIds: [],
   reminderId: 'xxx',
-  plannedAt: getDateTimeFromClockString(startTime, 0),
+  due: getDateTimeFromClockString(startTime, 0),
   title: startTime + ' ' + (note ? note : ' – reminderTask'),
 });
 
@@ -102,7 +102,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
         reminderId: 'rhCi_JJyP',
-        plannedAt: getDateTimeFromClockString('9:20', 0),
+        due: getDateTimeFromClockString('9:20', 0),
       },
       {
         id: 'S3',
@@ -111,7 +111,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
         reminderId: 'FeKPSsB_L',
-        plannedAt: getDateTimeFromClockString('10:20', 0),
+        due: getDateTimeFromClockString('10:20', 0),
       },
       {
         id: 'S2',
@@ -120,7 +120,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getDateTimeFromClockString('12:30', 0),
+        due: getDateTimeFromClockString('12:30', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
@@ -138,7 +138,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 1 15:00',
         reminderId: 'rhCi_JJyP',
-        plannedAt: getDateTimeFromClockString('9:20', 0),
+        due: getDateTimeFromClockString('9:20', 0),
       },
       {
         id: 'S3',
@@ -147,7 +147,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(3),
         title: 'Scheduled 3 17:00',
         reminderId: 'FeKPSsB_L',
-        plannedAt: getDateTimeFromClockString('10:20', 0),
+        due: getDateTimeFromClockString('10:20', 0),
       },
       {
         id: 'S2',
@@ -156,7 +156,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(1),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getDateTimeFromClockString('12:30', 0),
+        due: getDateTimeFromClockString('12:30', 0),
       },
       {
         id: 'S2',
@@ -165,7 +165,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 15:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getDateTimeFromClockString('12:00', 0),
+        due: getDateTimeFromClockString('12:00', 0),
       },
       {
         id: 'S4',
@@ -174,7 +174,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 2 17:30',
         reminderId: 'xlg47DKt6',
-        plannedAt: getDateTimeFromClockString('17:30', 0),
+        due: getDateTimeFromClockString('17:30', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
@@ -195,7 +195,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(1),
         title: 'Scheduled 1 15:00',
         reminderId: 'xxx',
-        plannedAt: getDateTimeFromClockString('15:00', 0),
+        due: getDateTimeFromClockString('15:00', 0),
       },
       {
         id: 'S2',
@@ -204,7 +204,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: minutes(185),
         title: 'Scheduled 2 15:30',
         reminderId: 'xxx',
-        plannedAt: getDateTimeFromClockString('15:30', 0),
+        due: getDateTimeFromClockString('15:30', 0),
       },
       {
         id: 'S3',
@@ -213,7 +213,7 @@ describe('createBlockerBlocks()', () => {
         timeEstimate: hours(2),
         title: 'Scheduled 3 17:00',
         reminderId: 'xxx',
-        plannedAt: getDateTimeFromClockString('17:00', 0),
+        due: getDateTimeFromClockString('17:00', 0),
       },
     ] as any;
     const r = createSortedBlockerBlocks(fakeTasks, [], [], undefined, undefined, 0);
@@ -256,26 +256,26 @@ describe('createBlockerBlocks()', () => {
         entries: [
           {
             data: fakeTasks[0],
-            end: fakeTasks[0].plannedAt,
-            start: fakeTasks[0].plannedAt,
+            end: fakeTasks[0].due,
+            start: fakeTasks[0].due,
             type: 'ScheduledTask',
           },
           {
             data: fakeTasks[3],
-            end: fakeTasks[3].plannedAt + hours(1),
-            start: fakeTasks[3].plannedAt,
+            end: fakeTasks[3].due + hours(1),
+            start: fakeTasks[3].due,
             type: 'ScheduledTask',
           },
           {
             data: fakeTasks[4],
-            end: fakeTasks[4].plannedAt + hours(2.5),
-            start: fakeTasks[4].plannedAt,
+            end: fakeTasks[4].due + hours(2.5),
+            start: fakeTasks[4].due,
             type: 'ScheduledTask',
           },
           {
             data: fakeTasks[1],
-            end: fakeTasks[1].plannedAt + hours(2),
-            start: fakeTasks[1].plannedAt,
+            end: fakeTasks[1].due + hours(2),
+            start: fakeTasks[1].due,
             type: 'ScheduledTask',
           },
         ],
@@ -286,8 +286,8 @@ describe('createBlockerBlocks()', () => {
         entries: [
           {
             data: fakeTasks[2],
-            end: fakeTasks[2].plannedAt + hours(1),
-            start: fakeTasks[2].plannedAt,
+            end: fakeTasks[2].due + hours(1),
+            start: fakeTasks[2].due,
             type: 'ScheduledTask',
           },
         ],
@@ -315,7 +315,7 @@ describe('createBlockerBlocks()', () => {
       },
       {
         ...BASE_REMINDER_TASK('15:30', 'TOMORROW'),
-        plannedAt: getDateTimeFromClockString('15:30', hours(24)),
+        due: getDateTimeFromClockString('15:30', hours(24)),
         timeEstimate: hours(2.5),
       },
     ] as any;
@@ -355,7 +355,7 @@ describe('createBlockerBlocks()', () => {
         reminderId: 'FeKPSsB_L',
         created: 1620028156706,
         repeatCfgId: null,
-        plannedAt: getDateTimeFromClockString('17:00', new Date(1620048600000)),
+        due: getDateTimeFromClockString('17:00', new Date(1620048600000)),
         _showSubTasksMode: 2,
         attachments: [],
         issueId: null,
@@ -381,7 +381,7 @@ describe('createBlockerBlocks()', () => {
         reminderId: 'rhCi_JJyP',
         created: 1619985034709,
         repeatCfgId: null,
-        plannedAt: getDateTimeFromClockString('15:00', new Date(1620048600000)),
+        due: getDateTimeFromClockString('15:00', new Date(1620048600000)),
         _showSubTasksMode: 2,
         attachments: [],
         issueId: null,
@@ -407,7 +407,7 @@ describe('createBlockerBlocks()', () => {
         reminderId: 'xlg47DKt6',
         created: 1620027763328,
         repeatCfgId: null,
-        plannedAt: getDateTimeFromClockString('15:30', new Date(1620048600000)),
+        due: getDateTimeFromClockString('15:30', new Date(1620048600000)),
         _showSubTasksMode: 2,
         attachments: [],
         issueId: null,
@@ -448,7 +448,7 @@ describe('createBlockerBlocks()', () => {
           reminderId: 'wctU7fdUV',
           created: 1620239185383,
           repeatCfgId: null,
-          plannedAt: getDateTimeFromClockString('23:00', 1620172800000),
+          due: getDateTimeFromClockString('23:00', 1620172800000),
           _showSubTasksMode: 2,
           attachments: [],
           issueId: null,
@@ -474,7 +474,7 @@ describe('createBlockerBlocks()', () => {
           reminderId: '8ON1WZbSb',
           created: 1620227641668,
           repeatCfgId: null,
-          plannedAt: getDateTimeFromClockString('22:00', 1620172800000),
+          due: getDateTimeFromClockString('22:00', 1620172800000),
           _showSubTasksMode: 2,
           attachments: [],
           issueId: null,
@@ -500,7 +500,7 @@ describe('createBlockerBlocks()', () => {
           reminderId: 'NkonFINlM',
           created: 1620227624280,
           repeatCfgId: null,
-          plannedAt: getDateTimeFromClockString('21:00', 1620172800000),
+          due: getDateTimeFromClockString('21:00', 1620172800000),
           _showSubTasksMode: 2,
           attachments: [],
           issueId: null,
@@ -558,7 +558,7 @@ describe('createBlockerBlocks()', () => {
                 issueWasUpdated: null,
                 notes: '',
                 parentId: null,
-                plannedAt: getDateTimeFromClockString('23:00', new Date(1620172800000)),
+                due: getDateTimeFromClockString('23:00', new Date(1620172800000)),
                 projectId: null,
                 reminderId: 'wctU7fdUV',
                 repeatCfgId: null,
@@ -589,7 +589,7 @@ describe('createBlockerBlocks()', () => {
                 issueWasUpdated: null,
                 notes: '',
                 parentId: null,
-                plannedAt: getDateTimeFromClockString('22:00', new Date(1620172800000)),
+                due: getDateTimeFromClockString('22:00', new Date(1620172800000)),
                 projectId: null,
                 reminderId: '8ON1WZbSb',
                 repeatCfgId: null,
@@ -620,7 +620,7 @@ describe('createBlockerBlocks()', () => {
                 issueWasUpdated: null,
                 notes: '',
                 parentId: null,
-                plannedAt: getDateTimeFromClockString('21:00', new Date(1620172800000)),
+                due: getDateTimeFromClockString('21:00', new Date(1620172800000)),
                 projectId: null,
                 reminderId: 'NkonFINlM',
                 repeatCfgId: null,
@@ -662,7 +662,7 @@ describe('createBlockerBlocks()', () => {
           reminderId: 'wctU7fdUV',
           created: 1620239185383,
           repeatCfgId: null,
-          plannedAt: getDateTimeFromClockString('11:00', 1620172800000),
+          due: getDateTimeFromClockString('11:00', 1620172800000),
           _showSubTasksMode: 2,
           attachments: [],
           issueId: null,
@@ -729,7 +729,7 @@ describe('createBlockerBlocks()', () => {
                 issueWasUpdated: null,
                 notes: '',
                 parentId: null,
-                plannedAt: getDateTimeFromClockString('11:00', new Date(1620172800000)),
+                due: getDateTimeFromClockString('11:00', new Date(1620172800000)),
                 projectId: null,
                 reminderId: 'wctU7fdUV',
                 repeatCfgId: null,
@@ -917,7 +917,7 @@ describe('createBlockerBlocks()', () => {
           timeEstimate: hours(2),
           title: 'Scheduled 1 15:00',
           reminderId: 'rhCi_JJyP',
-          plannedAt: getDateTimeFromClockString('9:20', 0),
+          due: getDateTimeFromClockString('9:20', 0),
         },
       ] as any;
       const r = createSortedBlockerBlocks(
@@ -936,7 +936,7 @@ describe('createBlockerBlocks()', () => {
               data: {
                 id: 'S1',
                 subTaskIds: [],
-                plannedAt: 30000000,
+                due: 30000000,
                 reminderId: 'rhCi_JJyP',
                 timeEstimate: 7200000,
                 timeSpent: 0,

@@ -121,7 +121,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       const reminder = this._reminderService.getById(this.data.task.reminderId);
       if (reminder) {
         this.selectedReminderCfgId = millisecondsDiffToRemindOption(
-          this.data.task.plannedAt as number,
+          this.data.task.due as number,
           reminder.remindAt,
         );
       } else {
@@ -131,10 +131,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
-    if (this.data.task.plannedAt) {
+    if (this.data.task.due) {
       const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
-      this.selectedDate = new Date(this.data.task.plannedAt + tzOffset);
-      this.selectedTime = new Date(this.data.task.plannedAt).toLocaleTimeString('en-GB', {
+      this.selectedDate = new Date(this.data.task.due + tzOffset);
+      this.selectedTime = new Date(this.data.task.due).toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -344,7 +344,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
             extra: await this._plannerService.getSnackExtraStr(newDay),
           },
         });
-      } else if (this.data.task.plannedAt && !this.selectedTime) {
+      } else if (this.data.task.due && !this.selectedTime) {
         // time was removed for today task case
         this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
         this._snackService.open({

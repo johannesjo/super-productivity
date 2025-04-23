@@ -141,6 +141,7 @@
           (valueEdited)="updateTaskTitleIfChanged($event)"
           [value]="t.title"
           class="task-title"
+          [title]="t | json"
         ></task-title>
 
         <tag-list
@@ -226,11 +227,11 @@
             <mat-icon>alarm</mat-icon>
             <div
               class="time-badge"
-              [innerHTML]="t.plannedAt | shortPlannedAt"
+              [innerHTML]="t.due | shortPlannedAt"
             ></div>
           </button>
         }
-        @if (((plannerService.plannedTaskDayMap$ | async) || {})[t.id]; as plannedAtDay) {
+        @if (((plannerService.plannedTaskDayMap$ | async) || {})[t.id]; as dueDay) {
           <button
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.SCHEDULE | translate"
@@ -239,7 +240,7 @@
             mat-icon-button
           >
             <mat-icon>today</mat-icon>
-            <div class="time-badge">{{ plannedAtDay | localDateStr }}</div>
+            <div class="time-badge">{{ dueDay | localDateStr }}</div>
           </button>
         }
 

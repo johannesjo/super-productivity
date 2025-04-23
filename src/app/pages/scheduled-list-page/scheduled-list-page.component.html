@@ -77,14 +77,14 @@
             >
               <div class="date-and-time-left">
                 <div class="date hide-xs">
-                  {{ task.plannedAt | date: 'EE, d MMM, ' }}
-                  {{ task.plannedAt | date: 'shortTime' }}
+                  {{ task.due | date: 'EE, d MMM, ' }}
+                  {{ task.due | date: 'shortTime' }}
                 </div>
                 <div class="date show-xs-only">
-                  {{ task.plannedAt | date: 'd MMM, ' }},
-                  {{ task.plannedAt | date: 'shortTime' }}
+                  {{ task.due | date: 'd MMM, ' }},
+                  {{ task.due | date: 'shortTime' }}
                 </div>
-                <div class="time-left">({{ task.plannedAt | humanizeTimestamp }})</div>
+                <div class="time-left">({{ task.due | humanizeTimestamp }})</div>
               </div>
               <mat-icon>alarm</mat-icon>
             </div>

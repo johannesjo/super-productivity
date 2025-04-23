@@ -143,11 +143,11 @@ export class BoardPanelComponent {
       }
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled) {
-        isTaskIncluded = isTaskIncluded && (task.plannedAt || plannedTaskDayMap[task.id]);
+        isTaskIncluded = isTaskIncluded && (task.due || plannedTaskDayMap[task.id]);
       }
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
-        isTaskIncluded = isTaskIncluded && !task.plannedAt && !plannedTaskDayMap[task.id];
+        isTaskIncluded = isTaskIncluded && !task.due && !plannedTaskDayMap[task.id];
       }
 
       return isTaskIncluded;
@@ -266,7 +266,7 @@ export class BoardPanelComponent {
         .select(selectTaskById, { id: taskId })
         .pipe(first())
         .toPromise();
-      if (!this.plannedTaskDayMap()[taskId] && !task.plannedAt) {
+      if (!this.plannedTaskDayMap()[taskId] && !task.due) {
         this.scheduleTask(task);
       }
     }

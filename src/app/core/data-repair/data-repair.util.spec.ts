@@ -1601,14 +1601,14 @@ describe('dataRepair()', () => {
           id: 'TEST',
           title: 'TEST',
           reminderId: 'R1',
-          plannedAt: 12321,
+          due: 12321,
         },
         {
           ...DEFAULT_TASK,
           id: 'TEST2',
           title: 'TEST2',
           reminderId: 'R2_MISSING',
-          plannedAt: 12321,
+          due: 12321,
         },
       ]),
     } as any;
@@ -1628,12 +1628,12 @@ describe('dataRepair()', () => {
           TEST: {
             ...taskState.entities.TEST,
             reminderId: 'R1',
-            plannedAt: 12321,
+            due: 12321,
           },
           TEST2: {
             ...taskState.entities.TEST2,
             reminderId: undefined,
-            plannedAt: undefined,
+            due: undefined,
           },
         },
       },

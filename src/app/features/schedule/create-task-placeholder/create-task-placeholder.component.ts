@@ -38,7 +38,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   time = input<string>();
   date = input<string>();
   isForDayMode = signal<boolean>(false);
-  plannedAt: Signal<number> = computed(() => {
+  due: Signal<number> = computed(() => {
     if (this.date() && this.time()) {
       // console.log(this.date(), this.time());
       const formattedTime = this._formatTimeWithLeadingZero(this.time() as string);
@@ -90,7 +90,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     const textAreaElement = this.textAreaElement();
     if (
       event.key === 'Enter' &&
-      typeof this.plannedAt() === 'number' &&
+      typeof this.due() === 'number' &&
       textAreaElement?.nativeElement.value
     ) {
       this.editEnd.emit();
@@ -106,7 +106,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,
-            day: getWorklogStr(this.plannedAt()),
+            day: getWorklogStr(this.due()),
           }),
         );
       } else {
@@ -115,7 +115,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
           {
             timeEstimate: 30 * 60 * 1000,
           },
-          this.plannedAt(),
+          this.due(),
           TaskReminderOptionId.AtStart,
         );
       }

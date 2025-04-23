@@ -197,17 +197,17 @@ export const selectTimelineTasks = createSelector(
         if (!t.isDone) {
           // if (
           //   !!t.parentId &&
-          //   (s.entities[t.parentId] as Task).plannedAt &&
+          //   (s.entities[t.parentId] as Task).due &&
           //   (s.entities[t.parentId] as Task).reminderId
           // ) {
           //   allPlannedTasks.push({
           //     ...t,
-          //     plannedAt:
-          //       t.plannedAt ||
-          //       ((s.entities[t.parentId as string] as Task).plannedAt as number),
+          //     due:
+          //       t.due ||
+          //       ((s.entities[t.parentId as string] as Task).due as number),
           //   });
           // } else
-          if (t.plannedAt && t.reminderId) {
+          if (t.due && t.reminderId) {
             allPlannedTasks.push(t as TaskPlanned);
           }
         }
@@ -243,7 +243,7 @@ export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
     taskIds
       .map((id) => taskState.entities[id] as Task)
       .forEach((t) => {
-        if (t.plannedAt && t.reminderId) {
+        if (t.due && t.reminderId) {
           allPlannedTasks.push(t as TaskPlanned);
         } else if (t.isDone) {
           doneTasks.push(t);

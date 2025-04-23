@@ -725,24 +725,24 @@ export const taskReducer = createReducer<TaskState>(
 
   // REMINDER STUFF
   // --------------
-  on(scheduleTask, (state, { task, plannedAt }) => {
+  on(scheduleTask, (state, { task, due }) => {
     return taskAdapter.updateOne(
       {
         id: task.id,
         changes: {
-          plannedAt,
+          due: due,
         },
       },
       state,
     );
   }),
 
-  on(reScheduleTask, (state, { task, plannedAt }) => {
+  on(reScheduleTask, (state, { task, due }) => {
     return taskAdapter.updateOne(
       {
         id: task.id,
         changes: {
-          plannedAt,
+          due: due,
         },
       },
       state,
@@ -754,7 +754,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id,
         changes: {
-          plannedAt: undefined,
+          due: undefined,
         },
       },
       state,

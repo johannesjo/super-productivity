@@ -231,7 +231,7 @@ export class TaskRepeatCfgService {
       createNewActions.push(
         scheduleTask({
           task,
-          plannedAt: dateTime,
+          due: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,
           isSkipAutoRemoveFromToday: true,

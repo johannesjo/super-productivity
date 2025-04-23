@@ -309,12 +309,12 @@ export class TaskService {
   async addAndSchedule(
     title: string | null,
     additional: Partial<Task> = {},
-    plannedAt: number,
+    due: number,
     remindCfg: TaskReminderOptionId = TaskReminderOptionId.AtStart,
   ): Promise<string> {
     const id = this.add(title, undefined, additional, undefined);
     const task = await this.getByIdOnce$(id).toPromise();
-    this.scheduleTask(task, plannedAt, remindCfg);
+    this.scheduleTask(task, due, remindCfg);
     return id;
   }
 
@@ -767,15 +767,15 @@ export class TaskService {
   // --------
   scheduleTask(
     task: Task | TaskWithSubTasks,
-    plannedAt: number,
+    due: number,
     remindCfg: TaskReminderOptionId,
     isMoveToBacklog: boolean = false,
   ): void {
     this._store.dispatch(
       scheduleTask({
         task,
-        plannedAt,
-        remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
+        due,
+        remindAt: remindOptionToMilliseconds(due, remindCfg),
         isMoveToBacklog,
       }),
     );
@@ -783,20 +783,20 @@ export class TaskService {
 
   reScheduleTask({
     task,
-    plannedAt,
+    due,
     remindCfg,
     isMoveToBacklog = false,
   }: {
     task: Task;
-    plannedAt: number;
+    due: number;
     remindCfg: TaskReminderOptionId;
     isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
       reScheduleTask({
         task,
-        plannedAt,
-        remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),
+        due,
+        remindAt: remindOptionToMilliseconds(due, remindCfg),
         isMoveToBacklog,
       }),
     );

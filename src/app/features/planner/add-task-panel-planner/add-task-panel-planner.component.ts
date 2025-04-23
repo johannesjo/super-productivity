@@ -76,7 +76,7 @@ export class AddTaskPanelPlannerComponent {
 
       return tasks.filter((task) => {
         const isViableTask = // pre filters
-          !task.plannedAt &&
+          !task.due &&
           !task.isDone &&
           !task.tagIds.includes(TODAY_TAG.id) &&
           task.repeatCfgId === null &&
@@ -115,7 +115,7 @@ export class AddTaskPanelPlannerComponent {
     }
 
     // TODO scheduled task case
-    if (t.reminderId && t.plannedAt) {
+    if (t.reminderId && t.due) {
       this._taskService.unScheduleTask(t.id, t.reminderId);
     } else {
       this._store.dispatch(

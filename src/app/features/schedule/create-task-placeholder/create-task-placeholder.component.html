@@ -4,7 +4,7 @@
 >
   @if (!isForDayMode()) {
     <mat-icon>alarm</mat-icon>
-    <span [innerHTML]="plannedAt() | shortTime2"></span>
+    <span [innerHTML]="due() | shortTime2"></span>
     <!---->
   } @else {
     <mat-icon>today</mat-icon>

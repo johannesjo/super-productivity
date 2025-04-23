@@ -8,7 +8,7 @@ const FAKE_TASK: TaskCopy = {
   subTaskIds: [],
   timeSpent: 0,
   timeEstimate: 0,
-  plannedAt: null,
+  due: null,
   reminderId: null,
 } as any;
 const minutes = (n: number): number => n * 60 * 1000;
@@ -30,7 +30,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'FAKE_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 3600000,
           timeSpent: 0,
@@ -44,7 +44,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'FAKE_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 3600000,
           timeSpent: 1800000,
@@ -58,7 +58,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'FAKE_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 0,
           timeSpent: 0,
@@ -72,7 +72,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'FAKE_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 5400000,
           timeSpent: 900000,
@@ -86,7 +86,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'FAKE_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 0,
           timeSpent: 0,
@@ -110,7 +110,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'OTHER_TASK_ID',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: hours(1),
           timeSpent: 0,
@@ -137,7 +137,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'T1',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 3600000,
           timeSpent: 0,
@@ -151,7 +151,7 @@ describe('createScheduleViewEntriesForNormalTasks()', () => {
         data: {
           id: 'T2',
           subTaskIds: [],
-          plannedAt: null,
+          due: null,
           reminderId: null,
           timeEstimate: 7200000,
           timeSpent: 0,

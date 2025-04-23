@@ -181,9 +181,9 @@ const createBlockerBlocksForScheduledTasks = (
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
   scheduledTasks.forEach((task) => {
-    const start = task.plannedAt;
-    // const end = task.plannedAt + Math.max(getTimeLeftForTask(task), 1);
-    const end = task.plannedAt + getTimeLeftForTask(task);
+    const start = task.due;
+    // const end = task.due + Math.max(getTimeLeftForTask(task), 1);
+    const end = task.due + getTimeLeftForTask(task);
 
     let wasMerged = false;
     for (const blockedBlock of blockedBlocks) {

@@ -16,7 +16,7 @@ type TagChanges = {
 };
 type DueChanges = {
   title?: string;
-  plannedAt?: number;
+  due?: number;
 };
 
 const SHORT_SYNTAX_TIME_REG_EX =
@@ -315,7 +315,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
     if (parsedDateArr.length) {
       const parsedDateResult = parsedDateArr[0];
       const start = parsedDateResult.start;
-      const plannedAt = start.date().getTime();
+      const due = start.date().getTime();
       let hasPlannedTime = true;
       // If user doesn't explicitly enter time, set the scheduled date
       // to 9:00:00 of the given day
@@ -331,7 +331,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
         inputDate += 'm';
       }
       return {
-        plannedAt,
+        due,
         // Strip out the short syntax for scheduled date and given date
         title: task.title.replace(`@${inputDate}`, ''),
         ...(hasPlannedTime ? {} : { hasPlannedTime: false }),
@@ -342,10 +342,10 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
     if (simpleMatch && simpleMatch[0] && typeof +simpleMatch[0] === 'number') {
       const nr = +simpleMatch[0];
       if (nr <= 24) {
-        const plannedAt = new Date();
-        plannedAt.setHours(nr, 0, 0, 0);
+        const due = new Date();
+        due.setHours(nr, 0, 0, 0);
         return {
-          plannedAt: plannedAt.getTime(),
+          due: due.getTime(),
           title: task.title.replace(`@${nr}`, ''),
         };
       }

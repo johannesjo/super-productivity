@@ -39,6 +39,7 @@
   (longPressIOS)="openContextMenu($event)"
   (contextmenu)="openContextMenu($event)"
   (touchstart)="onTouchStart($event)"
+  [title]="task | json"
 >
   <div class="wrap">
     @if (parentTitle) {

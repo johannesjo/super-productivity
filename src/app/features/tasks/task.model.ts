@@ -83,7 +83,7 @@ export interface TaskCopy extends IssueFieldsForTask {
   // TODO convert to number or string model;
   // number => timestamp (including time)
   // string => date (without time)
-  plannedAt?: number;
+  due?: number;
   // TODO replace
   hasPlannedTime?: boolean;
   // remindCfg: TaskReminderOptionId;
@@ -119,11 +119,11 @@ export interface TaskWithReminderData extends Task {
 
 export interface TaskWithReminder extends Task {
   reminderId: string;
-  plannedAt: number;
+  due: number;
 }
 
 export interface TaskPlanned extends Task {
-  plannedAt: number;
+  due: number;
 }
 
 export interface TaskWithPlannedDay extends Task {
@@ -132,7 +132,7 @@ export interface TaskWithPlannedDay extends Task {
 
 export interface TaskWithoutReminder extends Task {
   reminderId: undefined;
-  plannedAt: undefined;
+  due: undefined;
 }
 
 export interface TaskWithPlannedForDayIndication extends TaskWithoutReminder {

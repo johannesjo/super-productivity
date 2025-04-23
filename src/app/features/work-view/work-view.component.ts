@@ -84,7 +84,6 @@ import { SnackService } from '../../core/snack/snack.service';
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
-    MatIconButton,
     CollapsibleComponent,
   ],
 })

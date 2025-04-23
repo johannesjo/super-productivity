@@ -43,7 +43,7 @@ const fakePlannedTaskEntry = (
 ): TaskPlanned => {
   return {
     ...fakeTaskEntry(id, add),
-    plannedAt: planedAt.getTime(),
+    due: planedAt.getTime(),
     reminderId: 'R_ID',
   } as TaskPlanned;
 };
@@ -173,7 +173,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: {
               id: 'S1',
-              plannedAt: minAfterNowTs(30),
+              due: minAfterNowTs(30),
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],
