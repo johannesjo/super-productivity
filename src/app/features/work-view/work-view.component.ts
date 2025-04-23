@@ -40,12 +40,7 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import {
-  MatButton,
-  MatFabButton,
-  MatIconButton,
-  MatMiniFabButton,
-} from '@angular/material/button';
+import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
 import { ImprovementBannerComponent } from '../metric/improvement-banner/improvement-banner.component';
 import { AddTaskBarComponent } from '../tasks/add-task-bar/add-task-bar.component';
 import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
@@ -89,8 +84,8 @@ import { SnackService } from '../../core/snack/snack.service';
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
-    CollapsibleComponent,
     MatIconButton,
+    CollapsibleComponent,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {

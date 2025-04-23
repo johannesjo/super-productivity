@@ -10,26 +10,11 @@
         class="today"
         cdkScrollable
       >
-        <div style="border-bottom: 2px dashed rgba(0, 0, 0, 0.2); padding-bottom: 16px">
-          <div
-            style="
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              margin: 8px;
-              margin-top: 16px;
-            "
-          >
-            <h2
-              class="mat-h2 completed-tasks-heading"
-              style="margin: 0; padding: 0"
-            >
-              Overdue
-              <!--          {{ T.WW.COMPLETED_TASKS | translate }}-->
-            </h2>
-            <!--          <button mat-button>Reschedule</button>-->
-          </div>
-
+        <collapsible
+          [title]="'Overdue (3)'"
+          [isExpanded]="true"
+          [isIconBefore]="true"
+        >
           <div
             class="task-list-wrapper"
             style="padding-bottom: 16px"
@@ -48,7 +33,7 @@
           >
             <button
               [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-              mat-flat-button
+              mat-stroked-button
               color="primary"
               routerLink="/active/daily-summary"
               tabindex="1"
@@ -60,7 +45,7 @@
             </button>
             <button
               [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-              mat-flat-button
+              mat-stroked-button
               color="primary"
               routerLink="/active/daily-summary"
               tabindex="1"
@@ -71,14 +56,13 @@
               <!--            {{ T.WW.FINISH_DAY | translate }}-->
             </button>
           </div>
-        </div>
+        </collapsible>
 
         <h2
           class="mat-h2 completed-tasks-heading"
           style="margin: 8px; margin-top: 16px; margin-bottom: 0"
         >
-          <!--          {{ T.WW.COMPLETED_TASKS | translate }}-->
-          Today
+          <span>Today</span>
         </h2>
 
         <header class="work-view-header">
