@@ -30,6 +30,8 @@ import { InlineInputComponent } from '../../../ui/inline-input/inline-input.comp
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
+import { JsonPipe } from '@angular/common';
+import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 
 @Component({
   selector: 'planner-task',
@@ -46,6 +48,8 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
     MsToStringPipe,
     IssueIconPipe,
     ShortDate2Pipe,
+    JsonPipe,
+    TaskTitleComponent,
   ],
 })
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
