@@ -51,6 +51,7 @@ import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { flattenTasks } from '../tasks/store/task.selectors';
+import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 
 @Component({
   selector: 'work-view',
@@ -82,6 +83,7 @@ import { flattenTasks } from '../tasks/store/task.selectors';
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
+    CollapsibleComponent,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {

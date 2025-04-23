@@ -69,11 +69,6 @@ h2 {
   }
 }
 
-.completed-tasks-heading {
-  margin: $s;
-  margin-top: $s * 2;
-}
-
 .backlog-heading {
   margin: $s;
 }
@@ -268,7 +263,7 @@ h2 {
   margin-bottom: 32px;
 
   img {
-    width: 400px;
+    width: 500px;
     display: block;
     margin: auto;
     border-radius: 8px;
@@ -289,7 +284,20 @@ h2 {
     }
 
     @include darkTheme {
+      color: rgba(255, 255, 255, 0.6);
       text-shadow: 0 0 0 rgba(255, 255, 255, 1);
     }
+  }
+}
+
+:host ::ng-deep .collapsible-header {
+  font-size: 16px;
+  margin-top: 0;
+  padding: 10px 10px;
+  justify-content: center;
+
+  .collapsible-title {
+    flex-grow: 0;
+    margin-left: -10px;
   }
 }

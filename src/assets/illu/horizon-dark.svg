@@ -1,4 +1,4 @@
-<svg width="400"
+<svg width="500"
      height="100"
      xmlns="http://www.w3.org/2000/svg">
 
@@ -68,15 +68,15 @@
   <!--        fill="#003" />-->
 
 
-  <circle cx="200"
+  <circle cx="250"
           cy="50"
           r="40"
           filter="url(#glow)"
           fill="#fff"
-          opacity=".3"
+          opacity=".5"
           clip-path="url(#cut-off-bottom)" />
 
-  <circle cx="200"
+  <circle cx="250"
           cy="50"
           r="42"
           filter="url(#glow)"

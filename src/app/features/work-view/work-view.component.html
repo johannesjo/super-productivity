@@ -131,54 +131,54 @@
                 <button
                   (click)="planMore()"
                   color=""
-                  mat-flat-button
+                  mat-stroked-button
                   tabindex="1"
                 >
                   <mat-icon>playlist_add</mat-icon>
                   {{ T.WW.ADD_MORE | translate }}
                 </button>
-                @if (workContextService.isToday$ | async) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY | translate }}
-                  </button>
-                }
-                @if (
-                  !(workContextService.isToday$ | async) &&
-                  workContextService.activeWorkContextType === 'PROJECT'
-                ) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}
-                  </button>
-                }
-                @if (
-                  !(workContextService.isToday$ | async) &&
-                  workContextService.activeWorkContextType === 'TAG'
-                ) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}
-                  </button>
-                }
+                <!--                @if (workContextService.isToday$ | async) {-->
+                <!--                  <button-->
+                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
+                <!--                    color="primary"-->
+                <!--                    mat-flat-button-->
+                <!--                    routerLink="/active/daily-summary"-->
+                <!--                    tabindex="1"-->
+                <!--                  >-->
+                <!--                    <mat-icon>done_all</mat-icon>-->
+                <!--                    {{ T.WW.FINISH_DAY | translate }}-->
+                <!--                  </button>-->
+                <!--                }-->
+                <!--                @if (-->
+                <!--                  !(workContextService.isToday$ | async) &&-->
+                <!--                  workContextService.activeWorkContextType === 'PROJECT'-->
+                <!--                ) {-->
+                <!--                  <button-->
+                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
+                <!--                    color="primary"-->
+                <!--                    mat-flat-button-->
+                <!--                    routerLink="/active/daily-summary"-->
+                <!--                    tabindex="1"-->
+                <!--                  >-->
+                <!--                    <mat-icon>done_all</mat-icon>-->
+                <!--                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}-->
+                <!--                  </button>-->
+                <!--                }-->
+                <!--                @if (-->
+                <!--                  !(workContextService.isToday$ | async) &&-->
+                <!--                  workContextService.activeWorkContextType === 'TAG'-->
+                <!--                ) {-->
+                <!--                  <button-->
+                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
+                <!--                    color="primary"-->
+                <!--                    mat-flat-button-->
+                <!--                    routerLink="/active/daily-summary"-->
+                <!--                    tabindex="1"-->
+                <!--                  >-->
+                <!--                    <mat-icon>done_all</mat-icon>-->
+                <!--                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}-->
+                <!--                  </button>-->
+                <!--                }-->
               </div>
             </div>
           }
@@ -215,16 +215,25 @@
           ></task-list>
           @if (!isPlanningMode() || doneTasks()?.length) {
             <div @expand>
-              <h2 class="mat-h2 completed-tasks-heading">
-                {{ T.WW.COMPLETED_TASKS | translate }}
-              </h2>
-              <task-list
-                class="tour-doneList"
-                [noTasksMsg]="T.WW.NO_COMPLETED_TASKS | translate"
-                [tasks]="doneTasks()"
-                listId="PARENT"
-                listModelId="DONE"
-              ></task-list>
+              <collapsible
+                style="margin-top: 16px"
+                [title]="
+                  (T.WW.COMPLETED_TASKS | translate) +
+                  ' (' +
+                  (doneTasks()?.length || 0) +
+                  ')'
+                "
+                [isExpanded]="true"
+                [isIconBefore]="true"
+              >
+                <task-list
+                  class="tour-doneList"
+                  [noTasksMsg]="T.WW.NO_COMPLETED_TASKS | translate"
+                  [tasks]="doneTasks()"
+                  listId="PARENT"
+                  listModelId="DONE"
+                ></task-list>
+              </collapsible>
               <div class="finish-day-button-wrapper">
                 <!-- NOTE: tabindex is same as for tasks -->
                 @if (workContextService.isToday$ | async) {
@@ -239,36 +248,36 @@
                     {{ T.WW.FINISH_DAY | translate }}
                   </button>
                 }
-                @if (
-                  !(workContextService.isToday$ | async) &&
-                  workContextService.activeWorkContextType === 'PROJECT'
-                ) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}
-                  </button>
-                }
-                @if (
-                  !(workContextService.isToday$ | async) &&
-                  workContextService.activeWorkContextType === 'TAG'
-                ) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}
-                  </button>
-                }
+                <!--                @if (-->
+                <!--                  !(workContextService.isToday$ | async) &&-->
+                <!--                  workContextService.activeWorkContextType === 'PROJECT'-->
+                <!--                ) {-->
+                <!--                  <button-->
+                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
+                <!--                    color="primary"-->
+                <!--                    mat-flat-button-->
+                <!--                    routerLink="/active/daily-summary"-->
+                <!--                    tabindex="1"-->
+                <!--                  >-->
+                <!--                    <mat-icon>done_all</mat-icon>-->
+                <!--                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}-->
+                <!--                  </button>-->
+                <!--                }-->
+                <!--                @if (-->
+                <!--                  !(workContextService.isToday$ | async) &&-->
+                <!--                  workContextService.activeWorkContextType === 'TAG'-->
+                <!--                ) {-->
+                <!--                  <button-->
+                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
+                <!--                    color="primary"-->
+                <!--                    mat-flat-button-->
+                <!--                    routerLink="/active/daily-summary"-->
+                <!--                    tabindex="1"-->
+                <!--                  >-->
+                <!--                    <mat-icon>done_all</mat-icon>-->
+                <!--                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}-->
+                <!--                  </button>-->
+                <!--                }-->
               </div>
             </div>
           }
