@@ -262,3 +262,38 @@ h2 {
     right: $s * 2;
   }
 }
+
+.no-tasks-illu-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+
+  img {
+    width: 360px;
+    display: block;
+    margin: auto;
+    border-radius: 8px;
+    max-width: 100%;
+    @include lightTheme() {
+      opacity: 0.5;
+    }
+
+    &.illu-day {
+      @include darkTheme() {
+        display: none;
+      }
+    }
+    &.illu-night {
+      @include lightTheme() {
+        display: none;
+      }
+    }
+  }
+
+  .no-tasks-label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 90%;
+    transform: translate(-50%, -50%);
+  }
+}
