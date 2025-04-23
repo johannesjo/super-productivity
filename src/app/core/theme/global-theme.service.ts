@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
-import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  map,
+  skip,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
@@ -75,6 +82,9 @@ export class GlobalThemeService {
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
     this._initThemeWatchers();
+    this.darkMode$
+      .pipe(skip(1))
+      .subscribe((darkMode) => localStorage.setItem(LS.DARK_MODE, darkMode));
   }
 
   private _setDarkTheme(isDarkTheme: boolean): void {
