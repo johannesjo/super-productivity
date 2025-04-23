@@ -1757,7 +1757,7 @@
     "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
     "NO_COMPLETED_TASKS": "There are currently no completed tasks",
-    "NO_PLANNED_TASKS": "No planned tasks",
+    "NO_PLANNED_TASKS": "no tasks planned",
     "READY_TO_WORK": "Ready to work!",
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",

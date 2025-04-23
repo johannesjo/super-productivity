@@ -265,36 +265,24 @@ h2 {
 
 .no-tasks-illu-wrapper {
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 
   img {
-    //width: 360px;
-    width: 220px;
+    width: 100%;
     display: block;
     margin: auto;
     border-radius: 8px;
     max-width: 100%;
-    @include lightTheme() {
-      opacity: 0.5;
-    }
-
-    &.illu-day {
-      @include darkTheme() {
-        display: none;
-      }
-    }
-    &.illu-night {
-      @include lightTheme() {
-        display: none;
-      }
-    }
   }
 
   .no-tasks-label {
+    font-size: 16px;
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 90%;
     transform: translate(-50%, -50%);
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    font-weight: 200;
   }
 }
