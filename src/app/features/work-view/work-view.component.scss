@@ -273,10 +273,6 @@ h2 {
     margin: auto;
     border-radius: 8px;
     max-width: 100%;
-
-    @include darkTheme {
-      opacity: 0.1;
-    }
   }
 
   .no-tasks-label {
@@ -293,7 +289,7 @@ h2 {
     }
 
     @include darkTheme {
-      //text-shadow: 0 0 0 rgba(255, 255, 255, 1);
+      text-shadow: 0 0 0 rgba(255, 255, 255, 1);
     }
   }
 }
