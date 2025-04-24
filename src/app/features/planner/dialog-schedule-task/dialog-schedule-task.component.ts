@@ -37,7 +37,6 @@ import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { PlannerService } from '../planner.service';
-import { first } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { DateAdapter, MatOption } from '@angular/material/core';
@@ -143,10 +142,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         },
       );
     } else {
-      const plannerTaskMap = await this._plannerService.plannedTaskDayMap$
-        .pipe(first())
-        .toPromise();
-      this.plannedDayForTask = plannerTaskMap[this.data.task.id];
+      this.plannedDayForTask = this.data.task.dueDay || null;
 
       this.selectedDate = this.plannedDayForTask
         ? dateStrToUtcDate(this.plannedDayForTask)

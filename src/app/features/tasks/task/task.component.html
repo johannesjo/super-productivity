@@ -231,7 +231,7 @@
             ></div>
           </button>
         }
-        @if (((plannerService.plannedTaskDayMap$ | async) || {})[t.id]; as dueDay) {
+        @if (t.dueDay) {
           <button
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.SCHEDULE | translate"
@@ -240,7 +240,7 @@
             mat-icon-button
           >
             <mat-icon>today</mat-icon>
-            <div class="time-badge">{{ dueDay | localDateStr }}</div>
+            <div class="time-badge">{{ t.dueDay | localDateStr }}</div>
           </button>
         }
 

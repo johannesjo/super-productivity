@@ -79,7 +79,7 @@
       mat-icon-button
       tabindex="0"
       [matTooltip]="
-        (task.reminderId
+        (task.dueWithTime || task.dueDay
           ? (T.F.TASK.CMP.EDIT_SCHEDULED | translate)
           : (T.F.TASK.CMP.SCHEDULE | translate)) +
         (kb.taskSchedule ? ' [' + kb.taskSchedule + ']' : '')
@@ -89,9 +89,7 @@
       <mat-icon>today</mat-icon>
     </button>
 
-    @if (
-      task.reminderId || ((plannerService.plannedTaskDayMap$ | async) || {})[task.id]
-    ) {
+    @if (task.dueWithTime || task.dueDay) {
       <button
         mat-icon-button
         tabindex="0"

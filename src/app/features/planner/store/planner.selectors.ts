@@ -26,39 +26,16 @@ export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState
   fromPlanner.plannerFeatureKey,
 );
 
-export const selectAllTasksWithPlannedDay = createSelector(
+export const selectAllTasksWithDueDay = createSelector(
   selectTaskFeatureState,
-  selectPlannerState,
-  (taskState, plannerState): TaskWithPlannedDay[] => {
-    return Object.keys(plannerState.days)
-      .sort()
-      .reduce<TaskWithPlannedDay[]>(
-        (acc, dateStr) => [
-          ...acc,
-          ...plannerState.days[dateStr]
-            .filter((id) => taskState.entities[id])
-            .map((id) => {
-              const task = taskState.entities[id] as TaskWithPlannedDay;
-              return {
-                ...task,
-                plannedDay: dateStr,
-              };
-            }),
-        ],
-        [],
-      );
-  },
-);
-export const selectTaskIdPlannedDayMap = createSelector(
-  selectPlannerState,
-  (state): { [taskId: string]: string } => {
-    const taskIdDayMap: { [taskId: string]: string } = {};
-    Object.keys(state.days).forEach((day) => {
-      state.days[day].forEach((taskId) => {
-        taskIdDayMap[taskId] = day;
-      });
-    });
-    return taskIdDayMap;
+  (taskState): TaskWithPlannedDay[] => {
+    // return all tasks with dueDay
+    const allPlannnedForDayTasks = Object.values(taskState.entities).filter(
+      (task) => !!task && !!(task as TaskPlanned).dueDay,
+    ) as TaskWithPlannedDay[];
+    return allPlannnedForDayTasks.sort((a, b) =>
+      a.dueDay > b.dueDay ? 1 : a.dueDay < b.dueDay ? -1 : 0,
+    );
   },
 );
 
@@ -311,9 +288,9 @@ const getScheduledTaskItems = (
   currentDayDate: Date,
 ): ScheduleItemTask[] =>
   allPlannedTasks
-    .filter((task) => isSameDay(task.due, currentDayDate))
+    .filter((task) => isSameDay(task.dueWithTime, currentDayDate))
     .map((task) => {
-      const start = task.due;
+      const start = task.dueWithTime;
       const end = start + Math.max(task.timeEstimate - task.timeSpent, 0);
       return {
         id: task.id,

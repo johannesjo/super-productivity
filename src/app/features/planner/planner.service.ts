@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -16,7 +16,6 @@ import {
   selectAllDuePlannedDay,
   selectAllDuePlannedOnDay,
   selectPlannerDays,
-  selectTaskIdPlannedDayMap,
 } from './store/planner.selectors';
 import { ReminderService } from '../reminder/reminder.service';
 import { TaskPlanned } from '../tasks/task.model';
@@ -138,10 +137,10 @@ export class PlannerService {
     shareReplay(1),
   );
 
-  plannedTaskDayMap$: Observable<{ [taskId: string]: string }> = this._store
-    .select(selectTaskIdPlannedDayMap)
-    // make this more performant by sharing stream
-    .pipe(shareReplay(1));
+  // plannedTaskDayMap$: Observable<{ [taskId: string]: string }> = this._store
+  //   .select(selectTaskIdPlannedDayMap)
+  //   // make this more performant by sharing stream
+  //   .pipe(shareReplay(1));
 
   getDayOnce$(dayStr: string): Observable<PlannerDay | undefined> {
     return this.days$.pipe(

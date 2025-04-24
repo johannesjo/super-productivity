@@ -63,7 +63,6 @@ import {
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
-import { PlannerService } from '../../planner/planner.service';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE } from '../../issue/issue.const';
@@ -74,7 +73,7 @@ import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { TaskListComponent } from '../task-list/task-list.component';
-import { AsyncPipe, JsonPipe } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
@@ -114,7 +113,6 @@ import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-t
     MatMenu,
     MatMenuContent,
     MatMenuItem,
-    AsyncPipe,
     MsToStringPipe,
     ShortDate2Pipe,
     LocalDateStrPipe,
@@ -136,7 +134,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _elementRef = inject(ElementRef);
   private readonly _renderer = inject(Renderer2);
   private readonly _projectService = inject(ProjectService);
-  readonly plannerService = inject(PlannerService);
   readonly workContextService = inject(WorkContextService);
 
   task = input.required<TaskWithSubTasks>();

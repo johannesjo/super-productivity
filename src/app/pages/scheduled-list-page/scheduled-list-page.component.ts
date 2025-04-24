@@ -14,7 +14,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
-import { selectAllTasksWithPlannedDay } from '../../features/planner/store/planner.selectors';
+import { selectAllTasksWithDueDay } from '../../features/planner/store/planner.selectors';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { TaskTitleComponent } from '../../ui/task-title/task-title.component';
 import { MatRipple } from '@angular/material/core';
@@ -57,7 +57,7 @@ export class ScheduledListPageComponent {
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
-  tasksPlannedForDays$ = this._store.select(selectAllTasksWithPlannedDay);
+  tasksPlannedForDays$ = this._store.select(selectAllTasksWithDueDay);
 
   editReminder(task: TaskCopy, ev: MouseEvent): void {
     ev.preventDefault();

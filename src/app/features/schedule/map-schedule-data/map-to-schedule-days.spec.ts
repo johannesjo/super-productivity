@@ -43,7 +43,7 @@ const fakePlannedTaskEntry = (
 ): TaskPlanned => {
   return {
     ...fakeTaskEntry(id, add),
-    due: planedAt.getTime(),
+    dueWithTime: planedAt.getTime(),
     reminderId: 'R_ID',
   } as TaskPlanned;
 };

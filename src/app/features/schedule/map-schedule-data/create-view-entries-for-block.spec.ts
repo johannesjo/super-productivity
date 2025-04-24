@@ -22,7 +22,7 @@ describe('createViewEntriesForBlock()', () => {
             type: BlockedBlockType.ScheduledTask,
             data: {
               id: '1',
-              due: 0,
+              dueWithTime: 0,
               timeSpent: 0,
               subTaskIds: ESA,
               tagIds: ESA,
@@ -39,7 +39,7 @@ describe('createViewEntriesForBlock()', () => {
       {
         data: {
           id: '1',
-          due: 0,
+          dueWithTime: 0,
           subTaskIds: ESA,
           tagIds: ESA,
           timeEstimate: 1000,
@@ -63,7 +63,7 @@ describe('createViewEntriesForBlock()', () => {
             type: BlockedBlockType.ScheduledTask,
             data: {
               id: '1',
-              due: 0,
+              dueWithTime: 0,
               timeSpent: 0,
               subTaskIds: ESA,
               tagIds: ESA,
@@ -110,7 +110,7 @@ describe('createViewEntriesForBlock()', () => {
       {
         data: {
           id: '1',
-          due: 0,
+          dueWithTime: 0,
           subTaskIds: ESA,
           tagIds: ESA,
           timeEstimate: 1000,

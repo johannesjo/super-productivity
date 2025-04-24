@@ -36,7 +36,6 @@ import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
-import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { MatDialog } from '@angular/material/dialog';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
@@ -72,15 +71,11 @@ export class BoardPanelComponent {
 
   store = inject(Store);
   taskService = inject(TaskService);
-  plannerService = inject(PlannerService);
   _matDialog = inject(MatDialog);
 
   allTasks$ = this.store.select(selectAllTasksWithoutHiddenProjects);
   allTasks = toSignal(this.allTasks$, {
     initialValue: [],
-  });
-  plannedTaskDayMap = toSignal(this.plannerService.plannedTaskDayMap$, {
-    initialValue: {},
   });
 
   totalEstimate = computed(() =>
@@ -108,7 +103,6 @@ export class BoardPanelComponent {
 
   tasks = computed(() => {
     const panelCfg = this.panelCfg();
-    const plannedTaskDayMap = this.plannedTaskDayMap();
     const orderedTasks: TaskCopy[] = [];
     const nonOrderedTasks: TaskCopy[] = [];
 
@@ -143,13 +137,11 @@ export class BoardPanelComponent {
       }
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled) {
-        isTaskIncluded =
-          isTaskIncluded && (task.dueWithTime || plannedTaskDayMap[task.id]);
+        isTaskIncluded = isTaskIncluded && !!(task.dueWithTime || task.dueDay);
       }
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
-        isTaskIncluded =
-          isTaskIncluded && !task.dueWithTime && !plannedTaskDayMap[task.id];
+        isTaskIncluded = isTaskIncluded && !task.dueWithTime && !task.dueDay;
       }
 
       return isTaskIncluded;
@@ -268,7 +260,7 @@ export class BoardPanelComponent {
         .select(selectTaskById, { id: taskId })
         .pipe(first())
         .toPromise();
-      if (!this.plannedTaskDayMap()[taskId] && !task.dueWithTime) {
+      if (!task.dueDay && !task.dueWithTime) {
         this.scheduleTask(task);
       }
     }
@@ -277,7 +269,7 @@ export class BoardPanelComponent {
         .select(selectTaskById, { id: taskId })
         .pipe(first())
         .toPromise();
-      if (this.plannedTaskDayMap()[taskId]) {
+      if (task.dueDay) {
         this.store.dispatch(PlannerActions.removeTaskFromDays({ taskId }));
       } else if (task.reminderId) {
         this.store.dispatch(

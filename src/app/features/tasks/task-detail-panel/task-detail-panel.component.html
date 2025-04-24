@@ -102,41 +102,40 @@
       </ng-container>
     </task-detail-item>
   }
-  @if (plannerService.plannedTaskDayMap$ | async; as plannedTaskDayMap) {
-    <task-detail-item
-      (collapseParent)="collapseParent()"
-      (editActionTriggered)="scheduleTask()"
-      (keyPress)="onItemKeyPress($event)"
-      [inputIcon]="task.reminderId || (plannedTaskDayMap || {})[task.id] ? 'edit' : 'add'"
-      class="input-item"
-    >
-      <ng-container input-title>
-        <mat-icon>alarm</mat-icon>
-        @if (task.reminderId || (plannedTaskDayMap || {})[task.id]) {
-          <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT | translate }}</span>
-        }
-        @if (!(task.reminderId || (plannedTaskDayMap || {})[task.id])) {
-          <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK | translate }}</span>
-        }
-      </ng-container>
-      <ng-container input-value>
-        @if (reminderData$ | async; as reminderData) {
-          <div
-            [matTooltip]="reminderData.remindAt | date: 'short'"
-            class="reminder-value"
-            matTooltipPosition="left"
-          >
-            {{ reminderData.remindAt | date: 'short' }}
-          </div>
-        }
-        @if ((plannedTaskDayMap || {})[task.id]) {
-          <div class="reminder-value">
-            {{ (plannedTaskDayMap || {})[task.id] | date: 'shortDate' }}
-          </div>
-        }
-      </ng-container>
-    </task-detail-item>
-  }
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (editActionTriggered)="scheduleTask()"
+    (keyPress)="onItemKeyPress($event)"
+    [inputIcon]="task.reminderId || task.dueDay ? 'edit' : 'add'"
+    class="input-item"
+  >
+    <ng-container input-title>
+      <mat-icon>alarm</mat-icon>
+      @if (task.reminderId || task.dueDay) {
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT | translate }}</span>
+      }
+      @if (!(task.reminderId || task.dueDay)) {
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK | translate }}</span>
+      }
+    </ng-container>
+    <ng-container input-value>
+      @if (reminderData$ | async; as reminderData) {
+        <div
+          [matTooltip]="reminderData.remindAt | date: 'short'"
+          class="reminder-value"
+          matTooltipPosition="left"
+        >
+          {{ reminderData.remindAt | date: 'short' }}
+        </div>
+      }
+      @if (task.dueDay) {
+        <div class="reminder-value">
+          {{ task.dueDay | date: 'shortDate' }}
+        </div>
+      }
+    </ng-container>
+  </task-detail-item>
+
   @if (task.issueId && task.issueType !== ICAL_TYPE) {
     <task-detail-item
       (collapseParent)="collapseParent()"

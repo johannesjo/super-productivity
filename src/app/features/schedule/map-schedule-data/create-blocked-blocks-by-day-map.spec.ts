@@ -35,7 +35,7 @@ const fakePlannedTaskEntry = (
 ): TaskPlanned => {
   return {
     ...fakeTaskEntry(id, add),
-    due: planedAt.getTime(),
+    dueWithTime: planedAt.getTime(),
     reminderId: 'R_ID',
   } as TaskPlanned;
 };
@@ -139,7 +139,7 @@ describe('createBlockedBlocksByDayMap()', () => {
             {
               data: {
                 id: '1',
-                due: dhTz(1, 18),
+                dueWithTime: dhTz(1, 18),
                 reminderId: 'R_ID',
                 subTaskIds: [],
                 tagIds: [],
@@ -221,7 +221,7 @@ describe('createBlockedBlocksByDayMap()', () => {
           {
             data: {
               id: 'S1',
-              due: dhTz(1, 18),
+              dueWithTime: dhTz(1, 18),
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],
@@ -249,7 +249,7 @@ describe('createBlockedBlocksByDayMap()', () => {
           {
             data: {
               id: 'S1',
-              due: 147600000,
+              dueWithTime: 147600000,
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],
@@ -277,7 +277,7 @@ describe('createBlockedBlocksByDayMap()', () => {
           {
             data: {
               id: 'S1',
-              due: 147600000,
+              dueWithTime: 147600000,
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],
