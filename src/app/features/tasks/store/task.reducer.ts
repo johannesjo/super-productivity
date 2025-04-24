@@ -637,6 +637,7 @@ export const taskReducer = createReducer<TaskState>(
             id: task.id,
             changes: {
               tagIds: taskToUpdate.tagIds.filter((id) => id !== TODAY_TAG.id),
+              dueDay: getWorklogStr(newDay),
             },
           },
           state,
@@ -651,13 +652,22 @@ export const taskReducer = createReducer<TaskState>(
             id: task.id,
             changes: {
               tagIds,
+              dueDay: undefined,
             },
           },
           state,
         );
       }
 
-      return state;
+      return taskAdapter.updateOne(
+        {
+          id: task.id,
+          changes: {
+            dueDay: getWorklogStr(newDay),
+          },
+        },
+        state,
+      );
     },
   ),
   on(PlannerActions.moveBeforeTask, (state, { toTaskId, fromTask }) => {
@@ -675,6 +685,7 @@ export const taskReducer = createReducer<TaskState>(
           id: fromTask.id,
           changes: {
             tagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
+            dueDay: undefined,
           },
         },
         state,
@@ -688,12 +699,21 @@ export const taskReducer = createReducer<TaskState>(
           id: fromTask.id,
           changes: {
             tagIds: unique(fromTask.tagIds.filter((id) => id !== TODAY_TAG.id)),
+            dueDay: getWorklogStr(targetTask.dueDay),
           },
         },
         state,
       );
     }
-    return state;
+    return taskAdapter.updateOne(
+      {
+        id: fromTask.id,
+        changes: {
+          dueDay: getWorklogStr(targetTask.dueDay),
+        },
+      },
+      state,
+    );
   }),
 
   on(PlannerActions.planTaskForDay, (state, { task, day }) => {
@@ -704,6 +724,7 @@ export const taskReducer = createReducer<TaskState>(
           id: task.id,
           changes: {
             tagIds: unique([TODAY_TAG.id, ...task.tagIds]),
+            dueDay: undefined,
           },
         },
         state,
@@ -714,13 +735,21 @@ export const taskReducer = createReducer<TaskState>(
           id: task.id,
           changes: {
             tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+            dueDay: getWorklogStr(day),
           },
         },
         state,
       );
     }
-
-    return state;
+    return taskAdapter.updateOne(
+      {
+        id: task.id,
+        changes: {
+          dueDay: getWorklogStr(day),
+        },
+      },
+      state,
+    );
   }),
 
   // REMINDER STUFF
