@@ -18,7 +18,7 @@
     <!--NOTE: non observable should be enough as we only need the initial value-->
     @if (isTodayListActive()) {
       @if (!t.repeatCfgId) {
-        <mat-icon>alarm</mat-icon>
+        <mat-icon>today</mat-icon>
       }
       @if (t.repeatCfgId) {
         <mat-icon svgIcon="repeat"></mat-icon>
