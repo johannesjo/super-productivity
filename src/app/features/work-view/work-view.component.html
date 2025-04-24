@@ -213,6 +213,7 @@
             listId="PARENT"
             listModelId="UNDONE"
           ></task-list>
+
           @let isTodayList = workContextService.isToday$ | async;
           @if (!isPlanningMode() || doneTasks()?.length) {
             <div @expand>
