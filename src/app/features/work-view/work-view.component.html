@@ -236,6 +236,7 @@
                   @if (!isTodayList && doneTasks().length) {
                     <button
                       [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                      class="e2e-move-done-to-archive"
                       mat-stroked-button
                       (click)="moveDoneToArchive()"
                       tabindex="1"
