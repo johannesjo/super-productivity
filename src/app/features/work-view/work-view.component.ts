@@ -52,6 +52,7 @@ import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { flattenTasks } from '../tasks/store/task.selectors';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'work-view',
@@ -96,6 +97,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   private _activatedRoute = inject(ActivatedRoute);
   private _projectService = inject(ProjectService);
   private _cd = inject(ChangeDetectorRef);
+  private _snackService = inject(SnackService);
 
   // TODO refactor all to signals
   undoneTasks = input<TaskWithSubTasks[]>([]);
@@ -205,5 +207,18 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   resetBreakTimer(): void {
     this.takeABreakService.resetTimer();
+  }
+
+  moveDoneToArchive(): void {
+    const doneTasks = this.doneTasks();
+    this.taskService.moveToArchive(doneTasks);
+    this._snackService.open({
+      msg: T.F.TASK.S.MOVED_TO_ARCHIVE,
+      type: 'SUCCESS',
+      ico: 'done_all',
+      translateParams: {
+        nr: doneTasks.length,
+      },
+    });
   }
 }

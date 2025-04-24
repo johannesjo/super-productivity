@@ -213,30 +213,41 @@
             listId="PARENT"
             listModelId="UNDONE"
           ></task-list>
+          @let isTodayList = workContextService.isToday$ | async;
           @if (!isPlanningMode() || doneTasks()?.length) {
             <div @expand>
               <collapsible
                 style="margin-top: 16px"
                 [title]="
-                  (T.WW.COMPLETED_TASKS | translate) +
-                  ' (' +
-                  (doneTasks()?.length || 0) +
-                  ')'
+                  (T.WW.DONE_TASKS | translate) + ' (' + (doneTasks()?.length || 0) + ')'
                 "
                 [isExpanded]="true"
                 [isIconBefore]="true"
               >
                 <task-list
                   class="tour-doneList"
-                  [noTasksMsg]="T.WW.NO_COMPLETED_TASKS | translate"
+                  [noTasksMsg]="T.WW.NO_DONE_TASKS | translate"
                   [tasks]="doneTasks()"
                   listId="PARENT"
                   listModelId="DONE"
                 ></task-list>
+                <div class="finish-day-button-wrapper">
+                  @if (!isTodayList && doneTasks().length) {
+                    <button
+                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                      mat-stroked-button
+                      (click)="moveDoneToArchive()"
+                      tabindex="1"
+                    >
+                      <mat-icon>done_all</mat-icon>
+                      {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
+                    </button>
+                  }
+                </div>
               </collapsible>
               <div class="finish-day-button-wrapper">
                 <!-- NOTE: tabindex is same as for tasks -->
-                @if (workContextService.isToday$ | async) {
+                @if (isTodayList) {
                   <button
                     [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
                     color="primary"
@@ -248,36 +259,6 @@
                     {{ T.WW.FINISH_DAY | translate }}
                   </button>
                 }
-                <!--                @if (-->
-                <!--                  !(workContextService.isToday$ | async) &&-->
-                <!--                  workContextService.activeWorkContextType === 'PROJECT'-->
-                <!--                ) {-->
-                <!--                  <button-->
-                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
-                <!--                    color="primary"-->
-                <!--                    mat-flat-button-->
-                <!--                    routerLink="/active/daily-summary"-->
-                <!--                    tabindex="1"-->
-                <!--                  >-->
-                <!--                    <mat-icon>done_all</mat-icon>-->
-                <!--                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}-->
-                <!--                  </button>-->
-                <!--                }-->
-                <!--                @if (-->
-                <!--                  !(workContextService.isToday$ | async) &&-->
-                <!--                  workContextService.activeWorkContextType === 'TAG'-->
-                <!--                ) {-->
-                <!--                  <button-->
-                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
-                <!--                    color="primary"-->
-                <!--                    mat-flat-button-->
-                <!--                    routerLink="/active/daily-summary"-->
-                <!--                    tabindex="1"-->
-                <!--                  >-->
-                <!--                    <mat-icon>done_all</mat-icon>-->
-                <!--                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}-->
-                <!--                  </button>-->
-                <!--                }-->
               </div>
             </div>
           }
