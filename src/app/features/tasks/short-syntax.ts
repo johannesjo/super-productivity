@@ -16,7 +16,7 @@ type TagChanges = {
 };
 type DueChanges = {
   title?: string;
-  due?: number;
+  dueWithTime?: number;
 };
 
 const SHORT_SYNTAX_TIME_REG_EX =
@@ -331,7 +331,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
         inputDate += 'm';
       }
       return {
-        due,
+        dueWithTime: due,
         // Strip out the short syntax for scheduled date and given date
         title: task.title.replace(`@${inputDate}`, ''),
         ...(hasPlannedTime ? {} : { hasPlannedTime: false }),
@@ -345,7 +345,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
         const due = new Date();
         due.setHours(nr, 0, 0, 0);
         return {
-          due: due.getTime(),
+          dueWithTime: due.getTime(),
           title: task.title.replace(`@${nr}`, ''),
         };
       }

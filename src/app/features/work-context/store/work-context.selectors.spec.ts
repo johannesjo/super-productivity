@@ -63,7 +63,7 @@ describe('workContext selectors', () => {
         id: 'M2',
         subTaskIds: [],
         tagIds: [TODAY_TAG.id],
-        due: 1234,
+        dueWithTime: 1234,
         reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
       const ctx: Partial<WorkContext> = {
@@ -99,7 +99,7 @@ describe('workContext selectors', () => {
         id: 'M2',
         subTaskIds: [],
         tagIds: [TODAY_TAG.id],
-        due: 1234,
+        dueWithTime: 1234,
         reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -214,7 +214,7 @@ describe('workContext selectors', () => {
       } as Partial<TaskCopy> as TaskCopy;
       const SUB_S = {
         id: 'SUB_S',
-        due: 1234,
+        dueWithTime: 1234,
         reminderId: 'HA',
         parentId: P.id,
         subTaskIds: [],

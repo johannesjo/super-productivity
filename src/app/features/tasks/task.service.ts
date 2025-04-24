@@ -774,7 +774,7 @@ export class TaskService {
     this._store.dispatch(
       scheduleTask({
         task,
-        due,
+        dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
         isMoveToBacklog,
       }),
@@ -795,7 +795,7 @@ export class TaskService {
     this._store.dispatch(
       reScheduleTask({
         task,
-        due,
+        dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
         isMoveToBacklog,
       }),

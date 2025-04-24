@@ -561,9 +561,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     if (isRemoveFromToday) {
       this.removeFromMyDay();
-    } else if (this.task.due) {
+    } else if (this.task.dueWithTime) {
       const task = this.task;
-      const newDate = combineDateAndTime(new Date(this.task.due), newDayDate);
+      const newDate = combineDateAndTime(new Date(this.task.dueWithTime), newDayDate);
 
       const isTodayI = isToday(newDate);
       this._taskService.scheduleTask(

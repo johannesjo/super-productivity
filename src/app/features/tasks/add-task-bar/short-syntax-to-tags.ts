@@ -74,10 +74,10 @@ export const shortSyntaxToTags = ({
       icon: 'timer',
     });
   }
-  if (r.taskChanges.due) {
+  if (r.taskChanges.dueWithTime) {
     let displayedDayStr: string;
-    const { due } = r.taskChanges;
-    const plannedDate = new Date(due);
+    const { dueWithTime } = r.taskChanges;
+    const plannedDate = new Date(dueWithTime);
     const hour = plannedDate.getHours();
     const minute = plannedDate.getMinutes();
     const hh = hour < 10 ? `0${hour}` : hour.toString();

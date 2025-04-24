@@ -184,7 +184,7 @@ export const scheduleTask = createAction(
 
   props<{
     task: Task;
-    due: number;
+    dueWithTime: number;
     remindAt?: number;
     isMoveToBacklog: boolean;
     isSkipAutoRemoveFromToday?: boolean;
@@ -196,7 +196,7 @@ export const reScheduleTask = createAction(
 
   props<{
     task: Task;
-    due: number;
+    dueWithTime: number;
     isMoveToBacklog: boolean;
     remindAt?: number;
   }>(),

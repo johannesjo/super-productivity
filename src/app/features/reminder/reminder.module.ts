@@ -98,7 +98,7 @@ export class ReminderModule {
             this._reminderService.removeReminder(oldest.id);
             this._taskService.update(oldest.relatedId, {
               reminderId: undefined,
-              due: undefined,
+              dueWithTime: undefined,
             });
           } else {
             this._matDialog

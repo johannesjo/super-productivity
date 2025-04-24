@@ -137,7 +137,7 @@ export class PlannerDayComponent {
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
     if (newDay) {
       const newDate = dateStrToUtcDate(newDay);
-      if (task.due && task.reminderId) {
+      if (task.dueWithTime && task.reminderId) {
         this._rescheduleTask(task, newDate);
         return;
       } else {
@@ -154,13 +154,13 @@ export class PlannerDayComponent {
   }
 
   private _rescheduleTask(task: TaskCopy, newDate: Date): void {
-    const taskPlannedAtDate = new Date(task.due as number);
+    const taskPlannedAtDate = new Date(task.dueWithTime as number);
     newDate.setHours(taskPlannedAtDate.getHours(), taskPlannedAtDate.getMinutes(), 0, 0);
     const reminder: ReminderCopy | undefined = task.reminderId
       ? this._reminderService.getById(task.reminderId) || undefined
       : undefined;
     const selectedReminderCfgId = millisecondsDiffToRemindOption(
-      task.due as number,
+      task.dueWithTime as number,
       reminder?.remindAt,
     );
     const isToday = new Date().toDateString() === newDate.toDateString();

@@ -26,7 +26,7 @@ const TASK: TaskCopy = {
   reminderId: undefined,
   created: Date.now(),
   repeatCfgId: undefined,
-  due: undefined,
+  dueWithTime: undefined,
 
   attachments: [],
 
@@ -54,7 +54,7 @@ const getPlannedDateTimestampFromShortSyntaxReturnValue = (
   now: Date = new Date(),
 ): number => {
   const r = shortSyntax(taskInput, CONFIG, undefined, undefined, now);
-  const parsedDateInMilliseconds = r?.taskChanges?.due as number;
+  const parsedDateInMilliseconds = r?.taskChanges?.dueWithTime as number;
   return parsedDateInMilliseconds;
 };
 

@@ -201,7 +201,7 @@ export const selectPlannedTasksById = createSelector(
       ? (props.ids.map((id) => state.entities[id]) as Task[])
           // there is a short moment when the reminder is already there but the task is not
           // and there is another when a tasks get deleted
-          .filter((task) => !!task?.due)
+          .filter((task) => !!task?.dueWithTime)
       : [],
 );
 
@@ -264,9 +264,9 @@ export const selectTasksPlannedForRange = createSelector(
     return tasks.filter(
       (task) =>
         !task.isDone &&
-        typeof task.due === 'number' &&
-        task.due >= start &&
-        task.due <= end,
+        typeof task.dueWithTime === 'number' &&
+        task.dueWithTime >= start &&
+        task.dueWithTime <= end,
     ) as TaskPlanned[];
   },
 );
@@ -277,9 +277,9 @@ export const selectTasksPlannedForRangeNotOnToday = createSelector(
     return tasks.filter(
       (task) =>
         !task.isDone &&
-        typeof task.due === 'number' &&
-        task.due >= start &&
-        task.due <= end &&
+        typeof task.dueWithTime === 'number' &&
+        task.dueWithTime >= start &&
+        task.dueWithTime <= end &&
         !task.tagIds.includes(TODAY_TAG.id),
     ) as TaskPlanned[];
   },

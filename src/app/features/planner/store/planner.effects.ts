@@ -58,7 +58,7 @@ export class PlannerEffects {
   removeOnSchedule$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(scheduleTask),
-      filter((action) => !!action.due),
+      filter((action) => !!action.dueWithTime),
       map(({ task }) => {
         return PlannerActions.removeTaskFromDays({
           taskId: task.id,

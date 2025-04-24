@@ -146,7 +146,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       issuePoints: issue.storyPoints || undefined,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
-      due: issue.startDate
+      dueWithTime: issue.startDate
         ? new Date(new Date(issue.startDate).setHours(7, 30, 0, 0)).getTime() +
           this.oneDayInMilliseconds
         : undefined, // Adjust due to 7 AM or set it to null if not present

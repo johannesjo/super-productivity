@@ -79,11 +79,12 @@ export interface TaskCopy extends IssueFieldsForTask {
   created: number;
   isDone: boolean;
   doneOn?: number;
-  // TODO rename to due
-  // TODO convert to number or string model;
-  // number => timestamp (including time)
-  // string => date (without time)
-  due?: number;
+
+  // datetime
+  dueWithTime?: number;
+  // day only
+  dueDay?: string;
+
   // TODO replace
   hasPlannedTime?: boolean;
   // remindCfg: TaskReminderOptionId;

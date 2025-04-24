@@ -101,12 +101,12 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       this._setRepeatCfgInitiallyForEditOnly(this._data.repeatCfg);
       this.isEdit = true;
     } else if (this._data.task) {
-      const startTime = this._data.task.due
-        ? clockStringFromDate(this._data.task.due)
+      const startTime = this._data.task.dueWithTime
+        ? clockStringFromDate(this._data.task.dueWithTime)
         : undefined;
       this.repeatCfg = {
         ...DEFAULT_TASK_REPEAT_CFG,
-        startDate: getWorklogStr(this._data.task.due || undefined),
+        startDate: getWorklogStr(this._data.task.dueWithTime || undefined),
         startTime,
         remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
         title: this._data.task.title,

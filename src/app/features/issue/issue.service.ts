@@ -466,8 +466,8 @@ export class IssueService {
       ...additional,
     };
 
-    const taskId = taskData.due
-      ? await this._taskService.addAndSchedule(title, taskData, taskData.due)
+    const taskId = taskData.dueWithTime
+      ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
       : this._taskService.add(title, isAddToBacklog, taskData);
 
     // TODO more elegant solution for skipped calendar events

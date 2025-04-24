@@ -54,7 +54,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
       notes: calEv.description || '',
       issueWasUpdated: false,
       issueLastUpdated: new Date().getTime(),
-      due: calEv.start,
+      dueWithTime: calEv.start,
     };
   }
 
