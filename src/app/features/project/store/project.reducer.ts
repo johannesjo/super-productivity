@@ -158,7 +158,7 @@ export const projectReducer = createReducer<ProjectState>(
       {
         id,
         changes: {
-          isHiddenFromMenu: !state.entities[id]?.isHiddenFromMenu,
+          isHiddenFromMenu: !(state.entities[id] as Project).isHiddenFromMenu,
         },
       },
       state,
