@@ -24,7 +24,6 @@ import {
   updateProject,
   updateProjectOrder,
   upsertProject,
-  toggleHideFromMenu,
 } from './store/project.actions';
 import { DEFAULT_PROJECT } from './project.const';
 import {
@@ -213,16 +212,5 @@ export class ProjectService {
 
   updateOrder(ids: string[]): void {
     this._store$.dispatch(updateProjectOrder({ ids }));
-  }
-
-  async projectHideFromMenu(project: Project): Promise<void> {
-    const newVisibilityState = !project.isHiddenFromMenu;
-
-    this._store$.dispatch(
-      toggleHideFromMenu({
-        projectId: project.id,
-        isHiddenFromMenu: newVisibilityState,
-      }),
-    );
   }
 }

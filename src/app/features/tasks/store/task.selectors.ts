@@ -337,7 +337,7 @@ export const selectAllTaskIssueIdsForIssueProvider = (issueProvider: IssueProvid
   });
 };
 
-export const selectAllAvailableTasks = createSelector(
+export const selectAllTasksWithoutHiddenProjects = createSelector(
   selectAllTasks,
   selectAllProjects,
   (tasks: Task[], projects: Project[]): Task[] => {
@@ -355,9 +355,9 @@ export const selectAllAvailableTasks = createSelector(
 
       if (project.isHiddenFromMenu) return false;
 
-      if (project.backlogTaskIds && project.backlogTaskIds.includes(task.id)) {
-        return false;
-      }
+      // if (project.backlogTaskIds && project.backlogTaskIds.includes(task.id)) {
+      //   return false;
+      // }
 
       return true;
     });

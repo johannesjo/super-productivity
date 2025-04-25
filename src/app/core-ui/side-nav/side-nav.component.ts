@@ -55,6 +55,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
+import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 
 @Component({
   selector: 'side-nav',
@@ -276,7 +277,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleProjectVisibility(project: Project): void {
-    this.projectService.projectHideFromMenu(project);
+    this._store.dispatch(toggleHideFromMenu({ id: project.id }));
   }
 
   async dropOnProjectList(

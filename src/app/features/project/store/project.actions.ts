@@ -70,10 +70,7 @@ export const unarchiveProject = createAction(
 
 export const toggleHideFromMenu = createAction(
   '[Project] Toggle hide from menu',
-  props<{
-    projectId: string;
-    isHiddenFromMenu: boolean;
-  }>(),
+  props<{ id: string }>(),
 );
 
 // MOVE TASK ACTIONS

@@ -15,7 +15,7 @@ import {
 } from '../boards.model';
 import { select, Store } from '@ngrx/store';
 import {
-  selectAllAvailableTasks,
+  selectAllTasksWithoutHiddenProjects,
   selectTaskById,
   selectTaskByIdWithSubTaskData,
 } from '../../tasks/store/task.selectors';
@@ -75,7 +75,7 @@ export class BoardPanelComponent {
   plannerService = inject(PlannerService);
   _matDialog = inject(MatDialog);
 
-  allTasks$ = this.store.select(selectAllAvailableTasks);
+  allTasks$ = this.store.select(selectAllTasksWithoutHiddenProjects);
   allTasks = toSignal(this.allTasks$, {
     initialValue: [],
   });
