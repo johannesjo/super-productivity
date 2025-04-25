@@ -200,6 +200,7 @@ export const getGithubErrorUrl = (
     user: 'johannesjo',
     repo: 'super-productivity',
     title: title,
+    template: 'in_app_bug_report.md',
     body: getGithubIssueErrorMarkdown(stackTrace, isHideActionsBeforeError),
   });
 };
