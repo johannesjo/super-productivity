@@ -14,6 +14,7 @@ import { error, log } from 'electron-log/main';
 import { AppDataCompleteLegacy } from '../src/app/imex/sync/sync.model';
 
 export const BACKUP_DIR = path.join(app.getPath('userData'), `backups`);
+export const BACKUP_DIR_WINSTORE = BACKUP_DIR.replace('Roaming', `Local\\Packages\\53707johannesjo.SuperProductivity_ch45amy23cdv6\\LocalCache\\Roaming`);
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function initBackupAdapter(): void {
