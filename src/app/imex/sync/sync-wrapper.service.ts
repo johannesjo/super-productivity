@@ -140,6 +140,8 @@ export class SyncWrapperService {
         this._matDialog
           .open(DialogIncompleteSyncComponent, {
             data: { modelId },
+            disableClose: true,
+            autoFocus: false,
           })
           .afterClosed()
           .subscribe((res) => {
@@ -250,7 +252,10 @@ export class SyncWrapperService {
 
   private _handleDecryptionError(): void {
     this._matDialog
-      .open(DialogHandleDecryptErrorComponent)
+      .open(DialogHandleDecryptErrorComponent, {
+        disableClose: true,
+        autoFocus: false,
+      })
       .afterClosed()
       .subscribe(({ isReSync, isForceUpload }) => {
         if (isReSync) {
@@ -290,6 +295,7 @@ export class SyncWrapperService {
     }
     this.lastConflictDialog = this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
+      autoFocus: false,
       disableClose: true,
       data: {
         remote,
