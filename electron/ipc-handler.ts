@@ -1,6 +1,6 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell } from 'electron';
+import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell, process } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -20,7 +20,13 @@ export const initIpcInterfaces = (): void => {
   ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
     return app.getPath(name as any);
   });
-  ipcMain.handle(IPC.GET_BACKUP_PATH, () => BACKUP_DIR);
+  ipcMain.handle(IPC.GET_BACKUP_PATH, () => {
+    if (process.windowsStore) {
+      return BACKUP_DIR_WINSTORE;
+    } else {
+      return BACKUP_DIR;
+    }
+  });
 
   // BACKEND EVENTS
   // --------------
