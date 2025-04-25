@@ -212,20 +212,9 @@ const getGithubIssueErrorMarkdown = (
   const code = '```';
   let txt = `### Steps to Reproduce
 <!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
-<!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 1.
 2.
 3.
-4.
-
-
-### Error Log (Desktop only)
-<!-- For the desktop versions, there is also an error log file in case there is no console output.
-Usually, you can find it here:
-on Linux: ~/.config/superProductivity/logs/main.log
-on macOS: ~/Library/Logs/superProductivity/main.log
-on Windows: %USERPROFILE%/AppData/Roaming/superProductivity/logs/main.log
-. -->
 
 ### Console Output
 <!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
