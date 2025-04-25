@@ -460,7 +460,8 @@ export const projectReducer = createReducer<ProjectState>(
   on(moveProjectTaskToRegularListAuto, (state, { taskId, projectId, isMoveToTop }) => {
     const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
-    return todaysTaskIdsBefore.includes(taskId)
+    // we check if task was in backlog before to avoid moving up sub tasks
+    return todaysTaskIdsBefore.includes(taskId) || !backlogIdsBefore.includes(taskId)
       ? state
       : projectAdapter.updateOne(
           {
