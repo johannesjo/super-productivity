@@ -7,6 +7,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { IssueProvider } from '../../issue/issue.model';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // TODO fix null stuff here
 
@@ -103,6 +104,18 @@ export const selectStartableTasks = createSelector(
       );
   },
 );
+
+export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
+  const today = new Date(getWorklogStr());
+  return s.ids
+    .map((id) => s.entities[id] as Task)
+    .filter(
+      (task) =>
+        task.dueDay &&
+        new Date(task.dueDay) < today &&
+        !task.tagIds.includes(TODAY_TAG.id),
+    );
+});
 
 // export const selectJiraTasks = createSelector(
 //   selectTaskFeatureState,
