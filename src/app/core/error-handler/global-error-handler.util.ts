@@ -53,11 +53,14 @@ export const logAdvancedStacktrace = (
         stacktraceEl.innerText = stack;
       }
 
-      const githubIssueLink = document.getElementById('github-issue-url');
+      const githubIssueLinks = document.getElementsByClassName('github-issue-urlX');
+      console.log(githubIssueLinks);
 
-      if (githubIssueLink) {
+      if (githubIssueLinks) {
         const errEscaped = _cleanHtml(origErr as string);
-        githubIssueLink.setAttribute('href', getGithubErrorUrl(errEscaped, stack));
+        Array.from(githubIssueLinks).forEach((el) =>
+          el.setAttribute('href', getGithubErrorUrl(errEscaped, stack)),
+        );
       }
 
       // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
@@ -90,7 +93,7 @@ export const createErrorAlert = (
   errorAlert.innerHTML = `
     <div id="error-alert-inner-wrapper">
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
-    <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
+    <p><a href="${githubUrl}" class="github-issue-urlX" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
     <pre style="line-height: 1.3;">${errEscaped}</pre>
 
@@ -152,6 +155,7 @@ export const createErrorAlert = (
   btnReport.innerText = 'Report';
   tagReport.append(btnReport);
   tagReport.setAttribute('href', githubUrl);
+  tagReport.setAttribute('class', 'github-issue-urlX');
   tagReport.setAttribute('target', '_blank');
   innerWrapper.append(tagReport);
 
@@ -199,7 +203,7 @@ export const getGithubErrorUrl = (
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    title: title,
+    title: '💥 ' + title,
     template: 'in_app_bug_report.md',
     body: getGithubIssueErrorMarkdown(stackTrace, isHideActionsBeforeError),
   });
@@ -216,8 +220,39 @@ const getGithubIssueErrorMarkdown = (
 2.
 3.
 
-### Console Output
+### Additional Console Output
 <!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Url
+${window.location.href}
 
 ### Meta Info
 ${getSimpleMeta()}
