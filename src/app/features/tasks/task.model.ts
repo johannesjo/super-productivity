@@ -123,13 +123,15 @@ export interface TaskWithReminder extends Task {
   dueWithTime: number;
 }
 
-export interface TaskPlanned extends Task {
+export interface TaskWithDueTime extends Task {
   dueWithTime: number;
 }
 
-export interface TaskWithPlannedDay extends Task {
+export interface TaskWithDueDay extends Task {
   dueDay: string;
 }
+
+export type TaskPlannedWithDayOrTime = TaskWithDueTime | TaskWithDueDay;
 
 export interface TaskWithoutReminder extends Task {
   reminderId: undefined;

@@ -6,7 +6,7 @@ import {
   selectTaskEntities,
   selectTaskFeatureState,
 } from '../../tasks/store/task.selectors';
-import { Task, TaskPlanned, TaskWithSubTasks } from '../../tasks/task.model';
+import { Task, TaskWithDueTime, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
   selectProjectById,
@@ -187,10 +187,10 @@ export const selectTimelineTasks = createSelector(
     todayIds,
     s,
   ): {
-    planned: TaskPlanned[];
+    planned: TaskWithDueTime[];
     unPlanned: TaskWithSubTasks[];
   } => {
-    const allPlannedTasks: TaskPlanned[] = [];
+    const allPlannedTasks: TaskWithDueTime[] = [];
     s.ids
       .map((id) => s.entities[id] as Task)
       .forEach((t) => {
@@ -208,7 +208,7 @@ export const selectTimelineTasks = createSelector(
           //   });
           // } else
           if (t.dueWithTime && t.reminderId) {
-            allPlannedTasks.push(t as TaskPlanned);
+            allPlannedTasks.push(t as TaskWithDueTime);
           }
         }
       });
@@ -232,19 +232,19 @@ export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
     tagState,
     taskState,
   ): {
-    planned: TaskPlanned[];
+    planned: TaskWithDueTime[];
     normal: Task[];
     done: Task[];
   } => {
     const taskIds = tagState.entities[TODAY_TAG.id]?.taskIds || [];
     const normalTasks: Task[] = [];
-    const allPlannedTasks: TaskPlanned[] = [];
+    const allPlannedTasks: TaskWithDueTime[] = [];
     const doneTasks: Task[] = [];
     taskIds
       .map((id) => taskState.entities[id] as Task)
       .forEach((t) => {
         if (t.dueWithTime && t.reminderId) {
-          allPlannedTasks.push(t as TaskPlanned);
+          allPlannedTasks.push(t as TaskWithDueTime);
         } else if (t.isDone) {
           doneTasks.push(t);
         } else {

@@ -1,8 +1,4 @@
-@let nrOfPlannerItemsForTomorrow =
-  addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$ | async;
-<!---->
 @let plannedForToday = addTasksForTomorrowService.allPlannedForTodayNotOnToday$ | async;
-<!---->
 
 @if (
   workContextService.isToday &&
@@ -23,13 +19,15 @@
         {{ T.WW.ADD_SCHEDULED_FOR_TODAY | translate: { nr: plannedForToday.length } }}
       </button>
     }
-    <!---->
-    @if (plannedForToday.length === 0 && nrOfPlannerItemsForTomorrow) {
-      <!---->
+
+    @if (plannedForToday.length === 0) {
+      @let nrOfPlannerItemsForTomorrow =
+        addTasksForTomorrowService.nrOfPlannerItemsForTomorrow$ | async;
+
       @if (nrOfPlannerItemsForTomorrow) {
         <button
           class="add-scheduled"
-          (click)="addTasksForTomorrowService.addAllPlannedToDayAndCreateRepeatable()"
+          (click)="addTasksForTomorrowService.addAllPlannedTomorrowAndCreateRepeatable()"
           color=""
           mat-stroked-button
           tabindex="1"

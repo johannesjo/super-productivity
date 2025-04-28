@@ -1,5 +1,5 @@
 import { SVEType } from './schedule.const';
-import { TaskCopy, TaskPlanned } from '../tasks/task.model';
+import { TaskCopy, TaskWithDueTime } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { CalendarIntegrationEvent } from '../calendar-integration/calendar-integration.model';
 
@@ -150,7 +150,7 @@ export interface BlockedBlockEntryScheduledTask {
   start: number;
   end: number;
   type: BlockedBlockType.ScheduledTask | BlockedBlockType.ScheduledTaskSplit;
-  data: TaskPlanned;
+  data: TaskWithDueTime;
 }
 
 export interface BlockedBlockEntryScheduledRepeatProjection {

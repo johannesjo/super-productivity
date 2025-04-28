@@ -1,100 +1,80 @@
-import { Injectable, inject } from '@angular/core';
-import { TaskCopy, TaskPlanned } from '../tasks/task.model';
+import { inject, Injectable } from '@angular/core';
+import {
+  TaskCopy,
+  TaskPlannedWithDayOrTime,
+  TaskWithDueDay,
+  TaskWithDueTime,
+} from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { sortRepeatableTaskCfgs } from '../task-repeat-cfg/sort-repeatable-task-cfg';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { select, Store } from '@ngrx/store';
-import { selectTasksPlannedForRangeNotOnToday } from '../tasks/store/task.selectors';
+import { selectTasksWithDueTimeForRangeNotOnToday } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import { PlannerService } from '../planner/planner.service';
-import { first, map, withLatestFrom } from 'rxjs/operators';
-import { ScheduleItemTask, ScheduleItemType } from '../planner/planner.model';
-import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
+import { first, map, switchMap } from 'rxjs/operators';
 import { updateTaskTags } from '../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag/tag.const';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AddTasksForTomorrowService {
-  private _plannerService = inject(PlannerService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _store = inject(Store);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
-  // plannedForTomorrow: Observable<TaskPlanned[]> =
-  //   this._taskService.getPlannedTasksForTomorrow$();
-
-  // NOTE: this should work fine as long as the user restarts the app every day
-  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
-  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
-    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
+  private _tomorrowDate$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
+    map((todayStr) => {
+      const d = new Date(todayStr);
+      d.setDate(d.getDate() + 1);
+      return d;
+    }),
   );
 
-  // eslint-disable-next-line no-mixed-operators
-  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
-  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
-    this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(this._tomorrow);
+  // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
+  private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
+    switchMap((d) =>
+      this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
+    ),
+  );
+  private _dueWithTimeForToday$: Observable<TaskWithDueTime[]> = this._store.pipe(
+    select(selectTasksWithDueTimeForRangeNotOnToday, getDateRangeForDay(Date.now())),
+  );
+  private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> = new Subject();
 
-  nrOfPlannerItemsForTomorrow$: Observable<number> =
-    this._plannerService.plannerDayForAllDueTomorrow$.pipe(
-      withLatestFrom(this._store.select(selectTodayTaskIds)),
-      map(([day, todaysTaskIds]) =>
-        day
-          ? day.scheduledIItems.filter(
-              (scheduledItem) =>
-                scheduledItem.type === ScheduleItemType.RepeatProjection ||
-                (scheduledItem.type === ScheduleItemType.Task &&
-                  !todaysTaskIds.includes(scheduledItem.task.id) &&
-                  !(
-                    scheduledItem.task.parentId &&
-                    todaysTaskIds.includes(scheduledItem.task.parentId)
-                  )),
-            ).length +
-            day.tasks.filter(
-              (task) =>
-                !todaysTaskIds.includes(task.id) &&
-                !(task.parentId && todaysTaskIds.includes(task.parentId)),
-            ).length +
-            day.noStartTimeRepeatProjections.length
-          : 0,
-      ),
-    );
+  private _dueForDayForToday$: Observable<TaskWithDueDay[]> = new Subject();
+  private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = new Subject();
 
-  async addAllPlannedToDayAndCreateRepeatable(): Promise<void> {
-    const dayData = await this._plannerService.plannerDayForAllDueTomorrow$
-      .pipe(first())
-      .toPromise();
-    if (!dayData) {
-      throw new Error('No day data found');
-    }
+  allPlannedForTodayNotOnToday$: Observable<TaskPlannedWithDayOrTime[]> = combineLatest([
+    this._dueWithTimeForToday$,
+    this._dueForDayForToday$,
+  ]).pipe(map(([dueWithTime, dueForDay]) => [...dueWithTime, ...dueForDay]));
 
-    const tasksToSchedule = dayData.scheduledIItems
-      .filter((item) => item.type === ScheduleItemType.Task)
-      .map((item) => (item as ScheduleItemTask).task) as TaskPlanned[];
+  nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
+    this._repeatableForTomorrow$,
+    this._dueWithTimeForTomorrow$,
+    this._dueForDayForTomorrow$,
+  ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
-    if (tasksToSchedule.length) {
-      this.movePlannedTasksToToday(tasksToSchedule);
-    }
-    if (dayData.tasks.length) {
-      this.movePlannedTasksToToday(dayData.tasks);
-    }
-    const repeatableScheduledForTomorrow = await this.repeatableScheduledForTomorrow$
-      .pipe(first())
-      .toPromise();
+  async addAllPlannedTomorrowAndCreateRepeatable(): Promise<void> {
+    // eslint-disable-next-line no-mixed-operators
+    const dueWithTime = (
+      await this._dueWithTimeForTomorrow$.pipe(first()).toPromise()
+    ).sort((a, b) => a.dueWithTime - b.dueWithTime);
+    const dueWithDay = await this._dueForDayForTomorrow$.pipe(first()).toPromise();
+    const repeatCfgs = await this._repeatableForTomorrow$.pipe(first()).toPromise();
 
-    if (repeatableScheduledForTomorrow.length) {
-      const promises = repeatableScheduledForTomorrow
-        .sort(sortRepeatableTaskCfgs)
-        .map((repeatCfg) => {
-          return this._taskRepeatCfgService.createRepeatableTask(
-            repeatCfg,
-            this._tomorrow,
-          );
-        });
+    this.movePlannedTasksToToday([...dueWithDay, ...dueWithTime]);
 
-      await Promise.all(promises);
-    }
+    // eslint-disable-next-line no-mixed-operators
+    const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+    const promises = repeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
+      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, tomorrow);
+    });
+
+    await Promise.all(promises);
   }
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {

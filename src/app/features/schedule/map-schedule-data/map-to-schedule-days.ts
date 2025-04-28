@@ -1,4 +1,4 @@
-import { Task, TaskPlanned, TaskWithoutReminder } from '../../tasks/task.model';
+import { Task, TaskWithDueTime, TaskWithoutReminder } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 import { PlannerDayMap } from '../../planner/planner.model';
@@ -15,7 +15,7 @@ export const mapToScheduleDays = (
   now: number,
   dayDates: string[],
   tasks: Task[],
-  scheduledTasks: TaskPlanned[],
+  scheduledTasks: TaskWithDueTime[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   unScheduledTaskRepeatCfgs: TaskRepeatCfg[],
   // TODO replace with no schedule type

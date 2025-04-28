@@ -12,20 +12,14 @@ import { selectPlannedTasksById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
-import {
-  selectAllDuePlannedDay,
-  selectAllDuePlannedOnDay,
-  selectPlannerDays,
-} from './store/planner.selectors';
+import { selectPlannerDays } from './store/planner.selectors';
 import { ReminderService } from '../reminder/reminder.service';
-import { TaskPlanned } from '../tasks/task.model';
+import { TaskWithDueTime } from '../tasks/task.model';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DateService } from '../../core/date/date.service';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 @Injectable({
@@ -58,52 +52,18 @@ export class PlannerService {
     }),
   );
 
-  allScheduledTasks$: Observable<TaskPlanned[]> = this._reminderService.reminders$.pipe(
-    switchMap((reminders) => {
-      const tids = reminders
-        .filter((reminder) => reminder.type === 'TASK')
-        .map((reminder) => reminder.relatedId);
-      return this._store.select(selectPlannedTasksById, { ids: tids }) as Observable<
-        TaskPlanned[]
-      >;
-    }),
-    distinctUntilChanged(fastArrayCompare),
-  );
-
-  plannerDayForAllDueToday$: Observable<PlannerDay> = combineLatest([
-    this._store.select(selectAllTaskRepeatCfgs),
-    this._calendarIntegrationService.icalEvents$,
-    this.allScheduledTasks$,
-    this._globalTrackingIntervalService.todayDateStr$,
-  ]).pipe(
-    switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr]) =>
-      this._store.select(
-        selectAllDuePlannedDay(taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr),
-      ),
-    ),
-  );
-
-  plannerDayForAllDueTomorrow$: Observable<PlannerDay> = combineLatest([
-    this._store.select(selectAllTaskRepeatCfgs),
-    this._calendarIntegrationService.icalEvents$,
-    this.allScheduledTasks$,
-    this._globalTrackingIntervalService.todayDateStr$,
-  ]).pipe(
-    switchMap(([taskRepeatCfgs, icalEvents, allTasksPlanned, todayStr]) => {
-      const tomorrow = dateStrToUtcDate(todayStr);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = getWorklogStr(tomorrow);
-      return this._store.select(
-        selectAllDuePlannedOnDay(
-          taskRepeatCfgs,
-          icalEvents,
-          allTasksPlanned,
-          tomorrowStr,
-          todayStr,
-        ),
-      );
-    }),
-  );
+  allScheduledTasks$: Observable<TaskWithDueTime[]> =
+    this._reminderService.reminders$.pipe(
+      switchMap((reminders) => {
+        const tids = reminders
+          .filter((reminder) => reminder.type === 'TASK')
+          .map((reminder) => reminder.relatedId);
+        return this._store.select(selectPlannedTasksById, { ids: tids }) as Observable<
+          TaskWithDueTime[]
+        >;
+      }),
+      distinctUntilChanged(fastArrayCompare),
+    );
 
   // TODO this needs to be more performant
   days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(

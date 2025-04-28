@@ -10,7 +10,7 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
-import { TaskCopy, TaskPlanned, TaskWithPlannedDay } from '../../tasks/task.model';
+import { TaskCopy, TaskWithDueTime, TaskWithDueDay } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -28,11 +28,11 @@ export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState
 
 export const selectAllTasksWithDueDay = createSelector(
   selectTaskFeatureState,
-  (taskState): TaskWithPlannedDay[] => {
+  (taskState): TaskWithDueDay[] => {
     // return all tasks with dueDay
     const allPlannnedForDayTasks = Object.values(taskState.entities).filter(
-      (task) => !!task && !!(task as TaskPlanned).dueDay,
-    ) as TaskWithPlannedDay[];
+      (task) => !!task && !!(task as TaskWithDueTime).dueDay,
+    ) as TaskWithDueDay[];
     return allPlannnedForDayTasks.sort((a, b) =>
       a.dueDay > b.dueDay ? 1 : a.dueDay < b.dueDay ? -1 : 0,
     );
@@ -43,7 +43,7 @@ export const selectAllTasksWithDueDay = createSelector(
 export const selectAllDuePlannedDay = (
   taskRepeatCfgs: TaskRepeatCfg[],
   icalEvents: ScheduleCalendarMapEntry[],
-  allPlannedTasks: TaskPlanned[],
+  allPlannedTasks: TaskWithDueTime[],
   todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
@@ -69,7 +69,7 @@ export const selectAllDuePlannedDay = (
 export const selectAllDuePlannedOnDay = (
   taskRepeatCfgs: TaskRepeatCfg[],
   icalEvents: ScheduleCalendarMapEntry[],
-  allPlannedTasks: TaskPlanned[],
+  allPlannedTasks: TaskWithDueTime[],
   dayToGet: string,
   todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -99,7 +99,7 @@ export const selectPlannerDays = (
   taskRepeatCfgs: TaskRepeatCfg[],
   todayListTaskIds: string[],
   icalEvents: ScheduleCalendarMapEntry[],
-  allPlannedTasks: TaskPlanned[],
+  allPlannedTasks: TaskWithDueTime[],
   todayStr: string,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
@@ -165,7 +165,7 @@ const getPlannerDay = (
   taskState: any,
   plannerState: any,
   taskRepeatCfgs: TaskRepeatCfg[],
-  allPlannedTasks: TaskPlanned[],
+  allPlannedTasks: TaskWithDueTime[],
   icalEvents: ScheduleCalendarMapEntry[],
   unplannedTaskIdsToday: string[] | false,
   scheduleConfig?: ScheduleConfig,
@@ -284,7 +284,7 @@ const getAllRepeatableTasksForDay = (
 };
 
 const getScheduledTaskItems = (
-  allPlannedTasks: TaskPlanned[],
+  allPlannedTasks: TaskWithDueTime[],
   currentDayDate: Date,
 ): ScheduleItemTask[] =>
   allPlannedTasks

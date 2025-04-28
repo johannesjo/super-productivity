@@ -1,4 +1,4 @@
-import { TaskPlanned } from '../../tasks/task.model';
+import { TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import {
   BlockedBlockByDayMap,
@@ -16,7 +16,7 @@ import { getDiffInDays } from '../../../util/get-diff-in-days';
 const NR_OF_DAYS = 10;
 
 export const createBlockedBlocksByDayMap = (
-  scheduledTasks: TaskPlanned[],
+  scheduledTasks: TaskWithDueTime[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: ScheduleWorkStartEndCfg,

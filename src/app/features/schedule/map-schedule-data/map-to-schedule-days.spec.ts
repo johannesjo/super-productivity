@@ -1,5 +1,5 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
-import { TaskCopy, TaskPlanned } from '../../tasks/task.model';
+import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const NDS = '1970-01-01';
@@ -39,13 +39,13 @@ const fakeTaskEntry = (id = 'XXX', add?: Partial<TaskCopy>): TaskCopy => {
 const fakePlannedTaskEntry = (
   id = 'XXX',
   planedAt: Date,
-  add?: Partial<TaskPlanned>,
-): TaskPlanned => {
+  add?: Partial<TaskWithDueTime>,
+): TaskWithDueTime => {
   return {
     ...fakeTaskEntry(id, add),
     dueWithTime: planedAt.getTime(),
     reminderId: 'R_ID',
-  } as TaskPlanned;
+  } as TaskWithDueTime;
 };
 
 const fakeRepeatCfg = (

@@ -9,6 +9,7 @@ import {
   shareReplay,
   startWith,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 import { Tick } from './tick.model';
 import { DateService } from 'src/app/core/date/date.service';
