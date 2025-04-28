@@ -40,9 +40,6 @@ import {
   obstructionReducer,
 } from '../features/metric/obstruction/store/obstruction.reducer';
 import { ObstructionEffects } from '../features/metric/obstruction/store/obstruction.effects';
-import { plannerFeature } from '../features/planner/store/planner.reducer';
-import { PlannerEffects } from '../features/planner/store/planner.effects';
-import { PlannerInitialDialogEffects } from '../features/planner/store/planner-initial-dialog.effects';
 import {
   POMODORO_FEATURE_NAME,
   pomodoroReducer,
@@ -65,6 +62,7 @@ import {
   taskRepeatCfgReducer,
 } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { TaskRepeatCfgEffects } from '../features/task-repeat-cfg/store/task-repeat-cfg.effects';
+import { TaskCreateAllDueEffects } from '../features/tasks/store/task-create-all-due.effects';
 import { TASK_FEATURE_NAME, taskReducer } from '../features/tasks/store/task.reducer';
 import { TaskDbEffects } from '../features/tasks/store/task-db.effects';
 import { TaskInternalEffects } from '../features/tasks/store/task-internal.effects';
@@ -130,9 +128,6 @@ import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracki
     StoreModule.forFeature(OBSTRUCTION_FEATURE_NAME, obstructionReducer),
     EffectsModule.forFeature([ObstructionEffects]),
 
-    StoreModule.forFeature(plannerFeature),
-    EffectsModule.forFeature([PlannerEffects, PlannerInitialDialogEffects]),
-
     StoreModule.forFeature(POMODORO_FEATURE_NAME, pomodoroReducer),
     EffectsModule.forFeature([PomodoroEffects]),
 
@@ -156,6 +151,7 @@ import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracki
       TaskReminderEffects,
       TaskUiEffects,
       ShortSyntaxEffects,
+      TaskCreateAllDueEffects,
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
 

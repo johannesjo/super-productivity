@@ -45,6 +45,7 @@ export class GlobalTrackingIntervalService {
     startWith(this._dateService.todayStr()),
     concatMap(() => of(this._dateService.todayStr())),
     distinctUntilChanged(),
+    tap((v) => console.log('DAY_CHANGE ' + v)),
     // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
     shareReplay(1),
   );

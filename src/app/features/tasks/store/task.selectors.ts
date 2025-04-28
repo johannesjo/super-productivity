@@ -117,6 +117,21 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
     );
 });
 
+export const selectAllTasksDueAndOverdue = createSelector(
+  selectTaskFeatureState,
+  (s): Task[] => {
+    const today = new Date(getWorklogStr());
+    return s.ids
+      .map((id) => s.entities[id] as Task)
+      .filter(
+        (task) =>
+          task.dueDay &&
+          new Date(task.dueDay) <= today &&
+          !task.tagIds.includes(TODAY_TAG.id),
+      );
+  },
+);
+
 // export const selectJiraTasks = createSelector(
 //   selectTaskFeatureState,
 //   (s): Task[] => {
