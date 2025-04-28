@@ -92,6 +92,8 @@ import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { BoardsEffects } from '../features/boards/store/boards.effects';
 import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
 import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracking.effects';
+import { plannerFeature } from '../features/planner/store/planner.reducer';
+import { PlannerEffects } from '../features/planner/store/planner.effects';
 
 @NgModule({
   declarations: [],
@@ -163,6 +165,9 @@ import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracki
 
     StoreModule.forFeature(timeTrackingFeature),
     EffectsModule.forFeature([TimeTrackingEffects]),
+
+    StoreModule.forFeature(plannerFeature),
+    EffectsModule.forFeature([PlannerEffects]),
 
     // EFFECTS ONLY
     EffectsModule.forFeature([...(IS_ANDROID_WEB_VIEW ? [AndroidEffects] : [])]),
