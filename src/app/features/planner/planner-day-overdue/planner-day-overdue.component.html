@@ -3,9 +3,9 @@
   <div class="day-counts">
     <span>{{ totalEstimate() | roundDuration | msToString }}</span>
 
-    @if (overdueTasks().length > 5) {
+    @if ((overdueTasks() || []).length > 5) {
       <mat-icon inline="true">task_alt</mat-icon>
-      <span>{{ overdueTasks().length }}</span>
+      <span>{{ (overdueTasks() || []).length }}</span>
     }
   </div>
 </header>
