@@ -24,7 +24,7 @@ import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
-import { updateTaskTags } from '../../tasks/store/task.actions';
+import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
@@ -247,12 +247,22 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   remove(): void {
+    // TODO simplify
     if (this.data.task.reminderId) {
-      this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
+      this._store.dispatch(
+        unScheduleTask({
+          id: this.data.task.id,
+          reminderId: this.data.task.reminderId,
+        }),
+      );
     } else if (this.plannedDayForTask === getWorklogStr()) {
       // to cover edge cases
       this._store.dispatch(
-        PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),
+        unScheduleTask({
+          id: this.data.task.id,
+          reminderId: this.data.task.reminderId,
+          isSkipToast: true,
+        }),
       );
       this._store.dispatch(
         updateTaskTags({
@@ -267,8 +277,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       });
     } else {
       this._store.dispatch(
-        PlannerActions.removeTaskFromDays({ taskId: this.data.task.id }),
+        unScheduleTask({
+          id: this.data.task.id,
+          reminderId: this.data.task.reminderId,
+          isSkipToast: true,
+        }),
       );
+
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
@@ -345,7 +360,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         });
       } else if (this.data.task.dueWithTime && !this.selectedTime) {
         // time was removed for today task case
-        this._taskService.unScheduleTask(this.data.task.id, this.data.task.reminderId);
+        this._store.dispatch(
+          unScheduleTask({
+            id: this.data.task.id,
+            reminderId: this.data.task.reminderId,
+            isSkipToast: true,
+          }),
+        );
+
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.PLANNER.S.TASK_PLANNED_FOR,

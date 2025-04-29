@@ -40,7 +40,6 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { MatDialog } from '@angular/material/dialog';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { first, take } from 'rxjs/operators';
-import { PlannerActions } from '../../planner/store/planner.actions';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 
@@ -269,17 +268,14 @@ export class BoardPanelComponent {
         .select(selectTaskById, { id: taskId })
         .pipe(first())
         .toPromise();
-      if (task.dueDay) {
-        this.store.dispatch(PlannerActions.removeTaskFromDays({ taskId }));
-      } else if (task.reminderId) {
-        this.store.dispatch(
-          unScheduleTask({
-            id: taskId,
-            reminderId: task.reminderId,
-            isSkipToast: false,
-          }),
-        );
-      }
+
+      this.store.dispatch(
+        unScheduleTask({
+          id: taskId,
+          reminderId: task.reminderId,
+          isSkipToast: false,
+        }),
+      );
     }
   }
 }

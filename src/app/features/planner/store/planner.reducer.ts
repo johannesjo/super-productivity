@@ -4,7 +4,7 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
-import { updateTaskTags } from '../../tasks/store/task.actions';
+import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
@@ -52,21 +52,10 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  // STANDARD_ACTIONS
-  // ------------
-
-  on(PlannerActions.upsertPlannerDay, (state, action) => ({
-    ...state,
-    days: {
-      ...state.days,
-      [action.day]: action.taskIds,
-    },
-  })),
-
-  on(PlannerActions.removeTaskFromDays, (state, action) => {
+  on(unScheduleTask, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
-      const filtered = daysCopy[day].filter((id) => id !== action.taskId);
+      const filtered = daysCopy[day].filter((id) => id !== action.id);
       if (filtered.length !== daysCopy[day].length) {
         daysCopy[day] = filtered;
       }
@@ -78,6 +67,17 @@ export const plannerReducer = createReducer(
       },
     };
   }),
+
+  // STANDARD_ACTIONS
+  // ------------
+
+  on(PlannerActions.upsertPlannerDay, (state, action) => ({
+    ...state,
+    days: {
+      ...state.days,
+      [action.day]: action.taskIds,
+    },
+  })),
 
   on(
     PlannerActions.cleanupOldAndUndefinedPlannerTasks,

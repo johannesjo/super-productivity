@@ -27,6 +27,7 @@ import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
+import { unScheduleTask } from '../../tasks/store/task.actions';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 
 @Component({
@@ -127,7 +128,12 @@ export class PlannerDayComponent {
           // NOTE: we need to wait a bit to make sure the task is already moved into the proper position
           // as otherwise unschedule will mess up the order
           setTimeout(() => {
-            this._taskService.unScheduleTask(task.id, task.reminderId as string);
+            this._store.dispatch(
+              unScheduleTask({
+                id: task.id,
+                reminderId: task.reminderId,
+              }),
+            );
           });
         }
       }

@@ -70,6 +70,7 @@ import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
+import { unScheduleTask } from '../../store/task.actions';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -609,11 +610,12 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   unscheduleTask(): void {
-    if (this.task.reminderId) {
-      this._taskService.unScheduleTask(this.task.id, this.task.reminderId);
-    } else {
-      this._store.dispatch(PlannerActions.removeTaskFromDays({ taskId: this.task.id }));
-    }
+    this._store.dispatch(
+      unScheduleTask({
+        id: this.task.id,
+        reminderId: this.task.reminderId,
+      }),
+    );
   }
 
   isShowRemoveFromToday(): boolean {

@@ -39,7 +39,6 @@ import {
   setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
-  unScheduleTask,
   unsetCurrentTask,
   updateTask,
   updateTaskTags,
@@ -802,14 +801,6 @@ export class TaskService {
     );
   }
 
-  unScheduleTask(taskId: string, reminderId?: string, isSkipToast?: boolean): void {
-    if (!taskId) {
-      throw new Error('No task id');
-    }
-    this._store.dispatch(unScheduleTask({ id: taskId, reminderId, isSkipToast }));
-  }
-
-  // HELPER
   // ------
   getByIdOnce$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, { id }), take(1));

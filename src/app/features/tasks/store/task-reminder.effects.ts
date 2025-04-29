@@ -4,6 +4,7 @@ import {
   deleteTask,
   deleteTasks,
   moveToArchive_,
+  removeReminderFromTask,
   reScheduleTask,
   scheduleTask,
   unScheduleTask,
@@ -24,6 +25,7 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { isSameDay } from '../../../util/is-same-day';
 import { isToday } from '../../../util/is-today.util';
 import { flattenTasks } from './task.selectors';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -31,6 +33,7 @@ export class TaskReminderEffects {
   private _reminderService = inject(ReminderService);
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
+  private _store = inject(Store);
 
   addTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
@@ -148,7 +151,7 @@ export class TaskReminderEffects {
 
   removeTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(unScheduleTask),
+      ofType(unScheduleTask, removeReminderFromTask),
       filter(({ reminderId }) => !!reminderId),
       tap(({ isSkipToast }) => {
         if (!isSkipToast) {
@@ -225,7 +228,13 @@ export class TaskReminderEffects {
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         tap((task) => {
           if (task.reminderId) {
-            this._taskService.unScheduleTask(task.id, task.reminderId);
+            // TODO refactor to map with dispatch
+            this._store.dispatch(
+              unScheduleTask({
+                id: task.id,
+                reminderId: task.reminderId,
+              }),
+            );
           }
         }),
       ),
@@ -244,8 +253,15 @@ export class TaskReminderEffects {
             !task.tagIds.includes(TODAY_TAG.id) &&
             task.dueWithTime === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
           ) {
+            // TODO refactor to map with dispatch
             console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
-            this._taskService.unScheduleTask(task.id, task.reminderId, true);
+            this._store.dispatch(
+              unScheduleTask({
+                id: task.id,
+                reminderId: task.reminderId,
+                isSkipToast: true,
+              }),
+            );
           }
         }),
       ),

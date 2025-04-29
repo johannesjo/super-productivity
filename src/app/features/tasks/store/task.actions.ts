@@ -36,6 +36,8 @@ enum TaskActionTypes {
   'UnScheduleTask' = '[Task] UnSchedule',
   'ReScheduleTask' = '[Task] ReSchedule',
 
+  'RemoveReminder' = '[Task] Remove Reminder',
+
   // Sub Task Actions
   'AddSubTask' = '[Task] Add SubTask',
   'ConvertToMainTask' = '[Task] Convert SubTask to main task',
@@ -206,6 +208,12 @@ export const unScheduleTask = createAction(
   TaskActionTypes.UnScheduleTask,
 
   props<{ id: string; reminderId?: string; isSkipToast?: boolean }>(),
+);
+
+export const removeReminderFromTask = createAction(
+  TaskActionTypes.RemoveReminder,
+
+  props<{ id: string; reminderId: string; isSkipToast?: boolean }>(),
 );
 
 export const restoreTask = createAction(

@@ -6,7 +6,7 @@ import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
 import {
-  scheduleTask,
+  removeReminderFromTask,
   unScheduleTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
@@ -27,10 +27,10 @@ export class PlannerEffects {
           PlannerActions.cleanupOldAndUndefinedPlannerTasks,
           PlannerActions.moveInList,
           PlannerActions.transferTask,
-          PlannerActions.removeTaskFromDays,
           PlannerActions.planTaskForDay,
           PlannerActions.moveBeforeTask,
           updateTaskTags,
+          unScheduleTask,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
         tap(([, plannerState]) => this._saveToLs(plannerState)),
@@ -46,22 +46,10 @@ export class PlannerEffects {
       ofType(PlannerActions.planTaskForDay),
       filter(({ task, day }) => !!task.reminderId),
       map(({ task }) => {
-        return unScheduleTask({
+        return removeReminderFromTask({
           id: task.id,
           reminderId: task.reminderId as string,
           isSkipToast: true,
-        });
-      }),
-    );
-  });
-
-  removeOnSchedule$ = createEffect(() => {
-    return this._actions$.pipe(
-      ofType(scheduleTask),
-      filter((action) => !!action.dueWithTime),
-      map(({ task }) => {
-        return PlannerActions.removeTaskFromDays({
-          taskId: task.id,
         });
       }),
     );

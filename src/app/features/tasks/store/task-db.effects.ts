@@ -14,6 +14,7 @@ import {
   moveSubTaskUp,
   moveToArchive_,
   moveToOtherProject,
+  removeReminderFromTask,
   removeTagsForAllTasks,
   reScheduleTask,
   restoreTask,
@@ -95,6 +96,7 @@ export class TaskDbEffects {
           scheduleTask,
           reScheduleTask,
           unScheduleTask,
+          removeReminderFromTask,
 
           // ATTACHMENT ACTIONS
           addTaskAttachment,

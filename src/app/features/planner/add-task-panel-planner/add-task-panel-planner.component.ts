@@ -13,7 +13,6 @@ import { selectProjectFeatureState } from '../../project/store/project.selectors
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { selectPlannerState } from '../store/planner.selectors';
-import { TaskService } from '../../tasks/task.service';
 import { PlannerService } from '../planner.service';
 import { T } from 'src/app/t.const';
 import { DateService } from '../../../core/date/date.service';
@@ -23,6 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { PlannerTaskComponent } from '../planner-task/planner-task.component';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { unScheduleTask } from '../../tasks/store/task.actions';
 
 @Component({
   selector: 'add-task-panel-planner',
@@ -43,7 +43,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class AddTaskPanelPlannerComponent {
   private _store = inject(Store);
-  private _taskService = inject(TaskService);
   private _plannerPlanViewService = inject(PlannerService);
   private _dateService = inject(DateService);
 
@@ -116,7 +115,12 @@ export class AddTaskPanelPlannerComponent {
 
     // TODO scheduled task case
     if (t.reminderId && t.dueWithTime) {
-      this._taskService.unScheduleTask(t.id, t.reminderId);
+      this._store.dispatch(
+        unScheduleTask({
+          id: t.id,
+          reminderId: t.reminderId,
+        }),
+      );
     } else {
       this._store.dispatch(
         PlannerActions.transferTask({
