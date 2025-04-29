@@ -39,60 +39,6 @@ export const selectAllTasksWithDueDay = createSelector(
   },
 );
 
-// Updated selectAllDuePlannedDay
-export const selectAllDuePlannedDay = (
-  taskRepeatCfgs: TaskRepeatCfg[],
-  icalEvents: ScheduleCalendarMapEntry[],
-  allPlannedTasks: TaskWithDueTime[],
-  todayStr: string,
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-) => {
-  return createSelector(
-    selectTaskFeatureState,
-    selectPlannerState,
-    (taskState, plannerState): PlannerDay => {
-      return getPlannerDay(
-        todayStr,
-        todayStr,
-        taskState,
-        plannerState,
-        taskRepeatCfgs,
-        allPlannedTasks,
-        icalEvents,
-        false,
-      );
-      // and then map all to one single day
-    },
-  );
-};
-
-export const selectAllDuePlannedOnDay = (
-  taskRepeatCfgs: TaskRepeatCfg[],
-  icalEvents: ScheduleCalendarMapEntry[],
-  allPlannedTasks: TaskWithDueTime[],
-  dayToGet: string,
-  todayStr: string,
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-) => {
-  return createSelector(
-    selectTaskFeatureState,
-    selectPlannerState,
-    (taskState, plannerState): PlannerDay => {
-      return getPlannerDay(
-        dayToGet,
-        todayStr,
-        taskState,
-        plannerState,
-        taskRepeatCfgs,
-        allPlannedTasks,
-        icalEvents,
-        false,
-      );
-      // and then map all to one single day
-    },
-  );
-};
-
 // Updated selectPlannerDays
 export const selectPlannerDays = (
   dayDates: string[],

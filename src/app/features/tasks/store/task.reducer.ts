@@ -687,6 +687,7 @@ export const taskReducer = createReducer<TaskState>(
           changes: {
             tagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
             dueDay: undefined,
+            dueWithTime: undefined,
           },
         },
         state,
@@ -701,6 +702,7 @@ export const taskReducer = createReducer<TaskState>(
           changes: {
             tagIds: unique(fromTask.tagIds.filter((id) => id !== TODAY_TAG.id)),
             dueDay: getWorklogStr(targetTask.dueDay),
+            dueWithTime: undefined,
           },
         },
         state,
@@ -711,6 +713,7 @@ export const taskReducer = createReducer<TaskState>(
         id: fromTask.id,
         changes: {
           dueDay: getWorklogStr(targetTask.dueDay),
+          dueWithTime: undefined,
         },
       },
       state,
@@ -728,6 +731,7 @@ export const taskReducer = createReducer<TaskState>(
               ? unique([TODAY_TAG.id, ...task.tagIds])
               : task.tagIds.filter((id) => id !== TODAY_TAG.id),
           dueDay: todayStr,
+          dueWithTime: undefined,
         },
       },
       state,
@@ -765,8 +769,8 @@ export const taskReducer = createReducer<TaskState>(
       {
         id,
         changes: {
-          dueWithTime: undefined,
           dueDay: undefined,
+          dueWithTime: undefined,
         },
       },
       state,

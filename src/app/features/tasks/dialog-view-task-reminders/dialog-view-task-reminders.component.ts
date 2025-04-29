@@ -135,7 +135,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     if (task.projectId || task.parentId || task.tagIds.length > 0) {
       this._taskService.update(task.id, {
         reminderId: undefined,
-        // dueWithTime: undefined,
+        dueWithTime: undefined,
       });
       this._reminderService.removeReminder(task.reminderData.id);
       this._removeFromList(task.reminderId as string);
