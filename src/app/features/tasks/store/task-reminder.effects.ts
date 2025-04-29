@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   deleteTask,
@@ -19,8 +19,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { isSameDay } from '../../../util/is-same-day';
 import { isToday } from '../../../util/is-today.util';
@@ -241,30 +239,31 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  unscheduleScheduledForDayWhenAddedToToday$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(updateTaskTags),
-        tap(({ task, newTagIds }) => {
-          if (
-            task.reminderId &&
-            task.dueWithTime &&
-            newTagIds.includes(TODAY_TAG.id) &&
-            !task.tagIds.includes(TODAY_TAG.id) &&
-            task.dueWithTime === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
-          ) {
-            // TODO refactor to map with dispatch
-            console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
-            this._store.dispatch(
-              unScheduleTask({
-                id: task.id,
-                reminderId: task.reminderId,
-                isSkipToast: true,
-              }),
-            );
-          }
-        }),
-      ),
-    { dispatch: false },
-  );
+  // TODO check if this is still needed
+  // unscheduleScheduledForDayWhenAddedToToday$: any = createEffect(
+  //   () =>
+  //     this._actions$.pipe(
+  //       ofType(updateTaskTags),
+  //       tap(({ task, newTagIds }) => {
+  //         if (
+  //           task.reminderId &&
+  //           task.dueWithTime &&
+  //           newTagIds.includes(TODAY_TAG.id) &&
+  //           !task.tagIds.includes(TODAY_TAG.id) &&
+  //           task.dueWithTime === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
+  //         ) {
+  //           // TODO refactor to map with dispatch
+  //           console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
+  //           this._store.dispatch(
+  //             unScheduleTask({
+  //               id: task.id,
+  //               reminderId: task.reminderId,
+  //               isSkipToast: true,
+  //             }),
+  //           );
+  //         }
+  //       }),
+  //     ),
+  //   { dispatch: false },
+  // );
 }

@@ -59,6 +59,8 @@ import { MatSelect } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 
+const DEFAULT_TIME = '09:00';
+
 @Component({
   selector: 'dialog-schedule-task',
   imports: [
@@ -303,7 +305,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         if (isToday(this.selectedDate as Date)) {
           this.selectedTime = getClockStringFromHours(new Date().getHours() + 1);
         } else {
-          this.selectedTime = '09:00';
+          this.selectedTime = DEFAULT_TIME;
         }
       } else {
         // get current time +1h

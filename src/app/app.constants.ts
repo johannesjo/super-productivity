@@ -45,27 +45,6 @@ import '@angular/common/locales/global/nb';
 import '@angular/common/locales/global/hr';
 import '@angular/common/locales/global/uk';
 
-export const DAY_STARTS_AT_DEFAULT_H = 9;
-export const DAY_STARTS_AT: string = '9:00';
-
-export const ALL_THEMES: string[] = [
-  'blue',
-  'blue-grey',
-  'light-blue',
-  'indigo',
-  'pink',
-  'purple',
-  'deep-purple',
-  'cyan',
-  'teal',
-  'green',
-  'light-green',
-  'lime',
-  'yellow',
-  'amber',
-  'deep-orange',
-];
-
 export enum LanguageCode {
   ar = 'ar',
   de = 'de',

@@ -4,7 +4,6 @@ import { PlannerDay, ScheduleItem, ScheduleItemType } from '../planner.model';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
-import { DAY_STARTS_AT_DEFAULT_H } from '../../../app.constants';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -143,11 +142,9 @@ export class PlannerDayComponent {
   editTaskReminderOrReScheduleIfPossible(task: TaskCopy, newDay?: string): void {
     if (newDay) {
       const newDate = dateStrToUtcDate(newDay);
-      if (task.dueWithTime && task.reminderId) {
+      if (task.dueWithTime) {
         this._rescheduleTask(task, newDate);
         return;
-      } else {
-        newDate.setHours(DAY_STARTS_AT_DEFAULT_H, 0, 0, 0);
       }
     }
 
