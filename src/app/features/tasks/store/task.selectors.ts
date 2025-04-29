@@ -2,10 +2,10 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
 import {
   Task,
-  TaskWithDueTime,
   TaskState,
-  TaskWithSubTasks,
   TaskWithDueDay,
+  TaskWithDueTime,
+  TaskWithSubTasks,
 } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
@@ -292,28 +292,43 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
   },
 );
 
-export const selectTasksPlannedForDay = createSelector(
+export const selectTasksDueForDay = createSelector(
   selectAllTasks,
   (tasks: Task[], day: string): TaskWithDueDay[] => {
-    return tasks.filter((task) => typeof task.dueDay === day) as TaskWithDueDay[];
+    return tasks.filter((task) => task.dueDay === day) as TaskWithDueDay[];
   },
 );
 
-export const selectTasksWithDueTimeForRangeNotOnToday = createSelector(
+export const selectTasksDueAndOverdueForDay = createSelector(
+  selectAllTasks,
+  (tasks: Task[], day: string): TaskWithDueDay[] => {
+    const dayDate = new Date(day);
+    return tasks.filter(
+      (task) => typeof task.dueDay === 'string' && dayDate <= new Date(task.dueDay),
+    ) as TaskWithDueDay[];
+  },
+);
+
+export const selectTasksWithDueTimeForRange = createSelector(
   selectAllTasks,
   (tasks: Task[], { start, end }: { start: number; end: number }): TaskWithDueTime[] => {
     return tasks.filter(
       (task) =>
-        !task.isDone &&
-        !task.tagIds.includes(TODAY_TAG.id) &&
-        ((typeof task.dueWithTime === 'number' &&
-          task.dueWithTime >= start &&
-          task.dueWithTime <= end) ||
-          typeof task.dueDay === 'string'),
+        typeof task.dueWithTime === 'number' &&
+        task.dueWithTime >= start &&
+        task.dueWithTime <= end,
     ) as TaskWithDueTime[];
   },
 );
-// export const selectTasksPlannedForRange
+
+export const selectTasksWithDueTimeUntil = createSelector(
+  selectAllTasks,
+  (tasks: Task[], end: number): TaskWithDueTime[] => {
+    return tasks.filter(
+      (task) => typeof task.dueWithTime === 'number' && task.dueWithTime <= end,
+    ) as TaskWithDueTime[];
+  },
+);
 
 // REPEATABLE TASKS
 // ----------------

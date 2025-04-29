@@ -11,8 +11,10 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service
 import { combineLatest, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import {
-  selectTasksPlannedForDay,
-  selectTasksWithDueTimeForRangeNotOnToday,
+  selectTasksDueAndOverdueForDay,
+  selectTasksDueForDay,
+  selectTasksWithDueTimeForRange,
+  selectTasksWithDueTimeUntil,
 } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -42,13 +44,11 @@ export class AddTasksForTomorrowService {
     }),
   );
 
-  // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
   private _repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
     switchMap((dt) =>
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayIncludingOverdue$(dt),
     ),
   );
-  // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
@@ -57,17 +57,14 @@ export class AddTasksForTomorrowService {
   private _dueWithTimeForToday$: Observable<TaskWithDueTime[]> =
     this._todayDateTime$.pipe(
       switchMap((dt) =>
-        this._store.select(
-          selectTasksWithDueTimeForRangeNotOnToday,
-          getDateRangeForDay(dt),
-        ),
+        this._store.select(selectTasksWithDueTimeUntil, getDateRangeForDay(dt).end),
       ),
     );
   private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
     this._tomorrowDate$.pipe(
       switchMap((dt) =>
         this._store.select(
-          selectTasksWithDueTimeForRangeNotOnToday,
+          selectTasksWithDueTimeForRange,
           getDateRangeForDay(dt.getTime()),
         ),
       ),
@@ -75,10 +72,10 @@ export class AddTasksForTomorrowService {
 
   private _dueForDayForToday$: Observable<TaskWithDueDay[]> =
     this._globalTrackingIntervalService.todayDateStr$.pipe(
-      switchMap((ds) => this._store.select(selectTasksPlannedForDay, ds)),
+      switchMap((ds) => this._store.select(selectTasksDueAndOverdueForDay, ds)),
     );
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
-    switchMap((d) => this._store.select(selectTasksPlannedForDay, getWorklogStr(d))),
+    switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
   );
 
   allPlannedForTodayNotOnToday$: Observable<TaskPlannedWithDayOrTime[]> = combineLatest([
@@ -137,6 +134,13 @@ export class AddTasksForTomorrowService {
     this.movePlannedTasksToToday(
       dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),
     );
+
+    console.log({
+      dt,
+      dueWithTime,
+      dueWithDay,
+      dueRepeatCfgs,
+    });
 
     const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
       return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
