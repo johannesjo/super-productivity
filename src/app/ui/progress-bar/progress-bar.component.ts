@@ -12,6 +12,7 @@ import {
   template: '',
   styleUrls: ['./progress-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class ProgressBarComponent {
   private _elRef = inject(ElementRef);

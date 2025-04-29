@@ -16,6 +16,8 @@ export interface PlannerDay {
   tasks: TaskCopy[];
   noStartTimeRepeatProjections: NoStartTimeRepeatProjection[];
   scheduledIItems: ScheduleItem[];
+  availableHours?: number;
+  progressPercentage?: number;
 }
 
 export interface PlannerDayMap {

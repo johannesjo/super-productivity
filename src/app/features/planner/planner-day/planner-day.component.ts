@@ -27,6 +27,7 @@ import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
+import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 
 @Component({
   selector: 'planner-day',
@@ -48,6 +49,7 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
     ShortTime2Pipe,
     TranslatePipe,
     ShortDate2Pipe,
+    ProgressBarComponent,
   ],
 })
 export class PlannerDayComponent {
@@ -64,6 +66,18 @@ export class PlannerDayComponent {
 
   protected readonly T = T;
   protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
+
+  getProgressBarClass(percentage: number | undefined): string {
+    if (!percentage) return 'bg-success';
+
+    if (percentage > 95) {
+      return 'bg-danger';
+    } else if (percentage > 80) {
+      return 'bg-warning';
+    } else {
+      return 'bg-success';
+    }
+  }
 
   // TODO correct type
   drop(

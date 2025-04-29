@@ -10,12 +10,26 @@
 
   <div class="day-counts">
     <span>{{ day.timeEstimate | roundDuration | msToString }}</span>
+    @if (day.availableHours) {
+      <span class="available-hours"
+        >/ {{ day.availableHours | roundDuration | msToString }}</span
+      >
+    }
 
     @if (day.itemsTotal > 5) {
       <mat-icon inline="true">task_alt</mat-icon>
       <span>{{ day.itemsTotal }}</span>
     }
   </div>
+
+  @if (day.progressPercentage !== undefined) {
+    <div class="progress-container">
+      <progress-bar
+        [progress]="day.progressPercentage"
+        [cssClass]="getProgressBarClass(day.progressPercentage)"
+      ></progress-bar>
+    </div>
+  }
 </header>
 
 <div class="normal-tasks">

@@ -18,6 +18,8 @@ import { isSameDay } from '../../../util/is-same-day';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { calculateAvailableHours } from '../util/calculate-available-hours';
+import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -131,7 +133,8 @@ export const selectPlannerDays = (
   return createSelector(
     selectTaskFeatureState,
     selectPlannerState,
-    (taskState, plannerState): PlannerDay[] => {
+    selectConfigFeatureState,
+    (taskState, plannerState, globalConfig): PlannerDay[] => {
       const allDatesWithData = Object.keys(plannerState.days);
       const dayDatesToUse = [
         ...dayDates,
@@ -150,6 +153,7 @@ export const selectPlannerDays = (
           allPlannedTasks,
           icalEvents,
           unplannedTaskIdsToday,
+          globalConfig.schedule,
         ),
       );
     },
@@ -185,6 +189,7 @@ const getPlannerDay = (
   allPlannedTasks: TaskPlanned[],
   icalEvents: ScheduleCalendarMapEntry[],
   unplannedTaskIdsToday: string[] | false,
+  scheduleConfig?: any,
 ): PlannerDay => {
   const isToday = dayDate === todayStr;
   const currentDayDate = dateStrToUtcDate(dayDate);
@@ -203,6 +208,22 @@ const getPlannerDay = (
   const scheduledTaskItems = getScheduledTaskItems(allPlannedTasks, currentDayDate);
   const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
 
+  const timeEstimate = getAllTimeSpent(
+    normalTasks,
+    repeatProjectionsForDay,
+    noStartTimeRepeatProjections,
+    scheduledTaskItems,
+  );
+
+  // Calculate available hours and progress percentage
+  let availableHours;
+  let progressPercentage;
+
+  if (scheduleConfig) {
+    availableHours = calculateAvailableHours(dayDate, scheduleConfig);
+    progressPercentage = availableHours > 0 ? (timeEstimate / availableHours) * 100 : 0;
+  }
+
   return {
     isToday: isToday,
     dayDate,
@@ -219,12 +240,9 @@ const getPlannerDay = (
     ].sort((a, b) => a.start - b.start),
     tasks: normalTasks,
     noStartTimeRepeatProjections,
-    timeEstimate: getAllTimeSpent(
-      normalTasks,
-      repeatProjectionsForDay,
-      noStartTimeRepeatProjections,
-      scheduledTaskItems,
-    ),
+    timeEstimate,
+    availableHours,
+    progressPercentage,
   };
 };
 
