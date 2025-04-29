@@ -43,6 +43,12 @@ export class AddTasksForTomorrowService {
   );
 
   // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
+  private _repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
+    switchMap((dt) =>
+      this._taskRepeatCfgService.getRepeatTableTasksDueForDayIncludingOverdue$(dt),
+    ),
+  );
+  // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
@@ -86,30 +92,60 @@ export class AddTasksForTomorrowService {
     this._dueForDayForTomorrow$,
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
-  async addAllPlannedTomorrowAndCreateRepeatable(): Promise<void> {
-    // eslint-disable-next-line no-mixed-operators
-    const dueWithTime = (
-      await this._dueWithTimeForTomorrow$.pipe(first()).toPromise()
-    ).sort((a, b) => a.dueWithTime - b.dueWithTime);
-    const dueWithDay = await this._dueForDayForTomorrow$.pipe(first()).toPromise();
-    const repeatCfgs = await this._repeatableForTomorrow$.pipe(first()).toPromise();
+  async addAllDueToday(): Promise<void> {
+    const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
+      this._dueWithTimeForToday$,
+      this._dueForDayForToday$,
+      this._repeatableForToday$,
+    ])
+      .pipe(first())
+      .toPromise();
 
-    this.movePlannedTasksToToday([...dueWithDay, ...dueWithTime]);
+    await this._addAllDue(Date.now(), dueWithTime, dueWithDay, repeatCfgs);
+  }
+
+  async addAllDueTomorrow(): Promise<void> {
+    const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
+      this._dueWithTimeForTomorrow$,
+      this._dueForDayForTomorrow$,
+      this._repeatableForTomorrow$,
+    ])
+      .pipe(first())
+      .toPromise();
 
     // eslint-disable-next-line no-mixed-operators
     const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-    const promises = repeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
-      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, tomorrow);
-    });
-
-    await Promise.all(promises);
+    await this._addAllDue(tomorrow, dueWithTime, dueWithDay, repeatCfgs);
   }
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
     plannedTasks.reverse().forEach((task) => {
-      this._store.dispatch(
-        updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
-      );
+      if (!task.tagIds.includes(TODAY_TAG.id)) {
+        this._store.dispatch(
+          updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
+        );
+      }
     });
+  }
+
+  private async _addAllDue(
+    dt: number,
+    dueWithTime: TaskWithDueTime[],
+    dueWithDay: TaskWithDueDay[],
+    dueRepeatCfgs: TaskRepeatCfg[],
+  ): Promise<void> {
+    this.movePlannedTasksToToday(
+      dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),
+    );
+
+    const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
+      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
+    });
+
+    await Promise.all(promises);
+
+    this.movePlannedTasksToToday(
+      dueWithTime.sort((a, b) => a.dueWithTime - b.dueWithTime),
+    );
   }
 }
