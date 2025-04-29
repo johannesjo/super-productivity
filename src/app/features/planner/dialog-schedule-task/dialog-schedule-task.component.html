@@ -116,7 +116,7 @@
   >
     {{ T.G.CANCEL | translate }}
   </button>
-  @if (data.task.dueWithTime || (plannedDayForTask && plannedDayForTask !== todayStr)) {
+  @if (data.task.dueWithTime || plannedDayForTask) {
     <button
       (click)="remove()"
       color="warn"

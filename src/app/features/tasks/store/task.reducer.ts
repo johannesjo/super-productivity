@@ -719,34 +719,15 @@ export const taskReducer = createReducer<TaskState>(
 
   on(PlannerActions.planTaskForDay, (state, { task, day }) => {
     const todayStr = getWorklogStr();
-    if (day === todayStr && !task.tagIds.includes(TODAY_TAG.id)) {
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            tagIds: unique([TODAY_TAG.id, ...task.tagIds]),
-            dueDay: undefined,
-          },
-        },
-        state,
-      );
-    } else if (day !== todayStr && task.tagIds.includes(TODAY_TAG.id)) {
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
-            dueDay: getWorklogStr(day),
-          },
-        },
-        state,
-      );
-    }
     return taskAdapter.updateOne(
       {
         id: task.id,
         changes: {
-          dueDay: getWorklogStr(day),
+          tagIds:
+            day === todayStr
+              ? unique([TODAY_TAG.id, ...task.tagIds])
+              : task.tagIds.filter((id) => id !== TODAY_TAG.id),
+          dueDay: todayStr,
         },
       },
       state,

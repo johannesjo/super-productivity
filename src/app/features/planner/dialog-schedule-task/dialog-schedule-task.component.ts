@@ -24,7 +24,11 @@ import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
-import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
+import {
+  removeReminderFromTask,
+  unScheduleTask,
+  updateTaskTags,
+} from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
@@ -126,8 +130,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       } else {
         console.warn('No reminder found for task', this.data.task);
       }
-    } else {
+      // for tasks without anything scheduled
+    } else if (!this.data.task.dueWithTime) {
       this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
+    } else {
+      this.selectedReminderCfgId = TaskReminderOptionId.DoNotRemind;
     }
 
     if (this.data.task.dueWithTime) {
@@ -212,13 +219,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     this._taskService.addTodayTag(this.data.task);
   }
 
-  removeFromToday(): void {
-    this._taskService.updateTags(
-      this.data.task,
-      this.data.task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
-    );
-  }
-
   onTimeKeyDown(ev: KeyboardEvent): void {
     // console.log('ev.key!', ev.key);
     if (ev.key === 'Enter') {
@@ -264,12 +264,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           isSkipToast: true,
         }),
       );
-      this._store.dispatch(
-        updateTaskTags({
-          task: this.data.task,
-          newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        }),
-      );
+
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
@@ -319,17 +314,36 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   async submit(isRemoveFromToday = false): Promise<void> {
+    // TODO simplify
+
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
     }
-
     const newDayDate = new Date(this.selectedDate);
     const newDay = getWorklogStr(newDayDate);
     const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
+    if (
+      this.selectedReminderCfgId === TaskReminderOptionId.DoNotRemind &&
+      typeof this.data.task.reminderId === 'string'
+    ) {
+      this._store.dispatch(
+        removeReminderFromTask({
+          id: this.data.task.id,
+          reminderId: this.data.task.reminderId,
+          isSkipToast: true,
+        }),
+      );
+    }
+
     if (isRemoveFromToday) {
-      this.removeFromToday();
+      this._store.dispatch(
+        updateTaskTags({
+          task: this.data.task,
+          newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
+        }),
+      );
     } else if (this.selectedTime) {
       const task = this.data.task;
       const newDate = new Date(
@@ -347,41 +361,39 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         this.addToToday();
       }
     } else if (newDay === getWorklogStr()) {
-      if (this.isShowAddToToday()) {
-        this.addToToday();
-
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: {
-            date: formattedDate,
-            extra: await this._plannerService.getSnackExtraStr(newDay),
-          },
-        });
-      } else if (this.data.task.dueWithTime && !this.selectedTime) {
-        // time was removed for today task case
-        this._store.dispatch(
-          unScheduleTask({
-            id: this.data.task.id,
-            reminderId: this.data.task.reminderId,
-            isSkipToast: true,
-          }),
-        );
-
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: {
-            date: formattedDate,
-            extra: await this._plannerService.getSnackExtraStr(newDay),
-          },
-        });
-      } else {
+      if (!this.isShowAddToToday() && this.data.task.dueDay === newDay) {
         this._snackService.open({
           type: 'CUSTOM',
           ico: 'info',
           msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
           translateParams: { date: formattedDate },
+        });
+      } else {
+        if (this.isShowAddToToday()) {
+          this.addToToday();
+        } else if (this.data.task.dueWithTime) {
+          // time was removed for today task case
+          this._store.dispatch(
+            unScheduleTask({
+              id: this.data.task.id,
+              reminderId: this.data.task.reminderId,
+              isSkipToast: true,
+            }),
+          );
+        }
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: this.data.task,
+            day: newDay,
+          }),
+        );
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+          translateParams: {
+            date: formattedDate,
+            extra: await this._plannerService.getSnackExtraStr(newDay),
+          },
         });
       }
     } else {

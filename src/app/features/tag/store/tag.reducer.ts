@@ -184,7 +184,7 @@ export const tagReducer = createReducer<TagState>(
     const todayStr = getWorklogStr();
     const tagToUpdate = state.entities[TODAY_TAG.id] as Tag;
 
-    if (day === todayStr) {
+    if (day === todayStr && !tagToUpdate.taskIds.includes(task.id)) {
       return tagAdapter.updateOne(
         {
           id: TODAY_TAG.id,
