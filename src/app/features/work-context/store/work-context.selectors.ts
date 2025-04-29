@@ -192,19 +192,7 @@ export const selectTimelineTasks = createSelector(
       .map((id) => s.entities[id] as Task)
       .forEach((t) => {
         if (!t.isDone) {
-          // if (
-          //   !!t.parentId &&
-          //   (s.entities[t.parentId] as Task).due &&
-          //   (s.entities[t.parentId] as Task).reminderId
-          // ) {
-          //   allPlannedTasks.push({
-          //     ...t,
-          //     due:
-          //       t.due ||
-          //       ((s.entities[t.parentId as string] as Task).due as number),
-          //   });
-          // } else
-          if (t.dueWithTime && t.reminderId) {
+          if (t.dueWithTime) {
             allPlannedTasks.push(t as TaskWithDueTime);
           }
         }
