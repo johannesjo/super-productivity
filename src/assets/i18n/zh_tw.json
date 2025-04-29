@@ -750,7 +750,7 @@
         "LOCAL_ATTACHMENTS": "本地附件",
         "NOTES": "筆記",
         "PARENT": "親",
-        "SCHEDULED_AT": "计划时间",
+        "DUE": "计划时间",
         "REMINDER": "提醒",
         "REPEAT": "重複",
         "SCHEDULE_TASK": "安排任務",

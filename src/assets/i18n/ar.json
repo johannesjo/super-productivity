@@ -999,7 +999,7 @@
         "REMINDER": "تذكير",
         "REPEAT": "كرر",
         "SCHEDULE_TASK": "جدولة مهمة",
-        "SCHEDULED_AT": "من المقرر في",
+        "DUE": "من المقرر في",
         "SUB_TASKS": "المهام الفرعية ({{nr}})",
         "TIME": "زمن",
         "TITLE_PLACEHOLDER": "أدخل عنوانا"

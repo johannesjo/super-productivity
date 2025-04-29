@@ -999,7 +999,7 @@
         "REMINDER": "リマインダー",
         "REPEAT": "繰り返す",
         "SCHEDULE_TASK": "タスクのスケジュール",
-        "SCHEDULED_AT": "で予定されている。",
+        "DUE": "で予定されている。",
         "SUB_TASKS": "サブタスク（{{nr}}）",
         "TIME": "時間",
         "TITLE_PLACEHOLDER": "タイトルを入力"

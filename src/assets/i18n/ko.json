@@ -999,7 +999,7 @@
         "REMINDER": "조언",
         "REPEAT": "반복",
         "SCHEDULE_TASK": "작업 예약",
-        "SCHEDULED_AT": "예정된 날짜",
+        "DUE": "예정된 날짜",
         "SUB_TASKS": "하위 작업 ({{nr}})",
         "TIME": "시각",
         "TITLE_PLACEHOLDER": "제목 입력"

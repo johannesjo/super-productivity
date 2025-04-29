@@ -999,7 +999,7 @@
         "REMINDER": "Promemoria",
         "REPEAT": "Ripeti",
         "SCHEDULE_TASK": "Pianifica attività",
-        "SCHEDULED_AT": "Pianificato alle",
+        "DUE": "Pianificato alle",
         "SUB_TASKS": "Attività secondarie ({{nr}})",
         "TIME": "Tempo",
         "TITLE_PLACEHOLDER": "Inserisci un titolo"

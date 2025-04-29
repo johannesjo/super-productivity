@@ -999,7 +999,7 @@
         "REMINDER": "Pripomienka",
         "REPEAT": "Opakovať",
         "SCHEDULE_TASK": "Naplánovať úlohu",
-        "SCHEDULED_AT": "Naplánované na",
+        "DUE": "Naplánované na",
         "SUB_TASKS": "Podúlohy ({{nr}})",
         "TIME": "Čas",
         "TITLE_PLACEHOLDER": "Zadajte názov"

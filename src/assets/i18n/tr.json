@@ -999,7 +999,7 @@
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
-        "SCHEDULED_AT": "Planlandı",
+        "DUE": "Planlandı",
         "SUB_TASKS": "Alt Görevler ({{nr}})",
         "TIME": "Zaman",
         "TITLE_PLACEHOLDER": "Bir başlık girin"

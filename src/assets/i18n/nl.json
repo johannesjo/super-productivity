@@ -999,7 +999,7 @@
         "REMINDER": "Herinnering",
         "REPEAT": "Herhaling",
         "SCHEDULE_TASK": "Taak plannen",
-        "SCHEDULED_AT": "Gepland op",
+        "DUE": "Gepland op",
         "SUB_TASKS": "Subtaken ({{nr}})",
         "TIME": "Tijd",
         "TITLE_PLACEHOLDER": "Voer een titel in"

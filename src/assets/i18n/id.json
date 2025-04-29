@@ -999,7 +999,7 @@
         "REMINDER": "Pengingat",
         "REPEAT": "Ulangi",
         "SCHEDULE_TASK": "Jadwal tugas",
-        "SCHEDULED_AT": "Dijadwalkan pada",
+        "DUE": "Dijadwalkan pada",
         "SUB_TASKS": "Subtugas ({{nr}})",
         "TIME": "Waktu",
         "TITLE_PLACEHOLDER": "Masukkan Judul"

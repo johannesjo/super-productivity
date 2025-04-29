@@ -999,7 +999,7 @@
         "REMINDER": "Podsjetnik",
         "REPEAT": "Ponovi",
         "SCHEDULE_TASK": "Terminiraj zadatak",
-        "SCHEDULED_AT": "Pwograme nan",
+        "DUE": "Pwograme nan",
         "SUB_TASKS": "Broj podzadataka ({{nr}})",
         "TIME": "Vrijeme",
         "TITLE_PLACEHOLDER": "Antre yon tit"

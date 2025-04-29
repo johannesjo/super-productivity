@@ -999,7 +999,7 @@
         "REMINDER": "Erinnerung",
         "REPEAT": "Wiederholen",
         "SCHEDULE_TASK": "Aufgabe planen",
-        "SCHEDULED_AT": "Geplant am",
+        "DUE": "Geplant am",
         "SUB_TASKS": "Unteraufgaben ({{nr}})",
         "TIME": "Zeit",
         "TITLE_PLACEHOLDER": "Einen Titel eingeben"

@@ -999,7 +999,7 @@
         "REMINDER": "یادآور",
         "REPEAT": "تکرار",
         "SCHEDULE_TASK": "برنامه ریزی کار",
-        "SCHEDULED_AT": "برنامه ریزی شده در",
+        "DUE": "برنامه ریزی شده در",
         "SUB_TASKS": "وظایف فرعی ({{nr}})",
         "TIME": "زمان",
         "TITLE_PLACEHOLDER": "عنوانی را وارد کنید"

@@ -1018,7 +1018,7 @@
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
-        "SCHEDULED_AT": "Scheduled at",
+        "DUE": "Due",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time",
         "TITLE_PLACEHOLDER": "Enter a title"

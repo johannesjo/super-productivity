@@ -999,7 +999,7 @@
         "REMINDER": "Påminnelse",
         "REPEAT": "Gjenta",
         "SCHEDULE_TASK": "Planlegg oppgave",
-        "SCHEDULED_AT": "Planlagt på",
+        "DUE": "Planlagt på",
         "SUB_TASKS": "Underoppgaver ({{nr}})",
         "TIME": "Tid",
         "TITLE_PLACEHOLDER": "Skriv inn en tittel"

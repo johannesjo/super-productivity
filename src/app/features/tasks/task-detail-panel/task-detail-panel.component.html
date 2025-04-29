@@ -118,7 +118,7 @@
         <mat-icon>alarm</mat-icon>
       }
       @if (task.dueWithTime || task.dueDay) {
-        <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT | translate }}</span>
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.DUE | translate }}</span>
       }
       @if (!(task.dueWithTime || task.dueDay)) {
         <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK | translate }}</span>

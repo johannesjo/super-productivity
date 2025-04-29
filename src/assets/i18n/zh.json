@@ -851,7 +851,7 @@
         "REMINDER": "提醒",
         "REPEAT": "重复",
         "SCHEDULE_TASK": "安排任务",
-        "SCHEDULED_AT": "计划时间",
+        "DUE": "计划时间",
         "SUB_TASKS": "子任务（{{nr}}）",
         "TIME": "时间",
         "TITLE_PLACEHOLDER": "输入标题"
