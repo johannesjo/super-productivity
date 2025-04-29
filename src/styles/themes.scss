@@ -96,3 +96,16 @@
 .border-color-primary {
   border-color: $c-primary !important;
 }
+
+// Traffic light colors for progress bars
+.bg-success {
+  background-color: #4caf50;
+}
+
+.bg-warning {
+  background-color: #ff9800;
+}
+
+.bg-danger {
+  background-color: #f44336;
+}
