@@ -50,7 +50,6 @@ import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
 import { isTouchOnly } from '../../../util/is-touch-only';
-import { ReminderCopy } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
@@ -77,7 +76,6 @@ import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
 import { MatButton } from '@angular/material/button';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
-import { MatTooltip } from '@angular/material/tooltip';
 import { IssueHeaderComponent } from '../../issue/issue-header/issue-header.component';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { IssueContentComponent } from '../../issue/issue-content/issue-content.component';
@@ -111,7 +109,6 @@ interface IssueDataAndType {
     TaskListComponent,
     MatButton,
     ProgressBarComponent,
-    MatTooltip,
     IssueHeaderComponent,
     MatProgressBar,
     IssueContentComponent,
@@ -163,9 +160,6 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   T: typeof T = T;
   issueAttachments: TaskAttachment[] = [];
   reminderId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-  reminderData$: Observable<ReminderCopy | null> = this.reminderId$.pipe(
-    switchMap((id) => (id ? this._reminderService.getById$(id) : of(null))),
-  );
 
   repeatCfgId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
   repeatCfgLabel$: Observable<string | null> = this.repeatCfgId$.pipe(

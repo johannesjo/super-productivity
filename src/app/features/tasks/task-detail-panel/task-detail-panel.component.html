@@ -106,26 +106,31 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="scheduleTask()"
     (keyPress)="onItemKeyPress($event)"
-    [inputIcon]="task.reminderId || task.dueDay ? 'edit' : 'add'"
+    [inputIcon]="task.dueWithTime || task.dueDay ? 'edit' : 'add'"
     class="input-item"
   >
     <ng-container input-title>
-      <mat-icon>alarm</mat-icon>
-      @if (task.reminderId || task.dueDay) {
+      @if (task.dueDay) {
+        <mat-icon>today</mat-icon>
+      } @else if (task.dueWithTime && !task.reminderId) {
+        <mat-icon>schedule</mat-icon>
+      } @else {
+        <mat-icon>alarm</mat-icon>
+      }
+      @if (task.dueWithTime || task.dueDay) {
         <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULED_AT | translate }}</span>
       }
-      @if (!(task.reminderId || task.dueDay)) {
+      @if (!(task.dueWithTime || task.dueDay)) {
         <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK | translate }}</span>
       }
     </ng-container>
     <ng-container input-value>
-      @if (reminderData$ | async; as reminderData) {
+      @if (task.dueWithTime) {
         <div
-          [matTooltip]="reminderData.remindAt | date: 'short'"
           class="reminder-value"
           matTooltipPosition="left"
         >
-          {{ reminderData.remindAt | date: 'short' }}
+          {{ task.dueWithTime | date: 'short' }}
         </div>
       }
       @if (task.dueDay) {
