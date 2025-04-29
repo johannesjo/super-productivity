@@ -123,7 +123,7 @@ export class PlannerDayComponent {
             targetTaskId: allItems[ev.currentIndex]?.id,
           }),
         );
-        if (task.reminderId) {
+        if (task.dueWithTime || task.reminderId) {
           // NOTE: we need to wait a bit to make sure the task is already moved into the proper position
           // as otherwise unschedule will mess up the order
           setTimeout(() => {
