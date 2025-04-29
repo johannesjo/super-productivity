@@ -8,7 +8,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { selectPlannedTasksById } from '../tasks/store/task.selectors';
+import { selectTasksWithDueTimeById } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
@@ -58,9 +58,9 @@ export class PlannerService {
         const tids = reminders
           .filter((reminder) => reminder.type === 'TASK')
           .map((reminder) => reminder.relatedId);
-        return this._store.select(selectPlannedTasksById, { ids: tids }) as Observable<
-          TaskWithDueTime[]
-        >;
+        return this._store.select(selectTasksWithDueTimeById, {
+          ids: tids,
+        }) as Observable<TaskWithDueTime[]>;
       }),
       distinctUntilChanged(fastArrayCompare),
     );

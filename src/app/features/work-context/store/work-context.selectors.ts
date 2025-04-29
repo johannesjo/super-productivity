@@ -24,10 +24,7 @@ export const selectActiveContextId = createSelector(
   selectContextFeatureState,
   (state) => state.activeId,
 );
-export const selectActiveContextType = createSelector(
-  selectContextFeatureState,
-  (state) => state.activeType,
-);
+
 export const selectActiveContextTypeAndId = createSelector(
   selectContextFeatureState,
   (
@@ -221,41 +218,6 @@ export const selectTimelineTasks = createSelector(
           return mapSubTasksToTask(s.entities[id] as Task, s) as TaskWithSubTasks;
         })
         .filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
-    };
-  },
-);
-
-export const selectTodayTasksWithPlannedAndDoneSeperated = createSelector(
-  selectTagFeatureState,
-  selectTaskFeatureState,
-  (
-    tagState,
-    taskState,
-  ): {
-    planned: TaskWithDueTime[];
-    normal: Task[];
-    done: Task[];
-  } => {
-    const taskIds = tagState.entities[TODAY_TAG.id]?.taskIds || [];
-    const normalTasks: Task[] = [];
-    const allPlannedTasks: TaskWithDueTime[] = [];
-    const doneTasks: Task[] = [];
-    taskIds
-      .map((id) => taskState.entities[id] as Task)
-      .forEach((t) => {
-        if (t.dueWithTime && t.reminderId) {
-          allPlannedTasks.push(t as TaskWithDueTime);
-        } else if (t.isDone) {
-          doneTasks.push(t);
-        } else {
-          normalTasks.push(t);
-        }
-      });
-
-    return {
-      planned: allPlannedTasks,
-      normal: normalTasks,
-      done: doneTasks,
     };
   },
 );

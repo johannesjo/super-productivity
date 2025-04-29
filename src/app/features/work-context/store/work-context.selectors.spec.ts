@@ -78,7 +78,7 @@ describe('workContext selectors', () => {
         { id: 'M1', subTaskIds: [], tagIds: ['TODAY'] },
         {
           id: 'M2',
-          due: 1234,
+          dueWithTime: 1234,
           reminderId: 'asd',
           subTaskIds: [],
           tagIds: ['TODAY'],
@@ -107,12 +107,12 @@ describe('workContext selectors', () => {
       expect(result).toEqual([
         {
           id: 'M2',
-          due: 1234,
+          dueWithTime: 1234,
           reminderId: 'asd',
           subTaskIds: [],
           tagIds: ['TODAY'],
         },
-      ] as any[]);
+      ] as Partial<TaskCopy>[] as TaskCopy[]);
     });
   });
 

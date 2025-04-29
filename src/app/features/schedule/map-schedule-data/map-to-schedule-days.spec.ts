@@ -173,7 +173,7 @@ describe('mapToScheduleDays()', () => {
           {
             data: {
               id: 'S1',
-              due: minAfterNowTs(30),
+              dueWithTime: minAfterNowTs(30),
               reminderId: 'R_ID',
               subTaskIds: [],
               tagIds: [],

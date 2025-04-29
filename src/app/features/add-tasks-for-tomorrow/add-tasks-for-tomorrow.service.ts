@@ -125,7 +125,7 @@ export class AddTasksForTomorrowService {
     });
   }
 
-  private async _addAllDue(
+  async _addAllDue(
     dt: number,
     dueWithTime: TaskWithDueTime[],
     dueWithDay: TaskWithDueDay[],

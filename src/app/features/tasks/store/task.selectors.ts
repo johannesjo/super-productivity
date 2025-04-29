@@ -15,8 +15,6 @@ import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 
-// TODO fix null stuff here
-
 const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
   return tasksIN
     .filter((task) => !task.parentId)
@@ -138,30 +136,6 @@ export const selectAllTasksDueAndOverdue = createSelector(
   },
 );
 
-// export const selectJiraTasks = createSelector(
-//   selectTaskFeatureState,
-//   (s): Task[] => {
-//     return s.ids
-//       .map(id => s.entities[id])
-//       .filter((task: Task) => task.issueType === JIRA_TYPE);
-//   });
-//
-// export const selectGithubTasks = createSelector(
-//   selectTaskFeatureState,
-//   (s): Task[] => {
-//     return s.ids
-//       .map(id => s.entities[id])
-//       .filter((task: Task) => task.issueType === GITHUB_TYPE);
-//   });
-//
-// export const selectGitlabTasks = createSelector(
-//   selectTaskFeatureState,
-//   (s): Task[] => {
-//     return s.ids
-//       .map(id => s.entities[id])
-//       .filter((task: Task) => task.issueType === GITLAB_TYPE);
-//   });
-
 export const selectSelectedTaskId = createSelector(
   selectTaskFeatureState,
   (state) => state.selectedTaskId,
@@ -190,12 +164,6 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
     // @ts-ignore
     s.entities[s.currentTaskId],
 );
-
-// export const selectScheduledTasksWithReminder = createSelector(
-//   selectPlannedTasks,
-//   (tasks: Task[]): TaskWithReminder[] =>
-//     tasks.filter((task) => !!task.reminderId) as TaskWithReminder[],
-// );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 
@@ -228,7 +196,7 @@ export const selectTasksById = createSelector(
     props.ids ? (props.ids.map((id) => state.entities[id]) as Task[]) : [],
 );
 
-export const selectPlannedTasksById = createSelector(
+export const selectTasksWithDueTimeById = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { ids: string[] }): Task[] =>
     props.ids
@@ -304,7 +272,7 @@ export const selectTasksDueAndOverdueForDay = createSelector(
   (tasks: Task[], day: string): TaskWithDueDay[] => {
     const dayDate = new Date(day);
     return tasks.filter(
-      (task) => typeof task.dueDay === 'string' && dayDate <= new Date(task.dueDay),
+      (task) => typeof task.dueDay === 'string' && new Date(task.dueDay) <= dayDate,
     ) as TaskWithDueDay[];
   },
 );
@@ -337,10 +305,6 @@ export const selectAllRepeatableTaskWithSubTasks = createSelector(
   (tasks: TaskWithSubTasks[]) => {
     return tasks.filter((task) => !!task.repeatCfgId);
   },
-);
-export const selectAllRepeatableTaskWithSubTasksFlat = createSelector(
-  selectAllRepeatableTaskWithSubTasks,
-  flattenTasks,
 );
 
 export const selectTasksByRepeatConfigId = createSelector(

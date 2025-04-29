@@ -1037,10 +1037,10 @@ describe('shortSyntax', () => {
       };
       const parsedTaskInfo = shortSyntax(t, CONFIG, []);
       const taskChanges = parsedTaskInfo?.taskChanges;
-      const plannedAt = taskChanges?.plannedAt as number;
+      const dueWithTime = taskChanges?.dueWithTime as number;
       expect(
         checkIfCorrectDateMonthAndYear(
-          plannedAt,
+          dueWithTime,
           inputDayOfTheMonth,
           inputMonth,
           tomorrow.getFullYear(),
@@ -1061,10 +1061,10 @@ describe('shortSyntax', () => {
       };
       const parsedTaskInfo = shortSyntax(t, CONFIG, []);
       const taskChanges = parsedTaskInfo?.taskChanges;
-      const plannedAt = taskChanges?.plannedAt as number;
+      const dueWithTime = taskChanges?.dueWithTime as number;
       expect(
         checkIfCorrectDateMonthAndYear(
-          plannedAt,
+          dueWithTime,
           inputDayOfTheMonth,
           inputMonth,
           tomorrow.getFullYear(),
