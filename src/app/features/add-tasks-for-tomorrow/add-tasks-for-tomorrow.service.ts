@@ -131,6 +131,11 @@ export class AddTasksForTomorrowService {
     dueWithDay: TaskWithDueDay[],
     dueRepeatCfgs: TaskRepeatCfg[],
   ): Promise<'ADDED' | void> {
+    const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
+      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
+    });
+    await Promise.all(promises);
+
     this.movePlannedTasksToToday(
       dueWithTime.sort((a, b) => a.dueWithTime - b.dueWithTime),
     );
@@ -140,11 +145,6 @@ export class AddTasksForTomorrowService {
       dueWithDay,
       dueRepeatCfgs,
     });
-
-    const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
-      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
-    });
-    await Promise.all(promises);
 
     this.movePlannedTasksToToday(
       dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),

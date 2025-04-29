@@ -247,7 +247,7 @@
         } @else if (t.dueDay) {
           <button
             (click)="scheduleTask()"
-            [title]="T.F.TASK.CMP.SCHEDULE | translate"
+            [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
             class="ico-btn schedule-btn"
             [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
