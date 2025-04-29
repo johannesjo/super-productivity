@@ -8,21 +8,25 @@ import {
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { sortRepeatableTaskCfgs } from '../task-repeat-cfg/sort-repeatable-task-cfg';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
-import { combineLatest, Observable, Subject } from 'rxjs';
-import { select, Store } from '@ngrx/store';
-import { selectTasksWithDueTimeForRangeNotOnToday } from '../tasks/store/task.selectors';
+import { combineLatest, Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import {
+  selectTasksPlannedForDay,
+  selectTasksWithDueTimeForRangeNotOnToday,
+} from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap } from 'rxjs/operators';
 import { updateTaskTags } from '../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AddTasksForTomorrowService {
-  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _store = inject(Store);
+  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   private _tomorrowDate$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
@@ -32,6 +36,11 @@ export class AddTasksForTomorrowService {
       return d;
     }),
   );
+  private _todayDateTime$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
+    map((todayStr) => {
+      return new Date(todayStr).getTime();
+    }),
+  );
 
   // TODO check if this includes tasks that already have been created (probably does due to lastCreationDate)
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
@@ -39,13 +48,32 @@ export class AddTasksForTomorrowService {
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
     ),
   );
-  private _dueWithTimeForToday$: Observable<TaskWithDueTime[]> = this._store.pipe(
-    select(selectTasksWithDueTimeForRangeNotOnToday, getDateRangeForDay(Date.now())),
-  );
-  private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> = new Subject();
+  private _dueWithTimeForToday$: Observable<TaskWithDueTime[]> =
+    this._todayDateTime$.pipe(
+      switchMap((dt) =>
+        this._store.select(
+          selectTasksWithDueTimeForRangeNotOnToday,
+          getDateRangeForDay(dt),
+        ),
+      ),
+    );
+  private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
+    this._tomorrowDate$.pipe(
+      switchMap((dt) =>
+        this._store.select(
+          selectTasksWithDueTimeForRangeNotOnToday,
+          getDateRangeForDay(dt.getTime()),
+        ),
+      ),
+    );
 
-  private _dueForDayForToday$: Observable<TaskWithDueDay[]> = new Subject();
-  private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = new Subject();
+  private _dueForDayForToday$: Observable<TaskWithDueDay[]> =
+    this._globalTrackingIntervalService.todayDateStr$.pipe(
+      switchMap((ds) => this._store.select(selectTasksPlannedForDay, ds)),
+    );
+  private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
+    switchMap((d) => this._store.select(selectTasksPlannedForDay, getWorklogStr(d))),
+  );
 
   allPlannedForTodayNotOnToday$: Observable<TaskPlannedWithDayOrTime[]> = combineLatest([
     this._dueWithTimeForToday$,

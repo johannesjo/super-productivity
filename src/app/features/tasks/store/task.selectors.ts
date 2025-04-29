@@ -1,6 +1,12 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskWithDueTime, TaskState, TaskWithSubTasks } from '../task.model';
+import {
+  Task,
+  TaskWithDueTime,
+  TaskState,
+  TaskWithSubTasks,
+  TaskWithDueDay,
+} from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -286,16 +292,10 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
   },
 );
 
-export const selectTasksPlannedForRange = createSelector(
+export const selectTasksPlannedForDay = createSelector(
   selectAllTasks,
-  (tasks: Task[], { start, end }: { start: number; end: number }): TaskWithDueTime[] => {
-    return tasks.filter(
-      (task) =>
-        !task.isDone &&
-        typeof task.dueWithTime === 'number' &&
-        task.dueWithTime >= start &&
-        task.dueWithTime <= end,
-    ) as TaskWithDueTime[];
+  (tasks: Task[], day: string): TaskWithDueDay[] => {
+    return tasks.filter((task) => typeof task.dueDay === day) as TaskWithDueDay[];
   },
 );
 
