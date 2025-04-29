@@ -58,7 +58,7 @@ export class AddTaskPanelPlannerComponent {
     this.taskSuggestionsCtrl.valueChanges.pipe(startWith('')),
     this._store.select(selectPlannerState),
     // NOTE: needed as trigger only
-    this._plannerPlanViewService.allScheduledTasks$,
+    this._plannerPlanViewService.allDueWithTimeTasks$,
   ]).pipe(
     withLatestFrom(
       this.allTasks$,

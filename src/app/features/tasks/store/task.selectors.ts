@@ -289,6 +289,15 @@ export const selectTasksWithDueTimeForRange = createSelector(
   },
 );
 
+export const selectAllDueWithTimeTasks = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): TaskWithDueTime[] => {
+    return tasks.filter(
+      (task) => typeof task.dueWithTime === 'number',
+    ) as TaskWithDueTime[];
+  },
+);
+
 export const selectTasksWithDueTimeUntil = createSelector(
   selectAllTasks,
   (tasks: Task[], end: number): TaskWithDueTime[] => {
