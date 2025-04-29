@@ -21,7 +21,6 @@ import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { isSameDay } from '../../../util/is-same-day';
-import { isToday } from '../../../util/is-today.util';
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 
@@ -32,6 +31,27 @@ export class TaskReminderEffects {
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
+
+  removeFromTodayOnDueTimeReScheduleToOtherDay$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(scheduleTask),
+        filter(({ task, dueWithTime, isMoveToBacklog, isSkipAutoRemoveFromToday }) => {
+          const isRemoveFromToday =
+            !isSkipAutoRemoveFromToday &&
+            task.tagIds.includes(TODAY_TAG.id) &&
+            (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
+          return isRemoveFromToday;
+        }),
+        map(({ task }) => {
+          return updateTaskTags({
+            task,
+            newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
+          });
+        }),
+      ),
+    { dispatch: true },
+  );
 
   addTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
@@ -46,50 +66,35 @@ export class TaskReminderEffects {
           ico: 'schedule',
         }),
       ),
-      mergeMap(
-        ({ isSkipAutoRemoveFromToday, task, remindAt, dueWithTime, isMoveToBacklog }) => {
-          if (isMoveToBacklog && !task.projectId) {
-            throw new Error('Move to backlog not possible for non project tasks');
-          }
-          if (typeof remindAt !== 'number') {
-            return EMPTY;
-          }
+      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
+        if (isMoveToBacklog && !task.projectId) {
+          throw new Error('Move to backlog not possible for non project tasks');
+        }
+        if (typeof remindAt !== 'number') {
+          return EMPTY;
+        }
 
-          const reminderId = this._reminderService.addReminder(
-            'TASK',
-            task.id,
-            truncate(task.title),
-            remindAt,
-          );
+        const reminderId = this._reminderService.addReminder(
+          'TASK',
+          task.id,
+          truncate(task.title),
+          remindAt,
+        );
 
-          const isRemoveFromToday =
-            !isSkipAutoRemoveFromToday &&
-            task.tagIds.includes(TODAY_TAG.id) &&
-            (!isToday(dueWithTime) || isMoveToBacklog);
-
-          return [
-            updateTask({
-              task: { id: task.id, changes: { reminderId } },
-            }),
-            ...(isMoveToBacklog
-              ? [
-                  moveProjectTaskToBacklogListAuto({
-                    taskId: task.id,
-                    projectId: task.projectId as string,
-                  }),
-                ]
-              : []),
-            ...(isRemoveFromToday
-              ? [
-                  updateTaskTags({
-                    task,
-                    newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
-                  }),
-                ]
-              : []),
-          ];
-        },
-      ),
+        return [
+          updateTask({
+            task: { id: task.id, changes: { reminderId } },
+          }),
+          ...(isMoveToBacklog
+            ? [
+                moveProjectTaskToBacklogListAuto({
+                  taskId: task.id,
+                  projectId: task.projectId as string,
+                }),
+              ]
+            : []),
+        ];
+      }),
     ),
   );
 
