@@ -752,6 +752,18 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
+  on(PlannerActions.removeTaskFromDays, (state, { taskId }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          dueDay: undefined,
+        },
+      },
+      state,
+    );
+  }),
+
   // REMINDER STUFF
   // --------------
   on(scheduleTask, (state, { task, dueWithTime }) => {
@@ -784,6 +796,7 @@ export const taskReducer = createReducer<TaskState>(
         id,
         changes: {
           dueWithTime: undefined,
+          dueDay: undefined,
         },
       },
       state,

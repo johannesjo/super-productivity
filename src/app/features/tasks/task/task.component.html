@@ -230,8 +230,21 @@
               [innerHTML]="t.dueWithTime | shortPlannedAt"
             ></div>
           </button>
-        }
-        @if (t.dueDay) {
+        } @else if (t.dueWithTime) {
+          <button
+            (click)="scheduleTask()"
+            [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+            class="ico-btn schedule-btn"
+            color=""
+            mat-icon-button
+          >
+            <mat-icon>schedule</mat-icon>
+            <div
+              class="time-badge"
+              [innerHTML]="t.dueWithTime | shortPlannedAt"
+            ></div>
+          </button>
+        } @else if (t.dueDay) {
           <button
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.SCHEDULE | translate"
