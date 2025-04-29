@@ -221,7 +221,7 @@
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
             class="ico-btn schedule-btn"
-            color=""
+            [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
           >
             <mat-icon>alarm</mat-icon>
@@ -235,7 +235,7 @@
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
             class="ico-btn schedule-btn"
-            color=""
+            [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
           >
             <mat-icon>schedule</mat-icon>
@@ -249,7 +249,7 @@
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.SCHEDULE | translate"
             class="ico-btn schedule-btn"
-            color=""
+            [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
           >
             <mat-icon>today</mat-icon>

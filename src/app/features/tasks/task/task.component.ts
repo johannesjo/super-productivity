@@ -69,7 +69,7 @@ import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
-import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -123,6 +123,7 @@ import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-t
     ShortPlannedAtPipe,
     TagToggleMenuListComponent,
     JsonPipe,
+    MatButton,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
@@ -152,6 +153,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isRepeatTaskCreatedToday = computed(
     () => !!(this.task().repeatCfgId && isToday(this.task().created)),
   );
+  isOverdue = computed(() => {
+    const t = this.task();
+
+    return (
+      !t.isDone &&
+      ((t.dueWithTime && t.dueWithTime < Date.now()) ||
+        (t.dueDay && !isToday(new Date(t.dueDay)) && new Date(t.dueDay) < new Date()))
+    );
+  });
 
   progress = computed<number>(() => {
     const t = this.task();

@@ -833,6 +833,10 @@ $min-badge-size: $s * 2.25;
 
 .schedule-btn {
   position: relative;
+
+  &.mat-warn mat-icon {
+    color: $c-warn !important;
+  }
 }
 
 .repeat-date-badge,
