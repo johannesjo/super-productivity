@@ -89,7 +89,7 @@ export class AddTasksForTomorrowService {
     this._dueForDayForTomorrow$,
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
-  async addAllDueToday(): Promise<void> {
+  async addAllDueToday(): Promise<'ADDED' | void> {
     const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
       this._dueWithTimeForToday$,
       this._dueForDayForToday$,
@@ -98,10 +98,10 @@ export class AddTasksForTomorrowService {
       .pipe(first())
       .toPromise();
 
-    await this._addAllDue(Date.now(), dueWithTime, dueWithDay, repeatCfgs);
+    return await this._addAllDue(Date.now(), dueWithTime, dueWithDay, repeatCfgs);
   }
 
-  async addAllDueTomorrow(): Promise<void> {
+  async addAllDueTomorrow(): Promise<'ADDED' | void> {
     const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
       this._dueWithTimeForTomorrow$,
       this._dueForDayForTomorrow$,
@@ -112,7 +112,7 @@ export class AddTasksForTomorrowService {
 
     // eslint-disable-next-line no-mixed-operators
     const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-    await this._addAllDue(tomorrow, dueWithTime, dueWithDay, repeatCfgs);
+    return await this._addAllDue(tomorrow, dueWithTime, dueWithDay, repeatCfgs);
   }
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
@@ -130,11 +130,10 @@ export class AddTasksForTomorrowService {
     dueWithTime: TaskWithDueTime[],
     dueWithDay: TaskWithDueDay[],
     dueRepeatCfgs: TaskRepeatCfg[],
-  ): Promise<void> {
+  ): Promise<'ADDED' | void> {
     this.movePlannedTasksToToday(
-      dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),
+      dueWithTime.sort((a, b) => a.dueWithTime - b.dueWithTime),
     );
-
     console.log({
       dt,
       dueWithTime,
@@ -145,11 +144,14 @@ export class AddTasksForTomorrowService {
     const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
       return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
     });
-
     await Promise.all(promises);
 
     this.movePlannedTasksToToday(
-      dueWithTime.sort((a, b) => a.dueWithTime - b.dueWithTime),
+      dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),
     );
+
+    if (dueWithTime.length || dueWithDay.length || dueRepeatCfgs.length) {
+      return 'ADDED';
+    }
   }
 }
