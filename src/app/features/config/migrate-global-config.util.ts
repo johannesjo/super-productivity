@@ -8,7 +8,7 @@ import {
 import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/is-migrate-model';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
+import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { MODEL_VERSION } from '../../core/model-version';
 
 export const migrateGlobalConfigState = (
@@ -208,7 +208,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
   };
 
   if (config.sync) {
-    let syncProvider: SyncProvider | null = config.sync.syncProvider;
+    let syncProvider: LegacySyncProvider | null = config.sync.syncProvider;
     if ((syncProvider as any) === 'GoogleDrive') {
       syncProvider = null;
     }
@@ -216,7 +216,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
       delete (config.sync as any).googleDriveSync;
     }
 
-    if (!config.sync.localFileSync || !config.sync.dropboxSync || !config.sync.webDav) {
+    if (!config.sync.localFileSync || !config.sync.webDav) {
       console.warn(
         'sync config was missing some keys, reverting to default',
         config.sync,

@@ -1,6 +1,9 @@
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 
-export const isDataRepairPossible = (data: AppDataComplete): boolean => {
+export const isDataRepairPossible = (
+  data: AppDataCompleteLegacy | AppDataCompleteNew,
+): boolean => {
   const d: any = data as any;
   return (
     typeof d === 'object' &&

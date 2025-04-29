@@ -1,7 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
-  concatMap,
   filter,
   first,
   map,
@@ -13,74 +12,69 @@ import {
 } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { selectTagById, selectTagFeatureState } from './tag.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTag,
-  addToBreakTimeForTag,
   deleteTag,
   deleteTags,
   moveTaskInTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
-  updateWorkEndForTag,
-  updateWorkStartForTag,
   upsertTag,
 } from './tag.actions';
 import {
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
   moveToArchive_,
   moveToOtherProject,
-  removeTagsForAllTasks,
   restoreTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, of } from 'rxjs';
-import { Task, TaskArchive } from '../../tasks/task.model';
-import { Tag } from '../tag.model';
+import { Task } from '../../tasks/task.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
-import { createEmptyEntity } from '../../../util/create-empty-entity';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { DateService } from 'src/app/core/date/date.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
+import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Injectable()
 export class TagEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
   private _tagService = inject(TagService);
   private _workContextService = inject(WorkContextService);
   private _taskService = inject(TaskService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _router = inject(Router);
-  private _dateService = inject(DateService);
+  private _taskArchiveService = inject(TaskArchiveService);
+  private _timeTrackingService = inject(TimeTrackingService);
 
   saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
     take(1),
     switchMap((tagState) =>
-      this._persistenceService.tag.saveState(tagState, { isSyncModelChange: true }),
+      this._pfapiService.m.tag.save(tagState, { isUpdateRevAndLastUpdate: true }),
     ),
   );
   updateTagsStorage$: Observable<unknown> = createEffect(
@@ -96,9 +90,6 @@ export class TagEffects {
           updateTagOrder,
 
           updateAdvancedConfigForTag,
-          updateWorkStartForTag,
-          updateWorkEndForTag,
-          addToBreakTimeForTag,
           moveTaskInTagList,
 
           // TASK Actions
@@ -172,57 +163,6 @@ export class TagEffects {
     { dispatch: false },
   );
 
-  updateWorkStart$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      concatMap(({ task }) =>
-        task.parentId
-          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
-          : of(task),
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) =>
-        this._tagService.getTagsByIds$(task.tagIds).pipe(first()),
-      ),
-      concatMap((tags: Tag[]) =>
-        tags
-          // only if not assigned for day already
-          .filter((tag) => !tag.workStart[this._dateService.todayStr()])
-          .map((tag) =>
-            updateWorkStartForTag({
-              id: tag.id,
-              date: this._dateService.todayStr(),
-              newVal: Date.now(),
-            }),
-          ),
-      ),
-    ),
-  );
-
-  updateWorkEnd$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      concatMap(({ task }) =>
-        task.parentId
-          ? this._taskService.getByIdOnce$(task.parentId).pipe(first())
-          : of(task),
-      ),
-      filter((task: Task) => task.tagIds && !!task.tagIds.length),
-      concatMap((task: Task) =>
-        this._tagService.getTagsByIds$(task.tagIds).pipe(first()),
-      ),
-      concatMap((tags: Tag[]) =>
-        tags.map((tag) =>
-          updateWorkEndForTag({
-            id: tag.id,
-            date: this._dateService.todayStr(),
-            newVal: Date.now(),
-          }),
-        ),
-      ),
-    ),
-  );
-
   deleteTagRelatedData: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -232,10 +172,7 @@ export class TagEffects {
           // remove from all tasks
           this._taskService.removeTagsForAllTask(tagIdsToRemove);
           // remove from archive
-          await this._persistenceService.taskArchive.execAction(
-            removeTagsForAllTasks({ tagIdsToRemove }),
-            true,
-          );
+          await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
 
           const isOrphanedParentTask = (t: Task): boolean =>
             !t.projectId && !t.tagIds.length && !t.parentId;
@@ -247,27 +184,9 @@ export class TagEffects {
             .map((t) => t.id);
           this._taskService.removeMultipleTasks(taskIdsToRemove);
 
-          // remove orphaned for archive
-          const taskArchiveState: TaskArchive =
-            (await this._persistenceService.taskArchive.loadState()) ||
-            createEmptyEntity();
-
-          let archiveSubTaskIdsToDelete: string[] = [];
-          const archiveMainTaskIdsToDelete: string[] = [];
-          (taskArchiveState.ids as string[]).forEach((id) => {
-            const t = taskArchiveState.entities[id] as Task;
-            if (isOrphanedParentTask(t)) {
-              archiveMainTaskIdsToDelete.push(id);
-              archiveSubTaskIdsToDelete = archiveSubTaskIdsToDelete.concat(t.subTaskIds);
-            }
+          tagIdsToRemove.forEach((id) => {
+            this._timeTrackingService.cleanupDataEverywhereForTag(id);
           });
-
-          await this._persistenceService.taskArchive.execAction(
-            deleteTasks({
-              taskIds: [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
-            }),
-            true,
-          );
 
           // remove from task repeat
           const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$

@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   deleteTask,
   deleteTasks,
+  moveToArchive_,
   reScheduleTask,
   scheduleTask,
   unScheduleTask,
@@ -22,6 +23,7 @@ import { DEFAULT_DAY_START } from '../../config/default-global-config.const';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { isSameDay } from '../../../util/is-same-day';
 import { isToday } from '../../../util/is-today.util';
+import { flattenTasks } from './task.selectors';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -178,6 +180,28 @@ export class TaskReminderEffects {
           deletedTaskIds.forEach((id) => {
             this._reminderService.removeReminderByRelatedIdIfSet(id);
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  clearRemindersForArchivedTasks: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(moveToArchive_),
+        tap(({ tasks }) => {
+          const flatTasks = flattenTasks(tasks);
+          if (!flatTasks.length) {
+            return;
+          }
+          flatTasks
+            .filter((t) => !!t.reminderId)
+            .forEach((t) => {
+              if (!t.reminderId) {
+                throw new Error('No t.reminderId');
+              }
+              this._reminderService.removeReminder(t.reminderId);
+            });
         }),
       ),
     { dispatch: false },

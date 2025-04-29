@@ -22,11 +22,11 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { Reminder } from '../reminder.model';
 import { selectReminderConfig } from '../../config/store/global-config.reducer';
 import { BehaviorSubject, combineLatest, EMPTY, timer } from 'rxjs';
-import { DataInitService } from '../../../core/data-init/data-init.service';
 import { TaskService } from '../../tasks/task.service';
 import { Task, TaskWithReminder } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Router } from '@angular/router';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 
 const UPDATE_PERCENTAGE_INTERVAL = 250;
 // since the reminder modal doesn't show instantly we adjust a little for that
@@ -39,14 +39,14 @@ export class ReminderCountdownEffects {
   private _datePipe = inject(DatePipe);
   private _store = inject(Store);
   private _bannerService = inject(BannerService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _router = inject(Router);
 
   reminderCountdownBanner$ = createEffect(
     () =>
-      this._dataInitService.isAllDataLoadedInitially$.pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         concatMap(() => this._store.select(selectReminderConfig)),
         switchMap((reminderCfg) =>
           reminderCfg.isCountdownBannerEnabled

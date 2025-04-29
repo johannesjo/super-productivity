@@ -1,6 +1,10 @@
 import { shortSyntax } from '../short-syntax';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { DEFAULT_TODAY_TAG_COLOR } from '../../work-context/work-context.const';
+import {
+  DEFAULT_PROJECT_COLOR,
+  DEFAULT_TAG_COLOR,
+  DEFAULT_TODAY_TAG_COLOR,
+} from '../../work-context/work-context.const';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -50,7 +54,7 @@ export const shortSyntaxToTags = ({
     }
     shortSyntaxTags.push({
       title: project.title,
-      color: project.theme.primary,
+      color: project.theme.primary || DEFAULT_PROJECT_COLOR,
       projectId: r.projectId,
       icon: 'list',
     });
@@ -132,7 +136,7 @@ export const shortSyntaxToTags = ({
       }
       shortSyntaxTags.push({
         title: tag.title,
-        color: tag.color || tag.theme.primary,
+        color: tag.color || tag.theme.primary || DEFAULT_TAG_COLOR,
         icon: tag.icon || 'style',
       });
     });

@@ -88,11 +88,23 @@
     >
       <mat-icon>today</mat-icon>
     </button>
+
+    @if (
+      task.reminderId || ((plannerService.plannedTaskDayMap$ | async) || {})[task.id]
+    ) {
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="unscheduleTask()"
+        [matTooltip]="T.F.TASK.CMP.UNSCHEDULE_TASK | translate"
+      >
+        <mat-icon>event_busy</mat-icon>
+      </button>
+    }
   </div>
 
   @if (
-    isAdvancedControls() &&
-    IS_TOUCH_PRIMARY &&
+    ((isAdvancedControls() && IS_TOUCH_PRIMARY) || !isAdvancedControls()) &&
     !task.isDone &&
     !isCurrent &&
     !task.subTaskIds.length
@@ -165,7 +177,7 @@
     !task.parentId &&
     !task.isDone &&
     isTodayTag &&
-    (task.projectId || task.tagIds?.length > 1)
+    (task.projectId || task.tagIds.length > 1)
   ) {
     <button
       (click)="removeFromMyDay()"
@@ -208,6 +220,18 @@
   <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
   <!--      </ng-container>-->
   <!--    </button>-->
+
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
+      (click)="moveToTop()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_upward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_TOP | translate }}
+      </span>
+    </button>
+  }
 
   @if (isAdvancedControls() && !task.parentId && !task.isDone) {
     <button
@@ -303,7 +327,7 @@
     <span class="key-i">{{ kb.taskEditTags }}</span>
   </button>
 
-  @if (!task.parentId && (moveToProjectList$ | async)?.length > 0) {
+  @if (!task.parentId && ((moveToProjectList$ | async)?.length || 0) > 0) {
     <button
       [matMenuTriggerFor]="projectMenu"
       mat-menu-item

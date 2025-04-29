@@ -1,8 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { PlannerActions } from './planner.actions';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
@@ -11,12 +10,13 @@ import {
   unScheduleTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class PlannerEffects {
   private _actions$ = inject(Actions);
   private _store = inject(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
 
   saveToDB$ = createEffect(
     () => {
@@ -33,7 +33,7 @@ export class PlannerEffects {
           updateTaskTags,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
-        tap(([, plannerState]) => this._saveToLs(plannerState, true)),
+        tap(([, plannerState]) => this._saveToLs(plannerState)),
       );
     },
     { dispatch: false },
@@ -67,12 +67,9 @@ export class PlannerEffects {
     );
   });
 
-  private _saveToLs(
-    plannerState: PlannerState,
-    isSyncModelChange: boolean = false,
-  ): void {
-    this._persistenceService.planner.saveState(plannerState, {
-      isSyncModelChange,
+  private _saveToLs(plannerState: PlannerState): void {
+    this._pfapiService.m.planner.save(plannerState, {
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

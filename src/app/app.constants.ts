@@ -1,9 +1,27 @@
+import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
+
 export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
+// effectively IS_BROWSER
+export const IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = !IS_ELECTRON && !IS_ANDROID_WEB_VIEW;
+
+// TODO merge and remove one of these
 export const TRACKING_INTERVAL = 1000;
+export const TIME_TRACKING_TO_DB_INTERVAL = 15000;
 
 export const MODEL_VERSION_KEY = '__modelVersion';
 export const DRAG_DELAY_FOR_TOUCH = 75;
 export const DRAG_DELAY_FOR_TOUCH_LONGER = 150;
+
+// TODO use
+// const CORS_SKIP_EXTRA_HEADER_PROP = 'sp_cors_skip' as const;
+// export const CORS_SKIP_EXTRA_HEADERS: { [name: string]: string } = IS_ANDROID_WEB_VIEW
+//   ? ({
+//       [CORS_SKIP_EXTRA_HEADER_PROP]: 'true',
+//     } as const)
+//   : {};
+export const CORS_SKIP_EXTRA_HEADERS: { [name: string]: string } = IS_ANDROID_WEB_VIEW
+  ? {}
+  : {};
 
 import '@angular/common/locales/global/en';
 import '@angular/common/locales/global/es';

@@ -18,7 +18,7 @@
     <!--NOTE: non observable should be enough as we only need the initial value-->
     @if (isTodayListActive()) {
       @if (!t.repeatCfgId) {
-        <mat-icon>alarm</mat-icon>
+        <mat-icon>today</mat-icon>
       }
       @if (t.repeatCfgId) {
         <mat-icon svgIcon="repeat"></mat-icon>
@@ -159,10 +159,12 @@
       >
         @if (!t.subTasks?.length) {
           <div class="time">
-            <div class="time-val">
-              <span [innerHTML]="t.timeSpent | msToString"></span>
-            </div>
-            <div class="separator">/</div>
+            @if (t.timeSpent) {
+              <div class="time-val">
+                <span [innerHTML]="t.timeSpent | msToString"></span>
+              </div>
+              <div class="separator">/</div>
+            }
             <div
               [innerHTML]="t.timeEstimate | msToString"
               class="time-val"
@@ -291,12 +293,12 @@
           color=""
           mat-mini-fab
         >
-          @if (t._showSubTasksMode === ShowSubTasksMode.HideAll) {
+          @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
             <mat-icon>add </mat-icon>
           }
-          @if (t._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+          @if (t._hideSubTasksMode !== ShowSubTasksMode.HideAll) {
             <mat-icon
-              [class.isHideDoneTasks]="t._showSubTasksMode === ShowSubTasksMode.HideDone"
+              [class.isHideDoneTasks]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
               >remove
             </mat-icon>
           }
@@ -305,8 +307,8 @@
       @if (t.subTasks?.length) {
         <task-list
           [@expand]
-          [isHideAll]="t._showSubTasksMode !== ShowSubTasksMode.Show"
-          [isHideDone]="t._showSubTasksMode === ShowSubTasksMode.HideDone"
+          [isHideAll]="!!t._hideSubTasksMode"
+          [isHideDone]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
           [isSubTaskList]="true"
           [listModelId]="t.id"
           [parentId]="t.id"

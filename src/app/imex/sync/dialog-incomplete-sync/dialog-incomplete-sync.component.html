@@ -8,15 +8,14 @@
   </div>
 
   <p>
-    <strong> {{ T.F.SYNC.D_INCOMPLETE_SYNC.T1 | translate }} </strong>
+    <strong> {{ T.F.SYNC.D_INCOMPLETE_SYNC.P1 | translate }} </strong>
   </p>
 
   <p>
-    {{ T.F.SYNC.D_INCOMPLETE_SYNC.T2 | translate }}
-    <code
-      >mfRev: {{ data?.archiveRevInMainFile }} & realRev: {{ data?.archiveRevReal }}</code
-    >
+    {{ T.F.SYNC.D_INCOMPLETE_SYNC.P2 | translate }}
+    <strong>{{ data?.modelId }}</strong>
   </p>
+
   <p>{{ T.F.SYNC.D_INCOMPLETE_SYNC.T3 | translate }}</p>
 
   <p>{{ T.F.SYNC.D_INCOMPLETE_SYNC.T4 | translate }}</p>
@@ -44,7 +43,7 @@
     <button
       (click)="close()"
       color="primary"
-      mat-stroked-button
+      mat-button
     >
       {{ T.G.CANCEL | translate }}
     </button>

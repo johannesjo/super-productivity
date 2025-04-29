@@ -13,7 +13,6 @@ import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field'
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { GlobalConfigService } from '../../../features/config/global-config.service';
 
 @Component({
   selector: 'dialog-get-and-enter-auth-code',
@@ -36,7 +35,6 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
   ],
 })
 export class DialogGetAndEnterAuthCodeComponent {
-  private _globalConfigService = inject(GlobalConfigService);
   private _matDialogRef =
     inject<MatDialogRef<DialogGetAndEnterAuthCodeComponent>>(MatDialogRef);
   data = inject<{
@@ -53,8 +51,5 @@ export class DialogGetAndEnterAuthCodeComponent {
 
   close(token?: string): void {
     this._matDialogRef.close(token);
-    this._globalConfigService.updateSection('sync', {
-      isEnabled: false,
-    });
   }
 }

@@ -135,6 +135,7 @@ $noteFontSize: 14px;
   cursor: move;
   border-top: 1px dashed $dark-theme-extra-border-color;
   opacity: 0;
+  position: relative;
 
   @include lightTheme() {
     border-color: $light-theme-extra-border-color;
@@ -145,7 +146,6 @@ $noteFontSize: 14px;
   }
 
   @include mq(xs) {
-    position: relative;
     z-index: 1;
     margin-top: -8px;
   }

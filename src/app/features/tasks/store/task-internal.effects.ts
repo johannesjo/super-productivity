@@ -73,20 +73,20 @@ export class TaskInternalEffects {
       ofType(addTask, addSubTask),
       filter(({ task }) => !task.timeEstimate),
       withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
-      filter(
-        ([{ task }, cfg]) =>
-          (!task.timeEstimate && cfg.timeTracking.defaultEstimate > 0) ||
-          cfg.timeTracking.defaultEstimateSubTasks > 0,
-      ),
-      map(([action, cfg]) =>
+      map(([action, cfg]) => ({
+        timeEstimate:
+          (action.task.parentId || (action.type === addSubTask.type && action.parentId)
+            ? cfg.timeTracking.defaultEstimateSubTasks
+            : cfg.timeTracking.defaultEstimate) || 0,
+        task: action.task,
+      })),
+      filter(({ timeEstimate }) => timeEstimate > 0),
+      map(({ task, timeEstimate }) =>
         updateTask({
           task: {
-            id: action.task.id,
+            id: task.id,
             changes: {
-              timeEstimate:
-                action.task.parentId || (action as any).parentId
-                  ? cfg.timeTracking.defaultEstimateSubTasks
-                  : cfg.timeTracking.defaultEstimate,
+              timeEstimate,
             },
           },
         }),

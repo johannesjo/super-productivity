@@ -34,8 +34,8 @@ describe('workContext selectors', () => {
               separateTasksBy: ' | ',
             },
           },
-          breakNr: {},
-          breakTime: {},
+          // breakNr: {},
+          // breakTime: {},
           color: null,
           // created: 1620997370531,
           icon: 'wb_sunny',
@@ -46,8 +46,8 @@ describe('workContext selectors', () => {
           theme: TODAY_TAG.theme,
           title: 'Today',
           type: 'TAG',
-          workEnd: {},
-          workStart: {},
+          // workEnd: {},
+          // workStart: {},
         }),
       );
     });

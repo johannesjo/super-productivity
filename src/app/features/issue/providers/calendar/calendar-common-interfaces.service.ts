@@ -9,9 +9,9 @@ import {
   SearchResultItem,
 } from '../../issue.model';
 import { CalendarIntegrationService } from '../../../calendar-integration/calendar-integration.service';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { IssueProviderService } from '../../issue-provider.service';
-import { ICalIssueReduced, CalendarProviderCfg } from './calendar.model';
+import { CalendarProviderCfg, ICalIssueReduced } from './calendar.model';
 import { HttpClient } from '@angular/common/http';
 import { ICAL_TYPE } from '../../issue.const';
 
@@ -35,14 +35,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   }
 
   testConnection$(cfg: CalendarProviderCfg): Observable<boolean> {
-    //  simple http get request
-    return this._http.get(cfg.icalUrl, { responseType: 'text' }).pipe(
-      map((v) => !!v),
-      catchError((err) => {
-        console.error(err);
-        return of(false);
-      }),
-    );
+    return this._calendarIntegrationService.testConnection$(cfg);
   }
 
   getById$(id: number, issueProviderId: string): Observable<IssueData | null> {

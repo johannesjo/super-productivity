@@ -4,9 +4,9 @@ import pThrottle from 'p-throttle';
 import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download } from '../../util/download';
-import { AppDataComplete } from '../../imex/sync/sync.model';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
+import { CompleteBackup } from '../../pfapi/api';
 
 let isWasErrorAlertCreated = false;
 
@@ -30,7 +30,11 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
   return Promise.resolve('');
 };
 
-const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
+const throttle = pThrottle({
+  limit: 2,
+  interval: 5000,
+});
+const _getStacktraceThrottled = throttle(_getStacktrace);
 
 export const logAdvancedStacktrace = (
   origErr: unknown,
@@ -49,11 +53,14 @@ export const logAdvancedStacktrace = (
         stacktraceEl.innerText = stack;
       }
 
-      const githubIssueLink = document.getElementById('github-issue-url');
+      const githubIssueLinks = document.getElementsByClassName('github-issue-urlX');
+      console.log(githubIssueLinks);
 
-      if (githubIssueLink) {
+      if (githubIssueLinks) {
         const errEscaped = _cleanHtml(origErr as string);
-        githubIssueLink.setAttribute('href', getGithubErrorUrl(errEscaped, stack));
+        Array.from(githubIssueLinks).forEach((el) =>
+          el.setAttribute('href', getGithubErrorUrl(errEscaped, stack)),
+        );
       }
 
       // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
@@ -70,7 +77,7 @@ export const createErrorAlert = (
   err: string = '',
   stackTrace: string,
   origErr: any,
-  userData?: AppDataComplete | undefined,
+  userData?: CompleteBackup<any> | undefined,
 ): void => {
   if (isWasErrorAlertCreated) {
     return;
@@ -86,7 +93,7 @@ export const createErrorAlert = (
   errorAlert.innerHTML = `
     <div id="error-alert-inner-wrapper">
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
-    <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
+    <p><a href="${githubUrl}" class="github-issue-urlX" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
     <pre style="line-height: 1.3;">${errEscaped}</pre>
 
@@ -148,6 +155,7 @@ export const createErrorAlert = (
   btnReport.innerText = 'Report';
   tagReport.append(btnReport);
   tagReport.setAttribute('href', githubUrl);
+  tagReport.setAttribute('class', 'github-issue-urlX');
   tagReport.setAttribute('target', '_blank');
   innerWrapper.append(tagReport);
 
@@ -195,7 +203,8 @@ export const getGithubErrorUrl = (
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    title: title,
+    title: '💥 ' + title,
+    template: 'in_app_bug_report.md',
     body: getGithubIssueErrorMarkdown(stackTrace, isHideActionsBeforeError),
   });
 };
@@ -207,23 +216,43 @@ const getGithubIssueErrorMarkdown = (
   const code = '```';
   let txt = `### Steps to Reproduce
 <!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
-<!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 1.
 2.
 3.
-4.
 
-
-### Error Log (Desktop only)
-<!-- For the desktop versions, there is also an error log file in case there is no console output.
-Usually, you can find it here:
-on Linux: ~/.config/superProductivity/logs/main.log
-on macOS: ~/Library/Logs/superProductivity/main.log
-on Windows: %USERPROFILE%/AppData/Roaming/superProductivity/logs/main.log
-. -->
-
-### Console Output
+### Additional Console Output
 <!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Url
+${window.location.href}
 
 ### Meta Info
 ${getSimpleMeta()}

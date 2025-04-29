@@ -2,15 +2,17 @@
 <h1 mat-dialog-title>{{ T.F.SYNC.D_INITIAL_CFG.TITLE | translate }}</h1>
 
 <mat-dialog-content>
-  <form [formGroup]="form">
-    <formly-form
-      (modelChange)="updateCfg($event)"
-      [fields]="fields"
-      [form]="form"
-      [model]="cfg"
-    >
-    </formly-form>
-  </form>
+  @if (_tmpUpdatedCfg) {
+    <form [formGroup]="form">
+      <formly-form
+        (modelChange)="updateTmpCfg($event)"
+        [fields]="fields()"
+        [form]="form"
+        [model]="_tmpUpdatedCfg"
+      >
+      </formly-form>
+    </form>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
@@ -29,8 +31,10 @@
       mat-stroked-button
     >
       <mat-icon>save</mat-icon>
-
-      {{ T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE | translate }}
+      {{
+        (this.isWasEnabled() ? T.G.SAVE : T.F.SYNC.D_INITIAL_CFG.SAVE_AND_ENABLE)
+          | translate
+      }}
     </button>
   </div>
 </mat-dialog-actions>

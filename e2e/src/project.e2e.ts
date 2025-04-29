@@ -23,9 +23,8 @@ const SECOND_PROJECT_BTN = `${SECOND_PROJECT} button:first-of-type`;
 
 // const BACKLOG = `.backlog`;
 // const SPLIT = `split`;
-const FINISH_DAY_BTN = 'button[routerlink="/active/daily-summary"]';
+const MOVE_TO_ARCHIVE_BTN = '.e2e-move-done-to-archive';
 const READY_TO_WORK_BTN = '.ready-to-work-btn';
-const DAILY_SUMMARY = 'daily-summary';
 const GLOBAL_ERROR_ALERT = '.global-error-alert';
 
 module.exports = {
@@ -82,23 +81,23 @@ module.exports = {
       .assert.textContains(WORK_CTX_TITLE, 'Inbox')
       .end(),
 
-  'navigate to daily summary from project without error': (browser: NBrowser) =>
+  'move done tasks to archive without error': (browser: NBrowser) =>
     browser
       // Go to project page
       .goToDefaultProject()
-      // HERE TO: avoid Error   Error while running .clickElement() protocol action:
+      // HERE TO: avoid Error while running .clickElement() protocol action:
       // stale element reference: stale element not found in the current frame
       .pause(200)
       .click(READY_TO_WORK_BTN)
+      .addTask('Test task 1')
+      .addTask('Test task 2')
+      .moveToElement('task:nth-child(1)', 30, 30)
+      .click('.task-done-btn')
 
-      // navigate to
-      .waitForElementVisible(FINISH_DAY_BTN)
-      .click(FINISH_DAY_BTN)
-
-      .waitForElementPresent(DAILY_SUMMARY)
-      // wait a bit for route to be changed
+      .waitForElementVisible(MOVE_TO_ARCHIVE_BTN)
+      .click(MOVE_TO_ARCHIVE_BTN)
       .pause(500)
-      .assert.urlEquals(`${BASE}/#/project/INBOX/daily-summary`)
+      .assert.elementPresent('task:nth-child(1)')
       .assert.not.elementPresent(GLOBAL_ERROR_ALERT)
       .end(),
 };

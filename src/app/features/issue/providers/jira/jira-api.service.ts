@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
@@ -338,6 +338,8 @@ export class JiraApiService {
   }): Observable<any> {
     const worklog = {
       started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
+      // TODO check if this can be replaced with this
+      // started: formatISODateWithOffset(new Date(started)),
       timeSpentSeconds: Math.floor(timeSpent / 1000),
       comment,
     };
@@ -478,14 +480,17 @@ export class JiraApiService {
     });
 
     // save to request log (also sets up timeout)
-    this._requestsLog[requestId] = this._makeJiraRequestLogItem({
-      promiseResolve,
-      promiseReject,
-      requestId,
-      requestInit,
-      transform,
-      jiraCfg,
-    });
+    // since we don't use the requestLog anyway on android web view we can just use the requestId
+    if (!IS_ANDROID_WEB_VIEW) {
+      this._requestsLog[requestId] = this._makeJiraRequestLogItem({
+        promiseResolve,
+        promiseReject,
+        requestId,
+        requestInit,
+        transform,
+        jiraCfg,
+      });
+    }
 
     const requestToSend = { requestId, requestInit, url };
     if (IS_ELECTRON) {

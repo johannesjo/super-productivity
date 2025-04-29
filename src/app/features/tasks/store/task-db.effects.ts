@@ -1,10 +1,9 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   __updateMultipleTaskSimple,
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -20,8 +19,7 @@ import {
   restoreTask,
   roundTimeSpentForDay,
   scheduleTask,
-  toggleStart,
-  toggleTaskShowSubTasks,
+  toggleTaskHideSubTasks,
   undoDeleteTask,
   unScheduleTask,
   updateTask,
@@ -29,8 +27,7 @@ import {
   updateTaskUi,
 } from './task.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { auditTime, first, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
 import { TaskState } from '../task.model';
 import { environment } from '../../../../environments/environment';
@@ -42,12 +39,29 @@ import {
 } from '../task-attachment/task-attachment.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import { TIME_TRACKING_TO_DB_INTERVAL } from '../../../app.constants';
 
 @Injectable()
 export class TaskDbEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
+
+  updateTaskAuditTime$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(
+          // TIME TRACKING
+          TimeTrackingActions.addTimeSpent,
+        ),
+        auditTime(TIME_TRACKING_TO_DB_INTERVAL),
+        switchMap(() => this._store$.pipe(select(selectTaskFeatureState), first())),
+        tap((taskState) => this._saveToLs(taskState, true)),
+      ),
+    { dispatch: false },
+  );
 
   updateTask$: any = createEffect(
     () =>
@@ -55,7 +69,6 @@ export class TaskDbEffects {
         ofType(
           addTask,
           restoreTask,
-          addTimeSpent,
           deleteTask,
           deleteTasks,
           undoDeleteTask,
@@ -63,6 +76,8 @@ export class TaskDbEffects {
           convertToMainTask,
           // setCurrentTask,
           // unsetCurrentTask,
+          // toggleStart,
+
           updateTask,
           __updateMultipleTaskSimple,
           updateTaskTags,
@@ -74,7 +89,6 @@ export class TaskDbEffects {
           moveSubTaskToBottom,
           moveToArchive_,
           moveToOtherProject,
-          toggleStart,
           roundTimeSpentForDay,
 
           // REMINDER
@@ -107,7 +121,7 @@ export class TaskDbEffects {
   updateTaskUi$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTaskUi, toggleTaskShowSubTasks),
+        ofType(updateTaskUi, toggleTaskHideSubTasks),
         withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
         tap(([, taskState]) => this._saveToLs(taskState)),
       ),
@@ -115,8 +129,11 @@ export class TaskDbEffects {
   );
 
   // @debounce(50)
-  private _saveToLs(taskState: TaskState, isSyncModelChange: boolean = false): void {
-    this._persistenceService.task.saveState(
+  private _saveToLs(
+    taskState: TaskState,
+    isUpdateRevAndLastUpdate: boolean = false,
+  ): void {
+    this._pfapiService.m.task.save(
       {
         ...taskState,
 
@@ -124,7 +141,7 @@ export class TaskDbEffects {
         selectedTaskId: environment.production ? null : taskState.selectedTaskId,
         currentTaskId: null,
       },
-      { isSyncModelChange },
+      { isUpdateRevAndLastUpdate },
     );
   }
 }

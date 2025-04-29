@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   catchError,
@@ -33,6 +33,8 @@ import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
+import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
+import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -118,6 +120,24 @@ export class CalendarIntegrationService {
     }
   }
 
+  testConnection$(cfg: CalendarProviderCfg): Observable<boolean> {
+    //  simple http get request
+    return this._http
+      .get(cfg.icalUrl, {
+        responseType: 'text',
+        headers: {
+          ...CORS_SKIP_EXTRA_HEADERS,
+        },
+      })
+      .pipe(
+        map((v) => !!v),
+        catchError((err) => {
+          console.error(err);
+          return of(false);
+        }),
+      );
+  }
+
   skipCalendarEvent(evId: string): void {
     this.skippedEventIds$.next([...this.skippedEventIds$.getValue(), evId]);
     localStorage.setItem(
@@ -133,32 +153,39 @@ export class CalendarIntegrationService {
     end = getEndOfDayTimestamp(),
     isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
-    console.log('REQUEST EVENTS', calProvider, start, end);
+    // console.log('REQUEST EVENTS', calProvider, start, end);
 
-    return this._http.get(calProvider.icalUrl, { responseType: 'text' }).pipe(
-      map((icalStrData) =>
-        getRelevantEventsForCalendarIntegrationFromIcal(
-          icalStrData,
-          calProvider.id,
-          start,
-          end,
+    return this._http
+      .get(calProvider.icalUrl, {
+        responseType: 'text',
+        headers: {
+          ...CORS_SKIP_EXTRA_HEADERS,
+        },
+      })
+      .pipe(
+        map((icalStrData) =>
+          getRelevantEventsForCalendarIntegrationFromIcal(
+            icalStrData,
+            calProvider.id,
+            start,
+            end,
+          ),
         ),
-      ),
-      catchError((err) => {
-        console.error(err);
-        this._snackService.open({
-          type: 'ERROR',
-          msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
-          translateParams: {
-            errTxt: err?.toString() || err?.status || err?.message || 'UNKNOWN :(',
-          },
-        });
-        if (isForwardError) {
-          throw new Error(err);
-        }
-        return of([]);
-      }),
-    );
+        catchError((err) => {
+          console.error(err);
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
+            translateParams: {
+              errTxt: err?.toString() || err?.status || err?.message || 'UNKNOWN :(',
+            },
+          });
+          if (isForwardError) {
+            throw new Error(err);
+          }
+          return of([]);
+        }),
+      );
   }
 
   requestEventsForSchedule$(

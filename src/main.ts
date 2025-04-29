@@ -37,7 +37,12 @@ import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { ReminderModule } from './app/features/reminder/reminder.module';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, withHashLocation } from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withHashLocation,
+  withPreloading,
+} from '@angular/router';
 import { APP_ROUTES } from './app/app.routes';
 import { StoreModule } from '@ngrx/store';
 import { reducers } from './app/root-store';
@@ -53,6 +58,8 @@ import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BackgroundTask } from '@capawesome/capacitor-background-task';
+import { promiseTimeout } from './app/util/promise-timeout';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -156,38 +163,36 @@ bootstrapApplication(AppComponent, {
     },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
-    provideRouter(APP_ROUTES, withHashLocation()),
+    provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
   ],
-})
-  .then(() => {
-    // TODO make asset caching work for electron
-    if (
-      'serviceWorker' in navigator &&
-      (environment.production || environment.stage) &&
-      !IS_ELECTRON &&
-      !IS_ANDROID_WEB_VIEW
-    ) {
-      console.log('Registering Service worker');
-      return navigator.serviceWorker.register('ngsw-worker.js');
-    } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
-      navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
-          for (const registration of registrations) {
-            registration.unregister();
-          }
-        })
-        .catch((e) => {
-          console.error('ERROR when unregistering service worker');
-          console.error(e);
-        });
-    }
-    return;
-  })
-  .catch((err: any) => {
-    console.log('Service Worker Registration Error');
-    console.log(err);
-  });
+}).then(() => {
+  // TODO make asset caching work for electron
+  if (
+    'serviceWorker' in navigator &&
+    (environment.production || environment.stage) &&
+    !IS_ELECTRON &&
+    !IS_ANDROID_WEB_VIEW
+  ) {
+    console.log('Registering Service worker');
+    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: any) => {
+      console.log('Service Worker Registration Error');
+      console.error(err);
+    });
+  } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+        }
+      })
+      .catch((e) => {
+        console.error('ERROR when unregistering service worker');
+        console.error(e);
+      });
+  }
+  return undefined;
+});
 
 // fix mobile scrolling while dragging
 window.addEventListener('touchmove', () => {});
@@ -208,5 +213,21 @@ if (IS_ANDROID_WEB_VIEW) {
     } else {
       window.history.back();
     }
+  });
+
+  CapacitorApp.addListener('appStateChange', async ({ isActive }) => {
+    if (isActive) {
+      return;
+    }
+    // The app state has been changed to inactive.
+    // Start the background task by calling `beforeExit`.
+    const taskId = await BackgroundTask.beforeExit(async () => {
+      // Run your code...
+      // Finish the background task as soon as everything is done.
+      console.log('Time window for completing sync started');
+      await promiseTimeout(20000);
+      console.log('Time window for completing sync ended. Closing app!');
+      BackgroundTask.finish({ taskId });
+    });
   });
 }

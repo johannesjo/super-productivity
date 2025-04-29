@@ -62,31 +62,32 @@
     </button>
 
     @let isOnline = isOnline$ | async;
-    <!-- -->
-    @let isSyncEnabled = syncProviderService.isEnabled$ | async;
+    @let isSyncEnabled = syncWrapperService.isEnabled$ | async;
 
     <button
       class="sync-btn"
       matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
       (click)="isSyncEnabled ? sync() : setupSync()"
       (longPress)="setupSync()"
+      (contextmenu)="$event.preventDefault(); setupSync()"
       mat-icon-button
     >
       @if (isSyncEnabled) {
-        <!-- -->
         @if (isOnline) {
-          <!-- -->
-          <mat-icon [class.spin]="syncProviderService.isSyncing$ | async">sync</mat-icon>
-          @let isInSync = syncProviderService.isCurrentProviderInSync$ | async;
-          <!-- -->
-          @if (isInSync) {
-            <mat-icon class="sync-success-check-ico">check</mat-icon>
+          @let syncState = syncWrapperService.syncState$ | async;
+          @if (syncState === 'ERROR') {
+            <mat-icon>sync_problem</mat-icon>
+          } @else {
+            <mat-icon [class.spin]="syncWrapperService.isSyncInProgress$ | async"
+              >sync</mat-icon
+            >
           }
-          <!-- -->
+          @if (syncState === 'IN_SYNC') {
+            <mat-icon class="sync-state-ico">check</mat-icon>
+          }
         } @else {
           <mat-icon>wifi_off</mat-icon>
         }
-        <!-- -->
       } @else {
         <mat-icon>sync_disabled</mat-icon>
       }

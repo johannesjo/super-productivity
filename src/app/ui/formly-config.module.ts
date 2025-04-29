@@ -19,6 +19,7 @@ import { SelectProjectComponent } from '../features/config/select-project/select
 import { RepeatSectionTypeComponent } from '../features/config/repeat-section-type/repeat-section-type.component';
 import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
+import { FormlyBtnComponent } from './formly-button/formly-btn.component';
 
 @NgModule({
   imports: [
@@ -41,6 +42,7 @@ import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-s
           component: FormlyTranslatedTemplateComponent,
         },
         { name: 'collapsible', component: FormlyCollapsibleComponent, wrappers: [] },
+        { name: 'btn', component: FormlyBtnComponent, wrappers: [] },
         {
           name: 'keyboard',
           component: KeyboardInputComponent,

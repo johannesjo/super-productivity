@@ -5,7 +5,6 @@ import {
   WORK_CONTEXT_DEFAULT_COMMON,
   WORK_CONTEXT_DEFAULT_THEME,
 } from '../work-context/work-context.const';
-import { WorkContextThemeCfg } from '../work-context/work-context.model';
 
 export const TODAY_TAG: Tag = {
   color: null,
@@ -16,6 +15,10 @@ export const TODAY_TAG: Tag = {
   id: 'TODAY',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
+    isAutoContrast: false,
+    huePrimary: '400',
+    hueAccent: '500',
+    hueWarn: '500',
     primary: DEFAULT_TODAY_TAG_COLOR,
     // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
     backgroundImageDark: '',
@@ -47,12 +50,7 @@ export const NO_LIST_TAG: Tag = {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: DEFAULT_TODAY_TAG_COLOR,
     backgroundImageDark: '',
-
-    ...((window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? {
-          isDisableBackgroundGradient: false,
-        }
-      : {}) as Partial<WorkContextThemeCfg>),
+    isDisableBackgroundGradient: false,
   },
 };
 

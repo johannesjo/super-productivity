@@ -87,14 +87,13 @@ import { DropboxEffects } from '../imex/sync/dropbox/store/dropbox.effects';
 import { FinishDayBeforeCloseEffects } from '../features/finish-day-before-close/finish-day-before-close.effects';
 import { GitlabIssueEffects } from '../features/issue/providers/gitlab/gitlab-issue/gitlab-issue.effects';
 import { JiraIssueEffects } from '../features/issue/providers/jira/jira-issue/jira-issue.effects';
-import { LocalBackupEffects } from '../imex/local-backup/local-backup.effects';
-import { LocalFileSyncElectronEffects } from '../imex/sync/local-file-sync/store/local-file-sync-electron.effects';
 import { OpenProjectEffects } from '../features/issue/providers/open-project/open-project-issue/store/open-project.effects';
 import { ReminderCountdownEffects } from '../features/reminder/store/reminder-countdown.effects';
 import { SyncEffects } from '../imex/sync/sync.effects';
-import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { BoardsEffects } from '../features/boards/store/boards.effects';
+import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
+import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracking.effects';
 
 @NgModule({
   declarations: [],
@@ -166,6 +165,9 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
     StoreModule.forFeature(boardsFeature),
     EffectsModule.forFeature([BoardsEffects]),
 
+    StoreModule.forFeature(timeTrackingFeature),
+    EffectsModule.forFeature([TimeTrackingEffects]),
+
     // EFFECTS ONLY
     EffectsModule.forFeature([...(IS_ANDROID_WEB_VIEW ? [AndroidEffects] : [])]),
     EffectsModule.forFeature([CaldavIssueEffects]),
@@ -176,13 +178,9 @@ import { BoardsEffects } from '../features/boards/store/boards.effects';
     EffectsModule.forFeature([FinishDayBeforeCloseEffects]),
     EffectsModule.forFeature([GitlabIssueEffects]),
     EffectsModule.forFeature([JiraIssueEffects]),
-    EffectsModule.forFeature([LocalBackupEffects]),
-    EffectsModule.forFeature([LocalFileSyncElectronEffects]),
     EffectsModule.forFeature([OpenProjectEffects]),
     EffectsModule.forFeature([ReminderCountdownEffects]),
     EffectsModule.forFeature([SyncEffects]),
-
-    LocalBackupModule,
   ],
 })
 export class FeatureStoresModule {}

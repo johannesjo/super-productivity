@@ -8,7 +8,7 @@ import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-c
 import { TagState } from '../../features/tag/tag.model';
 import { SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
 import { ProjectArchive } from '../../features/project/project-archive.model';
-import { SyncProvider } from './sync-provider.model';
+import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { ProjectState } from '../../features/project/project.model';
 import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
@@ -64,9 +64,9 @@ export interface LocalSyncMetaForProvider {
 }
 
 export interface LocalSyncMetaModel {
-  [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
-  [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
-  [SyncProvider.LocalFile]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.WebDAV]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.Dropbox]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.LocalFile]: LocalSyncMetaForProvider;
 }
 
 export type AppBaseDataEntityLikeStates =
@@ -76,7 +76,7 @@ export type AppBaseDataEntityLikeStates =
   | TaskArchive
   | SimpleCounterState;
 
-export interface AppDataComplete extends AppBaseData {
+export interface AppDataCompleteLegacy extends AppBaseData {
   lastLocalSyncModelChange: number | null;
   lastArchiveUpdate: number | null;
 }
@@ -87,7 +87,7 @@ export type DialogPermissionResolutionResult = 'DISABLED_SYNC' | 'GRANTED_PERMIS
 
 export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
 
-export type SyncResult =
+export type SyncResultLegacy =
   | 'SUCCESS'
   | 'NO_UPDATE_REQUIRED'
   | 'USER_ABORT'

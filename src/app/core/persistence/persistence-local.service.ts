@@ -1,19 +1,19 @@
 import { inject, Injectable } from '@angular/core';
-import { DB, LS } from './storage-keys.const';
+import { DB } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
-import { SyncProvider } from 'src/app/imex/sync/sync-provider.model';
+import { LegacySyncProvider } from 'src/app/imex/sync/legacy-sync-provider.model';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
-  [SyncProvider.Dropbox]: {
+  [LegacySyncProvider.Dropbox]: {
     rev: null,
     lastSync: 0,
     revTaskArchive: null,
   },
-  [SyncProvider.WebDAV]: { rev: null, lastSync: 0, revTaskArchive: null },
-  [SyncProvider.LocalFile]: {
+  [LegacySyncProvider.WebDAV]: { rev: null, lastSync: 0, revTaskArchive: null },
+  [LegacySyncProvider.LocalFile]: {
     rev: null,
     lastSync: 0,
     revTaskArchive: null,
@@ -41,9 +41,9 @@ export class PersistenceLocalService {
 
     if (
       r &&
-      r[SyncProvider.Dropbox] &&
-      r[SyncProvider.WebDAV] &&
-      r[SyncProvider.LocalFile]
+      r[LegacySyncProvider.Dropbox] &&
+      r[LegacySyncProvider.WebDAV] &&
+      r[LegacySyncProvider.LocalFile]
     ) {
       if (environment.production) {
         console.log(r);
@@ -67,12 +67,11 @@ export class PersistenceLocalService {
   }
 
   async loadLastSyncModelChange(): Promise<number> {
-    const r =
-      ((await this._databaseService.load(
-        DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
-        // get legacy value if non here
-        // TODO remove legacy value
-      )) as string) || localStorage.getItem(LS.LAST_LOCAL_SYNC_MODEL_CHANGE);
+    const r = (await this._databaseService.load(
+      DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+      // get legacy value if non here
+      // TODO remove legacy value
+    )) as string;
     return this._parseTS(r);
   }
 
@@ -83,6 +82,8 @@ export class PersistenceLocalService {
   }
 
   async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
+    console.log(lastSyncModelChange);
+    console.trace();
     this.lastSnyModelChange$.next(lastSyncModelChange);
     return await this._databaseService.save(
       DB.LOCAL_LAST_SYNC_MODEL_CHANGE,

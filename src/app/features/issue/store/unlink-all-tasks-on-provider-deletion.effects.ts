@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TaskService } from '../../tasks/task.service';
 import { TaskCopy } from '../../tasks/task.model';
@@ -8,14 +8,14 @@ import { Observable } from 'rxjs';
 import { Update } from '@ngrx/entity/src/models';
 import { Store } from '@ngrx/store';
 import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   readonly UNLINKED_PARTIAL_TASK: Partial<TaskCopy> = {
     issueId: undefined,
@@ -68,10 +68,8 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
           changes: this.UNLINKED_PARTIAL_TASK,
         };
       });
-    await this._persistenceService.taskArchive.execAction(
-      __updateMultipleTaskSimple({ taskUpdates: archiveTaskUpdates }),
-      true,
-    );
+
+    await this._taskArchiveService.updateTasks(archiveTaskUpdates);
 
     console.log('unlinkAllTasksOnProviderDeletion$', {
       regularTasks,

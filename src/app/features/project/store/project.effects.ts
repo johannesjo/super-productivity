@@ -1,11 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { concatMap, filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
   addProject,
   addProjects,
-  addToProjectBreakTime,
   archiveProject,
   deleteProject,
   moveAllProjectBacklogTasksToRegularList,
@@ -22,23 +21,17 @@ import {
   updateProject,
   updateProjectAdvancedCfg,
   updateProjectOrder,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
-  deleteTasks,
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
 } from '../../tasks/store/task.actions';
-import { ProjectService } from '../project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
 import {
@@ -48,8 +41,6 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../project.model';
-import { Task, TaskArchive } from '../../tasks/task.model';
-import { unique } from '../../../util/unique';
 import { EMPTY, Observable, of } from 'rxjs';
 import { selectProjectFeatureState } from './project.selectors';
 import {
@@ -58,19 +49,21 @@ import {
   moveNoteToOtherProject,
   updateNoteOrder,
 } from '../../note/store/note.actions';
-import { DateService } from 'src/app/core/date/date.service';
 import { ReminderService } from '../../reminder/reminder.service';
+import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Injectable()
 export class ProjectEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
   private _snackService = inject(SnackService);
-  private _projectService = inject(ProjectService);
-  private _persistenceService = inject(PersistenceService);
+  private _taskArchiveService = inject(TaskArchiveService);
+  private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _dateService = inject(DateService);
   private _reminderService = inject(ReminderService);
+  private _timeTrackingService = inject(TimeTrackingService);
 
   syncProjectToLs$: Observable<unknown> = createEffect(
     () =>
@@ -82,9 +75,6 @@ export class ProjectEffects {
           deleteProject.type,
           updateProject.type,
           updateProjectAdvancedCfg.type,
-          updateProjectWorkStart.type,
-          updateProjectWorkEnd.type,
-          addToProjectBreakTime.type,
           updateProjectOrder.type,
           archiveProject.type,
           unarchiveProject.type,
@@ -102,16 +92,7 @@ export class ProjectEffects {
           moveProjectTaskToRegularListAuto.type,
         ),
         switchMap((a) => {
-          // exclude ui only actions
-          if (
-            [updateProjectWorkStart.type, updateProjectWorkEnd.type].includes(
-              a.type as any,
-            )
-          ) {
-            return this.saveToLs$(false);
-          } else {
-            return this.saveToLs$(true);
-          }
+          return this.saveToLs$(true);
         }),
       ),
     { dispatch: false },
@@ -191,38 +172,6 @@ export class ProjectEffects {
     { dispatch: false },
   );
 
-  updateWorkStart$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      filter(({ task }) => !!task.projectId),
-      concatMap(({ task }) =>
-        this._projectService.getByIdOnce$(task.projectId as string).pipe(first()),
-      ),
-      filter((project: Project) => !project.workStart[this._dateService.todayStr()]),
-      map((project) => {
-        return updateProjectWorkStart({
-          id: project.id,
-          date: this._dateService.todayStr(),
-          newVal: Date.now(),
-        });
-      }),
-    ),
-  );
-
-  updateWorkEnd$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(addTimeSpent),
-      filter(({ task }) => !!task.projectId),
-      map(({ task }) => {
-        return updateProjectWorkEnd({
-          id: task.projectId as string,
-          date: this._dateService.todayStr(),
-          newVal: Date.now(),
-        });
-      }),
-    ),
-  );
-
   // TODO a solution for orphaned tasks might be needed
 
   deleteProjectRelatedData: Observable<unknown> = createEffect(
@@ -232,8 +181,9 @@ export class ProjectEffects {
         tap(async ({ project, allTaskIds }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
-          this._removeAllArchiveTasksForProject(id);
+          this._taskArchiveService.removeAllArchiveTasksForProject(id);
           this._reminderService.removeRemindersByRelatedIds(allTaskIds);
+          this._timeTrackingService.cleanupDataEverywhereForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
           const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
@@ -264,7 +214,7 @@ export class ProjectEffects {
   //     this._actions$.pipe(
   //       ofType(archiveProject.type),
   //       tap(async ({ id }) => {
-  //         await this._persistenceService.archiveProject(id);
+  //         await this._pfapiService.archiveProject(id);
   //         // TODO remove reminders
   //         this._snackService.open({
   //           ico: 'archive',
@@ -279,7 +229,7 @@ export class ProjectEffects {
   //     this._actions$.pipe(
   //       ofType(unarchiveProject.type),
   //       tap(async ({ id }) => {
-  //         await this._persistenceService.unarchiveProject(id);
+  //         await this._pfapiService.unarchiveProject(id);
   //
   //         this._snackService.open({
   //           ico: 'unarchive',
@@ -337,40 +287,15 @@ export class ProjectEffects {
     { dispatch: false },
   );
 
-  private async _removeAllArchiveTasksForProject(
-    projectIdToDelete: string,
-  ): Promise<any> {
-    const taskArchiveState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
-    // NOTE: task archive might not if there never was a day completed
-    const archiveTaskIdsToDelete = !!taskArchiveState
-      ? (taskArchiveState.ids as string[]).filter((id) => {
-          const t = taskArchiveState.entities[id] as Task;
-          if (!t) {
-            throw new Error('No task');
-          }
-          return t.projectId === projectIdToDelete;
-        })
-      : [];
-    console.log(
-      'Archive TaskIds to remove/unique',
-      archiveTaskIdsToDelete,
-      unique(archiveTaskIdsToDelete),
-    );
-    // remove archive
-    await this._persistenceService.taskArchive.execAction(
-      deleteTasks({ taskIds: archiveTaskIdsToDelete }),
-      true,
-    );
-  }
-
-  private saveToLs$(isSyncModelChange: boolean): Observable<unknown> {
+  private saveToLs$(isUpdateRevAndLastUpdate: boolean): Observable<unknown> {
     return this._store$.pipe(
       // tap(() => console.log('SAVE')),
       select(selectProjectFeatureState),
       take(1),
       switchMap((projectState) =>
-        this._persistenceService.project.saveState(projectState, { isSyncModelChange }),
+        this._pfapiService.m.project.save(projectState, {
+          isUpdateRevAndLastUpdate,
+        }),
       ),
     );
   }

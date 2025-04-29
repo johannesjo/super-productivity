@@ -42,7 +42,6 @@ import { devError } from '../../../util/dev-error';
 import {
   addProject,
   addProjects,
-  addToProjectBreakTime,
   archiveProject,
   deleteProject,
   loadProjects,
@@ -61,8 +60,6 @@ import {
   updateProject,
   updateProjectAdvancedCfg,
   updateProjectOrder,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
 import {
@@ -72,7 +69,6 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
-import { roundTsToMinutes } from '../../../util/round-ts-to-minutes';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -162,7 +158,7 @@ export const projectReducer = createReducer<ProjectState>(
       {
         id,
         changes: {
-          isHiddenFromMenu: !state.entities[id]?.isHiddenFromMenu,
+          isHiddenFromMenu: !(state.entities[id] as Project).isHiddenFromMenu,
         },
       },
       state,
@@ -192,60 +188,6 @@ export const projectReducer = createReducer<ProjectState>(
       state,
     ),
   ),
-
-  on(updateProjectWorkStart, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workStart: {
-            ...oldP.workStart,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    );
-  }),
-  on(updateProjectWorkEnd, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workEnd: {
-            ...oldP.workEnd,
-            [date]: roundTsToMinutes(newVal),
-          },
-        },
-      },
-      state,
-    );
-  }),
-
-  on(addToProjectBreakTime, (state, { id, date, valToAdd }) => {
-    const oldP = state.entities[id] as Project;
-    const oldBreakTime = oldP.breakTime[date] || 0;
-    const oldBreakNr = oldP.breakNr[date] || 0;
-
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          breakNr: {
-            ...oldP.breakNr,
-            [date]: oldBreakNr + 1,
-          },
-          breakTime: {
-            ...oldP.breakTime,
-            [date]: oldBreakTime + valToAdd,
-          },
-        },
-      },
-      state,
-    );
-  }),
 
   on(updateProjectAdvancedCfg, (state, { projectId, sectionKey, data }) => {
     const currentProject = state.entities[projectId] as Project;
@@ -518,7 +460,8 @@ export const projectReducer = createReducer<ProjectState>(
   on(moveProjectTaskToRegularListAuto, (state, { taskId, projectId, isMoveToTop }) => {
     const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
-    return todaysTaskIdsBefore.includes(taskId)
+    // we check if task was in backlog before to avoid moving up sub tasks
+    return todaysTaskIdsBefore.includes(taskId) || !backlogIdsBefore.includes(taskId)
       ? state
       : projectAdapter.updateOne(
           {

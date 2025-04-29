@@ -5,9 +5,7 @@ import {
   inject,
   viewChild,
 } from '@angular/core';
-import { DataImportService } from '../sync/data-import.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { AppDataComplete } from '../sync/sync.model';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -17,6 +15,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { PfapiService } from 'src/app/pfapi/pfapi.service';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Component({
   selector: 'file-imex',
@@ -26,9 +27,9 @@ import { TranslatePipe } from '@ngx-translate/core';
   imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class FileImexComponent {
-  private _dataImportService = inject(DataImportService);
   private _snackService = inject(SnackService);
   private _router = inject(Router);
+  private _pfapiService = inject(PfapiService);
 
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
@@ -41,7 +42,7 @@ export class FileImexComponent {
     reader.onload = async () => {
       const textData = reader.result;
       console.log(textData);
-      let data: AppDataComplete | undefined;
+      let data: AppDataCompleteNew | undefined;
       let oldData;
       try {
         data = oldData = JSON.parse((textData as any).toString());
@@ -55,7 +56,15 @@ export class FileImexComponent {
         alert('V1 Data. Migration not supported any more.');
       } else {
         await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        await this._dataImportService.importCompleteSyncData(data as AppDataComplete);
+        try {
+          await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
+        } catch (e) {
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
+          });
+          return;
+        }
       }
 
       const fileInputRef = this.fileInputRef();
@@ -72,13 +81,25 @@ export class FileImexComponent {
   }
 
   async downloadBackup(): Promise<void> {
-    const data = await this._dataImportService.getCompleteSyncData();
+    const data = await this._pfapiService.pf.loadCompleteBackup();
     download('super-productivity-backup.json', JSON.stringify(data));
+    if (IS_ANDROID_WEB_VIEW) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+      });
+    }
     // download('super-productivity-backup.json', privacyExport(data));
   }
 
   async privacyAppDataDownload(): Promise<void> {
-    const data = await this._dataImportService.getCompleteSyncData();
+    const data = await this._pfapiService.pf.loadCompleteBackup();
     download('super-productivity-backup.json', privacyExport(data));
+    if (IS_ANDROID_WEB_VIEW) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+      });
+    }
   }
 }

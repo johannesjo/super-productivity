@@ -29,7 +29,11 @@ import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgClass } from '@angular/common';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
-import { HelperClasses } from '../../../app.constants';
+import {
+  HelperClasses,
+  IS_ELECTRON,
+  IS_WEB_EXTENSION_REQUIRED_FOR_JIRA,
+} from '../../../app.constants';
 import { MatInputModule } from '@angular/material/input';
 import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -42,6 +46,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { FormlyModule } from '@ngx-formly/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -214,4 +219,8 @@ export class DialogEditIssueProviderComponent {
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;
+  protected readonly IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
+  protected readonly IS_ELECTRON = IS_ELECTRON;
+  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA =
+    IS_WEB_EXTENSION_REQUIRED_FOR_JIRA;
 }

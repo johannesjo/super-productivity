@@ -166,7 +166,7 @@ export type JiraOriginalTransition = Readonly<{
     id: string;
     statusCategory: {
       self: string;
-      id: 2;
+      id: number;
       key: string;
       colorName: string;
       name: string;

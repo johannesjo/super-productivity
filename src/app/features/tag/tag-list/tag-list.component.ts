@@ -18,6 +18,7 @@ import { selectTagFeatureState } from '../store/tag.reducer';
 import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
 import { TagComponent } from '../tag/tag.component';
+import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 
 @Component({
   selector: 'tag-list',
@@ -61,7 +62,7 @@ export class TagListComponent {
     if (project) {
       const projectTag: Tag = {
         ...project,
-        color: project.theme.primary,
+        color: project.theme.primary || DEFAULT_PROJECT_COLOR,
         created: 0,
         icon: project.icon || 'folder_special',
       };

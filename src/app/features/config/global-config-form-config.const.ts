@@ -9,7 +9,6 @@ import { LANGUAGE_SELECTION_FORM_FORM } from './form-cfgs/language-selection-for
 import { EVALUATION_SETTINGS_FORM_CFG } from './form-cfgs/evaluation-settings-form.const';
 import { SIMPLE_COUNTER_FORM } from './form-cfgs/simple-counter-form.const';
 import { TIME_TRACKING_FORM_CFG } from './form-cfgs/time-tracking-form.const';
-import { SYNC_FORM } from './form-cfgs/sync-form.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SCHEDULE_FORM_CFG } from './form-cfgs/schedule-form.const';
@@ -37,10 +36,9 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   SCHEDULE_FORM_CFG,
 ].filter(filterGlobalConfigForm);
 
-export const GLOBAL_SYNC_FORM_CONFIG: ConfigFormConfig = [
-  SYNC_FORM,
+export const GLOBAL_IMEX_FORM_CONFIG: ConfigFormConfig = [
   // NOTE: the backup form is added dynamically due to async prop required
-  ...(IS_ANDROID_WEB_VIEW ? [] : [IMEX_FORM]),
+  IMEX_FORM,
 ].filter(filterGlobalConfigForm);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [

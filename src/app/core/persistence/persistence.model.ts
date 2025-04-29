@@ -2,7 +2,7 @@ import { AppBaseData } from '../../imex/sync/sync.model';
 import { Action } from '@ngrx/store';
 import { ActionReducer } from '@ngrx/store/src/models';
 
-export interface PersistenceBaseModel<T> {
+export interface PersistenceLegacyBaseModel<T> {
   appDataKey: keyof AppBaseData;
 
   loadState(isSkipMigration?: boolean): Promise<T>;
@@ -13,7 +13,7 @@ export interface PersistenceBaseModel<T> {
   ): Promise<unknown>;
 }
 
-export interface PersistenceBaseEntityModel<S, M> extends PersistenceBaseModel<S> {
+export interface PersistenceBaseEntityModel<S, M> extends PersistenceLegacyBaseModel<S> {
   getById(id: string): Promise<M>;
 
   // NOTE: side effects are not executed!!!

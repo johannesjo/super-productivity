@@ -15,7 +15,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
-import { SyncProviderService } from '../../imex/sync/sync-provider.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { first, mapTo, switchMap } from 'rxjs/operators';
 import { fromEvent, merge, Observable, of } from 'rxjs';
 
@@ -33,7 +33,7 @@ export class ShortcutService {
   private _activatedRoute = inject(ActivatedRoute);
   private _uiHelperService = inject(UiHelperService);
   private _translateService = inject(TranslateService);
-  private _syncProviderService = inject(SyncProviderService);
+  private _syncWrapperService = inject(SyncWrapperService);
   private _ngZone = inject(NgZone);
   private _store = inject(Store);
 
@@ -165,8 +165,8 @@ export class ShortcutService {
       this._layoutService.toggleAddTaskPanel();
     } else if (checkKeyCombo(ev, keys.triggerSync)) {
       ev.preventDefault();
-      if (await this._syncProviderService.isEnabled$.pipe(first()).toPromise()) {
-        this._syncProviderService.sync();
+      if (await this._syncWrapperService.isEnabled$.pipe(first()).toPromise()) {
+        this._syncWrapperService.sync();
       }
     } else if (
       checkKeyCombo(ev, 'Ctrl+Shift+*') &&

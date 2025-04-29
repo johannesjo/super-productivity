@@ -2,13 +2,14 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "resolveJsonModule": false,
+    "resolveJsonModule": true,
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "typeRoots": ["node_modules/@types"],
+    "downlevelIteration": true,
     "lib": ["dom"]
   },
   "include": ["main.ts", "**/*.ts"],

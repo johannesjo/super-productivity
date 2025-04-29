@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/operators';
 import { WorkContextService } from '../work-context/work-context.service';

@@ -47,7 +47,6 @@ import {
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
-import { updateProject } from '../../features/project/store/project.actions';
 import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -56,6 +55,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
+import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 
 @Component({
   selector: 'side-nav',
@@ -277,14 +277,7 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleProjectVisibility(project: Project): void {
-    this._store.dispatch(
-      updateProject({
-        project: {
-          id: project.id,
-          changes: { isHiddenFromMenu: !project.isHiddenFromMenu },
-        },
-      }),
-    );
+    this._store.dispatch(toggleHideFromMenu({ id: project.id }));
   }
 
   async dropOnProjectList(

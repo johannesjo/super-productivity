@@ -4,8 +4,14 @@ import { Project } from './project.model';
 import { select, Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
 import { Actions, ofType } from '@ngrx/effects';
-import { catchError, shareReplay, switchMap, take } from 'rxjs/operators';
-import { BreakNr, BreakTime, WorkContextType } from '../work-context/work-context.model';
+import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import {
+  BreakNr,
+  BreakNrCopy,
+  BreakTime,
+  BreakTimeCopy,
+  WorkContextType,
+} from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import {
   addProject,
@@ -22,8 +28,6 @@ import {
 import { DEFAULT_PROJECT } from './project.const';
 import {
   selectArchivedProjects,
-  selectProjectBreakNrForProject,
-  selectProjectBreakTimeForProject,
   selectProjectById,
   selectUnarchivedProjects,
   selectUnarchivedProjectsWithoutCurrent,
@@ -31,6 +35,7 @@ import {
 import { devError } from '../../util/dev-error';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +44,7 @@ export class ProjectService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _actions$ = inject(Actions);
+  private readonly _timeTrackingService = inject(TimeTrackingService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
 
@@ -63,11 +69,41 @@ export class ProjectService {
   }
 
   getBreakNrForProject$(projectId: string): Observable<BreakNr> {
-    return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
+    return this._timeTrackingService.state$.pipe(
+      map((current) => {
+        const dataForProject = current.project[projectId];
+        const breakNr: BreakNrCopy = {};
+        if (dataForProject) {
+          Object.keys(dataForProject).forEach((dateStr) => {
+            const dateData = dataForProject[dateStr];
+            if (typeof dateData?.b === 'number') {
+              breakNr[dateStr] = dateData.b;
+            }
+          });
+        }
+        return breakNr;
+      }),
+    );
+
+    // return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
   }
 
   getBreakTimeForProject$(projectId: string): Observable<BreakTime> {
-    return this._store$.pipe(select(selectProjectBreakTimeForProject, { id: projectId }));
+    return this._timeTrackingService.state$.pipe(
+      map((current) => {
+        const dataForProject = current.project[projectId];
+        const breakTime: BreakTimeCopy = {};
+        if (dataForProject) {
+          Object.keys(dataForProject).forEach((dateStr) => {
+            const dateData = dataForProject[dateStr];
+            if (typeof dateData?.bt === 'number') {
+              breakTime[dateStr] = dateData.bt;
+            }
+          });
+        }
+        return breakTime;
+      }),
+    );
   }
 
   archive(projectId: string): void {

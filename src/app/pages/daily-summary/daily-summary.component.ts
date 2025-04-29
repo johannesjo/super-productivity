@@ -1,11 +1,13 @@
 import confetti from 'canvas-confetti';
 
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   computed,
   inject,
+  linkedSignal,
   OnDestroy,
   OnInit,
   Signal,
@@ -33,10 +35,9 @@ import moment from 'moment';
 import { T } from '../../t.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { SyncProviderService } from '../../imex/sync/sync-provider.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { isToday, isYesterday } from '../../util/is-today.util';
 import { WorklogService } from '../../features/worklog/worklog.service';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
@@ -70,6 +71,9 @@ import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
+import { promiseTimeout } from '../../util/promise-timeout';
+import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -105,17 +109,17 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
   ],
   animations: [expandAnimation],
 })
-export class DailySummaryComponent implements OnInit, OnDestroy {
+export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly configService = inject(GlobalConfigService);
   readonly workContextService = inject(WorkContextService);
   private readonly _taskService = inject(TaskService);
   private readonly _router = inject(Router);
   private readonly _matDialog = inject(MatDialog);
-  private readonly _persistenceService = inject(PersistenceService);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _worklogService = inject(WorklogService);
   private readonly _cd = inject(ChangeDetectorRef);
   private readonly _activatedRoute = inject(ActivatedRoute);
-  private readonly _syncProviderService = inject(SyncProviderService);
+  private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
   private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
@@ -216,17 +220,17 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ),
   );
 
-  started$: Observable<number> = this.dayStr$.pipe(
+  started$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getWorkStart$(dayStr)),
   );
-  end$: Observable<number> = this.dayStr$.pipe(
+  end$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getWorkEnd$(dayStr)),
   );
 
-  breakTime$: Observable<number> = this.dayStr$.pipe(
+  breakTime$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getBreakTime$(dayStr)),
   );
-  breakNr$: Observable<number> = this.dayStr$.pipe(
+  breakNr$: Observable<number | undefined> = this.dayStr$.pipe(
     switchMap((dayStr) => this.workContextService.getBreakNr$(dayStr)),
   );
 
@@ -235,6 +239,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   );
 
   actionsToExecuteBeforeFinishDay: Action[] = [{ type: 'FINISH_DAY' }];
+
+  cfg = toSignal(this.cfg$);
+  dailySummaryNoteTxt = linkedSignal(() => this.cfg()?.dailySummaryNote?.txt);
 
   private _successAnimationTimeout?: number;
   private _startCelebrationTimeout?: number;
@@ -251,9 +258,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       this.configService.cfg?.dailySummaryNote?.lastUpdateDayStr !==
         this._dateService.todayStr()
     ) {
-      this.configService.updateSection('dailySummaryNote', {
-        txt: unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
-      });
+      this.dailySummaryNoteTxt.set(
+        unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
+      );
     }
   }
 
@@ -277,10 +284,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
           this.dayStr = s.params.dayStr;
         }
       });
+  }
 
-    this._startCelebrationTimeout = window.setTimeout(() => {
-      this._celebrate();
-    }, 750);
+  ngAfterViewInit(): void {
+    this._startCelebrationTimeout = window.setTimeout(
+      () => {
+        this._celebrate();
+      },
+      IS_TOUCH_ONLY ? 1500 : 500,
+    );
   }
 
   ngOnDestroy(): void {
@@ -366,12 +378,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private async _moveDoneToArchive(): Promise<void> {
     const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
     this._taskService.moveToArchive(doneTasks);
+    // wait for tasks being actually moved to archive and all database stuff to be completed...
+    await promiseTimeout(50);
   }
 
   private async _finishDayForGood(cb?: any): Promise<void> {
     const syncCfg = this.configService.cfg?.sync;
     if (syncCfg?.isEnabled) {
-      await this._syncProviderService.sync();
+      await this._syncWrapperService.sync();
     }
     this._initSuccessAnimation(cb);
   }
@@ -491,11 +505,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     };
 
     const archiveTasks: Observable<TaskWithSubTasks[]> = merge(
-      from(this._persistenceService.taskArchive.loadState()),
+      from(this._taskArchiveService.load()),
       this._worklogService.archiveUpdateManualTrigger$.pipe(
         // hacky wait for save
         delay(70),
-        switchMap(() => this._persistenceService.taskArchive.loadState()),
+        switchMap(() => this._taskArchiveService.load()),
       ),
     ).pipe(
       withLatestFrom(this.workContextService.activeWorkContextTypeAndId$),

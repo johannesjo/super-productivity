@@ -5,6 +5,8 @@ import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { IssueProvider } from '../../issue/issue.model';
+import { Project } from '../../project/project.model';
+import { selectAllProjects } from '../../project/store/project.selectors';
 
 // TODO fix null stuff here
 
@@ -334,3 +336,30 @@ export const selectAllTaskIssueIdsForIssueProvider = (issueProvider: IssueProvid
       .map((t) => t.issueId as string);
   });
 };
+
+export const selectAllTasksWithoutHiddenProjects = createSelector(
+  selectAllTasks,
+  selectAllProjects,
+  (tasks: Task[], projects: Project[]): Task[] => {
+    const projectMap: { [id: string]: Project } = {};
+    projects.forEach((project) => {
+      projectMap[project.id] = project;
+    });
+
+    return tasks.filter((task) => {
+      const projectId = task.projectId;
+      if (!projectId) return true;
+
+      const project = projectMap[projectId];
+      if (!project) return true;
+
+      if (project.isHiddenFromMenu) return false;
+
+      // if (project.backlogTaskIds && project.backlogTaskIds.includes(task.id)) {
+      //   return false;
+      // }
+
+      return true;
+    });
+  },
+);

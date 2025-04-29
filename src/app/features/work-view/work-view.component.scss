@@ -69,11 +69,6 @@ h2 {
   }
 }
 
-.completed-tasks-heading {
-  margin: $s;
-  margin-top: $s * 2;
-}
-
 .backlog-heading {
   margin: $s;
 }
@@ -260,5 +255,49 @@ h2 {
   &.isRight {
     transform: none;
     right: $s * 2;
+  }
+}
+
+.no-tasks-illu-wrapper {
+  position: relative;
+  margin-bottom: 32px;
+
+  img {
+    width: 500px;
+    display: block;
+    margin: auto;
+    border-radius: 8px;
+    max-width: 100%;
+  }
+
+  .no-tasks-label {
+    font-size: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-weight: 200;
+
+    @include lightTheme {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    @include darkTheme {
+      color: rgba(255, 255, 255, 0.6);
+      text-shadow: 0 0 0 rgba(255, 255, 255, 1);
+    }
+  }
+}
+
+:host ::ng-deep .collapsible-header {
+  font-size: 16px;
+  margin-top: 0;
+  padding: 10px 10px;
+  justify-content: center;
+
+  .collapsible-title {
+    flex-grow: 0;
+    margin-left: -10px;
   }
 }

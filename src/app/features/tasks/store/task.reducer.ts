@@ -2,7 +2,6 @@ import {
   __updateMultipleTaskSimple,
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -22,14 +21,14 @@ import {
   setCurrentTask,
   setSelectedTask,
   toggleStart,
-  toggleTaskShowSubTasks,
+  toggleTaskHideSubTasks,
   unScheduleTask,
   unsetCurrentTask,
   updateTask,
   updateTaskTags,
   updateTaskUi,
 } from './task.actions';
-import { ShowSubTasksMode, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
+import { Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -68,6 +67,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -112,6 +112,21 @@ export const taskReducer = createReducer<TaskState>(
           : state.currentTaskId,
     });
   }),
+
+  on(TimeTrackingActions.addTimeSpent, (state, { task, date, duration }) => {
+    const currentTimeSpentForTickDay =
+      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+    return updateTimeSpentForTask(
+      task.id,
+      {
+        ...task.timeSpentOnDay,
+        [date]: currentTimeSpentForTickDay + duration,
+      },
+      state,
+    );
+  }),
+
+  //--------------------------------
 
   // TODO check if working
   on(setCurrentTask, (state, { id }) => {
@@ -231,51 +246,42 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   // TODO simplify
-  on(toggleTaskShowSubTasks, (state, { taskId, isShowLess, isEndless }) => {
+  on(toggleTaskHideSubTasks, (state, { taskId, isShowLess, isEndless }) => {
     const task = getTaskById(taskId, state);
     const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
     const doneTasksLength = subTasks.filter((t) => t.isDone).length;
     const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
-    const oldVal = +task._showSubTasksMode;
-    let newVal;
+    // for easier calculations we use 0 instead of undefined for show state
+    const oldVal = task._hideSubTasksMode || 0;
+    let newVal: number = isShowLess ? oldVal + 1 : oldVal - 1;
 
-    if (isDoneTaskCaseNeeded) {
-      newVal = oldVal + (isShowLess ? -1 : 1);
-      if (isEndless) {
-        if (newVal > ShowSubTasksMode.Show) {
-          newVal = ShowSubTasksMode.HideAll;
-        } else if (newVal < ShowSubTasksMode.HideAll) {
-          newVal = ShowSubTasksMode.Show;
-        }
+    if (!isDoneTaskCaseNeeded && newVal === 1) {
+      if (isShowLess) {
+        newVal = 2;
       } else {
-        if (newVal > ShowSubTasksMode.Show) {
-          newVal = ShowSubTasksMode.Show;
-        }
-        if (newVal < ShowSubTasksMode.HideAll) {
-          newVal = ShowSubTasksMode.HideAll;
-        }
-      }
-    } else {
-      if (isEndless) {
-        if (oldVal === ShowSubTasksMode.Show) {
-          newVal = ShowSubTasksMode.HideAll;
-        }
-        if (oldVal !== ShowSubTasksMode.Show) {
-          newVal = ShowSubTasksMode.Show;
-        }
-      } else {
-        newVal = isShowLess ? ShowSubTasksMode.HideAll : ShowSubTasksMode.Show;
+        newVal = 0;
       }
     }
 
-    // failsafe
-    newVal = isNaN(newVal as any) ? ShowSubTasksMode.HideAll : newVal;
+    if (isEndless) {
+      if (newVal < 0) {
+        newVal = 2;
+      } else if (newVal > 2) {
+        newVal = 0;
+      }
+    } else {
+      if (newVal < 0) {
+        newVal = 0;
+      } else if (newVal > 2) {
+        newVal = 2;
+      }
+    }
 
     return taskAdapter.updateOne(
       {
         id: taskId,
         changes: {
-          _showSubTasksMode: newVal,
+          _hideSubTasksMode: newVal || undefined,
         },
       },
       state,
@@ -390,19 +396,6 @@ export const taskReducer = createReducer<TaskState>(
         changes: {
           subTaskIds: arrayMoveToEnd(parentSubTaskIds, id),
         },
-      },
-      state,
-    );
-  }),
-
-  on(addTimeSpent, (state, { task, date, duration }) => {
-    const currentTimeSpentForTickDay =
-      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
-    return updateTimeSpentForTask(
-      task.id,
-      {
-        ...task.timeSpentOnDay,
-        [date]: currentTimeSpentForTickDay + duration,
       },
       state,
     );

@@ -33,7 +33,7 @@ describe('PomodoroEffects', () => {
     isEnabled$ = new BehaviorSubject<boolean>(true);
     currentSessionTime$ = new BehaviorSubject<number>(5000);
     isBreak$ = new BehaviorSubject<boolean>(false);
-    allStartableTasks$ = new BehaviorSubject([]);
+    allStartableTasks$ = new BehaviorSubject<any[]>([]);
     TestBed.configureTestingModule({
       providers: [
         PomodoroEffects,

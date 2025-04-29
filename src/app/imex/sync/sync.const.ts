@@ -21,7 +21,6 @@ import { initialBoardsState } from '../../features/boards/store/boards.reducer';
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
 
-export const SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME = 1000 * 60;
 export const SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME = 1000 * 60 * 5;
 
 export const SYNC_BEFORE_CLOSE_ID = 'SYNC_BEFORE_CLOSE_ID';
@@ -67,7 +66,9 @@ type ConfigPath =
   | [GlobalConfigKey, SyncKey, LocalFileSyncKey | WebDavKey];
 
 export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: ConfigPath[] = [
-  ['misc', 'darkMode'],
-  ['sync', 'localFileSync', 'syncFolderPath'],
-  ['sync', 'webDav', 'password'],
+  // ['misc', 'darkMode'],
+  // ['sync', 'localFileSync'],
+  // ['sync', 'webDav', 'password'],
+  // ['sync', 'localFileSync', 'syncFolderPath'],
+  // ['sync', 'webDav', 'password'],
 ];

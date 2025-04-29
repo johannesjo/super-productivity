@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { first, switchMap, tap } from 'rxjs/operators';
 import {
@@ -11,17 +10,16 @@ import {
   updateNoteOrder,
 } from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { Observable } from 'rxjs';
 import { NoteState } from '../note.model';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class NoteEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
-  private _workContextService = inject(WorkContextService);
+  private _pfapiService = inject(PfapiService);
 
   updateNote$: Observable<any> = createEffect(
     () =>
@@ -42,8 +40,8 @@ export class NoteEffects {
   );
 
   private _saveToLs(noteState: NoteState): void {
-    this._persistenceService.note.saveState(noteState, {
-      isSyncModelChange: true,
+    this._pfapiService.m.note.save(noteState, {
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

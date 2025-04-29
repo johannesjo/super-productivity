@@ -317,7 +317,7 @@ export class TakeABreakService {
           cfg.takeABreak.motivationalImgs.length
             ? cfg.takeABreak.motivationalImgs[
                 Math.floor(Math.random() * cfg.takeABreak.motivationalImgs.length)
-              ]
+              ] || undefined
             : undefined,
       });
     });

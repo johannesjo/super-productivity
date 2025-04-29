@@ -1,9 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './global-config.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
@@ -15,11 +14,12 @@ import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
 import { hideSideNav, toggleSideNav } from '../../../core-ui/layout/store/layout.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class GlobalConfigEffects {
   private _actions$ = inject(Actions);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _languageService = inject(LanguageService);
   private _dateService = inject(DateService);
   private _snackService = inject(SnackService);
@@ -172,8 +172,8 @@ export class GlobalConfigEffects {
     { isSkipSyncModelChangeUpdate } = { isSkipSyncModelChangeUpdate: false },
   ): void {
     const globalConfig = completeState[CONFIG_FEATURE_NAME];
-    this._persistenceService.globalConfig.saveState(globalConfig, {
-      isSyncModelChange: !isSkipSyncModelChangeUpdate,
+    this._pfapiService.m.globalConfig.save(globalConfig, {
+      isUpdateRevAndLastUpdate: !isSkipSyncModelChangeUpdate,
     });
   }
 }

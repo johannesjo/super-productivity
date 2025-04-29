@@ -96,3 +96,15 @@
 .isAdvancedFeatures .isHideForAdvancedFeatures {
   display: none !important;
 }
+
+.show-dark-only {
+  @include lightTheme(true) {
+    display: none !important;
+  }
+}
+
+.show-light-only {
+  @include darkTheme(true) {
+    display: none !important;
+  }
+}

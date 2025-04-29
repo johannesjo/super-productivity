@@ -35,9 +35,15 @@
 .no-tasks {
   position: absolute;
   text-align: center;
-  top: 50%;
+  top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
+  width: 90%;
+  color: $light-theme-text-color-muted;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color-muted;
+  }
 }
 
 .expand-tasks-btn {

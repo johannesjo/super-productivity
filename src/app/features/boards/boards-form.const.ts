@@ -7,18 +7,11 @@ import {
 } from './boards.model';
 import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
+import { DEFAULT_PANEL_CFG } from './boards.const';
 
 const getNewPanel = (): BoardPanelCfg => ({
+  ...DEFAULT_PANEL_CFG,
   id: nanoid(),
-  title: '',
-  taskIds: [],
-
-  taskDoneState: BoardPanelCfgTaskDoneState.All,
-  excludedTagIds: [],
-  includedTagIds: [],
-  scheduledState: BoardPanelCfgScheduledState.All,
-  isParentTasksOnly: false,
-  projectId: '',
 });
 
 export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [

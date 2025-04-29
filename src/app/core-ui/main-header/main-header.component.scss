@@ -388,8 +388,9 @@ simple-counter-button {
   }
 }
 
-.sync-success-check-ico {
-  position: absolute;
+.sync-state-ico {
+  // important because it might be overwritten by material styles sometimes
+  position: absolute !important;
   font-size: 10px;
   height: 10px;
   line-height: 10px;

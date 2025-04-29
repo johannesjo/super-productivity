@@ -29,21 +29,6 @@ export const updateAdvancedConfigForTag = createAction(
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
 );
 
-export const updateWorkStartForTag = createAction(
-  '[Tag] Update Work Start for Tag',
-  props<{ id: string; date: string; newVal: number }>(),
-);
-
-export const updateWorkEndForTag = createAction(
-  '[Tag] Update Work End for Tag',
-  props<{ id: string; date: string; newVal: number }>(),
-);
-
-export const addToBreakTimeForTag = createAction(
-  '[Tag] Update Break Time for Tag',
-  props<{ id: string; date: string; valToAdd: number }>(),
-);
-
 export const moveTaskInTagList = createAction(
   '[Tag] Switch places of taskIds in tagList',
   props<{ tagId: string; fromTaskId: string; toTaskId: string }>(),

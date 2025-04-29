@@ -1,4 +1,4 @@
-import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue.model';
+import { IssueProviderKey } from '../issue/issue.model';
 import {
   WorkContextAdvancedCfgKey,
   WorkContextCommon,
@@ -11,6 +11,7 @@ export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
 export interface ProjectBasicCfg {
   title: string;
   isHiddenFromMenu: boolean;
+  // TODO remove maybe
   isArchived: boolean;
   isEnableBacklog: boolean;
   taskIds: string[];
@@ -21,7 +22,9 @@ export interface ProjectBasicCfg {
 export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
   id: string;
   // TODO legacy remove
-  issueIntegrationCfgs?: IssueIntegrationCfgs;
+  // issueIntegrationCfgs?: IssueIntegrationCfgs | { [key: string]: any };
+  // to make it simpler for validation
+  issueIntegrationCfgs?: any;
 }
 
 export type Project = Readonly<ProjectCopy>;

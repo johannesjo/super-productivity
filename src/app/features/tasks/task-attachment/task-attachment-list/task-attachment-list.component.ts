@@ -74,7 +74,7 @@ export class TaskAttachmentListComponent {
     // Force-cast PermissionDescriptor as 'clipboard-write' is not defined in type
     const permission = { name: 'clipboard-write' } as unknown as PermissionDescriptor;
     const result = await navigator.permissions.query(permission);
-    if (result.state == 'granted' || result.state == 'prompt') {
+    if ((result.state == 'granted' || result.state == 'prompt') && attachment.path) {
       await navigator.clipboard.writeText(attachment.path);
       this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD);
     }

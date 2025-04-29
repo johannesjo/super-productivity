@@ -1,15 +1,4 @@
 <resources>
     <string name="app_name">Super Productivity</string>
-    <string name="asset_statements">
-        [{
-        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-        \"target\": {
-        \"namespace\": \"web\",
-        \"site\": \"https://app.super-productivity.com\"}
-        }]
-    </string>
-    <string name="title_activity_fullscreen">Super Prod</string>
-    <string name="widget_no_data">Please tap here to load data</string>
-    <string name="empty_task_list_text">Tap to refresh task list</string>
-    <string name="service_background">Service is running background</string>
+  <string name="title_activity_fullscreen">Super Prod</string>
 </resources>

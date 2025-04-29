@@ -266,11 +266,11 @@
   margin-right: $s;
   align-items: stretch;
 
-  @include verySmallMainContainer {
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    justify-content: center;
-  }
+  //@include verySmallMainContainer {
+  //  flex-direction: column-reverse;
+  //  align-items: flex-end;
+  //  justify-content: center;
+  //}
 }
 
 .controls {
@@ -285,6 +285,7 @@
     margin-top: auto;
     margin-bottom: auto;
     height: 100% !important;
+    min-height: 40px;
     border-radius: $card-border-radius;
 
     ::ng-deep {
@@ -313,9 +314,9 @@
     margin-left: 5px;
   }
 
-  @include verySmallMainContainer {
-    min-height: 40px;
-  }
+  //@include verySmallMainContainer {
+  //  min-height: 40px;
+  //}
 }
 
 // OTHER UI ELEMENTS
@@ -323,6 +324,7 @@
 .title-and-tags-wrapper {
   flex-grow: 1;
   flex-shrink: 1;
+  min-width: 180px;
   // we cannot do this since this cuts of the box shadow of the task edit
   //overflow: hidden;
 
@@ -334,23 +336,16 @@
 }
 
 @mixin timeWrapperMinimalStyles() {
-  &:after {
-    content: '';
-    border-top: 1px solid;
-    opacity: 0.1;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-  }
-
   .time {
     font-size: 13px;
     flex-direction: column;
   }
 
   .separator {
-    display: none;
+    border-top: 1px solid;
+    height: 1px;
+    opacity: 0.1;
+    width: 100%;
   }
 }
 
@@ -360,11 +355,12 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: stretch;
+  justify-content: center;
   margin-right: $s;
   z-index: $z-time-wrapper;
   // note: fixes styles for empty time for very small mobile
   min-width: 25px;
+  //border: 1px solid red;
 
   @include mq(xxs) {
     min-width: 0;
@@ -391,7 +387,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    opacity: 0.8;
+    opacity: 0.6;
     font-weight: 300;
 
     @include mq(xs) {
@@ -429,12 +425,13 @@
     padding: 0 $s * 0.5;
   }
 
-  @include smallMainContainer {
-    @include timeWrapperMinimalStyles;
-  }
+  //@include smallMainContainer {
+  //  @include timeWrapperMinimalStyles;
+  //}
 
   @include mq(xs, max) {
     @at-root .time-wrapper {
+      margin-right: 0;
       @include timeWrapperMinimalStyles;
 
       @include isDoneForFirstLine {
@@ -443,18 +440,18 @@
     }
   }
 
-  @include verySmallMainContainer {
-    flex-direction: row;
-    &:after {
-      display: none;
-    }
-    .time {
-      flex-direction: row;
-    }
-    .separator {
-      display: block;
-    }
-  }
+  //@include verySmallMainContainer {
+  //  flex-direction: row;
+  //  &:after {
+  //    display: none;
+  //  }
+  //  .time {
+  //    flex-direction: row;
+  //  }
+  //  .separator {
+  //    display: block;
+  //  }
+  //}
 }
 
 .additional-info {
@@ -491,6 +488,7 @@
 
   &:hover {
     opacity: 1 !important;
+
     mat-icon {
       animation: $transition-duration-m success-btn-ani linear;
     }

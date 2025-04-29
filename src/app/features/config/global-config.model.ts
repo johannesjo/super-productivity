@@ -1,14 +1,10 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
+import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
-import { LegacyCalendarProvider } from '../issue/providers/calendar/calendar.model';
-
-export type DarkModeCfg = 'dark' | 'light' | 'system';
 
 export type MiscConfig = Readonly<{
-  darkMode: DarkModeCfg;
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
@@ -23,6 +19,8 @@ export type MiscConfig = Readonly<{
   taskNotesTpl: string;
   isUseMinimalNav: boolean;
   isDisableAnimations: boolean;
+  // optional because it was added later
+  isShowTipLonger?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
@@ -34,14 +32,14 @@ export type ShortSyntaxConfig = Readonly<{
 export type TimeTrackingConfig = Readonly<{
   trackingInterval: number;
   defaultEstimate: number;
-  defaultEstimateSubTasks: number;
+  defaultEstimateSubTasks?: number | null;
   isAutoStartNextTask: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTrackingReminderEnabled: boolean;
   isTrackingReminderShowOnMobile: boolean;
   trackingReminderMinTime: number;
-  isTrackingReminderNotify: boolean;
-  isTrackingReminderFocusWindow: boolean;
+  isTrackingReminderNotify?: boolean;
+  isTrackingReminderFocusWindow?: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{
@@ -63,7 +61,8 @@ export type TakeABreakConfig = Readonly<{
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
   takeABreakSnoozeTime: number;
-  motivationalImgs: string[];
+  // due to ngx-formly inconsistency they also can be undefined or null even
+  motivationalImgs: (string | undefined | null)[];
 }>;
 
 export type PomodoroConfig = Readonly<{
@@ -84,22 +83,21 @@ export type PomodoroConfig = Readonly<{
 }>;
 
 // NOTE: needs to be writable due to how we use it
-
-export type DropboxSyncConfig = object;
+// export type DropboxSyncConfig = object;
 
 export interface WebDavConfig {
-  baseUrl: string | null;
-  userName: string | null;
-  password: string | null;
+  baseUrl?: string | null;
+  userName?: string | null;
+  password?: string | null;
   // TODO remove and migrate
   syncFilePath?: string | null;
-  syncFolderPath: string | null;
+  syncFolderPath?: string | null;
 }
 
 export interface LocalFileSyncConfig {
   // TODO remove and migrate
   syncFilePath?: string | null;
-  syncFolderPath: string | null;
+  syncFolderPath?: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{
@@ -114,24 +112,24 @@ export type SoundConfig = Readonly<{
   isIncreaseDoneSoundPitch: boolean;
   doneSound: string | null;
   breakReminderSound: string | null;
-  trackTimeSound: string | null;
+  trackTimeSound?: string | null;
   volume: number;
 }>;
 
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled: boolean;
-  encryptionPassword: string | null;
   isCompressionEnabled: boolean;
-  syncProvider: SyncProvider | null;
+  // TODO migrate to SyncProviderId
+  syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
-  dropboxSync: DropboxSyncConfig;
-  webDav: WebDavConfig;
-  localFileSync: LocalFileSyncConfig;
-}>;
-export type LegacyCalendarIntegrationConfig = Readonly<{
-  calendarProviders: LegacyCalendarProvider[];
+  /* NOTE: view model for form only*/
+  encryptKey?: string | null;
+  /* NOTE: view model for form only*/
+  webDav?: WebDavConfig;
+  /* NOTE: view model for form only*/
+  localFileSync?: LocalFileSyncConfig;
 }>;
 
 export type ScheduleConfig = Readonly<{
@@ -159,7 +157,7 @@ export type DominaModeConfig = Readonly<{
   text: string;
   interval: number;
   volume: number;
-  voice: string;
+  voice?: string | null;
 }>;
 
 export type FocusModeConfig = Readonly<{
@@ -185,7 +183,6 @@ export type GlobalConfigState = Readonly<{
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
   timeTracking: TimeTrackingConfig;
-  calendarIntegration?: LegacyCalendarIntegrationConfig;
   reminder: ReminderConfig;
   schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;

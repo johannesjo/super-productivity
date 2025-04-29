@@ -132,5 +132,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_DISABLE_ANIMATIONS,
       },
     },
+    {
+      key: 'isShowTipLonger',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_SHOW_TIP_LONGER,
+      },
+    },
   ],
 };

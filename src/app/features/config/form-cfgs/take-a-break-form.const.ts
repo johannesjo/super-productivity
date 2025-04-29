@@ -103,6 +103,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
         addText: T.GCF.TAKE_A_BREAK.ADD_NEW_IMG,
         required: true,
         defaultValue: '',
+        minLength: 3,
       },
       fieldArray: {
         type: 'input',

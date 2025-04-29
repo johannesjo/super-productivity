@@ -10,7 +10,6 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { EMPTY, Observable } from 'rxjs';
 import { WorkContextService } from '../work-context/work-context.service';
@@ -19,6 +18,7 @@ import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 const EXEC_BEFORE_CLOSE_ID = 'FINISH_DAY_BEFORE_CLOSE_EFFECT';
 
@@ -27,17 +27,18 @@ export class FinishDayBeforeCloseEffects {
   private actions$ = inject(Actions);
   private _execBeforeCloseService = inject(ExecBeforeCloseService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _dataInitService = inject(DataInitService);
+  private _dataInitStateService = inject(DataInitStateService);
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
   private _router = inject(Router);
   private _translateService = inject(TranslateService);
 
-  isEnabled$: Observable<boolean> = this._dataInitService.isAllDataLoadedInitially$.pipe(
-    concatMap(() => this._globalConfigService.misc$),
-    map((misc) => misc.isConfirmBeforeExitWithoutFinishDay),
-    distinctUntilChanged(),
-  );
+  isEnabled$: Observable<boolean> =
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._globalConfigService.misc$),
+      map((misc) => misc.isConfirmBeforeExitWithoutFinishDay),
+      distinctUntilChanged(),
+    );
 
   scheduleUnscheduleFinishDayBeforeClose$ =
     IS_ELECTRON &&

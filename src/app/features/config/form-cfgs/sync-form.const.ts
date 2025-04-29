@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
 import { ConfigFormSection, SyncConfig } from '../global-config.model';
-import { SyncProvider } from '../../../imex/sync/sync-provider.model';
+import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
-import { androidInterface } from '../../android/android-interface';
+import { fileSyncElectron } from '../../../pfapi/pfapi-config';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -26,112 +26,42 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         label: T.F.SYNC.FORM.L_SYNC_PROVIDER,
         required: true,
         options: [
-          { label: SyncProvider.Dropbox, value: SyncProvider.Dropbox },
-          { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
-          ...(IS_ELECTRON ||
-          (IS_ANDROID_WEB_VIEW &&
-            (androidInterface as any).grantFilePermission &&
-            (androidInterface as any).isGrantedFilePermission)
-            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
+          { label: LegacySyncProvider.Dropbox, value: LegacySyncProvider.Dropbox },
+          { label: LegacySyncProvider.WebDAV, value: LegacySyncProvider.WebDAV },
+          ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
+            ? [
+                {
+                  label: LegacySyncProvider.LocalFile,
+                  value: LegacySyncProvider.LocalFile,
+                },
+              ]
             : []),
         ],
-        change: (field, ev) => {
-          if (
-            IS_ANDROID_WEB_VIEW &&
-            field.model.syncProvider === SyncProvider.LocalFile
-          ) {
-            // disable / enable is a workaround for the hide expression for the info file path info tpl
-            field.formControl?.disable();
-
-            androidInterface.grantFilePermissionWrapped().then(() => {
-              field.formControl?.enable();
-              console.log('Granted file access permission for android');
-              console.log(androidInterface?.allowedFolderPath());
-              field.formControl?.updateValueAndValidity();
-              field.formControl?.parent?.updateValueAndValidity();
-              field.formControl?.parent?.markAllAsTouched();
-              field.formControl?.markAllAsTouched();
-            });
-          }
-        },
-      },
-      validators: {
-        validFileAccessPermission: {
-          expression: (c: any) => {
-            if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
-              console.log(
-                'Checking file access permission for android',
-                androidInterface.isGrantedFilePermission(),
-              );
-              return androidInterface.isGrantedFilePermission();
-            }
-            return true;
-          },
-          message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
-        },
-      },
-      validation: {
-        show: true,
       },
     },
-    // TODO remove completely
-    // {
-    //   // TODO animation maybe
-    //   hideExpression: (m, v, field) =>
-    //     field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
-    //   key: 'dropboxSync',
-    //   fieldGroup: [
-    //     {
-    //       key: 'accessToken',
-    //       type: 'input',
-    //       hideExpression: (model: DropboxSyncConfig) => !model?.accessToken,
-    //       templateOptions: {
-    //         label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
-    //       },
-    //     },
-    //   ],
-    // },
-    IS_ANDROID_WEB_VIEW
-      ? {
-          hideExpression: (m, v, field) => {
-            return (
-              !IS_ANDROID_WEB_VIEW ||
-              field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
-              !androidInterface?.isGrantedFilePermission() ||
-              !androidInterface?.allowedFolderPath()
-            );
-          },
-          type: 'tpl',
-          className: `tpl`,
-          expressionProperties: {
-            template: () =>
-              // NOTE: hard to translate here, that's why we don't
-              `<div>Granted file access permission:<br />${
-                androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
-              }</div>`,
-          },
-        }
-      : {},
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
         // hide for android
         IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
         {
+          type: 'btn',
           key: 'syncFolderPath',
-          type: 'input',
           templateOptions: {
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
             required: true,
-            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            onClick: () => {
+              return fileSyncElectron.pickDirectory();
+            },
           },
         },
       ],
     },
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
+        field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: [
         ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
@@ -140,7 +70,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
                 type: 'tpl',
                 templateOptions: {
                   tag: 'p',
-                  // text: `<p>Please open the following link and copy the auth code provided there</p>`,
                   text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
                 },
               },
@@ -227,7 +156,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
         {
           hideExpression: (model: any) => !model.isEncryptionEnabled,
-          key: 'encryptionPassword',
+          key: 'encryptKey',
           type: 'input',
           templateOptions: {
             required: true,

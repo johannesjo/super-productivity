@@ -1,14 +1,14 @@
-import { AppDataComplete } from '../imex/sync/sync.model';
 import { MODEL_VERSION_KEY } from '../app.constants';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import { createEmptyEntity } from './create-empty-entity';
+import { AppDataCompleteNew } from '../pfapi/pfapi-config';
+import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 
-export const createAppDataCompleteMock = (): AppDataComplete => ({
+export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   project: {
     ...createEmptyEntity(),
     [MODEL_VERSION_KEY]: 5,
   },
-  archivedProjects: {},
   globalConfig: DEFAULT_GLOBAL_CONFIG,
 
   task: {
@@ -25,9 +25,7 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
     ...createEmptyEntity(),
     ids: [],
   },
-  taskArchive: createEmptyEntity(),
   taskRepeatCfg: createEmptyEntity(),
-  lastLocalSyncModelChange: 0,
 
   // OPTIONAL though they are really not
   reminders: [],
@@ -39,9 +37,23 @@ export const createAppDataCompleteMock = (): AppDataComplete => ({
   improvement: createEmptyEntity() as any,
   obstruction: createEmptyEntity(),
   planner: { days: {}, addPlannedTasksDialogLastShown: undefined },
-  lastArchiveUpdate: 0,
   issueProvider: createEmptyEntity() as any,
   boards: {
     boardCfgs: [],
+  },
+  timeTracking: {
+    project: {},
+    tag: {},
+  },
+
+  archiveYoung: {
+    task: createEmptyEntity(),
+    timeTracking: initialTimeTrackingState,
+    lastTimeTrackingFlush: 0,
+  },
+  archiveOld: {
+    task: createEmptyEntity(),
+    timeTracking: initialTimeTrackingState,
+    lastTimeTrackingFlush: 0,
   },
 });

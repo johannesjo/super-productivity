@@ -71,34 +71,43 @@ function initListeners(): void {
     }
   });
 
-  ipcMain.on(IPC.CURRENT_TASK_UPDATED, (ev, currentTask) => {
-    const mainWin = getWin();
-    getSettings(mainWin, (settings: GlobalConfigState) => {
-      const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
+  ipcMain.on(
+    IPC.CURRENT_TASK_UPDATED,
+    (ev, currentTask, isPomodoroEnabled, currentPomodoroSessionTime) => {
+      const mainWin = getWin();
+      getSettings(mainWin, (settings: GlobalConfigState) => {
+        const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
 
-      const msg =
-        isTrayShowCurrentTask && currentTask ? createIndicatorStr(currentTask) : '';
+        const msg =
+          isTrayShowCurrentTask && currentTask
+            ? createIndicatorMessage(
+                currentTask,
+                isPomodoroEnabled,
+                currentPomodoroSessionTime,
+              )
+            : '';
 
-      if (tray) {
-        // tray handling
-        if (currentTask && currentTask.title) {
-          tray.setTitle(msg);
-          if (!IS_MAC) {
-            // NOTE apparently this has no effect for gnome
-            tray.setToolTip(msg);
+        if (tray) {
+          // tray handling
+          if (currentTask && currentTask.title) {
+            tray.setTitle(msg);
+            if (!IS_MAC) {
+              // NOTE apparently this has no effect for gnome
+              tray.setToolTip(msg);
+            }
+          } else {
+            tray.setTitle('');
+            if (!IS_MAC) {
+              // NOTE apparently this has no effect for gnome
+              tray.setToolTip(msg);
+            }
+            const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
+            setTrayIcon(tray, DIR + `stopped${suf}`);
           }
-        } else {
-          tray.setTitle('');
-          if (!IS_MAC) {
-            // NOTE apparently this has no effect for gnome
-            tray.setToolTip(msg);
-          }
-          const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
-          setTrayIcon(tray, DIR + `stopped${suf}`);
         }
-      }
-    });
-  });
+      });
+    },
+  );
 
   // ipcMain.on(IPC.POMODORO_UPDATE, (ev, params) => {
   // const isOnBreak = params.isOnBreak;
@@ -111,28 +120,30 @@ function initListeners(): void {
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function createIndicatorStr(task: TaskCopy): string {
+function createIndicatorMessage(
+  task: TaskCopy,
+  isPomodoroEnabled: boolean,
+  currentPomodoroSessionTime: number,
+): string {
   if (task && task.title) {
     let title = task.title;
-    // let timeStr = '';
-    // let msg;
+    let timeStr = '';
     if (title.length > 40) {
       title = title.substring(0, 37) + '...';
     }
-    return title;
 
-    // if (task.timeSpent) {
-    //   const timeSpentAsMinutes = Math.round(task.timeSpent / 60 / 1000);
-    //   timeStr += timeSpentAsMinutes.toString();
-    // }
-    // const timeEstimateAsMin = Math.round(task.timeEstimate / 60 / 1000);
-    //
-    // if (task.timeEstimate && timeEstimateAsMin > 0) {
-    //   timeStr += '/' + timeEstimateAsMin;
-    // }
-    //
-    // msg = title + ' | ' + timeStr + 'm ';
-    // return msg;
+    if (task.timeEstimate) {
+      const restOfTime = Math.max(task.timeEstimate - task.timeSpent, 0);
+      timeStr = getCountdownMessage(restOfTime);
+    } else if (task.timeSpent) {
+      timeStr = getCountdownMessage(task.timeSpent);
+    }
+
+    if (isPomodoroEnabled) {
+      timeStr = getCountdownMessage(currentPomodoroSessionTime);
+    }
+
+    return `${title} ${timeStr}`;
   }
 
   // NOTE: we need to make sure that this is always a string
@@ -142,14 +153,8 @@ function createIndicatorStr(task: TaskCopy): string {
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createContextMenu(showApp: () => void, quitApp: () => void): Menu {
   return Menu.buildFromTemplate([
-    {
-      label: 'Show App',
-      click: showApp,
-    },
-    {
-      label: 'Quit',
-      click: quitApp,
-    },
+    { label: 'Show App', click: showApp },
+    { label: 'Quit', click: quitApp },
   ]);
 }
 
@@ -179,4 +184,12 @@ function isWindows11(): boolean {
   }
 
   return isWin11;
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function getCountdownMessage(countdownMs: number): string {
+  const totalSeconds = Math.floor(countdownMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }

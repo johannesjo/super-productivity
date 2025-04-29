@@ -1,12 +1,12 @@
 import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
   DEFAULT_TASK,
   DropListModelSource,
-  ShowSubTasksMode,
+  HideSubTasksMode,
   Task,
   TaskArchive,
   TaskCopy,
@@ -19,7 +19,6 @@ import { select, Store } from '@ngrx/store';
 import {
   addSubTask,
   addTask,
-  addTimeSpent,
   convertToMainTask,
   deleteTask,
   deleteTasks,
@@ -39,14 +38,13 @@ import {
   setCurrentTask,
   setSelectedTask,
   toggleStart,
-  toggleTaskShowSubTasks,
+  toggleTaskHideSubTasks,
   unScheduleTask,
   unsetCurrentTask,
   updateTask,
   updateTaskTags,
   updateTaskUi,
 } from './store/task.actions';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue.model';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import {
@@ -83,7 +81,7 @@ import {
 } from '../work-context/store/work-context-meta.actions';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import {
   moveProjectTaskDownInBacklogList,
@@ -96,19 +94,23 @@ import {
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
 import { DateService } from 'src/app/core/date/date.service';
+import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
+import { ArchiveService } from '../time-tracking/archive.service';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   private readonly _store = inject<Store<any>>(Store);
-  private readonly _persistenceService = inject(PersistenceService);
   private readonly _tagService = inject(TagService);
   private readonly _workContextService = inject(WorkContextService);
-  private readonly _imexMetaService = inject(ImexMetaService);
+  private readonly _imexMetaService = inject(ImexViewService);
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);
   private readonly _dateService = inject(DateService);
   private readonly _router = inject(Router);
+  private readonly _archiveService = inject(ArchiveService);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
 
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
@@ -142,7 +144,7 @@ export class TaskService {
       map((tasks) => tasks[0]),
     );
 
-  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null> =
+  taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null | undefined> =
     this._store.pipe(
       select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
@@ -631,7 +633,9 @@ export class TaskService {
     date: string = this._dateService.todayStr(),
     isFromTrackingReminder = false,
   ): void {
-    this._store.dispatch(addTimeSpent({ task, date, duration, isFromTrackingReminder }));
+    this._store.dispatch(
+      TimeTrackingActions.addTimeSpent({ task, date, duration, isFromTrackingReminder }),
+    );
   }
 
   removeTimeSpent(
@@ -692,6 +696,7 @@ export class TaskService {
       });
     }
     this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
+    this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
@@ -749,10 +754,13 @@ export class TaskService {
     );
 
     // archive
-    await this._persistenceService.taskArchive.execAction(
-      roundTimeSpentForDay({ day, taskIds: archivedIds, roundTo, isRoundUp, projectId }),
-      true,
-    );
+    await this._taskArchiveService.roundTimeSpent({
+      day,
+      taskIds: archivedIds,
+      roundTo,
+      isRoundUp,
+      projectId,
+    });
   }
 
   // REMINDER
@@ -854,7 +862,7 @@ export class TaskService {
   }
 
   showSubTasks(id: string): void {
-    this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.Show });
+    this.updateUi(id, { _hideSubTasksMode: undefined });
   }
 
   toggleSubTaskMode(
@@ -862,11 +870,11 @@ export class TaskService {
     isShowLess: boolean = true,
     isEndless: boolean = false,
   ): void {
-    this._store.dispatch(toggleTaskShowSubTasks({ taskId, isShowLess, isEndless }));
+    this._store.dispatch(toggleTaskHideSubTasks({ taskId, isShowLess, isEndless }));
   }
 
   hideSubTasks(id: string): void {
-    this.updateUi(id, { _showSubTasksMode: ShowSubTasksMode.HideAll });
+    this.updateUi(id, { _hideSubTasksMode: HideSubTasksMode.HideAll });
   }
 
   async convertToMainTask(task: Task): Promise<void> {
@@ -888,46 +896,32 @@ export class TaskService {
     }
   }
 
+  // TODO remove in favor of calling this directly
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    await this._persistenceService.taskArchive.execAction(
-      updateTask({
-        task: {
-          id,
-          changes: changedFields,
-        },
-      }),
-      true,
-    );
+    return this._taskArchiveService.updateTask(id, changedFields);
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTasks(updates: Update<Task>[]): Promise<void> {
-    await this._persistenceService.taskArchive.execActions(
-      updates.map((upd) => updateTask({ task: upd })),
-      true,
-    );
+    return this._taskArchiveService.updateTasks(updates);
   }
 
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
-      return (
-        (await this._persistenceService.task.getById(id)) ||
-        (await this._persistenceService.taskArchive.getById(id))
-      );
+      return this.getByIdOnce$(id).toPromise() || this._taskArchiveService.getById(id);
     }
 
     if (isArchive) {
-      return await this._persistenceService.taskArchive.getById(id);
+      return await this._taskArchiveService.getById(id);
     } else {
-      return await this._persistenceService.task.getById(id);
+      return await this.getByIdOnce$(id).toPromise();
     }
   }
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -936,8 +930,7 @@ export class TaskService {
   }
 
   async getArchiveTasksForRepeatCfgId(repeatCfgId: string): Promise<Task[]> {
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return archiveTasks.filter(
@@ -946,8 +939,7 @@ export class TaskService {
   }
 
   async getArchivedTasks(): Promise<Task[]> {
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState(true);
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]) as Task[];
     return archiveTasks;
@@ -972,8 +964,7 @@ export class TaskService {
 
   async getAllTasksEverywhere(): Promise<Task[]> {
     const allTasks = await this._allTasks$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive =
-      await this._persistenceService.taskArchive.loadState();
+    const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks] as Task[];
@@ -1009,8 +1000,7 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive =
-        await this._persistenceService.taskArchive.loadState();
+      const archiveTaskState: TaskArchive = await this._taskArchiveService.load();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids

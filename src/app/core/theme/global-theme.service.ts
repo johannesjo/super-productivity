@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
-import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  map,
+  skip,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
@@ -12,14 +19,17 @@ import { ThemeService as NgChartThemeService } from 'ng2-charts';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { combineLatest, fromEvent, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { ChartConfiguration } from 'chart.js';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
+import { LS } from '../persistence/storage-keys.const';
+
+export type DarkModeCfg = 'dark' | 'light' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
@@ -31,12 +41,16 @@ export class GlobalThemeService {
   private _domSanitizer = inject(DomSanitizer);
   private _chartThemeService = inject(NgChartThemeService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
-  private _imexMetaService = inject(ImexMetaService);
+  private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
 
-  isDarkTheme$: Observable<boolean> = this._globalConfigService.misc$.pipe(
-    switchMap((cfg) => {
-      switch (cfg.darkMode) {
+  darkMode$ = new BehaviorSubject<DarkModeCfg>(
+    (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
+  );
+
+  isDarkTheme$: Observable<boolean> = this.darkMode$.pipe(
+    switchMap((darkMode) => {
+      switch (darkMode) {
         case 'dark':
           return of(true);
         case 'light':
@@ -52,7 +66,7 @@ export class GlobalThemeService {
     distinctUntilChanged(),
   );
 
-  backgroundImg$: Observable<string | null> = combineLatest([
+  backgroundImg$: Observable<string | null | undefined> = combineLatest([
     this._workContextService.currentTheme$,
     this.isDarkTheme$,
   ]).pipe(
@@ -68,6 +82,9 @@ export class GlobalThemeService {
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
     this._initThemeWatchers();
+    this.darkMode$
+      .pipe(skip(1))
+      .subscribe((darkMode) => localStorage.setItem(LS.DARK_MODE, darkMode));
   }
 
   private _setDarkTheme(isDarkTheme: boolean): void {
@@ -78,18 +95,19 @@ export class GlobalThemeService {
   }
 
   private _setColorTheme(theme: WorkContextThemeCfg): void {
-    this._materialCssVarsService.setAutoContrastEnabled(theme.isAutoContrast);
-    this._setBackgroundGradient(theme.isDisableBackgroundGradient);
+    this._materialCssVarsService.setAutoContrastEnabled(!!theme.isAutoContrast);
+    this._setBackgroundGradient(!!theme.isDisableBackgroundGradient);
 
+    // NOTE: setting undefined values does not seem to be a problem so we use !
     if (!theme.isAutoContrast) {
-      this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary);
-      this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent);
-      this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn);
+      this._materialCssVarsService.setContrastColorThresholdPrimary(theme.huePrimary!);
+      this._materialCssVarsService.setContrastColorThresholdAccent(theme.hueAccent!);
+      this._materialCssVarsService.setContrastColorThresholdWarn(theme.hueWarn!);
     }
 
-    this._materialCssVarsService.setPrimaryColor(theme.primary);
-    this._materialCssVarsService.setAccentColor(theme.accent);
-    this._materialCssVarsService.setWarnColor(theme.warn);
+    this._materialCssVarsService.setPrimaryColor(theme.primary!);
+    this._materialCssVarsService.setAccentColor(theme.accent!);
+    this._materialCssVarsService.setWarnColor(theme.warn!);
   }
 
   private _setBackgroundGradient(isDisableBackgroundGradient: boolean): void {

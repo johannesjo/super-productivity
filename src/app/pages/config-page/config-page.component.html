@@ -12,7 +12,7 @@
             <mat-button-toggle-group
               name="darkMode"
               aria-label="darkMode"
-              [value]="globalCfg?.misc.darkMode"
+              [value]="globalThemeService.darkMode$ | async"
               (change)="updateDarkMode($event)"
             >
               <mat-button-toggle value="system">
@@ -68,8 +68,21 @@
         >
           {{ T.PS.SYNC_EXPORT | translate }}
         </h2>
-        @for (section of globalSyncProviderFormCfg; track section.key) {
-          <section class="config-section tour-syncSection">
+
+        <section class="config-section tour-syncSection">
+          <!-- NOTE: we need to debounce, as external updates end us in an endless loop -->
+          @let syncSettingsForm = syncSettingsService.syncSettingsForm$ | async;
+          @if (syncSettingsForm) {
+            <config-section
+              (save)="syncSettingsService.updateSettingsFromForm($event.config)"
+              [cfg]="syncSettingsForm"
+              [section]="globalSyncConfigFormCfg"
+            ></config-section>
+          }
+        </section>
+
+        @for (section of globalImexFormCfg; track section.key) {
+          <section class="config-section imex-section">
             <config-section
               (save)="saveGlobalCfg($event)"
               [cfg]="getGlobalCfgSection(section.key)"

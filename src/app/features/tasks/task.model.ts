@@ -4,10 +4,10 @@ import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 
-export enum ShowSubTasksMode {
-  HideAll = 0,
+export enum HideSubTasksMode {
+  // Show is undefined
   HideDone = 1,
-  Show = 2,
+  HideAll = 2,
 }
 
 export enum TaskDetailTargetPanel {
@@ -69,9 +69,12 @@ export interface TaskCopy extends IssueFieldsForTask {
   title: string;
 
   subTaskIds: string[];
+
   timeSpentOnDay: TimeSpentOnDay;
-  timeSpent: number;
   timeEstimate: number;
+  timeSpent: number;
+
+  notes?: string;
 
   created: number;
   isDone: boolean;
@@ -79,8 +82,6 @@ export interface TaskCopy extends IssueFieldsForTask {
   plannedAt?: number;
   hasPlannedTime?: boolean;
   // remindCfg: TaskReminderOptionId;
-
-  notes: string;
 
   parentId?: string;
   reminderId?: string;
@@ -92,8 +93,8 @@ export interface TaskCopy extends IssueFieldsForTask {
   attachments: TaskAttachment[];
 
   // ui model
-  // 0: show, 1: hide-done tasks, 2: hide all sub tasks
-  _showSubTasksMode: ShowSubTasksMode;
+  // 0: show, 1: hide-done tasks, 2: hide all sub-tasks
+  _hideSubTasksMode?: HideSubTasksMode;
 }
 
 /**
@@ -145,11 +146,8 @@ export const DEFAULT_TASK: Task = {
   timeEstimate: 0,
   isDone: false,
   title: '',
-  notes: '',
   tagIds: [],
   created: Date.now(),
-
-  _showSubTasksMode: ShowSubTasksMode.Show,
 
   attachments: [],
 };
@@ -161,7 +159,7 @@ export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
   selectedTaskId: string | null;
-  taskDetailTargetPanel: TaskDetailTargetPanel | null;
+  taskDetailTargetPanel?: TaskDetailTargetPanel | null;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
 

@@ -16,7 +16,7 @@ import {
 import { TaskService } from '../task.service';
 import { EMPTY, forkJoin, of } from 'rxjs';
 import {
-  ShowSubTasksMode,
+  HideSubTasksMode,
   TaskCopy,
   TaskDetailTargetPanel,
   TaskWithSubTasks,
@@ -83,7 +83,6 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pipe';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
-import { TagService } from '../../tag/tag.service';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 
 @Component({
@@ -136,7 +135,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _elementRef = inject(ElementRef);
   private readonly _renderer = inject(Renderer2);
   private readonly _projectService = inject(ProjectService);
-  private readonly _tagService = inject(TagService);
   readonly plannerService = inject(PlannerService);
   readonly workContextService = inject(WorkContextService);
 
@@ -169,7 +167,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isLockPanRight: boolean = false;
   isPreventPointerEventsWhilePanning: boolean = false;
   isActionTriggered: boolean = false;
-  ShowSubTasksMode: typeof ShowSubTasksMode = ShowSubTasksMode;
+  ShowSubTasksMode: typeof HideSubTasksMode = HideSubTasksMode;
   isFirstLineHover: boolean = false;
 
   readonly taskTitleEditEl = viewChild<TaskTitleComponent>('taskTitleEditEl');
@@ -207,6 +205,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   private _dragEnterTarget?: HTMLElement;
   private _currentPanTimeout?: number;
+  private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
 
   // methods come last
@@ -267,6 +266,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
+    window.clearTimeout(this._doubleClickTimeout);
   }
 
   isShowRemoveFromToday(): boolean {
@@ -396,7 +396,20 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  private _wasClickedInDoubleClickRange = false;
+
   toggleShowDetailPanel(ev?: MouseEvent): void {
+    const isInTaskDetailPanel =
+      this._elementRef.nativeElement.closest('task-detail-panel');
+    if (isInTaskDetailPanel && !this._wasClickedInDoubleClickRange) {
+      this._wasClickedInDoubleClickRange = true;
+      window.clearTimeout(this._doubleClickTimeout);
+      this._doubleClickTimeout = window.setTimeout(() => {
+        this._wasClickedInDoubleClickRange = false;
+      }, 400);
+      return;
+    }
+
     if (this.isSelected()) {
       this._taskService.setSelectedId(null);
     } else {
@@ -911,7 +924,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
       if (this.isSelected()) {
         this.hideDetailPanel();
-      } else if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.HideAll) {
+      } else if (hasSubTasks && t._hideSubTasksMode !== HideSubTasksMode.HideAll) {
         this._taskService.toggleSubTaskMode(t.id, true, false);
         // TODO find a solution
         // } else if (this.task.parentId) {
@@ -924,7 +937,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     // expand sub tasks
     if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
       const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
-      if (hasSubTasks && t._showSubTasksMode !== ShowSubTasksMode.Show) {
+      if (hasSubTasks && t._hideSubTasksMode !== undefined) {
         this._taskService.toggleSubTaskMode(t.id, false, false);
       } else if (!this.isSelected()) {
         this.showDetailPanel();

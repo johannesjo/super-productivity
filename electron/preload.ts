@@ -35,6 +35,7 @@ const ea: ElectronAPI = {
       rev: string;
       dataStr: string | undefined;
     }>,
+  fileSyncRemove: (filePath) => _invoke('FILE_SYNC_REMOVE', filePath) as Promise<void>,
   checkDirExists: (dirPath) =>
     _invoke('CHECK_DIR_EXISTS', dirPath) as Promise<true | Error>,
 
@@ -82,7 +83,8 @@ const ea: ElectronAPI = {
 
   backupAppData: (appData) => _send('BACKUP', appData),
 
-  updateCurrentTask: (task) => _send('CURRENT_TASK_UPDATED', task),
+  updateCurrentTask: (task, isPomodoroEnabled, currentPomodoroSessionTime) =>
+    _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
 
   exec: (command: string) => _send('EXEC', command),
 };

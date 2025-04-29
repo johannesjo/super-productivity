@@ -5,9 +5,10 @@ import {
 } from '../src/app/features/config/global-config.model';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
-import { AppDataComplete, SyncGetRevResult } from '../src/app/imex/sync/sync.model';
+import { AppDataCompleteLegacy, SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { Task } from '../src/app/features/tasks/task.model';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
+import { AppDataCompleteNew } from '../src/app/pfapi/pfapi-config';
 
 export interface ElectronAPI {
   on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;
@@ -37,6 +38,8 @@ export interface ElectronAPI {
     filePath: string;
     localRev: string | null;
   }): Promise<{ rev: string; dataStr: string | undefined } | Error>;
+
+  fileSyncRemove(args: { filePath: string }): Promise<unknown | Error>;
 
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
@@ -106,9 +109,13 @@ export interface ElectronAPI {
 
   jiraSetupImgHeaders(args: { jiraCfg: JiraCfg }): void;
 
-  backupAppData(appData: AppDataComplete): void;
+  backupAppData(appData: AppDataCompleteLegacy | AppDataCompleteNew): void;
 
-  updateCurrentTask(task: Task | null);
+  updateCurrentTask(
+    task: Task | null,
+    isPomodoroEnabled: boolean,
+    currentPomodoroSessionTime: number,
+  );
 
   exec(command: string): void;
 }

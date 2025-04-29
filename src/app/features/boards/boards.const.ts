@@ -1,5 +1,6 @@
 import {
   BoardCfg,
+  BoardPanelCfg,
   BoardPanelCfgScheduledState,
   BoardPanelCfgTaskDoneState,
 } from './boards.model';
@@ -98,4 +99,16 @@ export const DEFAULT_BOARD_CFG: BoardCfg = {
   cols: 1,
   panels: [],
   title: '',
+};
+
+export const DEFAULT_PANEL_CFG: BoardPanelCfg = {
+  id: '',
+  title: '',
+  taskIds: [],
+  taskDoneState: BoardPanelCfgTaskDoneState.All,
+  excludedTagIds: [],
+  includedTagIds: [],
+  scheduledState: BoardPanelCfgScheduledState.All,
+  isParentTasksOnly: false,
+  projectId: '',
 };

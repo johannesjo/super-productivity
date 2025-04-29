@@ -22,8 +22,7 @@ import {
   upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Task, TaskArchive, TaskCopy } from '../../tasks/task.model';
+import { Task, TaskCopy } from '../../tasks/task.model';
 import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
@@ -35,7 +34,7 @@ import {
 import { forkJoin, from, merge, of } from 'rxjs';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
-import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
+import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { sortRepeatableTaskCfgs } from '../sort-repeatable-task-cfg';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -45,18 +44,21 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { isToday } from '../../../util/is-today.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { deleteProject } from '../../project/store/project.actions';
+import { PfapiService } from '../../../pfapi/pfapi.service';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _store$ = inject<Store<any>>(Store);
-  private _persistenceService = inject(PersistenceService);
+  private _pfapiService = inject(PfapiService);
   private _dateService = inject(DateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _syncTriggerService = inject(SyncTriggerService);
-  private _syncProviderService = inject(SyncProviderService);
+  private _syncWrapperService = inject(SyncWrapperService);
   private _matDialog = inject(MatDialog);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   updateTaskRepeatCfgs$: any = createEffect(
     () =>
@@ -82,7 +84,7 @@ export class TaskRepeatCfgEffects {
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
     this._actions$.pipe(
       ofType(setActiveWorkContext),
-      concatMap(() => this._syncProviderService.afterCurrentSyncDoneOrSyncDisabled$),
+      concatMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
     ),
   ).pipe(
     // make sure everything has settled
@@ -143,7 +145,7 @@ export class TaskRepeatCfgEffects {
       this._actions$.pipe(
         ofType(deleteTaskRepeatCfg),
         tap(({ id }) => {
-          this._removeRepeatCfgFromArchiveTasks(id);
+          this._taskArchiveService.removeRepeatCfgFromArchiveTasks(id);
         }),
       ),
     { dispatch: false },
@@ -319,31 +321,8 @@ export class TaskRepeatCfgEffects {
   }
 
   private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
-    this._persistenceService.taskRepeatCfg.saveState(taskRepeatCfgState, {
-      isSyncModelChange: true,
-    });
-  }
-
-  private _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): void {
-    this._persistenceService.taskArchive.loadState().then((taskArchive: TaskArchive) => {
-      // if not yet initialized for project
-      if (!taskArchive) {
-        return;
-      }
-
-      const newState = { ...taskArchive };
-      const ids = newState.ids as string[];
-
-      const tasksWithRepeatCfgId = ids
-        .map((id) => newState.entities[id] as Task)
-        .filter((task) => task.repeatCfgId === repeatConfigId);
-
-      if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
-        tasksWithRepeatCfgId.forEach((task: any) => (task.repeatCfgId = null));
-        this._persistenceService.taskArchive.saveState(newState, {
-          isSyncModelChange: true,
-        });
-      }
+    this._pfapiService.m.taskRepeatCfg.save(taskRepeatCfgState, {
+      isUpdateRevAndLastUpdate: true,
     });
   }
 }

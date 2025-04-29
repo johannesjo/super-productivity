@@ -6,7 +6,6 @@ import { isMigrateModel } from '../../util/is-migrate-model';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { MODEL_VERSION } from '../../core/model-version';
-import { roundTsToMinutes } from '../../util/round-ts-to-minutes';
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION.PROJECT, 'Project')) {
@@ -16,7 +15,6 @@ export const migrateProjectState = (projectState: ProjectState): ProjectState =>
   const projectEntities: Dictionary<Project> = { ...projectState.entities };
   Object.keys(projectEntities).forEach((key) => {
     projectEntities[key] = _updateThemeModel(projectEntities[key] as Project);
-    projectEntities[key] = _reduceWorkStartEndPrecision(projectEntities[key] as Project);
 
     // NOTE: absolutely needs to come last as otherwise the previous defaults won't work
     projectEntities[key] = _extendProjectDefaults(projectEntities[key] as Project);
@@ -54,29 +52,6 @@ const _removeOutdatedData = (project: Project): Project => {
   delete copy.isDarkTheme;
   delete copy.isReducedTheme;
   return copy;
-};
-
-const __reduceWorkStartEndPrecision = (workStartEnd: {
-  [key: string]: any;
-}): {
-  [key: string]: any;
-} => {
-  return workStartEnd
-    ? Object.keys(workStartEnd).reduce((acc, dateKey) => {
-        return {
-          ...acc,
-          [dateKey]: roundTsToMinutes(workStartEnd[dateKey]),
-        };
-      }, {})
-    : workStartEnd;
-};
-
-const _reduceWorkStartEndPrecision = (project: Project): Project => {
-  return {
-    ...project,
-    workStart: __reduceWorkStartEndPrecision(project.workStart),
-    workEnd: __reduceWorkStartEndPrecision(project.workEnd),
-  };
 };
 
 const _updateThemeModel = (project: Project): Project => {
