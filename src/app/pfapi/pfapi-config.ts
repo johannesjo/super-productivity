@@ -54,7 +54,7 @@ import { initialTimeTrackingState } from '../features/time-tracking/store/time-t
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 import { validateAllData, appDataValidators } from './validate/validation-fn';
 
-export const CROSS_MODEL_VERSION = 2 as const;
+export const CROSS_MODEL_VERSION = 3 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
