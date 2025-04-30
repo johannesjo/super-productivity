@@ -24,6 +24,17 @@
     margin-right: $s;
   }
 
+  .due-for {
+    margin-left: $s;
+    font-size: 11px;
+    line-height: 1.4;
+    padding-bottom: 4px;
+
+    &.color-warn-i {
+      font-weight: bold;
+    }
+  }
+
   .title {
     margin-left: $s;
   }

@@ -16,6 +16,12 @@
       @for (task of tasks; track trackById($index, task)) {
         <div class="task">
           <div class="title-wrapper">
+            <div
+              class="due-for"
+              [class.color-warn-i]="(task.dueWithTime || 0) < overdueThreshold"
+            >
+              {{ task.dueWithTime | date: 'short' }}
+            </div>
             <div class="title">{{ task.title }}</div>
             <tag-list
               [isShowProjectTagAlways]="true"
@@ -77,7 +83,7 @@
                   {{ T.G.MINUTES | translate: { m: 60 } }}
                 </button>
                 <button
-                  (click)="rescheduleUntilTomorrow(task)"
+                  (click)="planForTomorrow(task)"
                   [disabled]="isDisableControls"
                   mat-menu-item
                 >

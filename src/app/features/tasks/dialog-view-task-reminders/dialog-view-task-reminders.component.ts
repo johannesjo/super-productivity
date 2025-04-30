@@ -24,9 +24,13 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
+import { Store } from '@ngrx/store';
+import { unScheduleTask } from '../store/task.actions';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const M = 1000 * 60;
 
@@ -49,6 +53,7 @@ const M = 1000 * 60;
     AsyncPipe,
     TranslatePipe,
     TagListComponent,
+    DatePipe,
   ],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
@@ -57,6 +62,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
   private _reminderService = inject(ReminderService);
   data = inject<{
     reminders: Reminder[];
@@ -92,6 +98,8 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     takeWhile((isMultiple) => !isMultiple, true),
   );
   isMultiple: boolean = false;
+  // eslint-disable-next-line no-mixed-operators
+  overdueThreshold = Date.now() - 30 * 60 * 1000; // 30 minutes
 
   private _subs: Subscription = new Subscription();
 
@@ -134,12 +142,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   dismiss(task: TaskWithReminderData): void {
     // const now = Date.now();
     if (task.projectId || task.parentId || task.tagIds.length > 0) {
-      this._taskService.update(task.id, {
-        reminderId: undefined,
-        // usually reminder time and dueWithTime are the same, but in case there are different, we keep due times in the future
-        // dueWithTime: (task.dueWithTime || 0) <= now ? undefined : task.dueWithTime,
-      });
-      this._reminderService.removeReminder(task.reminderData.id);
+      this._store.dispatch(
+        unScheduleTask({ id: task.id, reminderId: task.reminderId as string }),
+      );
       this._removeFromList(task.reminderId as string);
     }
   }
@@ -152,14 +157,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._removeFromList(task.reminderId as string);
   }
 
-  rescheduleUntilTomorrow(task: TaskWithReminderData): void {
-    const remindTime = getTomorrow().getTime();
-    this._reminderService.updateReminder(task.reminderData.id, {
-      remindAt: getTomorrow().getTime(),
-    });
-    this._taskService.update(task.id, {
-      dueWithTime: remindTime,
-    });
+  planForTomorrow(task: TaskWithReminderData): void {
+    this._store.dispatch(
+      PlannerActions.planTaskForDay({
+        task,
+        day: getWorklogStr(getTomorrow()),
+      }),
+    );
     this._removeFromList(task.reminderId as string);
   }
 
@@ -203,7 +207,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this.isDisableControls = true;
     this._subs.add(
       this.tasks$.pipe(first()).subscribe((tasks) => {
-        tasks.forEach((t) => this.rescheduleUntilTomorrow(t));
+        tasks.forEach((t) => this.planForTomorrow(t));
         this._close();
       }),
     );
