@@ -108,6 +108,7 @@
     (keyPress)="onItemKeyPress($event)"
     [inputIcon]="task.dueWithTime || task.dueDay ? 'edit' : 'add'"
     class="input-item"
+    [class.color-warn]="isOverdue"
   >
     <ng-container input-title>
       @if (task.dueDay) {

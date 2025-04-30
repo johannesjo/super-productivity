@@ -7,6 +7,13 @@
     outline: none;
   }
 
+  &.color-warn {
+    .input-item__value {
+      color: $c-warn !important;
+      font-weight: bold;
+    }
+  }
+
   &::ng-deep task ::ng-deep {
     margin: 2px;
 

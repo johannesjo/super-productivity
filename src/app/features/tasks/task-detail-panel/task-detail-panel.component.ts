@@ -50,7 +50,6 @@ import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
 import { isTouchOnly } from '../../../util/is-touch-only';
-import { ReminderService } from '../../reminder/reminder.service';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
@@ -66,7 +65,6 @@ import { shareReplayUntil } from '../../../util/share-replay-until';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { PlannerService } from '../../planner/planner.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
@@ -74,7 +72,7 @@ import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checkl
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { IssueHeaderComponent } from '../../issue/issue-header/issue-header.component';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -85,6 +83,7 @@ import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { isToday } from '../../../util/is-today.util';
 
 interface IssueAndType {
   id?: string | number;
@@ -120,6 +119,7 @@ interface IssueDataAndType {
     MsToStringPipe,
     TranslatePipe,
     IssueIconPipe,
+    MatIconButton,
   ],
 })
 export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -128,11 +128,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   layoutService = inject(LayoutService);
   private _globalConfigService = inject(GlobalConfigService);
   private _issueService = inject(IssueService);
-  private _reminderService = inject(ReminderService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
-  readonly plannerService = inject(PlannerService);
   private readonly _attachmentService = inject(TaskAttachmentService);
   private _translateService = inject(TranslateService);
   private locale = inject(LOCALE_ID);
@@ -319,6 +317,15 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   get task(): TaskWithSubTasks {
     return this._taskData as TaskWithSubTasks;
+  }
+
+  get isOverdue(): boolean {
+    const t = this.task;
+    return !!(
+      !t.isDone &&
+      ((t.dueWithTime && t.dueWithTime < Date.now()) ||
+        (t.dueDay && !isToday(new Date(t.dueDay)) && new Date(t.dueDay) < new Date()))
+    );
   }
 
   // TODO: Skipped for migration because:
