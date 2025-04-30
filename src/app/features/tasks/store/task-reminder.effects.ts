@@ -5,8 +5,8 @@ import {
   deleteTasks,
   moveToArchive_,
   removeReminderFromTask,
-  reScheduleTask,
-  scheduleTask,
+  reScheduleTaskWithTime,
+  scheduleTaskWithTime,
   unScheduleTask,
   updateTask,
   updateTaskTags,
@@ -32,30 +32,9 @@ export class TaskReminderEffects {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
 
-  removeFromTodayOnDueTimeReScheduleToOtherDay$ = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(scheduleTask),
-        filter(({ task, dueWithTime, isMoveToBacklog, isSkipAutoRemoveFromToday }) => {
-          const isRemoveFromToday =
-            !isSkipAutoRemoveFromToday &&
-            task.tagIds.includes(TODAY_TAG.id) &&
-            (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
-          return isRemoveFromToday;
-        }),
-        map(({ task }) => {
-          return updateTaskTags({
-            task,
-            newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
-          });
-        }),
-      ),
-    { dispatch: true },
-  );
-
   addTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(scheduleTask),
+      ofType(scheduleTaskWithTime),
       tap(({ task }) =>
         this._snackService.open({
           type: 'SUCCESS',
@@ -100,7 +79,7 @@ export class TaskReminderEffects {
 
   updateTaskReminder$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(reScheduleTask),
+      ofType(reScheduleTaskWithTime),
       filter(({ task, remindAt }) => typeof remindAt === 'number' && !!task.reminderId),
       tap(({ task, remindAt }) => {
         this._reminderService.updateReminder(task.reminderId as string, {

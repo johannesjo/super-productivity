@@ -15,10 +15,10 @@ import {
   removeReminderFromTask,
   removeTagsForAllTasks,
   removeTimeSpent,
-  reScheduleTask,
+  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTask,
+  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
@@ -740,7 +740,7 @@ export const taskReducer = createReducer<TaskState>(
 
   // REMINDER STUFF
   // --------------
-  on(scheduleTask, (state, { task, dueWithTime }) => {
+  on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
     return taskAdapter.updateOne(
       {
         id: task.id,
@@ -752,7 +752,7 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(reScheduleTask, (state, { task, dueWithTime }) => {
+  on(reScheduleTaskWithTime, (state, { task, dueWithTime }) => {
     return taskAdapter.updateOne(
       {
         id: task.id,

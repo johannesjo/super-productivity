@@ -31,10 +31,10 @@ import {
   moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
-  reScheduleTask,
+  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTask,
+  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
@@ -771,7 +771,7 @@ export class TaskService {
     isMoveToBacklog: boolean = false,
   ): void {
     this._store.dispatch(
-      scheduleTask({
+      scheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
@@ -792,7 +792,7 @@ export class TaskService {
     isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
-      reScheduleTask({
+      reScheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),

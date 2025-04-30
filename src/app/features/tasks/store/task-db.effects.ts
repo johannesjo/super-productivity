@@ -17,10 +17,10 @@ import {
   removeReminderFromTask,
   removeTagsForAllTasks,
   removeTimeSpent,
-  reScheduleTask,
+  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTask,
+  scheduleTaskWithTime,
   toggleTaskHideSubTasks,
   undoDeleteTask,
   unScheduleTask,
@@ -95,8 +95,8 @@ export class TaskDbEffects {
           roundTimeSpentForDay,
 
           // REMINDER
-          scheduleTask,
-          reScheduleTask,
+          scheduleTaskWithTime,
+          reScheduleTaskWithTime,
           unScheduleTask,
           removeReminderFromTask,
 

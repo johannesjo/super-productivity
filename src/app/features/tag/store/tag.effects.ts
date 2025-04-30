@@ -32,6 +32,7 @@ import {
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
+  scheduleTaskWithTime,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
@@ -55,6 +56,7 @@ import { selectTaskById } from '../../tasks/store/task.selectors';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
+import { isSameDay } from '../../../util/is-same-day';
 
 @Injectable()
 export class TagEffects {
@@ -422,5 +424,26 @@ export class TagEffects {
         }),
       ),
     ),
+  );
+
+  removeFromTodayOnDueTimeReScheduleToOtherDay$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(scheduleTaskWithTime),
+        filter(({ task, dueWithTime, isMoveToBacklog, isSkipAutoRemoveFromToday }) => {
+          const isRemoveFromToday =
+            !isSkipAutoRemoveFromToday &&
+            task.tagIds.includes(TODAY_TAG.id) &&
+            (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
+          return isRemoveFromToday;
+        }),
+        map(({ task }) => {
+          return updateTaskTags({
+            task,
+            newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
+          });
+        }),
+      ),
+    { dispatch: true },
   );
 }

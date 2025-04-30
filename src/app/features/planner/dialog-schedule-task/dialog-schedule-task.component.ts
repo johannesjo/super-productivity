@@ -217,10 +217,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  addToToday(): void {
-    this._taskService.addTodayTag(this.data.task);
-  }
-
   onTimeKeyDown(ev: KeyboardEvent): void {
     // console.log('ev.key!', ev.key);
     if (ev.key === 'Enter') {
@@ -316,16 +312,40 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   async submit(isRemoveFromToday = false): Promise<void> {
-    // TODO simplify
-
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
     }
+
     const newDayDate = new Date(this.selectedDate);
     const newDay = getWorklogStr(newDayDate);
     const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
+    this._handleReminderRemoval();
+
+    if (isRemoveFromToday) {
+      this._removeFromToday();
+    } else if (this.selectedTime) {
+      this._scheduleWithTime();
+    } else if (
+      newDay === getWorklogStr() &&
+      !this.isShowAddToToday() &&
+      this.data.task.dueDay === newDay
+    ) {
+      this._snackService.open({
+        type: 'CUSTOM',
+        ico: 'info',
+        msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
+        translateParams: { date: formattedDate },
+      });
+    } else {
+      await this._planForDay(formattedDate, newDay);
+    }
+
+    this.close(true);
+  }
+
+  private _handleReminderRemoval(): void {
     if (
       this.selectedReminderCfgId === TaskReminderOptionId.DoNotRemind &&
       typeof this.data.task.reminderId === 'string'
@@ -338,81 +358,48 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         }),
       );
     }
+  }
 
-    if (isRemoveFromToday) {
-      this._store.dispatch(
-        updateTaskTags({
-          task: this.data.task,
-          newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
-        }),
-      );
-    } else if (this.selectedTime) {
-      const task = this.data.task;
-      const newDate = new Date(
-        getDateTimeFromClockString(this.selectedTime, this.selectedDate as Date),
-      );
+  private _removeFromToday(): void {
+    this._store.dispatch(
+      updateTaskTags({
+        task: this.data.task,
+        newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
+      }),
+    );
+  }
 
-      const isTodayI = isToday(newDate);
-      this._taskService.scheduleTask(
-        task,
-        newDate.getTime(),
-        this.selectedReminderCfgId,
-        false,
-      );
-      if (isTodayI) {
-        this.addToToday();
-      }
-    } else if (newDay === getWorklogStr()) {
-      if (!this.isShowAddToToday() && this.data.task.dueDay === newDay) {
-        this._snackService.open({
-          type: 'CUSTOM',
-          ico: 'info',
-          msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
-          translateParams: { date: formattedDate },
-        });
-      } else {
-        if (this.isShowAddToToday()) {
-          this.addToToday();
-        } else if (this.data.task.dueWithTime) {
-          // time was removed for today task case
-          this._store.dispatch(
-            unScheduleTask({
-              id: this.data.task.id,
-              reminderId: this.data.task.reminderId,
-              isSkipToast: true,
-            }),
-          );
-        }
-        this._store.dispatch(
-          PlannerActions.planTaskForDay({
-            task: this.data.task,
-            day: newDay,
-          }),
-        );
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: {
-            date: formattedDate,
-            extra: await this._plannerService.getSnackExtraStr(newDay),
-          },
-        });
-      }
-    } else {
-      this._store.dispatch(
-        PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
-      );
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: {
-          date: formattedDate,
-          extra: await this._plannerService.getSnackExtraStr(newDay),
-        },
-      });
-    }
+  private _scheduleWithTime(): void {
+    const task = this.data.task;
+    const newDate = new Date(
+      getDateTimeFromClockString(this.selectedTime as string, this.selectedDate as Date),
+    );
 
-    this.close(true);
+    this._taskService.scheduleTask(
+      task,
+      newDate.getTime(),
+      this.selectedReminderCfgId,
+      false,
+    );
+    // TODO if we want this, we should add it as an effect
+    // const isTodayI = isToday(newDate);
+    // if (isTodayI) {
+    //   this.addToToday();
+    // }
+  }
+
+  private async _planForDay(formattedDate: string, newDay: string): Promise<void> {
+    this._store.dispatch(
+      PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
+    );
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+      translateParams: {
+        date: formattedDate,
+        extra: await this._plannerService.getSnackExtraStr(newDay),
+      },
+    });
   }
 
   quickAccessBtnClick(item: number): void {

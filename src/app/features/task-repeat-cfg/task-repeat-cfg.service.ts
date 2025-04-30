@@ -30,7 +30,7 @@ import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { Task } from '../tasks/task.model';
-import { addTask, scheduleTask } from '../tasks/store/task.actions';
+import { addTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -162,7 +162,7 @@ export class TaskRepeatCfgService {
     (
       | ReturnType<typeof addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTask>
+      | ReturnType<typeof scheduleTaskWithTime>
     )[]
   > {
     // NOTE: there might be multiple configs in case something went wrong
@@ -196,7 +196,7 @@ export class TaskRepeatCfgService {
     const createNewActions: (
       | ReturnType<typeof addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTask>
+      | ReturnType<typeof scheduleTaskWithTime>
     )[] = [
       addTask({
         task: {
@@ -229,7 +229,7 @@ export class TaskRepeatCfgService {
         targetDayDate,
       );
       createNewActions.push(
-        scheduleTask({
+        scheduleTaskWithTime({
           task,
           dueWithTime: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),

@@ -4,7 +4,7 @@ import {
   addNewTagsFromShortSyntax,
   addTask,
   moveToOtherProject,
-  scheduleTask,
+  scheduleTaskWithTime,
   updateTask,
   updateTaskTags,
 } from './task.actions';
@@ -144,7 +144,7 @@ export class ShortSyntaxEffects {
             });
             actions.push(plan);
           } else {
-            const schedule = scheduleTask({
+            const schedule = scheduleTaskWithTime({
               task,
               dueWithTime: dueWithTime,
               remindAt: remindOptionToMilliseconds(

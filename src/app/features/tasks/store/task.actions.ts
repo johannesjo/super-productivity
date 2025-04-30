@@ -181,7 +181,7 @@ export const removeTimeSpent = createAction(
 );
 
 // Reminder Actions
-export const scheduleTask = createAction(
+export const scheduleTaskWithTime = createAction(
   TaskActionTypes.ScheduleTask,
 
   props<{
@@ -193,7 +193,7 @@ export const scheduleTask = createAction(
   }>(),
 );
 
-export const reScheduleTask = createAction(
+export const reScheduleTaskWithTime = createAction(
   TaskActionTypes.ReScheduleTask,
 
   props<{
