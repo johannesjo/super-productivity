@@ -136,21 +136,43 @@ export class AddTasksForTomorrowService {
     });
     await Promise.all(promises);
 
-    this.movePlannedTasksToToday(
-      dueWithTime.sort((a, b) => a.dueWithTime - b.dueWithTime),
-    );
-    console.log({
-      dt,
-      dueWithTime,
-      dueWithDay,
-      dueRepeatCfgs,
+    const allDueSorted = [...dueWithTime, ...dueWithDay].sort((a, b) => {
+      // Handle cases where properties might be undefined
+      const aDate = a.dueDay ? new Date(a.dueDay) : null;
+      const bDate = b.dueDay ? new Date(b.dueDay) : null;
+
+      // Get timestamp values, with fallbacks
+      const aTime =
+        a.dueWithTime || (aDate ? aDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
+      const bTime =
+        b.dueWithTime || (bDate ? bDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
+
+      // For same day comparison
+      const aDay = a.dueWithTime
+        ? new Date(a.dueWithTime).setHours(0, 0, 0, 0)
+        : aDate
+          ? aDate.setHours(0, 0, 0, 0)
+          : null;
+      const bDay = b.dueWithTime
+        ? new Date(b.dueWithTime).setHours(0, 0, 0, 0)
+        : bDate
+          ? bDate.setHours(0, 0, 0, 0)
+          : null;
+
+      // Special handling for same day
+      if (aDay !== null && bDay !== null && aDay === bDay) {
+        // If one has dueDay without time and other has dueWithTime
+        if (a.dueDay && !a.dueWithTime && b.dueWithTime) return -1;
+        if (b.dueDay && !b.dueWithTime && a.dueWithTime) return 1;
+      }
+
+      // Default chronological ordering
+      return aTime - bTime;
     });
 
-    this.movePlannedTasksToToday(
-      dueWithDay.sort((a, b) => a.dueDay.localeCompare(b.dueDay)),
-    );
+    this.movePlannedTasksToToday(allDueSorted);
 
-    if (dueWithTime.length || dueWithDay.length || dueRepeatCfgs.length) {
+    if (allDueSorted.length || dueRepeatCfgs.length) {
       return 'ADDED';
     }
   }
