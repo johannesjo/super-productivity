@@ -111,13 +111,16 @@ export const selectStartableTasks = createSelector(
 
 export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
   const today = new Date(getWorklogStr());
+  const todayStart = new Date(today);
+  todayStart.setHours(0, 0, 0, 0);
   return s.ids
     .map((id) => s.entities[id] as Task)
     .filter(
       (task) =>
-        task.dueDay &&
-        new Date(task.dueDay) < today &&
-        !task.tagIds.includes(TODAY_TAG.id),
+        (task.dueDay &&
+          new Date(task.dueDay) < today &&
+          !task.tagIds.includes(TODAY_TAG.id)) ||
+        (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
     );
 });
 

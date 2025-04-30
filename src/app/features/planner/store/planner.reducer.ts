@@ -1,7 +1,7 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { PlannerActions } from './planner.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
-import { ADD_TASK_PANEL_ID } from '../planner.model';
+import { ADD_TASK_PANEL_ID, OVERDUE_LIST_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
@@ -106,10 +106,12 @@ export const plannerReducer = createReducer(
   on(PlannerActions.transferTask, (state, action) => {
     const targetDays = state.days[action.newDay] || [];
 
+    // alert(action.prevDay);
     const updatePrevDay =
       // NOTE: it is possible that there is no data saved yet when moving from scheduled to unscheduled
       // don't update for add task panel and today list
       action.prevDay === ADD_TASK_PANEL_ID ||
+      action.prevDay === OVERDUE_LIST_ID ||
       !state.days[action.prevDay] ||
       action.prevDay === action.today
         ? {}
@@ -132,6 +134,7 @@ export const plannerReducer = createReducer(
               // when moving a parent to the day, remove all sub-tasks
               .filter((id) => !action.task.subTaskIds.includes(id)),
           };
+    console.log({ updateNextDay, updatePrevDay });
 
     return {
       ...state,

@@ -6,6 +6,7 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { TaskCopy } from '../../tasks/task.model';
+import { OVERDUE_LIST_ID } from '../planner.model';
 
 @Component({
   selector: 'planner-day-overdue',
@@ -29,6 +30,7 @@ export class PlannerDayOverdueComponent {
     return tasks.reduce((acc, task) => acc + (task.timeEstimate || 0), 0);
   });
 
+  OVERDUE_LIST_ID = OVERDUE_LIST_ID;
   protected readonly T = T;
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {

@@ -15,6 +15,8 @@ import {
   BOARDS_FEATURE_NAME,
   BoardsState,
 } from '../features/boards/store/boards.reducer';
+import * as fromPlanner from '../features/planner/store/planner.reducer';
+import { PlannerState } from '../features/planner/store/planner.reducer';
 
 export interface RootState {
   [TASK_FEATURE_NAME]: TaskState;
@@ -25,4 +27,5 @@ export interface RootState {
   [LAYOUT_FEATURE_NAME]: LayoutState;
   [CONFIG_FEATURE_NAME]: GlobalConfigState;
   [BOARDS_FEATURE_NAME]: BoardsState;
+  [fromPlanner.plannerFeatureKey]: PlannerState;
 }

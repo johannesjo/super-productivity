@@ -64,3 +64,4 @@ export interface ScheduleItemCalendarEventData {
 }
 
 export const ADD_TASK_PANEL_ID = 'ADD_TASK_PANEL' as const;
+export const OVERDUE_LIST_ID = 'OVERDUE_LIST' as const;

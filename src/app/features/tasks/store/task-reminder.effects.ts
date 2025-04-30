@@ -23,6 +23,7 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { isSameDay } from '../../../util/is-same-day';
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -223,31 +224,18 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  // TODO check if this is still needed
-  // unscheduleScheduledForDayWhenAddedToToday$: any = createEffect(
-  //   () =>
-  //     this._actions$.pipe(
-  //       ofType(updateTaskTags),
-  //       tap(({ task, newTagIds }) => {
-  //         if (
-  //           task.reminderId &&
-  //           task.dueWithTime &&
-  //           newTagIds.includes(TODAY_TAG.id) &&
-  //           !task.tagIds.includes(TODAY_TAG.id) &&
-  //           task.dueWithTime === getDateTimeFromClockString(DEFAULT_DAY_START, new Date())
-  //         ) {
-  //           // TODO refactor to map with dispatch
-  //           console.log('unscheduleScheduledForDayWhenAddedToToday$ special case <3');
-  //           this._store.dispatch(
-  //             unScheduleTask({
-  //               id: task.id,
-  //               reminderId: task.reminderId,
-  //               isSkipToast: true,
-  //             }),
-  //           );
-  //         }
-  //       }),
-  //     ),
-  //   { dispatch: false },
-  // );
+  unschedulePlannedForDayTasks$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(PlannerActions.transferTask),
+      filter(({ task }) => !!task.reminderId),
+      // delay(100),
+      map(({ task }) => {
+        return removeReminderFromTask({
+          id: task.id,
+          reminderId: task.reminderId!,
+          isSkipToast: true,
+        });
+      }),
+    ),
+  );
 }
