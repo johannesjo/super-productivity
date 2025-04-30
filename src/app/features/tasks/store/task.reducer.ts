@@ -424,7 +424,6 @@ export const taskReducer = createReducer<TaskState>(
     const stateCopy = taskAdapter.addOne(
       {
         ...task,
-        parentId,
         // update timeSpent if first sub task and non present
         ...(parentTask.subTaskIds.length === 0 &&
         Object.keys(task.timeSpentOnDay).length === 0
@@ -437,6 +436,7 @@ export const taskReducer = createReducer<TaskState>(
         ...(parentTask.subTaskIds.length === 0 && !task.timeEstimate
           ? { timeEstimate: parentTask.timeEstimate }
           : {}),
+        parentId,
         // should always be empty
         tagIds: [],
         // should always be the one of the parent
