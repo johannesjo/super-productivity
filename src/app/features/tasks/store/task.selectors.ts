@@ -289,12 +289,21 @@ export const selectTasksWithDueTimeForRange = createSelector(
   },
 );
 
-export const selectAllDueWithTimeTasks = createSelector(
+export const selectAllTasksWithDueTime = createSelector(
   selectAllTasks,
   (tasks: Task[]): TaskWithDueTime[] => {
     return tasks.filter(
       (task) => typeof task.dueWithTime === 'number',
     ) as TaskWithDueTime[];
+  },
+);
+
+export const selectAllTasksWithDueTimeSorted = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): TaskWithDueTime[] => {
+    return tasks
+      .filter((task) => typeof task.dueWithTime === 'number')
+      .sort((a, b) => a.dueWithTime! - b.dueWithTime!) as TaskWithDueTime[];
   },
 );
 
@@ -378,5 +387,18 @@ export const selectAllTasksWithoutHiddenProjects = createSelector(
 
       return true;
     });
+  },
+);
+
+export const selectAllTasksWithDueDay = createSelector(
+  selectTaskFeatureState,
+  (taskState): TaskWithDueDay[] => {
+    // return all tasks with dueDay
+    const allPlannnedForDayTasks = Object.values(taskState.entities).filter(
+      (task) => !!task && !!(task as TaskWithDueTime).dueDay,
+    ) as TaskWithDueDay[];
+    return allPlannnedForDayTasks.sort((a, b) =>
+      a.dueDay > b.dueDay ? 1 : a.dueDay < b.dueDay ? -1 : 0,
+    );
   },
 );

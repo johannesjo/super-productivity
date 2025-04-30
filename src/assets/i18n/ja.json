@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "その日の予定タスク",
     "REPEATED_TASKS": "繰り返されるタスク",
     "SCHEDULED_TASKS": "スケジュールされたタスク",
-    "SCHEDULED_TASKS_WITH_REMINDER": "リマインダー付きスケジュールタスク",
+    "SCHEDULED_TASKS_WITH_TIME": "リマインダー付きスケジュールタスク",
     "START_TASK": "今すぐタスクを開始してリマインダーを削除"
   },
   "THEMES": {

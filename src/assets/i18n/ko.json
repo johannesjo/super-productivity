@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "하루 동안 예약된 작업",
     "REPEATED_TASKS": "반복 작업",
     "SCHEDULED_TASKS": "예약된 작업",
-    "SCHEDULED_TASKS_WITH_REMINDER": "미리 알림이 있는 예약된 작업",
+    "SCHEDULED_TASKS_WITH_TIME": "미리 알림이 있는 예약된 작업",
     "START_TASK": "지금 작업을 시작하고 알림 제거"
   },
   "THEMES": {

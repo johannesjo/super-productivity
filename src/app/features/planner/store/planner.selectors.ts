@@ -10,7 +10,7 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
-import { TaskCopy, TaskWithDueTime, TaskWithDueDay } from '../../tasks/task.model';
+import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -24,19 +24,6 @@ import { ScheduleConfig } from '../../config/global-config.model';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
-);
-
-export const selectAllTasksWithDueDay = createSelector(
-  selectTaskFeatureState,
-  (taskState): TaskWithDueDay[] => {
-    // return all tasks with dueDay
-    const allPlannnedForDayTasks = Object.values(taskState.entities).filter(
-      (task) => !!task && !!(task as TaskWithDueTime).dueDay,
-    ) as TaskWithDueDay[];
-    return allPlannnedForDayTasks.sort((a, b) =>
-      a.dueDay > b.dueDay ? 1 : a.dueDay < b.dueDay ? -1 : 0,
-    );
-  },
 );
 
 // Updated selectPlannerDays

@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Geplande taken voor de dag",
     "REPEATED_TASKS": "Herhaalde taken",
     "SCHEDULED_TASKS": "Geplande taken",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Geplande taken met herinnering",
+    "SCHEDULED_TASKS_WITH_TIME": "Geplande taken met herinnering",
     "START_TASK": "Start de taak nu en verwijder de herinnering"
   },
   "THEMES": {

@@ -1645,7 +1645,7 @@
     "NO_SCHEDULED_TITLE": "Tarefas agendadas para o dia",
     "REPEATED_TASKS": "Tarefas repetidas",
     "SCHEDULED_TASKS": "Tarefas agendadas",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Tarefas agendadas com lembrete",
+    "SCHEDULED_TASKS_WITH_TIME": "Tarefas agendadas com lembrete",
     "START_TASK": "Iniciar tarefa e remover lembrete"
   },
   "THEMES": {

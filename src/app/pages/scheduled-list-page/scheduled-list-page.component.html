@@ -55,12 +55,12 @@
   } @else {
     <full-page-spinner></full-page-spinner>
   }
-  @if (scheduledTaskService.allScheduledTasks$ | async; as allScheduledTasks) {
+  @if (tasksPlannedWithTime$ | async; as allScheduledTasks) {
     <section
       class="component-wrapper"
       style="margin-top: 24px"
     >
-      <h2>{{ T.SCHEDULE.SCHEDULED_TASKS_WITH_REMINDER | translate }}</h2>
+      <h2>{{ T.SCHEDULE.SCHEDULED_TASKS_WITH_TIME | translate }}</h2>
       @if (!allScheduledTasks?.length) {
         <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_SCHEDULED | translate }}</p>
       }
@@ -86,7 +86,11 @@
                 </div>
                 <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
               </div>
-              <mat-icon>alarm</mat-icon>
+              @if (task.reminderId) {
+                <mat-icon>alarm</mat-icon>
+              } @else {
+                <mat-icon>schedule</mat-icon>
+              }
             </div>
           </planner-task>
         }
@@ -119,7 +123,7 @@
                 <div class="date">{{ task.dueDay | date: 'EE, d MMM' }}</div>
                 <div class="time-left">({{ task.dueDay | humanizeTimestamp }})</div>
               </div>
-              <mat-icon>alarm</mat-icon>
+              <mat-icon>today</mat-icon>
             </div>
           </planner-task>
         }

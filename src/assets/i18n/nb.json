@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Planlagte oppgaver for dagen",
     "REPEATED_TASKS": "Gjentatte oppgaver",
     "SCHEDULED_TASKS": "Planlagte oppgaver",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Planlagte oppgaver med påminnelse",
+    "SCHEDULED_TASKS_WITH_TIME": "Planlagte oppgaver med påminnelse",
     "START_TASK": "Start oppgaven og fjern påminnelsen"
   },
   "THEMES": {

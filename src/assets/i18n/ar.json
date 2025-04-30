@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "المهام المجدولة لليوم",
     "REPEATED_TASKS": "المهام المتكررة",
     "SCHEDULED_TASKS": "المهام المجدولة",
-    "SCHEDULED_TASKS_WITH_REMINDER": "المهام المجدولة مع التذكير",
+    "SCHEDULED_TASKS_WITH_TIME": "المهام المجدولة مع التذكير",
     "START_TASK": "بدء المهمة الآن وإزالة تذكير"
   },
   "THEMES": {

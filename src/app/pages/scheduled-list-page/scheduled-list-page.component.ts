@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
 import { T } from '../../t.const';
-import { ScheduledTaskService } from '../../features/tasks/scheduled-task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskCopy, TaskWithReminderData } from '../../features/tasks/task.model';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
@@ -14,7 +13,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
-import { selectAllTasksWithDueDay } from '../../features/planner/store/planner.selectors';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { TaskTitleComponent } from '../../ui/task-title/task-title.component';
 import { MatRipple } from '@angular/material/core';
@@ -24,6 +22,10 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
 import { TagListComponent } from '../../features/tag/tag-list/tag-list.component';
 import { PlannerTaskComponent } from '../../features/planner/planner-task/planner-task.component';
+import {
+  selectAllTasksWithDueDay,
+  selectAllTasksWithDueTimeSorted,
+} from '../../features/tasks/store/task.selectors';
 
 @Component({
   selector: 'scheduled-list-page',
@@ -47,7 +49,6 @@ import { PlannerTaskComponent } from '../../features/planner/planner-task/planne
   ],
 })
 export class ScheduledListPageComponent {
-  scheduledTaskService = inject(ScheduledTaskService);
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
   private _translateService = inject(TranslateService);
@@ -58,6 +59,7 @@ export class ScheduledListPageComponent {
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
   tasksPlannedForDays$ = this._store.select(selectAllTasksWithDueDay);
+  tasksPlannedWithTime$ = this._store.select(selectAllTasksWithDueTimeSorted);
 
   editReminder(task: TaskCopy, ev: MouseEvent): void {
     ev.preventDefault();

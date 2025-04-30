@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { selectAllDueWithTimeTasks } from '../tasks/store/task.selectors';
+import { selectAllTasksWithDueTime } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { PlannerDay } from './planner.model';
@@ -43,7 +43,7 @@ export class PlannerService {
   );
 
   allDueWithTimeTasks$: Observable<TaskWithDueTime[]> = this._store.select(
-    selectAllDueWithTimeTasks,
+    selectAllTasksWithDueTime,
   );
 
   // TODO this needs to be more performant

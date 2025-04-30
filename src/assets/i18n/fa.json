@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "وظایف برنامه ریزی شده برای روز",
     "REPEATED_TASKS": "کارهای تکراری",
     "SCHEDULED_TASKS": "وظایف برنامه ریزی شده",
-    "SCHEDULED_TASKS_WITH_REMINDER": "کارهای برنامه ریزی شده با یادآوری",
+    "SCHEDULED_TASKS_WITH_TIME": "کارهای برنامه ریزی شده با یادآوری",
     "START_TASK": "Start task now and remove reminder"
   },
   "THEMES": {

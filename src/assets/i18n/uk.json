@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Заплановані завдання на день",
     "REPEATED_TASKS": "Повторювані завдання",
     "SCHEDULED_TASKS": "Заплановані завдання",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Заплановані завдання з нагадуванням",
+    "SCHEDULED_TASKS_WITH_TIME": "Заплановані завдання з нагадуванням",
     "START_TASK": "Почати завдання і видалити нагадування"
   },
   "THEMES": {

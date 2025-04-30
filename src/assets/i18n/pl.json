@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Zaplanowane zadania na dany dzień",
     "REPEATED_TASKS": "Powtarzające się zadania",
     "SCHEDULED_TASKS": "Zaplanowane zadania",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Zaplanowane zadania z przypomnieniem",
+    "SCHEDULED_TASKS_WITH_TIME": "Zaplanowane zadania z przypomnieniem",
     "START_TASK": "Ropoczni zadanie i wyłącz przypomnienie"
   },
   "THEMES": {

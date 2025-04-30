@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Tugas Terjadwal untuk Hari Ini",
     "REPEATED_TASKS": "Tugas berulang",
     "SCHEDULED_TASKS": "Tugas yang dijadwalkan",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Tugas terjadwal dengan pengingat",
+    "SCHEDULED_TASKS_WITH_TIME": "Tugas terjadwal dengan pengingat",
     "START_TASK": "Mulai tugas dan hapus pengingat"
   },
   "THEMES": {

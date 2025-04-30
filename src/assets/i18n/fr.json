@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Planifier les tâches du jour",
     "REPEATED_TASKS": "Tâches répétées",
     "SCHEDULED_TASKS": "Tâches programmées",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Planifier les tâches avec rappel",
+    "SCHEDULED_TASKS_WITH_TIME": "Planifier les tâches avec rappel",
     "START_TASK": "Démarrer la tâche maintenant et supprimer le rappel"
   },
   "THEMES": {

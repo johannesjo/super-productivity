@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Naplánované úlohy na deň",
     "REPEATED_TASKS": "Repeated tasks",
     "SCHEDULED_TASKS": "Scheduled tasks",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Naplánované úlohy s pripomienkou",
+    "SCHEDULED_TASKS_WITH_TIME": "Naplánované úlohy s pripomienkou",
     "START_TASK": "Start task and remove reminder"
   },
   "THEMES": {

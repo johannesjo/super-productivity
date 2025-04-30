@@ -1680,7 +1680,7 @@
     "NO_SCHEDULED_TITLE": "Tarefas programadas para o dia",
     "REPEATED_TASKS": "Tarefas Recorrentes",
     "SCHEDULED_TASKS": "Tarefas Agendadas",
-    "SCHEDULED_TASKS_WITH_REMINDER": "Tarefas programadas com lembrete",
+    "SCHEDULED_TASKS_WITH_TIME": "Tarefas programadas com lembrete",
     "START_TASK": "Iniciar tarefa agora e remover lembrete"
   },
   "THEMES": {
