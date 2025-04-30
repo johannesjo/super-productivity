@@ -12,11 +12,19 @@
       <div class="day-of-month">{{ se.dayOfMonth }}</div>
     }
     @case ('SCHEDULED_TASK') {
-      <mat-icon
-        class="ico"
-        inline="true"
-        >alarm
-      </mat-icon>
+      @if (task.reminderId) {
+        <mat-icon
+          class="ico"
+          inline="true"
+          >alarm
+        </mat-icon>
+      } @else {
+        <mat-icon
+          class="ico"
+          inline="true"
+          >schedule
+        </mat-icon>
+      }
     }
     @case ('FLOW') {
       <!--<div class="fake-ico">~</div>-->
