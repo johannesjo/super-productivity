@@ -23,6 +23,9 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
+const filterDoneAndToday = (task: TaskCopy): boolean =>
+  !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
+
 @Injectable({
   providedIn: 'root',
 })
@@ -59,6 +62,7 @@ export class AddTasksForTomorrowService {
       switchMap((dt) =>
         this._store.select(selectTasksWithDueTimeUntil, getDateRangeForDay(dt).end),
       ),
+      map((tasks) => tasks.filter(filterDoneAndToday)),
     );
   private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
     this._tomorrowDate$.pipe(
@@ -68,20 +72,27 @@ export class AddTasksForTomorrowService {
           getDateRangeForDay(dt.getTime()),
         ),
       ),
+      map((tasks) => tasks.filter(filterDoneAndToday)),
     );
 
   private _dueForDayForToday$: Observable<TaskWithDueDay[]> =
     this._globalTrackingIntervalService.todayDateStr$.pipe(
       switchMap((ds) => this._store.select(selectTasksDueAndOverdueForDay, ds)),
+      map((tasks) => tasks.filter(filterDoneAndToday)),
     );
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
     switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
+    map((tasks) => tasks.filter(filterDoneAndToday)),
   );
 
   allPlannedForTodayNotOnToday$: Observable<TaskPlannedWithDayOrTime[]> = combineLatest([
     this._dueWithTimeForToday$,
     this._dueForDayForToday$,
-  ]).pipe(map(([dueWithTime, dueForDay]) => [...dueWithTime, ...dueForDay]));
+  ]).pipe(
+    map(([dueWithTime, dueForDay]) =>
+      [...dueWithTime, ...dueForDay].filter(filterDoneAndToday),
+    ),
+  );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
     this._repeatableForTomorrow$,
