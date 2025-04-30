@@ -1073,8 +1073,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
-        "DISMISS": "Dismiss Reminder",
-        "DISMISS_ALL": "Dismiss all",
+        "UNSCHEDULE": "Unschedule",
+        "UNSCHEDULE_ALL": "Unschedule all",
         "DONE": "Done",
         "DUE_TASK": "Reminder for due task",
         "DUE_TASKS": "Reminder for due tasks",

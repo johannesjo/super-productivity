@@ -18,7 +18,7 @@
           <div class="title-wrapper">
             <div
               class="due-for"
-              [class.color-warn-i]="(task.dueWithTime || 0) < overdueThreshold"
+              [class.emphasized]="(task.dueWithTime || 0) < overdueThreshold"
             >
               {{ task.dueWithTime | date: 'short' }}
             </div>
@@ -33,13 +33,13 @@
               <button
                 [disabled]="!(task.projectId || task.parentId || task.tagIds.length > 0)"
                 (click)="dismiss(task)"
-                [title]="T.G.DISMISS | translate"
+                [title]="T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE | translate"
                 class="hide-xs"
                 color=""
                 mat-icon-button
                 type="button"
               >
-                <mat-icon>alarm_off</mat-icon>
+                <mat-icon>event_busy</mat-icon>
               </button>
               <button
                 (dblclick)="snooze(task, 10)"
@@ -87,7 +87,7 @@
                   [disabled]="isDisableControls"
                   mat-menu-item
                 >
-                  <mat-icon>schedule</mat-icon>
+                  <mat-icon>today</mat-icon>
                   {{ T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_UNTIL_TOMORROW | translate }}
                 </button>
                 <button
@@ -97,8 +97,8 @@
                   (click)="dismiss(task)"
                   mat-menu-item
                 >
-                  <mat-icon>alarm_off</mat-icon>
-                  {{ T.G.DISMISS | translate }}
+                  <mat-icon>event_busy</mat-icon>
+                  {{ T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE | translate }}
                 </button>
                 <button
                   (click)="editReminder(task)"
@@ -222,8 +222,13 @@
       [disabled]="isDisableControls"
       mat-menu-item
     >
-      <mat-icon>alarm_off</mat-icon>
-      {{ (isMultiple ? T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL : T.G.DISMISS) | translate }}
+      <mat-icon>event_busy</mat-icon>
+      {{
+        (isMultiple
+          ? T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE_ALL
+          : T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE
+        ) | translate
+      }}
     </button>
   </mat-menu>
 }
