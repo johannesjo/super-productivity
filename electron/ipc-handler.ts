@@ -1,6 +1,14 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell, process } from 'electron';
+import {
+  app,
+  dialog,
+  globalShortcut,
+  ipcMain,
+  IpcMainEvent,
+  shell,
+  process,
+} from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
