@@ -730,7 +730,7 @@ export const taskReducer = createReducer<TaskState>(
             day === todayStr
               ? unique([TODAY_TAG.id, ...task.tagIds])
               : task.tagIds.filter((id) => id !== TODAY_TAG.id),
-          dueDay: todayStr,
+          dueDay: day,
           dueWithTime: undefined,
         },
       },
