@@ -50,9 +50,10 @@ import { BacklogComponent } from './backlog/backlog.component';
 import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
-import { flattenTasks } from '../tasks/store/task.selectors';
+import { flattenTasks, selectOverdueTasks } from '../tasks/store/task.selectors';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'work-view',
@@ -97,9 +98,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   private _activatedRoute = inject(ActivatedRoute);
   private _projectService = inject(ProjectService);
   private _cd = inject(ChangeDetectorRef);
+  private _store = inject(Store);
   private _snackService = inject(SnackService);
 
   // TODO refactor all to signals
+  overdueTasks = toSignal(this._store.select(selectOverdueTasks), { initialValue: [] });
   undoneTasks = input<TaskWithSubTasks[]>([]);
   doneTasks = input<TaskWithSubTasks[]>([]);
   backlogTasks = input<TaskWithSubTasks[]>([]);

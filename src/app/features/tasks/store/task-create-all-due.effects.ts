@@ -36,16 +36,17 @@ export class TaskCreateAllDueEffects {
         }),
         tap(async (v) => {
           // if (!confirm('Create all due tasks?')) return;
-
-          if ((await this._addTasksForTomorrowService.addAllDueToday()) === 'ADDED') {
-            setTimeout(() => {
-              // TODO add move to list button if not on today list
-              this._snackService.open({
-                ico: 'today',
-                msg: 'Added all due and repeating tasks for today',
-              });
-            }, 10);
-          }
+          return false;
+          // TODO rework to repeatable tasks only
+          // if ((await this._addTasksForTomorrowService.addAllDueToday()) === 'ADDED') {
+          //   setTimeout(() => {
+          //     // TODO add move to list button if not on today list
+          //     this._snackService.open({
+          //       ico: 'today',
+          //       msg: 'Added all due and repeating tasks for today',
+          //     });
+          //   }, 10);
+          // }
         }),
       );
     },
