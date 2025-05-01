@@ -26,7 +26,6 @@ import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
-import { unScheduleTask } from '../../tasks/store/task.actions';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 
 @Component({
