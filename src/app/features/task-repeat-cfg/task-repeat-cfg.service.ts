@@ -38,6 +38,7 @@ import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -204,6 +205,7 @@ export class TaskRepeatCfgService {
           // NOTE if moving this to top isCreateNew check above would not work as intended
           // we use created also for the repeat day label for past tasks
           created: targetCreated.getTime(),
+          dueDay: getWorklogStr(targetCreated),
         },
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
