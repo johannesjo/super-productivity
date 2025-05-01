@@ -20,6 +20,7 @@ import { ScheduleCalendarMapEntry } from '../../schedule/schedule.model';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { calculateAvailableHours } from '../util/calculate-available-hours';
 import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
+import { ScheduleConfig } from '../../config/global-config.model';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -133,6 +134,7 @@ export const selectPlannerDays = (
   return createSelector(
     selectTaskFeatureState,
     selectPlannerState,
+    // TODO this could be more efficient by limiting this to changes of the relevant stuff
     selectConfigFeatureState,
     (taskState, plannerState, globalConfig): PlannerDay[] => {
       const allDatesWithData = Object.keys(plannerState.days);
@@ -189,7 +191,7 @@ const getPlannerDay = (
   allPlannedTasks: TaskPlanned[],
   icalEvents: ScheduleCalendarMapEntry[],
   unplannedTaskIdsToday: string[] | false,
-  scheduleConfig?: any,
+  scheduleConfig?: ScheduleConfig,
 ): PlannerDay => {
   const isToday = dayDate === todayStr;
   const currentDayDate = dateStrToUtcDate(dayDate);
@@ -219,7 +221,7 @@ const getPlannerDay = (
   let availableHours;
   let progressPercentage;
 
-  if (scheduleConfig) {
+  if (scheduleConfig && scheduleConfig.isWorkStartEndEnabled) {
     availableHours = calculateAvailableHours(dayDate, scheduleConfig);
     progressPercentage = availableHours > 0 ? (timeEstimate / availableHours) * 100 : 0;
   }
