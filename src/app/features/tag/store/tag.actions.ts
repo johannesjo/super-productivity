@@ -29,11 +29,6 @@ export const planTaskForToday = createAction(
   props<{ taskId: string }>(),
 );
 
-export const removeTaskFromTodayTagList = createAction(
-  '[Tag] Remove Task From Today',
-  props<{ taskId: string }>(),
-);
-
 export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),

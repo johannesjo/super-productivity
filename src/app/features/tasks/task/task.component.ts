@@ -80,11 +80,9 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
-import {
-  planTaskForToday,
-  removeTaskFromTodayTagList,
-} from '../../tag/store/tag.actions';
+import { planTaskForToday } from '../../tag/store/tag.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { unScheduleTask } from '../store/task.actions';
 
 @Component({
   selector: 'task',
@@ -479,8 +477,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this._store.dispatch(planTaskForToday({ taskId: this.task().id }));
   }
 
-  removeFromMyDay(): void {
-    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.task().id }));
+  unschedule(): void {
+    this._store.dispatch(
+      unScheduleTask({ id: this.task().id, reminderId: this.task().reminderId }),
+    );
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
@@ -640,7 +640,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
               // NOTHING
             } else {
               if (this.isOnTodayList()) {
-                this.removeFromMyDay();
+                this.unschedule();
               } else {
                 this.addToMyDay();
               }
@@ -762,7 +762,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (t.projectId && !t.parentId) {
       this._projectService.moveTaskToBacklog(t.id, t.projectId);
       if (this.isOnTodayList()) {
-        this.removeFromMyDay();
+        this.unschedule();
       }
     }
   }

@@ -53,7 +53,6 @@ import {
 import { MatSelect } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
-import { removeTaskFromTodayTagList } from '../../tag/store/tag.actions';
 
 const DEFAULT_TIME = '09:00';
 
@@ -305,7 +304,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  async submit(isRemoveFromToday = false): Promise<void> {
+  async submit(isUnschedule = false): Promise<void> {
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
@@ -317,8 +316,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     this._handleReminderRemoval();
 
-    if (isRemoveFromToday) {
-      this._removeFromToday();
+    if (isUnschedule) {
+      this._store.dispatch(
+        unScheduleTask({ id: this.data.task.id, reminderId: this.data.task.reminderId }),
+      );
     } else if (this.selectedTime) {
       this._scheduleWithTime();
     } else if (
@@ -352,10 +353,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         }),
       );
     }
-  }
-
-  private _removeFromToday(): void {
-    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.data.task.id }));
   }
 
   private _scheduleWithTime(): void {

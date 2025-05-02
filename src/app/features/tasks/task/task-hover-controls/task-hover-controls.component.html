@@ -42,7 +42,7 @@
 }
 @if (isShowRemoveFromToday()) {
   <button
-    (click)="parent.removeFromMyDay()"
+    (click)="parent.unschedule()"
     [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY | translate"
     class="ico-btn"
     color=""

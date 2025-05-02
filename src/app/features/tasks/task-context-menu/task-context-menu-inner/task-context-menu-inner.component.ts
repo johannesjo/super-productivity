@@ -59,7 +59,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
-import { isToday } from '../../../../util/is-today.util';
 import { DateAdapter } from '@angular/material/core';
 import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
@@ -70,11 +69,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { unScheduleTask } from '../../store/task.actions';
-import {
-  planTaskForToday,
-  removeTaskFromTodayTagList,
-} from '../../../tag/store/tag.actions';
+import { planTaskForToday } from '../../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
+import { isToday } from '../../../../util/is-today.util';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -344,8 +341,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._store.dispatch(planTaskForToday({ taskId: this.task.id }));
   }
 
-  removeFromMyDay(): void {
-    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.task.id }));
+  unschedule(): void {
+    this._store.dispatch(
+      unScheduleTask({ id: this.task.id, reminderId: this.task.reminderId }),
+    );
   }
 
   convertToMainTask(): void {
@@ -482,8 +481,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToBacklog(): void {
     if (this.task.projectId && !this.task.parentId) {
       this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
-      if (this.task.dueDay === getWorklogStr()) {
-        this.removeFromMyDay();
+      if (
+        this.task.dueDay === getWorklogStr() ||
+        (this.task.dueWithTime && isToday(this.task.dueWithTime))
+      ) {
+        this.unschedule();
       }
     }
   }
@@ -554,23 +556,16 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
     if (isRemoveFromToday) {
-      this.removeFromMyDay();
+      this.unschedule();
     } else if (this.task.dueWithTime) {
       const task = this.task;
       const newDate = combineDateAndTime(newDayDate, new Date(this.task.dueWithTime));
-      const isTodayI = isToday(newDate);
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
         TaskReminderOptionId.AtStart,
         false,
       );
-      if (isTodayI) {
-        // not required any more
-        // this._store.dispatch(planTaskForToday({ taskId: task.id }));
-      } else {
-        this._store.dispatch(removeTaskFromTodayTagList({ taskId: task.id }));
-      }
     } else if (newDay === getWorklogStr()) {
       if (this.isShowAddToToday()) {
         this.addToMyDay();

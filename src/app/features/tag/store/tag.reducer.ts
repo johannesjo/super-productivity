@@ -33,11 +33,10 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import {
   addTag,
-  planTaskForToday,
   deleteTag,
   deleteTags,
   moveTaskInTodayTagList,
-  removeTaskFromTodayTagList,
+  planTaskForToday,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -554,19 +553,6 @@ export const tagReducer = createReducer<TagState>(
         id: TODAY_TAG.id,
         changes: {
           taskIds: unique([taskId, ...todayTag.taskIds]),
-        },
-      },
-      state,
-    );
-  }),
-  on(removeTaskFromTodayTagList, (state, { taskId }) => {
-    return tagAdapter.updateOne(
-      {
-        id: TODAY_TAG.id,
-        changes: {
-          taskIds: (state.entities[TODAY_TAG.id] as Tag).taskIds.filter(
-            (id) => id !== taskId,
-          ),
         },
       },
       state,

@@ -178,7 +178,7 @@
     (task.projectId || task.tagIds.length > 1)
   ) {
     <button
-      (click)="removeFromMyDay()"
+      (click)="unschedule()"
       mat-menu-item
     >
       <mat-icon svgIcon="remove_today"></mat-icon>
