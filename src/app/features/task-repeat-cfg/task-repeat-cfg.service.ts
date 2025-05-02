@@ -6,7 +6,6 @@ import {
   selectTaskRepeatCfgByIdAllowUndefined,
   selectTaskRepeatCfgsDueOnDayIncludingOverdue,
   selectTaskRepeatCfgsDueOnDayOnly,
-  selectTaskRepeatCfgsWithStartTime,
 } from './store/task-repeat-cfg.reducer';
 import {
   addTaskRepeatCfgToTask,
@@ -50,10 +49,6 @@ export class TaskRepeatCfgService {
 
   taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
     select(selectAllTaskRepeatCfgs),
-  );
-
-  taskRepeatCfgsWithStartTime$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
-    select(selectTaskRepeatCfgsWithStartTime),
   );
 
   getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
@@ -219,7 +214,6 @@ export class TaskRepeatCfgService {
             lastTaskCreation: targetDayDate,
           },
         },
-        // TODO fix type
       }),
     ];
 
@@ -255,6 +249,7 @@ export class TaskRepeatCfgService {
           timeEstimate: taskRepeatCfg.defaultEstimate,
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
+          // always due for today
           dueDay: getWorklogStr(),
         },
       }),

@@ -237,7 +237,11 @@
             [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
           >
-            <mat-icon>schedule</mat-icon>
+            @if (isScheduledToday()) {
+              <mat-icon>wb_sunny</mat-icon>
+            } @else {
+              <mat-icon>schedule</mat-icon>
+            }
             <div
               class="time-badge"
               [innerHTML]="t.dueWithTime | shortPlannedAt"
@@ -251,7 +255,11 @@
             [color]="isOverdue() ? 'warn' : ''"
             mat-icon-button
           >
-            <mat-icon>today</mat-icon>
+            @if (isScheduledToday()) {
+              <mat-icon>wb_sunny</mat-icon>
+            } @else {
+              <mat-icon>today</mat-icon>
+            }
             <div class="time-badge">{{ t.dueDay | localDateStr }}</div>
           </button>
         }

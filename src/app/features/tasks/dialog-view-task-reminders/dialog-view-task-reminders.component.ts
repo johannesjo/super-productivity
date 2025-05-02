@@ -136,11 +136,11 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         .getByIdOnce$(task.parentId)
         .pipe(first())
         .toPromise();
+      this.dismiss(task);
       this._store.dispatch(addTaskToTodayTagList({ taskId: parent.id }));
-      this.dismiss(task);
     } else {
-      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
       this.dismiss(task);
+      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
     }
   }
 
@@ -246,12 +246,11 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
     // We need to make sure the uniqueness as both the parent as well as multiple child task can be scheduled
     const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
-
-    updateTagTasks.forEach((task) => {
-      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
-    });
     tasksToDismiss.forEach((task: TaskWithReminderData) => {
       this.dismiss(task);
+    });
+    updateTagTasks.forEach((task) => {
+      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
     });
 
     this._close();

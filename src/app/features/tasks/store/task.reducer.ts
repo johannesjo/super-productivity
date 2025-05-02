@@ -69,6 +69,10 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import {
+  addTaskToTodayTagList,
+  removeTaskFromTodayTagList,
+} from '../../tag/store/tag.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -701,6 +705,39 @@ export const taskReducer = createReducer<TaskState>(
       },
       state,
     );
+  }),
+
+  on(addTaskToTodayTagList, (state, { taskId }) => {
+    const targetTask = state.entities[taskId] as Task;
+    if (!targetTask.dueWithTime) {
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            dueDay: getWorklogStr(),
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
+  }),
+  on(removeTaskFromTodayTagList, (state, { taskId }) => {
+    const targetTask = state.entities[taskId] as Task;
+    if (targetTask.dueDay === getWorklogStr()) {
+      return taskAdapter.updateOne(
+        {
+          id: taskId,
+          changes: {
+            dueDay: undefined,
+          },
+        },
+        state,
+      );
+    }
+
+    return state;
   }),
 
   // REMINDER STUFF

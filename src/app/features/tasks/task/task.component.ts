@@ -84,6 +84,7 @@ import {
   addTaskToTodayTagList,
   removeTaskFromTodayTagList,
 } from '../../tag/store/tag.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'task',
@@ -157,11 +158,17 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   );
   isOverdue = computed(() => {
     const t = this.task();
-
     return (
       !t.isDone &&
       ((t.dueWithTime && t.dueWithTime < Date.now()) ||
         (t.dueDay && !isToday(new Date(t.dueDay)) && new Date(t.dueDay) < new Date()))
+    );
+  });
+  isScheduledToday = computed(() => {
+    const t = this.task();
+    return (
+      (t.dueWithTime && isToday(t.dueWithTime)) ||
+      (t.dueDay && t.dueDay === getWorklogStr())
     );
   });
 
