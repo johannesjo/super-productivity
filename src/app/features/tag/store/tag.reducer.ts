@@ -10,6 +10,7 @@ import {
   restoreTask,
   scheduleTaskWithTime,
   unScheduleTask,
+  updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -299,6 +300,26 @@ export const tagReducer = createReducer<TagState>(
     return state;
   }),
 
+  on(updateTaskTags, (state, { newTagIds = [], task }) => {
+    const taskId = task.id;
+    const oldTagIds = task.tagIds;
+    const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
+    const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+    const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state.entities[tagId] as Tag).taskIds.filter((id) => id !== taskId),
+      },
+    }));
+    const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: unique([taskId, ...(state.entities[tagId] as Tag).taskIds]),
+      },
+    }));
+    return tagAdapter.updateMany([...removeFrom, ...addTo], state);
+  }),
+
   // REGULAR ACTIONS
   // --------------------
   on(
@@ -437,36 +458,6 @@ export const tagReducer = createReducer<TagState>(
       ids: idsToUse,
     };
   }),
-
-  // on(updateWorkStartForTag, (state: TagState, { id, newVal, date }) =>
-  //   tagAdapter.updateOne(
-  //     {
-  //       id,
-  //       changes: {
-  //         workStart: {
-  //           ...(state.entities[id] as Tag).workStart,
-  //           [date]: roundTsToMinutes(newVal),
-  //         },
-  //       },
-  //     },
-  //     state,
-  //   ),
-  // ),
-
-  // on(updateWorkEndForTag, (state: TagState, { id, newVal, date }) =>
-  //   tagAdapter.updateOne(
-  //     {
-  //       id,
-  //       changes: {
-  //         workEnd: {
-  //           ...(state.entities[id] as Tag).workEnd,
-  //           [date]: roundTsToMinutes(newVal),
-  //         },
-  //       },
-  //     },
-  //     state,
-  //   ),
-  // ),
 
   on(updateAdvancedConfigForTag, (state: TagState, { tagId, sectionKey, data }) => {
     const tagToUpdate = state.entities[tagId] as Tag;
