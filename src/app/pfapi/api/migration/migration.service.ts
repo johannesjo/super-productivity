@@ -2,6 +2,7 @@ import { AllSyncModels, ModelCfgs } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import { ImpossibleError, ModelMigrationError } from '../errors/errors';
 import { Pfapi } from '../pfapi';
+import { PFAPI_MIGRATE_FORCE_VERSION_LS_KEY } from '../pfapi.const';
 
 export class MigrationService<MD extends ModelCfgs> {
   constructor(private _pfapiMain: Pfapi<MD>) {}
@@ -12,8 +13,12 @@ export class MigrationService<MD extends ModelCfgs> {
       meta,
     });
 
+    const forceMigrationVersion = +(
+      localStorage.getItem(PFAPI_MIGRATE_FORCE_VERSION_LS_KEY) || 0
+    );
+
     const r = await this.migrate(
-      meta.crossModelVersion,
+      forceMigrationVersion || meta.crossModelVersion,
       await this._pfapiMain.getAllSyncModelData(true),
     );
     if (r.wasMigrated) {

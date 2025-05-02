@@ -27,6 +27,8 @@ export const LOG_PREFIX = (window as any).PF_LOG_PREFIX || ('_' as const);
 
 export const REMOTE_FILE_CONTENT_PREFIX = 'pf_' as const;
 
+export const PFAPI_MIGRATE_FORCE_VERSION_LS_KEY = 'PFAPI_MIGRATE_FORCE_VERSION' as const;
+
 export enum DBNames {
   PrivateCfgStorePrefix = '__sp_cred_',
   ClientId = '__client_id_',
