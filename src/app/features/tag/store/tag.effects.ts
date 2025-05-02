@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, first, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { selectTagFeatureState } from './tag.reducer';
+import { selectTagFeatureState, selectTodayTagTaskIds } from './tag.reducer';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
@@ -42,7 +42,7 @@ import {
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteProject } from '../../project/store/project.actions';
-import { selectTaskById } from '../../tasks/store/task.selectors';
+import { selectAllTasksDueToday, selectTaskById } from '../../tasks/store/task.selectors';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
@@ -259,6 +259,48 @@ export class TagEffects {
     { dispatch: false },
   );
 
+  preventParentAndSubTaskInTodayList$: any = createEffect(() =>
+    this._store$.select(selectTodayTagTaskIds).pipe(
+      switchMap((todayTagTaskIds) =>
+        this._store$
+          .select(selectAllTasksDueToday)
+          .pipe(map((tasks) => ({ tasks, todayTagTaskIds }))),
+      ),
+      switchMap(({ tasks, todayTagTaskIds }) => {
+        const tasksWithParentInListIds = tasks
+          .filter((t) => t.parentId && todayTagTaskIds.includes(t.parentId))
+          .map((t) => t.id);
+
+        const dueNotInListIds = tasks
+          .filter((t) => !todayTagTaskIds.includes(t.id))
+          .map((t) => t.id);
+
+        const newTaskIds = [...todayTagTaskIds, ...dueNotInListIds].filter(
+          (id) => !tasksWithParentInListIds.includes(id),
+        );
+
+        // Only dispatch if the taskIds actually change
+        const isChanged =
+          newTaskIds.length !== todayTagTaskIds.length ||
+          newTaskIds.some((id, i) => id !== todayTagTaskIds[i]);
+
+        if (isChanged && (tasksWithParentInListIds.length || dueNotInListIds.length)) {
+          return of(
+            updateTag({
+              tag: {
+                id: TODAY_TAG.id,
+                changes: {
+                  taskIds: newTaskIds,
+                },
+              },
+            }),
+          );
+        }
+
+        return EMPTY;
+      }),
+    ),
+  );
   // PREVENT LAST TAG DELETION ACTIONS
   // ---------------------------------------------
   preventLastTagDeletion$: any = createEffect(() =>

@@ -15,6 +15,7 @@ import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { selectTagFeatureState } from '../../tag/store/tag.reducer';
+import { isToday } from '../../../util/is-today.util';
 
 const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
   return tasksIN
@@ -405,5 +406,23 @@ export const selectAllTasksWithDueDay = createSelector(
     return allPlannnedForDayTasks.sort((a, b) =>
       a.dueDay > b.dueDay ? 1 : a.dueDay < b.dueDay ? -1 : 0,
     );
+  },
+);
+
+export const selectAllTasksDueToday = createSelector(
+  selectTaskFeatureState,
+  (taskState): (TaskWithDueTime | TaskWithDueDay)[] => {
+    const todayStr = getWorklogStr();
+
+    const allDueDayTasks = Object.values(taskState.entities).filter(
+      (task) => !!task && !!(task as TaskWithDueTime).dueDay && todayStr === task.dueDay,
+    ) as TaskWithDueDay[];
+    const allDueWithTimeTasks = Object.values(taskState.entities).filter(
+      (task) =>
+        !!task &&
+        !!(task as TaskWithDueTime).dueWithTime &&
+        isToday((task as TaskWithDueTime).dueWithTime),
+    ) as TaskWithDueTime[];
+    return [...allDueDayTasks, ...allDueWithTimeTasks];
   },
 );
