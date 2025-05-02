@@ -95,6 +95,8 @@ import { DateService } from 'src/app/core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
+import { TODAY_TAG } from '../tag/tag.const';
+import { planTaskForToday } from '../tag/store/tag.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -681,10 +683,17 @@ export class TaskService {
     this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
   }
 
-  moveToCurrentWorkContext(task: TaskWithSubTasks): void {
+  moveToCurrentWorkContext(task: TaskWithSubTasks | Task): void {
     if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
-      this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
+      if (this._workContextService.activeWorkContextId === TODAY_TAG.id) {
+        this._store.dispatch(planTaskForToday({ taskId: task.id }));
+      } else {
+        this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
+      }
     } else {
+      if (!('subTasks' in task)) {
+        throw new Error('Wrong task model');
+      }
       this.moveToProject(task, this._workContextService.activeWorkContextId as string);
     }
   }

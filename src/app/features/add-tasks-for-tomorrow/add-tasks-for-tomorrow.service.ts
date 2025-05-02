@@ -18,7 +18,6 @@ import {
 } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap } from 'rxjs/operators';
-import { updateTaskTags } from '../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -128,11 +127,11 @@ export class AddTasksForTomorrowService {
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
     plannedTasks.reverse().forEach((task) => {
-      if (!task.tagIds.includes(TODAY_TAG.id)) {
-        this._store.dispatch(
-          updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
-        );
-      }
+      // if (!task.tagIds.includes(TODAY_TAG.id)) {
+      //   this._store.dispatch(
+      //     updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
+      //   );
+      // }
     });
   }
 

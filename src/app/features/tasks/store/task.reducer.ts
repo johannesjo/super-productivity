@@ -636,32 +636,6 @@ export const taskReducer = createReducer<TaskState>(
   on(
     PlannerActions.transferTask,
     (state, { task, today, targetIndex, newDay, prevDay }) => {
-      if (prevDay !== today && newDay === today) {
-        return taskAdapter.updateOne(
-          {
-            id: task.id,
-            changes: {
-              dueDay: undefined,
-              dueWithTime: undefined,
-            },
-          },
-          state,
-        );
-      }
-
-      if (prevDay === today && newDay !== today) {
-        return taskAdapter.updateOne(
-          {
-            id: task.id,
-            changes: {
-              dueDay: getWorklogStr(newDay),
-              dueWithTime: undefined,
-            },
-          },
-          state,
-        );
-      }
-
       return taskAdapter.updateOne(
         {
           id: task.id,
