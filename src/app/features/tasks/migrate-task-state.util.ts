@@ -5,6 +5,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/is-migrate-model';
 import { MODEL_VERSION } from '../../core/model-version';
 import { omit } from '../../util/omit';
+import { TODAY_TAG } from '../tag/tag.const';
 
 export const LEGACY_GITHUB_TYPE = 'GIT';
 
@@ -111,7 +112,10 @@ const _updateTimeEstimate = (task: Task, taskState: TaskState): Task => {
 
 const _addTagIds = (task: Task): Task => {
   return task.hasOwnProperty('tagIds')
-    ? task
+    ? {
+        ...task,
+        tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id),
+      }
     : {
         ...task,
         tagIds: [],

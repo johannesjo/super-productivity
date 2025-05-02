@@ -2,7 +2,7 @@
 
 export enum MODEL_VERSION {
   // moving from null to undefined to save data
-  TASK = 5,
+  TASK = 5.1,
   // needs to be always the same as TASK !!!
   TASK_ARCHIVE = MODEL_VERSION.TASK,
   // remove bookmark model
