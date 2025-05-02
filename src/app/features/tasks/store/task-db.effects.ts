@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   __updateMultipleTaskSimple,
+  addReminderIdToTask,
   addSubTask,
   addTask,
   convertToMainTask,
@@ -95,6 +96,7 @@ export class TaskDbEffects {
           roundTimeSpentForDay,
 
           // REMINDER
+          addReminderIdToTask,
           scheduleTaskWithTime,
           reScheduleTaskWithTime,
           unScheduleTask,

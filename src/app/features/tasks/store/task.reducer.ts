@@ -1,5 +1,6 @@
 import {
   __updateMultipleTaskSimple,
+  addReminderIdToTask,
   addSubTask,
   addTask,
   convertToMainTask,
@@ -718,6 +719,17 @@ export const taskReducer = createReducer<TaskState>(
 
   // REMINDER STUFF
   // --------------
+  on(addReminderIdToTask, (state, { taskId, reminderId }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          reminderId,
+        },
+      },
+      state,
+    );
+  }),
   on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
     return taskAdapter.updateOne(
       {

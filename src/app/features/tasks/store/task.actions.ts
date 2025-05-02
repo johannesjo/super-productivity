@@ -35,6 +35,7 @@ enum TaskActionTypes {
   'ScheduleTask' = '[Task] Schedule',
   'UnScheduleTask' = '[Task] UnSchedule',
   'ReScheduleTask' = '[Task] ReSchedule',
+  'AddReminderIdToTask' = '[Task] Add ReminderId to Task',
 
   'RemoveReminder' = '[Task] Remove Reminder',
 
@@ -87,6 +88,14 @@ export const updateTask = createAction(
   props<{
     task: Update<Task>;
     isIgnoreShortSyntax?: boolean;
+  }>(),
+);
+
+export const addReminderIdToTask = createAction(
+  TaskActionTypes.AddReminderIdToTask,
+  props<{
+    taskId: string;
+    reminderId: string;
   }>(),
 );
 

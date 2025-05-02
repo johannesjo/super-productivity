@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
+  addReminderIdToTask,
   deleteTask,
   deleteTasks,
   moveToArchive_,
@@ -31,52 +32,60 @@ export class TaskReminderEffects {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
 
-  addTaskReminder$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(scheduleTaskWithTime),
-      tap(({ task }) =>
-        this._snackService.open({
-          type: 'SUCCESS',
-          translateParams: {
-            title: truncate(task.title),
-          },
-          msg: T.F.TASK.S.REMINDER_ADDED,
-          ico: 'schedule',
+  snack$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(scheduleTaskWithTime),
+        tap(({ task }) => {
+          this._snackService.open({
+            type: 'SUCCESS',
+            translateParams: {
+              title: truncate(task.title),
+            },
+            msg: T.F.TASK.S.REMINDER_ADDED,
+            ico: 'schedule',
+          });
         }),
       ),
-      mergeMap(({ task, remindAt, isMoveToBacklog }) => {
-        if (isMoveToBacklog && !task.projectId) {
-          throw new Error('Move to backlog not possible for non project tasks');
-        }
-        if (typeof remindAt !== 'number') {
-          return EMPTY;
-        }
+    { dispatch: false },
+  );
 
+  createReminderAndAddToTask$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(scheduleTaskWithTime),
+      filter(({ task, remindAt }) => typeof remindAt === 'number'),
+      map(({ task, remindAt }) => {
         const reminderId = this._reminderService.addReminder(
           'TASK',
           task.id,
           truncate(task.title),
-          remindAt,
+          remindAt as number,
         );
-
-        return [
-          updateTask({
-            task: { id: task.id, changes: { reminderId } },
-          }),
-          ...(isMoveToBacklog
-            ? [
-                moveProjectTaskToBacklogListAuto({
-                  taskId: task.id,
-                  projectId: task.projectId as string,
-                }),
-              ]
-            : []),
-        ];
+        return addReminderIdToTask({
+          taskId: task.id,
+          reminderId,
+        });
       }),
     ),
   );
 
-  updateTaskReminder$: any = createEffect(() =>
+  autoMoveToBacklog$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(scheduleTaskWithTime),
+      filter(({ isMoveToBacklog }) => isMoveToBacklog),
+      map(({ task }) => {
+        if (!task.projectId) {
+          throw new Error('Move to backlog not possible for non project tasks');
+        }
+        return moveProjectTaskToBacklogListAuto({
+          taskId: task.id,
+          projectId: task.projectId,
+        });
+      }),
+    ),
+  );
+
+  updateTaskReminder$ = createEffect(() =>
     this._actions$.pipe(
       ofType(reScheduleTaskWithTime),
       filter(({ task, remindAt }) => typeof remindAt === 'number' && !!task.reminderId),
@@ -118,7 +127,7 @@ export class TaskReminderEffects {
     ),
   );
 
-  removeTaskReminder$: any = createEffect(() =>
+  removeTaskReminder$ = createEffect(() =>
     this._actions$.pipe(
       ofType(unScheduleTask, removeReminderFromTask),
       filter(({ reminderId }) => !!reminderId),
@@ -142,7 +151,7 @@ export class TaskReminderEffects {
       }),
     ),
   );
-  removeTaskReminder2$: any = createEffect(() =>
+  removeTaskReminder2$ = createEffect(() =>
     this._actions$.pipe(
       ofType(planTaskForToday),
       concatMap(({ taskId }) => this._taskService.getByIdOnce$(taskId)),
@@ -159,7 +168,7 @@ export class TaskReminderEffects {
     ),
   );
 
-  clearReminders: any = createEffect(
+  clearRemindersOnDelete$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(deleteTask),
@@ -173,7 +182,7 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  clearRemindersForArchivedTasks: any = createEffect(
+  clearRemindersForArchivedTasks$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(moveToArchive_),
@@ -194,7 +203,7 @@ export class TaskReminderEffects {
       ),
     { dispatch: false },
   );
-  clearMultipleReminders: any = createEffect(
+  clearMultipleReminders = createEffect(
     () =>
       this._actions$.pipe(
         ofType(deleteTasks),
@@ -205,7 +214,7 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  unscheduleDoneTask$: any = createEffect(
+  unscheduleDoneTask$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateTask),
@@ -226,7 +235,7 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  unschedulePlannedForDayTasks$: any = createEffect(() =>
+  unschedulePlannedForDayTasks$ = createEffect(() =>
     this._actions$.pipe(
       ofType(PlannerActions.transferTask),
       filter(({ task }) => !!task.reminderId),
