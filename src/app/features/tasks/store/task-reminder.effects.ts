@@ -127,47 +127,6 @@ export class TaskReminderEffects {
     ),
   );
 
-  removeTaskReminder$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(unScheduleTask, removeReminderFromTask),
-      filter(({ reminderId }) => !!reminderId),
-      tap(({ isSkipToast }) => {
-        if (!isSkipToast) {
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: T.F.TASK.S.REMINDER_DELETED,
-            ico: 'schedule',
-          });
-        }
-      }),
-      map(({ id, reminderId }) => {
-        this._reminderService.removeReminder(reminderId as string);
-        return updateTask({
-          task: {
-            id,
-            changes: { reminderId: undefined, dueWithTime: undefined },
-          },
-        });
-      }),
-    ),
-  );
-  removeTaskReminder2$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(planTaskForToday),
-      concatMap(({ taskId }) => this._taskService.getByIdOnce$(taskId)),
-      filter(({ reminderId }) => !!reminderId),
-      map(({ id, reminderId }) => {
-        this._reminderService.removeReminder(reminderId as string);
-        return updateTask({
-          task: {
-            id,
-            changes: { reminderId: undefined, dueWithTime: undefined },
-          },
-        });
-      }),
-    ),
-  );
-
   clearRemindersOnDelete$ = createEffect(
     () =>
       this._actions$.pipe(
@@ -249,4 +208,68 @@ export class TaskReminderEffects {
       }),
     ),
   );
+
+  // ---------------------------------------
+  // ---------------------------------------
+  removeTaskReminderSideEffects$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(removeReminderFromTask),
+        filter(({ reminderId }) => !!reminderId),
+        tap(({ isSkipToast }) => {
+          if (!isSkipToast) {
+            this._snackService.open({
+              type: 'SUCCESS',
+              msg: T.F.TASK.S.REMINDER_DELETED,
+              ico: 'schedule',
+            });
+          }
+        }),
+        tap(({ id, reminderId }) => {
+          this._reminderService.removeReminder(reminderId as string);
+        }),
+      ),
+    { dispatch: false },
+  );
+  removeTaskReminderTrigger1$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(planTaskForToday),
+      concatMap(({ taskId }) => this._taskService.getByIdOnce$(taskId)),
+      filter(({ reminderId }) => !!reminderId),
+      map(({ id, reminderId }) => {
+        return removeReminderFromTask({
+          id,
+          reminderId: reminderId as string,
+          isSkipToast: true,
+        });
+      }),
+    ),
+  );
+  removeTaskReminderTrigger2$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(unScheduleTask),
+      filter(({ reminderId }) => !!reminderId),
+      map(({ id, reminderId }) => {
+        return removeReminderFromTask({
+          id,
+          reminderId: reminderId as string,
+          isSkipToast: true,
+        });
+      }),
+    ),
+  );
+
+  removeTaskReminderTrigger3$ = createEffect(() => {
+    return this._actions$.pipe(
+      ofType(PlannerActions.planTaskForDay),
+      filter(({ task, day }) => !!task.reminderId),
+      map(({ task }) => {
+        return removeReminderFromTask({
+          id: task.id,
+          reminderId: task.reminderId as string,
+          isSkipToast: true,
+        });
+      }),
+    );
+  });
 }

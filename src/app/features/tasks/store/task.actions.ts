@@ -222,7 +222,12 @@ export const unScheduleTask = createAction(
 export const removeReminderFromTask = createAction(
   TaskActionTypes.RemoveReminder,
 
-  props<{ id: string; reminderId: string; isSkipToast?: boolean }>(),
+  props<{
+    id: string;
+    reminderId: string;
+    isSkipToast?: boolean;
+    isLeaveDueTime?: boolean;
+  }>(),
 );
 
 export const restoreTask = createAction(

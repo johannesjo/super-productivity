@@ -350,6 +350,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           id: this.data.task.id,
           reminderId: this.data.task.reminderId,
           isSkipToast: true,
+          isLeaveDueTime: true,
         }),
       );
     }

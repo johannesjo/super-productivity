@@ -767,12 +767,17 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(removeReminderFromTask, (state, { id }) => {
+  on(removeReminderFromTask, (state, { id, isLeaveDueTime }) => {
     return taskAdapter.updateOne(
       {
         id,
         changes: {
           reminderId: undefined,
+          ...(isLeaveDueTime
+            ? {}
+            : {
+                dueWithTime: undefined,
+              }),
         },
       },
       state,
