@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
@@ -46,8 +47,6 @@ import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-ta
 import { DialogTimeEstimateComponent } from '../../dialog-time-estimate/dialog-time-estimate.component';
 import { DialogEditTaskAttachmentComponent } from '../../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { throttle } from 'helpful-decorators';
-import { DialogEditTagsForTaskComponent } from '../../../tag/dialog-edit-tags/dialog-edit-tags-for-task.component';
-import { TODAY_TAG } from '../../../tag/tag.const';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
@@ -71,6 +70,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { unScheduleTask } from '../../store/task.actions';
+import {
+  addTaskToTodayTagList,
+  removeTaskFromTodayTagList,
+} from '../../../tag/store/tag.actions';
+import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -112,6 +116,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   protected readonly T = T;
 
   isAdvancedControls = input<boolean>(false);
+  todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
+  isOnTodayList = computed(() => this.todayList().includes(this.task.id));
+
   // eslint-disable-next-line @angular-eslint/no-output-native
   close = output();
 
@@ -125,7 +132,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   task!: TaskWithSubTasks | Task;
 
-  isTodayTag: boolean = false;
   isCurrent: boolean = false;
   isBacklog: boolean = false;
 
@@ -166,7 +172,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
-    this.isTodayTag = v.tagIds.includes(TODAY_TAG.id);
     this.isCurrent = this._taskService.currentTaskId === v.id;
     this._task$.next(v);
   }
@@ -335,24 +340,12 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
   }
 
-  async editTags(): Promise<void> {
-    this._matDialog
-      .open(DialogEditTagsForTaskComponent, {
-        data: {
-          task: this.task,
-        },
-      })
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => this.focusRelatedTaskOrNext());
-  }
-
   addToMyDay(): void {
-    this._taskService.addTodayTag(this.task);
+    this._store.dispatch(addTaskToTodayTagList({ taskId: this.task.id }));
   }
 
   removeFromMyDay(): void {
-    this.onTagsUpdated(this.task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
+    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.task.id }));
   }
 
   convertToMainTask(): void {
@@ -489,7 +482,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToBacklog(): void {
     if (this.task.projectId && !this.task.parentId) {
       this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
-      if (this.task.tagIds.includes(TODAY_TAG.id)) {
+      if (this.task.dueDay === getWorklogStr()) {
         this.removeFromMyDay();
       }
     }
@@ -573,12 +566,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         false,
       );
       if (isTodayI) {
-        this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+        this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
       } else {
-        this._taskService.updateTags(
-          task,
-          task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
-        );
+        this._store.dispatch(removeTaskFromTodayTagList({ taskId: task.id }));
       }
     } else if (newDay === getWorklogStr()) {
       if (this.isShowAddToToday()) {

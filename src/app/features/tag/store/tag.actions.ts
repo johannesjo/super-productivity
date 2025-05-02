@@ -24,12 +24,22 @@ export const updateTagOrder = createAction(
   props<{ ids: string[] }>(),
 );
 
+export const addTaskToTodayTagList = createAction(
+  '[Tag] Add Task to Today',
+  props<{ taskId: string }>(),
+);
+
+export const removeTaskFromTodayTagList = createAction(
+  '[Tag] Remove Task From Today',
+  props<{ taskId: string }>(),
+);
+
 export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
 );
 
-export const moveTaskInTagList = createAction(
-  '[Tag] Switch places of taskIds in tagList',
-  props<{ tagId: string; fromTaskId: string; toTaskId: string }>(),
+export const moveTaskInTodayTagList = createAction(
+  '[Tag] Switch places of taskIds in Today Tag list',
+  props<{ fromTaskId: string; toTaskId: string }>(),
 );

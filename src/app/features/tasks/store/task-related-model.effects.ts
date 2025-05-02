@@ -1,12 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { restoreTask, updateTask, updateTaskTags } from './task.actions';
-import { concatMap, filter, first, map, switchMap, tap } from 'rxjs/operators';
-import { Task, TaskCopy } from '../task.model';
+import {
+  concatMap,
+  filter,
+  first,
+  map,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
+import { Task } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { TODAY_TAG } from '../../tag/tag.const';
-import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
@@ -14,12 +20,16 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { Store } from '@ngrx/store';
+import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { addTaskToTodayTagList } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
+  private _store = inject(Store);
   private _snackService = inject(SnackService);
   private _taskArchiveService = inject(TaskArchiveService);
 
@@ -44,25 +54,15 @@ export class TaskRelatedModelEffects {
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
-        switchMap(({ task }) =>
-          task.parentId
-            ? this._taskService.getByIdOnce$(task.parentId).pipe(
-                map((parent) => ({
-                  parent,
-                  task,
-                })),
-              )
-            : of({ parent: undefined, task }),
-        ),
+        withLatestFrom(this._store.select(selectTodayTagTaskIds)),
         filter(
-          ({ task, parent }: { task: TaskCopy; parent?: TaskCopy }) =>
-            !task.tagIds.includes(TODAY_TAG.id) &&
-            (!parent || !parent.tagIds.includes(TODAY_TAG.id)),
+          ([{ task }, todayTaskIds]) =>
+            !todayTaskIds.includes(task.id) &&
+            (!task.parentId || !todayTaskIds.includes(task.parentId)),
         ),
-        map(({ task }) =>
-          updateTaskTags({
-            task,
-            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+        map(([{ task }]) =>
+          addTaskToTodayTagList({
+            taskId: task.id,
           }),
         ),
       ),
@@ -75,11 +75,10 @@ export class TaskRelatedModelEffects {
         ofType(updateTask),
         filter((a) => a.task.changes.isDone === true),
         switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
-        filter((task: Task) => !task.parentId && !task.tagIds.includes(TODAY_TAG.id)),
+        filter((task: Task) => !task.parentId),
         map((task) =>
-          updateTaskTags({
-            task,
-            newTagIds: unique([...task.tagIds, TODAY_TAG.id]),
+          addTaskToTodayTagList({
+            taskId: task.id,
           }),
         ),
       ),

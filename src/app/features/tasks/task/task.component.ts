@@ -48,18 +48,13 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { throttle } from 'helpful-decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { isToday } from '../../../util/is-today.util';
-import {
-  isShowAddToToday,
-  isShowRemoveFromToday,
-  isTodayTag,
-} from '../util/is-task-today';
+import { isShowAddToToday, isShowRemoveFromToday } from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -83,6 +78,12 @@ import { SubTaskTotalTimeSpentPipe } from '../pipes/sub-task-total-time-spent.pi
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
+import { Store } from '@ngrx/store';
+import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import {
+  addTaskToTodayTagList,
+  removeTaskFromTodayTagList,
+} from '../../tag/store/tag.actions';
 
 @Component({
   selector: 'task',
@@ -133,6 +134,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _attachmentService = inject(TaskAttachmentService);
   private readonly _elementRef = inject(ElementRef);
   private readonly _renderer = inject(Renderer2);
+  private readonly _store = inject(Store);
   private readonly _projectService = inject(ProjectService);
   readonly workContextService = inject(WorkContextService);
 
@@ -146,7 +148,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   selectedId = toSignal(this._taskService.selectedTaskId$);
   isSelected = computed(() => this.selectedId() === this.task().id);
 
-  isTodayTag = computed(() => isTodayTag(this.task()));
+  todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
+  isOnTodayList = computed(() => this.todayList().includes(this.task().id));
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
@@ -466,11 +469,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   addToMyDay(): void {
-    this._taskService.addTodayTag(this.task());
+    this._store.dispatch(addTaskToTodayTagList({ taskId: this.task().id }));
   }
 
   removeFromMyDay(): void {
-    this.onTagsUpdated(this.task().tagIds.filter((tagId) => tagId !== TODAY_TAG.id));
+    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.task().id }));
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
@@ -629,7 +632,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
             if (this.task().parentId) {
               // NOTHING
             } else {
-              if (this.task().tagIds.includes(TODAY_TAG.id)) {
+              if (this.isOnTodayList()) {
                 this.removeFromMyDay();
               } else {
                 this.addToMyDay();
@@ -751,7 +754,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     if (t.projectId && !t.parentId) {
       this._projectService.moveTaskToBacklog(t.id, t.projectId);
-      if (t.tagIds.includes(TODAY_TAG.id)) {
+      if (this.isOnTodayList()) {
         this.removeFromMyDay();
       }
     }

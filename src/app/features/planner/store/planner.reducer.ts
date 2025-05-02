@@ -4,9 +4,9 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID, OVERDUE_LIST_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
-import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
+import { unScheduleTask } from '../../tasks/store/task.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { addTaskToTodayTagList } from '../../tag/store/tag.actions';
 
 export const plannerFeatureKey = 'planner';
 
@@ -32,14 +32,10 @@ export const plannerReducer = createReducer(
     appDataComplete.planner ? appDataComplete.planner : state,
   ),
 
-  on(updateTaskTags, (state, action) => {
-    if (!action.newTagIds.includes(TODAY_TAG.id)) {
-      return state;
-    }
-
+  on(addTaskToTodayTagList, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
-      const filtered = daysCopy[day].filter((id) => id !== action.task.id);
+      const filtered = daysCopy[day].filter((id) => id !== action.taskId);
       if (filtered.length !== daysCopy[day].length) {
         daysCopy[day] = filtered;
       }

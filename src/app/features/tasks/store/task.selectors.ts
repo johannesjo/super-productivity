@@ -14,6 +14,7 @@ import { IssueProvider } from '../../issue/issue.model';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { selectTagFeatureState } from '../../tag/store/tag.reducer';
 
 const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
   return tasksIN
@@ -126,7 +127,8 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
 
 export const selectAllTasksDueAndOverdue = createSelector(
   selectTaskFeatureState,
-  (s): Task[] => {
+  selectTagFeatureState,
+  (s, tagState): Task[] => {
     const today = new Date(getWorklogStr());
     return s.ids
       .map((id) => s.entities[id] as Task)
@@ -134,7 +136,7 @@ export const selectAllTasksDueAndOverdue = createSelector(
         (task) =>
           task.dueDay &&
           new Date(task.dueDay) <= today &&
-          !task.tagIds.includes(TODAY_TAG.id),
+          !tagState.entities[TODAY_TAG.id]?.taskIds.includes(task.id),
       );
   },
 );

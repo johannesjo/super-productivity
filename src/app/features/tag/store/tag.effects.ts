@@ -1,24 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  filter,
-  first,
-  map,
-  mergeMap,
-  switchMap,
-  take,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { filter, first, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { selectTagById, selectTagFeatureState } from './tag.reducer';
+import { selectTagFeatureState } from './tag.reducer';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   addTag,
   deleteTag,
   deleteTags,
-  moveTaskInTagList,
+  moveTaskInTodayTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -32,7 +23,6 @@ import {
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
-  scheduleTaskWithTime,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
@@ -50,13 +40,11 @@ import {
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
-import { isSameDay } from '../../../util/is-same-day';
 
 @Injectable()
 export class TagEffects {
@@ -92,7 +80,7 @@ export class TagEffects {
           updateTagOrder,
 
           updateAdvancedConfigForTag,
-          moveTaskInTagList,
+          moveTaskInTodayTagList,
 
           // TASK Actions
           deleteTasks,
@@ -291,82 +279,82 @@ export class TagEffects {
       ]),
     ),
   );
-  preventLastTagDeletion2$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(PlannerActions.transferTask),
-      filter(
-        ({ task, newDay, prevDay, today }) =>
-          prevDay === today &&
-          newDay !== today &&
-          task.tagIds.includes(TODAY_TAG.id) &&
-          !task.parentId &&
-          !task.projectId &&
-          task.tagIds.length === 1,
-      ),
-      // tap(() => console.log('preventLastTagDeletion$')),
-      mergeMap(({ task }) => [
-        upsertTag({
-          tag: NO_LIST_TAG,
-        }),
-        updateTaskTags({
-          task: task,
-          newTagIds: [NO_LIST_TAG.id],
-          isSkipExcludeCheck: true,
-        }),
-      ]),
-    ),
-  );
-  preventLastTagDeletion3$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(PlannerActions.moveBeforeTask),
-      filter(
-        ({ fromTask, toTaskId }) =>
-          !fromTask.parentId &&
-          !fromTask.projectId &&
-          fromTask.tagIds.length <= 1 &&
-          fromTask.tagIds.includes(TODAY_TAG.id),
-      ),
-      withLatestFrom(this._store$.select(selectTagById, { id: TODAY_TAG.id })),
-      filter(
-        ([{ fromTask, toTaskId }, todayTag]) => !todayTag.taskIds.includes(toTaskId),
-      ),
-      // tap(() => alert('PREVENT 3')),
-      mergeMap(([{ fromTask }, todayTag]) => [
-        upsertTag({
-          tag: NO_LIST_TAG,
-        }),
-        updateTaskTags({
-          task: fromTask,
-          newTagIds: [NO_LIST_TAG.id],
-          isSkipExcludeCheck: true,
-        }),
-      ]),
-    ),
-  );
-  preventLastTagDeletion4$: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(PlannerActions.planTaskForDay),
-      filter(
-        ({ task, day }) =>
-          !task.parentId &&
-          !task.projectId &&
-          task.tagIds.length <= 1 &&
-          task.tagIds.includes(TODAY_TAG.id) &&
-          day !== getWorklogStr(),
-      ),
-      // tap(() => alert('PREVENT 4')),
-      mergeMap(({ task }) => [
-        upsertTag({
-          tag: NO_LIST_TAG,
-        }),
-        updateTaskTags({
-          task: task,
-          newTagIds: [NO_LIST_TAG.id],
-          isSkipExcludeCheck: true,
-        }),
-      ]),
-    ),
-  );
+  // preventLastTagDeletion2$: any = createEffect(() =>
+  //   this._actions$.pipe(
+  //     ofType(PlannerActions.transferTask),
+  //     filter(
+  //       ({ task, newDay, prevDay, today }) =>
+  //         prevDay === today &&
+  //         newDay !== today &&
+  //         task.tagIds.includes(TODAY_TAG.id) &&
+  //         !task.parentId &&
+  //         !task.projectId &&
+  //         task.tagIds.length === 1,
+  //     ),
+  //     // tap(() => console.log('preventLastTagDeletion$')),
+  //     mergeMap(({ task }) => [
+  //       upsertTag({
+  //         tag: NO_LIST_TAG,
+  //       }),
+  //       updateTaskTags({
+  //         task: task,
+  //         newTagIds: [NO_LIST_TAG.id],
+  //         isSkipExcludeCheck: true,
+  //       }),
+  //     ]),
+  //   ),
+  // );
+  // preventLastTagDeletion3$: any = createEffect(() =>
+  //   this._actions$.pipe(
+  //     ofType(PlannerActions.moveBeforeTask),
+  //     filter(
+  //       ({ fromTask, toTaskId }) =>
+  //         !fromTask.parentId &&
+  //         !fromTask.projectId &&
+  //         fromTask.tagIds.length <= 1 &&
+  //         fromTask.tagIds.includes(TODAY_TAG.id),
+  //     ),
+  //     withLatestFrom(this._store$.select(selectTagById, { id: TODAY_TAG.id })),
+  //     filter(
+  //       ([{ fromTask, toTaskId }, todayTag]) => !todayTag.taskIds.includes(toTaskId),
+  //     ),
+  //     // tap(() => alert('PREVENT 3')),
+  //     mergeMap(([{ fromTask }, todayTag]) => [
+  //       upsertTag({
+  //         tag: NO_LIST_TAG,
+  //       }),
+  //       updateTaskTags({
+  //         task: fromTask,
+  //         newTagIds: [NO_LIST_TAG.id],
+  //         isSkipExcludeCheck: true,
+  //       }),
+  //     ]),
+  //   ),
+  // );
+  // preventLastTagDeletion4$: any = createEffect(() =>
+  //   this._actions$.pipe(
+  //     ofType(PlannerActions.planTaskForDay),
+  //     filter(
+  //       ({ task, day }) =>
+  //         !task.parentId &&
+  //         !task.projectId &&
+  //         task.tagIds.length <= 1 &&
+  //         task.tagIds.includes(TODAY_TAG.id) &&
+  //         day !== getWorklogStr(),
+  //     ),
+  //     // tap(() => alert('PREVENT 4')),
+  //     mergeMap(({ task }) => [
+  //       upsertTag({
+  //         tag: NO_LIST_TAG,
+  //       }),
+  //       updateTaskTags({
+  //         task: task,
+  //         newTagIds: [NO_LIST_TAG.id],
+  //         isSkipExcludeCheck: true,
+  //       }),
+  //     ]),
+  //   ),
+  // );
 
   removeUnlistedTagWheneverTagIsAdded: any = createEffect(() =>
     this._actions$.pipe(
@@ -426,24 +414,24 @@ export class TagEffects {
     ),
   );
 
-  removeFromTodayOnDueTimeReScheduleToOtherDay$ = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(scheduleTaskWithTime),
-        filter(({ task, dueWithTime, isMoveToBacklog, isSkipAutoRemoveFromToday }) => {
-          const isRemoveFromToday =
-            !isSkipAutoRemoveFromToday &&
-            task.tagIds.includes(TODAY_TAG.id) &&
-            (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
-          return isRemoveFromToday;
-        }),
-        map(({ task }) => {
-          return updateTaskTags({
-            task,
-            newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
-          });
-        }),
-      ),
-    { dispatch: true },
-  );
+  // removeFromTodayOnDueTimeReScheduleToOtherDay$ = createEffect(
+  //   () =>
+  //     this._actions$.pipe(
+  //       ofType(scheduleTaskWithTime),
+  //       filter(({ task, dueWithTime, isMoveToBacklog, isSkipAutoRemoveFromToday }) => {
+  //         const isRemoveFromToday =
+  //           !isSkipAutoRemoveFromToday &&
+  //           task.tagIds.includes(TODAY_TAG.id) &&
+  //           (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
+  //         return isRemoveFromToday;
+  //       }),
+  //       map(({ task }) => {
+  //         return updateTaskTags({
+  //           task,
+  //           newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
+  //         });
+  //       }),
+  //     ),
+  //   { dispatch: true },
+  // );
 }

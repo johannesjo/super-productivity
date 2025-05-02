@@ -1,14 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SearchQueryParams } from '../../features/search-bar/search-bar.model';
 import { first } from 'rxjs/operators';
-import { TODAY_TAG } from '../../features/tag/tag.const';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';
 import { ProjectService } from '../../features/project/project.service';
 import { Router } from '@angular/router';
 import { Task } from '../../features/tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { WorkContextService } from '../../features/work-context/work-context.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 
@@ -19,7 +17,6 @@ export class NavigateToTaskService {
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _router = inject(Router);
-  private _workContextService = inject(WorkContextService);
   private _snackService = inject(SnackService);
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
@@ -51,18 +48,8 @@ export class NavigateToTaskService {
       ? await this._taskService.getByIdFromEverywhere(task.parentId, isArchiveTask)
       : task;
 
-    if (
-      taskToCheck.projectId &&
-      taskToCheck.tagIds[0] === TODAY_TAG.id &&
-      this._workContextService.isToday
-    ) {
-      return `/tag/TODAY/${tasksOrWorklog}`;
-    }
-
     if (taskToCheck.projectId) {
       return `/project/${taskToCheck.projectId}/${tasksOrWorklog}`;
-    } else if (taskToCheck.tagIds[0] === TODAY_TAG.id) {
-      return `/tag/TODAY/${tasksOrWorklog}`;
     } else if (taskToCheck.tagIds[0]) {
       return `/tag/${taskToCheck.tagIds[0]}/${tasksOrWorklog}`;
     } else {

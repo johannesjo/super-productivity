@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   IssueData,
   IssueDataReduced,
@@ -45,6 +45,7 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
+import { getWorklogStr } from '../../util/get-work-log-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 @Injectable({
@@ -441,12 +442,12 @@ export class IssueService {
       ) {
         return {
           projectId: defaultProjectId || this._workContextService.activeWorkContextId,
-          tagIds: [TODAY_TAG.id],
         };
       } else {
         return {
           tagIds:
-            this._workContextService.activeWorkContextType === WorkContextType.TAG
+            this._workContextService.activeWorkContextType === WorkContextType.TAG &&
+            this._workContextService.activeWorkContextId !== TODAY_TAG.id
               ? [this._workContextService.activeWorkContextId]
               : [],
           projectId: defaultProjectId || undefined,
@@ -460,6 +461,7 @@ export class IssueService {
       issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
+      dueDay: getWorklogStr(),
       ...additionalFromProviderIssueService,
       // NOTE: if we were to add tags, this could be overwritten here
       ...(await getProjectOrTagId()),

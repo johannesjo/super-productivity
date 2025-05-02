@@ -10,11 +10,10 @@ import {
 import { Reminder } from '../../reminder/reminder.model';
 import { Task, TaskWithReminderData } from '../task.model';
 import { TaskService } from '../task.service';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { first, map, switchMap, takeWhile } from 'rxjs/operators';
 import { T } from '../../../t.const';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
@@ -31,6 +30,8 @@ import { Store } from '@ngrx/store';
 import { unScheduleTask } from '../store/task.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { addTaskToTodayTagList } from '../../tag/store/tag.actions';
+import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 
 const M = 1000 * 60;
 
@@ -88,9 +89,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       ),
     ),
   );
-  isSingleOnToday$: Observable<boolean> = this.tasks$.pipe(
+  isSingleOnToday$: Observable<boolean> = combineLatest([
+    this.tasks$,
+    this._store.select(selectTodayTagTaskIds),
+  ]).pipe(
     map(
-      (tasks) => tasks.length === 1 && tasks[0] && tasks[0].tagIds.includes(TODAY_TAG.id),
+      ([tasks, todayTaskIds]) =>
+        tasks.length === 1 && tasks[0] && todayTaskIds.includes(tasks[0].id),
     ),
   );
   isMultiple$: Observable<boolean> = this.tasks$.pipe(
@@ -131,10 +136,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         .getByIdOnce$(task.parentId)
         .pipe(first())
         .toPromise();
-      this._taskService.updateTags(parent, [TODAY_TAG.id, ...parent.tagIds]);
+      this._store.dispatch(addTaskToTodayTagList({ taskId: parent.id }));
       this.dismiss(task);
     } else {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
       this.dismiss(task);
     }
   }
@@ -243,7 +248,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
 
     updateTagTasks.forEach((task) => {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
     });
     tasksToDismiss.forEach((task: TaskWithReminderData) => {
       this.dismiss(task);

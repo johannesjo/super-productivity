@@ -305,6 +305,7 @@ export class SideNavComponent implements OnDestroy {
       const allIds = allItems.map((p) => p.id);
       const targetTagId = allIds[ev.currentIndex] as string;
       if (targetTagId) {
+        // special today list should always be first
         const newIds = [TODAY_TAG.id, ...moveItemBeforeItem(allIds, tag.id, targetTagId)];
         this.tagService.updateOrder(newIds);
       }

@@ -223,6 +223,9 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(updateTaskTags, (state, { task, newTagIds }) => {
+    if (newTagIds.includes(TODAY_TAG.id)) {
+      throw new Error('We dont do this anymore!');
+    }
     return taskAdapter.updateOne(
       {
         id: task.id,
@@ -631,30 +634,25 @@ export const taskReducer = createReducer<TaskState>(
   on(
     PlannerActions.transferTask,
     (state, { task, today, targetIndex, newDay, prevDay }) => {
-      if (prevDay === today && newDay !== today) {
-        const taskToUpdate = state.entities[task.id] as Task;
+      if (prevDay !== today && newDay === today) {
         return taskAdapter.updateOne(
           {
             id: task.id,
             changes: {
-              tagIds: taskToUpdate.tagIds.filter((id) => id !== TODAY_TAG.id),
-              dueDay: getWorklogStr(newDay),
+              dueDay: undefined,
               dueWithTime: undefined,
             },
           },
           state,
         );
       }
-      if (prevDay !== today && newDay === today) {
-        const taskToUpdate = state.entities[task.id] as Task;
-        const tagIds = [...taskToUpdate.tagIds];
-        tagIds.unshift(TODAY_TAG.id);
+
+      if (prevDay === today && newDay !== today) {
         return taskAdapter.updateOne(
           {
             id: task.id,
             changes: {
-              tagIds,
-              dueDay: undefined,
+              dueDay: getWorklogStr(newDay),
               dueWithTime: undefined,
             },
           },
@@ -680,37 +678,6 @@ export const taskReducer = createReducer<TaskState>(
       return state;
     }
 
-    if (
-      targetTask.tagIds.includes(TODAY_TAG.id) &&
-      !fromTask.tagIds.includes(TODAY_TAG.id)
-    ) {
-      return taskAdapter.updateOne(
-        {
-          id: fromTask.id,
-          changes: {
-            tagIds: unique([TODAY_TAG.id, ...fromTask.tagIds]),
-            dueDay: undefined,
-            dueWithTime: undefined,
-          },
-        },
-        state,
-      );
-    } else if (
-      !targetTask.tagIds.includes(TODAY_TAG.id) &&
-      fromTask.tagIds.includes(TODAY_TAG.id)
-    ) {
-      return taskAdapter.updateOne(
-        {
-          id: fromTask.id,
-          changes: {
-            tagIds: unique(fromTask.tagIds.filter((id) => id !== TODAY_TAG.id)),
-            dueDay: getWorklogStr(targetTask.dueDay),
-            dueWithTime: undefined,
-          },
-        },
-        state,
-      );
-    }
     return taskAdapter.updateOne(
       {
         id: fromTask.id,
@@ -724,15 +691,10 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(PlannerActions.planTaskForDay, (state, { task, day }) => {
-    const todayStr = getWorklogStr();
     return taskAdapter.updateOne(
       {
         id: task.id,
         changes: {
-          tagIds:
-            day === todayStr
-              ? unique([TODAY_TAG.id, ...task.tagIds])
-              : task.tagIds.filter((id) => id !== TODAY_TAG.id),
           dueDay: day,
           dueWithTime: undefined,
         },

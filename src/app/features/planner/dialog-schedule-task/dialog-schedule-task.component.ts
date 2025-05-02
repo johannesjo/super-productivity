@@ -24,12 +24,7 @@ import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
-import {
-  removeReminderFromTask,
-  unScheduleTask,
-  updateTaskTags,
-} from '../../tasks/store/task.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
+import { removeReminderFromTask, unScheduleTask } from '../../tasks/store/task.actions';
 import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
 import { FormsModule } from '@angular/forms';
@@ -58,6 +53,7 @@ import {
 import { MatSelect } from '@angular/material/select';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
+import { removeTaskFromTodayTagList } from '../../tag/store/tag.actions';
 
 const DEFAULT_TIME = '09:00';
 
@@ -155,9 +151,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
       this.selectedDate = this.plannedDayForTask
         ? dateStrToUtcDate(this.plannedDayForTask)
-        : this.data.task.tagIds.includes(TODAY_TAG.id)
-          ? new Date()
-          : null;
+        : null;
     }
 
     if (this.data.targetDay) {
@@ -361,12 +355,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   private _removeFromToday(): void {
-    this._store.dispatch(
-      updateTaskTags({
-        task: this.data.task,
-        newTagIds: this.data.task.tagIds.filter((id) => id !== TODAY_TAG.id),
-      }),
-    );
+    this._store.dispatch(removeTaskFromTodayTagList({ taskId: this.data.task.id }));
   }
 
   private _scheduleWithTime(): void {

@@ -25,10 +25,9 @@
       }
     }
     @if (!isTodayListActive()) {
-      @if (!isTodayTag()) {
+      @if (!isOnTodayList()) {
         <mat-icon>wb_sunny</mat-icon>
-      }
-      @if (isTodayTag() && (t.projectId || t.tagIds?.length > 1)) {
+      } @else if (t.projectId || (t.tagIds?.length || 0) > 0) {
         <mat-icon svgIcon="remove_today"></mat-icon>
       }
     }

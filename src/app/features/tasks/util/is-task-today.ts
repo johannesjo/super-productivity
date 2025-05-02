@@ -1,14 +1,16 @@
 import { TaskCopy, TaskWithSubTasks } from '../task.model';
-import { TODAY_TAG } from '../../tag/tag.const';
-
-export const isTodayTag = (task: TaskWithSubTasks | TaskCopy): boolean =>
-  task.tagIds.includes(TODAY_TAG.id);
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { isToday } from '../../../util/is-today.util';
 
 export const isShowRemoveFromToday = (task: TaskWithSubTasks | TaskCopy): boolean =>
   !!(
-    !task.isDone &&
-    isTodayTag(task) &&
-    (task.projectId || task.tagIds?.length > 1 || task.parentId)
+    (
+      !task.isDone &&
+      (task.projectId || task.tagIds?.length > 1 || task.parentId) &&
+      task.dueDay === getWorklogStr()
+    )
+    // we don't show here
+    // &&     (task.dueWithTime && isToday(task.dueWithTime))
   );
 
 export const isShowAddToToday = (
@@ -18,6 +20,7 @@ export const isShowAddToToday = (
   return (
     !isShowRemoveFromToday(task) &&
     !(task.parentId && workContextIsToday) &&
-    !isTodayTag(task)
+    task.dueDay !== getWorklogStr() &&
+    (!task.dueWithTime || !isToday(task.dueWithTime))
   );
 };

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllTaskRepeatCfgs,
@@ -28,7 +28,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { TODAY_TAG } from '../tag/tag.const';
 import { Task } from '../tasks/task.model';
 import { addTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
@@ -248,8 +247,6 @@ export class TaskRepeatCfgService {
     task: Task;
     isAddToBottom: boolean;
   } {
-    const isAddToTodayAsFallback =
-      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
     return {
       task: this._taskService.createNewTaskWithDefaults({
         title: taskRepeatCfg.title,
@@ -257,8 +254,8 @@ export class TaskRepeatCfgService {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate,
           projectId: taskRepeatCfg.projectId || undefined,
-          tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
           notes: taskRepeatCfg.notes || '',
+          dueDay: getWorklogStr(),
         },
       }),
       isAddToBottom: taskRepeatCfg.order > 0,

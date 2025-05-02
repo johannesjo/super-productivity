@@ -9,18 +9,15 @@ import {
   scheduleTaskWithTime,
   unScheduleTask,
   updateTask,
-  updateTaskTags,
 } from './task.actions';
 import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
-import { isSameDay } from '../../../util/is-same-day';
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
@@ -106,24 +103,12 @@ export class TaskReminderEffects {
           return EMPTY;
         }
 
-        const isRemoveFromToday =
-          task.tagIds.includes(TODAY_TAG.id) &&
-          (!isSameDay(new Date(), dueWithTime) || isMoveToBacklog);
-
         return [
           ...(isMoveToBacklog
             ? [
                 moveProjectTaskToBacklogListAuto({
                   taskId: task.id,
                   projectId: task.projectId as string,
-                }),
-              ]
-            : []),
-          ...(isRemoveFromToday
-            ? [
-                updateTaskTags({
-                  task,
-                  newTagIds: task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
                 }),
               ]
             : []),

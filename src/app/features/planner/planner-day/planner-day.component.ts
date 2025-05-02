@@ -6,12 +6,15 @@ import { TaskCopy } from '../../tasks/task.model';
 import { PlannerActions } from '../store/planner.actions';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
-import { moveTaskInTagList } from '../../tag/store/tag.actions';
+import {
+  addTaskToTodayTagList,
+  moveTaskInTodayTagList,
+  removeTaskFromTodayTagList,
+} from '../../tag/store/tag.actions';
 import { DateService } from '../../../core/date/date.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
@@ -96,8 +99,7 @@ export class PlannerDayComponent {
       if (ev.previousContainer === ev.container) {
         if (this.day.isToday) {
           this._store.dispatch(
-            moveTaskInTagList({
-              tagId: TODAY_TAG.id,
+            moveTaskInTodayTagList({
               fromTaskId: task.id,
               toTaskId: allItems[ev.currentIndex].id,
             }),
@@ -156,12 +158,9 @@ export class PlannerDayComponent {
     const isToday = new Date().toDateString() === newDate.toDateString();
     this._taskService.scheduleTask(task, newDate.getTime(), selectedReminderCfgId, false);
     if (isToday) {
-      this._taskService.updateTags(task, [TODAY_TAG.id, ...task.tagIds]);
+      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
     } else {
-      this._taskService.updateTags(
-        task,
-        task.tagIds.filter((tid) => tid !== TODAY_TAG.id),
-      );
+      this._store.dispatch(removeTaskFromTodayTagList({ taskId: task.id }));
     }
   }
 }
