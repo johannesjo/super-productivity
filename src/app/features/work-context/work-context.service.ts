@@ -25,7 +25,7 @@ import {
   take,
   withLatestFrom,
 } from 'rxjs/operators';
-import { TODAY_TAG } from '../tag/tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { ArchiveTask, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
@@ -167,6 +167,31 @@ export class WorkContextService {
             })),
           )
         : of(mainWorkContext),
+    ),
+  );
+
+  inboxWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
+    concatMap(() => this._tagService.getTagById$(INBOX_TAG.id)),
+    map(
+      (inboxWorkContext) =>
+        ({
+          ...inboxWorkContext,
+          type: WorkContextType.TAG,
+          routerLink: `tag/${inboxWorkContext.id}`,
+          // TODO get pinned noteIds
+          noteIds: [],
+        }) as WorkContext,
+    ),
+    switchMap((inboxWorkContext) =>
+      inboxWorkContext.id === INBOX_TAG.id && inboxWorkContext.title === INBOX_TAG.title
+        ? this._translateService.stream(T.G.INBOX_TAG_TITLE).pipe(
+            distinctUntilChanged(),
+            map((translation) => ({
+              ...inboxWorkContext,
+              title: translation,
+            })),
+          )
+        : of(inboxWorkContext),
     ),
   );
 

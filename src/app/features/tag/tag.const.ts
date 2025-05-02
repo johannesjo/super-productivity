@@ -39,12 +39,12 @@ export const DEFAULT_TAG: Tag = {
   },
 };
 
-export const NO_LIST_TAG: Tag = {
+export const INBOX_TAG: Tag = {
   color: null,
   created: Date.now(),
   ...WORK_CONTEXT_DEFAULT_COMMON,
-  icon: 'question_mark',
-  title: 'no list scheduled',
+  icon: 'inbox',
+  title: 'Inbox',
   id: 'NO_LIST',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,

@@ -124,10 +124,10 @@ const validateTasksToProjectsAndTags = (
     }
 
     // Check if task has project or tag
-    // if (!task.parentId && !task.projectId && task.tagIds.length === 0) {
-    //   _validityError(`Task without project or tag`, { task, d });
-    //   return false;
-    // }
+    if (!task.parentId && !task.projectId && task.tagIds.length === 0) {
+      _validityError(`Task without project or tag`, { task, d });
+      return false;
+    }
   }
 
   // Similar validation for archive tasks

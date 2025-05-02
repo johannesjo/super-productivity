@@ -95,7 +95,7 @@ import { DateService } from 'src/app/core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
-import { TODAY_TAG } from '../tag/tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../tag/tag.const';
 import { planTaskForToday } from '../tag/store/tag.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
@@ -1033,7 +1033,7 @@ export class TaskService {
           : [],
 
       ...(workContextId === TODAY_TAG.id && !additional.parentId
-        ? { dueDay: getWorklogStr() }
+        ? { dueDay: getWorklogStr(), tagIds: [INBOX_TAG.id] }
         : {}),
 
       ...additional,

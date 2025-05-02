@@ -11,7 +11,7 @@ import { Task } from '../../tasks/task.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { NO_LIST_TAG } from '../tag.const';
+import { INBOX_TAG } from '../tag.const';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { selectTagFeatureState } from '../store/tag.reducer';
@@ -53,7 +53,7 @@ export class TagListComponent {
         ? this.tagIds().filter((id) => !tagsToHide.includes(id))
         : this.tagIds()
       : this.tagIds().filter(
-          (id) => id !== this.workContext()?.activeId && id !== NO_LIST_TAG.id,
+          (id) => id !== this.workContext()?.activeId && id !== INBOX_TAG.id,
         );
 
     const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);

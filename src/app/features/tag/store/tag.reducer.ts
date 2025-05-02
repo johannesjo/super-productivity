@@ -12,7 +12,7 @@ import {
   unScheduleTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
-import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
   moveTaskDownInTodayList,
@@ -64,12 +64,12 @@ export const selectAllTagIds = createSelector(selectTagFeatureState, selectIds);
 export const selectAllTagsWithoutMyDayAndNoList = createSelector(
   selectAllTags,
   (tags: Tag[]): Tag[] =>
-    tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== NO_LIST_TAG.id),
+    tags.filter((tag) => tag.id !== TODAY_TAG.id && tag.id !== INBOX_TAG.id),
 );
 
 export const selectAllTagsWithoutNoList = createSelector(
   selectAllTags,
-  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== NO_LIST_TAG.id),
+  (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== INBOX_TAG.id),
 );
 
 export const selectTodayTagTaskIds = createSelector(
@@ -109,22 +109,34 @@ export const selectTagsByIds = createSelector(
 //   (s): Tag => s.entities[TODAY_TAG.id] as Tag,
 // );
 
-const _addMyDayTagIfNecessary = (state: TagState): TagState => {
-  const ids = state.ids as string[];
-  if (ids && !ids.includes(TODAY_TAG.id)) {
-    return {
+// TODO also add no list tag
+const _addMyDayAndNoListTagIfNecessary = (state: TagState): TagState => {
+  if (state.ids && !(state.ids as string[]).includes(INBOX_TAG.id)) {
+    state = {
       ...state,
-      ids: [TODAY_TAG.id, ...ids] as string[],
+      ids: [INBOX_TAG.id, ...state.ids] as string[],
+      entities: {
+        ...state.entities,
+        [INBOX_TAG.id]: INBOX_TAG,
+      },
+    };
+  }
+
+  if (state.ids && !(state.ids as string[]).includes(TODAY_TAG.id)) {
+    state = {
+      ...state,
+      ids: [TODAY_TAG.id, ...state.ids] as string[],
       entities: {
         ...state.entities,
         [TODAY_TAG.id]: TODAY_TAG,
       },
     };
   }
+
   return state;
 };
 
-export const initialTagState: TagState = _addMyDayTagIfNecessary(
+export const initialTagState: TagState = _addMyDayAndNoListTagIfNecessary(
   tagAdapter.getInitialState({
     // additional entity state properties
     [MODEL_VERSION_KEY]: MODEL_VERSION.TAG,
@@ -137,7 +149,7 @@ export const tagReducer = createReducer<TagState>(
   // META ACTIONS
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
-    _addMyDayTagIfNecessary(
+    _addMyDayAndNoListTagIfNecessary(
       appDataComplete.tag ? migrateTagState({ ...appDataComplete.tag }) : oldState,
     ),
   ),
@@ -442,15 +454,15 @@ export const tagReducer = createReducer<TagState>(
 
   on(updateTagOrder, (state: TagState, { ids }) => {
     if (
-      ids.filter((id) => id !== NO_LIST_TAG.id).length !==
-      state.ids.filter((id) => id !== NO_LIST_TAG.id).length
+      ids.filter((id) => id !== INBOX_TAG.id).length !==
+      state.ids.filter((id) => id !== INBOX_TAG.id).length
     ) {
       console.log({ state, ids });
       throw new Error('Tag length should not change on re-order');
     }
     const idsToUse =
-      state.entities[NO_LIST_TAG.id] && !ids.includes(NO_LIST_TAG.id)
-        ? [...ids, NO_LIST_TAG.id]
+      state.entities[INBOX_TAG.id] && !ids.includes(INBOX_TAG.id)
+        ? [...ids, INBOX_TAG.id]
         : ids;
 
     return {

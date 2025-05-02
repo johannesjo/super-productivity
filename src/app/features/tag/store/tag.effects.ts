@@ -33,7 +33,7 @@ import { Task } from '../../tasks/task.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
-import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../tag.const';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -313,11 +313,11 @@ export class TagEffects {
       tap(() => alert('preventLastTagDeletion$')),
       mergeMap(({ newTagIds, task }) => [
         upsertTag({
-          tag: NO_LIST_TAG,
+          tag: INBOX_TAG,
         }),
         updateTaskTags({
           task: task,
-          newTagIds: [NO_LIST_TAG.id],
+          newTagIds: [INBOX_TAG.id],
           isSkipExcludeCheck: true,
         }),
       ]),
@@ -329,7 +329,7 @@ export class TagEffects {
       ofType(updateTaskTags),
       filter(
         ({ newTagIds, task }) =>
-          newTagIds.includes(NO_LIST_TAG.id) && newTagIds.length >= 2,
+          newTagIds.includes(INBOX_TAG.id) && newTagIds.length >= 2,
       ),
       tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
       map(({ newTagIds, task }) =>
@@ -338,7 +338,7 @@ export class TagEffects {
             ...task,
             tagIds: newTagIds,
           },
-          newTagIds: newTagIds.filter((id) => id !== NO_LIST_TAG.id),
+          newTagIds: newTagIds.filter((id) => id !== INBOX_TAG.id),
           isSkipExcludeCheck: true,
         }),
       ),
@@ -349,13 +349,13 @@ export class TagEffects {
       ofType(moveToOtherProject),
       filter(
         ({ targetProjectId, task }) =>
-          !!targetProjectId && task.tagIds.includes(NO_LIST_TAG.id),
+          !!targetProjectId && task.tagIds.includes(INBOX_TAG.id),
       ),
       // tap(() => console.log('removeUnlistedTagWheneverProjectIsAssigned')),
       map(({ task, targetProjectId }) =>
         updateTaskTags({
           task: { ...task, projectId: targetProjectId },
-          newTagIds: task.tagIds.filter((id) => id !== NO_LIST_TAG.id),
+          newTagIds: task.tagIds.filter((id) => id !== INBOX_TAG.id),
           isSkipExcludeCheck: true,
         }),
       ),
@@ -366,16 +366,16 @@ export class TagEffects {
       ofType(PlannerActions.transferTask),
       filter(
         ({ task, newDay, prevDay, today }) =>
-          newDay === today && prevDay !== today && task.tagIds.includes(NO_LIST_TAG.id),
+          newDay === today && prevDay !== today && task.tagIds.includes(INBOX_TAG.id),
       ),
       switchMap(({ task }) =>
         this._store$.select(selectTaskById, { id: task.id }).pipe(first()),
       ),
-      filter((task) => task.tagIds.includes(NO_LIST_TAG.id) && task.tagIds.length >= 2),
+      filter((task) => task.tagIds.includes(INBOX_TAG.id) && task.tagIds.length >= 2),
       map((freshTask) =>
         updateTaskTags({
           task: freshTask,
-          newTagIds: freshTask.tagIds.filter((id) => id !== NO_LIST_TAG.id),
+          newTagIds: freshTask.tagIds.filter((id) => id !== INBOX_TAG.id),
           isSkipExcludeCheck: true,
         }),
       ),
