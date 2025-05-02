@@ -97,6 +97,7 @@ import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { planTaskForToday } from '../tag/store/tag.actions';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -598,7 +599,10 @@ export class TaskService {
   addSubTaskTo(parentId: string): void {
     this._store.dispatch(
       addSubTask({
-        task: this.createNewTaskWithDefaults({ title: '' }),
+        task: this.createNewTaskWithDefaults({
+          title: '',
+          additional: { dueDay: undefined },
+        }),
         parentId,
       }),
     );
@@ -1022,9 +1026,15 @@ export class TaskService {
         : {}),
 
       tagIds:
-        workContextType === WorkContextType.TAG && !additional.parentId
+        workContextType === WorkContextType.TAG &&
+        !additional.parentId &&
+        workContextId !== TODAY_TAG.id
           ? [workContextId]
           : [],
+
+      ...(workContextId === TODAY_TAG.id && !additional.parentId
+        ? { dueDay: getWorklogStr() }
+        : {}),
 
       ...additional,
     };

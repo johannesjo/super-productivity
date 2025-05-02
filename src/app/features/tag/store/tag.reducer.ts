@@ -490,7 +490,11 @@ export const tagReducer = createReducer<TagState>(
   // TASK STUFF
   // ---------
   on(addTask, (state, { task, isAddToBottom }) => {
-    const updates: Update<Tag>[] = task.tagIds.map((tagId) => ({
+    const tagIdsToUpdate: string[] = [
+      ...task.tagIds,
+      ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
+    ];
+    const updates: Update<Tag>[] = tagIdsToUpdate.map((tagId) => ({
       id: tagId,
       changes: {
         taskIds: isAddToBottom // create an ordered list with the new task id in the correct position

@@ -83,6 +83,8 @@ import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { planTaskForToday } from '../../tag/store/tag.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { unScheduleTask } from '../store/task.actions';
+import { environment } from '../../../../environments/environment';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
   selector: 'task',
@@ -259,6 +261,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // TODO remove
+    if (!environment.production) {
+      if (this.task().tagIds.includes(TODAY_TAG.id)) {
+        throw new Error('Task should not have today tag');
+      }
+    }
+
     // hacky but relatively performant
     const t = this.task();
     if (t.parentId && !t.title.length && Date.now() - 200 < t.created) {
