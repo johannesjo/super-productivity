@@ -11,7 +11,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import {
-  addTaskToTodayTagList,
   moveTaskInTodayTagList,
   removeTaskFromTodayTagList,
 } from '../../tag/store/tag.actions';
@@ -158,7 +157,8 @@ export class PlannerDayComponent {
     const isToday = new Date().toDateString() === newDate.toDateString();
     this._taskService.scheduleTask(task, newDate.getTime(), selectedReminderCfgId, false);
     if (isToday) {
-      this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
+      // not required any more
+      // this._store.dispatch(planTaskForToday({ taskId: task.id }));
     } else {
       this._store.dispatch(removeTaskFromTodayTagList({ taskId: task.id }));
     }

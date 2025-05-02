@@ -70,7 +70,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import {
-  addTaskToTodayTagList,
+  planTaskForToday,
   removeTaskFromTodayTagList,
 } from '../../tag/store/tag.actions';
 
@@ -707,21 +707,16 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(addTaskToTodayTagList, (state, { taskId }) => {
-    const targetTask = state.entities[taskId] as Task;
-    if (!targetTask.dueWithTime) {
-      return taskAdapter.updateOne(
-        {
-          id: taskId,
-          changes: {
-            dueDay: getWorklogStr(),
-          },
+  on(planTaskForToday, (state, { taskId }) => {
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          dueDay: getWorklogStr(),
         },
-        state,
-      );
-    }
-
-    return state;
+      },
+      state,
+    );
   }),
   on(removeTaskFromTodayTagList, (state, { taskId }) => {
     const targetTask = state.entities[taskId] as Task;

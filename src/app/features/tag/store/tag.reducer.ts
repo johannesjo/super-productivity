@@ -33,7 +33,7 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import {
   addTag,
-  addTaskToTodayTagList,
+  planTaskForToday,
   deleteTag,
   deleteTags,
   moveTaskInTodayTagList,
@@ -468,7 +468,8 @@ export const tagReducer = createReducer<TagState>(
   on(deleteTask, (state, { task }) => {
     const affectedTagIds: string[] = [task, ...(task.subTasks || [])].reduce(
       (acc, t) => [...acc, ...t.tagIds],
-      [] as string[],
+      // always check today list too
+      [TODAY_TAG.id] as string[],
     );
     const removedTasksIds: string[] = [task.id, ...(task.subTaskIds || [])];
     const updates: Update<Tag>[] = affectedTagIds.map((tagId) => ({
@@ -541,12 +542,18 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(addTaskToTodayTagList, (state, { taskId }) => {
+  on(planTaskForToday, (state, { taskId }) => {
+    const todayTag = state.entities[TODAY_TAG.id] as Tag;
+
+    if (todayTag.taskIds.includes(taskId)) {
+      return state;
+    }
+
     return tagAdapter.updateOne(
       {
         id: TODAY_TAG.id,
         changes: {
-          taskIds: unique([taskId, ...(state.entities[TODAY_TAG.id] as Tag).taskIds]),
+          taskIds: unique([taskId, ...todayTag.taskIds]),
         },
       },
       state,

@@ -81,7 +81,7 @@ import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-t
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import {
-  addTaskToTodayTagList,
+  planTaskForToday,
   removeTaskFromTodayTagList,
 } from '../../tag/store/tag.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -476,7 +476,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   addToMyDay(): void {
-    this._store.dispatch(addTaskToTodayTagList({ taskId: this.task().id }));
+    this._store.dispatch(planTaskForToday({ taskId: this.task().id }));
   }
 
   removeFromMyDay(): void {

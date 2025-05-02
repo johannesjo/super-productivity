@@ -24,7 +24,7 @@ export const updateTagOrder = createAction(
   props<{ ids: string[] }>(),
 );
 
-export const addTaskToTodayTagList = createAction(
+export const planTaskForToday = createAction(
   '[Tag] Add Task to Today',
   props<{ taskId: string }>(),
 );

@@ -6,7 +6,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { unScheduleTask } from '../../tasks/store/task.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { addTaskToTodayTagList } from '../../tag/store/tag.actions';
+import { planTaskForToday } from '../../tag/store/tag.actions';
 
 export const plannerFeatureKey = 'planner';
 
@@ -32,7 +32,7 @@ export const plannerReducer = createReducer(
     appDataComplete.planner ? appDataComplete.planner : state,
   ),
 
-  on(addTaskToTodayTagList, (state, action) => {
+  on(planTaskForToday, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
       const filtered = daysCopy[day].filter((id) => id !== action.taskId);

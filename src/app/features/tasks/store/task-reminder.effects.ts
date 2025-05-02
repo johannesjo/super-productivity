@@ -21,6 +21,7 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
+import { planTaskForToday } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -130,6 +131,22 @@ export class TaskReminderEffects {
           });
         }
       }),
+      map(({ id, reminderId }) => {
+        this._reminderService.removeReminder(reminderId as string);
+        return updateTask({
+          task: {
+            id,
+            changes: { reminderId: undefined, dueWithTime: undefined },
+          },
+        });
+      }),
+    ),
+  );
+  removeTaskReminder2$: any = createEffect(() =>
+    this._actions$.pipe(
+      ofType(planTaskForToday),
+      concatMap(({ taskId }) => this._taskService.getByIdOnce$(taskId)),
+      filter(({ reminderId }) => !!reminderId),
       map(({ id, reminderId }) => {
         this._reminderService.removeReminder(reminderId as string);
         return updateTask({

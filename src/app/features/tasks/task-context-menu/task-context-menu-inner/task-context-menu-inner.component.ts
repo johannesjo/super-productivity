@@ -71,7 +71,7 @@ import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { unScheduleTask } from '../../store/task.actions';
 import {
-  addTaskToTodayTagList,
+  planTaskForToday,
   removeTaskFromTodayTagList,
 } from '../../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
@@ -341,7 +341,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   addToMyDay(): void {
-    this._store.dispatch(addTaskToTodayTagList({ taskId: this.task.id }));
+    this._store.dispatch(planTaskForToday({ taskId: this.task.id }));
   }
 
   removeFromMyDay(): void {
@@ -566,7 +566,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         false,
       );
       if (isTodayI) {
-        this._store.dispatch(addTaskToTodayTagList({ taskId: task.id }));
+        // not required any more
+        // this._store.dispatch(planTaskForToday({ taskId: task.id }));
       } else {
         this._store.dispatch(removeTaskFromTodayTagList({ taskId: task.id }));
       }
