@@ -310,7 +310,7 @@ export class TagEffects {
         ({ newTagIds, task }) =>
           newTagIds.length === 0 && !task.projectId && !task.parentId,
       ),
-      // tap(() => console.log('preventLastTagDeletion$')),
+      tap(() => alert('preventLastTagDeletion$')),
       mergeMap(({ newTagIds, task }) => [
         upsertTag({
           tag: NO_LIST_TAG,
@@ -323,82 +323,6 @@ export class TagEffects {
       ]),
     ),
   );
-  // preventLastTagDeletion2$: any = createEffect(() =>
-  //   this._actions$.pipe(
-  //     ofType(PlannerActions.transferTask),
-  //     filter(
-  //       ({ task, newDay, prevDay, today }) =>
-  //         prevDay === today &&
-  //         newDay !== today &&
-  //         task.tagIds.includes(TODAY_TAG.id) &&
-  //         !task.parentId &&
-  //         !task.projectId &&
-  //         task.tagIds.length === 1,
-  //     ),
-  //     // tap(() => console.log('preventLastTagDeletion$')),
-  //     mergeMap(({ task }) => [
-  //       upsertTag({
-  //         tag: NO_LIST_TAG,
-  //       }),
-  //       updateTaskTags({
-  //         task: task,
-  //         newTagIds: [NO_LIST_TAG.id],
-  //         isSkipExcludeCheck: true,
-  //       }),
-  //     ]),
-  //   ),
-  // );
-  // preventLastTagDeletion3$: any = createEffect(() =>
-  //   this._actions$.pipe(
-  //     ofType(PlannerActions.moveBeforeTask),
-  //     filter(
-  //       ({ fromTask, toTaskId }) =>
-  //         !fromTask.parentId &&
-  //         !fromTask.projectId &&
-  //         fromTask.tagIds.length <= 1 &&
-  //         fromTask.tagIds.includes(TODAY_TAG.id),
-  //     ),
-  //     withLatestFrom(this._store$.select(selectTagById, { id: TODAY_TAG.id })),
-  //     filter(
-  //       ([{ fromTask, toTaskId }, todayTag]) => !todayTag.taskIds.includes(toTaskId),
-  //     ),
-  //     // tap(() => alert('PREVENT 3')),
-  //     mergeMap(([{ fromTask }, todayTag]) => [
-  //       upsertTag({
-  //         tag: NO_LIST_TAG,
-  //       }),
-  //       updateTaskTags({
-  //         task: fromTask,
-  //         newTagIds: [NO_LIST_TAG.id],
-  //         isSkipExcludeCheck: true,
-  //       }),
-  //     ]),
-  //   ),
-  // );
-  // preventLastTagDeletion4$: any = createEffect(() =>
-  //   this._actions$.pipe(
-  //     ofType(PlannerActions.planTaskForDay),
-  //     filter(
-  //       ({ task, day }) =>
-  //         !task.parentId &&
-  //         !task.projectId &&
-  //         task.tagIds.length <= 1 &&
-  //         task.tagIds.includes(TODAY_TAG.id) &&
-  //         day !== getWorklogStr(),
-  //     ),
-  //     // tap(() => alert('PREVENT 4')),
-  //     mergeMap(({ task }) => [
-  //       upsertTag({
-  //         tag: NO_LIST_TAG,
-  //       }),
-  //       updateTaskTags({
-  //         task: task,
-  //         newTagIds: [NO_LIST_TAG.id],
-  //         isSkipExcludeCheck: true,
-  //       }),
-  //     ]),
-  //   ),
-  // );
 
   removeUnlistedTagWheneverTagIsAdded: any = createEffect(() =>
     this._actions$.pipe(

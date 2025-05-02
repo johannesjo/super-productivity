@@ -31,6 +31,7 @@ import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
 import { assertTruthy } from '../../../util/assert-truthy';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -321,10 +322,10 @@ export class AddTaskBarService {
       return await this._projectService.getByIdOnce$(projectId).toPromise();
     } else {
       const firstTagId = (tagIds as string[])[0];
-      if (!firstTagId) {
-        throw new Error('No first tag');
-      }
-      return await this._tagService.getTagById$(firstTagId).pipe(first()).toPromise();
+      return await this._tagService
+        .getTagById$(firstTagId || TODAY_TAG.id)
+        .pipe(first())
+        .toPromise();
     }
   }
 }
