@@ -9,6 +9,7 @@ import {
   moveToArchive_,
   restoreTask,
   scheduleTaskWithTime,
+  unScheduleTask,
 } from '../../tasks/store/task.actions';
 import { NO_LIST_TAG, TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -153,7 +154,6 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  // delete all project tasks from tags on project delete
   on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
     if (!todayTag.taskIds.includes(task.id) && isToday(dueWithTime)) {
@@ -178,7 +178,23 @@ export const tagReducer = createReducer<TagState>(
         state,
       );
     }
+    return state;
+  }),
 
+  on(unScheduleTask, (state, { id }) => {
+    const taskId = id;
+    const todayTag = state.entities[TODAY_TAG.id] as Tag;
+    if (todayTag.taskIds.includes(taskId)) {
+      return tagAdapter.updateOne(
+        {
+          id: todayTag.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((tId) => tId !== taskId),
+          },
+        },
+        state,
+      );
+    }
     return state;
   }),
 
