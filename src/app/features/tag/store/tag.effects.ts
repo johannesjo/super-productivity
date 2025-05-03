@@ -83,8 +83,9 @@ export class TagEffects {
           updateAdvancedConfigForTag,
           moveTaskInTodayTagList,
 
-          // TASK Actions
           planTaskForToday,
+
+          // TASK Actions
           deleteTasks,
           updateTaskTags,
 

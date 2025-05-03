@@ -7,6 +7,7 @@ import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
 import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { planTaskForToday } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class PlannerEffects {
@@ -27,6 +28,7 @@ export class PlannerEffects {
           PlannerActions.moveBeforeTask,
           updateTaskTags,
           unScheduleTask,
+          planTaskForToday,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
         tap(([, plannerState]) => this._saveToLs(plannerState)),
