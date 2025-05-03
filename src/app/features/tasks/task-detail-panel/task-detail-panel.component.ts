@@ -72,7 +72,7 @@ import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checkl
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { IssueHeaderComponent } from '../../issue/issue-header/issue-header.component';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -84,6 +84,7 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { isToday } from '../../../util/is-today.util';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 interface IssueAndType {
   id?: string | number;
@@ -119,7 +120,6 @@ interface IssueDataAndType {
     MsToStringPipe,
     TranslatePipe,
     IssueIconPipe,
-    MatIconButton,
   ],
 })
 export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -259,6 +259,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   isExpandedIssuePanel: boolean = false;
   isExpandedNotesPanel: boolean = false;
+  isPlannedForTodayDay: boolean = false;
   isExpandedAttachmentPanel: boolean = !IS_MOBILE;
 
   private _focusTimeout?: number;
@@ -367,6 +368,8 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     if (!prev || prev.parentId !== newVal.parentId) {
       this.parentId$.next(newVal.parentId || null);
     }
+
+    this.isPlannedForTodayDay = !!newVal.dueDay && newVal.dueDay === getWorklogStr();
 
     // panel states
     this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;

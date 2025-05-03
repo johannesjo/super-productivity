@@ -136,7 +136,12 @@
       }
       @if (task.dueDay) {
         <div class="reminder-value">
-          {{ task.dueDay | date: 'shortDate' }}
+          @if (isPlannedForTodayDay) {
+            <mat-icon>wb_sunny</mat-icon>
+            {{ T.G.TODAY_TAG_TITLE | translate }}
+          } @else {
+            {{ task.dueDay | date: 'shortDate' }}
+          }
         </div>
       }
     </ng-container>
