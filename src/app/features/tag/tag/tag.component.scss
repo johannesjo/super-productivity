@@ -22,7 +22,7 @@
 }
 
 $dot-size: 15px;
-$ico-size: 13px;
+$ico-size: 12px;
 $line-height: 15px;
 $ico-pad: ($dot-size - $ico-size) * 0.5;
 $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
@@ -32,6 +32,13 @@ $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
   font-size: 12px;
   line-height: $line-height;
   padding: $pad 0;
+
+  @include darkTheme() {
+    color: $dark-theme-text-color-muted;
+  }
+  @include lightTheme() {
+    color: $light-theme-text-color-muted;
+  }
 
   //// hide inside add task bar for smaller screens
   ///* TODO(mdc-migration): The following rule targets internal classes of autocomplete that may no longer apply for the MDC version.*/
