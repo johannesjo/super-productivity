@@ -1,7 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
-import { TODAY_TAG } from '../../features/tag/tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { isToday } from '../../util/is-today.util';
 
@@ -46,8 +46,18 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
       );
     }
   }
-  // @ts-ignore
-  todayTag.taskIds = [];
+
+  const legacyNoListTag = copy.tag.entities[INBOX_TAG.id];
+  if (legacyNoListTag) {
+    if (legacyNoListTag.title === 'no list scheduled') {
+      // @ts-ignore
+      legacyNoListTag.title = INBOX_TAG.title;
+      // @ts-ignore
+      legacyNoListTag.icon = INBOX_TAG.icon;
+      // @ts-ignore
+      legacyNoListTag.theme = INBOX_TAG.theme;
+    }
+  }
 
   Object.keys(copy.task.entities).forEach((tId) => {
     const task = copy.task.entities[tId];
