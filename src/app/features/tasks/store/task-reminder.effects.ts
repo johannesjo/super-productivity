@@ -150,14 +150,11 @@ export class TaskReminderEffects {
           if (!flatTasks.length) {
             return;
           }
-          flatTasks
-            .filter((t) => !!t.reminderId)
-            .forEach((t) => {
-              if (!t.reminderId) {
-                throw new Error('No t.reminderId');
-              }
+          flatTasks.forEach((t) => {
+            if (t.reminderId) {
               this._reminderService.removeReminder(t.reminderId);
-            });
+            }
+          });
         }),
       ),
     { dispatch: false },
