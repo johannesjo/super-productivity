@@ -71,7 +71,7 @@ export class ShortSyntaxEffects {
         );
       }),
       withLatestFrom(
-        this._tagService.tags$,
+        this._tagService.tagsNoMyDayAndNoList$,
         this._projectService.list$,
         this._globalConfigService.misc$.pipe(
           map((misc) => misc.defaultProjectId),

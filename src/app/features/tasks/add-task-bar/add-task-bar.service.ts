@@ -120,7 +120,7 @@ export class AddTaskBarService {
     return taskSuggestionsCtrl.valueChanges.pipe(
       filter((val) => typeof val === 'string'),
       withLatestFrom(
-        this._tagService.tags$,
+        this._tagService.tagsNoMyDayAndNoList$,
         this._projectService.list$,
         this._workContextService.activeWorkContext$,
         this._globalConfigService.shortSyntax$,
