@@ -17,12 +17,3 @@ export const DEFAULT_PROJECT: Project = {
     primary: DEFAULT_PROJECT_COLOR,
   },
 };
-
-export const DEFAULT_PROJECT_ID = 'INBOX';
-
-export const FIRST_PROJECT: Project = {
-  ...DEFAULT_PROJECT,
-  id: DEFAULT_PROJECT_ID,
-  title: 'Inbox',
-  icon: 'inbox',
-};

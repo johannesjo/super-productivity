@@ -1628,6 +1628,7 @@
       "SYNC": "Howto: Configure Sync"
     },
     "METRICS": "Metrics",
+    "NO_PROJECT_INFO": "No projects available. You can create a new project by clicking the \"Create Project\" button.",
     "NO_TAG_INFO": "There are currently no tags. You can add tags by entering `#yourTagName` when adding or editing tasks.",
     "NOTES": "Notes",
     "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",

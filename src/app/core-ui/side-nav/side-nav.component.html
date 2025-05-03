@@ -134,6 +134,9 @@
         ></side-nav-item>
       }
     </div>
+    @if (!projectList.length && isProjectsExpanded) {
+      <div class="no-tags-info">{{ T.MH.NO_PROJECT_INFO | translate }}</div>
+    }
   </section>
 }
 @if (tagList$ | async; as tagList) {

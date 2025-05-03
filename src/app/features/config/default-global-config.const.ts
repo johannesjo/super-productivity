@@ -1,7 +1,7 @@
 import { GlobalConfigState } from './global-config.model';
-import { DEFAULT_PROJECT_ID } from '../project/project.const';
 import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
 import { TRACKING_INTERVAL } from '../../app.constants';
+
 const minute = 60 * 1000;
 const defaultVoice = getDefaultVoice();
 
@@ -18,7 +18,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
-    defaultProjectId: DEFAULT_PROJECT_ID,
+    defaultProjectId: null,
     firstDayOfWeek: 1,
     startOfNextDay: 0,
     isUseMinimalNav: false,

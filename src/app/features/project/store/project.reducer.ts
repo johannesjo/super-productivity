@@ -1,7 +1,6 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
 import { createReducer, on } from '@ngrx/store';
-import { FIRST_PROJECT } from '../project.const';
 import {
   WorkContextAdvancedCfg,
   WorkContextType,
@@ -78,10 +77,8 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 // DEFAULT
 // -------
 export const initialProjectState: ProjectState = projectAdapter.getInitialState({
-  ids: [FIRST_PROJECT.id],
-  entities: {
-    [FIRST_PROJECT.id]: FIRST_PROJECT,
-  },
+  ids: [],
+  entities: {},
   [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
 });
 
