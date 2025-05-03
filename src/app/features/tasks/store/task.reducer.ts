@@ -710,6 +710,7 @@ export const taskReducer = createReducer<TaskState>(
         id: task.id,
         changes: {
           dueWithTime,
+          dueDay: undefined,
         },
       },
       state,
@@ -722,6 +723,7 @@ export const taskReducer = createReducer<TaskState>(
         id: task.id,
         changes: {
           dueWithTime,
+          dueDay: undefined,
         },
       },
       state,

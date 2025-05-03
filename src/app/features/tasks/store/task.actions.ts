@@ -32,7 +32,7 @@ enum TaskActionTypes {
   'RemoveTimeSpent' = '[Task] Remove time spent',
 
   // Reminders & StartAt
-  'ScheduleTask' = '[Task] Schedule',
+  'ScheduleTaskWithTime' = '[Task] Schedule with time',
   'UnScheduleTask' = '[Task] UnSchedule',
   'ReScheduleTask' = '[Task] ReSchedule',
   'AddReminderIdToTask' = '[Task] Add ReminderId to Task',
@@ -191,7 +191,7 @@ export const removeTimeSpent = createAction(
 
 // Reminder Actions
 export const scheduleTaskWithTime = createAction(
-  TaskActionTypes.ScheduleTask,
+  TaskActionTypes.ScheduleTaskWithTime,
 
   props<{
     task: Task;
