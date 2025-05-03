@@ -16,7 +16,12 @@ export enum TaskDetailTargetPanel {
   DONT_OPEN_PANEL = 'DONT_OPEN_PANEL',
 }
 
-export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG' | 'ADD_TASK_PANEL';
+export type DropListModelSource =
+  | 'UNDONE'
+  | 'DONE'
+  | 'BACKLOG'
+  | 'ADD_TASK_PANEL'
+  | 'OVERDUE';
 
 // NOTE: do not change these, as they are used inside task repeat model directly
 // (new can be added though)

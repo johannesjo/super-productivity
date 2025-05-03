@@ -24,7 +24,7 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToRegularList,
 } from '../../project/store/project.actions';
-import { moveSubTask } from '../store/task.actions';
+import { moveSubTask, updateTask } from '../store/task.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -35,10 +35,11 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
+import { planTaskForToday } from '../../tag/store/tag.actions';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
-const PARENT_ALLOWED_LISTS = ['DONE', 'UNDONE', 'BACKLOG', 'ADD_TASK_PANEL'];
+const PARENT_ALLOWED_LISTS = ['DONE', 'UNDONE', 'OVERDUE', 'BACKLOG', 'ADD_TASK_PANEL'];
 
 export interface DropModelDataForList {
   listModelId: ListModelId;
@@ -241,6 +242,29 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
           workContextType,
         }),
       );
+    } else if (target === 'OVERDUE') {
+      return;
+    } else if (src === 'OVERDUE' && (target === 'UNDONE' || target === 'DONE')) {
+      const workContextType = this._workContextService
+        .activeWorkContextType as WorkContextType;
+      this._store.dispatch(planTaskForToday({ taskId }));
+      this._store.dispatch(
+        moveTaskInTodayList({
+          taskId,
+          newOrderedIds,
+          src,
+          target,
+          workContextId,
+          workContextType,
+        }),
+      );
+      if (target === 'DONE') {
+        this._store.dispatch(
+          updateTask({
+            task: { id: taskId, changes: { isDone: true } },
+          }),
+        );
+      }
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
       // move inside backlog
       this._store.dispatch(
