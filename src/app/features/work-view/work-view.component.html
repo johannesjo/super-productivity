@@ -1,4 +1,6 @@
 @if (!(workContextService.isContextChangingWithDelay$ | async)) {
+  @let isTodayList = workContextService.isToday$ | async;
+
   <right-panel @projectChange>
     <div
       #containerEl
@@ -10,67 +12,78 @@
         class="today"
         cdkScrollable
       >
-        @if (overdueTasks().length) {
-          <!-- OVERDUE Outline -->
-          <collapsible
-            [title]="'Overdue (' + overdueTasks().length + ')'"
-            [isExpanded]="true"
-            [isIconBefore]="true"
+        @if (isTodayList && overdueTasks().length) {
+          <section
+            class="overdue-tasks"
+            @expandFade
           >
-            <div
-              class="task-list-wrapper"
-              style="padding-bottom: 16px"
+            <!-- OVERDUE Outline -->
+            <collapsible
+              [title]="'Overdue (' + overdueTasks().length + ')'"
+              [isExpanded]="true"
+              [isIconBefore]="true"
             >
-              <task-list
-                class="tour-undoneList"
-                [tasks]="overdueTasks()"
-                listId="PARENT"
-                listModelId="UNDONE"
-              ></task-list>
-            </div>
+              <div
+                class="task-list-wrapper"
+                style="padding-bottom: 16px"
+              >
+                <task-list
+                  class="tour-undoneList"
+                  [tasks]="overdueTasks()"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              </div>
 
-            <div
-              class=""
-              style="
-                display: flex;
-                gap: 16px;
-                justify-content: center;
-                align-items: center;
-              "
+              <div
+                class=""
+                style="
+                  display: flex;
+                  gap: 16px;
+                  justify-content: center;
+                  align-items: center;
+                "
+              >
+                <button
+                  [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                  mat-stroked-button
+                  color="primary"
+                  routerLink="/active/daily-summary"
+                  tabindex="1"
+                >
+                  <mat-icon>wb_sunny</mat-icon>
+                  <!--            {{ T.WW.FINISH_DAY | translate }}-->
+                  Add to Today
+                  <!--            Add all to Today-->
+                </button>
+                <button
+                  [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                  mat-stroked-button
+                  color="primary"
+                  routerLink="/active/daily-summary"
+                  tabindex="1"
+                >
+                  <mat-icon>edit_calendar</mat-icon>
+                  Reschedule
+                  <!--            Reschedule all-->
+                  <!--            {{ T.WW.FINISH_DAY | translate }}-->
+                </button>
+              </div>
+            </collapsible>
+
+            <h2
+              class="mat-h2 completed-tasks-heading"
+              style="margin: 8px; margin-top: 24px; margin-bottom: 8px"
             >
-              <button
-                [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                mat-stroked-button
-                color="primary"
-                routerLink="/active/daily-summary"
-                tabindex="1"
-              >
-                <mat-icon>wb_sunny</mat-icon>
-                <!--            {{ T.WW.FINISH_DAY | translate }}-->
-                Add to Today
-                <!--            Add all to Today-->
-              </button>
-              <button
-                [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                mat-stroked-button
-                color="primary"
-                routerLink="/active/daily-summary"
-                tabindex="1"
-              >
-                <mat-icon>edit_calendar</mat-icon>
-                Reschedule
-                <!--            Reschedule all-->
-                <!--            {{ T.WW.FINISH_DAY | translate }}-->
-              </button>
-            </div>
-          </collapsible>
-
-          <h2
-            class="mat-h2 completed-tasks-heading"
-            style="margin: 8px; margin-top: 24px; margin-bottom: 8px"
-          >
-            <span>Today</span>
-          </h2>
+              <span
+                >{{ T.G.TODAY_TAG_TITLE | translate }}
+                @if (estimateRemainingToday()) {
+                  (~<strong>{{ estimateRemainingToday() | msToString }}</strong
+                  >)
+                }
+              </span>
+            </h2>
+          </section>
         }
 
         @if (!overdueTasks().length) {
@@ -282,7 +295,6 @@
             listModelId="UNDONE"
           ></task-list>
 
-          @let isTodayList = workContextService.isToday$ | async;
           @if (!isPlanningMode() || doneTasks()?.length) {
             <div @expand>
               <collapsible
