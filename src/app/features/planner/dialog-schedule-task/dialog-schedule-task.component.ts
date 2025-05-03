@@ -119,9 +119,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     if (this.data.task.reminderId) {
       const reminder = this._reminderService.getById(this.data.task.reminderId);
-      if (reminder) {
+      if (reminder && this.data.task.dueWithTime) {
         this.selectedReminderCfgId = millisecondsDiffToRemindOption(
-          this.data.task.dueWithTime as number,
+          this.data.task.dueWithTime,
           reminder.remindAt,
         );
       } else {

@@ -1,4 +1,5 @@
 import { TaskReminderOptionId } from '../task.model';
+import { devError } from '../../../util/dev-error';
 
 export const remindOptionToMilliseconds = (
   due: number,
@@ -54,6 +55,7 @@ export const millisecondsDiffToRemindOption = (
     return TaskReminderOptionId.AtStart;
   } else {
     console.log(due, remindAt);
-    throw new Error('Cannot determine remind option. Invalid params');
+    devError('Cannot determine remind option. Invalid params');
+    return TaskReminderOptionId.DoNotRemind;
   }
 };
