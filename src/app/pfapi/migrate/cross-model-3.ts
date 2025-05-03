@@ -55,12 +55,12 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     task.tagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
   });
   Object.keys(copy.archiveYoung.task.entities).forEach((tId) => {
-    const task = copy.task.entities[tId];
+    const task = copy.archiveYoung.task.entities[tId];
     // @ts-ignore
     task.tagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
   });
   Object.keys(copy.archiveOld.task.entities).forEach((tId) => {
-    const task = copy.task.entities[tId];
+    const task = copy.archiveOld.task.entities[tId];
     // @ts-ignore
     task.tagIds = task.tagIds.filter((tagId) => tagId !== TODAY_TAG.id);
   });
