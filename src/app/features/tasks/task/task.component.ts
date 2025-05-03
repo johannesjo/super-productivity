@@ -150,7 +150,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isSelected = computed(() => this.selectedId() === this.task().id);
 
   todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
-  isOnTodayList = computed(() => this.todayList().includes(this.task().id));
+  isTaskOnTodayList = computed(() => this.todayList().includes(this.task().id));
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
@@ -173,12 +173,20 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   });
 
   isShowDueToday = computed(() => {
-    return !this.isOnTodayList() || !environment.production;
+    return !this.isTodayListActive() || !environment.production;
   });
 
   progress = computed<number>(() => {
     const t = this.task();
     return (t.timeEstimate && (t.timeSpent / t.timeEstimate) * 100) || 0;
+  });
+
+  isShowRemoveFromToday = computed(() => {
+    return !this.isTodayListActive() && isShowRemoveFromToday(this.task());
+  });
+
+  isShowAddToToday = computed(() => {
+    return isShowAddToToday(this.task(), this.isTodayListActive());
   });
 
   T: typeof T = T;
@@ -295,14 +303,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
     window.clearTimeout(this._doubleClickTimeout);
-  }
-
-  isShowRemoveFromToday(): boolean {
-    return !this.workContextService.isToday && isShowRemoveFromToday(this.task());
-  }
-
-  isShowAddToToday(): boolean {
-    return isShowAddToToday(this.task(), this.workContextService.isToday);
   }
 
   scheduleTask(): void {
@@ -652,7 +652,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
             if (this.task().parentId) {
               // NOTHING
             } else {
-              if (this.isOnTodayList()) {
+              if (this.isTaskOnTodayList()) {
                 this.unschedule();
               } else {
                 this.addToMyDay();
@@ -774,7 +774,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     if (t.projectId && !t.parentId) {
       this._projectService.moveTaskToBacklog(t.id, t.projectId);
-      if (this.isOnTodayList()) {
+      if (this.isTaskOnTodayList()) {
         this.unschedule();
       }
     }
