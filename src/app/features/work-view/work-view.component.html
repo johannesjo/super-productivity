@@ -45,29 +45,22 @@
                 "
               >
                 <button
-                  [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
                   mat-stroked-button
                   color="primary"
-                  routerLink="/active/daily-summary"
                   tabindex="1"
+                  (click)="addAllOverdueToMyDay()"
                 >
                   <mat-icon>wb_sunny</mat-icon>
-                  <!--            {{ T.WW.FINISH_DAY | translate }}-->
-                  Add to Today
-                  <!--            Add all to Today-->
+                  {{ T.F.TASK.CMP.ADD_TO_MY_DAY | translate }}
                 </button>
-                <button
-                  [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                  mat-stroked-button
-                  color="primary"
-                  routerLink="/active/daily-summary"
-                  tabindex="1"
-                >
-                  <mat-icon>edit_calendar</mat-icon>
-                  Reschedule
-                  <!--            Reschedule all-->
-                  <!--            {{ T.WW.FINISH_DAY | translate }}-->
-                </button>
+                <!--                <button-->
+                <!--                  mat-stroked-button-->
+                <!--                  color="primary"-->
+                <!--                  tabindex="1"-->
+                <!--                >-->
+                <!--                  <mat-icon>edit_calendar</mat-icon>-->
+                <!--                  {{ T.F.PLANNER.D.ADD_PLANNED.RE_PLAN_ALL | translate }}-->
+                <!--                </button>-->
               </div>
             </collapsible>
 

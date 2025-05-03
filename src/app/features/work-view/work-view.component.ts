@@ -54,6 +54,7 @@ import { flattenTasks, selectOverdueTasks } from '../tasks/store/task.selectors'
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
+import { planTaskForToday } from '../tag/store/tag.actions';
 
 @Component({
   selector: 'work-view',
@@ -223,5 +224,20 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         nr: doneTasks.length,
       },
     });
+  }
+
+  addAllOverdueToMyDay(): void {
+    const overdueTasks = this.overdueTasks();
+    overdueTasks.reverse().forEach((task) => {
+      this._store.dispatch(planTaskForToday({ taskId: task.id }));
+    });
+    // this._snackService.open({
+    //   msg: T.F.TASK.S.ADDED_TO_MY_DAY,
+    //   type: 'SUCCESS',
+    //   ico: 'today',
+    //   translateParams: {
+    //     nr: overdueTasks.length,
+    //   },
+    // });
   }
 }

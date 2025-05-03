@@ -626,11 +626,6 @@
           "ADD_TO_TODAY": "Add to Today",
           "RE_PLAN_ALL": "Reschedule all",
           "TITLE": "Add planned tasks to Today"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "This will remove the reminder from the task! Press Escape to cancel.",
-          "REMOVE_PLAN_DATE": "Remove plan date",
-          "TITLE": "Plan Task for Day"
         }
       },
       "EDIT_REPEATED_TASK": "Edit repeated task '{{taskName}}'",
