@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
@@ -58,6 +59,7 @@ import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component
 import { SnackService } from '../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { planTaskForToday } from '../tag/store/tag.actions';
+import { TODAY_TAG } from '../tag/tag.const';
 
 @Component({
   selector: 'work-view',
@@ -119,6 +121,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   estimateRemainingToday = toSignal(this.workContextService.estimateRemainingToday$);
   workingToday = toSignal(this.workContextService.workingToday$);
   selectedTaskId = toSignal(this.taskService.selectedTaskId$);
+  isOnTodayList = toSignal(this.workContextService.isToday$);
+
+  isShowOverduePanel = computed(
+    () => this.isOnTodayList() && this.overdueTasks().length > 0,
+  );
 
   isShowTimeWorkedWithoutBreak: boolean = true;
   splitInputPos: number = 100;
@@ -163,6 +170,13 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
       const doneArr = flattenTasks(this.doneTasks());
       if (doneArr.some((t) => t.id === currentSelectedId)) return;
+
+      if (
+        this.workContextService.activeWorkContextId === TODAY_TAG.id &&
+        this.overdueTasks().length > 0 &&
+        flattenTasks(this.overdueTasks()).some((t) => t.id === currentSelectedId)
+      )
+        return;
 
       // if task really is gone
       this.taskService.setSelectedId(null);

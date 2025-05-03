@@ -14,17 +14,6 @@ export class WorkContextEffects {
   private _taskService = inject(TaskService);
   private _bannerService = inject(BannerService);
 
-  // TODO improve
-  // updateContextsStorage$ = createEffect(() => this._actions$.pipe(
-  //   ofType(
-  //     setActiveWorkContext,
-  //   ),
-  //   withLatestFrom(
-  //     this._store$.pipe(select(selectContextFeatureState)),
-  //   ),
-  //   tap(this._saveToLs.bind(this)),
-  // ), {dispatch: false});
-
   dismissContextScopeBannersOnContextChange: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -35,15 +24,6 @@ export class WorkContextEffects {
       ),
     { dispatch: false },
   );
-
-  // EXTERNAL
-  // --------
-  // unsetCurrentTask$ = createEffect(() => this._actions$.pipe(
-  //   ofType(setActiveWorkContext),
-  //   withLatestFrom(this._taskService.isTaskDataLoaded$),
-  //   filter(([, isDataLoaded]) => isDataLoaded),
-  //   map(() => new UnsetCurrentTask()),
-  // ));
 
   unselectSelectedTask$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(

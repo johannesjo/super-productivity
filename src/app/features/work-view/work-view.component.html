@@ -1,6 +1,4 @@
 @if (!(workContextService.isContextChangingWithDelay$ | async)) {
-  @let isTodayList = workContextService.isToday$ | async;
-
   <right-panel @projectChange>
     <div
       #containerEl
@@ -12,7 +10,7 @@
         class="today"
         cdkScrollable
       >
-        @if (isTodayList && overdueTasks().length) {
+        @if (isShowOverduePanel()) {
           <section
             class="overdue-tasks"
             @expandFade
@@ -306,7 +304,7 @@
                   listModelId="DONE"
                 ></task-list>
                 <div class="finish-day-button-wrapper">
-                  @if (!isTodayList && doneTasks().length) {
+                  @if (!isOnTodayList() && doneTasks().length) {
                     <button
                       [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
                       class="e2e-move-done-to-archive"
@@ -322,7 +320,7 @@
               </collapsible>
               <div class="finish-day-button-wrapper">
                 <!-- NOTE: tabindex is same as for tasks -->
-                @if (isTodayList) {
+                @if (isOnTodayList()) {
                   <button
                     [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
                     color="primary"
