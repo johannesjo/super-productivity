@@ -172,6 +172,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     );
   });
 
+  isShowDueToday = computed(() => {
+    return !this.isOnTodayList() || !environment.production;
+  });
+
   progress = computed<number>(() => {
     const t = this.task();
     return (t.timeEstimate && (t.timeSpent / t.timeEstimate) * 100) || 0;
