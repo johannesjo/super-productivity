@@ -126,6 +126,19 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
     );
 });
 
+export const selectOverdueTasksWithSubTasks = createSelector(
+  selectTaskFeatureState,
+  selectOverdueTasks,
+  (s, overdueTasks): TaskWithSubTasks[] => {
+    const overdueIds = overdueTasks.map((task) => task.id);
+    return overdueTasks
+      .filter((task) => !task.parentId || !overdueIds.includes(task.parentId))
+      .map((task) => {
+        return mapSubTasksToTask(task as Task, s) as TaskWithSubTasks;
+      });
+  },
+);
+
 export const selectAllTasksDueAndOverdue = createSelector(
   selectTaskFeatureState,
   selectTagFeatureState,
