@@ -190,12 +190,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   isShowAddToToday = computed(() => {
     const task = this.task();
-    return (
-      !this.isShowRemoveFromToday() &&
-      !this.isTodayListActive() &&
-      task.dueDay !== getWorklogStr() &&
-      (!task.dueWithTime || !isToday(task.dueWithTime))
-    );
+    return this.isTodayListActive()
+      ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
+          (task.dueDay && task.dueDay !== getWorklogStr())
+      : !this.isShowRemoveFromToday() &&
+          task.dueDay !== getWorklogStr() &&
+          (!task.dueWithTime || !isToday(task.dueWithTime));
   });
 
   T: typeof T = T;
