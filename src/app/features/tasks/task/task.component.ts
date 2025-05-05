@@ -651,23 +651,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
         this._currentPanTimeout = window.setTimeout(() => {
-          if (this.workContextService.isToday) {
-            if (this.task().repeatCfgId) {
-              this.editTaskRepeatCfg();
-            } else {
-              this.scheduleTask();
-            }
+          if (this.task().repeatCfgId) {
+            this.editTaskRepeatCfg();
           } else {
-            if (this.task().parentId) {
-              // NOTHING
-            } else {
-              if (this.isTaskOnTodayList()) {
-                this.unschedule();
-              } else {
-                this.addToMyDay();
-              }
-            }
+            this.scheduleTask();
           }
+
           this._resetAfterPan();
         }, 100);
       } else if (this.isLockPanRight) {
