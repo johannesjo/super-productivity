@@ -109,7 +109,7 @@ export const updateDoneOnForTask = (upd: Update<Task>, state: TaskState): TaskSt
   const isToUnDone = upd.changes.isDone === false;
   if (isToDone || isToUnDone) {
     const changes = {
-      ...(isToDone ? { doneOn: Date.now() } : {}),
+      ...(isToDone ? { doneOn: Date.now(), dueDay: undefined } : {}),
       ...(isToUnDone ? { doneOn: undefined } : {}),
     };
     return taskAdapter.updateOne(

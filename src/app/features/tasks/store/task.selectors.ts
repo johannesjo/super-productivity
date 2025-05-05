@@ -132,7 +132,9 @@ export const selectOverdueTasksWithSubTasks = createSelector(
   (s, overdueTasks): TaskWithSubTasks[] => {
     const overdueIds = overdueTasks.map((task) => task.id);
     return overdueTasks
-      .filter((task) => !task.parentId || !overdueIds.includes(task.parentId))
+      .filter(
+        (task) => (!task.parentId || !overdueIds.includes(task.parentId)) && !task.isDone,
+      )
       .map((task) => {
         return mapSubTasksToTask(task as Task, s) as TaskWithSubTasks;
       });
