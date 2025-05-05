@@ -76,7 +76,7 @@
           </section>
         }
 
-        @if (!overdueTasks().length) {
+        @if (!isShowOverduePanel()) {
           <header class="work-view-header">
             @if (!isPlanningMode() && (estimateRemainingToday() || workingToday())) {
               <div
