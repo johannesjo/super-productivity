@@ -130,16 +130,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   async addToToday(task: TaskWithReminderData): Promise<void> {
-    // NOTE: we need to account for the parent task as well
-    if (task.parentId) {
-      const parent = await this._taskService
-        .getByIdOnce$(task.parentId)
-        .pipe(first())
-        .toPromise();
-      this._store.dispatch(planTaskForToday({ taskId: parent.id }));
-    } else {
-      this._store.dispatch(planTaskForToday({ taskId: task.id }));
-    }
+    this._store.dispatch(planTaskForToday({ taskId: task.id }));
   }
 
   dismiss(task: TaskWithReminderData): void {
@@ -232,7 +223,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const tasksToDismiss = (await this.tasks$
       .pipe(first())
       .toPromise()) as TaskWithReminderData[];
-    const mainTasks = tasksToDismiss.filter((t) => !t.parentId);
+    const mainTasks = tasksToDismiss;
     const parentIds: string[] = unique<string>(
       tasksToDismiss.map((t) => t.parentId as string).filter((pid) => !!pid),
     );
