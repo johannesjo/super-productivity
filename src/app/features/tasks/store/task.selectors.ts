@@ -127,16 +127,23 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
 });
 
 export const selectOverdueTasksWithSubTasks = createSelector(
-  selectTaskFeatureState,
   selectOverdueTasks,
-  (s, overdueTasks): TaskWithSubTasks[] => {
+  selectTaskFeatureState,
+  selectTagFeatureState,
+  (overdueTasks, taskState, tagState): TaskWithSubTasks[] => {
     const overdueIds = overdueTasks.map((task) => task.id);
+    const todayTag = tagState.entities[TODAY_TAG.id]!;
     return overdueTasks
       .filter(
-        (task) => (!task.parentId || !overdueIds.includes(task.parentId)) && !task.isDone,
+        (task) =>
+          (!task.parentId ||
+            (!overdueIds.includes(task.parentId) &&
+              !todayTag.taskIds.includes(task.parentId))) &&
+          !task.isDone &&
+          !todayTag.taskIds.includes(task.id),
       )
       .map((task) => {
-        return mapSubTasksToTask(task as Task, s) as TaskWithSubTasks;
+        return mapSubTasksToTask(task as Task, taskState) as TaskWithSubTasks;
       });
   },
 );
