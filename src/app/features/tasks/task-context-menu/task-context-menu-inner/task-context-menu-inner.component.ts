@@ -60,7 +60,6 @@ import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { DateAdapter } from '@angular/material/core';
-import { isShowAddToToday, isShowRemoveFromToday } from '../../util/is-task-today';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { PlannerService } from '../../../planner/planner.service';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
@@ -259,18 +258,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   updateIssueData(): void {
     this._issueService.refreshIssueTask(this.task, true, true);
   }
-
-  // editTaskRepeatCfg(): void {
-  //   this._matDialog
-  //     .open(DialogEditTaskRepeatCfgComponent, {
-  //       data: {
-  //         task: this.task,
-  //       },
-  //     })
-  //     .afterClosed()
-  //     .pipe(takeUntil(this._destroy$))
-  //     .subscribe(() => this.focusSelf());
-  // }
 
   async deleteTask(): Promise<void> {
     // NOTE: prevents attempts to delete the same task multiple times
@@ -516,9 +503,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     const tDate = new Date();
     tDate.setMinutes(0, 0, 0);
     switch (item) {
-      case 0:
-        this._schedule(tDate, this.isShowRemoveFromToday());
-        break;
       case 1:
         this._schedule(tDate);
         break;
@@ -557,6 +541,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     if (isRemoveFromToday) {
       this.unschedule();
+    } else if (this.task.dueDay === newDay) {
+      this._snackService.open({
+        type: 'CUSTOM',
+        ico: 'info',
+        msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
+        translateParams: { date: formattedDate },
+      });
+      return;
     } else if (this.task.dueWithTime) {
       const task = this.task;
       const newDate = combineDateAndTime(newDayDate, new Date(this.task.dueWithTime));
@@ -566,23 +558,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         TaskReminderOptionId.AtStart,
         false,
       );
-    } else if (newDay === getWorklogStr()) {
-      if (this.isShowAddToToday()) {
-        this.addToMyDay();
-
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-          translateParams: {
-            date: formattedDate,
-            extra: await this.plannerService.getSnackExtraStr(newDay),
-          },
-        });
-      }
     } else {
-      this._store.dispatch(
-        PlannerActions.planTaskForDay({ task: this.task, day: newDay }),
-      );
+      if (newDay === getWorklogStr()) {
+        this.addToMyDay();
+      } else {
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({ task: this.task, day: newDay }),
+        );
+      }
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
@@ -601,14 +584,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         reminderId: this.task.reminderId,
       }),
     );
-  }
-
-  isShowRemoveFromToday(): boolean {
-    return isShowRemoveFromToday(this.task);
-  }
-
-  isShowAddToToday(): boolean {
-    return isShowAddToToday(this.task, this.workContextService.isToday);
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

@@ -39,7 +39,6 @@ import { PlannerService } from '../planner.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { DateAdapter, MatOption } from '@angular/material/core';
-import { isShowAddToToday, isShowRemoveFromToday } from '../../tasks/util/is-task-today';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -304,7 +303,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  async submit(isUnschedule = false): Promise<void> {
+  async submit(): Promise<void> {
     if (!this.selectedDate) {
       console.warn('no selected date');
       return;
@@ -316,17 +315,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     this._handleReminderRemoval();
 
-    if (isUnschedule) {
-      this._store.dispatch(
-        unScheduleTask({ id: this.data.task.id, reminderId: this.data.task.reminderId }),
-      );
-    } else if (this.selectedTime) {
+    if (this.selectedTime) {
       this._scheduleWithTime();
-    } else if (
-      newDay === getWorklogStr() &&
-      !this.isShowAddToToday() &&
-      this.data.task.dueDay === newDay
-    ) {
+    } else if (this.data.task.dueDay === newDay) {
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'info',
@@ -394,8 +385,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     tDate.setMinutes(0, 0, 0);
 
     switch (item) {
-      case 0:
-        break;
       case 1:
         this.selectedDate = tDate;
         break;
@@ -421,15 +410,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         break;
     }
 
-    const isRemoveFromToday = item === 0 && this.isShowRemoveFromToday();
-    this.submit(isRemoveFromToday);
-  }
-
-  isShowRemoveFromToday(): boolean {
-    return isShowRemoveFromToday(this.task);
-  }
-
-  isShowAddToToday(): boolean {
-    return isShowAddToToday(this.task, this.workContextService.isToday);
+    this.submit();
   }
 }

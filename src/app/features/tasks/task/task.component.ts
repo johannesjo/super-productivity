@@ -54,7 +54,6 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { isToday } from '../../../util/is-today.util';
-import { isShowAddToToday, isShowRemoveFromToday } from '../util/is-task-today';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -182,11 +181,21 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   });
 
   isShowRemoveFromToday = computed(() => {
-    return !this.isTodayListActive() && isShowRemoveFromToday(this.task());
+    return (
+      !this.isTodayListActive() &&
+      !this.task().isDone &&
+      this.task().dueDay === getWorklogStr()
+    );
   });
 
   isShowAddToToday = computed(() => {
-    return isShowAddToToday(this.task(), this.isTodayListActive());
+    const task = this.task();
+    return (
+      !this.isShowRemoveFromToday() &&
+      !this.isTodayListActive() &&
+      task.dueDay !== getWorklogStr() &&
+      (!task.dueWithTime || !isToday(task.dueWithTime))
+    );
   });
 
   T: typeof T = T;
