@@ -48,7 +48,7 @@ export const INBOX_TAG: Tag = {
   id: 'NO_LIST',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
-    primary: DEFAULT_TODAY_TAG_COLOR,
+    primary: 'rgb(144, 187, 165)',
     backgroundImageDark: '',
     isDisableBackgroundGradient: false,
   },
