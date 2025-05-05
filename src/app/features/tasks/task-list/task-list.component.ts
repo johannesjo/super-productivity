@@ -130,7 +130,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const isSubtask = !!task.parentId;
     // console.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
     // return true;
-    if (isSubtask) {
+    if (targetModelId === 'OVERDUE') {
+      return false;
+    } else if (isSubtask) {
       if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
         return true;
       }
