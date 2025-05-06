@@ -32,7 +32,7 @@
   <span class="text">{{ T.MH.SETTINGS | translate }}</span>
 </button>
 
-@if (!isForProject && contextId !== TODAY_TAG_ID) {
+@if (!isForProject && contextId !== TODAY_TAG_ID && contextId !== INBOX_TAG.id) {
   <button
     (click)="deleteTag()"
     mat-menu-item

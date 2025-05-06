@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
-import { TODAY_TAG } from '../../features/tag/tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
@@ -91,4 +91,6 @@ export class WorkContextMenuComponent {
       this._projectService.remove(project);
     }
   }
+
+  protected readonly INBOX_TAG = INBOX_TAG;
 }
