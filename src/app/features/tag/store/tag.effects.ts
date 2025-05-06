@@ -325,26 +325,27 @@ export class TagEffects {
     ),
   );
 
-  removeUnlistedTagWheneverTagIsAdded: any = createEffect(() =>
-    this._actions$.pipe(
-      ofType(updateTaskTags),
-      filter(
-        ({ newTagIds, task }) =>
-          newTagIds.includes(INBOX_TAG.id) && newTagIds.length >= 1,
-      ),
-      tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
-      map(({ newTagIds, task }) =>
-        updateTaskTags({
-          task: {
-            ...task,
-            tagIds: newTagIds,
-          },
-          newTagIds: newTagIds.filter((id) => id !== INBOX_TAG.id),
-          isSkipExcludeCheck: true,
-        }),
-      ),
-    ),
-  );
+  // removeUnlistedTagWheneverTagIsAdded: any = createEffect(() =>
+  //   this._actions$.pipe(
+  //     ofType(updateTaskTags),
+  //     filter(
+  //       ({ newTagIds, task }) =>
+  //         newTagIds.includes(INBOX_TAG.id) && newTagIds.length >= 1,
+  //     ),
+  //     tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
+  //     map(({ newTagIds, task }) =>
+  //       updateTaskTags({
+  //         task: {
+  //           ...task,
+  //           tagIds: newTagIds,
+  //         },
+  //         newTagIds: newTagIds.filter((id) => id !== INBOX_TAG.id),
+  //         isSkipExcludeCheck: true,
+  //       }),
+  //     ),
+  //   ),
+  // );
+
   removeUnlistedTagWheneverProjectIsAssigned: any = createEffect(() =>
     this._actions$.pipe(
       ofType(moveToOtherProject),
