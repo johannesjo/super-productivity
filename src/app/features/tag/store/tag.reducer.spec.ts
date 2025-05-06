@@ -3,6 +3,7 @@ import { Tag, TagCopy } from '../tag.model';
 import { deleteTask, moveToArchive_, restoreTask } from '../../tasks/store/task.actions';
 import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
 import { addTag } from './tag.actions';
+import { TODAY_TAG } from '../tag.const';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -185,10 +186,33 @@ describe('TagReducer', () => {
       } as TaskWithSubTasks;
 
       const action = deleteTask({ task: taskToRemove });
-      const state = tagReducer(initialState, action);
+      const newState = tagReducer(
+        {
+          ...initialState,
+          ids: ['1', '2'],
+          entities: {
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: [] as string[],
+            } as Tag,
+            '1': {
+              id: '1',
+              title: 'Test Tag',
+              taskIds: ['task1', 'someOtherTask1'],
+            } as Tag,
+            '2': {
+              id: '2',
+              title: 'Test Tag 2',
+              taskIds: ['subTask2', 'someOtherTask2'],
+            } as Tag,
+          },
+        },
+        action,
+      );
 
-      expect((state.entities['1'] as TagCopy).taskIds).toEqual(['someOtherTask1']);
-      expect((state.entities['2'] as TagCopy).taskIds).toEqual(['someOtherTask2']);
+      expect((newState.entities['1'] as TagCopy).taskIds).toEqual(['someOtherTask1']);
+      expect((newState.entities['2'] as TagCopy).taskIds).toEqual(['someOtherTask2']);
     });
 
     it('should  work when removing a sub task only', () => {
@@ -198,7 +222,20 @@ describe('TagReducer', () => {
       } as TaskWithSubTasks;
 
       const action = deleteTask({ task: taskToRemove });
-      const state = tagReducer(initialState, action);
+      const state = tagReducer(
+        {
+          ...initialState,
+          entities: {
+            ...initialState.entities,
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: [] as string[],
+            } as Tag,
+          },
+        },
+        action,
+      );
 
       expect((state.entities['1'] as TagCopy).taskIds).toEqual(['someOtherTask1']);
       expect((state.entities['2'] as TagCopy).taskIds).toEqual([

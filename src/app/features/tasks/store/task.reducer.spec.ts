@@ -206,22 +206,24 @@ describe('Task Reducer', () => {
 
   describe('Tag operations', () => {
     it('should add a tag to a task', () => {
+      const N_ID = 'NEW_TAG_ID';
       const action = fromActions.updateTaskTags({
         task: task2,
-        newTagIds: [TODAY_TAG.id],
+        newTagIds: [N_ID],
       });
       const state = taskReducer(stateWithTasks, action);
 
-      expect(state.entities['task2']!.tagIds).toContain(TODAY_TAG.id);
+      expect(state.entities['task2']!.tagIds).toContain(N_ID);
     });
 
     it('should remove a tag from a task', () => {
+      const N_ID = 'NEW_TAG_ID';
       // First add a tag
       let state = taskReducer(
         stateWithTasks,
         fromActions.updateTaskTags({
           task: task2,
-          newTagIds: [TODAY_TAG.id],
+          newTagIds: [N_ID],
         }),
       );
 

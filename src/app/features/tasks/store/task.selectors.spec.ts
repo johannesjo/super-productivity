@@ -4,6 +4,7 @@ import { TASK_FEATURE_NAME } from './task.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
+import { TAG_FEATURE_NAME } from '../../tag/store/tag.reducer';
 
 describe('Task Selectors', () => {
   // Define mock tasks
@@ -172,6 +173,17 @@ describe('Task Selectors', () => {
         project1: { id: 'project1', title: 'Project 1', isHiddenFromMenu: false },
         project2: { id: 'project2', title: 'Project 2', isHiddenFromMenu: false },
         project3: { id: 'project3', title: 'Project 3', isHiddenFromMenu: true },
+      },
+    },
+    [TAG_FEATURE_NAME]: {
+      ids: ['SOME_TAG_ID'],
+      entities: {
+        SOME_TAG_ID: {
+          id: 'SOME_TAG_ID',
+          title: 'Today',
+          taskIds: ['task2'],
+          isHiddenFromMenu: false,
+        },
       },
     },
   };
