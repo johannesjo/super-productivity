@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, input, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -7,8 +13,6 @@ import { DialogWorklogExportComponent } from '../../worklog/dialog-worklog-expor
 import { Project, RoundTimeOption } from '../../project/project.model';
 import { Task } from '../task.model';
 import { T } from 'src/app/t.const';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { unique } from '../../../util/unique';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,8 +30,9 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'task-summary-tables',
@@ -45,6 +50,7 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
+    JsonPipe,
   ],
 })
 export class TaskSummaryTablesComponent {
@@ -60,39 +66,40 @@ export class TaskSummaryTablesComponent {
 
   readonly dayStr = input<string>(this._dateService.todayStr());
 
+  readonly flatTasks = input<Task[]>([]);
   readonly isForToday = input<boolean>(true);
 
   readonly isShowYesterday = input<boolean>(false);
-  flatTasks: Task[] = [];
-  projectIds$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
-  projects$: Observable<ProjectWithTasks[]> = this.projectIds$.pipe(
-    withLatestFrom(this._projectService.list$),
-    map(([pids, projects]) => {
-      // NOTE: the order is like the ones in the menu
-      const mappedProjects = projects
-        .filter((project) => pids.includes(project.id))
-        .map((project) => this._mapToProjectWithTasks(project));
 
-      if (this.flatTasks.find((task) => !task.projectId)) {
-        const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
-          id: null,
-          title: this._translateService.instant(T.G.WITHOUT_PROJECT),
-        });
-        return [...mappedProjects, noProjectProject];
-      }
-      return mappedProjects;
-    }),
-  );
-
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
-  @Input('flatTasks') set flatTasksIn(v: Task[]) {
-    this.flatTasks = v;
-    const pids = unique(
-      v.map((t) => t.projectId).filter((pid) => typeof pid === 'string'),
+  readonly projectIds = computed(() => {
+    return unique(
+      this.flatTasks()
+        .map((t) => t.projectId)
+        .filter((pid) => typeof pid === 'string'),
     ) as string[];
-    this.projectIds$.next(pids);
-  }
+  });
+
+  private readonly _allProjects = toSignal(this._projectService.list$, {
+    initialValue: [],
+  });
+
+  readonly projects = computed(() => {
+    const allProjects = this._allProjects();
+    // NOTE: the order is like the ones in the menu
+    const mappedProjects = allProjects
+      .filter((project) => this.projectIds().includes(project.id))
+      .map((project) => this._mapToProjectWithTasks(project));
+
+    if (this.flatTasks().find((task) => !task.projectId)) {
+      const noProjectProject: ProjectWithTasks = this._mapToProjectWithTasks({
+        id: null,
+        title: this._translateService.instant(T.G.WITHOUT_PROJECT),
+      });
+
+      return [...mappedProjects, noProjectProject];
+    }
+    return mappedProjects;
+  });
 
   onTaskSummaryEdit(): void {
     this._worklogService.refreshWorklog();
@@ -115,7 +122,7 @@ export class TaskSummaryTablesComponent {
     roundTo: RoundTimeOption,
     isRoundUp: boolean = false,
   ): Promise<void> {
-    const taskIds = this.flatTasks.map((task) => task.id);
+    const taskIds = this.flatTasks().map((task) => task.id);
     await this._taskService.roundTimeSpentForDayEverywhere({
       day: this.dayStr(),
       taskIds,
@@ -136,6 +143,6 @@ export class TaskSummaryTablesComponent {
       yesterdayStr = this._dateService.todayStr(t);
     }
 
-    return mapToProjectWithTasks(project, this.flatTasks, this.dayStr(), yesterdayStr);
+    return mapToProjectWithTasks(project, this.flatTasks(), this.dayStr(), yesterdayStr);
   }
 }

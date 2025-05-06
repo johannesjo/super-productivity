@@ -1,4 +1,4 @@
-@for (project of (projects$ | async) || []; track project.id) {
+@for (project of projects() || []; track project.id) {
   <section class="project-section">
     @if (project.id !== (workContextService.activeWorkContextId$ | async)) {
       <div
@@ -22,6 +22,7 @@
         }
       </div>
     }
+
     <task-summary-table
       (updated)="onTaskSummaryEdit()"
       [day]="dayStr()"
