@@ -23,6 +23,7 @@
   cdkDropList
   #dropList="cdkDropList"
   [cdkDropListConnectedTo]="dropListService.dropLists | async"
+  [cdkDropListSortingDisabled]="isSortingDisabled()"
   [cdkDropListEnterPredicate]="enterPredicate"
   [cdkDropListData]="dropModelDataForList()"
   (cdkDropListDropped)="drop(filteredTasks(), $event)"

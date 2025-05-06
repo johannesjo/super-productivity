@@ -72,6 +72,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
+  isSortingDisabled = input(false);
 
   listId = input.required<TaskListId>();
   listModelId = input.required<ListModelId>();
