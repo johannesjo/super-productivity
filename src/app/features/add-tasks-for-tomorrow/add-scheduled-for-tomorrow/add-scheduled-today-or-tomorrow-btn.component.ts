@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { T } from '../../../t.const';
 import { AsyncPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -22,5 +22,5 @@ export class AddScheduledTodayOrTomorrowBtnComponent {
 
   protected readonly T = T;
 
-  public readonly isAlwaysShowIfAny = input<boolean>(false);
+  public readonly isAlwaysShowIfAny = signal<boolean>(true);
 }

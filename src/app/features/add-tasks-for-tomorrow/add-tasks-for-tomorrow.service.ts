@@ -1,26 +1,20 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  TaskCopy,
-  TaskPlannedWithDayOrTime,
-  TaskWithDueDay,
-  TaskWithDueTime,
-} from '../tasks/task.model';
+import { TaskCopy, TaskWithDueDay, TaskWithDueTime } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { sortRepeatableTaskCfgs } from '../task-repeat-cfg/sort-repeatable-task-cfg';
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { combineLatest, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import {
-  selectTasksDueAndOverdueForDay,
   selectTasksDueForDay,
   selectTasksWithDueTimeForRange,
-  selectTasksWithDueTimeUntil,
 } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { planTaskForToday } from '../tag/store/tag.actions';
 
 const filterDoneAndToday = (task: TaskCopy): boolean =>
   !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
@@ -46,7 +40,7 @@ export class AddTasksForTomorrowService {
     }),
   );
 
-  private _repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
+  repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
     switchMap((dt) =>
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayIncludingOverdue$(dt),
     ),
@@ -56,13 +50,7 @@ export class AddTasksForTomorrowService {
       this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
     ),
   );
-  private _dueWithTimeForToday$: Observable<TaskWithDueTime[]> =
-    this._todayDateTime$.pipe(
-      switchMap((dt) =>
-        this._store.select(selectTasksWithDueTimeUntil, getDateRangeForDay(dt).end),
-      ),
-      map((tasks) => tasks.filter(filterDoneAndToday)),
-    );
+
   private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
     this._tomorrowDate$.pipe(
       switchMap((dt) =>
@@ -74,23 +62,9 @@ export class AddTasksForTomorrowService {
       map((tasks) => tasks.filter(filterDoneAndToday)),
     );
 
-  private _dueForDayForToday$: Observable<TaskWithDueDay[]> =
-    this._globalTrackingIntervalService.todayDateStr$.pipe(
-      switchMap((ds) => this._store.select(selectTasksDueAndOverdueForDay, ds)),
-      map((tasks) => tasks.filter(filterDoneAndToday)),
-    );
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
     switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
     map((tasks) => tasks.filter(filterDoneAndToday)),
-  );
-
-  allPlannedForTodayNotOnToday$: Observable<TaskPlannedWithDayOrTime[]> = combineLatest([
-    this._dueWithTimeForToday$,
-    this._dueForDayForToday$,
-  ]).pipe(
-    map(([dueWithTime, dueForDay]) =>
-      [...dueWithTime, ...dueForDay].filter(filterDoneAndToday),
-    ),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -98,18 +72,6 @@ export class AddTasksForTomorrowService {
     this._dueWithTimeForTomorrow$,
     this._dueForDayForTomorrow$,
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
-
-  async addAllDueToday(): Promise<'ADDED' | void> {
-    const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
-      this._dueWithTimeForToday$,
-      this._dueForDayForToday$,
-      this._repeatableForToday$,
-    ])
-      .pipe(first())
-      .toPromise();
-
-    return await this._addAllDue(Date.now(), dueWithTime, dueWithDay, repeatCfgs);
-  }
 
   async addAllDueTomorrow(): Promise<'ADDED' | void> {
     const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
@@ -127,11 +89,7 @@ export class AddTasksForTomorrowService {
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
     plannedTasks.reverse().forEach((task) => {
-      // if (!task.tagIds.includes(TODAY_TAG.id)) {
-      //   this._store.dispatch(
-      //     updateTaskTags({ task, newTagIds: [TODAY_TAG.id, ...task.tagIds] }),
-      //   );
-      // }
+      this._store.dispatch(planTaskForToday({ taskId: task.id }));
     });
   }
 
