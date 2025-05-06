@@ -42,12 +42,12 @@ export class AddTasksForTomorrowService {
 
   repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
     switchMap((dt) =>
-      this._taskRepeatCfgService.getRepeatTableTasksDueForDayIncludingOverdue$(dt),
+      this._taskRepeatCfgService.getRepeatableTasksDueForDayIncludingOverdue$(dt),
     ),
   );
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
-      this._taskRepeatCfgService.getRepeatTableTasksDueForDayOnly$(d.getTime()),
+      this._taskRepeatCfgService.getRepeatableTasksDueForDayOnly$(d.getTime()),
     ),
   );
 

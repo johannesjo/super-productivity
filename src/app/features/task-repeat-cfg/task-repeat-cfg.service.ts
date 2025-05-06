@@ -25,7 +25,7 @@ import { nanoid } from 'nanoid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
-import { take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { addTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
@@ -51,16 +51,18 @@ export class TaskRepeatCfgService {
     select(selectAllTaskRepeatCfgs),
   );
 
-  getRepeatTableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
+  getRepeatableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
     return this._store$.select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate });
   }
 
-  getRepeatTableTasksDueForDayIncludingOverdue$(
+  getRepeatableTasksDueForDayIncludingOverdue$(
     dayDate: number,
   ): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate });
+    return this._store$
+      .select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate })
+      .pipe(first());
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {

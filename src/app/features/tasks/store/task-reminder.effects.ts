@@ -60,6 +60,8 @@ export class TaskReminderEffects {
           task.id,
           truncate(task.title),
           remindAt as number,
+          undefined,
+          true,
         );
         return addReminderIdToTask({
           taskId: task.id,

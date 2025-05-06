@@ -9,7 +9,7 @@ import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
-import { filter, map, skipUntil } from 'rxjs/operators';
+import { filter, first, map, skipUntil } from 'rxjs/operators';
 import { migrateReminders } from './migrate-reminder.util';
 import { devError } from '../../util/dev-error';
 import { Note } from '../note/note.model';
@@ -44,7 +44,6 @@ export class ReminderService {
   private _isRemindersLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     false,
   );
-  isRemindersLoaded$: Observable<boolean> = this._isRemindersLoaded$.asObservable();
 
   private _w: Worker;
   private _reminders: Reminder[] = [];
@@ -120,6 +119,7 @@ export class ReminderService {
     title: string,
     remindAt: number,
     recurringConfig?: RecurringConfig,
+    isWaitForReady: boolean = false,
   ): string {
     // make sure that there is always only a single reminder with a particular relatedId as there might be race conditions
     this.removeReminderByRelatedIdIfSet(relatedId);
@@ -147,7 +147,7 @@ export class ReminderService {
         type,
         recurringConfig,
       });
-      this._saveModel(this._reminders);
+      this._saveModel(this._reminders, isWaitForReady);
       return id;
     }
   }
@@ -227,8 +227,18 @@ export class ReminderService {
     return migrateReminders((await this._pfapiService.m.reminders.load()) || []);
   }
 
-  private async _saveModel(reminders: Reminder[]): Promise<void> {
-    if (!this._isRemindersLoaded$.getValue()) {
+  private async _saveModel(
+    reminders: Reminder[],
+    isWaitForReady: boolean = false,
+  ): Promise<void> {
+    if (isWaitForReady) {
+      await this._isRemindersLoaded$
+        .pipe(
+          filter((v) => !!v),
+          first(),
+        )
+        .toPromise();
+    } else if (!this._isRemindersLoaded$.getValue()) {
       throw new Error('Reminders not loaded initially when trying to save model');
     }
     console.log('saveReminders', reminders);
