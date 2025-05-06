@@ -11,6 +11,7 @@ import {
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { INBOX_TAG } from '../tag/tag.const';
 
 /*
 # Considerations for flush architecture:
@@ -66,6 +67,7 @@ export class ArchiveService {
         dueWithTime: undefined,
         dueDay: undefined,
         _hideSubTasksMode: undefined,
+        tagIds: task.tagIds.filter((id) => id !== INBOX_TAG.id),
         doneOn:
           task.isDone && task.doneOn
             ? task.doneOn
