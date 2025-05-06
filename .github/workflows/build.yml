@@ -54,13 +54,13 @@ jobs:
         with:
           name: nightwatch-performance-metrics
           path: perf-metrics*.json
-      - name: 'Upload E2E screenshots on failure'
-        if: ${{ always() }}
+      - name: 'Upload E2E results on failure'
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: e2eScreenshots
-          path: e2e/screenshots/**/*.*
-          retention-days: 5
+          name: e2eResults
+          path: e2e-test-results/**/*.*
+          retention-days: 14
 
       - name: Build Frontend & Electron
         run: npm run build
