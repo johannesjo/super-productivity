@@ -23,7 +23,10 @@ import {
 } from '../task.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
+import {
+  expandAnimation,
+  expandInOnlyAnimation,
+} from '../../../ui/animations/expand.ani';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { checkKeyCombo } from '../../../util/check-key-combo';
 import {
@@ -90,7 +93,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, swirlAnimation],
+  animations: [expandAnimation, fadeAnimation, swirlAnimation, expandInOnlyAnimation],
   /* eslint-disable @typescript-eslint/naming-convention*/
   host: {
     '[id]': 'taskIdWithPrefix()',

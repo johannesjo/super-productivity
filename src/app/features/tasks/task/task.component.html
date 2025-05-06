@@ -318,7 +318,7 @@
       }
       @if (t.subTasks?.length) {
         <task-list
-          [@expand]
+          [@expandInOnly]
           [isHideAll]="!!t._hideSubTasksMode"
           [isHideDone]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
           [isSubTaskList]="true"

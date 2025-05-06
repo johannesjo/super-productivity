@@ -14,6 +14,15 @@ export const expandAnimation = [
   ]),
 ];
 
+export const expandInOnlyAnimation = [
+  trigger('expandInOnly', [
+    transition(':enter', [
+      style({ height: 0, overflow: 'hidden' }),
+      animate(ANI_ENTER_TIMING, style({ height: '*' })),
+    ]),
+  ]),
+];
+
 export const expandFastAnimation = [
   trigger('expandFast', [
     transition(':enter', [
