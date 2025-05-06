@@ -56,7 +56,6 @@ import { ContextMenuComponent } from '../../ui/context-menu/context-menu.compone
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'side-nav',
@@ -123,9 +122,7 @@ export class SideNavComponent implements OnDestroy {
     this.isTagsExpanded,
   );
 
-  tagListToDisplay$: Observable<Tag[]> = environment.production
-    ? this.tagService.tagsNoMyDayAndNoList$
-    : this.tagService.tags$;
+  tagListToDisplay$: Observable<Tag[]> = this.tagService.tagsNoMyDayAndNoList$;
 
   tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
     switchMap((isExpanded) =>
