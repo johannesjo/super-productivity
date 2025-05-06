@@ -11,6 +11,7 @@ import { sortRepeatableTaskCfgs } from '../../task-repeat-cfg/sort-repeatable-ta
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { DateService } from '../../../core/date/date.service';
 import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
+import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 
 @Injectable()
 export class TaskDueEffects {
@@ -20,9 +21,11 @@ export class TaskDueEffects {
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _dateService = inject(DateService);
   private _dataInitStateService = inject(DataInitStateService);
+  private _syncWrapperService = inject(SyncWrapperService);
 
   removeOverdueFormToday$ = createEffect(() => {
     return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
       switchMap(() => this._store$.select(selectOverdueTasks)),
       map((overdue) => removeTasksFromTodayTag({ taskIds: overdue.map((t) => t.id) })),
@@ -32,9 +35,8 @@ export class TaskDueEffects {
   createRepeatableTasks$ = createEffect(
     () => {
       return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
         concatMap(() => this._globalTrackingIntervalService.todayDateStr$),
-        tap((v) => console.log('1', v)),
-
         concatMap(() =>
           this._taskRepeatCfgService.getRepeatableTasksDueForDayIncludingOverdue$(
             Date.now(),
@@ -43,8 +45,6 @@ export class TaskDueEffects {
         tap((v) => console.log('2', v)),
         filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
         mergeMap((taskRepeatCfgs) => {
-          console.log('XXXXXXXXXXXXXX');
-          console.log(taskRepeatCfgs);
           // NOTE sorting here is important
           const sorted = taskRepeatCfgs.sort(sortRepeatableTaskCfgs);
           return from(sorted).pipe(

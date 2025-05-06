@@ -34,17 +34,6 @@ export class AddTasksForTomorrowService {
       return d;
     }),
   );
-  private _todayDateTime$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
-    map((todayStr) => {
-      return new Date(todayStr).getTime();
-    }),
-  );
-
-  repeatableForToday$: Observable<TaskRepeatCfg[]> = this._todayDateTime$.pipe(
-    switchMap((dt) =>
-      this._taskRepeatCfgService.getRepeatableTasksDueForDayIncludingOverdue$(dt),
-    ),
-  );
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
       this._taskRepeatCfgService.getRepeatableTasksDueForDayOnly$(d.getTime()),
