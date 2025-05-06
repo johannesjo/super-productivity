@@ -49,9 +49,8 @@ module.exports = {
           // Assert that only one tag is appended to this task
           browser.assert.strictEqual(
             result.value.length,
-            // NOTE: there is 1 "tag" for the default project
-            2,
-            `Expected 2 tags for this task, but found ${result.value.length}`,
+            1,
+            `Expected 1 tags for this task, but found ${result.value.length}`,
           );
         } else {
           console.error('Unexpected result format:', result.value);
