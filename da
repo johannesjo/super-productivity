@@ -1,0 +1,90 @@
+[1mdiff --git a/src/app/features/schedule/schedule-event/schedule-event.component.ts b/src/app/features/schedule/schedule-event/schedule-event.component.ts[m
+[1mindex 088b1284a..03ce861ca 100644[m
+[1m--- a/src/app/features/schedule/schedule-event/schedule-event.component.ts[m
+[1m+++ b/src/app/features/schedule/schedule-event/schedule-event.component.ts[m
+[36m@@ -107,9 +107,7 @@[m [mexport class ScheduleEventComponent implements OnInit {[m
+     const endClockStr = getClockStringFromHours([m
+       this.se.startHours + this.se.timeLeftInHours,[m
+     );[m
+[31m-    // this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);[m
+     this.hoverTitle = startClockStr + ' - ' + endClockStr + '  ' + this.title;[m
+[31m-    // this.scheduledClockStr = startClockStr + ' - ' + endClockStr;[m
+     this.scheduledClockStr = startClockStr;[m
+ [m
+     if (isDraggableSE(this.se)) {[m
+[36m@@ -124,17 +122,23 @@[m [mexport class ScheduleEventComponent implements OnInit {[m
+       this.se.type === SVEType.SplitTaskPlannedForDay ||[m
+       this.se.type === SVEType.ScheduledTask[m
+     ) {[m
+[31m-      this.task = this.se.data as TaskCopy;[m
+[31m-      this._projectId$.next(this.task.projectId || null);[m
+[32m+[m[32m      // Create a copy of the task object to avoid modifying a frozen object[m
+[32m+[m[32m      this.task = { ...(this.se.data as TaskCopy) };[m
+ [m
+       if ([m
+         (this.se.type === SVEType.Task || this.se.type === SVEType.TaskPlannedForDay) &&[m
+         this.task.timeEstimate === SCHEDULE_TASK_MIN_DURATION_IN_MS &&[m
+         this.task.timeSpent === 0[m
+       ) {[m
+[31m-        // this.hoverTitle = '! default estimate was to 15min ! – ' + this.hoverTitle;[m
+         this.hoverTitle += '  !!!!! ESTIMATE FOR SCHEDULE WAS SET TO 10MIN !!!!!';[m
+       }[m
+[32m+[m
+[32m+[m[32m      // Fix: Ensure remindAt is explicitly handled when set to "Never"[m
+[32m+[m[32m      if (this.task.remindAt === undefined || this.task.remindAt === null) {[m
+[32m+[m[32m        this.task.remindAt = null; // Explicitly set to null for clarity[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      this._projectId$.next(this.task.projectId || null);[m
+     }[m
+ [m
+     // SPLIT STUFF[m
+[1mdiff --git a/src/app/features/tasks/task.model.ts b/src/app/features/tasks/task.model.ts[m
+[1mindex 34b8900ec..fedfbeab4 100644[m
+[1m--- a/src/app/features/tasks/task.model.ts[m
+[1m+++ b/src/app/features/tasks/task.model.ts[m
+[36m@@ -95,6 +95,8 @@[m [mexport interface TaskCopy extends IssueFieldsForTask {[m
+   // ui model[m
+   // 0: show, 1: hide-done tasks, 2: hide all sub-tasks[m
+   _hideSubTasksMode?: HideSubTasksMode;[m
+[32m+[m
+[32m+[m[32m  remindAt?: number | null;[m
+ }[m
+ [m
+ /**[m
+[1mdiff --git a/src/app/features/tasks/task.service.ts b/src/app/features/tasks/task.service.ts[m
+[1mindex f73f07af0..04dddcaa8 100644[m
+[1m--- a/src/app/features/tasks/task.service.ts[m
+[1m+++ b/src/app/features/tasks/task.service.ts[m
+[36m@@ -771,11 +771,16 @@[m [mexport class TaskService {[m
+     remindCfg: TaskReminderOptionId,[m
+     isMoveToBacklog: boolean = false,[m
+   ): void {[m
+[32m+[m[32m    let remindAt = remindOptionToMilliseconds(plannedAt, remindCfg);[m
+[32m+[m[32m    if (remindAt === undefined) {[m
+[32m+[m[32m      // If remindAt is "Never", ensure plannedAt is used for scheduling[m
+[32m+[m[32m      remindAt = plannedAt;[m
+[32m+[m[32m    }[m
+     this._store.dispatch([m
+       scheduleTask({[m
+         task,[m
+         plannedAt,[m
+[31m-        remindAt: remindOptionToMilliseconds(plannedAt, remindCfg),[m
+[32m+[m[32m        remindAt,[m
+         isMoveToBacklog,[m
+       }),[m
+     );[m
+[1mdiff --git a/src/app/features/tasks/util/remind-option-to-milliseconds.ts b/src/app/features/tasks/util/remind-option-to-milliseconds.ts[m
+[1mindex 0aaaa0dbf..b26953e8c 100644[m
+[1m--- a/src/app/features/tasks/util/remind-option-to-milliseconds.ts[m
+[1m+++ b/src/app/features/tasks/util/remind-option-to-milliseconds.ts[m
+[36m@@ -28,6 +28,9 @@[m [mexport const remindOptionToMilliseconds = ([m
+       // prettier-ignore[m
+       return plannedAt - (60 * 60 * 1000);[m
+     }[m
+[32m+[m[32m    case TaskReminderOptionId.DoNotRemind: {[m
+[32m+[m[32m      return undefined; // Explicitly handle "Never" configuration[m
+[32m+[m[32m    }[m
+   }[m
+   return undefined;[m
+ };[m
