@@ -62,7 +62,7 @@ import {
   taskRepeatCfgReducer,
 } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { TaskRepeatCfgEffects } from '../features/task-repeat-cfg/store/task-repeat-cfg.effects';
-import { TaskCreateAllDueEffects } from '../features/tasks/store/task-create-all-due.effects';
+import { TaskDueEffects } from '../features/tasks/store/task-due.effects';
 import { TASK_FEATURE_NAME, taskReducer } from '../features/tasks/store/task.reducer';
 import { TaskDbEffects } from '../features/tasks/store/task-db.effects';
 import { TaskInternalEffects } from '../features/tasks/store/task-internal.effects';
@@ -153,7 +153,7 @@ import { PlannerEffects } from '../features/planner/store/planner.effects';
       TaskReminderEffects,
       TaskUiEffects,
       ShortSyntaxEffects,
-      TaskCreateAllDueEffects,
+      TaskDueEffects,
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
 

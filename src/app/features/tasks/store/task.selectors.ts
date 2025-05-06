@@ -119,9 +119,7 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
     .map((id) => s.entities[id] as Task)
     .filter(
       (task) =>
-        (task.dueDay &&
-          new Date(task.dueDay) < today &&
-          !task.tagIds.includes(TODAY_TAG.id)) ||
+        (task.dueDay && new Date(task.dueDay) < today) ||
         (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
     );
 });

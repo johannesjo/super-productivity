@@ -40,6 +40,7 @@ import {
   deleteTags,
   moveTaskInTodayTagList,
   planTaskForToday,
+  removeTasksFromTodayTag,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -607,6 +608,19 @@ export const tagReducer = createReducer<TagState>(
         id: TODAY_TAG.id,
         changes: {
           taskIds: unique([taskId, ...todayTag.taskIds]),
+        },
+      },
+      state,
+    );
+  }),
+
+  on(removeTasksFromTodayTag, (state, { taskIds }) => {
+    const todayTag = state.entities[TODAY_TAG.id] as Tag;
+    return tagAdapter.updateOne(
+      {
+        id: TODAY_TAG.id,
+        changes: {
+          taskIds: todayTag.taskIds.filter((id) => !taskIds.includes(id)),
         },
       },
       state,
