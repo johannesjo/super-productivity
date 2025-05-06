@@ -7,6 +7,7 @@ import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { TaskCopy } from '../../tasks/task.model';
 import { OVERDUE_LIST_ID } from '../planner.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'planner-day-overdue',
@@ -20,6 +21,7 @@ import { OVERDUE_LIST_ID } from '../planner.model';
     MatIcon,
     MsToStringPipe,
     RoundDurationPipe,
+    TranslatePipe,
   ],
 })
 export class PlannerDayOverdueComponent {
