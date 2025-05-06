@@ -197,9 +197,9 @@ export const PFAPI_SYNC_PROVIDERS = [
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   crossModelVersion: CROSS_MODEL_VERSION,
   validate: (data) => {
-    console.time('validateAllData');
+    // console.time('validateAllData');
     const r = validateAllData(data);
-    console.time('relatedDataValidation');
+    // console.time('relatedDataValidation');
     if (r.success && !isRelatedModelDataValid(data)) {
       return {
         success: false,
@@ -213,8 +213,8 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
         ],
       };
     }
-    console.timeEnd('relatedDataValidation');
-    console.timeEnd('validateAllData');
+    // console.timeEnd('relatedDataValidation');
+    // console.timeEnd('validateAllData');
     return r;
   },
   onDbError: (err) => {

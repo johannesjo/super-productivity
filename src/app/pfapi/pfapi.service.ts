@@ -105,9 +105,6 @@ export class PfapiService {
     });
 
     this._commonAndLegacySyncConfig$.subscribe(async (cfg) => {
-      // TODO handle android webdav
-      console.log('SEEEEEEEEEEEET', cfg.isEnabled, cfg.syncProvider, cfg);
-
       this.pf.setActiveSyncProvider(
         cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
       );
