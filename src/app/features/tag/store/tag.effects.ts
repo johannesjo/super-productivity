@@ -330,7 +330,7 @@ export class TagEffects {
       ofType(updateTaskTags),
       filter(
         ({ newTagIds, task }) =>
-          newTagIds.includes(INBOX_TAG.id) && newTagIds.length >= 2,
+          newTagIds.includes(INBOX_TAG.id) && newTagIds.length >= 1,
       ),
       tap(() => console.log('removeUnlistedTagWheneverTagIsAdded')),
       map(({ newTagIds, task }) =>
@@ -352,7 +352,7 @@ export class TagEffects {
         ({ targetProjectId, task }) =>
           !!targetProjectId && task.tagIds.includes(INBOX_TAG.id),
       ),
-      // tap(() => console.log('removeUnlistedTagWheneverProjectIsAssigned')),
+      tap(() => console.log('removeUnlistedTagWheneverProjectIsAssigned')),
       map(({ task, targetProjectId }) =>
         updateTaskTags({
           task: { ...task, projectId: targetProjectId },
