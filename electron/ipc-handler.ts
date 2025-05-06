@@ -1,14 +1,6 @@
 // FRONTEND EVENTS
 // ---------------
-import {
-  app,
-  dialog,
-  globalShortcut,
-  ipcMain,
-  IpcMainEvent,
-  shell,
-  process,
-} from 'electron';
+import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -20,7 +12,7 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
-import { BACKUP_DIR } from './backup';
+import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
 
 export const initIpcInterfaces = (): void => {
   // HANDLER
@@ -29,7 +21,7 @@ export const initIpcInterfaces = (): void => {
     return app.getPath(name as any);
   });
   ipcMain.handle(IPC.GET_BACKUP_PATH, () => {
-    if (process.windowsStore) {
+    if (process?.windowsStore) {
       return BACKUP_DIR_WINSTORE;
     } else {
       return BACKUP_DIR;
