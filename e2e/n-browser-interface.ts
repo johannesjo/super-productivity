@@ -11,7 +11,7 @@ export interface NBrowser extends NightwatchAPI {
   addTaskWithNewTag: (tagName: string) => NBrowser;
   addNote: (noteTitle: string) => NBrowser;
   draftTask: (taskTitle: string) => NBrowser;
-  goToDefaultProject: () => NBrowser;
+  createAndGoToDefaultProject: () => NBrowser;
   noError: () => NBrowser;
   loadAppAndClickAwayWelcomeDialog: (url?: string) => NBrowser;
   openPanelForTask: (taskSel: string) => NBrowser;

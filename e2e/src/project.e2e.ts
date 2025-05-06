@@ -1,10 +1,9 @@
-import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const SIDENAV = `side-nav`;
-const EXPAND_PROJECT_BTN = `${SIDENAV} .expand-btn:first-of-type`;
 const CREATE_PROJECT_BTN = `${SIDENAV} section.projects .g-multi-btn-wrapper > button:last-of-type`;
+const PROJECT_ACCORDION = '.projects button';
 
 const PROJECT_NAME_INPUT = `dialog-create-project input:first-of-type`;
 const SUBMIT_BTN = `dialog-create-project button[type=submit]:enabled`;
@@ -33,8 +32,8 @@ module.exports = {
   'navigate to project settings': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog()
-      .waitForElementVisible(EXPAND_PROJECT_BTN)
-      .click(EXPAND_PROJECT_BTN)
+      .createAndGoToDefaultProject()
+
       .waitForElementVisible(DEFAULT_PROJECT)
       .waitForElementVisible(DEFAULT_PROJECT_BTN)
       .moveToElement(DEFAULT_PROJECT_BTN, 20, 20)
@@ -50,11 +49,12 @@ module.exports = {
       .assert.textContains('.component-wrapper .mat-h1', 'Project Specific Settings')
       .end(),
 
-  'create project': (browser: NBrowser) =>
+  'create second project': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog()
-      .waitForElementVisible(EXPAND_PROJECT_BTN)
-      .click(EXPAND_PROJECT_BTN)
+      .createAndGoToDefaultProject()
+      .moveToElement(PROJECT_ACCORDION, 20, 15)
+
       .waitForElementVisible(CREATE_PROJECT_BTN)
       .click(CREATE_PROJECT_BTN)
       .waitForElementVisible(PROJECT_NAME_INPUT)
@@ -74,17 +74,10 @@ module.exports = {
       .assert.textContains(WORK_CTX_TITLE, 'Cool Test Project')
       .end(),
 
-  'navigate to default': (browser: NBrowser) =>
-    browser
-      .goToDefaultProject()
-      .assert.urlEquals(`${BASE}/#/project/INBOX/tasks`)
-      .assert.textContains(WORK_CTX_TITLE, 'Inbox')
-      .end(),
-
   'move done tasks to archive without error': (browser: NBrowser) =>
     browser
       // Go to project page
-      .goToDefaultProject()
+      .createAndGoToDefaultProject()
       // HERE TO: avoid Error while running .clickElement() protocol action:
       // stale element reference: stale element not found in the current frame
       .pause(200)

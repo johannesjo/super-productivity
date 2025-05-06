@@ -11,7 +11,7 @@ module.exports = {
 
   'create a note': (browser: NBrowser) =>
     browser
-      .goToDefaultProject()
+      .createAndGoToDefaultProject()
       .addNote('Some new Note')
 
       .moveToElement(NOTES_WRAPPER, 10, 50)
@@ -21,7 +21,7 @@ module.exports = {
 
   'new note should be still available after reload': (browser: NBrowser) =>
     browser
-      .goToDefaultProject()
+      .createAndGoToDefaultProject()
 
       .addNote('Some new Note')
       // wait for save
