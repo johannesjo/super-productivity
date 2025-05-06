@@ -70,7 +70,6 @@ import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { TaskHoverControlsComponent } from './task-hover-controls/task-hover-controls.component';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { TaskListComponent } from '../task-list/task-list.component';
-import { JsonPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
@@ -126,7 +125,6 @@ import { TODAY_TAG } from '../../tag/tag.const';
     TagListComponent,
     ShortPlannedAtPipe,
     TagToggleMenuListComponent,
-    JsonPipe,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {

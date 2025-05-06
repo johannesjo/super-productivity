@@ -21,6 +21,7 @@ import {
   formatOpenProjectWorkPackageSubjectForSnack,
 } from './format-open-project-work-package-subject.util';
 import { IssueProviderService } from '../../issue-provider.service';
+import { getWorklogStr } from '../../../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -146,10 +147,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       issuePoints: issue.storyPoints || undefined,
       issueWasUpdated: false,
       // NOTE: we use Date.now() instead to because updated does not account for comments
-      dueWithTime: issue.startDate
-        ? new Date(new Date(issue.startDate).setHours(7, 30, 0, 0)).getTime() +
-          this.oneDayInMilliseconds
-        : undefined, // Adjust due to 7 AM or set it to null if not present
+      dueDay: issue.startDate ? getWorklogStr(issue.startDate) : undefined,
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(parsedEstimate > 0 ? { timeEstimate: parsedEstimate } : {}),
     };
