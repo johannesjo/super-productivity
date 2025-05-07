@@ -110,7 +110,8 @@ export class ShortSyntaxEffects {
           !task.projectId &&
           !task.parentId &&
           task.projectId !== defaultProjectId &&
-          originalAction.type === addTask.type;
+          originalAction.type === addTask.type &&
+          this._workContextService.activeWorkContextId !== INBOX_TAG.id;
 
         if (!r) {
           if (isAddDefaultProjectIfNecessary) {
