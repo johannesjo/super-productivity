@@ -563,17 +563,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         this.addToMyDay();
       } else {
         this._store.dispatch(
-          PlannerActions.planTaskForDay({ task: this.task, day: newDay }),
+          PlannerActions.planTaskForDay({
+            task: this.task,
+            day: newDay,
+            isShowSnack: true,
+          }),
         );
       }
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-        translateParams: {
-          date: formattedDate,
-          extra: await this.plannerService.getSnackExtraStr(newDay),
-        },
-      });
     }
   }
 

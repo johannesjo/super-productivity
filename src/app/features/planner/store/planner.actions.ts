@@ -29,7 +29,12 @@ export const PlannerActions = createActionGroup({
       fromTask: TaskCopy;
       toTaskId: string;
     }>(),
-    'Plan Task for Day': props<{ task: TaskCopy; day: string; isAddToTop?: boolean }>(),
+    'Plan Task for Day': props<{
+      task: TaskCopy;
+      day: string;
+      isAddToTop?: boolean;
+      isShowSnack?: boolean;
+    }>(),
     'Update Planner Dialog Last Shown': props<{ today: string }>(),
   },
 });

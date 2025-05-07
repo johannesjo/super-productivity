@@ -325,7 +325,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         translateParams: { date: formattedDate },
       });
     } else {
-      await this._planForDay(formattedDate, newDay);
+      await this._planForDay(newDay);
     }
 
     this.close(true);
@@ -366,18 +366,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // }
   }
 
-  private async _planForDay(formattedDate: string, newDay: string): Promise<void> {
+  private async _planForDay(newDay: string): Promise<void> {
     this._store.dispatch(
-      PlannerActions.planTaskForDay({ task: this.data.task, day: newDay }),
+      PlannerActions.planTaskForDay({
+        task: this.data.task,
+        day: newDay,
+        isShowSnack: true,
+      }),
     );
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
-      translateParams: {
-        date: formattedDate,
-        extra: await this._plannerService.getSnackExtraStr(newDay),
-      },
-    });
   }
 
   quickAccessBtnClick(item: number): void {
