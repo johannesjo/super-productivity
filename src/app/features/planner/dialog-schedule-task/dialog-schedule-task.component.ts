@@ -35,11 +35,9 @@ import { isToday } from '../../../util/is-today.util';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { PlannerService } from '../planner.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { DateAdapter, MatOption } from '@angular/material/core';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -50,7 +48,7 @@ import {
   MatSuffix,
 } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 
 const DEFAULT_TIME = '09:00';
@@ -90,9 +88,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _snackService = inject(SnackService);
   private _datePipe = inject(DatePipe);
   private _taskService = inject(TaskService);
-  private workContextService = inject(WorkContextService);
   private _reminderService = inject(ReminderService);
-  private _plannerService = inject(PlannerService);
+  private _translateService = inject(TranslateService);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
 
   T: typeof T = T;
@@ -311,13 +308,16 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     const newDayDate = new Date(this.selectedDate);
     const newDay = getWorklogStr(newDayDate);
-    const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
     this._handleReminderRemoval();
 
     if (this.selectedTime) {
       this._scheduleWithTime();
     } else if (this.data.task.dueDay === newDay) {
+      const formattedDate =
+        newDay == getWorklogStr()
+          ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
+          : (this._datePipe.transform(newDay, 'shortDate') as string);
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'info',

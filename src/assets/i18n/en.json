@@ -1133,7 +1133,7 @@
         "MOVED_TO_ARCHIVE": "Moved {{nr}} tasks to archive",
         "MOVED_TO_PROJECT": "Moved task \"{{taskTitle}}\" to project \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Go to Project",
-        "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
+        "REMINDER_ADDED": "Scheduled <strong>{{title}}</strong> at <strong>{{date}}</strong>",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
         "TASK_CREATED": "Created task \"{{title}}\""

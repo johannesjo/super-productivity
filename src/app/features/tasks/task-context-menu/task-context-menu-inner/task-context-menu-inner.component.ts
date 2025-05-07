@@ -51,7 +51,7 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
 import { Update } from '@ngrx/entity';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
 import { T } from 'src/app/t.const';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
 import { MatIconButton } from '@angular/material/button';
@@ -61,7 +61,6 @@ import { PlannerActions } from '../../../planner/store/planner.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { DateAdapter } from '@angular/material/core';
 import { ICAL_TYPE } from '../../../issue/issue.const';
-import { PlannerService } from '../../../planner/planner.service';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -92,7 +91,7 @@ import { isToday } from '../../../../util/is-today.util';
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class TaskContextMenuInnerComponent implements AfterViewInit {
-  private _datePipe = inject(DatePipe);
+  private readonly _datePipe = inject(DatePipe);
   private readonly _taskService = inject(TaskService);
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _matDialog = inject(MatDialog);
@@ -101,12 +100,12 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private readonly _elementRef = inject(ElementRef);
   private readonly _snackService = inject(SnackService);
   private readonly _projectService = inject(ProjectService);
-  readonly workContextService = inject(WorkContextService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
   private readonly _tagService = inject(TagService);
-  readonly plannerService = inject(PlannerService);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _workContextService = inject(WorkContextService);
 
   protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   protected readonly T = T;
@@ -155,7 +154,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //   map((project) => project.isEnableBacklog),
   // );
   isShowMoveFromAndToBacklogBtns$: Observable<boolean> =
-    this.workContextService.activeWorkContext$.pipe(
+    this._workContextService.activeWorkContext$.pipe(
       take(1),
       map((ctx) => !!ctx.isEnableBacklog),
     );
@@ -537,11 +536,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     const newDayDate = new Date(selectedDate);
     const newDay = getWorklogStr(newDayDate);
-    const formattedDate = this._datePipe.transform(newDay, 'shortDate') as string;
 
     if (isRemoveFromToday) {
       this.unschedule();
     } else if (this.task.dueDay === newDay) {
+      const formattedDate =
+        newDay == getWorklogStr()
+          ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
+          : (this._datePipe.transform(newDay, 'shortDate') as string);
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'info',

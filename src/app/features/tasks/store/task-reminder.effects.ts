@@ -23,6 +23,7 @@ import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { planTasksForToday } from '../../tag/store/tag.actions';
+import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -31,19 +32,22 @@ export class TaskReminderEffects {
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
+  private _datePipe = inject(DatePipe);
 
   snack$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(scheduleTaskWithTime),
-        tap(({ task }) => {
+        tap(({ task, remindAt, dueWithTime }) => {
+          const formattedDate = this._datePipe.transform(dueWithTime, 'short');
           this._snackService.open({
             type: 'SUCCESS',
             translateParams: {
               title: truncate(task.title),
+              date: formattedDate || '',
             },
             msg: T.F.TASK.S.REMINDER_ADDED,
-            ico: 'schedule',
+            ico: remindAt ? 'alarm' : 'schedule',
           });
         }),
       ),
