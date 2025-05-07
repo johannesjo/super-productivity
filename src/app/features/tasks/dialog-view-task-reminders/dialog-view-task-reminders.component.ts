@@ -15,9 +15,7 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { first, map, switchMap, takeWhile } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { unique } from '../../../util/unique';
 import { getTomorrow } from '../../../util/get-tomorrow';
-import { uniqueByProp } from '../../../util/unique-by-prop';
 import { ProjectService } from '../../project/project.service';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { MatIcon } from '@angular/material/icon';
@@ -220,22 +218,16 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async addAllToToday(): Promise<void> {
     this.isDisableControls = true;
-    const tasksToDismiss = (await this.tasks$
+    const selectedTasks = (await this.tasks$
       .pipe(first())
       .toPromise()) as TaskWithReminderData[];
-    const mainTasks = tasksToDismiss;
-    const parentIds: string[] = unique<string>(
-      tasksToDismiss.map((t) => t.parentId as string).filter((pid) => !!pid),
-    );
-    const parents = await Promise.all(
-      parentIds.map((parentId) =>
-        this._taskService.getByIdOnce$(parentId).pipe(first()).toPromise(),
-      ),
-    );
+    const tasksIdsOnToday = await this._store
+      .select(selectTodayTagTaskIds)
+      .pipe(first())
+      .toPromise();
 
-    // We need to make sure the uniqueness as both the parent as well as multiple child task can be scheduled
-    const updateTagTasks = uniqueByProp<Task>([...parents, ...mainTasks], 'id');
-    updateTagTasks.forEach((task) => {
+    const tasksToAdd = selectedTasks.filter((t) => !tasksIdsOnToday.includes(t.id));
+    tasksToAdd.forEach((task) => {
       this._store.dispatch(planTaskForToday({ taskId: task.id }));
     });
 
