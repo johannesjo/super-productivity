@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
-import { concatMap, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { concatMap, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { from } from 'rxjs';
 import { removeTasksFromTodayTag } from '../../tag/store/tag.actions';
@@ -27,7 +27,7 @@ export class TaskDueEffects {
     return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
-      switchMap(() => this._store$.select(selectOverdueTasksOnToday)),
+      switchMap(() => this._store$.select(selectOverdueTasksOnToday).pipe(first())),
       filter((overdue) => !!overdue.length),
       map((overdue) => removeTasksFromTodayTag({ taskIds: overdue.map((t) => t.id) })),
     );
