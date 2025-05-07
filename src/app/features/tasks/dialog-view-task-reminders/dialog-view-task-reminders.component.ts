@@ -241,6 +241,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         parentTaskMap: tasksToAdd.reduce((acc, next: Task) => {
           return { ...acc, [next.id as string]: next.parentId };
         }, {}),
+        isShowSnack: true,
       }),
     );
 

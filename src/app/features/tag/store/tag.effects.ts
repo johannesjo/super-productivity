@@ -56,6 +56,9 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { TranslateService } from '@ngx-translate/core';
+import { PlannerService } from '../../planner/planner.service';
 
 @Injectable()
 export class TagEffects {
@@ -70,6 +73,8 @@ export class TagEffects {
   private _router = inject(Router);
   private _taskArchiveService = inject(TaskArchiveService);
   private _timeTrackingService = inject(TimeTrackingService);
+  private _translateService = inject(TranslateService);
+  private _plannerService = inject(PlannerService);
 
   saveToLs$: Observable<unknown> = this._store$.pipe(
     select(selectTagFeatureState),
@@ -162,6 +167,30 @@ export class TagEffects {
               msg: T.F.TAG.S.UPDATED,
             }),
         ),
+      ),
+    { dispatch: false },
+  );
+
+  snackPlanForToday$: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(planTasksForToday),
+        filter(({ isShowSnack }) => !!isShowSnack),
+        tap(async ({ taskIds }) => {
+          // if (taskIds.length === 1) {
+          //   const task = await this._taskService.getByIdOnce$(taskIds[0]).toPromise();
+          // }
+          const formattedDate = this._translateService.instant(T.G.TODAY_TAG_TITLE);
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: T.F.PLANNER.S.TASK_PLANNED_FOR,
+            ico: 'today',
+            translateParams: {
+              date: formattedDate,
+              extra: await this._plannerService.getSnackExtraStr(getWorklogStr()),
+            },
+          });
+        }),
       ),
     { dispatch: false },
   );

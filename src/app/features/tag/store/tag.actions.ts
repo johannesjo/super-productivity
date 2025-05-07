@@ -29,6 +29,7 @@ export const planTasksForToday = createAction(
   props<{
     taskIds: string[];
     parentTaskMap?: { [taskId: string]: string | undefined };
+    isShowSnack?: boolean;
   }>(),
 );
 

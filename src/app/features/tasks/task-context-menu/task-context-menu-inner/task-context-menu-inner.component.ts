@@ -324,7 +324,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   addToMyDay(): void {
-    this._store.dispatch(planTasksForToday({ taskIds: [this.task.id] }));
+    this._store.dispatch(
+      planTasksForToday({ taskIds: [this.task.id], isShowSnack: true }),
+    );
   }
 
   unschedule(): void {
