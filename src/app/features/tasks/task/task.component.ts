@@ -323,13 +323,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
         data: { task: this.task() },
       })
       .afterClosed()
-      // .pipe(takeUntil(this._destroy$))
       .subscribe((isPlanned) => {
-        if (isPlanned) {
-          this.focusNext(true);
-        } else {
-          this.focusSelf();
-        }
+        this.focusSelfOrNextIfNotPossible();
       });
   }
 
@@ -576,9 +571,24 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (IS_TOUCH_PRIMARY) {
       return;
     }
-
     this.focusSelfElement();
-    // this._taskService.focusTask(this.task().id);
+  }
+
+  focusSelfOrNextIfNotPossible(): void {
+    if (IS_TOUCH_PRIMARY) {
+      return;
+    }
+
+    this.focusSelf();
+    // we don't clear the timeout since this should be executed if task is gone
+    window.setTimeout(() => {
+      if (
+        !document.activeElement ||
+        document.activeElement.tagName.toLowerCase() !== 'task'
+      ) {
+        this.focusNext(true);
+      }
+    }, 200);
   }
 
   focusSelfElement(): void {
