@@ -249,7 +249,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     const overdueTasks = this.overdueTasks();
     this._store.dispatch(
       planTasksForToday({
-        taskIds: overdueTasks.map((t) => t.id).reverse(),
+        taskIds: overdueTasks.map((t) => t.id),
       }),
     );
   }
