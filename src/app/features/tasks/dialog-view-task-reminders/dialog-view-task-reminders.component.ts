@@ -161,6 +161,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       PlannerActions.planTaskForDay({
         task,
         day: getWorklogStr(getTomorrow()),
+        isShowSnack: true,
       }),
     );
     this._removeFromList(task.reminderId as string);

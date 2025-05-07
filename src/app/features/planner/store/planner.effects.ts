@@ -5,7 +5,11 @@ import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
-import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
+import {
+  scheduleTaskWithTime,
+  unScheduleTask,
+  updateTaskTags,
+} from '../../tasks/store/task.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { planTasksForToday } from '../../tag/store/tag.actions';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -39,6 +43,7 @@ export class PlannerEffects {
           PlannerActions.moveBeforeTask,
           updateTaskTags,
           unScheduleTask,
+          scheduleTaskWithTime,
           planTasksForToday,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
