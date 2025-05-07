@@ -601,8 +601,12 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(planTasksForToday, (state, { taskIds }) => {
+  on(planTasksForToday, (state, { taskIds, isDoNotAddToList }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
+
+    if (isDoNotAddToList) {
+      return state;
+    }
 
     return tagAdapter.updateOne(
       {

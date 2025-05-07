@@ -272,6 +272,7 @@ export class TagEffects {
 
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
     this._store$.select(selectTodayTagTaskIds).pipe(
+      filter((v) => v.length > 0),
       distinctUntilChanged(fastArrayCompare),
       // NOTE: wait a bit for potential effects to be executed
       switchMap((todayTagTaskIds) =>
@@ -299,6 +300,14 @@ export class TagEffects {
           newTaskIds.some((id, i) => id !== todayTagTaskIds[i]);
 
         if (isChanged && (tasksWithParentInListIds.length || dueNotInListIds.length)) {
+          console.log('Preventing parent and subtask in today list', {
+            isChanged,
+            tasksWithParentInListIds,
+            dueNotInListIds,
+            todayTagTaskIds,
+            newTaskIds,
+          });
+
           return of(
             updateTag({
               tag: {

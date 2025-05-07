@@ -128,7 +128,17 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   async addToToday(task: TaskWithReminderData): Promise<void> {
-    this._store.dispatch(planTasksForToday({ taskIds: [task.id] }));
+    const tasksIdsOnToday = await this._store
+      .select(selectTodayTagTaskIds)
+      .pipe(first())
+      .toPromise();
+
+    this._store.dispatch(
+      planTasksForToday({
+        taskIds: [task.id],
+        isDoNotAddToList: !!task.parentId && tasksIdsOnToday.includes(task.parentId),
+      }),
+    );
   }
 
   dismiss(task: TaskWithReminderData): void {
