@@ -1,6 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, first, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  mergeMap,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { selectTagFeatureState, selectTodayTagTaskIds } from './tag.reducer';
 import { T } from '../../../t.const';
@@ -46,6 +55,7 @@ import { selectAllTasksDueToday, selectTaskById } from '../../tasks/store/task.s
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
+import { fastArrayCompare } from '../../../util/fast-array-compare';
 
 @Injectable()
 export class TagEffects {
@@ -262,17 +272,20 @@ export class TagEffects {
 
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
     this._store$.select(selectTodayTagTaskIds).pipe(
+      distinctUntilChanged(fastArrayCompare),
+      // NOTE: wait a bit for potential effects to be executed
       switchMap((todayTagTaskIds) =>
-        this._store$
-          .select(selectAllTasksDueToday)
-          .pipe(map((tasks) => ({ tasks, todayTagTaskIds }))),
+        this._store$.select(selectAllTasksDueToday).pipe(
+          first(),
+          map((allTasksDueToday) => ({ allTasksDueToday, todayTagTaskIds })),
+        ),
       ),
-      switchMap(({ tasks, todayTagTaskIds }) => {
-        const tasksWithParentInListIds = tasks
+      switchMap(({ allTasksDueToday, todayTagTaskIds }) => {
+        const tasksWithParentInListIds = allTasksDueToday
           .filter((t) => t.parentId && todayTagTaskIds.includes(t.parentId))
           .map((t) => t.id);
 
-        const dueNotInListIds = tasks
+        const dueNotInListIds = allTasksDueToday
           .filter((t) => !todayTagTaskIds.includes(t.id))
           .map((t) => t.id);
 
@@ -294,6 +307,7 @@ export class TagEffects {
                   taskIds: newTaskIds,
                 },
               },
+              isSkipSnack: true,
             }),
           );
         }
