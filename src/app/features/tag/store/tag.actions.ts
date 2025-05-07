@@ -26,7 +26,10 @@ export const updateTagOrder = createAction(
 
 export const planTasksForToday = createAction(
   '[Tag] Plan tasks for Today',
-  props<{ taskIds: string[]; isDoNotAddToList?: boolean }>(),
+  props<{
+    taskIds: string[];
+    parentTaskMap?: { [taskId: string]: string | undefined };
+  }>(),
 );
 
 export const removeTasksFromTodayTag = createAction(

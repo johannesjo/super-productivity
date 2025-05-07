@@ -601,12 +601,8 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(planTasksForToday, (state, { taskIds, isDoNotAddToList }) => {
+  on(planTasksForToday, (state, { taskIds, parentTaskMap = {} }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
-
-    if (isDoNotAddToList) {
-      return state;
-    }
 
     return tagAdapter.updateOne(
       {
@@ -614,7 +610,13 @@ export const tagReducer = createReducer<TagState>(
         changes: {
           taskIds: unique([
             // only move new ids to the top
-            ...taskIds.filter((tId) => !todayTag.taskIds.includes(tId)),
+            ...taskIds.filter(
+              (tId) =>
+                !todayTag.taskIds.includes(tId) &&
+                (!parentTaskMap ||
+                  !parentTaskMap[tId] ||
+                  !todayTag.taskIds.includes(parentTaskMap[tId])),
+            ),
             ...todayTag.taskIds,
           ]),
         },
