@@ -1,30 +1,46 @@
-<div class="task-list-wrapper">
-  <section class="add-task-bar-wrapper">
-    @if (workContextService.estimateRemainingToday$ | async; as estimateTotal) {
-      <div
-        @expand
-        class="estimate-total"
-      >
-        <div class="label">{{ T.PDS.ESTIMATE_TOTAL | translate }}</div>
-        <div class="no-wrap">
-          ~<strong class="time-val">{{ estimateTotal | msToString }}</strong>
-          <mat-icon
-            style="margin-left: 2px"
-            svgIcon="estimate_remaining"
-          ></mat-icon>
-        </div>
+@let tomorrow = plannerService.tomorrow$ | async;
+@let leftOverTodayIds = leftOverTodayIds$ | async;
+
+@if (tomorrow) {
+  <div class="task-list-wrapper">
+    <section class="add-task-bar-wrapper">
+      <!--    @if (workContextService.estimateRemainingToday$ | async; as estimateTotal) {-->
+      <!--      <div-->
+      <!--        @expand-->
+      <!--        class="estimate-total"-->
+      <!--      >-->
+      <!--        <div class="label">{{ T.PDS.ESTIMATE_TOTAL | translate }}</div>-->
+      <!--        <div class="no-wrap">-->
+      <!--          ~<strong class="time-val">{{ estimateTotal | msToString }}</strong>-->
+      <!--          <mat-icon-->
+      <!--            style="margin-left: 2px"-->
+      <!--            svgIcon="estimate_remaining"-->
+      <!--          ></mat-icon>-->
+      <!--        </div>-->
+      <!--      </div>-->
+      <!--    }-->
+
+      <add-task-bar
+        [isDisableAutoFocus]="true"
+        [planForDay]="tomorrow.dayDate"
+      ></add-task-bar>
+
+      <!-- NOTE workContextService.isToday should work as we only need the initial value -->
+      <!--    <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>-->
+    </section>
+
+    @if (leftOverTodayIds?.length) {
+      <div>
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="planAllTodayTomorrow(leftOverTodayIds)"
+        >
+          <mat-icon>wb_sunny</mat-icon>
+          Add ({{ leftOverTodayIds?.length }}) tasks from today
+        </button>
       </div>
     }
-
-    <add-task-bar [isDisableAutoFocus]="true"></add-task-bar>
-
-    <!-- NOTE workContextService.isToday should work as we only need the initial value -->
-    <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>
-  </section>
-
-  <task-list
-    [tasks]="workContextService.undoneTasks$ | async"
-    listId="PARENT"
-    listModelId="UNDONE"
-  ></task-list>
-</div>
+    <planner-day [day]="tomorrow"></planner-day>
+  </div>
+}

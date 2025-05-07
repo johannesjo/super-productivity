@@ -4,13 +4,18 @@ import { TaskService } from '../../../features/tasks/task.service';
 import { T } from 'src/app/t.const';
 import { TaskRepeatCfgService } from '../../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { MatIcon } from '@angular/material/icon';
-import { AddScheduledTodayOrTomorrowBtnComponent } from '../../../features/add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
 import { AsyncPipe } from '@angular/common';
-import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
-import { TranslatePipe } from '@ngx-translate/core';
+import { PlannerDayComponent } from '../../../features/planner/planner-day/planner-day.component';
+import { PlannerService } from '../../../features/planner/planner.service';
 import { AddTaskBarComponent } from '../../../features/tasks/add-task-bar/add-task-bar.component';
-import { TaskListComponent } from '../../../features/tasks/task-list/task-list.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { Store } from '@ngrx/store';
+import { selectTodayTaskIds } from '../../../features/work-context/store/work-context.selectors';
+import { PlannerActions } from '../../../features/planner/store/planner.actions';
+import { first } from 'rxjs/operators';
+import { selectTasksWithSubTasksByIds } from '../../../features/tasks/store/task.selectors';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
@@ -18,21 +23,38 @@ import { TaskListComponent } from '../../../features/tasks/task-list/task-list.c
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  imports: [
-    MatIcon,
-
-    AddScheduledTodayOrTomorrowBtnComponent,
-    AsyncPipe,
-    MsToStringPipe,
-    TranslatePipe,
-    AddTaskBarComponent,
-    TaskListComponent,
-  ],
+  imports: [AsyncPipe, PlannerDayComponent, AddTaskBarComponent, MatButton, MatIcon],
 })
 export class PlanTasksTomorrowComponent {
   workContextService = inject(WorkContextService);
   taskService = inject(TaskService);
   _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  _store = inject(Store);
+  plannerService = inject(PlannerService);
+  leftOverTodayIds$ = this._store.select(selectTodayTaskIds);
 
   T: typeof T = T;
+
+  async planAllTodayTomorrow(ids: string[]): Promise<void> {
+    const todayStr = getWorklogStr();
+    const tomorrow = await this.plannerService.tomorrow$.pipe(first()).toPromise();
+    const tasks = await this._store
+      .select(selectTasksWithSubTasksByIds, { ids })
+      .pipe(first())
+      .toPromise();
+    tasks.forEach((task) => {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({ day: tomorrow!.dayDate, task }),
+      );
+      if (task.subTasks) {
+        task.subTasks.forEach((subTask) => {
+          if (subTask.dueDay && subTask.dueDay === todayStr) {
+            this._store.dispatch(
+              PlannerActions.planTaskForDay({ day: tomorrow!.dayDate, task: subTask }),
+            );
+          }
+        });
+      }
+    });
+  }
 }

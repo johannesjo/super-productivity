@@ -67,7 +67,6 @@ import {
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { RoundTimeOption } from '../project/project.model';
-import { TagService } from '../tag/tag.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import {
@@ -104,7 +103,6 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 })
 export class TaskService {
   private readonly _store = inject<Store<any>>(Store);
-  private readonly _tagService = inject(TagService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _imexMetaService = inject(ImexViewService);
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);

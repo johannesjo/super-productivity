@@ -12,6 +12,7 @@ import { DateService } from '../../core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -76,6 +77,16 @@ export class PlannerService {
     // tap((val) => console.log('days$', val)),
     // tap((val) => console.log('days$ SIs', val[0]?.scheduledIItems)),
     shareReplay(1),
+  );
+  tomorrow$ = this.days$.pipe(
+    map((days) => {
+      const tomorrow = new Date(this._dateService.todayStr());
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (days[1]?.dayDate === getWorklogStr(tomorrow)) {
+        return days[1];
+      }
+      return null;
+    }),
   );
 
   // plannedTaskDayMap$: Observable<{ [taskId: string]: string }> = this._store

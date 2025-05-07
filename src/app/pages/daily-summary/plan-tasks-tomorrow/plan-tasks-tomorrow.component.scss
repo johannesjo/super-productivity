@@ -37,3 +37,13 @@
     justify-content: center;
   }
 }
+
+:host planner-day {
+  max-width: 100%;
+  width: auto;
+  text-align: left;
+}
+
+:host ::ng-deep add-task-inline {
+  display: none !important;
+}
