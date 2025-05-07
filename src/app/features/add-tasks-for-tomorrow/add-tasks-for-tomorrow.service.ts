@@ -63,35 +63,23 @@ export class AddTasksForTomorrowService {
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
   async addAllDueTomorrow(): Promise<'ADDED' | void> {
-    const [dueWithTime, dueWithDay, repeatCfgs] = await combineLatest([
-      this._dueWithTimeForTomorrow$,
-      this._dueForDayForTomorrow$,
-      this._repeatableForTomorrow$,
-    ])
-      .pipe(first())
-      .toPromise();
+    const dueRepeatCfgs = await this._repeatableForTomorrow$.pipe(first()).toPromise();
 
     // eslint-disable-next-line no-mixed-operators
     const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-    return await this._addAllDue(tomorrow, dueWithTime, dueWithDay, repeatCfgs);
-  }
 
-  movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
-    this._store.dispatch(
-      planTasksForToday({ taskIds: plannedTasks.map((t) => t.id).reverse() }),
-    );
-  }
-
-  async _addAllDue(
-    dt: number,
-    dueWithTime: TaskWithDueTime[],
-    dueWithDay: TaskWithDueDay[],
-    dueRepeatCfgs: TaskRepeatCfg[],
-  ): Promise<'ADDED' | void> {
     const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
-      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, dt);
+      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, tomorrow);
     });
     await Promise.all(promises);
+
+    // NOTE we only get the tasks due after we created the repeatable tasks (which then should be also due tomorrow)
+    const [dueWithTime, dueWithDay] = await combineLatest([
+      this._dueWithTimeForTomorrow$,
+      this._dueForDayForTomorrow$,
+    ])
+      .pipe(first())
+      .toPromise();
 
     const allDueSorted = [...dueWithTime, ...dueWithDay].sort((a, b) => {
       // Handle cases where properties might be undefined
@@ -129,8 +117,12 @@ export class AddTasksForTomorrowService {
 
     this.movePlannedTasksToToday(allDueSorted);
 
-    if (allDueSorted.length || dueRepeatCfgs.length) {
+    if (allDueSorted.length) {
       return 'ADDED';
     }
+  }
+
+  movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
+    this._store.dispatch(planTasksForToday({ taskIds: plannedTasks.map((t) => t.id) }));
   }
 }
