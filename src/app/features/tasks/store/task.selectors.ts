@@ -57,6 +57,8 @@ export const mapSubTasksToTask = (
 
 export const flattenTasks = (tasksIN: TaskWithSubTasks[]): TaskWithSubTasks[] => {
   let flatTasks: TaskWithSubTasks[] = [];
+  console.log(tasksIN);
+
   tasksIN.forEach((task) => {
     flatTasks.push(task);
     if (task.subTasks) {

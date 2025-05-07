@@ -547,9 +547,12 @@ export const tagReducer = createReducer<TagState>(
       t.id,
       ...t.subTasks.map((st) => st.id),
     ]);
-    const tagIds = unique(
-      tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
-    );
+    const tagIds = unique([
+      // always cleanup inbox and today tag
+      TODAY_TAG.id,
+      INBOX_TAG.id,
+      ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
+    ]);
     const updates: Update<Tag>[] = tagIds.map((pid: string) => ({
       id: pid,
       changes: {
