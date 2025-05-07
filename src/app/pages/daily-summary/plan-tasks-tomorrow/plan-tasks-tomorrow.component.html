@@ -34,10 +34,10 @@
         <button
           mat-stroked-button
           color="primary"
-          (click)="planAllTodayTomorrow(leftOverTodayIds)"
+          (click)="planAllTodayTomorrow()"
         >
           <mat-icon>wb_sunny</mat-icon>
-          Add ({{ leftOverTodayIds?.length }}) tasks from today
+          {{ T.PDS.ADD_TASKS_FROM_TODAY | translate }} ({{ leftOverTodayIds?.length }})
         </button>
       </div>
     }

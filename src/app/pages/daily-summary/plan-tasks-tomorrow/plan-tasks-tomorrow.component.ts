@@ -16,6 +16,7 @@ import { PlannerActions } from '../../../features/planner/store/planner.actions'
 import { first } from 'rxjs/operators';
 import { selectTasksWithSubTasksByIds } from '../../../features/tasks/store/task.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
@@ -23,7 +24,14 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
-  imports: [AsyncPipe, PlannerDayComponent, AddTaskBarComponent, MatButton, MatIcon],
+  imports: [
+    AsyncPipe,
+    PlannerDayComponent,
+    AddTaskBarComponent,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class PlanTasksTomorrowComponent {
   workContextService = inject(WorkContextService);
@@ -35,9 +43,10 @@ export class PlanTasksTomorrowComponent {
 
   T: typeof T = T;
 
-  async planAllTodayTomorrow(ids: string[]): Promise<void> {
+  async planAllTodayTomorrow(): Promise<void> {
     const todayStr = getWorklogStr();
     const tomorrow = await this.plannerService.tomorrow$.pipe(first()).toPromise();
+    const ids = await this.leftOverTodayIds$.pipe(first()).toPromise();
     const tasks = await this._store
       .select(selectTasksWithSubTasksByIds, { ids })
       .pipe(first())

@@ -1657,6 +1657,7 @@
   },
 
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Add tasks from today",
     "BACK": "Wait I forgot something!",
     "BREAK_LABEL": "Breaks (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
