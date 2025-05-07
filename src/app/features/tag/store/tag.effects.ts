@@ -103,6 +103,7 @@ export class TagEffects {
           // TASK Actions
           deleteTasks,
           updateTaskTags,
+          moveToArchive_,
 
           // PLANNER
           PlannerActions.transferTask,
@@ -119,7 +120,7 @@ export class TagEffects {
   updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addTask, convertToMainTask, deleteTask, restoreTask, moveToArchive_),
+        ofType(addTask, convertToMainTask, deleteTask, restoreTask),
         switchMap((a) => {
           let isChange = false;
           switch (a.type) {
@@ -128,9 +129,6 @@ export class TagEffects {
               break;
             case deleteTask.type:
               isChange = !!a.task.tagIds.length;
-              break;
-            case moveToArchive_.type:
-              isChange = !!a.tasks.find((task) => task.tagIds.length);
               break;
             case restoreTask.type:
               isChange = !!a.task.tagIds.length;

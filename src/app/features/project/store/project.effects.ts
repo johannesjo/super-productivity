@@ -90,6 +90,8 @@ export class ProjectEffects {
           moveProjectTaskToBottomInBacklogList.type,
           moveProjectTaskToBacklogListAuto.type,
           moveProjectTaskToRegularListAuto.type,
+
+          moveToArchive_.type,
         ),
         switchMap((a) => {
           return this.saveToLs$(true);
@@ -125,14 +127,7 @@ export class ProjectEffects {
   updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(
-          addTask,
-          deleteTask,
-          moveToOtherProject,
-          restoreTask,
-          moveToArchive_,
-          convertToMainTask,
-        ),
+        ofType(addTask, deleteTask, moveToOtherProject, restoreTask, convertToMainTask),
         switchMap((a) => {
           let isChange = false;
           switch (a.type) {
@@ -144,9 +139,6 @@ export class ProjectEffects {
               break;
             case moveToOtherProject.type:
               isChange = !!a.task.projectId;
-              break;
-            case moveToArchive_.type:
-              isChange = !!a.tasks.find((task) => !!task.projectId);
               break;
             case restoreTask.type:
               isChange = !!a.task.projectId;
