@@ -5,7 +5,7 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 import { from } from 'rxjs';
 import { removeTasksFromTodayTag } from '../../tag/store/tag.actions';
 import { Store } from '@ngrx/store';
-import { selectOverdueTasks } from './task.selectors';
+import { selectOverdueTasksOnToday } from './task.selectors';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { sortRepeatableTaskCfgs } from '../../task-repeat-cfg/sort-repeatable-task-cfg';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
@@ -27,7 +27,8 @@ export class TaskDueEffects {
     return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
-      switchMap(() => this._store$.select(selectOverdueTasks)),
+      switchMap(() => this._store$.select(selectOverdueTasksOnToday)),
+      filter((overdue) => !!overdue.length),
       map((overdue) => removeTasksFromTodayTag({ taskIds: overdue.map((t) => t.id) })),
     );
   });

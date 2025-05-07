@@ -14,7 +14,10 @@ import { IssueProvider } from '../../issue/issue.model';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { selectTagFeatureState } from '../../tag/store/tag.reducer';
+import {
+  selectTagFeatureState,
+  selectTodayTagTaskIds,
+} from '../../tag/store/tag.reducer';
 import { isToday } from '../../../util/is-today.util';
 
 const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
@@ -123,6 +126,14 @@ export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Ta
         (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
     );
 });
+
+export const selectOverdueTasksOnToday = createSelector(
+  selectOverdueTasks,
+  selectTodayTagTaskIds,
+  (overdue, todayTaskIds): Task[] => {
+    return overdue.filter((t) => todayTaskIds.includes(t.id));
+  },
+);
 
 export const selectOverdueTasksWithSubTasks = createSelector(
   selectOverdueTasks,
