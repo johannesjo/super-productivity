@@ -35,7 +35,7 @@ export const plannerReducer = createReducer(
   on(planTasksForToday, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
-      const filtered = daysCopy[day].filter((id) => action.taskIds.includes(id));
+      const filtered = daysCopy[day].filter((id) => !action.taskIds.includes(id));
       if (filtered.length !== daysCopy[day].length) {
         daysCopy[day] = filtered;
       }
