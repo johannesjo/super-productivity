@@ -7,7 +7,7 @@ import { selectPlannerState } from './planner.selectors';
 import { PlannerState } from './planner.reducer';
 import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from 'src/app/t.const';
 import { PlannerService } from '../planner.service';
@@ -39,7 +39,7 @@ export class PlannerEffects {
           PlannerActions.moveBeforeTask,
           updateTaskTags,
           unScheduleTask,
-          planTaskForToday,
+          planTasksForToday,
         ),
         withLatestFrom(this._store.pipe(select(selectPlannerState))),
         tap(([, plannerState]) => this._saveToLs(plannerState)),

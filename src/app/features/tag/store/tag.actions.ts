@@ -24,9 +24,9 @@ export const updateTagOrder = createAction(
   props<{ ids: string[] }>(),
 );
 
-export const planTaskForToday = createAction(
-  '[Tag] Plan task for Today',
-  props<{ taskId: string }>(),
+export const planTasksForToday = createAction(
+  '[Tag] Plan tasks for Today',
+  props<{ taskIds: string[] }>(),
 );
 
 export const removeTasksFromTodayTag = createAction(

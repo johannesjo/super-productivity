@@ -11,7 +11,7 @@ import {
   unScheduleTask,
   updateTask,
 } from './task.actions';
-import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
+import { concatMap, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
@@ -22,7 +22,7 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -232,16 +232,19 @@ export class TaskReminderEffects {
   );
   removeTaskReminderTrigger1$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(planTaskForToday),
-      concatMap(({ taskId }) => this._taskService.getByIdOnce$(taskId)),
-      filter(({ reminderId }) => !!reminderId),
-      map(({ id, reminderId }) => {
-        return removeReminderFromTask({
-          id,
-          reminderId: reminderId as string,
-          isSkipToast: true,
-        });
-      }),
+      ofType(planTasksForToday),
+      concatMap(({ taskIds }) => this._taskService.getByIdsLive$(taskIds).pipe(first())),
+      mergeMap((tasks) =>
+        tasks
+          .filter((task) => !!task.reminderId)
+          .map((task) =>
+            removeReminderFromTask({
+              id: task.id,
+              reminderId: task.reminderId as string,
+              isSkipToast: true,
+            }),
+          ),
+      ),
     ),
   );
   removeTaskReminderTrigger2$ = createEffect(() =>

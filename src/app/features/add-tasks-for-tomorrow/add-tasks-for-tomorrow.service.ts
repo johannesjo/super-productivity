@@ -14,7 +14,7 @@ import { first, map, switchMap } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { planTaskForToday } from '../tag/store/tag.actions';
+import { planTasksForToday } from '../tag/store/tag.actions';
 
 const filterDoneAndToday = (task: TaskCopy): boolean =>
   !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
@@ -77,9 +77,9 @@ export class AddTasksForTomorrowService {
   }
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
-    plannedTasks.reverse().forEach((task) => {
-      this._store.dispatch(planTaskForToday({ taskId: task.id }));
-    });
+    this._store.dispatch(
+      planTasksForToday({ taskIds: plannedTasks.map((t) => t.id).reverse() }),
+    );
   }
 
   async _addAllDue(

@@ -95,7 +95,7 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { INBOX_TAG, TODAY_TAG } from '../tag/tag.const';
-import { planTaskForToday } from '../tag/store/tag.actions';
+import { planTasksForToday } from '../tag/store/tag.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
@@ -688,7 +688,7 @@ export class TaskService {
   moveToCurrentWorkContext(task: TaskWithSubTasks | Task): void {
     if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
       if (this._workContextService.activeWorkContextId === TODAY_TAG.id) {
-        this._store.dispatch(planTaskForToday({ taskId: task.id }));
+        this._store.dispatch(planTasksForToday({ taskIds: [task.id] }));
       } else {
         this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
       }

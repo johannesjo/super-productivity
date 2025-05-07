@@ -22,7 +22,7 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -61,8 +61,8 @@ export class TaskRelatedModelEffects {
             (!task.parentId || !todayTaskIds.includes(task.parentId)),
         ),
         map(([{ task }]) =>
-          planTaskForToday({
-            taskId: task.id,
+          planTasksForToday({
+            taskIds: [task.id],
           }),
         ),
       ),
@@ -77,8 +77,8 @@ export class TaskRelatedModelEffects {
         switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => !task.parentId),
         map((task) =>
-          planTaskForToday({
-            taskId: task.id,
+          planTasksForToday({
+            taskIds: [task.id],
           }),
         ),
       ),

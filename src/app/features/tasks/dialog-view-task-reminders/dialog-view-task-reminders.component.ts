@@ -28,7 +28,7 @@ import { Store } from '@ngrx/store';
 import { unScheduleTask } from '../store/task.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 
 const M = 1000 * 60;
@@ -128,7 +128,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   async addToToday(task: TaskWithReminderData): Promise<void> {
-    this._store.dispatch(planTaskForToday({ taskId: task.id }));
+    this._store.dispatch(planTasksForToday({ taskIds: [task.id] }));
   }
 
   dismiss(task: TaskWithReminderData): void {
@@ -227,9 +227,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       .toPromise();
 
     const tasksToAdd = selectedTasks.filter((t) => !tasksIdsOnToday.includes(t.id));
-    tasksToAdd.forEach((task) => {
-      this._store.dispatch(planTaskForToday({ taskId: task.id }));
-    });
+    this._store.dispatch(planTasksForToday({ taskIds: tasksToAdd.map((t) => t.id) }));
 
     this._close();
   }

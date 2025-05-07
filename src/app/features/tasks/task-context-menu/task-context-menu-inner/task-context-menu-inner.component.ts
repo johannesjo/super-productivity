@@ -68,7 +68,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { unScheduleTask } from '../../store/task.actions';
-import { planTaskForToday } from '../../../tag/store/tag.actions';
+import { planTasksForToday } from '../../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
 
@@ -325,7 +325,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   addToMyDay(): void {
-    this._store.dispatch(planTaskForToday({ taskId: this.task.id }));
+    this._store.dispatch(planTasksForToday({ taskIds: [this.task.id] }));
   }
 
   unschedule(): void {

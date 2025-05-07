@@ -70,7 +70,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -679,16 +679,15 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(planTaskForToday, (state, { taskId }) => {
-    return taskAdapter.updateOne(
-      {
-        id: taskId,
-        changes: {
-          dueDay: getWorklogStr(),
-        },
+  on(planTasksForToday, (state, { taskIds }) => {
+    const today = getWorklogStr();
+    const updates: Update<Task>[] = taskIds.map((taskId) => ({
+      id: taskId,
+      changes: {
+        dueDay: today,
       },
-      state,
-    );
+    }));
+    return taskAdapter.updateMany(updates, state);
   }),
 
   // REMINDER STUFF

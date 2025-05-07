@@ -45,7 +45,7 @@ import { deleteProject } from '../../project/store/project.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TIME_TRACKING_TO_DB_INTERVAL } from '../../../app.constants';
-import { planTaskForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday } from '../../tag/store/tag.actions';
 
 @Injectable()
 export class TaskDbEffects {
@@ -115,7 +115,7 @@ export class TaskDbEffects {
           PlannerActions.transferTask,
           PlannerActions.moveBeforeTask,
           PlannerActions.planTaskForDay,
-          planTaskForToday,
+          planTasksForToday,
 
           // PROJECT
           deleteProject,
