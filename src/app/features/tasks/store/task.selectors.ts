@@ -153,6 +153,23 @@ export const selectOverdueTasksWithSubTasks = createSelector(
       )
       .map((task) => {
         return mapSubTasksToTask(task as Task, taskState) as TaskWithSubTasks;
+      })
+      .sort((a, b) => {
+        // sort all chronologically
+        if (a.dueWithTime && b.dueWithTime) {
+          return a.dueWithTime - b.dueWithTime;
+        } else if (a.dueWithTime && b.dueDay) {
+          const bStartOfDueDay = new Date(b.dueDay);
+          bStartOfDueDay.setHours(0, 0, 0, 0);
+          return a.dueWithTime - bStartOfDueDay.getTime();
+        } else if (a.dueDay && b.dueWithTime) {
+          const aStartOfDueDay = new Date(a.dueDay);
+          aStartOfDueDay.setHours(0, 0, 0, 0);
+          return aStartOfDueDay.getTime() - b.dueWithTime;
+        } else if (a.dueDay && b.dueDay) {
+          return a.dueDay.localeCompare(b.dueDay);
+        }
+        return 0;
       });
   },
 );
