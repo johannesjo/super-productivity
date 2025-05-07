@@ -32,6 +32,7 @@ import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.
 import {
   flattenTasks,
   selectAllTasks,
+  selectAllTasksWithSubTasks,
   selectTasksWithSubTasksByIds,
 } from '../tasks/store/task.selectors';
 import { Actions, ofType } from '@ngrx/effects';
@@ -265,13 +266,6 @@ export class WorkContextService {
     ),
   );
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
-    map((tasks) => tasks.filter((task) => task && !task.isDone)),
-  );
-
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
-    map((tasks) => tasks.filter((task) => task && task.isDone)),
-  );
   doneTaskIds$: Observable<string[]> = this._store$.select(
     selectDoneTaskIdsForActiveContext,
   );
@@ -347,6 +341,17 @@ export class WorkContextService {
   isToday$: Observable<boolean> = this.activeWorkContextId$.pipe(
     map((id) => id === TODAY_TAG.id),
     shareReplay(1),
+  );
+
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
+    map((tasks) => tasks.filter((task) => task && !task.isDone)),
+  );
+
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.isToday$.pipe(
+    switchMap((isToday) =>
+      isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.todaysTasks$,
+    ),
+    map((tasks) => tasks.filter((task) => task && task.isDone)),
   );
 
   constructor() {
