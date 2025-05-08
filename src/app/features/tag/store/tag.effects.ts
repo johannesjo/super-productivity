@@ -10,34 +10,18 @@ import {
   take,
   tap,
 } from 'rxjs/operators';
-import { select, Store } from '@ngrx/store';
-import { selectTagFeatureState, selectTodayTagTaskIds } from './tag.reducer';
+import { Store } from '@ngrx/store';
+import { selectTodayTagTaskIds } from './tag.reducer';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
-  addTag,
   deleteTag,
   deleteTags,
-  moveTaskInTodayTagList,
   planTasksForToday,
-  removeTasksFromTodayTag,
-  updateAdvancedConfigForTag,
   updateTag,
-  updateTagOrder,
   upsertTag,
 } from './tag.actions';
-import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  deleteTasks,
-  moveToArchive_,
-  moveToOtherProject,
-  restoreTask,
-  scheduleTaskWithTime,
-  unScheduleTask,
-  updateTaskTags,
-} from '../../tasks/store/task.actions';
+import { moveToOtherProject, updateTaskTags } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, of } from 'rxjs';
@@ -46,18 +30,9 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { INBOX_TAG, TODAY_TAG } from '../tag.const';
-import {
-  moveTaskDownInTodayList,
-  moveTaskInTodayList,
-  moveTaskToBottomInTodayList,
-  moveTaskToTopInTodayList,
-  moveTaskUpInTodayList,
-} from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { deleteProject } from '../../project/store/project.actions';
 import { selectAllTasksDueToday, selectTaskById } from '../../tasks/store/task.selectors';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
@@ -69,7 +44,6 @@ import { PlannerService } from '../../planner/planner.service';
 export class TagEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject<Store<any>>(Store);
-  private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
   private _tagService = inject(TagService);
   private _workContextService = inject(WorkContextService);
@@ -80,94 +54,6 @@ export class TagEffects {
   private _timeTrackingService = inject(TimeTrackingService);
   private _translateService = inject(TranslateService);
   private _plannerService = inject(PlannerService);
-
-  saveToLs$: Observable<unknown> = this._store$.pipe(
-    select(selectTagFeatureState),
-    take(1),
-    switchMap((tagState) =>
-      this._pfapiService.m.tag.save(tagState, { isUpdateRevAndLastUpdate: true }),
-    ),
-  );
-  updateTagsStorage$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(
-          addTag,
-          updateTag,
-          upsertTag,
-          deleteTag,
-          deleteTags,
-
-          updateTagOrder,
-          moveTaskInTodayList,
-
-          updateAdvancedConfigForTag,
-          moveTaskInTodayTagList,
-
-          // ---
-          moveTaskUpInTodayList,
-          moveTaskDownInTodayList,
-          moveTaskToTopInTodayList,
-          moveTaskToBottomInTodayList,
-          planTasksForToday,
-          removeTasksFromTodayTag,
-
-          // TASK Actions
-          deleteTask,
-          deleteTasks,
-          updateTaskTags,
-          scheduleTaskWithTime,
-          unScheduleTask,
-          moveToArchive_,
-          addTask,
-          convertToMainTask,
-          restoreTask,
-
-          // PLANNER
-          PlannerActions.transferTask,
-          PlannerActions.moveBeforeTask,
-          PlannerActions.planTaskForDay,
-
-          // PROJECT
-          deleteProject,
-        ),
-        switchMap(() => this.saveToLs$),
-      ),
-    { dispatch: false },
-  );
-  updateTagsStorageConditional$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(moveTaskInTodayList, moveTaskUpInTodayList, moveTaskDownInTodayList),
-        filter((p) => p.workContextType === WorkContextType.TAG),
-        switchMap(() => this.saveToLs$),
-      ),
-    { dispatch: false },
-  );
-
-  // updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
-  //   () =>
-  //     this._actions$.pipe(
-  //       ofType(addTask, convertToMainTask, restoreTask),
-  //       switchMap((a) => {
-  //         let isChange = false;
-  //         switch (a.type) {
-  //           case addTask.type:
-  //             isChange = !!a.task.tagIds.length;
-  //             break;
-  //           case restoreTask.type:
-  //             isChange = !!a.task.tagIds.length;
-  //             break;
-  //           case convertToMainTask.type:
-  //             isChange = !!a.parentTagIds.length;
-  //             break;
-  //         }
-  //         return isChange ? of(a) : EMPTY;
-  //       }),
-  //       switchMap(() => this.saveToLs$),
-  //     ),
-  //   { dispatch: false },
-  // );
 
   snackUpdateBaseSettings$: any = createEffect(
     () =>

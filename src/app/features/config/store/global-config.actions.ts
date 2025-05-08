@@ -6,7 +6,6 @@ export const updateGlobalConfigSection = createAction(
   props<{
     sectionKey: GlobalConfigSectionKey;
     sectionCfg: Partial<GlobalSectionConfig>;
-    isSkipLastActiveUpdate?: boolean;
     isSkipSnack?: boolean;
   }>(),
 );

@@ -1,8 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { CONFIG_FEATURE_NAME } from './global-config.reducer';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
@@ -14,30 +13,14 @@ import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
 import { hideSideNav, toggleSideNav } from '../../../core-ui/layout/store/layout.actions';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class GlobalConfigEffects {
   private _actions$ = inject(Actions);
-  private _pfapiService = inject(PfapiService);
   private _languageService = inject(LanguageService);
   private _dateService = inject(DateService);
   private _snackService = inject(SnackService);
   private _store = inject<Store<any>>(Store);
-
-  updateConfig$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(updateGlobalConfigSection),
-        withLatestFrom(this._store),
-        tap(([action, store]) =>
-          this._saveToLs([action, store], {
-            isSkipSyncModelChangeUpdate: !!action.isSkipLastActiveUpdate,
-          }),
-        ),
-      ),
-    { dispatch: false },
-  );
 
   snackUpdate$: any = createEffect(
     () =>
@@ -166,14 +149,4 @@ export class GlobalConfigEffects {
       ),
     { dispatch: false },
   );
-
-  private _saveToLs(
-    [action, completeState]: [any, any],
-    { isSkipSyncModelChangeUpdate } = { isSkipSyncModelChangeUpdate: false },
-  ): void {
-    const globalConfig = completeState[CONFIG_FEATURE_NAME];
-    this._pfapiService.m.globalConfig.save(globalConfig, {
-      isUpdateRevAndLastUpdate: !isSkipSyncModelChangeUpdate,
-    });
-  }
 }

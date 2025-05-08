@@ -11,67 +11,32 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { Action, select, Store } from '@ngrx/store';
 import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
-  deleteTaskRepeatCfgs,
   updateTaskRepeatCfg,
-  updateTaskRepeatCfgs,
-  upsertTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
-import { selectTaskRepeatCfgFeatureState } from './task-repeat-cfg.reducer';
 import { Task, TaskCopy } from '../../tasks/task.model';
 import { updateTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfgCopy, TaskRepeatCfgState } from '../task-repeat-cfg.model';
+import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { forkJoin, of } from 'rxjs';
-import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
-import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isToday } from '../../../util/is-today.util';
-import { DateService } from 'src/app/core/date/date.service';
-import { deleteProject } from '../../project/store/project.actions';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
   private _actions$ = inject(Actions);
   private _taskService = inject(TaskService);
-  private _store$ = inject<Store<any>>(Store);
-  private _pfapiService = inject(PfapiService);
-  private _dateService = inject(DateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
-  private _syncTriggerService = inject(SyncTriggerService);
-  private _syncWrapperService = inject(SyncWrapperService);
   private _matDialog = inject(MatDialog);
   private _taskArchiveService = inject(TaskArchiveService);
-
-  updateTaskRepeatCfgs$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(
-          addTaskRepeatCfgToTask,
-          updateTaskRepeatCfg,
-          updateTaskRepeatCfgs,
-          upsertTaskRepeatCfg,
-          deleteTaskRepeatCfg,
-          deleteTaskRepeatCfgs,
-
-          // PROJECT
-          deleteProject,
-        ),
-        withLatestFrom(this._store$.pipe(select(selectTaskRepeatCfgFeatureState))),
-        tap(this._saveToLs.bind(this)),
-      ),
-    { dispatch: false },
-  );
 
   removeConfigIdFromTaskStateTasks$: any = createEffect(() =>
     this._actions$.pipe(
@@ -269,11 +234,5 @@ export class TaskRepeatCfgEffects {
         timeEstimate: changes.defaultEstimate,
       });
     }
-  }
-
-  private _saveToLs([action, taskRepeatCfgState]: [Action, TaskRepeatCfgState]): void {
-    this._pfapiService.m.taskRepeatCfg.save(taskRepeatCfgState, {
-      isUpdateRevAndLastUpdate: true,
-    });
   }
 }

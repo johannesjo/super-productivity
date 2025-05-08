@@ -2,18 +2,21 @@
 // import { provideMockActions } from '@ngrx/effects/testing';
 // import { Observable } from 'rxjs';
 //
-// import { IssueProviderDbEffects } from './issue-provider-db.effects';
+// import { SaveToDbEffects } from './save-to-db.effects';
 //
-// describe('IssueProviderDbEffects', () => {
+// describe('SaveToDbEffects', () => {
 //   let actions$: Observable<any>;
-//   let effects: IssueProviderDbEffects;
+//   let effects: SaveToDbEffects;
 //
 //   beforeEach(() => {
 //     TestBed.configureTestingModule({
-//       providers: [IssueProviderDbEffects, provideMockActions(() => actions$)],
+//       providers: [
+//         SaveToDbEffects,
+//         provideMockActions(() => actions$)
+//       ]
 //     });
 //
-//     effects = TestBed.inject(IssueProviderDbEffects);
+//     effects = TestBed.inject(SaveToDbEffects);
 //   });
 //
 //   it('should be created', () => {

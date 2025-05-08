@@ -1,170 +1,29 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { select, Store } from '@ngrx/store';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 import {
   addProject,
-  addProjects,
-  archiveProject,
   deleteProject,
   moveAllProjectBacklogTasksToRegularList,
-  moveProjectTaskDownInBacklogList,
-  moveProjectTaskInBacklogList,
-  moveProjectTaskToBacklogList,
-  moveProjectTaskToBacklogListAuto,
-  moveProjectTaskToBottomInBacklogList,
-  moveProjectTaskToRegularList,
-  moveProjectTaskToRegularListAuto,
-  moveProjectTaskToTopInBacklogList,
-  moveProjectTaskUpInBacklogList,
-  unarchiveProject,
   updateProject,
-  updateProjectAdvancedCfg,
-  updateProjectOrder,
-  upsertProject,
 } from './project.actions';
 import { SnackService } from '../../../core/snack/snack.service';
-import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  moveToArchive_,
-  moveToOtherProject,
-  restoreTask,
-} from '../../tasks/store/task.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
-import {
-  moveTaskDownInTodayList,
-  moveTaskInTodayList,
-  moveTaskUpInTodayList,
-} from '../../work-context/store/work-context-meta.actions';
-import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../project.model';
-import { EMPTY, Observable, of } from 'rxjs';
-import { selectProjectFeatureState } from './project.selectors';
-import {
-  addNote,
-  deleteNote,
-  moveNoteToOtherProject,
-  updateNoteOrder,
-} from '../../note/store/note.actions';
+import { Observable } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Injectable()
 export class ProjectEffects {
   private _actions$ = inject(Actions);
-  private _store$ = inject<Store<any>>(Store);
   private _snackService = inject(SnackService);
   private _taskArchiveService = inject(TaskArchiveService);
-  private _pfapiService = inject(PfapiService);
   private _globalConfigService = inject(GlobalConfigService);
   private _reminderService = inject(ReminderService);
   private _timeTrackingService = inject(TimeTrackingService);
-
-  syncProjectToLs$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(
-          addProject.type,
-          addProjects.type,
-          upsertProject.type,
-          deleteProject.type,
-          updateProject.type,
-          updateProjectAdvancedCfg.type,
-          updateProjectOrder.type,
-          archiveProject.type,
-          unarchiveProject.type,
-          moveToOtherProject.type,
-          moveNoteToOtherProject.type,
-
-          moveProjectTaskInBacklogList.type,
-          moveProjectTaskToBacklogList.type,
-          moveProjectTaskToRegularList.type,
-          moveProjectTaskUpInBacklogList.type,
-          moveProjectTaskDownInBacklogList.type,
-          moveProjectTaskToTopInBacklogList.type,
-          moveProjectTaskToBottomInBacklogList.type,
-          moveProjectTaskToBacklogListAuto.type,
-          moveProjectTaskToRegularListAuto.type,
-
-          moveToArchive_.type,
-        ),
-        switchMap((a) => {
-          return this.saveToLs$(true);
-        }),
-      ),
-    { dispatch: false },
-  );
-
-  updateProjectStorageConditionalNote$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(updateNoteOrder, addNote, deleteNote),
-        switchMap((a) => {
-          let isChange = false;
-          switch (a.type) {
-            case updateNoteOrder.type:
-              isChange = a.activeContextType === WorkContextType.PROJECT;
-              break;
-            case addNote.type:
-              isChange = !!a.note.projectId;
-              break;
-            case deleteNote.type:
-              isChange = !!a.projectId;
-              break;
-          }
-          return isChange ? of(a) : EMPTY;
-        }),
-        switchMap(() => this.saveToLs$(true)),
-      ),
-    { dispatch: false },
-  );
-
-  updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(addTask, deleteTask, moveToOtherProject, restoreTask, convertToMainTask),
-        switchMap((a) => {
-          let isChange = false;
-          switch (a.type) {
-            case addTask.type:
-              isChange = !!a.task.projectId;
-              break;
-            case deleteTask.type:
-              isChange = !!a.task.projectId;
-              break;
-            case moveToOtherProject.type:
-              isChange = !!a.task.projectId;
-              break;
-            case restoreTask.type:
-              isChange = !!a.task.projectId;
-              break;
-            case convertToMainTask.type:
-              isChange = !!a.task.projectId;
-              break;
-          }
-          return isChange ? of(a) : EMPTY;
-        }),
-        switchMap(() => this.saveToLs$(true)),
-      ),
-    { dispatch: false },
-  );
-
-  updateProjectStorageConditional$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(moveTaskInTodayList, moveTaskUpInTodayList, moveTaskDownInTodayList),
-        filter((p) => p.workContextType === WorkContextType.PROJECT),
-        switchMap(() => this.saveToLs$(true)),
-      ),
-    { dispatch: false },
-  );
-
-  // TODO a solution for orphaned tasks might be needed
 
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
@@ -278,17 +137,4 @@ export class ProjectEffects {
       ),
     { dispatch: false },
   );
-
-  private saveToLs$(isUpdateRevAndLastUpdate: boolean): Observable<unknown> {
-    return this._store$.pipe(
-      // tap(() => console.log('SAVE')),
-      select(selectProjectFeatureState),
-      take(1),
-      switchMap((projectState) =>
-        this._pfapiService.m.project.save(projectState, {
-          isUpdateRevAndLastUpdate,
-        }),
-      ),
-    );
-  }
 }

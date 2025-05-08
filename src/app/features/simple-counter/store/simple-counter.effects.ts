@@ -3,23 +3,12 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import confetti from 'canvas-confetti';
 import {
-  addSimpleCounter,
-  deleteSimpleCounter,
-  deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
-  setSimpleCounterCounterOff,
-  setSimpleCounterCounterOn,
-  setSimpleCounterCounterToday,
   updateAllSimpleCounters,
-  updateSimpleCounter,
-  upsertSimpleCounter,
 } from './simple-counter.actions';
-import { map, mergeMap, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import {
-  selectSimpleCounterById,
-  selectSimpleCounterFeatureState,
-} from './simple-counter.reducer';
-import { SimpleCounterState, SimpleCounterType } from '../simple-counter.model';
+import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { selectSimpleCounterById } from './simple-counter.reducer';
+import { SimpleCounterType } from '../simple-counter.model';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { SimpleCounterService } from '../simple-counter.service';
 import { EMPTY, Observable } from 'rxjs';
@@ -43,30 +32,6 @@ export class SimpleCounterEffects {
   private _translateService = inject(TranslateService);
 
   successFullCountersMap: { [key: string]: boolean } = {};
-
-  updateSimpleCountersStorage$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(
-          updateAllSimpleCounters,
-          setSimpleCounterCounterToday,
-          increaseSimpleCounterCounterToday,
-          setSimpleCounterCounterOn,
-          setSimpleCounterCounterOff,
-          // toggleSimpleCounterCounter,
-
-          // currently not used
-          addSimpleCounter,
-          updateSimpleCounter,
-          upsertSimpleCounter,
-          deleteSimpleCounter,
-          deleteSimpleCounters,
-        ),
-        withLatestFrom(this._store$.pipe(select(selectSimpleCounterFeatureState))),
-        tap(([, featureState]) => this._saveToLs(featureState)),
-      ),
-    { dispatch: false },
-  );
 
   checkTimedCounters$: Observable<unknown> = createEffect(() =>
     this._simpleCounterService.enabledAndToggledSimpleCounters$.pipe(
@@ -153,12 +118,6 @@ export class SimpleCounterEffects {
       ),
     { dispatch: false },
   );
-
-  private _saveToLs(simpleCounterState: SimpleCounterState): void {
-    this._pfapiService.m.simpleCounter.save(simpleCounterState, {
-      isUpdateRevAndLastUpdate: true,
-    });
-  }
 
   private _celebrate(): void {
     confetti({
