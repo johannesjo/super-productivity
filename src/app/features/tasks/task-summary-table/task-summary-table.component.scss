@@ -127,6 +127,7 @@
 
   > span {
     text-decoration: none !important;
+    word-break: break-word;
     display: block;
     padding-left: $s * 1;
   }
