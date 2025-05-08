@@ -20,6 +20,7 @@ import {
   deleteTags,
   moveTaskInTodayTagList,
   planTasksForToday,
+  removeTasksFromTodayTag,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -99,6 +100,7 @@ export class TagEffects {
           moveTaskInTodayTagList,
 
           planTasksForToday,
+          removeTasksFromTodayTag,
 
           // TASK Actions
           deleteTask,
