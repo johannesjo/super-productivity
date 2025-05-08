@@ -16,6 +16,7 @@ import { selectImprovementFeatureState } from '../../features/metric/improvement
 import { selectObstructionFeatureState } from '../../features/metric/obstruction/store/obstruction.reducer';
 import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { selectMetricFeatureState } from '../../features/metric/store/metric.selectors';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 
 // NOTE task state is a bit special, since we have ui only actions and we throttle addTimeSpent
 // NOTE TimeTrackingState is also a bit special, since we throttle addTimeSpent
@@ -25,10 +26,12 @@ import { selectMetricFeatureState } from '../../features/metric/store/metric.sel
 export class SaveToDbEffects {
   private _store = inject(Store);
   private _pfapiService = inject(PfapiService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   taskRepeatCfg$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectTaskRepeatCfgFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectTaskRepeatCfgFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.taskRepeatCfg.save(state, {
@@ -41,7 +44,8 @@ export class SaveToDbEffects {
 
   tag$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectTagFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectTagFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.tag.save(state, { isUpdateRevAndLastUpdate: true }),
@@ -52,7 +56,8 @@ export class SaveToDbEffects {
 
   project$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectProjectFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectProjectFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.project.save(state, {
@@ -65,7 +70,8 @@ export class SaveToDbEffects {
 
   globalCfg$ = createEffect(
     () =>
-      this._store.select(selectConfigFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectConfigFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.globalConfig.save(state, {
@@ -78,7 +84,8 @@ export class SaveToDbEffects {
 
   planner$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectPlannerState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectPlannerState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.planner.save(state, {
@@ -91,7 +98,8 @@ export class SaveToDbEffects {
 
   boards$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectBoardsState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectBoardsState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.boards.save(state, {
@@ -104,7 +112,8 @@ export class SaveToDbEffects {
 
   simpleCounter$: Observable<unknown> = createEffect(
     () =>
-      this._store.select(selectSimpleCounterFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectSimpleCounterFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.simpleCounter.save(state, {
@@ -117,7 +126,8 @@ export class SaveToDbEffects {
 
   issueProvider$ = createEffect(
     () =>
-      this._store.select(selectIssueProviderState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectIssueProviderState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.issueProvider.save(state, {
@@ -130,7 +140,8 @@ export class SaveToDbEffects {
 
   note$ = createEffect(
     () =>
-      this._store.select(selectNoteFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectNoteFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.note.save(state, {
@@ -143,7 +154,8 @@ export class SaveToDbEffects {
 
   metric$ = createEffect(
     () =>
-      this._store.select(selectMetricFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectMetricFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.metric.save(state, {
@@ -156,7 +168,8 @@ export class SaveToDbEffects {
 
   improvement$ = createEffect(
     () =>
-      this._store.select(selectImprovementFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectImprovementFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.improvement.save(state, {
@@ -169,7 +182,8 @@ export class SaveToDbEffects {
 
   obstruction$ = createEffect(
     () =>
-      this._store.select(selectObstructionFeatureState).pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        switchMap(() => this._store.select(selectObstructionFeatureState)),
         skip(1),
         switchMap((state) =>
           this._pfapiService.m.obstruction.save(state, {
