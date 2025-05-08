@@ -114,6 +114,8 @@
   //border: 1px solid orange;
   text-align: start;
   align-items: center;
+  // prevent overflow for looooong words
+  word-break: break-word;
 
   &.isDone ::ng-deep .value-wrapper {
     text-decoration: line-through;
@@ -124,6 +126,7 @@
   }
 
   > span {
+    border: 1px solid greenyellow;
     text-decoration: none !important;
     display: block;
     padding-left: $s * 1;

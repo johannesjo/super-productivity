@@ -245,6 +245,8 @@ $this-table-outer-padding-left-right: $s * 6;
         padding-left: $s * 2;
         position: relative;
         display: inline-block;
+        // prevent overflow for looooong words
+        word-break: break-word;
 
         &:before {
           content: '•';
