@@ -82,10 +82,10 @@ import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-t
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { planTasksForToday } from '../../tag/store/tag.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { unScheduleTask } from '../store/task.actions';
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'task',
@@ -137,6 +137,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _renderer = inject(Renderer2);
   private readonly _store = inject(Store);
   private readonly _projectService = inject(ProjectService);
+  private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   readonly workContextService = inject(WorkContextService);
 
   task = input.required<TaskWithSubTasks>();
@@ -148,6 +149,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isCurrent = computed(() => this.currentId() === this.task().id);
   selectedId = toSignal(this._taskService.selectedTaskId$);
   isSelected = computed(() => this.selectedId() === this.task().id);
+  todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
 
   todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
   isTaskOnTodayList = computed(() => this.todayList().includes(this.task().id));
@@ -168,12 +170,18 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     return (
       (t.dueWithTime && isToday(t.dueWithTime)) ||
-      (t.dueDay && t.dueDay === getWorklogStr())
+      (t.dueDay && t.dueDay === this.todayStr())
     );
   });
 
-  isShowDueToday = computed(() => {
-    return !this.isTodayListActive() || this.isOverdue() || !environment.production;
+  isShowDueDayBtn = computed(() => {
+    return (
+      this.task().dueDay &&
+      (!this.isTodayListActive() ||
+        this.isOverdue() ||
+        this.task().dueDay !== this.todayStr() ||
+        !environment.production)
+    );
   });
 
   progress = computed<number>(() => {
@@ -185,7 +193,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !this.isTodayListActive() &&
       !this.task().isDone &&
-      this.task().dueDay === getWorklogStr()
+      this.task().dueDay === this.todayStr()
     );
   });
 
@@ -193,9 +201,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const task = this.task();
     return this.isTodayListActive()
       ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
-          (task.dueDay && task.dueDay !== getWorklogStr())
+          (task.dueDay && task.dueDay !== this.todayStr())
       : !this.isShowRemoveFromToday() &&
-          task.dueDay !== getWorklogStr() &&
+          task.dueDay !== this.todayStr() &&
           (!task.dueWithTime || !isToday(task.dueWithTime));
   });
 

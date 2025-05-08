@@ -237,7 +237,7 @@
               [innerHTML]="t.dueWithTime | shortPlannedAt"
             ></div>
           </button>
-        } @else if (t.dueDay && isShowDueToday()) {
+        } @else if (isShowDueDayBtn()) {
           <button
             (click)="scheduleTask()"
             [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
