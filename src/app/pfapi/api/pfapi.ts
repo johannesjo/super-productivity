@@ -50,6 +50,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     isEncrypt: false,
   });
 
+  public readonly wasDataMigratedInitiallyPromise: Promise<void>;
+
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
   public readonly db: Database;
   public readonly metaModel: MetaModelCtrl;
@@ -106,7 +108,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       new EncryptAndCompressHandlerService(),
     );
 
-    this.migrationService.checkAndMigrateLocalDB();
+    this.wasDataMigratedInitiallyPromise = this.migrationService.checkAndMigrateLocalDB();
   }
 
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {

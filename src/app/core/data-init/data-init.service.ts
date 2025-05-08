@@ -32,6 +32,7 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(isOmitTokens: boolean = false): Promise<void> {
+    await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
     const isValid = this._pfapiService.pf.isValidateComplete(appDataComplete);
     if (isValid) {
