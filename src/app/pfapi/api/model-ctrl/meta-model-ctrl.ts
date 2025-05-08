@@ -88,6 +88,8 @@ export class MetaModelCtrl {
                 [modelId]: timestamp.toString(),
               },
             }),
+        // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
+        crossModelVersion: this.crossModelVersion,
       },
       isIgnoreDBLock,
     );
