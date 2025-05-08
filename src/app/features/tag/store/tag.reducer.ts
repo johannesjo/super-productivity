@@ -530,9 +530,6 @@ export const tagReducer = createReducer<TagState>(
     );
     const removedTasksIds: string[] = [task.id, ...(task.subTaskIds || [])];
     const updates: Update<Tag>[] = affectedTagIds.map((tagId) => {
-      console.log(tagId);
-      console.log(state.entities[tagId]);
-
       return {
         id: tagId,
         changes: {
