@@ -34,6 +34,8 @@ import {
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
+  scheduleTaskWithTime,
+  unScheduleTask,
   updateTaskTags,
 } from '../../tasks/store/task.actions';
 import { TagService } from '../tag.service';
@@ -47,6 +49,8 @@ import { INBOX_TAG, TODAY_TAG } from '../tag.const';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
@@ -95,10 +99,16 @@ export class TagEffects {
           deleteTags,
 
           updateTagOrder,
+          moveTaskInTodayList,
 
           updateAdvancedConfigForTag,
           moveTaskInTodayTagList,
 
+          // ---
+          moveTaskUpInTodayList,
+          moveTaskDownInTodayList,
+          moveTaskToTopInTodayList,
+          moveTaskToBottomInTodayList,
           planTasksForToday,
           removeTasksFromTodayTag,
 
@@ -106,7 +116,12 @@ export class TagEffects {
           deleteTask,
           deleteTasks,
           updateTaskTags,
+          scheduleTaskWithTime,
+          unScheduleTask,
           moveToArchive_,
+          addTask,
+          convertToMainTask,
+          restoreTask,
 
           // PLANNER
           PlannerActions.transferTask,
@@ -120,29 +135,6 @@ export class TagEffects {
       ),
     { dispatch: false },
   );
-  updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(addTask, convertToMainTask, restoreTask),
-        switchMap((a) => {
-          let isChange = false;
-          switch (a.type) {
-            case addTask.type:
-              isChange = !!a.task.tagIds.length;
-              break;
-            case restoreTask.type:
-              isChange = !!a.task.tagIds.length;
-              break;
-            case convertToMainTask.type:
-              isChange = !!a.parentTagIds.length;
-              break;
-          }
-          return isChange ? of(a) : EMPTY;
-        }),
-        switchMap(() => this.saveToLs$),
-      ),
-    { dispatch: false },
-  );
   updateTagsStorageConditional$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
@@ -152,6 +144,30 @@ export class TagEffects {
       ),
     { dispatch: false },
   );
+
+  // updateProjectStorageConditionalTask$: Observable<unknown> = createEffect(
+  //   () =>
+  //     this._actions$.pipe(
+  //       ofType(addTask, convertToMainTask, restoreTask),
+  //       switchMap((a) => {
+  //         let isChange = false;
+  //         switch (a.type) {
+  //           case addTask.type:
+  //             isChange = !!a.task.tagIds.length;
+  //             break;
+  //           case restoreTask.type:
+  //             isChange = !!a.task.tagIds.length;
+  //             break;
+  //           case convertToMainTask.type:
+  //             isChange = !!a.parentTagIds.length;
+  //             break;
+  //         }
+  //         return isChange ? of(a) : EMPTY;
+  //       }),
+  //       switchMap(() => this.saveToLs$),
+  //     ),
+  //   { dispatch: false },
+  // );
 
   snackUpdateBaseSettings$: any = createEffect(
     () =>
