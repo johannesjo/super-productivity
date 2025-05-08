@@ -167,6 +167,9 @@ export class ModelValidationError extends AdditionalLogErrorBase {
 export class ModelMigrationError extends AdditionalLogErrorBase {
   override name = ModelMigrationError.name;
 }
+export class CanNotMigrateDownError extends AdditionalLogErrorBase {
+  override name = CanNotMigrateDownError.name;
+}
 
 export class ModelRepairError extends AdditionalLogErrorBase {
   override name = ModelRepairError.name;

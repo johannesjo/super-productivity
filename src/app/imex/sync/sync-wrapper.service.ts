@@ -8,6 +8,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
+  CanNotMigrateDownError,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
@@ -164,6 +165,9 @@ export class SyncWrapperService {
         error instanceof DecryptError
       ) {
         this._handleDecryptionError();
+        return 'HANDLED_ERROR';
+      } else if (error instanceof CanNotMigrateDownError) {
+        alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);

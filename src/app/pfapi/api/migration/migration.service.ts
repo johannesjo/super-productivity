@@ -1,6 +1,10 @@
 import { AllSyncModels, ModelCfgs } from '../pfapi.model';
 import { pfLog } from '../util/log';
-import { ImpossibleError, ModelMigrationError } from '../errors/errors';
+import {
+  CanNotMigrateDownError,
+  ImpossibleError,
+  ModelMigrationError,
+} from '../errors/errors';
 import { Pfapi } from '../pfapi';
 import { PFAPI_MIGRATE_FORCE_VERSION_LS_KEY } from '../pfapi.const';
 
@@ -76,7 +80,7 @@ export class MigrationService<MD extends ModelCfgs> {
       // if (cfg?.crossModelBackwardMigrations) {
       //   // ...
       // }
-      throw new ImpossibleError(
+      throw new CanNotMigrateDownError(
         'Saved model version is higher than current one and no backwards migrations available',
       );
     }

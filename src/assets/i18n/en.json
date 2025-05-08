@@ -855,6 +855,7 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Your data was only partially uploaded. Please try again later! Otherwise you will not be able to sync your data to other devices.",
+        "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!",
         "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog."
       },
       "C": {
