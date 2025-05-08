@@ -1,6 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { auditTime, filter, first, map, skip, switchMap, tap } from 'rxjs/operators';
+import {
+  auditTime,
+  filter,
+  first,
+  map,
+  skip,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { MemoizedSelector, select, Store } from '@ngrx/store';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { selectBoardsState } from '../../features/boards/store/boards.selectors';
@@ -28,6 +37,7 @@ import {
 } from '../../features/tasks/store/task.actions';
 import { TIME_TRACKING_TO_DB_INTERVAL } from '../../app.constants';
 import { environment } from '../../../environments/environment';
+import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
 
 @Injectable()
 export class SaveToDbEffects {
@@ -59,6 +69,8 @@ export class SaveToDbEffects {
     selectTaskRepeatCfgFeatureState,
     'taskRepeatCfg',
   );
+
+  // ---------------------------------------------------
 
   task$ = this.createSaveEffectWithFilter(selectTaskFeatureState, 'task', [
     TimeTrackingActions.addTimeSpent.type,
@@ -93,6 +105,31 @@ export class SaveToDbEffects {
       ),
     { dispatch: false },
   );
+
+  // ---------------------------------------------------
+
+  timeTracking$ = this.createSaveEffectWithFilter(
+    selectTimeTrackingState,
+    'timeTracking',
+    [TimeTrackingActions.addTimeSpent.type],
+  );
+
+  updateTimeTrackingStorageAuditTime$: any = createEffect(
+    () =>
+      this._actions.pipe(
+        ofType(TimeTrackingActions.addTimeSpent),
+        auditTime(TIME_TRACKING_TO_DB_INTERVAL),
+        withLatestFrom(this._store.select(selectTimeTrackingState)),
+        tap(([, ttState]) => {
+          this._pfapiService.m.timeTracking.save(ttState, {
+            isUpdateRevAndLastUpdate: true,
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // ---------------------------------------------------
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private createSaveEffect<K extends keyof typeof this._pfapiService.m>(
@@ -138,9 +175,14 @@ export class SaveToDbEffects {
               map((a) => [state, a]),
             ),
           ),
-          tap(([state, action]) => console.log('1', action.type)),
+          tap(([state, action]) =>
+            console.log(
+              `__DB_S_${modelKey}__`,
+              !ignoredActionsTypes.includes(action.type),
+              action.type,
+            ),
+          ),
           filter(([state, action]) => !ignoredActionsTypes.includes(action.type)),
-          tap(([state, action]) => console.log('22', action.type)),
           switchMap(([state]) =>
             this._pfapiService.m[modelKey].save(state, {
               isUpdateRevAndLastUpdate: true,
