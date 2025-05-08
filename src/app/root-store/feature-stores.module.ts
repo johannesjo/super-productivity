@@ -94,10 +94,15 @@ import { timeTrackingFeature } from '../features/time-tracking/store/time-tracki
 import { TimeTrackingEffects } from '../features/time-tracking/store/time-tracking.effects';
 import { plannerFeature } from '../features/planner/store/planner.reducer';
 import { PlannerEffects } from '../features/planner/store/planner.effects';
+import { AppStateEffects } from './app-state/app-state.effects';
+import { appStateFeature } from './app-state/app-state.reducer';
 
 @NgModule({
   declarations: [],
   imports: [
+    StoreModule.forFeature(appStateFeature),
+    EffectsModule.forFeature([AppStateEffects]),
+
     StoreModule.forFeature(LAYOUT_FEATURE_NAME, layoutReducer),
     EffectsModule.forFeature([LayoutEffects]),
 

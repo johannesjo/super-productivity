@@ -13,12 +13,12 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { IssueProvider } from '../../issue/issue.model';
 import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
   selectTagFeatureState,
   selectTodayTagTaskIds,
 } from '../../tag/store/tag.reducer';
 import { isToday } from '../../../util/is-today.util';
+import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 
 const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
   return tasksIN
@@ -117,18 +117,22 @@ export const selectStartableTasks = createSelector(
   },
 );
 
-export const selectOverdueTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
-  const today = new Date(getWorklogStr());
-  const todayStart = new Date(today);
-  todayStart.setHours(0, 0, 0, 0);
-  return s.ids
-    .map((id) => s.entities[id] as Task)
-    .filter(
-      (task) =>
-        (task.dueDay && new Date(task.dueDay) < today) ||
-        (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
-    );
-});
+export const selectOverdueTasks = createSelector(
+  selectTaskFeatureState,
+  selectTodayStr,
+  (s, todayStr): Task[] => {
+    const today = new Date(todayStr);
+    const todayStart = new Date(today);
+    todayStart.setHours(0, 0, 0, 0);
+    return s.ids
+      .map((id) => s.entities[id] as Task)
+      .filter(
+        (task) =>
+          (task.dueDay && new Date(task.dueDay) < today) ||
+          (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
+      );
+  },
+);
 
 export const selectOverdueTasksOnToday = createSelector(
   selectOverdueTasks,
@@ -180,8 +184,9 @@ export const selectOverdueTasksWithSubTasks = createSelector(
 export const selectAllTasksDueAndOverdue = createSelector(
   selectTaskFeatureState,
   selectTagFeatureState,
-  (s, tagState): Task[] => {
-    const today = new Date(getWorklogStr());
+  selectTodayStr,
+  (s, tagState, todayStr): Task[] => {
+    const today = new Date(todayStr);
     return s.ids
       .map((id) => s.entities[id] as Task)
       .filter(
@@ -462,9 +467,8 @@ export const selectAllTasksWithDueDay = createSelector(
 
 export const selectAllTasksDueToday = createSelector(
   selectTaskFeatureState,
-  (taskState): (TaskWithDueTime | TaskWithDueDay)[] => {
-    const todayStr = getWorklogStr();
-
+  selectTodayStr,
+  (taskState, todayStr): (TaskWithDueTime | TaskWithDueDay)[] => {
     const allDueDayTasks = Object.values(taskState.entities).filter(
       (task) => !!task && !!(task as TaskWithDueTime).dueDay && todayStr === task.dueDay,
     ) as TaskWithDueDay[];
