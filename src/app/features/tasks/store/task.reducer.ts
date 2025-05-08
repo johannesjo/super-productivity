@@ -465,7 +465,7 @@ export const taskReducer = createReducer<TaskState>(
     };
   }),
 
-  on(convertToMainTask, (state, { task }) => {
+  on(convertToMainTask, (state, { task, isPlanForToday }) => {
     const par = state.entities[task.parentId as string];
     if (!par) {
       throw new Error('No parent for sub task');
@@ -478,6 +478,7 @@ export const taskReducer = createReducer<TaskState>(
         changes: {
           parentId: undefined,
           tagIds: [...par.tagIds],
+          ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
         },
       },
       stateCopy,

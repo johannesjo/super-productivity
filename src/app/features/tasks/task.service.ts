@@ -857,7 +857,13 @@ export class TaskService {
 
   async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
-    this._store.dispatch(convertToMainTask({ task, parentTagIds: parent.tagIds }));
+    this._store.dispatch(
+      convertToMainTask({
+        task,
+        parentTagIds: parent.tagIds,
+        isPlanForToday: this._workContextService.activeWorkContextId === TODAY_TAG.id,
+      }),
+    );
   }
 
   // GLOBAL TASK MODEL STUFF

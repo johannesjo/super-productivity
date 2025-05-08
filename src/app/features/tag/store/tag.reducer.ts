@@ -509,8 +509,11 @@ export const tagReducer = createReducer<TagState>(
     return tagAdapter.updateMany(updates, state);
   }),
 
-  on(convertToMainTask, (state, { task, parentTagIds }) => {
-    const updates: Update<Tag>[] = parentTagIds.map((tagId) => ({
+  on(convertToMainTask, (state, { task, parentTagIds, isPlanForToday }) => {
+    const updates: Update<Tag>[] = [
+      ...parentTagIds,
+      ...(isPlanForToday ? [TODAY_TAG.id] : []),
+    ].map((tagId) => ({
       id: tagId,
       changes: {
         taskIds: [task.id, ...(state.entities[tagId] as Tag).taskIds],

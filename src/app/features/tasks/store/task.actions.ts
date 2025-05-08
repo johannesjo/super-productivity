@@ -245,7 +245,7 @@ export const addSubTask = createAction(
 export const convertToMainTask = createAction(
   TaskActionTypes.ConvertToMainTask,
 
-  props<{ task: Task; parentTagIds: string[] }>(),
+  props<{ task: Task; parentTagIds: string[]; isPlanForToday?: boolean }>(),
 );
 
 // the _ indicates that it should not be used directly, but always over the service instead
