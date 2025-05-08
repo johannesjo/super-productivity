@@ -27,20 +27,6 @@ export const timeTrackingReducer = createReducer(
 
   on(TimeTrackingActions.addTimeSpent, (state, { task, date }) => {
     const isUpdateProject = !!task.projectId;
-    console.log({
-      ...state.tag,
-      ...([TODAY_TAG.id, ...task.tagIds] as string[]).reduce((acc, tagId) => {
-        acc[tagId] = {
-          ...state.tag[tagId],
-          [date]: {
-            ...state.tag[tagId]?.[date],
-            e: roundTsToMinutes(Date.now()),
-            s: roundTsToMinutes(state.tag[tagId]?.[date]?.s || Date.now()),
-          },
-        };
-        return acc;
-      }, {}),
-    });
 
     return {
       ...state,

@@ -62,7 +62,6 @@ import {
 import { TaskRepeatCfgEffects } from '../features/task-repeat-cfg/store/task-repeat-cfg.effects';
 import { TaskDueEffects } from '../features/tasks/store/task-due.effects';
 import { TASK_FEATURE_NAME, taskReducer } from '../features/tasks/store/task.reducer';
-import { TaskDbEffects } from '../features/tasks/store/task-db.effects';
 import { TaskInternalEffects } from '../features/tasks/store/task-internal.effects';
 import { TaskRelatedModelEffects } from '../features/tasks/store/task-related-model.effects';
 import { TaskReminderEffects } from '../features/tasks/store/task-reminder.effects';
@@ -150,7 +149,6 @@ import { SaveToDbEffects } from './shared/save-to-db.effects';
 
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
     EffectsModule.forFeature([
-      TaskDbEffects,
       TaskInternalEffects,
       TaskRelatedModelEffects,
       TaskReminderEffects,
