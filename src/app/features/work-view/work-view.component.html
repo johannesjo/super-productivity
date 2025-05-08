@@ -199,59 +199,19 @@
                 <h2 class="no-tasks-label">{{ T.WW.NO_PLANNED_TASKS | translate }}</h2>
               </div>
 
-              <div class="btn-wrapper">
-                <button
-                  (click)="planMore()"
-                  color=""
-                  mat-stroked-button
-                  tabindex="1"
-                >
-                  <mat-icon>playlist_add</mat-icon>
-                  {{ T.WW.ADD_MORE | translate }}
-                </button>
-                <!--                @if (workContextService.isToday$ | async) {-->
-                <!--                  <button-->
-                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
-                <!--                    color="primary"-->
-                <!--                    mat-flat-button-->
-                <!--                    routerLink="/active/daily-summary"-->
-                <!--                    tabindex="1"-->
-                <!--                  >-->
-                <!--                    <mat-icon>done_all</mat-icon>-->
-                <!--                    {{ T.WW.FINISH_DAY | translate }}-->
-                <!--                  </button>-->
-                <!--                }-->
-                <!--                @if (-->
-                <!--                  !(workContextService.isToday$ | async) &&-->
-                <!--                  workContextService.activeWorkContextType === 'PROJECT'-->
-                <!--                ) {-->
-                <!--                  <button-->
-                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
-                <!--                    color="primary"-->
-                <!--                    mat-flat-button-->
-                <!--                    routerLink="/active/daily-summary"-->
-                <!--                    tabindex="1"-->
-                <!--                  >-->
-                <!--                    <mat-icon>done_all</mat-icon>-->
-                <!--                    {{ T.WW.FINISH_DAY_FOR_PROJECT | translate }}-->
-                <!--                  </button>-->
-                <!--                }-->
-                <!--                @if (-->
-                <!--                  !(workContextService.isToday$ | async) &&-->
-                <!--                  workContextService.activeWorkContextType === 'TAG'-->
-                <!--                ) {-->
-                <!--                  <button-->
-                <!--                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"-->
-                <!--                    color="primary"-->
-                <!--                    mat-flat-button-->
-                <!--                    routerLink="/active/daily-summary"-->
-                <!--                    tabindex="1"-->
-                <!--                  >-->
-                <!--                    <mat-icon>done_all</mat-icon>-->
-                <!--                    {{ T.WW.FINISH_DAY_FOR_TAG | translate }}-->
-                <!--                  </button>-->
-                <!--                }-->
-              </div>
+              @if (!overdueTasks().length) {
+                <div class="btn-wrapper">
+                  <button
+                    (click)="planMore()"
+                    color=""
+                    mat-stroked-button
+                    tabindex="1"
+                  >
+                    <mat-icon>playlist_add</mat-icon>
+                    {{ T.WW.ADD_MORE | translate }}
+                  </button>
+                </div>
+              }
             </div>
           }
           @if (isPlanningMode()) {
@@ -264,7 +224,9 @@
                 [tabindex]="1"
                 [isDoubleEnterMode]="true"
               ></add-task-bar>
+
               <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>
+
               <button
                 (click)="startWork()"
                 class="ready-to-work-btn"

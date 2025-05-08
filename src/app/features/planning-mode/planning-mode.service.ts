@@ -3,11 +3,14 @@ import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/operators';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskService } from '../tasks/task.service';
+import { selectOverdueTasksWithSubTasks } from '../tasks/store/task.selectors';
+import { Store } from '@ngrx/store';
 
 @Injectable({ providedIn: 'root' })
 export class PlanningModeService {
   private _workContextService = inject(WorkContextService);
   private _taskService = inject(TaskService);
+  private _store = inject(Store);
 
   private _iPlanningModeEndedUser$: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
@@ -29,10 +32,11 @@ export class PlanningModeService {
     withLatestFrom(
       this._workContextService.isHasTasksToWorkOn$,
       this._iPlanningModeEndedUser$,
+      this._store.select(selectOverdueTasksWithSubTasks),
     ),
     map(
-      ([t, isHasTasksToWorkOn, isPlanningEndedByUser]) =>
-        !isHasTasksToWorkOn && !isPlanningEndedByUser,
+      ([t, isHasTasksToWorkOn, isPlanningEndedByUser, overdueTasks]) =>
+        !isHasTasksToWorkOn && !isPlanningEndedByUser && !overdueTasks.length,
     ),
   );
 
