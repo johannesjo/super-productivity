@@ -3,7 +3,7 @@ import { Tag, TagCopy } from '../tag.model';
 import { deleteTask, moveToArchive_, restoreTask } from '../../tasks/store/task.actions';
 import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
 import { addTag } from './tag.actions';
-import { TODAY_TAG } from '../tag.const';
+import { INBOX_TAG, TODAY_TAG } from '../tag.const';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -20,6 +20,8 @@ describe('TagReducer', () => {
             title: 'Test Tag',
             taskIds: ['task1', 'task2'],
           } as Tag,
+          [TODAY_TAG.id]: TODAY_TAG,
+          [INBOX_TAG.id]: INBOX_TAG,
         },
       };
     });
@@ -61,6 +63,8 @@ describe('TagReducer', () => {
             title: 'Test Tag',
             taskIds: ['task1', 'task2', 'subTask1', 'subTask2'],
           } as Tag,
+          [TODAY_TAG.id]: TODAY_TAG,
+          [INBOX_TAG.id]: INBOX_TAG,
         },
       };
     });

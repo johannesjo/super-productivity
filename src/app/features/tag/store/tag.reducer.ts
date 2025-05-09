@@ -553,10 +553,10 @@ export const tagReducer = createReducer<TagState>(
       INBOX_TAG.id,
       ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
     ]);
-    const updates: Update<Tag>[] = tagIds.map((pid: string) => ({
-      id: pid,
+    const updates: Update<Tag>[] = tagIds.map((tId: string) => ({
+      id: tId,
       changes: {
-        taskIds: (state.entities[pid] as Tag).taskIds.filter(
+        taskIds: (state.entities[tId] as Tag).taskIds.filter(
           (taskId) => !taskIdsToMoveToArchive.includes(taskId),
         ),
       },

@@ -5,6 +5,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../tag/store/tag.reducer';
+import { appStateFeatureKey } from '../../../root-store/app-state/app-state.reducer';
 
 describe('Task Selectors', () => {
   // Define mock tasks
@@ -166,6 +167,9 @@ describe('Task Selectors', () => {
   };
 
   const mockState = {
+    [appStateFeatureKey]: {
+      todayStr: today,
+    },
     [TASK_FEATURE_NAME]: mockTaskState,
     [PROJECT_FEATURE_NAME]: {
       ids: ['project1', 'project2', 'project3'],
