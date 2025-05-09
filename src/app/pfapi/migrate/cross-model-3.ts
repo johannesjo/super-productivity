@@ -10,6 +10,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { isToday } from '../../util/is-today.util';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
+import { plannerInitialState } from '../../features/planner/store/planner.reducer';
 
 export const crossModelMigration3: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
@@ -17,16 +18,20 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
   console.log('____________________Migrate3__________________');
   const copy = dirtyDeepCopy(fullData);
 
-  Object.keys(copy.planner.days).forEach((day) => {
-    const dayTasks = copy.planner.days[day];
-    dayTasks.forEach((taskId) => {
-      const task = copy.task.entities[taskId];
-      if (task) {
-        // @ts-ignore
-        task.dueDay = day;
-      }
+  if (copy.planner) {
+    Object.keys(copy.planner.days).forEach((day) => {
+      const dayTasks = copy.planner.days[day];
+      dayTasks.forEach((taskId) => {
+        const task = copy.task.entities[taskId];
+        if (task) {
+          // @ts-ignore
+          task.dueDay = day;
+        }
+      });
     });
-  });
+  } else {
+    copy.planner = plannerInitialState;
+  }
 
   const todayTag = copy.tag.entities[TODAY_TAG.id];
 

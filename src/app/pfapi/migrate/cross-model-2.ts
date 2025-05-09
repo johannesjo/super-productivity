@@ -13,7 +13,10 @@ import {
   TimeSpentOnDayCopy,
 } from '../../features/tasks/task.model';
 import { Dictionary } from '@ngrx/entity';
-import { BoardsState } from '../../features/boards/store/boards.reducer';
+import {
+  BoardsState,
+  initialBoardsState,
+} from '../../features/boards/store/boards.reducer';
 import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../../features/boards/boards.const';
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
@@ -164,6 +167,10 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
 
 // TODO remove later
 const migrateBoards = (boardsState: BoardsState): BoardsState => {
+  if (!boardsState) {
+    return initialBoardsState;
+  }
+
   return {
     ...boardsState,
     boardCfgs: boardsState.boardCfgs.map((boardCfg) => {

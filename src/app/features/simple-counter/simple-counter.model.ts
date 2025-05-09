@@ -15,7 +15,7 @@ export interface SimpleCounterCfgFields {
   isEnabled: boolean;
   icon: string | null;
   type: SimpleCounterType;
-  isTrackStreaks: boolean;
+  isTrackStreaks?: boolean;
   // can be undefined due to how form works :(
   streakMinValue?: number;
   streakWeekDays?: { [key: number]: boolean };

@@ -142,13 +142,13 @@ export interface IssueProviderBase extends BaseIssueProviderCfg {
   id: string;
   isEnabled: boolean;
   issueProviderKey: IssueProviderKey;
-  defaultProjectId: string | null;
-  pinnedSearch: string | null;
+  defaultProjectId?: string | null | false;
+  pinnedSearch?: string | null;
   // delete at some point in the future
   migratedFromProjectId?: string;
-  isAutoPoll: boolean;
-  isAutoAddToBacklog: boolean;
-  isIntegratedAddTaskBar: boolean;
+  isAutoPoll?: boolean;
+  isAutoAddToBacklog?: boolean;
+  isIntegratedAddTaskBar?: boolean;
 }
 
 export interface IssueProviderJira extends IssueProviderBase, JiraCfg {
