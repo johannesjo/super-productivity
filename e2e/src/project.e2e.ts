@@ -1,4 +1,8 @@
 import { NBrowser } from '../n-browser-interface';
+import { cssSelectors } from '../e2e.const';
+
+const { WORK_VIEW } = cssSelectors;
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const SIDENAV = `side-nav`;
@@ -23,7 +27,6 @@ const SECOND_PROJECT_BTN = `${SECOND_PROJECT} button:first-of-type`;
 // const BACKLOG = `.backlog`;
 // const SPLIT = `split`;
 const MOVE_TO_ARCHIVE_BTN = '.e2e-move-done-to-archive';
-const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const GLOBAL_ERROR_ALERT = '.global-error-alert';
 
 module.exports = {
@@ -81,7 +84,7 @@ module.exports = {
       // HERE TO: avoid Error while running .clickElement() protocol action:
       // stale element reference: stale element not found in the current frame
       .pause(200)
-      .click(READY_TO_WORK_BTN)
+      .click(WORK_VIEW)
       .addTask('Test task 1')
       .addTask('Test task 2')
       .moveToElement('task:nth-child(1)', 30, 30)

@@ -1,11 +1,11 @@
-import { BASE } from '../e2e.const';
+/* eslint-disable @typescript-eslint/naming-convention */
 import { NBrowser } from '../n-browser-interface';
 import { NightwatchCallbackResult } from 'nightwatch';
-/* eslint-disable @typescript-eslint/naming-convention */
+import { BASE, cssSelectors } from '../e2e.const';
+const { FINISH_DAY_BTN } = cssSelectors;
 
 const TASK = 'task';
 const WORK_VIEW_URL = `${BASE}/`;
-const READY_TO_WORK_BTN = '.ready-to-work-btn';
 
 const saveMetricsResult = (
   result: NightwatchCallbackResult<{ [metricName: string]: number }>,
@@ -29,7 +29,7 @@ module.exports = {
     browser
       .enablePerformanceMetrics()
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .getPerformanceMetrics((r) => saveMetricsResult(r, 'initial-load'))
       .end(),
 
@@ -37,7 +37,7 @@ module.exports = {
     browser
       .enablePerformanceMetrics()
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .addTask('1 test task koko')
       .addTask('2 test task koko')
       .addTask('3 test task koko')

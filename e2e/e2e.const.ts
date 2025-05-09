@@ -7,6 +7,8 @@ const ROUTER_WRAPPER = '.route-wrapper';
 const SIDENAV = 'side-nav';
 const EXPAND_TAG_BTN = `${SIDENAV} .tags .expand-btn`;
 const TAGS = `${SIDENAV} section.tags`;
+const FINISH_DAY_BTN = '.e2e-finish-day';
+const WORK_VIEW = 'work-view';
 
 export const cssSelectors = {
   ADD_TASK_GLOBAL_SEL,
@@ -15,4 +17,6 @@ export const cssSelectors = {
   ROUTER_WRAPPER,
   SIDENAV,
   TAGS,
+  FINISH_DAY_BTN,
+  WORK_VIEW,
 };

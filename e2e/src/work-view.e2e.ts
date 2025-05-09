@@ -1,5 +1,7 @@
-import { BASE } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+import { BASE, cssSelectors } from '../e2e.const';
+const { FINISH_DAY_BTN } = cssSelectors;
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const ADD_TASK_INITIAL = 'add-task-bar:not(.global) input';
@@ -7,15 +9,15 @@ const ADD_TASK_GLOBAL = 'add-task-bar.global input';
 const TASK = 'task';
 const ADD_TASK_BTN = '.action-nav > button:first-child';
 const WORK_VIEW_URL = `${BASE}/`;
-const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_TEXTAREA = 'task textarea';
+const ADD_MORE_BTN = '.btn-wrapper button';
 
 module.exports = {
   '@tags': ['work-view', 'task', 'task-standard'],
   'should add task via key combo': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .addTask('0 test task koko')
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
@@ -25,6 +27,7 @@ module.exports = {
   'should add a task from initial bar': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
+      .click(ADD_MORE_BTN)
       .waitForElementVisible(ADD_TASK_INITIAL)
 
       .setValue(ADD_TASK_INITIAL, '1 test task hihi')
@@ -38,6 +41,7 @@ module.exports = {
   'should add 2 tasks from initial bar': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
+      .click(ADD_MORE_BTN)
       .waitForElementVisible(ADD_TASK_INITIAL)
 
       .setValue(ADD_TASK_INITIAL, '2 test task hihi')
@@ -54,7 +58,6 @@ module.exports = {
   'should add multiple tasks from header button': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(ADD_TASK_BTN)
       .click(ADD_TASK_BTN)
       .waitForElementVisible(ADD_TASK_GLOBAL)
 
@@ -75,7 +78,7 @@ module.exports = {
   'should still show created task after reload': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .addTask('0 test task lolo')
       .waitForElementVisible(TASK)
       .execute('window.location.reload()')
@@ -89,6 +92,7 @@ module.exports = {
     (browser: NBrowser) =>
       browser
         .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
+        .click(ADD_MORE_BTN)
         .waitForElementVisible(ADD_TASK_INITIAL)
 
         .addTask('3 hihi some other task')

@@ -1,12 +1,13 @@
-import { BASE } from '../e2e.const';
+import { BASE, cssSelectors } from '../e2e.const';
 import { NBrowser } from '../n-browser-interface';
+
+const { FINISH_DAY_BTN } = cssSelectors;
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const WORK_VIEW_URL = `${BASE}/`;
 
 const TASK = 'task';
 const TASK_2 = `${TASK}:nth-of-type(1)`;
-const READY_TO_WORK_BTN = '.ready-to-work-btn';
 const TASK_SCHEDULE_BTN = '.ico-btn.schedule-btn';
 const TASK_SCHEDULE_BTN_2 = TASK_2 + ' ' + TASK_SCHEDULE_BTN;
 
@@ -26,7 +27,7 @@ module.exports = {
   'should add a scheduled tasks': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementPresent(READY_TO_WORK_BTN)
+      .waitForElementPresent(FINISH_DAY_BTN)
       .addTaskWithReminder({ title: '0 test task koko', scheduleTime: Date.now() })
       .waitForElementVisible(TASK)
       .waitForElementVisible(TASK_SCHEDULE_BTN)
@@ -43,7 +44,7 @@ module.exports = {
   'should add multiple scheduled tasks': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementPresent(READY_TO_WORK_BTN)
+      .waitForElementPresent(FINISH_DAY_BTN)
       .addTaskWithReminder({ title: '0 test task koko', taskSel: TASK })
       .addTaskWithReminder({ title: '2 hihihi', taskSel: TASK_2 })
       .waitForElementVisible(TASK)

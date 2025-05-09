@@ -1,6 +1,4 @@
 module.exports = {
-  // An array of folders (excluding subfolders) where your tests are located;
-  // if this is not specified, the test source must be passed as the second argument to the test runner.
   src_folders: ['../out-tsc/e2e/src'],
   output_folder: './e2e-test-results',
   custom_commands_path: 'out-tsc/e2e/commands',
@@ -31,7 +29,6 @@ module.exports = {
             '--user-agent=NIGHTWATCH',
             `--binary=${process.env.CHROME_BIN}`,
           ],
-          // w3c: false,
           prefs: {
             'profile.default_content_setting_values.geolocation': 1,
             'profile.default_content_setting_values.notifications': 2,
@@ -39,15 +36,39 @@ module.exports = {
         },
       },
       screenshots: {
-        enabled: true, // if you want to keep screenshots
+        enabled: true,
         on_failure: true,
         on_error: true,
-        path: './e2e-test-results/screenshots', // save screenshots here
+        path: './e2e-test-results/screenshots',
       },
       globals: {
         waitForConditionPollInterval: 500,
         waitForConditionTimeout: 10000,
         retryAssertionTimeout: 1000,
+        before: async function (browser) {
+          // Wait for the browser to be fully initialized
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          try {
+            // For newer Nightwatch versions (v2+)
+            if (browser.chrome && browser.chrome.sendDevToolsCommand) {
+              await browser.chrome.sendDevToolsCommand('Emulation.setVirtualTimePolicy', {
+                policy: 'pauseIfNetworkFetchesPending',
+                initialVirtualTime: new Date('2025-05-09T11:00:00Z').getTime(),
+              });
+            }
+            // Fallback to older method
+            else if (browser.driver) {
+              const session = await browser.driver.getDevToolsSession();
+              await session.send('Emulation.setVirtualTimePolicy', {
+                policy: 'pauseIfNetworkFetchesPending',
+                initialVirtualTime: new Date('2025-05-09T11:00:00Z').getTime(),
+              });
+            }
+          } catch (err) {
+            console.error('Failed to set virtual time policy:', err);
+          }
+        },
       },
     },
   },

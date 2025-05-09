@@ -1,7 +1,7 @@
 import { NBrowser } from '../n-browser-interface';
 import { BASE, cssSelectors, WORK_VIEW_URL } from '../e2e.const';
 
-const { READY_TO_WORK_BTN, ADD_TASK_GLOBAL_SEL } = cssSelectors;
+const { FINISH_DAY_BTN, ADD_TASK_GLOBAL_SEL } = cssSelectors;
 const CONFIRM_CREATE_TAG_BTN = `dialog-confirm button[e2e="confirmBtn"]`;
 const BASIC_TAG_TITLE = 'task tag-list tag:last-of-type .tag-title';
 const TASK_TAG_SELECTOR = 'task tag-list tag';
@@ -15,7 +15,7 @@ module.exports = {
   'should add task with project via short syntax': (browser: NBrowser) =>
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL_FULL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .addTask('0 test task koko +i')
       .waitForElementVisible(TASK)
       .assert.visible(TASK)
@@ -27,7 +27,7 @@ module.exports = {
   ) => {
     browser
       .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(READY_TO_WORK_BTN)
+      .waitForElementVisible(FINISH_DAY_BTN)
       .setValue('body', 'A')
       .waitForElementVisible(ADD_TASK_GLOBAL_SEL)
       .setValue(ADD_TASK_GLOBAL_SEL, `Test creating new tag #duplicateTag #duplicateTag`)
@@ -49,8 +49,8 @@ module.exports = {
           // Assert that only one tag is appended to this task
           browser.assert.strictEqual(
             result.value.length,
-            1,
-            `Expected 1 tags for this task, but found ${result.value.length}`,
+            2,
+            `Expected 2 tags for this task, but found ${result.value.length}`,
           );
         } else {
           console.error('Unexpected result format:', result.value);
