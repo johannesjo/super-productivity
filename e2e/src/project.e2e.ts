@@ -87,9 +87,21 @@ module.exports = {
       .click(WORK_VIEW)
       .addTask('Test task 1')
       .addTask('Test task 2')
-      .moveToElement('task:nth-child(1)', 30, 30)
+      .moveToElement('task', 50, 20)
+      .pause(50)
       .click('.task-done-btn')
-
+      // workaround for weird collapsible state during headless ???
+      .execute(
+        (moveToArchiveBtnSelector) => {
+          if (!document.querySelector(moveToArchiveBtnSelector)) {
+            const header = document.querySelector('.collapsible-header');
+            if (header) (header as HTMLElement).click();
+          }
+          return true;
+        },
+        [MOVE_TO_ARCHIVE_BTN],
+      )
+      .pause(100) // Give time for the header to expand if needed
       .waitForElementVisible(MOVE_TO_ARCHIVE_BTN)
       .click(MOVE_TO_ARCHIVE_BTN)
       .pause(500)
