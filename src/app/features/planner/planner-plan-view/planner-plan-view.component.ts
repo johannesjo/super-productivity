@@ -6,7 +6,7 @@ import { PlannerService } from '../planner.service';
 import { PlannerDayComponent } from '../planner-day/planner-day.component';
 import { AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { selectOverdueTasks } from '../../tasks/store/task.selectors';
+import { selectUndoneOverdue } from '../../tasks/store/task.selectors';
 import { PlannerDayOverdueComponent } from '../planner-day-overdue/planner-day-overdue.component';
 
 @Component({
@@ -20,7 +20,7 @@ export class PlannerPlanViewComponent {
   private _plannerService = inject(PlannerService);
   private _store = inject(Store);
 
-  overdue$ = this._store.select(selectOverdueTasks);
+  overdue$ = this._store.select(selectUndoneOverdue);
 
   days$: Observable<PlannerDay[]> = this._plannerService.days$;
 

@@ -134,6 +134,13 @@ export const selectOverdueTasks = createSelector(
   },
 );
 
+export const selectUndoneOverdue = createSelector(
+  selectOverdueTasks,
+  (overdue): Task[] => {
+    return overdue.filter((t) => !t.isDone);
+  },
+);
+
 export const selectOverdueTasksOnToday = createSelector(
   selectOverdueTasks,
   selectTodayTagTaskIds,
