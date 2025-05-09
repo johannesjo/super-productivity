@@ -10,12 +10,13 @@ import {
   selectTasksWithDueTimeForRange,
 } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
-import { first, map, switchMap } from 'rxjs/operators';
+import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { PlannerService } from '../planner/planner.service';
+import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 
 const filterDoneAndToday = (task: TaskCopy): boolean =>
   !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
@@ -60,8 +61,14 @@ export class AddTasksForTomorrowService {
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
     this._repeatableForTomorrow$,
-    this._dueWithTimeForTomorrow$,
     this._dueForDayForTomorrow$,
+    this._dueWithTimeForTomorrow$.pipe(
+      withLatestFrom(this._store.select(selectTodayTaskIds)),
+      // we need to filter since they might be added on today anyway
+      map(([tasks, todayTaskIds]) =>
+        tasks.filter((task) => !todayTaskIds.includes(task.id)),
+      ),
+    ),
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
   async addAllDueTomorrow(): Promise<'ADDED' | void> {
