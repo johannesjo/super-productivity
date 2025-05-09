@@ -208,7 +208,7 @@
     "nightwatch": "^3.6.3",
     "p-throttle": "^7.0.0",
     "prettier": "^3.5.1",
-    "pretty-quick": "^4.0.0",
+    "pretty-quick": "^4.1.1",
     "query-string": "^7.1.3",
     "rxjs": "^6.6.7",
     "shepherd.js": "^11.2.0",
