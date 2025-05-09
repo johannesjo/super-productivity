@@ -96,16 +96,26 @@ export const plannerReducer = createReducer(
     (state, { today, allTaskIds }) => {
       const daysCopy = { ...state.days };
       const todayDate = new Date(today);
+      let wasChanged = false;
       Object.keys(daysCopy).forEach((day) => {
         // NOTE: also deletes today
         if (new Date(day) <= todayDate) {
           delete daysCopy[day];
+          wasChanged = true;
         }
         // remove all deleted tasks if day was not deleted
         if (!!daysCopy[day]) {
-          daysCopy[day] = daysCopy[day].filter((id) => allTaskIds.includes(id));
+          const newDayVal = daysCopy[day].filter((id) => allTaskIds.includes(id));
+          if (newDayVal.length !== daysCopy[day].length) {
+            daysCopy[day] = newDayVal;
+            wasChanged = true;
+          }
         }
       });
+      if (!wasChanged) {
+        return state;
+      }
+
       return {
         ...state,
         days: {

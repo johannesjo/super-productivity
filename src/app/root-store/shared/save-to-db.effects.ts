@@ -30,6 +30,7 @@ import { selectTaskFeatureState } from '../../features/tasks/store/task.selector
 import { TimeTrackingActions } from '../../features/time-tracking/store/time-tracking.actions';
 import {
   setCurrentTask,
+  setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
   unsetCurrentTask,
@@ -75,6 +76,7 @@ export class SaveToDbEffects {
   task$ = this.createSaveEffectWithFilter(selectTaskFeatureState, 'task', [
     TimeTrackingActions.addTimeSpent.type,
     setCurrentTask.type,
+    setSelectedTask.type,
     updateTaskUi.type,
     toggleTaskHideSubTasks.type,
     unsetCurrentTask.type,
