@@ -89,7 +89,8 @@ export class AddTasksForTomorrowService {
       .toPromise();
     const tomorrowTasksFromPlanner = tomorrowFromPlanner?.tasks || [];
 
-    const allDue = tomorrowTasksFromPlanner.filter((t) => !t.dueWithTime);
+    const allDue = tomorrowTasksFromPlanner;
+
     [...dueWithTime, ...dueWithDay].forEach((task) => {
       if (!allDue.find((t) => t.id === task.id)) {
         allDue.push(task);
@@ -138,6 +139,11 @@ export class AddTasksForTomorrowService {
   }
 
   movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
-    this._store.dispatch(planTasksForToday({ taskIds: plannedTasks.map((t) => t.id) }));
+    this._store.dispatch(
+      planTasksForToday({
+        taskIds: plannedTasks.map((t) => t.id),
+        isSkipRemoveReminder: true,
+      }),
+    );
   }
 }

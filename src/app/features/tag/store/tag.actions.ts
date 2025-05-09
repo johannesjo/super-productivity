@@ -30,6 +30,7 @@ export const planTasksForToday = createAction(
     taskIds: string[];
     parentTaskMap?: { [taskId: string]: string | undefined };
     isShowSnack?: boolean;
+    isSkipRemoveReminder?: boolean;
   }>(),
 );
 

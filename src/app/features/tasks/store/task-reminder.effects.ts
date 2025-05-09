@@ -237,6 +237,7 @@ export class TaskReminderEffects {
   removeTaskReminderTrigger1$ = createEffect(() =>
     this._actions$.pipe(
       ofType(planTasksForToday),
+      filter(({ isSkipRemoveReminder }) => !isSkipRemoveReminder),
       concatMap(({ taskIds }) => this._taskService.getByIdsLive$(taskIds).pipe(first())),
       mergeMap((tasks) =>
         tasks
