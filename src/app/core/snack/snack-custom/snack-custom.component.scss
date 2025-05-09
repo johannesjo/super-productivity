@@ -8,8 +8,6 @@
   display: flex;
   align-items: center;
   justify-content: stretch;
-  min-height: 48px;
-  //background: inherit;
 }
 
 .snack-icon {
@@ -40,15 +38,10 @@ button {
   margin-left: auto;
 }
 
-.close-btn {
-  margin-left: 0;
-  margin-right: -$s;
-  transition: $transition-fast;
-  opacity: 0;
-
-  .wrapper:hover & {
-    opacity: 1;
-  }
+.button-wrapper-inner {
+  margin-top: -14px;
+  margin-bottom: -14px;
+  margin-right: -8px;
 }
 
 mat-progress-bar {

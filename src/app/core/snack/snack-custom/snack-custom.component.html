@@ -28,26 +28,20 @@
   ></span>
 
   <div class="button-wrapper">
-    @if (data.actionStr) {
-      <button
-        (click)="actionClick()"
-        class="action"
-        color="accent"
-        mat-button
-      >
-        {{ data.actionStr | translate }}
-      </button>
-    }
+    <div class="button-wrapper-inner">
+      @if (data.actionStr) {
+        <button
+          (click)="actionClick()"
+          class="action"
+          color="accent"
+          mat-button
+        >
+          {{ data.actionStr | translate }}
+        </button>
+      }
+    </div>
   </div>
 
-  @if (!data.actionStr) {
-    <button
-      class="close-btn"
-      mat-icon-button
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  }
   @if (data.promise || data.showWhile$ || data.isSpinner) {
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   }

@@ -131,7 +131,7 @@ export class SnackService {
         return;
       }
       if (document.querySelector('add-task-bar.global')) {
-        el.style.marginBottom = '86px';
+        el.style.marginBottom = '78px';
       } else if (document.querySelector('.FAB-BTN')) {
         el.style.marginBottom = '78px';
       }
