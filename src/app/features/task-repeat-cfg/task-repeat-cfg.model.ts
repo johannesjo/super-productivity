@@ -26,11 +26,11 @@ export interface TaskRepeatCfgCopy {
   projectId: string | null;
   lastTaskCreation: number;
   title: string | null;
-  defaultEstimate: number | undefined;
-  startTime: string | undefined;
-  remindAt: TaskReminderOptionId | undefined;
   tagIds: string[];
   order: number;
+  defaultEstimate?: number;
+  startTime?: string;
+  remindAt?: TaskReminderOptionId;
 
   // actual repeat cfg fields
   isPaused: boolean;
@@ -38,15 +38,15 @@ export interface TaskRepeatCfgCopy {
   quickSetting: RepeatQuickSetting;
   repeatCycle: RepeatCycleOption;
   // worklog string; only in effect for monthly/yearly
-  startDate: string | undefined;
+  startDate?: string;
   repeatEvery: number;
-  monday: boolean;
-  tuesday: boolean;
-  wednesday: boolean;
-  thursday: boolean;
-  friday: boolean;
-  saturday: boolean;
-  sunday: boolean;
+  monday?: boolean;
+  tuesday?: boolean;
+  wednesday?: boolean;
+  thursday?: boolean;
+  friday?: boolean;
+  saturday?: boolean;
+  sunday?: boolean;
 
   // advanced
   notes: string | undefined;
