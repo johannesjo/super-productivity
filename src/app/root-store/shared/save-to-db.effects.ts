@@ -39,6 +39,7 @@ import {
 import { TIME_TRACKING_TO_DB_INTERVAL } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
+import { removeTasksFromTodayTag } from '../../features/tag/store/tag.actions';
 
 @Injectable()
 export class SaveToDbEffects {
@@ -81,6 +82,7 @@ export class SaveToDbEffects {
     toggleTaskHideSubTasks.type,
     unsetCurrentTask.type,
     toggleStart.type,
+    removeTasksFromTodayTag.type,
   ]);
 
   updateTaskAuditTime$ = createEffect(

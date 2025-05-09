@@ -70,7 +70,7 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
-import { planTasksForToday } from '../../tag/store/tag.actions';
+import { planTasksForToday, removeTasksFromTodayTag } from '../../tag/store/tag.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -237,6 +237,14 @@ export const taskReducer = createReducer<TaskState>(
       },
       state,
     );
+  }),
+
+  on(removeTasksFromTodayTag, (state, { taskIds }) => {
+    return {
+      ...state,
+      // we do this to maintain the order of tasks when they are moved to overdue
+      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+    };
   }),
 
   on(removeTagsForAllTasks, (state, { tagIdsToRemove }) => {

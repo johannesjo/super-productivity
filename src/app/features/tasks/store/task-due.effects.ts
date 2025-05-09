@@ -1,6 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
-import { concatMap, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import {
+  concatMap,
+  filter,
+  first,
+  map,
+  mergeMap,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { from } from 'rxjs';
 import { removeTasksFromTodayTag } from '../../tag/store/tag.actions';
@@ -12,6 +21,7 @@ import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { DateService } from '../../../core/date/date.service';
 import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 
 @Injectable()
 export class TaskDueEffects {
@@ -29,7 +39,13 @@ export class TaskDueEffects {
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
       switchMap(() => this._store$.select(selectOverdueTasksOnToday).pipe(first())),
       filter((overdue) => !!overdue.length),
-      map((overdue) => removeTasksFromTodayTag({ taskIds: overdue.map((t) => t.id) })),
+      withLatestFrom(this._store$.select(selectTodayTaskIds)),
+      // we do this to maintain the order of tasks
+      map(([overdue, todayTaskIds]) =>
+        removeTasksFromTodayTag({
+          taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
+        }),
+      ),
     );
   });
 
