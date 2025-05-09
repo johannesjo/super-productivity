@@ -1,10 +1,19 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, merge, Observable } from 'rxjs';
-import { delay, distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, of, Subject } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  mapTo,
+  shareReplay,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskService } from '../tasks/task.service';
 import { selectOverdueTasksWithSubTasks } from '../tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
+
+const NO_PLANNING_MODE_HOUR = 15;
 
 @Injectable({ providedIn: 'root' })
 export class PlanningModeService {
@@ -14,18 +23,16 @@ export class PlanningModeService {
 
   private _iPlanningModeEndedUser$: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
-  private _manualTriggerCheck$: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(
-    null,
-  );
+  private _manualTriggerCheck$ = new Subject<unknown>();
   private _isCurrentTask$: Observable<unknown> = this._taskService.currentTaskId$.pipe(
     distinctUntilChanged(),
     filter((id) => !!id),
   );
   private _triggerCheck$: Observable<unknown> = merge(
-    this._manualTriggerCheck$,
+    this._manualTriggerCheck$.pipe(mapTo('MANUAL_TRIGGER')),
     this._isCurrentTask$,
-    // TODO fix hacky way of waiting for data to be loaded
-    this._workContextService.onWorkContextChange$.pipe(delay(100)),
+    this._workContextService.onWorkContextChange$,
+    of('INIT'),
   );
 
   isPlanningMode$: Observable<boolean> = this._triggerCheck$.pipe(
@@ -34,10 +41,14 @@ export class PlanningModeService {
       this._iPlanningModeEndedUser$,
       this._store.select(selectOverdueTasksWithSubTasks),
     ),
-    map(
-      ([t, isHasTasksToWorkOn, isPlanningEndedByUser, overdueTasks]) =>
-        !isHasTasksToWorkOn && !isPlanningEndedByUser && !overdueTasks.length,
-    ),
+
+    map(([t, isHasTasksToWorkOn, isPlanningEndedByUser, overdueTasks]) => {
+      if (t !== 'MANUAL_TRIGGER' && new Date().getHours() >= NO_PLANNING_MODE_HOUR) {
+        return false;
+      }
+      return !isHasTasksToWorkOn && !isPlanningEndedByUser && !overdueTasks.length;
+    }),
+    shareReplay(1),
   );
 
   constructor() {
