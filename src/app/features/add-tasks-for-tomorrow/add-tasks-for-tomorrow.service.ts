@@ -15,6 +15,7 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { planTasksForToday } from '../tag/store/tag.actions';
+import { PlannerService } from '../planner/planner.service';
 
 const filterDoneAndToday = (task: TaskCopy): boolean =>
   !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
@@ -26,6 +27,7 @@ export class AddTasksForTomorrowService {
   private _store = inject(Store);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _plannerService = inject(PlannerService);
 
   private _tomorrowDate$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     map((todayStr) => {
@@ -81,7 +83,20 @@ export class AddTasksForTomorrowService {
       .pipe(first())
       .toPromise();
 
-    const allDueSorted = [...dueWithTime, ...dueWithDay].sort((a, b) => {
+    // we do this to keep the order of the tasks in planner
+    const tomorrowFromPlanner = await this._plannerService.tomorrow$
+      .pipe(first())
+      .toPromise();
+    const tomorrowTasksFromPlanner = tomorrowFromPlanner?.tasks || [];
+
+    const allDue = tomorrowTasksFromPlanner.filter((t) => !t.dueWithTime);
+    [...dueWithTime, ...dueWithDay].forEach((task) => {
+      if (!allDue.find((t) => t.id === task.id)) {
+        allDue.push(task);
+      }
+    });
+
+    const allDueSorted = allDue.sort((a, b) => {
       // Handle cases where properties might be undefined
       const aDate = a.dueDay ? new Date(a.dueDay) : null;
       const bDate = b.dueDay ? new Date(b.dueDay) : null;
