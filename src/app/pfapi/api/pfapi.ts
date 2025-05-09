@@ -151,6 +151,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (activeProviderId) {
       const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
       if (!provider) {
+        console.log(provider, activeProviderId);
         throw new InvalidSyncProviderError();
       }
       this._activeSyncProvider$.next(provider);

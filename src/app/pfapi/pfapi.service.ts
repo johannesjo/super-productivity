@@ -105,14 +105,19 @@ export class PfapiService {
     });
 
     this._commonAndLegacySyncConfig$.subscribe(async (cfg) => {
-      this.pf.setActiveSyncProvider(
-        cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
-      );
-      if (cfg.isEnabled) {
-        this.pf.setEncryptAndCompressCfg({
-          isEncrypt: cfg.isEncryptionEnabled,
-          isCompress: cfg.isCompressionEnabled,
-        });
+      try {
+        this.pf.setActiveSyncProvider(
+          cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
+        );
+        if (cfg.isEnabled) {
+          this.pf.setEncryptAndCompressCfg({
+            isEncrypt: cfg.isEncryptionEnabled,
+            isCompress: cfg.isCompressionEnabled,
+          });
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Unable to set sync provider. Please check your settings.');
       }
     });
   }
