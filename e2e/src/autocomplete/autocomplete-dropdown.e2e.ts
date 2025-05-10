@@ -1,22 +1,20 @@
-import { NBrowser } from '../n-browser-interface';
-import { cssSelectors, WORK_VIEW_URL } from '../e2e.const';
-const { FINISH_DAY_BTN } = cssSelectors;
+import { NBrowser } from '../../n-browser-interface';
+import { cssSelectors } from '../../e2e.const';
 
-// const AUTOCOMPLETE = 'mention-list';
-// const AUTOCOMPLETE_ITEM = `${AUTOCOMPLETE} .mention-active`;
-// const AUTOCOMPLETE_ITEM_TEXT = `${AUTOCOMPLETE_ITEM} .mention-item`;
-// const { EXPAND_TAG_BTN, FINISH_DAY_BTN, TAGS } = cssSelectors;
-// const TAG = `${TAGS} div.tag`;
+const { TASK_LIST } = cssSelectors;
+
 const CONFIRM_CREATE_TAG_BTN = `dialog-confirm button[e2e="confirmBtn"]`;
 const BASIC_TAG_TITLE = 'task tag-list tag:last-of-type .tag-title';
 
 module.exports = {
   '@tags': ['task', 'short-syntax', 'autocomplete'],
 
+  before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
+  after: (browser: NBrowser) => browser.end(),
+
   'should create a simple tag': (browser: NBrowser) => {
     browser
-      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementVisible(FINISH_DAY_BTN)
+      .waitForElementVisible(TASK_LIST)
 
       .addTask('some task <3 #basicTag', true)
       .waitForElementPresent(CONFIRM_CREATE_TAG_BTN)
@@ -24,8 +22,7 @@ module.exports = {
       .waitForElementPresent(BASIC_TAG_TITLE)
 
       .assert.elementPresent(BASIC_TAG_TITLE)
-      .assert.textContains(BASIC_TAG_TITLE, 'basicTag')
-      .end();
+      .assert.textContains(BASIC_TAG_TITLE, 'basicTag');
   },
 
   // TODO make these work again

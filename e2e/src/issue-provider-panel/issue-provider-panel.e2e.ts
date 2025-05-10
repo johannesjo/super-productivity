@@ -1,8 +1,6 @@
-import { BASE } from '../e2e.const';
-import { NBrowser } from '../n-browser-interface';
+import { NBrowser } from '../../n-browser-interface';
 /* eslint-disable @typescript-eslint/naming-convention */
 
-const TARGET_URL = `${BASE}/`;
 const PANEL_BTN = '.e2e-toggle-issue-provider-panel';
 const ITEMS1 = '.items:nth-of-type(1)';
 const ITEMS2 = '.items:nth-of-type(2)';
@@ -12,9 +10,11 @@ const CANCEL_BTN = 'mat-dialog-actions button:nth-of-type(1)';
 module.exports = {
   '@tags': ['issue', 'issue-provider-panel'],
 
+  before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
+  after: (browser: NBrowser) => browser.end(),
+
   'should open all dialogs without error': (browser: NBrowser) =>
     browser
-      .loadAppAndClickAwayWelcomeDialog(TARGET_URL)
       .waitForElementVisible(PANEL_BTN)
       .click(PANEL_BTN)
       .waitForElementVisible('issue-provider-setup-overview')
@@ -51,7 +51,5 @@ module.exports = {
       .waitForElementVisible(CANCEL_BTN)
       .click(CANCEL_BTN)
 
-      .noError()
-
-      .end(),
+      .noError(),
 };

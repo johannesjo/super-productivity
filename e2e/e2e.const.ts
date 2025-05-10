@@ -9,6 +9,7 @@ const EXPAND_TAG_BTN = `${SIDENAV} .tags .expand-btn`;
 const TAGS = `${SIDENAV} section.tags`;
 const FINISH_DAY_BTN = '.e2e-finish-day';
 const WORK_VIEW = 'work-view';
+const TASK_LIST = 'task-list';
 
 export const cssSelectors = {
   ADD_TASK_GLOBAL_SEL,
@@ -19,4 +20,5 @@ export const cssSelectors = {
   TAGS,
   FINISH_DAY_BTN,
   WORK_VIEW,
+  TASK_LIST,
 };
