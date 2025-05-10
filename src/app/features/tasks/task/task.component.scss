@@ -333,6 +333,10 @@
       pointer-events: none;
     }
   }
+
+  tag-list {
+    margin-top: -1px;
+  }
 }
 
 @mixin timeWrapperMinimalStyles() {
