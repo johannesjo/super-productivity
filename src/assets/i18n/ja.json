@@ -1,6 +1,6 @@
 {
   "ANDROID": {
-    "NOTIFICATIONS": {
+  "NOTIFICATIONS": {
       "SYNC_CONFLICT_MSG": "確認して何をするか決めてください。",
       "SYNC_CONFLICT_TITLE": "同期の競合が発生しました"
     },
@@ -63,38 +63,38 @@
     },
     "BOARDS": {
       "DEFAULT": {
-        "DONE": "完成です",
+        "DONE": "完了",
         "EISENHAUER_MATRIX": "アイゼンハウアーマトリックス",
-        "IMPORTANT": "大事な",
-        "IN_PROGRESS": "進行中で",
+        "IMPORTANT": "重要",
+        "IN_PROGRESS": "進行中",
         "KANBAN": "カンバン",
-        "NOT_URGENT_IMPORTANT": "緊急性がなく、重要ではありません",
-        "NOT_URGENT_NOT_IMPORTANT": "緊急ではない、重要ではない",
-        "TO_DO": "やるべきこと",
+        "NOT_URGENT_IMPORTANT": "緊急ではないが重要",
+        "NOT_URGENT_NOT_IMPORTANT": "緊急でも重要でもない",
+        "TO_DO": "ToDo",
         "URGENT": "緊急",
         "URGENT_IMPORTANT": "緊急かつ重要",
-        "URGENT_NOT_IMPORTANT": "緊急 & 重要ではない"
+        "URGENT_NOT_IMPORTANT": "緊急だが重要ではない"
       },
       "FORM": {
         "ADD_NEW_PANEL": "新しいパネルを追加",
         "COLUMNS": "列",
-        "TAGS_EXCLUDED": "除外されたタグ",
-        "TAGS_REQUIRED": "必須タグ",
-        "TASK_DONE_STATE": "タスク完了状態",
-        "TASK_DONE_STATE_ALL": "すべての",
-        "TASK_DONE_STATE_DONE": "完成です",
-        "TASK_DONE_STATE_UNDONE": "取り消す"
+        "TAGS_EXCLUDED": "除外するタグ",
+        "TAGS_REQUIRED": "必須にするタグ",
+        "TASK_DONE_STATE": "タスクの状態",
+        "TASK_DONE_STATE_ALL": "すべて",
+        "TASK_DONE_STATE_DONE": "完了",
+        "TASK_DONE_STATE_UNDONE": "未完了"
       },
       "V": {
         "ADD_NEW_BOARD": "新しいボードを追加",
-        "CONFIRM_DELETE": "このボードを削除してもよろしいですか?",
+        "CONFIRM_DELETE": "このボードを削除してよろしいですか？",
         "CREATE_NEW_TAG_BTN": "タグを作成",
         "CREATE_NEW_TAG_MSG": "このボードを機能させるには、新しいタグを1つ作成する必要があります",
-        "CREATE_NEW_TAGS_BTN": "タグの作成",
-        "CREATE_NEW_TAGS_MSG": "このボードを機能させるには、{{nr}} 新しいタグを作成する必要があります",
-        "EDIT_BOARD": "編集ボード",
-        "NO_PANELS_BTN": "ボードの構成",
-        "NO_PANELS_MSG": "このボードにはパネルが設定されていません。それにいくつかのパネルを追加します。"
+        "CREATE_NEW_TAGS_BTN": "タグを作成",
+        "CREATE_NEW_TAGS_MSG": "このボードを機能させるには、{{nr}}個の新しいタグを作成する必要があります",
+        "EDIT_BOARD": "ボードを編集",
+        "NO_PANELS_BTN": "ボードを構成する",
+        "NO_PANELS_MSG": "このボードにはパネルが設定されていません。パネルを追加してください。"
       }
     },
     "CALDAV": {
@@ -146,10 +146,10 @@
     },
     "DOMINA_MODE": {
       "FORM": {
-        "HELP": "タスクの時間を追跡する際、設定されたフレーズをXごとに繰り返す。",
+        "HELP": "タスクの時間を記録中、設定されたフレーズをXごとに繰り返す。",
         "L_INTERVAL": "フレーズを繰り返す間隔",
         "L_TEXT": "テキスト",
-        "L_TEXT_DESCRIPTION": "例えば\"${currentTaskTitle}に取り組む！\"",
+        "L_TEXT_DESCRIPTION": "例：\"${currentTaskTitle}に取り組みましょう！\"",
         "TITLE": "ドミナ・モード"
       }
     },
@@ -166,41 +166,41 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "今日のリストには、まだアーカイブに移動されていない {{nr}} の完了したタスクがあります。あなたは本当にあなたの一日を終えることなくやめたいですか？"
+        "FINISH_DAY_BEFORE_EXIT": "今日のリストに、アーカイブに移動されていない完了タスクが{{nr}}個あります。あなたの1日を終えずに終了して本当に良いですか？"
       }
     },
     "FOCUS_MODE": {
       "B": {
         "SESSION_RUNNING": "フォーカスセッションが進行中です",
-        "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
+        "TO_FOCUS_OVERLAY": "フォーカスオーバーレイにする"
       },
       "BACK_TO_PLANNING": "計画に戻る",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
       "COUNTDOWN": "カウントダウン",
-      "FINISH_TASK_AND_SELECT_NEXT": "タスクを終了して次を選択",
+      "FINISH_TASK_AND_SELECT_NEXT": "タスクを完了して次を選択",
       "FLOWTIME": "フロータイム",
-      "FOR_TASK": "タスク用",
-      "GET_READY": "集中セッションの準備をしましょう!",
-      "GO_TO_PROCRASTINATION": "先延ばしにするときは助けを求める",
-      "GOGOGO": "行け、行け、行け！",
-      "NEXT": "次",
-      "ON": "オン",
-      "OPEN_ISSUE_IN_BROWSER": "ブラウザで問題を開く",
-      "POMODORO_BACK": "バック",
+      "FOR_TASK": "フォーカスするタスク",
+      "GET_READY": "フォーカスセッションの準備をしましょう!",
+      "GO_TO_PROCRASTINATION": "気が散るときはどうすればいい？",
+      "GOGOGO": "やるぞ、やるぞ、やるぞー！",
+      "NEXT": "次のタスク",
+      "ON": "でした",
+      "OPEN_ISSUE_IN_BROWSER": "ブラウザで課題を開く",
+      "POMODORO_BACK": "戻る",
       "POMODORO_DISABLE": "ポモドーロを無効にする",
-      "POMODORO_INFO": "ポモドーロ タイマーが有効になっている場合、フォーカス セッションを併用することはできません。",
-      "PREP_GET_MENTALLY_READY": "集中して生産的になるために精神的に準備する",
-      "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
-      "PREP_STRETCH": "軽いストレッチをする",
+      "POMODORO_INFO": "ポモドーロタイマーとフォーカスセッションを併用することはできません。",
+      "PREP_GET_MENTALLY_READY": "集中して生産的になるためにメンタルを整えましょう",
+      "PREP_SIT_UPRIGHT": "まっすぐに座りましょう(または立ちましょう)",
+      "PREP_STRETCH": "軽いストレッチをしましょう",
       "SELECT_ANOTHER_TASK": "別のタスクを選択",
-      "SELECT_TASK": "集中するタスクを選択",
+      "SELECT_TASK": "フォーカスするタスクを選択",
       "SESSION_COMPLETED": "フォーカスセッションが完了しました!",
-      "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
+      "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を指定する",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
       "START_FOCUS_SESSION": "フォーカスセッションを開始",
       "START_NEXT_FOCUS_SESSION": "次のフォーカスセッションを開始",
-      "WORKED_FOR": "あなたが働いていたのは"
+      "WORKED_FOR": "作業時間は"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
@@ -322,7 +322,7 @@
     "ISSUE": {
       "CROSS_ORIGIN_BROWSER_WARNING": "この統合は、お使いのブラウザでは動作しない可能性があります。デスクトップ版またはAndroid版のSuper Productivityをダウンロードしてください！",
       "DEFAULT": {
-        "ISSUE_STR": "問題",
+        "ISSUE_STR": "課題",
         "ISSUES_STR": "課題"
       },
       "DEFAULT_PROJECT_DESCRIPTION": "課題から作成されたタスクに割り当てられたプロジェクト",
@@ -347,38 +347,38 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira：APIからの締め出しを防ぐために、アクセスはSuper Productivityによってブロックされています。あなたはおそらくあなたのJira設定をチェックするべきです！",
+        "BLOCK_ACCESS_MSG": "Jira：API制限を防ぐために、アクセスはSuper Productivityによってブロックされています。あなたのJira設定を確認してください。",
         "BLOCK_ACCESS_UNBLOCK": "ブロック解除"
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "常にダイアログを開く",
         "DO_NOT": "移行しない",
-        "DONE": "タスク完了の状況",
+        "DONE": "タスク完了のステータス",
         "ENABLE": "Jira連携を有効にする",
         "ENABLE_TRANSITIONS": "遷移処理を有効にする",
-        "IN_PROGRESS": "開始タスクの状況",
+        "IN_PROGRESS": "開始タスクのステータス",
         "LOAD_SUGGESTIONS": "候補を読み込む",
         "MAP_CUSTOM_FIELDS": "カスタムフィールドのマッピング",
         "MAP_CUSTOM_FIELDS_INFO": "残念ながら、Jiraのデータの中には、インストールごとに異なるカスタムフィールドの下に保存されているものがあります。このデータを含める場合は、適切なカスタムフィールドを選択する必要があります。",
         "OPEN": "一時停止中のタスクのステータス",
         "SELECT_ISSUE_FOR_TRANSITIONS": "利用可能なトランジションをロードするために課題を選択",
         "STORY_POINTS": "ストーリーポイント",
-        "TRANSITION": "トランジション・ハンドリング"
+        "TRANSITION": "遷移処理"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> は現在 <strong>{{assignee}}</strong>に割り当てられています。自分に割り当てますか？",
-        "OK": "やれ！"
+        "OK": "割り当てる"
       },
       "DIALOG_INITIAL": {
-        "TITLE": "プロジェクトのセットアップJira"
+        "TITLE": "プロジェクト用にJiraを設定"
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "割り当てるステータスを選択",
         "CURRENT_ASSIGNEE": "現在の担当者：",
-        "CURRENT_STATUS": "現在の状態：",
+        "CURRENT_STATUS": "現在のステー5アス：",
         "TASK_NAME": "タスク名：",
-        "TITLE": "Jira：ステータス更新",
-        "UPDATE_STATUS": "最新状況"
+        "TITLE": "Jira：ステータスを更新",
+        "UPDATE_STATUS": "最新のステータス"
       },
       "DIALOG_WORKLOG": {
         "CHECKBOXES": {
@@ -391,10 +391,10 @@
         "INVALID_DATE": "入力された値は日付ではありません。",
         "SAVE_WORKLOG": "作業ログを保存",
         "STARTED": "始めました",
-        "SUBMIT_WORKLOG_FOR": "の仕事ログをJiraに提出する",
+        "SUBMIT_WORKLOG_FOR": "の作業ログをJiraに提出する",
         "TIME_SPENT": "使った時間",
         "TIME_SPENT_TOOLTIP": "異なる時間を追加する",
-        "TITLE": "Jira：作業記録を提出する"
+        "TITLE": "Jira：作業ログを提出する"
       },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "バックログにタスクを自動的に追加するために使用されるJQL",
@@ -405,8 +405,8 @@
         "WORKLOG_DEFAULT_ALL_TIME": "タスクに費やしたすべての時間を記入してください",
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "費やした時間から記録した時間を差し引いたすべての時間を入力します",
         "WORKLOG_DEFAULT_TIME_MODE": "ダイアログのデフォルトの時間値",
-        "WORKLOG_DEFAULT_TODAY": "今日過ごした時間だけを埋める",
-        "WORKLOG_DEFAULT_YESTERDAY": "昨日過ごした時間だけを埋める"
+        "WORKLOG_DEFAULT_TODAY": "今日費やした時間だけを埋める",
+        "WORKLOG_DEFAULT_YESTERDAY": "昨日費やした時間だけを埋める"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "自己署名証明書を許可する",
@@ -427,7 +427,7 @@
           "P1_3": "自動的に（たとえば、計画ビューにアクセスするたびに）したい場合は、カスタムJQLクエリで指定されたすべての新しいタスクをバックログに追加するように設定することもできます。",
           "P1_4": "別の選択肢は「現在のチケットが現在のユーザに割り当てられているかどうかを確認する」です。有効にして開始すると、現在Jiraでそのチケットに割り当てられているかどうかがチェックされます。そうでない場合は、チケットを自分に割り当てることを選択できるダイアログが表示されます。",
           "P2_1": "いつ、どのように作業ログを送信するかを決定するためのいくつかのオプションがあります。タスクが完了したときに作業ログをJiraに追加するための <em>'作業ログダイアログを開く'</em> を有効にすると、Jiraタスクに完了のマークを付けるたびに作業ログを追加するダイアログが開きます。そのため、これまで追跡してきたすべてのものの上に作業ログが追加されることに注意してください。そのため、タスクを2回目の完了としてマークした場合、そのタスクの全作業時間を再度送信することは望ましくないかもしれません。",
-          "P2_2": "<em>'サブタスクが完了したときにワークログダイアログを開き、サブタスク自体を持つタスクには対しては開きません」</em> は、Jira 課題のサブタスクを完了としてマークするたびにワークログ ダイアログを開きます。サブタスクを使用して時間を追跡しているため、Jira タスク自体を完了としてマークするとダイアログは開かなくなります。",
+          "P2_2": "<em>'サブタスクが完了したときに作業ログダイアログを開き、サブタスク自体を持つタスクには対しては開きません」</em> は、Jira 課題のサブタスクを完了としてマークするたびにワークログ ダイアログを開きます。サブタスクを使用して時間を追跡しているため、Jira タスク自体を完了としてマークするとダイアログは開かなくなります。",
           "P2_3": "<em>'ダイアログなしで作業ログに更新を自動的に送信'</em> はそれが言うことをします。タスクを複数回行われたものとしてマークすると、全体の作業時間が2回追跡されることになるため、これはお勧めできません。",
           "P3_1": "ここでデフォルトのトランジションを再設定できます。 JiraはあなたのJiraアジャイルボード上の異なるコラムとして通常実行される移行の幅広い設定を可能にします。タスクをいつどこに移行するかについて仮定することはできず、手動で設定する必要があります。"
         }
@@ -436,7 +436,7 @@
         "ASSIGNEE": "担当者",
         "AT": "で",
         "ATTACHMENTS": "添付ファイル",
-        "CHANGED": "かわった",
+        "CHANGED": "変更された",
         "COMMENTS": "コメント",
         "COMPONENTS": "コンポーネント",
         "DESCRIPTION": "説明",
@@ -469,7 +469,7 @@
       },
       "STEPPER": {
         "CREDENTIALS": "資格情報",
-        "DONE": "これで終わりです。",
+        "DONE": "これで完了です。",
         "LOGIN_SUCCESS": "ログイン成功！",
         "TEST_CREDENTIALS": "テスト資格情報",
         "WELCOME_USER": " {{user}}さん、ようこそ！"
