@@ -1,10 +1,8 @@
-import { BASE, cssSelectors } from '../e2e.const';
-import { NBrowser } from '../n-browser-interface';
+import { cssSelectors } from '../../e2e.const';
+import { NBrowser } from '../../n-browser-interface';
 
-const { FINISH_DAY_BTN } = cssSelectors;
+const { TASK_LIST } = cssSelectors;
 /* eslint-disable @typescript-eslint/naming-convention */
-
-const WORK_VIEW_URL = `${BASE}/`;
 
 const TASK = 'task';
 const TASK_2 = `${TASK}:nth-of-type(1)`;
@@ -23,11 +21,12 @@ const SCHEDULE_PAGE_TASK_2_TITLE_EL = `${SCHEDULE_PAGE_TASK_2} .title`;
 
 module.exports = {
   '@tags': ['task', 'reminder'],
+  before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
+  after: (browser: NBrowser) => browser.end(),
 
   'should add a scheduled tasks': (browser: NBrowser) =>
     browser
-      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementPresent(FINISH_DAY_BTN)
+      .waitForElementPresent(TASK_LIST)
       .addTaskWithReminder({ title: '0 test task koko', scheduleTime: Date.now() })
       .waitForElementVisible(TASK)
       .waitForElementVisible(TASK_SCHEDULE_BTN)
@@ -38,15 +37,18 @@ module.exports = {
       .waitForElementVisible(SCHEDULE_PAGE_CMP)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1_TITLE_EL)
-      .assert.textContains(SCHEDULE_PAGE_TASK_1_TITLE_EL, '0 test task koko')
-      .end(),
+      .assert.textContains(SCHEDULE_PAGE_TASK_1_TITLE_EL, '0 test task koko'),
 
   'should add multiple scheduled tasks': (browser: NBrowser) =>
     browser
-      .loadAppAndClickAwayWelcomeDialog(WORK_VIEW_URL)
-      .waitForElementPresent(FINISH_DAY_BTN)
-      .addTaskWithReminder({ title: '0 test task koko', taskSel: TASK })
-      .addTaskWithReminder({ title: '2 hihihi', taskSel: TASK_2 })
+      .click('.current-work-context-title')
+      .waitForElementPresent(TASK_LIST)
+      .pause(1000)
+      .addTaskWithReminder({
+        title: '2 hihihi',
+        taskSel: TASK_2,
+        scheduleTime: Date.now(),
+      })
       .waitForElementVisible(TASK)
       .waitForElementVisible(TASK_SCHEDULE_BTN)
       .assert.elementPresent(TASK_SCHEDULE_BTN)
@@ -58,6 +60,5 @@ module.exports = {
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1)
       .waitForElementVisible(SCHEDULE_PAGE_TASK_1_TITLE_EL)
       .assert.textContains(SCHEDULE_PAGE_TASK_1_TITLE_EL, '0 test task koko')
-      .assert.textContains(SCHEDULE_PAGE_TASK_2_TITLE_EL, '2 hihihi')
-      .end(),
+      .assert.textContains(SCHEDULE_PAGE_TASK_2_TITLE_EL, '2 hihihi'),
 };

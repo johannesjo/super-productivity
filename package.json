@@ -205,7 +205,7 @@
     "new-github-issue-url": "^1.1.0",
     "ng2-charts": "^8.0.0",
     "ngx-markdown": "^19.0.0",
-    "nightwatch": "^3.6.3",
+    "nightwatch": "^3.12.1",
     "p-throttle": "^7.0.0",
     "prettier": "^3.5.1",
     "pretty-quick": "^4.1.1",
