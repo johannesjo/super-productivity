@@ -30,7 +30,7 @@ $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
 .tag-title {
   display: block;
   font-size: 12px;
-  line-height: $line-height;
+  line-height: 1;
   padding: $pad 0;
 
   @include darkTheme() {
