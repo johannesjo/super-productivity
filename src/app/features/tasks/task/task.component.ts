@@ -216,6 +216,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isActionTriggered: boolean = false;
   ShowSubTasksMode: typeof HideSubTasksMode = HideSubTasksMode;
   isFirstLineHover: boolean = false;
+  _nextFocusTaskEl?: HTMLElement;
 
   readonly taskTitleEditEl = viewChild<TaskTitleComponent>('taskTitleEditEl');
   readonly blockLeftElRef = viewChild<ElementRef>('blockLeftEl');
@@ -324,6 +325,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   scheduleTask(): void {
+    this._storeNextFocusEl();
     this._matDialog
       .open(DialogScheduleTaskComponent, {
         // we focus inside dialog instead
@@ -543,24 +545,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    const taskEls = Array.from(document.querySelectorAll('task'));
-    const activeEl =
-      document.activeElement?.tagName.toLowerCase() === 'task'
-        ? document.activeElement
-        : document.activeElement?.closest('task');
-    const currentIndex = taskEls.findIndex((el) => el === activeEl);
-    const nextEl = isTaskMovedInList
-      ? (() => {
-          // if a parent task is moved in list, as it is for when toggling done,
-          // we don't want to focus the next sub-task, but the next main task instead
-          if (this.task().subTaskIds.length) {
-            return taskEls.find((el, i) => {
-              return i > currentIndex && el.parentElement?.closest('task');
-            }) as HTMLElement | undefined;
-          }
-          return taskEls[currentIndex + 1] as HTMLElement;
-        })()
-      : (taskEls[currentIndex + 1] as HTMLElement);
+    const nextEl = this._getNextFocusEl(isTaskMovedInList);
+    this._nextFocusTaskEl = undefined;
 
     if (nextEl) {
       nextEl.focus();
@@ -807,6 +793,36 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   trackByProjectId(i: number, project: Project): string {
     return project.id;
+  }
+
+  private _storeNextFocusEl(): void {
+    this._nextFocusTaskEl = this._getNextFocusEl();
+  }
+
+  private _getNextFocusEl(isTaskMovedInList = false): HTMLElement | undefined {
+    if (this._nextFocusTaskEl) {
+      return this._nextFocusTaskEl;
+    }
+
+    const taskEls = Array.from(document.querySelectorAll('task'));
+    const activeEl =
+      document.activeElement?.tagName.toLowerCase() === 'task'
+        ? document.activeElement
+        : document.activeElement?.closest('task');
+    const currentIndex = taskEls.findIndex((el) => el === activeEl);
+    const nextEl = isTaskMovedInList
+      ? (() => {
+          // if a parent task is moved in list, as it is for when toggling done,
+          // we don't want to focus the next sub-task, but the next main task instead
+          if (this.task().subTaskIds.length) {
+            return taskEls.find((el, i) => {
+              return i > currentIndex && el.parentElement?.closest('task');
+            }) as HTMLElement | undefined;
+          }
+          return taskEls[currentIndex + 1] as HTMLElement;
+        })()
+      : (taskEls[currentIndex + 1] as HTMLElement);
+    return nextEl;
   }
 
   private _handlePan(ev: any): void {
