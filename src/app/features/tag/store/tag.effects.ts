@@ -32,13 +32,14 @@ import { Router } from '@angular/router';
 import { INBOX_TAG, TODAY_TAG } from '../tag.const';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { selectAllTasksDueToday, selectTaskById } from '../../tasks/store/task.selectors';
+import { selectTaskById } from '../../tasks/store/task.selectors';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TranslateService } from '@ngx-translate/core';
 import { PlannerService } from '../../planner/planner.service';
+import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 
 @Injectable()
 export class TagEffects {
@@ -166,7 +167,7 @@ export class TagEffects {
     { dispatch: false },
   );
 
-  cleanupNullTasksForTaskList: Observable<unknown> = createEffect(
+  cleanupNullTasksForTaskList$: Observable<unknown> = createEffect(
     () =>
       this._workContextService.activeWorkContextTypeAndId$.pipe(
         filter(({ activeType }) => activeType === WorkContextType.TAG),
