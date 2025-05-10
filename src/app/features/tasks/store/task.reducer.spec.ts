@@ -4,6 +4,7 @@ import { initialTaskState, taskReducer } from './task.reducer';
 import * as fromActions from './task.actions';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
+import { INBOX_PROJECT } from '../../project/project.const';
 
 describe('Task Reducer', () => {
   const createTask = (id: string, partial: Partial<Task> = {}): Task => ({
@@ -13,7 +14,7 @@ describe('Task Reducer', () => {
     isDone: false,
     subTaskIds: [],
     tagIds: [],
-    projectId: undefined,
+    projectId: INBOX_PROJECT.id,
     parentId: undefined,
     timeSpentOnDay: {},
     timeEstimate: 0,

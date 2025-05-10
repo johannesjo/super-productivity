@@ -12,6 +12,7 @@ import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cf
 import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { INBOX_PROJECT } from '../../features/project/project.const';
 
 // TODO improve later
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
@@ -63,6 +64,7 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _removeDuplicatesFromArchive(dataOut);
   dataOut = _removeMissingReminderIds(dataOut);
   dataOut = _fixTaskRepeatMissingWeekday(dataOut);
+  dataOut = _addInboxProjectIdIfNecessary(dataOut);
 
   // console.timeEnd('dataRepair');
   return dataOut;
@@ -322,6 +324,52 @@ const _addOrphanedTasksToProjectLists = (
   return data;
 };
 
+const _addInboxProjectIdIfNecessary = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  const { task, archiveYoung } = data;
+  const taskIds: string[] = task.ids;
+  const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
+
+  if (!data.project.entities[INBOX_PROJECT.id]) {
+    // @ts-ignore
+    data.project.entities[INBOX_PROJECT.id] = {
+      ...INBOX_PROJECT,
+    };
+    // @ts-ignore
+    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids];
+  }
+
+  taskIds.forEach((id) => {
+    const t = task.entities[id] as TaskCopy;
+    if (!t.projectId) {
+      console.log('Set inbox project id for task  ' + t.id);
+      // @ts-ignore
+      data.project.entities[INBOX_PROJECT.id].taskIds = [
+        ...(data.project.entities[INBOX_PROJECT.id]!.taskIds as string[]),
+        t.id,
+      ];
+      t.projectId = INBOX_PROJECT.id;
+    }
+
+    // while we are at it
+    if (t.tagIds.includes(TODAY_TAG.id)) {
+      t.tagIds = t.tagIds.filter((idI) => idI !== TODAY_TAG.id);
+    }
+  });
+
+  console.log(taskArchiveIds);
+  console.log(Object.keys(archiveYoung.task.entities));
+
+  taskArchiveIds.forEach((id) => {
+    const t = archiveYoung.task.entities[id] as TaskCopy;
+    if (!t.projectId) {
+      console.log('Set inbox project for missing project id from archive task ' + t.id);
+      t.projectId = INBOX_PROJECT.id;
+    }
+  });
+
+  return data;
+};
+
 const _removeNonExistentProjectIdsFromTasks = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
@@ -332,8 +380,9 @@ const _removeNonExistentProjectIdsFromTasks = (
   taskIds.forEach((id) => {
     const t = task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
-      console.log('Delete missing project id from task ' + t.projectId);
-      delete t.projectId;
+      console.log('Set project id for task  ' + t.id + ' project' + t.projectId);
+      // @ts-ignore
+      data.project.entities[t.projectId].taskIds.push(t.id);
     }
   });
 
@@ -343,8 +392,10 @@ const _removeNonExistentProjectIdsFromTasks = (
   taskArchiveIds.forEach((id) => {
     const t = archiveYoung.task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
-      console.log('Delete missing project id from archive task ' + t.projectId);
-      delete t.projectId;
+      console.log(
+        'Set default project for missing project id from archive task ' + t.projectId,
+      );
+      t.projectId = INBOX_PROJECT.id;
     }
   });
 

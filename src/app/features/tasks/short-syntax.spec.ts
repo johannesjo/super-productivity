@@ -9,10 +9,11 @@ import { Tag } from '../tag/tag.model';
 import { DEFAULT_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { INBOX_PROJECT } from '../project/project.const';
 
 const TASK: TaskCopy = {
   id: 'id',
-  projectId: undefined,
+  projectId: INBOX_PROJECT.id,
   subTaskIds: [],
   timeSpentOnDay: {},
   timeSpent: 0,
