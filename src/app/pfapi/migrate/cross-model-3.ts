@@ -1,16 +1,17 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
-import {
-  INBOX_TAG,
-  LEGACY_NO_LIST_TAG_ID,
-  TODAY_TAG,
-} from '../../features/tag/tag.const';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { isToday } from '../../util/is-today.util';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
 import { plannerInitialState } from '../../features/planner/store/planner.reducer';
+import {
+  INBOX_PROJECT,
+  LEGACY_NO_LIST_TAG_ID,
+} from '../../features/project/project.const';
+import { ProjectState } from '../../features/project/project.model';
 
 export const crossModelMigration3: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
@@ -59,13 +60,13 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
   }
 
   // needed to replace task.tagIds if available
-  if (!copy.tag.entities[INBOX_TAG.id]) {
+  if (!copy.project.entities[INBOX_PROJECT.id]) {
     // @ts-ignore
-    copy.tag.entities[INBOX_TAG.id] = {
-      ...INBOX_TAG,
+    copy.project.entities[INBOX_PROJECT.id] = {
+      ...INBOX_PROJECT,
     };
     // @ts-ignore
-    copy.tag.ids = [INBOX_TAG.id, ...copy.tag.ids];
+    copy.project.ids = [INBOX_PROJECT.id, ...copy.project.ids];
   }
 
   const legacyNoListTag = copy.tag.entities[LEGACY_NO_LIST_TAG_ID];
@@ -76,30 +77,34 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     delete copy.tag.entities[LEGACY_NO_LIST_TAG_ID];
   }
 
-  migrateTasks(copy.task);
-  migrateTasks(copy.archiveYoung.task);
-  migrateTasks(copy.archiveOld.task);
+  migrateTasks(copy.task, copy.project);
+  migrateTasks(copy.archiveYoung.task, copy.project);
+  migrateTasks(copy.archiveOld.task, copy.project);
 
   console.log(copy);
   return copy;
 }) as CrossModelMigrateFn;
 
-const migrateTasks = <T extends EntityState<TaskCopy>>(s: T): void => {
+const migrateTasks = <T extends EntityState<TaskCopy>>(
+  s: T,
+  projectState: ProjectState,
+): void => {
+  const inboxProject = projectState.entities[INBOX_PROJECT.id]!;
+
   Object.keys(s.entities).forEach((id) => {
     const task = s.entities[id];
     if (task) {
-      const legacyNoListTagIndex = task.tagIds.findIndex(
-        (tagId) => tagId === LEGACY_NO_LIST_TAG_ID,
-      );
-      if (legacyNoListTagIndex > -1) {
+      const isLegacyNoListTagPresent = task.tagIds.includes(LEGACY_NO_LIST_TAG_ID);
+      if (isLegacyNoListTagPresent) {
         // @ts-ignore
-        task.tagIds[legacyNoListTagIndex] = INBOX_TAG.id;
+        task.tagIds = task.tagIds.filter((value) => value !== LEGACY_NO_LIST_TAG_ID);
+        if (!task.projectId) {
+          // @ts-ignore
+          task.projectId = INBOX_PROJECT.id;
+          // @ts-ignore
+          inboxProject.taskIds = [...inboxProject.taskIds, task.id];
+        }
       }
-
-      // @ts-ignore
-      task.tagIds = task.tagIds.filter(
-        (tagId) => tagId !== TODAY_TAG.id && tagId !== LEGACY_NO_LIST_TAG_ID,
-      );
     }
   });
 };

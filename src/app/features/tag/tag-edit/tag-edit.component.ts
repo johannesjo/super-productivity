@@ -86,9 +86,7 @@ export class TagEditComponent {
   tagSuggestions = toSignal(
     toObservable(this.isShowMyDayTag).pipe(
       switchMap((isShowMyDay) =>
-        isShowMyDay
-          ? this._tagService.tagsNoNoList$
-          : this._tagService.tagsNoMyDayAndNoList$,
+        isShowMyDay ? this._tagService.tags$ : this._tagService.tagsNoMyDayAndNoList$,
       ),
     ),
     { initialValue: [] },

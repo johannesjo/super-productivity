@@ -3,6 +3,7 @@ import { Reminder } from '../reminder/reminder.model';
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 import { MODEL_VERSION_KEY } from '../../app.constants';
+import { INBOX_PROJECT } from '../project/project.const';
 
 export enum HideSubTasksMode {
   // Show is undefined
@@ -70,7 +71,7 @@ export interface IssueFieldsForTask {
 
 export interface TaskCopy extends IssueFieldsForTask {
   id: string;
-  projectId?: string;
+  projectId: string;
   title: string;
 
   subTaskIds: string[];
@@ -161,6 +162,7 @@ export const DEFAULT_TASK: Task = {
   title: '',
   tagIds: [],
   created: Date.now(),
+  projectId: INBOX_PROJECT.id,
 
   attachments: [],
 };

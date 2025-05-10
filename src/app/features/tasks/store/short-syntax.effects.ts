@@ -36,7 +36,8 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { INBOX_TAG } from '../../tag/tag.const';
+
+import { INBOX_PROJECT } from '../../project/project.const';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -78,7 +79,8 @@ export class ShortSyntaxEffects {
         this._projectService.list$,
         this._globalConfigService.misc$.pipe(
           map((misc) => misc.defaultProjectId),
-          filter(() => this._workContextService.activeWorkContextId !== INBOX_TAG.id),
+          // TODO re-check
+          filter(() => this._workContextService.activeWorkContextId !== INBOX_PROJECT.id),
           concatMap((defaultProjectId) =>
             defaultProjectId
               ? this._projectService.getByIdOnce$(defaultProjectId).pipe(
@@ -110,8 +112,7 @@ export class ShortSyntaxEffects {
           !task.projectId &&
           !task.parentId &&
           task.projectId !== defaultProjectId &&
-          originalAction.type === addTask.type &&
-          this._workContextService.activeWorkContextId !== INBOX_TAG.id;
+          originalAction.type === addTask.type;
 
         if (!r) {
           if (isAddDefaultProjectIfNecessary) {

@@ -25,7 +25,7 @@ import {
   take,
   withLatestFrom,
 } from 'rxjs/operators';
-import { INBOX_TAG, TODAY_TAG } from '../tag/tag.const';
+import { TODAY_TAG } from '../tag/tag.const';
 import { TagService } from '../tag/tag.service';
 import { ArchiveTask, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
@@ -62,6 +62,8 @@ import { getTimeSpentForDay } from './get-time-spent-for-day.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
+import { INBOX_PROJECT } from '../project/project.const';
+import { selectProjectById } from '../project/store/project.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -172,7 +174,7 @@ export class WorkContextService {
   );
 
   inboxWorkContext$: Observable<WorkContext> = this._isAllDataLoaded$.pipe(
-    concatMap(() => this._tagService.getTagById$(INBOX_TAG.id)),
+    concatMap(() => this._store$.select(selectProjectById, { id: INBOX_PROJECT.id })),
     map(
       (inboxWorkContext) =>
         ({
@@ -184,8 +186,9 @@ export class WorkContextService {
         }) as WorkContext,
     ),
     switchMap((inboxWorkContext) =>
-      inboxWorkContext.id === INBOX_TAG.id && inboxWorkContext.title === INBOX_TAG.title
-        ? this._translateService.stream(T.G.INBOX_TAG_TITLE).pipe(
+      inboxWorkContext.id === INBOX_PROJECT.id &&
+      inboxWorkContext.title === INBOX_PROJECT.title
+        ? this._translateService.stream(T.G.INBOX_PROJECT_TITLE).pipe(
             distinctUntilChanged(),
             map((translation) => ({
               ...inboxWorkContext,
