@@ -40,6 +40,10 @@ import { TIME_TRACKING_TO_DB_INTERVAL } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
 import { removeTasksFromTodayTag } from '../../features/tag/store/tag.actions';
+import { loadAllData } from '../meta/load-all-data.action';
+import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
+
+const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
 @Injectable()
 export class SaveToDbEffects {
@@ -61,7 +65,6 @@ export class SaveToDbEffects {
   issueProvider$ = this.createSaveEffect(selectIssueProviderState, 'issueProvider');
   note$ = this.createSaveEffect(selectNoteFeatureState, 'note');
   metric$ = this.createSaveEffect(selectMetricFeatureState, 'metric');
-  improvement$ = this.createSaveEffect(selectImprovementFeatureState, 'improvement');
   obstruction$ = this.createSaveEffect(selectObstructionFeatureState, 'obstruction');
   simpleCounter$ = this.createSaveEffect(
     selectSimpleCounterFeatureState,
@@ -70,6 +73,12 @@ export class SaveToDbEffects {
   taskRepeatCfg$ = this.createSaveEffect(
     selectTaskRepeatCfgFeatureState,
     'taskRepeatCfg',
+  );
+
+  improvement$ = this.createSaveEffectWithFilter(
+    selectImprovementFeatureState,
+    'improvement',
+    [clearHiddenImprovements.type],
   );
 
   // ---------------------------------------------------
@@ -149,6 +158,14 @@ export class SaveToDbEffects {
           switchMap(() => this._store.select(selector)),
           skip(1),
           switchMap((state) =>
+            // thankfully the next action after is the action that triggered the change
+            this._actions.pipe(
+              first(),
+              map((a) => [state, a]),
+            ),
+          ),
+          filter(([state, action]) => !ALWAYS_IGNORED_ACTIONS.includes(action.type)),
+          switchMap(([state]) =>
             this._pfapiService.m[modelKey].save(state, {
               isUpdateRevAndLastUpdate: true,
             }),
@@ -167,6 +184,7 @@ export class SaveToDbEffects {
     modelKey: K,
     ignoredActionsTypes: string[],
   ) {
+    const ignoredActionTypesToUse = [...ALWAYS_IGNORED_ACTIONS, ...ignoredActionsTypes];
     return createEffect(
       () =>
         this._dataInitStateService.isAllDataLoadedInitially$.pipe(
@@ -182,11 +200,11 @@ export class SaveToDbEffects {
           tap(([state, action]) =>
             console.log(
               `__DB_S_${modelKey}__`,
-              !ignoredActionsTypes.includes(action.type),
+              !ignoredActionTypesToUse.includes(action.type),
               action.type,
             ),
           ),
-          filter(([state, action]) => !ignoredActionsTypes.includes(action.type)),
+          filter(([state, action]) => !ignoredActionTypesToUse.includes(action.type)),
           switchMap(([state]) =>
             this._pfapiService.m[modelKey].save(state, {
               isUpdateRevAndLastUpdate: true,
