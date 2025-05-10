@@ -1,8 +1,10 @@
-<mat-icon
-  [style.background]="color()"
-  class="tag-ico"
-  >{{ tag().icon }}</mat-icon
->
+@if (!isInboxTag()) {
+  <mat-icon
+    [style.background]="color()"
+    class="tag-ico"
+    >{{ tag().icon }}
+  </mat-icon>
+}
 @if (!isHideTitle()) {
   <span class="tag-title">{{ tag().title }}</span>
 }
