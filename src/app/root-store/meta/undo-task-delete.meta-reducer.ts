@@ -11,6 +11,7 @@ import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reduc
 import { taskAdapter } from '../../features/tasks/store/task.adapter';
 import { Project } from '../../features/project/project.model';
 import { Action, ActionReducer } from '@ngrx/store/src/models';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 export interface UndoTaskDeleteState {
   projectId?: string;
@@ -175,7 +176,7 @@ const _createTaskDeleteState = (
     }
 
     const tagState = state[TAG_FEATURE_NAME];
-    const tagTaskIdMap = task.tagIds.reduce((acc, id) => {
+    const tagTaskIdMap = [TODAY_TAG.id, ...task.tagIds].reduce((acc, id) => {
       const tag = tagState.entities[id];
       if (!tag) {
         console.log('------ERR_ADDITIONAL_INFO------');
