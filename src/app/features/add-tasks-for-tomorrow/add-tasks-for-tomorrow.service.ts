@@ -17,6 +17,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { PlannerService } from '../planner/planner.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
+import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
 
 const filterDoneAndToday = (task: TaskCopy): boolean =>
   !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
@@ -71,6 +72,7 @@ export class AddTasksForTomorrowService {
     ),
   ]).pipe(map(([a, b, c]) => a.length + b.length + c.length));
 
+  // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   async addAllDueTomorrow(): Promise<'ADDED' | void> {
     const dueRepeatCfgs = await this._repeatableForTomorrow$.pipe(first()).toPromise();
 
@@ -91,10 +93,10 @@ export class AddTasksForTomorrowService {
       .toPromise();
 
     // we do this to keep the order of the tasks in planner
-    const tomorrowFromPlanner = await this._plannerService.tomorrow$
+    const tomorrowTasksFromPlanner = await this._store
+      .select(selectTasksForPlannerDay(getWorklogStr(tomorrow)))
       .pipe(first())
       .toPromise();
-    const tomorrowTasksFromPlanner = tomorrowFromPlanner?.tasks || [];
 
     const allDue = tomorrowTasksFromPlanner;
 
@@ -104,7 +106,85 @@ export class AddTasksForTomorrowService {
       }
     });
 
-    const allDueSorted = allDue.sort((a, b) => {
+    const allDueSorted = this._sortAll(allDue);
+
+    this._movePlannedTasksToToday(allDueSorted);
+
+    if (allDueSorted.length) {
+      return 'ADDED';
+    }
+  }
+
+  // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
+  async addAllDueToday(): Promise<'ADDED' | void> {
+    const todayDate = new Date();
+    // Use current timestamp for today
+    const todayTS = Date.now();
+    const todayStr = getWorklogStr();
+
+    const dueRepeatCfgs = await this._taskRepeatCfgService
+      .getRepeatableTasksDueForDayOnly$(todayDate.getTime())
+      .pipe(first())
+      .toPromise();
+
+    const promises = dueRepeatCfgs.sort(sortRepeatableTaskCfgs).map((repeatCfg) => {
+      return this._taskRepeatCfgService.createRepeatableTask(repeatCfg, todayTS);
+    });
+    await Promise.all(promises);
+
+    // Get tasks due for today
+    const [dueWithTime, dueWithDay] = await combineLatest([
+      this._store
+        .select(selectTasksWithDueTimeForRange, getDateRangeForDay(todayDate.getTime()))
+        .pipe(map((tasks) => tasks.filter(filterDoneAndToday))),
+      this._store
+        .select(selectTasksDueForDay, getWorklogStr(todayDate))
+        .pipe(map((tasks) => tasks.filter(filterDoneAndToday))),
+    ])
+      .pipe(first())
+      .toPromise();
+
+    // Get today from planner instead of tomorrow
+    // const daysFromPlanner = await this._plannerService.days$.pipe(first()).toPromise();
+    // const todayFromPlanner = daysFromPlanner.find((d) => d.dayDate === todayStr);
+    // const todayTasksFromPlanner = todayFromPlanner?.tasks || [];
+    const todayTasksFromPlanner = await this._store
+      .select(selectTasksForPlannerDay(todayStr))
+      .pipe(first())
+      .toPromise();
+    console.log(JSON.parse(JSON.stringify(todayTasksFromPlanner)));
+
+    const allDue = todayTasksFromPlanner;
+
+    [...dueWithTime, ...dueWithDay].forEach((task) => {
+      if (!allDue.find((t) => t.id === task.id)) {
+        console.log('AAAAAA', task);
+
+        allDue.push(task);
+      }
+    });
+
+    const allDueSorted = this._sortAll([...allDue]);
+    console.log({ allDue, allDueSorted });
+
+    this._movePlannedTasksToToday(allDueSorted);
+
+    if (allDueSorted.length) {
+      return 'ADDED';
+    }
+  }
+
+  private _movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
+    this._store.dispatch(
+      planTasksForToday({
+        taskIds: plannedTasks.map((t) => t.id),
+        isSkipRemoveReminder: true,
+      }),
+    );
+  }
+
+  private _sortAll(tasks: TaskCopy[]): TaskCopy[] {
+    return tasks.sort((a, b) => {
       // Handle cases where properties might be undefined
       const aDate = a.dueDay ? new Date(a.dueDay) : null;
       const bDate = b.dueDay ? new Date(b.dueDay) : null;
@@ -137,20 +217,5 @@ export class AddTasksForTomorrowService {
       // Default chronological ordering
       return aTime - bTime;
     });
-
-    this.movePlannedTasksToToday(allDueSorted);
-
-    if (allDueSorted.length) {
-      return 'ADDED';
-    }
-  }
-
-  movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
-    this._store.dispatch(
-      planTasksForToday({
-        taskIds: plannedTasks.map((t) => t.id),
-        isSkipRemoveReminder: true,
-      }),
-    );
   }
 }
