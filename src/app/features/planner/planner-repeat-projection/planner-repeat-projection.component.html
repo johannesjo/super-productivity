@@ -1,8 +1,6 @@
 <div
   (click)="editTaskRepeatCfg()"
-  matTooltip="{{
-    T.F.PLANNER.EDIT_REPEATED_TASK | translate: { taskName: repeatCfg().title }
-  }}"
+  [title]="T.F.PLANNER.EDIT_REPEATED_TASK | translate: { taskName: repeatCfg().title }"
 >
   <mat-icon svgIcon="repeat"></mat-icon>
   <div class="title">
