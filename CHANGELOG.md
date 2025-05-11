@@ -1,3 +1,9 @@
+## [12.0.6-rc.7](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.6...v12.0.6-rc.7) (2025-05-11)
+
+### Features
+
+- improve planner styling by making it a vertical list ([4757d8c](https://github.com/johannesjo/super-productivity/commit/4757d8c46ee366e8c3618e120f7cbab0450db822))
+
 ## [12.0.6-rc.6](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.5...v12.0.6-rc.6) (2025-05-11)
 
 ### Bug Fixes
