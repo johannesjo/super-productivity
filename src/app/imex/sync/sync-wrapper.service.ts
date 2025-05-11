@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -66,6 +66,7 @@ export class SyncWrapperService {
     switchMap((isEnabled) =>
       isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
     ),
+    first(),
   );
 
   // TODO move someplace else
