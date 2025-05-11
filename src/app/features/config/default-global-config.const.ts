@@ -137,7 +137,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   sound: {
     volume: 75,
     isIncreaseDoneSoundPitch: true,
-    doneSound: 'done2.mp3',
+    doneSound: 'ding-small-bell.mp3',
     breakReminderSound: null,
     trackTimeSound: null,
   },
