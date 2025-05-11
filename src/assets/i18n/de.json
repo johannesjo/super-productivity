@@ -1322,6 +1322,7 @@
     "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api und Leerlaufzeitbehandlung zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
     "HIDE": "Verstecken",
     "ICON_INP_DESCRIPTION": "Alle utf-8-Emojis werden ebenfalls unterstützt!",
+    "INBOX_PROJECT_TITLE": "Eingang",
     "LOGIN": "Anmeldung",
     "LOGOUT": "Ausloggen",
     "MINUTES": "{{m}} Minuten",
