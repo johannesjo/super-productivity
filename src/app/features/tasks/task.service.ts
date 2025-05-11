@@ -1028,7 +1028,7 @@ export class TaskService {
 
       ...(workContextType === WorkContextType.PROJECT
         ? { projectId: workContextId }
-        : {}),
+        : { projectId: INBOX_PROJECT.id }),
 
       tagIds:
         workContextType === WorkContextType.TAG &&
@@ -1040,8 +1040,6 @@ export class TaskService {
       ...(workContextId === TODAY_TAG.id && !additional.parentId
         ? { dueDay: getWorklogStr() }
         : {}),
-
-      projectId: INBOX_PROJECT.id,
 
       ...additional,
     };
