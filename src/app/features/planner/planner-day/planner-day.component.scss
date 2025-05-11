@@ -10,6 +10,12 @@
 
   padding-bottom: 96px;
   margin-bottom: 32px;
+
+  @include mq(xs, max) {
+    width: auto;
+    padding: 0;
+    margin-bottom: 16px;
+  }
 }
 
 :host header {
@@ -89,6 +95,12 @@
   flex-grow: 1;
   /* Additional styles if needed */
   margin-top: 16px;
+
+  @include mq(xs, max) {
+    &.no-items {
+      display: none;
+    }
+  }
 }
 
 .normal-tasks-items,

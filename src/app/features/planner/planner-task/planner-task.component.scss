@@ -23,6 +23,12 @@ $h: $planner-item-height;
       text-decoration: line-through;
     }
   }
+
+  ::ng-deep tag-list {
+    margin-top: -2px;
+    margin-bottom: -2px;
+    margin-left: -4px;
+  }
 }
 
 :host-context(.isLightTheme).isCurrent {
@@ -37,13 +43,17 @@ $h: $planner-item-height;
 }
 
 .no-drag {
-  padding: 4px 0;
   display: flex;
   align-items: center;
   flex-grow: 1;
   flex-shrink: 1;
   min-width: 0;
   position: relative;
+  padding: 4px 0;
+
+  @include mq(xs) {
+    padding: 2px 0;
+  }
 }
 
 ::ng-deep .tag-title {
