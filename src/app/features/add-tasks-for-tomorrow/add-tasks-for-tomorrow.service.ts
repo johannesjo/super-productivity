@@ -11,16 +11,11 @@ import {
 } from '../tasks/store/task.selectors';
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
-import { TODAY_TAG } from '../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { planTasksForToday } from '../tag/store/tag.actions';
-import { PlannerService } from '../planner/planner.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
-
-const filterDoneAndToday = (task: TaskCopy): boolean =>
-  !task.isDone && !task.tagIds.includes(TODAY_TAG.id);
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +24,6 @@ export class AddTasksForTomorrowService {
   private _store = inject(Store);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
-  private _plannerService = inject(PlannerService);
 
   private _tomorrowDate$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     map((todayStr) => {
@@ -52,12 +46,10 @@ export class AddTasksForTomorrowService {
           getDateRangeForDay(dt.getTime()),
         ),
       ),
-      map((tasks) => tasks.filter(filterDoneAndToday)),
     );
 
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
     switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
-    map((tasks) => tasks.filter(filterDoneAndToday)),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -106,7 +98,14 @@ export class AddTasksForTomorrowService {
       }
     });
 
-    const allDueSorted = this._sortAll(allDue);
+    const todaysTaskIds = await this._store
+      .select(selectTodayTaskIds)
+      .pipe(first())
+      .toPromise();
+    const allDueSorted = this._sortAll([
+      ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
+    ]);
+    console.log({ allDue, allDueSorted });
 
     this._movePlannedTasksToToday(allDueSorted);
 
@@ -134,12 +133,11 @@ export class AddTasksForTomorrowService {
 
     // Get tasks due for today
     const [dueWithTime, dueWithDay] = await combineLatest([
-      this._store
-        .select(selectTasksWithDueTimeForRange, getDateRangeForDay(todayDate.getTime()))
-        .pipe(map((tasks) => tasks.filter(filterDoneAndToday))),
-      this._store
-        .select(selectTasksDueForDay, getWorklogStr(todayDate))
-        .pipe(map((tasks) => tasks.filter(filterDoneAndToday))),
+      this._store.select(
+        selectTasksWithDueTimeForRange,
+        getDateRangeForDay(todayDate.getTime()),
+      ),
+      this._store.select(selectTasksDueForDay, getWorklogStr(todayDate)),
     ])
       .pipe(first())
       .toPromise();
@@ -158,13 +156,17 @@ export class AddTasksForTomorrowService {
 
     [...dueWithTime, ...dueWithDay].forEach((task) => {
       if (!allDue.find((t) => t.id === task.id)) {
-        console.log('AAAAAA', task);
-
         allDue.push(task);
       }
     });
 
-    const allDueSorted = this._sortAll([...allDue]);
+    const todaysTaskIds = await this._store
+      .select(selectTodayTaskIds)
+      .pipe(first())
+      .toPromise();
+    const allDueSorted = this._sortAll([
+      ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
+    ]);
     console.log({ allDue, allDueSorted });
 
     this._movePlannedTasksToToday(allDueSorted);
@@ -175,12 +177,14 @@ export class AddTasksForTomorrowService {
   }
 
   private _movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
-    this._store.dispatch(
-      planTasksForToday({
-        taskIds: plannedTasks.map((t) => t.id),
-        isSkipRemoveReminder: true,
-      }),
-    );
+    if (plannedTasks.length) {
+      this._store.dispatch(
+        planTasksForToday({
+          taskIds: plannedTasks.map((t) => t.id),
+          isSkipRemoveReminder: true,
+        }),
+      );
+    }
   }
 
   private _sortAll(tasks: TaskCopy[]): TaskCopy[] {
