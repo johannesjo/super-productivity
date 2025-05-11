@@ -1,3 +1,25 @@
+## [12.0.6-rc.6](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.5...v12.0.6-rc.6) (2025-05-11)
+
+### Bug Fixes
+
+- sync never in sync ([17a50c6](https://github.com/johannesjo/super-productivity/commit/17a50c638374e35beb1be59b3d00d7c85c302cae))
+- wrong project added when on project list ([dd9939a](https://github.com/johannesjo/super-productivity/commit/dd9939a7465c9092eb18f18430924c8e22c45c28))
+- wrong title in main header for today and inbox ([d667f7e](https://github.com/johannesjo/super-productivity/commit/d667f7e6fdab05ba699cd9d514d9786ceaa3df1d))
+
+### Features
+
+- add migration from previous default inbox project to the new one ([f174134](https://github.com/johannesjo/super-productivity/commit/f174134777dd46454b15e7a6f667c8d5a7cd42eb))
+- adjust styling for inbox icon ([d5f05fb](https://github.com/johannesjo/super-productivity/commit/d5f05fb97e98f1b27e15b76aa1f088ff00a1736a))
+- change default done sound ([0a3d353](https://github.com/johannesjo/super-productivity/commit/0a3d3534a7a3bcd6485f779177d01e41ff5211fe))
+- decrease number of syncs ([aad9ceb](https://github.com/johannesjo/super-productivity/commit/aad9ceb02bf50fd90bfd9ad19a671c5ae45e4ae8))
+- **dueDate:** keep order from planner on day change and move due today on day change ([7e3d595](https://github.com/johannesjo/super-productivity/commit/7e3d5959b74573a7b49d705c66df10301f874415))
+- improve migration and repair ([2f838bb](https://github.com/johannesjo/super-productivity/commit/2f838bb9e6eab457814921b0b56b03aebb3613be))
+- improve task tag styling ([787f3b4](https://github.com/johannesjo/super-productivity/commit/787f3b4cb4879e019a1b9ffad89ad2ae38a38532))
+- **inbox:** use inbox project rather than tag ([976aeb0](https://github.com/johannesjo/super-productivity/commit/976aeb09ee9799e679e7f0954b943f494310511f))
+- make task deletion and undo work again for todays tasks ([6593a85](https://github.com/johannesjo/super-productivity/commit/6593a85596970fbd1fdb446d068d17fa1c67eeb3))
+- minor polish ([e91478e](https://github.com/johannesjo/super-productivity/commit/e91478ea36e72bbb7db4b56167c41cfda89bcefe))
+- refocus task after re-schedule ([d83d883](https://github.com/johannesjo/super-productivity/commit/d83d883c987fc1626c5546b96924fa2ca1240fb0))
+
 ## [12.0.6-rc.5](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.4...v12.0.6-rc.5) (2025-05-09)
 
 ### Bug Fixes
