@@ -201,7 +201,7 @@ const validateNotes = (
   for (const nid of d.note.todayOrder) {
     if (!noteIds.has(nid)) {
       _validityError(
-        `Inconsistent Note State: Missing note id ${nid} for Project undefined`,
+        `Inconsistent Note State: Missing note id ${nid} for note.todayOrder`,
         { d },
       );
       return false;
