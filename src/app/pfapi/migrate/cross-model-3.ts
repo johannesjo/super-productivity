@@ -13,6 +13,8 @@ import {
 } from '../../features/project/project.const';
 import { ProjectState } from '../../features/project/project.model';
 
+const LEGACY_INBOX_PROJECT_ID = 'INBOX' as const;
+
 export const crossModelMigration3: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
 ): AppDataCompleteNew => {
@@ -59,6 +61,32 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     }
   }
 
+  const isMigrateLegacyInboxProject =
+    !!copy.project.entities[LEGACY_INBOX_PROJECT_ID] &&
+    !copy.project.entities[INBOX_PROJECT.id] &&
+    copy.project.entities['INBOX']?.title.includes('box');
+
+  // check and migrate legacy INBOX project
+  if (isMigrateLegacyInboxProject) {
+    // @ts-ignore
+    copy.project.entities[INBOX_PROJECT.id] = {
+      ...INBOX_PROJECT,
+      ...copy.project.entities[LEGACY_INBOX_PROJECT_ID],
+      id: INBOX_PROJECT.id,
+      taskIds: [],
+      backlogTaskIds: [],
+    };
+    // @ts-ignore
+    copy.project.ids = [
+      INBOX_PROJECT.id,
+      ...copy.project.ids.filter((id) => id !== LEGACY_INBOX_PROJECT_ID),
+    ];
+    delete copy.project.entities[LEGACY_INBOX_PROJECT_ID];
+
+    // @ts-ignore
+    copy.globalConfig.misc.defaultProjectId = null;
+  }
+
   // needed to replace task.tagIds if available
   if (!copy.project.entities[INBOX_PROJECT.id]) {
     // @ts-ignore
@@ -77,9 +105,9 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     delete copy.tag.entities[LEGACY_NO_LIST_TAG_ID];
   }
 
-  migrateTasks(copy.task, copy.project);
-  migrateTasks(copy.archiveYoung.task, copy.project);
-  migrateTasks(copy.archiveOld.task, copy.project);
+  migrateTasks(copy.task, copy.project, false, isMigrateLegacyInboxProject);
+  migrateTasks(copy.archiveYoung.task, copy.project, true, isMigrateLegacyInboxProject);
+  migrateTasks(copy.archiveOld.task, copy.project, true, isMigrateLegacyInboxProject);
 
   console.log(copy);
   return copy;
@@ -88,6 +116,8 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
 const migrateTasks = <T extends EntityState<TaskCopy>>(
   s: T,
   projectState: ProjectState,
+  isArchive: boolean,
+  isMigrateLegacyInboxProject: boolean,
 ): void => {
   const inboxProject = projectState.entities[INBOX_PROJECT.id]!;
 
@@ -96,11 +126,25 @@ const migrateTasks = <T extends EntityState<TaskCopy>>(
     if (task) {
       const isLegacyNoListTagPresent = task.tagIds.includes(LEGACY_NO_LIST_TAG_ID);
       if (isLegacyNoListTagPresent) {
+        // remove legacy tag
         // @ts-ignore
         task.tagIds = task.tagIds.filter((value) => value !== LEGACY_NO_LIST_TAG_ID);
-        if (!task.projectId) {
+      }
+
+      // add inbox project to all tasks without projectId
+      if (!task.projectId) {
+        // @ts-ignore
+        task.projectId = INBOX_PROJECT.id;
+        if (!isArchive && !task.parentId) {
           // @ts-ignore
-          task.projectId = INBOX_PROJECT.id;
+          inboxProject.taskIds = [...inboxProject.taskIds, task.id];
+        }
+      }
+
+      if (isMigrateLegacyInboxProject && task.projectId === LEGACY_INBOX_PROJECT_ID) {
+        // @ts-ignore
+        task.projectId = INBOX_PROJECT.id;
+        if (!isArchive && !task.parentId) {
           // @ts-ignore
           inboxProject.taskIds = [...inboxProject.taskIds, task.id];
         }
