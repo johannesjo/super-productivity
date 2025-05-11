@@ -5,7 +5,7 @@ import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { Tag, TagState } from '../../features/tag/tag.model';
 import { Project, ProjectState } from '../../features/project/project.model';
-import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { DEFAULT_PROJECT, INBOX_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import {
   DEFAULT_TASK_REPEAT_CFG,
@@ -21,6 +21,7 @@ describe('dataRepair()', () => {
     mock = createAppDataCompleteMock();
     mock.project = {
       ...fakeEntityStateFromArray([
+        INBOX_PROJECT,
         {
           title: 'FAKE_PROJECT',
           id: FAKE_PROJECT_ID,
@@ -143,6 +144,7 @@ describe('dataRepair()', () => {
 
     const projectState: ProjectState = {
       ...fakeEntityStateFromArray([
+        INBOX_PROJECT,
         {
           title: 'TEST_PROJECT',
           id: 'TEST_ID_PROJECT',
@@ -165,6 +167,7 @@ describe('dataRepair()', () => {
       project: {
         ...projectState,
         entities: {
+          INBOX_PROJECT,
           TEST_ID_PROJECT: {
             title: 'TEST_PROJECT',
             id: 'TEST_ID_PROJECT',
@@ -182,7 +185,7 @@ describe('dataRepair()', () => {
       ...mock.task,
       ids: ['EXISTING'],
       entities: {
-        EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_PROJECT' },
+        EXISTING: { ...DEFAULT_TASK, id: 'EXISTING', projectId: 'TEST_ID_PROJECT' },
       },
     } as any;
 
@@ -195,6 +198,7 @@ describe('dataRepair()', () => {
           backlogTaskIds: ['noneExistingBacklog', 'nullBacklog'],
           noteIds: [],
         },
+        INBOX_PROJECT,
       ] as Partial<Project>[]),
     };
 
@@ -217,6 +221,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: [],
             noteIds: [],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -227,7 +232,7 @@ describe('dataRepair()', () => {
       ...mock.note,
       ids: ['EXISTING'],
       entities: {
-        EXISTING: { id: 'EXISTING', projectId: 'TEST_PROJECT' },
+        EXISTING: { id: 'EXISTING', projectId: 'TEST_ID_PROJECT' },
       },
       todayOrder: [],
     } as any;
@@ -241,6 +246,7 @@ describe('dataRepair()', () => {
           backlogTaskIds: [],
           noteIds: ['EXISTING', 'goneProject', 'noneExisting'],
         },
+        INBOX_PROJECT,
       ] as Partial<Project>[]),
     };
 
@@ -248,7 +254,9 @@ describe('dataRepair()', () => {
       dataRepair({
         ...mock,
         project: projectState,
-        note: noteState,
+        note: {
+          ...noteState,
+        } as any,
       }),
     ).toEqual({
       ...mock,
@@ -263,6 +271,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: [],
             noteIds: ['EXISTING'],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -292,6 +301,7 @@ describe('dataRepair()', () => {
           backlogTaskIds: ['SUB_ID'],
           noteIds: [],
         },
+        INBOX_PROJECT,
       ] as Partial<Project>[]),
     };
 
@@ -322,6 +332,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: [],
             noteIds: [],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -348,6 +359,7 @@ describe('dataRepair()', () => {
           backlogTaskIds: ['goneProject', 'TEST', 'noneExisting'],
           noteIds: [],
         },
+        INBOX_PROJECT,
       ] as Partial<Project>[]),
     };
 
@@ -370,6 +382,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: ['TEST'],
             noteIds: [],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -609,6 +622,7 @@ describe('dataRepair()', () => {
       } as any,
       project: {
         ...projectState,
+        ids: [INBOX_PROJECT.id, 'TEST_ID_PROJECT'],
         entities: {
           TEST_ID_PROJECT: {
             title: 'TEST_PROJECT',
@@ -617,6 +631,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: ['goneToArchiveBacklog'],
             noteIds: [],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -666,6 +681,7 @@ describe('dataRepair()', () => {
           backlogTaskIds: [],
           noteIds: [],
         },
+        INBOX_PROJECT,
       ] as Partial<Project>[]),
     };
 
@@ -695,6 +711,7 @@ describe('dataRepair()', () => {
             backlogTaskIds: [],
             noteIds: [],
           },
+          INBOX_PROJECT,
         } as any,
       },
     });
@@ -876,6 +893,7 @@ describe('dataRepair()', () => {
           ...DEFAULT_PROJECT,
           id: 'p1',
         },
+        INBOX_PROJECT,
       ]),
     } as any;
 
@@ -1132,6 +1150,7 @@ describe('dataRepair()', () => {
     const project = {
       ...mock.project,
       ...fakeEntityStateFromArray<Project>([
+        INBOX_PROJECT,
         {
           ...DEFAULT_PROJECT,
           id: 'p1',
@@ -1172,6 +1191,7 @@ describe('dataRepair()', () => {
       project: {
         ...project,
         ...fakeEntityStateFromArray<Project>([
+          INBOX_PROJECT,
           {
             ...DEFAULT_PROJECT,
             id: 'p1',
@@ -1192,6 +1212,7 @@ describe('dataRepair()', () => {
     const project = {
       ...mock.project,
       ...fakeEntityStateFromArray<Project>([
+        INBOX_PROJECT,
         {
           ...DEFAULT_PROJECT,
           id: 'p1',
@@ -1247,6 +1268,7 @@ describe('dataRepair()', () => {
     const project = {
       ...mock.project,
       ...fakeEntityStateFromArray<Project>([
+        INBOX_PROJECT,
         {
           ...DEFAULT_PROJECT,
           id: 'p1',
@@ -1342,11 +1364,13 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'task1',
             tagIds: ['tag1'],
+            projectId: INBOX_PROJECT.id,
           },
           {
             ...DEFAULT_TASK,
             id: 'task2',
             tagIds: ['tag1'],
+            projectId: INBOX_PROJECT.id,
           },
         ]),
       } as any,
@@ -1510,7 +1534,7 @@ describe('dataRepair()', () => {
     });
   });
 
-  it('should add today tag if no projectId or no tags', () => {
+  it('should add default project id if none', () => {
     const task = {
       ...mock.task,
       ...fakeEntityStateFromArray<Task>([
@@ -1560,8 +1584,8 @@ describe('dataRepair()', () => {
           {
             ...DEFAULT_TASK,
             id: 'task1',
-            tagIds: [TODAY_TAG.id],
             subTaskIds: ['sub_task'],
+            projectId: INBOX_PROJECT.id,
           },
           {
             ...DEFAULT_TASK,
@@ -1572,6 +1596,7 @@ describe('dataRepair()', () => {
             ...DEFAULT_TASK,
             id: 'sub_task',
             parentId: 'task1',
+            projectId: INBOX_PROJECT.id,
           },
         ]),
       } as any,
@@ -1584,7 +1609,7 @@ describe('dataRepair()', () => {
             {
               ...DEFAULT_TASK,
               id: 'archiveTask1',
-              tagIds: [TODAY_TAG.id],
+              projectId: INBOX_PROJECT.id,
             },
           ]),
         } as any,

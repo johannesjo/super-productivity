@@ -2,7 +2,7 @@ import {
   AppBaseDataEntityLikeStates,
   AppDataCompleteLegacy,
 } from '../../imex/sync/sync.model';
-import { Tag, TagCopy } from '../../features/tag/tag.model';
+import { TagCopy } from '../../features/tag/tag.model';
 import { ProjectCopy } from '../../features/project/project.model';
 import { isDataRepairPossible } from './is-data-repair-possible.util';
 import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/task.model';
@@ -49,7 +49,6 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _fixEntityStates(dataOut);
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeNonExistentProjectIdsFromIssueProviders(dataOut);
-  dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
   dataOut = _removeNonExistentProjectIdsFromTaskRepeatCfg(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
@@ -57,14 +56,15 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _cleanupOrphanedSubTasks(dataOut);
   dataOut = _cleanupNonExistingTasksFromLists(dataOut);
   dataOut = _cleanupNonExistingNotesFromLists(dataOut);
-  dataOut = _fixOrphanedNotes(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
-  dataOut = _addTodayTagIfNoProjectIdOrTagId(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
   dataOut = _removeMissingReminderIds(dataOut);
   dataOut = _fixTaskRepeatMissingWeekday(dataOut);
+  dataOut = _createInboxProjectIfNecessary(dataOut);
+  dataOut = _fixOrphanedNotes(dataOut);
+  dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
   dataOut = _addInboxProjectIdIfNecessary(dataOut);
 
   // console.timeEnd('dataRepair');
@@ -351,7 +351,7 @@ const _addInboxProjectIdIfNecessary = (data: AppDataCompleteNew): AppDataComplet
       t.projectId = INBOX_PROJECT.id;
     }
 
-    // while we are at it
+    // while we are at it, we also cleanup the today tag
     if (t.tagIds.includes(TODAY_TAG.id)) {
       t.tagIds = t.tagIds.filter((idI) => idI !== TODAY_TAG.id);
     }
@@ -366,7 +366,25 @@ const _addInboxProjectIdIfNecessary = (data: AppDataCompleteNew): AppDataComplet
       console.log('Set inbox project for missing project id from archive task ' + t.id);
       t.projectId = INBOX_PROJECT.id;
     }
+    // while we are at it, we also cleanup the today tag
+    if (t.tagIds.includes(TODAY_TAG.id)) {
+      t.tagIds = t.tagIds.filter((idI) => idI !== TODAY_TAG.id);
+    }
   });
+
+  return data;
+};
+
+const _createInboxProjectIfNecessary = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  const { project } = data;
+  if (!project.entities[INBOX_PROJECT.id]) {
+    // @ts-ignore
+    data.project.entities[INBOX_PROJECT.id] = {
+      ...INBOX_PROJECT,
+    };
+    // @ts-ignore
+    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids];
+  }
 
   return data;
 };
@@ -381,9 +399,9 @@ const _removeNonExistentProjectIdsFromTasks = (
   taskIds.forEach((id) => {
     const t = task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
-      console.log('Set project id for task  ' + t.id + ' project' + t.projectId);
+      console.log('Delete missing project id from task ' + t.projectId);
       // @ts-ignore
-      data.project.entities[t.projectId].taskIds.push(t.id);
+      delete t.projectId;
     }
   });
 
@@ -393,10 +411,9 @@ const _removeNonExistentProjectIdsFromTasks = (
   taskArchiveIds.forEach((id) => {
     const t = archiveYoung.task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
-      console.log(
-        'Set default project for missing project id from archive task ' + t.projectId,
-      );
-      t.projectId = INBOX_PROJECT.id;
+      console.log('Delete missing project id from archive task ' + t.projectId);
+      // @ts-ignore
+      delete t.projectId;
     }
   });
 
@@ -519,7 +536,6 @@ const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
           console.log(
             'Add orphaned note back to project list ' + note.projectId + ' ' + note.id,
           );
-          alert('1');
           // @ts-ignore
           data.project.entities[note.projectId]!.noteIds = [
             ...data.project.entities[note.projectId]!.noteIds,
@@ -531,7 +547,6 @@ const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
         note.projectId = null;
         // @ts-ignore
         if (!data.note.todayOrder.includes(note.id)) {
-          alert('2');
           data.note.todayOrder = [...data.note.todayOrder, note.id];
         }
       }
@@ -540,7 +555,6 @@ const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
       console.log('Add orphaned note to today list ' + note.id);
       // @ts-ignore
       if (!data.note.todayOrder.includes(note.id)) {
-        alert('3');
         data.note.todayOrder = [...data.note.todayOrder, note.id];
       }
     }
@@ -616,32 +630,6 @@ const _fixInconsistentTagId = (data: AppDataCompleteNew): AppDataCompleteNew => 
   return data;
 };
 
-const _addTodayTagIfNoProjectIdOrTagId = (
-  data: AppDataCompleteNew,
-): AppDataCompleteNew => {
-  const taskIds: string[] = data.task.ids as string[];
-  taskIds
-    .map((id) => data.task.entities[id])
-    .forEach((task) => {
-      if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
-        const tag = data.tag.entities[TODAY_TAG.id] as Tag;
-        (task as any).tagIds = [TODAY_TAG.id];
-        (tag as any).taskIds = [...tag.taskIds, task.id];
-      }
-    });
-
-  const archivedTaskIds: string[] = data.archiveYoung.task.ids as string[];
-  archivedTaskIds
-    .map((id) => data.archiveYoung.task.entities[id])
-    .forEach((task) => {
-      if (task && !task.parentId && !task.tagIds.length && !task.projectId) {
-        (task as any).tagIds = [TODAY_TAG.id];
-      }
-    });
-
-  return data;
-};
-
 const _setTaskProjectIdAccordingToParent = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
@@ -694,6 +682,7 @@ const _setTaskProjectIdAccordingToParent = (
 
 const _cleanupOrphanedSubTasks = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const taskIds: string[] = data.task.ids as string[];
+
   taskIds
     .map((id) => data.task.entities[id])
     .forEach((taskItem) => {
