@@ -17,4 +17,8 @@
   @include mq(xs) {
     gap: 24px;
   }
+
+  @include mq(xs, max) {
+    display: block;
+  }
 }
