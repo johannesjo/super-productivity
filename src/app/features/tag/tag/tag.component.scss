@@ -21,17 +21,11 @@
   }
 }
 
-$dot-size: 15px;
-$ico-size: 12px;
-$line-height: 15px;
-$ico-pad: ($dot-size - $ico-size) * 0.5;
-$pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
-
 .tag-title {
   display: block;
   font-size: 12px;
-  line-height: 1;
-  padding: $pad 0;
+  line-height: 14px;
+  padding: 2px 0;
 
   @include darkTheme() {
     color: $dark-theme-text-color-muted;
@@ -49,15 +43,26 @@ $pad: ($ico-size - $line-height + $ico-pad * 2) * 0.5;
   //}
 }
 
+.circle,
 .tag-ico {
   display: block;
-  padding: $ico-pad;
-  font-size: $ico-size;
-  height: $dot-size;
-  width: $dot-size;
-  border-radius: 50%;
-  color: $c-contrast;
+  padding: 0;
 
   // needs to be important to overwrite inside mat option
   margin-right: 3px !important;
+}
+
+$ico-size: 13px;
+.tag-ico {
+  font-size: $ico-size;
+  height: $ico-size;
+  width: $ico-size;
+}
+
+$circle-size: 9px;
+.circle {
+  font-size: $circle-size;
+  height: $circle-size;
+  width: $circle-size;
+  border-radius: 50%;
 }
