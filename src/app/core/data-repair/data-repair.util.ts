@@ -57,6 +57,7 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _cleanupOrphanedSubTasks(dataOut);
   dataOut = _cleanupNonExistingTasksFromLists(dataOut);
   dataOut = _cleanupNonExistingNotesFromLists(dataOut);
+  dataOut = _fixOrphanedNotes(dataOut);
   dataOut = _fixInconsistentProjectId(dataOut);
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
@@ -498,6 +499,52 @@ const _cleanupNonExistingNotesFromLists = (
   data.note.todayOrder = data.note.todayOrder
     ? data.note.todayOrder.filter((tid) => !!data.note.entities[tid])
     : [];
+
+  return data;
+};
+
+const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  const noteIds: string[] = data.note.ids as string[];
+  noteIds.forEach((nId) => {
+    const note = data.note.entities[nId];
+    if (!note) {
+      console.log(data.note);
+      throw new Error('No note');
+    }
+    // missing project case
+    if (note.projectId) {
+      if (data.project.entities[note.projectId]) {
+        // @ts-ignore
+        if (!data.project.entities[note.projectId]!.noteIds.includes(note.id)) {
+          console.log(
+            'Add orphaned note back to project list ' + note.projectId + ' ' + note.id,
+          );
+          alert('1');
+          // @ts-ignore
+          data.project.entities[note.projectId]!.noteIds = [
+            ...data.project.entities[note.projectId]!.noteIds,
+            note.id,
+          ];
+        }
+      } else {
+        console.log('Delete missing project id from note ' + note.id);
+        note.projectId = null;
+        // @ts-ignore
+        if (!data.note.todayOrder.includes(note.id)) {
+          alert('2');
+          data.note.todayOrder = [...data.note.todayOrder, note.id];
+        }
+      }
+    } // orphaned note case
+    else if (!data.note.todayOrder.includes(note.id)) {
+      console.log('Add orphaned note to today list ' + note.id);
+      // @ts-ignore
+      if (!data.note.todayOrder.includes(note.id)) {
+        alert('3');
+        data.note.todayOrder = [...data.note.todayOrder, note.id];
+      }
+    }
+  });
 
   return data;
 };

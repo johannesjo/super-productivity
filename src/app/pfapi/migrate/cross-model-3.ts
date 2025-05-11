@@ -83,6 +83,20 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     ];
     delete copy.project.entities[LEGACY_INBOX_PROJECT_ID];
 
+    // also migrate noteIds
+    Object.keys(copy.note.entities).forEach((id) => {
+      const note = copy.note.entities[id];
+      if (note && note.projectId === LEGACY_INBOX_PROJECT_ID) {
+        // @ts-ignore
+        note.projectId = INBOX_PROJECT.id;
+        // @ts-ignore
+        copy.project.entities[INBOX_PROJECT.id]!.noteIds = [
+          ...copy.project.entities[INBOX_PROJECT.id]!.noteIds,
+          note.id,
+        ];
+      }
+    });
+
     // @ts-ignore
     copy.globalConfig.misc.defaultProjectId = null;
   }
