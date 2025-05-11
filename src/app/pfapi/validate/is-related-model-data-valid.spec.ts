@@ -513,7 +513,7 @@ describe('isValidAppData()', () => {
         note: noteState,
       }),
     ).toThrowError(
-      `Inconsistent Note State: Missing note id MISSING for Project undefined`,
+      `Inconsistent Note State: Missing note id MISSING for note.todayOrder`,
     );
   });
 
