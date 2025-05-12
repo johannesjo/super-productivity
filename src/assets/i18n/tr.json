@@ -77,6 +77,9 @@
       "FORM": {
         "ADD_NEW_PANEL": "Yeni Panel Ekle",
         "BACKLOG_TASK_FILTER_ALL": "Hepsi",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Dışlamak",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Yalnızca biriktirme listesi",
+        "BACKLOG_TASK_FILTER_TYPE": "Kapsam görevleri",
         "COLUMNS": "Sütunlar",
         "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
         "TAGS_REQUIRED": "Gerekli Etiketler",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Nasıl ve nerede değerlendirilir",
+      "BTN_DONT_BOTHER": "Beni bir daha rahatsız etme",
+      "TITLE": "🙈 Lütfen bizi affedin ama...",
+      "TXT": "Beğenirseniz, <strong>iyi bir puan vererek projeye son derece yardımcı olursunuz!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -850,7 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Verileriniz yalnızca kısmen yüklendi. Lütfen daha sonra tekrar deneyin! Aksi takdirde verilerinizi diğer cihazlarla senkronize edemezsiniz.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity artık tek bir dosya yerine iki ayrı dosya kullanarak senkronizasyonu geliştirdi ve bu da çok daha az veri aktarımına olanak sağladı. Super Productivity'nin tüm örneklerini güncellemeniz ve önce verilerin en yeni olduğu uygulama örneğinden verileri senkronize etmeniz önerilir. Bu veriler yerel cihazınızdan geliyorsa lütfen bu uyarıyı görmezden gelin ve bir sonraki iletişim kutusunu onaylayarak yüklemeye devam edin."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity artık tek bir dosya yerine iki ayrı dosya kullanarak senkronizasyonu geliştirdi ve bu da çok daha az veri aktarımına olanak sağladı. Super Productivity'nin tüm örneklerini güncellemeniz ve önce verilerin en yeni olduğu uygulama örneğinden verileri senkronize etmeniz önerilir. Bu veriler yerel cihazınızdan geliyorsa lütfen bu uyarıyı görmezden gelin ve bir sonraki iletişim kutusunu onaylayarak yüklemeye devam edin.",
+        "REMOTE_MODEL_VERSION_NEWER": "Uzak model sürümü, yerel sürümden daha yenidir. Lütfen yerel uygulamanızı en yeni sürüme güncelleyin!"
       },
       "C": {
         "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
@@ -878,10 +888,21 @@
         "USE_LOCAL": "Lokal Verileri Kullan",
         "USE_REMOTE": "Uzak Verileri Kullan"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Uzaktan kumandayı değiştirme ve üzerine yazma",
+        "P1": "Verileriniz şifrelenir ve şifre çözme başarısız olur. Lütfen doğru şifreyi giriniz!",
+        "P2": "Ayrıca, tüm uzak verilerin üzerine yazacak olan şifrenizi de değiştirebilirsiniz."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Uygulamayı Kapat",
         "BTN_DOWNLOAD_BACKUP": "Yerel Yedeklemeyi İndir",
         "BTN_FORCE_UPLOAD": "Yerel Yüklemeyi Zorla",
+        "P1": "Uzaktan senkronizasyon verileri tutarsız!",
+        "P2": "Etkilenen model:",
+        "P3": "2 Seçeneğiniz var:",
+        "P4": "1. Diğer cihazınıza gidin ve orada tam bir senkronizasyon yapmayı deneyin.",
+        "P5": "2. Uzak verilerin üzerine yerel verilerinizle yazın. Tüm uzak değişiklikler kaybolacak!",
+        "P6": "Üzerine yazdığınız verilerin yedeğini oluşturmanız önerilir!!",
         "T1": "Son senkronizasyon tamamlanmadı!",
         "T2": "Arşiv verileriniz son senkronizasyon sırasında düzgün şekilde yüklenmedi:",
         "T3": "2 Seçeneğiniz var:",
@@ -929,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Zaten senkronize",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Yerel değişiklik yok – Zaten senkronize",
+        "BTN_CONFIGURE": "Yapılandırmak",
+        "BTN_FORCE_OVERWRITE": "Üzerine Yazmaya Zorla",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Uzak Veri şu anda yazılıyor",
         "ERROR_FALLBACK_TO_BACKUP": "Veriler içe aktarılırken bir sorun oluştu. Yerel yedeklemeye geri dönülüyor.",
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
         "ERROR_NO_REV": "Uzak dosya için geçerli bir rev yok",
@@ -936,6 +960,7 @@
         "IMPORTING": "Veriler içeri aktarılıyor",
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
         "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
+        "SUCCESS_DOWNLOAD": "Uzaktan kumandadan senkronize edilen veriler",
         "SUCCESS_IMPORT": "Alınan veri",
         "SUCCESS_VIA_BUTTON": "Veriler başarıyla senkronize edildi",
         "UNKNOWN_ERROR": "Bilinmeyen senkronizasyon hatası: {{err}}",
@@ -1019,6 +1044,7 @@
         "MOVE_TO_BACKLOG": "Görev biriktirme listesine taşı",
         "MOVE_TO_OTHER_PROJECT": "Diğer Projeye Taşı",
         "MOVE_TO_TODAY": "Bugünün listesine git",
+        "MOVE_TO_TOP": "Listenin en üstüne taşı",
         "OPEN_ATTACH": "Dosya veya bağlantı ekle",
         "OPEN_ISSUE": "Tarayıcıda aç",
         "OPEN_TIME": "Zaman Takibi",
@@ -1033,6 +1059,7 @@
         "TOGGLE_TAGS": "Etiketleri Aç/Kapat",
         "TRACK_TIME": "İzlemeye başla",
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
+        "UNSCHEDULE_TASK": "Görevin zamanlamasını kaldır",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1058,7 +1085,9 @@
         "SNOOZE": "Ertele",
         "SNOOZE_ALL": "Tümünü ertele",
         "START": "Başla",
-        "SWITCH_CONTEXT_START": "Kaynak Değiştir ve Başlat"
+        "SWITCH_CONTEXT_START": "Kaynak Değiştir ve Başlat",
+        "UNSCHEDULE": "Programı Kaldır",
+        "UNSCHEDULE_ALL": "Tümünü planlamayı kaldır"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi biriktirme günlüğüne kaydet",
@@ -1106,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
         "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}</strong> görevi geri yüklendi",
         "LAST_TAG_DELETION_WARNING": "Proje dışı bir görevin son etiketini kaldırmaya çalışıyorsunuz. Buna izin verilmiyor!",
+        "MOVED_TO_ARCHIVE": " {{nr}} görevler arşive taşındı",
         "MOVED_TO_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
         "MOVED_TO_PROJECT_ACTION": "Projeye Git",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
@@ -1297,6 +1327,8 @@
     "EXPORT_DATA": "Verileri Dışa Aktar",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
     "PRIVACY_EXPORT": "Anonimleştirilmiş verileri dışa aktarın (hata ayıklama için contact@super-productivity.com adresine göndermek üzere)",
+    "S_BACKUP_DOWNLOADED": "Android belgeler klasörüne indirilen yedekleme",
+    "S_ERR_IMPORT_FAILED": "Verileri içeri aktarma başarısız oldu",
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
   },
   "G": {
@@ -1314,6 +1346,7 @@
     "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
     "HIDE": "Gizle",
     "ICON_INP_DESCRIPTION": "Tüm utf-8 emojileri de destekleniyor!",
+    "INBOX_PROJECT_TITLE": "Gelen kutusu",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
@@ -1323,6 +1356,7 @@
     "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
     "NONE": "Yok",
     "OK": "Tamam",
+    "OVERDUE": "Gecik -miş",
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
     "RESET": "Sıfırla",
@@ -1465,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Tüm animasyonları devre dışı bırak",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
+      "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
       "IS_USE_MINIMAL_SIDE_NAV": "Minimal gezinme çubuğunu kullan (sadece ikonları göster)",
@@ -1595,6 +1630,7 @@
       "SYNC": "Nasıl Yapılır: Eşitleme ayarlamak"
     },
     "METRICS": "İstatistikler",
+    "NO_PROJECT_INFO": "Mevcut proje yok. \"Proje Oluştur\" butonuna tıklayarak yeni bir proje oluşturabilirsiniz.",
     "NO_TAG_INFO": "Şu anda hiçbir etiket yok. Görev eklerken veya düzenlerken `#EtiketAdınız` girerek etiket ekleyebilirsiniz.",
     "NOTES": "Notlar",
     "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",
@@ -1617,7 +1653,15 @@
     "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
     "WORKLOG": "Görev günlüğü"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Eski verilerinizin bir yedeğini indirmek istiyor musunuz (Süper Üretkenlik'in eski sürümleriyle kullanılabilir)?",
+    "DETECTED_LEGACY": "Algılanan eski veriler. Sizin için taşıyacağız!",
+    "E_MIGRATION_FAILED": "Geçiş başarısız oldu! Hatalı:",
+    "E_RESTART_FAILED": "Otomatik yeniden başlatma başarısız oldu. Lütfen uygulamayı manuel olarak yeniden başlatın!",
+    "SUCCESS": "Göç tamam! Uygulama şimdi yeniden başlatılıyor..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Bugünden itibaren görev ekleme",
     "BACK": "Bekle bir şey unuttum!",
     "BREAK_LABEL": "Molalar (saat / saat)",
     "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",
@@ -1696,6 +1740,7 @@
   "V": {
     "E_1TO10": "Lütfen 1 ile 10 arasında bir değer girin",
     "E_DATETIME": "Girilen değer bir tarih değil!",
+    "E_DURATION": "Lütfen geçerli bir süre girin (ör. 1 saat)",
     "E_MAX": " {{val}}'dan büyük olmamalıdır",
     "E_MAX_LENGTH": "Maksimum {{val}} karakter uzunluğunda olmalı",
     "E_MIN": " {{val}}'dan küçük olmalı",
@@ -1707,12 +1752,14 @@
     "ADD_MORE": "Daha ekle",
     "ADD_SCHEDULED_FOR_TOMORROW": "Yarın için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
+    "DONE_TASKS": "Yapılan Görevler",
     "ESTIMATE_REMAINING": "Tahmini kalan süre:",
     "FINISH_DAY": "Günü bitir",
     "FINISH_DAY_FOR_PROJECT": "Günü bu proje için bitir",
     "FINISH_DAY_FOR_TAG": "Günü bu etiket için bitir",
     "FINISH_DAY_TOOLTIP": "Gününüzü değerlendirin, yapılan tüm görevleri arşive taşıyın (isteğe bağlı olarak) ve/veya bir sonraki gününüzü planlayın.",
     "HELP_PROCRASTINATION": "Erteliyorum yardım et!",
+    "MOVE_DONE_TO_ARCHIVE": "Arşive taşıma işlemi tamamlandı",
     "NO_DONE_TASKS": "Şu anda yapılmış bir görev yok",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",

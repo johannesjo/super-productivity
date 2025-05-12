@@ -77,6 +77,9 @@
       "FORM": {
         "ADD_NEW_PANEL": "Legg til ny panel",
         "BACKLOG_TASK_FILTER_ALL": "Alle",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Utelukke",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Bare etterslep",
+        "BACKLOG_TASK_FILTER_TYPE": "Oppgaver for etterslep",
         "COLUMNS": "Kolonner",
         "TAGS_EXCLUDED": "Ekskluderte merker",
         "TAGS_REQUIRED": "Obligatoriske merker",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Oppdaterte innstillinger for <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Hvordan og hvor du skal rangere",
+      "BTN_DONT_BOTHER": "Ikke plag meg igjen",
+      "TITLE": "🙈 Vennligst tilgi oss, men...",
+      "TXT": "Du vil hjelpe prosjektet enormt ved å <strong>gi det en god vurdering, hvis du liker det!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -850,7 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Dataene dine ble bare delvis lastet opp. Vennligst prøv igjen senere! Ellers vil du ikke kunne synkronisere dataene dine til andre enheter.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity har forbedret synkroniseringen ved at den nå bruker to separate filer i stedet for én enkelt, noe som gir mye mindre dataoverføring. Det anbefales å oppdatere alle forekomster av Super Productivity og først synkronisere data fra den appforekomsten der dataene er nyest. Hvis dette er dataene fra din lokale enhet, kan du ignorere denne advarselen og bare fortsette å laste dem opp ved å bekrefte neste dialogboks."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity har forbedret synkroniseringen ved at den nå bruker to separate filer i stedet for én enkelt, noe som gir mye mindre dataoverføring. Det anbefales å oppdatere alle forekomster av Super Productivity og først synkronisere data fra den appforekomsten der dataene er nyest. Hvis dette er dataene fra din lokale enhet, kan du ignorere denne advarselen og bare fortsette å laste dem opp ved å bekrefte neste dialogboks.",
+        "REMOTE_MODEL_VERSION_NEWER": "Den eksterne modellversjonen er nyere enn den lokale. Oppdater din lokale app til den nyeste versjonen!"
       },
       "C": {
         "EMPTY_SYNC": "Du prøver å synkronisere et tomt dataobjekt. Hvis du prøver å konfigurere synkronisering fra en ny appforekomst, trykker du bare på OK for å laste inn dataene fra serveren. Ellers må du sjekke dataene dine.",
@@ -878,10 +888,21 @@
         "USE_LOCAL": "Behold det lokale",
         "USE_REMOTE": "Hold fjernkontrollen"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Endre og overskrive eksternt",
+        "P1": "Dataene dine er kryptert og dekryptering mislyktes. Vennligst skriv inn riktig passord!",
+        "P2": "Du kan også endre passordet ditt, som vil overskrive alle eksterne data."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Lukk app",
         "BTN_DOWNLOAD_BACKUP": "Last ned lokal sikkerhetskopi",
         "BTN_FORCE_UPLOAD": "Tving opplasting lokalt",
+        "P1": "Fjernsynkroniseringsdataene er usammenhengende!",
+        "P2": "Berørt modell:",
+        "P3": "Du har 2 alternativer:",
+        "P4": "1. Gå til den andre enheten din og prøv å gjøre en fullstendig synkronisering der.",
+        "P5": "2. Overskriv de eksterne dataene med dine lokale data. Alle eksterne endringer vil gå tapt!",
+        "P6": "Det anbefales å lage en sikkerhetskopi av dataene du overskriver!!",
         "T1": "Siste synkronisering var ufullstendig!",
         "T2": "Arkivdataene dine ble ikke lastet opp på riktig måte under siste synkronisering:",
         "T3": "Du har to alternativer:",
@@ -930,6 +951,8 @@
         "ALREADY_IN_SYNC": "Allerede synkronisert",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Ingen lokale endringer - allerede synkronisert",
         "BTN_CONFIGURE": "Konfigurer",
+        "BTN_FORCE_OVERWRITE": "Tving overskriving",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Eksterne data skrives for tiden",
         "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under importen av dataene. Faller tilbake til lokal sikkerhetskopi.",
         "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldige data",
         "ERROR_NO_REV": "Ingen gyldig rev for ekstern fil",
@@ -937,6 +960,7 @@
         "IMPORTING": "Importerer data",
         "INCOMPLETE_CFG": "Autentisering for synkronisering mislyktes. Vennligst sjekk konfigurasjonen din!",
         "INITIAL_SYNC_ERROR": "Første synkronisering mislyktes",
+        "SUCCESS_DOWNLOAD": "Synkroniserte data fra fjernkontrollen",
         "SUCCESS_IMPORT": "Data importert",
         "SUCCESS_VIA_BUTTON": "Data vellykket synkronisert",
         "UNKNOWN_ERROR": "Ukjent synkroniseringsfeil: {{err}}",
@@ -1020,6 +1044,7 @@
         "MOVE_TO_BACKLOG": "Gå til backlog",
         "MOVE_TO_OTHER_PROJECT": "Gå til et annet prosjekt",
         "MOVE_TO_TODAY": "Gå til dagens liste",
+        "MOVE_TO_TOP": "Gå til toppen av listen",
         "OPEN_ATTACH": "Legg ved fil eller lenke",
         "OPEN_ISSUE": "Åpne i nettleseren",
         "OPEN_TIME": "Tidssporing",
@@ -1034,6 +1059,7 @@
         "TOGGLE_TAGS": "Veksle tagger",
         "TRACK_TIME": "Begynn å spore tid",
         "TRACK_TIME_STOP": "Sett sporingstid på pause",
+        "UNSCHEDULE_TASK": "Oppheve tidsplan for oppgave",
         "UPDATE_ISSUE_DATA": "Oppdater data om problemet"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1059,7 +1085,9 @@
         "SNOOZE": "Slumre",
         "SNOOZE_ALL": "Utsett alle",
         "START": "Start",
-        "SWITCH_CONTEXT_START": "Bytt kontekst og start"
+        "SWITCH_CONTEXT_START": "Bytt kontekst og start",
+        "UNSCHEDULE": "Opphev tidsplanen",
+        "UNSCHEDULE_ALL": "Opphev tidsplanen for alle"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Flytt oppgaven til backlogg helt til planlagt",
@@ -1107,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Lagt til oppgave <strong>{{title}}</strong> fra <strong>{{contextTitle}}</strong> til gjeldende liste",
         "FOUND_RESTORE_FROM_ARCHIVE": "Gjenopprettet oppgave <strong>{{title}}</strong> relatert til utgave fra arkivet",
         "LAST_TAG_DELETION_WARNING": "Du prøver å fjerne den siste taggen for en ikke-prosjektoppgave. Dette er ikke tillatt!",
+        "MOVED_TO_ARCHIVE": "Flyttet {{nr}} oppgaver til arkiv",
         "MOVED_TO_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Gå til prosjekt",
         "REMINDER_ADDED": "Planlagt oppgave \"{{title}}\"",
@@ -1298,6 +1327,8 @@
     "EXPORT_DATA": "Eksporter data",
     "IMPORT_FROM_FILE": "Importer fra fil",
     "PRIVACY_EXPORT": "Eksporter anonymiserte data (for å sende til contact@super-productivity.com for feilsøking)",
+    "S_BACKUP_DOWNLOADED": "Sikkerhetskopi lastet ned til Android-dokumentmappe",
+    "S_ERR_IMPORT_FAILED": "Import av data mislyktes",
     "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON"
   },
   "G": {
@@ -1325,6 +1356,7 @@
     "NO_CON": "Du er for øyeblikket frakoblet. Koble til Internett på nytt.",
     "NONE": "Ingen",
     "OK": "Ok",
+    "OVERDUE": "Forfallen",
     "PREVIOUS": "Tidligere",
     "REMOVE": "Ta vekk",
     "RESET": "Nullstille",
@@ -1467,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Deaktiver alle animasjoner",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_MINIMIZE_TO_TRAY": "Minimere til skuffen (kun på skrivebordet)",
+      "IS_SHOW_TIP_LONGER": "Vis produktivitetstips på appstart litt lenger",
       "IS_TRAY_SHOW_CURRENT_TASK": "Vis gjeldende oppgave i skuffen / statusmenyen (kun desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
       "IS_USE_MINIMAL_SIDE_NAV": "Bruk minimal navigasjonslinje (vis bare ikoner)",
@@ -1597,6 +1630,7 @@
       "SYNC": "Slik gjør du det: Konfigurere synkronisering"
     },
     "METRICS": "Beregninger",
+    "NO_PROJECT_INFO": "Ingen prosjekter tilgjengelig. Du kan opprette et nytt prosjekt ved å klikke på \"Opprett prosjekt\"-knappen.",
     "NO_TAG_INFO": "Det finnes for øyeblikket ingen tagger. Du kan legge til tagger ved å skrive inn `#yourTagName` når du legger til eller redigerer oppgaver.",
     "NOTES": "Merknader",
     "NOTES_PANEL_INFO": "Notater kan bare vises fra tidsplan- og oppgavelistevisningene.",
@@ -1619,7 +1653,15 @@
     "TRIGGER_SYNC": "Utløs synkronisering manuelt",
     "WORKLOG": "Arbeidslogg"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Vil du laste ned en sikkerhetskopi av dine eldre data (kan brukes med eldre versjoner av Super Productivity)?",
+    "DETECTED_LEGACY": "Oppdaget eldre data. Vi vil migrere den for deg!",
+    "E_MIGRATION_FAILED": "Migrasjonen mislyktes! med feil:",
+    "E_RESTART_FAILED": "Automatisk omstart mislyktes. Start appen på nytt manuelt!",
+    "SUCCESS": "Migreringen er ferdig! Starter appen på nytt nå..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Legg til oppgaver fra i dag",
     "BACK": "Vent, jeg glemte noe!",
     "BREAK_LABEL": "Pause (nr / tid)",
     "CELEBRATE": "Ta deg tid til å <i>feire!</i>",
@@ -1698,6 +1740,7 @@
   "V": {
     "E_1TO10": "Angi en verdi mellom 1 og 10",
     "E_DATETIME": "Den angitte verdien er ikke en datotid!",
+    "E_DURATION": "Vennligst angi en gyldig varighet (f.eks. 1 time)",
     "E_MAX": "Bør ikke være større enn {{val}}",
     "E_MAX_LENGTH": "Bør være maks {{val}} tegn lang",
     "E_MIN": "Bør være mindre enn {{val}}",
@@ -1709,12 +1752,14 @@
     "ADD_MORE": "Legg til mer",
     "ADD_SCHEDULED_FOR_TOMORROW": "Legg til oppgaver som er planlagt for i morgen ({{nr}})",
     "ADD_SOME_TASKS": "Legg til noen oppgaver for å planlegge dagen din!",
+    "DONE_TASKS": "Utførte oppgaver",
     "ESTIMATE_REMAINING": "Anslått gjenværende:",
     "FINISH_DAY": "Avslutt dagen",
     "FINISH_DAY_FOR_PROJECT": "Sluttdag for dette prosjektet",
     "FINISH_DAY_FOR_TAG": "Sluttdag for denne taggen",
     "FINISH_DAY_TOOLTIP": "Evaluer dagen, flytt alle utførte oppgaver til arkivet (valgfritt) og/eller planlegg neste dag.",
     "HELP_PROCRASTINATION": "Hjelp jeg utsetter!",
+    "MOVE_DONE_TO_ARCHIVE": "Flytt ferdig til arkiv",
     "NO_DONE_TASKS": "Det er for øyeblikket ingen utførte oppgaver",
     "NO_PLANNED_TASKS": "Ingen planlagte oppgaver",
     "READY_TO_WORK": "Klar til å arbeide!",

@@ -76,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Aggiungi nuovo pannello",
+        "BACKLOG_TASK_FILTER_ALL": "Ყველა",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Გამორიცხვა",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Მხოლოდ Backlog",
+        "BACKLOG_TASK_FILTER_TYPE": "Backlog ამოცანები",
         "COLUMNS": "Colonne",
         "TAGS_EXCLUDED": "Etichette escluse",
         "TAGS_REQUIRED": "Etichette richieste",
@@ -142,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Aggiornate impostazioni per <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Როგორ და სად უნდა შეაფასოს",
+      "BTN_DONT_BOTHER": "Ნვ მვ ოპთრვჟნწგაი ჲრნჲგჲ.",
+      "TITLE": "🙈 მჲლწ რვ, ოპჲჟრთ ნთ, ნჲ...",
+      "TXT": "Თქვენ ძალიან დაეხმარებით პროექტს <strong>კარგი რეიტინგის მიცემით, თუ მოგწონთ!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -849,7 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "I dati sono stati caricati solo parzialmente. Riprova più tardi! In caso contrario, non sarà possibile sincronizzare i dati con altri dispositivi.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity ha migliorato la sincronizzazione utilizzando due file separati anziché uno solo, consentendo un trasferimento di dati molto più ridotto. Si consiglia di aggiornare tutte le istanze di Super Productivity e di sincronizzare prima i dati dall'istanza dell'applicazione in cui i dati sono più recenti. Se si tratta dei dati del dispositivo locale, ignorare l'avviso e procedere al caricamento confermando la finestra di dialogo successiva."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity ha migliorato la sincronizzazione utilizzando due file separati anziché uno solo, consentendo un trasferimento di dati molto più ridotto. Si consiglia di aggiornare tutte le istanze di Super Productivity e di sincronizzare prima i dati dall'istanza dell'applicazione in cui i dati sono più recenti. Se si tratta dei dati del dispositivo locale, ignorare l'avviso e procedere al caricamento confermando la finestra di dialogo successiva.",
+        "REMOTE_MODEL_VERSION_NEWER": "Დისტანციური მოდელის ვერსია უფრო ახალია, ვიდრე ადგილობრივი. გთხოვთ, განაახლოთ თქვენი ადგილობრივი აპლიკაცია უახლეს ვერსიაზე!"
       },
       "C": {
         "EMPTY_SYNC": "Stai tentando di sincronizzare un oggetto dati vuoto. Questa è la tua prima sincronizzazione di un'app (quasi) vergine?",
@@ -877,10 +888,21 @@
         "USE_LOCAL": "Usa locale",
         "USE_REMOTE": "Usa remoto"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Დისტანციური მართვის შეცვლა და გადაწერა",
+        "P1": "Თქვენი მონაცემები დაშიფრულია და გაშიფვრა ვერ მოხერხდა. გთხოვთ, შეიყვანოთ პაროლი!",
+        "P2": "Თქვენ ასევე შეგიძლიათ შეცვალოთ თქვენი პაროლი, რომელიც გადაწერს ყველა დისტანციურ მონაცემს."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Chiusi App",
         "BTN_DOWNLOAD_BACKUP": "Scarica backup locale",
         "BTN_FORCE_UPLOAD": "Forza caricamento locale",
+        "P1": "Დისტანციური სინქრონიზაციის მონაცემები არათანმიმდევრულია!",
+        "P2": "Დაზარალებული მოდელი:",
+        "P3": "Თქვენ გაქვთ 2 ვარიანტი:",
+        "P4": "1. გადადით თქვენს სხვა მოწყობილობაზე და შეეცადეთ გააკეთოთ სრული სინქრონიზაცია იქ.",
+        "P5": "2. გადაწერეთ დისტანციური მონაცემები თქვენი ადგილობრივი მონაცემებით. ყველა დისტანციური ცვლილება დაიკარგება!",
+        "P6": "Რეკომენდებულია თქვენ მიერ გადაწერული მონაცემების სარეზერვო ასლის შექმნა!!",
         "T1": "L'ultima sincronizzazione era incompleta!",
         "T2": "I dati dell'archivio non sono stati caricati correttamente durante l'ultima sincronizzazione:",
         "T3": "Hai 2 opzioni:",
@@ -928,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Già in sincronizzazione",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Nessuna modifica locale – Già in sincronizzazione",
+        "BTN_CONFIGURE": "Კონფიგურაცია",
+        "BTN_FORCE_OVERWRITE": "Ძალის გადაწერა",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Დისტანციური მონაცემები ამჟამად იწერება",
         "ERROR_FALLBACK_TO_BACKUP": "Qualcosa è andato storto durante l'importazione dei dati. Tornando al backup locale.",
         "ERROR_INVALID_DATA": "Errore durante la sincronizzazione. Dati non validi",
         "ERROR_NO_REV": "Nessuna revisione valida del file remoto",
@@ -935,6 +960,7 @@
         "IMPORTING": "Importazione di dati",
         "INCOMPLETE_CFG": "Autenticazione per la sincronizzazione non riuscita. Per favore controlla la tua configurazione!",
         "INITIAL_SYNC_ERROR": "Sincronizzazione iniziale non riuscita",
+        "SUCCESS_DOWNLOAD": "Სინქრონიზებული მონაცემები პულტიდან",
         "SUCCESS_IMPORT": "Dati importati",
         "SUCCESS_VIA_BUTTON": "Dati sincronizzati con successo",
         "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console.",
@@ -1018,6 +1044,7 @@
         "MOVE_TO_BACKLOG": "Sposta negli arretrati",
         "MOVE_TO_OTHER_PROJECT": "Sposta in un altro progetto",
         "MOVE_TO_TODAY": "Sposta nella lista di oggi",
+        "MOVE_TO_TOP": "Სიის თავზე გადატანა",
         "OPEN_ATTACH": "Allega file o link",
         "OPEN_ISSUE": "Apri issue in una nuova scheda del browser",
         "OPEN_TIME": "Stima il tempo/Aggiungi il tempo impiegato",
@@ -1032,6 +1059,7 @@
         "TOGGLE_TAGS": "Ტეგების გადართვა",
         "TRACK_TIME": "Inizia a tracciare il tempo",
         "TRACK_TIME_STOP": "Pausa tracciamento del tempo",
+        "UNSCHEDULE_TASK": "Დაუგეგმავი დავალება",
         "UPDATE_ISSUE_DATA": "Aggiorna dati dell'issue"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1057,7 +1085,9 @@
         "SNOOZE": "Silenzia",
         "SNOOZE_ALL": "Posticipa tutto",
         "START": "Inizia attività",
-        "SWITCH_CONTEXT_START": "Cambia progetto & inizia attività"
+        "SWITCH_CONTEXT_START": "Cambia progetto & inizia attività",
+        "UNSCHEDULE": "Დაუგეგმავი",
+        "UNSCHEDULE_ALL": "Ყველა"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Sposta attività negli arretrati finché non viene pianificata",
@@ -1105,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Attività <strong>{{title}}</strong> aggiunta da <strong>{{contextTitle}}</strong> alla lista attuale",
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
         "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
+        "MOVED_TO_ARCHIVE": " {{nr}} დავალებების არქივში გადატანა",
         "MOVED_TO_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Პროექტში გადასვლა",
         "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
@@ -1296,6 +1327,8 @@
     "EXPORT_DATA": "Esporta dati",
     "IMPORT_FROM_FILE": "Importa da file",
     "PRIVACY_EXPORT": "Esporta dati anonimizzati (da inviare a contact@super-productivity.com per il debug)",
+    "S_BACKUP_DOWNLOADED": "Android დოკუმენტების საქაღალდეში გადმოწერილი სარეზერვო ასლი",
+    "S_ERR_IMPORT_FAILED": "Მონაცემების იმპორტი ვერ განხორციელდა",
     "S_ERR_INVALID_DATA": "Importazione fallita: JSON non valido"
   },
   "G": {
@@ -1313,6 +1346,7 @@
     "EXTENSION_INFO": "Per favore <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> scarica l'estensione di chrome</a> per permettere la comunicazione con le api di Jira e la gestione del tempo inattivo. Nota che non funziona su dispositivi mobile.",
     "HIDE": "Nascondi",
     "ICON_INP_DESCRIPTION": "Tutte le emoji utf-8 sono supportate!",
+    "INBOX_PROJECT_TITLE": "Ინბოქსი",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minuti",
@@ -1322,6 +1356,7 @@
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "NONE": "Nessuna",
     "OK": "Ok",
+    "OVERDUE": "Overdue",
     "PREVIOUS": "Precedente",
     "REMOVE": "Rimuovi",
     "RESET": "Reset",
@@ -1464,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Disabilita tutte le animazioni",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
+      "IS_SHOW_TIP_LONGER": "Აჩვენეთ პროდუქტიულობის რჩევა აპში ცოტა ხნით",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "IS_USE_MINIMAL_SIDE_NAV": "Usa barra di navigazione minima (mostra solo icone)",
@@ -1594,6 +1630,7 @@
       "SYNC": "Howto: Configura Sincronizzazione"
     },
     "METRICS": "Metriche",
+    "NO_PROJECT_INFO": "Არ არსებობს პროექტები. თქვენ შეგიძლიათ შექმნათ ახალი პროექტი ღილაკზე \"პროექტის შექმნა\".",
     "NO_TAG_INFO": "Non ci sono tag. Puoi aggiungere tag inserendo `#nomeTag` mentre aggiungi o modifichi le attività.",
     "NOTES": "Note",
     "NOTES_PANEL_INFO": "Le note possono solo essere visualizzate dalla vista di pianificazione e dalla lista attività.",
@@ -1616,7 +1653,15 @@
     "TRIGGER_SYNC": "Attiva la sincronizzazione manualmente",
     "WORKLOG": "Registro di lavoro"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Გსურთ ჩამოტვირთოთ თქვენი მემკვიდრეობის მონაცემების სარეზერვო ასლი (შეიძლება გამოყენებულ იქნას სუპერ პროდუქტიულობის ძველი ვერსიებით)?",
+    "DETECTED_LEGACY": "Გამოვლენილია მემკვიდრეობის მონაცემები. ჩვენ მას თქვენთვის გადავახლებთ!",
+    "E_MIGRATION_FAILED": "Მიგრაცია ვერ მოხერხდა! შეცდომით:",
+    "E_RESTART_FAILED": "Ავტომატური გადატვირთვა ვერ მოხერხდა. გთხოვთ, ხელით გადატვირთოთ აპლიკაცია!",
+    "SUCCESS": "Მიგრაცია ყველაფერი გაკეთდა! აპის გადატვირთვა ახლა..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Დაამატეთ დავალებები დღეიდან",
     "BACK": "Apetta ho dimenticato qualcosa!",
     "BREAK_LABEL": "Pause (numero / tempo)",
     "CELEBRATE": "Prenditi un attimo per <i>celebrare!</i>",
@@ -1695,6 +1740,7 @@
   "V": {
     "E_1TO10": "Per favore inserisci un valore da 1 a 10",
     "E_DATETIME": "Il valore inserito non è una data ed ora!",
+    "E_DURATION": "Გთხოვთ, შეიყვანოთ სწორი ხანგრძლივობა (მაგ. 1 სთ)",
     "E_MAX": "Non deve essere maggiore di {{val}}",
     "E_MAX_LENGTH": "Deve essere al massimo lungo {{val}} caratteri",
     "E_MIN": "Deve essere minore di {{val}}",
@@ -1706,12 +1752,14 @@
     "ADD_MORE": "Aggiungi altro",
     "ADD_SCHEDULED_FOR_TOMORROW": "Aggiungi attività pianificate per domani ({{nr}})",
     "ADD_SOME_TASKS": "Aggiungi qualche attività per pianificare la tua giornata!",
+    "DONE_TASKS": "Შესრულებული დავალებები",
     "ESTIMATE_REMAINING": "Stima il rimanente:",
     "FINISH_DAY": "Termina giorno",
     "FINISH_DAY_FOR_PROJECT": "Termina giorno per questo progetto",
     "FINISH_DAY_FOR_TAG": "Termina giorno per questo tag",
     "FINISH_DAY_TOOLTIP": "Valuta la tua giornata, sposta tutte le attività fatte in archivio (opzionale) e/o pianifica la tua prossima giornata.",
     "HELP_PROCRASTINATION": "Aiuto sto procastinando!",
+    "MOVE_DONE_TO_ARCHIVE": "Არქივში გადატანა",
     "NO_DONE_TASKS": "Ამჟამად არ არსებობს შესრულებული დავალებები",
     "NO_PLANNED_TASKS": "Nessuna attività pianificata",
     "READY_TO_WORK": "Pronto a lavorare!",

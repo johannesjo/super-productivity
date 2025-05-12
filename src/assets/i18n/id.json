@@ -77,6 +77,9 @@
       "FORM": {
         "ADD_NEW_PANEL": "Tambahkan Panel baru",
         "BACKLOG_TASK_FILTER_ALL": "Semua",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Mengecualikan",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Hanya backlog",
+        "BACKLOG_TASK_FILTER_TYPE": "Tugas backlog",
         "COLUMNS": "Kolom",
         "TAGS_EXCLUDED": "Tag yang Dikecualikan",
         "TAGS_REQUIRED": "Tag yang Diperlukan",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Pengaturan yang diperbarui untuk <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Bagaimana dan di mana menilai",
+      "BTN_DONT_BOTHER": "Jangan ganggu aku lagi",
+      "TITLE": "🙈 Maafkan kami, tapi...",
+      "TXT": "Anda akan sangat membantu proyek dengan <strong>memberikannya peringkat yang bagus, jika Anda menyukainya!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -850,7 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Data Anda hanya diunggah sebagian. Silakan coba lagi nanti! Jika tidak, Anda tidak akan dapat menyinkronkan data Anda ke perangkat lain.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity telah meningkatkan sinkronisasi dengan menggunakan dua file terpisah daripada satu file, sehingga memungkinkan transfer data yang lebih sedikit. Disarankan untuk memperbarui semua contoh Super Productivity dan pertama-tama menyinkronkan data dari contoh aplikasi yang datanya paling baru. Jika ini adalah data dari perangkat lokal Anda, abaikan peringatan ini dan lanjutkan untuk mengunggahnya dengan mengonfirmasi dialog berikutnya."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity telah meningkatkan sinkronisasi dengan menggunakan dua file terpisah daripada satu file, sehingga memungkinkan transfer data yang lebih sedikit. Disarankan untuk memperbarui semua contoh Super Productivity dan pertama-tama menyinkronkan data dari contoh aplikasi yang datanya paling baru. Jika ini adalah data dari perangkat lokal Anda, abaikan peringatan ini dan lanjutkan untuk mengunggahnya dengan mengonfirmasi dialog berikutnya.",
+        "REMOTE_MODEL_VERSION_NEWER": "Versi model jarak jauh lebih baru dari versi lokal. Perbarui aplikasi lokal Anda ke versi terbaru!"
       },
       "C": {
         "EMPTY_SYNC": "Anda mencoba menyinkronkan objek data kosong. Jika Anda mencoba menyiapkan sinkronisasi dari instance aplikasi baru, cukup tekan OK untuk memuat data dari server. Jika tidak, silakan periksa data Anda.",
@@ -878,10 +888,21 @@
         "USE_LOCAL": "Gunakan lokal",
         "USE_REMOTE": "Gunakan jarak jauh"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Mengubah dan menimpa remote",
+        "P1": "Data Anda dienkripsi dan dekripsi gagal. Silakan masukkan kata sandi yang benar!",
+        "P2": "Anda juga dapat mengubah kata sandi Anda, yang akan menimpa semua data jarak jauh."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Tutup Aplikasi",
         "BTN_DOWNLOAD_BACKUP": "Unduh Cadangan Lokal",
         "BTN_FORCE_UPLOAD": "Paksa Unggah Lokal",
+        "P1": "Data sinkronisasi jarak jauh tidak koheren!",
+        "P2": "Model yang terpengaruh:",
+        "P3": "Anda memiliki 2 Opsi:",
+        "P4": "1. Buka perangkat Anda yang lain dan coba lakukan sinkronisasi lengkap di sana.",
+        "P5": "2. Timpa data jarak jauh dengan data lokal Anda. Semua perubahan jarak jauh akan hilang!",
+        "P6": "Disarankan untuk membuat cadangan data yang Anda timpa!!",
         "T1": "Sinkronisasi terakhir tidak lengkap!",
         "T2": "Data arsip Anda tidak diunggah dengan benar selama sinkronisasi terakhir:",
         "T3": "Anda memiliki 2 Opsi:",
@@ -929,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Sudah disinkronkan",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Tidak ada perubahan lokal - Sudah disinkronkan",
+        "BTN_CONFIGURE": "Mengkonfigurasi",
+        "BTN_FORCE_OVERWRITE": "Paksa Timpa",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Data Jarak Jauh saat ini sedang ditulis",
         "ERROR_FALLBACK_TO_BACKUP": "Terjadi masalah saat mengimpor data. Kembali ke cadangan lokal.",
         "ERROR_INVALID_DATA": "Kesalahan saat menyinkronkan. Data tidak valid",
         "ERROR_NO_REV": "Tidak ada rev yang valid untuk file jarak jauh",
@@ -936,6 +960,7 @@
         "IMPORTING": "Mengimpor data",
         "INCOMPLETE_CFG": "Otentikasi untuk sinkronisasi gagal. Silakan periksa Konfigurasi Anda!",
         "INITIAL_SYNC_ERROR": "Sinkronisasi Awal gagal",
+        "SUCCESS_DOWNLOAD": "Data yang disinkronkan dari jarak jauh",
         "SUCCESS_IMPORT": "Data diimpor",
         "SUCCESS_VIA_BUTTON": "Data berhasil disinkronkan",
         "UNKNOWN_ERROR": "Error Sinkronasi Tidak Diketahui: {{err}}",
@@ -1019,6 +1044,7 @@
         "MOVE_TO_BACKLOG": "Pindah ke backlog",
         "MOVE_TO_OTHER_PROJECT": "Pindah ke Proyek lain",
         "MOVE_TO_TODAY": "Pindah ke daftar hari ini",
+        "MOVE_TO_TOP": "Pindah ke bagian atas daftar",
         "OPEN_ATTACH": "Lampirkan file atau tautan",
         "OPEN_ISSUE": "Buka di browser",
         "OPEN_TIME": "Pelacakan Waktu",
@@ -1033,6 +1059,7 @@
         "TOGGLE_TAGS": "Beralih Tag",
         "TRACK_TIME": "Mulai waktu pelacakan",
         "TRACK_TIME_STOP": "Jeda waktu pelacakan",
+        "UNSCHEDULE_TASK": "Batalkan jadwal tugas",
         "UPDATE_ISSUE_DATA": "Perbarui data masalah"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1058,7 +1085,9 @@
         "SNOOZE": "Tunda",
         "SNOOZE_ALL": "Tunda semua",
         "START": "Mulai",
-        "SWITCH_CONTEXT_START": "Beralih Konteks & Mulai"
+        "SWITCH_CONTEXT_START": "Beralih Konteks & Mulai",
+        "UNSCHEDULE": "Batalkan jadwal",
+        "UNSCHEDULE_ALL": "Batalkan jadwal semua"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Pindahkan tugas ke backlog hingga dijadwalkan",
@@ -1106,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Menambahkan tugas <strong>{{title}}</strong> dari <strong>{{contextTitle}}</strong> ke daftar terbaru",
         "FOUND_RESTORE_FROM_ARCHIVE": "Memulihkan tugas <strong>{{title}}</strong> yang terkait dengan masalah dari arsip",
         "LAST_TAG_DELETION_WARNING": "Anda mencoba menghapus tag terakhir dari tugas non-proyek. Ini tidak diperbolehkan!",
+        "MOVED_TO_ARCHIVE": "Memindahkan tugas {{nr}} ke arsip",
         "MOVED_TO_PROJECT": "Pindahkan tugas \"{{taskTitle}}\" ke proyek \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Pergi ke Proyek",
         "REMINDER_ADDED": "Tugas \"{{title}}\" terjadwal",
@@ -1297,6 +1327,8 @@
     "EXPORT_DATA": "Ekspor Data",
     "IMPORT_FROM_FILE": "Impor dari file",
     "PRIVACY_EXPORT": "Ekspor data anonim (untuk dikirim ke contact@super-productivity.com untuk debugging)",
+    "S_BACKUP_DOWNLOADED": "Cadangan diunduh ke folder dokumen android",
+    "S_ERR_IMPORT_FAILED": "Mengimpor data gagal",
     "S_ERR_INVALID_DATA": "Impor gagal: JSON tidak valid"
   },
   "G": {
@@ -1314,6 +1346,7 @@
     "EXTENSION_INFO": "Silahkan <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> unduh ekstensi Chrome</a> untuk memungkinkan komunikasi dengan Jira Api dan Penanganan Waktu Idle. Perhatikan bahwa ini tidak berfungsi untuk seluler.",
     "HIDE": "Sembunyikan",
     "ICON_INP_DESCRIPTION": "Semua emoji utf-8 juga didukung!",
+    "INBOX_PROJECT_TITLE": "Kotak masuk",
     "LOGIN": "Login",
     "LOGOUT": "Keluar",
     "MINUTES": "{{m}} menit",
@@ -1323,6 +1356,7 @@
     "NO_CON": "Anda sedang offline. Harap sambungkan kembali ke internet.",
     "NONE": "Tidak ada",
     "OK": "Oke",
+    "OVERDUE": "Terlambat",
     "PREVIOUS": "Sebelumnya",
     "REMOVE": "Hapus",
     "RESET": "Atur ulang",
@@ -1465,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Nonaktifkan semua animasi",
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
+      "IS_SHOW_TIP_LONGER": "Tampilkan tip produktivitas saat aplikasi mulai sedikit lebih lama",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
       "IS_USE_MINIMAL_SIDE_NAV": "Gunakan bilah navigasi minimal (hanya menampilkan ikon)",
@@ -1595,6 +1630,7 @@
       "SYNC": "Howto: Mengonfigurasi Sinkronisasi"
     },
     "METRICS": "Metrik",
+    "NO_PROJECT_INFO": "Tidak ada proyek yang tersedia. Anda dapat membuat proyek baru dengan mengklik tombol \"Buat Proyek\".",
     "NO_TAG_INFO": "Saat ini tidak ada tag. Anda dapat menambahkan tag dengan memasukkan `#namaTag Anda` saat menambahkan atau mengedit tugas.",
     "NOTES": "Catatan",
     "NOTES_PANEL_INFO": "Catatan hanya dapat ditampilkan dari garis waktu dan tampilan daftar tugas biasa.",
@@ -1617,7 +1653,15 @@
     "TRIGGER_SYNC": "Memicu sinkronisasi secara manual",
     "WORKLOG": "Worklog"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Apakah Anda ingin mengunduh cadangan data lama Anda (dapat digunakan dengan versi Super Productivity yang lebih lama)?",
+    "DETECTED_LEGACY": "Data lama yang terdeteksi. Kami akan memigrasikannya untuk Anda!",
+    "E_MIGRATION_FAILED": "Migrasi gagal! dengan Kesalahan:",
+    "E_RESTART_FAILED": "Restart otomatis gagal. Silakan mulai ulang aplikasi secara manual!",
+    "SUCCESS": "Migrasi selesai! Memulai ulang aplikasi sekarang..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Tambahkan tugas mulai hari ini",
     "BACK": "Tunggu aku melupakan sesuatu!",
     "BREAK_LABEL": "Istirahat (nr / time)",
     "CELEBRATE": "Luangkan waktu sejenak untuk <i>merayakan!</i>",
@@ -1696,6 +1740,7 @@
   "V": {
     "E_1TO10": "Silakan masukkan nilai antara 1 dan 10",
     "E_DATETIME": "Nilai yang dimasukkan bukan waktu tanggal!",
+    "E_DURATION": "Silakan masukkan durasi yang valid (misalnya 1 jam)",
     "E_MAX": "Tidak boleh lebih besar dari {{val}}",
     "E_MAX_LENGTH": "Panjang maksimal {{val}} karakter",
     "E_MIN": "Harus lebih kecil dari {{val}}",
@@ -1707,12 +1752,14 @@
     "ADD_MORE": "Tambahkan lebih banyak",
     "ADD_SCHEDULED_FOR_TOMORROW": "Tambahkan tugas yang direncanakan untuk besok ({{nr}})",
     "ADD_SOME_TASKS": "Tambahkan beberapa tugas untuk merencanakan hari Anda!",
+    "DONE_TASKS": "Tugas Selesai",
     "ESTIMATE_REMAINING": "Perkiraan tersisa:",
     "FINISH_DAY": "Selesai Hari",
     "FINISH_DAY_FOR_PROJECT": "Hari Selesai untuk Proyek ini",
     "FINISH_DAY_FOR_TAG": "Hari Selesai untuk Tag ini",
     "FINISH_DAY_TOOLTIP": "Evaluasi hari Anda, pindahkan semua tugas yang sudah selesai ke arsip (opsional) dan/atau rencanakan hari berikutnya.",
     "HELP_PROCRASTINATION": "Bantu saya menunda-nunda!",
+    "MOVE_DONE_TO_ARCHIVE": "Pemindahan dilakukan ke arsip",
     "NO_DONE_TASKS": "Saat ini tidak ada tugas yang dilakukan",
     "NO_PLANNED_TASKS": "Tidak ada tugas yang direncanakan",
     "READY_TO_WORK": "Siap bekerja!",

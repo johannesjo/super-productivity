@@ -76,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "新しいパネルを追加",
+        "BACKLOG_TASK_FILTER_ALL": "すべての",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "除外する",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "バックログのみ",
+        "BACKLOG_TASK_FILTER_TYPE": "バックログ タスク",
         "COLUMNS": "列",
         "TAGS_EXCLUDED": "除外されたタグ",
         "TAGS_REQUIRED": "必須タグ",
@@ -142,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "<strong>{{sectionKey}}</strong>の設定を更新しました"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "評価方法と場所",
+      "BTN_DONT_BOTHER": "二度と気にしないで",
+      "TITLE": "🙈 ご容赦ください、しかし...",
+      "TXT": "あなたがそれを好きなら、あなたはそれに良い評価を与えることによって、プロジェクトを大いに助けるでしょう、 <strong>!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -849,7 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "データが一部しかアップロードされませんでした。後で再試行してください！そうしないと、他のデバイスにデータを同期することができません。",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity は同期を改善し、1 つのファイルではなく 2 つの別々のファイルを使用するようになりました。Super Productivity のすべてのインスタンスを更新し、データが最も新しいアプリインスタンスから最初にデータを同期することをお勧めします。ローカルデバイスのデータである場合は、この警告を無視して、次のダイアログを確認してアップロードしてください。"
+        "POSSIBLE_LEGACY_DATA": "Super Productivity は同期を改善し、1 つのファイルではなく 2 つの別々のファイルを使用するようになりました。Super Productivity のすべてのインスタンスを更新し、データが最も新しいアプリインスタンスから最初にデータを同期することをお勧めします。ローカルデバイスのデータである場合は、この警告を無視して、次のダイアログを確認してアップロードしてください。",
+        "REMOTE_MODEL_VERSION_NEWER": "リモートモデルのバージョンは、ローカルのものよりも新しいです。ローカルアプリを最新バージョンに更新してください。"
       },
       "C": {
         "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
@@ -877,10 +888,21 @@
         "USE_LOCAL": "ローカルを使用",
         "USE_REMOTE": "リモートを使用"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "リモートの変更と上書き",
+        "P1": "データは暗号化され、復号化に失敗しました。正しいパスワードを入力してください。",
+        "P2": "パスワードを変更することもでき、これによりすべてのリモートデータが上書きされます。"
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "アプリを閉じる",
         "BTN_DOWNLOAD_BACKUP": "ローカルバックアップのダウンロード",
         "BTN_FORCE_UPLOAD": "ローカルへの強制アップロード",
+        "P1": "リモート同期データが支離滅裂です!",
+        "P2": "影響を受けるモデル:",
+        "P3": "次の 2 つのオプションがあります。",
+        "P4": "1.他のデバイスに移動し、そこで完全な同期を試みます。",
+        "P5": "2. リモートデータをローカルデータで上書きします。すべてのリモート変更は失われます!",
+        "P6": "上書きするデータのバックアップを作成することをお勧めします!!",
         "T1": "最後の同期が不完全だった！",
         "T2": "前回の同期時にアーカイブデータが正しくアップロードされませんでした：",
         "T3": "選択肢は2つ：",
@@ -928,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "すでに同期",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "ローカルの変更なし - すでに同期している",
+        "BTN_CONFIGURE": "構成",
+        "BTN_FORCE_OVERWRITE": "強制上書き",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "リモート・データは現在書き込まれています",
         "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
         "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
         "ERROR_NO_REV": "リモートファイルに有効な rev がない",
@@ -935,6 +960,7 @@
         "IMPORTING": "データをインポートする",
         "INCOMPLETE_CFG": "同期の認証に失敗しました。設定を確認してください！",
         "INITIAL_SYNC_ERROR": "初期同期に失敗しました",
+        "SUCCESS_DOWNLOAD": "リモートからの同期データ",
         "SUCCESS_IMPORT": "インポートされたデータ",
         "SUCCESS_VIA_BUTTON": "データが正常に同期されました",
         "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。",
@@ -1018,6 +1044,7 @@
         "MOVE_TO_BACKLOG": "バックログに移動",
         "MOVE_TO_OTHER_PROJECT": "他のプロジェクトに移動",
         "MOVE_TO_TODAY": "今日のリストに移動",
+        "MOVE_TO_TOP": "リストの一番上に移動する",
         "OPEN_ATTACH": "ファイルまたはリンクを添付",
         "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
         "OPEN_TIME": "見積もり時間/消費時間の編集",
@@ -1032,6 +1059,7 @@
         "TOGGLE_TAGS": "トグルタグ",
         "TRACK_TIME": "タイムトラッキングの開始",
         "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
+        "UNSCHEDULE_TASK": "タスクのスケジュール解除",
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1057,7 +1085,9 @@
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
         "START": "開始タスク",
-        "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
+        "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始",
+        "UNSCHEDULE": "スケジュール解除",
+        "UNSCHEDULE_ALL": "すべてのスケジュールを解除"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
@@ -1105,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "タスク <strong>{{title}}</strong> を <strong>{{contextTitle}}</strong> から現在のリストに追加しました",
         "FOUND_RESTORE_FROM_ARCHIVE": "アーカイブからの発行に関連する復元されたタスク <strong>{{title}}</strong> ",
         "LAST_TAG_DELETION_WARNING": "非プロジェクトタスクの最後のタグを削除しようとしています。これは許可されていません！",
+        "MOVED_TO_ARCHIVE": "アーカイブに {{nr}} タスクを移動",
         "MOVED_TO_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
         "MOVED_TO_PROJECT_ACTION": "プロジェクトに移動",
         "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
@@ -1296,6 +1327,8 @@
     "EXPORT_DATA": "データのエクスポート",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "PRIVACY_EXPORT": "匿名化されたデータをエクスポートする（デバッグ用に contact@super-productivity.com に送信する）。",
+    "S_BACKUP_DOWNLOADED": "バックアップをAndroidドキュメントフォルダにダウンロードしました",
+    "S_ERR_IMPORT_FAILED": "データのインポートに失敗しました",
     "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON"
   },
   "G": {
@@ -1313,6 +1346,7 @@
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">Chrome拡張機能をダウンロード</a>してください。これはモバイルでは機能しないことに注意してください。",
     "HIDE": "隠す",
     "ICON_INP_DESCRIPTION": "すべてのutf-8の絵文字もサポートしています！",
+    "INBOX_PROJECT_TITLE": "受信トレイ",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
@@ -1322,6 +1356,7 @@
     "NO_CON": "現在オフラインです。インターネットに再接続してください。",
     "NONE": "無し",
     "OK": "OK",
+    "OVERDUE": "遅れた",
     "PREVIOUS": "前",
     "REMOVE": "削除する",
     "RESET": "リセット",
@@ -1464,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "すべてのアニメーションを無効にする",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
+      "IS_SHOW_TIP_LONGER": "アプリの起動時に生産性のヒントを少し長く表示する",
       "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
       "IS_USE_MINIMAL_SIDE_NAV": "最小限のナビゲーションバーを使用する（アイコンのみを表示する）",
@@ -1594,6 +1630,7 @@
       "SYNC": "ハウツー同期の設定"
     },
     "METRICS": "メトリック",
+    "NO_PROJECT_INFO": "利用可能なプロジェクトはありません。「プロジェクトを作成」ボタンをクリックすると、新しいプロジェクトを作成できます。",
     "NO_TAG_INFO": "現在タグはありません。タスクの追加や編集の際に`#yourTagName`と入力することでタグを追加することができます。",
     "NOTES": "ノート",
     "NOTES_PANEL_INFO": "メモはスケジュールと通常のタスクリストビューからのみ表示できます。",
@@ -1616,7 +1653,15 @@
     "TRIGGER_SYNC": "手動で同期をトリガーする",
     "WORKLOG": "作業記録"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "レガシーデータのバックアップをダウンロードしますか(古いバージョンのSuper Productivityで使用できます)?",
+    "DETECTED_LEGACY": "レガシーデータを検出しました。私たちはあなたのためにそれを移行します!",
+    "E_MIGRATION_FAILED": "移行に失敗しました。エラーあり:",
+    "E_RESTART_FAILED": "自動再起動に失敗しました。アプリを手動で再起動してください。",
+    "SUCCESS": "移行はすべて完了しました!今すぐアプリを再起動しています..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "今日のタスクを追加",
     "BACK": "待って！何か忘れてる！",
     "BREAK_LABEL": "休憩（回数/時間）",
     "CELEBRATE": " <i>お祝いしましょう！</i>",
@@ -1695,6 +1740,7 @@
   "V": {
     "E_1TO10": "1から10までの値を入力してください",
     "E_DATETIME": "入力された値は日時ではありません",
+    "E_DURATION": "有効な期間を入力してください(例:1時間)",
     "E_MAX": " {{val}}より大きくてはいけません",
     "E_MAX_LENGTH": "最大 {{val}} 文字にする必要があります",
     "E_MIN": " {{val}}より小さくなければなりません",
@@ -1706,12 +1752,14 @@
     "ADD_MORE": "さらに追加",
     "ADD_SCHEDULED_FOR_TOMORROW": "明日予定されているタスクを追加します（{{nr}}）",
     "ADD_SOME_TASKS": "一日を計画するためタスクをいくつか追加しましょう！",
+    "DONE_TASKS": "完了したタスク",
     "ESTIMATE_REMAINING": "推定残り：",
     "FINISH_DAY": "一日を終える",
     "FINISH_DAY_FOR_PROJECT": "プロジェクト終了日",
     "FINISH_DAY_FOR_TAG": "このタグの終了日",
     "FINISH_DAY_TOOLTIP": "一日を評価し、完了したタスクをアーカイブに移動し（オプション）、次の日の計画を立てる。",
     "HELP_PROCRASTINATION": "先延ばししてるので助けて！",
+    "MOVE_DONE_TO_ARCHIVE": "アーカイブへの移動が完了しました",
     "NO_DONE_TASKS": "現在、完了したタスクはありません",
     "NO_PLANNED_TASKS": "計画タスクなし",
     "READY_TO_WORK": "準備オーケー！",
