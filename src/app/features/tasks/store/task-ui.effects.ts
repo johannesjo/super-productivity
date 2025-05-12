@@ -36,6 +36,7 @@ import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Router } from '@angular/router';
 import { WorkContextType } from '../../work-context/work-context.model';
+import { INBOX_PROJECT } from '../../project/project.const';
 
 @Injectable()
 export class TaskUiEffects {
@@ -205,7 +206,7 @@ export class TaskUiEffects {
               ? task.projectId !== this._workContextService.activeWorkContextId
               : !task.tagIds.includes(
                   this._workContextService.activeWorkContextId as string,
-                )),
+                ) && task.projectId !== INBOX_PROJECT.id),
         ),
         switchMap(({ task }) =>
           this._store$.select(selectProjectById, { id: task.projectId as string }).pipe(
