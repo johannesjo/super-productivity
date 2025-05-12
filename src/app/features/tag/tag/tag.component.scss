@@ -4,7 +4,6 @@
   display: inline-flex;
   align-items: center;
   flex-direction: row;
-  margin: 2px;
   min-width: 20px;
   padding: 0 $s;
   padding-left: 0;
@@ -24,8 +23,7 @@
 .tag-title {
   display: block;
   font-size: 12px;
-  line-height: 14px;
-  padding: 2px 0;
+  line-height: 1;
 
   @include darkTheme() {
     color: $dark-theme-text-color-muted;
