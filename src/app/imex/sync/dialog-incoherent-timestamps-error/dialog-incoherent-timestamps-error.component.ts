@@ -55,7 +55,7 @@ export class DialogIncoherentTimestampsErrorComponent {
     // download('super-productivity-backup.json', privacyExport(data));
   }
 
-  close(res?: 'FORCE_UPDATE_REMOTE'): void {
+  close(res?: 'FORCE_UPDATE_REMOTE' | 'FORCE_UPDATE_LOCAL'): void {
     this._matDialogRef.close(res);
   }
 

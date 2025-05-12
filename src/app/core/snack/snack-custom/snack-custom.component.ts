@@ -10,7 +10,7 @@ import { SnackParams } from '../snack.model';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -19,7 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './snack-custom.component.html',
   styleUrls: ['./snack-custom.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIcon, MatButton, MatIconButton, MatProgressBar, TranslatePipe],
+  imports: [MatIcon, MatButton, MatProgressBar, TranslatePipe],
 })
 export class SnackCustomComponent implements OnInit, OnDestroy {
   data = inject<SnackParams>(MAT_SNACK_BAR_DATA);
