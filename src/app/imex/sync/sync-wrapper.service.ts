@@ -14,6 +14,7 @@ import {
   LockPresentError,
   NoRemoteModelFile,
   RevMismatchForModelError,
+  SyncInvalidTimeValuesError,
   SyncProviderId,
   SyncStatus,
 } from '../../pfapi/api';
@@ -134,11 +135,15 @@ export class SyncWrapperService {
         });
         return 'HANDLED_ERROR';
       } else if (
+        error instanceof SyncInvalidTimeValuesError ||
         error instanceof RevMismatchForModelError ||
         error instanceof NoRemoteModelFile
       ) {
         console.log(error, Object.keys(error));
-        const modelId = error.additionalLog;
+        const modelId =
+          error instanceof SyncInvalidTimeValuesError
+            ? 'Invalid (future) time values for sync meta'
+            : error.additionalLog;
         this._matDialog
           .open(DialogIncompleteSyncComponent, {
             data: { modelId },
