@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "データが破損しているようです。自動修復を試しますか？その結果、データが部分的に失われる可能性があります。",
-    "DELETE_STRAY_BACKUP": "このダイアログが表示されないように、バックアップを削除しますか？",
     "RELOAD_AFTER_IDB_ERROR": "データベースにアクセスできません:(考えられる原因は、バックグラウンドでのアプリの更新またはディスク容量の不足です。[OK]を押してアプリをリロードします（一部のプラットフォームではアプリを手動で再起動する必要がある場合があります）。",
     "RESTORE_FILE_BACKUP": "データがないようですが、「{{dir}}」で利用可能なバックアップがあります。 {{from}}から最新のバックアップを復元しますか？",
     "RESTORE_FILE_BACKUP_ANDROID": "データがないようですが、利用可能なバックアップがあります。ロードしますか？",
@@ -992,6 +991,7 @@
         "ADD_ATTACHMENT": "添付ファイルを追加する",
         "ADD_SUB_TASK": "サブタスクを追加",
         "ATTACHMENTS": "添付ファイル {{nr}}",
+        "DUE": "で予定されている。",
         "FROM_PARENT": "（親から）",
         "LOCAL_ATTACHMENTS": "ローカル添付",
         "NOTES": "メモ",
@@ -999,7 +999,6 @@
         "REMINDER": "リマインダー",
         "REPEAT": "繰り返す",
         "SCHEDULE_TASK": "タスクのスケジュール",
-        "DUE": "で予定されている。",
         "SUB_TASKS": "サブタスク（{{nr}}）",
         "TIME": "時間",
         "TITLE_PLACEHOLDER": "タイトルを入力"
@@ -1584,6 +1583,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
+    "ALL_PLANNED_LIST": "リピート／予定",
     "BOARDS": "ポート",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
@@ -1611,7 +1611,6 @@
     "PROJECT_SETTINGS": "プロジェクト設定",
     "PROJECTS": "プロジェクト",
     "QUICK_HISTORY": "クイックヒストリー",
-    "ALL_PLANNED_LIST": "リピート／予定",
     "SCHEDULE": "スケジュール",
     "SETTINGS": "設定",
     "SHOW_SEARCH_BAR": "検索バーを表示する",

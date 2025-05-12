@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Dataene dine ser ut til å være skadet. Vil du prøve å fikse det automatisk? Dette kan føre til delvis tap av data.",
-    "DELETE_STRAY_BACKUP": "Vil du slette sikkerhetskopien for å unngå å se denne dialogen?",
     "RELOAD_AFTER_IDB_ERROR": "Kan ikke få tilgang til databasen :( Mulige årsaker er en appoppdatering til appen i bakgrunnen eller lite diskplass. Hvis du installerte appen på linux som snap, bør du også aktivere oppdateringsbevissthet 'snap set core experimental.refresh-app-awareness=true' til de fikser dette problemet på sin side. Trykk OK for å laste inn appen på nytt (kan kreve manuell omstart av appen på noen plattformer).",
     "RESTORE_FILE_BACKUP": "Det ser ut til å være INGEN DATA, men det er sikkerhetskopier tilgjengelig på \"{{dir}}\". Vil du gjenopprette den siste sikkerhetskopien fra {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Det ser ut til å være INGEN DATA, men det er en sikkerhetskopi tilgjengelig. Vil du laste den inn?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Legg til ny panel",
+        "BACKLOG_TASK_FILTER_ALL": "Alle",
         "COLUMNS": "Kolonner",
         "TAGS_EXCLUDED": "Ekskluderte merker",
         "TAGS_REQUIRED": "Obligatoriske merker",
@@ -935,6 +935,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Allerede synkronisert",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Ingen lokale endringer - allerede synkronisert",
+        "BTN_CONFIGURE": "Konfigurer",
         "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under importen av dataene. Faller tilbake til lokal sikkerhetskopi.",
         "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldige data",
         "ERROR_NO_REV": "Ingen gyldig rev for ekstern fil",
@@ -992,6 +993,7 @@
         "ADD_ATTACHMENT": "Legg til vedlegg",
         "ADD_SUB_TASK": "Legg til underoppgave",
         "ATTACHMENTS": "Vedlegg ({{nr}})",
+        "DUE": "Planlagt på",
         "FROM_PARENT": "(fra forelder)",
         "LOCAL_ATTACHMENTS": "Lokale vedlegg",
         "NOTES": "Merknader",
@@ -999,7 +1001,6 @@
         "REMINDER": "Påminnelse",
         "REPEAT": "Gjenta",
         "SCHEDULE_TASK": "Planlegg oppgave",
-        "DUE": "Planlagt på",
         "SUB_TASKS": "Underoppgaver ({{nr}})",
         "TIME": "Tid",
         "TITLE_PLACEHOLDER": "Skriv inn en tittel"
@@ -1322,6 +1323,7 @@
     "EXTENSION_INFO": "Last <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">ned chrome-utvidelsen</a> for å tillate kommunikasjon med Jira Api og Idle Time Handling. Merk at dette ikke fungerer for mobil.",
     "HIDE": "Skjul",
     "ICON_INP_DESCRIPTION": "Alle utf-8-emojier støttes også!",
+    "INBOX_PROJECT_TITLE": "Innboks",
     "LOGIN": "Logg Inn",
     "LOGOUT": "Logg ut",
     "MINUTES": "{{m}} minutter",
@@ -1584,6 +1586,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Legg til ny oppgave",
+    "ALL_PLANNED_LIST": "Gjentatt/planlagt",
     "BOARDS": "Brett",
     "CREATE_PROJECT": "Lag prosjekt",
     "CREATE_TAG": "Opprett tag",
@@ -1611,7 +1614,6 @@
     "PROJECT_SETTINGS": "Prosjektinnstillinger",
     "PROJECTS": "Prosjekter",
     "QUICK_HISTORY": "Rask historikk",
-    "ALL_PLANNED_LIST": "Gjentatt/planlagt",
     "SCHEDULE": "Planlegge",
     "SETTINGS": "Innstillinger",
     "SHOW_SEARCH_BAR": "Vis søkefelt",

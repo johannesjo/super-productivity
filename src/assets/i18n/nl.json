@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Uw gegevens lijken beschadigd te zijn. Wilt u proberen het automatisch op te lossen? Dit kan leiden tot gedeeltelijk gegevensverlies.",
-    "DELETE_STRAY_BACKUP": "Wilt u de achterkant verwijderen om dit dialoogvenster niet te zien?",
     "RELOAD_AFTER_IDB_ERROR": "Kan geen toegang krijgen tot de database :( Mogelijke oorzaken zijn een app-update van de app op de achtergrond of weinig schijfruimte. Druk op OK om de app opnieuw te laden (op sommige platforms kan het nodig zijn de app handmatig opnieuw te starten).",
     "RESTORE_FILE_BACKUP": "Er lijken GEEN GEGEVENS te zijn, maar er zijn back-ups beschikbaar op \"{{dir}}\". Wilt u de nieuwste back-up van {{from}}herstellen?",
     "RESTORE_FILE_BACKUP_ANDROID": "Er lijken GEEN GEGEVENS te zijn, maar er is een back-up beschikbaar. Wil je hem laden?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Voeg nieuw paneel toe",
+        "BACKLOG_TASK_FILTER_ALL": "Alles",
         "COLUMNS": "Kolommen",
         "TAGS_EXCLUDED": "Uitsluit Tags",
         "TAGS_REQUIRED": "Vereiste Tags",
@@ -935,6 +935,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Al gesynchroniseerd",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Geen locale wijzigingen - Al gesynchroniseerd",
+        "BTN_CONFIGURE": "Configureren",
         "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan tijdens het importeren van de gegevens. Terugvallen op lokale back-up.",
         "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
         "ERROR_NO_REV": "Geen geldige rev voor bestand op afstand",
@@ -992,6 +993,7 @@
         "ADD_ATTACHMENT": "Voeg bijlage toe",
         "ADD_SUB_TASK": "Subtaak toevoegen",
         "ATTACHMENTS": "Bijlagen ({{nr}})",
+        "DUE": "Gepland op",
         "FROM_PARENT": "(van ouder)",
         "LOCAL_ATTACHMENTS": "Lokale bijlagen",
         "NOTES": "Opmerkingen",
@@ -999,7 +1001,6 @@
         "REMINDER": "Herinnering",
         "REPEAT": "Herhaling",
         "SCHEDULE_TASK": "Taak plannen",
-        "DUE": "Gepland op",
         "SUB_TASKS": "Subtaken ({{nr}})",
         "TIME": "Tijd",
         "TITLE_PLACEHOLDER": "Voer een titel in"
@@ -1322,6 +1323,7 @@
     "EXTENSION_INFO": "<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> Download de Chrome-extensie</a> om communicatie met de Jira Api en Idle Time Handling mogelijk te maken. Merk op dat dit niet werkt voor mobiel.",
     "HIDE": "Verberg",
     "ICON_INP_DESCRIPTION": "Alle utf-8 emoji's worden ook ondersteund!",
+    "INBOX_PROJECT_TITLE": "Postvak IN",
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
     "MINUTES": "{{m}} minuten",
@@ -1584,6 +1586,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
+    "ALL_PLANNED_LIST": "Herhalen/ Gepland",
     "BOARDS": "Borden",
     "CREATE_PROJECT": "Project maken",
     "CREATE_TAG": "Tag maken",
@@ -1611,7 +1614,6 @@
     "PROJECT_SETTINGS": "Projectinstellingen",
     "PROJECTS": "Projecten",
     "QUICK_HISTORY": "Snelle geschiedenis",
-    "ALL_PLANNED_LIST": "Herhalen/ Gepland",
     "SCHEDULE": "Schema",
     "SETTINGS": "Instellingen",
     "SHOW_SEARCH_BAR": "Toon zoekbalk",

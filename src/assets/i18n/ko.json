@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "데이터가 손상된 것 같습니다. 자동으로 수정 하시겠습니까? 이로 인해 데이터가 부분적으로 손실 될 수 있습니다.",
-    "DELETE_STRAY_BACKUP": "이 대화 상자가 표시되지 않도록 뒷면을 삭제 하시겠습니까?",
     "RELOAD_AFTER_IDB_ERROR": "데이터베이스에 액세스할 수 없음:(가능한 원인은 백그라운드에서 앱 업데이트 또는 디스크 공간 부족입니다. 앱을 다시 로드하려면 확인을 누르십시오(일부 플랫폼에서는 앱을 수동으로 다시 시작해야 할 수 있음).",
     "RESTORE_FILE_BACKUP": "데이터가 없는 것 같지만 \"{{dir}}\"에서 사용 가능한 백업이 있습니다. {{from}}에서 최신 백업을 복원 하시겠습니까?",
     "RESTORE_FILE_BACKUP_ANDROID": "데이터가 없는 것 같지만 사용 가능한 백업이 있습니다. 로드하시겠습니까?",
@@ -992,6 +991,7 @@
         "ADD_ATTACHMENT": "첨부 파일 추가",
         "ADD_SUB_TASK": "하위 작업 추가",
         "ATTACHMENTS": "첨부 파일 {{nr}}",
+        "DUE": "예정된 날짜",
         "FROM_PARENT": "(부모님)",
         "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
         "NOTES": "노트",
@@ -999,7 +999,6 @@
         "REMINDER": "조언",
         "REPEAT": "반복",
         "SCHEDULE_TASK": "작업 예약",
-        "DUE": "예정된 날짜",
         "SUB_TASKS": "하위 작업 ({{nr}})",
         "TIME": "시각",
         "TITLE_PLACEHOLDER": "제목 입력"
@@ -1584,6 +1583,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "새 작업 추가",
+    "ALL_PLANNED_LIST": "반복/예약",
     "BOARDS": "보드",
     "CREATE_PROJECT": "프로젝트 만들기",
     "CREATE_TAG": "태그 생성",
@@ -1611,7 +1611,6 @@
     "PROJECT_SETTINGS": "프로젝트 설정",
     "PROJECTS": "프로젝트",
     "QUICK_HISTORY": "빠른 기록",
-    "ALL_PLANNED_LIST": "반복/예약",
     "SCHEDULE": "일정",
     "SETTINGS": "설정",
     "SHOW_SEARCH_BAR": "검색창 표시",

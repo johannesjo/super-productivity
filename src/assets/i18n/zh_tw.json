@@ -15,7 +15,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "您的資料似乎已損壞。您想嘗試自動修復它嗎？這可能會導致部分資料丟失。",
-    "DELETE_STRAY_BACKUP": "是否要刪除備份以避免看到此對話框？",
     "RELOAD_AFTER_IDB_ERROR": "無法存取資料庫 :( 也許是因為應用程式在背景更新或是硬碟空間不足導致。如果您在 Linux 上以 snap 安裝本應用程式，您可能也需要啟用重新整理感知 'snap set core experimental.refresh-app-awareness=true' 直到他們修復此問題。點擊 OK 以重新載入應用程式 (在某些平台可能會需要手動重啟)。",
     "RESTORE_FILE_BACKUP": "似乎沒有資料，但是\"{{dir}}\"處有可用的備份。您是否要從 {{from}}恢復最新備份？",
     "RESTORE_FILE_BACKUP_ANDROID": "似乎沒有資料，但是有可用備份。是否要從備份載入？",

@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Twoje dane są popsute. Czy chcesz je automatycznie naprawić? Może wystąpić utrata danych.",
-    "DELETE_STRAY_BACKUP": "Czy chcesz usunąć kopię zapasową aby nie widzieć tego okna w przyszłości?",
     "RELOAD_AFTER_IDB_ERROR": "Nie można uzyskać dostępu do bazy danych :( Możliwe przyczyny to aktualizacja aplikacji w tle lub mało miejsca na dysku. Jeśli zainstalowałeś aplikację na Linuksie jako snap, chcesz również włączyć świadomość odświeżania \"snap set core experimental.refresh-app-awareness=true\", dopóki nie naprawią tego problemu po swojej stronie. Naciśnij OK, aby ponownie załadować aplikację (może wymagać ręcznego ponownego uruchomienia aplikacji na niektórych platformach).",
     "RESTORE_FILE_BACKUP": "Wygląda na to, że aplikacja nie posiada danych, ale istnieje kopia zapasowa w \"{{dir}}\". Czy chcesz ją odzyskać z {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Wygląda na to, że NIE MA DANYCH, ale dostępna jest kopia zapasowa. Czy chcesz ją załadować?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Dodaj nowy panel",
+        "BACKLOG_TASK_FILTER_ALL": "Wszystkie",
         "COLUMNS": "Kolumny",
         "TAGS_EXCLUDED": "Wykluczone tagi",
         "TAGS_REQUIRED": "Wymagane tagi",
@@ -935,6 +935,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Już zsynchronizowane",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Brak zmian lokalnych - już zsynchronizowane",
+        "BTN_CONFIGURE": "Konfiguruj",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "ERROR_NO_REV": "Brak prawidłowego rev dla zdalnego pliku",
@@ -992,6 +993,7 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
+        "DUE": "Zaplanowane na",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
@@ -999,7 +1001,6 @@
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
-        "DUE": "Zaplanowane na",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time",
         "TITLE_PLACEHOLDER": "Wprowadź tytuł"
@@ -1066,7 +1067,8 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
-        "SWITCH_CONTEXT_START": "Switch Context & Start"
+        "SWITCH_CONTEXT_START": "Switch Context & Start",
+        "UNSCHEDULE": "Odwołaj harmonogram"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -1584,6 +1586,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
+    "ALL_PLANNED_LIST": "Powtarzanie/zaplanowane",
     "BOARDS": "Tablice",
     "CREATE_PROJECT": "Stwórz Projekt",
     "CREATE_TAG": "Stwórz Tag",
@@ -1611,7 +1614,6 @@
     "PROJECT_SETTINGS": "Ustawienia projektów",
     "PROJECTS": "Projekty",
     "QUICK_HISTORY": "Szybka historia",
-    "ALL_PLANNED_LIST": "Powtarzanie/zaplanowane",
     "SCHEDULE": "Harmonogram",
     "SETTINGS": "Ustawienia",
     "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania",

@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Tus datos parecen estar dañados. ¿Quieres intentar solucionarlo automáticamente? Esto puede resultar en una pérdida parcial de datos.",
-    "DELETE_STRAY_BACKUP": "¿Quieres eliminar el reverso para evitar ver este diálogo?",
     "RELOAD_AFTER_IDB_ERROR": "No se puede acceder a la base de datos :( Las posibles causas son una actualización de la aplicación en el fondo o poco espacio en el disco. Presione OK para volver a cargar la aplicación (puede requerir el reinicio manual de la aplicación en algunas plataformas).",
     "RESTORE_FILE_BACKUP": "Parece que NO HAY DATOS, pero hay copias de seguridad disponibles en \"{{dir}}\". ¿Quiere restaurar la última copia de seguridad de {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarla?",
@@ -77,6 +76,8 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Agregar nuevo panel",
+        "BACKLOG_TASK_FILTER_ALL": "Todos",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Excluir",
         "COLUMNS": "Columnas",
         "TAGS_EXCLUDED": "Etiquetas excluidas",
         "TAGS_REQUIRED": "Etiquetas requeridas",
@@ -935,6 +936,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Ya sincronizados",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Sin cambios locales - Ya está sincronizado",
+        "BTN_CONFIGURE": "Configurar",
         "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
         "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
         "ERROR_NO_REV": "No hay rev válida para el archivo remoto",
@@ -992,6 +994,7 @@
         "ADD_ATTACHMENT": "Agregar un adjunto",
         "ADD_SUB_TASK": "Agregar subtarea",
         "ATTACHMENTS": "Adjuntos {{nr}}",
+        "DUE": "Programado en",
         "FROM_PARENT": "(del padre)",
         "LOCAL_ATTACHMENTS": "Adjuntos locales",
         "NOTES": "Notas",
@@ -999,7 +1002,6 @@
         "REMINDER": "Recordatorio",
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Tarea programada",
-        "DUE": "Programado en",
         "SUB_TASKS": "Subtareas ({{nr}})",
         "TIME": "hora",
         "TITLE_PLACEHOLDER": "Introduzca un título"
@@ -1322,6 +1324,7 @@
     "EXTENSION_INFO": "Por favor descargue <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> la extensión de Chrome</a> para permitir la comunicación con Jira Api y Idle Time Handling. Tenga en cuenta que esto no funciona para móviles.",
     "HIDE": "Ocultar",
     "ICON_INP_DESCRIPTION": "También se admiten todos los emojis utf-8.",
+    "INBOX_PROJECT_TITLE": "Bandeja de entrada",
     "LOGIN": "Iniciar sesión",
     "LOGOUT": "Cerrar sesión",
     "MINUTES": "{{m}} minutos",
@@ -1331,6 +1334,7 @@
     "NO_CON": "Actualmente estás desconectado. Por favor, vuelva a conectarse a internet.",
     "NONE": "Ninguna",
     "OK": "De acuerdo",
+    "OVERDUE": "Vencido",
     "PREVIOUS": "Anterior",
     "REMOVE": "Retirar",
     "RESET": "Reiniciar",
@@ -1584,6 +1588,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",
+    "ALL_PLANNED_LIST": "Repetición/Programado",
     "BOARDS": "Tableros",
     "CREATE_PROJECT": "Crear proyecto",
     "CREATE_TAG": "Crear etiqueta",
@@ -1611,7 +1616,6 @@
     "PROJECT_SETTINGS": "Ajustes del proyecto",
     "PROJECTS": "Proyectos",
     "QUICK_HISTORY": "Historia rápida",
-    "ALL_PLANNED_LIST": "Repetición/Programado",
     "SCHEDULE": "Calendario",
     "SETTINGS": "Ajustes",
     "SHOW_SEARCH_BAR": "Mostrar barra de búsqueda",

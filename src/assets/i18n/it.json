@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "I tuoi dati sembrano essere danneggiati. Vuoi provare a risolvere il problema automaticamente? Ciò potrebbe causare una parziale perdita dei dati.",
-    "DELETE_STRAY_BACKUP": "Vuoi eliminare il backup per evitare di vedere questa finestra di dialogo?",
     "RELOAD_AFTER_IDB_ERROR": "Impossibile accedere al database: (Le possibili cause sono un aggiornamento dell'app in background o spazio su disco insufficiente. Premi OK per ricaricare l'app (potrebbe richiedere il riavvio manuale dell'app su alcune piattaforme).",
     "RESTORE_FILE_BACKUP": "Sembra che NON ci siano DATI, ma sono disponibili backup in \"{{dir}}\". Vuoi ripristinare l'ultimo backup da {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Sembra che non ci siano DATI, ma è disponibile un backup. Vuoi caricarlo?",
@@ -992,6 +991,7 @@
         "ADD_ATTACHMENT": "Aggiungi allegato",
         "ADD_SUB_TASK": "Aggiungi attività secondaria",
         "ATTACHMENTS": "Allegati ({{nr}})",
+        "DUE": "Pianificato alle",
         "FROM_PARENT": "(da genitore)",
         "LOCAL_ATTACHMENTS": "Allegato locale",
         "NOTES": "Note",
@@ -999,7 +999,6 @@
         "REMINDER": "Promemoria",
         "REPEAT": "Ripeti",
         "SCHEDULE_TASK": "Pianifica attività",
-        "DUE": "Pianificato alle",
         "SUB_TASKS": "Attività secondarie ({{nr}})",
         "TIME": "Tempo",
         "TITLE_PLACEHOLDER": "Inserisci un titolo"
@@ -1584,6 +1583,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Aggiungi nuova attività",
+    "ALL_PLANNED_LIST": "Ripetute/Pianificate",
     "BOARDS": "Schede",
     "CREATE_PROJECT": "Crea progetto",
     "CREATE_TAG": "Crea etichetta",
@@ -1611,7 +1611,6 @@
     "PROJECT_SETTINGS": "Impostazioni di progetto",
     "PROJECTS": "Progetti",
     "QUICK_HISTORY": "Cronologia rapida",
-    "ALL_PLANNED_LIST": "Ripetute/Pianificate",
     "SCHEDULE": "Pianifica",
     "SETTINGS": "Impostazioni",
     "SHOW_SEARCH_BAR": "Mostra barra di ricerca",

@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Seus dados parecem estar danificados. Quer tentar consertar automaticamente? Isso pode resultar em perda parcial de dados.",
-    "DELETE_STRAY_BACKUP": "Quer excluir o verso para evitar ver esta caixa de diálogo?",
     "RELOAD_AFTER_IDB_ERROR": "Não é possível acessar o banco de dados :( As possíveis causas são uma atualização do aplicativo em segundo plano ou pouco espaço em disco. Pressione OK para recarregar o aplicativo (pode exigir a reinicialização manual do aplicativo em algumas plataformas).",
     "RESTORE_FILE_BACKUP": "Parece não haver NENHUM DADO, mas há backups disponíveis em \"{{dir}}\". Quer restaurar o backup mais recente de {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Parece não haver NENHUM DADO, mas há um backup disponível. Você quer carregá-lo?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Adicionar novo Painel",
+        "BACKLOG_TASK_FILTER_ALL": "Todos",
         "COLUMNS": "Colunas",
         "TAGS_EXCLUDED": "Tags Excluídas",
         "TAGS_REQUIRED": "Tags Obrigatórias",
@@ -935,6 +935,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Já sincronizado",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Nenhuma alteração local – Já em sincronia",
+        "BTN_CONFIGURE": "Configurar",
         "ERROR_FALLBACK_TO_BACKUP": "Algo deu errado ao importar os dados. Retornando ao backup local.",
         "ERROR_INVALID_DATA": "Erro ao sincronizar. Dados inválidos",
         "ERROR_NO_REV": "Nenhuma revisão válida para arquivo remoto",
@@ -992,6 +993,7 @@
         "ADD_ATTACHMENT": "Juntar anexo",
         "ADD_SUB_TASK": "Adicionar subtarefa",
         "ATTACHMENTS": "Anexos {{nr}}",
+        "DUE": "Programado para",
         "FROM_PARENT": "(do pai)",
         "LOCAL_ATTACHMENTS": "Anexos locais",
         "NOTES": "Notas",
@@ -999,7 +1001,6 @@
         "REMINDER": "Lembrete",
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Agendar Tarefa",
-        "DUE": "Programado para",
         "SUB_TASKS": "Subtarefas ({{nr}})",
         "TIME": "Tempo",
         "TITLE_PLACEHOLDER": "Insira um título"
@@ -1322,6 +1323,7 @@
     "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> faça o download da extensão chrome</a> para permitir a comunicação com o Jira Api e o Idle Time Handling. Observe que isso não funciona para dispositivos móveis.",
     "HIDE": "Esconder",
     "ICON_INP_DESCRIPTION": "Todos os emojis utf-8 também são suportados!",
+    "INBOX_PROJECT_TITLE": "Caixa de entrada",
     "LOGIN": "Login",
     "LOGOUT": "Sair",
     "MINUTES": "{{m}} minutos",
@@ -1584,6 +1586,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Adicionar nova tarefa",
+    "ALL_PLANNED_LIST": "Repetir/Programado",
     "BOARDS": "Placas",
     "CREATE_PROJECT": "Criar Projeto",
     "CREATE_TAG": "Criar tag",
@@ -1611,7 +1614,6 @@
     "PROJECT_SETTINGS": "Configurações do projeto",
     "PROJECTS": "Projetos",
     "QUICK_HISTORY": "História Rápida",
-    "ALL_PLANNED_LIST": "Repetir/Programado",
     "SCHEDULE": "Horário",
     "SETTINGS": "Configurações",
     "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",

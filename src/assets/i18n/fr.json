@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Vos données semblent endommagées. Voulez-vous essayer de le réparer automatiquement? Cela peut entraîner une perte de données partielle.",
-    "DELETE_STRAY_BACKUP": "Voulez-vous supprimer le verso pour éviter de voir cette boîte de dialogue?",
     "RELOAD_AFTER_IDB_ERROR": "Impossible d'accéder à la base de données :( Les causes possibles sont une mise à jour de l'application en arrière-plan ou un espace disque insuffisant. Appuyez sur OK pour recharger l'application (peut nécessiter un redémarrage manuel de l'application sur certaines plates-formes).",
     "RESTORE_FILE_BACKUP": "Il ne semble pas y avoir de DONNÉES, mais des sauvegardes sont disponibles sur \"{{dir}}\". Voulez-vous restaurer la dernière sauvegarde de {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Il semble qu'il n'y ait PAS DE DONNÉES, mais une sauvegarde est disponible. Voulez-vous le charger ?",
@@ -77,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Ajouter un nouveau panneau",
+        "BACKLOG_TASK_FILTER_ALL": "Tout",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclure",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Seulement le backlog",
+        "BACKLOG_TASK_FILTER_TYPE": "Tâches du backlog",
         "COLUMNS": "Colonnes",
         "TAGS_EXCLUDED": "Tags exclus",
         "TAGS_REQUIRED": "Tags requis",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Paramètres mis à jour pour <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Comment et où évaluer",
+      "BTN_DONT_BOTHER": "Ne me dérange plus",
+      "TITLE": "\u001f926\u001f3fd Veuillez nous pardonner, mais...",
+      "TXT": "Vous aideriez énormément le projet en <strong>l'évaluant positivement, si vous l'aimez !</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -855,7 +864,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Vos données ont été partiellement importées. Merci de réessayer plus tard ! Autrement, vous ne serez pas en capacité de synchroniser vos données avec d'autres appareils.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity a amélioré la synchronisation en utilisant désormais deux fichiers distincts plutôt qu'un seul, ce qui permet un transfert de données beaucoup moins important. Il est recommandé de mettre à jour toutes les instances de Super Productivity et de synchroniser d'abord les données de l'instance d'application où les données sont les plus récentes. S'il s'agit des données de votre appareil local, ignorez cet avertissement et procédez simplement au téléchargement en confirmant la boîte de dialogue suivante."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity a amélioré la synchronisation en utilisant désormais deux fichiers distincts plutôt qu'un seul, ce qui permet un transfert de données beaucoup moins important. Il est recommandé de mettre à jour toutes les instances de Super Productivity et de synchroniser d'abord les données de l'instance d'application où les données sont les plus récentes. S'il s'agit des données de votre appareil local, ignorez cet avertissement et procédez simplement au téléchargement en confirmant la boîte de dialogue suivante.",
+        "REMOTE_MODEL_VERSION_NEWER": "La version du modèle distant est plus récente que celle locale. Veuillez mettre à jour votre application locale vers la dernière version !"
       },
       "C": {
         "EMPTY_SYNC": "Vous essayez de synchroniser un objet de données vide. Est-ce votre toute première synchronisation d'une application (presque) vierge?",
@@ -884,10 +894,21 @@
         "USE_LOCAL": "Conserver la version local",
         "USE_REMOTE": "Utiliser le serveur distant"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Changer et écraser le distant",
+        "P1": "Vos données sont cryptées et le décryptage a échoué. Veuillez entrer le mot de passe correct !",
+        "P2": "Vous pouvez également changer votre mot de passe, ce qui écrasera toutes les données distantes."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Femer l'application",
         "BTN_DOWNLOAD_BACKUP": "Télécharger une sauvegarde locale",
         "BTN_FORCE_UPLOAD": "Forcer un envoi des données locales",
+        "P1": "Les données de synchronisation distante sont incohérentes !",
+        "P2": "Modèle affecté :",
+        "P3": "Vous avez 2 options :",
+        "P4": "1. Allez sur votre autre appareil et essayez d'effectuer une synchronisation complète là-bas.",
+        "P5": "2. Écraser les données distantes avec vos données locales. Tous les changements distants seront perdus !",
+        "P6": "Il est recommandé de créer une sauvegarde des données que vous écrasez !!!",
         "T1": "La dernière synchronisation est incomplète !",
         "T2": "Vos données d'archive n'ont pas été correctement importées au cours de la dernière synchronisation :",
         "T3": "Vous avez 2 Options :",
@@ -935,6 +956,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Déjà synchronisé",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Pas de changement local - Déjà synchronisé",
+        "BTN_CONFIGURE": "Configurer",
+        "BTN_FORCE_OVERWRITE": "Forcer l'écrasement",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Les données distantes sont en cours d'écriture",
         "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
         "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
         "ERROR_NO_REV": "Pas de révision valide pour le fichier distant",
@@ -942,6 +966,7 @@
         "IMPORTING": "Importer des données",
         "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
         "INITIAL_SYNC_ERROR": "Échec de la synchronisation initiale",
+        "SUCCESS_DOWNLOAD": "Données synchronisées depuis le distant",
         "SUCCESS_IMPORT": "Données importées",
         "SUCCESS_VIA_BUTTON": "Données synchronisées avec succès",
         "UNKNOWN_ERROR": "Erreur inconnue lors de la synchronisation. Veuillez vérifier la console.",
@@ -992,6 +1017,7 @@
         "ADD_ATTACHMENT": "Ajouter une pièce jointe",
         "ADD_SUB_TASK": "Ajouter une sous-tâche",
         "ATTACHMENTS": "Pièces jointes {{nr}}",
+        "DUE": "Planifié à",
         "FROM_PARENT": "(du parent)",
         "LOCAL_ATTACHMENTS": "Pièces jointes locales",
         "NOTES": "Notes",
@@ -999,7 +1025,6 @@
         "REMINDER": "Rappel",
         "REPEAT": "Répéter",
         "SCHEDULE_TASK": "Planifier une tâche",
-        "DUE": "Planifié à",
         "SUB_TASKS": "Sous-tâches ({{nr}})",
         "TIME": "Temps",
         "TITLE_PLACEHOLDER": "Entrez un titre"
@@ -1025,6 +1050,7 @@
         "MOVE_TO_BACKLOG": "Déplacer dans le backlog",
         "MOVE_TO_OTHER_PROJECT": "Déplacer vers un autre projet",
         "MOVE_TO_TODAY": "Déplacer vers la liste quotidienne",
+        "MOVE_TO_TOP": "Déplacer en haut de la liste",
         "OPEN_ATTACH": "Joindre un fichier ou un lien",
         "OPEN_ISSUE": "Ouvrir le ticket dans un nouvel onglet du navigateur",
         "OPEN_TIME": "Estimer le temps / Ajouter le temps passé",
@@ -1039,6 +1065,7 @@
         "TOGGLE_TAGS": "Basculer les balises",
         "TRACK_TIME": "Commencer le suivi du temps",
         "TRACK_TIME_STOP": "Mettre en pause le suivi du temps",
+        "UNSCHEDULE_TASK": "Déprogrammer la tâche",
         "UPDATE_ISSUE_DATA": "Mettre à jour les données du ticket"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1066,7 +1093,9 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Répéter tout",
         "START": "Démarrer la tâche",
-        "SWITCH_CONTEXT_START": "Changer de contexte et démarrer"
+        "SWITCH_CONTEXT_START": "Changer de contexte et démarrer",
+        "UNSCHEDULE": "Déprogrammer",
+        "UNSCHEDULE_ALL": "Déprogrammer tout"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",
@@ -1114,6 +1143,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Tâche <strong>{{title}}</strong> ajoutée de <strong>{{contextTitle}}</strong> à la liste actuelle",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tâche <strong>{{title}}</strong> restaurée en lien avec le ticket de l'archive",
         "LAST_TAG_DELETION_WARNING": "Vous essayez de supprimer la dernière balise d'une tâche non liée à un projet. Ce n'est pas permis!",
+        "MOVED_TO_ARCHIVE": "Déplacé {{nr}} tâches vers l'archive",
         "MOVED_TO_PROJECT": "Tâche \"{{taskTitle}}\" déplacée vers le projet \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Aller au projet",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
@@ -1305,6 +1335,8 @@
     "EXPORT_DATA": "Exporter des données",
     "IMPORT_FROM_FILE": "Importer depuis un fichier",
     "PRIVACY_EXPORT": "Exporter les données anonymisées (pour envoyer à contact@super-productivity.com dans un but de débogage)",
+    "S_BACKUP_DOWNLOADED": "Sauvegarde téléchargée dans le dossier documents d'android",
+    "S_ERR_IMPORT_FAILED": "L'importation des données a échoué",
     "S_ERR_INVALID_DATA": "Échec de l'importation: JSON non valide"
   },
   "G": {
@@ -1322,6 +1354,7 @@
     "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> télécharger l'extension chrome</a> afin de permettre la communication avec l'Api Jira et la gestion du temps d'inactivité. Notez que cela ne fonctionne pas sur mobile.",
     "HIDE": "Réduire",
     "ICON_INP_DESCRIPTION": "Tous les emojis utf-8 sont également pris en charge !",
+    "INBOX_PROJECT_TITLE": "Boîte de réception",
     "LOGIN": "S'identifier",
     "LOGOUT": "Se déconnecter",
     "MINUTES": "{{m}} minutes",
@@ -1331,6 +1364,7 @@
     "NO_CON": "Vous êtes actuellement hors ligne. Veuillez vous reconnecter à Internet.",
     "NONE": "Aucun",
     "OK": "Ok",
+    "OVERDUE": "En retard",
     "PREVIOUS": "précédent",
     "REMOVE": "Retirer",
     "RESET": "Réinitialiser",
@@ -1473,6 +1507,7 @@
       "IS_DISABLE_ANIMATIONS": "Désactiver toutes les animations",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
+      "IS_SHOW_TIP_LONGER": "Afficher le conseil de productivité au démarrage de l'application un peu plus longtemps",
       "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Utiliser la barre minimale de navigation (affichage des icônes uniquement)",
@@ -1584,6 +1619,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
+    "ALL_PLANNED_LIST": "Répété / Programmé",
     "BOARDS": "Tableaux",
     "CREATE_PROJECT": "Créer un projet",
     "CREATE_TAG": "Créer une balise",
@@ -1602,6 +1638,7 @@
       "SYNC": "Tutoriel : Configurer la synchronisation"
     },
     "METRICS": "Métriques",
+    "NO_PROJECT_INFO": "Aucun projet disponible. Vous pouvez créer un nouveau projet en cliquant sur le bouton \"Créer un projet\".",
     "NO_TAG_INFO": "Il n'y a actuellement aucune balise. Vous pouvez ajouter des balises en saisissant \"#maBalise\" lors de l'ajout ou de la modification de tâches.",
     "NOTES": "Remarques",
     "NOTES_PANEL_INFO": "Les notes ne peuvent être affichées que depuis les vues de programmation et de listes de tâches.",
@@ -1611,7 +1648,6 @@
     "PROJECT_SETTINGS": "paramètres du projet",
     "PROJECTS": "Projets",
     "QUICK_HISTORY": "Historique rapide",
-    "ALL_PLANNED_LIST": "Répété / Programmé",
     "SCHEDULE": "Programmer",
     "SETTINGS": "Réglages",
     "SHOW_SEARCH_BAR": "Afficher la barre de recherche",
@@ -1625,7 +1661,15 @@
     "TRIGGER_SYNC": "Déclencher la synchronisation manuellement",
     "WORKLOG": "Journal de travail"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Voulez-vous télécharger une sauvegarde de vos données héritées (peut être utilisée avec des versions antérieures de Super Productivity) ?",
+    "DETECTED_LEGACY": "Données héritées détectées. Nous allons les migrer pour vous !",
+    "E_MIGRATION_FAILED": "Échec de la migration ! avec l'erreur :",
+    "E_RESTART_FAILED": "Échec du redémarrage automatique. Veuillez redémarrer l'application manuellement !",
+    "SUCCESS": "Migration terminée ! Redémarrage de l'application maintenant..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Ajouter des tâches d'aujourd'hui",
     "BACK": "Attends j'ai oublié quelque chose!",
     "BREAK_LABEL": "Pauses (nr / heure)",
     "CELEBRATE": "Prenez un moment pour célébrer <i>!</i>",
@@ -1704,6 +1748,7 @@
   "V": {
     "E_1TO10": "Veuillez entrer une valeur entre 1 et 10",
     "E_DATETIME": "La valeur entrée n'est pas un datetime !",
+    "E_DURATION": "Veuillez entrer une durée valide (par exemple, 1h)",
     "E_MAX": "Ne devrait pas être plus grand que {{val}}",
     "E_MAX_LENGTH": "Doit comporter au maximum {{val}} caractères",
     "E_MIN": "Devrait être plus petit que {{val}}",
@@ -1717,13 +1762,16 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Ajouter des tâches prévues pour demain ({{nr}})",
     "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée!",
     "COMPLETED_TASKS": "Tâches terminées",
+    "DONE_TASKS": "Tâches terminées",
     "ESTIMATE_REMAINING": "Tps. restant:",
     "FINISH_DAY": "Fin de journée",
     "FINISH_DAY_FOR_PROJECT": "Finir la journée pour ce Projet",
     "FINISH_DAY_FOR_TAG": "Finir la journée pour cette Balise",
     "FINISH_DAY_TOOLTIP": "Évaluer votre journée, archiver toutes les tâches finies (optionnel) et/ou planifier la prochaine journée.",
     "HELP_PROCRASTINATION": "A l'aide je procrastine !",
+    "MOVE_DONE_TO_ARCHIVE": "Déplacer les tâches terminées vers l'archive",
     "NO_COMPLETED_TASKS": "Il n'y a actuellement aucune tâche terminée",
+    "NO_DONE_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_PLANNED_TASKS": "Aucune tâche planifiée",
     "READY_TO_WORK": "Prêt à travailler !",
     "RESET_BREAK_TIMER": "Réinitialiser le timer 'sans prendre de pause'",

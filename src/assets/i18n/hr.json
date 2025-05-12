@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Čini se da su tvoji podaci oštećeni („{{validityError}}”). Želiš li pokušati automatski popraviti podatke? To može prouzročiti djelomično gubljenje podataka.",
-    "DELETE_STRAY_BACKUP": "Želiš li izbrisati sigurnosnu kopiju za izbjegavanje prikaza ovog dijaloškog okvira?",
     "RELOAD_AFTER_IDB_ERROR": "Pristup bazi podataka nije moguć :( Mogući uzroci su aktualiziranje programa u pozadini ili nedovoljna memorija na disku. Ako si program instalirao/la na linuxu kao snap, također omogući aktualiziranje 'snap set core experimental.refresh-app-awareness=true' dok ne riješe ovaj problem. Pritisni „U redu” za ponovno učitavanje programa (na nekim platformama će se program morati ručno ponovo pokrenuti).",
     "RESTORE_FILE_BACKUP": "Čini se da NEMA PODATAKA, međutim postoje sigirnosne kopije u „{{dir}}”. Želiš li obnoviti zadnju sigurnosnu kopiju iz {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Čini se da NEMA PODATAKA, međutim postoji sigirnosna kopija. Želiš li je učitati?",
@@ -992,6 +991,7 @@
         "ADD_ATTACHMENT": "Dodaj prilog",
         "ADD_SUB_TASK": "Dodaj podzadatak",
         "ATTACHMENTS": "Broj priloga ({{nr}})",
+        "DUE": "Pwograme nan",
         "FROM_PARENT": "(od nadređenog)",
         "LOCAL_ATTACHMENTS": "Lokalni prilozi",
         "NOTES": "Opis",
@@ -999,7 +999,6 @@
         "REMINDER": "Podsjetnik",
         "REPEAT": "Ponovi",
         "SCHEDULE_TASK": "Terminiraj zadatak",
-        "DUE": "Pwograme nan",
         "SUB_TASKS": "Broj podzadataka ({{nr}})",
         "TIME": "Vrijeme",
         "TITLE_PLACEHOLDER": "Antre yon tit"
@@ -1584,6 +1583,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj novi zadatak",
+    "ALL_PLANNED_LIST": "Repete/Pwograme",
     "BOARDS": "Ankadreman yo",
     "CREATE_PROJECT": "Stvori projekt",
     "CREATE_TAG": "Stvori oznaku",
@@ -1611,7 +1611,6 @@
     "PROJECT_SETTINGS": "Postavke projekta",
     "PROJECTS": "Projekti",
     "QUICK_HISTORY": "Brza povijest",
-    "ALL_PLANNED_LIST": "Repete/Pwograme",
     "SCHEDULE": "Orè",
     "SETTINGS": "Postavke",
     "SHOW_SEARCH_BAR": "Prikaži traku pretrage",

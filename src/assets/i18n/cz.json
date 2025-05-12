@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Vaše data se zdají být poškozena („{{validityError}}“). Chcete je pokusit se automaticky opravit? To může způsobit částečnou ztrátu dat.",
-    "DELETE_STRAY_BACKUP": "Chcete smazat zálohu, abyste se vyhnuli zobrazení tohoto dialogu?",
     "RELOAD_AFTER_IDB_ERROR": "Nelze přistoupit k databázi :( Možné příčiny jsou aktualizace aplikace na pozadí nebo nedostatek místa na disku. Pokud jste aplikaci na linuxu nainstalovali jako snap, můžete také povolit „snap set core experimental.refresh-app-awareness=true“, dokud tento problém na jejich straně nevyřeší. Stiskněte OK pro znovunačtení aplikace (může vyžadovat ruční restart aplikace na některých platformách).",
     "RESTORE_FILE_BACKUP": "Zdá se, že neexistují ŽÁDNÁ DATA, ale jsou k dispozici zálohy v adresáři „{{dir}}“. Chcete obnovit nejnovější zálohu z {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Zdá se, že neexistují ŽÁDNÁ DATA, ale je k dispozici záloha. Chcete ji načíst?",

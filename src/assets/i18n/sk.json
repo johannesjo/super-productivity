@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Vaše údaje sú zrejme poškodené (\"{{validityError}}\"). Chcete sa pokúsiť o automatickú opravu? Mohlo by to viesť k čiastočnej strate údajov.",
-    "DELETE_STRAY_BACKUP": "Do you want to delete the back to avoid seeing this dialog?",
     "RELOAD_AFTER_IDB_ERROR": "Nemožno získať prístup k databáze :( Možnou príčinou je aktualizácia aplikácie na pozadí alebo málo miesta na disku. Ak ste aplikáciu nainštalovali na linux ako snap, mali by ste povoliť refresh awareness 'snap set core experimental.refresh-app-awareness=true', kým tento problém neopravia na svojej strane. Stlačením tlačidla OK aplikáciu znovu načítajte (na niektorých platformách môže byť potrebné manuálne reštartovanie aplikácie).",
     "RESTORE_FILE_BACKUP": "Zdá sa, že neexistujú žiadne DÁTA, ale na adrese \"{{dir}}\" sú k dispozícii zálohy. Chcete obnoviť poslednú zálohu z {{{z}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Zdá sa, že neexistujú žiadne údaje, ale je k dispozícii záloha. Chcete ju načítať?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Pridať nový panel",
+        "BACKLOG_TASK_FILTER_ALL": "Všetko",
         "COLUMNS": "Stĺpce",
         "TAGS_EXCLUDED": "Vylúčené značky",
         "TAGS_REQUIRED": "Povinné značky",
@@ -992,6 +992,7 @@
         "ADD_ATTACHMENT": "Pridať prílohu",
         "ADD_SUB_TASK": "Pridať podúlohu",
         "ATTACHMENTS": "Prílohy ({{nr}})",
+        "DUE": "Naplánované na",
         "FROM_PARENT": "(od rodiča)",
         "LOCAL_ATTACHMENTS": "Lokálne prílohy",
         "NOTES": "Popis",
@@ -999,7 +1000,6 @@
         "REMINDER": "Pripomienka",
         "REPEAT": "Opakovať",
         "SCHEDULE_TASK": "Naplánovať úlohu",
-        "DUE": "Naplánované na",
         "SUB_TASKS": "Podúlohy ({{nr}})",
         "TIME": "Čas",
         "TITLE_PLACEHOLDER": "Zadajte názov"
@@ -1584,6 +1584,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Pridať novú úlohu",
+    "ALL_PLANNED_LIST": "Opakovanie/plánované",
     "BOARDS": "Tabule",
     "CREATE_PROJECT": "Vytvoriť Projekt",
     "CREATE_TAG": "Vytvoriť štítok",
@@ -1611,7 +1612,6 @@
     "PROJECT_SETTINGS": "Nastavenia projektu",
     "PROJECTS": "Projekty",
     "QUICK_HISTORY": "Rýchla história",
-    "ALL_PLANNED_LIST": "Opakovanie/plánované",
     "SCHEDULE": "Plán",
     "SETTINGS": "Nastavenia",
     "SHOW_SEARCH_BAR": "Zobrazenie panela vyhľadávania",

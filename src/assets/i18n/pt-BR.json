@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Seus dados parecem estar danificados (\" {{validityError}}\"). Deseja tentar corrigi-los automaticamente? Isso pode resultar em perda parcial de dados.",
-    "DELETE_STRAY_BACKUP": "Deseja excluir o verso para não ver esta caixa de diálogo?",
     "RELOAD_AFTER_IDB_ERROR": "Não é possível acessar o banco de dados :( As possíveis causas são uma atualização do aplicativo em segundo plano ou pouco espaço em disco. Se você instalou o aplicativo no Linux como snap, você também deseja habilitar o reconhecimento de atualização 'snap set core experimental.refresh-app-awareness=true' até que eles corrijam esse problema. Pressione OK para recarregar o aplicativo (pode exigir a reinicialização manual do aplicativo em algumas plataformas).",
     "RESTORE_FILE_BACKUP": "Parece que NÃO HÁ DADOS, mas há backups disponíveis em \" {{dir}}\". Deseja restaurar o backup mais recente de {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NÃO HÁ DADOS, mas há um backup disponível. Você quer carregá-lo?",

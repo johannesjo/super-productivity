@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Verileriniz zarar görmüş görünüyor (\"{{validityError}}\"). Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
-    "DELETE_STRAY_BACKUP": "Bu iletişim kutusunu görmemek için arka tarafı silmek istiyor musunuz?",
     "RELOAD_AFTER_IDB_ERROR": "Veritabanına erişilemiyor :( Olası nedenler, arka planda uygulama güncellemesi veya düşük disk alanıdır.Eğer uygulamayı linux da snap aracılığıyla yüklediyseniz, onlar bu sorunu kendi taraflarında çözene kadar haberdar olma yenilemesini 'snap set core experimental.refresh-app-awareness=true' etkinleştirmeyi isteyebilirsiniz. Uygulamayı yeniden yüklemek için Tamam'a basın (bazı platformlarda uygulamanın manuel olarak yeniden başlatılması gerekebilir).",
     "RESTORE_FILE_BACKUP": "HİÇ VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
     "RESTORE_FILE_BACKUP_ANDROID": "HİÇ VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Yeni Panel Ekle",
+        "BACKLOG_TASK_FILTER_ALL": "Hepsi",
         "COLUMNS": "Sütunlar",
         "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
         "TAGS_REQUIRED": "Gerekli Etiketler",
@@ -992,6 +992,7 @@
         "ADD_ATTACHMENT": "Eklenti ekle",
         "ADD_SUB_TASK": "Alt Görev ekle",
         "ATTACHMENTS": "Ekler {{nr}}",
+        "DUE": "Planlandı",
         "FROM_PARENT": "(Ana görevden)",
         "LOCAL_ATTACHMENTS": "Lokal Ekler",
         "NOTES": "Notlar",
@@ -999,7 +1000,6 @@
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
-        "DUE": "Planlandı",
         "SUB_TASKS": "Alt Görevler ({{nr}})",
         "TIME": "Zaman",
         "TITLE_PLACEHOLDER": "Bir başlık girin"
@@ -1584,6 +1584,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
+    "ALL_PLANNED_LIST": "Tekrar/Planlanmış",
     "BOARDS": "Panolar",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
@@ -1611,7 +1612,6 @@
     "PROJECT_SETTINGS": "Proje Ayarları",
     "PROJECTS": "Projeler",
     "QUICK_HISTORY": "Hızlı Geçmiş",
-    "ALL_PLANNED_LIST": "Tekrar/Planlanmış",
     "SCHEDULE": "Takvim",
     "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",

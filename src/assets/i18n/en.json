@@ -76,17 +76,17 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Add new Panel",
+        "BACKLOG_TASK_FILTER_ALL": "All",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclude",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Backlog only",
+        "BACKLOG_TASK_FILTER_TYPE": "Backlog tasks",
         "COLUMNS": "Columns",
         "TAGS_EXCLUDED": "Excluded Tags",
         "TAGS_REQUIRED": "Required Tags",
         "TASK_DONE_STATE": "Task Done State",
         "TASK_DONE_STATE_ALL": "All",
         "TASK_DONE_STATE_DONE": "Done",
-        "TASK_DONE_STATE_UNDONE": "Undone",
-        "BACKLOG_TASK_FILTER_TYPE": "Backlog tasks",
-        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclude",
-        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Backlog only",
-        "BACKLOG_TASK_FILTER_ALL": "All"
+        "TASK_DONE_STATE_UNDONE": "Undone"
       },
       "V": {
         "ADD_NEW_BOARD": "Add new board",
@@ -147,6 +147,12 @@
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
     },
+    "D_RATE": {
+      "A_HOW": "How and where to rate",
+      "BTN_DONT_BOTHER": "Don't bother me again",
+      "TITLE": "🙈 Please forgive us, but...",
+      "TXT": "You would help the project immensely by <strong>giving it a good rating, if you like it!</strong>"
+    },
     "DOMINA_MODE": {
       "FORM": {
         "HELP": "Repeats the configured phrase every X when tracking time to a task.",
@@ -166,12 +172,6 @@
         "SYNC_ERROR": "Dropbox: Error while syncing",
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Unable to generate PKCE challenge."
       }
-    },
-    "D_RATE": {
-      "A_HOW": "How and where to rate",
-      "BTN_DONT_BOTHER": "Don't bother me again",
-      "TITLE": "\uD83D\uDE48 Please forgive us, but...",
-      "TXT": "You would help the project immensely by <strong>giving it a good rating, if you like it!</strong>"
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
@@ -859,8 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Your data was only partially uploaded. Please try again later! Otherwise you will not be able to sync your data to other devices.",
-        "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog.",
+        "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!"
       },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
@@ -1011,6 +1011,7 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
+        "DUE": "Due",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
@@ -1018,7 +1019,6 @@
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
-        "DUE": "Due",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time",
         "TITLE_PLACEHOLDER": "Enter a title"
@@ -1073,8 +1073,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
-        "UNSCHEDULE": "Unschedule",
-        "UNSCHEDULE_ALL": "Unschedule all",
         "DONE": "Done",
         "DUE_TASK": "Reminder for due task",
         "DUE_TASKS": "Reminder for due tasks",
@@ -1087,7 +1085,9 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
-        "SWITCH_CONTEXT_START": "Switch Context & Start"
+        "SWITCH_CONTEXT_START": "Switch Context & Start",
+        "UNSCHEDULE": "Unschedule",
+        "UNSCHEDULE_ALL": "Unschedule all"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -1611,6 +1611,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
+    "ALL_PLANNED_LIST": "Due / Repeat",
     "BOARDS": "Boards",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
@@ -1639,7 +1640,6 @@
     "PROJECT_SETTINGS": "Project Settings",
     "PROJECTS": "Projects",
     "QUICK_HISTORY": "Quick History",
-    "ALL_PLANNED_LIST": "Due / Repeat",
     "SCHEDULE": "Schedule",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
@@ -1654,13 +1654,12 @@
     "WORKLOG": "Worklog"
   },
   "MIGRATE": {
-    "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
-    "SUCCESS": "Migration all done! Restarting app now...",
     "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "E_MIGRATION_FAILED": "Migration failed! with Error:",
-    "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!"
+    "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!",
+    "SUCCESS": "Migration all done! Restarting app now..."
   },
-
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
     "BACK": "Wait I forgot something!",

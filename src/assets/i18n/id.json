@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Apa Anda ingin memperbaikinya secara otomatis? Ini dapat mengakibatkan hilangnya sebagian data.",
-    "DELETE_STRAY_BACKUP": "Apakah Anda ingin menghapus bagian belakang untuk menghindari melihat dialog ini?",
     "RELOAD_AFTER_IDB_ERROR": "Tidak bisa mengakses database :( Kemungkinan penyebabnya adalah pembaruan aplikasi di latar belakang atau kekurangan kapasitas disk. Jika Anda memasang aplikasi di Linux sebagai Snap, Anda juga harus mengaktifkan refresh awarness 'snap set core experimental.refresh-app-awareness=true' sampai mereka memperbaiki masalah ini di pihak mereka. Tekan OK untuk memuat ulang aplikasi (mungkin perlu memulai ulang aplikasi secara manual di beberapa platform).",
     "RESTORE_FILE_BACKUP": "Sepertinya TIDAK ADA DATA, tetapi ada cadangan yang tersedia di \"{{dir}}\". Apakah Anda ingin memulihkan cadangan dari {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Sepertinya TIDAK ADA DATA, tetapi ada cadangan yang tersedia. Apakah Anda ingin memuatnya?",
@@ -77,6 +76,7 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Tambahkan Panel baru",
+        "BACKLOG_TASK_FILTER_ALL": "Semua",
         "COLUMNS": "Kolom",
         "TAGS_EXCLUDED": "Tag yang Dikecualikan",
         "TAGS_REQUIRED": "Tag yang Diperlukan",
@@ -992,6 +992,7 @@
         "ADD_ATTACHMENT": "Tambahkan lampiran",
         "ADD_SUB_TASK": "Tambah subtugas",
         "ATTACHMENTS": "Lampiran ({{nr}})",
+        "DUE": "Dijadwalkan pada",
         "FROM_PARENT": "(dari Induk)",
         "LOCAL_ATTACHMENTS": "Lampiran Lokal",
         "NOTES": "Deskripsi",
@@ -999,7 +1000,6 @@
         "REMINDER": "Pengingat",
         "REPEAT": "Ulangi",
         "SCHEDULE_TASK": "Jadwal tugas",
-        "DUE": "Dijadwalkan pada",
         "SUB_TASKS": "Subtugas ({{nr}})",
         "TIME": "Waktu",
         "TITLE_PLACEHOLDER": "Masukkan Judul"
@@ -1584,6 +1584,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Tambah Tugas Baru",
+    "ALL_PLANNED_LIST": "Ulangi/Jadwal",
     "BOARDS": "Papan",
     "CREATE_PROJECT": "Buat Proyek",
     "CREATE_TAG": "Buat Tag",
@@ -1611,7 +1612,6 @@
     "PROJECT_SETTINGS": "Pengaturan Proyek",
     "PROJECTS": "Proyek",
     "QUICK_HISTORY": "Riwayat Cepat",
-    "ALL_PLANNED_LIST": "Ulangi/Jadwal",
     "SCHEDULE": "Jadwal",
     "SETTINGS": "Pengaturan",
     "SHOW_SEARCH_BAR": "Tampilkan Bilah Pencarian",
