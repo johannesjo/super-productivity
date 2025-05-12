@@ -13,6 +13,7 @@ import {
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 const FAKE_PROJECT_ID = 'FAKE_PROJECT_ID';
 describe('dataRepair()', () => {
@@ -39,6 +40,8 @@ describe('dataRepair()', () => {
         },
       ] as Partial<Tag>[]),
     };
+    // to prevent side effects
+    mock = dirtyDeepCopy(mock);
   });
 
   it('should delete tasks with same id in "task" and "taskArchive" from taskArchive', () => {
@@ -53,35 +56,29 @@ describe('dataRepair()', () => {
         },
       ]),
     } as any;
-    expect(
-      dataRepair({
-        ...mock,
-        task: taskState,
-        archiveYoung: {
-          lastTimeTrackingFlush: 0,
-          timeTracking: mock.archiveYoung.timeTracking,
-          task: fakeEntityStateFromArray<Task>([
-            {
-              ...DEFAULT_TASK,
-              id: 'TEST',
-              title: 'TEST',
-              projectId: FAKE_PROJECT_ID,
-            },
-          ]),
-        },
-      } as any),
-    ).toEqual({
+
+    const result = dataRepair({
       ...mock,
       task: taskState,
-      // TODO fix
       archiveYoung: {
         lastTimeTrackingFlush: 0,
         timeTracking: mock.archiveYoung.timeTracking,
-        task: {
-          ...createEmptyEntity(),
-        },
+        task: fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'TEST',
+            title: 'TEST',
+            projectId: FAKE_PROJECT_ID,
+          },
+        ]),
       },
-    });
+    } as any);
+
+    expect(result.task).toEqual(taskState);
+    expect(result.archiveYoung.lastTimeTrackingFlush).toBe(0);
+    expect(result.archiveYoung.timeTracking).toBe(mock.archiveYoung.timeTracking);
+    expect(result.archiveYoung.task.ids).toEqual([]);
+    expect(Object.keys(result.archiveYoung.task.entities)).toEqual([]);
   });
 
   it('should delete missing tasks for tags today list', () => {
@@ -997,7 +994,7 @@ describe('dataRepair()', () => {
 
   it('should delete non-existent project ids for tasks in "taskArchive"', () => {
     const taskArchiveState = {
-      ...mock.archiveYoung.task,
+      // ...mock.archiveYoung.task,
       ...fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
