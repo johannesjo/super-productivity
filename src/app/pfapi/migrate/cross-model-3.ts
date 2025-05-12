@@ -135,6 +135,25 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     copy.issueProvider = issueProviderInitialState;
   }
 
+  // cleanup task repeat stuff legacy (TODAY_TAG mainly)
+  const availableTagIds = Object.keys(copy.tag.entities);
+  Object.keys(copy.taskRepeatCfg.entities).forEach((id) => {
+    const taskRepeatCfg = copy.taskRepeatCfg.entities[id];
+    if (taskRepeatCfg && taskRepeatCfg.tagIds.length > 0) {
+      // @ts-ignore
+      taskRepeatCfg.tagIds = taskRepeatCfg.tagIds.filter((tagId) =>
+        availableTagIds.includes(tagId),
+      );
+    }
+    if (
+      taskRepeatCfg?.projectId &&
+      taskRepeatCfg?.projectId === LEGACY_INBOX_PROJECT_ID
+    ) {
+      // @ts-ignore
+      taskRepeatCfg.projectId = INBOX_PROJECT.id;
+    }
+  });
+
   console.log(copy);
   return copy;
 }) as CrossModelMigrateFn;
