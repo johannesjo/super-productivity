@@ -20,5 +20,6 @@
 
   @include mq(xs, max) {
     display: block;
+    max-width: 100%;
   }
 }
