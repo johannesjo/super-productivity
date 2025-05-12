@@ -1011,7 +1011,7 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
-        "DUE": "Due",
+        "DUE": "Planned at",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
@@ -1074,8 +1074,8 @@
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
         "DONE": "Done",
-        "DUE_TASK": "Reminder for due task",
-        "DUE_TASKS": "Reminder for due tasks",
+        "DUE_TASK": "Reminder for planned task",
+        "DUE_TASKS": "Reminder for planned tasks",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
@@ -1542,7 +1542,7 @@
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",
-      "IS_ENABLE_DUE": "Enable due short syntax (@<Due time>)",
+      "IS_ENABLE_DUE": "Enable planned at short syntax (@<planned time>)",
       "IS_ENABLE_PROJECT": "Enable project short syntax (+<Project name>)",
       "IS_ENABLE_TAG": "Enable tag short syntax (#<Tag>)",
       "TITLE": "Short Syntax"
@@ -1611,7 +1611,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
-    "ALL_PLANNED_LIST": "Due / Repeat",
+    "ALL_PLANNED_LIST": "Planned / Repeat",
     "BOARDS": "Boards",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
