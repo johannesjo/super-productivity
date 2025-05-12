@@ -267,7 +267,6 @@
                 <div class="finish-day-button-wrapper">
                   @if (!isOnTodayList() && doneTasks().length) {
                     <button
-                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
                       class="e2e-move-done-to-archive"
                       mat-stroked-button
                       (click)="moveDoneToArchive()"
@@ -282,17 +281,31 @@
               <div class="finish-day-button-wrapper">
                 <!-- NOTE: tabindex is same as for tasks -->
                 @if (isOnTodayList()) {
-                  <button
-                    [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                    color="primary"
-                    mat-flat-button
-                    routerLink="/active/daily-summary"
-                    tabindex="1"
-                    class="e2e-finish-day"
-                  >
-                    <mat-icon>done_all</mat-icon>
-                    {{ T.WW.FINISH_DAY | translate }}
-                  </button>
+                  @if (undoneTasks().length) {
+                    <button
+                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                      color=""
+                      mat-stroked-button
+                      routerLink="/active/daily-summary"
+                      tabindex="1"
+                      class="e2e-finish-day"
+                    >
+                      <mat-icon>done_all</mat-icon>
+                      {{ T.WW.FINISH_DAY | translate }}
+                    </button>
+                  } @else {
+                    <button
+                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
+                      color="primary"
+                      mat-flat-button
+                      routerLink="/active/daily-summary"
+                      tabindex="1"
+                      class="e2e-finish-day"
+                    >
+                      <mat-icon>done_all</mat-icon>
+                      {{ T.WW.FINISH_DAY | translate }}
+                    </button>
+                  }
                 }
               </div>
             </div>
