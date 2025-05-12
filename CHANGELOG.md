@@ -1,3 +1,11 @@
+## [12.0.6-rc.9](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.8...v12.0.6-rc.9) (2025-05-12)
+
+### Features
+
+- improve backwards compatability ([bf510e1](https://github.com/johannesjo/super-productivity/commit/bf510e1d46bb2dba60274c71a6b2eadd9ce146ab))
+- make finish day button more subtle when there are still undone tasks ([4761ed6](https://github.com/johannesjo/super-productivity/commit/4761ed65a5d3fc13bfc0a8b1a4f17ee0e78dc6b8))
+- persist done task collapsed state ([34e985e](https://github.com/johannesjo/super-productivity/commit/34e985ed5f3f77811dd110f52c4f7d181d63d634))
+
 ## [12.0.6-rc.8](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.7...v12.0.6-rc.8) (2025-05-12)
 
 ### Bug Fixes
