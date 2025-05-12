@@ -57,10 +57,7 @@
   .date-and-time-left {
     margin-top: auto;
     margin-bottom: auto;
-
-    @include mq(xs) {
-      margin-right: $s;
-    }
+    margin-right: $s * 2;
   }
 
   mat-icon {

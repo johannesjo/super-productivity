@@ -470,3 +470,10 @@ export const selectAllTasksWithDueDay = createSelector(
     );
   },
 );
+
+export const selectAllUndoneTasksWithDueDay = createSelector(
+  selectAllTasksWithDueDay,
+  (tasks): TaskWithDueDay[] => {
+    return tasks.filter((task) => !task.isDone);
+  },
+);
