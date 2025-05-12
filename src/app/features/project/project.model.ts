@@ -10,10 +10,10 @@ export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null | undefi
 
 export interface ProjectBasicCfg {
   title: string;
-  isHiddenFromMenu: boolean;
   // TODO remove maybe
-  isArchived: boolean;
-  isEnableBacklog: boolean;
+  isArchived?: boolean;
+  isHiddenFromMenu?: boolean;
+  isEnableBacklog?: boolean;
   taskIds: string[];
   backlogTaskIds: string[];
   noteIds: string[];

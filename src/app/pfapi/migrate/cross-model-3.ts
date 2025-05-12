@@ -12,6 +12,8 @@ import {
   LEGACY_NO_LIST_TAG_ID,
 } from '../../features/project/project.const';
 import { ProjectState } from '../../features/project/project.model';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
+import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 
 const LEGACY_INBOX_PROJECT_ID = 'INBOX' as const;
 
@@ -123,6 +125,16 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
   migrateTasks(copy.archiveYoung.task, copy.project, true, isMigrateLegacyInboxProject);
   migrateTasks(copy.archiveOld.task, copy.project, true, isMigrateLegacyInboxProject);
 
+  // add default configs
+  copy.globalConfig = {
+    ...DEFAULT_GLOBAL_CONFIG,
+    ...copy.globalConfig,
+  };
+
+  if (!copy.issueProvider) {
+    copy.issueProvider = issueProviderInitialState;
+  }
+
   console.log(copy);
   return copy;
 }) as CrossModelMigrateFn;
@@ -163,6 +175,20 @@ const migrateTasks = <T extends EntityState<TaskCopy>>(
           inboxProject.taskIds = [...inboxProject.taskIds, task.id];
         }
       }
+
+      // cleanup null values once more
+      task.issueId = task.issueId || undefined;
+      task.issueProviderId = task.issueProviderId || undefined;
+      task.issueType =
+        (task.issueType as any) === 'CALENDAR' ? 'ICAL' : task.issueType || undefined;
+      task.issueWasUpdated = task.issueWasUpdated || undefined;
+      task.issueLastUpdated = task.issueLastUpdated || undefined;
+      task.issueAttachmentNr = task.issueAttachmentNr || undefined;
+      task.issueTimeTracked = task.issueTimeTracked || undefined;
+      task.issuePoints = task.issuePoints || undefined;
+      task.reminderId = task.reminderId || undefined;
+      task.parentId = task.parentId || undefined;
+      task.doneOn = task.doneOn || undefined;
     }
   });
 };

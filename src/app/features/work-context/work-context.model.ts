@@ -63,7 +63,7 @@ export enum WorkContextType {
 export interface WorkContextCommon {
   advancedCfg: WorkContextAdvancedCfg;
   theme: WorkContextThemeCfg;
-  icon: string | null;
+  icon?: string | null;
   taskIds: string[];
   id: string;
   title: string;
@@ -83,7 +83,7 @@ export interface WorkContextCommon {
 export type WorkContextAdvancedCfgKey = keyof WorkContextAdvancedCfg;
 
 export interface WorkContextCopy extends WorkContextCommon {
-  icon: string | null;
+  icon?: string | null;
   routerLink: string;
   isEnableBacklog?: boolean;
   backlogTaskIds?: string[];

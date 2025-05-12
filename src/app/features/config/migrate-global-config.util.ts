@@ -201,11 +201,11 @@ const _migrateMotivationalImg = (config: GlobalConfigState): GlobalConfigState =
 };
 
 const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
-  const getDir = (file: string): string | null => {
-    const normalizedFilePath = file.replace(/\\/g, '/');
-    const m = normalizedFilePath.match(/(.*)\//);
-    return (m && m[1]) || null;
-  };
+  // const getDir = (file: string): string | null => {
+  //   const normalizedFilePath = file.replace(/\\/g, '/');
+  //   const m = normalizedFilePath.match(/(.*)\//);
+  //   return (m && m[1]) || null;
+  // };
 
   if (config.sync) {
     let syncProvider: LegacySyncProvider | null = config.sync.syncProvider;
@@ -229,26 +229,26 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
       };
     }
 
-    if (
-      !config.sync.localFileSync.syncFolderPath &&
-      config.sync.localFileSync.syncFilePath?.length
-    ) {
-      config.sync.localFileSync.syncFolderPath = getDir(
-        config.sync.localFileSync.syncFilePath,
-      );
-      console.log(
-        'migrating new folder path localFileSync',
-        JSON.stringify(config.sync.localFileSync),
-      );
-      // TODO add delete with next version
-      // delete config.sync.localFileSync.syncFilePath;
-    }
-    if (!config.sync.webDav.syncFolderPath && config.sync.webDav.syncFilePath?.length) {
-      config.sync.webDav.syncFolderPath = getDir(config.sync.webDav.syncFilePath);
-      console.log('migrating new folder path webDav', JSON.stringify(config.sync.webDav));
-      // TODO add delete with next version
-      // delete config.sync.webDav.syncFilePath;
-    }
+    // if (
+    //   !config.sync.localFileSync.syncFolderPath &&
+    //   config.sync.localFileSync.syncFilePath?.length
+    // ) {
+    //   config.sync.localFileSync.syncFolderPath = getDir(
+    //     config.sync.localFileSync.syncFilePath,
+    //   );
+    //   console.log(
+    //     'migrating new folder path localFileSync',
+    //     JSON.stringify(config.sync.localFileSync),
+    //   );
+    //   // TODO add delete with next version
+    //   // delete config.sync.localFileSync.syncFilePath;
+    // }
+    // if (!config.sync.webDav.syncFolderPath && config.sync.webDav.syncFilePath?.length) {
+    //   config.sync.webDav.syncFolderPath = getDir(config.sync.webDav.syncFilePath);
+    //   console.log('migrating new folder path webDav', JSON.stringify(config.sync.webDav));
+    //   // TODO add delete with next version
+    //   // delete config.sync.webDav.syncFilePath;
+    // }
 
     return { ...config, sync: { ...config.sync, syncProvider } };
   }
