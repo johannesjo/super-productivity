@@ -10,6 +10,12 @@ export enum BoardPanelCfgScheduledState {
   NotScheduled = 3,
 }
 
+export enum BoardPanelCfgTaskTypeFilter {
+  All = 1,
+  NoBacklog = 2,
+  OnlyBacklog = 3,
+}
+
 export interface BoardSrcCfg {
   // projectId?: string;
   includedTagIds: string[];
@@ -18,6 +24,8 @@ export interface BoardSrcCfg {
   taskDoneState: BoardPanelCfgTaskDoneState;
   scheduledState: BoardPanelCfgScheduledState;
   isParentTasksOnly: boolean;
+  // optional since newly added
+  backlogState?: BoardPanelCfgTaskTypeFilter;
 }
 
 export interface BoarFieldsToRemove {

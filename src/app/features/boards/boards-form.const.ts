@@ -4,6 +4,7 @@ import {
   BoardPanelCfg,
   BoardPanelCfgScheduledState,
   BoardPanelCfgTaskDoneState,
+  BoardPanelCfgTaskTypeFilter,
 } from './boards.model';
 import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
@@ -121,6 +122,29 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
                 value: BoardPanelCfgScheduledState.NotScheduled,
                 // label: T.F.BOARDS.FORM.TASK_DONE_STATE_UNDONE,
                 label: 'Not Scheduled',
+              },
+            ],
+          },
+        },
+        {
+          key: 'filterType',
+          type: 'radio',
+          props: {
+            label: T.F.BOARDS.FORM.BACKLOG_TASK_FILTER_TYPE,
+            required: true,
+            defaultValue: BoardPanelCfgTaskTypeFilter.All,
+            options: [
+              {
+                value: BoardPanelCfgTaskTypeFilter.All,
+                label: T.F.BOARDS.FORM.BACKLOG_TASK_FILTER_ALL,
+              },
+              {
+                value: BoardPanelCfgTaskTypeFilter.NoBacklog,
+                label: T.F.BOARDS.FORM.BACKLOG_TASK_FILTER_NO_BACKLOG,
+              },
+              {
+                value: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
+                label: T.F.BOARDS.FORM.BACKLOG_TASK_FILTER_ONLY_BACKLOG,
               },
             ],
           },
