@@ -1,3 +1,20 @@
+## [12.0.6-rc.10](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.9...v12.0.6-rc.10) (2025-05-12)
+
+### Bug Fixes
+
+- wrong task number shown for daily summary "Add tasks from today" ([2fe012a](https://github.com/johannesjo/super-productivity/commit/2fe012abe50a4e76ff71ecc7ba6ac694a4e15d9c))
+
+### Features
+
+- add missing tag cleanup for repeatable tasks during migration ([52431a3](https://github.com/johannesjo/super-productivity/commit/52431a34ea2de7b1761fc1060706578b61bfc9e3))
+- change icon ([f045058](https://github.com/johannesjo/super-productivity/commit/f0450583634001d3fa188cb1e3400734b70fb2d9))
+- **i18n:** add from chatgpt ([54faf45](https://github.com/johannesjo/super-productivity/commit/54faf4573b3fadaa9746787a6fbb15a92a81b9b0))
+- **i18n:** add missing ([9a9c035](https://github.com/johannesjo/super-productivity/commit/9a9c03561afb5cfc2d1784a8ce418077c0d2b365))
+- **i18n:** add missing translations ([c0b1e24](https://github.com/johannesjo/super-productivity/commit/c0b1e24333f917340d3843d85a9e9f1bbf3daeb6))
+- **i18n:** remove unused ([3e78a66](https://github.com/johannesjo/super-productivity/commit/3e78a66204e7b1c7069070f89e804d0e15ffe988))
+- **i18n:** wording due to planned at ([6eb7f41](https://github.com/johannesjo/super-productivity/commit/6eb7f41d99148c180e1c5064e89a07c1a871b8e6))
+- show nr of done archived tasks ([baa0523](https://github.com/johannesjo/super-productivity/commit/baa052328f2903a4cf663fb6dfe71f265b4c0e3b))
+
 ## [12.0.6-rc.9](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.8...v12.0.6-rc.9) (2025-05-12)
 
 ### Features
