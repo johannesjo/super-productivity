@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Pridať do Dnes",
           "RE_PLAN_ALL": "Zmeniť termín všetkých",
           "TITLE": "Pridanie plánovaných úloh do položky Dnes"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Tým sa z úlohy odstráni pripomienka! Stlačením tlačidla Escape ju zrušíte.",
-          "REMOVE_PLAN_DATE": "Odstránenie dátumu plánu",
-          "TITLE": "Naplánujte si úlohu na deň"
         }
       },
       "EDIT_REPEATED_TASK": "Upraviť opakovanú úlohu '{{taskName}}'",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Snažíte sa synchronizovať prázdny dátový objekt. Ak sa pokúšate nastaviť synchronizáciu z novej inštancie aplikácie, stačí stlačiť tlačidlo OK, aby ste načítali údaje zo servera. V opačnom prípade skontrolujte svoje údaje.",
-        "FORCE_IMPORT": "Napriek tomu importovať vzdialené údaje?",
         "FORCE_UPLOAD": "Napriek tomu nahrať lokálne údaje?",
         "FORCE_UPLOAD_AFTER_ERROR": "Pri nahrávaní miestnych údajov došlo k chybe. Chcete vynútiť aktualizáciu?",
         "MIGRATE_LEGACY": "Pri importe boli zistené staršie údaje, chcete sa pokúsiť o ich migráciu?",
@@ -1052,8 +1046,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Pridať všetko k dnešnému dňu",
         "ADD_TO_TODAY": "Pridať k dnešnému dňu",
-        "DISMISS": "Odmietnuť pripomienku",
-        "DISMISS_ALL": "Odmietnuť všetko",
         "DONE": "Hotové",
         "DUE_TASK": "Náležitá úloha",
         "DUE_TASKS": "Náležité úlohy",
@@ -1713,17 +1705,14 @@
   },
   "WW": {
     "ADD_MORE": "Add more",
-    "ADD_SCHEDULED_FOR_TODAY": "Add tasks planned for today ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
     "ADD_SOME_TASKS": "Add some tasks to plan your day!",
-    "COMPLETED_TASKS": "Completed Tasks",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
     "FINISH_DAY_FOR_TAG": "Finish Day for this Tag",
     "FINISH_DAY_TOOLTIP": "Evaluate your day, move all done tasks to the archive (optionally) and/or plan your next day.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
-    "NO_COMPLETED_TASKS": "There are currently no completed tasks",
     "NO_PLANNED_TASKS": "No planned tasks",
     "READY_TO_WORK": "Ready to work!",
     "RESET_BREAK_TIMER": "Reset without break timer",

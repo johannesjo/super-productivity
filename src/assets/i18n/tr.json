@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Bugüne Ekle",
           "RE_PLAN_ALL": "Tümünü yeniden planla",
           "TITLE": "Planlanmış görevleri Bugüne Ekle"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Bu, hatırlatıcıyı görevden kaldıracak! İptal etmek için Escape tuşuna basın.",
-          "REMOVE_PLAN_DATE": "Plan tarihini kaldır",
-          "TITLE": "Gün için Plan Görevi"
         }
       },
       "EDIT_REPEATED_TASK": "Tekrarlanan görevi '{{taskName}}' düzenle",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
-        "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
         "FORCE_UPLOAD": "Yine de Lokal veriler yüklensin mi?",
         "FORCE_UPLOAD_AFTER_ERROR": "Lokal verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
         "MIGRATE_LEGACY": "İçe aktarılırken eski veriler algılandı, taşımayı denemek istiyor musunuz?",
@@ -1052,8 +1046,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
         "ADD_TO_TODAY": "Bugüne ekle",
-        "DISMISS": "Görmezden gel",
-        "DISMISS_ALL": "Hepsini görmezden gel",
         "DONE": "Bitti",
         "DUE_TASK": "Yapılacak görev",
         "DUE_TASKS": "Yapılacak görevler",
@@ -1713,17 +1705,14 @@
   },
   "WW": {
     "ADD_MORE": "Daha ekle",
-    "ADD_SCHEDULED_FOR_TODAY": "Bugün için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Yarın için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
-    "COMPLETED_TASKS": "Tamamlanan Görevler",
     "ESTIMATE_REMAINING": "Tahmini kalan süre:",
     "FINISH_DAY": "Günü bitir",
     "FINISH_DAY_FOR_PROJECT": "Günü bu proje için bitir",
     "FINISH_DAY_FOR_TAG": "Günü bu etiket için bitir",
     "FINISH_DAY_TOOLTIP": "Gününüzü değerlendirin, yapılan tüm görevleri arşive taşıyın (isteğe bağlı olarak) ve/veya bir sonraki gününüzü planlayın.",
     "HELP_PROCRASTINATION": "Erteliyorum yardım et!",
-    "NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",
     "RESET_BREAK_TIMER": "Mola zamanlayıcısı olmadan sıfırla",

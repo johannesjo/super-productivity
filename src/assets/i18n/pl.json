@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Dodaj do Dzisiaj",
           "RE_PLAN_ALL": "Zmień termin wszystkiego",
           "TITLE": "Dodawanie zaplanowanych zadań do Dzisiaj"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Spowoduje to usunięcie przypomnienia z zadania! Naciśnij Escape, aby anulować.",
-          "REMOVE_PLAN_DATE": "Usuń datę planu",
-          "TITLE": "Planowanie zadań na dany dzień"
         }
       },
       "EDIT_REPEATED_TASK": "Edytuj powtarzające się zadanie '{{taskName}}'",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
-        "FORCE_IMPORT": "Import remote data anyway?",
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "MIGRATE_LEGACY": "Wykryto starsze dane podczas importowania, czy chcesz spróbować je zmigrować?",
@@ -1053,8 +1047,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
         "ADD_TO_TODAY": "Add to today",
-        "DISMISS": "Dismiss Reminder",
-        "DISMISS_ALL": "Dismiss all",
         "DONE": "Gotowe",
         "DUE_TASK": "Due task",
         "DUE_TASKS": "Due tasks",
@@ -1715,17 +1707,14 @@
   },
   "WW": {
     "ADD_MORE": "Dodaj więcej",
-    "ADD_SCHEDULED_FOR_TODAY": "Dodaj zaplanowane zadania na dzisiaj ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj zaplanowane zadania na jutro ({{nr}})",
     "ADD_SOME_TASKS": "Dodaj zadania do dzisiejszego planu!",
-    "COMPLETED_TASKS": "Zakończone Zadania",
     "ESTIMATE_REMAINING": "Pozostało zaplanowanego czasu:",
     "FINISH_DAY": "Zakończ Dzień",
     "FINISH_DAY_FOR_PROJECT": "Dzień zakończenia tego projektu",
     "FINISH_DAY_FOR_TAG": "Dzień zakończenia dla tego tagu",
     "FINISH_DAY_TOOLTIP": "Oceń swój dzień, przenieś wszystkie wykonane zadania do archiwum (opcjonalnie) i/lub zaplanuj następny dzień.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
-    "NO_COMPLETED_TASKS": "Aktualnie nie ma ukończonych zadań",
     "NO_PLANNED_TASKS": "Nie zaplaniwano zadań",
     "READY_TO_WORK": "Gotowy do Pracy!",
     "RESET_BREAK_TIMER": "Zresetuj bez czasu przerwy",

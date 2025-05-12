@@ -620,11 +620,6 @@
           "ADD_TO_TODAY": "Aggiungi a oggi",
           "RE_PLAN_ALL": "Riprogramma tutti",
           "TITLE": "Aggiungi attività pianificata a Oggi"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Questo rimuoverà il promemoria dall'attività! Premi Esc per annullare.",
-          "REMOVE_PLAN_DATE": "Rimuovi la data pianificata",
-          "TITLE": "Pianifica attività per il Giorno"
         }
       },
       "EDIT_REPEATED_TASK": "Modifica l'attività ripetuta \"{{taskName}}\"",
@@ -858,7 +853,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Stai tentando di sincronizzare un oggetto dati vuoto. Questa è la tua prima sincronizzazione di un'app (quasi) vergine?",
-        "FORCE_IMPORT": "Importare comunque i dati remoti?",
         "FORCE_UPLOAD": "Caricare comunque i dati locali?",
         "FORCE_UPLOAD_AFTER_ERROR": "Si è verificato un errore durante il caricamento dei dati locali. Prova a forzare l'aggiornamento?",
         "MIGRATE_LEGACY": "Dati legacy rilevati durante l'importazione, vuoi provare a migrarli?",
@@ -1051,8 +1045,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Aggiungi tutto a oggi",
         "ADD_TO_TODAY": "Aggiungi a oggi",
-        "DISMISS": "Rimuovi promemoria",
-        "DISMISS_ALL": "Ignora tutto",
         "DONE": "Fatto",
         "DUE_TASK": "Compito dovuto",
         "DUE_TASKS": "Compiti dovuti",
@@ -1712,17 +1704,14 @@
   },
   "WW": {
     "ADD_MORE": "Aggiungi altro",
-    "ADD_SCHEDULED_FOR_TODAY": "Aggiungi attività pianificate per oggi ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Aggiungi attività pianificate per domani ({{nr}})",
     "ADD_SOME_TASKS": "Aggiungi qualche attività per pianificare la tua giornata!",
-    "COMPLETED_TASKS": "Attività completate",
     "ESTIMATE_REMAINING": "Stima il rimanente:",
     "FINISH_DAY": "Termina giorno",
     "FINISH_DAY_FOR_PROJECT": "Termina giorno per questo progetto",
     "FINISH_DAY_FOR_TAG": "Termina giorno per questo tag",
     "FINISH_DAY_TOOLTIP": "Valuta la tua giornata, sposta tutte le attività fatte in archivio (opzionale) e/o pianifica la tua prossima giornata.",
     "HELP_PROCRASTINATION": "Aiuto sto procastinando!",
-    "NO_COMPLETED_TASKS": "Non ci sono attività completate",
     "NO_PLANNED_TASKS": "Nessuna attività pianificata",
     "READY_TO_WORK": "Pronto a lavorare!",
     "RESET_BREAK_TIMER": "Reset senza interrompere il tempo",

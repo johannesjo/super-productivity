@@ -630,11 +630,6 @@
           "ADD_TO_TODAY": "Ajouter à Aujourd'hui",
           "RE_PLAN_ALL": "Tout reprogrammer",
           "TITLE": "Ajouter les tâches planifiées à Aujourd'hui"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Cela supprimera le rappel de la tâche ! Appuyez sur Échap pour annuler.",
-          "REMOVE_PLAN_DATE": "Supprimer la date de planification",
-          "TITLE": "Planifier la tâche pour la journée"
         }
       },
       "EDIT_REPEATED_TASK": "Modifier la tâche répétée '{{taskName}}'",
@@ -869,7 +864,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Vous essayez de synchroniser un objet de données vide. Est-ce votre toute première synchronisation d'une application (presque) vierge?",
-        "FORCE_IMPORT": "Importer quand même des données distantes?",
         "FORCE_UPLOAD": "Télécharger quand même des données locales?",
         "FORCE_UPLOAD_AFTER_ERROR": "Une erreur s'est produite lors du téléchargement de vos données locales. Essayez de forcer la mise à jour?",
         "MIGRATE_LEGACY": "Données héritées détectées lors de l'importation, voulez-vous essayer de les migrer ?",
@@ -1079,8 +1073,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Ajouter tout à aujourd'hui",
         "ADD_TO_TODAY": "Ajouter à aujourd'hui",
-        "DISMISS": "Fermer le rappel",
-        "DISMISS_ALL": "Rejeter la totalité",
         "DONE": "Terminé",
         "DUE_TASK": "Tâche due",
         "DUE_TASKS": "Tâches dues",
@@ -1758,10 +1750,8 @@
   },
   "WW": {
     "ADD_MORE": "Ajouter plus",
-    "ADD_SCHEDULED_FOR_TODAY": "Ajouter des tâches prévues pour aujourd'hui ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Ajouter des tâches prévues pour demain ({{nr}})",
     "ADD_SOME_TASKS": "Ajoutez quelques tâches pour planifier votre journée!",
-    "COMPLETED_TASKS": "Tâches terminées",
     "DONE_TASKS": "Tâches terminées",
     "ESTIMATE_REMAINING": "Tps. restant:",
     "FINISH_DAY": "Fin de journée",
@@ -1770,7 +1760,6 @@
     "FINISH_DAY_TOOLTIP": "Évaluer votre journée, archiver toutes les tâches finies (optionnel) et/ou planifier la prochaine journée.",
     "HELP_PROCRASTINATION": "A l'aide je procrastine !",
     "MOVE_DONE_TO_ARCHIVE": "Déplacer les tâches terminées vers l'archive",
-    "NO_COMPLETED_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_DONE_TASKS": "Il n'y a actuellement aucune tâche terminée",
     "NO_PLANNED_TASKS": "Aucune tâche planifiée",
     "READY_TO_WORK": "Prêt à travailler !",

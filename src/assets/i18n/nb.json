@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Legg til i dag",
           "RE_PLAN_ALL": "Planlegg alle på nytt",
           "TITLE": "Legg til planlagte oppgaver i I dag"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Dette fjerner påminnelsen fra oppgaven! Trykk på Escape for å avbryte.",
-          "REMOVE_PLAN_DATE": "Fjern plandato",
-          "TITLE": "Planlegg dagens oppgaver"
         }
       },
       "EDIT_REPEATED_TASK": "Rediger gjentatt oppgave '{{taskName}}'",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Du prøver å synkronisere et tomt dataobjekt. Hvis du prøver å konfigurere synkronisering fra en ny appforekomst, trykker du bare på OK for å laste inn dataene fra serveren. Ellers må du sjekke dataene dine.",
-        "FORCE_IMPORT": "Importere eksterne data likevel?",
         "FORCE_UPLOAD": "Laste opp lokale data likevel?",
         "FORCE_UPLOAD_AFTER_ERROR": "Det oppstod en feil under opplasting av lokale data. Prøv å tvinge oppdateringen?",
         "MIGRATE_LEGACY": "Eldre data oppdaget under import, vil du prøve å migrere dem?",
@@ -1053,8 +1047,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
         "ADD_TO_TODAY": "Legg til i dag",
-        "DISMISS": "Avvis påminnelse",
-        "DISMISS_ALL": "Avvis alle",
         "DONE": "Ferdig",
         "DUE_TASK": "Forfalt oppgave",
         "DUE_TASKS": "Forfalte oppgaver",
@@ -1715,17 +1707,14 @@
   },
   "WW": {
     "ADD_MORE": "Legg til mer",
-    "ADD_SCHEDULED_FOR_TODAY": "Legg til oppgaver som er planlagt for i dag ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Legg til oppgaver som er planlagt for i morgen ({{nr}})",
     "ADD_SOME_TASKS": "Legg til noen oppgaver for å planlegge dagen din!",
-    "COMPLETED_TASKS": "Fullførte oppgaver",
     "ESTIMATE_REMAINING": "Anslått gjenværende:",
     "FINISH_DAY": "Avslutt dagen",
     "FINISH_DAY_FOR_PROJECT": "Sluttdag for dette prosjektet",
     "FINISH_DAY_FOR_TAG": "Sluttdag for denne taggen",
     "FINISH_DAY_TOOLTIP": "Evaluer dagen, flytt alle utførte oppgaver til arkivet (valgfritt) og/eller planlegg neste dag.",
     "HELP_PROCRASTINATION": "Hjelp jeg utsetter!",
-    "NO_COMPLETED_TASKS": "Det er for tiden ingen fullførte oppgaver",
     "NO_PLANNED_TASKS": "Ingen planlagte oppgaver",
     "READY_TO_WORK": "Klar til å arbeide!",
     "RESET_BREAK_TIMER": "Tilbakestill uten pausetimer",

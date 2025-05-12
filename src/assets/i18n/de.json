@@ -630,11 +630,6 @@
           "ADD_TO_TODAY": "Zu Heute hinzufügen",
           "RE_PLAN_ALL": "Alle verschieben",
           "TITLE": "Geplante Aufgaben zu Heute hinzufügen"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Dadurch wird die Erinnerung von der Aufgabe entfernt! Drücken Sie Escape, um abzubrechen.",
-          "REMOVE_PLAN_DATE": "Plandatum entfernen",
-          "TITLE": "Aufgabe für den Tag planen"
         }
       },
       "EDIT_REPEATED_TASK": "Wiederholte Aufgabe bearbeiten '{{taskName}}'",
@@ -869,7 +864,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Sie versuchen, ein leeres Datenobjekt zu synchronisieren. Wenn Sie versuchen, Synchronisation von einer neuen App-Instanz zu aktivieren, klicken Sie einfach \"OK\" um die Daten vom Server zu laden. Andernfalls überprüfen Sie bitte Ihre Daten.",
-        "FORCE_IMPORT": "Remote-Daten trotzdem importieren?",
         "FORCE_UPLOAD": "Lokale Daten trotzdem hochladen?",
         "FORCE_UPLOAD_AFTER_ERROR": "Beim Hochladen Ihrer lokalen Daten ist ein Fehler aufgetreten. Versuchen, das Update zu erzwingen?",
         "MIGRATE_LEGACY": "Beim Importieren wurden veraltete Daten erkannt. Möchten Sie versuchen, sie zu migrieren?",
@@ -1079,8 +1073,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
         "ADD_TO_TODAY": "Zu heute hinzufügen",
-        "DISMISS": "Erinnerung verwerfen",
-        "DISMISS_ALL": "Alle schließen",
         "DONE": "Erledigt",
         "DUE_TASK": "Fällige Aufgabe",
         "DUE_TASKS": "Fällige Aufgaben",
@@ -1758,10 +1750,8 @@
   },
   "WW": {
     "ADD_MORE": "Weitere hinzufügen",
-    "ADD_SCHEDULED_FOR_TODAY": "Für heute geplante Aufgaben hinzufügen ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Für morgen geplante Aufgaben hinzufügen ({{nr}})",
     "ADD_SOME_TASKS": "Fügen Sie einige Aufgaben hinzu, um Ihren Tag zu planen!",
-    "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
     "DONE_TASKS": "Erledigte Aufgaben",
     "ESTIMATE_REMAINING": "Schätzung verbleibend:",
     "FINISH_DAY": "Tag beenden",
@@ -1770,7 +1760,6 @@
     "FINISH_DAY_TOOLTIP": "Evaluieren Sie Ihren Tag, alle Aufgaben werden optional in das Archiv verschoben und/oder planen Sie Ihren nächsten Tag",
     "HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
     "MOVE_DONE_TO_ARCHIVE": "Erledigte Aufgaben ins Archiv verschieben",
-    "NO_COMPLETED_TASKS": "Derzeit sind keine Aufgaben erledigt",
     "NO_DONE_TASKS": "Derzeit gibt es keine erledigten Aufgaben",
     "NO_PLANNED_TASKS": "Keine geplanten Aufgaben",
     "READY_TO_WORK": "Bereit zu arbeiten!",

@@ -620,11 +620,6 @@
           "ADD_TO_TODAY": "오늘에 추가",
           "RE_PLAN_ALL": "모두 일정 변경",
           "TITLE": "오늘에 계획된 작업 추가"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "이렇게 하면 작업에서 미리 알림이 제거됩니다! 취소하려면 Escape 키를 누릅니다.",
-          "REMOVE_PLAN_DATE": "요금제 날짜 제거",
-          "TITLE": "오늘의 계획 작업"
         }
       },
       "EDIT_REPEATED_TASK": "반복 작업 편집 '{{taskName}}'",
@@ -858,7 +853,6 @@
       },
       "C": {
         "EMPTY_SYNC": "빈 데이터 개체를 동기화하려고합니다. 이것이 (거의) 처녀 앱의 첫 번째 동기화입니까?",
-        "FORCE_IMPORT": "그래도 원격 데이터를 가져 오시겠습니까?",
         "FORCE_UPLOAD": "그래도 로컬 데이터를 업로드 하시겠습니까?",
         "FORCE_UPLOAD_AFTER_ERROR": "로컬 데이터를 업로드하는 동안 오류가 발생했습니다. 강제로 업데이트 하시겠습니까?",
         "MIGRATE_LEGACY": "가져오는 동안 기존 데이터가 감지되었습니다. 마이그레이션을 시도하시겠습니까?",
@@ -1051,8 +1045,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "오늘 모두 추가",
         "ADD_TO_TODAY": "오늘 추가",
-        "DISMISS": "알림 일시 중지",
-        "DISMISS_ALL": "모두 해제",
         "DONE": "끝난",
         "DUE_TASK": "마감일",
         "DUE_TASKS": "마감일",
@@ -1712,17 +1704,14 @@
   },
   "WW": {
     "ADD_MORE": "더 추가하기",
-    "ADD_SCHEDULED_FOR_TODAY": "오늘 계획된 작업 추가 ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "내일 예정된 작업 추가 ({{nr}})",
     "ADD_SOME_TASKS": "하루 계획을 세우십시오!",
-    "COMPLETED_TASKS": "완료된 작업",
     "ESTIMATE_REMAINING": "예상 남은 시간 :",
     "FINISH_DAY": "피니시 데이",
     "FINISH_DAY_FOR_PROJECT": "이 프로젝트의 마감일",
     "FINISH_DAY_FOR_TAG": "이 태그의 마감일",
     "FINISH_DAY_TOOLTIP": "하루를 평가하고, 완료된 모든 작업을 아카이브로 옮기거나(선택 사항) 다음 날을 계획하세요.",
     "HELP_PROCRASTINATION": "내가 미루는 걸 도와주세요!",
-    "NO_COMPLETED_TASKS": "현재 완료된 작업이 없습니다.",
     "NO_PLANNED_TASKS": "계획된 작업 없음",
     "READY_TO_WORK": "준비 완료!",
     "RESET_BREAK_TIMER": "중단 타이머없이 재설정",

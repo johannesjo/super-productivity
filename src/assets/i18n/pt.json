@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Adicionar a Hoje",
           "RE_PLAN_ALL": "Reagendar tudo",
           "TITLE": "Adicionar tarefas planejadas para Hoje"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Isso removerá o lembrete da tarefa! Pressione Escape para cancelar.",
-          "REMOVE_PLAN_DATE": "Remover data do plano",
-          "TITLE": "Planejar tarefa para o dia"
         }
       },
       "EDIT_REPEATED_TASK": "Editar tarefa repetida '{{taskName}}'",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Você está tentando sincronizar um objeto de dados vazio. Esta é a sua primeira sincronização de um aplicativo (quase) virgem?",
-        "FORCE_IMPORT": "Importar dados remotos mesmo assim?",
         "FORCE_UPLOAD": "Enviar dados locais mesmo assim?",
         "FORCE_UPLOAD_AFTER_ERROR": "Ocorreu um erro ao enviar seus dados locais. Tentar forçar a atualização?",
         "MIGRATE_LEGACY": "Dados legados detectados durante a importação, deseja tentar migrá-los?",
@@ -1053,8 +1047,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Adicionar tudo hoje",
         "ADD_TO_TODAY": "Adicione hoje",
-        "DISMISS": "Dispensar lembrete",
-        "DISMISS_ALL": "Recusar tudo",
         "DONE": "Feito",
         "DUE_TASK": "Tarefa devida",
         "DUE_TASKS": "Tarefas devidas",
@@ -1715,17 +1707,14 @@
   },
   "WW": {
     "ADD_MORE": "Adicione mais",
-    "ADD_SCHEDULED_FOR_TODAY": "Adicionar tarefas planejadas para hoje ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Adicionar tarefas planejadas para amanhã ({{nr}})",
     "ADD_SOME_TASKS": "Adicione algumas tarefas para planejar o seu dia!",
-    "COMPLETED_TASKS": "Tarefas concluídas",
     "ESTIMATE_REMAINING": "Estimativa restante:",
     "FINISH_DAY": "Encerrar o dia",
     "FINISH_DAY_FOR_PROJECT": "Dia de conclusão deste projeto",
     "FINISH_DAY_FOR_TAG": "Dia de conclusão para esta etiqueta",
     "FINISH_DAY_TOOLTIP": "Avalie o seu dia, mova todas as tarefas concluídas para o arquivo (opcionalmente) e/ou planeie o seu dia seguinte.",
     "HELP_PROCRASTINATION": "Ajuda! Eu estou procrastinando!",
-    "NO_COMPLETED_TASKS": "No momento, não há tarefas concluídas",
     "NO_PLANNED_TASKS": "Nenhuma tarefa planejada",
     "READY_TO_WORK": "Pronto para trabalhar!",
     "RESET_BREAK_TIMER": "Reiniciar sem temporizador de pause",

@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Tambahkan ke Hari Ini",
           "RE_PLAN_ALL": "Menjadwal ulang semua",
           "TITLE": "Menambahkan tugas yang direncanakan ke Hari Ini"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Ini akan menghapus pengingat dari tugas! Tekan Escape untuk membatalkan.",
-          "REMOVE_PLAN_DATE": "Menghapus tanggal rencana",
-          "TITLE": "Rencanakan Tugas untuk Hari Ini"
         }
       },
       "EDIT_REPEATED_TASK": "Mengedit tugas berulang '{{taskName}}'",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Anda mencoba menyinkronkan objek data kosong. Jika Anda mencoba menyiapkan sinkronisasi dari instance aplikasi baru, cukup tekan OK untuk memuat data dari server. Jika tidak, silakan periksa data Anda.",
-        "FORCE_IMPORT": "Tetap mengimpor data jarak jauh?",
         "FORCE_UPLOAD": "Tetap unggah data lokal?",
         "FORCE_UPLOAD_AFTER_ERROR": "Terjadi kesalahan saat mengunggah data lokal Anda. Coba paksa pembaruan?",
         "MIGRATE_LEGACY": "Data lama terdeteksi saat mengimpor, apakah Anda ingin mencoba memigrasikannya?",
@@ -1052,8 +1046,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tambahkan semua ke hari ini",
         "ADD_TO_TODAY": "Tambah ke hari ini",
-        "DISMISS": "Abaikan Pengingat",
-        "DISMISS_ALL": "Singkirkan semua",
         "DONE": "Selesai",
         "DUE_TASK": "Tugas yang harus diselesaikan",
         "DUE_TASKS": "Tugas-tugas yang harus diselesaikan",
@@ -1713,17 +1705,14 @@
   },
   "WW": {
     "ADD_MORE": "Tambahkan lebih banyak",
-    "ADD_SCHEDULED_FOR_TODAY": "Tambahkan tugas yang direncanakan untuk hari ini ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Tambahkan tugas yang direncanakan untuk besok ({{nr}})",
     "ADD_SOME_TASKS": "Tambahkan beberapa tugas untuk merencanakan hari Anda!",
-    "COMPLETED_TASKS": "Tugas selesai",
     "ESTIMATE_REMAINING": "Perkiraan tersisa:",
     "FINISH_DAY": "Selesai Hari",
     "FINISH_DAY_FOR_PROJECT": "Hari Selesai untuk Proyek ini",
     "FINISH_DAY_FOR_TAG": "Hari Selesai untuk Tag ini",
     "FINISH_DAY_TOOLTIP": "Evaluasi hari Anda, pindahkan semua tugas yang sudah selesai ke arsip (opsional) dan/atau rencanakan hari berikutnya.",
     "HELP_PROCRASTINATION": "Bantu saya menunda-nunda!",
-    "NO_COMPLETED_TASKS": "Saat ini tidak ada tugas yang diselesaikan",
     "NO_PLANNED_TASKS": "Tidak ada tugas yang direncanakan",
     "READY_TO_WORK": "Siap bekerja!",
     "RESET_BREAK_TIMER": "Setel ulang tanpa penghitung waktu istirahat",

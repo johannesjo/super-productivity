@@ -620,11 +620,6 @@
           "ADD_TO_TODAY": "今日に追加",
           "RE_PLAN_ALL": "すべて再スケジュール",
           "TITLE": "今日の予定タスクを追加する"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "これでタスクからリマインダーが削除されます！キャンセルするにはエスケープを押してください。",
-          "REMOVE_PLAN_DATE": "プランの日付を削除",
-          "TITLE": "その日のタスクを計画する"
         }
       },
       "EDIT_REPEATED_TASK": "繰り返しタスク「{{taskName}}」を編集する",
@@ -858,7 +853,6 @@
       },
       "C": {
         "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
-        "FORCE_IMPORT": "とにかくリモートデータをインポートしますか？",
         "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
         "FORCE_UPLOAD_AFTER_ERROR": "ローカルデータのアップロード中にエラーが発生しました。強制的に更新しますか？",
         "MIGRATE_LEGACY": "インポート中にレガシーデータが検出されましたが、移行してみますか？",
@@ -1051,8 +1045,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "今日にすべて追加",
         "ADD_TO_TODAY": "今日に追加",
-        "DISMISS": "リマインダーを却下",
-        "DISMISS_ALL": "すべて却下する",
         "DONE": "完了",
         "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
@@ -1712,17 +1704,14 @@
   },
   "WW": {
     "ADD_MORE": "さらに追加",
-    "ADD_SCHEDULED_FOR_TODAY": "今日予定されているタスクを追加します（{{nr}}）",
     "ADD_SCHEDULED_FOR_TOMORROW": "明日予定されているタスクを追加します（{{nr}}）",
     "ADD_SOME_TASKS": "一日を計画するためタスクをいくつか追加しましょう！",
-    "COMPLETED_TASKS": "完了したタスク",
     "ESTIMATE_REMAINING": "推定残り：",
     "FINISH_DAY": "一日を終える",
     "FINISH_DAY_FOR_PROJECT": "プロジェクト終了日",
     "FINISH_DAY_FOR_TAG": "このタグの終了日",
     "FINISH_DAY_TOOLTIP": "一日を評価し、完了したタスクをアーカイブに移動し（オプション）、次の日の計画を立てる。",
     "HELP_PROCRASTINATION": "先延ばししてるので助けて！",
-    "NO_COMPLETED_TASKS": "現在完了したタスクはありません",
     "NO_PLANNED_TASKS": "計画タスクなし",
     "READY_TO_WORK": "準備オーケー！",
     "RESET_BREAK_TIMER": "休憩タイマーなしでリセット",

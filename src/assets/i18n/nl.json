@@ -621,11 +621,6 @@
           "ADD_TO_TODAY": "Toevoegen aan vandaag",
           "RE_PLAN_ALL": "Alles opnieuw plannen",
           "TITLE": "Geplande taken toevoegen aan Vandaag"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Dit verwijdert de herinnering van de taak! Druk op Escape om te annuleren.",
-          "REMOVE_PLAN_DATE": "Plangegevens verwijderen",
-          "TITLE": "Plan taak voor de dag"
         }
       },
       "EDIT_REPEATED_TASK": "Herhaalde taak '{{taskName}}' bewerken",
@@ -859,7 +854,6 @@
       },
       "C": {
         "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
-        "FORCE_IMPORT": "Toch externe gegevens importeren?",
         "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
         "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
         "MIGRATE_LEGACY": "Verouderde gegevens gedetecteerd tijdens het importeren. Wilt u proberen deze te migreren?",
@@ -1053,8 +1047,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
-        "DISMISS": "Herinnering afwijzen",
-        "DISMISS_ALL": "Alles afkeuren",
         "DONE": "Gedaan",
         "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
@@ -1715,17 +1707,14 @@
   },
   "WW": {
     "ADD_MORE": "Voeg meer toe",
-    "ADD_SCHEDULED_FOR_TODAY": "Voeg taken toe die voor vandaag zijn gepland ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Voeg taken toe die voor morgen zijn gepland ({{nr}})",
     "ADD_SOME_TASKS": "Voeg wat taken toe om je dag te plannen!",
-    "COMPLETED_TASKS": "Voltooide taken",
     "ESTIMATE_REMAINING": "Resterende schatting:",
     "FINISH_DAY": "Eindig de dag",
     "FINISH_DAY_FOR_PROJECT": "Einddatum voor dit project",
     "FINISH_DAY_FOR_TAG": "Einddatum voor deze tag",
     "FINISH_DAY_TOOLTIP": "Evalueer je dag, verplaats alle uitgevoerde taken naar het archief (optioneel) en/of plan je volgende dag.",
     "HELP_PROCRASTINATION": "Help, ik stel het uit!",
-    "NO_COMPLETED_TASKS": "Er zijn momenteel geen voltooide taken",
     "NO_PLANNED_TASKS": "Geen geplande taken",
     "READY_TO_WORK": "Klaar om te werken!",
     "RESET_BREAK_TIMER": "Reset zonder pauzetimer",

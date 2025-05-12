@@ -620,11 +620,6 @@
           "ADD_TO_TODAY": "Ajoute jodi a",
           "RE_PLAN_ALL": "Repwodiksyon tout",
           "TITLE": "Ajoute travay ki planifye jodi a"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Sa a pral retire rapèl la nan travay la! Peze chape pou anile.",
-          "REMOVE_PLAN_DATE": "Retire dat plan an",
-          "TITLE": "Plan travay pou jounen an"
         }
       },
       "EDIT_REPEATED_TASK": "Edite repete travay '{{taskName}}'",
@@ -858,7 +853,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Pokušavaš sinkronizirati prazan objekt podataka. Ako pokušavaš postaviti sinkronizaciju iz nove instance programa, jednostavno pritisni „U redu” za učitavanje podataka s poslužitelja. U suprotnom, provjeri tvoje podatke.",
-        "FORCE_IMPORT": "Svejedno uvesti podatke udaljenog uređaja?",
         "FORCE_UPLOAD": "Svejedno učitati podatke lokalnog uređaja?",
         "FORCE_UPLOAD_AFTER_ERROR": "Dogodila se greška tijekom učitavanja podataka lokalnog uređaja. Želiš li pokušati prisilno aktualizirati?",
         "MIGRATE_LEGACY": "Otkriveni su stari podaci tijekom uvoza. Želiš li ih pokušati migrirati?",
@@ -1051,8 +1045,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj sve u Danas",
         "ADD_TO_TODAY": "Dodaj u Danas",
-        "DISMISS": "Odbaci podsjetnik",
-        "DISMISS_ALL": "Odbaci sve",
         "DONE": "Obavljeno",
         "DUE_TASK": "Dospio zadatak",
         "DUE_TASKS": "Dospjeli zadaci",
@@ -1712,17 +1704,14 @@
   },
   "WW": {
     "ADD_MORE": "Dodaj još",
-    "ADD_SCHEDULED_FOR_TODAY": "Dodaj za danas planirane zadatke ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj za sutra planirane zadatke ({{nr}})",
     "ADD_SOME_TASKS": "Dodaj zadatke za planiranje dana!",
-    "COMPLETED_TASKS": "Završeni zadaci",
     "ESTIMATE_REMAINING": "Preostalo procijenjeno vrijeme:",
     "FINISH_DAY": "Završi dan",
     "FINISH_DAY_FOR_PROJECT": "Završi dan za ovaj projekt",
     "FINISH_DAY_FOR_TAG": "Završi dan za ovu oznaku",
     "FINISH_DAY_TOOLTIP": "Evaluiraj dan, premjesti sve obavljene zadatke u arhivu (opcionalno) i/ili planiraj sljedeći dan.",
     "HELP_PROCRASTINATION": "Upomoć, odugovlačim!",
-    "NO_COMPLETED_TASKS": "Trenutačno nema završenih zadataka",
     "NO_PLANNED_TASKS": "Nema planiranih zadataka",
     "READY_TO_WORK": "Spremno za rad!",
     "RESET_BREAK_TIMER": "Obnovi bez timera pauza",
