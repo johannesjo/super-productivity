@@ -1713,6 +1713,7 @@
     "FINISH_DAY_FOR_TAG": "Hari Selesai untuk Tag ini",
     "FINISH_DAY_TOOLTIP": "Evaluasi hari Anda, pindahkan semua tugas yang sudah selesai ke arsip (opsional) dan/atau rencanakan hari berikutnya.",
     "HELP_PROCRASTINATION": "Bantu saya menunda-nunda!",
+    "NO_DONE_TASKS": "Saat ini tidak ada tugas yang dilakukan",
     "NO_PLANNED_TASKS": "Tidak ada tugas yang direncanakan",
     "READY_TO_WORK": "Siap bekerja!",
     "RESET_BREAK_TIMER": "Setel ulang tanpa penghitung waktu istirahat",

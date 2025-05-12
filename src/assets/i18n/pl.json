@@ -1715,6 +1715,7 @@
     "FINISH_DAY_FOR_TAG": "Dzień zakończenia dla tego tagu",
     "FINISH_DAY_TOOLTIP": "Oceń swój dzień, przenieś wszystkie wykonane zadania do archiwum (opcjonalnie) i/lub zaplanuj następny dzień.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
+    "NO_DONE_TASKS": "Obecnie nie ma żadnych wykonanych zadań",
     "NO_PLANNED_TASKS": "Nie zaplaniwano zadań",
     "READY_TO_WORK": "Gotowy do Pracy!",
     "RESET_BREAK_TIMER": "Zresetuj bez czasu przerwy",

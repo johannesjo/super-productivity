@@ -1715,6 +1715,7 @@
     "FINISH_DAY_FOR_TAG": "Einddatum voor deze tag",
     "FINISH_DAY_TOOLTIP": "Evalueer je dag, verplaats alle uitgevoerde taken naar het archief (optioneel) en/of plan je volgende dag.",
     "HELP_PROCRASTINATION": "Help, ik stel het uit!",
+    "NO_DONE_TASKS": "Er zijn momenteel geen voltooide taken",
     "NO_PLANNED_TASKS": "Geen geplande taken",
     "READY_TO_WORK": "Klaar om te werken!",
     "RESET_BREAK_TIMER": "Reset zonder pauzetimer",

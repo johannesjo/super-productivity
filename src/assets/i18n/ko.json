@@ -1712,6 +1712,7 @@
     "FINISH_DAY_FOR_TAG": "이 태그의 마감일",
     "FINISH_DAY_TOOLTIP": "하루를 평가하고, 완료된 모든 작업을 아카이브로 옮기거나(선택 사항) 다음 날을 계획하세요.",
     "HELP_PROCRASTINATION": "내가 미루는 걸 도와주세요!",
+    "NO_DONE_TASKS": "현재 완료된 작업이 없습니다",
     "NO_PLANNED_TASKS": "계획된 작업 없음",
     "READY_TO_WORK": "준비 완료!",
     "RESET_BREAK_TIMER": "중단 타이머없이 재설정",

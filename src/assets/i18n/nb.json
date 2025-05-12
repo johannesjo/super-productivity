@@ -1715,6 +1715,7 @@
     "FINISH_DAY_FOR_TAG": "Sluttdag for denne taggen",
     "FINISH_DAY_TOOLTIP": "Evaluer dagen, flytt alle utførte oppgaver til arkivet (valgfritt) og/eller planlegg neste dag.",
     "HELP_PROCRASTINATION": "Hjelp jeg utsetter!",
+    "NO_DONE_TASKS": "Det er for øyeblikket ingen utførte oppgaver",
     "NO_PLANNED_TASKS": "Ingen planlagte oppgaver",
     "READY_TO_WORK": "Klar til å arbeide!",
     "RESET_BREAK_TIMER": "Tilbakestill uten pausetimer",

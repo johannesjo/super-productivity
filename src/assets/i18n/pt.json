@@ -1715,6 +1715,7 @@
     "FINISH_DAY_FOR_TAG": "Dia de conclusão para esta etiqueta",
     "FINISH_DAY_TOOLTIP": "Avalie o seu dia, mova todas as tarefas concluídas para o arquivo (opcionalmente) e/ou planeie o seu dia seguinte.",
     "HELP_PROCRASTINATION": "Ajuda! Eu estou procrastinando!",
+    "NO_DONE_TASKS": "No momento, não há tarefas concluídas",
     "NO_PLANNED_TASKS": "Nenhuma tarefa planejada",
     "READY_TO_WORK": "Pronto para trabalhar!",
     "RESET_BREAK_TIMER": "Reiniciar sem temporizador de pause",

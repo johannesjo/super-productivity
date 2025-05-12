@@ -1713,6 +1713,7 @@
     "FINISH_DAY_FOR_TAG": "Günü bu etiket için bitir",
     "FINISH_DAY_TOOLTIP": "Gününüzü değerlendirin, yapılan tüm görevleri arşive taşıyın (isteğe bağlı olarak) ve/veya bir sonraki gününüzü planlayın.",
     "HELP_PROCRASTINATION": "Erteliyorum yardım et!",
+    "NO_DONE_TASKS": "Şu anda yapılmış bir görev yok",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",
     "RESET_BREAK_TIMER": "Mola zamanlayıcısı olmadan sıfırla",

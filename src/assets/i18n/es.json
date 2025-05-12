@@ -1717,6 +1717,7 @@
     "FINISH_DAY_FOR_TAG": "Fin de día pra esta Etiqueta",
     "FINISH_DAY_TOOLTIP": "Evalúa tu día, mueve todas las tareas realizadas al archivo (opcionalmente) y/o planifica tu día siguiente.",
     "HELP_PROCRASTINATION": "Ayuda, ¡estoy procrastinando!",
+    "NO_DONE_TASKS": "Actualmente no hay tareas terminadas",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
     "READY_TO_WORK": "¡Listo para trabajar!",
     "RESET_BREAK_TIMER": "Restablecer sin temporizador de pausa",

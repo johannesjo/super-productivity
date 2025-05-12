@@ -1712,6 +1712,7 @@
     "FINISH_DAY_FOR_TAG": "Termina giorno per questo tag",
     "FINISH_DAY_TOOLTIP": "Valuta la tua giornata, sposta tutte le attività fatte in archivio (opzionale) e/o pianifica la tua prossima giornata.",
     "HELP_PROCRASTINATION": "Aiuto sto procastinando!",
+    "NO_DONE_TASKS": "Ამჟამად არ არსებობს შესრულებული დავალებები",
     "NO_PLANNED_TASKS": "Nessuna attività pianificata",
     "READY_TO_WORK": "Pronto a lavorare!",
     "RESET_BREAK_TIMER": "Reset senza interrompere il tempo",

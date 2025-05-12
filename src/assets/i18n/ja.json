@@ -1712,6 +1712,7 @@
     "FINISH_DAY_FOR_TAG": "このタグの終了日",
     "FINISH_DAY_TOOLTIP": "一日を評価し、完了したタスクをアーカイブに移動し（オプション）、次の日の計画を立てる。",
     "HELP_PROCRASTINATION": "先延ばししてるので助けて！",
+    "NO_DONE_TASKS": "現在、完了したタスクはありません",
     "NO_PLANNED_TASKS": "計画タスクなし",
     "READY_TO_WORK": "準備オーケー！",
     "RESET_BREAK_TIMER": "休憩タイマーなしでリセット",
