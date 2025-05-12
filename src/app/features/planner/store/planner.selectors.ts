@@ -45,7 +45,11 @@ export const selectAllTasksDueToday = createSelector(
 
     const allDue: (TaskWithDueTime | TaskWithDueDay)[] = (
       plannerState.days[todayStr] || []
-    ).map((tid) => taskState.entities[tid] as TaskWithDueDay);
+    )
+      .map((tid) => taskState.entities[tid] as TaskWithDueDay)
+      // there is a chance that the task is not in the store anymore
+      .filter((t) => !!t);
+
     [...allDueDayTasks, ...allDueWithTimeTasks].forEach((task) => {
       if (!allDue.find((t) => t.id === task.id)) {
         allDue.push(task);
@@ -61,7 +65,10 @@ export const selectTasksForPlannerDay = (day: string) => {
     selectPlannerState,
     selectTaskFeatureState,
     (plannerState, taskState) =>
-      (plannerState.days[day] || []).map((tid) => taskState.entities[tid] as TaskCopy),
+      (plannerState.days[day] || [])
+        .map((tid) => taskState.entities[tid] as TaskCopy)
+        // there is a chance that the task is not in the store anymore
+        .filter((t) => !!t),
   );
 };
 
