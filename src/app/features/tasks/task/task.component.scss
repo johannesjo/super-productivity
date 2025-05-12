@@ -335,8 +335,9 @@
   }
 
   tag-list {
-    margin-top: -3px;
-    margin-bottom: -1px;
+    // to match task title padding
+    margin-left: 6px;
+    margin-bottom: 5px;
   }
 }
 

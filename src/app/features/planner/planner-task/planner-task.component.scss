@@ -25,9 +25,10 @@ $h: $planner-item-height;
   }
 
   ::ng-deep tag-list {
-    margin-top: -2px;
-    margin-bottom: -2px;
-    margin-left: -4px;
+    // to match task title padding
+    margin-left: 4px;
+    margin-bottom: 2px;
+    margin-top: 2px;
   }
 }
 
