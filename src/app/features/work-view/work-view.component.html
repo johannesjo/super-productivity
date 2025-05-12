@@ -253,7 +253,8 @@
                 [title]="
                   (T.WW.DONE_TASKS | translate) + ' (' + (doneTasks()?.length || 0) + ')'
                 "
-                [isExpanded]="true"
+                [isExpanded]="!isDoneHidden()"
+                (isExpandedChange)="isDoneHidden.set(!$event)"
                 [isIconBefore]="true"
               >
                 <task-list

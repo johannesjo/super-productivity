@@ -10,6 +10,7 @@ import {
   input,
   OnDestroy,
   OnInit,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
@@ -60,6 +61,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { TODAY_TAG } from '../tag/tag.const';
+import { LS } from '../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'work-view',
@@ -122,6 +124,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   workingToday = toSignal(this.workContextService.workingToday$);
   selectedTaskId = toSignal(this.taskService.selectedTaskId$);
   isOnTodayList = toSignal(this.workContextService.isToday$);
+  isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
 
   isShowOverduePanel = computed(
     () => this.isOnTodayList() && this.overdueTasks().length > 0,
@@ -180,6 +183,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
       // if task really is gone
       this.taskService.setSelectedId(null);
+    });
+
+    effect(() => {
+      const isExpanded = this.isDoneHidden();
+      if (isExpanded) {
+        localStorage.setItem(LS.DONE_TASKS_HIDDEN, 'true');
+      } else {
+        localStorage.removeItem(LS.DONE_TASKS_HIDDEN);
+      }
     });
   }
 
