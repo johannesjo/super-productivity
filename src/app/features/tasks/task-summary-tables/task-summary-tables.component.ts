@@ -30,7 +30,7 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { AsyncPipe, JsonPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -50,7 +50,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
-    JsonPipe,
   ],
 })
 export class TaskSummaryTablesComponent {
