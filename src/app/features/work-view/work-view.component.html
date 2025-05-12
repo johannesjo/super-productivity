@@ -247,11 +247,19 @@
           ></task-list>
 
           @if (!isPlanningMode() || doneTasks()?.length) {
+            @let nrOfDoneArchived =
+              doneTasks()?.length === 0
+                ? (workContextService.doneTodayArchived$ | async)
+                : 0;
             <div @expand>
               <collapsible
                 style="margin-top: 16px"
                 [title]="
-                  (T.WW.DONE_TASKS | translate) + ' (' + (doneTasks()?.length || 0) + ')'
+                  (T.WW.DONE_TASKS | translate) +
+                  ' (' +
+                  (doneTasks()?.length || 0) +
+                  (nrOfDoneArchived ? ' + ' + nrOfDoneArchived : '') +
+                  ')'
                 "
                 [isExpanded]="!isDoneHidden()"
                 (isExpandedChange)="isDoneHidden.set(!$event)"

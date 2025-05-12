@@ -64,6 +64,7 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { INBOX_PROJECT } from '../project/project.const';
 import { selectProjectById } from '../project/store/project.selectors';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -315,8 +316,13 @@ export class WorkContextService {
   workingTodayArchived$: Observable<number> =
     this._globalTrackingIntervalService.todayDateStr$.pipe(
       switchMap((worklogStrDate) =>
-        this.getTimeWorkedForDayForArchivedTasks(worklogStrDate),
+        this.getTimeWorkedForDayForTasksInArchiveYoung(worklogStrDate),
       ),
+    );
+
+  doneTodayArchived$: Observable<number> =
+    this._globalTrackingIntervalService.todayDateStr$.pipe(
+      switchMap((worklogStrDate) => this.getDoneTodayInArchive(worklogStrDate)),
     );
 
   isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
@@ -424,14 +430,46 @@ export class WorkContextService {
     );
   }
 
-  async getTimeWorkedForDayForArchivedTasks(
+  async getDoneTodayInArchive(
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
     const isToday = await this.isToday$.pipe(first()).toPromise();
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
-    const taskArchiveState = await this._taskArchiveService.load();
+    // young should be enough for this
+    const taskArchiveState = await this._taskArchiveService.loadYoung();
+
+    const { ids, entities } = taskArchiveState;
+    const tasksDoneToday: ArchiveTask[] = ids
+      .map((id) => entities[id])
+      .filter(
+        (t) => !!t && !t.parentId && t.doneOn && getWorklogStr(t.doneOn) === day,
+      ) as ArchiveTask[];
+
+    let tasksToConsider: ArchiveTask[] = [];
+    if (isToday) {
+      tasksToConsider = tasksDoneToday;
+    } else {
+      if (activeType === WorkContextType.PROJECT) {
+        tasksToConsider = tasksDoneToday.filter((t) => t.projectId === activeId);
+      } else {
+        tasksToConsider = tasksDoneToday.filter((t) => t.tagIds.includes(activeId));
+      }
+    }
+
+    return tasksToConsider.length;
+  }
+
+  async getTimeWorkedForDayForTasksInArchiveYoung(
+    day: string = this._dateService.todayStr(),
+  ): Promise<number> {
+    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const { activeId, activeType } = await this.activeWorkContextTypeAndId$
+      .pipe(first())
+      .toPromise();
+    // young should be enough for this
+    const taskArchiveState = await this._taskArchiveService.loadYoung();
 
     const { ids, entities } = taskArchiveState;
     const tasksWorkedOnToday: ArchiveTask[] = ids
