@@ -161,11 +161,11 @@ export class BoardPanelComponent {
         isTaskIncluded = isTaskIncluded && !task.dueWithTime && !task.dueDay;
       }
 
-      if (panelCfg.filterType === BoardPanelCfgTaskTypeFilter.OnlyBacklog) {
+      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.OnlyBacklog) {
         isTaskIncluded = isTaskIncluded && this._isTaskInBacklog(task);
       }
 
-      if (panelCfg.filterType === BoardPanelCfgTaskTypeFilter.NoBacklog) {
+      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.NoBacklog) {
         isTaskIncluded = isTaskIncluded && !this._isTaskInBacklog(task);
       }
 

@@ -22,7 +22,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.All,
+        backlogState: BoardPanelCfgTaskTypeFilter.All,
         isParentTasksOnly: true,
       },
       {
@@ -33,7 +33,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.All,
+        backlogState: BoardPanelCfgTaskTypeFilter.All,
         isParentTasksOnly: true,
       },
       {
@@ -44,7 +44,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.All,
+        backlogState: BoardPanelCfgTaskTypeFilter.All,
         isParentTasksOnly: true,
       },
       {
@@ -55,7 +55,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         taskIds: [],
         taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.All,
+        backlogState: BoardPanelCfgTaskTypeFilter.All,
         isParentTasksOnly: true,
       },
     ],
@@ -73,7 +73,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.NoBacklog,
+        backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
         isParentTasksOnly: false,
       },
       {
@@ -84,7 +84,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.NoBacklog,
+        backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
         isParentTasksOnly: false,
       },
       {
@@ -95,7 +95,7 @@ export const DEFAULT_BOARDS: BoardCfg[] = [
         excludedTagIds: [IN_PROGRESS_TAG.id],
         taskIds: [],
         scheduledState: BoardPanelCfgScheduledState.All,
-        filterType: BoardPanelCfgTaskTypeFilter.NoBacklog,
+        backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
         isParentTasksOnly: false,
       },
     ],
@@ -117,7 +117,7 @@ export const DEFAULT_PANEL_CFG: BoardPanelCfg = {
   excludedTagIds: [],
   includedTagIds: [],
   scheduledState: BoardPanelCfgScheduledState.All,
-  filterType: BoardPanelCfgTaskTypeFilter.All,
+  backlogState: BoardPanelCfgTaskTypeFilter.All,
   isParentTasksOnly: false,
   projectId: '',
 };

@@ -29,7 +29,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     id: 'panel-1',
     title: 'Backlog Panel',
     taskIds: [mockBacklogTaskId, mockNonBacklogTaskId],
-    filterType: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
+    backlogState: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
     includedTagIds: [],
     excludedTagIds: [],
     isParentTasksOnly: false,
@@ -115,7 +115,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
   it('should only include backlog tasks when filterType is OnlyBacklog', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
-      filterType: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
+      backlogState: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
     } as BoardPanelCfg);
     fixture.detectChanges();
     const tasks = component.tasks();
@@ -126,7 +126,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
   it('should exclude backlog tasks when filterType is NoBacklog', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
-      filterType: BoardPanelCfgTaskTypeFilter.NoBacklog,
+      backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
     } as BoardPanelCfg);
     fixture.detectChanges();
     const tasks = component.tasks();
@@ -137,7 +137,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
   it('should include all tasks regardless of backlog when filterType is All', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
-      filterType: BoardPanelCfgTaskTypeFilter.All,
+      backlogState: BoardPanelCfgTaskTypeFilter.All,
     } as BoardPanelCfg);
     fixture.detectChanges();
     const tasks = component.tasks();

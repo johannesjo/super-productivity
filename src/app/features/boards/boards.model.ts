@@ -23,8 +23,9 @@ export interface BoardSrcCfg {
   projectId?: string;
   taskDoneState: BoardPanelCfgTaskDoneState;
   scheduledState: BoardPanelCfgScheduledState;
-  filterType: BoardPanelCfgTaskTypeFilter;
   isParentTasksOnly: boolean;
+  // optional since newly added
+  backlogState?: BoardPanelCfgTaskTypeFilter;
 }
 
 export interface BoarFieldsToRemove {

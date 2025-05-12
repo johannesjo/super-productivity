@@ -83,10 +83,10 @@
         "TASK_DONE_STATE_ALL": "All",
         "TASK_DONE_STATE_DONE": "Done",
         "TASK_DONE_STATE_UNDONE": "Undone",
-        "BACKLOG_TASK_FILTER_TYPE": "Filter backlog tasks",
-        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclude backlog",
-        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Only show backlog",
-        "BACKLOG_TASK_FILTER_ALL": "Keep All"
+        "BACKLOG_TASK_FILTER_TYPE": "Backlog tasks",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclude",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Backlog only",
+        "BACKLOG_TASK_FILTER_ALL": "All"
       },
       "V": {
         "ADD_NEW_BOARD": "Add new board",
