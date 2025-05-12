@@ -20,8 +20,9 @@ export class TaskDueEffects {
 
   private _dayChangeAfterInit$ =
     this._dataInitStateService.isAllDataLoadedInitially$.pipe(
-      switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
+      // we wait to till the current sync is done
+      switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
     );
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
