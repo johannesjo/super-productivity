@@ -29,6 +29,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
+import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-timestamps-error/dialog-incoherent-timestamps-error.component';
 
 @Injectable({
   providedIn: 'root',
@@ -134,16 +135,28 @@ export class SyncWrapperService {
           actionStr: T.F.SYNC.S.BTN_CONFIGURE,
         });
         return 'HANDLED_ERROR';
+      } else if (error instanceof SyncInvalidTimeValuesError) {
+        this._matDialog
+          .open(DialogIncoherentTimestampsErrorComponent, {
+            disableClose: true,
+            autoFocus: false,
+          })
+          .afterClosed()
+          .subscribe(async (res) => {
+            if (res === 'FORCE_UPDATE_REMOTE') {
+              await this._forceUpload();
+            } else if (res === 'FORCE_UPDATE_LOCAL') {
+              await this._pfapiService.pf.downloadAll();
+              await this._reInitAppAfterDataModelChange();
+            }
+          });
+        return 'HANDLED_ERROR';
       } else if (
-        error instanceof SyncInvalidTimeValuesError ||
         error instanceof RevMismatchForModelError ||
         error instanceof NoRemoteModelFile
       ) {
         console.log(error, Object.keys(error));
-        const modelId =
-          error instanceof SyncInvalidTimeValuesError
-            ? 'Invalid (future) time values for sync meta'
-            : error.additionalLog;
+        const modelId = error.additionalLog;
         this._matDialog
           .open(DialogIncompleteSyncComponent, {
             data: { modelId },
