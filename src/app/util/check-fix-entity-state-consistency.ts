@@ -2,17 +2,6 @@ import { devError } from './dev-error';
 import { arrayEquals } from './array-equals';
 import { Dictionary } from '@ngrx/entity';
 
-export const checkFixEntityStateConsistency = <T extends Dictionary<any>>(
-  data: T,
-  additionalStr = '',
-): T => {
-  if (!isEntityStateConsistent(data, additionalStr)) {
-    return fixEntityStateConsistency(data);
-  }
-
-  return data;
-};
-
 export const isEntityStateConsistent = <T extends Dictionary<any>>(
   data: T,
   additionalStr = '',
@@ -33,7 +22,7 @@ export const isEntityStateConsistent = <T extends Dictionary<any>>(
 
 export const fixEntityStateConsistency = <T extends Dictionary<any>>(data: T): T => {
   if (Object.keys(data.entities).length !== data.ids.length) {
-    console.log({
+    console.warn('FIXING ENTITY STATE', {
       ...data,
       ids: Object.keys(data.entities),
     });
