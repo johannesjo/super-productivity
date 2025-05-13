@@ -345,7 +345,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'moveToTodaysTasks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TO_TODAYS_TASKS,
+        label: T.GCF.KEYBOARD.MOVE_TO_REGULARS_TASKS,
       },
     },
     {
