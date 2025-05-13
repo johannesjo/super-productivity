@@ -1,3 +1,10 @@
+# [13.0.0](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.10...v13.0.0) (2025-05-13)
+
+### Features
+
+- improve task context menu on mobile ([751ff3b](https://github.com/johannesjo/super-productivity/commit/751ff3be27a5530f81aee193bfde0075d58517b0))
+- **pfapi:** improve validation handling for getAllSyncModelData ([8c33502](https://github.com/johannesjo/super-productivity/commit/8c33502689310502e0f8b4e31fff4706de5041ff))
+
 ## [12.0.6-rc.10](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.9...v12.0.6-rc.10) (2025-05-12)
 
 ### Bug Fixes
