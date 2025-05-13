@@ -30,8 +30,8 @@ export type ShortSyntaxConfig = Readonly<{
 }>;
 
 export type TimeTrackingConfig = Readonly<{
-  trackingInterval?: number;
-  defaultEstimate: number;
+  trackingInterval?: number | null;
+  defaultEstimate?: number | null;
   defaultEstimateSubTasks?: number | null;
   isAutoStartNextTask: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
