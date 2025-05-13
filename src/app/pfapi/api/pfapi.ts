@@ -230,17 +230,18 @@ export class Pfapi<const MD extends ModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
-    // TODO maybe remove validation check
-    if (
+
+    // TODO maybe remove validation check, since we already validate on every import and save
+    const validationResultIfNeeded =
       !isSkipValidityCheck &&
       this.cfg?.validate &&
-      !this.cfg.validate(allData as AllSyncModels<MD>).success
-    ) {
-      pfLog(1, 'ACTUALLY GOT ONE!!');
+      this.cfg.validate(allData as AllSyncModels<MD>);
+    if (validationResultIfNeeded && !validationResultIfNeeded.success) {
+      pfLog(1, 'ACTUALLY GOT ONE!!', validationResultIfNeeded);
       if (this._getAllSyncModelDataRetryCount >= 1) {
-        pfLog(1, 'ACTUALLY GOT ONE 2!! ERROR');
+        pfLog(1, 'ACTUALLY GOT ONE 2!! ERROR', validationResultIfNeeded);
         this._getAllSyncModelDataRetryCount = 0;
-        throw new DataValidationFailedError();
+        throw new DataValidationFailedError(validationResultIfNeeded);
       }
       await promiseTimeout(1000);
       this._getAllSyncModelDataRetryCount++;
