@@ -1,3 +1,14 @@
+## [13.0.1](https://github.com/johannesjo/super-productivity/compare/v13.0.0...v13.0.1) (2025-05-13)
+
+### Bug Fixes
+
+- error during migration [#4338](https://github.com/johannesjo/super-productivity/issues/4338) ([efd3440](https://github.com/johannesjo/super-productivity/commit/efd34405200c31dbf1065c3e6ab062d339b9e002))
+- validation error [#4337](https://github.com/johannesjo/super-productivity/issues/4337) ([66b3693](https://github.com/johannesjo/super-productivity/commit/66b3693edc4161db4713201f1c8a63978fcd4c83))
+
+### Features
+
+- **pfapi:** add repair function for each model individually [#4332](https://github.com/johannesjo/super-productivity/issues/4332) ([c9ef64d](https://github.com/johannesjo/super-productivity/commit/c9ef64d0d2511c52980f0d6f719c2872829838e7))
+
 # [13.0.0](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.10...v13.0.0) (2025-05-13)
 
 ### Features
