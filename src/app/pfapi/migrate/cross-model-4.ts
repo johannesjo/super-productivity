@@ -3,6 +3,7 @@ import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 export const crossModelMigration4: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
@@ -14,6 +15,9 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
   migrateTasks(copy.task);
   migrateTasks(copy.archiveYoung.task);
   migrateTasks(copy.archiveOld.task);
+
+  // @ts-ignore
+  // copy.tag.entities[TODAY_TAG.id].taskIds = [];
 
   console.log(copy);
   return copy;
@@ -28,6 +32,12 @@ const migrateTasks = <T extends EntityState<TaskCopy>>(s: T): void => {
         // @ts-ignore
         task.dueWithTime = task.plannedAt;
         delete (task as any).plannedAt;
+      }
+      const isTodayTagPresent = task.tagIds.includes(TODAY_TAG.id);
+      if (isTodayTagPresent) {
+        // remove legacy tag
+        // @ts-ignore
+        task.tagIds = task.tagIds.filter((value) => value !== TODAY_TAG.id);
       }
     }
   });
