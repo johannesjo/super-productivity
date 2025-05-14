@@ -34,14 +34,17 @@ export class DataInitService {
   async reInit(isOmitTokens: boolean = false): Promise<void> {
     await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
-    const isValid = this._pfapiService.pf.isValidateComplete(appDataComplete);
-    if (isValid) {
+    const validationResult = this._pfapiService.pf.validate(appDataComplete);
+    if (validationResult.success) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
       // DATA REPAIR CASE
       // ----------------
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
-        const fixedData = this._pfapiService.pf.repairCompleteData(appDataComplete);
+        const fixedData = this._pfapiService.pf.repairCompleteData(
+          appDataComplete,
+          validationResult.errors,
+        );
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,

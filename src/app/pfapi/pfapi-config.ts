@@ -54,6 +54,7 @@ import { initialTimeTrackingState } from '../features/time-tracking/store/time-t
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 import { appDataValidators, validateAllData } from './validate/validation-fn';
 import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
+import { IValidation } from 'typia';
 
 export const CROSS_MODEL_VERSION = 3 as const;
 
@@ -244,11 +245,11 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     console.error(err);
     alert('DB ERROR: ' + err);
   },
-  repair: (data: any) => {
+  repair: (data: any, errors: IValidation.IError[]) => {
     if (!isDataRepairPossible(data)) {
       throw new DataRepairNotPossibleError(data);
     }
-    return dataRepair(data) as AppDataCompleteNew;
+    return dataRepair(data, errors) as AppDataCompleteNew;
   },
   crossModelMigrations: CROSS_MODEL_MIGRATIONS,
 };

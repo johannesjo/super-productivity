@@ -13,11 +13,16 @@ import { ALL_ENTITY_MODEL_KEYS } from '../../core/persistence/persistence.const'
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { INBOX_PROJECT } from '../../features/project/project.const';
+import { autoFixTypiaErrors } from './auto-fix-typia-errors';
+import { IValidation } from 'typia';
 
 // TODO improve later
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
 
-export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
+export const dataRepair = (
+  data: AppDataCompleteNew,
+  errors: IValidation.IError[] = [],
+): AppDataCompleteNew => {
   if (!isDataRepairPossible(data)) {
     throw new Error('Data repair attempted but not possible');
   }
@@ -66,6 +71,7 @@ export const dataRepair = (data: AppDataCompleteNew): AppDataCompleteNew => {
   dataOut = _fixOrphanedNotes(dataOut);
   dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
   dataOut = _addInboxProjectIdIfNecessary(dataOut);
+  dataOut = autoFixTypiaErrors(dataOut, errors);
 
   // console.timeEnd('dataRepair');
   return dataOut;
