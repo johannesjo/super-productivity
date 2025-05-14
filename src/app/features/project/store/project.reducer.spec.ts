@@ -3,19 +3,21 @@ import { fakeEntityStateFromArray } from '../../../util/fake-entity-state-from-a
 import { Project } from '../project.model';
 import { updateProjectOrder } from './project.actions';
 import { moveNoteToOtherProject } from '../../note/store/note.actions';
+import { INBOX_PROJECT } from '../project.const';
 
 describe('projectReducer', () => {
   describe('UpdateProjectOrder', () => {
     it('Should re-add archived projects if incomplete list is given as param', () => {
       const s = fakeEntityStateFromArray([
         { id: 'A', isArchived: false },
+        { id: INBOX_PROJECT.id, isArchived: false },
         { id: 'B', isArchived: false },
         { id: 'C', isArchived: true },
       ] as Partial<Project>[]);
 
       const ids = ['B', 'A'];
       const r = projectReducer(s as any, updateProjectOrder({ ids }) as any);
-      expect(r.ids).toEqual(['B', 'A', 'C']);
+      expect(r.ids).toEqual([INBOX_PROJECT.id, 'B', 'A', 'C']);
     });
 
     it('Should throw an error for inconsistent data', () => {

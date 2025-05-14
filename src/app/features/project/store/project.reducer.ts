@@ -257,7 +257,10 @@ export const projectReducer = createReducer<ProjectState>(
       throw new Error('Project ids are undefined');
     }
 
-    return { ...state, ids: [INBOX_PROJECT.id, ...newIds] };
+    return {
+      ...state,
+      ids: state.entities[INBOX_PROJECT.id] ? [INBOX_PROJECT.id, ...newIds] : newIds,
+    };
   }),
 
   // MOVE TASK ACTIONS
