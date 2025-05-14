@@ -208,6 +208,8 @@ const migrateTasks = <T extends EntityState<TaskCopy>>(
       task.reminderId = task.reminderId || undefined;
       task.parentId = task.parentId || undefined;
       task.doneOn = task.doneOn || undefined;
+      task.timeEstimate = task.timeEstimate || 0;
+      task.timeSpent = task.timeSpent || 0;
     }
   });
 };
