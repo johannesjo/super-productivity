@@ -230,7 +230,7 @@ export const projectReducer = createReducer<ProjectState>(
   }),
 
   on(updateProjectOrder, (state, { ids }) => {
-    const currentIds = state.ids as string[];
+    const currentIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
     let newIds: string[] = ids;
     if (ids.length !== currentIds.length) {
       const allP = currentIds.map((id) => state.entities[id]) as Project[];
@@ -257,7 +257,7 @@ export const projectReducer = createReducer<ProjectState>(
       throw new Error('Project ids are undefined');
     }
 
-    return { ...state, ids: newIds };
+    return { ...state, ids: [INBOX_PROJECT.id, ...newIds] };
   }),
 
   // MOVE TASK ACTIONS
