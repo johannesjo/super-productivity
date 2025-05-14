@@ -51,10 +51,13 @@ export class DataInitService {
             isOmitTokens,
           }),
         );
+        const localCrossModelVersion =
+          (await this._pfapiService.pf.metaModel.load()).crossModelVersion ||
+          CROSS_MODEL_VERSION;
+
         await this._pfapiService.pf.importAllSycModelData({
           data: fixedData,
-          // TODO decide if this or to reapply all migrations??
-          crossModelVersion: CROSS_MODEL_VERSION,
+          crossModelVersion: localCrossModelVersion,
           // since we already did try
           isAttemptRepair: false,
         });
