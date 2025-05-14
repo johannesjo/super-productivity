@@ -81,7 +81,6 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             },
             hooks: {
               onInit: (field) => {
-                console.log(field?.formControl?.value);
                 if (!field?.formControl?.value && field?.formControl?.value !== null) {
                   field?.formControl?.setValue(30 * 60000);
                 }
