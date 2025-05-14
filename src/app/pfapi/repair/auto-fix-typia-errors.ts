@@ -14,25 +14,19 @@ export const autoFixTypiaErrors = (
       const keys = path.split('.');
       const value = getValueByPath(data, keys);
       console.warn('Auto-fixing error:', error);
-      if (error.expected.includes('number')) {
-        if (typeof value === 'string') {
-          const parsedValue = parseFloat(value);
-          if (!isNaN(parsedValue)) {
-            setValueByPath(data, keys, parsedValue);
-          }
+      if (error.expected.includes('number') && typeof value === 'string') {
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+          setValueByPath(data, keys, parsedValue);
         }
-      } else if (error.expected.includes('undefined')) {
-        if (value === null) {
-          setValueByPath(data, keys, undefined);
-        }
-      } else if (error.expected.includes('null')) {
-        if (value === undefined) {
-          setValueByPath(data, keys, null);
-        }
-      } else if (error.expected.includes('boolean')) {
-        if (!value) {
-          setValueByPath(data, keys, false);
-        }
+      } else if (error.expected.includes('undefined') && value === null) {
+        setValueByPath(data, keys, undefined);
+      } else if (error.expected.includes('null') && value === undefined) {
+        setValueByPath(data, keys, null);
+      } else if (error.expected.includes('boolean') && !value) {
+        setValueByPath(data, keys, false);
+      } else if (keys[0] === 'task' && error.expected.includes('number')) {
+        setValueByPath(data, keys, 0);
       }
     }
   });
