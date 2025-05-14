@@ -303,7 +303,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         pfLog(0, `${this.importAllSycModelData.name}() data not valid`, validationResult);
         if (isAttemptRepair && this.cfg.repair) {
           pfLog(0, `${this.importAllSycModelData.name}() attempting repair`);
-          data = this.cfg.repair(data, validationResult.errors);
+          data = this.cfg.repair(data, (validationResult as IValidation.IFailure).errors);
 
           const r2 = this.cfg.validate(data);
           if (!r2.success) {

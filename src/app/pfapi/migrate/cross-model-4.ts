@@ -31,7 +31,6 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
 const migrateTasks = <T extends EntityState<TaskCopy>>(s: T): void => {
   Object.keys(s.entities).forEach((id) => {
     const task = s.entities[id];
-    console.log(task);
     if (task) {
       if (typeof (task as any).plannedAt === 'number') {
         // @ts-ignore
