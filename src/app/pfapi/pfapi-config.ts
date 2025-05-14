@@ -35,12 +35,12 @@ import { initialSimpleCounterState } from '../features/simple-counter/store/simp
 import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
-import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
+import { isDataRepairPossible } from './repair/is-data-repair-possible.util';
 import {
   getLastValidityError,
   isRelatedModelDataValid,
 } from './validate/is-related-model-data-valid';
-import { dataRepair } from '../core/data-repair/data-repair.util';
+import { dataRepair } from './repair/data-repair';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';

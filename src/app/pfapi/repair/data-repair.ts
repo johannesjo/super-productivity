@@ -9,9 +9,9 @@ import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/tas
 import { unique } from '../../util/unique';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { ALL_ENTITY_MODEL_KEYS } from '../persistence/persistence.const';
+import { ALL_ENTITY_MODEL_KEYS } from '../../core/persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { AppDataCompleteNew } from '../pfapi-config';
 import { INBOX_PROJECT } from '../../features/project/project.const';
 
 // TODO improve later
