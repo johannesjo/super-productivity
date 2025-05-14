@@ -267,7 +267,10 @@
               >
                 <task-list
                   class="tour-doneList"
-                  [noTasksMsg]="T.WW.NO_DONE_TASKS | translate"
+                  [noTasksMsg]="
+                    (nrOfDoneArchived ? T.WW.DONE_TASKS_IN_ARCHIVE : T.WW.NO_DONE_TASKS)
+                      | translate
+                  "
                   [tasks]="doneTasks()"
                   listId="PARENT"
                   listModelId="DONE"

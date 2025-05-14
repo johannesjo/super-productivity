@@ -1753,6 +1753,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
     "ADD_SOME_TASKS": "Add some tasks to plan your day!",
     "DONE_TASKS": "Done Tasks",
+    "DONE_TASKS_IN_ARCHIVE": "There are currently no done tasks here, but there are some already archived.",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
