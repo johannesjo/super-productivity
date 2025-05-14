@@ -1,3 +1,24 @@
+## [13.0.4](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.4) (2025-05-14)
+
+### Bug Fixes
+
+- account for cases that might cause "Error: No tag undefined" [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([fd15515](https://github.com/johannesjo/super-productivity/commit/fd15515f474a03e36d1b5ae41444bc8d0476d08f))
+- also cleanup today tag from all tasks [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([340ad33](https://github.com/johannesjo/super-productivity/commit/340ad332e0776b735c0e1d07ffd0f132d493e0fc))
+- avoid problem with hiddenImprovementBannerItems ([7d683e2](https://github.com/johannesjo/super-productivity/commit/7d683e2f807ebe31e0b7fd4ccc229bb08dbb228e))
+- object is not extensible error ([cb12a8f](https://github.com/johannesjo/super-productivity/commit/cb12a8f728d6e81fc7f38b0e8c236201c4c59e39))
+- project drag & drop broken [#4342](https://github.com/johannesjo/super-productivity/issues/4342) ([0f57841](https://github.com/johannesjo/super-productivity/commit/0f5784152b079b3c518f8768910bed067b3e4a52))
+- tasks scheduled with time being gone [#4347](https://github.com/johannesjo/super-productivity/issues/4347) ([514fa45](https://github.com/johannesjo/super-productivity/commit/514fa450112ec3511fc0cf745d646c9c4e86fd18))
+- typing issue ([ede1680](https://github.com/johannesjo/super-productivity/commit/ede1680ed49475aef98236130f5d0120a725d6dc))
+- validity error for task by better data fix script [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([64e2071](https://github.com/johannesjo/super-productivity/commit/64e20715852c823d7cb81327946371ac2b344960))
+- validity error for task by better migration [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([ee9d584](https://github.com/johannesjo/super-productivity/commit/ee9d5847f8cc8cbb4066bea79d280802b81357dc))
+- view task reminder dialog not working as intended ([35c1d58](https://github.com/johannesjo/super-productivity/commit/35c1d58923851ba8249b504dee8739d58ba2c79d))
+
+### Features
+
+- add explanation for + archived done task number ([7497f12](https://github.com/johannesjo/super-productivity/commit/7497f12315763088390c30a4c6aa303ad074614c))
+- outline new data repair stuff ([ea8cc5b](https://github.com/johannesjo/super-productivity/commit/ea8cc5bb11e00a6d9c70fcc94dfe4f8a382293e2))
+- **pfapi:** add autofixes for simple data inconsistencies [#4343](https://github.com/johannesjo/super-productivity/issues/4343) ([b550353](https://github.com/johannesjo/super-productivity/commit/b550353b17cd90e615e5e8112886b69e13f8f3d5))
+
 ## [13.0.3](https://github.com/johannesjo/super-productivity/compare/v13.0.2...v13.0.3) (2025-05-14)
 
 ## [13.0.2](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.2) (2025-05-14)
