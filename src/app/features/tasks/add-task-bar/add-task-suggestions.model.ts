@@ -21,5 +21,5 @@ export interface AddTaskSuggestion {
   // for add from tag context only
   ctx?: Tag | Project;
   tagIds?: string[];
-  projectId?: string;
+  projectId: string;
 }
