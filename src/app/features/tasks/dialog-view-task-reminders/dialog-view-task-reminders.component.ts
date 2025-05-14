@@ -136,6 +136,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         },
       }),
     );
+    if (task.reminderId) {
+      this._removeFromList(task.reminderId as string);
+    }
   }
 
   dismiss(task: TaskWithReminderData): void {
@@ -229,12 +232,13 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const selectedTasks = (await this.tasks$
       .pipe(first())
       .toPromise()) as TaskWithReminderData[];
-    const tasksIdsOnToday = await this._store
-      .select(selectTodayTagTaskIds)
-      .pipe(first())
-      .toPromise();
+    // const tasksIdsOnToday = await this._store
+    //   .select(selectTodayTagTaskIds)
+    //   .pipe(first())
+    //   .toPromise();
+    // const tasksToAdd = selectedTasks.filter((t) => !tasksIdsOnToday.includes(t.id));
+    const tasksToAdd = selectedTasks;
 
-    const tasksToAdd = selectedTasks.filter((t) => !tasksIdsOnToday.includes(t.id));
     this._store.dispatch(
       planTasksForToday({
         taskIds: tasksToAdd.map((t) => t.id),
