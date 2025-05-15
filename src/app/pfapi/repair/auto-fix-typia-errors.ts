@@ -11,7 +11,7 @@ export const autoFixTypiaErrors = (
   errors.forEach((error) => {
     if (error.path.startsWith('$input')) {
       const path = error.path.replace('$input.', '');
-      const keys = path.split('.');
+      const keys = parsePath(path);
       const value = getValueByPath(data, keys);
       console.warn('Auto-fixing error:', error);
       if (error.expected.includes('number') && typeof value === 'string') {
@@ -31,6 +31,26 @@ export const autoFixTypiaErrors = (
     }
   });
   return data;
+};
+
+/**
+ * Parse a path string into an array of keys, handling both dot notation and bracket notation.
+ * Example: 'task.entities["BbgHI8-2NZ7zBn7BNVQPG"].timeEstimate' becomes
+ * ['task', 'entities', 'BbgHI8-2NZ7zBn7BNVQPG', 'timeEstimate']
+ */
+const parsePath = (path: string): (string | number)[] => {
+  const keys: (string | number)[] = [];
+  const pathParts = path.split('.');
+
+  for (const part of pathParts) {
+    if (part.includes('[')) {
+      const partsInner = part.replace(/\]/g, '').replace(/\"/g, '').split('[');
+      partsInner.forEach((innerPart) => keys.push(innerPart));
+    } else {
+      keys.push(part);
+    }
+  }
+  return keys;
 };
 
 const getValueByPath = <T, R = any>(obj: T, path: (string | number)[]): R | undefined =>

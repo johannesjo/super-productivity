@@ -1,6 +1,8 @@
 import { autoFixTypiaErrors } from './auto-fix-typia-errors';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { createValidate } from 'typia';
+import { initialTaskState } from '../../features/tasks/store/task.reducer';
+import { DEFAULT_TASK, TaskState } from '../../features/tasks/task.model';
 
 interface TestInterface {
   globalConfig: {
@@ -12,6 +14,7 @@ interface TestInterface {
     optionalProp?: string;
     bool: boolean;
   };
+  task?: TaskState;
 }
 
 describe('autoFixTypiaErrors', () => {
@@ -70,7 +73,7 @@ describe('autoFixTypiaErrors', () => {
     expect(result.globalConfig.misc.startOfNextDay).toEqual(undefined as any);
   });
 
-  it('should sanatize null to undefined if model requests it', () => {
+  it('should sanitize null to undefined if model requests it', () => {
     const d = {
       globalConfig: {
         misc: {
@@ -88,7 +91,7 @@ describe('autoFixTypiaErrors', () => {
     expect((result as any).optionalObj.optionalProp).toEqual(undefined);
   });
 
-  it('should sanatize boolean to false for undefined types', () => {
+  it('should sanitize boolean to false for undefined types', () => {
     const d = {
       globalConfig: {
         misc: {
@@ -103,5 +106,35 @@ describe('autoFixTypiaErrors', () => {
     expect(validateResult.success).toBe(false);
     const result = autoFixTypiaErrors(d, (validateResult as any).errors);
     expect((result as any).optionalObj.bool).toEqual(false);
+  });
+
+  it('should sanitize special id syntax', () => {
+    const d = {
+      globalConfig: {
+        misc: {
+          startOfNextDay: 111,
+        },
+      },
+      task: {
+        ...initialTaskState,
+        entities: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'task-1': {
+            ...DEFAULT_TASK,
+            id: 'task-1',
+            timeEstimate: '0',
+            timeSpent: '0',
+          },
+        },
+        ids: ['task-1'],
+      },
+    } as any;
+    const validateResult = validate(d);
+    expect(validateResult.success).toBe(false);
+
+    const result = autoFixTypiaErrors(d, (validateResult as any).errors);
+
+    expect((result as any).task.entities['task-1'].timeEstimate).toEqual(0);
+    expect((result as any).task.entities['task-1'].timeSpent).toEqual(0);
   });
 });
