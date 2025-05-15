@@ -1,3 +1,20 @@
+## [13.0.5](https://github.com/johannesjo/super-productivity/compare/v13.0.4...v13.0.5) (2025-05-15)
+
+### Bug Fixes
+
+- allow for legacy left over jira and open project configs [#4360](https://github.com/johannesjo/super-productivity/issues/4360) [#4362](https://github.com/johannesjo/super-productivity/issues/4362) ([5f1fe57](https://github.com/johannesjo/super-productivity/commit/5f1fe575a3ca7e6695413e891bd3a2b560189a95))
+- also cleanup todays tag ids from task repeat configs [#4364](https://github.com/johannesjo/super-productivity/issues/4364) ([fecbd75](https://github.com/johannesjo/super-productivity/commit/fecbd75ad1d66dce8e613dd42061066023683e6b))
+- exclude today tag from boards config [#4368](https://github.com/johannesjo/super-productivity/issues/4368) ([3d55745](https://github.com/johannesjo/super-productivity/commit/3d557454946a9f40feb8cf58325ccbe7b1420022))
+- make autofix work for task model [#4365](https://github.com/johannesjo/super-productivity/issues/4365) ([42c481a](https://github.com/johannesjo/super-productivity/commit/42c481a639e71c72f642ec52a93fe897cc3c88f9))
+- **pfapi:** error logging ([1e1ec99](https://github.com/johannesjo/super-productivity/commit/1e1ec9912e1ffc73ba431f7ec3a64ac50f3d0158))
+- **pfapi:** error logging 2 ([a50d135](https://github.com/johannesjo/super-productivity/commit/a50d135141de17c325347a5055eb1005305b1296))
+- **pfapi:** use documents folder for android sync instead [#4349](https://github.com/johannesjo/super-productivity/issues/4349) [#4357](https://github.com/johannesjo/super-productivity/issues/4357) ([e515e10](https://github.com/johannesjo/super-productivity/commit/e515e101836a075387f5a6ad8e37e091e4da1674))
+- remove misleading "remove from my day" button [#4366](https://github.com/johannesjo/super-productivity/issues/4366) ([f3b448f](https://github.com/johannesjo/super-productivity/commit/f3b448f31ae01b5f46d240ee52f7f52ac994b499))
+
+### Features
+
+- **pfapi:** improve logging [#4369](https://github.com/johannesjo/super-productivity/issues/4369) ([2ae3aad](https://github.com/johannesjo/super-productivity/commit/2ae3aad77844c522627d94e44832e6bd2342bc40))
+
 ## [13.0.4](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.4) (2025-05-14)
 
 ### Bug Fixes

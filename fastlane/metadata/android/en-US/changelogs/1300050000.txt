@@ -1,0 +1,14 @@
+
+### Bug Fixes
+
+* allow for legacy left over jira and open project configs #4360 #4362
+* also cleanup todays tag ids from task repeat configs #4364
+* exclude today tag from boards config #4368
+* make autofix work for task model #4365
+* **pfapi:** error logging
+* **pfapi:** error logging 2
+* **pfapi:** use documents folder for android sync instead #4349 #4357
+* remove misleading "remove from my day" button #4366
+### Features
+
+* **pfapi:** improve logging #4369
