@@ -104,7 +104,8 @@ export class ModelSyncService<MD extends ModelCfgs> {
       );
       if (expectedRev) {
         if (!rev || !this._isSameRev(rev, expectedRev)) {
-          throw new RevMismatchForModelError(modelId);
+          pfLog(2, 'Rev mismatch', rev, expectedRev);
+          throw new RevMismatchForModelError(modelId, { rev, expectedRev });
         }
       }
       const data = await this._encryptAndCompressHandler.decompressAndDecryptData<
