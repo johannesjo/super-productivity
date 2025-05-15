@@ -32,6 +32,7 @@ import { TaskCopy } from '../../tasks/task.model';
 import { TagComponent } from '../tag/tag.component';
 import { TranslatePipe } from '@ngx-translate/core';
 import { switchMap } from 'rxjs/operators';
+import { TODAY_TAG } from '../tag.const';
 
 interface Suggestion {
   id: string;
@@ -95,6 +96,7 @@ export class TagEditComponent {
   allExcludedTagIds = computed<string[]>(() => [
     ...this.tagIds(),
     ...(this.excludedTagIds() || []),
+    TODAY_TAG.id,
   ]);
   filteredSuggestions = computed(() => {
     const val = this.inputVal();
