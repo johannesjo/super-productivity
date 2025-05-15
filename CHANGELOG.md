@@ -1,3 +1,11 @@
+## [13.0.7](https://github.com/johannesjo/super-productivity/compare/v13.0.6...v13.0.7) (2025-05-15)
+
+### Bug Fixes
+
+- actual sync provider state in sync button [#4374](https://github.com/johannesjo/super-productivity/issues/4374) ([3c759d9](https://github.com/johannesjo/super-productivity/commit/3c759d9b8366841dd1ad66e263aa81b45f7e1b1c))
+- prevent sync provider being set wrong initially ([f88d5a1](https://github.com/johannesjo/super-productivity/commit/f88d5a19564e3c419fafc9a1af0b350e65417819))
+- sidebar opens when toggling any misc setting on mobile [#4379](https://github.com/johannesjo/super-productivity/issues/4379) ([5f41722](https://github.com/johannesjo/super-productivity/commit/5f41722d33d0d58656e533296adc302730c8fdf1))
+
 ## [13.0.6](https://github.com/johannesjo/super-productivity/compare/v13.0.5...v13.0.6) (2025-05-15)
 
 ### Bug Fixes
