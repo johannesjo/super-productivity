@@ -179,7 +179,7 @@ export class OpenProjectEffects {
     openProjectCfg: OpenProjectCfg,
     task: Task,
   ): Observable<any> {
-    const chosenTransition: OpenProjectTransitionOption =
+    const chosenTransition: OpenProjectTransitionOption | undefined =
       openProjectCfg.transitionConfig[localState];
 
     if (!task.issueId) {

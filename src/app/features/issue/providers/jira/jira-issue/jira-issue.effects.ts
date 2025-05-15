@@ -254,7 +254,8 @@ export class JiraIssueEffects {
     jiraCfg: IssueProviderJira,
     task: Task,
   ): Observable<any> {
-    const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
+    const chosenTransition: JiraTransitionOption | undefined =
+      jiraCfg.transitionConfig[localState];
 
     if (!task.issueId) {
       throw new Error('No issueId for task');

@@ -9,7 +9,8 @@ export type OpenProjectTransitionOption =
 
 export interface OpenProjectTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
-  // OPEN: OpenProjectTransitionOption;
+  // todo remove this with a proper migration since currently not used
+  OPEN?: OpenProjectTransitionOption;
   IN_PROGRESS: OpenProjectTransitionOption;
   DONE: OpenProjectTransitionOption;
 }
