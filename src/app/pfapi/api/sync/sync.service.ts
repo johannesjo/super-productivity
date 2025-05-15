@@ -123,12 +123,12 @@ export class SyncService<const MD extends ModelCfgs> {
                 pfLog(2, 'Downloading all since model version changed');
                 await this.downloadAll();
                 return { status: SyncStatus.UpdateLocalAll };
-
               case ModelVersionCheckResult.RemoteMajorAhead:
                 throw new ModelVersionToImportNewerThanLocalError({
                   localMeta,
                   remoteMeta,
                 });
+              // NOTE case ModelVersionCheckResult.RemoteModelEqualOrMinorUpdateOnly is fallthrough
             }
           }
           // NOTE: also fallthrough for case ModelVersionCheckResult.RemoteModelEqualOrMinorUpdateOnly:

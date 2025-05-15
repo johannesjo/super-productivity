@@ -1,7 +1,7 @@
 import { AllSyncModels, ModelCfgs } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import {
-  CanNotMigrateDownError,
+  CanNotMigrateMajorDownError,
   ImpossibleError,
   ModelMigrationError,
 } from '../errors/errors';
@@ -80,9 +80,11 @@ export class MigrationService<MD extends ModelCfgs> {
       // if (cfg?.crossModelBackwardMigrations) {
       //   // ...
       // }
-      throw new CanNotMigrateDownError(
-        'Saved model version is higher than current one and no backwards migrations available',
-      );
+      if (Math.floor(dataInCrossModelVersion) !== Math.floor(codeModelVersion)) {
+        throw new CanNotMigrateMajorDownError(
+          'Saved model version is higher than current one and no backwards migrations available',
+        );
+      }
     }
 
     return this._migrateUp(codeModelVersion, dataInCrossModelVersion, dataIn);

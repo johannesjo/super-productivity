@@ -56,7 +56,7 @@ import { appDataValidators, validateAllData } from './validate/validation-fn';
 import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
 import { IValidation } from 'typia';
 
-export const CROSS_MODEL_VERSION = 4 as const;
+export const CROSS_MODEL_VERSION = 4.1 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
