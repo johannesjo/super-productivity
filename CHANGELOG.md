@@ -1,3 +1,9 @@
+## [13.0.6](https://github.com/johannesjo/super-productivity/compare/v13.0.5...v13.0.6) (2025-05-15)
+
+### Bug Fixes
+
+- segfault on debian [#4375](https://github.com/johannesjo/super-productivity/issues/4375) ([8ddd4f4](https://github.com/johannesjo/super-productivity/commit/8ddd4f438b7ed45e26dffadedf28d7d8a7e0750b))
+
 ## [13.0.5](https://github.com/johannesjo/super-productivity/compare/v13.0.4...v13.0.5) (2025-05-15)
 
 ### Bug Fixes
