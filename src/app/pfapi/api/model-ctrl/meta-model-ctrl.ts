@@ -105,7 +105,7 @@ export class MetaModelCtrl {
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
     pfLog(2, `${MetaModelCtrl.name}.${this.save.name}()`, metaModel);
-    if (!metaModel.lastUpdate) {
+    if (typeof metaModel.lastUpdate !== 'number') {
       throw new InvalidMetaError(
         `${MetaModelCtrl.name}.${this.save.name}()`,
         'lastUpdate not found',
