@@ -5,7 +5,10 @@ const isSpecialKeyExactlyRight = (
   return (isKeyRequired && isKeyPressed) || (!isKeyRequired && !isKeyPressed);
 };
 
-export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null): boolean => {
+export const checkKeyCombo = (
+  ev: KeyboardEvent,
+  comboToTest: string | null | undefined,
+): boolean => {
   // NOTE: comboToTest can sometimes be undefined
   if (!!comboToTest) {
     const isPlusKey = comboToTest.includes('++');

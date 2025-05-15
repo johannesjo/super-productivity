@@ -28,6 +28,14 @@ export class TaskArchiveService {
 
   constructor() {}
 
+  async loadYoung(): Promise<TaskArchive> {
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    return {
+      ids: archiveYoung.task.ids,
+      entities: archiveYoung.task.entities,
+    };
+  }
+
   async load(): Promise<TaskArchive> {
     // NOTE: these are already saved in memory to speed up things
     const [archiveYoung, archiveOld] = await Promise.all([

@@ -23,6 +23,14 @@ $h: $planner-item-height;
       text-decoration: line-through;
     }
   }
+
+  // note: we use .tags-container, since we don't want margins for an empty list
+  ::ng-deep .tags-container {
+    // to match task title padding
+    margin-left: 3px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+  }
 }
 
 :host-context(.isLightTheme).isCurrent {
@@ -37,13 +45,17 @@ $h: $planner-item-height;
 }
 
 .no-drag {
-  padding: 4px 0;
   display: flex;
   align-items: center;
   flex-grow: 1;
   flex-shrink: 1;
   min-width: 0;
   position: relative;
+  padding: 4px 0;
+
+  @include mq(xs) {
+    padding: 2px 0;
+  }
 }
 
 ::ng-deep .tag-title {

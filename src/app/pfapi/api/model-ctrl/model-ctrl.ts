@@ -41,7 +41,7 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog(2, `${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
+    pfLog(2, `___ ${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
 
     // Validate data if validator is available
     if (this.modelCfg.validate && !this.modelCfg.validate(data).success) {

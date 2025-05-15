@@ -6,14 +6,14 @@ import {
 import { EntityState } from '@ngrx/entity';
 import { MODEL_VERSION_KEY } from '../../app.constants';
 
-export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null;
+export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null | undefined;
 
 export interface ProjectBasicCfg {
   title: string;
-  isHiddenFromMenu: boolean;
   // TODO remove maybe
-  isArchived: boolean;
-  isEnableBacklog: boolean;
+  isArchived?: boolean;
+  isHiddenFromMenu?: boolean;
+  isEnableBacklog?: boolean;
   taskIds: string[];
   backlogTaskIds: string[];
   noteIds: string[];

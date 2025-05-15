@@ -333,6 +333,13 @@
       pointer-events: none;
     }
   }
+
+  // note: we use .tags-container, since we don't want margins for an empty list
+  ::ng-deep .tags-container {
+    // to match task title padding
+    margin-left: 6px;
+    margin-bottom: 5px;
+  }
 }
 
 @mixin timeWrapperMinimalStyles() {

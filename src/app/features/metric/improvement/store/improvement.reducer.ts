@@ -35,6 +35,10 @@ export const selectImprovementHideDay = createSelector(
   selectImprovementFeatureState,
   (s) => s.hideDay,
 );
+export const selectHiddenImprovements = createSelector(
+  selectImprovementFeatureState,
+  (s) => s.hiddenImprovementBannerItems,
+);
 
 export const selectRepeatedImprovementIds = createSelector(
   selectAllImprovements,
@@ -120,6 +124,9 @@ export const improvementReducer = createReducer<ImprovementState>(
   }),
 
   on(clearHiddenImprovements, (state) => {
+    if (state.hiddenImprovementBannerItems.length === 0) {
+      return state;
+    }
     return {
       ...state,
       hiddenImprovementBannerItems: [],

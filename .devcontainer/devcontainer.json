@@ -9,5 +9,12 @@
       "label": "Angular Dev Server",
       "onAutoForward": "openBrowser"
     }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/kreemer/features/chrometesting:1": {}
+  },
+  "containerEnv": {
+    "CHROME_BIN": "/opt/chrome/chrome"
   }
 }

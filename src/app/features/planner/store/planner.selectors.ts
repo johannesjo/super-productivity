@@ -10,7 +10,7 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
-import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
+import { TaskCopy, TaskWithDueDay, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -21,10 +21,56 @@ import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { calculateAvailableHours } from '../util/calculate-available-hours';
 import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
 import { ScheduleConfig } from '../../config/global-config.model';
+import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
+import { isToday } from '../../../util/is-today.util';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
 );
+
+export const selectAllTasksDueToday = createSelector(
+  selectTodayStr,
+  selectTaskFeatureState,
+  selectPlannerState,
+  (todayStr, taskState, plannerState): (TaskWithDueTime | TaskWithDueDay)[] => {
+    const allDueDayTasks = Object.values(taskState.entities).filter(
+      (task) => !!task && !!(task as TaskWithDueTime).dueDay && todayStr === task.dueDay,
+    ) as TaskWithDueDay[];
+    const allDueWithTimeTasks = Object.values(taskState.entities).filter(
+      (task) =>
+        !!task &&
+        !!(task as TaskWithDueTime).dueWithTime &&
+        isToday((task as TaskWithDueTime).dueWithTime),
+    ) as TaskWithDueTime[];
+
+    const allDue: (TaskWithDueTime | TaskWithDueDay)[] = (
+      plannerState.days[todayStr] || []
+    )
+      .map((tid) => taskState.entities[tid] as TaskWithDueDay)
+      // there is a chance that the task is not in the store anymore
+      .filter((t) => !!t);
+
+    [...allDueDayTasks, ...allDueWithTimeTasks].forEach((task) => {
+      if (!allDue.find((t) => t.id === task.id)) {
+        allDue.push(task);
+      }
+    });
+    return allDue;
+  },
+);
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const selectTasksForPlannerDay = (day: string) => {
+  return createSelector(
+    selectPlannerState,
+    selectTaskFeatureState,
+    (plannerState, taskState) =>
+      (plannerState.days[day] || [])
+        .map((tid) => taskState.entities[tid] as TaskCopy)
+        // there is a chance that the task is not in the store anymore
+        .filter((t) => !!t),
+  );
+};
 
 // Updated selectPlannerDays
 export const selectPlannerDays = (
@@ -103,11 +149,11 @@ const getPlannerDay = (
   unplannedTaskIdsToday: string[] | false,
   scheduleConfig?: ScheduleConfig,
 ): PlannerDay => {
-  const isToday = dayDate === todayStr;
+  const isTodayI = dayDate === todayStr;
   const currentDayDate = dateStrToUtcDate(dayDate);
   const currentDayTimestamp = currentDayDate.getTime();
   const tIds =
-    isToday && unplannedTaskIdsToday
+    isTodayI && unplannedTaskIdsToday
       ? unplannedTaskIdsToday
       : plannerState.days[dayDate] || [];
   const normalTasks = tIds
@@ -137,7 +183,7 @@ const getPlannerDay = (
   }
 
   return {
-    isToday: isToday,
+    isToday: isTodayI,
     dayDate,
     timeLimit: 0,
     itemsTotal:

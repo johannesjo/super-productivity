@@ -287,7 +287,7 @@
     >
       <span class="menuItemLeft">
         <mat-icon>arrow_upward</mat-icon>
-        {{ T.F.TASK.CMP.MOVE_TO_TODAY | translate }}
+        {{ T.F.TASK.CMP.MOVE_TO_REGULAR | translate }}
       </span>
       <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
     </button>
@@ -377,9 +377,9 @@
         mat-menu-item
       >
         @if (task.tagIds.includes(tag.id)) {
-          <mat-icon>check_box</mat-icon>
+          <mat-icon class="check-ico">check_box</mat-icon>
         } @else {
-          <mat-icon>check_box_outline_blank</mat-icon>
+          <mat-icon class="check-ico">check_box_outline_blank</mat-icon>
         }
         <mat-icon
           [style.color]="tag.color || tag.theme.primary"

@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Twoje dane są popsute. Czy chcesz je automatycznie naprawić? Może wystąpić utrata danych.",
-    "DELETE_STRAY_BACKUP": "Czy chcesz usunąć kopię zapasową aby nie widzieć tego okna w przyszłości?",
     "RELOAD_AFTER_IDB_ERROR": "Nie można uzyskać dostępu do bazy danych :( Możliwe przyczyny to aktualizacja aplikacji w tle lub mało miejsca na dysku. Jeśli zainstalowałeś aplikację na Linuksie jako snap, chcesz również włączyć świadomość odświeżania \"snap set core experimental.refresh-app-awareness=true\", dopóki nie naprawią tego problemu po swojej stronie. Naciśnij OK, aby ponownie załadować aplikację (może wymagać ręcznego ponownego uruchomienia aplikacji na niektórych platformach).",
     "RESTORE_FILE_BACKUP": "Wygląda na to, że aplikacja nie posiada danych, ale istnieje kopia zapasowa w \"{{dir}}\". Czy chcesz ją odzyskać z {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Wygląda na to, że NIE MA DANYCH, ale dostępna jest kopia zapasowa. Czy chcesz ją załadować?",
@@ -77,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Dodaj nowy panel",
+        "BACKLOG_TASK_FILTER_ALL": "Wszystkie",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Wykluczać",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Tylko zaległości",
+        "BACKLOG_TASK_FILTER_TYPE": "Zadania listy prac",
         "COLUMNS": "Kolumny",
         "TAGS_EXCLUDED": "Wykluczone tagi",
         "TAGS_REQUIRED": "Wymagane tagi",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Jak i gdzie oceniać",
+      "BTN_DONT_BOTHER": "Nie zawracaj mi więcej głowy",
+      "TITLE": "🙈 Proszę nam wybaczyć, ale...",
+      "TXT": "Ogromnie pomógłbyś projektowi, <strong>wystawiając mu dobrą ocenę, jeśli Ci się spodoba!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -621,11 +630,6 @@
           "ADD_TO_TODAY": "Dodaj do Dzisiaj",
           "RE_PLAN_ALL": "Zmień termin wszystkiego",
           "TITLE": "Dodawanie zaplanowanych zadań do Dzisiaj"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Spowoduje to usunięcie przypomnienia z zadania! Naciśnij Escape, aby anulować.",
-          "REMOVE_PLAN_DATE": "Usuń datę planu",
-          "TITLE": "Planowanie zadań na dany dzień"
         }
       },
       "EDIT_REPEATED_TASK": "Edytuj powtarzające się zadanie '{{taskName}}'",
@@ -855,11 +859,11 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Twoje dane zostały przesłane tylko częściowo. Spróbuj ponownie później! W przeciwnym razie nie będzie można zsynchronizować danych z innymi urządzeniami.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity usprawniło synchronizację, używając teraz dwóch oddzielnych plików zamiast jednego, co pozwala na znacznie mniejszy transfer danych. Zaleca się aktualizację wszystkich instancji Super Productivity i najpierw synchronizację danych z instancji aplikacji, w której dane są najnowsze. Jeśli są to dane z urządzenia lokalnego, zignoruj to ostrzeżenie i po prostu prześlij je, potwierdzając następne okno dialogowe."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity usprawniło synchronizację, używając teraz dwóch oddzielnych plików zamiast jednego, co pozwala na znacznie mniejszy transfer danych. Zaleca się aktualizację wszystkich instancji Super Productivity i najpierw synchronizację danych z instancji aplikacji, w której dane są najnowsze. Jeśli są to dane z urządzenia lokalnego, zignoruj to ostrzeżenie i po prostu prześlij je, potwierdzając następne okno dialogowe.",
+        "REMOTE_MODEL_VERSION_NEWER": "Wersja modelu zdalnego jest nowsza niż lokalna. Zaktualizuj swoją lokalną aplikację do najnowszej wersji!"
       },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
-        "FORCE_IMPORT": "Import remote data anyway?",
         "FORCE_UPLOAD": "Upload local data anyway?",
         "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
         "MIGRATE_LEGACY": "Wykryto starsze dane podczas importowania, czy chcesz spróbować je zmigrować?",
@@ -884,10 +888,21 @@
         "USE_LOCAL": "Use local",
         "USE_REMOTE": "Use remote"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Zmienianie i nadpisywanie zdalne",
+        "P1": "Twoje dane są zaszyfrowane, a odszyfrowanie nie powiodło się. Podaj poprawne hasło!",
+        "P2": "Możesz także zmienić hasło, które zastąpi wszystkie zdalne dane."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Zamknij aplikację",
         "BTN_DOWNLOAD_BACKUP": "Pobierz lokalną kopię zapasową",
         "BTN_FORCE_UPLOAD": "Wymuś przesyłanie lokalne",
+        "P1": "Dane zdalnej synchronizacji są niespójne!",
+        "P2": "Model, którego dotyczy problem:",
+        "P3": "Masz 2 opcje:",
+        "P4": "1. Przejdź do drugiego urządzenia i spróbuj przeprowadzić tam pełną synchronizację.",
+        "P5": "2. Zastąp dane zdalne danymi lokalnymi. Wszystkie zdalne zmiany zostaną utracone!",
+        "P6": "Zaleca się utworzenie kopii zapasowej nadpisanych danych!!",
         "T1": "Ostatnia synchronizacja była niekompletna!",
         "T2": "Dane archiwum nie zostały poprawnie przesłane podczas ostatniej synchronizacji:",
         "T3": "Dostępne są 2 opcje:",
@@ -935,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Już zsynchronizowane",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Brak zmian lokalnych - już zsynchronizowane",
+        "BTN_CONFIGURE": "Konfiguruj",
+        "BTN_FORCE_OVERWRITE": "Wymuś nadpisanie",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Dane zdalne są obecnie zapisywane",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "ERROR_NO_REV": "Brak prawidłowego rev dla zdalnego pliku",
@@ -942,6 +960,7 @@
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
+        "SUCCESS_DOWNLOAD": "Zsynchronizowane dane ze zdalnej",
         "SUCCESS_IMPORT": "Zaimportowane dane",
         "SUCCESS_VIA_BUTTON": "Dane zostały pomyślnie zsynchronizowane",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
@@ -992,6 +1011,7 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
+        "DUE": "Zaplanowane na",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
@@ -999,7 +1019,6 @@
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
-        "DUE": "Zaplanowane na",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time",
         "TITLE_PLACEHOLDER": "Wprowadź tytuł"
@@ -1024,7 +1043,8 @@
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
         "MOVE_TO_OTHER_PROJECT": "Move to other Project",
-        "MOVE_TO_TODAY": "Move to today's list",
+        "MOVE_TO_REGULAR": "Move to today's list",
+        "MOVE_TO_TOP": "Przejście na górę listy",
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TIME": "Time Tracking",
@@ -1039,6 +1059,7 @@
         "TOGGLE_TAGS": "Przełącz tagi",
         "TRACK_TIME": "Start tracking time",
         "TRACK_TIME_STOP": "Pause tracking time",
+        "UNSCHEDULE_TASK": "Anuluj harmonogram zadania",
         "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1052,8 +1073,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
         "ADD_TO_TODAY": "Add to today",
-        "DISMISS": "Dismiss Reminder",
-        "DISMISS_ALL": "Dismiss all",
         "DONE": "Gotowe",
         "DUE_TASK": "Due task",
         "DUE_TASKS": "Due tasks",
@@ -1066,7 +1085,9 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
-        "SWITCH_CONTEXT_START": "Switch Context & Start"
+        "SWITCH_CONTEXT_START": "Switch Context & Start",
+        "UNSCHEDULE": "Odwołaj harmonogram",
+        "UNSCHEDULE_ALL": "Anuluj harmonogram wszystkich"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -1114,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "MOVED_TO_ARCHIVE": "Przeniesiono zadania {{nr}} do archiwum",
         "MOVED_TO_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Przejdź do projektu",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
@@ -1305,6 +1327,8 @@
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file",
     "PRIVACY_EXPORT": "Eksport anonimowych danych (do wysłania na adres contact@super-productivity.com w celu debugowania)",
+    "S_BACKUP_DOWNLOADED": "Kopia zapasowa pobrana do folderu dokumentów Androida",
+    "S_ERR_IMPORT_FAILED": "Importowanie danych nie powiodło się",
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "G": {
@@ -1322,6 +1346,7 @@
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "HIDE": "Ukryj",
     "ICON_INP_DESCRIPTION": "Obsługiwane są również wszystkie emotikony utf-8!",
+    "INBOX_PROJECT_TITLE": "Skrzynka odbiorcza",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
@@ -1331,6 +1356,7 @@
     "NO_CON": "You are currently offline. Please reconnect to the internet.",
     "NONE": "None",
     "OK": "Ok",
+    "OVERDUE": "Zaległy",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
     "RESET": "Reset",
@@ -1403,7 +1429,7 @@
       "MOVE_TASK_TO_TOP": "Przenieś zadanie na górę listy",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
-      "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
+      "MOVE_TO_REGULARS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
       "SAVE_NOTE": "Zapisz notatkę",
       "SELECT_NEXT_TASK": "Select next Task",
@@ -1473,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Wyłącz wszystkie animacje",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
+      "IS_SHOW_TIP_LONGER": "Pokaż wskazówkę dotyczącą produktywności przy starcie aplikacji nieco dłużej",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Używaj minimalnego paska nawigacji (wyświetlaj tylko ikony)",
@@ -1584,6 +1611,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe Zadanie",
+    "ALL_PLANNED_LIST": "Powtarzanie/zaplanowane",
     "BOARDS": "Tablice",
     "CREATE_PROJECT": "Stwórz Projekt",
     "CREATE_TAG": "Stwórz Tag",
@@ -1602,6 +1630,7 @@
       "SYNC": "Jak to zrobić: Konfiguracja synchronizacji"
     },
     "METRICS": "Metryki",
+    "NO_PROJECT_INFO": "Brak dostępnych projektów. Możesz utworzyć nowy projekt, klikając przycisk \"Utwórz projekt\".",
     "NO_TAG_INFO": "Obecnie nie ma żadnych tagów. Tagi można dodawać, wpisując `#yourTagName` podczas dodawania lub edytowania zadań.",
     "NOTES": "Notatki",
     "NOTES_PANEL_INFO": "Notatki mogą być wyświetlane tylko w widoku harmonogramu i zwykłej listy zadań.",
@@ -1611,7 +1640,6 @@
     "PROJECT_SETTINGS": "Ustawienia projektów",
     "PROJECTS": "Projekty",
     "QUICK_HISTORY": "Szybka historia",
-    "ALL_PLANNED_LIST": "Powtarzanie/zaplanowane",
     "SCHEDULE": "Harmonogram",
     "SETTINGS": "Ustawienia",
     "SHOW_SEARCH_BAR": "Pokaż pasek wyszukiwania",
@@ -1625,7 +1653,15 @@
     "TRIGGER_SYNC": "Ręczne wyzwalanie synchronizacji",
     "WORKLOG": "Czas pracy"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Czy chcesz pobrać kopię zapasową starszych danych (może być używana ze starszymi wersjami Super Productivity)?",
+    "DETECTED_LEGACY": "Wykryto starsze dane. Przeniesiemy go za Ciebie!",
+    "E_MIGRATION_FAILED": "Migracja nie powiodła się! z błędem:",
+    "E_RESTART_FAILED": "Automatyczne ponowne uruchomienie nie powiodło się. Uruchom ponownie aplikację ręcznie!",
+    "SUCCESS": "Migracja gotowa! Ponowne uruchamianie aplikacji teraz..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Dodawanie zadań od dzisiaj",
     "BACK": "Poczekaj! Zapomniałem czegoś...",
     "BREAK_LABEL": "Przewy (nr / czas)",
     "CELEBRATE": "Czas na <i>świętowanie!</i>",
@@ -1704,6 +1740,7 @@
   "V": {
     "E_1TO10": "Please enter a value between 1 and 10",
     "E_DATETIME": "The entered value is not a datetime!",
+    "E_DURATION": "Podaj prawidłowy czas trwania (np. 1 godzina)",
     "E_MAX": "Should not be bigger than {{val}}",
     "E_MAX_LENGTH": "Should be max {{val}} characters long",
     "E_MIN": "Should be smaller than {{val}}",
@@ -1713,17 +1750,17 @@
   },
   "WW": {
     "ADD_MORE": "Dodaj więcej",
-    "ADD_SCHEDULED_FOR_TODAY": "Dodaj zaplanowane zadania na dzisiaj ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj zaplanowane zadania na jutro ({{nr}})",
     "ADD_SOME_TASKS": "Dodaj zadania do dzisiejszego planu!",
-    "COMPLETED_TASKS": "Zakończone Zadania",
+    "DONE_TASKS": "Wykonane zadania",
     "ESTIMATE_REMAINING": "Pozostało zaplanowanego czasu:",
     "FINISH_DAY": "Zakończ Dzień",
     "FINISH_DAY_FOR_PROJECT": "Dzień zakończenia tego projektu",
     "FINISH_DAY_FOR_TAG": "Dzień zakończenia dla tego tagu",
     "FINISH_DAY_TOOLTIP": "Oceń swój dzień, przenieś wszystkie wykonane zadania do archiwum (opcjonalnie) i/lub zaplanuj następny dzień.",
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
-    "NO_COMPLETED_TASKS": "Aktualnie nie ma ukończonych zadań",
+    "MOVE_DONE_TO_ARCHIVE": "Przenieś gotowe do archiwum",
+    "NO_DONE_TASKS": "Obecnie nie ma żadnych wykonanych zadań",
     "NO_PLANNED_TASKS": "Nie zaplaniwano zadań",
     "READY_TO_WORK": "Gotowy do Pracy!",
     "RESET_BREAK_TIMER": "Zresetuj bez czasu przerwy",

@@ -2,6 +2,7 @@ import { Project, ProjectState } from '../project.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { exists } from '../../../util/exists';
 import { PROJECT_FEATURE_NAME, projectAdapter } from './project.reducer';
+import { INBOX_PROJECT } from '../project.const';
 
 export const selectProjectFeatureState =
   createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
@@ -12,7 +13,10 @@ export const selectUnarchivedProjects = createSelector(selectAllProjects, (proje
 );
 export const selectUnarchivedVisibleProjects = createSelector(
   selectAllProjects,
-  (projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
+  (projects) =>
+    projects.filter(
+      (p) => !p.isArchived && !p.isHiddenFromMenu && p.id !== INBOX_PROJECT.id,
+    ),
 );
 export const selectUnarchivedHiddenProjectIds = createSelector(
   selectAllProjects,

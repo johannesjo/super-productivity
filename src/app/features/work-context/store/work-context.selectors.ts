@@ -177,6 +177,16 @@ export const selectTodayTaskIds = createSelector(
   },
 );
 
+export const selectUndoneTodayTaskIds = createSelector(
+  selectTagFeatureState,
+  selectTaskFeatureState,
+  (tagState, taskState): string[] => {
+    return (tagState.entities[TODAY_TAG.id]?.taskIds || []).filter(
+      (taskId) => taskState.entities[taskId]?.isDone === false,
+    );
+  },
+);
+
 export const selectTimelineTasks = createSelector(
   selectTodayTaskIds,
   selectTaskFeatureState,

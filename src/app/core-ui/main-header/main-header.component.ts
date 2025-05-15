@@ -14,7 +14,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import { filter, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
@@ -111,7 +111,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             }
             return currentTask.projectId
               ? this.projectService.getByIdOnce$(currentTask.projectId)
-              : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
+              : of(null);
           }),
         ),
       ),

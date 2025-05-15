@@ -76,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Add new Panel",
+        "BACKLOG_TASK_FILTER_ALL": "All",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Exclude",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Backlog only",
+        "BACKLOG_TASK_FILTER_TYPE": "Backlog tasks",
         "COLUMNS": "Columns",
         "TAGS_EXCLUDED": "Excluded Tags",
         "TAGS_REQUIRED": "Required Tags",
@@ -143,6 +147,12 @@
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
     },
+    "D_RATE": {
+      "A_HOW": "How and where to rate",
+      "BTN_DONT_BOTHER": "Don't bother me again",
+      "TITLE": "🙈 Please forgive us, but...",
+      "TXT": "You would help the project immensely by <strong>giving it a good rating, if you like it!</strong>"
+    },
     "DOMINA_MODE": {
       "FORM": {
         "HELP": "Repeats the configured phrase every X when tracking time to a task.",
@@ -162,12 +172,6 @@
         "SYNC_ERROR": "Dropbox: Error while syncing",
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Unable to generate PKCE challenge."
       }
-    },
-    "D_RATE": {
-      "A_HOW": "How and where to rate",
-      "BTN_DONT_BOTHER": "Don't bother me again",
-      "TITLE": "\uD83D\uDE48 Please forgive us, but...",
-      "TXT": "You would help the project immensely by <strong>giving it a good rating, if you like it!</strong>"
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
@@ -855,8 +859,8 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Your data was only partially uploaded. Please try again later! Otherwise you will not be able to sync your data to other devices.",
-        "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog.",
+        "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!"
       },
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
@@ -1007,6 +1011,7 @@
         "ADD_ATTACHMENT": "Add attachment",
         "ADD_SUB_TASK": "Add Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
+        "DUE": "Planned at",
         "FROM_PARENT": "(from Parent)",
         "LOCAL_ATTACHMENTS": "Local Attachments",
         "NOTES": "Description",
@@ -1014,7 +1019,6 @@
         "REMINDER": "Reminder",
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
-        "DUE": "Due",
         "SUB_TASKS": "Sub Tasks ({{nr}})",
         "TIME": "Time",
         "TITLE_PLACEHOLDER": "Enter a title"
@@ -1038,9 +1042,9 @@
         "MARK_DONE": "Mark as done",
         "MARK_UNDONE": "Mark as undone",
         "MOVE_TO_BACKLOG": "Move to backlog",
-        "MOVE_TO_OTHER_PROJECT": "Move to other Project",
-        "MOVE_TO_TODAY": "Move to today's list",
-        "MOVE_TO_TOP": "Move to top of the list",
+        "MOVE_TO_OTHER_PROJECT": "Move to Project",
+        "MOVE_TO_REGULAR": "Move to regular list",
+        "MOVE_TO_TOP": "Move to Top",
         "OPEN_ATTACH": "Attach file or link",
         "OPEN_ISSUE": "Open in browser",
         "OPEN_TIME": "Time Tracking",
@@ -1069,11 +1073,9 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
-        "UNSCHEDULE": "Unschedule",
-        "UNSCHEDULE_ALL": "Unschedule all",
         "DONE": "Done",
-        "DUE_TASK": "Reminder for due task",
-        "DUE_TASKS": "Reminder for due tasks",
+        "DUE_TASK": "Reminder for planned task",
+        "DUE_TASKS": "Reminder for planned tasks",
         "FOR_CURRENT": "Task is due. Do you want to start working on it?",
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
@@ -1083,7 +1085,9 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
         "START": "Start",
-        "SWITCH_CONTEXT_START": "Switch Context & Start"
+        "SWITCH_CONTEXT_START": "Switch Context & Start",
+        "UNSCHEDULE": "Unschedule",
+        "UNSCHEDULE_ALL": "Unschedule all"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
@@ -1124,7 +1128,7 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Cannot assign project via short syntax for repeatable tasks!",
-        "CREATED_FOR_PROJECT": "Moved task \"{{taskTitle}}\" to project \"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT": "Created task \"{{taskTitle}}\" for project \"{{projectTitle}}\"",
         "CREATED_FOR_PROJECT_ACTION": "Go to Project",
         "DELETED": "Deleted task \"{{title}}\"",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
@@ -1342,7 +1346,7 @@
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile. <strong>Without the extension the features will not work!!</strong>",
     "HIDE": "Hide",
     "ICON_INP_DESCRIPTION": "All utf-8 emojis are also supported!",
-    "INBOX_TAG_TITLE": "Inbox",
+    "INBOX_PROJECT_TITLE": "Inbox",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
     "MINUTES": "{{m}} minutes",
@@ -1425,7 +1429,7 @@
       "MOVE_TASK_TO_TOP": "Move Task to the top of the List",
       "MOVE_TASK_UP": "Move Task up in List",
       "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
-      "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
+      "MOVE_TO_REGULARS_TASKS": "Move Task to Today\"s Task List",
       "OPEN_PROJECT_NOTES": "Show/Hide Notes",
       "SAVE_NOTE": "Save note",
       "SELECT_NEXT_TASK": "Select next Task",
@@ -1538,7 +1542,7 @@
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",
-      "IS_ENABLE_DUE": "Enable due short syntax (@<Due time>)",
+      "IS_ENABLE_DUE": "Enable planned at short syntax (@<planned time>)",
       "IS_ENABLE_PROJECT": "Enable project short syntax (+<Project name>)",
       "IS_ENABLE_TAG": "Enable tag short syntax (#<Tag>)",
       "TITLE": "Short Syntax"
@@ -1607,6 +1611,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
+    "ALL_PLANNED_LIST": "Planned / Repeat",
     "BOARDS": "Boards",
     "CREATE_PROJECT": "Create Project",
     "CREATE_TAG": "Create Tag",
@@ -1635,7 +1640,6 @@
     "PROJECT_SETTINGS": "Project Settings",
     "PROJECTS": "Projects",
     "QUICK_HISTORY": "Quick History",
-    "ALL_PLANNED_LIST": "Due / Repeat",
     "SCHEDULE": "Schedule",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
@@ -1650,13 +1654,12 @@
     "WORKLOG": "Worklog"
   },
   "MIGRATE": {
-    "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
-    "SUCCESS": "Migration all done! Restarting app now...",
     "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "E_MIGRATION_FAILED": "Migration failed! with Error:",
-    "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!"
+    "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!",
+    "SUCCESS": "Migration all done! Restarting app now..."
   },
-
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
     "BACK": "Wait I forgot something!",
@@ -1750,6 +1753,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
     "ADD_SOME_TASKS": "Add some tasks to plan your day!",
     "DONE_TASKS": "Done Tasks",
+    "DONE_TASKS_IN_ARCHIVE": "There are currently no done tasks here, but there are some already archived.",
     "ESTIMATE_REMAINING": "Estimate remaining:",
     "FINISH_DAY": "Finish Day",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",

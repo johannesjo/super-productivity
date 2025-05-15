@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -14,6 +14,7 @@ import {
   LockPresentError,
   NoRemoteModelFile,
   RevMismatchForModelError,
+  SyncInvalidTimeValuesError,
   SyncProviderId,
   SyncStatus,
 } from '../../pfapi/api';
@@ -28,6 +29,7 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
+import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-timestamps-error/dialog-incoherent-timestamps-error.component';
 
 @Injectable({
   providedIn: 'root',
@@ -66,6 +68,7 @@ export class SyncWrapperService {
     switchMap((isEnabled) =>
       isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
     ),
+    first(),
   );
 
   // TODO move someplace else
@@ -131,6 +134,22 @@ export class SyncWrapperService {
           actionFn: async () => this._matDialog.open(DialogSyncInitialCfgComponent),
           actionStr: T.F.SYNC.S.BTN_CONFIGURE,
         });
+        return 'HANDLED_ERROR';
+      } else if (error instanceof SyncInvalidTimeValuesError) {
+        this._matDialog
+          .open(DialogIncoherentTimestampsErrorComponent, {
+            disableClose: true,
+            autoFocus: false,
+          })
+          .afterClosed()
+          .subscribe(async (res) => {
+            if (res === 'FORCE_UPDATE_REMOTE') {
+              await this._forceUpload();
+            } else if (res === 'FORCE_UPDATE_LOCAL') {
+              await this._pfapiService.pf.downloadAll();
+              await this._reInitAppAfterDataModelChange();
+            }
+          });
         return 'HANDLED_ERROR';
       } else if (
         error instanceof RevMismatchForModelError ||

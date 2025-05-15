@@ -12,6 +12,7 @@ import {
   BoardPanelCfg,
   BoardPanelCfgScheduledState,
   BoardPanelCfgTaskDoneState,
+  BoardPanelCfgTaskTypeFilter,
 } from '../boards.model';
 import { select, Store } from '@ngrx/store';
 import {
@@ -42,6 +43,7 @@ import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { first, take } from 'rxjs/operators';
 import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { selectUnarchivedVisibleProjects } from '../../project/store/project.selectors';
 
 @Component({
   selector: 'board-panel',
@@ -75,6 +77,22 @@ export class BoardPanelComponent {
   allTasks$ = this.store.select(selectAllTasksWithoutHiddenProjects);
   allTasks = toSignal(this.allTasks$, {
     initialValue: [],
+  });
+
+  allProjects$ = this.store.select(selectUnarchivedVisibleProjects);
+  allProjects = toSignal(this.allProjects$, {
+    initialValue: [],
+  });
+
+  // Create a Set of all backlog task IDs for fast lookup
+  allBacklogTaskIds = computed(() => {
+    const backlogIds = new Set<string>();
+    for (const project of this.allProjects()) {
+      if (project && project.backlogTaskIds && Array.isArray(project.backlogTaskIds)) {
+        project.backlogTaskIds.forEach((id) => backlogIds.add(id));
+      }
+    }
+    return backlogIds;
   });
 
   totalEstimate = computed(() =>
@@ -141,6 +159,14 @@ export class BoardPanelComponent {
 
       if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
         isTaskIncluded = isTaskIncluded && !task.dueWithTime && !task.dueDay;
+      }
+
+      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.OnlyBacklog) {
+        isTaskIncluded = isTaskIncluded && this._isTaskInBacklog(task);
+      }
+
+      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.NoBacklog) {
+        isTaskIncluded = isTaskIncluded && !this._isTaskInBacklog(task);
       }
 
       return isTaskIncluded;
@@ -277,5 +303,9 @@ export class BoardPanelComponent {
         }),
       );
     }
+  }
+
+  _isTaskInBacklog(task: Readonly<TaskCopy>): boolean {
+    return this.allBacklogTaskIds().has(task.id);
   }
 }

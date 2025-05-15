@@ -26,7 +26,6 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Uw gegevens lijken beschadigd te zijn. Wilt u proberen het automatisch op te lossen? Dit kan leiden tot gedeeltelijk gegevensverlies.",
-    "DELETE_STRAY_BACKUP": "Wilt u de achterkant verwijderen om dit dialoogvenster niet te zien?",
     "RELOAD_AFTER_IDB_ERROR": "Kan geen toegang krijgen tot de database :( Mogelijke oorzaken zijn een app-update van de app op de achtergrond of weinig schijfruimte. Druk op OK om de app opnieuw te laden (op sommige platforms kan het nodig zijn de app handmatig opnieuw te starten).",
     "RESTORE_FILE_BACKUP": "Er lijken GEEN GEGEVENS te zijn, maar er zijn back-ups beschikbaar op \"{{dir}}\". Wilt u de nieuwste back-up van {{from}}herstellen?",
     "RESTORE_FILE_BACKUP_ANDROID": "Er lijken GEEN GEGEVENS te zijn, maar er is een back-up beschikbaar. Wil je hem laden?",
@@ -77,6 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "Voeg nieuw paneel toe",
+        "BACKLOG_TASK_FILTER_ALL": "Alles",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Uitsluiten",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Alleen achterstand",
+        "BACKLOG_TASK_FILTER_TYPE": "Achterstand taken",
         "COLUMNS": "Kolommen",
         "TAGS_EXCLUDED": "Uitsluit Tags",
         "TAGS_REQUIRED": "Vereiste Tags",
@@ -143,6 +146,12 @@
       "S": {
         "UPDATE_SECTION": "Bijgewerkte instellingen voor <strong>{{sectionKey}}</strong>"
       }
+    },
+    "D_RATE": {
+      "A_HOW": "Hoe en waar te beoordelen",
+      "BTN_DONT_BOTHER": "Val me niet meer lastig",
+      "TITLE": "🙈 Vergeef ons alstublieft, maar...",
+      "TXT": "Je zou het project enorm helpen door het <strong>een goede beoordeling te geven, als je het leuk vindt!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {
@@ -621,11 +630,6 @@
           "ADD_TO_TODAY": "Toevoegen aan vandaag",
           "RE_PLAN_ALL": "Alles opnieuw plannen",
           "TITLE": "Geplande taken toevoegen aan Vandaag"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Dit verwijdert de herinnering van de taak! Druk op Escape om te annuleren.",
-          "REMOVE_PLAN_DATE": "Plangegevens verwijderen",
-          "TITLE": "Plan taak voor de dag"
         }
       },
       "EDIT_REPEATED_TASK": "Herhaalde taak '{{taskName}}' bewerken",
@@ -855,11 +859,11 @@
     "SYNC": {
       "A": {
         "ARCHIVE_ONLY_UPLOADED": "Uw gegevens zijn slechts gedeeltelijk geüpload. Probeer het later nog eens! Anders kunt u uw gegevens niet synchroniseren met andere apparaten.",
-        "POSSIBLE_LEGACY_DATA": "Super Productivity heeft de synchronisatie verbeterd door nu twee aparte bestanden te gebruiken in plaats van één, waardoor veel minder gegevens hoeven te worden overgezet. Het wordt aanbevolen om alle instanties van Super Productivity bij te werken en eerst gegevens te synchroniseren van de app-instantie waar de gegevens het meest recent zijn. Als dit de gegevens van je lokale apparaat zijn, negeer dan deze waarschuwing en ga gewoon door met uploaden door het volgende dialoogvenster te bevestigen."
+        "POSSIBLE_LEGACY_DATA": "Super Productivity heeft de synchronisatie verbeterd door nu twee aparte bestanden te gebruiken in plaats van één, waardoor veel minder gegevens hoeven te worden overgezet. Het wordt aanbevolen om alle instanties van Super Productivity bij te werken en eerst gegevens te synchroniseren van de app-instantie waar de gegevens het meest recent zijn. Als dit de gegevens van je lokale apparaat zijn, negeer dan deze waarschuwing en ga gewoon door met uploaden door het volgende dialoogvenster te bevestigen.",
+        "REMOTE_MODEL_VERSION_NEWER": "De versie van het externe model is nieuwer dan de lokale. Werk uw lokale app bij naar de nieuwste versie!"
       },
       "C": {
         "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
-        "FORCE_IMPORT": "Toch externe gegevens importeren?",
         "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
         "FORCE_UPLOAD_AFTER_ERROR": "Er is een fout opgetreden tijdens het uploaden van uw lokale gegevens. Probeer de update te forceren?",
         "MIGRATE_LEGACY": "Verouderde gegevens gedetecteerd tijdens het importeren. Wilt u proberen deze te migreren?",
@@ -884,10 +888,21 @@
         "USE_LOCAL": "Gebruik lokaal",
         "USE_REMOTE": "Gebruik afstandsbediening"
       },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Wijzigen en overschrijven op afstand",
+        "P1": "Uw gegevens zijn versleuteld en de decodering is mislukt. Voer het juiste wachtwoord in!",
+        "P2": "U kunt ook uw wachtwoord wijzigen, waardoor alle externe gegevens worden overschreven."
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "App sluiten",
         "BTN_DOWNLOAD_BACKUP": "Lokale back-up downloaden",
         "BTN_FORCE_UPLOAD": "Upload lokaal forceren",
+        "P1": "De gegevens voor synchronisatie op afstand zijn onsamenhangend!",
+        "P2": "Betrokken model:",
+        "P3": "Je hebt 2 opties:",
+        "P4": "1. Ga naar je andere apparaat en probeer daar een volledige synchronisatie uit te voeren.",
+        "P5": "2. Overschrijf de externe gegevens met uw lokale gegevens. Alle wijzigingen op afstand gaan verloren!",
+        "P6": "Het wordt aanbevolen om een back-up te maken van de gegevens die u overschrijft!!",
         "T1": "Laatste synchronisatie was onvolledig!",
         "T2": "Je archiefgegevens zijn niet goed geüpload tijdens de laatste synchronisatie:",
         "T3": "Je hebt 2 opties:",
@@ -935,6 +950,9 @@
       "S": {
         "ALREADY_IN_SYNC": "Al gesynchroniseerd",
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Geen locale wijzigingen - Al gesynchroniseerd",
+        "BTN_CONFIGURE": "Configureren",
+        "BTN_FORCE_OVERWRITE": "Forceer overschrijven",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Remote Data wordt momenteel geschreven",
         "ERROR_FALLBACK_TO_BACKUP": "Er is iets misgegaan tijdens het importeren van de gegevens. Terugvallen op lokale back-up.",
         "ERROR_INVALID_DATA": "Fout tijdens het synchroniseren. Onjuiste data",
         "ERROR_NO_REV": "Geen geldige rev voor bestand op afstand",
@@ -942,6 +960,7 @@
         "IMPORTING": "Gegevens importeren",
         "INCOMPLETE_CFG": "Verificatie voor synchronisatie is mislukt. Controleer uw configuratie!",
         "INITIAL_SYNC_ERROR": "Initiële synchronisatie mislukt",
+        "SUCCESS_DOWNLOAD": "Gesynchroniseerde gegevens van op afstand",
         "SUCCESS_IMPORT": "Gegevens geïmporteerd",
         "SUCCESS_VIA_BUTTON": "Gegevens succesvol gesynchroniseerd",
         "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
@@ -992,6 +1011,7 @@
         "ADD_ATTACHMENT": "Voeg bijlage toe",
         "ADD_SUB_TASK": "Subtaak toevoegen",
         "ATTACHMENTS": "Bijlagen ({{nr}})",
+        "DUE": "Gepland op",
         "FROM_PARENT": "(van ouder)",
         "LOCAL_ATTACHMENTS": "Lokale bijlagen",
         "NOTES": "Opmerkingen",
@@ -999,7 +1019,6 @@
         "REMINDER": "Herinnering",
         "REPEAT": "Herhaling",
         "SCHEDULE_TASK": "Taak plannen",
-        "DUE": "Gepland op",
         "SUB_TASKS": "Subtaken ({{nr}})",
         "TIME": "Tijd",
         "TITLE_PLACEHOLDER": "Voer een titel in"
@@ -1024,7 +1043,8 @@
         "MARK_UNDONE": "Markeren als ongedaan gemaakt",
         "MOVE_TO_BACKLOG": "Verplaats naar backlog",
         "MOVE_TO_OTHER_PROJECT": "Verplaats naar een ander project",
-        "MOVE_TO_TODAY": "Verplaats naar de lijst van vandaag",
+        "MOVE_TO_REGULAR": "Verplaats naar de lijst van vandaag",
+        "MOVE_TO_TOP": "Naar boven gaan",
         "OPEN_ATTACH": "Voeg bestand of link toe",
         "OPEN_ISSUE": "Open in de browser",
         "OPEN_TIME": "Tijd bijhouden",
@@ -1039,6 +1059,7 @@
         "TOGGLE_TAGS": "Tags wisselen",
         "TRACK_TIME": "Begin met het bijhouden van de tijd",
         "TRACK_TIME_STOP": "Pauzeer de volgtijd",
+        "UNSCHEDULE_TASK": "Taak ongepland",
         "UPDATE_ISSUE_DATA": "Update probleemgegevens"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1052,8 +1073,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
-        "DISMISS": "Herinnering afwijzen",
-        "DISMISS_ALL": "Alles afkeuren",
         "DONE": "Gedaan",
         "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
@@ -1066,7 +1085,9 @@
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze All",
         "START": "Begin",
-        "SWITCH_CONTEXT_START": "Wissel van context en start"
+        "SWITCH_CONTEXT_START": "Wissel van context en start",
+        "UNSCHEDULE": "Ongepland",
+        "UNSCHEDULE_ALL": "Alles uitplannen"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Verplaats taak naar backlog tot gepland",
@@ -1114,6 +1135,7 @@
         "FOUND_MOVE_FROM_OTHER_LIST": "Taak <strong>{{title}}</strong> van <strong>{{contextTitle}}</strong> toegevoegd aan huidige lijst",
         "FOUND_RESTORE_FROM_ARCHIVE": "Herstelde taak <strong>{{title}}</strong> gerelateerd aan probleem uit archief",
         "LAST_TAG_DELETION_WARNING": "U probeert de laatste tag van een niet-projecttaak te verwijderen. Dit mag niet!",
+        "MOVED_TO_ARCHIVE": "Verplaatste {{nr}} taken naar archief",
         "MOVED_TO_PROJECT": "Taak \"{{taskTitle}}\" verplaatst naar project \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Ga naar Project",
         "REMINDER_ADDED": "Geplande taak \"{{title}}\"",
@@ -1305,6 +1327,8 @@
     "EXPORT_DATA": "Exportgegevens",
     "IMPORT_FROM_FILE": "Importeren uit bestand",
     "PRIVACY_EXPORT": "Geanonimiseerde gegevens exporteren (om naar contact@super-productivity.com te sturen voor debugging)",
+    "S_BACKUP_DOWNLOADED": "Back-up gedownload naar de map met Android-documenten",
+    "S_ERR_IMPORT_FAILED": "Het importeren van gegevens is mislukt",
     "S_ERR_INVALID_DATA": "Importeren mislukt: ongeldige JSON"
   },
   "G": {
@@ -1322,6 +1346,7 @@
     "EXTENSION_INFO": "<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> Download de Chrome-extensie</a> om communicatie met de Jira Api en Idle Time Handling mogelijk te maken. Merk op dat dit niet werkt voor mobiel.",
     "HIDE": "Verberg",
     "ICON_INP_DESCRIPTION": "Alle utf-8 emoji's worden ook ondersteund!",
+    "INBOX_PROJECT_TITLE": "Postvak IN",
     "LOGIN": "Log in",
     "LOGOUT": "Uitloggen",
     "MINUTES": "{{m}} minuten",
@@ -1331,6 +1356,7 @@
     "NO_CON": "Je bent momenteel offline. Maak opnieuw verbinding met internet.",
     "NONE": "Geen",
     "OK": "OK",
+    "OVERDUE": "Achterstallig",
     "PREVIOUS": "Vorige",
     "REMOVE": "Verwijderen",
     "RESET": "Reset",
@@ -1403,7 +1429,7 @@
       "MOVE_TASK_TO_TOP": "Verplaats taak naar de top van de lijst",
       "MOVE_TASK_UP": "Verplaats taak omhoog in lijst",
       "MOVE_TO_BACKLOG": "Verplaats taak naar backlog",
-      "MOVE_TO_TODAYS_TASKS": "Verplaats taak naar de takenlijst van vandaag",
+      "MOVE_TO_REGULARS_TASKS": "Verplaats taak naar de takenlijst van vandaag",
       "OPEN_PROJECT_NOTES": "Projectnotities tonen / verbergen",
       "SAVE_NOTE": "Notitie opslaan",
       "SELECT_NEXT_TASK": "Selecteer de volgende taak",
@@ -1473,6 +1499,7 @@
       "IS_DISABLE_ANIMATIONS": "Alle animaties uitschakelen",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
+      "IS_SHOW_TIP_LONGER": "Toon productiviteitstip op app-start iets langer",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "IS_USE_MINIMAL_SIDE_NAV": "Gebruik een minimale navigatiebalk (toon alleen pictogrammen)",
@@ -1584,6 +1611,7 @@
   },
   "MH": {
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
+    "ALL_PLANNED_LIST": "Herhalen/ Gepland",
     "BOARDS": "Borden",
     "CREATE_PROJECT": "Project maken",
     "CREATE_TAG": "Tag maken",
@@ -1602,6 +1630,7 @@
       "SYNC": "Howto: Synchronisatie configureren"
     },
     "METRICS": "Metrische gegevens",
+    "NO_PROJECT_INFO": "Geen projecten beschikbaar. U kunt een nieuw project maken door op de knop \"Project maken\" te klikken.",
     "NO_TAG_INFO": "Er zijn momenteel geen tags. U kunt tags toevoegen door `#uwTagNaam` in te voeren bij het toevoegen of bewerken van taken.",
     "NOTES": "Opmerkingen",
     "NOTES_PANEL_INFO": "Notities kunnen alleen worden weergegeven vanuit de agenda en de gewone takenlijst.",
@@ -1611,7 +1640,6 @@
     "PROJECT_SETTINGS": "Projectinstellingen",
     "PROJECTS": "Projecten",
     "QUICK_HISTORY": "Snelle geschiedenis",
-    "ALL_PLANNED_LIST": "Herhalen/ Gepland",
     "SCHEDULE": "Schema",
     "SETTINGS": "Instellingen",
     "SHOW_SEARCH_BAR": "Toon zoekbalk",
@@ -1625,7 +1653,15 @@
     "TRIGGER_SYNC": "Synchronisatie handmatig activeren",
     "WORKLOG": "Werklogboek"
   },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Wilt u een back-up downloaden van uw verouderde gegevens (kan worden gebruikt met oudere versies van Super Productivity)?",
+    "DETECTED_LEGACY": "Verouderde gegevens gedetecteerd. Wij migreren het voor u!",
+    "E_MIGRATION_FAILED": "Migratie mislukt! met fout:",
+    "E_RESTART_FAILED": "Automatisch opnieuw opstarten is mislukt. Start de app handmatig opnieuw!",
+    "SUCCESS": "Migratie helemaal klaar! App nu opnieuw opstarten..."
+  },
   "PDS": {
+    "ADD_TASKS_FROM_TODAY": "Taken toevoegen vanaf vandaag",
     "BACK": "Wacht, ik ben iets vergeten!",
     "BREAK_LABEL": "Pauzes (nr / tijd)",
     "CELEBRATE": "Neem even de tijd om <i>te vieren!</i>",
@@ -1704,6 +1740,7 @@
   "V": {
     "E_1TO10": "Voer een waarde in tussen 1 en 10",
     "E_DATETIME": "De ingevoerde waarde is geen datetime!",
+    "E_DURATION": "Voer een geldige duur in (bijv. 1 uur)",
     "E_MAX": "Mag niet groter zijn dan {{val}}",
     "E_MAX_LENGTH": "Mag maximaal {{val}} tekens lang zijn",
     "E_MIN": "Moet kleiner zijn dan {{val}}",
@@ -1713,17 +1750,17 @@
   },
   "WW": {
     "ADD_MORE": "Voeg meer toe",
-    "ADD_SCHEDULED_FOR_TODAY": "Voeg taken toe die voor vandaag zijn gepland ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Voeg taken toe die voor morgen zijn gepland ({{nr}})",
     "ADD_SOME_TASKS": "Voeg wat taken toe om je dag te plannen!",
-    "COMPLETED_TASKS": "Voltooide taken",
+    "DONE_TASKS": "Voltooide taken",
     "ESTIMATE_REMAINING": "Resterende schatting:",
     "FINISH_DAY": "Eindig de dag",
     "FINISH_DAY_FOR_PROJECT": "Einddatum voor dit project",
     "FINISH_DAY_FOR_TAG": "Einddatum voor deze tag",
     "FINISH_DAY_TOOLTIP": "Evalueer je dag, verplaats alle uitgevoerde taken naar het archief (optioneel) en/of plan je volgende dag.",
     "HELP_PROCRASTINATION": "Help, ik stel het uit!",
-    "NO_COMPLETED_TASKS": "Er zijn momenteel geen voltooide taken",
+    "MOVE_DONE_TO_ARCHIVE": "Verplaatsing gedaan naar archief",
+    "NO_DONE_TASKS": "Er zijn momenteel geen voltooide taken",
     "NO_PLANNED_TASKS": "Geen geplande taken",
     "READY_TO_WORK": "Klaar om te werken!",
     "RESET_BREAK_TIMER": "Reset zonder pauzetimer",

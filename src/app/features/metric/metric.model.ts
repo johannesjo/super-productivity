@@ -11,8 +11,8 @@ export interface MetricCopy {
   obstructions: string[];
   improvements: string[];
   improvementsTomorrow: string[];
-  mood?: number;
-  productivity?: number;
+  mood?: number | null;
+  productivity?: number | null;
 }
 
 export type Metric = Readonly<MetricCopy>;

@@ -10,6 +10,12 @@
 
   padding-bottom: 96px;
   margin-bottom: 32px;
+
+  @include mq(xs, max) {
+    width: auto;
+    padding: 0;
+    margin-bottom: 16px;
+  }
 }
 
 :host header {

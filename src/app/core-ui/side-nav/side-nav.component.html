@@ -46,7 +46,7 @@
   @if (inboxContext) {
     <side-nav-item
       #menuEntry
-      [type]="WorkContextType.TAG"
+      [type]="WorkContextType.PROJECT"
       [defaultIcon]="inboxContext.icon"
       [workContext]="inboxContext"
       [activeWorkContextId]="activeWorkContextId"
@@ -82,7 +82,7 @@
         #projectExpandBtn2
         mat-icon-button
       >
-        <mat-icon>more_vert</mat-icon>
+        <mat-icon>visibility_off</mat-icon>
       </button>
       <button
         (click)="addProject()"

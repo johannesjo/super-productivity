@@ -40,6 +40,7 @@
 
   > button {
     height: 48px;
+    min-width: 40px;
     flex-grow: 1;
     border-radius: 4px !important;
 
@@ -56,4 +57,40 @@
 .label {
   display: block;
   text-align: center;
+}
+
+[mat-menu-item] {
+  @include mq(xs, max) {
+    padding-right: 12px;
+  }
+
+  mat-icon {
+    @include mq(xs, max) {
+      margin-right: 12px;
+    }
+  }
+}
+
+.tag-ico {
+  margin-right: 4px;
+
+  @include mq(xs, max) {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    margin-right: 4px;
+  }
+}
+
+.check-ico {
+  margin-right: 16px;
+
+  @include mq(xs, max) {
+    //font-size: 20px;
+    //width: 20px;
+    //height: 20px;
+    //line-height: 20px;
+    margin-right: 12px;
+  }
 }

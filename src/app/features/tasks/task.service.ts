@@ -94,9 +94,10 @@ import { DateService } from 'src/app/core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
-import { INBOX_TAG, TODAY_TAG } from '../tag/tag.const';
+import { TODAY_TAG } from '../tag/tag.const';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { INBOX_PROJECT } from '../project/project.const';
 
 @Injectable({
   providedIn: 'root',
@@ -1027,7 +1028,7 @@ export class TaskService {
 
       ...(workContextType === WorkContextType.PROJECT
         ? { projectId: workContextId }
-        : {}),
+        : { projectId: INBOX_PROJECT.id }),
 
       tagIds:
         workContextType === WorkContextType.TAG &&
@@ -1037,7 +1038,7 @@ export class TaskService {
           : [],
 
       ...(workContextId === TODAY_TAG.id && !additional.parentId
-        ? { dueDay: getWorklogStr(), tagIds: [INBOX_TAG.id] }
+        ? { dueDay: getWorklogStr() }
         : {}),
 
       ...additional,

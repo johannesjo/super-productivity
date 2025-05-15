@@ -13,11 +13,11 @@ export type MiscConfig = Readonly<{
   isMinimizeToTray: boolean;
   isTrayShowCurrentTask: boolean;
   // allow also false because of #569
-  defaultProjectId: string | null | false;
+  defaultProjectId?: string | null | false;
   firstDayOfWeek: number;
   startOfNextDay: number;
   taskNotesTpl: string;
-  isUseMinimalNav: boolean;
+  isUseMinimalNav?: boolean;
   isDisableAnimations: boolean;
   // optional because it was added later
   isShowTipLonger?: boolean;
@@ -30,8 +30,8 @@ export type ShortSyntaxConfig = Readonly<{
 }>;
 
 export type TimeTrackingConfig = Readonly<{
-  trackingInterval: number;
-  defaultEstimate: number;
+  trackingInterval?: number | null;
+  defaultEstimate?: number | null;
   defaultEstimateSubTasks?: number | null;
   isAutoStartNextTask: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
@@ -118,8 +118,8 @@ export type SoundConfig = Readonly<{
 
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
-  isEncryptionEnabled: boolean;
-  isCompressionEnabled: boolean;
+  isEncryptionEnabled?: boolean;
+  isCompressionEnabled?: boolean;
   // TODO migrate to SyncProviderId
   syncProvider: LegacySyncProvider | null;
   syncInterval: number;

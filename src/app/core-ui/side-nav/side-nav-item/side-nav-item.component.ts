@@ -59,8 +59,6 @@ export class SideNavItemComponent {
       .length;
   });
 
-  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
-
   readonly routeBtn = viewChild.required('routeBtn', { read: ElementRef });
 
   @HostBinding('class.hasTasks')
@@ -75,7 +73,7 @@ export class SideNavItemComponent {
 
   @HostBinding('class.isHidden')
   get isHidden(): boolean {
-    return (this.workContext() as Project)?.isHiddenFromMenu;
+    return !!(this.workContext() as Project)?.isHiddenFromMenu;
   }
 
   focus(): void {

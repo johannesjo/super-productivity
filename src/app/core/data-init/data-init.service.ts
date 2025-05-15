@@ -34,24 +34,30 @@ export class DataInitService {
   async reInit(isOmitTokens: boolean = false): Promise<void> {
     await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
-    const isValid = this._pfapiService.pf.isValidateComplete(appDataComplete);
-    if (isValid) {
+    const validationResult = this._pfapiService.pf.validate(appDataComplete);
+    if (validationResult.success) {
       this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
     } else {
       // DATA REPAIR CASE
       // ----------------
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
-        const fixedData = this._pfapiService.pf.repairCompleteData(appDataComplete);
+        const fixedData = this._pfapiService.pf.repairCompleteData(
+          appDataComplete,
+          validationResult.errors,
+        );
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,
             isOmitTokens,
           }),
         );
+        const localCrossModelVersion =
+          (await this._pfapiService.pf.metaModel.load()).crossModelVersion ||
+          CROSS_MODEL_VERSION;
+
         await this._pfapiService.pf.importAllSycModelData({
           data: fixedData,
-          // TODO decide if this or to reapply all migrations??
-          crossModelVersion: CROSS_MODEL_VERSION,
+          crossModelVersion: localCrossModelVersion,
           // since we already did try
           isAttemptRepair: false,
         });

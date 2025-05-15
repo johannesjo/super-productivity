@@ -18,7 +18,6 @@ import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
-import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
 import { UntypedFormControl } from '@angular/forms';
@@ -31,7 +30,6 @@ import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
 import { assertTruthy } from '../../../util/assert-truthy';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -274,7 +272,7 @@ export class AddTaskBarService {
               taskId: task.id,
               taskIssueId: task.issueId || undefined,
               issueType: task.issueType || undefined,
-              projectId: task.projectId || undefined,
+              projectId: task.projectId,
               isFromOtherContextAndTagOnlySearch: true,
               tagIds: task.tagIds,
             })),
@@ -283,15 +281,13 @@ export class AddTaskBarService {
           !!tasks.length
             ? forkJoin(
                 tasks.map((task) => {
-                  const isFromProject = !!task.projectId;
                   return from(this._getCtxForTaskSuggestion(task)).pipe(
                     first(),
                     map((ctx) => ({
                       ...task,
                       ctx: {
                         ...ctx,
-                        icon:
-                          (ctx && (ctx as Tag).icon) || (isFromProject && 'list') || null,
+                        icon: (ctx && ctx.icon) || null,
                       },
                     })),
                   );
@@ -316,16 +312,7 @@ export class AddTaskBarService {
 
   private async _getCtxForTaskSuggestion({
     projectId,
-    tagIds,
-  }: AddTaskSuggestion): Promise<Tag | Project> {
-    if (projectId) {
-      return await this._projectService.getByIdOnce$(projectId).toPromise();
-    } else {
-      const firstTagId = (tagIds as string[])[0];
-      return await this._tagService
-        .getTagById$(firstTagId || TODAY_TAG.id)
-        .pipe(first())
-        .toPromise();
-    }
+  }: AddTaskSuggestion): Promise<Project> {
+    return await this._projectService.getByIdOnce$(projectId).toPromise();
   }
 }

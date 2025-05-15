@@ -34,6 +34,7 @@ import { TmpBackupService } from './backup/tmp-backup.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
+import { IValidation } from 'typia';
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
@@ -230,17 +231,18 @@ export class Pfapi<const MD extends ModelCfgs> {
       acc[modelIds[idx]] = cur;
       return acc;
     }, {});
-    // TODO maybe remove validation check
-    if (
+
+    // TODO maybe remove validation check, since we already validate on every import and save
+    const validationResultIfNeeded =
       !isSkipValidityCheck &&
       this.cfg?.validate &&
-      !this.cfg.validate(allData as AllSyncModels<MD>).success
-    ) {
-      pfLog(1, 'ACTUALLY GOT ONE!!');
+      this.cfg.validate(allData as AllSyncModels<MD>);
+    if (validationResultIfNeeded && !validationResultIfNeeded.success) {
+      pfLog(1, 'ACTUALLY GOT ONE!!', validationResultIfNeeded);
       if (this._getAllSyncModelDataRetryCount >= 1) {
-        pfLog(1, 'ACTUALLY GOT ONE 2!! ERROR');
+        pfLog(1, 'ACTUALLY GOT ONE 2!! ERROR', validationResultIfNeeded);
         this._getAllSyncModelDataRetryCount = 0;
-        throw new DataValidationFailedError();
+        throw new DataValidationFailedError(validationResultIfNeeded);
       }
       await promiseTimeout(1000);
       this._getAllSyncModelDataRetryCount++;
@@ -301,7 +303,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         pfLog(0, `${this.importAllSycModelData.name}() data not valid`, validationResult);
         if (isAttemptRepair && this.cfg.repair) {
           pfLog(0, `${this.importAllSycModelData.name}() attempting repair`);
-          data = this.cfg.repair(data);
+          data = this.cfg.repair(data, (validationResult as IValidation.IFailure).errors);
 
           const r2 = this.cfg.validate(data);
           if (!r2.success) {
@@ -386,12 +388,20 @@ export class Pfapi<const MD extends ModelCfgs> {
     // we don't do this!!!! => throw new DataValidationFailedError();
   }
 
-  repairCompleteData(data: unknown): AllSyncModels<MD> {
+  repairCompleteData(data: unknown, errors: IValidation.IError[]): AllSyncModels<MD> {
     pfLog(2, `${this.repairCompleteData.name}()`, { data });
     if (!this.cfg?.repair) {
       throw new NoRepairFunctionProvidedError();
     }
-    return this.cfg.repair(data);
+    return this.cfg.repair(data, errors);
+  }
+
+  validate(data: unknown): IValidation<AllSyncModels<MD>> {
+    pfLog(2, `${this.validate.name}()`, { data });
+    if (!this.cfg?.validate) {
+      throw new NoValidateFunctionProvidedError();
+    }
+    return this.cfg.validate(data as any);
   }
 
   private _createModels(modelCfgs: MD): ModelCfgToModelCtrl<MD> {

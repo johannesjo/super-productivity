@@ -1,3 +1,167 @@
+## [13.0.4](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.4) (2025-05-14)
+
+### Bug Fixes
+
+- account for cases that might cause "Error: No tag undefined" [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([fd15515](https://github.com/johannesjo/super-productivity/commit/fd15515f474a03e36d1b5ae41444bc8d0476d08f))
+- also cleanup today tag from all tasks [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([340ad33](https://github.com/johannesjo/super-productivity/commit/340ad332e0776b735c0e1d07ffd0f132d493e0fc))
+- avoid problem with hiddenImprovementBannerItems ([7d683e2](https://github.com/johannesjo/super-productivity/commit/7d683e2f807ebe31e0b7fd4ccc229bb08dbb228e))
+- object is not extensible error ([cb12a8f](https://github.com/johannesjo/super-productivity/commit/cb12a8f728d6e81fc7f38b0e8c236201c4c59e39))
+- project drag & drop broken [#4342](https://github.com/johannesjo/super-productivity/issues/4342) ([0f57841](https://github.com/johannesjo/super-productivity/commit/0f5784152b079b3c518f8768910bed067b3e4a52))
+- tasks scheduled with time being gone [#4347](https://github.com/johannesjo/super-productivity/issues/4347) ([514fa45](https://github.com/johannesjo/super-productivity/commit/514fa450112ec3511fc0cf745d646c9c4e86fd18))
+- typing issue ([ede1680](https://github.com/johannesjo/super-productivity/commit/ede1680ed49475aef98236130f5d0120a725d6dc))
+- validity error for task by better data fix script [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([64e2071](https://github.com/johannesjo/super-productivity/commit/64e20715852c823d7cb81327946371ac2b344960))
+- validity error for task by better migration [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([ee9d584](https://github.com/johannesjo/super-productivity/commit/ee9d5847f8cc8cbb4066bea79d280802b81357dc))
+- view task reminder dialog not working as intended ([35c1d58](https://github.com/johannesjo/super-productivity/commit/35c1d58923851ba8249b504dee8739d58ba2c79d))
+
+### Features
+
+- add explanation for + archived done task number ([7497f12](https://github.com/johannesjo/super-productivity/commit/7497f12315763088390c30a4c6aa303ad074614c))
+- outline new data repair stuff ([ea8cc5b](https://github.com/johannesjo/super-productivity/commit/ea8cc5bb11e00a6d9c70fcc94dfe4f8a382293e2))
+- **pfapi:** add autofixes for simple data inconsistencies [#4343](https://github.com/johannesjo/super-productivity/issues/4343) ([b550353](https://github.com/johannesjo/super-productivity/commit/b550353b17cd90e615e5e8112886b69e13f8f3d5))
+
+## [13.0.3](https://github.com/johannesjo/super-productivity/compare/v13.0.2...v13.0.3) (2025-05-14)
+
+## [13.0.2](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.2) (2025-05-14)
+
+### Bug Fixes
+
+- account for cases that might cause "Error: No tag undefined" [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([7dafac7](https://github.com/johannesjo/super-productivity/commit/7dafac793719aa47305a1e3b0f21179f1b8cc730))
+- also cleanup today tag from all tasks [#4348](https://github.com/johannesjo/super-productivity/issues/4348) ([ce051a2](https://github.com/johannesjo/super-productivity/commit/ce051a2eef8d53ad034d203e5ade1d1cc49f5e22))
+- avoid problem with hiddenImprovementBannerItems ([cde10e1](https://github.com/johannesjo/super-productivity/commit/cde10e1001f753b5d041f09fb2553231f613b4d0))
+- object is not extensible error ([8644aa8](https://github.com/johannesjo/super-productivity/commit/8644aa83fe84e097e49cc0bb18b894861ad4f7d3))
+- project drag & drop broken [#4342](https://github.com/johannesjo/super-productivity/issues/4342) ([d8c9efb](https://github.com/johannesjo/super-productivity/commit/d8c9efb16dd8963ca43c23b093a3f9a27349abde))
+- tasks scheduled with time being gone [#4347](https://github.com/johannesjo/super-productivity/issues/4347) ([8567bd2](https://github.com/johannesjo/super-productivity/commit/8567bd223b65eb3794ab7eebd1bd89f24c68a8ae))
+- typing issue ([23bb59c](https://github.com/johannesjo/super-productivity/commit/23bb59c90154c890be33f41b4fea3c51941bff7c))
+- validity error for task by better data fix script [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([5c2227a](https://github.com/johannesjo/super-productivity/commit/5c2227acb6fc482c9f302b60e466413d700857d9))
+- validity error for task by better migration [#4346](https://github.com/johannesjo/super-productivity/issues/4346) ([7b76cc0](https://github.com/johannesjo/super-productivity/commit/7b76cc0c0116bc227d54e4d3ec20feb85e3a1cb0))
+- view task reminder dialog not working as intended ([0568f37](https://github.com/johannesjo/super-productivity/commit/0568f37616c19f1ea869ff4c2d8b539b858df035))
+
+### Features
+
+- add explanation for + archived done task number ([4998faa](https://github.com/johannesjo/super-productivity/commit/4998faaecbd147aaf2cbe8e2a08628b5953f622c))
+- outline new data repair stuff ([ac32302](https://github.com/johannesjo/super-productivity/commit/ac323024c13c60b8f0acbef76fcf7100cdd93d8b))
+- **pfapi:** add autofixes for simple data inconsistencies [#4343](https://github.com/johannesjo/super-productivity/issues/4343) ([616b38f](https://github.com/johannesjo/super-productivity/commit/616b38f8eaf455dd62417ab2a0fe59f881050a60))
+
+## [13.0.1](https://github.com/johannesjo/super-productivity/compare/v13.0.0...v13.0.1) (2025-05-13)
+
+### Bug Fixes
+
+- error during migration [#4338](https://github.com/johannesjo/super-productivity/issues/4338) ([efd3440](https://github.com/johannesjo/super-productivity/commit/efd34405200c31dbf1065c3e6ab062d339b9e002))
+- validation error [#4337](https://github.com/johannesjo/super-productivity/issues/4337) ([66b3693](https://github.com/johannesjo/super-productivity/commit/66b3693edc4161db4713201f1c8a63978fcd4c83))
+
+### Features
+
+- **pfapi:** add repair function for each model individually [#4332](https://github.com/johannesjo/super-productivity/issues/4332) ([c9ef64d](https://github.com/johannesjo/super-productivity/commit/c9ef64d0d2511c52980f0d6f719c2872829838e7))
+
+# [13.0.0](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.10...v13.0.0) (2025-05-13)
+
+### Features
+
+- improve task context menu on mobile ([751ff3b](https://github.com/johannesjo/super-productivity/commit/751ff3be27a5530f81aee193bfde0075d58517b0))
+- **pfapi:** improve validation handling for getAllSyncModelData ([8c33502](https://github.com/johannesjo/super-productivity/commit/8c33502689310502e0f8b4e31fff4706de5041ff))
+
+## [12.0.6-rc.10](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.9...v12.0.6-rc.10) (2025-05-12)
+
+### Bug Fixes
+
+- wrong task number shown for daily summary "Add tasks from today" ([2fe012a](https://github.com/johannesjo/super-productivity/commit/2fe012abe50a4e76ff71ecc7ba6ac694a4e15d9c))
+
+### Features
+
+- add missing tag cleanup for repeatable tasks during migration ([52431a3](https://github.com/johannesjo/super-productivity/commit/52431a34ea2de7b1761fc1060706578b61bfc9e3))
+- change icon ([f045058](https://github.com/johannesjo/super-productivity/commit/f0450583634001d3fa188cb1e3400734b70fb2d9))
+- **i18n:** add from chatgpt ([54faf45](https://github.com/johannesjo/super-productivity/commit/54faf4573b3fadaa9746787a6fbb15a92a81b9b0))
+- **i18n:** add missing ([9a9c035](https://github.com/johannesjo/super-productivity/commit/9a9c03561afb5cfc2d1784a8ce418077c0d2b365))
+- **i18n:** add missing translations ([c0b1e24](https://github.com/johannesjo/super-productivity/commit/c0b1e24333f917340d3843d85a9e9f1bbf3daeb6))
+- **i18n:** remove unused ([3e78a66](https://github.com/johannesjo/super-productivity/commit/3e78a66204e7b1c7069070f89e804d0e15ffe988))
+- **i18n:** wording due to planned at ([6eb7f41](https://github.com/johannesjo/super-productivity/commit/6eb7f41d99148c180e1c5064e89a07c1a871b8e6))
+- show nr of done archived tasks ([baa0523](https://github.com/johannesjo/super-productivity/commit/baa052328f2903a4cf663fb6dfe71f265b4c0e3b))
+
+## [12.0.6-rc.9](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.8...v12.0.6-rc.9) (2025-05-12)
+
+### Features
+
+- improve backwards compatability ([bf510e1](https://github.com/johannesjo/super-productivity/commit/bf510e1d46bb2dba60274c71a6b2eadd9ce146ab))
+- make finish day button more subtle when there are still undone tasks ([4761ed6](https://github.com/johannesjo/super-productivity/commit/4761ed65a5d3fc13bfc0a8b1a4f17ee0e78dc6b8))
+- persist done task collapsed state ([34e985e](https://github.com/johannesjo/super-productivity/commit/34e985ed5f3f77811dd110f52c4f7d181d63d634))
+
+## [12.0.6-rc.8](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.7...v12.0.6-rc.8) (2025-05-12)
+
+### Bug Fixes
+
+- allow undefined for round time option [#4325](https://github.com/johannesjo/super-productivity/issues/4325) ([41c1478](https://github.com/johannesjo/super-productivity/commit/41c1478be9db689fba13516ac0655143ba5e3022))
+- allow undefined for round time option [#4325](https://github.com/johannesjo/super-productivity/issues/4325) ([cdb3197](https://github.com/johannesjo/super-productivity/commit/cdb3197bfad7a4a8d3a640c7626008631bc392bf))
+- linting stuff ([b2965ff](https://github.com/johannesjo/super-productivity/commit/b2965ff33b15d903bfa9bef5617911232248625d))
+- linting stuff ([483e68f](https://github.com/johannesjo/super-productivity/commit/483e68f9275ada731116b7d7abbae83550b54918))
+- planner add task styling acting out on mobile ([7b94d4f](https://github.com/johannesjo/super-productivity/commit/7b94d4ff713ecd873c9ef3e05f4615fd6e8823e9))
+- planner add task styling acting out on mobile ([29b938a](https://github.com/johannesjo/super-productivity/commit/29b938ab26181899d20d665bb7bf43e506d5fc98))
+- **planner:** task repeat instances not scrollable on mobile ([ae13534](https://github.com/johannesjo/super-productivity/commit/ae135343282b68989b24451844643a4c1693aadd))
+- **planner:** task repeat instances not scrollable on mobile ([27c9f4e](https://github.com/johannesjo/super-productivity/commit/27c9f4e9651bdf50eafbd04d9fec669d8a8c70b2))
+- potential undefined error ([ee2b329](https://github.com/johannesjo/super-productivity/commit/ee2b329803994748c2ed0bd3463bc7bca783e7e1))
+- potential undefined error ([ad8916d](https://github.com/johannesjo/super-productivity/commit/ad8916d2d477dc605ba6d8331892bf603f9636a3))
+- sync never in sync ([1a9dd01](https://github.com/johannesjo/super-productivity/commit/1a9dd01d47a074fb48921317eecdf2434928374c))
+- wrong project added when on project list ([fc0d6d0](https://github.com/johannesjo/super-productivity/commit/fc0d6d0d2ea7ac0218801a270ddaf45d2fa65257))
+- wrong title in main header for today and inbox ([b265d25](https://github.com/johannesjo/super-productivity/commit/b265d25f43c25e13ce52769796976f2e553e40c9))
+
+### Features
+
+- add migration from previous default inbox project to the new one ([74355ae](https://github.com/johannesjo/super-productivity/commit/74355ae2e61130d012c175ba4a70ac72fc30acef))
+- adjust styling for inbox icon ([3d9cc6f](https://github.com/johannesjo/super-productivity/commit/3d9cc6fe34b1ec4daa2400e476ebcbc5f0057d8d))
+- also adjust overdue styling for mobile planner ([648172c](https://github.com/johannesjo/super-productivity/commit/648172c4ac27850fa92c513d9eddb855e24b2717))
+- also adjust overdue styling for mobile planner ([c9d6f90](https://github.com/johannesjo/super-productivity/commit/c9d6f90b12594b78387a9180499c3db1aa2ff74d))
+- **boards:** allow filtering for backlog tasks [#4307](https://github.com/johannesjo/super-productivity/issues/4307) ([2e7381e](https://github.com/johannesjo/super-productivity/commit/2e7381ee210d8b530da1826cb36c66eaa1f73cd3))
+- **boards:** small adjustments to PR ([d0107bb](https://github.com/johannesjo/super-productivity/commit/d0107bbaf6be704a91293dabd75533376735a781))
+- change default done sound ([3429a37](https://github.com/johannesjo/super-productivity/commit/3429a37618b45dd2ae340453e85b5107e6ba07af))
+- decrease number of syncs ([bdfc8b3](https://github.com/johannesjo/super-productivity/commit/bdfc8b3ed3b726e0d01e1c68d17fadae09e1cb5e))
+- **dueDate:** keep order from planner on day change and move due today on day change ([8e616b4](https://github.com/johannesjo/super-productivity/commit/8e616b4f7428fdaf502c7e7300665ca5ce2661d6))
+- improve migration and repair ([4fe86e7](https://github.com/johannesjo/super-productivity/commit/4fe86e782e405c4c223f804f266551070aef8fc9))
+- improve planner styling by making it a vertical list ([03a4fed](https://github.com/johannesjo/super-productivity/commit/03a4fed8bdefb1033e09654f453baf00f831ce0d))
+- improve scheduled list page ([93cec7f](https://github.com/johannesjo/super-productivity/commit/93cec7fc1c39027f28e1665c16b7ee8298ba0cab))
+- improve scheduled list page ([7f5e6a2](https://github.com/johannesjo/super-productivity/commit/7f5e6a221086dae909fdda57dd1dffdc7899c57d))
+- improve snack behavior on task creation ([6ab5dd6](https://github.com/johannesjo/super-productivity/commit/6ab5dd610e027d6093a6436ac2332f61495af9e6))
+- improve snack behavior on task creation ([c93be69](https://github.com/johannesjo/super-productivity/commit/c93be691eec7fb56102a5afe35719e31b0198ab1))
+- improve tag list styling ([0f456da](https://github.com/johannesjo/super-productivity/commit/0f456da5381d99dc365068a4e48780e0dac53dda))
+- improve tag list styling ([db35884](https://github.com/johannesjo/super-productivity/commit/db35884549a6f40dcec84f7f1161d2875266458a))
+- improve task tag styling ([04fe797](https://github.com/johannesjo/super-productivity/commit/04fe797a82a47cef47a9e47fecbc329c82b151bc))
+- **inbox:** use inbox project rather than tag ([3690903](https://github.com/johannesjo/super-productivity/commit/36909034cff453cf054e74d27e9de34621194dca))
+- make task deletion and undo work again for todays tasks ([501d6d3](https://github.com/johannesjo/super-productivity/commit/501d6d31f037428ae1622385e96f6ecfe95afb09))
+- minor polish ([313f0e6](https://github.com/johannesjo/super-productivity/commit/313f0e6b38df99f3d0337d950f09fdb9ed51ffc6))
+- polish tags styling once more ([089c5f3](https://github.com/johannesjo/super-productivity/commit/089c5f37f1d9db07d63265132679c847a25b45e9))
+- polish tags styling once more ([588d2cd](https://github.com/johannesjo/super-productivity/commit/588d2cd77581e0d53cbd21d6c7b65a45fdbb053a))
+- refocus task after re-schedule ([c2085e1](https://github.com/johannesjo/super-productivity/commit/c2085e191b6d8c17275680c958ca0e33de2044b9))
+- **sync:** offer way out for SyncInvalidTimeValueError ([282b304](https://github.com/johannesjo/super-productivity/commit/282b3041e193179eff77f60934d994ac13b4c30d))
+- **sync:** offer way out for SyncInvalidTimeValueError ([a53a9f2](https://github.com/johannesjo/super-productivity/commit/a53a9f2c97e13905c181cac3c70a86fcdf269567))
+- **sync:** offer way out for SyncInvalidTimeValueError 2 ([dd9f900](https://github.com/johannesjo/super-productivity/commit/dd9f900ab34b330245cf092dd63838b26e29c879))
+- **sync:** offer way out for SyncInvalidTimeValueError 2 ([8208067](https://github.com/johannesjo/super-productivity/commit/8208067d00eff6dc4031884b2ca4c0ce385dba38))
+
+## [12.0.6-rc.7](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.6...v12.0.6-rc.7) (2025-05-11)
+
+### Features
+
+- improve planner styling by making it a vertical list ([4757d8c](https://github.com/johannesjo/super-productivity/commit/4757d8c46ee366e8c3618e120f7cbab0450db822))
+
+## [12.0.6-rc.6](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.5...v12.0.6-rc.6) (2025-05-11)
+
+### Bug Fixes
+
+- sync never in sync ([17a50c6](https://github.com/johannesjo/super-productivity/commit/17a50c638374e35beb1be59b3d00d7c85c302cae))
+- wrong project added when on project list ([dd9939a](https://github.com/johannesjo/super-productivity/commit/dd9939a7465c9092eb18f18430924c8e22c45c28))
+- wrong title in main header for today and inbox ([d667f7e](https://github.com/johannesjo/super-productivity/commit/d667f7e6fdab05ba699cd9d514d9786ceaa3df1d))
+
+### Features
+
+- add migration from previous default inbox project to the new one ([f174134](https://github.com/johannesjo/super-productivity/commit/f174134777dd46454b15e7a6f667c8d5a7cd42eb))
+- adjust styling for inbox icon ([d5f05fb](https://github.com/johannesjo/super-productivity/commit/d5f05fb97e98f1b27e15b76aa1f088ff00a1736a))
+- change default done sound ([0a3d353](https://github.com/johannesjo/super-productivity/commit/0a3d3534a7a3bcd6485f779177d01e41ff5211fe))
+- decrease number of syncs ([aad9ceb](https://github.com/johannesjo/super-productivity/commit/aad9ceb02bf50fd90bfd9ad19a671c5ae45e4ae8))
+- **dueDate:** keep order from planner on day change and move due today on day change ([7e3d595](https://github.com/johannesjo/super-productivity/commit/7e3d5959b74573a7b49d705c66df10301f874415))
+- improve migration and repair ([2f838bb](https://github.com/johannesjo/super-productivity/commit/2f838bb9e6eab457814921b0b56b03aebb3613be))
+- improve task tag styling ([787f3b4](https://github.com/johannesjo/super-productivity/commit/787f3b4cb4879e019a1b9ffad89ad2ae38a38532))
+- **inbox:** use inbox project rather than tag ([976aeb0](https://github.com/johannesjo/super-productivity/commit/976aeb09ee9799e679e7f0954b943f494310511f))
+- make task deletion and undo work again for todays tasks ([6593a85](https://github.com/johannesjo/super-productivity/commit/6593a85596970fbd1fdb446d068d17fa1c67eeb3))
+- minor polish ([e91478e](https://github.com/johannesjo/super-productivity/commit/e91478ea36e72bbb7db4b56167c41cfda89bcefe))
+- refocus task after re-schedule ([d83d883](https://github.com/johannesjo/super-productivity/commit/d83d883c987fc1626c5546b96924fa2ca1240fb0))
+
 ## [12.0.6-rc.5](https://github.com/johannesjo/super-productivity/compare/v12.0.6-rc.4...v12.0.6-rc.5) (2025-05-09)
 
 ### Bug Fixes

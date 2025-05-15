@@ -5,6 +5,7 @@ import {
 } from './time-tracking.model';
 import { ArchiveTask, TaskArchive } from '../tasks/task.model';
 import { ImpossibleError } from '../../pfapi/api';
+import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 const TIME_TRACKING_CATEGORIES = ['project', 'tag'] as const;
 
@@ -20,8 +21,8 @@ export const sortTimeTrackingDataToArchiveYoung = ({
   timeTracking: TimeTrackingState;
   archiveYoung: ArchiveModel;
 } => {
-  const currTT = { ...timeTracking };
-  const archiveTT = { ...archiveYoung.timeTracking };
+  const currTT = dirtyDeepCopy(timeTracking);
+  const archiveTT = dirtyDeepCopy(archiveYoung.timeTracking);
 
   // Find dates that are not today and move them to archive
   // First iterate over categories (project, tag)

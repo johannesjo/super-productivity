@@ -35,12 +35,12 @@ import { initialSimpleCounterState } from '../features/simple-counter/store/simp
 import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
-import { isDataRepairPossible } from '../core/data-repair/is-data-repair-possible.util';
+import { isDataRepairPossible } from './repair/is-data-repair-possible.util';
 import {
-  isRelatedModelDataValid,
   getLastValidityError,
+  isRelatedModelDataValid,
 } from './validate/is-related-model-data-valid';
-import { dataRepair } from '../core/data-repair/data-repair.util';
+import { dataRepair } from './repair/data-repair';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
@@ -52,9 +52,11 @@ import {
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
-import { validateAllData, appDataValidators } from './validate/validation-fn';
+import { appDataValidators, validateAllData } from './validate/validation-fn';
+import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
+import { IValidation } from 'typia';
 
-export const CROSS_MODEL_VERSION = 3 as const;
+export const CROSS_MODEL_VERSION = 4 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
@@ -88,6 +90,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialTaskState,
     isMainFileModel: true,
     validate: appDataValidators.task,
+    repair: fixEntityStateConsistency,
   },
   timeTracking: {
     defaultData: initialTimeTrackingState,
@@ -99,21 +102,25 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: appDataValidators.project,
+    repair: fixEntityStateConsistency,
   },
   tag: {
     defaultData: initialTagState,
     isMainFileModel: true,
     validate: appDataValidators.tag,
+    repair: fixEntityStateConsistency,
   },
   simpleCounter: {
     defaultData: initialSimpleCounterState,
     isMainFileModel: true,
     validate: appDataValidators.simpleCounter,
+    repair: fixEntityStateConsistency,
   },
   note: {
     defaultData: initialNoteState,
     isMainFileModel: true,
     validate: appDataValidators.note,
+    repair: fixEntityStateConsistency,
   },
   taskRepeatCfg: {
     defaultData: initialTaskRepeatCfgState,
@@ -121,6 +128,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     // needs to be due to last creation data being saved to model
     isMainFileModel: true,
     validate: appDataValidators.taskRepeatCfg,
+    repair: fixEntityStateConsistency,
   },
 
   reminders: {
@@ -148,20 +156,24 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   issueProvider: {
     defaultData: issueProviderInitialState,
     validate: appDataValidators.issueProvider,
+    repair: fixEntityStateConsistency,
   },
 
   // Metric models
   metric: {
     defaultData: initialMetricState,
     validate: appDataValidators.metric,
+    repair: fixEntityStateConsistency,
   },
   improvement: {
     defaultData: initialImprovementState,
     validate: appDataValidators.improvement,
+    repair: fixEntityStateConsistency,
   },
   obstruction: {
     defaultData: initialObstructionState,
     validate: appDataValidators.obstruction,
+    repair: fixEntityStateConsistency,
   },
 
   archiveYoung: {
@@ -171,6 +183,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       lastTimeTrackingFlush: 0,
     },
     validate: appDataValidators.archiveYoung,
+    repair: (d) => {
+      return {
+        ...d,
+        task: fixEntityStateConsistency(d.task),
+      };
+    },
   },
   archiveOld: {
     defaultData: {
@@ -179,6 +197,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
       lastTimeTrackingFlush: 0,
     },
     validate: appDataValidators.archiveOld,
+    repair: (d) => {
+      return {
+        ...d,
+        task: fixEntityStateConsistency(d.task),
+      };
+    },
   },
 } as const;
 
@@ -221,11 +245,11 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     console.error(err);
     alert('DB ERROR: ' + err);
   },
-  repair: (data: any) => {
+  repair: (data: any, errors: IValidation.IError[]) => {
     if (!isDataRepairPossible(data)) {
       throw new DataRepairNotPossibleError(data);
     }
-    return dataRepair(data) as AppDataCompleteNew;
+    return dataRepair(data, errors) as AppDataCompleteNew;
   },
   crossModelMigrations: CROSS_MODEL_MIGRATIONS,
 };

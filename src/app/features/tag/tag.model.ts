@@ -7,10 +7,10 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export interface TagCopy extends WorkContextCommon {
   id: string;
-  icon: string | null;
+  icon?: string | null;
   title: string;
   created: number;
-  color: string | null;
+  color?: string | null;
   taskIds: string[];
 }
 

@@ -111,8 +111,8 @@ export class PfapiService {
         );
         if (cfg.isEnabled) {
           this.pf.setEncryptAndCompressCfg({
-            isEncrypt: cfg.isEncryptionEnabled,
-            isCompress: cfg.isCompressionEnabled,
+            isEncrypt: !!cfg.isEncryptionEnabled,
+            isCompress: !!cfg.isCompressionEnabled,
           });
         }
       } catch (e) {

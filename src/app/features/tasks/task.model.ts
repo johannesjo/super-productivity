@@ -70,7 +70,7 @@ export interface IssueFieldsForTask {
 
 export interface TaskCopy extends IssueFieldsForTask {
   id: string;
-  projectId?: string;
+  projectId: string;
   title: string;
 
   subTaskIds: string[];
@@ -151,7 +151,7 @@ export interface TaskWithSubTasks extends Task {
   readonly subTasks: Task[];
 }
 
-export const DEFAULT_TASK: Task = {
+export const DEFAULT_TASK: Omit<TaskCopy, 'projectId'> = {
   id: '',
   subTaskIds: [],
   timeSpentOnDay: {},

@@ -23,8 +23,8 @@ import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
 import { TagListComponent } from '../../features/tag/tag-list/tag-list.component';
 import { PlannerTaskComponent } from '../../features/planner/planner-task/planner-task.component';
 import {
-  selectAllTasksWithDueDay,
   selectAllTasksWithDueTimeSorted,
+  selectAllUndoneTasksWithDueDay,
 } from '../../features/tasks/store/task.selectors';
 
 @Component({
@@ -58,7 +58,7 @@ export class ScheduledListPageComponent {
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;
   taskRepeatCfgs$ = this._store.select(selectTaskRepeatCfgsSortedByTitleAndProject);
-  tasksPlannedForDays$ = this._store.select(selectAllTasksWithDueDay);
+  tasksPlannedForDays$ = this._store.select(selectAllUndoneTasksWithDueDay);
   tasksPlannedWithTime$ = this._store.select(selectAllTasksWithDueTimeSorted);
 
   editReminder(task: TaskCopy, ev: MouseEvent): void {

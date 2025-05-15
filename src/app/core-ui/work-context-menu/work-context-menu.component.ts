@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { T } from 'src/app/t.const';
-import { INBOX_TAG, TODAY_TAG } from '../../features/tag/tag.const';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TagService } from '../../features/tag/tag.service';
@@ -13,6 +13,7 @@ import { ProjectService } from '../../features/project/project.service';
 import { MatMenuItem } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
+import { INBOX_PROJECT } from '../../features/project/project.const';
 
 @Component({
   selector: 'work-context-menu',
@@ -92,5 +93,5 @@ export class WorkContextMenuComponent {
     }
   }
 
-  protected readonly INBOX_TAG = INBOX_TAG;
+  protected readonly INBOX_PROJECT = INBOX_PROJECT;
 }

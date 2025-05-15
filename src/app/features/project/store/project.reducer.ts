@@ -68,6 +68,7 @@ import {
   updateNoteOrder,
 } from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
+import { INBOX_PROJECT } from '../project.const';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -76,11 +77,28 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 
 // DEFAULT
 // -------
-export const initialProjectState: ProjectState = projectAdapter.getInitialState({
-  ids: [],
-  entities: {},
-  [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
-});
+const _addInboxProjectIfNecessary = (state: ProjectState): ProjectState => {
+  if (state.ids && !(state.ids as string[]).includes(INBOX_PROJECT.id)) {
+    state = {
+      ...state,
+      ids: [INBOX_PROJECT.id, ...state.ids] as string[],
+      entities: {
+        ...state.entities,
+        [INBOX_PROJECT.id]: INBOX_PROJECT,
+      },
+    };
+  }
+
+  return state;
+};
+
+export const initialProjectState: ProjectState = _addInboxProjectIfNecessary(
+  projectAdapter.getInitialState({
+    ids: [],
+    entities: {},
+    [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
+  }),
+);
 
 export const projectReducer = createReducer<ProjectState>(
   initialProjectState,
@@ -88,9 +106,11 @@ export const projectReducer = createReducer<ProjectState>(
   // META ACTIONS
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.project
-      ? migrateProjectState({ ...appDataComplete.project })
-      : oldState,
+    _addInboxProjectIfNecessary(
+      appDataComplete.project
+        ? migrateProjectState({ ...appDataComplete.project })
+        : oldState,
+    ),
   ),
 
   on(
@@ -210,7 +230,7 @@ export const projectReducer = createReducer<ProjectState>(
   }),
 
   on(updateProjectOrder, (state, { ids }) => {
-    const currentIds = state.ids as string[];
+    const currentIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
     let newIds: string[] = ids;
     if (ids.length !== currentIds.length) {
       const allP = currentIds.map((id) => state.entities[id]) as Project[];
@@ -237,7 +257,10 @@ export const projectReducer = createReducer<ProjectState>(
       throw new Error('Project ids are undefined');
     }
 
-    return { ...state, ids: newIds };
+    return {
+      ...state,
+      ids: state.entities[INBOX_PROJECT.id] ? [INBOX_PROJECT.id, ...newIds] : newIds,
+    };
   }),
 
   // MOVE TASK ACTIONS
