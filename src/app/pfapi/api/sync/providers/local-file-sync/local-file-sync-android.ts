@@ -6,8 +6,8 @@ import { PrivateCfgByProviderId } from '../../../pfapi.model';
 import { SyncProviderId } from '../../../pfapi.const';
 
 export class LocalFileSyncAndroid extends LocalFileSyncBase {
-  constructor() {
-    super(new CapacitorFileAdapter(Directory.Data));
+  constructor(public directory = Directory.Documents) {
+    super(new CapacitorFileAdapter(directory));
   }
 
   async isReady(): Promise<boolean> {
