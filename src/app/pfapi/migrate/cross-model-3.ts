@@ -1,5 +1,4 @@
 import { AppDataCompleteNew } from '../pfapi-config';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -21,7 +20,7 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
 ): AppDataCompleteNew => {
   console.log('____________________Migrate3__________________');
-  const copy = dirtyDeepCopy(fullData);
+  const copy = fullData;
 
   if (copy.planner) {
     Object.keys(copy.planner.days).forEach((day) => {

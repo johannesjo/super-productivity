@@ -1,5 +1,4 @@
 import { AppDataCompleteNew } from '../pfapi-config';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
@@ -9,7 +8,7 @@ export const crossModelMigration4_1: CrossModelMigrateFn = ((
 ): AppDataCompleteNew => {
   // throw new Error('Migration 4 is not implemented yet');
   console.log('____________________Migrate4.1__________________');
-  const copy = dirtyDeepCopy(fullData);
+  const copy = fullData;
 
   Object.keys(copy.taskRepeatCfg.entities).forEach((id) => {
     const repeatCfg = copy.taskRepeatCfg.entities[id]!;

@@ -1,5 +1,4 @@
 import { AppDataCompleteNew } from '../pfapi-config';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn } from '../api';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
@@ -11,7 +10,7 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
 ): AppDataCompleteNew => {
   // throw new Error('Migration 4 is not implemented yet');
   console.log('____________________Migrate4__________________');
-  const copy = dirtyDeepCopy(fullData);
+  const copy = fullData;
 
   if (!isArray(copy.improvement.hiddenImprovementBannerItems)) {
     copy.improvement.hiddenImprovementBannerItems = [];

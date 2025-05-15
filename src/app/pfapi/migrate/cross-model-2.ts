@@ -1,6 +1,5 @@
 import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { AppDataCompleteNew } from '../pfapi-config';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { CrossModelMigrateFn, ImpossibleError } from '../api';
 import { TTWorkContextSessionMap } from '../../features/time-tracking/time-tracking.model';
 import { ProjectCopy } from '../../features/project/project.model';
@@ -22,9 +21,9 @@ import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../../features/boards/boar
 export const crossModelMigration2: CrossModelMigrateFn = ((
   fullData: AppDataCompleteLegacy,
 ): AppDataCompleteNew => {
+  console.log('____________________Migrate2__________________');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { lastLocalSyncModelChange, lastArchiveUpdate, taskArchive, ...copy } =
-    dirtyDeepCopy(fullData);
+  const { lastLocalSyncModelChange, lastArchiveUpdate, taskArchive, ...copy } = fullData;
 
   if (
     (fullData as any as AppDataCompleteNew).archiveYoung &&
