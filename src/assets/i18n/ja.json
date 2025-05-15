@@ -287,7 +287,7 @@
         "FILTER_USER": "ユーザー名（例：自分で変更を除外するため）",
         "GITLAB_BASE_URL": "カスタムGitLabベースURL",
         "PROJECT": "フルパスまたはユーザー名/プロジェクト",
-        "PROJECT_HINT": "例：ヨハネスジョ／超生産性",
+        "PROJECT_HINT": "例：ヨハネスジョ／Super Productivity",
         "SCOPE": "範囲",
         "SCOPE_ALL": "すべて",
         "SCOPE_ASSIGNED": "私に割り当てられた",
@@ -326,7 +326,7 @@
         "ISSUES_STR": "課題"
       },
       "DEFAULT_PROJECT_DESCRIPTION": "課題から作成されたタスクに割り当てられたプロジェクト",
-      "DEFAULT_PROJECT_LABEL": "デフォルトの超生産性プロジェクト",
+      "DEFAULT_PROJECT_LABEL": "デフォルトのSuper Productivityプロジェクト",
       "HOW_TO_GET_A_TOKEN": "トークンの入手方法は？",
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} エラー： {{errTxt}}",
@@ -353,17 +353,17 @@
       "CFG_CMP": {
         "ALWAYS_ASK": "常にダイアログを開く",
         "DO_NOT": "移行しない",
-        "DONE": "タスク完了のステータス",
+        "DONE": "タスクを完了したときの遷移先ステータス",
         "ENABLE": "Jira連携を有効にする",
-        "ENABLE_TRANSITIONS": "遷移処理を有効にする",
-        "IN_PROGRESS": "開始タスクのステータス",
+        "ENABLE_TRANSITIONS": "ステータス遷移を有効にする",
+        "IN_PROGRESS": "タスクを開始したときの遷移先ステータス",
         "LOAD_SUGGESTIONS": "候補を読み込む",
         "MAP_CUSTOM_FIELDS": "カスタムフィールドのマッピング",
         "MAP_CUSTOM_FIELDS_INFO": "残念ながら、Jiraのデータの中には、インストールごとに異なるカスタムフィールドの下に保存されているものがあります。このデータを含める場合は、適切なカスタムフィールドを選択する必要があります。",
         "OPEN": "一時停止中のタスクのステータス",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "利用可能なトランジションをロードするために課題を選択",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "利用可能な遷移先ステータスを課題から選択",
         "STORY_POINTS": "ストーリーポイント",
-        "TRANSITION": "遷移処理"
+        "TRANSITION": "ステータス遷移"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> は現在 <strong>{{assignee}}</strong>に割り当てられています。自分に割り当てますか？",
@@ -375,10 +375,10 @@
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "割り当てるステータスを選択",
         "CURRENT_ASSIGNEE": "現在の担当者：",
-        "CURRENT_STATUS": "現在のステー5アス：",
+        "CURRENT_STATUS": "現在のステータス：",
         "TASK_NAME": "タスク名：",
         "TITLE": "Jira：ステータスを更新",
-        "UPDATE_STATUS": "最新のステータス"
+        "UPDATE_STATUS": "ステータスを更新"
       },
       "DIALOG_WORKLOG": {
         "CHECKBOXES": {
@@ -429,7 +429,7 @@
           "P2_1": "いつ、どのように作業ログを送信するかを決定するためのいくつかのオプションがあります。タスクが完了したときに作業ログをJiraに追加するための <em>'作業ログダイアログを開く'</em> を有効にすると、Jiraタスクに完了のマークを付けるたびに作業ログを追加するダイアログが開きます。そのため、これまで追跡してきたすべてのものの上に作業ログが追加されることに注意してください。そのため、タスクを2回目の完了としてマークした場合、そのタスクの全作業時間を再度送信することは望ましくないかもしれません。",
           "P2_2": "<em>'サブタスクが完了したときに作業ログダイアログを開き、サブタスク自体を持つタスクには対しては開きません」</em> は、Jira 課題のサブタスクを完了としてマークするたびにワークログ ダイアログを開きます。サブタスクを使用して時間を追跡しているため、Jira タスク自体を完了としてマークするとダイアログは開かなくなります。",
           "P2_3": "<em>'ダイアログなしで作業ログに更新を自動的に送信'</em> はそれが言うことをします。タスクを複数回行われたものとしてマークすると、全体の作業時間が2回追跡されることになるため、これはお勧めできません。",
-          "P3_1": "ここでデフォルトのトランジションを再設定できます。 JiraはあなたのJiraアジャイルボード上の異なるコラムとして通常実行される移行の幅広い設定を可能にします。タスクをいつどこに移行するかについて仮定することはできず、手動で設定する必要があります。"
+          "P3_1": "ここでデフォルトのステータス遷移を設定できます。Jiraはアジャイルボードごとに異なるステータス遷移の設定がされているので、タスクをいつ、どのように遷移するかについては手動で設定する必要があります。"
         }
       },
       "ISSUE_CONTENT": {
@@ -1022,9 +1022,9 @@
         "FOCUS_SESSION": "フォーカス・セッション開始",
         "MARK_DONE": "完了としてマーク",
         "MARK_UNDONE": "未完了としてマーク",
-        "MOVE_TO_BACKLOG": "バックログに移動",
-        "MOVE_TO_OTHER_PROJECT": "他のプロジェクトに移動",
-        "MOVE_TO_TODAY": "今日のリストに移動",
+        "MOVE_TO_BACKLOG": "バックログに移す",
+        "MOVE_TO_OTHER_PROJECT": "他のプロジェクトに移す",
+        "MOVE_TO_TODAY": "今日のリストに移す",
         "OPEN_ATTACH": "ファイルまたはリンクを添付",
         "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
         "OPEN_TIME": "見積もり時間/消費時間の編集",
@@ -1050,22 +1050,22 @@
         "OK": "タグの作成"
       },
       "D_REMINDER_VIEW": {
-        "ADD_ALL_TO_TODAY": "今日にすべて追加",
-        "ADD_TO_TODAY": "今日に追加",
+        "ADD_ALL_TO_TODAY": "今日のリストにすべて追加",
+        "ADD_TO_TODAY": "今日のリストに追加",
         "DISMISS": "リマインダーを却下",
         "DISMISS_ALL": "すべて却下する",
         "DONE": "完了",
         "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
-        "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
-        "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
+        "FOR_CURRENT": "タスクは期限が来ています。取り組み始めますか？",
+        "FOR_OTHER": "タスクは期限が来ています。取り組み始めますか？",
         "FROM_PROJECT": "プロジェクトから",
         "FROM_TAG": "タグから：「{{title}}」",
         "RESCHEDULE_EDIT": "編集（再スケジュール）",
         "RESCHEDULE_UNTIL_TOMORROW": "明日まで",
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
-        "START": "開始タスク",
+        "START": "タスクを開始",
         "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
       },
       "D_SCHEDULE_TASK": {
@@ -1084,7 +1084,7 @@
         "RO_NEVER": "Never",
         "RO_START": "それが始まるとき",
         "SCHEDULE": "スケジュール",
-        "UNSCHEDULE": "予定外"
+        "UNSCHEDULE": "スケジュール解除"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "消費時間を他の日に追加",
@@ -1102,11 +1102,11 @@
         "TITLE": "他の日に追加"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "時間見積もりを超えました！",
-        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"の予想時間を超えました。"
+        "ESTIMATE_EXCEEDED": "見積もり時間を超えました！",
+        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"の見積もり時間を超えました。"
       },
       "S": {
-        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクの短い構文でプロジェクトを割り当てられない！",
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクの短い構文でプロジェクトを割り当てられません！",
         "CREATED_FOR_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
         "CREATED_FOR_PROJECT_ACTION": "プロジェクトに移動",
         "DELETED": "削除されたタスク \"{{title}}\"",
@@ -1123,8 +1123,8 @@
       },
       "SELECT_OR_CREATE": "タスクを選択または作成する",
       "SUMMARY_TABLE": {
-        "ESTIMATE": "見積もり",
-        "SPENT_TODAY": "今日の消費",
+        "ESTIMATE": "見積もり時間",
+        "SPENT_TODAY": "今日の消費時間",
         "SPENT_TOTAL": "消費時間合計",
         "TASK": "タスク",
         "TOGGLE_DONE": "完了にする/未完了に戻す"
@@ -1173,7 +1173,7 @@
         "HELP1": "繰り返しタスクは、日々の雑用、たとえば「整理」、「毎日の会議」、「コードレビュー」、「メールの確認」、といった何度も繰り返し発生するタスクに向いています。",
         "HELP2": "繰り返しタスクを一度設定すると、プロジェクトを開いたときにタスクが以下で選択した曜日に再作成され、1日の終わりに自動的に完了としてマークされます。個々のタスクそれぞれ別のものとして扱われるため、サブタスクなどは自由に追加できます",
         "HELP3": "JiraまたはGit Issueからインポートしたタスクを繰り返すことはできません。繰り返しタスクでは、リマインダーもすべて削除されます。",
-        "HELP4": "注文フィールドに関する注意：作成注文の繰り返し可能なタスクを参照してください。同時に作成される繰り返し可能なタスクに対してのみ有効です。値が小さいほど、タスクはリストの上位になり、数値が小さいほど、リストの下位になります。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
+        "HELP4": "順番フィールドに関する注意：順番の繰り返し可能なタスクを参照してください。同時に作成される繰り返し可能なタスクに対してのみ有効です。値が小さいほど、タスクはリストの上位になり、数値が小さいほど、リストの下位になります。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
         "TAG_LABEL": "追加するタグ"
       },
       "F": {
@@ -1186,7 +1186,7 @@
         "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜日",
         "NOTES": "デフォルト・ノート",
-        "ORDER": "注文",
+        "ORDER": "順番",
         "ORDER_DESCRIPTION": "繰り返し可能なタスクの作成順序。同時に作成された繰り返し可能なタスクにのみ影響します。値が小さいほど、タスクはリストの上位に作成され、数値が小さいほど、リストの下位に作成されます。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
         "Q_CUSTOM": "カスタム繰り返し設定",
         "Q_DAILY": "毎日",
@@ -1212,8 +1212,8 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "私はすでにやった",
-        "SNOOZE": "スヌーズ {{time}}"
+        "ALREADY_DID": "もう休憩した",
+        "SNOOZE": "{{time}}後に再通知"
       },
       "B_TTR": {
         "ADD_TO_TASK": "タスクに追加",
@@ -1666,7 +1666,7 @@
   "PS": {
     "GLOBAL_SETTINGS": "全体設定",
     "ISSUE_INTEGRATION": "課題の連携",
-    "PRIVACY_POLICY": "プライベートポリシー",
+    "PRIVACY_POLICY": "プライバシーポリシー",
     "PRODUCTIVITY_HELPER": "生産性ヘルパー",
     "PROJECT_SETTINGS": "プロジェクト固有の設定",
     "PROVIDE_FEEDBACK": "フィードバックを提供します",
@@ -1717,20 +1717,20 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "明日予定されているタスクを追加します（{{nr}}）",
     "ADD_SOME_TASKS": "一日を計画するためタスクをいくつか追加しましょう！",
     "COMPLETED_TASKS": "完了したタスク",
-    "ESTIMATE_REMAINING": "推定残り：",
+    "ESTIMATE_REMAINING": "推定残り時間：",
     "FINISH_DAY": "一日を終える",
     "FINISH_DAY_FOR_PROJECT": "プロジェクト終了日",
     "FINISH_DAY_FOR_TAG": "このタグの終了日",
     "FINISH_DAY_TOOLTIP": "一日を評価し、完了したタスクをアーカイブに移動し（オプション）、次の日の計画を立てる。",
     "HELP_PROCRASTINATION": "先延ばししてるので助けて！",
     "NO_COMPLETED_TASKS": "現在完了したタスクはありません",
-    "NO_PLANNED_TASKS": "計画タスクなし",
+    "NO_PLANNED_TASKS": "予定されているタスクはありません",
     "READY_TO_WORK": "準備オーケー！",
-    "RESET_BREAK_TIMER": "休憩タイマーなしでリセット",
+    "RESET_BREAK_TIMER": "休憩タイマーをリセット",
     "TIME_ESTIMATED": "推定所要時間：",
     "TODAY_REMAINING": "今日も残っている：",
-    "WITHOUT_BREAK": "連続：",
-    "WORKING_TODAY": "今日：",
+    "WITHOUT_BREAK": "連続作業時間：",
+    "WORKING_TODAY": "今日の作業時間：",
     "WORKING_TODAY_ARCHIVED": "アーカイブされたタスクの今日の作業時間"
   }
 }
