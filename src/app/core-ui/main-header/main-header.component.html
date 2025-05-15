@@ -62,7 +62,7 @@
     </button>
 
     @let isOnline = isOnline$ | async;
-    @let isSyncEnabled = syncWrapperService.isEnabled$ | async;
+    @let isSyncEnabled = syncWrapperService.isEnabledAndReady$ | async;
 
     <button
       class="sync-btn"

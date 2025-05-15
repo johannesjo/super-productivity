@@ -117,17 +117,10 @@ export class SyncEffects {
             this._initialPwaUpdateCheckService.afterInitialUpdateCheck$.pipe(
               concatMap(() => this._syncWrapperService.isEnabledAndReady$),
               take(1),
-              withLatestFrom(this._syncWrapperService.isEnabled$),
-              switchMap(([isEnabledAndReady, isEnabled]) => {
+              switchMap((isEnabledAndReady) => {
                 if (isEnabledAndReady) {
                   return of(SYNC_INITIAL_SYNC_TRIGGER);
                 } else {
-                  if (isEnabled) {
-                    this._snackService.open({
-                      msg: T.F.SYNC.S.INITIAL_SYNC_ERROR,
-                      type: 'ERROR',
-                    });
-                  }
                   this._syncTriggerService.setInitialSyncDone(true);
                   return EMPTY;
                 }

@@ -54,7 +54,6 @@ export class SyncWrapperService {
   );
 
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
-  isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
@@ -64,7 +63,7 @@ export class SyncWrapperService {
     filter((isSyncing) => !isSyncing),
   );
 
-  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabled$.pipe(
+  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
     switchMap((isEnabled) =>
       isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
     ),
