@@ -1,63 +1,75 @@
-class AdditionalLogErrorBase<T = unknown> extends Error {
+abstract class BaseError extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = new.target.name;
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, new.target);
+    }
+  }
+}
+
+class AdditionalLogErrorBase<T = unknown> extends BaseError {
   additionalLog: T;
 
   constructor(...additional: any) {
-    super(...additional);
+    super(typeof additional[0] === 'string' ? additional[0] : new.target.name);
+
     if (additional.length > 0) {
       // pfLog(0, this.name, ...additional);
       console.log(this.name, ...additional);
       try {
-        console.log('additional error log:');
-        console.log(JSON.stringify(additional));
+        console.log('additional error log: ' + JSON.stringify(additional));
       } catch (e) {}
     }
     this.additionalLog = additional;
   }
 }
 
-export class ImpossibleError extends Error {
-  override name = ImpossibleError.name;
+export class ImpossibleError extends BaseError {
+  override name = ' ImpossibleError';
 }
 
 // --------------API ERRORS--------------
 export class NoRevAPIError extends AdditionalLogErrorBase {
-  override name = NoRevAPIError.name;
+  override name = ' NoRevAPIError';
 }
 
 export class TooManyRequestsAPIError extends AdditionalLogErrorBase {
-  override name = TooManyRequestsAPIError.name;
+  override name = ' TooManyRequestsAPIError';
 }
 
 export class NoEtagAPIError extends AdditionalLogErrorBase {
-  override name = NoEtagAPIError.name;
+  override name = ' NoEtagAPIError';
 }
 
-export class FileExistsAPIError extends Error {
-  override name = FileExistsAPIError.name;
+export class FileExistsAPIError extends BaseError {
+  override name = ' FileExistsAPIError';
 }
 
 export class RemoteFileNotFoundAPIError extends AdditionalLogErrorBase {
-  override name = RemoteFileNotFoundAPIError.name;
+  override name = ' RemoteFileNotFoundAPIError';
 }
 
-export class MissingRefreshTokenAPIError extends Error {
-  override name = MissingRefreshTokenAPIError.name;
+export class MissingRefreshTokenAPIError extends BaseError {
+  override name = ' MissingRefreshTokenAPIError';
 }
 
 export class FileHashCreationAPIError extends AdditionalLogErrorBase {
-  override name = FileHashCreationAPIError.name;
+  override name = ' FileHashCreationAPIError';
 }
 
 export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
-  override name = UploadRevToMatchMismatchAPIError.name;
+  override name = ' UploadRevToMatchMismatchAP';
 }
 
 // export class CannotCreateFolderAPIError extends AdditionalLogErrorBase {
-//   override name = CannotCreateFolderAPIError.name;
+//   override name = 'CannotCreateFolderAPIError';
 // }
 
 export class HttpNotOkAPIError extends AdditionalLogErrorBase {
-  override name = HttpNotOkAPIError.name;
+  override name = ' HttpNotOkAPIError';
   response: Response;
 
   constructor(response: Response) {
@@ -68,155 +80,155 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
 
 // --------------SYNC PROVIDER ERRORS--------------
 
-export class MissingCredentialsSPError extends Error {
-  override name = MissingCredentialsSPError.name;
+export class MissingCredentialsSPError extends BaseError {
+  override name = 'MissingCredentialsSPError';
 }
 
 export class AuthFailSPError extends AdditionalLogErrorBase {
-  override name = AuthFailSPError.name;
+  override name = 'AuthFailSPError';
 }
 
 export class InvalidDataSPError extends AdditionalLogErrorBase {
-  override name = InvalidDataSPError.name;
+  override name = 'InvalidDataSPError';
 }
 
 // --------------OTHER SYNC ERRORS--------------
-export class NoSyncProviderSetError extends Error {
-  override name = NoSyncProviderSetError.name;
+export class NoSyncProviderSetError extends BaseError {
+  override name = 'NoSyncProviderSetError';
 }
 
 export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
-  override name = RevMismatchForModelError.name;
+  override name = 'RevMismatchForModelError';
 }
 
-export class UnknownSyncStateError extends Error {
-  override name = DBNotInitializedError.name;
+export class UnknownSyncStateError extends BaseError {
+  override name = 'DBNotInitializedError';
 }
 
 export class SyncInvalidTimeValuesError extends AdditionalLogErrorBase {
-  override name = SyncInvalidTimeValuesError.name;
+  override name = 'SyncInvalidTimeValuesError';
 }
 
 export class RevMapModelMismatchErrorOnDownload extends AdditionalLogErrorBase {
-  override name = RevMapModelMismatchErrorOnDownload.name;
+  override name = 'RevMapModelMismatchErrorOnDownload';
 }
 
 export class RevMapModelMismatchErrorOnUpload extends AdditionalLogErrorBase {
-  override name = RevMapModelMismatchErrorOnUpload.name;
+  override name = 'RevMapModelMismatchErrorOnUpload';
 }
 
 export class NoRemoteModelFile extends AdditionalLogErrorBase<string> {
-  override name = NoRemoteModelFile.name;
+  override name = 'NoRemoteModelFile';
 }
 
-export class NoRemoteMetaFile extends Error {
-  override name = NoRemoteMetaFile.name;
+export class NoRemoteMetaFile extends BaseError {
+  override name = 'NoRemoteMetaFile';
 }
 
 // --------------LOCKFILE ERRORS--------------
-export class LockPresentError extends Error {
-  override name = LockPresentError.name;
+export class LockPresentError extends BaseError {
+  override name = 'LockPresentError';
 }
 
-export class LockFromLocalClientPresentError extends Error {
-  override name = LockFromLocalClientPresentError.name;
+export class LockFromLocalClientPresentError extends BaseError {
+  override name = 'LockFromLocalClientPresentError';
 }
 
 // -----ENCRYPTION & COMPRESSION----
 export class DecryptNoPasswordError extends AdditionalLogErrorBase {
-  override name = DecryptNoPasswordError.name;
+  override name = 'DecryptNoPasswordError';
 }
 
 export class DecryptError extends AdditionalLogErrorBase {
-  override name = DecryptError.name;
+  override name = 'DecryptError';
 }
 
 export class CompressError extends AdditionalLogErrorBase {
-  override name = CompressError.name;
+  override name = 'CompressError';
 }
 
 export class DecompressError extends AdditionalLogErrorBase {
-  override name = DecompressError.name;
+  override name = 'DecompressError';
 }
 
 // --------------MODEL AND DB ERRORS--------------
-export class ClientIdNotFoundError extends Error {
-  override name = ClientIdNotFoundError.name;
+export class ClientIdNotFoundError extends BaseError {
+  override name = 'ClientIdNotFoundError';
 }
 
-export class DBNotInitializedError extends Error {
-  override name = DBNotInitializedError.name;
+export class DBNotInitializedError extends BaseError {
+  override name = 'DBNotInitializedError';
 }
 
 export class InvalidMetaError extends AdditionalLogErrorBase {
-  override name = InvalidMetaError.name;
+  override name = 'InvalidMetaError';
 }
 
 export class MetaNotReadyError extends AdditionalLogErrorBase {
-  override name = MetaNotReadyError.name;
+  override name = 'MetaNotReadyError';
 }
 
 export class InvalidRevMapError extends AdditionalLogErrorBase {
-  override name = InvalidRevMapError.name;
+  override name = 'InvalidRevMapError';
 }
 
 export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
-  override name = ModelIdWithoutCtrlError.name;
+  override name = 'ModelIdWithoutCtrlError';
 }
 
 export class ModelValidationError extends AdditionalLogErrorBase {
-  override name = ModelValidationError.name;
+  override name = 'ModelValidationError';
 }
 
 export class ModelMigrationError extends AdditionalLogErrorBase {
-  override name = ModelMigrationError.name;
+  override name = 'ModelMigrationError';
 }
 export class CanNotMigrateMajorDownError extends AdditionalLogErrorBase {
-  override name = CanNotMigrateMajorDownError.name;
+  override name = 'CanNotMigrateMajorDownError';
 }
 
 export class ModelRepairError extends AdditionalLogErrorBase {
-  override name = ModelRepairError.name;
+  override name = 'ModelRepairError';
 }
 
 export class InvalidModelCfgError extends AdditionalLogErrorBase {
-  override name = InvalidModelCfgError.name;
+  override name = 'InvalidModelCfgError';
 }
 
-export class InvalidSyncProviderError extends Error {
-  override name = InvalidSyncProviderError.name;
+export class InvalidSyncProviderError extends BaseError {
+  override name = 'InvalidSyncProviderError';
 }
 
 export class DataValidationFailedError extends AdditionalLogErrorBase {
-  override name = DataValidationFailedError.name;
+  override name = 'DataValidationFailedError';
 }
 
 export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorBase {
-  override name = ModelVersionToImportNewerThanLocalError.name;
+  override name = 'ModelVersionToImportNewerThanLoca';
 }
 
 // --------------OTHER--------------
 
-export class InvalidFilePrefixError extends Error {
-  override name = InvalidFilePrefixError.name;
+export class InvalidFilePrefixError extends BaseError {
+  override name = 'InvalidFilePrefixError';
 }
 
 export class DataRepairNotPossibleError extends AdditionalLogErrorBase {
-  override name = DataRepairNotPossibleError.name;
+  override name = 'DataRepairNotPossibleError';
 }
 
-export class NoRepairFunctionProvidedError extends Error {
-  override name = NoRepairFunctionProvidedError.name;
+export class NoRepairFunctionProvidedError extends BaseError {
+  override name = 'NoRepairFunctionProvidedError';
 }
 
-export class NoValidateFunctionProvidedError extends Error {
-  override name = NoValidateFunctionProvidedError.name;
+export class NoValidateFunctionProvidedError extends BaseError {
+  override name = 'NoValidateFunctionProvidedError';
 }
 
 export class BackupImportFailedError extends AdditionalLogErrorBase {
-  override name = BackupImportFailedError.name;
+  override name = 'BackupImportFailedError';
 }
 
-export class WebCryptoNotAvailableError extends Error {
-  override name = WebCryptoNotAvailableError.name;
+export class WebCryptoNotAvailableError extends BaseError {
+  override name = 'WebCryptoNotAvailableError';
 }
