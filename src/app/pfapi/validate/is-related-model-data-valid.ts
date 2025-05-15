@@ -48,6 +48,11 @@ export const getLastValidityError = (): string | undefined => lastValidityError;
 const _validityError = (errTxt: string, additionalInfo?: any): void => {
   if (additionalInfo) {
     console.log('Validity Error Info: ', additionalInfo);
+    if (environment.production) {
+      try {
+        console.log('Validity Error Info string: ', JSON.stringify(additionalInfo));
+      } catch (e) {}
+    }
   }
   if (errorCount <= 3) {
     devError(errTxt);

@@ -33,7 +33,7 @@ export class ModelCtrl<MT extends ModelBase> {
   /**
    * Saves the model data to database
    * @param data Model data to save
-   * @param options Save options
+   * @param p
    * @returns Promise resolving after save operation
    */
   save(

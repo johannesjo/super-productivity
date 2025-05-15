@@ -6,6 +6,10 @@ class AdditionalLogErrorBase<T = unknown> extends Error {
     if (additional.length > 0) {
       // pfLog(0, this.name, ...additional);
       console.log(this.name, ...additional);
+      try {
+        console.log('additional error log:');
+        console.log(JSON.stringify(additional));
+      } catch (e) {}
     }
     this.additionalLog = additional;
   }
