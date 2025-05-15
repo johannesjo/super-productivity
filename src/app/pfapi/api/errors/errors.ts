@@ -1,16 +1,4 @@
-abstract class BaseError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = new.target.name;
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, new.target);
-    }
-  }
-}
-
-class AdditionalLogErrorBase<T = unknown> extends BaseError {
+class AdditionalLogErrorBase<T = unknown> extends Error {
   additionalLog: T;
 
   constructor(...additional: any) {
@@ -27,7 +15,7 @@ class AdditionalLogErrorBase<T = unknown> extends BaseError {
   }
 }
 
-export class ImpossibleError extends BaseError {
+export class ImpossibleError extends Error {
   override name = ' ImpossibleError';
 }
 
@@ -44,7 +32,7 @@ export class NoEtagAPIError extends AdditionalLogErrorBase {
   override name = ' NoEtagAPIError';
 }
 
-export class FileExistsAPIError extends BaseError {
+export class FileExistsAPIError extends Error {
   override name = ' FileExistsAPIError';
 }
 
@@ -52,7 +40,7 @@ export class RemoteFileNotFoundAPIError extends AdditionalLogErrorBase {
   override name = ' RemoteFileNotFoundAPIError';
 }
 
-export class MissingRefreshTokenAPIError extends BaseError {
+export class MissingRefreshTokenAPIError extends Error {
   override name = ' MissingRefreshTokenAPIError';
 }
 
@@ -80,7 +68,7 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
 
 // --------------SYNC PROVIDER ERRORS--------------
 
-export class MissingCredentialsSPError extends BaseError {
+export class MissingCredentialsSPError extends Error {
   override name = 'MissingCredentialsSPError';
 }
 
@@ -93,7 +81,7 @@ export class InvalidDataSPError extends AdditionalLogErrorBase {
 }
 
 // --------------OTHER SYNC ERRORS--------------
-export class NoSyncProviderSetError extends BaseError {
+export class NoSyncProviderSetError extends Error {
   override name = 'NoSyncProviderSetError';
 }
 
@@ -101,7 +89,7 @@ export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
   override name = 'RevMismatchForModelError';
 }
 
-export class UnknownSyncStateError extends BaseError {
+export class UnknownSyncStateError extends Error {
   override name = 'DBNotInitializedError';
 }
 
@@ -121,16 +109,16 @@ export class NoRemoteModelFile extends AdditionalLogErrorBase<string> {
   override name = 'NoRemoteModelFile';
 }
 
-export class NoRemoteMetaFile extends BaseError {
+export class NoRemoteMetaFile extends Error {
   override name = 'NoRemoteMetaFile';
 }
 
 // --------------LOCKFILE ERRORS--------------
-export class LockPresentError extends BaseError {
+export class LockPresentError extends Error {
   override name = 'LockPresentError';
 }
 
-export class LockFromLocalClientPresentError extends BaseError {
+export class LockFromLocalClientPresentError extends Error {
   override name = 'LockFromLocalClientPresentError';
 }
 
@@ -152,11 +140,11 @@ export class DecompressError extends AdditionalLogErrorBase {
 }
 
 // --------------MODEL AND DB ERRORS--------------
-export class ClientIdNotFoundError extends BaseError {
+export class ClientIdNotFoundError extends Error {
   override name = 'ClientIdNotFoundError';
 }
 
-export class DBNotInitializedError extends BaseError {
+export class DBNotInitializedError extends Error {
   override name = 'DBNotInitializedError';
 }
 
@@ -195,7 +183,7 @@ export class InvalidModelCfgError extends AdditionalLogErrorBase {
   override name = 'InvalidModelCfgError';
 }
 
-export class InvalidSyncProviderError extends BaseError {
+export class InvalidSyncProviderError extends Error {
   override name = 'InvalidSyncProviderError';
 }
 
@@ -209,7 +197,7 @@ export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorB
 
 // --------------OTHER--------------
 
-export class InvalidFilePrefixError extends BaseError {
+export class InvalidFilePrefixError extends Error {
   override name = 'InvalidFilePrefixError';
 }
 
@@ -217,11 +205,11 @@ export class DataRepairNotPossibleError extends AdditionalLogErrorBase {
   override name = 'DataRepairNotPossibleError';
 }
 
-export class NoRepairFunctionProvidedError extends BaseError {
+export class NoRepairFunctionProvidedError extends Error {
   override name = 'NoRepairFunctionProvidedError';
 }
 
-export class NoValidateFunctionProvidedError extends BaseError {
+export class NoValidateFunctionProvidedError extends Error {
   override name = 'NoValidateFunctionProvidedError';
 }
 
@@ -229,6 +217,6 @@ export class BackupImportFailedError extends AdditionalLogErrorBase {
   override name = 'BackupImportFailedError';
 }
 
-export class WebCryptoNotAvailableError extends BaseError {
+export class WebCryptoNotAvailableError extends Error {
   override name = 'WebCryptoNotAvailableError';
 }
