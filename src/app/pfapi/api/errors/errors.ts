@@ -1,4 +1,6 @@
-class AdditionalLogErrorBase<T = unknown> extends Error {
+import { IValidation } from 'typia';
+
+class AdditionalLogErrorBase<T = any[]> extends Error {
   additionalLog: T;
 
   constructor(...additional: any) {
@@ -191,6 +193,9 @@ export class InvalidSyncProviderError extends Error {
 
 export class DataValidationFailedError extends AdditionalLogErrorBase {
   override name = 'DataValidationFailedError';
+  constructor(validationResult: IValidation.IFailure) {
+    super(validationResult);
+  }
 }
 
 export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorBase {
