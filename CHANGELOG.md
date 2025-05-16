@@ -1,3 +1,14 @@
+## [13.0.8](https://github.com/johannesjo/super-productivity/compare/v13.0.7...v13.0.8) (2025-05-16)
+
+### Bug Fixes
+
+- open project model being wrong [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([adb9691](https://github.com/johannesjo/super-productivity/commit/adb969127659dcb33ac311e7fb0f17fb65bd462e))
+
+### Features
+
+- improve logging for rev mismatch [#4374](https://github.com/johannesjo/super-productivity/issues/4374) ([da0f2df](https://github.com/johannesjo/super-productivity/commit/da0f2dfc0336d6e027c7a2ab1e8353fcf7197bfe))
+- make open project validation even more lenient [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([8dc1143](https://github.com/johannesjo/super-productivity/commit/8dc11439d8039f788c259111d8d121e4d4b7dcb6))
+
 ## [13.0.7](https://github.com/johannesjo/super-productivity/compare/v13.0.6...v13.0.7) (2025-05-15)
 
 ### Bug Fixes

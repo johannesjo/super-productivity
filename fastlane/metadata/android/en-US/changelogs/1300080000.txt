@@ -1,0 +1,8 @@
+
+### Bug Fixes
+
+* open project model being wrong #4360
+### Features
+
+* improve logging for rev mismatch #4374
+* make open project validation even more lenient  #4360
