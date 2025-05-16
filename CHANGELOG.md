@@ -1,3 +1,10 @@
+## [13.0.9](https://github.com/johannesjo/super-productivity/compare/v13.0.8...v13.0.9) (2025-05-16)
+
+### Bug Fixes
+
+- make improvement model stuff optional [#4385](https://github.com/johannesjo/super-productivity/issues/4385) ([7934eb4](https://github.com/johannesjo/super-productivity/commit/7934eb4ff717ee2f83834f9d754ec2050e3ea4d7))
+- make open project validation even more lenient 2 [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([689570d](https://github.com/johannesjo/super-productivity/commit/689570dd6851c4731e77a2fef87b4f461dfc0034))
+
 ## [13.0.8](https://github.com/johannesjo/super-productivity/compare/v13.0.7...v13.0.8) (2025-05-16)
 
 ### Bug Fixes
