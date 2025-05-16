@@ -192,10 +192,16 @@ export class InvalidSyncProviderError extends Error {
   override name = 'InvalidSyncProviderError';
 }
 
-export class DataValidationFailedError extends AdditionalLogErrorBase {
+export class DataValidationFailedError extends Error {
   override name = 'DataValidationFailedError';
   constructor(validationResult: IValidation.IFailure) {
-    super(validationResult);
+    super('DataValidationFailedError');
+    try {
+      console.log('validation errors: ' + JSON.stringify(validationResult.errors));
+      console.log('validation result: ' + JSON.stringify(validationResult));
+    } catch (e) {
+      console.log('validation errors not stringified: ', validationResult, e);
+    }
   }
 }
 
