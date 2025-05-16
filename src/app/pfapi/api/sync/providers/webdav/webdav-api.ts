@@ -1,4 +1,4 @@
-import { Webdav, WebdavPrivateCfg } from './webdav';
+import { WebdavPrivateCfg } from './webdav';
 import {
   AuthFailSPError,
   FileExistsAPIError,
@@ -29,6 +29,8 @@ interface FileMeta {
 }
 
 export class WebdavApi {
+  private static readonly L = 'WebdavApi';
+
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   async upload({
@@ -55,14 +57,14 @@ export class WebdavApi {
         });
         return this._findEtagInHeaders(responseHeaderObj);
       } catch (e) {
-        pfLog(0, `${WebdavApi.name}.upload() direct etag parsing failed`, {
+        pfLog(0, `${WebdavApi.L}.upload() direct etag parsing failed`, {
           path,
           error: e,
         });
         return undefined;
       }
     } catch (e: any) {
-      pfLog(0, `${WebdavApi.name}.upload() error`, { path, error: e });
+      pfLog(0, `${WebdavApi.L}.upload() error`, { path, error: e });
       if (e?.status === 412) {
         throw new FileExistsAPIError();
       }
@@ -150,7 +152,7 @@ export class WebdavApi {
       return this._cleanRev(d[etagKey]);
     }
 
-    pfLog(0, `${Webdav.name}.getRevFromMeta() No etag found in metadata`, {
+    pfLog(0, `${WebdavApi.L}.getRevFromMeta() No etag found in metadata`, {
       availableKeys: Object.keys(d),
       metadata: d,
     });
@@ -164,10 +166,10 @@ export class WebdavApi {
         path: folderPath,
       });
     } catch (e: any) {
-      pfLog(0, `${WebdavApi.name}.createFolder() error`, { folderPath, error: e });
+      pfLog(0, `${WebdavApi.L}.createFolder() error`, { folderPath, error: e });
       // If MKCOL is not supported, try alternative approach with PUT
       if (e?.message?.includes('Method not allowed') || e?.status === 405) {
-        pfLog(2, `${Webdav.name}.createFolder() MKCOL not supported, trying PUT`);
+        pfLog(2, `${WebdavApi.L}.createFolder() MKCOL not supported, trying PUT`);
         try {
           await this._makeRequest({
             method: 'PUT',
@@ -175,7 +177,7 @@ export class WebdavApi {
             body: '',
           });
         } catch (putError) {
-          pfLog(0, `${WebdavApi.name}.createFolder() PUT fallback failed`, {
+          pfLog(0, `${WebdavApi.L}.createFolder() PUT fallback failed`, {
             folderPath,
             error: putError,
           });
@@ -214,7 +216,7 @@ export class WebdavApi {
       });
 
       if (!response.ok) {
-        pfLog(0, `${WebdavApi.name}._makeRequest() HTTP error`, {
+        pfLog(0, `${WebdavApi.L}._makeRequest() HTTP error`, {
           method,
           path,
           status: response.status,
@@ -224,7 +226,7 @@ export class WebdavApi {
       }
       return response;
     } catch (e) {
-      pfLog(0, `${WebdavApi.name}._makeRequest() network error`, {
+      pfLog(0, `${WebdavApi.L}._makeRequest() network error`, {
         method,
         path,
         error: e,
@@ -255,7 +257,7 @@ export class WebdavApi {
       .replace(/&quot;/g, '')
       .trim();
 
-    pfLog(3, `${Webdav.name}.cleanRev() "${rev}" -> "${result}"`);
+    pfLog(3, `${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
     return result;
   }
 
@@ -274,7 +276,7 @@ export class WebdavApi {
   }
 
   private _checkCommonErrors(e: any, targetPath: string): void {
-    pfLog(0, `${Webdav.name} API error for ${targetPath}`, e);
+    pfLog(0, `${WebdavApi.L} API error for ${targetPath}`, e);
 
     const status = e?.status || e?.response?.status;
     // Handle common HTTP error codes

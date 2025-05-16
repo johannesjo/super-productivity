@@ -19,6 +19,8 @@ export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
 }
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
+  private static readonly L = 'Webdav';
+
   readonly id = SyncProviderId.WebDAV;
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
@@ -76,9 +78,9 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
         return { rev };
       }
     } catch (e) {
-      pfLog(0, `${Webdav.name}.uploadFile() error during upload`, e);
+      pfLog(0, `${Webdav.L}.uploadFile() error during upload`, e);
       if (e instanceof RemoteFileNotFoundAPIError) {
-        pfLog(2, `${Webdav.name}.uploadFile() creating parent folders and retrying`);
+        pfLog(2, `${Webdav.L}.uploadFile() creating parent folders and retrying`);
         try {
           // Create necessary parent folders
           await this._ensureFolderExists(targetPath, cfg);
@@ -90,7 +92,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
             isOverwrite: isForceOverwrite,
           });
         } catch (retryError) {
-          pfLog(0, `${Webdav.name}.uploadFile() retry failed`, retryError);
+          pfLog(0, `${Webdav.L}.uploadFile() retry failed`, retryError);
           throw retryError;
         }
       } else {
@@ -99,7 +101,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     }
     const { etag } = await this._api.getFileMeta(filePath, null);
     if (!etag) {
-      pfLog(0, `${Webdav.name}.uploadFile() no etag returned after upload`);
+      pfLog(0, `${Webdav.L}.uploadFile() no etag returned after upload`);
       throw new NoRevAPIError();
     }
     return { rev: etag };
@@ -167,12 +169,12 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
 
       try {
         await this._api.createFolder({ folderPath: currentPath });
-        pfLog(2, `${Webdav.name}.ensureFolderExists() created folder`, currentPath);
+        pfLog(2, `${Webdav.L}.ensureFolderExists() created folder`, currentPath);
       } catch (e: any) {
         // Ignore 405 Method Not Allowed (folder likely exists)
         // Ignore 409 Conflict (folder already exists)
         if (e?.status !== 405 && e?.status !== 409) {
-          pfLog(0, `${Webdav.name}.ensureFolderExists() error creating folder`, {
+          pfLog(0, `${Webdav.L}.ensureFolderExists() error creating folder`, {
             folderPath: currentPath,
             error: e,
           });

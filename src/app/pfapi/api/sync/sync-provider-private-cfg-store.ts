@@ -9,6 +9,7 @@ import { PrivateCfgByProviderId } from '../pfapi.model';
  * Handles persistence and change notifications
  */
 export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
+  private static readonly L = 'SyncProviderPrivateCfgStore';
   public static readonly DB_KEY_PREFIX = DBNames.PrivateCfgStorePrefix;
 
   private readonly _dbKey: string;
@@ -30,7 +31,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   async load(): Promise<PrivateCfgByProviderId<PID> | null> {
     pfLog(
       3,
-      `${SyncProviderPrivateCfgStore.name}.${this.load.name}`,
+      `${SyncProviderPrivateCfgStore.L}.${this.load.name}`,
       this._privateCfgInMemory,
     );
 
@@ -61,7 +62,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
    */
   async save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
     const key = this._providerId;
-    pfLog(2, `${SyncProviderPrivateCfgStore.name}.${this.save.name}()`, key, privateCfg);
+    pfLog(2, `${SyncProviderPrivateCfgStore.L}.${this.save.name}()`, key, privateCfg);
 
     this._privateCfgInMemory = privateCfg;
 

@@ -17,6 +17,8 @@ import { SyncProviderId } from '../pfapi.const';
  * Service responsible for synchronizing metadata between local and remote storage
  */
 export class MetaSyncService {
+  private static readonly L = 'MetaSyncService';
+
   constructor(
     private _metaModelCtrl: MetaModelCtrl,
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
@@ -45,7 +47,7 @@ export class MetaSyncService {
     localRev: string | null = null,
   ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
-    pfLog(2, `${MetaSyncService.name}.${this.download.name}()`, { localRev });
+    pfLog(2, `${MetaSyncService.L}.${this.download.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
 
     try {
@@ -104,7 +106,7 @@ export class MetaSyncService {
         meta.crossModelVersion,
       );
 
-    pfLog(2, `${MetaSyncService.name}.${this.upload.name}()`, { meta });
+    pfLog(2, `${MetaSyncService.L}.${this.upload.name}()`, { meta });
 
     // Upload the data
     return (
@@ -124,7 +126,7 @@ export class MetaSyncService {
    * @throws NoRemoteMetaFile if the remote file doesn't exist
    */
   async getRev(localRev: string | null): Promise<string> {
-    pfLog(2, `${MetaSyncService.name}.${this.getRev.name}()`, { localRev });
+    pfLog(2, `${MetaSyncService.L}.${this.getRev.name}()`, { localRev });
     const syncProvider = this._currentSyncProvider$.getOrError();
 
     try {
@@ -147,7 +149,7 @@ export class MetaSyncService {
    * @returns Promise resolving to the new revision string
    */
   async lock(revToMatch: string | null = null): Promise<string> {
-    pfLog(2, `${MetaSyncService.name}.${this.lock.name}()`, { revToMatch });
+    pfLog(2, `${MetaSyncService.L}.${this.lock.name}()`, { revToMatch });
     const syncProvider = this._currentSyncProvider$.getOrError();
     const clientId = await this._metaModelCtrl.loadClientId();
 

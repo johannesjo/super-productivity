@@ -38,6 +38,8 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTION
  * API class for Dropbox integration
  */
 export class DropboxApi {
+  private static readonly L = 'DropboxApi';
+
   constructor(
     private _appKey: string,
     private _parent: SyncProviderServiceInterface<SyncProviderId.Dropbox>,
@@ -63,7 +65,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.getMetaData() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.L}.getMetaData() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -104,7 +106,7 @@ export class DropboxApi {
 
       return { meta, data: data as unknown as T };
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.download() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.L}.download() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -155,7 +157,7 @@ export class DropboxApi {
 
       return result;
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.upload() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.L}.upload() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -174,7 +176,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.remove() error for path: ${path}`, e);
+      pfLog(0, `${DropboxApi.L}.remove() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -197,7 +199,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.checkUser() error`, e);
+      pfLog(0, `${DropboxApi.L}.checkUser() error`, e);
       this._checkCommonErrors(e, 'check/user');
       throw e;
     }
@@ -207,7 +209,7 @@ export class DropboxApi {
    * Refresh access token using refresh token
    */
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<void> {
-    pfLog(2, `${DropboxApi.name}.updateAccessTokenFromRefreshTokenIfAvailable()`);
+    pfLog(2, `${DropboxApi.L}.updateAccessTokenFromRefreshTokenIfAvailable()`);
 
     const privateCfg = await this._parent.privateCfg.load();
     const refreshToken = privateCfg?.refreshToken;
@@ -296,7 +298,7 @@ export class DropboxApi {
         expiresAt: +data.expires_in * 1000 + Date.now(),
       };
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}.getTokensFromAuthCode() error`, e);
+      pfLog(0, `${DropboxApi.L}.getTokensFromAuthCode() error`, e);
       throw e;
     }
   }
@@ -386,7 +388,7 @@ export class DropboxApi {
 
       return response;
     } catch (e) {
-      pfLog(0, `${DropboxApi.name}._request() error for ${url}`, e);
+      pfLog(0, `${DropboxApi.L}._request() error for ${url}`, e);
       this._checkCommonErrors(e, url);
       throw e;
     }
