@@ -9,7 +9,9 @@ class AdditionalLogErrorBase<T = unknown> extends Error {
       console.log(this.name, ...additional);
       try {
         console.log('additional error log: ' + JSON.stringify(additional));
-      } catch (e) {}
+      } catch (e) {
+        console.log('additional error log not stringified: ', additional, e);
+      }
     }
     this.additionalLog = additional;
   }
