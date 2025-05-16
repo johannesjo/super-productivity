@@ -27,5 +27,5 @@ export interface OpenProjectCfg extends BaseIssueProviderCfg {
   isSetProgressOnTaskDone: boolean;
   progressOnDone: number;
   transitionConfig: OpenProjectTransitionConfig;
-  availableTransitions: OpenProjectOriginalStatus[];
+  availableTransitions: OpenProjectOriginalStatus[] | unknown[];
 }
