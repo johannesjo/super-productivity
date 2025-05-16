@@ -1,9 +1,10 @@
 import { IValidation } from 'typia';
 
-class AdditionalLogErrorBase<T = any[]> extends Error {
+class AdditionalLogErrorBase<T = unknown[]> extends Error {
   additionalLog: T;
 
-  constructor(...additional: any) {
+  // TODO improve typing here
+  constructor(...additional: unknown[]) {
     super(typeof additional[0] === 'string' ? additional[0] : new.target.name);
 
     if (additional.length > 0) {
@@ -15,7 +16,7 @@ class AdditionalLogErrorBase<T = any[]> extends Error {
         console.log('additional error log not stringified: ', additional, e);
       }
     }
-    this.additionalLog = additional;
+    this.additionalLog = additional as T;
   }
 }
 
