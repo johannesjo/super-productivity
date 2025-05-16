@@ -51,7 +51,7 @@ export type OpenProjectOriginalStatus = Readonly<{
   color: string;
   isDefault: boolean;
   isReadonly: boolean;
-  defaultDoneRatio: null;
+  defaultDoneRatio?: null | number;
   position: number;
   _links: OpenProjectApiLinks;
 }>;
