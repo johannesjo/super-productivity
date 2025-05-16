@@ -223,6 +223,12 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   validate: (data) => {
     // console.time('validateAllData');
     const r = validateAllData(data);
+
+    if (!environment.production && !r.success) {
+      console.log(r);
+      alert('VALIDATION ERROR ');
+    }
+
     // console.time('relatedDataValidation');
     if (r.success && !isRelatedModelDataValid(data)) {
       return {
