@@ -108,10 +108,12 @@ export abstract class LocalFileSyncBase
         try {
           const existingFile = await this.downloadFile(targetPath, revToMatch);
           if (existingFile.rev !== revToMatch) {
-            pfLog(0, `${this.constructor.name}.${this.uploadFile.name}() rev mismatch`, {
-              existingFileRev: existingFile.rev,
+            pfLog(
+              0,
+              `${this.constructor.name}.${this.uploadFile.name}() rev mismatch`,
+              existingFile.rev,
               revToMatch,
-            });
+            );
             throw new UploadRevToMatchMismatchAPIError();
           }
         } catch (err) {
