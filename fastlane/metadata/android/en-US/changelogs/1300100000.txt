@@ -1,0 +1,12 @@
+
+### Bug Fixes
+
+* horizontal scroll bar for planner
+### Features
+
+* add better mechanism to catch validation errors during dev
+* add stricter runtime checks for dev
+* adjust log
+* adjust log 2
+* always open checklists also for mobile in task detail panel
+* **pfapi:** improve logs

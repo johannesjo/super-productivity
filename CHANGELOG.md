@@ -1,3 +1,18 @@
+## [13.0.10](https://github.com/johannesjo/super-productivity/compare/v13.0.9...v13.0.10) (2025-05-16)
+
+### Bug Fixes
+
+- horizontal scroll bar for planner ([9ff6c1d](https://github.com/johannesjo/super-productivity/commit/9ff6c1da0063b3c115641d24eeeac72f080bf97b))
+
+### Features
+
+- add better mechanism to catch validation errors during dev ([914285d](https://github.com/johannesjo/super-productivity/commit/914285d5f93b067a7664bcec0641a2cfc5c89dee))
+- add stricter runtime checks for dev ([8f9b2e7](https://github.com/johannesjo/super-productivity/commit/8f9b2e7948716bf3fec436de8cd417b37ca4b932))
+- adjust log ([e4ac101](https://github.com/johannesjo/super-productivity/commit/e4ac10114920f974954a541a791cd08b61a4c6ca))
+- adjust log 2 ([5a310ab](https://github.com/johannesjo/super-productivity/commit/5a310ab81447db3828f2b1c18ee7984e8d98176d))
+- always open checklists also for mobile in task detail panel ([3d3316f](https://github.com/johannesjo/super-productivity/commit/3d3316f24e23239b243399788460f69a50b4854d))
+- **pfapi:** improve logs ([4b9b220](https://github.com/johannesjo/super-productivity/commit/4b9b220a964659d81db29807f15dd02f90124ec9))
+
 ## [13.0.9](https://github.com/johannesjo/super-productivity/compare/v13.0.8...v13.0.9) (2025-05-16)
 
 ### Bug Fixes
