@@ -21,9 +21,9 @@ export const isMarkdownChecklist = (text: string): boolean => {
     }
 
     const items = lines.filter(
-      (it) => it.trim().startsWith('- [x] ') || it.trim().startsWith('- [ ] '),
+      (it) => it.trim().startsWith('- [x]') || it.trim().startsWith('- [ ]'),
     );
-    return items.length === lines.length || items.length >= 3;
+    return items.length === lines.length || items.length >= 2;
   } catch (e) {
     console.error('Checklist parsing failed');
     console.error(e);

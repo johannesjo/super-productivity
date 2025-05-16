@@ -372,10 +372,11 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     this.isPlannedForTodayDay = !!newVal.dueDay && newVal.dueDay === getWorklogStr();
 
     // panel states
-    this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;
-    this.isExpandedNotesPanel =
-      !IS_MOBILE && (!!newVal.notes || (!newVal.issueId && !newVal.attachments?.length));
     this.isMarkdownChecklist = isMarkdownChecklist(newVal.notes || '');
+    this.isExpandedIssuePanel = !IS_MOBILE && !!this.issueData;
+    this.isExpandedNotesPanel = IS_MOBILE
+      ? this.isMarkdownChecklist
+      : !!newVal.notes || (!newVal.issueId && !newVal.attachments?.length);
   }
 
   get progress(): number {
