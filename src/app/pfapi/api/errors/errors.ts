@@ -177,6 +177,7 @@ export class ModelValidationError extends AdditionalLogErrorBase {
 export class ModelMigrationError extends AdditionalLogErrorBase {
   override name = 'ModelMigrationError';
 }
+
 export class CanNotMigrateMajorDownError extends AdditionalLogErrorBase {
   override name = 'CanNotMigrateMajorDownError';
 }
@@ -195,17 +196,16 @@ export class InvalidSyncProviderError extends Error {
 
 export class DataValidationFailedError extends Error {
   override name = 'DataValidationFailedError';
+
   constructor(validationResult: IValidation<AllModelData<any>>) {
     super('DataValidationFailedError');
+    console.log('validation result: ', validationResult);
     try {
-      console.log(validationResult);
       if ('errors' in validationResult) {
-        console.log('validation errors: ' + JSON.stringify(validationResult.errors));
+        console.log('validation errors_: ' + JSON.stringify(validationResult.errors));
       }
-      console.log('validation result: ' + JSON.stringify(validationResult));
-    } catch (e) {
-      console.log('validation errors not stringified: ', validationResult, e);
-    }
+      console.log('validation result_: ' + JSON.stringify(validationResult));
+    } catch (e) {}
   }
 }
 
