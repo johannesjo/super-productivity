@@ -11,6 +11,8 @@ import { ModelValidationError } from '../errors/errors';
  * @template MT - Model type that extends ModelBase
  */
 export class ModelCtrl<MT extends ModelBase> {
+  private static readonly L = 'ModelCtrl';
+
   public readonly modelId: string;
   public readonly modelCfg: ModelCfg<MT>;
 
@@ -33,7 +35,7 @@ export class ModelCtrl<MT extends ModelBase> {
   /**
    * Saves the model data to database
    * @param data Model data to save
-   * @param options Save options
+   * @param p
    * @returns Promise resolving after save operation
    */
   save(
@@ -41,7 +43,7 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog(2, `___ ${ModelCtrl.name}.${this.save.name}()`, this.modelId, p, data);
+    pfLog(2, `___ ${ModelCtrl.L}.${this.save.name}()`, this.modelId, p, data);
 
     // Validate data if validator is available
     if (this.modelCfg.validate && !this.modelCfg.validate(data).success) {
@@ -74,7 +76,7 @@ export class ModelCtrl<MT extends ModelBase> {
    */
   async partialUpdate(data: Partial<MT>): Promise<unknown> {
     if (typeof data !== 'object' || data === null) {
-      throw new Error(`${ModelCtrl.name}:${this.modelId}: data is not an object`);
+      throw new Error(`${ModelCtrl.L}:${this.modelId}: data is not an object`);
     }
 
     // Load current data and merge with partial update
@@ -93,7 +95,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving to model data
    */
   async load(): Promise<MT> {
-    pfLog(3, `${ModelCtrl.name}.${this.load.name}()`, {
+    pfLog(3, `${ModelCtrl.L}.${this.load.name}()`, {
       inMemoryData: this._inMemoryData,
     });
     return (
@@ -108,7 +110,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving after remove operation
    */
   async remove(): Promise<unknown> {
-    pfLog(2, `${ModelCtrl.name}.${this.remove.name}()`, this.modelId);
+    pfLog(2, `${ModelCtrl.L}.${this.remove.name}()`, this.modelId);
     this._inMemoryData = null;
     return this._db.remove(this.modelId);
   }

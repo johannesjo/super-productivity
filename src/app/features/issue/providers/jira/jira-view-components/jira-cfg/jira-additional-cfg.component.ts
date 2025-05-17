@@ -109,7 +109,7 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
     );
   transitionConfigOpts: {
     key: keyof JiraTransitionConfig;
-    val: JiraTransitionOption;
+    val: JiraTransitionOption | undefined;
   }[] = [];
 
   private _subs: Subscription = new Subscription();
@@ -177,7 +177,7 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
     this.notifyModelChange();
   }
 
-  getTransition(key: keyof JiraTransitionConfig): JiraTransitionOption {
+  getTransition(key: keyof JiraTransitionConfig): JiraTransitionOption | undefined {
     return this.cfg.transitionConfig[key];
   }
 

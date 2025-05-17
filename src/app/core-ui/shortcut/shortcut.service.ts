@@ -165,7 +165,7 @@ export class ShortcutService {
       this._layoutService.toggleAddTaskPanel();
     } else if (checkKeyCombo(ev, keys.triggerSync)) {
       ev.preventDefault();
-      if (await this._syncWrapperService.isEnabled$.pipe(first()).toPromise()) {
+      if (await this._syncWrapperService.isEnabledAndReady$.pipe(first()).toPromise()) {
         this._syncWrapperService.sync();
       }
     } else if (

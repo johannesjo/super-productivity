@@ -12,6 +12,8 @@ import {
 import { EncryptAndCompressCfg } from '../pfapi.model';
 
 export class EncryptAndCompressHandlerService {
+  private static readonly L = 'EncryptAndCompressHandlerService';
+
   async compressAndEncryptData<T>(
     cfg: EncryptAndCompressCfg,
     encryptKey: string | undefined,
@@ -59,11 +61,12 @@ export class EncryptAndCompressHandlerService {
       isEncrypt,
       modelVersion,
     });
-    pfLog(
-      2,
-      `${EncryptAndCompressHandlerService.name}.${this.compressAndEncrypt.name}()`,
-      { prefix, modelVersion, isCompress, isEncrypt },
-    );
+    pfLog(2, `${EncryptAndCompressHandlerService.L}.${this.compressAndEncrypt.name}()`, {
+      prefix,
+      modelVersion,
+      isCompress,
+      isEncrypt,
+    });
     let dataStr = JSON.stringify(data);
     if (isCompress) {
       dataStr = await compressWithGzipToString(dataStr);
@@ -93,7 +96,7 @@ export class EncryptAndCompressHandlerService {
       extractSyncFileStateFromPrefix(dataStr);
     pfLog(
       2,
-      `${EncryptAndCompressHandlerService.name}.${this.decompressAndDecrypt.name}()`,
+      `${EncryptAndCompressHandlerService.L}.${this.decompressAndDecrypt.name}()`,
       { isCompressed, isEncrypted, modelVersion },
     );
     let outStr = cleanDataStr;

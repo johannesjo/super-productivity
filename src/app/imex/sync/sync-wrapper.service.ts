@@ -8,7 +8,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
-  CanNotMigrateDownError,
+  CanNotMigrateMajorDownError,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
@@ -54,7 +54,6 @@ export class SyncWrapperService {
   );
 
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
-  isEnabled$: Observable<boolean> = this.syncCfg$.pipe(map((cfg) => cfg.isEnabled));
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
@@ -64,7 +63,7 @@ export class SyncWrapperService {
     filter((isSyncing) => !isSyncing),
   );
 
-  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabled$.pipe(
+  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
     switchMap((isEnabled) =>
       isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
     ),
@@ -185,7 +184,7 @@ export class SyncWrapperService {
       ) {
         this._handleDecryptionError();
         return 'HANDLED_ERROR';
-      } else if (error instanceof CanNotMigrateDownError) {
+      } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
       } else {

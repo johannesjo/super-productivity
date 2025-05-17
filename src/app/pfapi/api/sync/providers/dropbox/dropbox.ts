@@ -40,6 +40,8 @@ interface DropboxApiError {
 }
 
 export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Dropbox> {
+  private static readonly L = 'Dropbox';
+
   readonly id = SyncProviderId.Dropbox;
   readonly isUploadForcePossible = true;
   readonly maxConcurrentRequests = 4;
@@ -129,7 +131,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       }
 
       if (typeof r.data !== 'string') {
-        pfLog(0, `${Dropbox.name}.${this.downloadFile.name}() data`, r.data);
+        pfLog(0, `${Dropbox.L}.${this.downloadFile.name}() data`, r.data);
         throw new InvalidDataSPError(r.data);
       }
 

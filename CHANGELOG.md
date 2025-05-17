@@ -1,3 +1,67 @@
+## [13.0.10](https://github.com/johannesjo/super-productivity/compare/v13.0.9...v13.0.10) (2025-05-16)
+
+### Bug Fixes
+
+- horizontal scroll bar for planner ([9ff6c1d](https://github.com/johannesjo/super-productivity/commit/9ff6c1da0063b3c115641d24eeeac72f080bf97b))
+
+### Features
+
+- add better mechanism to catch validation errors during dev ([914285d](https://github.com/johannesjo/super-productivity/commit/914285d5f93b067a7664bcec0641a2cfc5c89dee))
+- add stricter runtime checks for dev ([8f9b2e7](https://github.com/johannesjo/super-productivity/commit/8f9b2e7948716bf3fec436de8cd417b37ca4b932))
+- adjust log ([e4ac101](https://github.com/johannesjo/super-productivity/commit/e4ac10114920f974954a541a791cd08b61a4c6ca))
+- adjust log 2 ([5a310ab](https://github.com/johannesjo/super-productivity/commit/5a310ab81447db3828f2b1c18ee7984e8d98176d))
+- always open checklists also for mobile in task detail panel ([3d3316f](https://github.com/johannesjo/super-productivity/commit/3d3316f24e23239b243399788460f69a50b4854d))
+- **pfapi:** improve logs ([4b9b220](https://github.com/johannesjo/super-productivity/commit/4b9b220a964659d81db29807f15dd02f90124ec9))
+
+## [13.0.9](https://github.com/johannesjo/super-productivity/compare/v13.0.8...v13.0.9) (2025-05-16)
+
+### Bug Fixes
+
+- make improvement model stuff optional [#4385](https://github.com/johannesjo/super-productivity/issues/4385) ([7934eb4](https://github.com/johannesjo/super-productivity/commit/7934eb4ff717ee2f83834f9d754ec2050e3ea4d7))
+- make open project validation even more lenient 2 [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([689570d](https://github.com/johannesjo/super-productivity/commit/689570dd6851c4731e77a2fef87b4f461dfc0034))
+
+## [13.0.8](https://github.com/johannesjo/super-productivity/compare/v13.0.7...v13.0.8) (2025-05-16)
+
+### Bug Fixes
+
+- open project model being wrong [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([adb9691](https://github.com/johannesjo/super-productivity/commit/adb969127659dcb33ac311e7fb0f17fb65bd462e))
+
+### Features
+
+- improve logging for rev mismatch [#4374](https://github.com/johannesjo/super-productivity/issues/4374) ([da0f2df](https://github.com/johannesjo/super-productivity/commit/da0f2dfc0336d6e027c7a2ab1e8353fcf7197bfe))
+- make open project validation even more lenient [#4360](https://github.com/johannesjo/super-productivity/issues/4360) ([8dc1143](https://github.com/johannesjo/super-productivity/commit/8dc11439d8039f788c259111d8d121e4d4b7dcb6))
+
+## [13.0.7](https://github.com/johannesjo/super-productivity/compare/v13.0.6...v13.0.7) (2025-05-15)
+
+### Bug Fixes
+
+- actual sync provider state in sync button [#4374](https://github.com/johannesjo/super-productivity/issues/4374) ([3c759d9](https://github.com/johannesjo/super-productivity/commit/3c759d9b8366841dd1ad66e263aa81b45f7e1b1c))
+- prevent sync provider being set wrong initially ([f88d5a1](https://github.com/johannesjo/super-productivity/commit/f88d5a19564e3c419fafc9a1af0b350e65417819))
+- sidebar opens when toggling any misc setting on mobile [#4379](https://github.com/johannesjo/super-productivity/issues/4379) ([5f41722](https://github.com/johannesjo/super-productivity/commit/5f41722d33d0d58656e533296adc302730c8fdf1))
+
+## [13.0.6](https://github.com/johannesjo/super-productivity/compare/v13.0.5...v13.0.6) (2025-05-15)
+
+### Bug Fixes
+
+- segfault on debian [#4375](https://github.com/johannesjo/super-productivity/issues/4375) ([8ddd4f4](https://github.com/johannesjo/super-productivity/commit/8ddd4f438b7ed45e26dffadedf28d7d8a7e0750b))
+
+## [13.0.5](https://github.com/johannesjo/super-productivity/compare/v13.0.4...v13.0.5) (2025-05-15)
+
+### Bug Fixes
+
+- allow for legacy left over jira and open project configs [#4360](https://github.com/johannesjo/super-productivity/issues/4360) [#4362](https://github.com/johannesjo/super-productivity/issues/4362) ([5f1fe57](https://github.com/johannesjo/super-productivity/commit/5f1fe575a3ca7e6695413e891bd3a2b560189a95))
+- also cleanup todays tag ids from task repeat configs [#4364](https://github.com/johannesjo/super-productivity/issues/4364) ([fecbd75](https://github.com/johannesjo/super-productivity/commit/fecbd75ad1d66dce8e613dd42061066023683e6b))
+- exclude today tag from boards config [#4368](https://github.com/johannesjo/super-productivity/issues/4368) ([3d55745](https://github.com/johannesjo/super-productivity/commit/3d557454946a9f40feb8cf58325ccbe7b1420022))
+- make autofix work for task model [#4365](https://github.com/johannesjo/super-productivity/issues/4365) ([42c481a](https://github.com/johannesjo/super-productivity/commit/42c481a639e71c72f642ec52a93fe897cc3c88f9))
+- **pfapi:** error logging ([1e1ec99](https://github.com/johannesjo/super-productivity/commit/1e1ec9912e1ffc73ba431f7ec3a64ac50f3d0158))
+- **pfapi:** error logging 2 ([a50d135](https://github.com/johannesjo/super-productivity/commit/a50d135141de17c325347a5055eb1005305b1296))
+- **pfapi:** use documents folder for android sync instead [#4349](https://github.com/johannesjo/super-productivity/issues/4349) [#4357](https://github.com/johannesjo/super-productivity/issues/4357) ([e515e10](https://github.com/johannesjo/super-productivity/commit/e515e101836a075387f5a6ad8e37e091e4da1674))
+- remove misleading "remove from my day" button [#4366](https://github.com/johannesjo/super-productivity/issues/4366) ([f3b448f](https://github.com/johannesjo/super-productivity/commit/f3b448f31ae01b5f46d240ee52f7f52ac994b499))
+
+### Features
+
+- **pfapi:** improve logging [#4369](https://github.com/johannesjo/super-productivity/issues/4369) ([2ae3aad](https://github.com/johannesjo/super-productivity/commit/2ae3aad77844c522627d94e44832e6bd2342bc40))
+
 ## [13.0.4](https://github.com/johannesjo/super-productivity/compare/v13.0.1...v13.0.4) (2025-05-14)
 
 ### Bug Fixes

@@ -1,7 +1,7 @@
 import { AllSyncModels, ModelCfgs } from '../pfapi.model';
 import { pfLog } from '../util/log';
 import {
-  CanNotMigrateDownError,
+  CanNotMigrateMajorDownError,
   ImpossibleError,
   ModelMigrationError,
 } from '../errors/errors';
@@ -9,11 +9,13 @@ import { Pfapi } from '../pfapi';
 import { PFAPI_MIGRATE_FORCE_VERSION_LS_KEY } from '../pfapi.const';
 
 export class MigrationService<MD extends ModelCfgs> {
+  private static readonly L = 'MigrationService';
+
   constructor(private _pfapiMain: Pfapi<MD>) {}
 
   async checkAndMigrateLocalDB(): Promise<void> {
     const meta = await this._pfapiMain.metaModel.load();
-    pfLog(2, `${MigrationService.name}.${this.checkAndMigrateLocalDB.name}()`, {
+    pfLog(2, `${MigrationService.L}.${this.checkAndMigrateLocalDB.name}()`, {
       meta,
     });
 
@@ -65,7 +67,7 @@ export class MigrationService<MD extends ModelCfgs> {
       typeof codeModelVersion !== 'number' ||
       dataInCrossModelVersion === codeModelVersion
     ) {
-      pfLog(2, `${MigrationService.name}.${this.migrate.name}() no migration needed`, {
+      pfLog(2, `${MigrationService.L}.${this.migrate.name}() no migration needed`, {
         dataInCrossModelVersion,
         codeModelVersion,
       });
@@ -80,9 +82,11 @@ export class MigrationService<MD extends ModelCfgs> {
       // if (cfg?.crossModelBackwardMigrations) {
       //   // ...
       // }
-      throw new CanNotMigrateDownError(
-        'Saved model version is higher than current one and no backwards migrations available',
-      );
+      if (Math.floor(dataInCrossModelVersion) !== Math.floor(codeModelVersion)) {
+        throw new CanNotMigrateMajorDownError(
+          'Saved model version is higher than current one and no backwards migrations available',
+        );
+      }
     }
 
     return this._migrateUp(codeModelVersion, dataInCrossModelVersion, dataIn);
@@ -108,7 +112,7 @@ export class MigrationService<MD extends ModelCfgs> {
 
     pfLog(
       2,
-      `${MigrationService.name}.${this.migrate.name}() migrate ${dataInCrossModelVersion} to ${codeModelVersion}`,
+      `${MigrationService.L}.${this.migrate.name}() migrate ${dataInCrossModelVersion} to ${codeModelVersion}`,
       {
         migrationKeys,
         migrationsKeysToRun,

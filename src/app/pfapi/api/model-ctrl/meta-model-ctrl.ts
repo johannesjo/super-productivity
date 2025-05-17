@@ -24,6 +24,8 @@ export const DEFAULT_META_MODEL: LocalMeta = {
  * Handles client identification and provides meta information for the synchronization process.
  */
 export class MetaModelCtrl {
+  private static readonly L = 'MetaModelCtrl';
+
   static readonly META_MODEL_ID = DBNames.MetaModel;
   static readonly META_MODEL_REMOTE_FILE_NAME = DBNames.MetaModel;
   static readonly CLIENT_ID = DBNames.ClientId;
@@ -64,7 +66,7 @@ export class MetaModelCtrl {
     modelCfg: ModelCfg<MT>,
     isIgnoreDBLock = false,
   ): void {
-    pfLog(2, `${MetaModelCtrl.name}.${this.updateRevForModel.name}()`, modelId, {
+    pfLog(2, `${MetaModelCtrl.L}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
     });
@@ -104,10 +106,10 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When metamodel is invalid
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.name}.${this.save.name}()`, metaModel);
-    if (!metaModel.lastUpdate) {
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, metaModel);
+    if (typeof metaModel.lastUpdate !== 'number') {
       throw new InvalidMetaError(
-        `${MetaModelCtrl.name}.${this.save.name}()`,
+        `${MetaModelCtrl.L}.${this.save.name}()`,
         'lastUpdate not found',
       );
     }
@@ -127,7 +129,7 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When loaded data is invalid
    */
   async load(): Promise<LocalMeta> {
-    pfLog(3, `${MetaModelCtrl.name}.${this.load.name}()`, this._metaModelInMemory);
+    pfLog(3, `${MetaModelCtrl.L}.${this.load.name}()`, this._metaModelInMemory);
 
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
@@ -179,10 +181,10 @@ export class MetaModelCtrl {
     } catch (e) {
       if (e instanceof ClientIdNotFoundError) {
         const clientId = this._generateClientId();
-        pfLog(2, `${MetaModelCtrl.name} Create clientId ${clientId}`);
+        pfLog(2, `${MetaModelCtrl.L} Create clientId ${clientId}`);
         await this._saveClientId(clientId);
       } else {
-        pfLog(0, `${MetaModelCtrl.name} Error initializing clientId:`, e);
+        pfLog(0, `${MetaModelCtrl.L} Error initializing clientId:`, e);
       }
     }
   }
@@ -208,7 +210,7 @@ export class MetaModelCtrl {
    * @returns Promise that resolves when the save completes
    */
   private _saveClientId(clientId: string): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.name}.${this._saveClientId.name}()`, clientId);
+    pfLog(2, `${MetaModelCtrl.L}.${this._saveClientId.name}()`, clientId);
     this._clientIdInMemory = clientId;
     return this._db.save(MetaModelCtrl.CLIENT_ID, clientId, true);
   }
@@ -219,7 +221,7 @@ export class MetaModelCtrl {
    * @returns Generated client ID
    */
   private _generateClientId(): string {
-    pfLog(2, `${MetaModelCtrl.name}.${this._generateClientId.name}()`);
+    pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
   }
 }

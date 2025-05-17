@@ -17,7 +17,6 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { filter, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { TagService } from '../../features/tag/tag.service';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
@@ -82,7 +81,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
-  private readonly _tagService = inject(TagService);
   private readonly _renderer = inject(Renderer2);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);

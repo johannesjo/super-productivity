@@ -22,7 +22,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { Store } from '@ngrx/store';
 import { selectSyncConfig } from '../features/config/store/global-config.reducer';
-import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import {
+  concatMap,
+  distinctUntilChanged,
+  filter,
+  map,
+  shareReplay,
+} from 'rxjs/operators';
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
@@ -85,7 +91,10 @@ export class PfapiService {
     shareReplay(1),
   );
 
-  private readonly _commonAndLegacySyncConfig$ = this._store.select(selectSyncConfig);
+  private readonly _commonAndLegacySyncConfig$ =
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      concatMap(() => this._store.select(selectSyncConfig)),
+    );
 
   onLocalMetaUpdate$: Observable<LocalMeta> = fromPfapiEvent(
     this.pf.ev,

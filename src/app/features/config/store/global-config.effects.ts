@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, tap } from 'rxjs/operators';
+import { filter, pairwise, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -12,7 +12,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
-import { hideSideNav, toggleSideNav } from '../../../core-ui/layout/store/layout.actions';
+import { selectMiscConfig } from './global-config.reducer';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -133,17 +133,13 @@ export class GlobalConfigEffects {
 
   toggleNavOnMinimalNavChange$: any = createEffect(
     () =>
-      this._actions$.pipe(
-        ofType(updateGlobalConfigSection),
-        filter(({ sectionKey, sectionCfg }) => sectionKey === 'misc'),
-        // eslint-disable-next-line
-        filter(
-          ({ sectionKey, sectionCfg }) =>
-            sectionCfg && 'isUseMinimalNav' in (sectionCfg as MiscConfig),
-        ),
-        tap(({ sectionKey, sectionCfg }) => {
-          this._store.dispatch(hideSideNav());
-          this._store.dispatch(toggleSideNav());
+      this._store.select(selectMiscConfig).pipe(
+        pairwise(),
+        filter(([a, b]) => a.isUseMinimalNav !== b.isUseMinimalNav),
+        tap(() => {
+          console.log('AA');
+          // this._store.dispatch(hideSideNav());
+          // this._store.dispatch(toggleSideNav());
           window.dispatchEvent(new Event('resize'));
         }),
       ),

@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "13.0.4",
+  "version": "13.0.10",
   "description": "ToDo list and Time Tracking",
   "keywords": [
     "ToDo",
@@ -135,7 +135,7 @@
     "@capawesome/capacitor-android-dark-mode-support": "^7.0.0",
     "@capawesome/capacitor-background-task": "^7.0.1",
     "@csstools/stylelint-formatter-github": "^1.0.0",
-    "@electron/notarize": "^2.5.0",
+    "@electron/notarize": "^3.0.1",
     "@fontsource/roboto": "^4.5.8",
     "@nextcloud/cdav-library": "^1.5.3",
     "@ngrx/effects": "^19.0.0",

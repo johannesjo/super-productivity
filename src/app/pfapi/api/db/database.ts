@@ -2,6 +2,8 @@ import { DatabaseAdapter } from './database-adapter.model';
 import { pfLog } from '../util/log';
 
 export class Database {
+  private static readonly L = 'Database';
+
   private _lastParams?: { a: string; key?: string; data?: unknown };
   private _isLocked: boolean = false;
   private readonly _adapter: DatabaseAdapter;
@@ -14,12 +16,12 @@ export class Database {
   }
 
   lock(): void {
-    pfLog(2, `${Database.name}.${this.lock.name}()`);
+    pfLog(2, `${Database.L}.${this.lock.name}()`);
     this._isLocked = true;
   }
 
   unlock(): void {
-    pfLog(2, `${Database.name}.${this.unlock.name}()`);
+    pfLog(2, `${Database.L}.${this.unlock.name}()`);
     this._isLocked = false;
   }
 
@@ -103,7 +105,7 @@ export class Database {
     fn: (...args: any[]) => Promise<any>,
     args: any[],
   ): Promise<void> {
-    pfLog(0, `${Database.name}.${this._errorHandler.name}()`, e, fn.name, args);
+    pfLog(0, `${Database.L}.${this._errorHandler.name}()`, e, fn.name, args);
     this._onError(e);
     throw e; // Rethrow to allow caller to handle
   }

@@ -1,0 +1,5 @@
+
+### Bug Fixes
+
+* make improvement model stuff optional #4385
+* make open project validation even more lenient 2  #4360

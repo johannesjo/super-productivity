@@ -10,6 +10,8 @@ export interface LocalFileSyncElectronPrivateCfg extends SyncProviderPrivateCfgB
 }
 
 export class LocalFileSyncElectron extends LocalFileSyncBase {
+  private static readonly L = 'LocalFileSyncElectron';
+
   constructor() {
     super(new ElectronFileAdapter());
   }
@@ -36,23 +38,20 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
   }
 
   private async _checkDirAndOpenPickerIfNotExists(): Promise<void> {
-    pfLog(
-      2,
-      `${LocalFileSyncElectron.name}.${this._checkDirAndOpenPickerIfNotExists.name}`,
-    );
+    pfLog(2, `${LocalFileSyncElectron.L}.${this._checkDirAndOpenPickerIfNotExists.name}`);
 
     try {
       const folderPath = await this._getFolderPath();
       const isDirExists = await this._checkDirExists(folderPath);
 
       if (!isDirExists) {
-        pfLog(0, `${LocalFileSyncElectron.name} - No valid directory, opening picker`);
+        pfLog(0, `${LocalFileSyncElectron.L} - No valid directory, opening picker`);
         await this.pickDirectory();
       }
     } catch (err) {
       pfLog(
         1,
-        `${LocalFileSyncElectron.name}.${this._checkDirAndOpenPickerIfNotExists.name}() error`,
+        `${LocalFileSyncElectron.L}.${this._checkDirAndOpenPickerIfNotExists.name}() error`,
         err,
       );
       await this.pickDirectory();
@@ -78,13 +77,13 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
       }
       return r;
     } catch (e) {
-      pfLog(0, `${LocalFileSyncElectron.name}.${this._checkDirExists.name}() error`, e);
+      pfLog(0, `${LocalFileSyncElectron.L}.${this._checkDirExists.name}() error`, e);
       return false;
     }
   }
 
   async pickDirectory(): Promise<string | void> {
-    pfLog(2, `${LocalFileSyncElectron.name}.pickDirectory()`);
+    pfLog(2, `${LocalFileSyncElectron.L}.pickDirectory()`);
 
     try {
       const dir = await (window as any).ea.pickDirectory();
@@ -93,7 +92,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
       }
       return dir;
     } catch (e) {
-      pfLog(0, `${LocalFileSyncElectron.name}.pickDirectory() error`, e);
+      pfLog(0, `${LocalFileSyncElectron.L}.pickDirectory() error`, e);
       throw e;
     }
   }
