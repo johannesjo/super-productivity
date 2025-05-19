@@ -105,7 +105,7 @@
     @if (!(globalConfigService.cfg$ | async)?.focusMode?.isAlwaysUseFocusMode) {
       <button
         mat-icon-button
-        matTooltip="Enter focus mode {{
+        matTooltip="{{ T.MH.GO_TO_FOCUS_MODE | translate }} {{
           kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
         }}"
         class="hide-xxs"
