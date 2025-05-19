@@ -2,11 +2,21 @@
   mat-stretch-tabs="false"
   dynamicHeight="true"
   cdkScrollable
-  (selectedIndexChange)="selectedTabIndex.set($event)"
+  (selectedIndexChange)="onTabChange($event)"
   [selectedIndex]="selectedTabIndex()"
 >
   @for (board of boards(); track board.id) {
-    <mat-tab [label]="board.title | translate">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span [id]="board.id">
+          {{ board.title | translate }}
+        </span>
+        <span
+          class="menu-trigger"
+          #menuTrigger="matMenuTrigger"
+          [matMenuTriggerFor]="contextMenu"
+        ></span>
+      </ng-template>
       <ng-template matTabContent>
         <board
           [boardCfg]="board"
@@ -14,6 +24,10 @@
         ></board>
       </ng-template>
     </mat-tab>
+    <mat-menu #contextMenu="matMenu">
+      <button mat-menu-item>Rename</button>
+      <button mat-menu-item>Duplicate</button>
+    </mat-menu>
   }
 
   <mat-tab>
