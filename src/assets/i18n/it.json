@@ -224,7 +224,7 @@
         "SCOPE_ALL": "Tutti",
         "SCOPE_ASSIGNED": "Assegnate a me",
         "SCOPE_CREATED": "Create da me",
-        "TOKEN": "Access Token"
+        "TOKEN": "Token di accesso"
       },
       "FORM_SECTION": {
         "HELP": "<p>Qui è possibile configurare SuperProductivity in modo che elenchi le issue aperte di Gitea per uno specifico repository nel pannello di creazione delle attività nella vista di pianificazione giornaliera. Saranno elencati come suggerimenti e forniranno un link all'issue e ulteriori informazioni su di esso.</p> <p>Inoltre è possibile aggiungere e importare automaticamente tutte le issue aperte.</p><p>Per superare i limiti di utilizzo e accedere è possibile fornire un token di accesso.",
@@ -242,7 +242,7 @@
         "WRITE_A_COMMENT": "Scrivi un commento"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Errore sconosciuto {{statusCode}} {{errorMsg}}. Hai forse raggiunto il limite di chiamata Api?"
+        "ERR_UNKNOWN": "Gitea: Errore sconosciuto {{statusCode}} {{errorMsg}}. Hai forse raggiunto il limite di chiamata API?"
       }
     },
     "GITHUB": {
@@ -264,7 +264,7 @@
         "ASSIGNEE": "Assegnatario",
         "AT": "a",
         "DESCRIPTION": "Descrizione",
-        "LABELS": "Etichetta",
+        "LABELS": "Etichette",
         "LAST_COMMENT": "Ultimo commento",
         "LOAD_ALL_COMMENTS": "Carica tutti i {{nr}} commenti",
         "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Carica descrizione & tutti i commenti",
@@ -275,7 +275,7 @@
       },
       "S": {
         "CONFIG_ERROR": "GitHub: Errore durante la mappatura dati. Il nome del tuo repository è corretto?",
-        "ERR_UNKNOWN": "GitHub: Errore sconosciuto {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "GitHub: Errore sconosciuto {{statusCode}} {{errorMsg}}. Limite di frequenza API superato?"
       }
     },
     "GITLAB": {
@@ -317,7 +317,7 @@
         "ASSIGNEE": "Assegnatario",
         "AT": "a",
         "DESCRIPTION": "Descrizione",
-        "LABELS": "Etichetta",
+        "LABELS": "Etichette",
         "MARK_AS_CHECKED": "Segna gli aggiornamenti come verificati",
         "PROJECT": "Progetto",
         "STATUS": "Stato",
@@ -449,6 +449,7 @@
         "COMMENTS": "Commenti",
         "COMPONENTS": "Componenti",
         "DESCRIPTION": "Descrizione",
+        "LABELS": "Etichette",
         "LIST_OF_CHANGES": "Lista delle modifiche",
         "MARK_AS_CHECKED": "Segna gli aggiornamenti come verificati",
         "ON": "su",
@@ -502,7 +503,7 @@
         "NO_ADDITIONAL_DATA_YET": "Nessun dato aggiuntivo raccolto. Usa il form nel pannello riepilogo giornaliero \"Valutazione\" per aggiungerlo.",
         "OBSTRUCTION_SELECTION_COUNT": "Numero di volte in cui è stato selezionato un fattore ostruente",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Fare clic su Contatori nel tempo",
-        "SIMPLE_COUNTERS": "Contatori semplici",
+        "SIMPLE_COUNTERS": "Contatori semplici & Tracciamento abitudini",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Contatori cronometro nel tempo",
         "TASKS_DONE_CREATED": "Attività (completate/create)",
         "TIME_ESTIMATED": "Tempo stimato",
@@ -531,7 +532,7 @@
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Scrivi del testo per salvarlo come nota..."
+        "NOTE_LABEL": "Inserisci del testo da salvare come nota (puoi usare markdown)..."
       },
       "D_FULLSCREEN": {
         "VIEW_PARSED": "Vedi come markdown formattato (non modificabile)",
@@ -580,7 +581,7 @@
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Scegli lo stato da assegnare",
         "CURRENT_ASSIGNEE": "Assegnato a:",
-        "CURRENT_STATUS": "Statu attuale:",
+        "CURRENT_STATUS": "Stato attuale:",
         "PERCENTAGE_DONE": "Avanzamento:",
         "TASK_NAME": "Nome attività:",
         "TITLE": "OpenProject: Aggiorna Stato",
@@ -608,9 +609,9 @@
         "ASSIGNEE": "Assegnatario",
         "DESCRIPTION": "Descrizione",
         "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
-        "STATUS": "stato",
-        "SUMMARY": "sommario",
-        "TYPE": "genere"
+        "STATUS": "Stato",
+        "SUMMARY": "Sommario",
+        "TYPE": "Tipo"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pacchetto di lavoro",
@@ -621,7 +622,7 @@
         "POST_TIME_SUCCESS": "OpenProject: inserimento dell'ora creato con successo per {{issueTitle}}",
         "TRANSITION": "OpenProject: Imposta issue \"{{issueKey}}\" a \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Imposta issue {{issueKey}} a <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transizione caricata. Use i selettori sotto per assegnarli"
+        "TRANSITIONS_LOADED": "Transizione caricata. Usa i selettori sotto per assegnarli"
       }
     },
     "PLANNER": {
@@ -640,7 +641,7 @@
       "S": {
         "REMOVED_PLAN_DATE": "Rimossa la data di pianificazione per l'attività '{{taskTitle}}'",
         "TASK_ALREADY_PLANNED": "Attività già pianificata per {{date}} ",
-        "TASK_PLANNED_FOR": "Attività pianificata per il {{date}}"
+        "TASK_PLANNED_FOR": "Attività pianificata per <strong>{{date}}</strong>{{extra}}"
       },
       "TASK_DRAWER": "Disegnatore di attività"
     },
@@ -666,7 +667,7 @@
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Torna al lavoro!",
       "COMP": {
-        "INTRO": "Prenderti cura di te stesso è sempre una buona idea. Migliora la tua autostima, i sentimenti positivi e può aiutarti ad evitare la procastinazione. Prova a fare un po' di esercizio:",
+        "INTRO": "Le persone con alti livelli di procrastinazione di solito hanno una bassa auto-compassione. Quindi praticala! Migliora il tuo senso di autostima, favorisce emozioni positive e può aiutarti a superare la procrastinazione. Prova un piccolo esercizio:",
         "L1": "Siediti e fai un po' di stretching, se ne hai voglia, rilassati un po'",
         "L2": "Prova ad ascoltare i tuoi pensieri e le emozioni che ne scaturiscono",
         "L3": "Rispondi a te stesso nello stesso modo in cui risponderesti ad un amico?",
@@ -693,7 +694,7 @@
         "TITLE": "Introduzione"
       },
       "P1": "Prima di tutto rilassati! Tutti ne hanno bisogno ogni tanto. E se non stai facendo quello che dovresti fare, dovresti almeno godertelo! Nelle sezioni sottostanti troverai risorse utili.",
-      "P2": "Ricorda: La procastinazione è un problema di regolazione delle emozioni, non un problema di gestione del tempo.",
+      "P2": "Ricorda: <b>La procastinazione è un problema di regolazione delle emozioni, non un problema di gestione del tempo.</b> Questo significa che rimproverarti non è la soluzione, ma parte del problema. Lascia che questo concetto ti entri in testa e poi controlla le altre schede qui per ulteriore aiuto.",
       "REFRAME": {
         "INTRO": "Pensa a ciò che potrebbe essere positivo riguardo l'attività, nonostante tutto.",
         "TITLE": "Ricontestualizzazione",
@@ -712,7 +713,7 @@
         "CREATE": "Crea progetto",
         "EDIT": "Modifica progetto",
         "SETUP_CALDAV": "Configurazione integrazione Caldav",
-        "SETUP_GIT": "Configura integrazione Githun",
+        "SETUP_GIT": "Configura integrazione GitHub",
         "SETUP_GITEA_PROJECT": "Configura integrazione Gitea",
         "SETUP_GITLAB": "Configura integrazione GitLab",
         "SETUP_JIRA": "Configura integrazione Jira",
@@ -767,13 +768,13 @@
         "TITLE": "Imposta Redmine per il Progetto"
       },
       "FORM": {
-        "API_KEY": "API access key",
+        "API_KEY": "Chiave di accesso API",
         "HOST": "Host (es.: https://redmine.org)",
         "PROJECT_ID": "Identificatore progetto",
         "PROJECT_ID_DESCRIPTION": "Può essere trovato come parte dell'url, quando si visualizza il progetto nel Browser.",
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
-        "SCOPE_ASSIGNED": "Assignate a me",
+        "SCOPE_ASSIGNED": "Assegnate a me",
         "SCOPE_CREATED": "Create da me"
       },
       "FORM_SECTION": {
@@ -798,7 +799,7 @@
         "TXT": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altre attività sono scadute)"
       },
-      "S_ACTIVE_TASK_DUE": "L'attvità su cui stai lavorando è scaduta!<br/> ({{title}})",
+      "S_ACTIVE_TASK_DUE": "L'attività su cui stai lavorando è scaduta!<br/> ({{title}})",
       "S_REMINDER_ERR": "Errore per interfaccia promemoria"
     },
     "SCHEDULE": {
@@ -832,11 +833,11 @@
         "CURRENT_STREAK": "Serie corrente",
         "DAILY_GOAL": "Obiettivo giornaliero",
         "DAYS": "Giorni",
-        "L_COUNTER": "Contare"
+        "L_COUNTER": "Conteggio per oggi"
       },
       "FORM": {
-        "ADD_NEW": "Aggiungi un semplice contatore",
-        "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato, facendo clic su di esso.",
+        "ADD_NEW": "Aggiungi contatore semplice/abitudine",
+        "HELP": "Qui puoi configurare semplici pulsanti che appariranno in alto a destra. Possono essere timer o solo un semplice contatore, che viene contato facendo clic su di esso. Abilitando 'Traccia serie' puoi usarli per il tracciamento delle abitudini.",
         "L_COUNTDOWN_DURATION": "Durata conto alla rovescia",
         "L_DAILY_GOAL": "Obiettivo giornaliero",
         "L_ICON": "Icona",
@@ -845,8 +846,8 @@
         "L_TITLE": "Titolo",
         "L_TRACK_STREAKS": "Traccia serie",
         "L_TYPE": "Tipo",
-        "L_WEEKDAYS": "Giorni della settimana",
-        "TITLE": "Contatori semplici",
+        "L_WEEKDAYS": "Giorni della settimana da controllare per la serie",
+        "TITLE": "Contatori semplici & Tracciamento abitudini",
         "TYPE_CLICK_COUNTER": "Contatore clic",
         "TYPE_REPEATED_COUNTDOWN": "Conto alla rovescia ripetuto",
         "TYPE_STOPWATCH": "Cronometro"
@@ -940,7 +941,7 @@
         },
         "TITLE": "Sincronizzazione",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Sperimentale !!</strong> Per fare in modo che funzioni, devi disabilitare o limitare CORS per la tua istanza Nextcloud, che può avere implicazioni negative per la sicurezza! Per ulteriori informazioni, <a href='https://github.com/nextcloud/server/issues/3131'>fai riferimento a questo thread</a> . Utilizzare a proprio rischio!",
+          "CORS_INFO": "<strong>Per farlo funzionare nel browser:</strong> Per far funzionare questo nel browser devi inserire Super Productivity nella whitelist per le richieste CORS per la tua istanza Nextcloud. Questo può avere implicazioni negative per la sicurezza! <a href='https://github.com/nextcloud/server/issues/3131'>Fai riferimento a questo thread per maggiori informazioni</a>. Un approccio per farlo funzionare su mobile è inserire nella whitelist \"https://app.super-productivity.com\" tramite l'app nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Usa a tuo rischio e pericolo!</p>",
           "L_BASE_URL": "URL di base",
           "L_PASSWORD": "Password",
           "L_SYNC_FOLDER_PATH": "Sincronizza percorso cartella",
@@ -963,7 +964,7 @@
         "SUCCESS_DOWNLOAD": "Dati sincronizzati da remoto",
         "SUCCESS_IMPORT": "Dati importati",
         "SUCCESS_VIA_BUTTON": "Dati sincronizzati con successo",
-        "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione. Si prega di controllare la console.",
+        "UNKNOWN_ERROR": "Errore sconosciuto durante la sincronizzazione: {{err}}",
         "UPLOAD_ERROR": "Errore di caricamento sconosciuto (impostazioni corrette?): {{err}}"
       }
     },
@@ -990,7 +991,7 @@
         "UPDATED": "Impostazioni dell'etichetta aggiornate"
       },
       "TTL": {
-        "ADD_NEW_TAG": "Ახალი ტეგის დამატება"
+        "ADD_NEW_TAG": "Aggiungi nuova etichetta"
       }
     },
     "TASK": {
@@ -1086,8 +1087,8 @@
         "SNOOZE_ALL": "Posticipa tutto",
         "START": "Inizia attività",
         "SWITCH_CONTEXT_START": "Cambia progetto & inizia attività",
-        "UNSCHEDULE": "Დაუგეგმავი",
-        "UNSCHEDULE_ALL": "Ყველა"
+        "UNSCHEDULE": "Rimuovi pianificazione",
+        "UNSCHEDULE_ALL": "Rimuovi tutte le pianificazioni"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Sposta attività negli arretrati finché non viene pianificata",
@@ -1128,7 +1129,7 @@
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Impossibile assegnare il progetto tramite la sintassi breve per le attività ripetibili!",
-        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "CREATED_FOR_PROJECT": "Creata attività \"{{taskTitle}}\" per il progetto \"{{projectTitle}}\"",
         "CREATED_FOR_PROJECT_ACTION": "Vai al Progetto",
         "DELETED": "Attività \"{{title}} eliminata\"",
         "FOUND_MOVE_FROM_BACKLOG": "Attività <strong>{{title}}</strong> spostata dagli arretrati alla lista delle attività di oggi",
@@ -1136,9 +1137,9 @@
         "FOUND_RESTORE_FROM_ARCHIVE": "Ripristinata attività <strong>{{title}}</strong> relativa all'issue dall'archivio",
         "LAST_TAG_DELETION_WARNING": "Stai cercando di rimuovere l'ultimo tag di un'attività non di progetto. Questo non è permesso!",
         "MOVED_TO_ARCHIVE": "Spostato {{nr}} attività nell'archivio",
-        "MOVED_TO_PROJECT": "\"{{taskTitle}}\"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT": "Spostata attività \"{{taskTitle}}\" al progetto \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Vai al Progetto",
-        "REMINDER_ADDED": "Pianificata attività \"{{title}}\"",
+        "REMINDER_ADDED": "Pianificata attività <strong>{{title}}</strong> alle <strong>{{date}}</strong>{{extra}}",
         "REMINDER_DELETED": "Cancellato promemoria per attività",
         "REMINDER_UPDATED": "Aggiornato promemoria per attività \"{{title}}\"",
         "TASK_CREATED": "Creata attività \"{{title}}\""
@@ -1342,7 +1343,7 @@
     "DURATION_DESCRIPTION": "es. \"5h 23m\" diventerà 5 ore e 23 minuti",
     "EDIT": "Modifica",
     "ENABLED": "Abilitato",
-    "EXAMPLE_VAL": "clicca per modificare",
+    "EXAMPLE_VAL": "es. 32m",
     "EXTENSION_INFO": "Per favore <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> scarica l'estensione di chrome</a> per permettere la comunicazione con le api di Jira e la gestione del tempo inattivo. Nota che non funziona su dispositivi mobile.",
     "HIDE": "Nascondi",
     "ICON_INP_DESCRIPTION": "Tutte le emoji utf-8 sono supportate!",
@@ -1356,10 +1357,10 @@
     "NO_CON": "Attualmente sei offline. Per favore, riconnettiti ad internet.",
     "NONE": "Nessuna",
     "OK": "Ok",
-    "OVERDUE": "Overdue",
+    "OVERDUE": "Scaduto",
     "PREVIOUS": "Precedente",
     "REMOVE": "Rimuovi",
-    "RESET": "Reset",
+    "RESET": "Azzera",
     "SAVE": "Salva",
     "SUBMIT": "Invia",
     "TITLE": "Titolo",
@@ -1753,6 +1754,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Aggiungi attività pianificate per domani ({{nr}})",
     "ADD_SOME_TASKS": "Aggiungi qualche attività per pianificare la tua giornata!",
     "DONE_TASKS": "Attività completate",
+    "DONE_TASKS_IN_ARCHIVE": "Non ci sono attività completate qui, ma ce ne sono alcune già archiviate.",
     "ESTIMATE_REMAINING": "Stima il rimanente:",
     "FINISH_DAY": "Termina giorno",
     "FINISH_DAY_FOR_PROJECT": "Termina giorno per questo progetto",
