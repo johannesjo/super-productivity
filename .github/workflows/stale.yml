@@ -9,8 +9,8 @@ jobs:
     steps:
       - uses: actions/stale@v9
         with:
-          days-before-stale: 120
+          days-before-stale: 180
           days-before-close: 14
-          stale-issue-message: 'This issue has not received any updates in 90 days. Please comment, if this still relevant!'
-          stale-pr-message: 'This PR has not received any updates in 90 days. Please comment, if this still relevant!'
+          stale-issue-message: 'This issue has not received any updates in 180 days. Please comment, if this still relevant!'
+          stale-pr-message: 'This PR has not received any updates in 180 days. Please comment, if this still relevant!'
           days-before-pr-close: -1
