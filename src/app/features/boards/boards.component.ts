@@ -1,14 +1,19 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   effect,
   inject,
+  OnDestroy,
   signal,
+  viewChild,
 } from '@angular/core';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { Store } from '@ngrx/store';
 import { T } from '../../t.const';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { BoardComponent } from './board/board.component';
 import { CdkScrollable } from '@angular/cdk/overlay';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -23,6 +28,7 @@ import { DEFAULT_BOARD_CFG } from './boards.const';
   selector: 'boards',
   standalone: true,
   imports: [
+    MatMenuModule,
     MatTabGroup,
     MatTab,
     MatIcon,
@@ -38,7 +44,8 @@ import { DEFAULT_BOARD_CFG } from './boards.const';
   styleUrl: './boards.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardsComponent {
+export class BoardsComponent implements AfterViewInit, OnDestroy {
+  readonly contextMenuTrigger = viewChild.required<MatMenuTrigger>('menuTrigger');
   store = inject(Store);
   selectedTabIndex = signal(localStorage.getItem(LS.SELECTED_BOARD) || 0);
 
@@ -47,9 +54,26 @@ export class BoardsComponent {
 
   DEFAULT_BOARD_CFG = DEFAULT_BOARD_CFG;
 
-  constructor() {
+  constructor(private elementRef: ElementRef) {
     effect(() => {
       localStorage.setItem(LS.SELECTED_BOARD, this.selectedTabIndex().toString());
+    });
+  }
+  ngAfterViewInit(): void {
+    const boardTabEls = this.elementRef.nativeElement.querySelectorAll(
+      'mat-tab-header [id*="mat-tab-group"]',
+    );
+    boardTabEls.forEach((element: HTMLElement) => {
+      element.addEventListener('click', this.tabClick.bind(this));
+    });
+  }
+
+  ngOnDestroy(): void {
+    const boardTabEls = this.elementRef.nativeElement.querySelectorAll(
+      'mat-tab-header [id*="mat-tab-group"]',
+    );
+    boardTabEls.forEach((element: HTMLElement) => {
+      element.removeEventListener('click', this.tabClick.bind(this));
     });
   }
 
@@ -60,5 +84,25 @@ export class BoardsComponent {
     setTimeout(() => {
       this.selectedTabIndex.set(newIndex);
     });
+  }
+
+  // Tab change happens before the click event gets to the callback.
+  // We need to delay updating the selected tab index until the click event has completed
+  // propagation.
+  onTabChange(index: number): void {
+    setTimeout(() => this.selectedTabIndex.set(index));
+  }
+
+  tabClick(event: MouseEvent): void {
+    const activeTabIdx = this.selectedTabIndex();
+    // Get the element where the click event is attached, not the actual element
+    // that receives the click
+    const el = event.currentTarget as HTMLElement;
+    const clickedTabIdx = el.id.substring(el.id.length - 1);
+    if (parseInt(clickedTabIdx) == activeTabIdx) {
+      // Open context menu
+      console.log('Active tab clicked');
+      this.contextMenuTrigger().openMenu();
+    }
   }
 }
