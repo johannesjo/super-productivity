@@ -1,6 +1,6 @@
 {
   "ANDROID": {
-  "NOTIFICATIONS": {
+    "NOTIFICATIONS": {
       "SYNC_CONFLICT_MSG": "確認して何をするか決めてください。",
       "SYNC_CONFLICT_TITLE": "同期の競合が発生しました"
     },
@@ -63,7 +63,7 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "完了",
-        "EISENHAUER_MATRIX": "アイゼンハウアーマトリックス",
+        "EISENHAUER_MATRIX": "アイゼンハワーマトリクス",
         "IMPORTANT": "重要",
         "IN_PROGRESS": "進行中",
         "KANBAN": "カンバン",
@@ -76,10 +76,10 @@
       },
       "FORM": {
         "ADD_NEW_PANEL": "新しいパネルを追加",
-        "BACKLOG_TASK_FILTER_ALL": "すべての",
-        "BACKLOG_TASK_FILTER_NO_BACKLOG": "除外する",
+        "BACKLOG_TASK_FILTER_ALL": "すべて",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "除外",
         "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "バックログのみ",
-        "BACKLOG_TASK_FILTER_TYPE": "バックログ タスク",
+        "BACKLOG_TASK_FILTER_TYPE": "バックログタスク",
         "COLUMNS": "列",
         "TAGS_EXCLUDED": "除外するタグ",
         "TAGS_REQUIRED": "必須にするタグ",
@@ -192,12 +192,12 @@
       "FOR_TASK": "フォーカスするタスク",
       "GET_READY": "フォーカスセッションの準備をしましょう!",
       "GO_TO_PROCRASTINATION": "気が散るときはどうすればいい？",
-      "GOGOGO": "やるぞ、やるぞ、やるぞー！",
+      "GOGOGO": "やりましょう！",
       "NEXT": "次のタスク",
       "ON": "でした",
       "OPEN_ISSUE_IN_BROWSER": "ブラウザで課題を開く",
       "POMODORO_BACK": "戻る",
-      "POMODORO_DISABLE": "ポモドーロを無効にする",
+      "POMODORO_DISABLE": "ポモドーロタイマーを無効にする",
       "POMODORO_INFO": "ポモドーロタイマーとフォーカスセッションを併用することはできません。",
       "PREP_GET_MENTALLY_READY": "集中して生産的になるためにメンタルを整えましょう",
       "PREP_SIT_UPRIGHT": "まっすぐに座りましょう(または立ちましょう)",
@@ -231,7 +231,7 @@
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "譲受人",
+        "ASSIGNEE": "担当者",
         "AT": "で",
         "DESCRIPTION": "説明",
         "LABELS": "ラベル",
@@ -334,9 +334,9 @@
         "ISSUE_STR": "課題",
         "ISSUES_STR": "課題"
       },
-      "DEFAULT_PROJECT_DESCRIPTION": "課題から作成されたタスクに割り当てられたプロジェクト",
+      "DEFAULT_PROJECT_DESCRIPTION": "課題から作成されたタスクに割り当てられるプロジェクト",
       "DEFAULT_PROJECT_LABEL": "デフォルトのSuper Productivityプロジェクト",
-      "HOW_TO_GET_A_TOKEN": "トークンの入手方法は？",
+      "HOW_TO_GET_A_TOKEN": "トークンの取得方法は？",
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} エラー： {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}：クライアント側のネットワークエラーが原因でリクエストが失敗しました",
@@ -492,21 +492,21 @@
         "AVG_BREAKS_PER_DAY": "一日あたりの平均休憩回数",
         "AVG_TASKS_PER_DAY_WORKED": "一日あたりの平均タスク数",
         "AVG_TIME_SPENT_ON_BREAKS": "平均休憩時間",
-        "AVG_TIME_SPENT_PER_DAY": "一日あたりの平均消費時間",
-        "AVG_TIME_SPENT_PER_TASK": "タスクあたりの平均消費時間",
+        "AVG_TIME_SPENT_PER_DAY": "1日の平均作業実績時間",
+        "AVG_TIME_SPENT_PER_TASK": "タスクあたりの平均作業実績時間",
         "COUNTING_SUBTASKS": "（サブタスク数）",
-        "DAYS_WORKED": "稼動日数",
+        "DAYS_WORKED": "稼働日数",
         "GLOBAL_METRICS": "グローバルメトリクス",
         "IMPROVEMENT_SELECTION_COUNT": "改善要因が選択された回数",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "時間とともに気分と生産性",
-        "NO_ADDITIONAL_DATA_YET": "追加データはまだ収集されていません。そのためには、日次要約の「評価」パネルのフォームを使用してください。",
-        "OBSTRUCTION_SELECTION_COUNT": "妨害要因が選択された回数",
-        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "時間の経過とともにカウンターをクリックします",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "気分と生産性の推移",
+        "NO_ADDITIONAL_DATA_YET": "追加データはまだ収集されていません。日次要約の「評価」パネルのフォームを使用してください。",
+        "OBSTRUCTION_SELECTION_COUNT": "阻害要因が選択された回数",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "カウンターのクリック数の推移",
         "SIMPLE_COUNTERS": "シンプルなカウンター",
-        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "時間の経過とともにストップウォッチカウンター",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "ストップウォッチカウンターのクリック数の推移",
         "TASKS_DONE_CREATED": "タスク（完了/作成済み）",
         "TIME_ESTIMATED": "推定時間",
-        "TIME_SPENT": "使った時間"
+        "TIME_SPENT": "作業実績時間"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "明日のメモを追加",
@@ -548,7 +548,7 @@
         "NO_NOTES": "現在、メモはありません"
       },
       "S": {
-        "NOTE_ADDED": "保存されたノート"
+        "NOTE_ADDED": "保存されたメモ"
       }
     },
     "OPEN_PROJECT": {
@@ -639,13 +639,13 @@
       },
       "S": {
         "REMOVED_PLAN_DATE": "タスク「{{taskTitle}}」の計画日が削除されました。",
-        "TASK_ALREADY_PLANNED": "タスクはすでに {{date}}で計画されている。",
+        "TASK_ALREADY_PLANNED": "タスクはすでに {{date}}で計画されています。",
         "TASK_PLANNED_FOR": " <strong>{{date}}</strong>{{extra}}に予定されているタスク"
       },
       "TASK_DRAWER": "タスクドロワー"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "仕事に戻る！",
+      "BACK_TO_WORK": "仕事に戻りましょう！",
       "BREAK_IS_DONE": "休憩時間が終わりました！",
       "ENJOY_YOURSELF": "楽しんで、体を動かして、また戻ってきてね：",
       "FINISH_SESSION_X": "セッション <strong>{{nr}}</strong>が正常に終了しました。",
@@ -664,7 +664,7 @@
       "START_BREAK": "休憩開始"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "仕事に戻る！",
+      "BACK_TO_WORK": "仕事に戻りましょう！",
       "COMP": {
         "INTRO": "自分自身を思いやるのはよい考えです。自己効力感を高め、前向きな感情を育み、そしてもちろん先延ばしの克服にも役立ちます。ちょっとしたエクササイズを試してみましょう：",
         "L1": "少し座って、体を伸ばします。よければ、少し落ち着いてみましょう。",
@@ -758,9 +758,9 @@
       }
     },
     "QUICK_HISTORY": {
-      "NO_DATA": "今年度のデータはありません",
+      "NO_DATA": "今年のデータはありません",
       "PAGE_TITLE": "クイックヒストリー",
-      "WEEK_TITLE": "週 {{nr}} （{{timeSpent}}）"
+      "WEEK_TITLE": "{{nr}}週目 （{{timeSpent}}）"
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
@@ -825,8 +825,8 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "単純なカウンターを削除すると、そのカウンターで追跡されている過去のデータもすべて削除されます。続行してもよろしいですか？",
-        "OK": "やれ！"
+        "MSG": "シンプルカウンターを削除すると、そのカウンターで記録されている過去のデータもすべて削除されます。続行してもよろしいですか？",
+        "OK": "OK"
       },
       "D_EDIT": {
         "CURRENT_STREAK": "現在のストリーク",
@@ -835,25 +835,25 @@
         "L_COUNTER": "カウント"
       },
       "FORM": {
-        "ADD_NEW": "シンプルなカウンターを追加",
+        "ADD_NEW": "シンプルカウンターを追加",
         "HELP": "ここで、右上に表示されるシンプルなボタンを設定できます。タイマー、またはクリックするだけでカウントアップされる単純なカウンターのいずれかです。",
         "L_COUNTDOWN_DURATION": "カウントダウン時間",
-        "L_DAILY_GOAL": "連勝のための日々の目標",
+        "L_DAILY_GOAL": "1日の目標",
         "L_ICON": "アイコン",
         "L_ICON_ON": "切り替え時のアイコン",
         "L_IS_ENABLED": "有効",
         "L_TITLE": "タイトル",
-        "L_TRACK_STREAKS": "トラックストリーク",
+        "L_TRACK_STREAKS": "ストリークを計測する",
         "L_TYPE": "タイプ",
-        "L_WEEKDAYS": "平日の連休チェック",
-        "TITLE": "シンプルなカウンター",
-        "TYPE_CLICK_COUNTER": "カウンターをクリック",
+        "L_WEEKDAYS": "ストリークを計測する曜日",
+        "TITLE": "シンプルカウンター",
+        "TYPE_CLICK_COUNTER": "クリックカウンター",
         "TYPE_REPEATED_COUNTDOWN": "繰り返しカウントダウン",
         "TYPE_STOPWATCH": "ストップウォッチ"
       },
       "S": {
         "GOAL_REACHED_1": "今日の目標は達成した！",
-        "GOAL_REACHED_2": "現在の連勝期間"
+        "GOAL_REACHED_2": "現在のストリーク"
       }
     },
     "SYNC": {
@@ -1004,8 +1004,8 @@
         "CREATE_TASK": "新しいタスクを作成する",
         "EXAMPLE": "例：「Some task title + projectName #some-tag #some-other-tag 10m / 3h」",
         "START": "もう一度Enterキーを押して開始します",
-        "TOGGLE_ADD_TO_BACKLOG_TODAY": "タスクのバックログへの追加／今日のリストへの追加を切り替える",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "タスクをリストの一番上と一番下に追加するトグル"
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "タスクをバックログへ追加するか、今日のリストへ追加するかを切り替える",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "タスクをリストの1番上に追加するか、1番下に追加するかを切り替える"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
@@ -1033,12 +1033,12 @@
         "ADD_TO_PROJECT": "プロジェクトに追加",
         "CONVERT_TO_PARENT_TASK": "親タスクに変換",
         "DELETE": "タスクを削除",
-        "DELETE_REPEAT_INSTANCE": "繰り返されるタスクインスタンスの削除",
+        "DELETE_REPEAT_INSTANCE": "繰り返しタスクのインスタンスを削除",
         "DROP_ATTACHMENT": "ここにドロップして\"{{title}}\"に添付",
         "EDIT_SCHEDULED": "リマインダーを編集",
         "EDIT_TAGS": "タグを編集",
-        "EDIT_TASK_TITLE": "編集タイトル",
-        "FOCUS_SESSION": "フォーカス・セッション開始",
+        "EDIT_TASK_TITLE": "タイトルを編集",
+        "FOCUS_SESSION": "フォーカスセッションを開始",
         "MARK_DONE": "完了としてマーク",
         "MARK_UNDONE": "未完了としてマーク",
         "MOVE_TO_BACKLOG": "バックログに移す",
@@ -1046,18 +1046,18 @@
         "MOVE_TO_TODAY": "今日のリストに移す",
         "OPEN_ATTACH": "ファイルまたはリンクを添付",
         "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
-        "OPEN_TIME": "見積もり時間/消費時間の編集",
+        "OPEN_TIME": "見積もり時間/作業実績時間の編集",
         "REMOVE_FROM_MY_DAY": "今日から削除",
-        "REPEAT_EDIT": "繰り返しタスク設定の編集",
-        "SCHEDULE": "タスクのスケジュール",
+        "REPEAT_EDIT": "繰り返しタスクを編集",
+        "SCHEDULE": "タスクをスケジュール",
         "SHOW_UPDATES": "更新を表示",
         "TOGGLE_ATTACHMENTS": "添付ファイルの表示/非表示",
         "TOGGLE_DETAIL_PANEL": "追加情報を表示/非表示",
         "TOGGLE_DONE": "完了/未完了としてマーク",
         "TOGGLE_SUB_TASK_VISIBILITY": "サブタスクの表示/非表示",
-        "TOGGLE_TAGS": "トグルタグ",
-        "TRACK_TIME": "タイムトラッキングの開始",
-        "TRACK_TIME_STOP": "タイムトラッキングを一時停止",
+        "TOGGLE_TAGS": "タグをトグル",
+        "TRACK_TIME": "時間計測を開始",
+        "TRACK_TIME_STOP": "時間計測を一時停止",
         "UNSCHEDULE_TASK": "タスクのスケジュール解除",
         "UPDATE_ISSUE_DATA": "課題データを更新"
       },
@@ -1077,16 +1077,18 @@
         "DONE": "完了",
         "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
-        "FOR_CURRENT": "タスクは期限が来ています。取り組み始めますか？",
-        "FOR_OTHER": "タスクは期限が来ています。取り組み始めますか？",
+        "FOR_CURRENT": "タスクは期限が来ています。開始しますか？",
+        "FOR_OTHER": "タスクは期限が来ています。開始しますか？",
         "FROM_PROJECT": "プロジェクトから",
         "FROM_TAG": "タグから：「{{title}}」",
         "RESCHEDULE_EDIT": "編集（再スケジュール）",
-        "RESCHEDULE_UNTIL_TOMORROW": "明日まで",
+        "RESCHEDULE_UNTIL_TOMORROW": "明日に再スケジュール",
         "SNOOZE": "スヌーズ",
         "SNOOZE_ALL": "すべてスヌーズ",
         "START": "タスクを開始",
-        "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始"
+        "SWITCH_CONTEXT_START": "コンテキストの切り替えと開始",
+        "UNSCHEDULE": "スケジュール解除",
+        "UNSCHEDULE_ALL": "すべてスケジュール解除"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
@@ -1107,26 +1109,26 @@
         "UNSCHEDULE": "スケジュール解除"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "消費時間を他の日に追加",
+        "ADD_FOR_OTHER_DAY": "作業実績時間を他の日に追加",
         "DELETE_FOR": "その日のエントリを削除",
         "ESTIMATE": "見積もり時間",
-        "TIME_SPENT": "消費時間",
-        "TIME_SPENT_ON": "{{date}} の消費時間",
-        "TITLE": "消費時間/見積もり時間"
+        "TIME_SPENT": "作業実績時間",
+        "TIME_SPENT_ON": "{{date}} の作業実績時間",
+        "TITLE": "作業実績時間/見積もり時間"
       },
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": " {{date}}の新規エントリを追加",
         "DATE": "新規エントリを追加する日",
         "HELP": "例：<br> 30m => 30分<br> 2h => 2時間<br> 2h 30m => 2時間30分",
-        "TINE_SPENT": "消費時間",
+        "TIME_SPENT": "作業実績時間",
         "TITLE": "他の日に追加"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "見積もり時間を超えました！",
-        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"の見積もり時間を超えました。"
+        "ESTIMATE_EXCEEDED": "見積時間を超えました！",
+        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"の見積時間を超えました。"
       },
       "S": {
-        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクの短い構文でプロジェクトを割り当てられません！",
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "繰り返しタスクは短縮記法でプロジェクトを割り当てられません。",
         "CREATED_FOR_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
         "CREATED_FOR_PROJECT_ACTION": "プロジェクトに移動",
         "DELETED": "削除されたタスク \"{{title}}\"",
@@ -1144,9 +1146,9 @@
       },
       "SELECT_OR_CREATE": "タスクを選択または作成する",
       "SUMMARY_TABLE": {
-        "ESTIMATE": "見積もり時間",
-        "SPENT_TODAY": "今日の消費時間",
-        "SPENT_TOTAL": "消費時間合計",
+        "ESTIMATE": "見積時間",
+        "SPENT_TODAY": "今日の作業実績時間",
+        "SPENT_TOTAL": "作業実績時間合計",
         "TASK": "タスク",
         "TOGGLE_DONE": "完了にする/未完了に戻す"
       }
@@ -1175,7 +1177,7 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "年間 {{dayAndMonthStr}}、 {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "この反復可能なタスク用に {{tasksNr}} 個のインスタンスが作成されています。これらすべてをプロジェクト \"{{projectName}}\" に移動しますか？\"?",
+        "MSG": "この繰り返しタスクは {{tasksNr}} 個のインスタンスが作成されています。これらすべてをプロジェクト \"{{projectName}}\" に移動しますか？\"?",
         "OK": "すべてのインスタンスを更新する"
       },
       "D_CONFIRM_REMOVE": {
@@ -1184,7 +1186,7 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "CANCEL": "将来のタスクのみ",
-        "MSG": "この反復可能なタスクには {{tasksNr}} 個のインスタンスが作成されています。すべてのインスタンスを新しいデフォルトで更新しますか、それとも将来のタスクだけを更新しますか？",
+        "MSG": "この繰り返しタスクには {{tasksNr}} 個のインスタンスが作成されています。すべてのインスタンスを新しいデフォルトで更新しますか、それとも将来のタスクだけを更新しますか？",
         "OK": "すべてのインスタンスを更新する"
       },
       "D_EDIT": {
@@ -1202,13 +1204,13 @@
         "C_MONTH": "月",
         "C_WEEK": "週間",
         "C_YEAR": "年",
-        "DEFAULT_ESTIMATE": "デフォルトの見積もり",
+        "DEFAULT_ESTIMATE": "デフォルトの見積時間",
         "FRIDAY": "金曜日",
         "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜日",
-        "NOTES": "デフォルト・ノート",
+        "NOTES": "デフォルトのノート",
         "ORDER": "順番",
-        "ORDER_DESCRIPTION": "繰り返し可能なタスクの作成順序。同時に作成された繰り返し可能なタスクにのみ影響します。値が小さいほど、タスクはリストの上位に作成され、数値が小さいほど、リストの下位に作成されます。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
+        "ORDER_DESCRIPTION": "繰り返しタスクの作成順序。同時に作成された繰り返しタスクにのみ影響します。値が小さいほど、タスクはリストの上位に作成され、数値が小さいほど、リストの下位に作成されます。 0より大きい値は、通常のタスクの下部にアイテムが作成されることを意味します。",
         "Q_CUSTOM": "カスタム繰り返し設定",
         "Q_DAILY": "毎日",
         "Q_MONDAY_TO_FRIDAY": "毎週月曜日から金曜日",
@@ -1216,10 +1218,10 @@
         "Q_WEEKLY_CURRENT_WEEKDAY": "毎週 {{weekdayStr}}日",
         "Q_YEARLY_CURRENT_DATE": "毎年 {{dayAndMonthStr}}日に",
         "QUICK_SETTING": "リピート設定",
-        "REMIND_AT": "で思い出させる",
-        "REMIND_AT_PLACEHOLDER": "いつ思い出させるかを選択します",
-        "REPEAT_CYCLE": "サイクルを繰り返す",
-        "REPEAT_EVERY": "毎回繰り返す",
+        "REMIND_AT": "にリマインドする",
+        "REMIND_AT_PLACEHOLDER": "いつリマインドするかを選択します",
+        "REPEAT_CYCLE": "繰り返しサイクル",
+        "REPEAT_EVERY": "何回おきに繰り返すか",
         "SATURDAY": "土曜日",
         "START_DATE": "開始日",
         "START_TIME": "開始予定時刻",
@@ -1233,15 +1235,15 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "もう休憩した",
+        "ALREADY_DID": "もう休憩しました。",
         "SNOOZE": "{{time}}後に再通知"
       },
       "B_TTR": {
         "ADD_TO_TASK": "タスクに追加",
-        "MSG": "タイムトラッキングしていない時間が{{time}}あります"
+        "MSG": "時間計測していない時間が{{time}}あります"
       },
       "D_IDLE": {
-        "ADD_ENTRY": "トラッキングのエントリーを追加",
+        "ADD_ENTRY": "時間計測のエントリーを追加",
         "BREAK": "休憩",
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
         "IDLE_FOR": "アイドル状態になっている時間：",
@@ -1254,31 +1256,31 @@
         "SKIP": "スキップ",
         "SPLIT_TIME": "時間を複数のタスクと休憩に分ける",
         "TASK": "タスク",
-        "TRACK_TO": "以下に追加する："
+        "TRACK_TO": "時間計測："
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
         "IDLE_FOR": "アイドル状態になっている時間：",
-        "NOTIFICATION_TITLE": "あなたの時間を追跡してください!",
+        "NOTIFICATION_TITLE": "時間を計測してください!",
         "TASK": "タスク",
-        "TRACK_TO": "以下に追加する：",
-        "UNTRACKED_TIME": "トラッキングしていない時間："
+        "TRACK_TO": "時間計測：",
+        "UNTRACKED_TIME": "計測していない時間："
       }
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "稼動日数：",
-        "MONTH_WORKED": "稼動月数：",
+        "DAYS_WORKED": "稼働日数：",
+        "MONTH_WORKED": "稼働月数：",
         "REPEATING_TASK": "繰り返しタスク",
         "RESTORE_TASK_FROM_ARCHIVE": "アーカイブからタスクを復元",
         "TASKS": "タスク",
         "TOTAL_TIME": "合計時間：",
         "WEEK_NR": "{{nr}}週目",
-        "WORKED": "消費時間"
+        "WORKED": "作業実績時間"
       },
       "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？",
-      "D_EXPORT_TITLE": "作業ログのエクスポート {{start}} - {{end}}",
-      "D_EXPORT_TITLE_SINGLE": "作業ログのエクスポート {{day}}",
+      "D_EXPORT_TITLE": "作業記録のエクスポート {{start}} - {{end}}",
+      "D_EXPORT_TITLE_SINGLE": "作業記録のエクスポート {{day}}",
       "EXPORT": {
         "ADD_COL": "列を追加",
         "COPY_TO_CLIPBOARD": "クリップボードにコピー",
@@ -1345,7 +1347,7 @@
     "EXTENSION_INFO": "Jira ApiおよびIdle Time Handlingとの通信を可能にするために、<a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\">Chrome拡張機能をダウンロード</a>してください。これはモバイルでは機能しないことに注意してください。",
     "HIDE": "隠す",
     "ICON_INP_DESCRIPTION": "すべてのutf-8の絵文字もサポートしています！",
-    "INBOX_PROJECT_TITLE": "受信トレイ",
+    "INBOX_PROJECT_TITLE": "インボックス",
     "LOGIN": "ログイン",
     "LOGOUT": "ログアウト",
     "MINUTES": "{{m}} 分",
@@ -1509,79 +1511,79 @@
     },
     "POMODORO": {
       "BREAK_DURATION": "短い休憩時間",
-      "CYCLES_BEFORE_LONGER_BREAK": "長い休憩までの作業セッションの回数",
-      "DURATION": "作業セッションの時間",
+      "CYCLES_BEFORE_LONGER_BREAK": "長い休憩までのセッションの回数",
+      "DURATION": "セッションの時間",
       "HELP": "<p>ポモドーロタイマーは各作業セッションの時間、短い休憩時間、長い休憩までの作業セッションの回数、長い休憩時間など複数の項目で設定できます。</p> <p>ポモドーロが中断している間に気を散らすものを表示するかどうかも設定できます。</p> <p>「ポモドーロ休憩時間追跡の一時停止」を設定すると、作業時間がタスクに費やされたときに休憩時間も追跡されます。 </p> <p>「アクティブなタスクがないときにポモドーロセッションを一時停止」を有効にすると、タスクを一時停止したときにポモドーロセッションも一時停止します。</p>",
       "IS_ENABLED": "ポモドーロタイマーを有効にする",
-      "IS_MANUAL_CONTINUE": "次のポモドーロセッションを手動で開始する",
+      "IS_MANUAL_CONTINUE": "次のセッションを手動で開始する",
       "IS_MANUAL_CONTINUE_BREAK": "次の休憩の開始を手動で確認",
       "IS_PLAY_SOUND": "セッション終了時に音を鳴らす",
       "IS_PLAY_SOUND_AFTER_BREAK": "休憩終了時に音を鳴らす",
       "IS_PLAY_TICK": "1秒ごとにチクタク音を鳴らす",
-      "IS_STOP_TRACKING_ON_BREAK": "休憩中のタスクのタイムトラッキングを停止する",
+      "IS_STOP_TRACKING_ON_BREAK": "休憩中のタスクの時間計測を停止する",
       "LONGER_BREAK_DURATION": "長い休憩時間",
       "TITLE": "ポモドーロタイマー"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "リマインダーの前にバナーXを表示",
       "IS_COUNTDOWN_BANNER_ENABLED": "リマインダーの期限前にカウントダウンバナーを表示する",
-      "TITLE": "注意事項"
+      "TITLE": "リマインダー"
     },
     "SCHEDULE": {
-      "HELP": "タイムライン機能は、計画されたタスクが時間の経過とともにどのように実行されるかについての簡単な概要を提供する必要があります。左側のメニューの <a href='#/schedule'>'タイムライン'</a>の下にあります。",
-      "L_IS_LUNCH_BREAK_ENABLED": "昼食休憩の有効化",
-      "L_IS_WORK_START_END_ENABLED": "予定外のタスクフローを特定の作業時間に制限する",
+      "HELP": "スケジュール機能では、計画したタスクを1日の中でどのように実行していくかがわかります。表示するには、左側のメニューの <a href='#/schedule'>'スケジュール'</a>を押します。",
+      "L_IS_LUNCH_BREAK_ENABLED": "ランチ休憩を有効にする",
+      "L_IS_WORK_START_END_ENABLED": "スケジュールされていないタスクは就業時間内にだけ配置する",
       "L_LUNCH_BREAK_END": "昼食休憩終了",
       "L_LUNCH_BREAK_START": "昼休み開始",
-      "L_WORK_END": "就業日の終わり",
-      "L_WORK_START": "就業日開始",
+      "L_WORK_END": "就業時間の終了時刻",
+      "L_WORK_START": "就業時間の開始時刻",
       "LUNCH_BREAK_START_END_DESCRIPTION": "例 13:00",
-      "TITLE": "タイムライン",
+      "TITLE": "スケジュール",
       "WORK_START_END_DESCRIPTION": "例えば17:00"
     },
     "SHORT_SYNTAX": {
-      "HELP": "<p>ここでタスク作成時の短い構文オプションを制御できます</p>。",
-      "IS_ENABLE_DUE": "短い構文による有効化 (@<Due time>)",
-      "IS_ENABLE_PROJECT": "プロジェクト短縮構文を有効にする (+<Project name>)",
-      "IS_ENABLE_TAG": "タグの短縮構文を有効にする (#<Tag>)",
-      "TITLE": "短い構文"
+      "HELP": "<p>ここでタスク作成時の短縮記法オプションを制御できます</p>。",
+      "IS_ENABLE_DUE": "短縮記法を有効化 (@<Due time>)",
+      "IS_ENABLE_PROJECT": "プロジェクトの短縮記法を有効にする (+<Project name>)",
+      "IS_ENABLE_TAG": "タグの短縮記法を有効にする (#<Tag>)",
+      "TITLE": "短縮記法"
     },
     "SOUND": {
-      "BREAK_REMINDER_SOUND": "休憩リマインダー音",
-      "DONE_SOUND": "タスク完了音",
-      "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
+      "BREAK_REMINDER_SOUND": "休憩リマインダーの音",
+      "DONE_SOUND": "タスク完了の音",
+      "IS_INCREASE_DONE_PITCH": "タスクを完了するたびに音程を上げる",
       "TITLE": "音",
-      "TRACK_TIME_SOUND": "時間リマインダー音を追跡",
-      "VOLUME": "ボリューム"
+      "TRACK_TIME_SOUND": "時間計測リマインダーの音",
+      "VOLUME": "音量"
     },
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "モチベーションを高める画像を追加",
       "FULL_SCREEN_BLOCKER_DURATION": "フルスクリーンウィンドウの表示時間（デスクトップのみ）",
       "HELP": "<div> <p>指定した時間休憩せずに作業したときに、繰り返し発生するリマインダーを設定できます。</p> <p>表示するメッセージは変更できます。 ${duration} は休憩せずに作業した時間に置き換えられます。</p> </div>",
       "IS_ENABLED": "休憩リマインダーを有効にする",
-      "IS_FOCUS_WINDOW": "リマインダーがアクティブなときにアプリウィンドウをフォーカスする（デスクトップのみ）",
+      "IS_FOCUS_WINDOW": "リマインダーがアクティブなときにアプリウィンドウにフォーカスする（デスクトップのみ）",
       "IS_FULL_SCREEN_BLOCKER": "フルスクリーンウィンドウにメッセージを表示する（デスクトップのみ）",
       "IS_LOCK_SCREEN": "休憩時間が来たら画面をロックする（デスクトップのみ）",
       "MESSAGE": "休憩メッセージを受け取る",
       "MIN_WORKING_TIME": "休憩の通知を受け取るまでの時間",
       "MOTIVATIONAL_IMGS": "やる気を起こさせる画像（ウェブのURL）",
-      "NOTIFICATION_TITLE": "休憩する！",
-      "SNOOZE_TIME": "休憩をとるように促されたときに時間をスヌーズする",
+      "NOTIFICATION_TITLE": "休憩しましょう！",
+      "SNOOZE_TIME": "休憩リマインダーをスヌーズする場合の時間",
       "TITLE": "休憩リマインダー"
     },
     "TIME_TRACKING": {
-      "HELP": "タイムトラッキングリマインダーは、タイムトラッキングの開始を忘れた場合に表示されるバナーです。",
+      "HELP": "時間計測リマインダーは、時間計測の開始を忘れた場合に表示されるバナーです。",
       "L_DEFAULT_ESTIMATE": "新規タスクのデフォルト見積時間",
       "L_DEFAULT_ESTIMATE_SUB_TASKS": "新規サブタスクのデフォルト見積時間",
-      "L_IS_AUTO_START_NEXT_TASK": "現在のタスクに完了マークを付けると、次のタスクのトラッキングを開始",
-      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超過した場合に通知",
-      "L_IS_TRACKING_REMINDER_ENABLED": "トラッキング・リマインダー有効",
-      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "リマインダーがアクティブなときにフォーカス アプリ ウィンドウ (デスクトップのみ)",
-      "L_IS_TRACKING_REMINDER_NOTIFY": "タイムトラッキングリマインダーが表示されたときに通知",
-      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "モバイルアプリにトラッキングリマインダーを表示",
-      "L_TRACKING_INTERVAL": "時間追跡間隔（実験的）",
-      "L_TRACKING_REMINDER_MIN_TIME": "追跡リマインダーを表示するまでの待ち時間 バナー",
-      "TITLE": "タイムトラッキング"
+      "L_IS_AUTO_START_NEXT_TASK": "現在のタスクに完了マークを付けると、次のタスクの時間計測を開始",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積時間を超過した場合に通知",
+      "L_IS_TRACKING_REMINDER_ENABLED": "時間計測リマインダーを有効にする",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "時間計測リマインダーがアクティブなときにアプリウィンドウにフォーカスする（デスクトップのみ）",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "時間計測リマインダーが表示されたときに通知",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "モバイルアプリに時間計測リマインダーを表示",
+      "L_TRACKING_INTERVAL": "時間計測間隔（実験的）",
+      "L_TRACKING_REMINDER_MIN_TIME": "時間計測リマインダーを表示するまでの時間",
+      "TITLE": "時間計測"
     }
   },
   "GLOBAL_SNACK": {
@@ -1610,23 +1612,23 @@
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
-    "ALL_PLANNED_LIST": "リピート／予定",
-    "BOARDS": "ポート",
+    "ALL_PLANNED_LIST": "繰り返し／予定",
+    "BOARDS": "ボード",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
-    "DELETE_PROJECT": "プロジェクトの削除",
+    "DELETE_PROJECT": "プロジェクトを削除",
     "DELETE_TAG": "タグを削除",
     "GO_TO_TASK_LIST": "タスクリストへ",
     "HELP": "ヘルプ",
     "HM": {
-      "CALENDARS": "ハウツーカレンダーの接続",
+      "CALENDARS": "カレンダーの接続方法",
       "CONTRIBUTE": "貢献する",
       "GET_HELP_ONLINE": "オンラインヘルプ",
-      "KEYBOARD": "ハウツー高度なキーボード",
+      "KEYBOARD": "キーボードのショートカット",
       "REDDIT_COMMUNITY": "Reddit コミュニティ",
       "REPORT_A_PROBLEM": "問題を報告する",
       "START_WELCOME": "ウェルカムツアー開始",
-      "SYNC": "ハウツー同期の設定"
+      "SYNC": "同期の設定方法"
     },
     "METRICS": "メトリック",
     "NO_PROJECT_INFO": "利用可能なプロジェクトはありません。「プロジェクトを作成」ボタンをクリックすると、新しいプロジェクトを作成できます。",
@@ -1713,7 +1715,7 @@
     "NO_REPEATABLE_TASKS": "現在、繰り返しタスクはありません。タスクのサイドパネルで \"リピートタスク \"を選択すると、タスクをスケジュールすることができます。タスクをクリックすると表示される一番右のアイコンをクリックしてください。",
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
     "NO_SCHEDULED_TITLE": "その日の予定タスク",
-    "REPEATED_TASKS": "繰り返されるタスク",
+    "REPEATED_TASKS": "繰り返しタスク",
     "SCHEDULED_TASKS": "スケジュールされたタスク",
     "SCHEDULED_TASKS_WITH_TIME": "リマインダー付きスケジュールタスク",
     "START_TASK": "今すぐタスクを開始してリマインダーを削除"
@@ -1763,9 +1765,9 @@
     "READY_TO_WORK": "準備オーケー！",
     "RESET_BREAK_TIMER": "休憩タイマーをリセット",
     "TIME_ESTIMATED": "推定所要時間：",
-    "TODAY_REMAINING": "今日も残っている：",
+    "TODAY_REMAINING": "今日の残り：",
     "WITHOUT_BREAK": "連続作業時間：",
-    "WORKING_TODAY": "今日の作業時間：",
-    "WORKING_TODAY_ARCHIVED": "アーカイブされたタスクの今日の作業時間"
+    "WORKING_TODAY": "今日の作業実績時間：",
+    "WORKING_TODAY_ARCHIVED": "アーカイブされたタスクの今日の作業実績時間"
   }
 }
