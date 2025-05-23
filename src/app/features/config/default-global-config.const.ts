@@ -18,6 +18,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
+    isTrayShowCurrentCountdown: true,
     defaultProjectId: null,
     firstDayOfWeek: 1,
     startOfNextDay: 0,
