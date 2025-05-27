@@ -611,7 +611,8 @@
         "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
         "STATUS": "Stato",
         "SUMMARY": "Sommario",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Allegati"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pacchetto di lavoro",
@@ -622,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: inserimento dell'ora creato con successo per {{issueTitle}}",
         "TRANSITION": "OpenProject: Imposta issue \"{{issueKey}}\" a \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Imposta issue {{issueKey}} a <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transizione caricata. Usa i selettori sotto per assegnarli"
+        "TRANSITIONS_LOADED": "Transizione caricata. Usa i selettori sotto per assegnarli",
+        "ERR_NO_FILE": "Nessun file selezionato"
       }
     },
     "PLANNER": {

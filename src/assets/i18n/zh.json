@@ -526,7 +526,8 @@
         "MARK_AS_CHECKED": "将更新标记为已选中",
         "STATUS": "状态",
         "SUMMARY": "摘要",
-        "TYPE": "类型"
+        "TYPE": "类型",
+        "ATTACHMENTS": "附件"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "工作包",
@@ -534,7 +535,8 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject：未知错误 {{statusCode}} {{errorMsg}}。是否为服务器正确配置了 CORS？",
-        "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目"
+        "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目",
+        "ERR_NO_FILE": "未选择文件"
       }
     },
     "PLANNER": {

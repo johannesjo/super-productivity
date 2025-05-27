@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
-        "TYPE": "Tip"
+        "TYPE": "Tip",
+        "ATTACHMENTS": "Ekler"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "iş paketi",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi",
         "TRANSITION": "OpenProject: \"{{issueKey}}\" sorununu \"{{name}}\" olarak ayarlayın",
         "TRANSITION_SUCCESS": "OpenProject: {{issueKey}} sorununu <strong>{{chosenTransition}}</strong> olarak ayarlayın",
-        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
+        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın",
+        "ERR_NO_FILE": "Dosya seçilmedi"
       }
     },
     "PLANNER": {
