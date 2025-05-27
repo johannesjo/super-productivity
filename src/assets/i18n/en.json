@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Attachments"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "work package",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
         "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
+        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them",
+        "ERR_NO_FILE": "No file selected"
       }
     },
     "PLANNER": {

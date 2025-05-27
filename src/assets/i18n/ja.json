@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
         "STATUS": "状態",
         "SUMMARY": "概要",
-        "TYPE": "タイプ"
+        "TYPE": "タイプ",
+        "ATTACHMENTS": "添付ファイル"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "ワークパッケージ",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject： {{issueTitle}}の時間エントリが正常に作成されました",
         "TRANSITION": "OpenProject：issue「{{issueKey}}」を「{{name}}」に設定します。\"",
         "TRANSITION_SUCCESS": "OpenProject：課題 {{issueKey}} を <strong>に設定 {{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。"
+        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。",
+        "ERR_NO_FILE": "ファイルが選択されていません"
       }
     },
     "PLANNER": {

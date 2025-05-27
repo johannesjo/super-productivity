@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Archivos adjuntos"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Paquete de trabajo",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: entrada de tiempo creada correctamente para {{issueTitle}}",
         "TRANSITION": "OpenProject: Establecer el problema \"{{issueKey}}\" en \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Establecer el problema {{issueKey}} en <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas"
+        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas",
+        "ERR_NO_FILE": "No se seleccionó ningún archivo"
       }
     },
     "PLANNER": {

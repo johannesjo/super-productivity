@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
         "STATUS": "Статус",
         "SUMMARY": "Сводка",
-        "TYPE": "Тип"
+        "TYPE": "Тип",
+        "ATTACHMENTS": "Вложения"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "комплекс работ",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Успешно создана запись времени для {{issueTitle}}",
         "TRANSITION": "OpenProject: Установить значение {{name}} для проблемы \"{{issueKey}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Установить значение <strong>{{chosenTransition}}</strong> для проблемы {{issueKey}}",
-        "TRANSITIONS_LOADED": "Переходы загружены. Используйте выбранные для назначения их"
+        "TRANSITIONS_LOADED": "Переходы загружены. Используйте выбранные для назначения их",
+        "ERR_NO_FILE": "Файл не выбран"
       }
     },
     "PLANNER": {

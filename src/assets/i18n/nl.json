@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
         "STATUS": "staat",
         "SUMMARY": "Samenvatting",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Bijlagen"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Werkpakket",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: tijdsinvoer voor {{issueTitle}}gemaakt",
         "TRANSITION": "OpenProject: Zet issue \"{{issueKey}}\" op \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Stel issue {{issueKey}} in op <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen"
+        "TRANSITIONS_LOADED": "Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
+        "ERR_NO_FILE": "Geen bestand geselecteerd"
       }
     },
     "PLANNER": {
