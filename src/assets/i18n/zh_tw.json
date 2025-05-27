@@ -479,7 +479,8 @@
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "附件"
       },
       "ISSUE_STRINGS": {
         "ISSUES_STR": "work packages",
@@ -487,7 +488,8 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
-        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}"
+        "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
+        "ERR_NO_FILE": "未選擇檔案"
       }
     },
     "PLANNER": {

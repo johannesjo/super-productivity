@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "به روزرسانی ها را به عنوان علامت گذاری شده علامت گذاری کنید",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
-        "TYPE": "تایپ کنید"
+        "TYPE": "تایپ کنید",
+        "ATTACHMENTS": "پیوست‌ها"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "بسته کاری",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: ورودی زمان برای {{issueTitle}}با موفقیت ایجاد شد",
         "TRANSITION": "OpenProject: مسئله \"{{issueKey}}\" را روی \"{{name}}\" تنظیم کنید",
         "TRANSITION_SUCCESS": "OpenProject: شماره {{issueKey}} را روی <strong>{{chosenTransition}}</strong>تنظیم کنید ",
-        "TRANSITIONS_LOADED": "انتقال بارگذاری شد. از انتخاب های زیر برای اختصاص دادن آنها استفاده کنید"
+        "TRANSITIONS_LOADED": "انتقال بارگذاری شد. از انتخاب های زیر برای اختصاص دادن آنها استفاده کنید",
+        "ERR_NO_FILE": "فایلی انتخاب نشده است"
       }
     },
     "PLANNER": {

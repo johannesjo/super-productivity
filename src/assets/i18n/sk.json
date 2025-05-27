@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Označiť aktualizácie ako skontrolované",
         "STATUS": "Stav",
         "SUMMARY": "Súhrn",
-        "TYPE": "Typ"
+        "TYPE": "Typ",
+        "ATTACHMENTS": "Prílohy"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pracovný balík",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Úspešne vytvorený časový záznam pre {{issueTitle}}",
         "TRANSITION": "OpenProject: Nastavte číslo \"{{issueKey}}\" na \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Nastaviť číslo {{issueKey}} na <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Prechody sú načítané. Na ich priradenie použite nasledujúce výbery"
+        "TRANSITIONS_LOADED": "Prechody sú načítané. Na ich priradenie použite nasledujúce výbery",
+        "ERR_NO_FILE": "Nie je vybraný žiadny súbor"
       }
     },
     "PLANNER": {

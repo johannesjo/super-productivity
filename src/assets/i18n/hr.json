@@ -610,7 +610,8 @@
         "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
-        "TYPE": "Vrsta"
+        "TYPE": "Vrsta",
+        "ATTACHMENTS": "Privitci"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "radni paket",
@@ -621,7 +622,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Unos vremena je uspješno stvoren za {{issueTitle}}",
         "TRANSITION": "OpenProject: Zadaj problemu „{{issueKey}}” ime „{{name}}”",
         "TRANSITION_SUCCESS": "OpenProject: Postavi problem {{issueKey}} kao <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Tranzicije su učitane. Koristi donje odabire za dodjeljivanje"
+        "TRANSITIONS_LOADED": "Tranzicije su učitane. Koristi donje odabire za dodjeljivanje",
+        "ERR_NO_FILE": "Nije odabrana nijedna datoteka"
       }
     },
     "PLANNER": {
