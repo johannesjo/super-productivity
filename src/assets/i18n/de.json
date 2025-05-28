@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
-        "TYPE": "Typ"
+        "TYPE": "Typ",
+        "ATTACHMENTS": "Anhänge",
+        "UPLOAD_ATTACHMENT": "Hochladen zur Aufgabe"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Arbeitspaket",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Zeiteintrag für {{issueTitle}}erfolgreich erstellt",
         "TRANSITION": "OpenProject: Setzen Sie das Issue „ {{issueKey}}“ auf „ {{name}}“",
         "TRANSITION_SUCCESS": "OpenProject: Das Issue {{issueKey}} wurde auf <strong>{{chosenTransition}}</strong> gesetzt",
-        "TRANSITIONS_LOADED": "Übergänge geladen. Verwenden Sie die Auswahl unten, um sie zuzuweisen"
+        "TRANSITIONS_LOADED": "Übergänge geladen. Verwenden Sie die Auswahl unten, um sie zuzuweisen",
+        "ERR_NO_FILE": "Keine Datei ausgewählt"
       }
     },
     "PLANNER": {

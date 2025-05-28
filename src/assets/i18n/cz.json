@@ -584,7 +584,9 @@
         "MARK_AS_CHECKED": "Označit aktualizace jako zkontrolované",
         "STATUS": "Stav",
         "SUMMARY": "Shrnutí",
-        "TYPE": "Typ"
+        "TYPE": "Typ",
+        "ATTACHMENTS": "Přílohy",
+        "UPLOAD_ATTACHMENT": "Nahrát k úkolu"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pracovní balíček",
@@ -595,7 +597,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Úspěšně vytvořen záznam o čase pro {{issueTitle}}",
         "TRANSITION": "OpenProject: Nastavit úkol „{{issueKey}}“ na „{{name}}“",
         "TRANSITION_SUCCESS": "OpenProject: Nastavit úkol {{issueKey}} na <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Přechody načteny. Použijte níže uvedené výběry k jejich přiřazení"
+        "TRANSITIONS_LOADED": "Přechody načteny. Použijte níže uvedené výběry k jejich přiřazení",
+        "ERR_NO_FILE": "Nebyl vybrán žádný soubor"
       }
     },
     "POMODORO": {

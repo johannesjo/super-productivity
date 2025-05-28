@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
         "STATUS": "الحالة",
         "SUMMARY": "ملخص",
-        "TYPE": "نوع"
+        "TYPE": "نوع",
+        "ATTACHMENTS": "المرفقات",
+        "UPLOAD_ATTACHMENT": "تحميل إلى المهمة"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "حزمة العمل",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: تم إنشاء إدخال الوقت بنجاح لـ {{issueTitle}}",
         "TRANSITION": "OpenProject: تعيين المشكلة \"{{issueKey}}\" إلى \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: تعيين المشكلة {{issueKey}} إلى <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها"
+        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها",
+        "ERR_NO_FILE": "لم يتم تحديد ملف"
       }
     },
     "PLANNER": {

@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
         "STATUS": "Statut",
         "SUMMARY": "Résumé",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Pièces jointes",
+        "UPLOAD_ATTACHMENT": "Téléverser dans la tâche"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Lot de travaux",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject : entrée de temps créée avec succès pour {{issueTitle}}",
         "TRANSITION": "OpenProject : définir le ticket \"{{issueKey}}\" sur \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject : définir le ticket {{issueKey}} sur <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transitions chargées. Utilisez les sélections ci-dessous pour les attribuer"
+        "TRANSITIONS_LOADED": "Transitions chargées. Utilisez les sélections ci-dessous pour les attribuer",
+        "ERR_NO_FILE": "Aucun fichier sélectionné"
       }
     },
     "PLANNER": {

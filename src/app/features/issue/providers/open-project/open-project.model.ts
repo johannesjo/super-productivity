@@ -30,4 +30,5 @@ export interface OpenProjectCfg extends BaseIssueProviderCfg {
   availableTransitions:
     | OpenProjectOriginalStatus[]
     | { id: string; name: string; [key: string]: unknown }[];
+  metadata: { string: any } | undefined;
 }

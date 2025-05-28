@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
         "STATUS": "Status",
         "SUMMARY": "Ringkasan",
-        "TYPE": "Tipe"
+        "TYPE": "Tipe",
+        "ATTACHMENTS": "Lampiran",
+        "UPLOAD_ATTACHMENT": "Unggah ke Tugas"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "work package",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Berhasil membuat entri waktu untuk {{issueTitle}}",
         "TRANSITION": "OpenProject: Atur issue \"{{issueKey}}\" untuk \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Atur issue {{issueKey}} untuk <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya"
+        "TRANSITIONS_LOADED": "Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya",
+        "ERR_NO_FILE": "Tidak ada file yang dipilih"
       }
     },
     "PLANNER": {
