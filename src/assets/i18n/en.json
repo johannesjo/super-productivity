@@ -611,7 +611,8 @@
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "TYPE": "Type",
-        "ATTACHMENTS": "Attachments"
+        "ATTACHMENTS": "Attachments",
+        "UPLOAD_ATTACHMENT": "Upload to Task"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "work package",

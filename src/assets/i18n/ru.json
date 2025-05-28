@@ -611,7 +611,8 @@
         "STATUS": "Статус",
         "SUMMARY": "Сводка",
         "TYPE": "Тип",
-        "ATTACHMENTS": "Вложения"
+        "ATTACHMENTS": "Вложения",
+        "UPLOAD_ATTACHMENT": "Загрузить в задачу"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "комплекс работ",

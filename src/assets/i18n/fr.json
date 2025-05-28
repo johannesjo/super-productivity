@@ -611,7 +611,8 @@
         "STATUS": "Statut",
         "SUMMARY": "Résumé",
         "TYPE": "Type",
-        "ATTACHMENTS": "Pièces jointes"
+        "ATTACHMENTS": "Pièces jointes",
+        "UPLOAD_ATTACHMENT": "Téléverser dans la tâche"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Lot de travaux",

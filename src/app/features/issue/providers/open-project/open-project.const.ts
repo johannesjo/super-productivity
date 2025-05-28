@@ -29,6 +29,7 @@ export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
     IN_PROGRESS: 'ALWAYS_ASK',
     DONE: 'ALWAYS_ASK',
   },
+  metadata: undefined,
 };
 
 export const OPEN_PROJECT_POLL_INTERVAL = 5 * 60 * 1000;

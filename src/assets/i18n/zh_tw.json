@@ -480,7 +480,8 @@
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "TYPE": "Type",
-        "ATTACHMENTS": "附件"
+        "ATTACHMENTS": "附件",
+        "UPLOAD_ATTACHMENT": "上傳到任務"
       },
       "ISSUE_STRINGS": {
         "ISSUES_STR": "work packages",

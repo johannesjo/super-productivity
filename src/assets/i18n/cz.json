@@ -585,7 +585,8 @@
         "STATUS": "Stav",
         "SUMMARY": "Shrnutí",
         "TYPE": "Typ",
-        "ATTACHMENTS": "Přílohy"
+        "ATTACHMENTS": "Přílohy",
+        "UPLOAD_ATTACHMENT": "Nahrát k úkolu"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pracovní balíček",
