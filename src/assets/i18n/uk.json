@@ -611,7 +611,8 @@
         "STATUS": "Статус",
         "SUMMARY": "Підсумок",
         "TYPE": "Тип",
-        "ATTACHMENTS": "Вкладення"
+        "ATTACHMENTS": "Вкладення",
+        "UPLOAD_ATTACHMENT": "Завантажити в завдання"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "робочий пакет",

@@ -611,7 +611,8 @@
         "STATUS": "Stav",
         "SUMMARY": "Súhrn",
         "TYPE": "Typ",
-        "ATTACHMENTS": "Prílohy"
+        "ATTACHMENTS": "Prílohy",
+        "UPLOAD_ATTACHMENT": "Nahrať do úlohy"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pracovný balík",

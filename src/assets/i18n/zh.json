@@ -527,7 +527,8 @@
         "STATUS": "状态",
         "SUMMARY": "摘要",
         "TYPE": "类型",
-        "ATTACHMENTS": "附件"
+        "ATTACHMENTS": "附件",
+        "UPLOAD_ATTACHMENT": "上传到任务"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "工作包",

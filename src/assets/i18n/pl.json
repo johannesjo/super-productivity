@@ -611,7 +611,8 @@
         "STATUS": "Status",
         "SUMMARY": "Podsumowanie",
         "TYPE": "Typ",
-        "ATTACHMENTS": "Załączniki"
+        "ATTACHMENTS": "Załączniki",
+        "UPLOAD_ATTACHMENT": "Prześlij do zadania"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pakiet roboczy",

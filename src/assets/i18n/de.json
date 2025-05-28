@@ -611,7 +611,8 @@
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
         "TYPE": "Typ",
-        "ATTACHMENTS": "Anhänge"
+        "ATTACHMENTS": "Anhänge",
+        "UPLOAD_ATTACHMENT": "Hochladen zur Aufgabe"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Arbeitspaket",
