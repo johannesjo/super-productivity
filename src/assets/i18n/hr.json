@@ -611,7 +611,8 @@
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
         "TYPE": "Vrsta",
-        "ATTACHMENTS": "Privitci"
+        "ATTACHMENTS": "Privitci",
+        "UPLOAD_ATTACHMENT": "Učitaj u zadatak"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "radni paket",

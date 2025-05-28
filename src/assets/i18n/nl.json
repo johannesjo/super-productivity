@@ -611,7 +611,8 @@
         "STATUS": "staat",
         "SUMMARY": "Samenvatting",
         "TYPE": "Type",
-        "ATTACHMENTS": "Bijlagen"
+        "ATTACHMENTS": "Bijlagen",
+        "UPLOAD_ATTACHMENT": "Uploaden naar taak"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Werkpakket",

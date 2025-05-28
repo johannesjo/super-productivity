@@ -611,7 +611,8 @@
         "STATUS": "Status",
         "SUMMARY": "Ringkasan",
         "TYPE": "Tipe",
-        "ATTACHMENTS": "Lampiran"
+        "ATTACHMENTS": "Lampiran",
+        "UPLOAD_ATTACHMENT": "Unggah ke Tugas"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "work package",

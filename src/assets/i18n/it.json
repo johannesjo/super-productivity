@@ -612,7 +612,8 @@
         "STATUS": "Stato",
         "SUMMARY": "Sommario",
         "TYPE": "Tipo",
-        "ATTACHMENTS": "Allegati"
+        "ATTACHMENTS": "Allegati",
+        "UPLOAD_ATTACHMENT": "Carica nel compito"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pacchetto di lavoro",

@@ -611,7 +611,8 @@
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
         "TYPE": "Type",
-        "ATTACHMENTS": "Vedlegg"
+        "ATTACHMENTS": "Vedlegg",
+        "UPLOAD_ATTACHMENT": "Last opp til oppgave"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "arbeidspakke",

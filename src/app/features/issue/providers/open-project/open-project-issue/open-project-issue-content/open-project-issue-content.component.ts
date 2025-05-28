@@ -99,7 +99,13 @@ export class OpenProjectIssueContentComponent {
 
     const dateTime = moment().format('YYYYMMDD_HHmmss');
     const fileExtension = file?.name.split('.').pop();
-    const fileName = `${dateTime}_${currentTask.issueId}.${fileExtension}`;
+
+    let fileName = `${dateTime}_${currentTask.issueId}.${fileExtension}`;
+
+    const fileNamePrefix = cfg.metadata?.['attachments']?.['fileNamePrefix'];
+    if (fileNamePrefix) {
+      fileName = `${fileNamePrefix}_${fileName}`;
+    }
 
     const newAttachment = await this._openProjectApiService
       .uploadAttachment$(cfg, currentTask.issueId, file, fileName)

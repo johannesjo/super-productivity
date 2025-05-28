@@ -611,7 +611,8 @@
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "TYPE": "تایپ کنید",
-        "ATTACHMENTS": "پیوست‌ها"
+        "ATTACHMENTS": "پیوست‌ها",
+        "UPLOAD_ATTACHMENT": "بارگذاری در وظیفه"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "بسته کاری",

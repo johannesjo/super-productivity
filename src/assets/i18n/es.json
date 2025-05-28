@@ -611,7 +611,8 @@
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
         "TYPE": "Tipo",
-        "ATTACHMENTS": "Archivos adjuntos"
+        "ATTACHMENTS": "Archivos adjuntos",
+        "UPLOAD_ATTACHMENT": "Subir a la tarea"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Paquete de trabajo",

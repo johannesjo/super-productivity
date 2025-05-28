@@ -611,7 +611,8 @@
         "STATUS": "الحالة",
         "SUMMARY": "ملخص",
         "TYPE": "نوع",
-        "ATTACHMENTS": "المرفقات"
+        "ATTACHMENTS": "المرفقات",
+        "UPLOAD_ATTACHMENT": "تحميل إلى المهمة"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "حزمة العمل",

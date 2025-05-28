@@ -611,7 +611,8 @@
         "STATUS": "Durum",
         "SUMMARY": "Özet",
         "TYPE": "Tip",
-        "ATTACHMENTS": "Ekler"
+        "ATTACHMENTS": "Ekler",
+        "UPLOAD_ATTACHMENT": "Göreve yükle"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "iş paketi",

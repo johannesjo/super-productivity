@@ -611,7 +611,8 @@
         "STATUS": "状態",
         "SUMMARY": "概要",
         "TYPE": "タイプ",
-        "ATTACHMENTS": "添付ファイル"
+        "ATTACHMENTS": "添付ファイル",
+        "UPLOAD_ATTACHMENT": "タスクにアップロード"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "ワークパッケージ",

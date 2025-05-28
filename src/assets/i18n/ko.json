@@ -611,7 +611,8 @@
         "STATUS": "상태",
         "SUMMARY": "개요",
         "TYPE": "유형",
-        "ATTACHMENTS": "첨부파일"
+        "ATTACHMENTS": "첨부파일",
+        "UPLOAD_ATTACHMENT": "작업에 업로드"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "작업 패키지",

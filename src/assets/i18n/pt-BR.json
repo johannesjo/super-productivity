@@ -583,7 +583,8 @@
         "STATUS": "Status",
         "SUMMARY": "Resumo",
         "TYPE": "Tipo",
-        "ATTACHMENTS": "Anexos"
+        "ATTACHMENTS": "Anexos",
+        "UPLOAD_ATTACHMENT": "Fazer upload para a tarefa"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pacote de trabalho",
