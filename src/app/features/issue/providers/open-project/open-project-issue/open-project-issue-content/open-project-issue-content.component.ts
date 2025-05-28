@@ -21,6 +21,7 @@ import { mapOpenProjectAttachmentToTaskAttachment } from '../open-project-issue-
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { OpenProjectApiService } from '../../open-project-api.service';
 import { SnackService } from '../../../../../../core/snack/snack.service';
+import moment from 'moment';
 
 @Component({
   selector: 'open-project-issue-content',
@@ -96,8 +97,12 @@ export class OpenProjectIssueContentComponent {
       .getCfgOnce$(currentTask.issueProviderId, 'OPEN_PROJECT')
       .toPromise();
 
+    const dateTime = moment().format('YYYYMMDD_HHmmss');
+    const fileExtension = file?.name.split('.').pop();
+    const fileName = `${dateTime}_${currentTask.issueId}.${fileExtension}`;
+
     const newAttachment = await this._openProjectApiService
-      .uploadAttachment$(cfg, currentTask.issueId, file, file?.name)
+      .uploadAttachment$(cfg, currentTask.issueId, file, fileName)
       .toPromise();
 
     element.value = '';
