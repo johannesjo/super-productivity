@@ -5,6 +5,15 @@
 .table-wrapper {
   margin: $s * 2;
   margin-bottom: $s;
+
+  .upload-btn {
+    margin-bottom: 5px;
+  }
+
+  .attachment-dl-list {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
 }
 
 .issue-description {

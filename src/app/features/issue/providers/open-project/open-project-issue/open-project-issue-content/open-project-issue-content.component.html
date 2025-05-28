@@ -27,28 +27,28 @@
         </td>
       </tr>
 
-      @if (issue?._embedded?.type?.name) {
+      @if (issue?._embedded.type?.name) {
         <tr>
           <th>{{ T.F.OPEN_PROJECT.ISSUE_CONTENT.TYPE | translate }}</th>
-          <td>{{ issue?._embedded?.type?.name }}</td>
+          <td>{{ issue?._embedded.type.name }}</td>
         </tr>
       }
-      @if (issue?._embedded?.status) {
+      @if (issue?._embedded.status) {
         <tr>
           <th>{{ T.F.OPEN_PROJECT.ISSUE_CONTENT.STATUS | translate }}</th>
           <td>
             <span
               class="dot"
-              [style.backgroud-color]="issue?._embedded?.status?.color"
+              [style.backgroud-color]="issue?._embedded.status.color"
             ></span
-            >{{ issue?._embedded?.status?.name }}
+            >{{ issue?._embedded.status.name }}
           </td>
         </tr>
       }
-      @if (issue?._embedded?.assignee?.name) {
+      @if (issue?._embedded.assignee?.name) {
         <tr>
           <th>{{ T.F.OPEN_PROJECT.ISSUE_CONTENT.ASSIGNEE | translate }}</th>
-          <td>{{ issue?._embedded?.assignee?.name }}</td>
+          <td>{{ issue?._embedded.assignee.name }}</td>
         </tr>
       }
       @if (issue?.description?.raw || issue?.description?.html) {
@@ -56,7 +56,7 @@
           <th>{{ T.F.OPEN_PROJECT.ISSUE_CONTENT.DESCRIPTION | translate }}</th>
           <td class="issue-description">
             <div
-              [data]="issue?.description?.raw || issue?.description?.html"
+              [data]="issue?.description.raw || issue?.description.html"
               class="description markdown"
               markdown
             ></div>
