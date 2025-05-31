@@ -15,6 +15,7 @@ import {
 } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
+import { getWorklogStr } from '../../../../util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root',
@@ -176,6 +177,7 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       issueLastUpdated: new Date(issue.updated_at).getTime(),
       issueId: issue.id,
       isDone: this._isIssueDone(issue),
+      dueDay: issue.due_date ? getWorklogStr(issue.due_date) : undefined,
     };
   }
 
