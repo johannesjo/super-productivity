@@ -30,6 +30,7 @@ export type GitlabIssue = Readonly<{
   closed_at: string;
   created_at: string;
   updated_at: string;
+  due_date?: string;
   // added
   wasUpdated: boolean;
   commentsNr: number;
