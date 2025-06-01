@@ -216,7 +216,7 @@
     "stacktrace-js": "^2.0.2",
     "start-server-and-test": "^2.0.9",
     "stylelint": "^16.18.0",
-    "stylelint-config-recommended-scss": "^14.1.0",
+    "stylelint-config-recommended-scss": "^15.0.1",
     "ts-node": "~10.9.2",
     "ts-patch": "^3.3.0",
     "tslib": "^2.7.0",
