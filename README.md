@@ -327,7 +327,7 @@ There are several ways to help.
 
 If you don't want or cannot use Codespaces for any reason, here are the instructions for local development.
 
-To run the development server you need to have Node installed at least in the version 14. Go to https://nodejs.org for installation instructions.
+To run the development server you need to have Node installed (version 20 or higher required). Go to https://nodejs.org for installation instructions.
 
 **Clone repo**
 
