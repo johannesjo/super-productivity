@@ -22,7 +22,7 @@ android {
         compileSdk 35
         versionCode 13_00_10_0000
         versionName "13.0.10"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 hostName       : "app.super-productivity.com",
                 defaultUrl     : "https://app.super-productivity.com",
@@ -85,6 +85,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        viewBinding true
     }
 
     namespace "com.superproductivity.superproductivity"
@@ -105,10 +106,13 @@ dependencies {
     implementation project(':capacitor-android')
 
     testImplementation "junit:junit:4.13.2"
+    testImplementation 'org.mockito:mockito-core:5.14.1'
+    androidTestImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'org.mockito:mockito-android:5.14.1'
 
     androidTestImplementation "androidx.test:rules:1.6.1"
-    androidTestImplementation "com.android.support.test:runner:1.0.2"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+    androidTestImplementation "androidx.test:runner:1.6.2"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
 }
 
 apply from: 'capacitor.build.gradle'

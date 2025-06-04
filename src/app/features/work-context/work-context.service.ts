@@ -47,6 +47,7 @@ import {
   selectDoneBacklogTaskIdsForActiveContext,
   selectDoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
+  selectTodayTaskIds,
   selectTrackableTasksForActiveContext,
 } from './store/work-context.selectors';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
@@ -244,6 +245,18 @@ export class WorkContextService {
 
   // TASK LEVEL
   // ----------
+  globalTodaysTaskIds$: Observable<string[]> = this._isAllDataLoaded$.pipe(
+    switchMap(() => this._store$),
+    select(selectTodayTaskIds),
+    distinctUntilChanged(),
+    shareReplay(1),
+  );
+
+  globalTodaysTasks$: Observable<TaskWithSubTasks[]> = this.globalTodaysTaskIds$.pipe(
+    switchMap((taskIds) => this._getTasksByIds$(taskIds)),
+    shareReplay(1),
+  );
+
   todaysTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
     map((ac) => ac.taskIds),
     distinctUntilChanged(distinctUntilChangedSimpleArray),

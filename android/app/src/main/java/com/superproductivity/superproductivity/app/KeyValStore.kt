@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.superproductivity.superproductivity.App
+import org.json.JSONArray
 
 class KeyValStore(private val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -85,6 +86,47 @@ class KeyValStore(private val context: Context) :
             db.close()
         }
     }
+
+    fun getTodayTasks(): List<SpTask> {
+        val taskList = mutableListOf<SpTask>()
+        val stringValue = get("dailyTasks", "")
+        Log.d("KeyValStore", "DailyTask JSON: $stringValue")
+
+        if (stringValue.isNotEmpty()) {
+            try {
+                val tasksArray = JSONArray(stringValue)
+
+                for (i in 0 until tasksArray.length()) {
+                    val task = tasksArray.getJSONObject(i)
+
+                    val id = task.optString("id", "")
+                    val title = task.optString("title", "No Title")
+                    val isDone = task.optBoolean("isDone", false)
+                    val category = task.optString("projectId", "No Category")
+                    val categoryHtml = ""
+
+                    if (id.isNotBlank()) {
+                        taskList.add(
+                            SpTask(
+                                id = id,
+                                title = title,
+                                category = category,
+                                categoryHtml = categoryHtml,
+                                isDone = isDone
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("KeyValStore", "Error processing JSON: ${e.message}")
+            }
+        }
+
+        Log.d("KeyValStore", "Found tasks: ${taskList.size}")
+        Log.d("taskList", "Task List: $taskList")
+        return taskList
+    }
+
 
     companion object {
         private const val DATABASE_TABLE: String = "supKeyValStore"

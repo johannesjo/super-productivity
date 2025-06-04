@@ -1,0 +1,52 @@
+
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/widget_layout_root"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:gravity="top">
+
+  <!-- Header -->
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#6495ED"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <ImageView
+      android:id="@+id/icon_sun"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:src="@drawable/ic_sun"
+      android:contentDescription="Sun" />
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="My Day"
+      android:textSize="18sp"
+      android:textStyle="bold"
+      android:textColor="#FFFFFF"
+      android:layout_marginStart="8dp" />
+
+    <ImageView
+      android:id="@+id/icon_plus"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:src="@drawable/ic_add"
+      android:contentDescription="Add"
+      android:layout_marginStart="8dp" />
+  </LinearLayout>
+
+  <!-- ListView for the tasks -->
+  <ListView
+    android:id="@+id/today_tasks_widget_list_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@android:color/darker_gray"
+    android:dividerHeight="1dp"
+    android:layout_weight="1" />
+</LinearLayout>

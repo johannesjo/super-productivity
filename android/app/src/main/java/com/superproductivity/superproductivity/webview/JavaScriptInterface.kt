@@ -8,6 +8,7 @@ import com.superproductivity.superproductivity.App
 import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.widget.TodayTasksWidget
 
 
 class JavaScriptInterface(
@@ -37,6 +38,9 @@ class JavaScriptInterface(
     fun saveToDb(requestId: String, key: String, value: String) {
         (activity.application as App).keyValStore.set(key, value)
         callJavaScriptFunction(FN_PREFIX + "saveToDbCallback('" + requestId + "')")
+
+        //  Update widget
+        TodayTasksWidget.update(activity)
     }
 
     @Suppress("unused")
