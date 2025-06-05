@@ -104,7 +104,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.11",
+    "@angular-devkit/build-angular": "^20.0.1",
     "@angular-eslint/builder": "^19.3.0",
     "@angular-eslint/eslint-plugin": "^19.3.0",
     "@angular-eslint/eslint-plugin-template": "^19.3.0",
