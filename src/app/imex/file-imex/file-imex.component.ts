@@ -4,12 +4,15 @@ import {
   ElementRef,
   inject,
   viewChild,
+  OnInit,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import { download } from '../../util/download';
+import { DialogImportFromUrlComponent } from '../dialog-import-from-url/dialog-import-from-url.component';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { privacyExport } from './privacy-export';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -18,6 +21,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { PfapiService } from 'src/app/pfapi/pfapi.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { first } from 'rxjs/operators';
+import {
+  ConfirmUrlImportDialogComponent,
+  DialogConfirmUrlImportData,
+} from '../dialog-confirm-url-import/dialog-confirm-url-import.component';
 
 @Component({
   selector: 'file-imex',
@@ -26,46 +34,71 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
-export class FileImexComponent {
+export class FileImexComponent implements OnInit {
   private _snackService = inject(SnackService);
   private _router = inject(Router);
   private _pfapiService = inject(PfapiService);
+  private _activatedRoute = inject(ActivatedRoute);
+  private _matDialog = inject(MatDialog);
 
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
+
+  ngOnInit(): void {
+    this._activatedRoute.queryParams.pipe(first()).subscribe((params) => {
+      const importUrlParam = params['importFromUrl'];
+      if (importUrlParam) {
+        // Clear the parameter from the URL immediately
+        this._router.navigate([], {
+          relativeTo: this._activatedRoute,
+          queryParams: { importFromUrl: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+
+        let decodedUrl: string;
+        try {
+          decodedUrl = decodeURIComponent(importUrlParam);
+        } catch (e) {
+          console.error('Error decoding importFromUrl parameter:', e);
+          this._snackService.open({
+            type: 'ERROR',
+            msg: T.FILE_IMEX.S_IMPORT_FROM_URL_ERR_DECODE,
+          });
+          return;
+        }
+
+        this._matDialog
+          .open<ConfirmUrlImportDialogComponent, DialogConfirmUrlImportData, boolean>(
+            ConfirmUrlImportDialogComponent,
+            {
+              data: { domain: new URL(decodedUrl).hostname },
+            },
+          )
+          .afterClosed()
+          .subscribe(async (confirmed) => {
+            if (confirmed) {
+              await this.importFromUrlHandler(decodedUrl);
+            }
+          });
+      }
+    });
+  }
 
   // NOTE: after promise done the file is NOT yet read
   async handleFileInput(ev: any): Promise<void> {
     const files = ev.target.files;
     const file = files.item(0);
+
+    if (!file) {
+      // No file selected or selection cancelled
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async () => {
-      const textData = reader.result;
-      console.log(textData);
-      let data: AppDataCompleteNew | undefined;
-      let oldData;
-      try {
-        data = oldData = JSON.parse((textData as any).toString());
-      } catch (e) {
-        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
-      }
-
-      if (!data || !oldData) {
-        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
-      } else if (oldData.config && Array.isArray(oldData.tasks)) {
-        alert('V1 Data. Migration not supported any more.');
-      } else {
-        await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
-        try {
-          await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
-        } catch (e) {
-          this._snackService.open({
-            type: 'ERROR',
-            msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
-          });
-          return;
-        }
-      }
+      const textData = reader.result as string;
+      await this._processAndImportData(textData);
 
       const fileInputRef = this.fileInputRef();
       if (!fileInputRef) {
@@ -78,6 +111,86 @@ export class FileImexComponent {
       fileInputRef.nativeElement.type = 'file';
     };
     reader.readAsText(file);
+  }
+
+  async importFromUrlHandler(url: string): Promise<void> {
+    if (!url) {
+      this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_URL });
+      return;
+    }
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        // Handle non-successful HTTP responses (e.g., 404, 500)
+        console.error(`HTTP error! status: ${response.status} for URL: ${url}`);
+        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_NETWORK });
+        return;
+      }
+      const textData = await response.text();
+      await this._processAndImportData(textData);
+    } catch (error) {
+      // Handle network errors (e.g., fetch failed to connect)
+      console.error('Network error or other issue fetching from URL:', error);
+      this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_NETWORK });
+    }
+  }
+
+  openUrlImportDialog(): void {
+    this._matDialog
+      .open(DialogImportFromUrlComponent, {
+        width: '500px', // Or any other appropriate width
+      })
+      .afterClosed()
+      .subscribe(async (url: string | undefined) => {
+        if (url) {
+          await this.importFromUrlHandler(url);
+        }
+      });
+  }
+
+  private async _processAndImportData(dataString: string): Promise<void> {
+    let data: AppDataCompleteNew | undefined;
+    let oldData: any; // Keep type any for oldData to match original logic for V1 check
+
+    try {
+      data = oldData = JSON.parse(dataString);
+    } catch (e) {
+      this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
+      return; // Exit if JSON parsing fails
+    }
+
+    if (!data || !oldData) {
+      this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_INVALID_DATA });
+      return; // Exit if data is falsy
+    }
+
+    // V1 data check (as in original handleFileInput)
+    // TODO: consider if this check is still relevant or can be removed/updated
+    if (oldData.config && Array.isArray(oldData.tasks)) {
+      alert('V1 Data. Migration not supported any more.');
+      // Potentially also use snackService here or log an error.
+      // For now, keeping alert as per original logic.
+      return;
+    }
+
+    try {
+      await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
+      await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
+      // Optionally, add a success snackbar here if desired
+      // this._snackService.open({ type: 'SUCCESS', msg: 'Data imported successfully!' });
+    } catch (e) {
+      console.error('Import process failed', e);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
+      });
+    }
   }
 
   async downloadBackup(): Promise<void> {

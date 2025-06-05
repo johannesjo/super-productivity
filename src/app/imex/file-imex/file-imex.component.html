@@ -35,3 +35,13 @@
   id="file"
   type="file"
 />
+
+<button
+  (click)="openUrlImportDialog()"
+  color="primary"
+  mat-stroked-button
+  type="button"
+>
+  <mat-icon>cloud_download</mat-icon>
+  {{ T.FILE_IMEX.OPEN_IMPORT_FROM_URL_DIALOG | translate }}
+</button>

@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "익명화된 데이터 내보내기(디버깅을 위해 contact@super-productivity.com 으로 보내기)",
     "S_BACKUP_DOWNLOADED": "백업은 안드로이드 문서 폴더에 다운로드되었습니다.",
     "S_ERR_IMPORT_FAILED": "데이터 가져오기 실패",
-    "S_ERR_INVALID_DATA": "가져 오기 실패 : 잘못된 JSON"
+    "S_ERR_INVALID_DATA": "가져 오기 실패 : 잘못된 JSON",
+    "S_ERR_INVALID_URL": "가져오기 실패: 제공된 URL이 유효하지 않습니다",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "오류: 가져오기를 위한 URL 매개변수를 디코딩할 수 없습니다. 올바르게 형식화되었는지 확인하십시오.",
+    "S_ERR_NETWORK": "가져오기 실패: URL에서 데이터를 가져오는 중 네트워크 오류 발생",
+    "IMPORT_FROM_URL": "URL에서 가져오기",
+    "URL_PLACEHOLDER": "가져올 URL을 입력하세요",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URL에서 가져오기",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "가져오려는 Super Productivity 백업 JSON 파일의 전체 URL을 입력하세요.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URL에서 가져오기",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "URL에서 데이터 가져오기 확인",
+      "INITIATED_MSG": "자동 데이터 가져오기가 시작되었습니다.",
+      "SOURCE_URL_DOMAIN": "소스 도메인",
+      "WARNING_TITLE": "경고",
+      "WARNING_MSG": "계속하면 지정된 URL의 내용으로 현재 애플리케이션 데이터 및 구성이 덮어씌워집니다. 이 작업은 취소할 수 없습니다."
+    }
   },
   "G": {
     "ADD": "추가",

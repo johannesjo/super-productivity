@@ -1276,7 +1276,22 @@
     "EXPORT_DATA": "Exportar dados",
     "IMPORT_FROM_FILE": "Importar do arquivo",
     "PRIVACY_EXPORT": "Exportar dados anonimizados (para enviar para contact@super-productivity.com para depuração)",
-    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido"
+    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido",
+    "S_ERR_INVALID_URL": "Falha na importação: URL fornecido inválido",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Erro: Não foi possível decodificar o parâmetro de URL para importação. Certifique-se de que está corretamente formatado.",
+    "S_ERR_NETWORK": "Falha na importação: erro de rede ao buscar dados do URL",
+    "IMPORT_FROM_URL": "Importar do URL",
+    "URL_PLACEHOLDER": "Insira o URL para importar",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar do URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, insira o URL completo do arquivo de backup JSON do Super Productivity que deseja importar.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar do URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirmar importação de dados do URL",
+      "INITIATED_MSG": "Uma importação automática de dados foi iniciada.",
+      "SOURCE_URL_DOMAIN": "Domínio de origem",
+      "WARNING_TITLE": "Aviso",
+      "WARNING_MSG": "Prosseguir irá sobrescrever seus dados e configurações atuais do aplicativo com o conteúdo do URL especificado. Esta ação não pode ser desfeita."
+    }
   },
   "G": {
     "ADD": "Adicionar",

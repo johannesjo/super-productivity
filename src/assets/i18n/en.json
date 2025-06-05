@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Export anonymized data (to send to contact@super-productivity.com for debugging)",
     "S_BACKUP_DOWNLOADED": "Backup downloaded to android documents folder",
     "S_ERR_IMPORT_FAILED": "Importing data failed",
-    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
+    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON",
+    "S_ERR_INVALID_URL": "Import failed: Invalid URL provided",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: Could not decode the URL parameter for import. Please ensure it is correctly formatted.",
+    "S_ERR_NETWORK": "Import failed: Network error while fetching data from URL",
+    "IMPORT_FROM_URL": "Import from URL",
+    "URL_PLACEHOLDER": "Enter URL to import from",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Import from URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Please enter the full URL of the Super Productivity backup JSON file you want to import.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Import from URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirm Data Import from URL",
+      "INITIATED_MSG": "An automatic data import has been initiated.",
+      "SOURCE_URL_DOMAIN": "Source Domain",
+      "WARNING_TITLE": "Warning",
+      "WARNING_MSG": "Proceeding will overwrite your current application data and configuration with the content from the specified URL. This action cannot be undone."
+    }
   },
   "G": {
     "ADD": "Add",

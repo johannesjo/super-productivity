@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Ekspor data anonim (untuk dikirim ke contact@super-productivity.com untuk debugging)",
     "S_BACKUP_DOWNLOADED": "Cadangan diunduh ke folder dokumen android",
     "S_ERR_IMPORT_FAILED": "Mengimpor data gagal",
-    "S_ERR_INVALID_DATA": "Impor gagal: JSON tidak valid"
+    "S_ERR_INVALID_DATA": "Impor gagal: JSON tidak valid",
+    "S_ERR_INVALID_URL": "Impor gagal: URL yang diberikan tidak valid",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Kesalahan: Tidak dapat mendekode parameter URL untuk impor. Pastikan formatnya benar.",
+    "S_ERR_NETWORK": "Impor gagal: Kesalahan jaringan saat mengambil data dari URL",
+    "IMPORT_FROM_URL": "Impor dari URL",
+    "URL_PLACEHOLDER": "Masukkan URL untuk impor",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Impor dari URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Silakan masukkan URL lengkap file cadangan JSON Super Productivity yang ingin Anda impor.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Impor dari URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Konfirmasi Impor Data dari URL",
+      "INITIATED_MSG": "Impor data otomatis telah dimulai.",
+      "SOURCE_URL_DOMAIN": "Domain Sumber",
+      "WARNING_TITLE": "Peringatan",
+      "WARNING_MSG": "Melanjutkan akan menimpa data dan konfigurasi aplikasi Anda saat ini dengan konten dari URL yang ditentukan. Tindakan ini tidak dapat dibatalkan."
+    }
   },
   "G": {
     "ADD": "Menambahkan",
