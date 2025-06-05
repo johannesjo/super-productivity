@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Clipper</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: sans-serif;
+      width: 300px;
+      padding: 10px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 2px;
+    }
+    input[type="text"] {
+      width: calc(100% - 10px);
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+    #clipDetails {
+      border: 1px solid #ccc;
+      min-height: 50px;
+      padding: 5px;
+      background-color: #f9f9f9;
+    }
+    #clipDetails p {
+      margin: 5px 0;
+    }
+    #savedClipsArea div {
+      border-bottom: 1px solid #eee;
+      padding: 5px 0;
+    }
+    #savedClipsArea div:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Web Clipper</h1>
+
+  <label for="clipTitle">Title:</label>
+  <input type="text" id="clipTitle" name="clipTitle">
+
+  <label>Details:</label>
+  <div id="clipDetails">
+    <p id="clippedSentence"></p>
+    <p id="sourceUrl"></p>
+  </div>
+
+  <label>Date:</label>
+  <div id="clipDate"></div>
+
+  <button id="saveClipButton">Save Clip</button>
+
+  <hr>
+  <h2>Saved Clips</h2>
+  <div id="savedClipsArea"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
