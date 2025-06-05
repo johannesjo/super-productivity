@@ -160,6 +160,9 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       this._layoutService.toggleNotes();
+    } else if (checkKeyCombo(ev, keys.toggleTaskViewCustomizerPanel)) {
+      ev.preventDefault();
+      this._layoutService.toggleTaskViewCustomizerPanel();
     } else if (checkKeyCombo(ev, keys.toggleIssuePanel)) {
       ev.preventDefault();
       this._layoutService.toggleAddTaskPanel();

@@ -239,12 +239,25 @@
               </button>
             </div>
           }
-          <task-list
-            class="tour-undoneList"
-            [tasks]="undoneTasks()"
-            listId="PARENT"
-            listModelId="UNDONE"
-          ></task-list>
+          @if (customizedUndoneTasks$ | async; as customized) {
+            @if (customized.grouped) {
+              @for (group of customized.grouped | keyvalue; track group.key) {
+                <h3>{{ group.key }}</h3>
+                <task-list
+                  [tasks]="group.value"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              }
+            } @else {
+              <task-list
+                class="tour-undoneList"
+                [tasks]="customized.list"
+                listId="PARENT"
+                listModelId="UNDONE"
+              ></task-list>
+            }
+          }
 
           @if (!isPlanningMode() || doneTasks()?.length) {
             @let nrOfDoneArchived =

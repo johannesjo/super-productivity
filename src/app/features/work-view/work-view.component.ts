@@ -36,6 +36,7 @@ import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
+import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RightPanelComponent } from '../right-panel/right-panel.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -62,6 +63,7 @@ import { Store } from '@ngrx/store';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'work-view',
@@ -94,6 +96,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
     MsToStringPipe,
     TranslatePipe,
     CollapsibleComponent,
+    CommonModule,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
@@ -102,6 +105,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   planningModeService = inject(PlanningModeService);
   improvementService = inject(ImprovementService);
   layoutService = inject(LayoutService);
+  customizerService = inject(TaskViewCustomizerService);
   workContextService = inject(WorkContextService);
   private _activatedRoute = inject(ActivatedRoute);
   private _projectService = inject(ProjectService);
@@ -114,6 +118,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     initialValue: [],
   });
   undoneTasks = input<TaskWithSubTasks[]>([]);
+  customizedUndoneTasks$ = this.customizerService.customizeUndoneTasks(
+    this.workContextService.undoneTasks$,
+  );
   doneTasks = input<TaskWithSubTasks[]>([]);
   backlogTasks = input<TaskWithSubTasks[]>([]);
   isShowBacklog = input<boolean>(false);

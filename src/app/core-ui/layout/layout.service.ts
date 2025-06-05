@@ -5,6 +5,7 @@ import {
   hideNotesAndAddTaskPanel,
   hideSearchBar,
   hideSideNav,
+  hideTaskViewCustomizerPanel,
   showAddTaskBar,
   showSearchBar,
   toggleAddTaskBar,
@@ -12,6 +13,7 @@ import {
   toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
+  toggleTaskViewCustomizerPanel,
 } from './store/layout.actions';
 import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -22,6 +24,7 @@ import {
   selectIsShowNotes,
   selectIsShowSearchBar,
   selectIsShowSideNav,
+  selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
 import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -85,6 +88,12 @@ export class LayoutService {
     select(selectIsShowNotes),
   );
   isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe();
+
+  private _isShowTaskViewCustomizerPanel$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowTaskViewCustomizerPanel),
+  );
+  isShowTaskViewCustomizerPanel$: Observable<boolean> =
+    this._isShowTaskViewCustomizerPanel$.pipe();
 
   private _isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowIssuePanel),
@@ -157,5 +166,13 @@ export class LayoutService {
 
   hideAddTaskPanel(): void {
     this._store$.dispatch(hideIssuePanel());
+  }
+
+  toggleTaskViewCustomizerPanel(): void {
+    this._store$.dispatch(toggleTaskViewCustomizerPanel());
+  }
+
+  hideTaskViewCustomizerPanel(): void {
+    this._store$.dispatch(hideTaskViewCustomizerPanel());
   }
 }

@@ -249,6 +249,22 @@
     }
 
     <button
+      class="toggle-notes-btn e2e-toggle-task-view-customizer-panel"
+      [disabled]="!(isRouteWithSidePanel$ | async)"
+      [class.isActive]="layoutService.isShowTaskCustomizerPanel$ | async"
+      [class.isRouteWithRightPanel]="isRouteWithRightPanel$ | async"
+      (click)="layoutService.toggleTaskViewCustomizerPanel()"
+      mat-icon-button
+      matTooltip="Customize Task View {{
+        kb.toggleTaskViewCustomizerPanel
+          ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
+          : ''
+      }}"
+    >
+      <mat-icon class="note-ico">tune</mat-icon>
+    </button>
+
+    <button
       class="toggle-notes-btn tour-issuePanelTrigger e2e-toggle-issue-provider-panel"
       [disabled]="!(isRouteWithSidePanel$ | async)"
       [class.isActive]="layoutService.isShowIssuePanel$ | async"

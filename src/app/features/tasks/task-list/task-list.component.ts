@@ -36,6 +36,7 @@ import { MatIcon } from '@angular/material/icon';
 import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
 import { planTasksForToday } from '../../tag/store/tag.actions';
+import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -67,6 +68,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
   private _issueService = inject(IssueService);
+  private _taskViewCustomizerService = inject(TaskViewCustomizerService);
   dropListService = inject(DropListService);
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -204,6 +206,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       targetListData.listModelId,
       newIds.map((p) => p.id),
     );
+
+    this._taskViewCustomizerService.setSort('default');
   }
 
   async _addFromIssuePanel(
