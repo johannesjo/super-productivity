@@ -179,6 +179,17 @@ $this-stroke-width: 4px;
   transform: translate3d(-50%, -50%, 0);
 }
 
+.time-duration-input {
+  width: 65%;
+  text-align: center;
+}
+
+.invalid-input {
+  display: inline-block;
+  font-size: 10px;
+  line-height: 1.2;
+  margin-top: $s;
+}
 .value {
   width: 100%;
   text-align: center;
