@@ -10,11 +10,13 @@ import {
   output,
   viewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 import { InputDurationDirective } from '../input-duration.directive';
+import { InputTimeDurationDirective } from '../input-time-duration.directive';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -24,7 +26,13 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [dotAnimation],
-  imports: [InputDurationDirective, FormsModule, TranslatePipe],
+  imports: [
+    FormsModule,
+    InputDurationDirective,
+    InputTimeDurationDirective,
+    TranslatePipe,
+    CommonModule,
+  ],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   private _el = inject(ElementRef);
