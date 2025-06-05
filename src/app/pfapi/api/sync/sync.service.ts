@@ -276,9 +276,8 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // If nothing to update or provider limited to single file sync
     if (
-      !isDownloadAll &&
-      ((toUpdate.length === 0 && toDelete.length === 0) ||
-        this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync)
+      (!isDownloadAll && toUpdate.length === 0 && toDelete.length === 0) ||
+        this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
       pfLog(3, 'RevMap comparison', {
