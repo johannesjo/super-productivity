@@ -42,6 +42,7 @@
               [options]="lineChartOptions"
               [legend]="true"
               baseChart
+              (chartClick)="onChartClick($event)"
             >
             </canvas>
           </div>
@@ -50,6 +51,10 @@
     }
 
     <div class="form-wrapper">
+      <div style="margin-bottom: 8px; font-weight: 600">
+        {{ 'Count for' }} {{ formatSelectedDate() }}
+      </div>
+
       @if (
         data.simpleCounter.type === SimpleCounterType.ClickCounter ||
         data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder

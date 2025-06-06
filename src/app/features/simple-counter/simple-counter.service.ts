@@ -13,6 +13,7 @@ import {
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
   setSimpleCounterCounterToday,
+  setSimpleCounterCounterForDate,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
@@ -60,6 +61,10 @@ export class SimpleCounterService {
   setCounterToday(id: string, newVal: number): void {
     const today = this._dateService.todayStr();
     this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+  }
+
+  setCounterForDate(id: string, date: string, newVal: number): void {
+    this._store$.dispatch(setSimpleCounterCounterForDate({ id, newVal, date }));
   }
 
   increaseCounterToday(id: string, increaseBy: number): void {
