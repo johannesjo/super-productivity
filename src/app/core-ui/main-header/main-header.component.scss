@@ -113,6 +113,91 @@ button {
   }
 }
 
+.week-month-selector {
+  display: flex;
+  border-radius: $card-border-radius;
+  overflow: hidden;
+  margin-right: $s * 0.25;
+  box-shadow: $whiteframe-shadow-2dp;
+
+  @include mq(xs) {
+    margin-right: $s;
+  }
+
+  @include mq(xs, max) {
+    margin-right: $s * 0.125;
+  }
+}
+
+.week-month-btn {
+  min-width: 48px;
+  height: 36px;
+  padding: 0 $s;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 0;
+  transition: $transition-standard;
+  cursor: pointer;
+  position: relative;
+
+  @include mq(xs, max) {
+    min-width: 40px;
+    padding: 0 $s * 0.75;
+    font-size: 11px;
+  }
+
+  @include lightTheme() {
+    background: rgba($c-primary, 0.7);
+    color: white;
+
+    &:hover {
+      background: rgba($c-primary, 0.9);
+    }
+
+    &.active {
+      background: $c-primary;
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+    color: $dark-theme-text-color;
+
+    &:hover {
+      background: $dark8;
+    }
+
+    &.active {
+      background: $c-primary;
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  &:first-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-top-left-radius: $card-border-radius;
+    border-bottom-left-radius: $card-border-radius;
+
+    @include darkTheme() {
+      border-right-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &:last-child {
+    border-top-right-radius: $card-border-radius;
+    border-bottom-right-radius: $card-border-radius;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
 @keyframes pulse {
   0% {
     transform: scale(0.7);

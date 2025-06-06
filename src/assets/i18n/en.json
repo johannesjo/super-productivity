@@ -865,12 +865,14 @@
       },
       "END": "Work End",
       "LUNCH_BREAK": "Lunch Break",
+      "MONTH": "Month",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "NOW": "Now",
       "PLAN_END_DAY": "Plan at end of day",
       "PLAN_START_DAY": "Plan at start of day",
       "START": "Work Start",
-      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
+      "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
+      "WEEK": "Week"
     },
     "SEARCH_BAR": {
       "INFO": "Start typing to search for tasks",
@@ -1598,7 +1600,9 @@
       "L_WORK_START": "Work Day Start",
       "LUNCH_BREAK_START_END_DESCRIPTION": "e.g. 13:00",
       "TITLE": "Schedule",
-      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00",
+      "WEEK": "Week",
+      "MONTH": "Month"
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",

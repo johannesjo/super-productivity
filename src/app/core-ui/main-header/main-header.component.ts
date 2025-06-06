@@ -91,7 +91,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
   isShowSimpleCounterBtnsMobile: boolean = false;
-
+  get isScheduleSection(): boolean {
+    return this._router.url.includes('schedule');
+  }
   readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
   currentTaskContext$: Observable<Project | Tag | null> =
@@ -127,6 +129,12 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   );
 
   private _subs: Subscription = new Subscription();
+
+  selectedTimeView$ = this.layoutService.selectedTimeView$;
+
+  selectTimeView(view: 'week' | 'month'): void {
+    this.layoutService.setTimeView(view);
+  }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
