@@ -1,0 +1,113 @@
+<div class="customizer-panel">
+  <h3>Customize Task View</h3>
+
+  <div class="form-group">
+    <label>Sort By</label>
+    <mat-form-field>
+      <mat-select
+        [(ngModel)]="selectedSort"
+        (selectionChange)="applyTaskViewCustomizations()"
+      >
+        @for (opt of sortOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <label>Group By</label>
+    <mat-form-field>
+      <mat-select
+        [(ngModel)]="selectedGroup"
+        (selectionChange)="applyTaskViewCustomizations()"
+      >
+        @for (opt of groupOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <label>Filter By</label>
+    <mat-form-field>
+      <mat-select
+        [(ngModel)]="selectedFilter"
+        (selectionChange)="applyTaskViewCustomizations()"
+      >
+        @for (opt of filterOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (selectedFilter === 'tag') {
+      <mat-form-field>
+        <input
+          matInput
+          [(ngModel)]="filterInputValue"
+          placeholder="Enter tag"
+          (keydown)="triggerEnterSubmit($event)"
+        />
+      </mat-form-field>
+    }
+
+    @if (selectedFilter === 'project') {
+      <mat-form-field>
+        <input
+          matInput
+          [(ngModel)]="filterInputValue"
+          placeholder="Enter project"
+          (keydown)="triggerEnterSubmit($event)"
+        />
+      </mat-form-field>
+    }
+
+    @if (selectedFilter === 'scheduledDate') {
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="filterInputValue"
+          (selectionChange)="applyTaskViewCustomizations()"
+        >
+          @for (option of scheduledPresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (selectedFilter === 'estimatedTime') {
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="filterInputValue"
+          (selectionChange)="applyTaskViewCustomizations()"
+        >
+          @for (option of timePresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (selectedFilter === 'timeSpent') {
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="filterInputValue"
+          (selectionChange)="applyTaskViewCustomizations()"
+        >
+          @for (option of timePresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+
+  <button
+    mat-raised-button
+    (click)="onResetAll()"
+  >
+    Reset All
+  </button>
+</div>

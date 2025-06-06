@@ -1,0 +1,50 @@
+.customizer-panel {
+  padding: 8px 0;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+
+  h3 {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+
+    label {
+      margin-bottom: 5px;
+      color: white;
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    mat-slide-toggle {
+      align-self: flex-start;
+    }
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+}
