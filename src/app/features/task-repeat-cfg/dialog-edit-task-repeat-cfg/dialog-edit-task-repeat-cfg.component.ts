@@ -206,7 +206,9 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         this.repeatCfgInitial.startTime !== this.repeatCfg.startTime ||
         this.repeatCfgInitial.notes !== this.repeatCfg.notes ||
         JSON.stringify(this.repeatCfgInitial.tagIds) !==
-          JSON.stringify(this.repeatCfg.tagIds);
+          JSON.stringify(this.repeatCfg.tagIds) ||
+        JSON.stringify(this.repeatCfgInitial.subTasks) !==
+          JSON.stringify(this.repeatCfg.subTasks);
 
       this._taskRepeatCfgService.updateTaskRepeatCfg(
         exists((this.repeatCfg as TaskRepeatCfg).id),

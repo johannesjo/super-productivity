@@ -197,6 +197,10 @@ export const taskReducer = createReducer<TaskState>(
   // Task Actions
   // ------------
   on(addTask, (state, { task }) => {
+    console.log('DEBUG: addTask reducer called', {
+      taskId: task.id,
+      subTaskIds: task.subTaskIds,
+    });
     const newTask = {
       ...task,
       timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
@@ -431,6 +435,11 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(addSubTask, (state, { task, parentId }) => {
+    console.log('DEBUG: addSubTask reducer called', {
+      taskId: task.id,
+      parentId,
+      parentTaskExists: !!state.entities[parentId],
+    });
     const parentTask = getTaskById(parentId, state);
 
     // add item1

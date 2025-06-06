@@ -28,7 +28,7 @@ import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
-import { addTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
+import { addTask, addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -78,16 +78,33 @@ export class TaskRepeatCfgService {
     projectId: string | null,
     taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>,
   ): void {
+    const repeatCfgId = nanoid();
+    const taskRepeatCfgWithId = {
+      ...taskRepeatCfg,
+      projectId,
+      id: repeatCfgId,
+    };
     this._store$.dispatch(
       addTaskRepeatCfgToTask({
-        taskRepeatCfg: {
-          ...taskRepeatCfg,
-          projectId,
-          id: nanoid(),
-        },
+        taskRepeatCfg: taskRepeatCfgWithId,
         taskId,
       }),
     );
+    if (taskRepeatCfg.subTasks && taskRepeatCfg.subTasks.length > 0) {
+      const { subTasks } = this._getTaskRepeatTemplate(taskRepeatCfgWithId);
+      subTasks.forEach((subTask) => {
+        this._store$.dispatch(
+          addSubTask({
+            task: {
+              ...subTask,
+              created: Date.now(),
+              dueDay: getWorklogStr(),
+            },
+            parentId: taskId,
+          }),
+        );
+      });
+    }
   }
 
   deleteTaskRepeatCfg(id: string): void {
@@ -158,6 +175,7 @@ export class TaskRepeatCfgService {
   Promise<
     (
       | ReturnType<typeof addTask>
+      | ReturnType<typeof addSubTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTaskWithTime>
     )[]
@@ -188,10 +206,11 @@ export class TaskRepeatCfgService {
       throw new Error('Unable to getNewestPossibleDueDate()');
     }
 
-    const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
+    const { task, isAddToBottom, subTasks } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
     const createNewActions: (
       | ReturnType<typeof addTask>
+      | ReturnType<typeof addSubTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTaskWithTime>
     )[] = [
@@ -219,6 +238,22 @@ export class TaskRepeatCfgService {
       }),
     ];
 
+    // Add subtasks if configured
+    if (subTasks && subTasks.length > 0) {
+      subTasks.forEach((subTask) => {
+        createNewActions.push(
+          addSubTask({
+            task: {
+              ...subTask,
+              created: targetCreated.getTime(),
+              dueDay: getWorklogStr(targetCreated),
+            },
+            parentId: task.id,
+          }),
+        );
+      });
+    }
+
     // Schedule if given
     if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
       const dateTime = getDateTimeFromClockString(
@@ -242,20 +277,37 @@ export class TaskRepeatCfgService {
   private _getTaskRepeatTemplate(taskRepeatCfg: TaskRepeatCfg): {
     task: Task;
     isAddToBottom: boolean;
+    subTasks: Task[];
   } {
-    return {
-      task: this._taskService.createNewTaskWithDefaults({
-        title: taskRepeatCfg.title,
+    const mainTask = this._taskService.createNewTaskWithDefaults({
+      title: taskRepeatCfg.title,
+      additional: {
+        repeatCfgId: taskRepeatCfg.id,
+        timeEstimate: taskRepeatCfg.defaultEstimate,
+        projectId: taskRepeatCfg.projectId || undefined,
+        notes: taskRepeatCfg.notes || '',
+        // always due for today
+        dueDay: getWorklogStr(),
+      },
+    });
+
+    const subTasks: Task[] = (taskRepeatCfg.subTasks || []).map((subTaskTemplate) =>
+      this._taskService.createNewTaskWithDefaults({
+        title: subTaskTemplate.title,
         additional: {
-          repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate,
+          timeEstimate: subTaskTemplate.timeEstimate,
           projectId: taskRepeatCfg.projectId || undefined,
-          notes: taskRepeatCfg.notes || '',
-          // always due for today
+          notes: subTaskTemplate.notes || '',
+          isDone: subTaskTemplate.isDone || false,
           dueDay: getWorklogStr(),
         },
       }),
+    );
+
+    return {
+      task: mainTask,
       isAddToBottom: taskRepeatCfg.order > 0,
+      subTasks,
     };
   }
 }
