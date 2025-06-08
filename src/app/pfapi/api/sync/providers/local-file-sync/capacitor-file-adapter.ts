@@ -26,6 +26,7 @@ export class CapacitorFileAdapter implements FileAdapter {
       data: dataStr,
       directory: this._directory,
       encoding: Encoding.UTF8,
+      recursive: true,
     });
   }
 
@@ -38,6 +39,7 @@ export class CapacitorFileAdapter implements FileAdapter {
     } catch (e) {
       // Ignore file not found errors
       if (e?.toString?.().includes('File does not exist')) {
+        console.error(`File not found for deletion: ${filePath}`);
         return;
       }
       throw e;
