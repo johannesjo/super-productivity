@@ -159,7 +159,9 @@
         "L_INTERVAL": "Interval to repeat phrase",
         "L_TEXT": "Text",
         "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
-        "TITLE": "Domina Mode"
+        "TITLE": "Domina Mode",
+        "L_VOICE": "Select a Voice",
+        "L_VOICE_DESCRIPTION": "Choose a voice"
       }
     },
     "DROPBOX": {
