@@ -12,7 +12,6 @@ export type MiscConfig = Readonly<{
   isAutoAddWorkedOnToToday: boolean;
   isMinimizeToTray: boolean;
   isTrayShowCurrentTask: boolean;
-  isTrayShowCurrentCountdown: boolean;
   // allow also false because of #569
   defaultProjectId?: string | null | false;
   firstDayOfWeek: number;
@@ -22,6 +21,7 @@ export type MiscConfig = Readonly<{
   isDisableAnimations: boolean;
   // optional because it was added later
   isShowTipLonger?: boolean;
+  isTrayShowCurrentCountdown?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
