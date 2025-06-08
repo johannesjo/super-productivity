@@ -14,8 +14,15 @@ export const autoFixTypiaErrors = (
       const path = error.path.replace('$input.', '');
       const keys = parsePath(path);
       const value = getValueByPath(data, keys);
-      console.warn('Auto-fixing error:', error);
-      if (error.expected.includes('number') && typeof value === 'string') {
+      console.warn('Auto-fixing error:', error, keys, value);
+
+      if (keys[0] === 'globalConfig') {
+        const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
+        setValueByPath(data, keys, defaultValue);
+        alert(
+          `Warning: ${path} had an invalid value and was set to default: ${defaultValue}`,
+        );
+      } else if (error.expected.includes('number') && typeof value === 'string') {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
           setValueByPath(data, keys, parsedValue);
@@ -28,13 +35,6 @@ export const autoFixTypiaErrors = (
         setValueByPath(data, keys, false);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         setValueByPath(data, keys, 0);
-      } else if (keys[0] === 'globalConfig') {
-        const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
-        console.warn(
-          `Auto-fixing globalConfig error by setting to default}: ${defaultValue}`,
-          keys,
-        );
-        setValueByPath(data, keys, defaultValue);
       }
     }
   });
