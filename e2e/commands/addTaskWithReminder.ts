@@ -47,7 +47,7 @@ const getTimeVal = (d: Date): string => {
   const v = new Date(d).toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
-    hour12: isBrowserLocaleClockType12h(),
+    hour12: false,
     timeZone: tz,
   });
   console.log(
