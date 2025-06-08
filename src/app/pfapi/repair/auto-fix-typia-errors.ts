@@ -1,5 +1,6 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { IValidation } from 'typia';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 export const autoFixTypiaErrors = (
   data: AppDataCompleteNew,
@@ -27,6 +28,13 @@ export const autoFixTypiaErrors = (
         setValueByPath(data, keys, false);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         setValueByPath(data, keys, 0);
+      } else if (keys[0] === 'globalConfig') {
+        const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
+        console.warn(
+          `Auto-fixing globalConfig error by setting to default}: ${defaultValue}`,
+          keys,
+        );
+        setValueByPath(data, keys, defaultValue);
       }
     }
   });
