@@ -196,13 +196,17 @@ export class InvalidSyncProviderError extends Error {
 
 export class DataValidationFailedError extends Error {
   override name = 'DataValidationFailedError';
+  additionalLog?: string;
 
   constructor(validationResult: IValidation<AllModelData<any>>) {
     super('DataValidationFailedError');
     console.log('validation result: ', validationResult);
+
     try {
       if ('errors' in validationResult) {
-        console.log('validation errors_: ' + JSON.stringify(validationResult.errors));
+        const str = JSON.stringify(validationResult.errors);
+        console.log('validation errors_: ' + str);
+        this.additionalLog = str.substring(0, 400);
       }
       console.log('validation result_: ' + JSON.stringify(validationResult));
     } catch (e) {}

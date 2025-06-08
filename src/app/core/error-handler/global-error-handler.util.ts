@@ -59,7 +59,7 @@ export const logAdvancedStacktrace = (
       if (githubIssueLinks) {
         const errEscaped = _cleanHtml(origErr as string);
         Array.from(githubIssueLinks).forEach((el) =>
-          el.setAttribute('href', getGithubErrorUrl(errEscaped, stack)),
+          el.setAttribute('href', getGithubErrorUrl(errEscaped, stack, origErr)),
         );
       }
 
@@ -84,7 +84,7 @@ export const createErrorAlert = (
   }
   // it seems for whatever reason, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
-  const githubUrl = getGithubErrorUrl(errEscaped, stackTrace);
+  const githubUrl = getGithubErrorUrl(errEscaped, stackTrace, origErr);
 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
@@ -198,6 +198,7 @@ export const isHandledError = (err: unknown): boolean => {
 export const getGithubErrorUrl = (
   title: string,
   stackTrace?: string,
+  origErr?: Error | unknown,
   isHideActionsBeforeError = false,
 ): string => {
   return newGithubIssueUrl({
@@ -205,12 +206,13 @@ export const getGithubErrorUrl = (
     repo: 'super-productivity',
     title: '💥 ' + title,
     template: 'in_app_bug_report.md',
-    body: getGithubIssueErrorMarkdown(stackTrace, isHideActionsBeforeError),
+    body: getGithubIssueErrorMarkdown(stackTrace, origErr, isHideActionsBeforeError),
   });
 };
 
 const getGithubIssueErrorMarkdown = (
   stacktrace?: string,
+  origErr?: Error | unknown,
   isHideActionsBeforeError = false,
 ): string => {
   const code = '```';
@@ -253,6 +255,8 @@ const getGithubIssueErrorMarkdown = (
 
 ### Url
 ${window.location.href}
+
+${typeof origErr === 'object' && origErr && 'additionalLog' in origErr ? `### AL\n${origErr.additionalLog}` : ''}
 
 ### Meta Info
 ${getSimpleMeta()}
