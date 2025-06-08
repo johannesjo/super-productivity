@@ -16,17 +16,19 @@ export const autoFixTypiaErrors = (
       const value = getValueByPath(data, keys);
       console.warn('Auto-fixing error:', error, keys, value);
 
-      if (keys[0] === 'globalConfig') {
+      if (
+        error.expected.includes('number') &&
+        typeof value === 'string' &&
+        !isNaN(parseFloat(value))
+      ) {
+        const parsedValue = parseFloat(value);
+        setValueByPath(data, keys, parsedValue);
+      } else if (keys[0] === 'globalConfig') {
         const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
         setValueByPath(data, keys, defaultValue);
         alert(
           `Warning: ${path} had an invalid value and was set to default: ${defaultValue}`,
         );
-      } else if (error.expected.includes('number') && typeof value === 'string') {
-        const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-          setValueByPath(data, keys, parsedValue);
-        }
       } else if (error.expected.includes('undefined') && value === null) {
         setValueByPath(data, keys, undefined);
       } else if (error.expected.includes('null') && value === undefined) {
