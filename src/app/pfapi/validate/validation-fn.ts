@@ -125,7 +125,7 @@ const _wrapValidate = <R>(
   isEntityCheck = false,
 ): ValidationResult<R> => {
   if (!result.success) {
-    console.log('Validation failed', (result as any)?.errors, result);
+    console.log('Validation failed', (result as any)?.errors, result, d);
   }
   if (isEntityCheck && !isEntityStateConsistent(d as any)) {
     return {
