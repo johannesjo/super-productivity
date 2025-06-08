@@ -39,13 +39,13 @@ export class TranslateExtension {
 
     field.expressionProperties = {
       ...(field.expressionProperties || {}),
-      ...(typeof to.label === 'string'
+      ...(typeof to.label === 'string' && to.label.length
         ? { 'templateOptions.label': this.translate.stream(to.label) }
         : {}),
-      ...(typeof to.description === 'string'
+      ...(typeof to.description === 'string' && to.description.length
         ? { 'templateOptions.description': this.translate.stream(to.description) }
         : {}),
-      ...(typeof to.placeholder === 'string'
+      ...(typeof to.placeholder === 'string' && to.placeholder.length
         ? { 'templateOptions.placeholder': this.translate.stream(to.placeholder) }
         : {}),
     };
