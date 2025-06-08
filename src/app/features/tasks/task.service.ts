@@ -294,6 +294,8 @@ export class TaskService {
       workContextId,
     });
 
+    console.log(task, additional);
+
     this._store.dispatch(
       addTask({
         task,
@@ -1019,7 +1021,7 @@ export class TaskService {
     workContextType?: WorkContextType;
     workContextId?: string;
   }): Task {
-    return {
+    const d1 = {
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
@@ -1043,5 +1045,10 @@ export class TaskService {
 
       ...additional,
     };
+
+    if (d1.projectId === undefined) {
+      return { ...d1, projectId: INBOX_PROJECT.id };
+    }
+    return d1;
   }
 }
