@@ -155,7 +155,7 @@ export class PfapiService {
 
       this._imexViewService.setDataImportInProgress(false);
       if (!isSkipReload) {
-        // window.location.reload();
+        window.location.reload();
       }
     } catch (e) {
       this._imexViewService.setDataImportInProgress(false);
