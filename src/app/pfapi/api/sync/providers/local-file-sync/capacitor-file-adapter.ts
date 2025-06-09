@@ -1,12 +1,14 @@
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { FileAdapter } from './file-adapter.interface';
 
+const BASE = 'sync/';
+
 export class CapacitorFileAdapter implements FileAdapter {
   constructor(private readonly _directory: Directory) {}
 
   async readFile(filePath: string): Promise<string> {
     const res = await Filesystem.readFile({
-      path: filePath,
+      path: BASE + filePath,
       directory: this._directory,
       encoding: Encoding.UTF8,
     });
@@ -22,7 +24,7 @@ export class CapacitorFileAdapter implements FileAdapter {
 
   async writeFile(filePath: string, dataStr: string): Promise<void> {
     await Filesystem.writeFile({
-      path: filePath,
+      path: BASE + filePath,
       data: dataStr,
       directory: this._directory,
       encoding: Encoding.UTF8,
@@ -33,7 +35,7 @@ export class CapacitorFileAdapter implements FileAdapter {
   async deleteFile(filePath: string): Promise<void> {
     try {
       await Filesystem.deleteFile({
-        path: filePath,
+        path: BASE + filePath,
         directory: this._directory,
       });
     } catch (e) {
@@ -49,7 +51,7 @@ export class CapacitorFileAdapter implements FileAdapter {
   // async checkDirExists(dirPath: string): Promise<boolean> {
   //   try {
   //     await Filesystem.stat({
-  //       path: dirPath,
+  //       path:BASE+ dirPath,
   //       directory: this.directory,
   //     });
   //     return true;
