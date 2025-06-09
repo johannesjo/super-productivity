@@ -41,7 +41,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile,
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+        IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
         {
@@ -51,10 +52,27 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
             required: true,
             onClick: () => {
-              if (IS_ANDROID_WEB_VIEW) {
-                return fileSyncDroid.setupSaf();
-              }
               return fileSyncElectron.pickDirectory();
+            },
+          },
+        },
+      ],
+    },
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+        !IS_ANDROID_WEB_VIEW,
+      key: 'localFileSync',
+      fieldGroup: [
+        {
+          type: 'btn',
+          key: 'safFolderUri',
+          templateOptions: {
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            required: true,
+            onClick: () => {
+              // NOTE: this actually sets the value in the model
+              return fileSyncDroid.setupSaf();
             },
           },
         },

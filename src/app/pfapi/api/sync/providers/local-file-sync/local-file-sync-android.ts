@@ -17,11 +17,11 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
   async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();
     // Check if SAF is enabled and has valid permissions
-    if (privateCfg?.safEnabled) {
+    if (privateCfg?.safFolderUri?.length) {
       const hasPermission = await SafService.checkPermission(privateCfg.safFolderUri);
       if (!hasPermission) {
         // SAF was enabled but permission was revoked
-        await this.privateCfg.save({ ...privateCfg, safEnabled: false });
+        await this.privateCfg.save({ ...privateCfg, safFolderUri: undefined });
         return false;
       }
       return true;
@@ -29,30 +29,19 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
     return false;
   }
 
-  async setupSaf(): Promise<boolean> {
+  async setupSaf(): Promise<string | undefined> {
     try {
       const uri = await SafService.selectFolder();
+      const privateCfg = await this.privateCfg.load();
       await this.privateCfg.save({
+        ...privateCfg,
         safFolderUri: uri,
-        safEnabled: true,
       });
-      return true;
+      return uri;
     } catch (error) {
       console.error('Failed to setup SAF:', error);
-      return false;
+      return undefined;
     }
-  }
-
-  async isSafEnabled(): Promise<boolean> {
-    const privateCfg = await this.privateCfg.load();
-    return !!privateCfg?.safEnabled;
-  }
-
-  async disableSaf(): Promise<void> {
-    await this.privateCfg.save({
-      safFolderUri: undefined,
-      safEnabled: false,
-    });
   }
 
   async setPrivateCfg(privateCfg: LocalFileSyncPrivateCfg): Promise<void> {

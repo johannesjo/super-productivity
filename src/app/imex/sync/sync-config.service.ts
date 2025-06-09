@@ -35,6 +35,7 @@ export class SyncConfigService {
 
       // If no provider is active, return base config with empty encryption key
       if (!currentProviderCfg) {
+        alert('BASE CONFIG: No sync provider is active, using default settings.');
         return {
           ...baseConfig,
           encryptKey: '',
@@ -124,6 +125,15 @@ export class SyncConfigService {
         password: webDavCfg.password || '',
         syncFolderPath: webDavCfg.syncFolderPath || '',
       });
+      // } else if (providerId === SyncProviderId.LocalFile) {
+      //   const localFileCfg = privateCfg as PrivateCfgByProviderId<SyncProviderId.LocalFile>;
+      //   await this._pfapiService.pf.setPrivateCfgForSyncProvider(providerId, {
+      //     ...localFileCfg,
+      //     baseUrl: localFileCfg.baseUrl || '',
+      //     userName: localFileCfg.userName || '',
+      //     password: localFileCfg.password || '',
+      //     syncFolderPath: localFileCfg.syncFolderPath || '',
+      //   });
     } else {
       await this._pfapiService.pf.setPrivateCfgForSyncProvider(
         providerId,

@@ -155,7 +155,6 @@ export interface LocalFileSyncPrivateCfg extends SyncProviderPrivateCfgBase {
   syncFolderPath?: string;
   // Android SAF specific
   safFolderUri?: string;
-  safEnabled?: boolean;
 }
 
 // TODO better dynamic typing
