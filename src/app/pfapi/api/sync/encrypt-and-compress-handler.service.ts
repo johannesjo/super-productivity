@@ -73,6 +73,7 @@ export class EncryptAndCompressHandlerService {
     }
     if (isEncrypt) {
       if (!encryptKey) {
+        console.log(encryptKey);
         throw new Error('No encryption password provided');
       }
 

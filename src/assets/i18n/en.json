@@ -894,9 +894,11 @@
         "USE_REMOTE": "Keep remote"
       },
       "D_DECRYPT_ERROR": {
-        "BTN_OVER_WRITE_REMOTE": "Change and overwrite remote",
-        "P1": "Your data is encrypted and decryption failed. Please enter the correct password!",
-        "P2": "You can also change your password, which will overwrite all remote data."
+        "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
+        "CHANGE_PW_AND_DECRYPT": "Change & Attempt Decrypt",
+        "P1": "Your remote data is encrypted and decryption failed. Please enter the correct password!",
+        "P2": "Or you can also change your password, which will overwrite all remote data.",
+        "PASSWORD": "Password"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Close App",
