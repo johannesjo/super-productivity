@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## General Guidelines
 
-1. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity.
-2. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic.
+1. Prefer functional programming patterns: Use pure functions, immutability, and avoid side effects where possible.
+2. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity and abstractions.
+3. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic, but avoid unnecessary abstractions.
 
 ## Project Overview
 
