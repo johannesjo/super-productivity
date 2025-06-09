@@ -11,9 +11,6 @@ project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacit
 include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('../node_modules/@capacitor/local-notifications/android')
 
-include ':capacitor-preferences'
-project(':capacitor-preferences').projectDir = new File('../node_modules/@capacitor/preferences/android')
-
 include ':capawesome-capacitor-android-dark-mode-support'
 project(':capawesome-capacitor-android-dark-mode-support').projectDir = new File('../node_modules/@capawesome/capacitor-android-dark-mode-support/android')
 
