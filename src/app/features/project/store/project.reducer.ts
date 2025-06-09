@@ -230,21 +230,22 @@ export const projectReducer = createReducer<ProjectState>(
   }),
 
   on(updateProjectOrder, (state, { ids }) => {
-    const currentIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
-    let newIds: string[] = ids;
-    if (ids.length !== currentIds.length) {
-      const allP = currentIds.map((id) => state.entities[id]) as Project[];
+    const existingIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+    let newIds: string[] = ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+
+    if (newIds.length !== existingIds.length) {
+      const allP = existingIds.map((id) => state.entities[id]) as Project[];
       const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
       const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
       if (
-        ids.length === unarchivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === unarchivedIds.length &&
+        newIds.length > 0 &&
         unarchivedIds.includes(ids[0])
       ) {
         newIds = [...ids, ...archivedIds];
       } else if (
-        ids.length === archivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === archivedIds.length &&
+        newIds.length > 0 &&
         archivedIds.includes(ids[0])
       ) {
         newIds = [...unarchivedIds, ...ids];
