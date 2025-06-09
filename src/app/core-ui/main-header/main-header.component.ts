@@ -38,7 +38,7 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
 import { LongPressDirective } from '../../ui/longpress/longpress.directive';
 import { isOnline$ } from '../../util/is-online';
@@ -167,8 +167,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  private dialogSyncCfgRef: MatDialogRef<DialogSyncInitialCfgComponent> | null = null;
+
   setupSync(): void {
-    this.matDialog.open(DialogSyncInitialCfgComponent);
+    // to prevent multiple dialogs on longpress from android
+    if (this.dialogSyncCfgRef) {
+      return;
+    }
+    this.dialogSyncCfgRef = this.matDialog.open(DialogSyncInitialCfgComponent);
+    this._subs.add(
+      this.dialogSyncCfgRef.afterClosed().subscribe(() => {
+        this.dialogSyncCfgRef = null;
+      }),
+    );
   }
 
   isCounterRunning(counters: SimpleCounter[]): boolean {
