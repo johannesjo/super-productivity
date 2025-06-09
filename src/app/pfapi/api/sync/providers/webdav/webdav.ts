@@ -50,33 +50,14 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     targetPath: string,
     localRev: string | null,
   ): Promise<{ rev: string }> {
-    const cfg = await this._cfgOrError();
-    const filePath = this._getFilePath(targetPath, cfg);
+    const { cfg, filePath } = await this._getConfigAndPath(targetPath);
 
     try {
       const meta = await this._api.getFileMeta(filePath, localRev);
-      return {
-        rev: meta.etag,
-      };
+      return { rev: meta.etag };
     } catch (e) {
-      if (e instanceof RemoteFileNotFoundAPIError) {
-        pfLog(
-          2,
-          `${Webdav.L}.getFileRev() file not found, checking if directories exist`,
-        );
-        try {
-          // Try to ensure folder structure exists for future operations
-          await this._ensureFolderExists(targetPath, cfg);
-          pfLog(2, `${Webdav.L}.getFileRev() created directory structure`);
-        } catch (folderError) {
-          pfLog(1, `${Webdav.L}.getFileRev() failed to create directories`, folderError);
-          // Continue with original error since file truly doesn't exist
-        }
-        // Re-throw the original error since the file doesn't exist
-        throw e;
-      } else {
-        throw e;
-      }
+      await this._handleDirectoryCreationOnError(e, targetPath, cfg, 'getFileRev');
+      throw e;
     }
   }
 
@@ -86,8 +67,8 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    const cfg = await this._cfgOrError();
-    const filePath = this._getFilePath(targetPath, cfg);
+    const { cfg, filePath } = await this._getConfigAndPath(targetPath);
+
     try {
       const rev = await this._api.upload({
         path: filePath,
@@ -102,9 +83,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       if (e instanceof RemoteFileNotFoundAPIError) {
         pfLog(2, `${Webdav.L}.uploadFile() creating parent folders and retrying`);
         try {
-          // Create necessary parent folders
           await this._ensureFolderExists(targetPath, cfg);
-
           // Retry upload after folder creation
           await this._api.upload({
             path: filePath,
@@ -119,6 +98,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
         throw e;
       }
     }
+
     const { etag } = await this._api.getFileMeta(filePath, null);
     if (!etag) {
       pfLog(0, `${Webdav.L}.uploadFile() no etag returned after upload`);
@@ -131,8 +111,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    const cfg = await this._cfgOrError();
-    const filePath = this._getFilePath(targetPath, cfg);
+    const { filePath } = await this._getConfigAndPath(targetPath);
     const { rev, dataStr } = await this._api.download({
       path: filePath,
       localRev,
@@ -147,8 +126,8 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
   }
 
   async removeFile(targetPath: string): Promise<void> {
-    const cfg = await this._cfgOrError();
-    await this._api.remove(this._getFilePath(targetPath, cfg));
+    const { filePath } = await this._getConfigAndPath(targetPath);
+    await this._api.remove(filePath);
   }
 
   private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
@@ -164,6 +143,31 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       throw new MissingCredentialsSPError();
     }
     return cfg;
+  }
+
+  private async _getConfigAndPath(
+    targetPath: string,
+  ): Promise<{ cfg: WebdavPrivateCfg; filePath: string }> {
+    const cfg = await this._cfgOrError();
+    const filePath = this._getFilePath(targetPath, cfg);
+    return { cfg, filePath };
+  }
+
+  private async _handleDirectoryCreationOnError(
+    error: any,
+    targetPath: string,
+    cfg: WebdavPrivateCfg,
+    methodName: string,
+  ): Promise<void> {
+    if (error instanceof RemoteFileNotFoundAPIError) {
+      pfLog(2, `${Webdav.L}.${methodName}() file not found, ensuring directories exist`);
+      try {
+        await this._ensureFolderExists(targetPath, cfg);
+        pfLog(2, `${Webdav.L}.${methodName}() created directory structure`);
+      } catch (folderError) {
+        pfLog(1, `${Webdav.L}.${methodName}() failed to create directories`, folderError);
+      }
+    }
   }
 
   private async _ensureFolderExists(

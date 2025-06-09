@@ -30,8 +30,79 @@ interface FileMeta {
 
 export class WebdavApi {
   private static readonly L = 'WebdavApi';
+  private static readonly PROPFIND_XML = `<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+    <D:getcontentlength/>
+    <D:getlastmodified/>
+    <D:getetag/>
+    <D:resourcetype/>
+    <D:getcontenttype/>
+  </D:prop>
+</D:propfind>`;
 
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
+
+  // Utility methods to reduce duplication
+  private _responseHeadersToObject(response: Response): Record<string, string> {
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headers[key.toLowerCase()] = value;
+    });
+    return headers;
+  }
+
+  private _createConditionalHeaders(
+    isOverwrite?: boolean,
+    expectedEtag?: string | null,
+  ): Record<string, string> {
+    const headers: Record<string, string> = {};
+    if (!isOverwrite) {
+      if (expectedEtag) {
+        headers['If-Match'] = expectedEtag;
+      } else {
+        headers['If-None-Match'] = '*';
+      }
+    } else if (expectedEtag) {
+      headers['If-Match'] = expectedEtag;
+    }
+    return headers;
+  }
+
+  private _isHtmlResponse(text: string): boolean {
+    const trimmed = text.trim().toLowerCase();
+    return (
+      trimmed.startsWith('<!doctype html') ||
+      trimmed.startsWith('<html') ||
+      text.includes('There is nothing here, sorry')
+    );
+  }
+
+  private _handleWebDavError(error: any, operation: string, path: string): void {
+    const status = error?.status;
+    pfLog(0, `${WebdavApi.L}.${operation}() error`, { path, error });
+
+    switch (status) {
+      case 401:
+      case 403:
+        throw new AuthFailSPError(`WebDAV ${status}`, path);
+      case 404:
+        throw new RemoteFileNotFoundAPIError(path);
+      case 409:
+        throw new Error(`Conflict: ${path} (parent directory may not exist)`);
+      case 412:
+        throw new Error(`Precondition failed: ${path} (file was modified)`);
+      case 413:
+        throw new Error(`File too large: ${path}`);
+      case 423:
+        throw new Error(`Resource is locked: ${path}`);
+      case 507:
+        throw new Error(`Insufficient storage space for: ${path}`);
+      default:
+        throw error;
+    }
+  }
 
   async upload({
     data,
@@ -44,27 +115,13 @@ export class WebdavApi {
     isOverwrite?: boolean;
     expectedEtag?: string | null;
   }): Promise<string | undefined> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': new Blob([data]).size.toString(),
+      ...this._createConditionalHeaders(isOverwrite, expectedEtag),
+    };
+
     try {
-      // Enhanced WebDAV PUT with proper conditional headers
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/octet-stream',
-        'Content-Length': new Blob([data]).size.toString(),
-      };
-
-      // Add conditional headers for WebDAV compliance
-      if (!isOverwrite) {
-        if (expectedEtag) {
-          // If we expect a specific etag, use If-Match to ensure atomicity
-          headers['If-Match'] = expectedEtag;
-        } else {
-          // If we don't want to overwrite, use If-None-Match: *
-          headers['If-None-Match'] = '*';
-        }
-      } else if (expectedEtag) {
-        // For overwrite with expected etag, use If-Match
-        headers['If-Match'] = expectedEtag;
-      }
-
       // Ensure parent directory exists before upload
       await this._ensureParentDirectoryExists(path);
 
@@ -76,11 +133,7 @@ export class WebdavApi {
       });
 
       // Extract etag from response headers
-      const responseHeaderObj: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        responseHeaderObj[key.toLowerCase()] = value;
-      });
-
+      const responseHeaderObj = this._responseHeadersToObject(response);
       const etag = this._findEtagInHeaders(responseHeaderObj);
 
       if (!etag) {
@@ -113,35 +166,15 @@ export class WebdavApi {
             );
             await this._ensureParentDirectoryExists(path);
 
-            // Retry the upload once - recreate headers
-            const retryHeaders: Record<string, string> = {
-              'Content-Type': 'application/octet-stream',
-              'Content-Length': new Blob([data]).size.toString(),
-            };
-
-            // Re-apply conditional headers for retry
-            if (!isOverwrite) {
-              if (expectedEtag) {
-                retryHeaders['If-Match'] = expectedEtag;
-              } else {
-                retryHeaders['If-None-Match'] = '*';
-              }
-            } else if (expectedEtag) {
-              retryHeaders['If-Match'] = expectedEtag;
-            }
-
+            // Retry the upload once
             const retryResponse = await this._makeRequest({
               method: 'PUT',
               path,
               body: data,
-              headers: retryHeaders,
+              headers,
             });
 
-            const retryHeaderObj: Record<string, string> = {};
-            retryResponse.headers.forEach((value, key) => {
-              retryHeaderObj[key.toLowerCase()] = value;
-            });
-
+            const retryHeaderObj = this._responseHeadersToObject(retryResponse);
             return this._findEtagInHeaders(retryHeaderObj);
           } catch (retryError: any) {
             pfLog(0, `${WebdavApi.L}.upload() retry after 409 also failed`, retryError);
@@ -175,23 +208,10 @@ export class WebdavApi {
 
   async getFileMeta(path: string, localRev: string | null): Promise<FileMeta> {
     try {
-      // Use PROPFIND to get file properties (WebDAV standard)
-      const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
-<D:propfind xmlns:D="DAV:">
-  <D:prop>
-    <D:displayname/>
-    <D:getcontentlength/>
-    <D:getlastmodified/>
-    <D:getetag/>
-    <D:resourcetype/>
-    <D:getcontenttype/>
-  </D:prop>
-</D:propfind>`;
-
       const response = await this._makeRequest({
         method: 'PROPFIND',
         path,
-        body: propfindBody,
+        body: WebdavApi.PROPFIND_XML,
         headers: {
           'Content-Type': 'application/xml',
           Depth: '0',
@@ -201,11 +221,8 @@ export class WebdavApi {
 
       const xmlText = await response.text();
 
-      // Check if response is HTML instead of XML (common with some WebDAV servers)
-      if (
-        xmlText.trim().toLowerCase().startsWith('<!doctype html') ||
-        xmlText.trim().toLowerCase().startsWith('<html')
-      ) {
+      // Check if response is HTML instead of XML
+      if (this._isHtmlResponse(xmlText)) {
         pfLog(1, `${WebdavApi.L}.getFileMeta() received HTML response instead of XML`, {
           path,
           responseSnippet: xmlText.substring(0, 200),
@@ -283,12 +300,8 @@ export class WebdavApi {
       // Get response data
       const dataStr = await response.text();
 
-      // Check if response is HTML instead of file content (common with some WebDAV servers on 404)
-      if (
-        dataStr.trim().toLowerCase().startsWith('<!doctype html') ||
-        dataStr.trim().toLowerCase().startsWith('<html') ||
-        dataStr.includes('There is nothing here, sorry')
-      ) {
+      // Check if response is HTML instead of file content
+      if (this._isHtmlResponse(dataStr)) {
         pfLog(
           1,
           `${WebdavApi.L}.download() received HTML error page instead of file content`,
@@ -307,10 +320,7 @@ export class WebdavApi {
       }
 
       // Extract headers
-      const headerObj: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        headerObj[key.toLowerCase()] = value;
-      });
+      const headerObj = this._responseHeadersToObject(response);
 
       // Get etag/revision
       const rev = this._findEtagInHeaders(headerObj);
@@ -698,9 +708,55 @@ export class WebdavApi {
     return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
   }
 
+  private _parseXmlResponseElement(
+    response: Element,
+    requestPath: string,
+  ): FileMeta | null {
+    const href = response.querySelector('href')?.textContent?.trim();
+    if (!href) return null;
+
+    // Decode the href for processing
+    const decodedHref = decodeURIComponent(href);
+
+    const propstat = response.querySelector('propstat');
+    if (!propstat) return null;
+
+    const status = propstat.querySelector('status')?.textContent;
+    if (!status?.includes('200 OK')) return null;
+
+    const prop = propstat.querySelector('prop');
+    if (!prop) return null;
+
+    // Extract properties
+    const displayname = prop.querySelector('displayname')?.textContent || '';
+    const contentLength = prop.querySelector('getcontentlength')?.textContent || '0';
+    const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
+    const etag = prop.querySelector('getetag')?.textContent || '';
+    const resourceType = prop.querySelector('resourcetype');
+    const contentType = prop.querySelector('getcontenttype')?.textContent || '';
+
+    // Determine if it's a collection (directory) or file
+    const isCollection = resourceType?.querySelector('collection') !== null;
+
+    return {
+      filename: displayname || decodedHref.split('/').pop() || '',
+      basename: displayname || decodedHref.split('/').pop() || '',
+      lastmod: lastModified,
+      size: parseInt(contentLength, 10),
+      type: isCollection ? 'directory' : 'file',
+      etag: this._cleanRev(etag),
+      data: {
+        'content-type': contentType,
+        'content-length': contentLength,
+        'last-modified': lastModified,
+        etag: etag,
+        href: decodedHref,
+      },
+    };
+  }
+
   private _parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
     try {
-      // Create a DOM parser to parse the XML response
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
 
@@ -721,50 +777,15 @@ export class WebdavApi {
         const href = response.querySelector('href')?.textContent?.trim();
         if (!href) continue;
 
-        // Match the href to our requested path (handle URL encoding and path variations)
         const decodedHref = decodeURIComponent(href);
-        const normalizedHref = decodedHref.replace(/\/$/, ''); // Remove trailing slash
+        const normalizedHref = decodedHref.replace(/\/$/, '');
         const normalizedPath = requestPath.replace(/\/$/, '');
 
         if (
           normalizedHref.endsWith(normalizedPath) ||
           normalizedPath.endsWith(normalizedHref)
         ) {
-          const propstat = response.querySelector('propstat');
-          if (!propstat) continue;
-
-          const status = propstat.querySelector('status')?.textContent;
-          if (!status?.includes('200 OK')) continue;
-
-          const prop = propstat.querySelector('prop');
-          if (!prop) continue;
-
-          // Extract properties
-          const displayname = prop.querySelector('displayname')?.textContent || '';
-          const contentLength =
-            prop.querySelector('getcontentlength')?.textContent || '0';
-          const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
-          const etag = prop.querySelector('getetag')?.textContent || '';
-          const resourceType = prop.querySelector('resourcetype');
-          const contentType = prop.querySelector('getcontenttype')?.textContent || '';
-
-          // Determine if it's a collection (directory) or file
-          const isCollection = resourceType?.querySelector('collection') !== null;
-
-          return {
-            filename: displayname || requestPath.split('/').pop() || '',
-            basename: displayname || requestPath.split('/').pop() || '',
-            lastmod: lastModified,
-            size: parseInt(contentLength, 10),
-            type: isCollection ? 'directory' : 'file',
-            etag: this._cleanRev(etag),
-            data: {
-              'content-type': contentType,
-              'content-length': contentLength,
-              'last-modified': lastModified,
-              etag: etag,
-            },
-          };
+          return this._parseXmlResponseElement(response, requestPath);
         }
       }
 
@@ -781,17 +802,10 @@ export class WebdavApi {
 
   async checkFolderExists(folderPath: string): Promise<boolean> {
     try {
-      const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
-<D:propfind xmlns:D="DAV:">
-  <D:prop>
-    <D:resourcetype/>
-  </D:prop>
-</D:propfind>`;
-
       const response = await this._makeRequest({
         method: 'PROPFIND',
         path: folderPath,
-        body: propfindBody,
+        body: WebdavApi.PROPFIND_XML,
         headers: {
           'Content-Type': 'application/xml',
           Depth: '0',
@@ -810,22 +824,10 @@ export class WebdavApi {
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
-    const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
-<D:propfind xmlns:D="DAV:">
-  <D:prop>
-    <D:displayname/>
-    <D:getcontentlength/>
-    <D:getlastmodified/>
-    <D:getetag/>
-    <D:resourcetype/>
-    <D:getcontenttype/>
-  </D:prop>
-</D:propfind>`;
-
     const response = await this._makeRequest({
       method: 'PROPFIND',
       path: folderPath,
-      body: propfindBody,
+      body: WebdavApi.PROPFIND_XML,
       headers: {
         'Content-Type': 'application/xml',
         Depth: '1', // Get immediate children
@@ -865,39 +867,10 @@ export class WebdavApi {
           continue;
         }
 
-        const propstat = response.querySelector('propstat');
-        if (!propstat) continue;
-
-        const status = propstat.querySelector('status')?.textContent;
-        if (!status?.includes('200 OK')) continue;
-
-        const prop = propstat.querySelector('prop');
-        if (!prop) continue;
-
-        const displayname = prop.querySelector('displayname')?.textContent || '';
-        const contentLength = prop.querySelector('getcontentlength')?.textContent || '0';
-        const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
-        const etag = prop.querySelector('getetag')?.textContent || '';
-        const resourceType = prop.querySelector('resourcetype');
-        const contentType = prop.querySelector('getcontenttype')?.textContent || '';
-
-        const isCollection = resourceType?.querySelector('collection') !== null;
-
-        results.push({
-          filename: displayname || decodedHref.split('/').pop() || '',
-          basename: displayname || decodedHref.split('/').pop() || '',
-          lastmod: lastModified,
-          size: parseInt(contentLength, 10),
-          type: isCollection ? 'directory' : 'file',
-          etag: this._cleanRev(etag),
-          data: {
-            'content-type': contentType,
-            'content-length': contentLength,
-            'last-modified': lastModified,
-            etag: etag,
-            href: decodedHref,
-          },
-        });
+        const fileMeta = this._parseXmlResponseElement(response, decodedHref);
+        if (fileMeta) {
+          results.push(fileMeta);
+        }
       }
 
       return results;
