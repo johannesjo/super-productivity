@@ -98,6 +98,7 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { planTasksForToday } from '../tag/store/tag.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
+import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -111,6 +112,7 @@ export class TaskService {
   private readonly _router = inject(Router);
   private readonly _archiveService = inject(ArchiveService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
@@ -1030,7 +1032,10 @@ export class TaskService {
 
       ...(workContextType === WorkContextType.PROJECT
         ? { projectId: workContextId }
-        : { projectId: INBOX_PROJECT.id }),
+        : {
+            projectId:
+              this._globalConfigService.cfg?.misc.defaultProjectId || INBOX_PROJECT.id,
+          }),
 
       tagIds:
         workContextType === WorkContextType.TAG &&
