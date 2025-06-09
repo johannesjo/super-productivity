@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { Preferences } from '@capacitor/preferences';
 
 // Define the plugin interface for SAF operations
 export interface SafPlugin {
@@ -49,26 +48,8 @@ const SafBridge = registerPlugin<SafPlugin>('SafBridge', {
 });
 
 export class SafService {
-  private static readonly SAF_URI_KEY = 'saf_folder_uri';
-  private static readonly SAF_ENABLED_KEY = 'saf_enabled';
-
   static async isAndroid(): Promise<boolean> {
     return Capacitor.getPlatform() === 'android';
-  }
-
-  static async isEnabled(): Promise<boolean> {
-    if (!(await this.isAndroid())) {
-      return false;
-    }
-    const result = await Preferences.get({ key: this.SAF_ENABLED_KEY });
-    return result.value === 'true';
-  }
-
-  static async setEnabled(enabled: boolean): Promise<void> {
-    await Preferences.set({
-      key: this.SAF_ENABLED_KEY,
-      value: enabled.toString(),
-    });
   }
 
   static async selectFolder(): Promise<string> {
@@ -77,29 +58,10 @@ export class SafService {
     }
 
     const result = await SafBridge.selectFolder();
-    await this.saveFolderUri(result.uri);
     return result.uri;
   }
 
-  static async getSavedFolderUri(): Promise<string | null> {
-    const result = await Preferences.get({ key: this.SAF_URI_KEY });
-    return result.value;
-  }
-
-  static async saveFolderUri(uri: string): Promise<void> {
-    await Preferences.set({
-      key: this.SAF_URI_KEY,
-      value: uri,
-    });
-  }
-
-  static async clearFolderUri(): Promise<void> {
-    await Preferences.remove({ key: this.SAF_URI_KEY });
-    await this.setEnabled(false);
-  }
-
-  static async checkPermission(): Promise<boolean> {
-    const uri = await this.getSavedFolderUri();
+  static async checkPermission(uri?: string): Promise<boolean> {
     if (!uri) {
       return false;
     }
@@ -113,36 +75,32 @@ export class SafService {
     }
   }
 
-  static async readFile(fileName: string): Promise<string> {
-    const uri = await this.getSavedFolderUri();
+  static async readFile(uri: string, fileName: string): Promise<string> {
     if (!uri) {
-      throw new Error('No SAF folder selected');
+      throw new Error('No SAF folder URI provided');
     }
 
     const result = await SafBridge.readFile({ uri, fileName });
     return result.data;
   }
 
-  static async writeFile(fileName: string, data: string): Promise<void> {
-    const uri = await this.getSavedFolderUri();
+  static async writeFile(uri: string, fileName: string, data: string): Promise<void> {
     if (!uri) {
-      throw new Error('No SAF folder selected');
+      throw new Error('No SAF folder URI provided');
     }
 
     await SafBridge.writeFile({ uri, fileName, data });
   }
 
-  static async deleteFile(fileName: string): Promise<void> {
-    const uri = await this.getSavedFolderUri();
+  static async deleteFile(uri: string, fileName: string): Promise<void> {
     if (!uri) {
-      throw new Error('No SAF folder selected');
+      throw new Error('No SAF folder URI provided');
     }
 
     await SafBridge.deleteFile({ uri, fileName });
   }
 
-  static async checkFileExists(fileName: string): Promise<boolean> {
-    const uri = await this.getSavedFolderUri();
+  static async checkFileExists(uri: string, fileName: string): Promise<boolean> {
     if (!uri) {
       return false;
     }

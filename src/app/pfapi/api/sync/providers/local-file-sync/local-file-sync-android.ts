@@ -1,33 +1,46 @@
 import { Directory } from '@capacitor/filesystem';
 import { LocalFileSyncBase } from './local-file-sync-base';
-import { PrivateCfgByProviderId } from '../../../pfapi.model';
-import { SyncProviderId } from '../../../pfapi.const';
+import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 import { SafService } from './droid-saf/saf.service';
 import { SafFileAdapter } from './droid-saf/saf-file-adapter';
 
+export interface LocalFileSyncAndroidPrivateCfg extends SyncProviderPrivateCfgBase {
+  safFolderUri?: string;
+  safEnabled?: boolean;
+}
+
 export class LocalFileSyncAndroid extends LocalFileSyncBase {
   constructor(public directory = Directory.Documents) {
-    super(new SafFileAdapter());
+    super(
+      new SafFileAdapter(async () => {
+        const cfg = await this.privateCfg.load();
+        return cfg?.safFolderUri;
+      }),
+    );
   }
 
   async isReady(): Promise<boolean> {
+    const privateCfg = await this.privateCfg.load();
     // Check if SAF is enabled and has valid permissions
-    if (await SafService.isEnabled()) {
-      const hasPermission = await SafService.checkPermission();
+    if (privateCfg?.safEnabled) {
+      const hasPermission = await SafService.checkPermission(privateCfg.safFolderUri);
       if (!hasPermission) {
         // SAF was enabled but permission was revoked
-        await SafService.setEnabled(false);
+        await this.privateCfg.save({ ...privateCfg, safEnabled: false });
         return false;
       }
+      return true;
     }
-    return true;
+    return false;
   }
 
   async setupSaf(): Promise<boolean> {
     try {
       const uri = await SafService.selectFolder();
-      alert(uri);
-      await SafService.setEnabled(true);
+      await this.privateCfg.save({
+        safFolderUri: uri,
+        safEnabled: true,
+      });
       return true;
     } catch (error) {
       console.error('Failed to setup SAF:', error);
@@ -36,16 +49,18 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
   }
 
   async isSafEnabled(): Promise<boolean> {
-    return await SafService.isEnabled();
+    const privateCfg = await this.privateCfg.load();
+    return !!privateCfg?.safEnabled;
   }
 
   async disableSaf(): Promise<void> {
-    await SafService.clearFolderUri();
+    await this.privateCfg.save({
+      safFolderUri: undefined,
+      safEnabled: false,
+    });
   }
 
-  async setPrivateCfg(
-    privateCfg: PrivateCfgByProviderId<SyncProviderId.LocalFile>,
-  ): Promise<void> {
+  async setPrivateCfg(privateCfg: LocalFileSyncAndroidPrivateCfg): Promise<void> {
     await this.privateCfg.save(privateCfg);
   }
 
