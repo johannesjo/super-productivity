@@ -237,17 +237,31 @@ export const projectReducer = createReducer<ProjectState>(
       const allP = existingIds.map((id) => state.entities[id]) as Project[];
       const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
       const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
+      const hiddenIds = allP.filter((p) => p.isHiddenFromMenu).map((p) => p.id);
+      const visibleUnarchivedIds = allP
+        .filter((p) => !p.isArchived && !p.isHiddenFromMenu)
+        .map((p) => p.id);
+
       if (
+        newIds.length === visibleUnarchivedIds.length &&
+        newIds.length > 0 &&
+        visibleUnarchivedIds.includes(ids[0])
+      ) {
+        // Reordering visible unarchived projects - add back archived and hidden
+        newIds = [...ids, ...archivedIds, ...hiddenIds];
+      } else if (
         newIds.length === unarchivedIds.length &&
         newIds.length > 0 &&
         unarchivedIds.includes(ids[0])
       ) {
+        // Reordering all unarchived projects (including hidden) - add back archived
         newIds = [...ids, ...archivedIds];
       } else if (
         newIds.length === archivedIds.length &&
         newIds.length > 0 &&
         archivedIds.includes(ids[0])
       ) {
+        // Reordering archived projects - add back unarchived
         newIds = [...unarchivedIds, ...ids];
       } else {
         throw new Error('Invalid param given to UpdateProjectOrder');
