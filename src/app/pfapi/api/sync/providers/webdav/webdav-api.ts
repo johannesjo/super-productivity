@@ -73,33 +73,36 @@ export class WebdavApi {
   }
 
   async getFileMeta(path: string, localRev: string | null): Promise<FileMeta> {
+    // Use PROPFIND to get file properties (WebDAV standard)
+    const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+    <D:getcontentlength/>
+    <D:getlastmodified/>
+    <D:getetag/>
+    <D:resourcetype/>
+    <D:getcontenttype/>
+  </D:prop>
+</D:propfind>`;
+
     const response = await this._makeRequest({
-      method: 'HEAD',
+      method: 'PROPFIND',
       path,
+      body: propfindBody,
+      headers: {
+        'Content-Type': 'application/xml',
+        Depth: '0',
+      },
       ifNoneMatch: localRev,
     });
 
-    // Create case-insensitive header object
-    const responseHeaderObj: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      responseHeaderObj[key.toLowerCase()] = value;
-    });
+    const xmlText = await response.text();
+    const fileMeta = this._parsePropsFromXml(xmlText, path);
 
-    // Get etag from response headers
-    const etag = this._findEtagInHeaders(responseHeaderObj);
-
-    // Build the file stat object
-    const fileMeta: FileMeta = {
-      filename: path.split('/').pop() || '',
-      basename: path.split('/').pop() || '',
-      lastmod: responseHeaderObj['last-modified'] || '',
-      size: parseInt(responseHeaderObj['content-length'] || '0', 10),
-      type: 'file',
-      etag: etag,
-      data: {
-        ...responseHeaderObj,
-      },
-    };
+    if (!fileMeta) {
+      throw new RemoteFileNotFoundAPIError(path);
+    }
 
     return fileMeta;
   }
@@ -143,6 +146,18 @@ export class WebdavApi {
     });
   }
 
+  async fileExists(path: string): Promise<boolean> {
+    try {
+      await this.getFileMeta(path, null);
+      return true;
+    } catch (e: any) {
+      if (e?.status === 404) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
   getRevFromMetaHelper(fileMeta: unknown | Headers): string {
     const d = (fileMeta as any)?.data || fileMeta;
 
@@ -160,21 +175,33 @@ export class WebdavApi {
   }
 
   async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
+    // First check if folder already exists
+    const exists = await this.checkFolderExists(folderPath);
+    if (exists) {
+      return; // Folder already exists, nothing to do
+    }
+
     try {
       await this._makeRequest({
         method: 'MKCOL',
         path: folderPath,
       });
     } catch (e: any) {
-      pfLog(0, `${WebdavApi.L}.createFolder() error`, { folderPath, error: e });
-      // If MKCOL is not supported, try alternative approach with PUT
-      if (e?.message?.includes('Method not allowed') || e?.status === 405) {
-        pfLog(2, `${WebdavApi.L}.createFolder() MKCOL not supported, trying PUT`);
+      pfLog(0, `${WebdavApi.L}.createFolder() MKCOL error`, { folderPath, error: e });
+
+      // Handle different error scenarios
+      if (e?.status === 405) {
+        // Method not allowed - MKCOL not supported
+        pfLog(
+          2,
+          `${WebdavApi.L}.createFolder() MKCOL not supported, trying PUT fallback`,
+        );
         try {
           await this._makeRequest({
             method: 'PUT',
             path: `${folderPath}/.folder`,
             body: '',
+            headers: { 'Content-Type': 'application/octet-stream' },
           });
         } catch (putError) {
           pfLog(0, `${WebdavApi.L}.createFolder() PUT fallback failed`, {
@@ -182,6 +209,19 @@ export class WebdavApi {
             error: putError,
           });
           throw putError;
+        }
+      } else if (e?.status === 409) {
+        // Conflict - parent directory doesn't exist, try to create it recursively
+        const parentPath = folderPath.split('/').slice(0, -1).join('/');
+        if (parentPath && parentPath !== folderPath) {
+          await this.createFolder({ folderPath: parentPath });
+          // Try again after creating parent
+          await this._makeRequest({
+            method: 'MKCOL',
+            path: folderPath,
+          });
+        } else {
+          throw e;
         }
       } else {
         throw e;
@@ -215,7 +255,9 @@ export class WebdavApi {
         body,
       });
 
-      if (!response.ok) {
+      // WebDAV specific status codes handling
+      if (!response.ok && response.status !== 207) {
+        // 207 Multi-Status is valid for WebDAV
         pfLog(0, `${WebdavApi.L}._makeRequest() HTTP error`, {
           method,
           path,
@@ -275,6 +317,215 @@ export class WebdavApi {
     return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
   }
 
+  private _parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
+    try {
+      // Create a DOM parser to parse the XML response
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+      // Check for parsing errors
+      const parserError = xmlDoc.querySelector('parsererror');
+      if (parserError) {
+        pfLog(
+          0,
+          `${WebdavApi.L}._parsePropsFromXml() XML parsing error`,
+          parserError.textContent,
+        );
+        return null;
+      }
+
+      // Find the response element for our file
+      const responses = xmlDoc.querySelectorAll('response');
+      for (const response of Array.from(responses)) {
+        const href = response.querySelector('href')?.textContent?.trim();
+        if (!href) continue;
+
+        // Match the href to our requested path (handle URL encoding and path variations)
+        const decodedHref = decodeURIComponent(href);
+        const normalizedHref = decodedHref.replace(/\/$/, ''); // Remove trailing slash
+        const normalizedPath = requestPath.replace(/\/$/, '');
+
+        if (
+          normalizedHref.endsWith(normalizedPath) ||
+          normalizedPath.endsWith(normalizedHref)
+        ) {
+          const propstat = response.querySelector('propstat');
+          if (!propstat) continue;
+
+          const status = propstat.querySelector('status')?.textContent;
+          if (!status?.includes('200 OK')) continue;
+
+          const prop = propstat.querySelector('prop');
+          if (!prop) continue;
+
+          // Extract properties
+          const displayname = prop.querySelector('displayname')?.textContent || '';
+          const contentLength =
+            prop.querySelector('getcontentlength')?.textContent || '0';
+          const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
+          const etag = prop.querySelector('getetag')?.textContent || '';
+          const resourceType = prop.querySelector('resourcetype');
+          const contentType = prop.querySelector('getcontenttype')?.textContent || '';
+
+          // Determine if it's a collection (directory) or file
+          const isCollection = resourceType?.querySelector('collection') !== null;
+
+          return {
+            filename: displayname || requestPath.split('/').pop() || '',
+            basename: displayname || requestPath.split('/').pop() || '',
+            lastmod: lastModified,
+            size: parseInt(contentLength, 10),
+            type: isCollection ? 'directory' : 'file',
+            etag: this._cleanRev(etag),
+            data: {
+              'content-type': contentType,
+              'content-length': contentLength,
+              'last-modified': lastModified,
+              etag: etag,
+            },
+          };
+        }
+      }
+
+      pfLog(
+        0,
+        `${WebdavApi.L}._parsePropsFromXml() No matching response found for path: ${requestPath}`,
+      );
+      return null;
+    } catch (error) {
+      pfLog(0, `${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
+      return null;
+    }
+  }
+
+  async checkFolderExists(folderPath: string): Promise<boolean> {
+    try {
+      const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:resourcetype/>
+  </D:prop>
+</D:propfind>`;
+
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path: folderPath,
+        body: propfindBody,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '0',
+        },
+      });
+
+      const xmlText = await response.text();
+      const meta = this._parsePropsFromXml(xmlText, folderPath);
+      return meta?.type === 'directory';
+    } catch (e: any) {
+      if (e?.status === 404) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  async listFolder(folderPath: string): Promise<FileMeta[]> {
+    const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+    <D:getcontentlength/>
+    <D:getlastmodified/>
+    <D:getetag/>
+    <D:resourcetype/>
+    <D:getcontenttype/>
+  </D:prop>
+</D:propfind>`;
+
+    const response = await this._makeRequest({
+      method: 'PROPFIND',
+      path: folderPath,
+      body: propfindBody,
+      headers: {
+        'Content-Type': 'application/xml',
+        Depth: '1', // Get immediate children
+      },
+    });
+
+    const xmlText = await response.text();
+    return this._parseMultiplePropsFromXml(xmlText, folderPath);
+  }
+
+  private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+      const parserError = xmlDoc.querySelector('parsererror');
+      if (parserError) {
+        pfLog(
+          0,
+          `${WebdavApi.L}._parseMultiplePropsFromXml() XML parsing error`,
+          parserError.textContent,
+        );
+        return [];
+      }
+
+      const results: FileMeta[] = [];
+      const responses = xmlDoc.querySelectorAll('response');
+
+      for (const response of Array.from(responses)) {
+        const href = response.querySelector('href')?.textContent?.trim();
+        if (!href) continue;
+
+        const decodedHref = decodeURIComponent(href);
+
+        // Skip the base path itself (we only want children)
+        if (decodedHref.replace(/\/$/, '') === basePath.replace(/\/$/, '')) {
+          continue;
+        }
+
+        const propstat = response.querySelector('propstat');
+        if (!propstat) continue;
+
+        const status = propstat.querySelector('status')?.textContent;
+        if (!status?.includes('200 OK')) continue;
+
+        const prop = propstat.querySelector('prop');
+        if (!prop) continue;
+
+        const displayname = prop.querySelector('displayname')?.textContent || '';
+        const contentLength = prop.querySelector('getcontentlength')?.textContent || '0';
+        const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
+        const etag = prop.querySelector('getetag')?.textContent || '';
+        const resourceType = prop.querySelector('resourcetype');
+        const contentType = prop.querySelector('getcontenttype')?.textContent || '';
+
+        const isCollection = resourceType?.querySelector('collection') !== null;
+
+        results.push({
+          filename: displayname || decodedHref.split('/').pop() || '',
+          basename: displayname || decodedHref.split('/').pop() || '',
+          lastmod: lastModified,
+          size: parseInt(contentLength, 10),
+          type: isCollection ? 'directory' : 'file',
+          etag: this._cleanRev(etag),
+          data: {
+            'content-type': contentType,
+            'content-length': contentLength,
+            'last-modified': lastModified,
+            etag: etag,
+            href: decodedHref,
+          },
+        });
+      }
+
+      return results;
+    } catch (error) {
+      pfLog(0, `${WebdavApi.L}._parseMultiplePropsFromXml() parsing error`, error);
+      return [];
+    }
+  }
+
   private _checkCommonErrors(e: any, targetPath: string): void {
     pfLog(0, `${WebdavApi.L} API error for ${targetPath}`, e);
 
@@ -286,6 +537,9 @@ export class WebdavApi {
         throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
       case 404:
         throw new RemoteFileNotFoundAPIError(targetPath);
+      case 207:
+        // Multi-Status is normal for WebDAV PROPFIND responses
+        break;
     }
   }
 }
