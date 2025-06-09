@@ -1,13 +1,8 @@
 import { Directory } from '@capacitor/filesystem';
 import { LocalFileSyncBase } from './local-file-sync-base';
-import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
+import { LocalFileSyncPrivateCfg } from '../../../pfapi.model';
 import { SafService } from './droid-saf/saf.service';
 import { SafFileAdapter } from './droid-saf/saf-file-adapter';
-
-export interface LocalFileSyncAndroidPrivateCfg extends SyncProviderPrivateCfgBase {
-  safFolderUri?: string;
-  safEnabled?: boolean;
-}
 
 export class LocalFileSyncAndroid extends LocalFileSyncBase {
   constructor(public directory = Directory.Documents) {
@@ -60,7 +55,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
     });
   }
 
-  async setPrivateCfg(privateCfg: LocalFileSyncAndroidPrivateCfg): Promise<void> {
+  async setPrivateCfg(privateCfg: LocalFileSyncPrivateCfg): Promise<void> {
     await this.privateCfg.save(privateCfg);
   }
 

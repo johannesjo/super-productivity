@@ -3,8 +3,6 @@ import { ModelCtrl } from './model-ctrl/model-ctrl';
 import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
 import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
 import { WebdavPrivateCfg } from './sync/providers/webdav/webdav';
-import { LocalFileSyncElectronPrivateCfg } from './sync/providers/local-file-sync/local-file-sync-electron';
-import { LocalFileSyncAndroidPrivateCfg } from './sync/providers/local-file-sync/local-file-sync-android';
 import { IValidation } from 'typia';
 
 type JSONPrimitive = string | number | boolean | null;
@@ -151,16 +149,24 @@ export interface SyncProviderPrivateCfgBase {
   encryptKey?: string;
 }
 
+// Local file sync config that works for both platforms
+export interface LocalFileSyncPrivateCfg extends SyncProviderPrivateCfgBase {
+  // Electron specific
+  syncFolderPath?: string;
+  // Android SAF specific
+  safFolderUri?: string;
+  safEnabled?: boolean;
+}
+
 // TODO better dynamic typing
 export type SyncProviderPrivateCfg =
   | DropboxPrivateCfg
   | WebdavPrivateCfg
-  | LocalFileSyncElectronPrivateCfg
-  | LocalFileSyncAndroidPrivateCfg;
+  | LocalFileSyncPrivateCfg;
 
 export type PrivateCfgByProviderId<T extends SyncProviderId> =
   T extends SyncProviderId.LocalFile
-    ? LocalFileSyncElectronPrivateCfg | LocalFileSyncAndroidPrivateCfg
+    ? LocalFileSyncPrivateCfg
     : T extends SyncProviderId.WebDAV
       ? WebdavPrivateCfg
       : T extends SyncProviderId.Dropbox
