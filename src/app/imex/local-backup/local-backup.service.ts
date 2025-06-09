@@ -9,14 +9,15 @@ import { IS_ELECTRON } from '../../app.constants';
 import { androidInterface } from '../../features/android/android-interface';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { T } from '../../t.const';
+import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { SnackService } from '../../core/snack/snack.service';
+import { WorkContextService } from '../../features/work-context/work-context.service';
 
 const DEFAULT_BACKUP_INTERVAL = 5 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';
-
-// const DEFAULT_BACKUP_INTERVAL = 6 * 1000;
+const ANDROID_DB_TODAY_KEY = 'dailyTasks';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,7 @@ export class LocalBackupService {
   private _pfapiService = inject(PfapiService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
+  private _workContextService = inject(WorkContextService);
 
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
@@ -35,9 +37,14 @@ export class LocalBackupService {
     switchMap(() => interval(DEFAULT_BACKUP_INTERVAL)),
     tap(() => this._backup()),
   );
+  private _triggerDailyTasksBackup$: Observable<void> =
+    this._workContextService.globalTodaysTasks$.pipe(
+      switchMap((tasks) => this._dailyTasksBackup(tasks)),
+    );
 
   init(): void {
     this._triggerBackupSave$.subscribe();
+    this._triggerDailyTasksBackup$.subscribe();
   }
 
   checkBackupAvailable(): Promise<boolean | LocalBackupMeta> {
@@ -98,6 +105,12 @@ export class LocalBackupService {
     }
     if (IS_ANDROID_WEB_VIEW) {
       await androidInterface.saveToDbWrapped(ANDROID_DB_KEY, JSON.stringify(data));
+    }
+  }
+
+  private async _dailyTasksBackup(tasks: TaskWithSubTasks[]): Promise<void> {
+    if (IS_ANDROID_WEB_VIEW) {
+      await androidInterface.saveToDbWrapped(ANDROID_DB_TODAY_KEY, JSON.stringify(tasks));
     }
   }
 
