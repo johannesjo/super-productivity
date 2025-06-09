@@ -248,7 +248,7 @@ export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorB
 
 // --------------OTHER--------------
 
-export class InvalidFilePrefixError extends Error {
+export class InvalidFilePrefixError extends AdditionalLogErrorBase {
   override name = 'InvalidFilePrefixError';
 }
 

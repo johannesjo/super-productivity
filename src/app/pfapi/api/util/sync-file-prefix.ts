@@ -30,7 +30,7 @@ export const extractSyncFileStateFromPrefix = (
     new RegExp(`^${PREFIX}(C)?(E)?(\\d+(?:\\.\\d+)?)${END_SEPERATOR}`),
   );
   if (!match) {
-    throw new InvalidFilePrefixError();
+    throw new InvalidFilePrefixError(dataStr);
   }
 
   return {

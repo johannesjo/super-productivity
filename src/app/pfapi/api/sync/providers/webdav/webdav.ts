@@ -51,13 +51,33 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string | null,
   ): Promise<{ rev: string }> {
     const cfg = await this._cfgOrError();
-    const meta = await this._api.getFileMeta(
-      this._getFilePath(targetPath, cfg),
-      localRev,
-    );
-    return {
-      rev: meta.etag,
-    };
+    const filePath = this._getFilePath(targetPath, cfg);
+
+    try {
+      const meta = await this._api.getFileMeta(filePath, localRev);
+      return {
+        rev: meta.etag,
+      };
+    } catch (e) {
+      if (e instanceof RemoteFileNotFoundAPIError) {
+        pfLog(
+          2,
+          `${Webdav.L}.getFileRev() file not found, checking if directories exist`,
+        );
+        try {
+          // Try to ensure folder structure exists for future operations
+          await this._ensureFolderExists(targetPath, cfg);
+          pfLog(2, `${Webdav.L}.getFileRev() created directory structure`);
+        } catch (folderError) {
+          pfLog(1, `${Webdav.L}.getFileRev() failed to create directories`, folderError);
+          // Continue with original error since file truly doesn't exist
+        }
+        // Re-throw the original error since the file doesn't exist
+        throw e;
+      } else {
+        throw e;
+      }
+    }
   }
 
   async uploadFile(
@@ -150,35 +170,72 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     targetPath: string,
     cfg: WebdavPrivateCfg,
   ): Promise<void> {
-    // Extract the directory path from the target file path
-    const pathParts = targetPath.split('/');
-    pathParts.pop(); // Remove the filename part
-    if (this._extraPath) {
-      pathParts.unshift(this._extraPath);
+    // Get the full file path to create directory structure for
+    const fullFilePath = this._getFilePath(targetPath, cfg);
+
+    // Extract directory parts from the full file path
+    const pathParts = fullFilePath.split('/').filter((part) => part.length > 0);
+
+    // Don't process if it's a root-level file
+    if (pathParts.length <= 1) {
+      return;
     }
 
-    if (pathParts.length === 0) {
-      return; // No folder needed, file is at root level
-    }
+    // Remove the filename to get directory path parts
+    const dirParts = pathParts.slice(0, -1);
 
-    // Create folder hierarchy as needed
-    let currentPath = cfg.syncFolderPath;
-
-    for (const part of pathParts) {
-      currentPath = `${currentPath}/${part}`;
+    // Create directories progressively from root to parent
+    for (let i = 1; i <= dirParts.length; i++) {
+      const currentPath = dirParts.slice(0, i).join('/');
 
       try {
+        pfLog(
+          2,
+          `${Webdav.L}._ensureFolderExists() attempting to create directory: ${currentPath}`,
+        );
         await this._api.createFolder({ folderPath: currentPath });
-        pfLog(2, `${Webdav.L}.ensureFolderExists() created folder`, currentPath);
-      } catch (e: any) {
-        // Ignore 405 Method Not Allowed (folder likely exists)
-        // Ignore 409 Conflict (folder already exists)
-        if (e?.status !== 405 && e?.status !== 409) {
-          pfLog(0, `${Webdav.L}.ensureFolderExists() error creating folder`, {
-            folderPath: currentPath,
-            error: e,
-          });
-          throw e;
+        pfLog(
+          2,
+          `${Webdav.L}._ensureFolderExists() successfully created directory: ${currentPath}`,
+        );
+      } catch (error: any) {
+        pfLog(
+          1,
+          `${Webdav.L}._ensureFolderExists() error creating directory: ${currentPath}`,
+          error,
+        );
+
+        // Handle specific error cases
+        if (error?.status === 403 || error?.status === 401) {
+          // Permission errors - don't continue
+          pfLog(
+            0,
+            `${Webdav.L}._ensureFolderExists() permission denied for: ${currentPath}`,
+          );
+          throw new Error(`Permission denied creating directory: ${currentPath}`);
+        } else if (error?.status === 405) {
+          // Method not allowed - MKCOL not supported, this is handled in createFolder
+          pfLog(
+            2,
+            `${Webdav.L}._ensureFolderExists() MKCOL not supported for ${currentPath}`,
+          );
+        } else if (
+          error?.message?.includes('already exists') ||
+          error?.status === 409 ||
+          error?.status === 405
+        ) {
+          // Directory already exists or conflict, continue
+          pfLog(
+            2,
+            `${Webdav.L}._ensureFolderExists() directory exists or conflict for: ${currentPath}`,
+          );
+        } else {
+          // Other errors - log but continue, let the final operation fail with a clearer error
+          pfLog(
+            1,
+            `${Webdav.L}._ensureFolderExists() ignoring error for ${currentPath}`,
+            error,
+          );
         }
       }
     }
