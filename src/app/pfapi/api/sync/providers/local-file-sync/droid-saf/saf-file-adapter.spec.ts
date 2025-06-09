@@ -3,9 +3,12 @@ import { SafService } from './saf.service';
 
 describe('SafFileAdapter', () => {
   let adapter: SafFileAdapter;
+  let mockGetUri: jasmine.Spy<() => Promise<string | undefined>>;
+  const testUri = 'content://test.uri';
 
   beforeEach(() => {
-    adapter = new SafFileAdapter();
+    mockGetUri = jasmine.createSpy('getUri').and.returnValue(Promise.resolve(testUri));
+    adapter = new SafFileAdapter(mockGetUri);
   });
 
   describe('readFile', () => {
@@ -15,8 +18,16 @@ describe('SafFileAdapter', () => {
 
       const result = await adapter.readFile('test.json');
 
-      expect(SafService.readFile).toHaveBeenCalledWith('test.json');
+      expect(SafService.readFile).toHaveBeenCalledWith(testUri, 'test.json');
       expect(result).toBe(mockData);
+    });
+
+    it('should throw error when no URI is available', async () => {
+      mockGetUri.and.returnValue(Promise.resolve(undefined));
+
+      await expectAsync(adapter.readFile('test.json')).toBeRejectedWithError(
+        'No SAF folder URI available',
+      );
     });
 
     it('should throw file not found error with proper message', async () => {
@@ -44,7 +55,19 @@ describe('SafFileAdapter', () => {
 
       await adapter.writeFile('test.json', '{"data": "test"}');
 
-      expect(SafService.writeFile).toHaveBeenCalledWith('test.json', '{"data": "test"}');
+      expect(SafService.writeFile).toHaveBeenCalledWith(
+        testUri,
+        'test.json',
+        '{"data": "test"}',
+      );
+    });
+
+    it('should throw error when no URI is available', async () => {
+      mockGetUri.and.returnValue(Promise.resolve(undefined));
+
+      await expectAsync(
+        adapter.writeFile('test.json', '{"data": "test"}'),
+      ).toBeRejectedWithError('No SAF folder URI available');
     });
 
     it('should propagate write errors', async () => {
@@ -63,7 +86,15 @@ describe('SafFileAdapter', () => {
 
       await adapter.deleteFile('test.json');
 
-      expect(SafService.deleteFile).toHaveBeenCalledWith('test.json');
+      expect(SafService.deleteFile).toHaveBeenCalledWith(testUri, 'test.json');
+    });
+
+    it('should throw error when no URI is available', async () => {
+      mockGetUri.and.returnValue(Promise.resolve(undefined));
+
+      await expectAsync(adapter.deleteFile('test.json')).toBeRejectedWithError(
+        'No SAF folder URI available',
+      );
     });
 
     it('should ignore file not found errors', async () => {
@@ -93,7 +124,7 @@ describe('SafFileAdapter', () => {
 
       const result = await adapter.checkDirExists?.('any-path');
 
-      expect(SafService.checkPermission).toHaveBeenCalled();
+      expect(SafService.checkPermission).toHaveBeenCalledWith(testUri);
       expect(result).toBe(true);
     });
 
@@ -102,6 +133,17 @@ describe('SafFileAdapter', () => {
 
       const result = await adapter.checkDirExists?.('any-path');
 
+      expect(SafService.checkPermission).toHaveBeenCalledWith(testUri);
+      expect(result).toBe(false);
+    });
+
+    it('should handle undefined URI', async () => {
+      mockGetUri.and.returnValue(Promise.resolve(undefined));
+      spyOn(SafService, 'checkPermission').and.returnValue(Promise.resolve(false));
+
+      const result = await adapter.checkDirExists?.('any-path');
+
+      expect(SafService.checkPermission).toHaveBeenCalledWith(undefined);
       expect(result).toBe(false);
     });
   });
