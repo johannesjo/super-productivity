@@ -248,7 +248,7 @@ export class TaskRepeatCfgService {
         title: taskRepeatCfg.title,
         additional: {
           repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate,
+          timeEstimate: taskRepeatCfg.defaultEstimate || 0,
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           // always due for today
