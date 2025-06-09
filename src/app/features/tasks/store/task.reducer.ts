@@ -30,7 +30,7 @@ import {
   updateTaskTags,
   updateTaskUi,
 } from './task.actions';
-import { Task, TaskDetailTargetPanel, TaskState } from '../task.model';
+import { DEFAULT_TASK, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -198,6 +198,8 @@ export const taskReducer = createReducer<TaskState>(
   // ------------
   on(addTask, (state, { task }) => {
     const newTask = {
+      // NOTE we also need to do it here to avoid problems with undefined stuff
+      ...DEFAULT_TASK,
       ...task,
       timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
     };
