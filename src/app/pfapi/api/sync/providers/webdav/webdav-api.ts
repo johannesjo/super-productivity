@@ -200,6 +200,19 @@ export class WebdavApi {
       });
 
       const xmlText = await response.text();
+
+      // Check if response is HTML instead of XML (common with some WebDAV servers)
+      if (
+        xmlText.trim().toLowerCase().startsWith('<!doctype html') ||
+        xmlText.trim().toLowerCase().startsWith('<html')
+      ) {
+        pfLog(1, `${WebdavApi.L}.getFileMeta() received HTML response instead of XML`, {
+          path,
+          responseSnippet: xmlText.substring(0, 200),
+        });
+        throw new RemoteFileNotFoundAPIError(path);
+      }
+
       const fileMeta = this._parsePropsFromXml(xmlText, path);
 
       if (!fileMeta) {
@@ -269,6 +282,23 @@ export class WebdavApi {
 
       // Get response data
       const dataStr = await response.text();
+
+      // Check if response is HTML instead of file content (common with some WebDAV servers on 404)
+      if (
+        dataStr.trim().toLowerCase().startsWith('<!doctype html') ||
+        dataStr.trim().toLowerCase().startsWith('<html') ||
+        dataStr.includes('There is nothing here, sorry')
+      ) {
+        pfLog(
+          1,
+          `${WebdavApi.L}.download() received HTML error page instead of file content`,
+          {
+            path,
+            responseSnippet: dataStr.substring(0, 200),
+          },
+        );
+        throw new RemoteFileNotFoundAPIError(path);
+      }
 
       // Validate response content
       if (!dataStr && response.status === 200) {
@@ -537,6 +567,18 @@ export class WebdavApi {
           });
           throw putError;
         }
+      } else if (e?.status === 403) {
+        // Forbidden - might be a permissions issue or the directory already exists
+        pfLog(
+          0,
+          `${WebdavApi.L}.createFolder() 403 Forbidden - check WebDAV permissions and path`,
+          {
+            folderPath,
+            baseUrl: (await this._getCfgOrError()).baseUrl,
+            error: e,
+          },
+        );
+        throw e;
       } else if (e?.status === 409) {
         // Conflict - parent directory doesn't exist, try to create it recursively
         const parentPath = folderPath.split('/').slice(0, -1).join('/');
