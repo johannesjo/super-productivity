@@ -113,12 +113,28 @@ export class WebdavApi {
             );
             await this._ensureParentDirectoryExists(path);
 
-            // Retry the upload once
+            // Retry the upload once - recreate headers
+            const retryHeaders: Record<string, string> = {
+              'Content-Type': 'application/octet-stream',
+              'Content-Length': new Blob([data]).size.toString(),
+            };
+
+            // Re-apply conditional headers for retry
+            if (!isOverwrite) {
+              if (expectedEtag) {
+                retryHeaders['If-Match'] = expectedEtag;
+              } else {
+                retryHeaders['If-None-Match'] = '*';
+              }
+            } else if (expectedEtag) {
+              retryHeaders['If-Match'] = expectedEtag;
+            }
+
             const retryResponse = await this._makeRequest({
               method: 'PUT',
               path,
               body: data,
-              headers,
+              headers: retryHeaders,
             });
 
             const retryHeaderObj: Record<string, string> = {};
