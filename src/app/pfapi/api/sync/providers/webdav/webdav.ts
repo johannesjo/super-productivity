@@ -189,6 +189,16 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       const currentPath = dirParts.slice(0, i).join('/');
 
       try {
+        // First check if directory already exists to avoid unnecessary creation attempts
+        const dirExists = await this._api.checkFolderExists(currentPath);
+        if (dirExists) {
+          pfLog(
+            2,
+            `${Webdav.L}._ensureFolderExists() directory already exists: ${currentPath}`,
+          );
+          continue;
+        }
+
         pfLog(
           2,
           `${Webdav.L}._ensureFolderExists() attempting to create directory: ${currentPath}`,
@@ -207,7 +217,25 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
 
         // Handle specific error cases
         if (error?.status === 403 || error?.status === 401) {
-          // Permission errors - don't continue
+          // Permission errors - check if directory exists first
+          try {
+            const dirExists = await this._api.checkFolderExists(currentPath);
+            if (dirExists) {
+              pfLog(
+                2,
+                `${Webdav.L}._ensureFolderExists() directory exists despite 403 error: ${currentPath}`,
+              );
+              continue; // Directory exists, continue with next one
+            }
+          } catch (checkError) {
+            pfLog(
+              1,
+              `${Webdav.L}._ensureFolderExists() failed to check directory existence: ${currentPath}`,
+              checkError,
+            );
+          }
+
+          // If directory doesn't exist and we can't create it, this is a real permission error
           pfLog(
             0,
             `${Webdav.L}._ensureFolderExists() permission denied for: ${currentPath}`,
