@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## General Guidelines
+
+1. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity.
+2. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic.
+
 ## Project Overview
 
 Super Productivity is an advanced todo list and time tracking application built with Angular, Electron, and Capacitor for web, desktop, and mobile platforms.
