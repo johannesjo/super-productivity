@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/../node_modules/@capacitor/app/android" />
             <option value="$PROJECT_DIR$/../node_modules/@capacitor/filesystem/android" />
             <option value="$PROJECT_DIR$/../node_modules/@capacitor/local-notifications/android" />
+            <option value="$PROJECT_DIR$/../node_modules/@capacitor/preferences/android" />
             <option value="$PROJECT_DIR$/../node_modules/@capawesome/capacitor-android-dark-mode-support/android" />
             <option value="$PROJECT_DIR$/../node_modules/@capawesome/capacitor-background-task/android" />
           </set>

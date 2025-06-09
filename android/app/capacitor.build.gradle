@@ -12,6 +12,7 @@ dependencies {
     implementation project(':capacitor-app')
     implementation project(':capacitor-filesystem')
     implementation project(':capacitor-local-notifications')
+    implementation project(':capacitor-preferences')
     implementation project(':capawesome-capacitor-android-dark-mode-support')
     implementation project(':capawesome-capacitor-background-task')
 
