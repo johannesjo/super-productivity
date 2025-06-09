@@ -80,6 +80,7 @@ export abstract class LocalFileSyncBase
       // TODO move to file adapters
       // Handle common file not found errors
       if (
+        e?.toString?.().includes('File not found') ||
         e?.toString?.().includes('does not exist') ||
         e?.toString?.().includes('ENOENT')
       ) {
