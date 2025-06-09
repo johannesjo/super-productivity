@@ -2,8 +2,8 @@ import { Directory } from '@capacitor/filesystem';
 import { LocalFileSyncBase } from './local-file-sync-base';
 import { PrivateCfgByProviderId } from '../../../pfapi.model';
 import { SyncProviderId } from '../../../pfapi.const';
-import { SafService } from '../../../../../imex/sync/droid-saf/saf.service';
-import { SafFileAdapter } from '../../../../../imex/sync/droid-saf/saf-file-adapter';
+import { SafService } from './droid-saf/saf.service';
+import { SafFileAdapter } from './droid-saf/saf-file-adapter';
 
 export class LocalFileSyncAndroid extends LocalFileSyncBase {
   constructor(public directory = Directory.Documents) {

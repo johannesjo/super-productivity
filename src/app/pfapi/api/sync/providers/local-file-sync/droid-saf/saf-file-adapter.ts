@@ -1,4 +1,4 @@
-import { FileAdapter } from '../../../pfapi/api/sync/providers/local-file-sync/file-adapter.interface';
+import { FileAdapter } from '../file-adapter.interface';
 import { SafService } from './saf.service';
 
 export class SafFileAdapter implements FileAdapter {
