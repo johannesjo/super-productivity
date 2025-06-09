@@ -47,24 +47,24 @@ jobs:
           name: nightwatch-performance-metrics
           path: perf-metrics*.json
 
-      - name: Read performance metrics to env
-        # if: github.event_name == 'pull_request'
-        run: |
-          perfResult=$(node tools/gen-perf-metrics.js)
-          echo "e2ePerfResult<<EOF" >> $GITHUB_ENV
-          echo "$perfResult" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo $perfResult
-          echo $GITHUB_ENV
-      - name: Attach performance metrics to PR as comment
-        # if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        continue-on-error: true
-        with:
-          #          header: test
-          message: |
-            Perf Result
-            ${{ env.e2ePerfResult }}
+      #      - name: Read performance metrics to env
+      #        # if: github.event_name == 'pull_request'
+      #        run: |
+      #          perfResult=$(node tools/gen-perf-metrics.js)
+      #          echo "e2ePerfResult<<EOF" >> $GITHUB_ENV
+      #          echo "$perfResult" >> $GITHUB_ENV
+      #          echo "EOF" >> $GITHUB_ENV
+      #          echo $perfResult
+      #          echo $GITHUB_ENV
+      #      - name: Attach performance metrics to PR as comment
+      #        # if: github.event_name == 'pull_request'
+      #        uses: marocchino/sticky-pull-request-comment@v2
+      #        continue-on-error: true
+      #        with:
+      #          #          header: test
+      #          message: |
+      #            Perf Result
+      #            ${{ env.e2ePerfResult }}
 
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
