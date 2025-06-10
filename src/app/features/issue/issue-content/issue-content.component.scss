@@ -1,3 +1,114 @@
 :host {
   display: block;
 }
+
+/* Table styles */
+
+.table-wrapper {
+  padding: 8px;
+}
+
+.issue-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    vertical-align: top;
+  }
+
+  .summary {
+    font-weight: 500;
+  }
+
+  .issue-description {
+    max-width: 600px;
+  }
+
+  .description-row td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+.comment {
+  display: flex;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--palette-background-hover);
+  border-radius: 4px;
+
+  &.isLastComment {
+    background-color: var(--palette-background-default);
+    border: 1px solid var(--palette-divider);
+  }
+
+  .author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .name-and-comment-content {
+    flex: 1;
+    min-width: 0;
+
+    .author-name {
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    .when {
+      color: var(--palette-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .markdown {
+      margin-top: 8px;
+
+      ::ng-deep p:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.last-comment-headline {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--palette-text-secondary);
+}
+
+.load-comments-and-all-data {
+  margin: 16px 0;
+}
+
+.write-a-comment {
+  margin-top: 16px;
+}
+
+.subtask-list,
+.related-issue-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: 4px;
+
+    a {
+      color: var(--palette-primary-main);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+mat-chip-listbox {
+  margin-top: 4px;
+}
