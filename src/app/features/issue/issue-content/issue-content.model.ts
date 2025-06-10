@@ -10,9 +10,8 @@ export enum IssueFieldType {
 
 export interface IssueFieldConfig<T = IssueData> {
   label: string;
-  field: string;
   type: IssueFieldType;
-  getValue?: (issue: T) => any;
+  value: string | ((issue: T) => any);
   getLink?: (issue: T) => string;
   isVisible?: (issue: T) => boolean;
   customTemplate?: string;

@@ -10,33 +10,31 @@ export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GithubIssue> = {
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
-      field: 'title',
       type: IssueFieldType.LINK,
-      getValue: (issue: GithubIssue) => `${issue.title} #${issue.number}`,
+      value: (issue: GithubIssue) => `${issue.title} #${issue.number}`,
       getLink: (issue: GithubIssue) => issue.html_url,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
-      field: 'state',
+      value: 'state',
       type: IssueFieldType.TEXT,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
-      field: 'assignee',
       type: IssueFieldType.LINK,
-      getValue: (issue: GithubIssue) => issue.assignee?.login,
+      value: (issue: GithubIssue) => issue.assignee?.login,
       getLink: (issue: GithubIssue) => issue.assignee?.html_url,
       isVisible: (issue: GithubIssue) => !!issue.assignee,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
-      field: 'labels',
+      value: 'labels',
       type: IssueFieldType.CHIPS,
       isVisible: (issue: GithubIssue) => (issue.labels?.length ?? 0) > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-      field: 'body',
+      value: 'body',
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: GithubIssue) => !!issue.body,
     },

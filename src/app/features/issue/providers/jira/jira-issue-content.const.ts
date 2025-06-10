@@ -10,34 +10,30 @@ export const JIRA_ISSUE_CONTENT_CONFIG: IssueContentConfig<JiraIssue> = {
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
-      field: 'summary',
       type: IssueFieldType.CUSTOM,
       customTemplate: 'jira-link',
-      getValue: (issue: JiraIssue) => `${issue.key} ${issue.summary}`,
+      value: (issue: JiraIssue) => `${issue.key} ${issue.summary}`,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
-      field: 'status',
       type: IssueFieldType.TEXT,
-      getValue: (issue: JiraIssue) => issue.status?.name,
+      value: (issue: JiraIssue) => issue.status?.name,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STORY_POINTS,
-      field: 'storyPoints',
+      value: 'storyPoints',
       type: IssueFieldType.TEXT,
       isVisible: (issue: JiraIssue) => !!issue.storyPoints,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
-      field: 'assignee',
       type: IssueFieldType.TEXT,
-      getValue: (issue: JiraIssue) => issue.assignee?.displayName || '–',
+      value: (issue: JiraIssue) => issue.assignee?.displayName || '–',
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.WORKLOG,
-      field: 'worklog',
       type: IssueFieldType.TEXT,
-      getValue: (issue: JiraIssue) => {
+      value: (issue: JiraIssue) => {
         const timeSpent = issue.timespent ? issue.timespent * 1000 : 0;
         const timeEstimate = issue.timeestimate ? issue.timeestimate * 1000 : 0;
         const formatMs = (ms: number): string => {
@@ -51,23 +47,22 @@ export const JIRA_ISSUE_CONTENT_CONFIG: IssueContentConfig<JiraIssue> = {
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUB_TASKS,
-      field: 'subtasks',
+      value: 'subtasks',
       type: IssueFieldType.CUSTOM,
       customTemplate: 'jira-subtasks',
       isVisible: (issue: JiraIssue) => false, // Will be handled by observable
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.RELATED,
-      field: 'related',
+      value: 'related',
       type: IssueFieldType.CUSTOM,
       customTemplate: 'jira-related',
       isVisible: (issue: JiraIssue) => false, // Will be handled by observable
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.COMPONENTS,
-      field: 'components',
       type: IssueFieldType.CHIPS,
-      getValue: (issue: JiraIssue) =>
+      value: (issue: JiraIssue) =>
         issue.components?.map((c) => ({
           name: c.name,
           description: c.description,
@@ -76,9 +71,8 @@ export const JIRA_ISSUE_CONTENT_CONFIG: IssueContentConfig<JiraIssue> = {
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.ATTACHMENTS,
-      field: 'attachments',
       type: IssueFieldType.CHIPS,
-      getValue: (issue: JiraIssue) =>
+      value: (issue: JiraIssue) =>
         issue.attachments?.map((attachment) => ({
           name: attachment.filename,
           description: `${attachment.size} bytes`,
@@ -87,7 +81,7 @@ export const JIRA_ISSUE_CONTENT_CONFIG: IssueContentConfig<JiraIssue> = {
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-      field: 'description',
+      value: 'description',
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: JiraIssue) => !!issue.description,
     },
