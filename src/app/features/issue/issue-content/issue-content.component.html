@@ -77,8 +77,8 @@
                   @switch (field.customTemplate) {
                     @case ('jira-worklog') {
                       <span>
-                        {{ getJiraTimeSpent() | msToString }} /
-                        {{ getJiraTimeEstimate() | msToString }}
+                        {{ jiraTimeSpent() | msToString }} /
+                        {{ jiraTimeEstimate() | msToString }}
                       </span>
                     }
                     @case ('jira-subtasks') {
@@ -93,12 +93,12 @@
                     @case ('redmine-spent-time') {
                       <div>
                         @if (hasRedmineSpentHours()) {
-                          <span>{{ getRedmineSpentHours() }}h</span>
+                          <span>{{ redmineSpentHours() }}h</span>
                         }
                         @if (hasRedmineTotalSpentHours()) {
                           <span>
                             ({{ translate('F.REDMINE.ISSUE_CONTENT.TOTAL') }}:
-                            {{ getRedmineTotalSpentHours() }}h)
+                            {{ redmineTotalSpentHours() }}h)
                           </span>
                         }
                       </div>
@@ -188,7 +188,7 @@
                   </span>
                 } @else {
                   {{
-                    translate(cfg.loadAllCommentsLabel || '', { nr: getCommentsLength() })
+                    translate(cfg.loadAllCommentsLabel || '', { nr: commentsLength() })
                   }}
                 }
               </button>
@@ -232,7 +232,7 @@
             }
           } @else {
             @for (
-              comment of getComments() | sort: cfg.comments.sortField;
+              comment of comments() | sort: cfg.comments.sortField;
               track trackByIndex($index)
             ) {
               <div class="comment">

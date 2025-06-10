@@ -280,63 +280,63 @@ export class IssueContentComponent {
     return this._translateService.instant(key, params);
   }
 
-  protected getJiraTimeSpent(): number {
+  protected jiraTimeSpent = computed(() => {
     const issue = this.currentIssue();
     if (!this.isJiraIssue(issue) || !issue.timespent) return 0;
     return (issue as JiraIssue).timespent * 1000;
-  }
+  });
 
-  protected getJiraTimeEstimate(): number {
+  protected jiraTimeEstimate = computed(() => {
     const issue = this.currentIssue();
     if (!this.isJiraIssue(issue) || !issue.timeestimate) return 0;
     return (issue as JiraIssue).timeestimate * 1000;
-  }
+  });
 
-  protected hasRedmineSpentHours(): boolean {
+  protected hasRedmineSpentHours = computed(() => {
     const issue = this.currentIssue();
     return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
-  }
+  });
 
-  protected getRedmineSpentHours(): number {
+  protected redmineSpentHours = computed(() => {
     const issue = this.currentIssue();
     if (!issue || !('spent_hours' in issue)) return 0;
     return (issue as any).spent_hours || 0;
-  }
+  });
 
-  protected hasRedmineTotalSpentHours(): boolean {
+  protected hasRedmineTotalSpentHours = computed(() => {
     const issue = this.currentIssue();
     return (
       !!issue &&
       'total_spent_hours' in issue &&
       (issue as any).total_spent_hours !== undefined
     );
-  }
+  });
 
-  protected getRedmineTotalSpentHours(): number {
+  protected redmineTotalSpentHours = computed(() => {
     const issue = this.currentIssue();
     if (!issue || !('total_spent_hours' in issue)) return 0;
     return (issue as any).total_spent_hours || 0;
-  }
+  });
 
-  protected hasComments(): boolean {
+  protected hasComments = computed(() => {
     const issue = this.currentIssue();
     return this.hasCommentsField(issue) && this.getCommentsArray(issue).length > 0;
-  }
+  });
 
-  protected getCommentsLength(): number {
+  protected commentsLength = computed(() => {
     const issue = this.currentIssue();
     return this.getCommentsArray(issue).length;
-  }
+  });
 
-  protected getComments(): any[] {
+  protected comments = computed(() => {
     const issue = this.currentIssue();
     return this.getCommentsArray(issue);
-  }
+  });
 
   // OpenProject attachment methods
-  protected isOpenProjectUploading(): boolean {
+  protected isOpenProjectUploading = computed(() => {
     return this.isOpenProjectUploadingSignal();
-  }
+  });
 
   protected getOpenProjectAttachments(): TaskAttachment[] {
     const issue = this.currentIssue() as OpenProjectWorkPackage;
