@@ -75,17 +75,17 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((openProjectCfg) =>
-        this.isEnabled(openProjectCfg)
-          ? this._openProjectApiService.searchIssueForRepo$(searchTerm, openProjectCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((openProjectCfg) =>
+          this.isEnabled(openProjectCfg)
+            ? this._openProjectApiService.searchIssueForRepo$(searchTerm, openProjectCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

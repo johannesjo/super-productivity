@@ -23,10 +23,7 @@ export interface IssueServiceInterface {
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]>;
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]>;
 
   // also used to determine if task is done
   getFreshDataForIssueTask(task: Task): Promise<{

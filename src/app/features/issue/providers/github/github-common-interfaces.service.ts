@@ -56,17 +56,17 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((githubCfg) =>
-        this.isEnabled(githubCfg)
-          ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((githubCfg) =>
+          this.isEnabled(githubCfg)
+            ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

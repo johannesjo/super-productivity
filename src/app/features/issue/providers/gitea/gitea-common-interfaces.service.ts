@@ -75,17 +75,17 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((giteaCfg) =>
-        this.isEnabled(giteaCfg)
-          ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg) =>
+          this.isEnabled(giteaCfg)
+            ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

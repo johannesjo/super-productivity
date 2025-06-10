@@ -72,17 +72,17 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((gitlabCfg) =>
-        this.isEnabled(gitlabCfg)
-          ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((gitlabCfg) =>
+          this.isEnabled(gitlabCfg)
+            ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

@@ -135,17 +135,17 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((caldavCfg) =>
-        this.isEnabled(caldavCfg)
-          ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((caldavCfg) =>
+          this.isEnabled(caldavCfg)
+            ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getNewIssuesToAddToBacklog(

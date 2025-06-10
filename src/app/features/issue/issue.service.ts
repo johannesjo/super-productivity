@@ -124,17 +124,17 @@ export class IssueService {
     );
   }
 
-  searchIssues$(
+  searchIssues(
     searchTerm: string,
     issueProviderId: string,
     issueProviderKey: IssueProviderKey,
     isEmptySearch = false,
-  ): Observable<SearchResultItem[]> {
+  ): Promise<SearchResultItem[]> {
     // check if text is more than just special chars
     if (searchTerm.replace(/[\W_]+/g, '').trim().length === 0 && !isEmptySearch) {
-      return of([]);
+      return Promise.resolve([]);
     }
-    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
+    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues(
       searchTerm,
       issueProviderId,
     );
@@ -146,7 +146,9 @@ export class IssueService {
     return this._store.select(selectEnabledIssueProviders).pipe(
       switchMap((enabledProviders) => {
         const searchObservables = enabledProviders.map((provider) =>
-          this.searchIssues$(searchTerm, provider.id, provider.issueProviderKey).pipe(
+          from(
+            this.searchIssues(searchTerm, provider.id, provider.issueProviderKey),
+          ).pipe(
             map((results) =>
               results.map((result) => ({
                 ...result,

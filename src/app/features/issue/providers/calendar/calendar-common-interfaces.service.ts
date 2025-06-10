@@ -58,23 +58,26 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg) =>
-        this._calendarIntegrationService.requestEventsForSchedule$(cfg, true),
-      ),
-      map((calEvents) =>
-        calEvents
-          .filter((calEvent) =>
-            calEvent.title.toLowerCase().includes(query.toLowerCase()),
-          )
-          .map((calEvent) => ({
-            title: calEvent.title,
-            issueType: ICAL_TYPE,
-            issueData: calEvent,
-          })),
-      ),
-    );
+  searchIssues(query: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((cfg) =>
+          this._calendarIntegrationService.requestEventsForSchedule$(cfg, true),
+        ),
+        map((calEvents) =>
+          calEvents
+            .filter((calEvent) =>
+              calEvent.title.toLowerCase().includes(query.toLowerCase()),
+            )
+            .map((calEvent) => ({
+              title: calEvent.title,
+              issueType: ICAL_TYPE,
+              issueData: calEvent,
+            })),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{
