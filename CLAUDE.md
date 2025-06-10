@@ -7,6 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. Prefer functional programming patterns: Use pure functions, immutability, and avoid side effects where possible.
 2. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity and abstractions.
 3. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic, but avoid unnecessary abstractions.
+4. Confirm understanding before making changes: If you're unsure about the purpose of a piece of code, ask for clarification rather than making assumptions.
+5. Use `npm run prettier` and `npm run lint` to format and check code style before committing changes.
 
 ## Project Overview
 
@@ -30,6 +32,7 @@ npm start
 # Run tests
 npm test          # Unit tests
 npm run e2e       # E2E tests
+npm run prettier  # Prettier formatting
 npm run lint      # Linting
 
 # Build for production

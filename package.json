@@ -90,7 +90,8 @@
     "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
     "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
     "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
-    "prepare": "ts-patch install"
+    "prepare": "ts-patch install",
+    "prettier": "pretty-quick"
   },
   "resolutions": {
     "sass": "1.32.6"
