@@ -162,8 +162,17 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: T.F.ISSUE.ISSUE_CONTENT.WORKLOG,
         field: 'worklog',
-        type: IssueFieldType.CUSTOM,
-        customTemplate: 'jira-worklog',
+        type: IssueFieldType.TEXT,
+        getValue: (issue) => {
+          const timeSpent = issue.timespent ? issue.timespent * 1000 : 0;
+          const timeEstimate = issue.timeestimate ? issue.timeestimate * 1000 : 0;
+          const formatMs = (ms: number): string => {
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+          };
+          return `${formatMs(timeSpent)} / ${formatMs(timeEstimate)}`;
+        },
         isVisible: (issue) => !!issue.timespent || !!issue.timeestimate,
       },
       {

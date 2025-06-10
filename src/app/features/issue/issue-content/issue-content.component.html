@@ -65,7 +65,7 @@
                   </mat-chip-listbox>
                 }
                 @case (IssueFieldType.MARKDOWN) {
-                  @if (!isCollapsedIssueSummary() || field.field !== 'body') {
+                  @if (!isCollapsedIssueSummary()) {
                     <div
                       [data]="getFieldValue(field, currentIssue())"
                       class="description markdown"
@@ -75,12 +75,6 @@
                 }
                 @case (IssueFieldType.CUSTOM) {
                   @switch (field.customTemplate) {
-                    @case ('jira-worklog') {
-                      <span>
-                        {{ jiraTimeSpent() | msToString }} /
-                        {{ jiraTimeEstimate() | msToString }}
-                      </span>
-                    }
                     @case ('jira-subtasks') {
                       <!-- TODO JIRA subtasks would need additional service integration -->
                     }

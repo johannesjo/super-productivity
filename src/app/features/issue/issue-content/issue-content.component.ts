@@ -169,18 +169,6 @@ export class IssueContentComponent {
     return comments.length > 0 ? comments[comments.length - 1] : null;
   });
 
-  jiraTimeSpent = computed(() => {
-    const issue = this.currentIssue();
-    if (!this._isJiraIssue(issue) || !issue.timespent) return 0;
-    return (issue as JiraIssue).timespent * 1000;
-  });
-
-  jiraTimeEstimate = computed(() => {
-    const issue = this.currentIssue();
-    if (!this._isJiraIssue(issue) || !issue.timeestimate) return 0;
-    return (issue as JiraIssue).timeestimate * 1000;
-  });
-
   hasRedmineSpentHours = computed(() => {
     const issue = this.currentIssue();
     return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
