@@ -12,6 +12,7 @@ import {
   IssueContentConfig,
   IssueFieldConfig,
   IssueFieldType,
+  IssueComment,
 } from './issue-content.model';
 import { ISSUE_CONTENT_CONFIGS } from './issue-content-configs.const';
 import { TranslateModule } from '@ngx-translate/core';
@@ -150,28 +151,34 @@ export class IssueContentComponent {
     return '';
   }
 
-  getCommentAuthor(comment: any, cfg: IssueContentConfig): string {
+  getCommentAuthor(comment: IssueComment | null, cfg: IssueContentConfig): string {
+    if (!comment) return '';
     const keys = cfg.comments!.authorField.split('.');
-    let value = comment;
+    let value: any = comment;
     for (const key of keys) {
       value = value?.[key];
     }
     return value || '';
   }
 
-  getCommentBody(comment: any, cfg: IssueContentConfig): string {
+  getCommentBody(comment: IssueComment | null, cfg: IssueContentConfig): string {
+    if (!comment) return '';
     return comment[cfg.comments!.bodyField] || '';
   }
 
-  getCommentCreated(comment: any, cfg: IssueContentConfig): string {
+  getCommentCreated(comment: IssueComment | null, cfg: IssueContentConfig): string {
+    if (!comment) return '';
     return comment[cfg.comments!.createdField] || '';
   }
 
-  getCommentAvatar(comment: any, cfg: IssueContentConfig): string | undefined {
-    if (!cfg.comments?.avatarField) return undefined;
+  getCommentAvatar(
+    comment: IssueComment | null,
+    cfg: IssueContentConfig,
+  ): string | undefined {
+    if (!comment || !cfg.comments?.avatarField) return undefined;
 
     const keys = cfg.comments.avatarField.split('.');
-    let value = comment;
+    let value: any = comment;
     for (const key of keys) {
       value = value?.[key];
     }
@@ -191,10 +198,10 @@ export class IssueContentComponent {
     );
   }
 
-  private _getCommentsArray(issue: IssueData | undefined): any[] {
+  private _getCommentsArray(issue: IssueData | undefined): IssueComment[] {
     const config = this.config();
     if (!config?.comments || !issue) return [];
-    const comments = (issue as any)[config.comments.field];
+    const comments = issue[config.comments.field];
     return Array.isArray(comments) ? comments : [];
   }
 
