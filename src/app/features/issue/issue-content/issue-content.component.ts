@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueData, IssueProviderKey } from '../issue.model';
+import { JiraIssue } from '../providers/jira/jira-issue/jira-issue.model';
 import {
   ISSUE_CONTENT_CONFIGS,
   IssueContentConfig,
@@ -78,47 +79,53 @@ export class IssueContentComponent {
   });
 
   protected isCollapsedIssueSummary = computed(() => {
-    const issue = this.currentIssue() as any;
+    const issue = this.currentIssue();
     return (
       !this.isForceShowDescription() &&
-      issue?.wasUpdated === false &&
-      issue?.bodyUpdated === false
+      this.hasWasUpdatedField(issue) &&
+      this.hasBodyUpdatedField(issue)
     );
   });
 
   protected isCollapsedIssueComments = computed(() => {
-    const issue = this.currentIssue() as any;
+    const issue = this.currentIssue();
     const config = this.config();
     return (
       !this.isForceShowAllComments() &&
       config?.hasCollapsingComments &&
-      issue?.commentsUpdated === false &&
-      issue?.comments?.length > 1
+      this.hasCommentsUpdatedField(issue) &&
+      this.hasCommentsField(issue) &&
+      this.getCommentsArray(issue).length > 1
     );
   });
 
   protected lastComment = computed(() => {
-    const issue = this.currentIssue() as any;
+    const issue = this.currentIssue();
     const config = this.config();
-    if (!issue?.comments?.length || !config?.comments) return null;
-    return issue.comments[issue.comments.length - 1];
+    if (!this.hasCommentsField(issue) || !config?.comments) return null;
+    const comments = this.getCommentsArray(issue);
+    return comments.length > 0 ? comments[comments.length - 1] : null;
   });
 
-  protected getFieldValue(field: any, issue: any): any {
+  protected getFieldValue(field: any, issue: IssueData | undefined): any {
+    if (!issue) return undefined;
+
     if (field.getValue) {
       return field.getValue(issue);
     }
 
     // Handle nested fields like 'status.name'
     const keys = field.field.split('.');
-    let value = issue;
+    let value: any = issue;
     for (const key of keys) {
       value = value?.[key];
     }
     return value;
   }
 
-  protected getFieldLink(field: any, issue: any): string {
+  protected getFieldLink(field: any, issue: IssueData | undefined): string {
+    if (!issue) return '';
+
     if (field.getLink) {
       return field.getLink(issue);
     }
@@ -160,6 +167,45 @@ export class IssueContentComponent {
     return index;
   }
 
+  // Type guard functions
+  private isJiraIssue(issue: IssueData | undefined): issue is JiraIssue {
+    return !!issue && 'timespent' in issue && 'timeestimate' in issue;
+  }
+
+  private isRedmineIssue(issue: IssueData | undefined): boolean {
+    return !!issue && 'tracker' in issue && 'status' in issue && 'priority' in issue;
+  }
+
+  private hasWasUpdatedField(issue: IssueData | undefined): boolean {
+    return !!issue && 'wasUpdated' in issue && (issue as any).wasUpdated === false;
+  }
+
+  private hasBodyUpdatedField(issue: IssueData | undefined): boolean {
+    return !!issue && 'bodyUpdated' in issue && (issue as any).bodyUpdated === false;
+  }
+
+  private hasCommentsUpdatedField(issue: IssueData | undefined): boolean {
+    return (
+      !!issue && 'commentsUpdated' in issue && (issue as any).commentsUpdated === false
+    );
+  }
+
+  private hasCommentsField(issue: IssueData | undefined): boolean {
+    const config = this.config();
+    if (!config?.comments || !issue) return false;
+    return (
+      config.comments.field in issue &&
+      Array.isArray((issue as any)[config.comments.field])
+    );
+  }
+
+  private getCommentsArray(issue: IssueData | undefined): any[] {
+    const config = this.config();
+    if (!config?.comments || !issue) return [];
+    const comments = (issue as any)[config.comments.field];
+    return Array.isArray(comments) ? comments : [];
+  }
+
   hideUpdates(): void {
     const task = this.currentTask();
     if (task?.id && task?.issueId) {
@@ -177,55 +223,56 @@ export class IssueContentComponent {
   }
 
   protected getJiraTimeSpent(): number {
-    const issue = this.currentIssue() as any;
-    if (!issue?.timespent) return 0;
-    return issue.timespent * 1000;
+    const issue = this.currentIssue();
+    if (!this.isJiraIssue(issue) || !issue.timespent) return 0;
+    return (issue as JiraIssue).timespent * 1000;
   }
 
   protected getJiraTimeEstimate(): number {
-    const issue = this.currentIssue() as any;
-    if (!issue?.timeestimate) return 0;
-    return issue.timeestimate * 1000;
+    const issue = this.currentIssue();
+    if (!this.isJiraIssue(issue) || !issue.timeestimate) return 0;
+    return (issue as JiraIssue).timeestimate * 1000;
   }
 
   protected hasRedmineSpentHours(): boolean {
-    const issue = this.currentIssue() as any;
-    return issue?.spent_hours !== undefined;
+    const issue = this.currentIssue();
+    return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
   }
 
   protected getRedmineSpentHours(): number {
-    const issue = this.currentIssue() as any;
-    return issue?.spent_hours || 0;
+    const issue = this.currentIssue();
+    if (!issue || !('spent_hours' in issue)) return 0;
+    return (issue as any).spent_hours || 0;
   }
 
   protected hasRedmineTotalSpentHours(): boolean {
-    const issue = this.currentIssue() as any;
-    return issue?.total_spent_hours !== undefined;
+    const issue = this.currentIssue();
+    return (
+      !!issue &&
+      'total_spent_hours' in issue &&
+      (issue as any).total_spent_hours !== undefined
+    );
   }
 
   protected getRedmineTotalSpentHours(): number {
-    const issue = this.currentIssue() as any;
-    return issue?.total_spent_hours || 0;
+    const issue = this.currentIssue();
+    if (!issue || !('total_spent_hours' in issue)) return 0;
+    return (issue as any).total_spent_hours || 0;
   }
 
   protected hasComments(): boolean {
-    const config = this.config();
-    const issue = this.currentIssue() as any;
-    return !!(config?.comments && issue?.[config.comments.field]?.length);
+    const issue = this.currentIssue();
+    return this.hasCommentsField(issue) && this.getCommentsArray(issue).length > 0;
   }
 
   protected getCommentsLength(): number {
-    const config = this.config();
-    const issue = this.currentIssue() as any;
-    if (!config?.comments || !issue) return 0;
-    return issue[config.comments.field]?.length || 0;
+    const issue = this.currentIssue();
+    return this.getCommentsArray(issue).length;
   }
 
   protected getComments(): any[] {
-    const config = this.config();
-    const issue = this.currentIssue() as any;
-    if (!config?.comments || !issue) return [];
-    return issue[config.comments.field] || [];
+    const issue = this.currentIssue();
+    return this.getCommentsArray(issue);
   }
 
   constructor() {}
