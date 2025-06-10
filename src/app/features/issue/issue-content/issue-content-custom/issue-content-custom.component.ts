@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { IssueFieldConfig, IssueContentConfig } from '../issue-content-config.model';
+import { IssueFieldConfig, IssueContentConfig } from '../issue-content-types.model';
 import { IssueData } from '../../issue.model';
 import { OpenProjectAttachmentsComponent } from './open-project-attachments/open-project-attachments.component';
 import { JiraLinkComponent } from './jira-link/jira-link.component';

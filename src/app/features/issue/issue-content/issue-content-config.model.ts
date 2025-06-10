@@ -1,4 +1,10 @@
 import { IssueProviderKey } from '../issue.model';
+import {
+  IssueFieldType,
+  IssueFieldConfig,
+  IssueCommentConfig,
+  IssueContentConfig,
+} from './issue-content-types.model';
 import { JIRA_ISSUE_CONTENT_CONFIG } from '../providers/jira/jira-issue-content.const';
 import { GITHUB_ISSUE_CONTENT_CONFIG } from '../providers/github/github-issue-content.const';
 import { GITLAB_ISSUE_CONTENT_CONFIG } from '../providers/gitlab/gitlab-issue-content.const';
@@ -7,40 +13,8 @@ import { GITEA_ISSUE_CONTENT_CONFIG } from '../providers/gitea/gitea-issue-conte
 import { REDMINE_ISSUE_CONTENT_CONFIG } from '../providers/redmine/redmine-issue-content.const';
 import { OPEN_PROJECT_ISSUE_CONTENT_CONFIG } from '../providers/open-project/open-project-issue-content.const';
 
-export enum IssueFieldType {
-  TEXT = 'text',
-  LINK = 'link',
-  CHIPS = 'chips',
-  MARKDOWN = 'markdown',
-  CUSTOM = 'custom',
-}
-
-export interface IssueFieldConfig {
-  label: string;
-  field: string;
-  type: IssueFieldType;
-  getValue?: (issue: any) => any;
-  getLink?: (issue: any) => string;
-  isVisible?: (issue: any) => boolean;
-  customTemplate?: string;
-}
-
-export interface IssueCommentConfig {
-  field: string;
-  authorField: string;
-  bodyField: string;
-  createdField: string;
-  avatarField?: string;
-  sortField: string;
-}
-
-export interface IssueContentConfig {
-  issueType: IssueProviderKey;
-  fields: IssueFieldConfig[];
-  comments?: IssueCommentConfig;
-  getIssueUrl?: (issue: any) => string;
-  hasCollapsingComments?: boolean;
-}
+// Re-export types for backwards compatibility
+export { IssueFieldType, IssueFieldConfig, IssueCommentConfig, IssueContentConfig };
 
 export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig> = {
   GITHUB: GITHUB_ISSUE_CONTENT_CONFIG,
@@ -50,4 +24,8 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
   GITEA: GITEA_ISSUE_CONTENT_CONFIG,
   REDMINE: REDMINE_ISSUE_CONTENT_CONFIG,
   OPEN_PROJECT: OPEN_PROJECT_ISSUE_CONTENT_CONFIG,
+  ICAL: {
+    issueType: 'ICAL',
+    fields: [],
+  },
 };

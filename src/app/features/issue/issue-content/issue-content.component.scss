@@ -14,12 +14,14 @@
   width: 100%;
   border-collapse: collapse;
 
-  td {
-    vertical-align: top;
+  tr:first-of-type {
+    td {
+      font-weight: 500;
+    }
   }
 
-  .summary {
-    font-weight: 500;
+  td {
+    vertical-align: top;
   }
 
   .issue-description {

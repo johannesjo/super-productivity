@@ -7,10 +7,9 @@ import {
   computed,
 } from '@angular/core';
 import { IssueData } from '../../../issue.model';
-import { IssueContentConfig } from '../../issue-content-config.model';
+import { IssueContentConfig } from '../../issue-content-types.model';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { OpenProjectApiService } from '../../../providers/open-project/open-project-api.service';
-import { SnackService } from '../../../../core/snack/snack.service';
 import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
 import { mapOpenProjectAttachmentToTaskAttachment } from '../../../providers/open-project/open-project-issue/open-project-issue-map.util';
 import { OpenProjectWorkPackage } from '../../../providers/open-project/open-project-issue/open-project-issue.model';
@@ -20,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { TaskService } from '../../../../tasks/task.service';
 import moment from 'moment';
+import { SnackService } from '../../../../../core/snack/snack.service';
 
 @Component({
   selector: 'open-project-attachments',
@@ -82,7 +82,7 @@ export class OpenProjectAttachmentsComponent {
     const currentTask = this.currentTask();
 
     if (!file || !currentTask || !currentTask.issueId || !currentTask.issueProviderId) {
-      if (!file) {
+      if (!file && this._snackService && typeof this._snackService.open === 'function') {
         this._snackService.open({
           type: 'ERROR',
           msg: 'No file selected',
@@ -122,10 +122,12 @@ export class OpenProjectAttachmentsComponent {
 
       element.value = '';
     } catch (error) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: 'Failed to upload attachment',
-      });
+      if (this._snackService && typeof this._snackService.open === 'function') {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Failed to upload attachment',
+        });
+      }
     } finally {
       this.isUploading.set(false);
     }

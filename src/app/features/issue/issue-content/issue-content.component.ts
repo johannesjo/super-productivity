@@ -9,11 +9,8 @@ import {
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueData, IssueProviderKey } from '../issue.model';
 import { JiraIssue } from '../providers/jira/jira-issue/jira-issue.model';
-import {
-  ISSUE_CONTENT_CONFIGS,
-  IssueContentConfig,
-  IssueFieldType,
-} from './issue-content-config.model';
+import { IssueContentConfig, IssueFieldType } from './issue-content-types.model';
+import { ISSUE_CONTENT_CONFIGS } from './issue-content-config.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,11 +20,10 @@ import { MarkdownModule } from 'ngx-markdown';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { TaskService } from '../../tasks/task.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
-import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
-import { SortPipe } from '../../../ui/pipes/sort.pipe';
 import { IssueContentCustomComponent } from './issue-content-custom/issue-content-custom.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
+import { SortPipe } from '../../../ui/pipes/sort.pipe';
 import { T } from '../../../t.const';
 
 @Component({
@@ -44,10 +40,9 @@ import { T } from '../../../t.const';
     MarkdownModule,
     AsyncPipe,
     DatePipe,
-    MsToStringPipe,
+    MatProgressBarModule,
     JiraToMarkdownPipe,
     SortPipe,
-    MatProgressBarModule,
     IssueContentCustomComponent,
   ],
   animations: [expandAnimation],
