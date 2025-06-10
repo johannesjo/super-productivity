@@ -1,25 +1,29 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
+  input,
   Input,
   OnDestroy,
   OnInit,
-  input,
   output,
-  inject,
 } from '@angular/core';
 import { ConfigFormSection } from '../../../../../config/global-config.model';
 import { FormlyFormOptions } from '@ngx-formly/core';
 import {
-  UntypedFormControl,
-  UntypedFormGroup,
   FormsModule,
   ReactiveFormsModule,
+  UntypedFormControl,
+  UntypedFormGroup,
 } from '@angular/forms';
 import { JiraTransitionConfig, JiraTransitionOption } from '../../jira.model';
 import { expandAnimation } from '../../../../../../ui/animations/expand.ani';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { IssueProviderJira, SearchResultItem } from '../../../../issue.model';
+import {
+  IssueProvider,
+  IssueProviderJira,
+  SearchResultItem,
+} from '../../../../issue.model';
 import { catchError, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../../jira.const';
@@ -32,13 +36,14 @@ import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatOption } from '@angular/material/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSelect } from '@angular/material/select';
 import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { devError } from '../../../../../../util/dev-error';
 
 @Component({
   selector: 'jira-additonal-cfg',
@@ -171,9 +176,23 @@ export class JiraAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   partialModelChange(cfg: Partial<IssueProviderJira>): void {
-    Object.keys(cfg).forEach((key) => {
-      this._cfg![key] = cfg[key];
-    });
+    // NOTE: this currently throws an error when loading issue point stuff for jira
+    try {
+      Object.keys(cfg).forEach((key) => {
+        if (key !== 'isEnabled') {
+          this._cfg![key] = cfg[key];
+        }
+      });
+    } catch (e) {
+      devError(e);
+      const updates: any = {};
+      Object.keys(cfg).forEach((key) => {
+        if (key !== 'isEnabled') {
+          updates[key] = cfg[key as keyof IssueProvider];
+        }
+      });
+      this._cfg = { ...this._cfg, ...updates };
+    }
     this.notifyModelChange();
   }
 
