@@ -1,0 +1,58 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { JiraCommonInterfacesService } from '../../../../providers/jira/jira-common-interfaces.service';
+import { of } from 'rxjs';
+import { TaskWithSubTasks } from '../../../../../tasks/task.model';
+import { IssueData } from '../../../../issue.model';
+import { IssueFieldConfig } from '../../issue-content-config.model';
+
+@Component({
+  selector: 'jira-link',
+  templateUrl: './jira-link.component.html',
+  styleUrls: ['./jira-link.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule],
+})
+export class JiraLinkComponent {
+  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
+    optional: true,
+  });
+
+  readonly field = input.required<IssueFieldConfig>();
+  readonly issue = input.required<IssueData>();
+  readonly task = input.required<TaskWithSubTasks>();
+
+  issueUrl$ = computed(() => {
+    const task = this.task();
+    if (!task?.issueId || !task?.issueProviderId || !this._jiraCommonInterfacesService) {
+      return of('');
+    }
+    return this._jiraCommonInterfacesService.issueLink$(
+      task.issueId,
+      task.issueProviderId,
+    );
+  });
+
+  fieldValue = computed(() => {
+    const field = this.field();
+    const issue = this.issue();
+
+    if (field.getValue) {
+      return field.getValue(issue);
+    }
+
+    // Handle nested fields like 'status.name'
+    const keys = field.field.split('.');
+    let value: any = issue;
+    for (const key of keys) {
+      value = value?.[key];
+    }
+    return value;
+  });
+}
