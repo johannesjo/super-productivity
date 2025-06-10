@@ -80,18 +80,9 @@ export class IssueService {
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
   };
 
-  // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
-  ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
-    [GITLAB_TYPE]: {},
-    [GITHUB_TYPE]: {},
-    [REDMINE_TYPE]: {},
-    [JIRA_TYPE]: {},
-    [CALDAV_TYPE]: {},
-    [OPEN_PROJECT_TYPE]: {},
-    [GITEA_TYPE]: {},
-    [REDMINE_TYPE]: {},
-    [ICAL_TYPE]: {},
-  };
+  ISSUE_REFRESH_MAP: {
+    [issueProviderId: string]: { [issueId: string]: Subject<IssueData> };
+  } = {};
 
   testConnection(issueProviderCfg: IssueProvider): Promise<boolean> {
     return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection(
@@ -114,12 +105,15 @@ export class IssueService {
     issueProviderId: string,
   ): Observable<IssueData | null> {
     // account for (manual) issue refreshing
-    if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
-      this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId] = {};
+    }
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId][id]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId][id] = new Subject<IssueData>();
     }
     return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
       switchMap((issue) =>
-        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
+        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id]),
       ),
     );
   }
@@ -284,8 +278,8 @@ export class IssueService {
     )(task, isNotifySuccess, isNotifyNoUpdateRequired);
 
     if (update) {
-      if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
-        this.ISSUE_REFRESH_MAP[issueType][issueId].next(update.issue);
+      if (this.ISSUE_REFRESH_MAP[issueProviderId]?.[issueId]) {
+        this.ISSUE_REFRESH_MAP[issueProviderId][issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);
 
@@ -356,8 +350,8 @@ export class IssueService {
 
       if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string]) {
-            this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string].next(
+          if (this.ISSUE_REFRESH_MAP[issueProvider.id]?.[update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[issueProvider.id][update.task.issueId as string].next(
               update.issue,
             );
           }
