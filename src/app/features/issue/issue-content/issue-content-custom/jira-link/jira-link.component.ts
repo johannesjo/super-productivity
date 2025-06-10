@@ -6,11 +6,11 @@ import {
   input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { JiraCommonInterfacesService } from '../../../../providers/jira/jira-common-interfaces.service';
+import { JiraCommonInterfacesService } from '../../../providers/jira/jira-common-interfaces.service';
 import { of } from 'rxjs';
-import { TaskWithSubTasks } from '../../../../../tasks/task.model';
-import { IssueData } from '../../../../issue.model';
-import { IssueFieldConfig } from '../../issue-content-config.model';
+import { TaskWithSubTasks } from '../../../../tasks/task.model';
+import { IssueData } from '../../../issue.model';
+import { IssueFieldConfig } from '../../issue-content-types.model';
 
 @Component({
   selector: 'jira-link',
@@ -30,7 +30,12 @@ export class JiraLinkComponent {
 
   issueUrl$ = computed(() => {
     const task = this.task();
-    if (!task?.issueId || !task?.issueProviderId || !this._jiraCommonInterfacesService) {
+    if (
+      !task?.issueId ||
+      !task?.issueProviderId ||
+      !this._jiraCommonInterfacesService ||
+      typeof this._jiraCommonInterfacesService.issueLink$ !== 'function'
+    ) {
       return of('');
     }
     return this._jiraCommonInterfacesService.issueLink$(

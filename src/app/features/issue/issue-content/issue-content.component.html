@@ -20,10 +20,7 @@
         @for (field of visibleFields(); track trackByIndex($index)) {
           <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
             <th>{{ t(field.label) }}</th>
-            <td
-              [class.issue-description]="field.type === IssueFieldType.MARKDOWN"
-              [class.summary]="field.field === 'summary' || field.field === 'title'"
-            >
+            <td [class.issue-description]="field.type === IssueFieldType.MARKDOWN">
               @switch (field.type) {
                 @case (IssueFieldType.TEXT) {
                   {{ getFieldValue(field, currentIssue()) }}
