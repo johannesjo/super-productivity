@@ -24,7 +24,7 @@ export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GitlabIssue> = {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
       type: IssueFieldType.LINK,
       value: (issue: GitlabIssue) => issue.assignee?.username,
-      getLink: (issue: GitlabIssue) => (issue.assignee as any)?.web_url || '',
+      getLink: (issue: GitlabIssue) => issue.assignee?.web_url || '',
       isVisible: (issue: GitlabIssue) => !!issue.assignee,
     },
     {
@@ -47,6 +47,6 @@ export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GitlabIssue> = {
     createdField: 'created_at',
     sortField: 'created_at',
   },
-  getIssueUrl: (issue) => (issue as any).url,
+  getIssueUrl: (issue: GitlabIssue) => issue.url,
   hasCollapsingComments: true,
 };
