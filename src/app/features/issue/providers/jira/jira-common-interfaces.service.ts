@@ -27,11 +27,15 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     return isJiraEnabled(cfg);
   }
 
-  testConnection$(cfg: JiraCfg): Observable<boolean> {
-    return this._jiraApiService.issuePicker$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: JiraCfg): Promise<boolean> {
+    return this._jiraApiService
+      .issuePicker$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   // NOTE: we're using the issueKey instead of the real issueId

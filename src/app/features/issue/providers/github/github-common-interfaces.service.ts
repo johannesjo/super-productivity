@@ -26,11 +26,15 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
     return isGithubEnabled(cfg);
   }
 
-  testConnection$(cfg: GithubCfg): Observable<boolean> {
-    return this._githubApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GithubCfg): Promise<boolean> {
+    return this._githubApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {

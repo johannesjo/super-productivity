@@ -31,11 +31,15 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     return isRedmineEnabled(cfg);
   }
 
-  testConnection$(cfg: RedmineCfg): Observable<boolean> {
-    return this._redmineApiService.searchIssuesInProject$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: RedmineCfg): Promise<boolean> {
+    return this._redmineApiService
+      .searchIssuesInProject$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   pollTimer$: Observable<number> = timer(

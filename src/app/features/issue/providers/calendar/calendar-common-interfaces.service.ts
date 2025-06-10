@@ -34,8 +34,8 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return of('NONE');
   }
 
-  testConnection$(cfg: CalendarProviderCfg): Observable<boolean> {
-    return this._calendarIntegrationService.testConnection$(cfg);
+  testConnection(cfg: CalendarProviderCfg): Promise<boolean> {
+    return this._calendarIntegrationService.testConnection(cfg);
   }
 
   getById$(id: number, issueProviderId: string): Observable<IssueData | null> {

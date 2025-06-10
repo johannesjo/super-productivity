@@ -13,7 +13,7 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  testConnection$(cfg: IssueIntegrationCfg): Observable<boolean>;
+  testConnection(cfg: IssueIntegrationCfg): Promise<boolean>;
 
   pollTimer$: Observable<number>;
 

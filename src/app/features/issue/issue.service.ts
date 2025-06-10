@@ -93,8 +93,8 @@ export class IssueService {
     [ICAL_TYPE]: {},
   };
 
-  testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection$(
+  testConnection(issueProviderCfg: IssueProvider): Promise<boolean> {
+    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection(
       issueProviderCfg,
     );
   }
