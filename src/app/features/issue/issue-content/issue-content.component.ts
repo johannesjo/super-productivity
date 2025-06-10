@@ -20,7 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MarkdownModule } from 'ngx-markdown';
-import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { TaskService } from '../../tasks/task.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
@@ -36,6 +36,7 @@ import { mapOpenProjectAttachmentToTaskAttachment } from '../providers/open-proj
 import { OpenProjectWorkPackage } from '../providers/open-project/open-project-issue/open-project-issue.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import moment from 'moment';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'issue-content',
@@ -51,7 +52,6 @@ import moment from 'moment';
     MarkdownModule,
     AsyncPipe,
     DatePipe,
-    NgClass,
     MsToStringPipe,
     JiraToMarkdownPipe,
     SortPipe,
@@ -62,10 +62,10 @@ import moment from 'moment';
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
-  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
+  private _issueProviderService = inject(IssueProviderService, {
     optional: true,
   });
-  private _issueProviderService = inject(IssueProviderService, {
+  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
     optional: true,
   });
   private _openProjectApiService = inject(OpenProjectApiService, {
@@ -75,22 +75,25 @@ export class IssueContentComponent {
     optional: true,
   });
 
-  protected readonly IssueFieldType = IssueFieldType;
+  readonly IssueFieldType = IssueFieldType;
 
-  readonly task = input.required<TaskWithSubTasks>();
-  readonly issueData = input<IssueData>();
+  task = input.required<TaskWithSubTasks>();
+  issueData = input<IssueData>();
 
-  protected isForceShowDescription = signal(false);
-  protected isForceShowAllComments = signal(false);
-  protected openProjectAttachments = signal<TaskAttachment[]>([]);
-  protected isOpenProjectUploadingSignal = signal(false);
+  isForceShowDescription = signal(false);
+  isForceShowAllComments = signal(false);
+  openProjectAttachments = signal<TaskAttachment[]>([]);
+  isOpenProjectUploadingSignal = signal(false);
 
-  protected config = computed<IssueContentConfig | undefined>(() => {
+  config = computed<IssueContentConfig | undefined>(() => {
     const issueType = this.task().issueType as IssueProviderKey;
-    return issueType ? ISSUE_CONTENT_CONFIGS[issueType] : undefined;
+    if (!ISSUE_CONTENT_CONFIGS[issueType]) {
+      throw new Error(`No issue content config found for issue type: ${issueType}`);
+    }
+    return ISSUE_CONTENT_CONFIGS[issueType];
   });
 
-  protected issueUrl = computed(() => {
+  issueUrl = computed(() => {
     const task = this.currentTask();
     const config = this.config();
     const issue = this.currentIssue();
@@ -112,7 +115,8 @@ export class IssueContentComponent {
     return config.getIssueUrl ? config.getIssueUrl(issue) : '';
   });
 
-  protected jiraIssueUrl$ = computed(() => {
+  // TODO this is ugly as hell
+  jiraIssueUrl$ = computed(() => {
     const task = this.currentTask();
     if (!task?.issueId || !task?.issueProviderId || !this._jiraCommonInterfacesService) {
       return of('');
@@ -123,10 +127,10 @@ export class IssueContentComponent {
     );
   });
 
-  protected currentTask = computed(() => this.task());
-  protected currentIssue = computed(() => this.issueData());
+  currentTask = computed(() => this.task());
+  currentIssue = computed(() => this.issueData());
 
-  protected visibleFields = computed(() => {
+  visibleFields = computed(() => {
     const cfg = this.config();
     const issue = this.currentIssue();
     if (!cfg || !issue) return [];
@@ -136,36 +140,94 @@ export class IssueContentComponent {
     );
   });
 
-  protected isCollapsedIssueSummary = computed(() => {
+  isCollapsedIssueSummary = computed(() => {
     const issue = this.currentIssue();
     return (
       !this.isForceShowDescription() &&
-      this.hasWasUpdatedField(issue) &&
-      this.hasBodyUpdatedField(issue)
+      this._hasWasUpdatedField(issue) &&
+      this._hasBodyUpdatedField(issue)
     );
   });
 
-  protected isCollapsedIssueComments = computed(() => {
+  isCollapsedIssueComments = computed(() => {
     const issue = this.currentIssue();
     const config = this.config();
     return (
       !this.isForceShowAllComments() &&
       config?.hasCollapsingComments &&
-      this.hasCommentsUpdatedField(issue) &&
-      this.hasCommentsField(issue) &&
-      this.getCommentsArray(issue).length > 1
+      this._hasCommentsUpdatedField(issue) &&
+      this._hasCommentsField(issue) &&
+      this._getCommentsArray(issue).length > 1
     );
   });
 
-  protected lastComment = computed(() => {
+  lastComment = computed(() => {
     const issue = this.currentIssue();
     const config = this.config();
-    if (!this.hasCommentsField(issue) || !config?.comments) return null;
-    const comments = this.getCommentsArray(issue);
+    if (!this._hasCommentsField(issue) || !config?.comments) return null;
+    const comments = this._getCommentsArray(issue);
     return comments.length > 0 ? comments[comments.length - 1] : null;
   });
 
-  protected getFieldValue(field: any, issue: IssueData | undefined): any {
+  jiraTimeSpent = computed(() => {
+    const issue = this.currentIssue();
+    if (!this._isJiraIssue(issue) || !issue.timespent) return 0;
+    return (issue as JiraIssue).timespent * 1000;
+  });
+
+  jiraTimeEstimate = computed(() => {
+    const issue = this.currentIssue();
+    if (!this._isJiraIssue(issue) || !issue.timeestimate) return 0;
+    return (issue as JiraIssue).timeestimate * 1000;
+  });
+
+  hasRedmineSpentHours = computed(() => {
+    const issue = this.currentIssue();
+    return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
+  });
+
+  redmineSpentHours = computed(() => {
+    const issue = this.currentIssue();
+    if (!issue || !('spent_hours' in issue)) return 0;
+    return (issue as any).spent_hours || 0;
+  });
+
+  hasRedmineTotalSpentHours = computed(() => {
+    const issue = this.currentIssue();
+    return (
+      !!issue &&
+      'total_spent_hours' in issue &&
+      (issue as any).total_spent_hours !== undefined
+    );
+  });
+
+  redmineTotalSpentHours = computed(() => {
+    const issue = this.currentIssue();
+    if (!issue || !('total_spent_hours' in issue)) return 0;
+    return (issue as any).total_spent_hours || 0;
+  });
+
+  hasComments = computed(() => {
+    const issue = this.currentIssue();
+    return this._hasCommentsField(issue) && this._getCommentsArray(issue).length > 0;
+  });
+
+  commentsLength = computed(() => {
+    const issue = this.currentIssue();
+    return this._getCommentsArray(issue).length;
+  });
+
+  comments = computed(() => {
+    const issue = this.currentIssue();
+    return this._getCommentsArray(issue);
+  });
+
+  // OpenProject attachment methods
+  isOpenProjectUploading = computed(() => {
+    return this.isOpenProjectUploadingSignal();
+  });
+
+  getFieldValue(field: any, issue: IssueData | undefined): any {
     if (!issue) return undefined;
 
     if (field.getValue) {
@@ -181,7 +243,7 @@ export class IssueContentComponent {
     return value;
   }
 
-  protected getFieldLink(field: any, issue: IssueData | undefined): string {
+  getFieldLink(field: any, issue: IssueData | undefined): string {
     if (!issue) return '';
 
     if (field.getLink) {
@@ -190,7 +252,7 @@ export class IssueContentComponent {
     return '';
   }
 
-  protected getCommentAuthor(comment: any, config: IssueContentConfig): string {
+  getCommentAuthor(comment: any, config: IssueContentConfig): string {
     const keys = config.comments!.authorField.split('.');
     let value = comment;
     for (const key of keys) {
@@ -199,18 +261,15 @@ export class IssueContentComponent {
     return value || '';
   }
 
-  protected getCommentBody(comment: any, config: IssueContentConfig): string {
+  getCommentBody(comment: any, config: IssueContentConfig): string {
     return comment[config.comments!.bodyField] || '';
   }
 
-  protected getCommentCreated(comment: any, config: IssueContentConfig): string {
+  getCommentCreated(comment: any, config: IssueContentConfig): string {
     return comment[config.comments!.createdField] || '';
   }
 
-  protected getCommentAvatar(
-    comment: any,
-    config: IssueContentConfig,
-  ): string | undefined {
+  getCommentAvatar(comment: any, config: IssueContentConfig): string | undefined {
     if (!config.comments?.avatarField) return undefined;
 
     const keys = config.comments.avatarField.split('.');
@@ -221,34 +280,30 @@ export class IssueContentComponent {
     return value;
   }
 
-  protected trackByIndex(index: number): number {
+  trackByIndex(index: number): number {
     return index;
   }
 
   // Type guard functions
-  private isJiraIssue(issue: IssueData | undefined): issue is JiraIssue {
+  private _isJiraIssue(issue: IssueData | undefined): issue is JiraIssue {
     return !!issue && 'timespent' in issue && 'timeestimate' in issue;
   }
 
-  private isRedmineIssue(issue: IssueData | undefined): boolean {
-    return !!issue && 'tracker' in issue && 'status' in issue && 'priority' in issue;
-  }
-
-  private hasWasUpdatedField(issue: IssueData | undefined): boolean {
+  private _hasWasUpdatedField(issue: IssueData | undefined): boolean {
     return !!issue && 'wasUpdated' in issue && (issue as any).wasUpdated === false;
   }
 
-  private hasBodyUpdatedField(issue: IssueData | undefined): boolean {
+  private _hasBodyUpdatedField(issue: IssueData | undefined): boolean {
     return !!issue && 'bodyUpdated' in issue && (issue as any).bodyUpdated === false;
   }
 
-  private hasCommentsUpdatedField(issue: IssueData | undefined): boolean {
+  private _hasCommentsUpdatedField(issue: IssueData | undefined): boolean {
     return (
       !!issue && 'commentsUpdated' in issue && (issue as any).commentsUpdated === false
     );
   }
 
-  private hasCommentsField(issue: IssueData | undefined): boolean {
+  private _hasCommentsField(issue: IssueData | undefined): boolean {
     const config = this.config();
     if (!config?.comments || !issue) return false;
     return (
@@ -257,7 +312,7 @@ export class IssueContentComponent {
     );
   }
 
-  private getCommentsArray(issue: IssueData | undefined): any[] {
+  private _getCommentsArray(issue: IssueData | undefined): any[] {
     const config = this.config();
     if (!config?.comments || !issue) return [];
     const comments = (issue as any)[config.comments.field];
@@ -276,69 +331,12 @@ export class IssueContentComponent {
     this.isForceShowAllComments.set(true);
   }
 
-  translate(key: string, params?: any): string {
+  // TODO replace with translation pipe
+  t(key: string, params?: any): string {
     return this._translateService.instant(key, params);
   }
 
-  protected jiraTimeSpent = computed(() => {
-    const issue = this.currentIssue();
-    if (!this.isJiraIssue(issue) || !issue.timespent) return 0;
-    return (issue as JiraIssue).timespent * 1000;
-  });
-
-  protected jiraTimeEstimate = computed(() => {
-    const issue = this.currentIssue();
-    if (!this.isJiraIssue(issue) || !issue.timeestimate) return 0;
-    return (issue as JiraIssue).timeestimate * 1000;
-  });
-
-  protected hasRedmineSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
-  });
-
-  protected redmineSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    if (!issue || !('spent_hours' in issue)) return 0;
-    return (issue as any).spent_hours || 0;
-  });
-
-  protected hasRedmineTotalSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    return (
-      !!issue &&
-      'total_spent_hours' in issue &&
-      (issue as any).total_spent_hours !== undefined
-    );
-  });
-
-  protected redmineTotalSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    if (!issue || !('total_spent_hours' in issue)) return 0;
-    return (issue as any).total_spent_hours || 0;
-  });
-
-  protected hasComments = computed(() => {
-    const issue = this.currentIssue();
-    return this.hasCommentsField(issue) && this.getCommentsArray(issue).length > 0;
-  });
-
-  protected commentsLength = computed(() => {
-    const issue = this.currentIssue();
-    return this.getCommentsArray(issue).length;
-  });
-
-  protected comments = computed(() => {
-    const issue = this.currentIssue();
-    return this.getCommentsArray(issue);
-  });
-
-  // OpenProject attachment methods
-  protected isOpenProjectUploading = computed(() => {
-    return this.isOpenProjectUploadingSignal();
-  });
-
-  protected getOpenProjectAttachments(): TaskAttachment[] {
+  getOpenProjectAttachments(): TaskAttachment[] {
     const issue = this.currentIssue() as OpenProjectWorkPackage;
     const cached = this.openProjectAttachments();
 
@@ -357,7 +355,7 @@ export class IssueContentComponent {
     return [];
   }
 
-  protected async onOpenProjectFileUpload(event: Event): Promise<void> {
+  async onOpenProjectFileUpload(event: Event): Promise<void> {
     if (
       !this._issueProviderService ||
       !this._openProjectApiService ||
@@ -421,5 +419,5 @@ export class IssueContentComponent {
     }
   }
 
-  constructor() {}
+  protected readonly T = T;
 }

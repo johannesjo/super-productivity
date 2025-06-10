@@ -1,3 +1,5 @@
+@import '../../../../variables';
+
 :host {
   display: block;
 }
@@ -34,18 +36,14 @@
   display: flex;
   margin-bottom: 16px;
   padding: 12px;
-  background-color: var(--palette-background-hover);
   border-radius: 4px;
-  border-bottom: 1px solid var(--palette-divider);
+  border-bottom: 1px dashed $light-theme-extra-border-color;
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &.isLastComment {
-    background-color: var(--palette-background-default);
-    border: 1px solid var(--palette-divider);
-    border-bottom: 1px solid var(--palette-divider);
   }
 
   .author-avatar {
@@ -105,7 +103,6 @@
     margin-bottom: 4px;
 
     a {
-      color: var(--palette-primary-main);
       text-decoration: none;
 
       &:hover {
