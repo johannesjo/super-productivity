@@ -1,9 +1,17 @@
 import { IssueProviderKey } from '../issue.model';
 
+export enum IssueFieldType {
+  TEXT = 'text',
+  LINK = 'link',
+  CHIPS = 'chips',
+  MARKDOWN = 'markdown',
+  CUSTOM = 'custom',
+}
+
 export interface IssueFieldConfig {
   label: string;
   field: string;
-  type: 'text' | 'link' | 'chips' | 'markdown' | 'custom';
+  type: IssueFieldType;
   getValue?: (issue: any) => any;
   getLink?: (issue: any) => string;
   isVisible?: (issue: any) => boolean;
@@ -39,19 +47,19 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITHUB.ISSUE_CONTENT.SUMMARY',
         field: 'title',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => `${issue.title} #${issue.number}`,
         getLink: (issue) => issue.html_url,
       },
       {
         label: 'F.GITHUB.ISSUE_CONTENT.STATUS',
         field: 'state',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.GITHUB.ISSUE_CONTENT.ASSIGNEE',
         field: 'assignee',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => issue.assignee?.login,
         getLink: (issue) => issue.assignee?.html_url,
         isVisible: (issue) => !!issue.assignee?.html_url,
@@ -59,7 +67,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITHUB.ISSUE_CONTENT.LABELS',
         field: 'labels',
-        type: 'chips',
+        type: IssueFieldType.CHIPS,
         getValue: (issue) =>
           issue.labels?.map((l: any) => ({ name: l.name, description: l.description })),
         isVisible: (issue) => issue.labels?.length > 0,
@@ -67,7 +75,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITHUB.ISSUE_CONTENT.DESCRIPTION',
         field: 'body',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.body,
       },
     ],
@@ -91,19 +99,19 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITLAB.ISSUE_CONTENT.SUMMARY',
         field: 'title',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => `${issue.title} #${issue.number}`,
         getLink: (issue) => issue.html_url,
       },
       {
         label: 'F.GITLAB.ISSUE_CONTENT.STATUS',
         field: 'state',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.GITLAB.ISSUE_CONTENT.ASSIGNEE',
         field: 'assignee',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => issue.assignee?.username,
         getLink: (issue) => issue.assignee?.web_url,
         isVisible: (issue) => !!issue.assignee?.web_url,
@@ -111,14 +119,14 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITLAB.ISSUE_CONTENT.LABELS',
         field: 'labels',
-        type: 'chips',
+        type: IssueFieldType.CHIPS,
         getValue: (issue) => issue.labels?.map((l: string) => ({ name: l })),
         isVisible: (issue) => issue.labels?.length > 0,
       },
       {
         label: 'F.GITLAB.ISSUE_CONTENT.DESCRIPTION',
         field: 'body',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.body,
       },
     ],
@@ -139,53 +147,53 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.JIRA.ISSUE_CONTENT.SUMMARY',
         field: 'summary',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => `${issue.key} ${issue.summary}`,
         getLink: (issue) => '', // Will be handled by component with issueUrl$ observable
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.STATUS',
         field: 'status',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         getValue: (issue) => issue.status?.name,
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.STORY_POINTS',
         field: 'storyPoints',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue.storyPoints,
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.ASSIGNEE',
         field: 'assignee',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         getValue: (issue) => issue.assignee?.displayName || '–',
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.WORKLOG',
         field: 'worklog',
-        type: 'custom',
+        type: IssueFieldType.CUSTOM,
         customTemplate: 'jira-worklog',
         isVisible: (issue) => !!issue.timespent || !!issue.timeestimate,
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.SUB_TASKS',
         field: 'subtasks',
-        type: 'custom',
+        type: IssueFieldType.CUSTOM,
         customTemplate: 'jira-subtasks',
         isVisible: (issue) => false, // Will be handled by observable
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.RELATED',
         field: 'related',
-        type: 'custom',
+        type: IssueFieldType.CUSTOM,
         customTemplate: 'jira-related',
         isVisible: (issue) => false, // Will be handled by observable
       },
       {
         label: 'F.JIRA.ISSUE_CONTENT.COMPONENTS',
         field: 'components',
-        type: 'chips',
+        type: IssueFieldType.CHIPS,
         getValue: (issue) =>
           issue.components?.map((c: any) => ({
             name: c.name,
@@ -196,7 +204,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.JIRA.ISSUE_CONTENT.DESCRIPTION',
         field: 'description',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.description,
       },
     ],
@@ -218,24 +226,24 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.CALDAV.ISSUE_CONTENT.SUMMARY',
         field: 'summary',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.CALDAV.ISSUE_CONTENT.STATUS',
         field: 'completed',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.CALDAV.ISSUE_CONTENT.LABELS',
         field: 'labels',
-        type: 'chips',
+        type: IssueFieldType.CHIPS,
         getValue: (issue) => issue.labels?.map((l: string) => ({ name: l })),
         isVisible: (issue) => issue.labels?.length > 0,
       },
       {
         label: 'F.CALDAV.ISSUE_CONTENT.DESCRIPTION',
         field: 'note',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.note,
       },
     ],
@@ -249,19 +257,19 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITEA.ISSUE_CONTENT.SUMMARY',
         field: 'title',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => `${issue.title} #${issue.number}`,
         getLink: (issue) => issue.html_url,
       },
       {
         label: 'F.GITEA.ISSUE_CONTENT.STATUS',
         field: 'state',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.GITEA.ISSUE_CONTENT.ASSIGNEE',
         field: 'assignee',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => issue.assignee?.login,
         getLink: (issue) => issue.assignee?.html_url,
         isVisible: (issue) => !!issue.assignee?.html_url,
@@ -269,7 +277,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITEA.ISSUE_CONTENT.LABELS',
         field: 'labels',
-        type: 'chips',
+        type: IssueFieldType.CHIPS,
         getValue: (issue) =>
           issue.labels?.map((l: any) => ({ name: l.name, description: l.description })),
         isVisible: (issue) => issue.labels?.length > 0,
@@ -277,7 +285,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.GITEA.ISSUE_CONTENT.DESCRIPTION',
         field: 'body',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.body,
       },
     ],
@@ -298,44 +306,44 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.SUMMARY',
         field: 'subject',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => issue.subject,
         getLink: (issue) => '', // Will be handled by component
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.STATUS',
         field: '_links.status.title',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.ASSIGNEE',
         field: '_links.assignee.title',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue._links?.assignee?.title,
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.VERSION',
         field: '_links.version.title',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue._links?.version?.title,
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.CATEGORY',
         field: '_links.category.title',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue._links?.category?.title,
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.SPENT_TIME',
         field: 'spentTime',
-        type: 'custom',
+        type: IssueFieldType.CUSTOM,
         customTemplate: 'open-project-spent-time',
         isVisible: (issue) => !!issue.spentTime,
       },
       {
         label: 'F.OPEN_PROJECT.ISSUE_CONTENT.DESCRIPTION',
         field: 'description.raw',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.description?.raw,
       },
     ],
@@ -349,62 +357,62 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: 'F.REDMINE.ISSUE_CONTENT.SUMMARY',
         field: 'subject',
-        type: 'link',
+        type: IssueFieldType.LINK,
         getValue: (issue) => `#${issue.id} ${issue.subject}`,
         getLink: (issue) => '', // Will be handled by component
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.STATUS',
         field: 'status.name',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.PRIORITY',
         field: 'priority.name',
-        type: 'text',
+        type: IssueFieldType.TEXT,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.ASSIGNEE',
         field: 'assigned_to.name',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue.assigned_to?.name,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.CATEGORY',
         field: 'category.name',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue.category?.name,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.VERSION',
         field: 'fixed_version.name',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue.fixed_version?.name,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.DUE_DATE',
         field: 'due_date',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         isVisible: (issue) => !!issue.due_date,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.DONE_RATIO',
         field: 'done_ratio',
-        type: 'text',
+        type: IssueFieldType.TEXT,
         getValue: (issue) => `${issue.done_ratio}%`,
         isVisible: (issue) => issue.done_ratio !== undefined,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.SPENT_TIME',
         field: 'spent_hours',
-        type: 'custom',
+        type: IssueFieldType.CUSTOM,
         customTemplate: 'redmine-spent-time',
         isVisible: (issue) => !!issue.spent_hours || !!issue.total_spent_hours,
       },
       {
         label: 'F.REDMINE.ISSUE_CONTENT.DESCRIPTION',
         field: 'description',
-        type: 'markdown',
+        type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.description,
       },
     ],

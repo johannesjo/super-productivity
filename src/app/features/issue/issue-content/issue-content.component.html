@@ -18,19 +18,17 @@
     <div class="table-wrapper">
       <table class="issue-table">
         @for (field of visibleFields(); track trackByIndex($index)) {
-          <tr [ngClass]="{ 'description-row': field.type === 'markdown' }">
+          <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
             <th>{{ translate(field.label) }}</th>
             <td
-              [ngClass]="{
-                'issue-description': field.type === 'markdown',
-                summary: field.field === 'summary' || field.field === 'title',
-              }"
+              [class.issue-description]="field.type === IssueFieldType.MARKDOWN"
+              [class.summary]="field.field === 'summary' || field.field === 'title'"
             >
               @switch (field.type) {
-                @case ('text') {
+                @case (IssueFieldType.TEXT) {
                   {{ getFieldValue(field, currentIssue()) }}
                 }
-                @case ('link') {
+                @case (IssueFieldType.LINK) {
                   @if (getFieldLink(field, currentIssue()); as link) {
                     <a
                       [href]="link"
@@ -42,7 +40,7 @@
                     <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
                   }
                 }
-                @case ('chips') {
+                @case (IssueFieldType.CHIPS) {
                   <mat-chip-listbox>
                     @for (
                       chip of getFieldValue(field, currentIssue());
@@ -54,7 +52,7 @@
                     }
                   </mat-chip-listbox>
                 }
-                @case ('markdown') {
+                @case (IssueFieldType.MARKDOWN) {
                   @if (!isCollapsedIssueSummary() || field.field !== 'body') {
                     <div
                       [data]="getFieldValue(field, currentIssue())"
@@ -63,7 +61,7 @@
                     ></div>
                   }
                 }
-                @case ('custom') {
+                @case (IssueFieldType.CUSTOM) {
                   @switch (field.customTemplate) {
                     @case ('jira-worklog') {
                       <span>

@@ -8,7 +8,11 @@ import {
 } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueData, IssueProviderKey } from '../issue.model';
-import { ISSUE_CONTENT_CONFIGS, IssueContentConfig } from './issue-content-config.model';
+import {
+  ISSUE_CONTENT_CONFIGS,
+  IssueContentConfig,
+  IssueFieldType,
+} from './issue-content-config.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -46,6 +50,8 @@ import { SortPipe } from '../../../ui/pipes/sort.pipe';
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
+
+  protected readonly IssueFieldType = IssueFieldType;
 
   readonly task = input.required<TaskWithSubTasks>();
   readonly issueData = input<IssueData>();
