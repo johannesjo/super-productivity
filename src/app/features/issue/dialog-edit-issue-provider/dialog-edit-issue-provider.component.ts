@@ -174,23 +174,30 @@ export class DialogEditIssueProviderComponent {
     this.isConnectionWorks.set(false);
   }
 
-  testConnection(): void {
-    this._issueService
-      .testConnection$(this.model as IssueProvider)
-      .subscribe((isSuccess) => {
-        this.isConnectionWorks.set(isSuccess);
-        if (isSuccess) {
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: 'Connection works!',
-          });
-        } else {
-          this._snackService.open({
-            type: 'ERROR',
-            msg: 'Connection failed',
-          });
-        }
+  async testConnection(): Promise<void> {
+    try {
+      const isSuccess = await this._issueService.testConnection(
+        this.model as IssueProvider,
+      );
+      this.isConnectionWorks.set(isSuccess);
+      if (isSuccess) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: 'Connection works!',
+        });
+      } else {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Connection failed',
+        });
+      }
+    } catch (error) {
+      this.isConnectionWorks.set(false);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Connection failed',
       });
+    }
   }
 
   remove(): void {

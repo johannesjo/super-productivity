@@ -39,11 +39,15 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     return isOpenProjectEnabled(cfg);
   }
 
-  testConnection$(cfg: OpenProjectCfg): Observable<boolean> {
-    return this._openProjectApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: OpenProjectCfg): Promise<boolean> {
+    return this._openProjectApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   issueLink$(issueId: number, issueProviderId: string): Observable<string> {

@@ -30,11 +30,15 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
     return isGitlabEnabled(cfg);
   }
 
-  testConnection$(cfg: GitlabCfg): Observable<boolean> {
-    return this._gitlabApiService.searchIssueInProject$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GitlabCfg): Promise<boolean> {
+    return this._gitlabApiService
+      .searchIssueInProject$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   issueLink$(issueId: string, issueProviderId: string): Observable<string> {

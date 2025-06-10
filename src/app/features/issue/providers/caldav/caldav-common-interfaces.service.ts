@@ -29,11 +29,15 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return isCaldavEnabled(cfg);
   }
 
-  testConnection$(cfg: CaldavCfg): Observable<boolean> {
-    return this._caldavClientService.searchOpenTasks$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: CaldavCfg): Promise<boolean> {
+    return this._caldavClientService
+      .searchOpenTasks$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {

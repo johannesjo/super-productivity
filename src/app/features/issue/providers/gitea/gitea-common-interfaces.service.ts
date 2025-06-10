@@ -33,11 +33,15 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     return isGiteaEnabled(cfg);
   }
 
-  testConnection$(cfg: GiteaCfg): Observable<boolean> {
-    return this._giteaApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GiteaCfg): Promise<boolean> {
+    return this._giteaApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   issueLink$(issueNumber: string | number, issueProviderId: string): Observable<string> {
