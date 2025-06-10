@@ -17,7 +17,7 @@ export interface IssueServiceInterface {
 
   pollTimer$: Observable<number>;
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string>;
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string>;
 
   getById$(id: string | number, issueProviderId: string): Observable<IssueData | null>;
 

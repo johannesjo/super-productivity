@@ -37,10 +37,11 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   getById$(issueId: number, issueProviderId: string): Observable<GithubIssue> {

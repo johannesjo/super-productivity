@@ -4,10 +4,11 @@ import {
   computed,
   inject,
   input,
+  signal,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { JiraCommonInterfacesService } from '../../../providers/jira/jira-common-interfaces.service';
-import { of } from 'rxjs';
 import { TaskCopy } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
 import { IssueFieldConfig } from '../../issue-content.model';
@@ -28,21 +29,31 @@ export class JiraLinkComponent {
   readonly issue = input.required<IssueData>();
   readonly task = input.required<TaskCopy>();
 
-  issueUrl$ = computed(() => {
-    const task = this.task();
-    if (
-      !task?.issueId ||
-      !task?.issueProviderId ||
-      !this._jiraCommonInterfacesService ||
-      typeof this._jiraCommonInterfacesService.issueLink$ !== 'function'
-    ) {
-      return of('');
-    }
-    return this._jiraCommonInterfacesService.issueLink$(
-      task.issueId,
-      task.issueProviderId,
-    );
-  });
+  issueUrl = signal('');
+
+  constructor() {
+    effect(async () => {
+      const task = this.task();
+      if (
+        !task?.issueId ||
+        !task?.issueProviderId ||
+        !this._jiraCommonInterfacesService ||
+        typeof this._jiraCommonInterfacesService.issueLink !== 'function'
+      ) {
+        this.issueUrl.set('');
+        return;
+      }
+      try {
+        const url = await this._jiraCommonInterfacesService.issueLink(
+          task.issueId,
+          task.issueProviderId,
+        );
+        this.issueUrl.set(url);
+      } catch {
+        this.issueUrl.set('');
+      }
+    });
+  }
 
   fieldValue = computed(() => {
     const field = this.field();

@@ -30,8 +30,8 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   // We currently don't support polling for calendar events
   pollTimer$: Observable<number> = EMPTY;
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return of('NONE');
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return Promise.resolve('NONE');
   }
 
   testConnection(cfg: CalendarProviderCfg): Promise<boolean> {

@@ -41,20 +41,23 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: string, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => {
-        const project: string = cfg.project;
-        if (cfg.gitlabBaseUrl) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
-            ? cfg.gitlabBaseUrl
-            : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${project}/issues/${issueId}`;
-        } else {
-          return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
-        }
-      }),
-    );
+  issueLink(issueId: string, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        map((cfg) => {
+          const project: string = cfg.project;
+          if (cfg.gitlabBaseUrl) {
+            const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
+              ? cfg.gitlabBaseUrl
+              : `${cfg.gitlabBaseUrl}/`;
+            return `${fixedUrl}${project}/issues/${issueId}`;
+          } else {
+            return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
+          }
+        }),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   getById$(issueId: string, issueProviderId: string): Observable<GitlabIssue> {

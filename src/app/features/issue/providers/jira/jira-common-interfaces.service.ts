@@ -134,15 +134,18 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string> {
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string> {
     if (!issueId || !issueProviderId) {
       throw new Error('No issueId or no issueProviderId');
     }
     // const isIssueKey = isNaN(Number(issueId));
-    return this._getCfgOnce$(issueProviderId).pipe(
-      first(),
-      map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
-    );
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        first(),
+        map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   async getNewIssuesToAddToBacklog(

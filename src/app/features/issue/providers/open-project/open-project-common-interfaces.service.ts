@@ -50,10 +50,13 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/projects/${cfg.projectId}/work_packages/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        map((cfg) => `${cfg.host}/projects/${cfg.projectId}/work_packages/${issueId}`),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   getById$(issueId: number, issueProviderId: string): Observable<OpenProjectWorkPackage> {
