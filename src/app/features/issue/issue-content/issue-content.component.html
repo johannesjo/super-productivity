@@ -39,15 +39,17 @@
                     >
                       <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
                     </a>
-                  } @else if (getFieldLink(field, currentIssue()); as link) {
-                    <a
-                      [href]="link"
-                      target="_blank"
-                    >
-                      <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
-                    </a>
                   } @else {
-                    <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                    @if (getFieldLink(field, currentIssue()); as link) {
+                      <a
+                        [href]="link"
+                        target="_blank"
+                      >
+                        <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                      </a>
+                    } @else {
+                      <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                    }
                   }
                 }
                 @case (IssueFieldType.CHIPS) {
