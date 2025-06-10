@@ -139,6 +139,9 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
     },
     writeCommentLabel: 'F.GITLAB.ISSUE_CONTENT.WRITE_A_COMMENT',
     getIssueUrl: (issue) => issue.url,
+    hasCollapsingComments: true,
+    loadAllCommentsLabel: 'F.GITLAB.ISSUE_CONTENT.LOAD_ALL_COMMENTS',
+    lastCommentLabel: 'F.GITLAB.ISSUE_CONTENT.LAST_COMMENT',
   },
   JIRA: {
     issueType: 'JIRA',
@@ -229,6 +232,9 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
     },
     writeCommentLabel: 'F.JIRA.ISSUE_CONTENT.WRITE_A_COMMENT',
     getIssueUrl: (issue) => '', // Will be handled by component
+    hasCollapsingComments: true,
+    loadAllCommentsLabel: 'F.JIRA.ISSUE_CONTENT.LOAD_ALL_COMMENTS',
+    lastCommentLabel: 'F.JIRA.ISSUE_CONTENT.LAST_COMMENT',
   },
   CALDAV: {
     issueType: 'CALDAV',
@@ -309,6 +315,9 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
     },
     writeCommentLabel: 'F.GITEA.ISSUE_CONTENT.WRITE_A_COMMENT',
     getIssueUrl: (issue) => issue.html_url,
+    hasCollapsingComments: true,
+    loadAllCommentsLabel: 'F.GITEA.ISSUE_CONTENT.LOAD_ALL_COMMENTS',
+    lastCommentLabel: 'F.GITEA.ISSUE_CONTENT.LAST_COMMENT',
   },
   OPEN_PROJECT: {
     issueType: 'OPEN_PROJECT',
