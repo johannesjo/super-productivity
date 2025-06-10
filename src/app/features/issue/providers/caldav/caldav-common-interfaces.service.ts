@@ -53,8 +53,8 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     );
   }
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string> {
-    return of('');
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string> {
+    return Promise.resolve('');
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

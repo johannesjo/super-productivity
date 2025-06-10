@@ -44,10 +44,11 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  issueLink$(issueNumber: string | number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`),
-    );
+  issueLink(issueNumber: string | number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   getById$(id: string | number, issueProviderId: string): Observable<IssueData> {

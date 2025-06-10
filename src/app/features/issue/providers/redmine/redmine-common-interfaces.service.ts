@@ -47,10 +47,11 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     REDMINE_POLL_INTERVAL,
   );
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/issues/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `${cfg.host}/issues/${issueId}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   getById$(id: number, issueProviderId: string): Observable<IssueData> {

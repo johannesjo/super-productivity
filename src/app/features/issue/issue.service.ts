@@ -165,12 +165,12 @@ export class IssueService {
     );
   }
 
-  issueLink$(
+  issueLink(
     issueType: IssueProviderKey,
     issueId: string | number,
     issueProviderId: string,
-  ): Observable<string> {
-    return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, issueProviderId);
+  ): Promise<string> {
+    return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId, issueProviderId);
   }
 
   getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
