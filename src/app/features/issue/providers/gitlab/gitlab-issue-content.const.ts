@@ -4,16 +4,17 @@ import {
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
 import { IssueProviderKey } from '../../issue.model';
+import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 
-export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GitlabIssue> = {
   issueType: 'GITLAB' as IssueProviderKey,
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
       field: 'title',
       type: IssueFieldType.LINK,
-      getValue: (issue) => `${issue.title} #${issue.number}`,
-      getLink: (issue) => issue.url,
+      getValue: (issue: GitlabIssue) => `${issue.title} #${issue.number}`,
+      getLink: (issue: GitlabIssue) => issue.html_url,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
@@ -24,22 +25,22 @@ export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
       field: 'assignee',
       type: IssueFieldType.LINK,
-      getValue: (issue) => issue.assignee?.username,
-      getLink: (issue) => issue.assignee?.web_url,
-      isVisible: (issue) => !!issue.assignee?.web_url,
+      getValue: (issue: GitlabIssue) => issue.assignee?.username,
+      getLink: (issue: GitlabIssue) => (issue.assignee as any)?.web_url || '',
+      isVisible: (issue: GitlabIssue) => !!issue.assignee,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
       field: 'labels',
       type: IssueFieldType.CHIPS,
-      getValue: (issue) => issue.labels?.map((l: string) => ({ name: l })),
-      isVisible: (issue) => issue.labels?.length > 0,
+      getValue: (issue: GitlabIssue) => issue.labels?.map((l: string) => ({ name: l })),
+      isVisible: (issue: GitlabIssue) => (issue.labels?.length ?? 0) > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
       field: 'body',
       type: IssueFieldType.MARKDOWN,
-      isVisible: (issue) => !!issue.body,
+      isVisible: (issue: GitlabIssue) => !!issue.body,
     },
   ],
   comments: {
@@ -49,6 +50,6 @@ export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
     createdField: 'created_at',
     sortField: 'created_at',
   },
-  getIssueUrl: (issue) => issue.url,
+  getIssueUrl: (issue) => (issue as any).url,
   hasCollapsingComments: true,
 };

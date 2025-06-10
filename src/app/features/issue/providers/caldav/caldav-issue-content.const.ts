@@ -3,9 +3,10 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
+import { CaldavIssue } from './caldav-issue/caldav-issue.model';
 import { IssueProviderKey } from '../../issue.model';
 
-export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {
   issueType: 'CALDAV' as IssueProviderKey,
   fields: [
     {
@@ -17,13 +18,13 @@ export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
       field: 'description',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.description,
+      isVisible: (issue: CaldavIssue) => !!(issue as any).description,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LOCATION,
       field: 'location',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.location,
+      isVisible: (issue: CaldavIssue) => !!(issue as any).location,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.START,

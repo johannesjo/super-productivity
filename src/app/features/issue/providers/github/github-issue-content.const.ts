@@ -3,16 +3,17 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
+import { GithubIssue } from './github-issue/github-issue.model';
 
-export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GithubIssue> = {
   issueType: 'GITHUB' as const,
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
       field: 'title',
       type: IssueFieldType.LINK,
-      getValue: (issue) => `${issue.title} #${issue.number}`,
-      getLink: (issue) => issue.html_url,
+      getValue: (issue: GithubIssue) => `${issue.title} #${issue.number}`,
+      getLink: (issue: GithubIssue) => issue.html_url,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
@@ -23,21 +24,21 @@ export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
       field: 'assignee',
       type: IssueFieldType.LINK,
-      getValue: (issue) => issue.assignee?.login,
-      getLink: (issue) => issue.assignee?.html_url,
-      isVisible: (issue) => !!issue.assignee,
+      getValue: (issue: GithubIssue) => issue.assignee?.login,
+      getLink: (issue: GithubIssue) => issue.assignee?.html_url,
+      isVisible: (issue: GithubIssue) => !!issue.assignee,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
       field: 'labels',
       type: IssueFieldType.CHIPS,
-      isVisible: (issue) => issue.labels?.length > 0,
+      isVisible: (issue: GithubIssue) => (issue.labels?.length ?? 0) > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
       field: 'body',
       type: IssueFieldType.MARKDOWN,
-      isVisible: (issue) => !!issue.body,
+      isVisible: (issue: GithubIssue) => !!issue.body,
     },
   ],
   comments: {
@@ -48,6 +49,6 @@ export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
     avatarField: 'user.avatar_url',
     sortField: 'created_at',
   },
-  getIssueUrl: (issue) => issue.html_url,
+  getIssueUrl: (issue) => (issue as any).html_url,
   hasCollapsingComments: true,
 };

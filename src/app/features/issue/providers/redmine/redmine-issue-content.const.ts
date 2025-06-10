@@ -3,16 +3,17 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
+import { RedmineIssue } from './redmine-issue/redmine-issue.model';
 import { IssueProviderKey } from '../../issue.model';
 
-export const REDMINE_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+export const REDMINE_ISSUE_CONTENT_CONFIG: IssueContentConfig<RedmineIssue> = {
   issueType: 'REDMINE' as IssueProviderKey,
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
       field: 'id',
       type: IssueFieldType.LINK,
-      getValue: (issue) => `#${issue.id} ${issue.subject}`,
+      getValue: (issue: RedmineIssue) => `#${issue.id} ${issue.subject}`,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
@@ -33,42 +34,42 @@ export const REDMINE_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
       field: 'assigned_to.name',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.assigned_to,
+      isVisible: (issue: RedmineIssue) => !!(issue as any).assigned_to,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.CATEGORY,
       field: 'category.name',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.category,
+      isVisible: (issue: RedmineIssue) => !!issue.category,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.VERSION,
       field: 'fixed_version.name',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.fixed_version,
+      isVisible: (issue: RedmineIssue) => !!(issue as any).fixed_version,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DUE_DATE,
       field: 'due_date',
       type: IssueFieldType.TEXT,
-      isVisible: (issue) => !!issue.due_date,
+      isVisible: (issue: RedmineIssue) => !!(issue as any).due_date,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.TIME_SPENT,
       field: 'spent_hours',
       type: IssueFieldType.TEXT,
-      getValue: (issue) => {
-        const hours = Math.floor(issue.spent_hours);
-        const minutes = Math.round((issue.spent_hours - hours) * 60);
+      getValue: (issue: RedmineIssue) => {
+        const hours = Math.floor((issue as any).spent_hours);
+        const minutes = Math.round(((issue as any).spent_hours - hours) * 60);
         return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
       },
-      isVisible: (issue) => issue.spent_hours > 0,
+      isVisible: (issue: RedmineIssue) => (issue as any).spent_hours > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
       field: 'description',
       type: IssueFieldType.MARKDOWN,
-      isVisible: (issue) => !!issue.description,
+      isVisible: (issue: RedmineIssue) => !!issue.description,
     },
   ],
   comments: {
