@@ -17,6 +17,7 @@ import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 import { InputDurationDirective } from '../input-duration.directive';
 import { InputTimeDurationDirective } from '../input-time-duration.directive';
+import { convertTimeStringToMilliseconds } from '../../../util/convert-time-string-to-milliseconds';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -248,6 +249,17 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this._model = $event;
     this.modelChange.emit(this._model);
     this.setRotationFromValue();
+  }
+  _onInputChange($event: string): void {
+    const milliseconds = convertTimeStringToMilliseconds(
+      /^([0-9]?[0-9]):([0-5][0-9])$/,
+      $event,
+    );
+    if (milliseconds !== null) {
+      this._model = milliseconds;
+      this.modelChange.emit(this._model);
+      this.setRotationFromValue(milliseconds);
+    }
   }
 
   setRotationFromValue(val: number = this._model): void {
