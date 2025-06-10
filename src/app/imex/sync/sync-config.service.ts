@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, from, of, Observable } from 'rxjs';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { map, tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import { PrivateCfgByProviderId, SyncProviderId } from '../../pfapi/api';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
@@ -26,7 +26,7 @@ export class SyncConfigService {
     this._globalConfigService.sync$,
     this._pfapiService.currentProviderPrivateCfg$,
   ]).pipe(
-    map(([syncCfg, currentProviderCfg]) => {
+    switchMap(([syncCfg, currentProviderCfg]) => {
       // Base config with defaults
       const baseConfig = {
         ...DEFAULT_GLOBAL_CONFIG.sync,
@@ -35,10 +35,23 @@ export class SyncConfigService {
 
       // If no provider is active, return base config with empty encryption key
       if (!currentProviderCfg) {
-        return {
-          ...baseConfig,
-          encryptKey: '',
-        };
+        return from(
+          fetch('/assets/sync-config-default-override.json')
+            .then((res) => res.json())
+            .then((defaultOverride) => {
+              return {
+                ...baseConfig,
+                ...defaultOverride,
+                encryptKey: '',
+              };
+            })
+            .catch(() => {
+              return {
+                ...baseConfig,
+                encryptKey: '',
+              };
+            }),
+        );
       }
 
       const prop = PROP_MAP_TO_FORM[currentProviderCfg.providerId];
@@ -57,7 +70,7 @@ export class SyncConfigService {
         result[prop] = currentProviderCfg.privateCfg;
       }
 
-      return result;
+      return of(result);
     }),
     tap((v) => console.log('syncSettingsForm$', v)),
   );
