@@ -202,6 +202,17 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
         isVisible: (issue) => issue.components?.length > 0,
       },
       {
+        label: 'F.JIRA.ISSUE_CONTENT.ATTACHMENTS',
+        field: 'attachments',
+        type: IssueFieldType.CHIPS,
+        getValue: (issue) =>
+          issue.attachments?.map((attachment: any) => ({
+            name: attachment.filename,
+            description: `${attachment.size} bytes`,
+          })),
+        isVisible: (issue) => issue.attachments?.length > 0,
+      },
+      {
         label: 'F.JIRA.ISSUE_CONTENT.DESCRIPTION',
         field: 'description',
         type: IssueFieldType.MARKDOWN,
@@ -347,7 +358,7 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
         isVisible: (issue) => !!issue.description?.raw,
       },
     ],
-    writeCommentLabel: 'F.OPEN_PROJECT.ISSUE_CONTENT.WRITE_A_COMMENT',
+    writeCommentLabel: '',
     getIssueUrl: (issue) => '', // Will be handled by component
   },
   REDMINE: {

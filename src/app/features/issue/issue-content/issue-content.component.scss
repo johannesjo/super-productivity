@@ -36,10 +36,16 @@
   padding: 12px;
   background-color: var(--palette-background-hover);
   border-radius: 4px;
+  border-bottom: 1px solid var(--palette-divider);
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   &.isLastComment {
     background-color: var(--palette-background-default);
     border: 1px solid var(--palette-divider);
+    border-bottom: 1px solid var(--palette-divider);
   }
 
   .author-avatar {
@@ -110,5 +116,11 @@
 }
 
 mat-chip-listbox {
-  margin-top: 4px;
+  margin-top: 0;
+  margin-bottom: 0;
+  vertical-align: baseline;
+
+  mat-chip-option {
+    margin: 2px 4px 2px 0;
+  }
 }

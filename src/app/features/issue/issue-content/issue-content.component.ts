@@ -26,6 +26,8 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
 import { SortPipe } from '../../../ui/pipes/sort.pipe';
+import { JiraCommonInterfacesService } from '../providers/jira/jira-common-interfaces.service';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'issue-content',
@@ -51,6 +53,9 @@ import { SortPipe } from '../../../ui/pipes/sort.pipe';
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
+  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
+    optional: true,
+  });
 
   protected readonly IssueFieldType = IssueFieldType;
 
@@ -63,6 +68,39 @@ export class IssueContentComponent {
   protected config = computed<IssueContentConfig | undefined>(() => {
     const issueType = this.task().issueType as IssueProviderKey;
     return issueType ? ISSUE_CONTENT_CONFIGS[issueType] : undefined;
+  });
+
+  protected issueUrl = computed(() => {
+    const task = this.currentTask();
+    const config = this.config();
+    const issue = this.currentIssue();
+
+    if (!config || !issue || !task) return '';
+
+    // Handle JIRA URLs specially using the service
+    if (
+      config.issueType === 'JIRA' &&
+      this._jiraCommonInterfacesService &&
+      task.issueId &&
+      task.issueProviderId
+    ) {
+      // Note: This returns an Observable, but we'll handle it in the template
+      return 'jira-special-case';
+    }
+
+    // For other providers, use the config method
+    return config.getIssueUrl ? config.getIssueUrl(issue) : '';
+  });
+
+  protected jiraIssueUrl$ = computed(() => {
+    const task = this.currentTask();
+    if (!task?.issueId || !task?.issueProviderId || !this._jiraCommonInterfacesService) {
+      return of('');
+    }
+    return this._jiraCommonInterfacesService.issueLink$(
+      task.issueId,
+      task.issueProviderId,
+    );
   });
 
   protected currentTask = computed(() => this.task());

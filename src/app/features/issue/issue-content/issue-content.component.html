@@ -29,7 +29,17 @@
                   {{ getFieldValue(field, currentIssue()) }}
                 }
                 @case (IssueFieldType.LINK) {
-                  @if (getFieldLink(field, currentIssue()); as link) {
+                  @if (
+                    config()?.issueType === 'JIRA' &&
+                    (field.field === 'summary' || field.field === 'title')
+                  ) {
+                    <a
+                      [href]="jiraIssueUrl$() | async"
+                      target="_blank"
+                    >
+                      <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                    </a>
+                  } @else if (getFieldLink(field, currentIssue()); as link) {
                     <a
                       [href]="link"
                       target="_blank"
@@ -205,16 +215,29 @@
 
       @if (cfg.writeCommentLabel) {
         <div style="text-align: center">
-          <a
-            [href]="config()?.getIssueUrl(currentIssue()) || ''"
-            class="write-a-comment"
-            color="primary"
-            mat-stroked-button
-            target="_blank"
-          >
-            <mat-icon>textsms</mat-icon>
-            {{ translate(cfg.writeCommentLabel) }}
-          </a>
+          @if (cfg.issueType === 'JIRA') {
+            <a
+              [href]="jiraIssueUrl$() | async"
+              class="write-a-comment"
+              color="primary"
+              mat-stroked-button
+              target="_blank"
+            >
+              <mat-icon>textsms</mat-icon>
+              {{ translate(cfg.writeCommentLabel) }}
+            </a>
+          } @else {
+            <a
+              [href]="config()?.getIssueUrl(currentIssue()) || ''"
+              class="write-a-comment"
+              color="primary"
+              mat-stroked-button
+              target="_blank"
+            >
+              <mat-icon>textsms</mat-icon>
+              {{ translate(cfg.writeCommentLabel) }}
+            </a>
+          }
         </div>
       }
     </div>
