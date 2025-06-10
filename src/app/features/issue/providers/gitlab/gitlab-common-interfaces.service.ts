@@ -42,13 +42,22 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       .pipe(
         map((cfg) => {
           const project: string = cfg.project;
+          console.log('GitLab issueLink debug:', {
+            issueId,
+            project,
+            gitlabBaseUrl: cfg.gitlabBaseUrl,
+          });
           if (cfg.gitlabBaseUrl) {
             const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
               ? cfg.gitlabBaseUrl
               : `${cfg.gitlabBaseUrl}/`;
-            return `${fixedUrl}${project}/-/issues/${issueId}`;
+            const url = `${fixedUrl}${project}/-/issues/${issueId}`;
+            console.log('GitLab issueLink result (custom base):', url);
+            return url;
           } else {
-            return `${GITLAB_BASE_URL}${project}/-/issues/${issueId}`;
+            const url = `${GITLAB_BASE_URL}${project}/-/issues/${issueId}`;
+            console.log('GitLab issueLink result (default base):', url);
+            return url;
           }
         }),
       )
