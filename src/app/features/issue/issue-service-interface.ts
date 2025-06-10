@@ -47,4 +47,7 @@ export interface IssueServiceInterface {
     issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]>;
+
+  // TODO could be called when task is updated from issue, whenever task is updated
+  updateIssueFromTask?(task: Task): Promise<void>;
 }
