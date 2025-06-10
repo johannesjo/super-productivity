@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { JiraCommonInterfacesService } from '../../../providers/jira/jira-common-interfaces.service';
 import { of } from 'rxjs';
-import { TaskWithSubTasks } from '../../../../tasks/task.model';
+import { TaskCopy } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
 import { IssueFieldConfig } from '../../issue-content.model';
 
@@ -26,7 +26,7 @@ export class JiraLinkComponent {
 
   readonly field = input.required<IssueFieldConfig>();
   readonly issue = input.required<IssueData>();
-  readonly task = input.required<TaskWithSubTasks>();
+  readonly task = input.required<TaskCopy>();
 
   issueUrl$ = computed(() => {
     const task = this.task();
