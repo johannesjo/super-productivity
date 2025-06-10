@@ -9,7 +9,7 @@
         color="accent"
         mat-raised-button
       >
-        {{ translate(config()?.updateButtonLabel || '') }}
+        {{ T.F.ISSUE.ISSUE_CONTENT.MARK_AS_CHECKED | translate }}
       </button>
     </div>
   }
@@ -19,7 +19,7 @@
       <table class="issue-table">
         @for (field of visibleFields(); track trackByIndex($index)) {
           <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
-            <th>{{ translate(field.label) }}</th>
+            <th>{{ t(field.label) }}</th>
             <td
               [class.issue-description]="field.type === IssueFieldType.MARKDOWN"
               [class.summary]="field.field === 'summary' || field.field === 'title'"
@@ -82,10 +82,10 @@
                       </span>
                     }
                     @case ('jira-subtasks') {
-                      <!-- JIRA subtasks would need additional service integration -->
+                      <!-- TODO JIRA subtasks would need additional service integration -->
                     }
                     @case ('jira-related') {
-                      <!-- JIRA related issues would need additional service integration -->
+                      <!-- TODO JIRA related issues would need additional service integration -->
                     }
                     @case ('open-project-spent-time') {
                       <span>{{ getFieldValue(field, currentIssue()) }}</span>
@@ -97,7 +97,7 @@
                         }
                         @if (hasRedmineTotalSpentHours()) {
                           <span>
-                            ({{ translate('F.REDMINE.ISSUE_CONTENT.TOTAL') }}:
+                            ({{ t('F.REDMINE.ISSUE_CONTENT.TOTAL') }}:
                             {{ redmineTotalSpentHours() }}h)
                           </span>
                         }
@@ -120,9 +120,7 @@
                             class="upload-btn"
                           >
                             <mat-icon>cloud_upload</mat-icon>
-                            {{
-                              translate('F.OPEN_PROJECT.ISSUE_CONTENT.UPLOAD_ATTACHMENT')
-                            }}
+                            {{ t('F.OPEN_PROJECT.ISSUE_CONTENT.UPLOAD_ATTACHMENT') }}
                           </button>
                         }
 
@@ -181,21 +179,21 @@
                     style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap"
                   >
                     {{
-                      translate(
-                        'F.GITHUB.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS'
-                      )
+                      T.F.ISSUE.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS
+                        | translate
                     }}
                   </span>
                 } @else {
                   {{
-                    translate(cfg.loadAllCommentsLabel || '', { nr: commentsLength() })
+                    T.F.ISSUE.ISSUE_CONTENT.LOAD_ALL_COMMENTS
+                      | translate: { nr: commentsLength() }
                   }}
                 }
               </button>
             </div>
             @if (lastComment()) {
               <h3 class="last-comment-headline">
-                {{ translate(cfg.lastCommentLabel || '') }}
+                {{ T.F.ISSUE.ISSUE_CONTENT.LAST_COMMENT | translate }}
               </h3>
               <div class="comment isLastComment">
                 @if (getCommentAvatar(lastComment(), cfg); as avatar) {
@@ -210,7 +208,7 @@
                       getCommentAuthor(lastComment(), cfg)
                     }}</span>
                     <span class="when">
-                      {{ translate('F.GITHUB.ISSUE_CONTENT.AT') }}
+                      {{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
                       {{ getCommentCreated(lastComment(), cfg) | date: 'short' }}
                     </span>
                   </div>
@@ -231,10 +229,7 @@
               </div>
             }
           } @else {
-            @for (
-              comment of comments() | sort: cfg.comments.sortField;
-              track trackByIndex($index)
-            ) {
+            @for (comment of comments() | sort: cfg.comments?.sortField; track $index) {
               <div class="comment">
                 @if (getCommentAvatar(comment, cfg); as avatar) {
                   <img
@@ -246,7 +241,7 @@
                   <div>
                     <span class="author-name">{{ getCommentAuthor(comment, cfg) }}</span>
                     <span class="when">
-                      {{ translate('F.GITHUB.ISSUE_CONTENT.AT') }}
+                      {{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
                       {{ getCommentCreated(comment, cfg) | date: 'short' }}
                     </span>
                   </div>
@@ -266,34 +261,6 @@
                 </div>
               </div>
             }
-          }
-        </div>
-      }
-
-      @if (cfg.writeCommentLabel) {
-        <div style="text-align: center">
-          @if (cfg.issueType === 'JIRA') {
-            <a
-              [href]="jiraIssueUrl$() | async"
-              class="write-a-comment"
-              color="primary"
-              mat-stroked-button
-              target="_blank"
-            >
-              <mat-icon>textsms</mat-icon>
-              {{ translate(cfg.writeCommentLabel) }}
-            </a>
-          } @else {
-            <a
-              [href]="config()?.getIssueUrl(currentIssue()) || ''"
-              class="write-a-comment"
-              color="primary"
-              mat-stroked-button
-              target="_blank"
-            >
-              <mat-icon>textsms</mat-icon>
-              {{ translate(cfg.writeCommentLabel) }}
-            </a>
           }
         </div>
       }
