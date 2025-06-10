@@ -50,17 +50,18 @@ export const OPEN_PROJECT_ISSUE_CONTENT_CONFIG: IssueContentConfig<OpenProjectWo
         isVisible: (issue: OpenProjectWorkPackage) => issue.spentTime !== 'PT0S',
       },
       {
+        label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
+        value: 'description.raw',
+        type: IssueFieldType.MARKDOWN,
+        isVisible: (issue: OpenProjectWorkPackage) => !!issue.description?.raw,
+      },
+      {
         label: T.F.ISSUE.ISSUE_CONTENT.ATTACHMENTS,
         value: 'attachments',
         type: IssueFieldType.CUSTOM,
         customTemplate: 'open-project-attachments',
         isVisible: () => true,
-      },
-      {
-        label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-        value: 'description.raw',
-        type: IssueFieldType.MARKDOWN,
-        isVisible: (issue: OpenProjectWorkPackage) => !!issue.description?.raw,
+        isFullWidth: true,
       },
     ],
     comments: {

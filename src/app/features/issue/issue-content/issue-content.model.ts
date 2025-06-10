@@ -15,6 +15,7 @@ export interface IssueFieldConfig<T = IssueData> {
   getLink?: (issue: T) => string;
   isVisible?: (issue: T) => boolean;
   customTemplate?: string;
+  isFullWidth?: boolean;
 }
 
 export interface IssueComment {
