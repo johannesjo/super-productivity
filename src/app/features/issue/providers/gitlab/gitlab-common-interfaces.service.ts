@@ -44,26 +44,17 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
           const project: string = cfg.project;
 
           // Extract just the numeric issue ID from formats like 'project/repo#123' or '#123'
+          // Note: issueId is intentionally stored as 'project/repo#123' to ensure uniqueness across different projects
+          // but for URL construction we only need the numeric part after the '#'
           const cleanIssueId = issueId.toString().replace(/^.*#/, '');
-
-          console.log('GitLab issueLink debug:', {
-            originalIssueId: issueId,
-            cleanIssueId,
-            project,
-            gitlabBaseUrl: cfg.gitlabBaseUrl,
-          });
 
           if (cfg.gitlabBaseUrl) {
             const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
               ? cfg.gitlabBaseUrl
               : `${cfg.gitlabBaseUrl}/`;
-            const url = `${fixedUrl}${project}/-/issues/${cleanIssueId}`;
-            console.log('GitLab issueLink result (custom base):', url);
-            return url;
+            return `${fixedUrl}${project}/-/issues/${cleanIssueId}`;
           } else {
-            const url = `${GITLAB_BASE_URL}${project}/-/issues/${cleanIssueId}`;
-            console.log('GitLab issueLink result (default base):', url);
-            return url;
+            return `${GITLAB_BASE_URL}${project}/-/issues/${cleanIssueId}`;
           }
         }),
       )
