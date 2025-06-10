@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
@@ -42,20 +42,26 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       .pipe(
         map((cfg) => {
           const project: string = cfg.project;
+
+          // Extract just the numeric issue ID from formats like 'project/repo#123' or '#123'
+          const cleanIssueId = issueId.toString().replace(/^.*#/, '');
+
           console.log('GitLab issueLink debug:', {
-            issueId,
+            originalIssueId: issueId,
+            cleanIssueId,
             project,
             gitlabBaseUrl: cfg.gitlabBaseUrl,
           });
+
           if (cfg.gitlabBaseUrl) {
             const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
               ? cfg.gitlabBaseUrl
               : `${cfg.gitlabBaseUrl}/`;
-            const url = `${fixedUrl}${project}/-/issues/${issueId}`;
+            const url = `${fixedUrl}${project}/-/issues/${cleanIssueId}`;
             console.log('GitLab issueLink result (custom base):', url);
             return url;
           } else {
-            const url = `${GITLAB_BASE_URL}${project}/-/issues/${issueId}`;
+            const url = `${GITLAB_BASE_URL}${project}/-/issues/${cleanIssueId}`;
             console.log('GitLab issueLink result (default base):', url);
             return url;
           }
