@@ -53,7 +53,7 @@
                   }
                 }
                 @case (IssueFieldType.CHIPS) {
-                  <mat-chip-listbox>
+                  <mat-chip-listbox [selectable]="false">
                     @for (
                       chip of getFieldValue(field, currentIssue());
                       track trackByIndex($index)
@@ -86,9 +86,6 @@
                     }
                     @case ('jira-related') {
                       <!-- TODO JIRA related issues would need additional service integration -->
-                    }
-                    @case ('open-project-spent-time') {
-                      <span>{{ getFieldValue(field, currentIssue()) }}</span>
                     }
                     @case ('redmine-spent-time') {
                       <div>
