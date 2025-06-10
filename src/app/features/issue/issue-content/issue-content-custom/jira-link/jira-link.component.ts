@@ -10,7 +10,7 @@ import { JiraCommonInterfacesService } from '../../../providers/jira/jira-common
 import { of } from 'rxjs';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
-import { IssueFieldConfig } from '../../issue-content-types.model';
+import { IssueFieldConfig } from '../../issue-content.model';
 
 @Component({
   selector: 'jira-link',

@@ -20,7 +20,7 @@
         @for (field of visibleFields(); track trackByIndex($index)) {
           <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
             <th>{{ t(field.label) }}</th>
-            <td [class.issue-description]="field.type === IssueFieldType.MARKDOWN">
+            <td [class.markdown]="field.type === IssueFieldType.MARKDOWN">
               @switch (field.type) {
                 @case (IssueFieldType.TEXT) {
                   {{ getFieldValue(field, currentIssue()) }}
@@ -53,7 +53,7 @@
                   @if (!isCollapsedIssueSummary()) {
                     <div
                       [data]="getFieldValue(field, currentIssue())"
-                      class="description markdown"
+                      class="markdown"
                       markdown
                     ></div>
                   }
@@ -149,7 +149,7 @@
                   <div>
                     <span class="author-name">{{ getCommentAuthor(comment, cfg) }}</span>
                     <span class="when">
-                      {{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
+                      {{ T.F.ISSUE.ISSUE_CONTENT.AT | translate }}
                       {{ getCommentCreated(comment, cfg) | date: 'short' }}
                     </span>
                   </div>

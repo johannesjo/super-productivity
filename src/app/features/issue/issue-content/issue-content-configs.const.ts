@@ -4,7 +4,7 @@ import {
   IssueFieldConfig,
   IssueCommentConfig,
   IssueContentConfig,
-} from './issue-content-types.model';
+} from './issue-content.model';
 import { JIRA_ISSUE_CONTENT_CONFIG } from '../providers/jira/jira-issue-content.const';
 import { GITHUB_ISSUE_CONTENT_CONFIG } from '../providers/github/github-issue-content.const';
 import { GITLAB_ISSUE_CONTENT_CONFIG } from '../providers/gitlab/gitlab-issue-content.const';

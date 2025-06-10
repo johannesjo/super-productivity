@@ -9,8 +9,8 @@ import {
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueData, IssueProviderKey } from '../issue.model';
 import { JiraIssue } from '../providers/jira/jira-issue/jira-issue.model';
-import { IssueContentConfig, IssueFieldType } from './issue-content-types.model';
-import { ISSUE_CONTENT_CONFIGS } from './issue-content-config.model';
+import { IssueContentConfig, IssueFieldType } from './issue-content.model';
+import { ISSUE_CONTENT_CONFIGS } from './issue-content-configs.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';

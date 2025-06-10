@@ -7,7 +7,7 @@ import {
   computed,
 } from '@angular/core';
 import { IssueData } from '../../../issue.model';
-import { IssueContentConfig } from '../../issue-content-types.model';
+import { IssueContentConfig } from '../../issue-content.model';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { OpenProjectApiService } from '../../../providers/open-project/open-project-api.service';
 import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
