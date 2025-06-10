@@ -51,12 +51,20 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? '');
   }
 
-  getById$(id: string | number, issueProviderId: string): Observable<IssueData> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((giteaCfg: GiteaCfg) =>
-        this._giteaApiService.getById$(id as number, giteaCfg),
-      ),
-    );
+  getById(id: string | number, issueProviderId: string): Promise<IssueData> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg: GiteaCfg) =>
+          this._giteaApiService.getById$(id as number, giteaCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Gitea issue');
+        }
+        return result;
+      });
   }
 
   getAddTaskData(issue: GiteaIssue): Partial<Readonly<TaskCopy>> & { title: string } {

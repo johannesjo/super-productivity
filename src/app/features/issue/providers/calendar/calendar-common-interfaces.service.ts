@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -38,8 +38,8 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     return this._calendarIntegrationService.testConnection(cfg);
   }
 
-  getById$(id: number, issueProviderId: string): Observable<IssueData | null> {
-    return of(null);
+  getById(id: number, issueProviderId: string): Promise<IssueData | null> {
+    return Promise.resolve(null);
   }
 
   getAddTaskData(

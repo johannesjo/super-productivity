@@ -59,12 +59,20 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
       .then((result) => result ?? '');
   }
 
-  getById$(issueId: number, issueProviderId: string): Observable<OpenProjectWorkPackage> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((openProjectCfg) =>
-        this._openProjectApiService.getById$(issueId, openProjectCfg),
-      ),
-    );
+  getById(issueId: number, issueProviderId: string): Promise<OpenProjectWorkPackage> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        concatMap((openProjectCfg) =>
+          this._openProjectApiService.getById$(issueId, openProjectCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get OpenProject work package');
+        }
+        return result;
+      });
   }
 
   searchIssues$(

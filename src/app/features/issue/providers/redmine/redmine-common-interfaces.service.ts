@@ -54,10 +54,20 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? '');
   }
 
-  getById$(id: number, issueProviderId: string): Observable<IssueData> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg: RedmineCfg) => this._redmineApiService.getById$(id as number, cfg)),
-    );
+  getById(id: number, issueProviderId: string): Promise<IssueData> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((cfg: RedmineCfg) =>
+          this._redmineApiService.getById$(id as number, cfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Redmine issue');
+        }
+        return result;
+      });
   }
 
   getAddTaskData(issue: RedmineIssue): Partial<Readonly<TaskCopy>> & { title: string } {

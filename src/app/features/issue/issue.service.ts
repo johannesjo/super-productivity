@@ -8,7 +8,7 @@ import {
   SearchResultItemWithProviderId,
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
-import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
+import { forkJoin, from, merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
@@ -99,6 +99,15 @@ export class IssueService {
     );
   }
 
+  getById(
+    issueType: IssueProviderKey,
+    id: string | number,
+    issueProviderId: string,
+  ): Promise<IssueData | null> {
+    return this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId);
+  }
+
+  // Keep Observable version for components that need real-time updates via refresh
   getById$(
     issueType: IssueProviderKey,
     id: string | number,
@@ -108,13 +117,11 @@ export class IssueService {
     if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
       this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
     }
-    return this.ISSUE_SERVICE_MAP[issueType]
-      .getById$(id, issueProviderId)
-      .pipe(
-        switchMap((issue) =>
-          merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
-        ),
-      );
+    return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
+      switchMap((issue) =>
+        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
+      ),
+    );
   }
 
   searchIssues$(

@@ -60,10 +60,16 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? '');
   }
 
-  getById$(issueId: string, issueProviderId: string): Observable<GitlabIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
-    );
+  getById(issueId: string, issueProviderId: string): Promise<GitlabIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get GitLab issue');
+        }
+        return result;
+      });
   }
 
   searchIssues$(
