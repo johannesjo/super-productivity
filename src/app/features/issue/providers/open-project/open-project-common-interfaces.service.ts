@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -11,10 +11,7 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { isOpenProjectEnabled } from './is-open-project-enabled.util';
-import {
-  OPEN_PROJECT_INITIAL_POLL_DELAY,
-  OPEN_PROJECT_POLL_INTERVAL,
-} from './open-project.const';
+import { OPEN_PROJECT_POLL_INTERVAL } from './open-project.const';
 import { parseOpenProjectDuration } from './open-project-view-components/parse-open-project-duration.util';
 import {
   formatOpenProjectWorkPackageSubject,
@@ -30,10 +27,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   private readonly _openProjectApiService = inject(OpenProjectApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(
-    OPEN_PROJECT_INITIAL_POLL_DELAY,
-    OPEN_PROJECT_POLL_INTERVAL,
-  );
+  pollInterval: number = OPEN_PROJECT_POLL_INTERVAL;
 
   isEnabled(cfg: OpenProjectCfg): boolean {
     return isOpenProjectEnabled(cfg);

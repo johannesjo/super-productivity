@@ -1,4 +1,3 @@
-import { Observable } from 'rxjs';
 import {
   IssueData,
   IssueDataReduced,
@@ -15,7 +14,7 @@ export interface IssueServiceInterface {
 
   testConnection(cfg: IssueIntegrationCfg): Promise<boolean>;
 
-  pollTimer$: Observable<number>;
+  pollInterval: number; // 0 means no polling
 
   issueLink(issueId: string | number, issueProviderId: string): Promise<string>;
 

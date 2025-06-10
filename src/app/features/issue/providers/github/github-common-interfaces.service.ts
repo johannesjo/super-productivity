@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -10,7 +10,7 @@ import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.mod
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
-import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from './github.const';
+import { GITHUB_POLL_INTERVAL } from './github.const';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   private readonly _githubApiService = inject(GithubApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
+  pollInterval: number = GITHUB_POLL_INTERVAL;
 
   isEnabled(cfg: GithubCfg): boolean {
     return isGithubEnabled(cfg);
