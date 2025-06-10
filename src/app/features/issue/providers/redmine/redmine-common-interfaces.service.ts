@@ -78,14 +78,17 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg) =>
-        this.isEnabled(cfg)
-          ? this._redmineApiService.searchIssuesInProject$(query, cfg)
-          : of([]),
-      ),
-    );
+  searchIssues(query: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((cfg) =>
+          this.isEnabled(cfg)
+            ? this._redmineApiService.searchIssuesInProject$(query, cfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

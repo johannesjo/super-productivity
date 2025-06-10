@@ -56,19 +56,19 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   // NOTE: this gives back issueKey instead of issueId
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((jiraCfg) =>
-        this.isEnabled(jiraCfg)
-          ? this._jiraApiService
-              .issuePicker$(searchTerm, jiraCfg)
-              .pipe(tap((v) => console.log('jira.issuePicker$', v)))
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((jiraCfg) =>
+          this.isEnabled(jiraCfg)
+            ? this._jiraApiService
+                .issuePicker$(searchTerm, jiraCfg)
+                .pipe(tap((v) => console.log('jira.issuePicker$', v)))
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{
