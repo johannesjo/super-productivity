@@ -415,8 +415,17 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: T.F.ISSUE.ISSUE_CONTENT.TIME_SPENT,
         field: 'spent_hours',
-        type: IssueFieldType.CUSTOM,
-        customTemplate: 'redmine-spent-time',
+        type: IssueFieldType.TEXT,
+        getValue: (issue) => {
+          const parts: string[] = [];
+          if (issue.spent_hours !== undefined) {
+            parts.push(`${issue.spent_hours}h`);
+          }
+          if (issue.total_spent_hours !== undefined) {
+            parts.push(`(Total: ${issue.total_spent_hours}h)`);
+          }
+          return parts.join(' ');
+        },
         isVisible: (issue) => !!issue.spent_hours || !!issue.total_spent_hours,
       },
       {

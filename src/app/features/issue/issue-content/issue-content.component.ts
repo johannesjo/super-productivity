@@ -169,32 +169,6 @@ export class IssueContentComponent {
     return comments.length > 0 ? comments[comments.length - 1] : null;
   });
 
-  hasRedmineSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    return !!issue && 'spent_hours' in issue && (issue as any).spent_hours !== undefined;
-  });
-
-  redmineSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    if (!issue || !('spent_hours' in issue)) return 0;
-    return (issue as any).spent_hours || 0;
-  });
-
-  hasRedmineTotalSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    return (
-      !!issue &&
-      'total_spent_hours' in issue &&
-      (issue as any).total_spent_hours !== undefined
-    );
-  });
-
-  redmineTotalSpentHours = computed(() => {
-    const issue = this.currentIssue();
-    if (!issue || !('total_spent_hours' in issue)) return 0;
-    return (issue as any).total_spent_hours || 0;
-  });
-
   hasComments = computed(() => {
     const issue = this.currentIssue();
     return this._hasCommentsField(issue) && this._getCommentsArray(issue).length > 0;

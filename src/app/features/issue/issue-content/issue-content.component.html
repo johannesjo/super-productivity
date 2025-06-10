@@ -81,19 +81,6 @@
                     @case ('jira-related') {
                       <!-- TODO JIRA related issues would need additional service integration -->
                     }
-                    @case ('redmine-spent-time') {
-                      <div>
-                        @if (hasRedmineSpentHours()) {
-                          <span>{{ redmineSpentHours() }}h</span>
-                        }
-                        @if (hasRedmineTotalSpentHours()) {
-                          <span>
-                            ({{ t('F.REDMINE.ISSUE_CONTENT.TOTAL') }}:
-                            {{ redmineTotalSpentHours() }}h)
-                          </span>
-                        }
-                      </div>
-                    }
                     @case ('open-project-attachments') {
                       <div class="open-project-attachments">
                         @if (isOpenProjectUploading()) {
