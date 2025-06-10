@@ -44,10 +44,16 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? '');
   }
 
-  getById$(issueId: number, issueProviderId: string): Observable<GithubIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)),
-    );
+  getById(issueId: number, issueProviderId: string): Promise<GithubIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get GitHub issue');
+        }
+        return result;
+      });
   }
 
   searchIssues$(

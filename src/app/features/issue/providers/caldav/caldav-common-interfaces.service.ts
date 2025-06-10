@@ -47,10 +47,16 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  getById$(id: string | number, issueProviderId: string): Observable<CaldavIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((caldavCfg) => this._caldavClientService.getById$(id, caldavCfg)),
-    );
+  getById(id: string | number, issueProviderId: string): Promise<CaldavIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((caldavCfg) => this._caldavClientService.getById$(id, caldavCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get CalDAV issue');
+        }
+        return result;
+      });
   }
 
   issueLink(issueId: string | number, issueProviderId: string): Promise<string> {

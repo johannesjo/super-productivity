@@ -39,12 +39,20 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   }
 
   // NOTE: we're using the issueKey instead of the real issueId
-  getById$(issueId: string | number, issueProviderId: string): Observable<JiraIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((jiraCfg) =>
-        this._jiraApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
-      ),
-    );
+  getById(issueId: string | number, issueProviderId: string): Promise<JiraIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((jiraCfg) =>
+          this._jiraApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Jira issue');
+        }
+        return result;
+      });
   }
 
   // NOTE: this gives back issueKey instead of issueId
