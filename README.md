@@ -425,6 +425,10 @@ docker compose up -d
 
 Additionally to accessing the web app from your browser at `http://localhost`, you can set up WebDAV synchronization with base url `http://localhost/webdav/`.
 
+### Other configuration of docker container
+
+You can provide the default values for WebDAV settings in the "Sync" section of the "Settings" page, via setting some environment variables of the docker container. This could be used for single user instances. Check out `docker-compose.yaml` in this repository for available environment variables.
+
 ## Custom themes (desktop only)
 
 In addition to color coding your projects and tags and to the dark and light theme you can also load completely custom CSS to restyle everything. To load a custom theme you simply need to put them into a new file named `styles.css` directly in the [user data folder](#user-data-folder).
