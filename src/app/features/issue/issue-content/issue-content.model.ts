@@ -17,6 +17,10 @@ export interface IssueFieldConfig<T = IssueData> {
   customTemplate?: string;
 }
 
+export interface IssueComment {
+  [key: string]: any; // Allow provider-specific fields
+}
+
 export interface IssueCommentConfig {
   field: string;
   authorField: string;
