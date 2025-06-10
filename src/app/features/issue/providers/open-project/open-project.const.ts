@@ -9,6 +9,11 @@ import { JIRA_WORK_LOG_EXPORT_FORM_OPTIONS } from '../jira/jira.const';
 import { JiraWorklogExportDefaultTime } from '../jira/jira.model';
 import { IssueProviderOpenProject } from '../../issue.model';
 import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
+import {
+  IssueContentConfig,
+  IssueFieldType,
+  IssueProviderKey,
+} from '../../issue-content/issue-content-config.model';
 
 export const DEFAULT_OPEN_PROJECT_CFG: OpenProjectCfg = {
   isEnabled: false,
@@ -146,3 +151,72 @@ export const OPEN_PROJECT_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderOp
     items: OPEN_PROJECT_CONFIG_FORM,
     help: T.F.OPEN_PROJECT.FORM_SECTION.HELP,
   };
+
+export const OPEN_PROJECT_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+  issueType: 'OPEN_PROJECT' as IssueProviderKey,
+  fields: [
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
+      field: 'subject',
+      type: IssueFieldType.LINK,
+      getValue: (issue) => `#${issue.id} ${issue.subject}`,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.TYPE,
+      field: '_embedded.type.name',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
+      field: '_embedded.status.name',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.PRIORITY,
+      field: '_embedded.priority.name',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.AUTHOR,
+      field: '_embedded.author.name',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue) => !!issue._embedded?.author,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
+      field: '_embedded.assignee.name',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue) => !!issue._embedded?.assignee,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.SPENT_TIME,
+      field: 'spentTime',
+      type: IssueFieldType.CUSTOM,
+      customTemplate: 'open-project-spent-time',
+      getValue: (issue) => issue.spentTime,
+      isVisible: (issue) => issue.spentTime !== 'PT0S',
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.ATTACHMENTS,
+      field: 'attachments',
+      type: IssueFieldType.CUSTOM,
+      customTemplate: 'open-project-attachments',
+      isVisible: () => true,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
+      field: 'description.raw',
+      type: IssueFieldType.MARKDOWN,
+      isVisible: (issue) => !!issue.description?.raw,
+    },
+  ],
+  comments: {
+    field: 'comments',
+    authorField: '_embedded.user.name',
+    bodyField: 'raw',
+    createdField: 'createdAt',
+    avatarField: '_embedded.user.avatar',
+    sortField: 'createdAt',
+  },
+  hasCollapsingComments: true,
+};

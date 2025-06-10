@@ -11,6 +11,11 @@ import {
   CROSS_ORIGIN_WARNING,
   ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 } from '../../common-issue-form-stuff.const';
+import {
+  IssueContentConfig,
+  IssueFieldType,
+  IssueProviderKey,
+} from '../../issue-content/issue-content-config.model';
 
 export const DEFAULT_GITLAB_CFG: GitlabCfg = {
   isEnabled: false,
@@ -152,4 +157,52 @@ export const GITLAB_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderGitlab> 
   key: 'GITLAB',
   items: GITLAB_CONFIG_FORM,
   help: T.F.GITLAB.FORM_SECTION.HELP,
+};
+
+export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+  issueType: 'GITLAB' as IssueProviderKey,
+  fields: [
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
+      field: 'title',
+      type: IssueFieldType.LINK,
+      getValue: (issue) => `${issue.title} #${issue.number}`,
+      getLink: (issue) => issue.url,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
+      field: 'state',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
+      field: 'assignee',
+      type: IssueFieldType.LINK,
+      getValue: (issue) => issue.assignee?.username,
+      getLink: (issue) => issue.assignee?.web_url,
+      isVisible: (issue) => !!issue.assignee?.web_url,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
+      field: 'labels',
+      type: IssueFieldType.CHIPS,
+      getValue: (issue) => issue.labels?.map((l: string) => ({ name: l })),
+      isVisible: (issue) => issue.labels?.length > 0,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
+      field: 'body',
+      type: IssueFieldType.MARKDOWN,
+      isVisible: (issue) => !!issue.body,
+    },
+  ],
+  comments: {
+    field: 'comments',
+    authorField: 'author.username',
+    bodyField: 'body',
+    createdField: 'created_at',
+    sortField: 'created_at',
+  },
+  getIssueUrl: (issue) => issue.url,
+  hasCollapsingComments: true,
 };

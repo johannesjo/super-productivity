@@ -6,6 +6,11 @@ import {
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
 import { T } from '../../../../t.const';
+import {
+  IssueContentConfig,
+  IssueFieldType,
+  IssueProviderKey,
+} from '../../issue-content/issue-content-config.model';
 
 export const GITEA_POLL_INTERVAL = 5 * 60 * 1000;
 export const GITEA_INITIAL_POLL_DELAY = 8 * 1000;
@@ -94,3 +99,50 @@ export const GITEA_API_SUFFIX = 'api';
 export const GITEA_API_VERSION = 'v1';
 export const GITEA_API_SUBPATH_REPO = 'repos';
 export const GITEA_API_SUBPATH_USER = 'user';
+
+export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+  issueType: 'GITEA' as IssueProviderKey,
+  fields: [
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
+      field: 'title',
+      type: IssueFieldType.LINK,
+      getValue: (issue) => `${issue.title} #${issue.number}`,
+      getLink: (issue) => issue.url,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
+      field: 'state',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
+      field: 'assignee',
+      type: IssueFieldType.LINK,
+      getValue: (issue) => issue.assignee?.login,
+      getLink: (issue) => issue.assignee?.html_url,
+      isVisible: (issue) => !!issue.assignee?.html_url,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
+      field: 'labels',
+      type: IssueFieldType.CHIPS,
+      isVisible: (issue) => issue.labels?.length > 0,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
+      field: 'body',
+      type: IssueFieldType.MARKDOWN,
+      isVisible: (issue) => !!issue.body,
+    },
+  ],
+  comments: {
+    field: 'comments',
+    authorField: 'user.login',
+    bodyField: 'body',
+    createdField: 'created_at',
+    sortField: 'created_at',
+  },
+  getIssueUrl: (issue) => issue.url,
+  hasCollapsingComments: true,
+};
