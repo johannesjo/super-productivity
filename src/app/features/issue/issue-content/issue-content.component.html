@@ -29,27 +29,15 @@
                   {{ getFieldValue(field, currentIssue()) }}
                 }
                 @case (IssueFieldType.LINK) {
-                  @if (
-                    config()?.issueType === 'JIRA' &&
-                    (field.field === 'summary' || field.field === 'title')
-                  ) {
+                  @if (getFieldLink(field, currentIssue()); as link) {
                     <a
-                      [href]="jiraIssueUrl$() | async"
+                      [href]="link"
                       target="_blank"
                     >
                       <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
                     </a>
                   } @else {
-                    @if (getFieldLink(field, currentIssue()); as link) {
-                      <a
-                        [href]="link"
-                        target="_blank"
-                      >
-                        <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
-                      </a>
-                    } @else {
-                      <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
-                    }
+                    <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
                   }
                 }
                 @case (IssueFieldType.CHIPS) {

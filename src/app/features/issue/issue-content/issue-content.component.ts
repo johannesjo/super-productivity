@@ -26,8 +26,6 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
 import { SortPipe } from '../../../ui/pipes/sort.pipe';
-import { JiraCommonInterfacesService } from '../providers/jira/jira-common-interfaces.service';
-import { of } from 'rxjs';
 import { IssueContentCustomComponent } from './issue-content-custom/issue-content-custom.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { T } from '../../../t.const';
@@ -57,9 +55,6 @@ import { T } from '../../../t.const';
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
-  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
-    optional: true,
-  });
 
   readonly IssueFieldType = IssueFieldType;
 
@@ -75,40 +70,6 @@ export class IssueContentComponent {
       throw new Error(`No issue content config found for issue type: ${issueType}`);
     }
     return ISSUE_CONTENT_CONFIGS[issueType];
-  });
-
-  issueUrl = computed(() => {
-    const task = this.currentTask();
-    const config = this.config();
-    const issue = this.currentIssue();
-
-    if (!config || !issue || !task) return '';
-
-    // Handle JIRA URLs specially using the service
-    if (
-      config.issueType === 'JIRA' &&
-      this._jiraCommonInterfacesService &&
-      task.issueId &&
-      task.issueProviderId
-    ) {
-      // Note: This returns an Observable, but we'll handle it in the template
-      return 'jira-special-case';
-    }
-
-    // For other providers, use the config method
-    return config.getIssueUrl ? config.getIssueUrl(issue) : '';
-  });
-
-  // TODO this is ugly as hell
-  jiraIssueUrl$ = computed(() => {
-    const task = this.currentTask();
-    if (!task?.issueId || !task?.issueProviderId || !this._jiraCommonInterfacesService) {
-      return of('');
-    }
-    return this._jiraCommonInterfacesService.issueLink$(
-      task.issueId,
-      task.issueProviderId,
-    );
   });
 
   currentTask = computed(() => this.task());

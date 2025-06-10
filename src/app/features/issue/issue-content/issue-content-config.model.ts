@@ -138,7 +138,8 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
         field: 'summary',
-        type: IssueFieldType.LINK,
+        type: IssueFieldType.CUSTOM,
+        customTemplate: 'jira-link',
         getValue: (issue) => `${issue.key} ${issue.summary}`,
       },
       {

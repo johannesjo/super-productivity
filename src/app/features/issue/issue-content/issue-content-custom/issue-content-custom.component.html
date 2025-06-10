@@ -1,4 +1,11 @@
 @switch (field().customTemplate) {
+  @case ('jira-link') {
+    <jira-link
+      [field]="field()"
+      [issue]="issue()"
+      [task]="task()"
+    ></jira-link>
+  }
   @case ('jira-subtasks') {
     <!-- TODO JIRA subtasks would need additional service integration -->
   }
