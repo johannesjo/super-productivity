@@ -100,24 +100,22 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
     // ]);
     this.isLoading.set(true);
     this._issueService
-      .searchIssues$(
+      .searchIssues(
         '',
         this.issueProvider().id,
         this.issueProvider().issueProviderKey,
         true,
       )
-      .subscribe(
-        (items: SearchResultItem[]) => {
-          this.isLoading.set(false);
-          this._setAgendaItems(items as SearchResultItem<'ICAL'>[]);
-        },
-        (e) => {
-          this.isLoading.set(false);
-          this._setAgendaItems([]);
-          console.error(e);
-          this.error.set(getErrorTxt(e));
-        },
-      );
+      .then((items: SearchResultItem[]) => {
+        this.isLoading.set(false);
+        this._setAgendaItems(items as SearchResultItem<'ICAL'>[]);
+      })
+      .catch((e) => {
+        this.isLoading.set(false);
+        this._setAgendaItems([]);
+        console.error(e);
+        this.error.set(getErrorTxt(e));
+      });
   }
 
   private _setAgendaItems(items: SearchResultItem<'ICAL'>[]): void {
