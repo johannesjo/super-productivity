@@ -1,4 +1,4 @@
-import { IssueProviderKey } from '../issue.model';
+import { IssueProviderKey, IssueData } from '../issue.model';
 
 export enum IssueFieldType {
   TEXT = 'text',
@@ -8,13 +8,13 @@ export enum IssueFieldType {
   CUSTOM = 'custom',
 }
 
-export interface IssueFieldConfig {
+export interface IssueFieldConfig<T = IssueData> {
   label: string;
   field: string;
   type: IssueFieldType;
-  getValue?: (issue: any) => any;
-  getLink?: (issue: any) => string;
-  isVisible?: (issue: any) => boolean;
+  getValue?: (issue: T) => any;
+  getLink?: (issue: T) => string;
+  isVisible?: (issue: T) => boolean;
   customTemplate?: string;
 }
 
@@ -27,10 +27,10 @@ export interface IssueCommentConfig {
   sortField: string;
 }
 
-export interface IssueContentConfig {
+export interface IssueContentConfig<T = IssueData> {
   issueType: IssueProviderKey;
-  fields: IssueFieldConfig[];
+  fields: IssueFieldConfig<T>[];
   comments?: IssueCommentConfig;
-  getIssueUrl?: (issue: any) => string;
+  getIssueUrl?: (issue: T) => string;
   hasCollapsingComments?: boolean;
 }

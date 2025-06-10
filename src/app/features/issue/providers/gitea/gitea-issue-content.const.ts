@@ -3,17 +3,18 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
+import { GiteaIssue } from './gitea-issue/gitea-issue.model';
 import { IssueProviderKey } from '../../issue.model';
 
-export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig<GiteaIssue> = {
   issueType: 'GITEA' as IssueProviderKey,
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
       field: 'title',
       type: IssueFieldType.LINK,
-      getValue: (issue) => `${issue.title} #${issue.number}`,
-      getLink: (issue) => issue.url,
+      getValue: (issue: GiteaIssue) => `${issue.title} #${issue.number}`,
+      getLink: (issue: GiteaIssue) => issue.html_url,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
@@ -24,21 +25,21 @@ export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
       field: 'assignee',
       type: IssueFieldType.LINK,
-      getValue: (issue) => issue.assignee?.login,
-      getLink: (issue) => issue.assignee?.html_url,
-      isVisible: (issue) => !!issue.assignee?.html_url,
+      getValue: (issue: GiteaIssue) => issue.assignee?.login,
+      getLink: (issue: GiteaIssue) => (issue as any).assignee?.html_url || '',
+      isVisible: (issue: GiteaIssue) => !!issue.assignee,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
       field: 'labels',
       type: IssueFieldType.CHIPS,
-      isVisible: (issue) => issue.labels?.length > 0,
+      isVisible: (issue: GiteaIssue) => (issue.labels?.length ?? 0) > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
       field: 'body',
       type: IssueFieldType.MARKDOWN,
-      isVisible: (issue) => !!issue.body,
+      isVisible: (issue: GiteaIssue) => !!issue.body,
     },
   ],
   comments: {
@@ -48,6 +49,6 @@ export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
     createdField: 'created_at',
     sortField: 'created_at',
   },
-  getIssueUrl: (issue) => issue.url,
+  getIssueUrl: (issue) => (issue as any).url,
   hasCollapsingComments: true,
 };

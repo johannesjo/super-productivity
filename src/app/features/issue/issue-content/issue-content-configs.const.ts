@@ -16,7 +16,7 @@ import { OPEN_PROJECT_ISSUE_CONTENT_CONFIG } from '../providers/open-project/ope
 // Re-export types for backwards compatibility
 export { IssueFieldType, IssueFieldConfig, IssueCommentConfig, IssueContentConfig };
 
-export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig> = {
+export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig<any>> = {
   GITHUB: GITHUB_ISSUE_CONTENT_CONFIG,
   GITLAB: GITLAB_ISSUE_CONTENT_CONFIG,
   JIRA: JIRA_ISSUE_CONTENT_CONFIG,
