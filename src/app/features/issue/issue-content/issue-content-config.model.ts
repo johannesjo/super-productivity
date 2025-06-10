@@ -357,6 +357,13 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
         type: IssueFieldType.MARKDOWN,
         isVisible: (issue) => !!issue.description?.raw,
       },
+      {
+        label: 'F.OPEN_PROJECT.ISSUE_CONTENT.ATTACHMENTS',
+        field: 'attachments',
+        type: IssueFieldType.CUSTOM,
+        customTemplate: 'open-project-attachments',
+        isVisible: () => true, // Always show for Open Project
+      },
     ],
     writeCommentLabel: '',
     getIssueUrl: (issue) => '', // Will be handled by component
