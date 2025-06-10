@@ -28,14 +28,8 @@ import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
 import { SortPipe } from '../../../ui/pipes/sort.pipe';
 import { JiraCommonInterfacesService } from '../providers/jira/jira-common-interfaces.service';
 import { of } from 'rxjs';
-import { IssueProviderService } from '../issue-provider.service';
-import { OpenProjectApiService } from '../providers/open-project/open-project-api.service';
-import { SnackService } from '../../../core/snack/snack.service';
-import { TaskAttachment } from '../../tasks/task-attachment/task-attachment.model';
-import { mapOpenProjectAttachmentToTaskAttachment } from '../providers/open-project/open-project-issue/open-project-issue-map.util';
-import { OpenProjectWorkPackage } from '../providers/open-project/open-project-issue/open-project-issue.model';
+import { IssueContentCustomComponent } from './issue-content-custom/issue-content-custom.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import moment from 'moment';
 import { T } from '../../../t.const';
 
 @Component({
@@ -56,22 +50,14 @@ import { T } from '../../../t.const';
     JiraToMarkdownPipe,
     SortPipe,
     MatProgressBarModule,
+    IssueContentCustomComponent,
   ],
   animations: [expandAnimation],
 })
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
-  private _issueProviderService = inject(IssueProviderService, {
-    optional: true,
-  });
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
-    optional: true,
-  });
-  private _openProjectApiService = inject(OpenProjectApiService, {
-    optional: true,
-  });
-  private _snackService = inject(SnackService, {
     optional: true,
   });
 
@@ -82,8 +68,6 @@ export class IssueContentComponent {
 
   isForceShowDescription = signal(false);
   isForceShowAllComments = signal(false);
-  openProjectAttachments = signal<TaskAttachment[]>([]);
-  isOpenProjectUploadingSignal = signal(false);
 
   config = computed<IssueContentConfig | undefined>(() => {
     const issueType = this.task().issueType as IssueProviderKey;
@@ -182,11 +166,6 @@ export class IssueContentComponent {
   comments = computed(() => {
     const issue = this.currentIssue();
     return this._getCommentsArray(issue);
-  });
-
-  // OpenProject attachment methods
-  isOpenProjectUploading = computed(() => {
-    return this.isOpenProjectUploadingSignal();
   });
 
   getFieldValue(field: any, issue: IssueData | undefined): any {
@@ -296,91 +275,6 @@ export class IssueContentComponent {
   // TODO replace with translation pipe
   t(key: string, params?: any): string {
     return this._translateService.instant(key, params);
-  }
-
-  openProjectAttachmentsComputed = computed(() => {
-    const issue = this.currentIssue() as OpenProjectWorkPackage;
-    const uploaded = this.openProjectAttachments();
-
-    // Get attachments from the issue data
-    const issueAttachments = issue?._embedded?.attachments?._embedded?.elements
-      ? issue._embedded.attachments._embedded.elements.map((att) =>
-          mapOpenProjectAttachmentToTaskAttachment(att),
-        )
-      : [];
-
-    // Combine issue attachments with any newly uploaded ones
-    return [...issueAttachments, ...uploaded];
-  });
-
-  // Keep the method for backward compatibility in template
-  getOpenProjectAttachments(): TaskAttachment[] {
-    return this.openProjectAttachmentsComputed();
-  }
-
-  async onOpenProjectFileUpload(event: Event): Promise<void> {
-    if (
-      !this._issueProviderService ||
-      !this._openProjectApiService ||
-      !this._snackService
-    ) {
-      return;
-    }
-
-    this.isOpenProjectUploadingSignal.set(true);
-
-    const element = event.target as HTMLInputElement;
-    const file = element.files?.[0];
-    const currentTask = this.currentTask();
-
-    if (!file || !currentTask || !currentTask.issueId || !currentTask.issueProviderId) {
-      if (!file) {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: 'No file selected',
-        });
-      }
-
-      element.value = '';
-      this.isOpenProjectUploadingSignal.set(false);
-      return;
-    }
-
-    try {
-      const cfg = await this._issueProviderService
-        .getCfgOnce$(currentTask.issueProviderId, 'OPEN_PROJECT')
-        .toPromise();
-
-      const dateTime = moment().format('YYYYMMDD_HHmmss');
-      const fileExtension = file?.name.split('.').pop();
-
-      let fileName = `${dateTime}_${currentTask.issueId}.${fileExtension}`;
-
-      const fileNamePrefix = cfg.metadata?.['attachments']?.['fileNamePrefix'];
-      if (fileNamePrefix) {
-        fileName = `${fileNamePrefix}_${fileName}`;
-      }
-
-      const newAttachment = await this._openProjectApiService
-        .uploadAttachment$(cfg, currentTask.issueId, file, fileName)
-        .toPromise();
-
-      // Add the new attachment to the uploaded attachments signal
-      const currentUploaded = this.openProjectAttachments();
-      this.openProjectAttachments.set([
-        ...currentUploaded,
-        mapOpenProjectAttachmentToTaskAttachment(newAttachment),
-      ]);
-
-      element.value = '';
-    } catch (error) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: 'Failed to upload attachment',
-      });
-    } finally {
-      this.isOpenProjectUploadingSignal.set(false);
-    }
   }
 
   protected readonly T = T;
