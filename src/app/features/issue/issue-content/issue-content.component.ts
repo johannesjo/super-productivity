@@ -336,23 +336,24 @@ export class IssueContentComponent {
     return this._translateService.instant(key, params);
   }
 
-  getOpenProjectAttachments(): TaskAttachment[] {
+  openProjectAttachmentsComputed = computed(() => {
     const issue = this.currentIssue() as OpenProjectWorkPackage;
-    const cached = this.openProjectAttachments();
+    const uploaded = this.openProjectAttachments();
 
-    if (cached.length > 0) {
-      return cached;
-    }
+    // Get attachments from the issue data
+    const issueAttachments = issue?._embedded?.attachments?._embedded?.elements
+      ? issue._embedded.attachments._embedded.elements.map((att) =>
+          mapOpenProjectAttachmentToTaskAttachment(att),
+        )
+      : [];
 
-    if (issue?._embedded?.attachments?._embedded?.elements) {
-      const attachments = issue._embedded.attachments._embedded.elements.map((att) =>
-        mapOpenProjectAttachmentToTaskAttachment(att),
-      );
-      this.openProjectAttachments.set(attachments);
-      return attachments;
-    }
+    // Combine issue attachments with any newly uploaded ones
+    return [...issueAttachments, ...uploaded];
+  });
 
-    return [];
+  // Keep the method for backward compatibility in template
+  getOpenProjectAttachments(): TaskAttachment[] {
+    return this.openProjectAttachmentsComputed();
   }
 
   async onOpenProjectFileUpload(event: Event): Promise<void> {
@@ -402,9 +403,10 @@ export class IssueContentComponent {
         .uploadAttachment$(cfg, currentTask.issueId, file, fileName)
         .toPromise();
 
-      const currentAttachments = this.openProjectAttachments();
+      // Add the new attachment to the uploaded attachments signal
+      const currentUploaded = this.openProjectAttachments();
       this.openProjectAttachments.set([
-        ...currentAttachments,
+        ...currentUploaded,
         mapOpenProjectAttachmentToTaskAttachment(newAttachment),
       ]);
 

@@ -332,9 +332,10 @@ export const ISSUE_CONTENT_CONFIGS: Record<IssueProviderKey, IssueContentConfig>
       {
         label: T.F.ISSUE.ISSUE_CONTENT.TIME_SPENT,
         field: 'spentTime',
-        type: IssueFieldType.CUSTOM,
+        type: IssueFieldType.TEXT,
         customTemplate: 'open-project-spent-time',
         isVisible: (issue) => !!issue.spentTime,
+        getValue: (issue) => issue.spentTime,
       },
       {
         label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
