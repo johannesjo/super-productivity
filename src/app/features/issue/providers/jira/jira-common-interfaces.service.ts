@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -10,7 +10,7 @@ import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.m
 import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
 import { JiraCfg } from './jira.model';
 import { isJiraEnabled } from './is-jira-enabled.util';
-import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
+import { JIRA_POLL_INTERVAL } from './jira.const';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
 
@@ -21,7 +21,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   private readonly _jiraApiService = inject(JiraApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
+  pollInterval: number = JIRA_POLL_INTERVAL;
 
   isEnabled(cfg: JiraCfg): boolean {
     return isJiraEnabled(cfg);

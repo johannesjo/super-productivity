@@ -182,8 +182,8 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId, issueProviderId);
   }
 
-  getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
-    return this.ISSUE_SERVICE_MAP[providerKey].pollTimer$;
+  getPollInterval(providerKey: IssueProviderKey): number {
+    return this.ISSUE_SERVICE_MAP[providerKey].pollInterval;
   }
 
   getMappedAttachments(

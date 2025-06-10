@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -9,7 +9,7 @@ import {
   IssueProviderGitea,
   SearchResultItem,
 } from '../../issue.model';
-import { GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL } from './gitea.const';
+import { GITEA_POLL_INTERVAL } from './gitea.const';
 import {
   formatGiteaIssueTitle,
   formatGiteaIssueTitleForSnack,
@@ -27,7 +27,7 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   private readonly _giteaApiService = inject(GiteaApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
+  pollInterval: number = GITEA_POLL_INTERVAL;
 
   isEnabled(cfg: GiteaCfg): boolean {
     return isGiteaEnabled(cfg);

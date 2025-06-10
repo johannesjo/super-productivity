@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import {
@@ -28,7 +28,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   }
 
   // We currently don't support polling for calendar events
-  pollTimer$: Observable<number> = EMPTY;
+  pollInterval: number = 0;
 
   issueLink(issueId: number, issueProviderId: string): Promise<string> {
     return Promise.resolve('NONE');

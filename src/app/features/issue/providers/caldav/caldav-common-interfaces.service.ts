@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
@@ -9,7 +9,7 @@ import { CaldavCfg } from './caldav.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
-import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
+import { CALDAV_POLL_INTERVAL } from './caldav.const';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -23,7 +23,7 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return truncate(title);
   }
 
-  pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
+  pollInterval: number = CALDAV_POLL_INTERVAL;
 
   isEnabled(cfg: CaldavCfg): boolean {
     return isCaldavEnabled(cfg);

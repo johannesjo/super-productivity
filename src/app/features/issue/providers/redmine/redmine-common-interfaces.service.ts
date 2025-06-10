@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -9,7 +9,7 @@ import {
   IssueProviderRedmine,
   SearchResultItem,
 } from '../../issue.model';
-import { REDMINE_INITIAL_POLL_DELAY, REDMINE_POLL_INTERVAL } from './redmine.const';
+import { REDMINE_POLL_INTERVAL } from './redmine.const';
 import {
   formatRedmineIssueSubject,
   formatRedmineIssueSubjectForSnack,
@@ -42,10 +42,7 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  pollTimer$: Observable<number> = timer(
-    REDMINE_INITIAL_POLL_DELAY,
-    REDMINE_POLL_INTERVAL,
-  );
+  pollInterval: number = REDMINE_POLL_INTERVAL;
 
   issueLink(issueId: number, issueProviderId: string): Promise<string> {
     return this._getCfgOnce$(issueProviderId)

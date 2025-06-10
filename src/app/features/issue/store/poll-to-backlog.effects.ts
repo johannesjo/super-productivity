@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { merge, Observable } from 'rxjs';
+import { merge, Observable, timer } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -19,6 +19,7 @@ import { selectEnabledIssueProviders } from './issue-provider.selectors';
 import { IssueProvider } from '../issue.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getErrorTxt } from '../../../util/get-error-text';
+import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
 
 @Injectable()
 export class PollToBacklogEffects {
@@ -59,8 +60,16 @@ export class PollToBacklogEffects {
                     (provider) =>
                       provider.defaultProjectId === pId && provider.isAutoAddToBacklog,
                   )
+                  // filter out providers with 0 poll interval (no polling)
+                  .filter(
+                    (provider) =>
+                      this._issueService.getPollInterval(provider.issueProviderKey) > 0,
+                  )
                   .map((provider) =>
-                    this._issueService.getPollTimer$(provider.issueProviderKey).pipe(
+                    timer(
+                      DELAY_BEFORE_ISSUE_POLLING,
+                      this._issueService.getPollInterval(provider.issueProviderKey),
+                    ).pipe(
                       takeUntil(this.pollToBacklogActions$),
                       tap(() => console.log('POLL ' + provider.issueProviderKey)),
                       switchMap(() =>
