@@ -2,7 +2,7 @@ import { T } from '../../../../t.const';
 import {
   IssueContentConfig,
   IssueFieldType,
-} from '../../issue-content/issue-content-types.model';
+} from '../../issue-content/issue-content.model';
 import { IssueProviderKey } from '../../issue.model';
 
 export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {

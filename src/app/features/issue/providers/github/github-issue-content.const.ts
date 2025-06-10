@@ -2,7 +2,7 @@ import { T } from '../../../../t.const';
 import {
   IssueContentConfig,
   IssueFieldType,
-} from '../../issue-content/issue-content-types.model';
+} from '../../issue-content/issue-content.model';
 
 export const GITHUB_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
   issueType: 'GITHUB' as const,
