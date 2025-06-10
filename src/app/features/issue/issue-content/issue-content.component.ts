@@ -8,10 +8,13 @@ import {
 } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueData, IssueProviderKey } from '../issue.model';
-import { JiraIssue } from '../providers/jira/jira-issue/jira-issue.model';
-import { IssueContentConfig, IssueFieldType } from './issue-content.model';
+import {
+  IssueContentConfig,
+  IssueFieldConfig,
+  IssueFieldType,
+} from './issue-content.model';
 import { ISSUE_CONTENT_CONFIGS } from './issue-content-configs.const';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -25,6 +28,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { JiraToMarkdownPipe } from '../../../ui/pipes/jira-to-markdown.pipe';
 import { SortPipe } from '../../../ui/pipes/sort.pipe';
 import { T } from '../../../t.const';
+import { devError } from '../../../util/dev-error';
 
 @Component({
   selector: 'issue-content',
@@ -49,7 +53,7 @@ import { T } from '../../../t.const';
 })
 export class IssueContentComponent {
   private _taskService = inject(TaskService);
-  private _translateService = inject(TranslateService);
+  protected readonly T = T;
 
   readonly IssueFieldType = IssueFieldType;
 
@@ -81,12 +85,7 @@ export class IssueContentComponent {
   });
 
   isCollapsedIssueSummary = computed(() => {
-    const issue = this.currentIssue();
-    return (
-      !this.isForceShowDescription() &&
-      this._hasWasUpdatedField(issue) &&
-      this._hasBodyUpdatedField(issue)
-    );
+    return !this.isForceShowDescription() && this.task().issueWasUpdated;
   });
 
   isCollapsedIssueComments = computed(() => {
@@ -95,8 +94,6 @@ export class IssueContentComponent {
     return (
       !this.isForceShowAllComments() &&
       config?.hasCollapsingComments &&
-      this._hasCommentsUpdatedField(issue) &&
-      this._hasCommentsField(issue) &&
       this._getCommentsArray(issue).length > 1
     );
   });
@@ -124,23 +121,27 @@ export class IssueContentComponent {
     return this._getCommentsArray(issue);
   });
 
-  getFieldValue(field: any, issue: IssueData | undefined): any {
+  getFieldValue(field: IssueFieldConfig<IssueData>, issue: IssueData | undefined): any {
     if (!issue) return undefined;
 
-    if (typeof field.value === 'function') {
-      return field.value(issue);
-    }
+    try {
+      if (typeof field.value === 'function') {
+        return field.value(issue);
+      }
 
-    // Handle nested fields like 'status.name'
-    const keys = field.value.split('.');
-    let value: any = issue;
-    for (const key of keys) {
-      value = value?.[key];
+      // Handle nested fields like 'status.name'
+      const keys = field.value.split('.');
+      let value: any = issue;
+      for (const key of keys) {
+        value = value?.[key];
+      }
+      return value;
+    } catch (error) {
+      devError(error);
     }
-    return value;
   }
 
-  getFieldLink(field: any, issue: IssueData | undefined): string {
+  getFieldLink(field: IssueFieldConfig<IssueData>, issue: IssueData | undefined): string {
     if (!issue) return '';
 
     if (field.getLink) {
@@ -149,8 +150,8 @@ export class IssueContentComponent {
     return '';
   }
 
-  getCommentAuthor(comment: any, config: IssueContentConfig): string {
-    const keys = config.comments!.authorField.split('.');
+  getCommentAuthor(comment: any, cfg: IssueContentConfig): string {
+    const keys = cfg.comments!.authorField.split('.');
     let value = comment;
     for (const key of keys) {
       value = value?.[key];
@@ -158,18 +159,18 @@ export class IssueContentComponent {
     return value || '';
   }
 
-  getCommentBody(comment: any, config: IssueContentConfig): string {
-    return comment[config.comments!.bodyField] || '';
+  getCommentBody(comment: any, cfg: IssueContentConfig): string {
+    return comment[cfg.comments!.bodyField] || '';
   }
 
-  getCommentCreated(comment: any, config: IssueContentConfig): string {
-    return comment[config.comments!.createdField] || '';
+  getCommentCreated(comment: any, cfg: IssueContentConfig): string {
+    return comment[cfg.comments!.createdField] || '';
   }
 
-  getCommentAvatar(comment: any, config: IssueContentConfig): string | undefined {
-    if (!config.comments?.avatarField) return undefined;
+  getCommentAvatar(comment: any, cfg: IssueContentConfig): string | undefined {
+    if (!cfg.comments?.avatarField) return undefined;
 
-    const keys = config.comments.avatarField.split('.');
+    const keys = cfg.comments.avatarField.split('.');
     let value = comment;
     for (const key of keys) {
       value = value?.[key];
@@ -179,25 +180,6 @@ export class IssueContentComponent {
 
   trackByIndex(index: number): number {
     return index;
-  }
-
-  // Type guard functions
-  private _isJiraIssue(issue: IssueData | undefined): issue is JiraIssue {
-    return !!issue && 'timespent' in issue && 'timeestimate' in issue;
-  }
-
-  private _hasWasUpdatedField(issue: IssueData | undefined): boolean {
-    return !!issue && 'wasUpdated' in issue && (issue as any).wasUpdated === false;
-  }
-
-  private _hasBodyUpdatedField(issue: IssueData | undefined): boolean {
-    return !!issue && 'bodyUpdated' in issue && (issue as any).bodyUpdated === false;
-  }
-
-  private _hasCommentsUpdatedField(issue: IssueData | undefined): boolean {
-    return (
-      !!issue && 'commentsUpdated' in issue && (issue as any).commentsUpdated === false
-    );
   }
 
   private _hasCommentsField(issue: IssueData | undefined): boolean {
@@ -227,11 +209,4 @@ export class IssueContentComponent {
     this.isForceShowDescription.set(true);
     this.isForceShowAllComments.set(true);
   }
-
-  // TODO replace with translation pipe
-  t(key: string, params?: any): string {
-    return this._translateService.instant(key, params);
-  }
-
-  protected readonly T = T;
 }

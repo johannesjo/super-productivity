@@ -19,7 +19,7 @@
       <table class="issue-table">
         @for (field of visibleFields(); track trackByIndex($index)) {
           <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
-            <th>{{ t(field.label) }}</th>
+            <th>{{ field.label | translate }}</th>
             <td [class.markdown]="field.type === IssueFieldType.MARKDOWN">
               @switch (field.type) {
                 @case (IssueFieldType.TEXT) {
@@ -39,10 +39,7 @@
                 }
                 @case (IssueFieldType.CHIPS) {
                   <mat-chip-listbox [selectable]="false">
-                    @for (
-                      chip of getFieldValue(field, currentIssue());
-                      track trackByIndex($index)
-                    ) {
+                    @for (chip of getFieldValue(field, currentIssue()); track $index) {
                       <mat-chip-option [title]="chip.description || ''">
                         {{ chip.name || chip }}
                       </mat-chip-option>

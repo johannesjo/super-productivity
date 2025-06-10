@@ -4,10 +4,9 @@ import {
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
 import { GiteaIssue } from './gitea-issue/gitea-issue.model';
-import { IssueProviderKey } from '../../issue.model';
 
 export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig<GiteaIssue> = {
-  issueType: 'GITEA' as IssueProviderKey,
+  issueType: 'GITEA' as const,
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
@@ -47,6 +46,6 @@ export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig<GiteaIssue> = {
     createdField: 'created_at',
     sortField: 'created_at',
   },
-  getIssueUrl: (issue) => (issue as any).url,
+  getIssueUrl: (issue: GiteaIssue) => issue.url,
   hasCollapsingComments: true,
 };
