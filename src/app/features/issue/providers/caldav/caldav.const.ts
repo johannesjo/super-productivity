@@ -6,6 +6,11 @@ import {
 import { T } from '../../../../t.const';
 import { IssueProviderCaldav } from '../../issue.model';
 import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
+import {
+  IssueContentConfig,
+  IssueFieldType,
+  IssueProviderKey,
+} from '../../issue-content/issue-content-config.model';
 
 export const DEFAULT_CALDAV_CFG: CaldavCfg = {
   isEnabled: false,
@@ -90,4 +95,32 @@ export const CALDAV_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderCaldav> 
   key: 'CALDAV',
   items: CALDAV_CONFIG_FORM,
   help: T.F.CALDAV.FORM_SECTION.HELP,
+};
+
+export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig = {
+  issueType: 'CALDAV' as IssueProviderKey,
+  fields: [
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
+      field: 'summary',
+      type: IssueFieldType.TEXT,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
+      field: 'description',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue) => !!issue.description,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.LOCATION,
+      field: 'location',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue) => !!issue.location,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.START,
+      field: 'start',
+      type: IssueFieldType.TEXT,
+    },
+  ],
 };
