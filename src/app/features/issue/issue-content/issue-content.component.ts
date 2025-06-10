@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  Input,
   input,
   signal,
 } from '@angular/core';
@@ -48,21 +47,18 @@ export class IssueContentComponent {
   private _taskService = inject(TaskService);
   private _translateService = inject(TranslateService);
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input() task?: TaskWithSubTasks;
+  readonly task = input.required<TaskWithSubTasks>();
   readonly issueData = input<IssueData>();
 
   protected isForceShowDescription = signal(false);
   protected isForceShowAllComments = signal(false);
 
   protected config = computed<IssueContentConfig | undefined>(() => {
-    const issueType = this.task?.issueType as IssueProviderKey;
+    const issueType = this.task().issueType as IssueProviderKey;
     return issueType ? ISSUE_CONTENT_CONFIGS[issueType] : undefined;
   });
 
-  protected currentTask = computed(() => this.task);
+  protected currentTask = computed(() => this.task());
   protected currentIssue = computed(() => this.issueData());
 
   protected visibleFields = computed(() => {
