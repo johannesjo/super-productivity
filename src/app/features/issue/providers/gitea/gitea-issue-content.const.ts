@@ -11,33 +11,31 @@ export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig<GiteaIssue> = {
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
-      field: 'title',
       type: IssueFieldType.LINK,
-      getValue: (issue: GiteaIssue) => `${issue.title} #${issue.number}`,
+      value: (issue: GiteaIssue) => `${issue.title} #${issue.number}`,
       getLink: (issue: GiteaIssue) => issue.html_url,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
-      field: 'state',
+      value: 'state',
       type: IssueFieldType.TEXT,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.ASSIGNEE,
-      field: 'assignee',
       type: IssueFieldType.LINK,
-      getValue: (issue: GiteaIssue) => issue.assignee?.login,
+      value: (issue: GiteaIssue) => issue.assignee?.login,
       getLink: (issue: GiteaIssue) => (issue as any).assignee?.html_url || '',
       isVisible: (issue: GiteaIssue) => !!issue.assignee,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LABELS,
-      field: 'labels',
+      value: 'labels',
       type: IssueFieldType.CHIPS,
       isVisible: (issue: GiteaIssue) => (issue.labels?.length ?? 0) > 0,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-      field: 'body',
+      value: 'body',
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: GiteaIssue) => !!issue.body,
     },

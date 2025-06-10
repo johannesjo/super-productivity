@@ -18,12 +18,12 @@ export class IssueContentCustomComponent {
   readonly task = input.required<any>();
 
   getFieldValue(field: IssueFieldConfig, issue: IssueData): any {
-    if (field.getValue) {
-      return field.getValue(issue);
+    if (typeof field.value === 'function') {
+      return field.value(issue);
     }
 
     // Handle nested fields like 'status.name'
-    const keys = field.field.split('.');
+    const keys = field.value.split('.');
     let value: any = issue;
     for (const key of keys) {
       value = value?.[key];

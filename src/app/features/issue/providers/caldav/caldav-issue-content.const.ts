@@ -11,24 +11,24 @@ export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {
   fields: [
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
-      field: 'summary',
+      value: 'summary',
       type: IssueFieldType.TEXT,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-      field: 'description',
+      value: 'description',
       type: IssueFieldType.TEXT,
       isVisible: (issue: CaldavIssue) => !!(issue as any).description,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LOCATION,
-      field: 'location',
+      value: 'location',
       type: IssueFieldType.TEXT,
       isVisible: (issue: CaldavIssue) => !!(issue as any).location,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.START,
-      field: 'start',
+      value: 'start',
       type: IssueFieldType.TEXT,
     },
   ],
