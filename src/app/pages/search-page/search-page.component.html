@@ -25,22 +25,19 @@
   <div class="search-results">
     @let results = filteredResults$ | async;
     @if (results && results.length > 0) {
-      <mat-selection-list [multiple]="false">
+      <mat-list>
         @for (item of results; track trackByFn($index, item)) {
-          <mat-list-option
-            (click)="navigateToItem(item)"
-            class="search-result-item"
-          >
+          <mat-list-item (click)="navigateToItem(item)">
             <div class="search-result-content">
               <div class="task-info">
-                @if (item.ctx) {
-                  <tag
-                    [tag]="item.ctx"
-                    class="context-tag"
-                  ></tag>
-                }
-                <span class="task-title">{{ item?.title }}</span>
+                <div class="task-title">{{ item?.title }}</div>
                 <div class="task-icons">
+                  @if (item.ctx) {
+                    <tag
+                      [tag]="item.ctx"
+                      class="context-tag"
+                    ></tag>
+                  }
                   @if (item.issueType) {
                     <mat-icon
                       [svgIcon]="item.issueType | issueIcon"
@@ -53,9 +50,9 @@
                 </div>
               </div>
             </div>
-          </mat-list-option>
+          </mat-list-item>
         }
-      </mat-selection-list>
+      </mat-list>
     } @else if (searchForm.value && searchForm.value.trim()) {
       <div class="no-results">
         <mat-icon>search_off</mat-icon>

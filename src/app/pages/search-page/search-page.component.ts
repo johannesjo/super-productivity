@@ -17,7 +17,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { ProjectService } from '../../features/project/project.service';
 import { TagService } from '../../features/tag/tag.service';
 import { Task } from '../../features/tasks/task.model';
-import { SearchItem } from '../../features/search-bar/search-bar.model';
+import { SearchItem } from './search-page.model';
 import { NavigateToTaskService } from '../../core-ui/navigate-to-task/navigate-to-task.service';
 import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
@@ -26,7 +26,7 @@ import { MatInput } from '@angular/material/input';
 import { IssueIconPipe } from '../../features/issue/issue-icon/issue-icon.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
-import { MatListOption, MatSelectionList } from '@angular/material/list';
+import { MatList, MatListItem } from '@angular/material/list';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 const MAX_RESULTS = 50;
@@ -45,8 +45,8 @@ const MAX_RESULTS = 50;
     IssueIconPipe,
     TranslatePipe,
     TagComponent,
-    MatSelectionList,
-    MatListOption,
+    MatList,
+    MatListItem,
     MatFormField,
     MatLabel,
   ],

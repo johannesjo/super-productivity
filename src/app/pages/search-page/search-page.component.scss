@@ -7,6 +7,8 @@
 
   .search-header {
     margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
 
     .search-field {
       width: 100%;
@@ -18,18 +20,17 @@
     flex: 1;
     overflow-y: auto;
 
-    mat-selection-list {
-      .search-result-item {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-        margin-bottom: 0.5rem;
-        cursor: pointer;
+    mat-list-item {
+      cursor: pointer !important;
 
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.04);
-        }
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
 
+      &::ng-deep {
         .search-result-content {
           width: 100%;
+          cursor: pointer !important;
 
           .task-info {
             display: flex;
@@ -42,7 +43,6 @@
             }
 
             .task-title {
-              flex: 1;
               font-weight: 500;
               text-transform: capitalize;
             }

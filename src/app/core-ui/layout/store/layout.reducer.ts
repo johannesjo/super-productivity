@@ -1,13 +1,10 @@
 import {
   hideAddTaskBar,
   hideNotesAndAddTaskPanel,
-  hideSearchBar,
   hideSideNav,
   showAddTaskBar,
-  showSearchBar,
   toggleAddTaskBar,
   toggleIssuePanel,
-  toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
   toggleTaskViewCustomizerPanel,
@@ -26,7 +23,6 @@ export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowNotes: boolean;
   isShowIssuePanel: boolean;
-  isShowSearchBar: boolean;
   isShowSideNav: boolean;
   isShowCelebrate: boolean;
   isShowTaskViewCustomizerPanel: boolean;
@@ -35,7 +31,6 @@ export interface LayoutState {
 const _initialLayoutState: LayoutState = {
   isShowAddTaskBar: false,
   isShowSideNav: false,
-  isShowSearchBar: false,
   isShowNotes: false,
   isShowIssuePanel: false,
   isShowCelebrate: false,
@@ -70,11 +65,6 @@ export const selectIsShowIssuePanel = createSelector(
   (state) => state.isShowIssuePanel,
 );
 
-export const selectIsShowSearchBar = createSelector(
-  selectLayoutFeatureState,
-  (state) => state.isShowSearchBar,
-);
-
 export const selectIsShowCelebrate = createSelector(
   selectLayoutFeatureState,
   (state) => state.isShowCelebrate,
@@ -90,15 +80,6 @@ const _reducer = createReducer<LayoutState>(
   on(toggleAddTaskBar, (state) => ({
     ...state,
     isShowAddTaskBar: !state.isShowAddTaskBar,
-  })),
-
-  on(showSearchBar, (state) => ({ ...state, isShowSearchBar: true })),
-
-  on(hideSearchBar, (state) => ({ ...state, isShowSearchBar: false })),
-
-  on(toggleSearchBar, (state) => ({
-    ...state,
-    isShowSearchBar: !state.isShowSearchBar,
   })),
 
   on(hideSideNav, (state) => ({ ...state, isShowSideNav: false })),

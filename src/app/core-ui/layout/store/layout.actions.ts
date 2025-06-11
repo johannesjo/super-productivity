@@ -18,12 +18,6 @@ export const hideAddTaskBar = createAction('[Layout] Hide AddTaskBar');
 
 export const toggleAddTaskBar = createAction('[Layout] Toggle AddTaskBar');
 
-export const showSearchBar = createAction('[Layout] Show SearchBar');
-
-export const hideSearchBar = createAction('[Layout] Hide SearchBar');
-
-export const toggleSearchBar = createAction('[Layout] Toggle SearchBar');
-
 export const hideSideNav = createAction('[Layout] Hide SideBar');
 
 export const toggleSideNav = createAction('[Layout] Toggle SideBar');

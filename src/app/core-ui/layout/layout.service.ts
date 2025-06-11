@@ -3,14 +3,11 @@ import {
   hideAddTaskBar,
   hideIssuePanel,
   hideNotesAndAddTaskPanel,
-  hideSearchBar,
   hideSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
-  showSearchBar,
   toggleAddTaskBar,
   toggleIssuePanel,
-  toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
   toggleTaskViewCustomizerPanel,
@@ -22,7 +19,6 @@ import {
   selectIsShowAddTaskBar,
   selectIsShowIssuePanel,
   selectIsShowNotes,
-  selectIsShowSearchBar,
   selectIsShowSideNav,
   selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
@@ -52,9 +48,6 @@ export class LayoutService {
 
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
-  );
-  isShowSearchBar$: Observable<boolean> = this._store$.pipe(
-    select(selectIsShowSearchBar),
   );
 
   isNavAlwaysVisible$: Observable<boolean> = this._breakPointObserver
@@ -130,18 +123,6 @@ export class LayoutService {
 
   toggleAddTaskBar(): void {
     this._store$.dispatch(toggleAddTaskBar());
-  }
-
-  showSearchBar(): void {
-    this._store$.dispatch(showSearchBar());
-  }
-
-  hideSearchBar(): void {
-    this._store$.dispatch(hideSearchBar());
-  }
-
-  toggleSearchBar(): void {
-    this._store$.dispatch(toggleSearchBar());
   }
 
   toggleSideNav(): void {
