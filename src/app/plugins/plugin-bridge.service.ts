@@ -92,6 +92,10 @@ export class PluginBridgeService {
     }
   }
 
+  showIndexHtmlAsView(): void {
+    // TODO implement via routing
+  }
+
   /**
    * Get all tasks
    */
@@ -308,9 +312,10 @@ export class PluginBridgeService {
   /**
    * Persist plugin data
    */
-  persistDataSynced(dataStr: string): void {
+  async persistDataSynced(dataStr: string): Promise<void> {
     typia.assert<string>(dataStr);
 
+    // TODO use pfapi for this
     try {
       localStorage.setItem('plugin-data', dataStr);
       console.log('PluginBridge: Plugin data persisted successfully');
@@ -323,7 +328,8 @@ export class PluginBridgeService {
   /**
    * Get persisted plugin data
    */
-  getPersistedData(): string | null {
+  async loadPersistedData(): Promise<string | null> {
+    // TODO use pfapi for this
     try {
       return localStorage.getItem('plugin-data');
     } catch (error) {
