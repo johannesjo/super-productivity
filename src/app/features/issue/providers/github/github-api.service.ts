@@ -16,12 +16,12 @@ import {
   mapGithubGraphQLSearchResult,
   mapGithubIssue,
   mapGithubIssueToSearchResult,
-} from './github-issue/github-issue-map.util';
+} from './issue/github-issue-map.util';
 import {
   GithubComment,
   GithubIssue,
   GithubIssueReduced,
-} from './github-issue/github-issue.model';
+} from './issue/github-issue.model';
 import { SearchResultItem } from '../../issue.model';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
