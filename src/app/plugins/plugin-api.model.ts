@@ -1,7 +1,18 @@
 import { SnackParams } from '../core/snack/snack.model';
 import { TaskCopy } from '../features/tasks/task.model';
+import { ProjectCopy } from '../features/project/project.model';
+import { TagCopy } from '../features/tag/tag.model';
 
-export { TaskCopy };
+export { TaskCopy, ProjectCopy, TagCopy };
+
+export interface CreateTaskData {
+  title: string;
+  projectId?: string | null;
+  tagIds?: string[];
+  notes?: string;
+  timeEstimate?: number;
+  parentId?: string | null;
+}
 
 export enum PluginHooks {
   TASK_COMPLETE = 'taskComplete',
@@ -87,6 +98,22 @@ export interface PluginAPI {
   getCurrentContextTasks(): Promise<TaskCopy[]>;
 
   updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void>;
+
+  addTask(taskData: CreateTaskData): Promise<string>;
+
+  // projects
+  getAllProjects(): Promise<ProjectCopy[]>;
+
+  addProject(projectData: Partial<ProjectCopy>): Promise<string>;
+
+  updateProject(projectId: string, updates: Partial<ProjectCopy>): Promise<void>;
+
+  // tags
+  getAllTags(): Promise<TagCopy[]>;
+
+  addTag(tagData: Partial<TagCopy>): Promise<string>;
+
+  updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void>;
 
   // ui bridge
   showSnack(snackCfg: SnackCfgLimited): void;

@@ -1,14 +1,25 @@
 import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
-import { DialogCfg, Hooks, NotifyCfg, SnackCfgLimited } from './plugin-api.model';
+import {
+  DialogCfg,
+  Hooks,
+  NotifyCfg,
+  SnackCfgLimited,
+  CreateTaskData,
+} from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskCopy } from '../features/tasks/task.model';
 import { TaskService } from '../features/tasks/task.service';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { GlobalConfigService } from '../features/config/global-config.service';
+import { ProjectService } from '../features/project/project.service';
+import { ProjectCopy } from '../features/project/project.model';
+import { TagService } from '../features/tag/tag.service';
+import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { map, first } from 'rxjs/operators';
+import { nanoid } from 'nanoid';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -28,6 +39,8 @@ export class PluginBridgeService {
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
   private _globalConfigService = inject(GlobalConfigService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
 
   constructor() {}
 
@@ -169,6 +182,166 @@ export class PluginBridgeService {
   }
 
   /**
+   * Add a new task
+   */
+  async addTask(taskData: CreateTaskData): Promise<string> {
+    typia.assert<CreateTaskData>(taskData);
+
+    try {
+      // TaskService.add expects (title, isAddToBacklog, additional, isAddToBottom)
+      const additional: Partial<any> = {
+        projectId: taskData.projectId || undefined,
+        tagIds: taskData.tagIds || [],
+        notes: taskData.notes || '',
+        timeEstimate: taskData.timeEstimate || 0,
+        parentId: taskData.parentId || undefined,
+      };
+
+      // Add the task using TaskService
+      const taskId = this._taskService.add(
+        taskData.title,
+        false, // isAddToBacklog
+        additional,
+        false, // isAddToBottom
+      );
+
+      console.log('PluginBridge: Task added successfully', { taskId, taskData });
+      return taskId;
+    } catch (error) {
+      console.error('PluginBridge: Failed to add task:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all projects
+   */
+  async getAllProjects(): Promise<ProjectCopy[]> {
+    try {
+      const projects = await this._projectService.list$
+        .pipe(
+          map((projectList: any[]) =>
+            projectList.map((project: any) => this._convertProjectToProjectCopy(project)),
+          ),
+          first(),
+        )
+        .toPromise();
+      return projects || [];
+    } catch (error) {
+      console.error('PluginBridge: Failed to get all projects:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Add a new project
+   */
+  async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
+    typia.assert<Partial<ProjectCopy>>(projectData);
+
+    try {
+      // Generate ID and convert ProjectCopy to Project format expected by ProjectService
+      const projectId = nanoid();
+      const projectToAdd = {
+        ...this._convertProjectCopyToProject(projectData),
+        id: projectId,
+      };
+
+      // Add the project using ProjectService
+      this._projectService.add(projectToAdd);
+
+      console.log('PluginBridge: Project added successfully', { projectId, projectData });
+      return projectId;
+    } catch (error) {
+      console.error('PluginBridge: Failed to add project:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a project
+   */
+  async updateProject(projectId: string, updates: Partial<ProjectCopy>): Promise<void> {
+    typia.assert<string>(projectId);
+    typia.assert<Partial<ProjectCopy>>(updates);
+
+    try {
+      // Convert ProjectCopy updates to Project updates format
+      const projectUpdates = this._convertProjectCopyUpdatesToProjectUpdates(updates);
+
+      // Update the project using ProjectService
+      this._projectService.update(projectId, projectUpdates);
+
+      console.log('PluginBridge: Project updated successfully', { projectId, updates });
+    } catch (error) {
+      console.error('PluginBridge: Failed to update project:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all tags
+   */
+  async getAllTags(): Promise<TagCopy[]> {
+    try {
+      const tags = await this._tagService.tags$
+        .pipe(
+          map((tagList: any[]) =>
+            tagList.map((tag: any) => this._convertTagToTagCopy(tag)),
+          ),
+          first(),
+        )
+        .toPromise();
+      return tags || [];
+    } catch (error) {
+      console.error('PluginBridge: Failed to get all tags:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Add a new tag
+   */
+  async addTag(tagData: Partial<TagCopy>): Promise<string> {
+    typia.assert<Partial<TagCopy>>(tagData);
+
+    try {
+      // Convert TagCopy to Tag format expected by TagService
+      const tagToAdd = this._convertTagCopyToTag(tagData);
+
+      // Add the tag using TagService
+      const tagId = this._tagService.addTag(tagToAdd);
+
+      console.log('PluginBridge: Tag added successfully', { tagId, tagData });
+      return tagId;
+    } catch (error) {
+      console.error('PluginBridge: Failed to add tag:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a tag
+   */
+  async updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void> {
+    typia.assert<string>(tagId);
+    typia.assert<Partial<TagCopy>>(updates);
+
+    try {
+      // Convert TagCopy updates to Tag updates format
+      const tagUpdates = this._convertTagCopyUpdatesToTagUpdates(updates);
+
+      // Update the tag using TagService
+      this._tagService.updateTag(tagId, tagUpdates);
+
+      console.log('PluginBridge: Tag updated successfully', { tagId, updates });
+    } catch (error) {
+      console.error('PluginBridge: Failed to update tag:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Persist plugin data
    */
   persistDataSynced(dataStr: string): void {
@@ -240,6 +413,123 @@ export class PluginBridgeService {
     typia.assert<string>(pluginId);
 
     this._pluginHooksService.unregisterPluginHooks(pluginId);
+  }
+
+  /**
+   * Convert Project to ProjectCopy for plugin consumption
+   */
+  private _convertProjectToProjectCopy(project: any): ProjectCopy {
+    return {
+      id: project.id || '',
+      title: project.title || '',
+      isArchived: project.isArchived || false,
+      isHiddenFromMenu: project.isHiddenFromMenu || false,
+      isEnableBacklog: project.isEnableBacklog || false,
+      taskIds: project.taskIds || [],
+      backlogTaskIds: project.backlogTaskIds || [],
+      noteIds: project.noteIds || [],
+      advancedCfg: project.advancedCfg || { worklogExportSettings: {} },
+      theme: project.theme || {},
+      icon: project.icon || null,
+      breakTime: project.breakTime || {},
+      breakNr: project.breakNr || {},
+      workStart: project.workStart || {},
+      workEnd: project.workEnd || {},
+      issueIntegrationCfgs: project.issueIntegrationCfgs || {},
+    };
+  }
+
+  /**
+   * Convert ProjectCopy to Project format for app consumption
+   */
+  private _convertProjectCopyToProject(projectData: Partial<ProjectCopy>): any {
+    return {
+      title: projectData.title || 'New Project',
+      isArchived: projectData.isArchived || false,
+      isHiddenFromMenu: projectData.isHiddenFromMenu || false,
+      isEnableBacklog: projectData.isEnableBacklog || false,
+      taskIds: projectData.taskIds || [],
+      backlogTaskIds: projectData.backlogTaskIds || [],
+      noteIds: projectData.noteIds || [],
+      advancedCfg: projectData.advancedCfg || { worklogExportSettings: {} },
+      theme: projectData.theme || {},
+      icon: projectData.icon || null,
+      breakTime: projectData.breakTime || {},
+      breakNr: projectData.breakNr || {},
+      workStart: projectData.workStart || {},
+      workEnd: projectData.workEnd || {},
+      issueIntegrationCfgs: projectData.issueIntegrationCfgs || {},
+    };
+  }
+
+  /**
+   * Convert ProjectCopy updates to Project updates format
+   */
+  private _convertProjectCopyUpdatesToProjectUpdates(updates: Partial<ProjectCopy>): any {
+    const cleanUpdates: any = {};
+
+    Object.keys(updates).forEach((key) => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
+    });
+
+    return cleanUpdates;
+  }
+
+  /**
+   * Convert Tag to TagCopy for plugin consumption
+   */
+  private _convertTagToTagCopy(tag: any): TagCopy {
+    return {
+      id: tag.id || '',
+      title: tag.title || '',
+      icon: tag.icon || null,
+      color: tag.color || null,
+      created: tag.created || Date.now(),
+      taskIds: tag.taskIds || [],
+      advancedCfg: tag.advancedCfg || { worklogExportSettings: {} },
+      theme: tag.theme || {},
+      breakTime: tag.breakTime || {},
+      breakNr: tag.breakNr || {},
+      workStart: tag.workStart || {},
+      workEnd: tag.workEnd || {},
+    };
+  }
+
+  /**
+   * Convert TagCopy to Tag format for app consumption
+   */
+  private _convertTagCopyToTag(tagData: Partial<TagCopy>): any {
+    return {
+      title: tagData.title || 'New Tag',
+      icon: tagData.icon || null,
+      color: tagData.color || null,
+      taskIds: tagData.taskIds || [],
+      advancedCfg: tagData.advancedCfg || { worklogExportSettings: {} },
+      theme: tagData.theme || {},
+      breakTime: tagData.breakTime || {},
+      breakNr: tagData.breakNr || {},
+      workStart: tagData.workStart || {},
+      workEnd: tagData.workEnd || {},
+    };
+  }
+
+  /**
+   * Convert TagCopy updates to Tag updates format
+   */
+  private _convertTagCopyUpdatesToTagUpdates(updates: Partial<TagCopy>): any {
+    const cleanUpdates: any = {};
+
+    Object.keys(updates).forEach((key) => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
+    });
+
+    return cleanUpdates;
   }
 
   /**
