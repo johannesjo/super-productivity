@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store, select } from '@ngrx/store';
-import { filter, map, switchMap, tap, take } from 'rxjs/operators';
+import { select, Store } from '@ngrx/store';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 
 import {
-  updateTask,
   deleteTask,
   deleteTasks,
+  updateTask,
 } from '../features/tasks/store/task.actions';
 import { selectTaskById } from '../features/tasks/store/task.selectors';
 import { Task } from '../features/tasks/task.model';
 import { PluginService } from './plugin.service';
-import { TaskCopy, PluginHooks } from './plugin-api.model';
+import { PluginHooks } from './plugin-api.model';
 
 @Injectable()
 export class PluginHooksEffects {
@@ -28,16 +28,7 @@ export class PluginHooksEffects {
             take(1),
             tap((task: Task | undefined) => {
               if (task) {
-                const taskCopy: TaskCopy = {
-                  id: task.id,
-                  title: task.title,
-                  isDone: task.isDone,
-                  timeSpent: task.timeSpent,
-                  timeEstimate: task.timeEstimate,
-                  created: task.created,
-                };
-
-                this.pluginService.dispatchHook(PluginHooks.TASK_COMPLETE, taskCopy);
+                this.pluginService.dispatchHook(PluginHooks.TASK_COMPLETE, task);
               }
             }),
             map(() => EMPTY),
@@ -58,16 +49,7 @@ export class PluginHooksEffects {
             take(1),
             tap((task: Task | undefined) => {
               if (task) {
-                const taskCopy: TaskCopy = {
-                  id: task.id,
-                  title: task.title,
-                  isDone: task.isDone,
-                  timeSpent: task.timeSpent,
-                  timeEstimate: task.timeEstimate,
-                  created: task.created,
-                };
-
-                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, taskCopy);
+                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, task);
               }
             }),
             map(() => EMPTY),
