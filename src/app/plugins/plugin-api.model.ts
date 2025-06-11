@@ -1,5 +1,4 @@
-import { MatSnackBarConfig } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
+import { SnackParams } from '../core/snack/snack.model';
 
 export enum PluginHooks {
   TASK_COMPLETE = 'taskComplete',
@@ -11,11 +10,13 @@ export enum PluginHooks {
   ISSUE_TASK_UPDATE = 'issueTaskUpdate',
   ISSUE_PROVIDER_SETTINGS_UPDATE = 'issueProviderSettingsUpdate',
   ACTION = 'action',
+  // ISSUE_TASK_UPDATE = 'ISSUE_TASK_UPDATE',
+  // ISSUE_PROVIDER_SETTINGS_UPDATE = 'ISSUE_PROVIDER_SETTINGS_UPDATE',
 }
 
 export type Hooks = PluginHooks;
 
-export interface BaseCfg {
+export interface PluginBaseCfg {
   theme: 'light' | 'dark';
   appVersion: string;
   platform: 'web' | 'desktop' | 'android' | 'ios';
@@ -38,16 +39,10 @@ export interface DialogCfg {
   buttons?: DialogButtonCfg[];
 }
 
-export interface SnackCfg {
-  msg: string;
-  type?: 'ERROR' | 'SUCCESS' | 'CUSTOM';
-  ico?: string;
-  actionFn?: (...args: any[]) => void;
-  config?: MatSnackBarConfig;
-  isSpinner?: boolean;
-  promise?: Promise<unknown>;
-  showWhile$?: Observable<unknown>;
-}
+export type SnackCfgLimited = Omit<
+  SnackParams,
+  'actionFn' | 'actionStr' | 'actionPayload'
+>;
 
 export interface NotifyCfg {
   title: string;
@@ -62,6 +57,7 @@ export interface TaskCopy {
   timeSpent: number;
   timeEstimate: number;
   created: number;
+
   [key: string]: any;
 }
 
@@ -79,24 +75,41 @@ export interface PluginManifest {
 }
 
 export interface PluginAPI {
-  cfg: BaseCfg;
+  cfg: PluginBaseCfg;
   Hooks: typeof PluginHooks;
+
   registerIssueProvider(provider: IssueProviderPluginCfg): void;
+
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void;
+
   registerHeaderButton(label: string, icon: string, onClick: () => void): void;
+
   registerMenuEntry(label: string, icon: string, onClick: () => void): void;
+
   registerShortcut(label: string, onExec: () => void): void;
+
   showIndexHtml(): void;
+
   getAllTasks(): Promise<TaskCopy[]>;
+
   getArchivedTasks(): Promise<TaskCopy[]>;
+
   getCurrentContextTasks(): Promise<TaskCopy[]>;
+
   updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void>;
-  showSnack(snackCfg: SnackCfg): void;
+
+  showSnack(snackCfg: SnackCfgLimited): void;
+
   notify(notifyCfg: NotifyCfg): void;
+
   persistDataSynced(dataStr: string): void;
+
   openDialog(dialogCfg: DialogCfg): Promise<void>;
+
   addActionBeforeCloseApp(action: () => Promise<void>): void;
+
   getCfg<T>(): Promise<T>;
+
   __getHookHandlers(): Map<
     string,
     Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
