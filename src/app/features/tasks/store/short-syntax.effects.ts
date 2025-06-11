@@ -9,6 +9,7 @@ import {
   updateTaskTags,
 } from './task.actions';
 import {
+  catchError,
   concatMap,
   filter,
   map,
@@ -38,6 +39,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { WorkContextService } from '../../work-context/work-context.service';
 
 import { INBOX_PROJECT } from '../../project/project.const';
+import { devError } from '../../../util/dev-error';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -91,8 +93,12 @@ export class ShortSyntaxEffects {
                     }
                   }),
                   mapTo(defaultProjectId),
+                  catchError(() => {
+                    devError('Default Project not found, using null instead');
+                    return of(null);
+                  }),
                 )
-              : of(defaultProjectId),
+              : of(null),
           ),
         ),
       ),
