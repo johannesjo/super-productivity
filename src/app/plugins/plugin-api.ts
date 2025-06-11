@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
-  BaseCfg,
   DialogCfg,
   Hooks,
   IssueProviderPluginCfg,
   NotifyCfg,
   PluginAPI as IPluginAPI,
+  PluginBaseCfg,
   PluginHooks,
-  SnackCfg,
+  SnackCfgLimited,
   TaskCopy,
 } from './plugin-api.model';
+import { SnackService } from '../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +27,10 @@ export class PluginAPI implements IPluginAPI {
   private _shortcuts: Array<{ label: string; onExec: () => void }> = [];
   private _actionsBeforeClose: Array<() => Promise<void>> = [];
 
+  private _snackService = inject(SnackService);
+
   constructor(
-    public cfg: BaseCfg,
+    public cfg: PluginBaseCfg,
     private pluginId: string,
   ) {}
 
@@ -87,8 +90,8 @@ export class PluginAPI implements IPluginAPI {
     console.log(`Plugin ${this.pluginId} requested to update task ${taskId}:`, updates);
   }
 
-  showSnack(snackCfg: SnackCfg): void {
-    console.log(`Plugin ${this.pluginId} requested to show snack:`, snackCfg);
+  showSnack(snackCfg: SnackCfgLimited): void {
+    this._snackService.open(snackCfg);
   }
 
   notify(notifyCfg: NotifyCfg): void {

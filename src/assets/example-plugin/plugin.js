@@ -1,7 +1,7 @@
 // Hello World Plugin
 // This plugin demonstrates basic plugin functionality by showing a message when a task is completed
 
-console.log('Hello World Plugin initializing...');
+console.log('Hello World Plugin initializing...', PluginAPI);
 
 // Register a hook for when tasks are completed
 PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, function (taskData) {
