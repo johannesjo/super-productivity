@@ -6,7 +6,7 @@ import { IssueServiceInterface } from '../../issue-service-interface';
 import { GithubApiService } from './github-api.service';
 import { IssueProviderGithub, SearchResultItem } from '../../issue.model';
 import { GithubCfg } from './github.model';
-import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
+import { GithubIssue, GithubIssueReduced } from './issue/github-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
