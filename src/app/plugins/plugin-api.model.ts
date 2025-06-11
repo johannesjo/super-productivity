@@ -118,7 +118,7 @@ export interface PluginAPI {
   // ui bridge
   showSnack(snackCfg: SnackCfgLimited): void;
 
-  notify(notifyCfg: NotifyCfg): void;
+  notify(notifyCfg: NotifyCfg): Promise<void>;
 
   persistDataSynced(dataStr: string): void;
 
