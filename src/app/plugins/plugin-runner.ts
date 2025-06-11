@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
+import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class PluginRunner {
   async loadPlugin(
     manifest: PluginManifest,
     pluginCode: string,
-    baseCfg: BaseCfg,
+    baseCfg: PluginBaseCfg,
   ): Promise<PluginInstance> {
     try {
       // Create plugin API instance

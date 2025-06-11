@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
 import { PluginSecurityService } from './plugin-security';
-import { BaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
+import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
 
 @Injectable({
   providedIn: 'root',
@@ -44,7 +44,7 @@ export class PluginService {
     }
   }
 
-  private async _loadBuiltInPlugins(baseCfg: BaseCfg): Promise<void> {
+  private async _loadBuiltInPlugins(baseCfg: PluginBaseCfg): Promise<void> {
     // For now, we'll load the example plugin from assets
     const pluginPaths = ['assets/example-plugin'];
 
@@ -60,7 +60,7 @@ export class PluginService {
 
   private async _loadPlugin(
     pluginPath: string,
-    baseCfg: BaseCfg,
+    baseCfg: PluginBaseCfg,
   ): Promise<PluginInstance> {
     try {
       // Load manifest
@@ -122,9 +122,9 @@ export class PluginService {
     }
   }
 
-  private _getBaseCfg(): BaseCfg {
+  private _getBaseCfg(): PluginBaseCfg {
     // Determine platform
-    let platform: BaseCfg['platform'] = 'web';
+    let platform: PluginBaseCfg['platform'] = 'web';
     if (typeof window !== 'undefined') {
       // Check if running in Electron
       if ((window as any).electronAPI) {
