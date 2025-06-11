@@ -1849,10 +1849,13 @@
   "PS": {
     "GLOBAL_SETTINGS": "Global Settings",
     "ISSUE_INTEGRATION": "Issue Integration",
+    "NO_PLUGINS_INSTALLED": "No plugins are currently installed",
+    "PLUGINS": "Plugins",
     "PRIVACY_POLICY": "Privacy Policy",
     "PRODUCTIVITY_HELPER": "Productivity Helper",
     "PROJECT_SETTINGS": "Project Specific Settings",
     "PROVIDE_FEEDBACK": "Provide Feedback",
+    "RELOAD": "Reload",
     "SYNC_EXPORT": "Sync & Export",
     "TAG_SETTINGS": "Tag Specific Settings",
     "TOGGLE_DARK_MODE": "Toggle Dark Mode"
