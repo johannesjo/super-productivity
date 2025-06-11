@@ -18,7 +18,7 @@ import { ProjectCopy } from '../features/project/project.model';
 import { TagService } from '../features/tag/tag.service';
 import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
-import { map, first } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { nanoid } from 'nanoid';
 
 /**
@@ -110,14 +110,7 @@ export class PluginBridgeService {
    */
   async getAllTasks(): Promise<TaskCopy[]> {
     try {
-      const tasks = await this._taskService.allTasks$
-        .pipe(
-          map((taskList: any[]) =>
-            taskList.map((task: any) => this._convertTaskToTaskCopy(task)),
-          ),
-          first(),
-        )
-        .toPromise();
+      const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
       return tasks || [];
     } catch (error) {
       console.error('PluginBridge: Failed to get all tasks:', error);
@@ -146,12 +139,7 @@ export class PluginBridgeService {
   async getCurrentContextTasks(): Promise<TaskCopy[]> {
     try {
       const contextTasks = await this._workContextService.todaysTasks$
-        .pipe(
-          map((taskList: any[]) =>
-            taskList.map((task: any) => this._convertTaskToTaskCopy(task)),
-          ),
-          first(),
-        )
+        .pipe(first())
         .toPromise();
       return contextTasks || [];
     } catch (error) {
@@ -175,11 +163,8 @@ export class PluginBridgeService {
         updates.parentId,
       );
 
-      // Convert TaskCopy updates to Task updates format
-      const taskUpdates = this._convertTaskCopyUpdatesToTaskUpdates(updates);
-
-      // Update the task using TaskService
-      this._taskService.update(taskId, taskUpdates);
+      // Update the task using TaskService (TaskCopy is compatible with Task)
+      this._taskService.update(taskId, updates);
 
       console.log('PluginBridge: Task updated successfully', { taskId, updates });
     } catch (error) {
@@ -232,14 +217,7 @@ export class PluginBridgeService {
    */
   async getAllProjects(): Promise<ProjectCopy[]> {
     try {
-      const projects = await this._projectService.list$
-        .pipe(
-          map((projectList: any[]) =>
-            projectList.map((project: any) => this._convertProjectToProjectCopy(project)),
-          ),
-          first(),
-        )
-        .toPromise();
+      const projects = await this._projectService.list$.pipe(first()).toPromise();
       return projects || [];
     } catch (error) {
       console.error('PluginBridge: Failed to get all projects:', error);
@@ -254,11 +232,12 @@ export class PluginBridgeService {
     typia.assert<Partial<ProjectCopy>>(projectData);
 
     try {
-      // Generate ID and convert ProjectCopy to Project format expected by ProjectService
+      // Generate ID and add project (ProjectCopy is compatible with Project)
       const projectId = nanoid();
       const projectToAdd = {
-        ...this._convertProjectCopyToProject(projectData),
         id: projectId,
+        title: projectData.title || 'New Project',
+        ...projectData,
       };
 
       // Add the project using ProjectService
@@ -280,11 +259,8 @@ export class PluginBridgeService {
     typia.assert<Partial<ProjectCopy>>(updates);
 
     try {
-      // Convert ProjectCopy updates to Project updates format
-      const projectUpdates = this._convertProjectCopyUpdatesToProjectUpdates(updates);
-
-      // Update the project using ProjectService
-      this._projectService.update(projectId, projectUpdates);
+      // Update the project using ProjectService (ProjectCopy is compatible with Project)
+      this._projectService.update(projectId, updates);
 
       console.log('PluginBridge: Project updated successfully', { projectId, updates });
     } catch (error) {
@@ -298,14 +274,7 @@ export class PluginBridgeService {
    */
   async getAllTags(): Promise<TagCopy[]> {
     try {
-      const tags = await this._tagService.tags$
-        .pipe(
-          map((tagList: any[]) =>
-            tagList.map((tag: any) => this._convertTagToTagCopy(tag)),
-          ),
-          first(),
-        )
-        .toPromise();
+      const tags = await this._tagService.tags$.pipe(first()).toPromise();
       return tags || [];
     } catch (error) {
       console.error('PluginBridge: Failed to get all tags:', error);
@@ -320,11 +289,8 @@ export class PluginBridgeService {
     typia.assert<Partial<TagCopy>>(tagData);
 
     try {
-      // Convert TagCopy to Tag format expected by TagService
-      const tagToAdd = this._convertTagCopyToTag(tagData);
-
-      // Add the tag using TagService
-      const tagId = this._tagService.addTag(tagToAdd);
+      // Add the tag using TagService (TagCopy is compatible with Tag)
+      const tagId = this._tagService.addTag(tagData as any);
 
       console.log('PluginBridge: Tag added successfully', { tagId, tagData });
       return tagId;
@@ -342,11 +308,8 @@ export class PluginBridgeService {
     typia.assert<Partial<TagCopy>>(updates);
 
     try {
-      // Convert TagCopy updates to Tag updates format
-      const tagUpdates = this._convertTagCopyUpdatesToTagUpdates(updates);
-
-      // Update the tag using TagService
-      this._tagService.updateTag(tagId, tagUpdates);
+      // Update the tag using TagService (TagCopy is compatible with Tag)
+      this._tagService.updateTag(tagId, updates);
 
       console.log('PluginBridge: Tag updated successfully', { tagId, updates });
     } catch (error) {
@@ -490,167 +453,5 @@ export class PluginBridgeService {
     if (errors.length > 0) {
       throw new Error(`Validation failed: ${errors.join('; ')}`);
     }
-  }
-
-  /**
-   * Convert Project to ProjectCopy for plugin consumption
-   */
-  // TODO remove
-  private _convertProjectToProjectCopy(project: any): ProjectCopy {
-    return {
-      id: project.id || '',
-      title: project.title || '',
-      isArchived: project.isArchived || false,
-      isHiddenFromMenu: project.isHiddenFromMenu || false,
-      isEnableBacklog: project.isEnableBacklog || false,
-      taskIds: project.taskIds || [],
-      backlogTaskIds: project.backlogTaskIds || [],
-      noteIds: project.noteIds || [],
-      advancedCfg: project.advancedCfg || { worklogExportSettings: {} },
-      theme: project.theme || {},
-      icon: project.icon || null,
-      breakTime: project.breakTime || {},
-      breakNr: project.breakNr || {},
-      workStart: project.workStart || {},
-      workEnd: project.workEnd || {},
-      issueIntegrationCfgs: project.issueIntegrationCfgs || {},
-    };
-  }
-
-  /**
-   * Convert ProjectCopy to Project format for app consumption
-   */
-  private _convertProjectCopyToProject(projectData: Partial<ProjectCopy>): any {
-    return {
-      title: projectData.title || 'New Project',
-      isArchived: projectData.isArchived || false,
-      isHiddenFromMenu: projectData.isHiddenFromMenu || false,
-      isEnableBacklog: projectData.isEnableBacklog || false,
-      taskIds: projectData.taskIds || [],
-      backlogTaskIds: projectData.backlogTaskIds || [],
-      noteIds: projectData.noteIds || [],
-      advancedCfg: projectData.advancedCfg || { worklogExportSettings: {} },
-      theme: projectData.theme || {},
-      icon: projectData.icon || null,
-      breakTime: projectData.breakTime || {},
-      breakNr: projectData.breakNr || {},
-      workStart: projectData.workStart || {},
-      workEnd: projectData.workEnd || {},
-      issueIntegrationCfgs: projectData.issueIntegrationCfgs || {},
-    };
-  }
-
-  /**
-   * Convert ProjectCopy updates to Project updates format
-   */
-  private _convertProjectCopyUpdatesToProjectUpdates(updates: Partial<ProjectCopy>): any {
-    const cleanUpdates: any = {};
-
-    Object.keys(updates).forEach((key) => {
-      const value = (updates as any)[key];
-      if (value !== undefined) {
-        cleanUpdates[key] = value;
-      }
-    });
-
-    return cleanUpdates;
-  }
-
-  /**
-   * Convert Tag to TagCopy for plugin consumption
-   */
-  private _convertTagToTagCopy(tag: any): TagCopy {
-    return {
-      id: tag.id || '',
-      title: tag.title || '',
-      icon: tag.icon || null,
-      color: tag.color || null,
-      created: tag.created || Date.now(),
-      taskIds: tag.taskIds || [],
-      advancedCfg: tag.advancedCfg || { worklogExportSettings: {} },
-      theme: tag.theme || {},
-      breakTime: tag.breakTime || {},
-      breakNr: tag.breakNr || {},
-      workStart: tag.workStart || {},
-      workEnd: tag.workEnd || {},
-    };
-  }
-
-  /**
-   * Convert TagCopy to Tag format for app consumption
-   */
-  private _convertTagCopyToTag(tagData: Partial<TagCopy>): any {
-    return {
-      title: tagData.title || 'New Tag',
-      icon: tagData.icon || null,
-      color: tagData.color || null,
-      taskIds: tagData.taskIds || [],
-      advancedCfg: tagData.advancedCfg || { worklogExportSettings: {} },
-      theme: tagData.theme || {},
-      breakTime: tagData.breakTime || {},
-      breakNr: tagData.breakNr || {},
-      workStart: tagData.workStart || {},
-      workEnd: tagData.workEnd || {},
-    };
-  }
-
-  /**
-   * Convert TagCopy updates to Tag updates format
-   */
-  private _convertTagCopyUpdatesToTagUpdates(updates: Partial<TagCopy>): any {
-    const cleanUpdates: any = {};
-
-    Object.keys(updates).forEach((key) => {
-      const value = (updates as any)[key];
-      if (value !== undefined) {
-        cleanUpdates[key] = value;
-      }
-    });
-
-    return cleanUpdates;
-  }
-
-  // TODO remove
-  /**
-   * Convert Task to TaskCopy for plugin consumption
-   * This ensures plugins only get safe, serializable data
-   */
-  private _convertTaskToTaskCopy(task: any): TaskCopy {
-    return {
-      id: task.id || '',
-      title: task.title || '',
-      isDone: task.isDone || false,
-      created: task.created || Date.now(),
-      timeSpent: task.timeSpent || 0,
-      timeSpentOnDay: task.timeSpentOnDay || {},
-      timeEstimate: task.timeEstimate || 0,
-      projectId: task.projectId || null,
-      tagIds: task.tagIds || [],
-      parentId: task.parentId || null,
-      subTaskIds: task.subTaskIds || [],
-      notes: task.notes || '',
-      attachments: task.attachments || [],
-      // Add other safe properties as needed
-      // Exclude functions, circular references, etc.
-    };
-  }
-
-  /**
-   * Convert TaskCopy updates to Task updates format
-   * This ensures plugin updates are properly formatted for the app
-   */
-  // TODO remove
-  private _convertTaskCopyUpdatesToTaskUpdates(updates: Partial<TaskCopy>): any {
-    // Filter out undefined values and ensure proper types
-    const cleanUpdates: any = {};
-
-    Object.keys(updates).forEach((key) => {
-      const value = (updates as any)[key];
-      if (value !== undefined) {
-        cleanUpdates[key] = value;
-      }
-    });
-
-    return cleanUpdates;
   }
 }
