@@ -1,14 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
-import {
-  DialogCfg,
-  NotifyCfg,
-  SnackCfgLimited,
-  TaskCopy,
-  Hooks,
-} from './plugin-api.model';
+import { DialogCfg, Hooks, NotifyCfg, SnackCfgLimited } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
+import { TaskCopy } from '../features/tasks/task.model';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -44,14 +39,12 @@ export class PluginBridgeService {
       if (Notification.permission === 'granted') {
         new Notification(notifyCfg.title, {
           body: notifyCfg.body,
-          icon: notifyCfg.icon,
         });
       } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then((permission) => {
           if (permission === 'granted') {
             new Notification(notifyCfg.title, {
               body: notifyCfg.body,
-              icon: notifyCfg.icon,
             });
           }
         });

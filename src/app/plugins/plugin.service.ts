@@ -6,6 +6,9 @@ import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
 import { PluginSecurityService } from './plugin-security';
 import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
+import { GlobalThemeService } from '../core/theme/global-theme.service';
+import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
+import { IS_ELECTRON } from '../app.constants';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +22,7 @@ export class PluginService {
     private _pluginRunner: PluginRunner,
     private _pluginHooks: PluginHooksService,
     private _pluginSecurity: PluginSecurityService,
+    private _globalThemeService: GlobalThemeService,
   ) {}
 
   async initializePlugins(): Promise<void> {
@@ -30,12 +34,8 @@ export class PluginService {
     console.log('Initializing plugin system...');
 
     try {
-      // Get base configuration for plugins
-      const baseCfg = this._getBaseCfg();
-
       // Load plugins from known locations
-      await this._loadBuiltInPlugins(baseCfg);
-
+      await this._loadBuiltInPlugins();
       this._isInitialized = true;
       console.log('Plugin system initialized successfully');
     } catch (error) {
@@ -44,13 +44,13 @@ export class PluginService {
     }
   }
 
-  private async _loadBuiltInPlugins(baseCfg: PluginBaseCfg): Promise<void> {
+  private async _loadBuiltInPlugins(): Promise<void> {
     // For now, we'll load the example plugin from assets
     const pluginPaths = ['assets/example-plugin'];
 
     for (const pluginPath of pluginPaths) {
       try {
-        await this._loadPlugin(pluginPath, baseCfg);
+        await this._loadPlugin(pluginPath);
       } catch (error) {
         console.error(`Failed to load plugin from ${pluginPath}:`, error);
         // Continue loading other plugins even if one fails
@@ -58,10 +58,7 @@ export class PluginService {
     }
   }
 
-  private async _loadPlugin(
-    pluginPath: string,
-    baseCfg: PluginBaseCfg,
-  ): Promise<PluginInstance> {
+  private async _loadPlugin(pluginPath: string): Promise<PluginInstance> {
     try {
       // Load manifest
       const manifestUrl = `${pluginPath}/manifest.json`;
@@ -102,6 +99,7 @@ export class PluginService {
       }
 
       // Load the plugin
+      const baseCfg = this._getBaseCfg();
       const pluginInstance = await this._pluginRunner.loadPlugin(
         manifest,
         pluginCode,
@@ -123,26 +121,16 @@ export class PluginService {
   }
 
   private _getBaseCfg(): PluginBaseCfg {
-    // Determine platform
     let platform: PluginBaseCfg['platform'] = 'web';
-    if (typeof window !== 'undefined') {
-      // Check if running in Electron
-      if ((window as any).electronAPI) {
-        platform = 'desktop';
-      }
-      // Check if running in Android WebView (basic detection)
-      else if (navigator.userAgent.includes('Android')) {
-        platform = 'android';
-      }
-      // Check if running on iOS (basic detection)
-      else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-        platform = 'ios';
-      }
+    if (IS_ELECTRON) {
+      platform = 'desktop';
+    } else if (IS_ANDROID_WEB_VIEW) {
+      platform = 'android';
     }
 
     return {
-      theme: 'light', // TODO: Get from theme service
-      appVersion: '13.0.11', // TODO: Get from environment or package.json
+      theme: this._globalThemeService.darkMode$.getValue() ? 'dark' : 'light',
+      appVersion: environment.version,
       platform,
       isDev: !environment.production,
     };
@@ -166,8 +154,7 @@ export class PluginService {
   }
 
   async loadPluginFromPath(pluginPath: string): Promise<PluginInstance> {
-    const baseCfg = this._getBaseCfg();
-    const pluginInstance = await this._loadPlugin(pluginPath, baseCfg);
+    const pluginInstance = await this._loadPlugin(pluginPath);
 
     if (pluginInstance.loaded) {
       this._loadedPlugins.push(pluginInstance);
