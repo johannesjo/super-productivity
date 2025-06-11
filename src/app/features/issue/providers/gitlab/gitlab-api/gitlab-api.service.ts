@@ -24,12 +24,12 @@ import {
   reduce,
   take,
 } from 'rxjs/operators';
-import { GitlabIssue } from '../gitlab-issue/gitlab-issue.model';
+import { GitlabIssue } from '../issue/gitlab-issue.model';
 import {
   getPartsFromGitlabIssueId,
   mapGitlabIssue,
   mapGitlabIssueToSearchResult,
-} from '../gitlab-issue/gitlab-issue-map.util';
+} from '../issue/gitlab-issue-map.util';
 import { SearchResultItem } from '../../../issue.model';
 import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 import { assertTruthy } from '../../../../../util/assert-truthy';
