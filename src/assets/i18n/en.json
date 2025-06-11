@@ -873,8 +873,9 @@
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
     },
     "SEARCH_BAR": {
-      "INFO": "Click on the list icon to search for archived tasks",
+      "INFO": "Start typing to search for tasks",
       "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks",
+      "NO_RESULTS": "No tasks found matching your search",
       "PLACEHOLDER": "Search for task or task description",
       "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
       "TOO_MANY_RESULTS": "Too many results, please narrow your search"
@@ -1701,6 +1702,7 @@
     "PROJECTS": "Projects",
     "QUICK_HISTORY": "Quick History",
     "SCHEDULE": "Schedule",
+    "SEARCH": "Search",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",
