@@ -4,6 +4,7 @@ import { NotifyService } from '../core/notify/notify.service';
 import { DialogCfg, Hooks, NotifyCfg, SnackCfgLimited } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskCopy } from '../features/tasks/task.model';
+import typia from 'typia';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -27,6 +28,7 @@ export class PluginBridgeService {
    * Show a snack message to the user
    */
   showSnack(snackCfg: SnackCfgLimited): void {
+    typia.assert<SnackCfgLimited>(snackCfg);
     this._snackService.open(snackCfg);
   }
 
@@ -34,6 +36,8 @@ export class PluginBridgeService {
    * Show a notification to the user
    */
   notify(notifyCfg: NotifyCfg): void {
+    typia.assert<NotifyCfg>(notifyCfg);
+
     if ('Notification' in window) {
       // Use browser notifications
       if (Notification.permission === 'granted') {
@@ -62,6 +66,8 @@ export class PluginBridgeService {
    * Open a dialog
    */
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
+    typia.assert<DialogCfg>(dialogCfg);
+
     // For now, use a simple browser dialog
     // TODO: Integrate with Angular Material Dialog or custom dialog service
     if (dialogCfg.htmlContent) {
