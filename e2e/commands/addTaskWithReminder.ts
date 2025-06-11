@@ -43,13 +43,13 @@ module.exports = {
 };
 
 const getTimeVal = (d: Date): string => {
+  // HTML time inputs always expect HH:MM format in 24-hour notation
+  // regardless of locale settings
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  const v = `${hours}:${minutes}`;
+
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const v = new Date(d).toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: tz,
-  });
   console.log(
     `Enter time input value ${v}  – ${tz}; 12h: ${isBrowserLocaleClockType12h()}`,
   );
