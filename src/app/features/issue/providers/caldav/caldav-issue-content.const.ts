@@ -3,7 +3,7 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
-import { CaldavIssue } from './issue/caldav-issue.model';
+import { CaldavIssue } from './caldav-issue.model';
 import { IssueProviderKey } from '../../issue.model';
 
 export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {

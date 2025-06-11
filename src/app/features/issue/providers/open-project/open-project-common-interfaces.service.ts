@@ -9,7 +9,7 @@ import { OpenProjectCfg } from './open-project.model';
 import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
-} from './issue/open-project-issue.model';
+} from './open-project-issue.model';
 import { isOpenProjectEnabled } from './is-open-project-enabled.util';
 import { OPEN_PROJECT_POLL_INTERVAL } from './open-project.const';
 import { parseOpenProjectDuration } from './open-project-view-components/parse-open-project-duration.util';

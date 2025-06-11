@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { JiraIssue } from '../../issue/providers/jira/jira-issue/jira-issue.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { T } from '../../../t.const';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
@@ -253,10 +252,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         }
       }, 220);
     }
-  }
-
-  displayWith(issue?: JiraIssue): string | undefined {
-    return issue?.summary;
   }
 
   async addTask(): Promise<void> {

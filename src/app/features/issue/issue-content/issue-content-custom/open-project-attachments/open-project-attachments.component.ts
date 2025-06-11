@@ -11,8 +11,6 @@ import { IssueContentConfig } from '../../issue-content.model';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { OpenProjectApiService } from '../../../providers/open-project/open-project-api.service';
 import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
-import { mapOpenProjectAttachmentToTaskAttachment } from '../../../providers/open-project/open-project-issue/open-project-issue-map.util';
-import { OpenProjectWorkPackage } from '../../../providers/open-project/open-project-issue/open-project-issue.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,6 +18,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { TaskService } from '../../../../tasks/task.service';
 import moment from 'moment';
 import { SnackService } from '../../../../../core/snack/snack.service';
+import { OpenProjectWorkPackage } from '../../../providers/open-project/open-project-issue.model';
+import { mapOpenProjectAttachmentToTaskAttachment } from '../../../providers/open-project/open-project-issue-map.util';
 
 @Component({
   selector: 'open-project-attachments',

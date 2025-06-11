@@ -14,7 +14,7 @@ import {
   mapToSearchResults,
   mapToSearchResultsForJQL,
   mapTransitionResponse,
-} from './issue/jira-issue-map.util';
+} from './jira-issue-map.util';
 import {
   JiraOriginalStatus,
   JiraOriginalTransition,
@@ -37,7 +37,7 @@ import {
   tap,
   timeoutWith,
 } from 'rxjs/operators';
-import { JiraIssue, JiraIssueReduced } from './issue/jira-issue.model';
+import { JiraIssue, JiraIssueReduced } from './jira-issue.model';
 import moment from 'moment';
 import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';

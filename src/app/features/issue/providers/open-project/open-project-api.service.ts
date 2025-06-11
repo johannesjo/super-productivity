@@ -13,12 +13,12 @@ import {
   mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
   mapOpenProjectIssueToSearchResult,
-} from './issue/open-project-issue-map.util';
+} from './open-project-issue-map.util';
 import {
   OpenProjectAttachment,
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
-} from './issue/open-project-issue.model';
+} from './open-project-issue.model';
 import { SearchResultItem } from '../../issue.model';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';

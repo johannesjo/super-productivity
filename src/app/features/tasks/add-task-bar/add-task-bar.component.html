@@ -161,7 +161,6 @@
     #autoEl="matAutocomplete"
     (optionActivated)="onOptionActivated($event?.option?.value)"
     (optionSelected)="addTask()"
-    [displayWith]="displayWith"
   >
     @for (
       item of filteredIssueSuggestions$ | async;

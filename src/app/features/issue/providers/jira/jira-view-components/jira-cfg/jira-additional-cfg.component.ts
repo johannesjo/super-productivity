@@ -27,7 +27,7 @@ import {
 import { catchError, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../../jira.const';
-import { JiraIssue } from '../../issue/jira-issue.model';
+import { JiraIssue } from '../../jira-issue.model';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
