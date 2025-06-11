@@ -42,6 +42,8 @@ import { map, tap } from 'rxjs/operators';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
 import { GlobalThemeService } from '../../core/theme/global-theme.service';
 import { AsyncPipe } from '@angular/common';
+import { PluginManagementComponent } from '../../features/config/plugin-management/plugin-management.component';
+import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 
 @Component({
   selector: 'config-page',
@@ -56,6 +58,8 @@ import { AsyncPipe } from '@angular/common';
     ConfigSoundFormComponent,
     TranslatePipe,
     AsyncPipe,
+    PluginManagementComponent,
+    CollapsibleComponent,
   ],
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
