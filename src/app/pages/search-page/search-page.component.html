@@ -1,0 +1,71 @@
+<div class="search-page">
+  <div class="search-header">
+    <mat-form-field
+      class="search-field"
+      appearance="outline"
+    >
+      <mat-label>{{ T.F.SEARCH_BAR.PLACEHOLDER | translate }}</mat-label>
+      <input
+        #inputEl
+        matInput
+        [formControl]="searchForm"
+        [placeholder]="T.F.SEARCH_BAR.PLACEHOLDER | translate"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="clearSearch()"
+        *ngIf="searchForm.value"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="search-results">
+    @let results = filteredResults$ | async;
+    @if (results && results.length > 0) {
+      <mat-selection-list [multiple]="false">
+        @for (item of results; track trackByFn($index, item)) {
+          <mat-list-option
+            (click)="navigateToItem(item)"
+            class="search-result-item"
+          >
+            <div class="search-result-content">
+              <div class="task-info">
+                @if (item.ctx) {
+                  <tag
+                    [tag]="item.ctx"
+                    class="context-tag"
+                  ></tag>
+                }
+                <span class="task-title">{{ item?.title }}</span>
+                <div class="task-icons">
+                  @if (item.issueType) {
+                    <mat-icon
+                      [svgIcon]="item.issueType | issueIcon"
+                      class="issue-icon"
+                    ></mat-icon>
+                  }
+                  @if (item.isArchiveTask) {
+                    <mat-icon class="archive-icon">archive</mat-icon>
+                  }
+                </div>
+              </div>
+            </div>
+          </mat-list-option>
+        }
+      </mat-selection-list>
+    } @else if (searchForm.value && searchForm.value.trim()) {
+      <div class="no-results">
+        <mat-icon>search_off</mat-icon>
+        <p>{{ T.F.SEARCH_BAR.NO_RESULTS | translate }}</p>
+      </div>
+    } @else {
+      <div class="search-prompt">
+        <mat-icon>search</mat-icon>
+        <p>{{ T.F.SEARCH_BAR.INFO | translate }}</p>
+      </div>
+    }
+  </div>
+</div>

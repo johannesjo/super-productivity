@@ -20,16 +20,6 @@
       class="backdrop"
     ></div>
   }
-  @if (layoutService.isShowSearchBar$ | async) {
-    <search-bar (blurred)="layoutService.hideSearchBar()"></search-bar>
-  }
-  @if (layoutService.isShowSearchBar$ | async) {
-    <div
-      (click)="layoutService.hideSearchBar()"
-      @fade
-      class="backdrop"
-    ></div>
-  }
   <!-- -->
   @if (isShowFocusOverlay$ | async) {
     <focus-mode-overlay @warp></focus-mode-overlay>

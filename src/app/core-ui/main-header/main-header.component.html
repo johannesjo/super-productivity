@@ -51,16 +51,6 @@
       <mat-icon>add</mat-icon>
     </button>
 
-    <button
-      (click)="layoutService.showSearchBar()"
-      matTooltip="{{ T.MH.SHOW_SEARCH_BAR | translate }} {{
-        kb.showSearchBar ? '[' + kb.showSearchBar + ']' : ''
-      }}"
-      mat-icon-button
-    >
-      <mat-icon>search</mat-icon>
-    </button>
-
     @let isOnline = isOnline$ | async;
     @let isSyncEnabled = syncWrapperService.isEnabledAndReady$ | async;
 
