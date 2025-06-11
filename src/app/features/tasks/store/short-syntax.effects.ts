@@ -81,10 +81,14 @@ export class ShortSyntaxEffects {
         this._projectService.list$,
         this._globalConfigService.misc$.pipe(
           map((misc) => misc.defaultProjectId),
-          // TODO re-check
-          filter(() => this._workContextService.activeWorkContextId !== INBOX_PROJECT.id),
-          concatMap((defaultProjectId) =>
-            defaultProjectId
+
+          concatMap((defaultProjectId) => {
+            if (this._workContextService.activeWorkContextId === INBOX_PROJECT.id) {
+              // if we are in the INBOX project, we do not need to fetch the default project, since it is not used in this context
+              return of(null);
+            }
+
+            return defaultProjectId
               ? this._projectService.getByIdOnce$(defaultProjectId).pipe(
                   tap((project) => {
                     if (!project) {
@@ -98,8 +102,8 @@ export class ShortSyntaxEffects {
                     return of(null);
                   }),
                 )
-              : of(null),
-          ),
+              : of(null);
+          }),
         ),
       ),
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
