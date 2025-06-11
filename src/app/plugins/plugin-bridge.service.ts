@@ -2,11 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
+  CreateTaskData,
   DialogCfg,
   Hooks,
   NotifyCfg,
   SnackCfgLimited,
-  CreateTaskData,
 } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskCopy } from '../features/tasks/task.model';
@@ -55,31 +55,18 @@ export class PluginBridgeService {
   /**
    * Show a notification to the user
    */
-  notify(notifyCfg: NotifyCfg): void {
+  async notify(notifyCfg: NotifyCfg): Promise<void> {
     typia.assert<NotifyCfg>(notifyCfg);
 
-    if ('Notification' in window) {
-      // Use browser notifications
-      if (Notification.permission === 'granted') {
-        new Notification(notifyCfg.title, {
-          body: notifyCfg.body,
-        });
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            new Notification(notifyCfg.title, {
-              body: notifyCfg.body,
-            });
-          }
-        });
-      }
-    } else {
-      // Fallback to snack message if notifications aren't supported
-      this.showSnack({
-        msg: `${notifyCfg.title}: ${notifyCfg.body}`,
-        type: 'CUSTOM',
-      });
-    }
+    // Use the app's NotifyService for better integration
+    await this._notifyService.notify({
+      title: notifyCfg.title,
+      body: notifyCfg.body,
+      icon: 'assets/icons/icon-128x128.png',
+      duration: 5000, // 5 seconds default duration
+    });
+
+    console.log('PluginBridge: Notification sent successfully', notifyCfg);
   }
 
   /**
