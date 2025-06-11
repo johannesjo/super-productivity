@@ -3,7 +3,7 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
-import { GiteaIssue } from './gitea-issue/gitea-issue.model';
+import { GiteaIssue } from './issue/gitea-issue.model';
 
 export const GITEA_ISSUE_CONTENT_CONFIG: IssueContentConfig<GiteaIssue> = {
   issueType: 'GITEA' as const,

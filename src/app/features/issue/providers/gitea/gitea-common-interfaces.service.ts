@@ -17,7 +17,7 @@ import {
 import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
 import { GiteaApiService } from '../gitea/gitea-api.service';
-import { GiteaIssue } from './gitea-issue/gitea-issue.model';
+import { GiteaIssue } from './issue/gitea-issue.model';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({

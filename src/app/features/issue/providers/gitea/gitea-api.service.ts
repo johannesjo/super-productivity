@@ -11,12 +11,12 @@ import {
   GiteaIssue,
   GiteaIssueStateOptions,
   GiteaRepositoryReduced,
-} from './gitea-issue/gitea-issue.model';
+} from './issue/gitea-issue.model';
 import {
   isIssueFromProject,
   mapGiteaIssueIdToIssueNumber,
   mapGiteaIssueToSearchResult,
-} from './gitea-issue/gitea-issue-map.util';
+} from './issue/gitea-issue-map.util';
 import {
   GITEA_API_SUBPATH_REPO,
   GITEA_API_SUBPATH_USER,

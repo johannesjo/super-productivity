@@ -17,7 +17,7 @@ import {
 import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
 import { RedmineApiService } from '../redmine/redmine-api.service';
-import { RedmineIssue } from './redmine-issue/redmine-issue.model';
+import { RedmineIssue } from './issue/redmine-issue.model';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
