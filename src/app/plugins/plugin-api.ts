@@ -8,6 +8,9 @@ import {
   PluginHooks,
   SnackCfgLimited,
   TaskCopy,
+  ProjectCopy,
+  TagCopy,
+  CreateTaskData,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 
@@ -101,6 +104,44 @@ export class PluginAPI implements IPluginAPI {
   async updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to update task ${taskId}:`, updates);
     return this._pluginBridge.updateTask(taskId, updates);
+  }
+
+  async addTask(taskData: CreateTaskData): Promise<string> {
+    console.log(`Plugin ${this._pluginId} requested to add task:`, taskData);
+    return this._pluginBridge.addTask(taskData);
+  }
+
+  async getAllProjects(): Promise<ProjectCopy[]> {
+    console.log(`Plugin ${this._pluginId} requested all projects`);
+    return this._pluginBridge.getAllProjects();
+  }
+
+  async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
+    console.log(`Plugin ${this._pluginId} requested to add project:`, projectData);
+    return this._pluginBridge.addProject(projectData);
+  }
+
+  async updateProject(projectId: string, updates: Partial<ProjectCopy>): Promise<void> {
+    console.log(
+      `Plugin ${this._pluginId} requested to update project ${projectId}:`,
+      updates,
+    );
+    return this._pluginBridge.updateProject(projectId, updates);
+  }
+
+  async getAllTags(): Promise<TagCopy[]> {
+    console.log(`Plugin ${this._pluginId} requested all tags`);
+    return this._pluginBridge.getAllTags();
+  }
+
+  async addTag(tagData: Partial<TagCopy>): Promise<string> {
+    console.log(`Plugin ${this._pluginId} requested to add tag:`, tagData);
+    return this._pluginBridge.addTag(tagData);
+  }
+
+  async updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void> {
+    console.log(`Plugin ${this._pluginId} requested to update tag ${tagId}:`, updates);
+    return this._pluginBridge.updateTag(tagId, updates);
   }
 
   showSnack(snackCfg: SnackCfgLimited): void {
