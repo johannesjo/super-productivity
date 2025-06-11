@@ -5,15 +5,6 @@ import { TagCopy } from '../features/tag/tag.model';
 
 export { TaskCopy, ProjectCopy, TagCopy };
 
-export interface CreateTaskData {
-  title: string;
-  projectId?: string | null;
-  tagIds?: string[];
-  notes?: string;
-  timeEstimate?: number;
-  parentId?: string | null;
-}
-
 export enum PluginHooks {
   TASK_COMPLETE = 'taskComplete',
   TASK_UPDATE = 'taskUpdate',
@@ -21,9 +12,9 @@ export enum PluginHooks {
   FINISH_DAY = 'finishDay',
   LANGUAGE_CHANGE = 'languageChange',
   CFG_CHANGE = 'cfgChange',
-  ISSUE_TASK_UPDATE = 'issueTaskUpdate',
-  ISSUE_PROVIDER_SETTINGS_UPDATE = 'issueProviderSettingsUpdate',
+  PERSISTED_DATA_UPDATE = 'persistedDataUpdate',
   ACTION = 'action',
+
   // ISSUE_TASK_UPDATE = 'ISSUE_TASK_UPDATE',
   // ISSUE_PROVIDER_SETTINGS_UPDATE = 'ISSUE_PROVIDER_SETTINGS_UPDATE',
 }
@@ -78,7 +69,6 @@ export interface PluginManifest {
 
 export interface PluginAPI {
   cfg: PluginBaseCfg;
-  Hooks: typeof PluginHooks;
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void;
 
@@ -88,7 +78,14 @@ export interface PluginAPI {
 
   registerShortcut(label: string, onExec: () => void): void;
 
-  showIndexHtml(): void;
+  // ui bridge
+  showSnack(snackCfg: SnackCfgLimited): void;
+
+  notify(notifyCfg: NotifyCfg): Promise<void>;
+
+  showIndexHtmlAsView(): void;
+
+  openDialog(dialogCfg: DialogCfg): Promise<void>;
 
   // tasks
   getAllTasks(): Promise<TaskCopy[]>;
@@ -115,23 +112,18 @@ export interface PluginAPI {
 
   updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void>;
 
-  // ui bridge
-  showSnack(snackCfg: SnackCfgLimited): void;
+  // persistence
+  persistDataSynced(dataStr: string): Promise<void>;
 
-  notify(notifyCfg: NotifyCfg): Promise<void>;
-
-  persistDataSynced(dataStr: string): void;
-
-  openDialog(dialogCfg: DialogCfg): Promise<void>;
-
-  addActionBeforeCloseApp(action: () => Promise<void>): void;
-
-  getCfg<T>(): Promise<T>;
+  loadSyncedData(): Promise<string | null>;
 
   __getHookHandlers(): Map<
     string,
     Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
   >;
+
+  // Potentially later
+  // addActionBeforeCloseApp(action: () => Promise<void>): void;
 }
 
 export interface PluginInstance {
@@ -145,4 +137,13 @@ export interface PluginHookHandler {
   pluginId: string;
   hook: Hooks;
   handler: (...args: any[]) => void | Promise<void>;
+}
+
+export interface CreateTaskData {
+  title: string;
+  projectId?: string | null;
+  tagIds?: string[];
+  notes?: string;
+  timeEstimate?: number;
+  parentId?: string | null;
 }
