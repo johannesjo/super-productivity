@@ -15,4 +15,12 @@ PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, function (taskData) {
   });
 });
 
-console.log('Hello World Plugin initialized successfully!');
+setTimeout(() => {
+  // Show a friendly message when a task is completed
+  PluginAPI.showSnack({
+    msg: '🎉 Hello World! Init!',
+    type: 'SUCCESS',
+    ico: 'celebration',
+  });
+  console.log('Hello World Plugin initialized successfully!');
+}, 1000);
