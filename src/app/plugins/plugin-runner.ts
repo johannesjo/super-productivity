@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
+import { PluginMessagingService } from './plugin-messaging.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginRunner {
   private _loadedPlugins = new Map<string, PluginInstance>();
+  private _messagingService = inject(PluginMessagingService);
 
   constructor() {}
 
@@ -16,8 +18,22 @@ export class PluginRunner {
     baseCfg: PluginBaseCfg,
   ): Promise<PluginInstance> {
     try {
-      // Create plugin API instance
-      const pluginAPI = new PluginAPI(baseCfg, manifest.id);
+      // Create message handlers for this plugin
+      const sendMessage = async (message: any): Promise<any> => {
+        return this._messagingService.handleMessage(message, manifest.id);
+      };
+
+      const registerCallback = (fn: (...args: any[]) => void | Promise<void>): string => {
+        return this._messagingService.registerCallback(manifest.id, fn);
+      };
+
+      // Create plugin API instance with messaging
+      const pluginAPI = new PluginAPI(
+        baseCfg,
+        manifest.id,
+        sendMessage,
+        registerCallback,
+      );
 
       // Create plugin instance
       const pluginInstance: PluginInstance = {
@@ -36,9 +52,17 @@ export class PluginRunner {
       return pluginInstance;
     } catch (error) {
       console.error(`Failed to load plugin ${manifest.id}:`, error);
+      // Create dummy handlers for error case
+      const dummySendMessage = async (): Promise<any> => {
+        throw new Error('Plugin failed to load');
+      };
+      const dummyRegisterCallback = (): string => {
+        return 'error';
+      };
+
       const errorInstance: PluginInstance = {
         manifest,
-        api: new PluginAPI(baseCfg, manifest.id),
+        api: new PluginAPI(baseCfg, manifest.id, dummySendMessage, dummyRegisterCallback),
         loaded: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
@@ -68,6 +92,7 @@ export class PluginRunner {
     const plugin = this._loadedPlugins.get(pluginId);
     if (plugin) {
       this._loadedPlugins.delete(pluginId);
+      this._messagingService.cleanupPlugin(pluginId);
       console.log(`Plugin ${pluginId} unloaded`);
       return true;
     }

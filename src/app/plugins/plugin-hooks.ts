@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Hooks, PluginHookHandler } from './plugin-api.model';
-import { PluginRunner } from './plugin-runner';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +7,7 @@ import { PluginRunner } from './plugin-runner';
 export class PluginHooksService {
   private _hookHandlers: PluginHookHandler[] = [];
 
-  constructor(private _pluginRunner: PluginRunner) {}
+  constructor() {}
 
   /**
    * Dispatch a hook to all registered plugin handlers
@@ -16,33 +15,14 @@ export class PluginHooksService {
   async dispatchHook(hookName: Hooks, payload?: any): Promise<void> {
     console.log(`Dispatching hook: ${hookName}`, payload);
 
-    // Get all loaded plugins
-    const loadedPlugins = this._pluginRunner.getAllLoadedPlugins();
+    // Get all registered handlers for this hook
+    const handlersToCall = this._hookHandlers.filter(
+      (handler) => handler.hook === hookName,
+    );
 
-    // Collect all hook handlers for this hook from all plugins
-    const handlersToCall: Array<{
-      pluginId: string;
-      handler: (...args: any[]) => void | Promise<void>;
-    }> = [];
-
-    for (const plugin of loadedPlugins) {
-      if (!plugin.loaded || plugin.error) {
-        continue;
-      }
-
-      // Get hook handlers from the plugin API
-      const pluginHookHandlers = plugin.api.__getHookHandlers();
-      const pluginSpecificHandlers = pluginHookHandlers.get(plugin.manifest.id);
-
-      if (pluginSpecificHandlers && pluginSpecificHandlers.has(hookName)) {
-        const handlers = pluginSpecificHandlers.get(hookName) || [];
-        for (const handler of handlers) {
-          handlersToCall.push({
-            pluginId: plugin.manifest.id,
-            handler,
-          });
-        }
-      }
+    if (handlersToCall.length === 0) {
+      console.log(`No handlers registered for hook: ${hookName}`);
+      return;
     }
 
     // Execute all handlers
