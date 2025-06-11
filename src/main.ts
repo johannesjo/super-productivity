@@ -3,8 +3,8 @@ import {
   ErrorHandler,
   importProvidersFrom,
   LOCALE_ID,
-  SecurityContext,
   provideExperimentalZonelessChangeDetection,
+  SecurityContext,
 } from '@angular/core';
 
 import { environment } from './environments/environment';
@@ -49,12 +49,12 @@ import { reducers } from './app/root-store';
 import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
 import {
+  plannerSharedMetaReducer,
+  projectSharedMetaReducer,
+  tagSharedMetaReducer,
   taskSharedCrudMetaReducer,
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
-  projectSharedMetaReducer,
-  tagSharedMetaReducer,
-  plannerSharedMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -68,6 +68,7 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
+import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 
 if (environment.production || environment.stage) {
@@ -180,6 +181,7 @@ bootstrapApplication(AppComponent, {
     },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
+    PLUGIN_INITIALIZER_PROVIDER,
     provideExperimentalZonelessChangeDetection(),
   ],
 }).then(() => {
