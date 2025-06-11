@@ -168,6 +168,13 @@ export class PluginBridgeService {
     typia.assert<Partial<TaskCopy>>(updates);
 
     try {
+      // Validate that referenced project, tags, and parent task exist if they are being updated
+      await this._validateTaskReferences(
+        updates.projectId,
+        updates.tagIds,
+        updates.parentId,
+      );
+
       // Convert TaskCopy updates to Task updates format
       const taskUpdates = this._convertTaskCopyUpdatesToTaskUpdates(updates);
 
@@ -188,6 +195,13 @@ export class PluginBridgeService {
     typia.assert<CreateTaskData>(taskData);
 
     try {
+      // Validate that referenced project, tags, and parent task exist
+      await this._validateTaskReferences(
+        taskData.projectId,
+        taskData.tagIds,
+        taskData.parentId,
+      );
+
       // TaskService.add expects (title, isAddToBacklog, additional, isAddToBottom)
       const additional: Partial<any> = {
         projectId: taskData.projectId || undefined,
@@ -416,8 +430,72 @@ export class PluginBridgeService {
   }
 
   /**
+   * Validate that referenced project, tags, and parent task exist
+   */
+  private async _validateTaskReferences(
+    projectId?: string | null,
+    tagIds?: string[],
+    parentId?: string | null,
+  ): Promise<void> {
+    const errors: string[] = [];
+
+    // Validate project exists if provided
+    if (projectId && projectId !== null && projectId !== undefined) {
+      try {
+        const projects = await this._projectService.list$.pipe(first()).toPromise();
+
+        const projectExists = projects?.some((project: any) => project.id === projectId);
+        if (!projectExists) {
+          errors.push(`Project with ID '${projectId}' does not exist`);
+        }
+      } catch (error) {
+        console.error('PluginBridge: Failed to validate project:', error);
+        errors.push(`Failed to validate project '${projectId}'`);
+      }
+    }
+
+    // Validate tags exist if provided
+    if (tagIds && tagIds.length > 0) {
+      try {
+        const tags = await this._tagService.tags$.pipe(first()).toPromise();
+
+        const existingTagIds = tags?.map((tag: any) => tag.id) || [];
+        const nonExistentTags = tagIds.filter((tagId) => !existingTagIds.includes(tagId));
+
+        if (nonExistentTags.length > 0) {
+          errors.push(`Tags with IDs '${nonExistentTags.join(', ')}' do not exist`);
+        }
+      } catch (error) {
+        console.error('PluginBridge: Failed to validate tags:', error);
+        errors.push(`Failed to validate tags '${tagIds.join(', ')}'`);
+      }
+    }
+
+    // Validate parent task exists if provided
+    if (parentId && parentId !== null && parentId !== undefined) {
+      try {
+        const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+
+        const parentExists = tasks?.some((task: any) => task.id === parentId);
+        if (!parentExists) {
+          errors.push(`Parent task with ID '${parentId}' does not exist`);
+        }
+      } catch (error) {
+        console.error('PluginBridge: Failed to validate parent task:', error);
+        errors.push(`Failed to validate parent task '${parentId}'`);
+      }
+    }
+
+    // Throw error if any validation failed
+    if (errors.length > 0) {
+      throw new Error(`Validation failed: ${errors.join('; ')}`);
+    }
+  }
+
+  /**
    * Convert Project to ProjectCopy for plugin consumption
    */
+  // TODO remove
   private _convertProjectToProjectCopy(project: any): ProjectCopy {
     return {
       id: project.id || '',
@@ -532,6 +610,7 @@ export class PluginBridgeService {
     return cleanUpdates;
   }
 
+  // TODO remove
   /**
    * Convert Task to TaskCopy for plugin consumption
    * This ensures plugins only get safe, serializable data
@@ -560,6 +639,7 @@ export class PluginBridgeService {
    * Convert TaskCopy updates to Task updates format
    * This ensures plugin updates are properly formatted for the app
    */
+  // TODO remove
   private _convertTaskCopyUpdatesToTaskUpdates(updates: Partial<TaskCopy>): any {
     // Filter out undefined values and ensure proper types
     const cleanUpdates: any = {};
