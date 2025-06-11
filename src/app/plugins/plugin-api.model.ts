@@ -1,4 +1,7 @@
 import { SnackParams } from '../core/snack/snack.model';
+import { TaskCopy } from '../features/tasks/task.model';
+
+export { TaskCopy };
 
 export enum PluginHooks {
   TASK_COMPLETE = 'taskComplete',
@@ -47,18 +50,6 @@ export type SnackCfgLimited = Omit<
 export interface NotifyCfg {
   title: string;
   body: string;
-  icon?: string;
-}
-
-export interface TaskCopy {
-  id: string;
-  title: string;
-  isDone: boolean;
-  timeSpent: number;
-  timeEstimate: number;
-  created: number;
-
-  [key: string]: any;
 }
 
 export interface PluginManifest {
@@ -70,15 +61,13 @@ export interface PluginManifest {
   hooks: Hooks[];
   permissions: string[];
   iFrame?: boolean;
-  type: 'issueProvider' | 'standard';
+  type?: 'standard'; // 'issueProvider'
   assets?: string[];
 }
 
 export interface PluginAPI {
   cfg: PluginBaseCfg;
   Hooks: typeof PluginHooks;
-
-  registerIssueProvider(provider: IssueProviderPluginCfg): void;
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void;
 
@@ -90,6 +79,7 @@ export interface PluginAPI {
 
   showIndexHtml(): void;
 
+  // tasks
   getAllTasks(): Promise<TaskCopy[]>;
 
   getArchivedTasks(): Promise<TaskCopy[]>;
@@ -98,6 +88,7 @@ export interface PluginAPI {
 
   updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void>;
 
+  // ui bridge
   showSnack(snackCfg: SnackCfgLimited): void;
 
   notify(notifyCfg: NotifyCfg): void;
