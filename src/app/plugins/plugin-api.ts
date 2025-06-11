@@ -1,16 +1,15 @@
 import {
+  CreateTaskData,
   DialogCfg,
   Hooks,
-  IssueProviderPluginCfg,
   NotifyCfg,
   PluginAPI as IPluginAPI,
   PluginBaseCfg,
   PluginHooks,
-  SnackCfgLimited,
-  TaskCopy,
   ProjectCopy,
+  SnackCfgLimited,
   TagCopy,
-  CreateTaskData,
+  TaskCopy,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 
@@ -35,12 +34,6 @@ export class PluginAPI implements IPluginAPI {
     private _pluginId: string,
     private _pluginBridge: PluginBridgeService,
   ) {}
-
-  registerIssueProvider(provider: IssueProviderPluginCfg): void {
-    console.log(`Plugin ${this._pluginId} registered issue provider:`, provider);
-    // TODO: Implement issue provider registration in bridge
-    console.warn('Issue provider registration not yet implemented in bridge');
-  }
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void {
     if (!this._hookHandlers.has(this._pluginId)) {
@@ -80,10 +73,11 @@ export class PluginAPI implements IPluginAPI {
     console.warn('Shortcut registration not yet implemented in bridge');
   }
 
-  showIndexHtml(): void {
+  showIndexHtmlAsView(): void {
     console.log(`Plugin ${this._pluginId} requested to show index.html`);
     // TODO: Implement show index html in bridge
     console.warn('Show index html not yet implemented in bridge');
+    return this._pluginBridge.showIndexHtmlAsView();
   }
 
   async getAllTasks(): Promise<TaskCopy[]> {
@@ -153,9 +147,14 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.notify(notifyCfg);
   }
 
-  persistDataSynced(dataStr: string): void {
+  persistDataSynced(dataStr: string): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to persist data:`, dataStr);
-    this._pluginBridge.persistDataSynced(dataStr);
+    return this._pluginBridge.persistDataSynced(dataStr);
+  }
+
+  loadSyncedData(): Promise<string | null> {
+    console.log(`Plugin ${this._pluginId} requested to load persisted data:`);
+    return this._pluginBridge.loadPersistedData();
   }
 
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
@@ -169,32 +168,11 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.addActionBeforeCloseApp(action);
   }
 
-  async getCfg<T>(): Promise<T> {
-    console.log(`Plugin ${this._pluginId} requested configuration`);
-    return this._pluginBridge.getCfg<T>();
-  }
-
   // Internal methods for the plugin system
   __getHookHandlers(): Map<
     string,
     Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
   > {
     return this._hookHandlers;
-  }
-
-  __getHeaderButtons(): Array<{ label: string; icon: string; onClick: () => void }> {
-    return this._headerButtons;
-  }
-
-  __getMenuEntries(): Array<{ label: string; icon: string; onClick: () => void }> {
-    return this._menuEntries;
-  }
-
-  __getShortcuts(): Array<{ label: string; onExec: () => void }> {
-    return this._shortcuts;
-  }
-
-  __getActionsBeforeClose(): Array<() => Promise<void>> {
-    return this._actionsBeforeClose;
   }
 }
