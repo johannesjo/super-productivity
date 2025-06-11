@@ -148,9 +148,9 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.showSnack(snackCfg);
   }
 
-  notify(notifyCfg: NotifyCfg): void {
+  async notify(notifyCfg: NotifyCfg): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested notification:`, notifyCfg);
-    this._pluginBridge.notify(notifyCfg);
+    return this._pluginBridge.notify(notifyCfg);
   }
 
   persistDataSynced(dataStr: string): void {
