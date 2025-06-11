@@ -116,6 +116,9 @@ export class PluginBridgeService {
    * Update a task (placeholder implementation)
    */
   async updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void> {
+    typia.assert<string>(taskId);
+    typia.assert<Partial<TaskCopy>>(updates);
+
     // TODO: Integrate with TaskService
     console.log('PluginBridge: updateTask called', { taskId, updates });
   }
@@ -124,6 +127,8 @@ export class PluginBridgeService {
    * Persist plugin data (placeholder implementation)
    */
   persistDataSynced(dataStr: string): void {
+    typia.assert<string>(dataStr);
+
     // TODO: Integrate with persistence service
     console.log('PluginBridge: persistDataSynced called', dataStr);
 
@@ -151,6 +156,8 @@ export class PluginBridgeService {
    * Add action to execute before app close (placeholder implementation)
    */
   addActionBeforeCloseApp(action: () => Promise<void>): void {
+    typia.assert<() => Promise<void>>(action);
+
     // TODO: Integrate with app lifecycle service
     console.log('PluginBridge: addActionBeforeCloseApp called', action);
   }
@@ -172,6 +179,10 @@ export class PluginBridgeService {
     hook: Hooks,
     handler: (...args: any[]) => void | Promise<void>,
   ): void {
+    typia.assert<string>(pluginId);
+    typia.assert<Hooks>(hook);
+    typia.assert<(...args: any[]) => void | Promise<void>>(handler);
+
     this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
   }
 
@@ -179,6 +190,8 @@ export class PluginBridgeService {
    * Unregister all hooks for a plugin
    */
   unregisterPluginHooks(pluginId: string): void {
+    typia.assert<string>(pluginId);
+
     this._pluginHooksService.unregisterPluginHooks(pluginId);
   }
 }
