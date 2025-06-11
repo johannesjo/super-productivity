@@ -1,0 +1,12 @@
+{
+  "name": "Hello World Plugin",
+  "id": "hello-world",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "13.0.0",
+  "hooks": ["taskComplete"],
+  "permissions": ["PluginAPI.showSnack"],
+  "iFrame": false,
+  "type": "standard",
+  "assets": []
+}

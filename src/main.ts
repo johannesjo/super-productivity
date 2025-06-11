@@ -61,6 +61,7 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
+import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -171,6 +172,7 @@ bootstrapApplication(AppComponent, {
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
+    PLUGIN_INITIALIZER_PROVIDER,
   ],
 }).then(() => {
   // TODO make asset caching work for electron
