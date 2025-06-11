@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -11,10 +11,7 @@ import {
   OpenProjectWorkPackageReduced,
 } from './open-project-issue/open-project-issue.model';
 import { isOpenProjectEnabled } from './is-open-project-enabled.util';
-import {
-  OPEN_PROJECT_INITIAL_POLL_DELAY,
-  OPEN_PROJECT_POLL_INTERVAL,
-} from './open-project.const';
+import { OPEN_PROJECT_POLL_INTERVAL } from './open-project.const';
 import { parseOpenProjectDuration } from './open-project-view-components/parse-open-project-duration.util';
 import {
   formatOpenProjectWorkPackageSubject,
@@ -30,47 +27,59 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
   private readonly _openProjectApiService = inject(OpenProjectApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(
-    OPEN_PROJECT_INITIAL_POLL_DELAY,
-    OPEN_PROJECT_POLL_INTERVAL,
-  );
+  pollInterval: number = OPEN_PROJECT_POLL_INTERVAL;
 
   isEnabled(cfg: OpenProjectCfg): boolean {
     return isOpenProjectEnabled(cfg);
   }
 
-  testConnection$(cfg: OpenProjectCfg): Observable<boolean> {
-    return this._openProjectApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: OpenProjectCfg): Promise<boolean> {
+    return this._openProjectApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/projects/${cfg.projectId}/work_packages/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        map((cfg) => `${cfg.host}/projects/${cfg.projectId}/work_packages/${issueId}`),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
-  getById$(issueId: number, issueProviderId: string): Observable<OpenProjectWorkPackage> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((openProjectCfg) =>
-        this._openProjectApiService.getById$(issueId, openProjectCfg),
-      ),
-    );
+  getById(issueId: number, issueProviderId: string): Promise<OpenProjectWorkPackage> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        concatMap((openProjectCfg) =>
+          this._openProjectApiService.getById$(issueId, openProjectCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get OpenProject work package');
+        }
+        return result;
+      });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((openProjectCfg) =>
-        this.isEnabled(openProjectCfg)
-          ? this._openProjectApiService.searchIssueForRepo$(searchTerm, openProjectCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((openProjectCfg) =>
+          this.isEnabled(openProjectCfg)
+            ? this._openProjectApiService.searchIssueForRepo$(searchTerm, openProjectCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { Observable, of, Subject } from 'rxjs';
+import { from, Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { first, map, switchMap, take, takeUntil, throttleTime } from 'rxjs/operators';
@@ -94,7 +94,7 @@ export class FocusModeMainComponent implements OnDestroy {
         return of(null);
       }
       return v.issueType && v.issueId && v.issueProviderId
-        ? this._issueService.issueLink$(v.issueType, v.issueId, v.issueProviderId)
+        ? from(this._issueService.issueLink(v.issueType, v.issueId, v.issueProviderId))
         : of(null);
     }),
     take(1),

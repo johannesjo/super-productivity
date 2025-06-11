@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -8,11 +8,7 @@ import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.mo
 import { GitlabCfg } from './gitlab.model';
 import { GitlabIssue } from './gitlab-issue/gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
-import {
-  GITLAB_BASE_URL,
-  GITLAB_INITIAL_POLL_DELAY,
-  GITLAB_POLL_INTERVAL,
-} from './gitlab.const';
+import { GITLAB_BASE_URL, GITLAB_POLL_INTERVAL } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled';
 import { IssueProviderService } from '../../issue-provider.service';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
@@ -24,52 +20,71 @@ export class GitlabCommonInterfacesService implements IssueServiceInterface {
   private readonly _gitlabApiService = inject(GitlabApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(GITLAB_INITIAL_POLL_DELAY, GITLAB_POLL_INTERVAL);
+  pollInterval: number = GITLAB_POLL_INTERVAL;
 
   isEnabled(cfg: GitlabCfg): boolean {
     return isGitlabEnabled(cfg);
   }
 
-  testConnection$(cfg: GitlabCfg): Observable<boolean> {
-    return this._gitlabApiService.searchIssueInProject$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GitlabCfg): Promise<boolean> {
+    return this._gitlabApiService
+      .searchIssueInProject$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: string, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => {
-        const project: string = cfg.project;
-        if (cfg.gitlabBaseUrl) {
-          const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
-            ? cfg.gitlabBaseUrl
-            : `${cfg.gitlabBaseUrl}/`;
-          return `${fixedUrl}${project}/issues/${issueId}`;
-        } else {
-          return `${GITLAB_BASE_URL}${project}/issues/${issueId}`;
+  issueLink(issueId: string, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        map((cfg) => {
+          const project: string = cfg.project;
+
+          // Extract just the numeric issue ID from formats like 'project/repo#123' or '#123'
+          // Note: issueId is intentionally stored as 'project/repo#123' to ensure uniqueness across different projects
+          // but for URL construction we only need the numeric part after the '#'
+          const cleanIssueId = issueId.toString().replace(/^.*#/, '');
+
+          if (cfg.gitlabBaseUrl) {
+            const fixedUrl = cfg.gitlabBaseUrl.match(/.*\/$/)
+              ? cfg.gitlabBaseUrl
+              : `${cfg.gitlabBaseUrl}/`;
+            return `${fixedUrl}${project}/-/issues/${cleanIssueId}`;
+          } else {
+            return `${GITLAB_BASE_URL}${project}/-/issues/${cleanIssueId}`;
+          }
+        }),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
+  }
+
+  getById(issueId: string, issueProviderId: string): Promise<GitlabIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get GitLab issue');
         }
-      }),
-    );
+        return result;
+      });
   }
 
-  getById$(issueId: string, issueProviderId: string): Observable<GitlabIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((gitlabCfg) => this._gitlabApiService.getById$(issueId, gitlabCfg)),
-    );
-  }
-
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((gitlabCfg) =>
-        this.isEnabled(gitlabCfg)
-          ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((gitlabCfg) =>
+          this.isEnabled(gitlabCfg)
+            ? this._gitlabApiService.searchIssueInProject$(searchTerm, gitlabCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

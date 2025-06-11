@@ -20,7 +20,7 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { Task, TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../../task.model';
-import { EMPTY, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { EMPTY, forkJoin, from, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
   delay,
@@ -134,7 +134,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   issueUrl$: Observable<string | null> = this._task$.pipe(
     switchMap((v) => {
       return v.issueType && v.issueId && v.issueProviderId
-        ? this._issueService.issueLink$(v.issueType, v.issueId, v.issueProviderId)
+        ? from(this._issueService.issueLink(v.issueType, v.issueId, v.issueProviderId))
         : of(null);
     }),
     take(1),

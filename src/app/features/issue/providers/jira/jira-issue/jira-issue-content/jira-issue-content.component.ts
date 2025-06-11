@@ -7,7 +7,15 @@ import { T } from '../../../../../../t.const';
 import { TaskService } from '../../../../../tasks/task.service';
 // @ts-ignore
 import j2m from 'jira2md';
-import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import {
+  combineLatest,
+  forkJoin,
+  from,
+  Observable,
+  of,
+  ReplaySubject,
+  Subject,
+} from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { JiraCommonInterfacesService } from '../../jira-common-interfaces.service';
 import { devError } from '../../../../../../util/dev-error';
@@ -64,9 +72,11 @@ export class JiraIssueContentComponent {
 
   issueUrl$: Observable<string> = this._task$.pipe(
     switchMap((task) =>
-      this._jiraCommonInterfacesService.issueLink$(
-        assertTruthy(task.issueId),
-        assertTruthy(task.issueProviderId),
+      from(
+        this._jiraCommonInterfacesService.issueLink(
+          assertTruthy(task.issueId),
+          assertTruthy(task.issueProviderId),
+        ),
       ),
     ),
   );
@@ -78,14 +88,17 @@ export class JiraIssueContentComponent {
       issue.subtasks?.length
         ? forkJoin(
             ...issue.subtasks.map((ist: JiraSubtask) => {
-              return this._jiraCommonInterfacesService
-                .issueLink$(assertTruthy(ist.id), assertTruthy(task.issueProviderId))
-                .pipe(
-                  map((issueUrl) => ({
-                    ...ist,
-                    href: issueUrl,
-                  })),
-                );
+              return from(
+                this._jiraCommonInterfacesService.issueLink(
+                  assertTruthy(ist.id),
+                  assertTruthy(task.issueProviderId),
+                ),
+              ).pipe(
+                map((issueUrl) => ({
+                  ...ist,
+                  href: issueUrl,
+                })),
+              );
             }),
           ).pipe(
             catchError((e) => {
@@ -109,14 +122,17 @@ export class JiraIssueContentComponent {
       issue.relatedIssues?.length
         ? forkJoin(
             ...issue.relatedIssues.map((ist: any) => {
-              return this._jiraCommonInterfacesService
-                .issueLink$(assertTruthy(ist.key), assertTruthy(task.issueProviderId))
-                .pipe(
-                  map((issueUrl) => ({
-                    ...ist,
-                    href: issueUrl,
-                  })),
-                );
+              return from(
+                this._jiraCommonInterfacesService.issueLink(
+                  assertTruthy(ist.key),
+                  assertTruthy(task.issueProviderId),
+                ),
+              ).pipe(
+                map((issueUrl) => ({
+                  ...ist,
+                  href: issueUrl,
+                })),
+              );
             }),
           )
         : of(undefined),
