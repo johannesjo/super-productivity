@@ -3,7 +3,7 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
-import { JiraIssue } from './jira-issue/jira-issue.model';
+import { JiraIssue } from './issue/jira-issue.model';
 
 export const JIRA_ISSUE_CONTENT_CONFIG: IssueContentConfig<JiraIssue> = {
   issueType: 'JIRA' as const,
