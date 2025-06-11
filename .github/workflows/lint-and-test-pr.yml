@@ -38,6 +38,11 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 'latest'
+
       - run: npm run lint:ci
       - run: npm run test
       - run: npm run e2e
