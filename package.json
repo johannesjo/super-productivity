@@ -167,7 +167,7 @@
     "canvas-confetti": "^1.9.3",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
-    "chromedriver": "^135.0.4",
+    "chromedriver": "^137.0.3",
     "chrono-node": "^2.8.0",
     "clipboard": "^2.0.11",
     "conventional-changelog-cli": "^5.0.0",
