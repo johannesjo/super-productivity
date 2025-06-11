@@ -29,7 +29,7 @@ import { OpenProjectApiService } from '../../open-project-api.service';
 import {
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
-} from '../../open-project-issue/open-project-issue.model';
+} from '../../issue/open-project-issue.model';
 import { DEFAULT_OPEN_PROJECT_CFG } from '../../open-project.const';
 import {
   OpenProjectTransitionConfig,

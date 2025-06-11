@@ -4,7 +4,7 @@ import {
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
 import { IssueProviderKey } from '../../issue.model';
-import { OpenProjectWorkPackage } from './open-project-issue/open-project-issue.model';
+import { OpenProjectWorkPackage } from './issue/open-project-issue.model';
 
 export const OPEN_PROJECT_ISSUE_CONTENT_CONFIG: IssueContentConfig<OpenProjectWorkPackage> =
   {

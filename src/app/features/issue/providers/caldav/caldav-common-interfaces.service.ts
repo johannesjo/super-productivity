@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
-import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
+import { CaldavIssue, CaldavIssueReduced } from './issue/caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
