@@ -1,15 +1,11 @@
-import { APP_INITIALIZER } from '@angular/core';
+import { Injector } from '@angular/core';
 import { PluginService } from './plugin.service';
 
-export const pluginInitializerFactory = (
-  pluginService: PluginService,
-): (() => Promise<void>) => {
-  return () => pluginService.initializePlugins();
-};
-
-export const PLUGIN_INITIALIZER_PROVIDER = {
-  provide: APP_INITIALIZER,
-  useFactory: pluginInitializerFactory,
-  deps: [PluginService],
-  multi: true,
+/**
+ * Modern Angular initialization function for plugins
+ * To be called during application bootstrap with the app injector
+ */
+export const initializePlugins = async (injector: Injector): Promise<void> => {
+  const pluginService = injector.get(PluginService);
+  await pluginService.initializePlugins();
 };
