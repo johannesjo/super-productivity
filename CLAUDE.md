@@ -91,3 +91,11 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 4. **Translations**: UI strings must use the translation service (`T` or `TranslateService`).
 5. **Electron Context**: Check `IS_ELECTRON` before using Electron-specific features.
 6. **Privacy**: No analytics or tracking. User data stays local unless explicitly synced.
+
+## 🚫 Known Anti-Patterns to Avoid
+
+- `any` or untyped public APIs
+- Direct DOM access (use Angular bindings)
+- Adding side effects in constructors
+- Re-declaring styles that exist in Angular Material theme
+- Using deprecated Angular APIs (e.g., `NgModules` when not needed)
