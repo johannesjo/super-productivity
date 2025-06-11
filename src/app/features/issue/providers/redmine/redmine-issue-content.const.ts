@@ -3,7 +3,7 @@ import {
   IssueContentConfig,
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
-import { RedmineIssue } from './issue/redmine-issue.model';
+import { RedmineIssue } from './redmine-issue.model';
 import { IssueProviderKey } from '../../issue.model';
 
 export const REDMINE_ISSUE_CONTENT_CONFIG: IssueContentConfig<RedmineIssue> = {

@@ -4,7 +4,7 @@ import {
   IssueFieldType,
 } from '../../issue-content/issue-content.model';
 import { IssueProviderKey } from '../../issue.model';
-import { GitlabIssue } from './issue/gitlab-issue.model';
+import { GitlabIssue } from './gitlab-issue.model';
 
 export const GITLAB_ISSUE_CONTENT_CONFIG: IssueContentConfig<GitlabIssue> = {
   issueType: 'GITLAB' as IssueProviderKey,

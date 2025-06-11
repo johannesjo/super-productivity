@@ -12,8 +12,8 @@ import {
   RedmineIssueResult,
   RedmineSearchResult,
   RedmineSearchResultItem,
-} from './issue/redmine-issue.model';
-import { mapRedmineSearchResultItemToSearchResult } from './issue/redmine-issue-map.util';
+} from './redmine-issue.model';
+import { mapRedmineSearchResultItemToSearchResult } from './redmine-issue-map.util';
 import { SearchResultItem } from '../../issue.model';
 import { ScopeOptions } from './redmine.const';
 import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';

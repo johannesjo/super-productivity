@@ -11,7 +11,7 @@ import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import moment from 'moment';
-import { OpenProjectWorkPackage } from '../../issue/open-project-issue.model';
+import { OpenProjectWorkPackage } from '../../open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
 import { JiraWorklogExportDefaultTime } from '../../../jira/jira.model';
 import {

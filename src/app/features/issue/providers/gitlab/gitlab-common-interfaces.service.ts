@@ -6,7 +6,7 @@ import { IssueServiceInterface } from '../../issue-service-interface';
 import { GitlabApiService } from './gitlab-api/gitlab-api.service';
 import { IssueData, IssueProviderGitlab, SearchResultItem } from '../../issue.model';
 import { GitlabCfg } from './gitlab.model';
-import { GitlabIssue } from './issue/gitlab-issue.model';
+import { GitlabIssue } from './gitlab-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { GITLAB_BASE_URL, GITLAB_POLL_INTERVAL } from './gitlab.const';
 import { isGitlabEnabled } from './is-gitlab-enabled.util';
