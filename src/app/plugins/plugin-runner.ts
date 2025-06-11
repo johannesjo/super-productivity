@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
-import { PluginMessagingService } from './plugin-messaging.service';
+import { PluginBridgeService } from './plugin-bridge.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginRunner {
   private _loadedPlugins = new Map<string, PluginInstance>();
-  private _messagingService = inject(PluginMessagingService);
+  private _pluginBridge = inject(PluginBridgeService);
 
   constructor() {}
 
@@ -18,22 +18,8 @@ export class PluginRunner {
     baseCfg: PluginBaseCfg,
   ): Promise<PluginInstance> {
     try {
-      // Create message handlers for this plugin
-      const sendMessage = async (message: any): Promise<any> => {
-        return this._messagingService.handleMessage(message, manifest.id);
-      };
-
-      const registerCallback = (fn: (...args: any[]) => void | Promise<void>): string => {
-        return this._messagingService.registerCallback(manifest.id, fn);
-      };
-
-      // Create plugin API instance with messaging
-      const pluginAPI = new PluginAPI(
-        baseCfg,
-        manifest.id,
-        sendMessage,
-        registerCallback,
-      );
+      // Create plugin API instance with direct bridge service injection
+      const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge);
 
       // Create plugin instance
       const pluginInstance: PluginInstance = {
@@ -52,17 +38,10 @@ export class PluginRunner {
       return pluginInstance;
     } catch (error) {
       console.error(`Failed to load plugin ${manifest.id}:`, error);
-      // Create dummy handlers for error case
-      const dummySendMessage = async (): Promise<any> => {
-        throw new Error('Plugin failed to load');
-      };
-      const dummyRegisterCallback = (): string => {
-        return 'error';
-      };
-
+      // Create error instance with bridge service
       const errorInstance: PluginInstance = {
         manifest,
-        api: new PluginAPI(baseCfg, manifest.id, dummySendMessage, dummyRegisterCallback),
+        api: new PluginAPI(baseCfg, manifest.id, this._pluginBridge),
         loaded: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
@@ -92,7 +71,7 @@ export class PluginRunner {
     const plugin = this._loadedPlugins.get(pluginId);
     if (plugin) {
       this._loadedPlugins.delete(pluginId);
-      this._messagingService.cleanupPlugin(pluginId);
+      this._pluginBridge.unregisterPluginHooks(pluginId);
       console.log(`Plugin ${pluginId} unloaded`);
       return true;
     }
