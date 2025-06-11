@@ -1,4 +1,7 @@
 {
+  "includePatterns": ["**/*"],
+  "excludePatterns": ["node_modules/**", "dist/**", "out-tsc/**"],
+  "allowFileAccess": true,
   "permissions": {
     "allow": [
       "Bash(npm ci)",
@@ -18,7 +21,7 @@
       "Bash(git add:*)",
       "Bash(git commit:*)"
     ],
-    "deny": ["Bash(rm:*)", "Bash(curl:*)", "Bash(git push:*)", "Edit(//*)"]
+    "deny": ["Bash(rm:*)", "Bash(curl:*)", "Bash(git push:*)"]
   },
 
   "env": {
@@ -26,7 +29,6 @@
     "NG_CLI_ANALYTICS": "false",
     "CI": "true"
   },
-
   "includeCoAuthoredBy": false,
   "verbose": false
 }
