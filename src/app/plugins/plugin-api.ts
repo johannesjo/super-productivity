@@ -9,16 +9,11 @@ import {
   SnackCfgLimited,
   TaskCopy,
 } from './plugin-api.model';
-import {
-  PluginMessage,
-  PluginMessageType,
-  PluginMessageResponse,
-} from './plugin-messaging.model';
-import { nanoid } from 'nanoid';
+import { PluginBridgeService } from './plugin-bridge.service';
 
 /**
- * PluginAPI implementation that uses messaging instead of dependency injection
- * This allows it to work in sandboxed plugin environments
+ * PluginAPI implementation that uses direct bridge service injection
+ * This provides a clean intermediary layer between plugins and app services
  */
 export class PluginAPI implements IPluginAPI {
   readonly Hooks = PluginHooks;
@@ -34,168 +29,108 @@ export class PluginAPI implements IPluginAPI {
 
   constructor(
     public cfg: PluginBaseCfg,
-    private pluginId: string,
-    private sendMessage: (message: PluginMessage) => Promise<PluginMessageResponse>,
-    private registerCallback: (fn: (...args: any[]) => void | Promise<void>) => string,
+    private _pluginId: string,
+    private _pluginBridge: PluginBridgeService,
   ) {}
 
-  /**
-   * Helper method to send a message to the main application
-   */
-  private async _sendMessage(type: PluginMessageType, payload: any = {}): Promise<any> {
-    const message: PluginMessage = {
-      id: nanoid(),
-      type,
-      payload,
-    };
-
-    const response = await this.sendMessage(message);
-
-    if (!response.success) {
-      throw new Error(response.error || 'Plugin message failed');
-    }
-
-    return response.data;
-  }
-
   registerIssueProvider(provider: IssueProviderPluginCfg): void {
-    console.log(`Plugin ${this.pluginId} registered issue provider:`, provider);
-    this._sendMessage(PluginMessageType.REGISTER_ISSUE_PROVIDER, { provider }).catch(
-      (error) => {
-        console.error('Failed to register issue provider:', error);
-      },
-    );
+    console.log(`Plugin ${this._pluginId} registered issue provider:`, provider);
+    // TODO: Implement issue provider registration in bridge
+    console.warn('Issue provider registration not yet implemented in bridge');
   }
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void {
-    if (!this._hookHandlers.has(this.pluginId)) {
-      this._hookHandlers.set(this.pluginId, new Map());
+    if (!this._hookHandlers.has(this._pluginId)) {
+      this._hookHandlers.set(this._pluginId, new Map());
     }
 
-    const pluginHooks = this._hookHandlers.get(this.pluginId)!;
+    const pluginHooks = this._hookHandlers.get(this._pluginId)!;
     if (!pluginHooks.has(hook)) {
       pluginHooks.set(hook, []);
     }
 
     pluginHooks.get(hook)!.push(fn);
-    console.log(`Plugin ${this.pluginId} registered hook: ${hook}`);
+    console.log(`Plugin ${this._pluginId} registered hook: ${hook}`);
 
-    // Register callback and send message to main app
-    const callbackId = this.registerCallback(fn);
-    this._sendMessage(PluginMessageType.REGISTER_HOOK, { hook, callbackId }).catch(
-      (error) => {
-        console.error('Failed to register hook:', error);
-      },
-    );
+    // Register hook with bridge
+    this._pluginBridge.registerHook(this._pluginId, hook, fn);
   }
 
   registerHeaderButton(label: string, icon: string, onClick: () => void): void {
     this._headerButtons.push({ label, icon, onClick });
-    console.log(`Plugin ${this.pluginId} registered header button: ${label}`);
-
-    const callbackId = this.registerCallback(onClick);
-    this._sendMessage(PluginMessageType.REGISTER_HEADER_BUTTON, {
-      label,
-      icon,
-      callbackId,
-    }).catch((error) => {
-      console.error('Failed to register header button:', error);
-    });
+    console.log(`Plugin ${this._pluginId} registered header button: ${label}`);
+    // TODO: Implement header button registration in bridge
+    console.warn('Header button registration not yet implemented in bridge');
   }
 
   registerMenuEntry(label: string, icon: string, onClick: () => void): void {
     this._menuEntries.push({ label, icon, onClick });
-    console.log(`Plugin ${this.pluginId} registered menu entry: ${label}`);
-
-    const callbackId = this.registerCallback(onClick);
-    this._sendMessage(PluginMessageType.REGISTER_MENU_ENTRY, {
-      label,
-      icon,
-      callbackId,
-    }).catch((error) => {
-      console.error('Failed to register menu entry:', error);
-    });
+    console.log(`Plugin ${this._pluginId} registered menu entry: ${label}`);
+    // TODO: Implement menu entry registration in bridge
+    console.warn('Menu entry registration not yet implemented in bridge');
   }
 
   registerShortcut(label: string, onExec: () => void): void {
     this._shortcuts.push({ label, onExec });
-    console.log(`Plugin ${this.pluginId} registered shortcut: ${label}`);
-
-    const callbackId = this.registerCallback(onExec);
-    this._sendMessage(PluginMessageType.REGISTER_SHORTCUT, { label, callbackId }).catch(
-      (error) => {
-        console.error('Failed to register shortcut:', error);
-      },
-    );
+    console.log(`Plugin ${this._pluginId} registered shortcut: ${label}`);
+    // TODO: Implement shortcut registration in bridge
+    console.warn('Shortcut registration not yet implemented in bridge');
   }
 
   showIndexHtml(): void {
-    console.log(`Plugin ${this.pluginId} requested to show index.html`);
-    this._sendMessage(PluginMessageType.SHOW_INDEX_HTML).catch((error) => {
-      console.error('Failed to show index.html:', error);
-    });
+    console.log(`Plugin ${this._pluginId} requested to show index.html`);
+    // TODO: Implement show index html in bridge
+    console.warn('Show index html not yet implemented in bridge');
   }
 
   async getAllTasks(): Promise<TaskCopy[]> {
-    console.log(`Plugin ${this.pluginId} requested all tasks`);
-    return this._sendMessage(PluginMessageType.GET_ALL_TASKS);
+    console.log(`Plugin ${this._pluginId} requested all tasks`);
+    return this._pluginBridge.getAllTasks();
   }
 
   async getArchivedTasks(): Promise<TaskCopy[]> {
-    console.log(`Plugin ${this.pluginId} requested archived tasks`);
-    return this._sendMessage(PluginMessageType.GET_ARCHIVED_TASKS);
+    console.log(`Plugin ${this._pluginId} requested archived tasks`);
+    return this._pluginBridge.getArchivedTasks();
   }
 
   async getCurrentContextTasks(): Promise<TaskCopy[]> {
-    console.log(`Plugin ${this.pluginId} requested current context tasks`);
-    return this._sendMessage(PluginMessageType.GET_CURRENT_CONTEXT_TASKS);
+    console.log(`Plugin ${this._pluginId} requested current context tasks`);
+    return this._pluginBridge.getCurrentContextTasks();
   }
 
   async updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void> {
-    console.log(`Plugin ${this.pluginId} requested to update task ${taskId}:`, updates);
-    return this._sendMessage(PluginMessageType.UPDATE_TASK, { taskId, updates });
+    console.log(`Plugin ${this._pluginId} requested to update task ${taskId}:`, updates);
+    return this._pluginBridge.updateTask(taskId, updates);
   }
 
   showSnack(snackCfg: SnackCfgLimited): void {
-    this._sendMessage(PluginMessageType.SHOW_SNACK, { snackCfg }).catch((error) => {
-      console.error('Failed to show snack:', error);
-    });
+    this._pluginBridge.showSnack(snackCfg);
   }
 
   notify(notifyCfg: NotifyCfg): void {
-    console.log(`Plugin ${this.pluginId} requested notification:`, notifyCfg);
-    this._sendMessage(PluginMessageType.NOTIFY, { notifyCfg }).catch((error) => {
-      console.error('Failed to show notification:', error);
-    });
+    console.log(`Plugin ${this._pluginId} requested notification:`, notifyCfg);
+    this._pluginBridge.notify(notifyCfg);
   }
 
   persistDataSynced(dataStr: string): void {
-    console.log(`Plugin ${this.pluginId} requested to persist data:`, dataStr);
-    this._sendMessage(PluginMessageType.PERSIST_DATA, { dataStr }).catch((error) => {
-      console.error('Failed to persist data:', error);
-    });
+    console.log(`Plugin ${this._pluginId} requested to persist data:`, dataStr);
+    this._pluginBridge.persistDataSynced(dataStr);
   }
 
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
-    console.log(`Plugin ${this.pluginId} requested to open dialog:`, dialogCfg);
-    return this._sendMessage(PluginMessageType.OPEN_DIALOG, { dialogCfg });
+    console.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
+    return this._pluginBridge.openDialog(dialogCfg);
   }
 
   addActionBeforeCloseApp(action: () => Promise<void>): void {
     this._actionsBeforeClose.push(action);
-    console.log(`Plugin ${this.pluginId} added action before close`);
-
-    const callbackId = this.registerCallback(action);
-    this._sendMessage(PluginMessageType.ADD_ACTION_BEFORE_CLOSE, { callbackId }).catch(
-      (error) => {
-        console.error('Failed to add action before close:', error);
-      },
-    );
+    console.log(`Plugin ${this._pluginId} added action before close`);
+    this._pluginBridge.addActionBeforeCloseApp(action);
   }
 
   async getCfg<T>(): Promise<T> {
-    console.log(`Plugin ${this.pluginId} requested configuration`);
-    return this._sendMessage(PluginMessageType.GET_CONFIG);
+    console.log(`Plugin ${this._pluginId} requested configuration`);
+    return this._pluginBridge.getCfg<T>();
   }
 
   // Internal methods for the plugin system

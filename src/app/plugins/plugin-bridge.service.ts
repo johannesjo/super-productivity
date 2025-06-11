@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
-import { DialogCfg, NotifyCfg, SnackCfgLimited, TaskCopy } from './plugin-api.model';
+import {
+  DialogCfg,
+  NotifyCfg,
+  SnackCfgLimited,
+  TaskCopy,
+  Hooks,
+} from './plugin-api.model';
+import { PluginHooksService } from './plugin-hooks';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -17,6 +24,7 @@ import { DialogCfg, NotifyCfg, SnackCfgLimited, TaskCopy } from './plugin-api.mo
 export class PluginBridgeService {
   private _snackService = inject(SnackService);
   private _notifyService = inject(NotifyService);
+  private _pluginHooksService = inject(PluginHooksService);
 
   constructor() {}
 
@@ -155,5 +163,23 @@ export class PluginBridgeService {
     // TODO: Integrate with GlobalConfigService
     console.log('PluginBridge: getCfg called');
     return {} as T;
+  }
+
+  /**
+   * Register a hook handler for a plugin
+   */
+  registerHook(
+    pluginId: string,
+    hook: Hooks,
+    handler: (...args: any[]) => void | Promise<void>,
+  ): void {
+    this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
+  }
+
+  /**
+   * Unregister all hooks for a plugin
+   */
+  unregisterPluginHooks(pluginId: string): void {
+    this._pluginHooksService.unregisterPluginHooks(pluginId);
   }
 }
