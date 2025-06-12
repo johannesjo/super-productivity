@@ -26,6 +26,7 @@ export class PluginRunner {
         manifest,
         api: pluginAPI,
         loaded: false,
+        isEnabled: true, // Plugins are enabled by default when loaded
       };
 
       // Execute plugin code in a sandboxed environment
@@ -43,6 +44,7 @@ export class PluginRunner {
         manifest,
         api: new PluginAPI(baseCfg, manifest.id, this._pluginBridge),
         loaded: false,
+        isEnabled: false, // Errored plugins are disabled
         error: error instanceof Error ? error.message : 'Unknown error',
       };
       this._loadedPlugins.set(manifest.id, errorInstance);
