@@ -6,6 +6,36 @@
     </mat-card-content>
   </mat-card>
 }
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Install Plugin</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Upload a plugin ZIP file to install it:</p>
+    <input
+      #fileInput
+      type="file"
+      accept=".zip"
+      (change)="onFileSelected($event)"
+      style="display: none"
+    />
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="fileInput.click()"
+      [disabled]="isUploading()"
+    >
+      <mat-icon>upload</mat-icon>
+      {{ isUploading() ? 'Installing...' : 'Choose Plugin File' }}
+    </button>
+    @if (uploadError()) {
+      <mat-error style="margin-top: 8px; display: block">
+        {{ uploadError() }}
+      </mat-error>
+    }
+  </mat-card-content>
+</mat-card>
 <mat-card>EMPTY</mat-card>
 
 @for (plugin of allPlugins(); track plugin.manifest.id) {
