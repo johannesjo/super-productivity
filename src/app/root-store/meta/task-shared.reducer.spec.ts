@@ -52,34 +52,67 @@ describe('taskSharedMetaReducer', () => {
     projectBacklogIds: string[] = [],
     tagTaskIds: string[] = [],
     todayTaskIds: string[] = [],
-  ): RootState => ({
-    ...baseState,
-    [PROJECT_FEATURE_NAME]: {
-      ...baseState[PROJECT_FEATURE_NAME],
-      entities: {
-        ...baseState[PROJECT_FEATURE_NAME].entities,
-        project1: {
-          ...baseState[PROJECT_FEATURE_NAME].entities.project1,
-          taskIds: projectTaskIds,
-          backlogTaskIds: projectBacklogIds,
-        } as Project,
+  ): RootState => {
+    // Collect all unique task IDs
+    const allTaskIds = [
+      ...new Set([
+        ...projectTaskIds,
+        ...projectBacklogIds,
+        ...tagTaskIds,
+        ...todayTaskIds,
+      ]),
+    ];
+
+    // Create task entities
+    const taskEntities: Record<string, Task> = {};
+    const taskIds: string[] = [];
+
+    allTaskIds.forEach((taskId) => {
+      taskEntities[taskId] = createMockTask({
+        id: taskId,
+        tagIds: tagTaskIds.includes(taskId) ? ['tag1'] : [],
+        projectId:
+          projectTaskIds.includes(taskId) || projectBacklogIds.includes(taskId)
+            ? 'project1'
+            : undefined,
+      });
+      taskIds.push(taskId);
+    });
+
+    return {
+      ...baseState,
+      [TASK_FEATURE_NAME]: {
+        ...baseState[TASK_FEATURE_NAME],
+        ids: taskIds,
+        entities: taskEntities,
       },
-    },
-    [TAG_FEATURE_NAME]: {
-      ...baseState[TAG_FEATURE_NAME],
-      entities: {
-        ...baseState[TAG_FEATURE_NAME].entities,
-        tag1: {
-          ...baseState[TAG_FEATURE_NAME].entities.tag1,
-          taskIds: tagTaskIds,
-        } as Tag,
-        TODAY: {
-          ...baseState[TAG_FEATURE_NAME].entities.TODAY,
-          taskIds: todayTaskIds,
-        } as Tag,
+      [PROJECT_FEATURE_NAME]: {
+        ...baseState[PROJECT_FEATURE_NAME],
+        entities: {
+          ...baseState[PROJECT_FEATURE_NAME].entities,
+          project1: {
+            ...baseState[PROJECT_FEATURE_NAME].entities.project1,
+            taskIds: projectTaskIds,
+            backlogTaskIds: projectBacklogIds,
+          } as Project,
+        },
       },
-    },
-  });
+      [TAG_FEATURE_NAME]: {
+        ...baseState[TAG_FEATURE_NAME],
+        entities: {
+          ...baseState[TAG_FEATURE_NAME].entities,
+          tag1: {
+            ...baseState[TAG_FEATURE_NAME].entities.tag1,
+            taskIds: tagTaskIds,
+          } as Tag,
+          TODAY: {
+            ...baseState[TAG_FEATURE_NAME].entities.TODAY,
+            taskIds: todayTaskIds,
+          } as Tag,
+        },
+      },
+    };
+  };
 
   const expectStateUpdate = (
     expectedState: any,
@@ -560,19 +593,41 @@ describe('taskSharedMetaReducer', () => {
     });
   });
 
-  describe('updateTaskTags action', () => {
-    const createUpdateTagsAction = (
-      taskOverrides: Partial<Task> = {},
-      newTagIds: string[] = [],
-    ) =>
-      TaskSharedActions.updateTaskTags({
-        task: createMockTask(taskOverrides),
-        newTagIds,
+  describe('updateTask action', () => {
+    const createUpdateTaskAction = (taskId: string, changes: Partial<Task>) =>
+      TaskSharedActions.updateTask({
+        task: { id: taskId, changes },
       });
 
-    it('should add task to new tags and remove from old tags', () => {
-      const testState = createStateWithExistingTasks([], [], ['task1', 'other-task']);
-      const action = createUpdateTagsAction({}, ['tag2']);
+    it('should update task properties without affecting tags', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], ['task1']);
+      const action = createUpdateTaskAction('task1', {
+        title: 'Updated Title',
+        isDone: true,
+      });
+
+      expectStateUpdate(
+        {
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                title: 'Updated Title',
+                isDone: true,
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should add task to new tags and remove from old tags when tagIds are updated', () => {
+      const testState = createStateWithExistingTasks(
+        ['task1'],
+        [],
+        ['task1', 'other-task'],
+      );
 
       // Add tag2 to the test state
       testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
@@ -584,6 +639,8 @@ describe('taskSharedMetaReducer', () => {
         'tag2',
       ];
 
+      const action = createUpdateTaskAction('task1', { tagIds: ['tag2'] });
+
       expectStateUpdate(
         expectTagUpdates({
           tag1: { taskIds: ['other-task'] },
@@ -594,12 +651,134 @@ describe('taskSharedMetaReducer', () => {
       );
     });
 
-    it('should handle no changes when tags are the same', () => {
-      const testState = createStateWithExistingTasks([], [], ['task1']);
-      const action = createUpdateTagsAction({}, ['tag1']);
+    it('should handle adding multiple new tags', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], ['task1']);
+
+      // Add additional tags
+      testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
+        id: 'tag2',
+        title: 'Tag 2',
+      });
+      testState[TAG_FEATURE_NAME].entities.tag3 = createMockTag({
+        id: 'tag3',
+        title: 'Tag 3',
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]) = [
+        ...(testState[TAG_FEATURE_NAME].ids as string[]),
+        'tag2',
+        'tag3',
+      ];
+
+      const action = createUpdateTaskAction('task1', {
+        tagIds: ['tag1', 'tag2', 'tag3'],
+      });
 
       expectStateUpdate(
-        expectTagUpdate('tag1', { taskIds: ['task1'] }),
+        expectTagUpdates({
+          tag1: { taskIds: ['task1'] },
+          tag2: { taskIds: ['task1'] },
+          tag3: { taskIds: ['task1'] },
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle removing all tags', () => {
+      const testState = createStateWithExistingTasks(
+        ['task1'],
+        [],
+        ['task1', 'other-task'],
+      );
+      const action = createUpdateTaskAction('task1', { tagIds: [] });
+
+      expectStateUpdate(
+        expectTagUpdates({
+          tag1: { taskIds: ['other-task'] },
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle no tag changes when tagIds are the same', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], ['task1']);
+      const action = createUpdateTaskAction('task1', {
+        title: 'Updated Title',
+        tagIds: ['tag1'],
+      });
+
+      expectStateUpdate(
+        {
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                title: 'Updated Title',
+                tagIds: ['tag1'],
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle updating non-existent task gracefully', () => {
+      const testState = createStateWithExistingTasks([], [], []);
+      const action = createUpdateTaskAction('non-existent', { title: 'Updated' });
+
+      expectStateUpdate(testState, action, testState);
+    });
+
+    it('should update both task properties and tags in one action', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], ['task1']);
+
+      // Add tag2
+      testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
+        id: 'tag2',
+        title: 'Tag 2',
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]) = [
+        ...(testState[TAG_FEATURE_NAME].ids as string[]),
+        'tag2',
+      ];
+
+      const action = createUpdateTaskAction('task1', {
+        title: 'Updated Title',
+        isDone: true,
+        tagIds: ['tag2'],
+      });
+
+      expectStateUpdate(
+        {
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              tag2: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                title: 'Updated Title',
+                isDone: true,
+                tagIds: ['tag2'],
+              }),
+            }),
+          }),
+        },
         action,
         testState,
       );

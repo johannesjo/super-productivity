@@ -7,6 +7,12 @@ import {
   projectAdapter,
 } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
+import { TASK_FEATURE_NAME, taskAdapter } from '../../features/tasks/store/task.reducer';
+import {
+  updateTimeSpentForTask,
+  updateTimeEstimateForTask,
+  updateDoneOnForTask,
+} from '../../features/tasks/store/task.reducer.util';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
@@ -86,11 +92,11 @@ export const taskSharedMetaReducer: MetaReducer = (
         const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
         return handleUnScheduleTask(rootState, id);
       },
-      [TaskSharedActions.updateTaskTags.type]: () => {
-        const { task, newTagIds = [] } = action as ReturnType<
-          typeof TaskSharedActions.updateTaskTags
+      [TaskSharedActions.updateTask.type]: () => {
+        const { task, isIgnoreShortSyntax } = action as ReturnType<
+          typeof TaskSharedActions.updateTask
         >;
-        return handleUpdateTaskTags(rootState, task, newTagIds);
+        return handleUpdateTask(rootState, task, isIgnoreShortSyntax);
       },
       [TaskSharedActions.deleteProject.type]: () => {
         const { allTaskIds } = action as ReturnType<
@@ -379,12 +385,51 @@ const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
   ]);
 };
 
-const handleUpdateTaskTags = (
+const handleUpdateTask = (
   state: RootState,
-  task: { id: string; tagIds: string[] },
+  taskUpdate: Update<Task>,
+  isIgnoreShortSyntax?: boolean,
+): RootState => {
+  const taskId = taskUpdate.id as string;
+  const currentTask = state[TASK_FEATURE_NAME].entities[taskId] as Task;
+
+  if (!currentTask) {
+    return state;
+  }
+
+  let updatedState = state;
+
+  // Handle tag changes if tagIds are being updated
+  if (taskUpdate.changes.tagIds) {
+    const oldTagIds = currentTask.tagIds;
+    const newTagIds = taskUpdate.changes.tagIds;
+
+    updatedState = handleTagUpdates(updatedState, taskId, oldTagIds, newTagIds);
+  }
+
+  // Handle task state updates using existing task reducer logic
+  let taskState = updatedState[TASK_FEATURE_NAME];
+  const { timeSpentOnDay, timeEstimate } = taskUpdate.changes;
+
+  taskState = timeSpentOnDay
+    ? updateTimeSpentForTask(taskId, timeSpentOnDay, taskState)
+    : taskState;
+  taskState = updateTimeEstimateForTask(taskUpdate, timeEstimate, taskState);
+  taskState = updateDoneOnForTask(taskUpdate, taskState);
+  taskState = taskAdapter.updateOne(taskUpdate, taskState);
+
+  return {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: taskState,
+  };
+};
+
+const handleTagUpdates = (
+  state: RootState,
+  taskId: string,
+  oldTagIds: string[],
   newTagIds: string[],
 ): RootState => {
-  const { id: taskId, tagIds: oldTagIds } = task;
   const tagsToRemoveFrom = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
   const tagsToAddTo = newTagIds.filter((newId) => !oldTagIds.includes(newId));
 
