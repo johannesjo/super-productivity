@@ -24,7 +24,8 @@ import { IssueService } from '../../issue.service';
 import { JIRA_TYPE } from '../../issue.const';
 import { T } from '../../../../t.const';
 import { JiraTransitionOption } from './jira.model';
-import { setCurrentTask, updateTask } from '../../../tasks/store/task.actions';
+import { setCurrentTask } from '../../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../tasks/store/task-shared.actions';
 import { DialogJiraAddWorklogComponent } from './jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import { selectCurrentTaskParentOrCurrent } from '../../../tasks/store/task.selectors';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
@@ -49,7 +50,7 @@ export class JiraIssueEffects {
   addWorkLog$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
         concatMap((task) =>
@@ -225,7 +226,7 @@ export class JiraIssueEffects {
   checkForDoneTransition$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task }): boolean => !!task.changes.isDone),
         // NOTE: as this is only a partial object we need to get the full one
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),

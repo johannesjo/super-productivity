@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { restoreTask, updateTask } from './task.actions';
+import { restoreTask } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
@@ -61,7 +62,7 @@ export class TaskRelatedModelEffects {
   autoAddTodayTagOnMarkAsDone: any = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter((a) => a.task.changes.isDone === true),
         switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => !task.parentId),
@@ -84,7 +85,7 @@ export class TaskRelatedModelEffects {
         ({ src, target }) => (src === 'DONE' || src === 'BACKLOG') && target === 'UNDONE',
       ),
       map(({ taskId }) =>
-        updateTask({
+        TaskSharedActions.updateTask({
           task: {
             id: taskId,
             changes: {
@@ -103,7 +104,7 @@ export class TaskRelatedModelEffects {
         ({ src, target }) => (src === 'UNDONE' || src === 'BACKLOG') && target === 'DONE',
       ),
       map(({ taskId }) =>
-        updateTask({
+        TaskSharedActions.updateTask({
           task: {
             id: taskId,
             changes: {

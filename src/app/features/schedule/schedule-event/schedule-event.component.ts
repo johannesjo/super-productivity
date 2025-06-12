@@ -31,7 +31,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
-import { deleteTask, updateTask } from '../../tasks/store/task.actions';
+import { deleteTask } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../tasks/store/task-shared.actions';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -287,7 +288,7 @@ export class ScheduleEventComponent implements OnInit {
 
   markAsDone(): void {
     this._store.dispatch(
-      updateTask({
+      TaskSharedActions.updateTask({
         task: {
           id: this.task.id,
           changes: {
@@ -300,7 +301,7 @@ export class ScheduleEventComponent implements OnInit {
 
   markAsUnDone(): void {
     this._store.dispatch(
-      updateTask({
+      TaskSharedActions.updateTask({
         task: {
           id: this.task.id,
           changes: {
