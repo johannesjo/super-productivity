@@ -3,7 +3,6 @@ import { Task, TaskState } from '../task.model';
 import { initialTaskState, taskReducer } from './task.reducer';
 import * as fromActions from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { WorkContextType } from '../../work-context/work-context.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 
 describe('Task Reducer', () => {
@@ -53,34 +52,46 @@ describe('Task Reducer', () => {
     });
   });
 
-  describe('Task CRUD operations', () => {
-    it('should add a task', () => {
-      const newTask = createTask('task3');
-      const action = TaskSharedActions.addTask({
-        task: newTask,
-        isAddToBacklog: false,
-        isAddToBottom: false,
-        workContextId: 'XXX',
-        workContextType: WorkContextType.TAG,
+  describe('Task operations still handled by task reducer', () => {
+    it('should handle unknown actions by returning current state', () => {
+      const unknownAction = { type: 'UNKNOWN_ACTION' } as any;
+      const state = taskReducer(stateWithTasks, unknownAction);
+
+      expect(state).toBe(stateWithTasks);
+    });
+
+    it('should handle restored tasks', () => {
+      const restoredTask = createTask('restored-task');
+      const action = fromActions.restoreTask({
+        task: restoredTask,
+        subTasks: [],
       });
       const state = taskReducer(initialTaskState, action);
 
-      expect(state.ids).toContain('task3');
-      expect(state.entities['task3']).toEqual(newTask);
+      expect(state.ids).toContain('restored-task');
+      expect(state.entities['restored-task']).toEqual(
+        jasmine.objectContaining({
+          id: 'restored-task',
+          isDone: false,
+          doneOn: undefined,
+        }),
+      );
+    });
+  });
+
+  describe('Note: CRUD operations moved to meta-reducer', () => {
+    it('should note that addTask is now handled by TaskSharedActions in meta-reducer', () => {
+      // This test documents that addTask has been moved to the meta-reducer
+      // and is no longer handled directly by the task reducer.
+      // See task-shared.reducer.spec.ts for comprehensive addTask tests.
+      expect(TaskSharedActions.addTask).toBeDefined();
     });
 
-    it('should delete a task', () => {
-      const action = TaskSharedActions.deleteTask({
-        task: {
-          ...createTask('asd'),
-          id: 'task2',
-          subTasks: [],
-        },
-      });
-      const state = taskReducer(stateWithTasks, action);
-
-      expect(state.ids).not.toContain('task2');
-      expect(state.entities['task2']).toBeUndefined();
+    it('should note that deleteTask is now handled by TaskSharedActions in meta-reducer', () => {
+      // This test documents that deleteTask has been moved to the meta-reducer
+      // and is no longer handled directly by the task reducer.
+      // See task-shared.reducer.spec.ts for comprehensive deleteTask tests.
+      expect(TaskSharedActions.deleteTask).toBeDefined();
     });
   });
 
