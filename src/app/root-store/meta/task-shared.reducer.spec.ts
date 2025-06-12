@@ -19,17 +19,19 @@ import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
-import { ActionReducer, Action } from '@ngrx/store';
+import { Action, ActionReducer } from '@ngrx/store';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { WorklogGrouping } from '../../features/worklog/worklog.model';
+import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { DEFAULT_TAG } from '../../features/tag/tag.const';
 
 describe('taskSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
-  let metaReducer: ActionReducer<RootState, Action>;
+  let metaReducer: ActionReducer<any, Action>;
   let initialState: Partial<RootState>;
 
   beforeEach(() => {
@@ -37,49 +39,16 @@ describe('taskSharedMetaReducer', () => {
     metaReducer = taskSharedMetaReducer(mockReducer);
 
     const mockProject: Project = {
+      ...DEFAULT_PROJECT,
       id: 'project1',
       title: 'Test Project',
-      isArchived: false,
-      isHiddenFromMenu: false,
       isEnableBacklog: true,
-      taskIds: [],
-      backlogTaskIds: [],
-      noteIds: [],
-      advancedCfg: {
-        worklogExportSettings: {
-          cols: [],
-          roundWorkTimeTo: null,
-          roundStartTimeTo: null,
-          roundEndTimeTo: null,
-          separateTasksBy: '',
-          groupBy: WorklogGrouping.DATE,
-        },
-      },
-      theme: {
-        primary: '#000000',
-      },
-      icon: null,
     };
 
     const mockTag: Tag = {
+      ...DEFAULT_TAG,
       id: 'tag1',
       title: 'Test Tag',
-      color: '#000000',
-      created: Date.now(),
-      taskIds: [],
-      advancedCfg: {
-        worklogExportSettings: {
-          cols: [],
-          roundWorkTimeTo: null,
-          roundStartTimeTo: null,
-          roundEndTimeTo: null,
-          separateTasksBy: '',
-          groupBy: WorklogGrouping.DATE,
-        },
-      },
-      theme: {
-        primary: '#000000',
-      },
     };
 
     initialState = {
@@ -160,17 +129,11 @@ describe('taskSharedMetaReducer', () => {
 
     it('should add task to project backlogTaskIds when adding to backlog', () => {
       const mockTask: Task = {
+        ...DEFAULT_TASK,
         id: 'task1',
         title: 'Test Task',
-        created: Date.now(),
-        isDone: false,
         tagIds: ['tag1'],
         projectId: 'project1',
-        subTaskIds: [],
-        timeSpentOnDay: {},
-        timeSpent: 0,
-        timeEstimate: 0,
-        attachments: [],
       };
 
       const action = addTask({
