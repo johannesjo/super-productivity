@@ -85,11 +85,21 @@ export class PluginManagementComponent implements OnInit, OnDestroy {
     this.loadPlugins(); // Refresh the list
   }
 
-  reloadPlugin(plugin: PluginInstance): void {
+  async reloadPlugin(plugin: PluginInstance): Promise<void> {
     console.log('Reloading plugin:', plugin.manifest.id);
-    this._pluginService.unloadPlugin(plugin.manifest.id);
-    // TODO: Implement plugin reload functionality
-    // For now, just refresh the list
+
+    try {
+      const success = await this._pluginService.reloadPlugin(plugin.manifest.id);
+      if (success) {
+        console.log('Plugin reloaded successfully:', plugin.manifest.id);
+      } else {
+        console.error('Failed to reload plugin:', plugin.manifest.id);
+      }
+    } catch (error) {
+      console.error('Failed to reload plugin:', error);
+    }
+
+    // Refresh the UI
     this.loadPlugins();
   }
 
