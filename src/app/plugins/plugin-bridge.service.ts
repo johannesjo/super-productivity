@@ -18,6 +18,7 @@ import { TagService } from '../features/tag/tag.service';
 import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
+import { PluginPersistenceService } from './plugin-persistence.service';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -38,6 +39,7 @@ export class PluginBridgeService {
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
+  private _pluginPersistenceService = inject(PluginPersistenceService);
 
   constructor() {}
 
@@ -244,9 +246,8 @@ export class PluginBridgeService {
   async persistDataSynced(dataStr: string): Promise<void> {
     typia.assert<string>(dataStr);
 
-    // TODO use pfapi for this
     try {
-      localStorage.setItem('plugin-data', dataStr);
+      await this._pluginPersistenceService.persistDataSynced(dataStr);
       console.log('PluginBridge: Plugin data persisted successfully');
     } catch (error) {
       console.error('PluginBridge: Failed to persist plugin data:', error);
@@ -258,9 +259,8 @@ export class PluginBridgeService {
    * Get persisted plugin data
    */
   async loadPersistedData(): Promise<string | null> {
-    // TODO use pfapi for this
     try {
-      return localStorage.getItem('plugin-data');
+      return await this._pluginPersistenceService.loadPersistedData();
     } catch (error) {
       console.error('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
