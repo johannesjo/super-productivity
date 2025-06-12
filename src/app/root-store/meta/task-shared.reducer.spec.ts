@@ -1,21 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { taskSharedMetaReducer } from './task-shared.reducer';
-import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  deleteTasks,
-  moveToArchive_,
-  restoreTask,
-  scheduleTaskWithTime,
-  unScheduleTask,
-  updateTaskTags,
-} from '../../features/tasks/store/task.actions';
-import { deleteProject } from '../../features/project/store/project.actions';
-import {
-  planTasksForToday,
-  removeTasksFromTodayTag,
-} from '../../features/tag/store/tag.actions';
+import { TaskSharedActions } from './task-shared.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -186,7 +171,7 @@ describe('taskSharedMetaReducer', () => {
       taskOverrides: Partial<Task> = {},
       actionOverrides = {},
     ) =>
-      addTask({
+      TaskSharedActions.addTask({
         task: createMockTask(taskOverrides),
         workContextId: 'project1',
         workContextType: WorkContextType.PROJECT,
@@ -258,7 +243,7 @@ describe('taskSharedMetaReducer', () => {
       taskOverrides: Partial<Task> = {},
       actionOverrides = {},
     ) =>
-      convertToMainTask({
+      TaskSharedActions.convertToMainTask({
         task: createMockTask(taskOverrides),
         parentTagIds: ['tag1'],
         isPlanForToday: false,
@@ -310,7 +295,7 @@ describe('taskSharedMetaReducer', () => {
 
   describe('deleteTask action', () => {
     const createDeleteAction = (taskOverrides: Partial<TaskWithSubTasks> = {}) =>
-      deleteTask({
+      TaskSharedActions.deleteTask({
         task: {
           ...createMockTask(),
           subTasks: [],
@@ -375,7 +360,9 @@ describe('taskSharedMetaReducer', () => {
         ['task1', 'task2', 'other-task'],
         ['task1', 'task3', 'today-task'],
       );
-      const action = deleteTasks({ taskIds: ['task1', 'task2', 'task3'] });
+      const action = TaskSharedActions.deleteTasks({
+        taskIds: ['task1', 'task2', 'task3'],
+      });
 
       expectStateUpdate(
         expectTagUpdates({
@@ -388,7 +375,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should handle empty taskIds array', () => {
-      const action = deleteTasks({ taskIds: [] });
+      const action = TaskSharedActions.deleteTasks({ taskIds: [] });
 
       expectStateUpdate(
         expectTagUpdates({
@@ -402,7 +389,7 @@ describe('taskSharedMetaReducer', () => {
 
   describe('moveToArchive_ action', () => {
     const createArchiveAction = (tasks: Partial<TaskWithSubTasks>[] = []) =>
-      moveToArchive_({
+      TaskSharedActions.moveToArchive({
         tasks: tasks.map(
           (t) =>
             ({
@@ -469,7 +456,7 @@ describe('taskSharedMetaReducer', () => {
       taskOverrides: Partial<Task> = {},
       subTasks: Task[] = [],
     ) =>
-      restoreTask({
+      TaskSharedActions.restoreTask({
         task: createMockTask(taskOverrides),
         subTasks,
       });
@@ -523,7 +510,7 @@ describe('taskSharedMetaReducer', () => {
       taskOverrides: Partial<Task> = {},
       dueWithTime: number,
     ) =>
-      scheduleTaskWithTime({
+      TaskSharedActions.scheduleTaskWithTime({
         task: createMockTask(taskOverrides),
         dueWithTime,
         isMoveToBacklog: false,
@@ -556,7 +543,7 @@ describe('taskSharedMetaReducer', () => {
   describe('unScheduleTask action', () => {
     it('should remove task from Today tag when task is in Today', () => {
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
-      const action = unScheduleTask({ id: 'task1' });
+      const action = TaskSharedActions.unscheduleTask({ id: 'task1' });
 
       expectStateUpdate(
         expectTagUpdate('TODAY', { taskIds: ['other-task'] }),
@@ -566,7 +553,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should not change state when task is not in Today tag', () => {
-      const action = unScheduleTask({ id: 'task1' });
+      const action = TaskSharedActions.unscheduleTask({ id: 'task1' });
 
       metaReducer(baseState, action);
       expect(mockReducer).toHaveBeenCalledWith(baseState, action);
@@ -578,7 +565,7 @@ describe('taskSharedMetaReducer', () => {
       taskOverrides: Partial<Task> = {},
       newTagIds: string[] = [],
     ) =>
-      updateTaskTags({
+      TaskSharedActions.updateTaskTags({
         task: createMockTask(taskOverrides),
         newTagIds,
       });
@@ -627,7 +614,7 @@ describe('taskSharedMetaReducer', () => {
         ['task1', 'task2', 'keep-task'],
         ['task1', 'task3', 'keep-task'],
       );
-      const action = deleteProject({
+      const action = TaskSharedActions.deleteProject({
         project: createMockProject(),
         allTaskIds: ['task1', 'task2', 'task3'],
       });
@@ -643,7 +630,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should handle empty project task lists', () => {
-      const action = deleteProject({
+      const action = TaskSharedActions.deleteProject({
         project: createMockProject(),
         allTaskIds: [],
       });
@@ -661,7 +648,7 @@ describe('taskSharedMetaReducer', () => {
   describe('planTasksForToday action', () => {
     it('should add new tasks to the top of Today tag', () => {
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
-      const action = planTasksForToday({
+      const action = TaskSharedActions.planTasksForToday({
         taskIds: ['task1', 'task2'],
         parentTaskMap: {},
       });
@@ -680,7 +667,7 @@ describe('taskSharedMetaReducer', () => {
         [],
         ['task1', 'existing-task'],
       );
-      const action = planTasksForToday({
+      const action = TaskSharedActions.planTasksForToday({
         taskIds: ['task1', 'task2'],
         parentTaskMap: {},
       });
@@ -694,7 +681,7 @@ describe('taskSharedMetaReducer', () => {
 
     it('should handle parentTaskMap filtering', () => {
       const testState = createStateWithExistingTasks([], [], [], ['parent-task']);
-      const action = planTasksForToday({
+      const action = TaskSharedActions.planTasksForToday({
         taskIds: ['subtask1', 'task2'],
         parentTaskMap: { subtask1: 'parent-task' },
       });
@@ -715,7 +702,7 @@ describe('taskSharedMetaReducer', () => {
         [],
         ['task1', 'task2', 'keep-task'],
       );
-      const action = removeTasksFromTodayTag({
+      const action = TaskSharedActions.removeTasksFromTodayTag({
         taskIds: ['task1', 'task2'],
       });
 
@@ -728,7 +715,7 @@ describe('taskSharedMetaReducer', () => {
 
     it('should handle empty taskIds array', () => {
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'task2']);
-      const action = removeTasksFromTodayTag({ taskIds: [] });
+      const action = TaskSharedActions.removeTasksFromTodayTag({ taskIds: [] });
 
       expectStateUpdate(
         expectTagUpdate('TODAY', { taskIds: ['task1', 'task2'] }),
