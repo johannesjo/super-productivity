@@ -7,6 +7,7 @@ import {
   moveToArchive_,
   restoreTask,
   scheduleTaskWithTime,
+  unScheduleTask,
 } from '../../features/tasks/store/task.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -1385,6 +1386,90 @@ describe('taskSharedMetaReducer', () => {
       metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(initialState, action);
+    });
+  });
+
+  describe('unScheduleTask action', () => {
+    it('should remove task from Today tag when task is in Today', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'other-task'],
+            },
+          },
+        },
+      };
+
+      const action = unScheduleTask({ id: 'task1' });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['other-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should not change state when task is not in Today tag', () => {
+      const action = unScheduleTask({ id: 'task1' });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(initialState, action);
+    });
+
+    it('should handle empty Today tag taskIds', () => {
+      const action = unScheduleTask({ id: 'task1' });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(initialState, action);
+    });
+
+    it('should remove only the specified task', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task2', 'task3'],
+            },
+          },
+        },
+      };
+
+      const action = unScheduleTask({ id: 'task2' });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'task3'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
     });
   });
 
