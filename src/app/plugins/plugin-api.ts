@@ -27,7 +27,6 @@ export class PluginAPI implements IPluginAPI {
     [];
   private _menuEntries: Array<{ label: string; icon: string; onClick: () => void }> = [];
   private _shortcuts: Array<{ label: string; onExec: () => void }> = [];
-  private _actionsBeforeClose: Array<() => Promise<void>> = [];
 
   constructor(
     public cfg: PluginBaseCfg,
