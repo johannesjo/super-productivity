@@ -2,7 +2,6 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
-  convertToMainTask,
   deleteTask,
   deleteTasks,
   moveToArchive_,
@@ -468,19 +467,6 @@ export const tagReducer = createReducer<TagState>(
 
   // TASK STUFF
   // ---------
-
-  on(convertToMainTask, (state, { task, parentTagIds, isPlanForToday }) => {
-    const updates: Update<Tag>[] = [
-      ...parentTagIds,
-      ...(isPlanForToday ? [TODAY_TAG.id] : []),
-    ].map((tagId) => ({
-      id: tagId,
-      changes: {
-        taskIds: [task.id, ...(state.entities[tagId] as Tag).taskIds],
-      },
-    }));
-    return tagAdapter.updateMany(updates, state);
-  }),
 
   on(deleteTask, (state, { task }) => {
     const affectedTagIds: string[] = [task, ...(task.subTasks || [])].reduce(

@@ -1,6 +1,6 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { RootState } from '../root-state';
-import { addTask } from '../../features/tasks/store/task.actions';
+import { addTask, convertToMainTask } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
 import { projectAdapter } from '../../features/project/store/project.reducer';
@@ -95,8 +95,71 @@ export const taskSharedMetaReducer = (
         return reducer(updatedState, action);
       }
 
+      case convertToMainTask.type: {
+        const { task, parentTagIds, isPlanForToday } = action as ReturnType<
+          typeof convertToMainTask
+        >;
+
+        let updatedState = updateProjectWithConvertToMainTask(state, task);
+        updatedState = updateTagsWithConvertToMainTask(
+          updatedState,
+          task,
+          parentTagIds,
+          isPlanForToday,
+        );
+
+        return reducer(updatedState, action);
+      }
+
       default:
         return reducer(state, action);
     }
+  };
+};
+
+const updateProjectWithConvertToMainTask = (
+  state: RootState,
+  task: { id: string; projectId?: string | null },
+): RootState => {
+  if (!task.projectId || !state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
+    return state;
+  }
+
+  const affectedProject = state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project;
+  return {
+    ...state,
+    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
+      {
+        id: task.projectId,
+        changes: {
+          taskIds: [task.id, ...affectedProject.taskIds],
+        },
+      },
+      state[PROJECT_FEATURE_NAME],
+    ),
+  };
+};
+
+const updateTagsWithConvertToMainTask = (
+  state: RootState,
+  task: { id: string },
+  parentTagIds: string[],
+  isPlanForToday?: boolean,
+): RootState => {
+  const tagIdsToUpdate = [...parentTagIds, ...(isPlanForToday ? [TODAY_TAG.id] : [])];
+
+  const tagUpdates: Update<Tag>[] = tagIdsToUpdate.map((tagId) => {
+    const existingTag = state[TAG_FEATURE_NAME].entities[tagId] as Tag;
+    return {
+      id: tagId,
+      changes: {
+        taskIds: [task.id, ...existingTag.taskIds],
+      },
+    };
+  });
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
   };
 };
