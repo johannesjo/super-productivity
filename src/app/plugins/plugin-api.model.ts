@@ -67,6 +67,7 @@ export interface PluginManifest {
   hooks: Hooks[];
   permissions: string[];
   iFrame?: boolean;
+  isSkipMenuEntry?: boolean;
   type?: 'standard'; // 'issueProvider'
   assets?: string[];
 }

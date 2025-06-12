@@ -137,21 +137,23 @@ export class PluginService {
         throw new Error('Failed to load plugin code');
       }
 
-      // Try to load index.html for built-in plugins (optional)
-      const indexHtmlUrl = `${pluginPath}/index.html`;
-      try {
-        const indexHtml = await this._http
-          .get(indexHtmlUrl, { responseType: 'text' })
-          .pipe(take(1))
-          .toPromise();
+      // Only try to load index.html if manifest.iFrame is true
+      if (manifest.iFrame) {
+        const indexHtmlUrl = `${pluginPath}/index.html`;
+        try {
+          const indexHtml = await this._http
+            .get(indexHtmlUrl, { responseType: 'text' })
+            .pipe(take(1))
+            .toPromise();
 
-        if (indexHtml) {
-          this._pluginIndexHtml.set(manifest.id, indexHtml);
-          console.log(`Loaded index.html for plugin ${manifest.id}`);
+          if (indexHtml) {
+            this._pluginIndexHtml.set(manifest.id, indexHtml);
+            console.log(`Loaded index.html for plugin ${manifest.id}`);
+          }
+        } catch (error) {
+          // index.html is optional, so we don't throw an error
+          console.log(`No index.html found for plugin ${manifest.id} (optional)`);
         }
-      } catch (error) {
-        // index.html is optional, so we don't throw an error
-        console.log(`No index.html found for plugin ${manifest.id} (optional)`);
       }
 
       // Validate plugin code
@@ -369,9 +371,9 @@ export class PluginService {
 
       const pluginCode = new TextDecoder().decode(pluginCodeBytes);
 
-      // Extract index.html if it exists (optional)
+      // Extract index.html if it exists (optional) and iFrame is true
       let indexHtml: string | null = null;
-      if (extractedFiles['index.html']) {
+      if (manifest.iFrame && extractedFiles['index.html']) {
         const indexHtmlBytes = extractedFiles['index.html'];
         // Validate index.html size (same as manifest for now)
         if (indexHtmlBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
