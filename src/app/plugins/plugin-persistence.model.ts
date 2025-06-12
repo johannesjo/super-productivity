@@ -1,6 +1,7 @@
 export interface DataForPlugin {
   id: string;
   data: string;
+  isEnabled?: boolean;
 }
 
 /**
