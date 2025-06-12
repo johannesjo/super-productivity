@@ -5,10 +5,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { PluginService } from '../../../plugins/plugin.service';
-import { PluginInstance } from '../../../plugins/plugin-api.model';
-import { PluginPersistenceService } from '../../../plugins/plugin-persistence.service';
-import { PluginCacheService } from '../../../plugins/plugin-cache.service';
+import { PluginService } from '../../plugin.service';
+import { PluginInstance } from '../../plugin-api.model';
+import { PluginPersistenceService } from '../../plugin-persistence.service';
+import { PluginCacheService } from '../../plugin-cache.service';
 import { CommonModule } from '@angular/common';
 import {
   MatCard,
