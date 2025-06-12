@@ -4,6 +4,7 @@ import {
   convertToMainTask,
   deleteTask,
   deleteTasks,
+  moveToArchive_,
 } from '../../features/tasks/store/task.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -802,6 +803,190 @@ describe('taskSharedMetaReducer', () => {
               }),
               TODAY: jasmine.objectContaining({
                 taskIds: ['keep-task3', 'keep-task4'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('moveToArchive_ action', () => {
+    it('should remove tasks from project taskIds and backlogTaskIds', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [PROJECT_FEATURE_NAME]: {
+          ...initialState[PROJECT_FEATURE_NAME]!,
+          entities: {
+            ...initialState[PROJECT_FEATURE_NAME]!.entities,
+            project1: {
+              ...(initialState[PROJECT_FEATURE_NAME]!.entities.project1 as Project),
+              taskIds: ['task1', 'task2', 'keep-task'],
+              backlogTaskIds: ['task1', 'backlog-task'],
+            },
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['task1', 'subtask1', 'keep-task'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'subtask1', 'today-task'],
+            },
+          },
+        },
+      };
+
+      const tasksToArchive: TaskWithSubTasks[] = [
+        {
+          id: 'task1',
+          title: 'Task 1',
+          created: Date.now(),
+          isDone: false,
+          tagIds: ['tag1'],
+          projectId: 'project1',
+          subTaskIds: ['subtask1'],
+          subTasks: [
+            {
+              id: 'subtask1',
+              tagIds: ['tag1'],
+            } as Task,
+          ],
+          timeSpentOnDay: {},
+          timeSpent: 0,
+          timeEstimate: 0,
+          attachments: [],
+        },
+        {
+          id: 'task2',
+          title: 'Task 2',
+          created: Date.now(),
+          isDone: false,
+          tagIds: [],
+          projectId: 'project1',
+          subTaskIds: [],
+          subTasks: [],
+          timeSpentOnDay: {},
+          timeSpent: 0,
+          timeEstimate: 0,
+          attachments: [],
+        },
+      ];
+
+      const action = moveToArchive_({ tasks: tasksToArchive });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+                backlogTaskIds: ['backlog-task'],
+              }),
+            }),
+          }),
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['today-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle tasks without projects', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['task1', 'keep-task'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'today-task'],
+            },
+          },
+        },
+      };
+
+      const tasksToArchive: TaskWithSubTasks[] = [
+        {
+          id: 'task1',
+          title: 'Task 1',
+          created: Date.now(),
+          isDone: false,
+          tagIds: ['tag1'],
+          projectId: '',
+          subTaskIds: [],
+          subTasks: [],
+          timeSpentOnDay: {},
+          timeSpent: 0,
+          timeEstimate: 0,
+          attachments: [],
+        },
+      ];
+
+      const action = moveToArchive_({ tasks: tasksToArchive });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['today-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty tasks array', () => {
+      const action = moveToArchive_({ tasks: [] });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+                backlogTaskIds: [],
+              }),
+            }),
+          }),
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
               }),
             }),
           }),

@@ -5,11 +5,7 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import {
-  moveToArchive_,
-  moveToOtherProject,
-  restoreTask,
-} from '../../tasks/store/task.actions';
+import { moveToOtherProject, restoreTask } from '../../tasks/store/task.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -28,12 +24,10 @@ import {
   arrayMoveToStart,
 } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
-import { unique } from '../../../util/unique';
 
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateProjectState } from '../migrate-projects-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { Task } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
   addProject,
@@ -558,26 +552,6 @@ export const projectReducer = createReducer<ProjectState>(
   // Task Actions
   // ------------
 
-  on(moveToArchive_, (state, { tasks }) => {
-    const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-    const projectIds = unique<string>(
-      tasks
-        .map((t: Task) => t.projectId || null)
-        .filter((pid: string | null) => !!pid) as string[],
-    );
-    const updates: Update<Project>[] = projectIds.map((pid: string) => ({
-      id: pid,
-      changes: {
-        taskIds: (state.entities[pid] as Project).taskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-        backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-      },
-    }));
-    return projectAdapter.updateMany(updates, state);
-  }),
   on(restoreTask, (state, { task }) => {
     if (!task.projectId) {
       return state;

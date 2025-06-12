@@ -5,6 +5,7 @@ import {
   convertToMainTask,
   deleteTask,
   deleteTasks,
+  moveToArchive_,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -12,9 +13,11 @@ import { projectAdapter } from '../../features/project/store/project.reducer';
 import { tagAdapter } from '../../features/tag/store/tag.reducer';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Update } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { unique } from '../../util/unique';
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
 
@@ -133,6 +136,15 @@ export const taskSharedMetaReducer = (
         return reducer(updatedState, action);
       }
 
+      case moveToArchive_.type: {
+        const { tasks } = action as ReturnType<typeof moveToArchive_>;
+
+        let updatedState = updateProjectsWithMoveToArchive(state, tasks);
+        updatedState = updateTagsWithMoveToArchive(updatedState, tasks);
+
+        return reducer(updatedState, action);
+      }
+
       default:
         return reducer(state, action);
     }
@@ -247,6 +259,63 @@ const updateTagsWithDeleteTasks = (state: RootState, taskIds: string[]): RootSta
       },
     }),
   );
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
+  };
+};
+
+const updateProjectsWithMoveToArchive = (
+  state: RootState,
+  tasks: TaskWithSubTasks[],
+): RootState => {
+  const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
+  const projectIds = unique<string>(
+    tasks
+      .map((t: Task) => t.projectId || null)
+      .filter((pid: string | null) => !!pid) as string[],
+  );
+  const updates: Update<Project>[] = projectIds.map((pid: string) => ({
+    id: pid,
+    changes: {
+      taskIds: (state[PROJECT_FEATURE_NAME].entities[pid] as Project).taskIds.filter(
+        (taskId) => !taskIdsToMoveToArchive.includes(taskId),
+      ),
+      backlogTaskIds: (
+        state[PROJECT_FEATURE_NAME].entities[pid] as Project
+      ).backlogTaskIds.filter((taskId) => !taskIdsToMoveToArchive.includes(taskId)),
+    },
+  }));
+  return {
+    ...state,
+    [PROJECT_FEATURE_NAME]: projectAdapter.updateMany(
+      updates,
+      state[PROJECT_FEATURE_NAME],
+    ),
+  };
+};
+
+const updateTagsWithMoveToArchive = (
+  state: RootState,
+  tasks: TaskWithSubTasks[],
+): RootState => {
+  const taskIdsToMoveToArchive = tasks.flatMap((t) => [
+    t.id,
+    ...t.subTasks.map((st) => st.id),
+  ]);
+  const tagIds = unique([
+    // always cleanup inbox and today tag
+    TODAY_TAG.id,
+    ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
+  ]);
+  const tagUpdates: Update<Tag>[] = tagIds.map((tId: string) => ({
+    id: tId,
+    changes: {
+      taskIds: (state[TAG_FEATURE_NAME].entities[tId] as Tag).taskIds.filter(
+        (taskId) => !taskIdsToMoveToArchive.includes(taskId),
+      ),
+    },
+  }));
   return {
     ...state,
     [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
