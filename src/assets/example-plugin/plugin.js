@@ -26,7 +26,22 @@ setTimeout(() => {
 }, 1000);
 
 PluginAPI.registerHeaderButton({
-  label: 'Something',
+  label: 'Hello World',
+  icon: 'celebration',
+  onClick: function (taskData) {
+    console.log('Hello World Plugin: Task completed!', taskData);
+
+    // Show a friendly message when a task is completed
+    PluginAPI.showSnack({
+      msg: '🎉 Hello World! Clicked Button',
+      type: 'SUCCESS',
+      ico: 'celebration',
+    });
+  },
+});
+
+PluginAPI.registerMenuEntry({
+  label: 'Hello World',
   icon: 'celebration',
   onClick: function (taskData) {
     console.log('Hello World Plugin: Task completed!', taskData);
