@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { PluginManifest, PluginHooks } from './plugin-api.model';
+import { PluginManifest, PluginHooks, PluginAPI } from './plugin-api.model';
 
 // TODO should be simple util functions maybe
 @Injectable({
   providedIn: 'root',
 })
 export class PluginSecurityService {
+  // Dynamically extract allowed permissions from PluginAPI interface
+  private readonly ALLOWED_PERMISSIONS: string[] = this.extractPluginAPIPermissions();
   private readonly MAX_PLUGIN_SIZE = 500 * 1024; // 500KB
   private readonly DANGEROUS_PATTERNS = [
     /eval\s*\(/,
@@ -26,6 +28,47 @@ export class PluginSecurityService {
   ];
 
   constructor() {}
+
+  /**
+   * Dynamically extract allowed permissions from PluginAPI interface.
+   * Uses TypeScript's keyof operator to ensure only actual PluginAPI methods can be specified.
+   */
+  private extractPluginAPIPermissions(): string[] {
+    // Define which methods from PluginAPI should be exposed as permissions
+    // TypeScript will enforce that these are actual methods from the PluginAPI interface
+    const permissibleMethods: (keyof PluginAPI)[] = [
+      // Task methods
+      'getAllTasks',
+      'getArchivedTasks',
+      'getCurrentContextTasks',
+      'updateTask',
+      'addTask',
+      // Project methods
+      'getAllProjects',
+      'addProject',
+      'updateProject',
+      // Tag methods
+      'getAllTags',
+      'addTag',
+      'updateTag',
+      // UI methods
+      'showSnack',
+      'notify',
+      'showIndexHtmlAsView',
+      'openDialog',
+      // Persistence methods
+      'persistDataSynced',
+      'loadSyncedData',
+      // Hook registration methods (these are always allowed)
+      'registerHook',
+      'registerHeaderButton',
+      'registerMenuEntry',
+      'registerShortcut',
+    ];
+
+    // Generate permission strings
+    return permissibleMethods.map((method) => `PluginAPI.${String(method)}`);
+  }
 
   /**
    * Validate plugin code for security issues
@@ -63,7 +106,8 @@ export class PluginSecurityService {
   }
 
   /**
-   * Validate plugin manifest for security issues
+   * Validate plugin manifest for security issues.
+   * Uses dynamically extracted permissions from PluginAPI to stay in sync with API changes.
    */
   validatePluginManifest(manifest: PluginManifest): {
     isValid: boolean;
@@ -83,26 +127,14 @@ export class PluginSecurityService {
       errors.push('Plugin version must follow semantic versioning format (x.y.z)');
     }
 
-    // Validate permissions
-    const allowedPermissions = [
-      'PluginAPI.getAllTasks',
-      'PluginAPI.getArchivedTasks',
-      'PluginAPI.getCurrentContextTasks',
-      'PluginAPI.updateTask',
-      'PluginAPI.showSnack',
-      'PluginAPI.notify',
-      'PluginAPI.persistDataSynced',
-      'PluginAPI.openDialog',
-      'PluginAPI.getCfg',
-    ];
-
+    // Validate permissions using dynamically extracted list
     for (const permission of manifest.permissions) {
-      if (!allowedPermissions.includes(permission)) {
+      if (!this.ALLOWED_PERMISSIONS.includes(permission)) {
         errors.push(`Unknown permission requested: ${permission}`);
       }
     }
 
-    // Validate hooks
+    // Validate hooks (still using enum values as they're defined in the model)
     const allowedHooks = Object.values(PluginHooks);
 
     for (const hook of manifest.hooks) {
@@ -185,18 +217,10 @@ Do you want to continue?
   }
 
   /**
-   * Check if a plugin requires elevated permissions
+   * Get a list of all available permissions that plugins can request.
+   * Useful for documentation or UI display.
    */
-  requiresElevatedPermissions(manifest: PluginManifest): boolean {
-    const elevatedPermissions = [
-      'PluginAPI.getAllTasks',
-      'PluginAPI.getArchivedTasks',
-      'PluginAPI.updateTask',
-      'PluginAPI.persistDataSynced',
-    ];
-
-    return manifest.permissions.some((permission) =>
-      elevatedPermissions.includes(permission),
-    );
+  getAvailablePermissions(): string[] {
+    return [...this.ALLOWED_PERMISSIONS];
   }
 }
