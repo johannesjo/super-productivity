@@ -148,6 +148,43 @@ export class PluginService {
     };
   }
 
+  async getAllPlugins(): Promise<PluginInstance[]> {
+    const loadedPlugins = [...this._loadedPlugins];
+    const allPluginData = await this._pluginPersistenceService.getAllPluginData();
+
+    // Update loaded plugins with persistence state
+    for (const plugin of loadedPlugins) {
+      const persistedData = allPluginData.find((data) => data.id === plugin.manifest.id);
+      plugin.isEnabled = persistedData?.isEnabled ?? true;
+    }
+
+    // Add disabled plugins that aren't loaded
+    for (const pluginData of allPluginData) {
+      const isAlreadyLoaded = loadedPlugins.some((p) => p.manifest.id === pluginData.id);
+      if (!isAlreadyLoaded && pluginData.isEnabled === false) {
+        // Create minimal PluginInstance for disabled plugins
+        loadedPlugins.push({
+          manifest: {
+            id: pluginData.id,
+            name: pluginData.id,
+            version: 'unknown',
+            manifestVersion: 1,
+            minSupVersion: 'unknown',
+            hooks: [],
+            permissions: [],
+            type: 'standard',
+          },
+          api: null as any,
+          loaded: false,
+          isEnabled: false,
+          error: undefined,
+        });
+      }
+    }
+
+    return loadedPlugins;
+  }
+
   getLoadedPlugins(): PluginInstance[] {
     return [...this._loadedPlugins];
   }
