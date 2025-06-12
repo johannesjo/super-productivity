@@ -21,6 +21,7 @@ import typia from 'typia';
 import { first } from 'rxjs/operators';
 import { PluginPersistenceService } from './plugin-persistence.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
+import { PluginMenuEntryCfg } from './plugin-api.model';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -49,6 +50,10 @@ export class PluginBridgeService {
   // Track header buttons registered by plugins
   private _headerButtons$ = new BehaviorSubject<PluginHeaderBtnCfg[]>([]);
   public readonly headerButtons$ = this._headerButtons$.asObservable();
+
+  // Track menu entries registered by plugins
+  private _menuEntries$ = new BehaviorSubject<PluginMenuEntryCfg[]>([]);
+  public readonly menuEntries$ = this._menuEntries$.asObservable();
 
   /**
    * Set the current plugin context for secure operations
@@ -317,6 +322,7 @@ export class PluginBridgeService {
 
     this._pluginHooksService.unregisterPluginHooks(pluginId);
     this._removePluginHeaderButtons(pluginId);
+    this._removePluginMenuEntries(pluginId);
   }
 
   /**
@@ -343,6 +349,30 @@ export class PluginBridgeService {
   }
 
   /**
+   * Register a menu entry for a plugin
+   */
+  registerMenuEntry(menuEntryCfg: PluginMenuEntryCfg): void {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for menu entry registration');
+    }
+
+    typia.assert<Omit<PluginMenuEntryCfg, 'pluginId'>>(menuEntryCfg);
+
+    const newMenuEntry: PluginMenuEntryCfg = {
+      ...menuEntryCfg,
+      pluginId: this._currentPluginId,
+    };
+
+    const currentEntries = this._menuEntries$.value;
+    this._menuEntries$.next([...currentEntries, newMenuEntry]);
+
+    console.log('PluginBridge: Menu entry registered', {
+      pluginId: this._currentPluginId,
+      menuEntryCfg,
+    });
+  }
+
+  /**
    * Remove all header buttons for a specific plugin
    */
   private _removePluginHeaderButtons(pluginId: string): void {
@@ -353,6 +383,17 @@ export class PluginBridgeService {
     this._headerButtons$.next(filteredButtons);
 
     console.log('PluginBridge: Header buttons removed for plugin', { pluginId });
+  }
+
+  /**
+   * Remove all menu entries for a specific plugin
+   */
+  private _removePluginMenuEntries(pluginId: string): void {
+    const currentEntries = this._menuEntries$.value;
+    const filteredEntries = currentEntries.filter((entry) => entry.pluginId !== pluginId);
+    this._menuEntries$.next(filteredEntries);
+
+    console.log('PluginBridge: Menu entries removed for plugin', { pluginId });
   }
 
   /**

@@ -13,6 +13,7 @@ import {
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
+import { PluginMenuEntryCfg } from './plugin-api.model';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
@@ -25,7 +26,7 @@ export class PluginAPI implements IPluginAPI {
     Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
   >();
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
-  private _menuEntries: Array<{ label: string; icon: string; onClick: () => void }> = [];
+  private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<{ label: string; onExec: () => void }> = [];
 
   constructor(
@@ -60,11 +61,10 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.registerHeaderButton(headerBtnCfg);
   }
 
-  registerMenuEntry(label: string, icon: string, onClick: () => void): void {
-    this._menuEntries.push({ label, icon, onClick });
-    console.log(`Plugin ${this._pluginId} registered menu entry: ${label}`);
-    // TODO: Implement menu entry registration in bridge
-    console.warn('Menu entry registration not yet implemented in bridge');
+  registerMenuEntry(menuEntryCfg: PluginMenuEntryCfg): void {
+    this._menuEntries.push({ ...menuEntryCfg, pluginId: this._pluginId });
+    console.log(`Plugin ${this._pluginId} registered menu entry`, menuEntryCfg);
+    this._pluginBridge.registerMenuEntry(menuEntryCfg);
   }
 
   registerShortcut(label: string, onExec: () => void): void {
