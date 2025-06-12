@@ -18,10 +18,7 @@ import {
 import { select, Store } from '@ngrx/store';
 import {
   addSubTask,
-  addTask,
   convertToMainTask,
-  deleteTask,
-  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
@@ -298,7 +295,7 @@ export class TaskService {
     console.log(task, additional);
 
     this._store.dispatch(
-      addTask({
+      TaskSharedActions.addTask({
         task,
         workContextId,
         workContextType,
@@ -322,11 +319,11 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks): void {
-    this._store.dispatch(deleteTask({ task }));
+    this._store.dispatch(TaskSharedActions.deleteTask({ task }));
   }
 
   removeMultipleTasks(taskIds: string[]): void {
-    this._store.dispatch(deleteTasks({ taskIds }));
+    this._store.dispatch(TaskSharedActions.deleteTasks({ taskIds }));
   }
 
   update(id: string, changedFields: Partial<Task>): void {

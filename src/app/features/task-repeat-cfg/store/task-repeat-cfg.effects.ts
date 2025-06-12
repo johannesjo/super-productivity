@@ -17,7 +17,7 @@ import {
   updateTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { Task, TaskCopy } from '../../tasks/task.model';
-import { TaskSharedActions } from '../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';

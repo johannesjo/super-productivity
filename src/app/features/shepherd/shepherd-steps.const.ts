@@ -4,8 +4,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskService } from '../tasks/task.service';
 import { delay, filter, first, map, switchMap } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
-import { addTask, deleteTask } from '../tasks/store/task.actions';
-import { TaskSharedActions } from '../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigState } from '../config/global-config.model';
 import { IS_MOUSE_PRIMARY } from '../../util/is-mouse-primary';
 import { NavigationEnd, Router } from '@angular/router';
@@ -115,7 +114,7 @@ export const SHEPHERD_STEPS = (
       },
       beforeShowPromise: () => promiseTimeout(200),
       when: twoWayObs(
-        { obs: actions$.pipe(ofType(addTask)) },
+        { obs: actions$.pipe(ofType(TaskSharedActions.addTask)) },
         {
           obs: merge(actions$.pipe(ofType(hideAddTaskBar))),
         },
@@ -405,7 +404,7 @@ export const SHEPHERD_STEPS = (
               shepherdService.hide();
             });
             actions$
-              .pipe(ofType(deleteTask), first())
+              .pipe(ofType(TaskSharedActions.deleteTask), first())
               .subscribe(() => shepherdService.next());
           },
           hide: () => {
@@ -654,7 +653,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         {
           obs: actions$.pipe(
-            ofType(addTask),
+            ofType(TaskSharedActions.addTask),
             switchMap(() =>
               workContextService.todaysTasks$.pipe(filter((tasks) => tasks.length >= 4)),
             ),

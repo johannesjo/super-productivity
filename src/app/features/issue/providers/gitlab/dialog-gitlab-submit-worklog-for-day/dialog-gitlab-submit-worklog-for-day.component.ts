@@ -17,7 +17,7 @@ import { SnackService } from '../../../../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { msToString, MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
-import { TaskSharedActions } from '../../../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../../../root-store/meta/task-shared.actions';
 import { assertTruthy } from '../../../../../util/assert-truthy';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';

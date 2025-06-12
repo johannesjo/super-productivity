@@ -1,9 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Task, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
-import { IssueDataReduced } from '../../issue/issue.model';
 import { RoundTimeOption } from '../../project/project.model';
-import { WorkContextType } from '../../work-context/work-context.model';
 
 enum TaskActionTypes {
   'SetCurrentTask' = '[Task] SetCurrentTask',
@@ -11,14 +9,11 @@ enum TaskActionTypes {
   'UnsetCurrentTask' = '[Task] UnsetCurrentTask',
 
   // Task Actions
-  'AddTask' = '[Task][Issue] Add Task',
   'UpdateTaskUi' = '[Task] Update Task Ui',
   'RemoveTagsForAllTasks' = '[Task] Remove Tags from all Tasks',
   'ToggleTaskHideSubTasks' = '[Task] Toggle Show Sub Tasks',
   'UpdateMTasksSimple' = '[Task] Update multiple Tasks (simple)',
   'UpdateTasks' = '[Task] Update Tasks',
-  'DeleteTask' = '[Task] Delete Task',
-  'DeleteTasks' = '[Task] Delete Tasks',
   'DeleteMainTasks' = '[Task] Delete Main Tasks',
   'UndoDeleteTask' = '[Task] Undo Delete Task',
   'MoveSubTask' = '[Task] Move sub task',
@@ -68,19 +63,6 @@ export const setSelectedTask = createAction(
 
 export const unsetCurrentTask = createAction(TaskActionTypes.UnsetCurrentTask);
 
-export const addTask = createAction(
-  TaskActionTypes.AddTask,
-  props<{
-    task: Task;
-    issue?: IssueDataReduced;
-    workContextId: string;
-    workContextType: WorkContextType;
-    isAddToBacklog: boolean;
-    isAddToBottom: boolean;
-    isIgnoreShortSyntax?: boolean;
-  }>(),
-);
-
 export const addReminderIdToTask = createAction(
   TaskActionTypes.AddReminderIdToTask,
   props<{
@@ -115,17 +97,6 @@ export const toggleTaskHideSubTasks = createAction(
 export const updateTasks = createAction(
   TaskActionTypes.UpdateTasks,
   props<{ tasks: Update<Task>[] }>(),
-);
-
-export const deleteTask = createAction(
-  TaskActionTypes.DeleteTask,
-  props<{ task: TaskWithSubTasks }>(),
-);
-
-// NOTE: does not automatically account for sub tasks!!!
-export const deleteTasks = createAction(
-  TaskActionTypes.DeleteTasks,
-  props<{ taskIds: string[] }>(),
 );
 
 export const undoDeleteTask = createAction(TaskActionTypes.UndoDeleteTask);

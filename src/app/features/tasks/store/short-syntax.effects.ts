@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addNewTagsFromShortSyntax,
-  addTask,
   moveToOtherProject,
   scheduleTaskWithTime,
 } from './task.actions';
@@ -54,7 +53,7 @@ export class ShortSyntaxEffects {
 
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(addTask, TaskSharedActions.updateTask),
+      ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;
@@ -121,7 +120,7 @@ export class ShortSyntaxEffects {
           !task.projectId &&
           !task.parentId &&
           task.projectId !== defaultProjectId &&
-          originalAction.type === addTask.type;
+          originalAction.type === TaskSharedActions.addTask.type;
 
         if (!r) {
           if (isAddDefaultProjectIfNecessary) {

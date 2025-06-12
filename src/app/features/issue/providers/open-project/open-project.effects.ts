@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { setCurrentTask } from '../../../tasks/store/task.actions';
-import { TaskSharedActions } from '../../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { OPEN_PROJECT_TYPE } from '../../issue.const';

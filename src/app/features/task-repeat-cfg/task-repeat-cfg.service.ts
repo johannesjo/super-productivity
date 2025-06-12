@@ -28,7 +28,8 @@ import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
-import { addTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
+import { scheduleTaskWithTime } from '../tasks/store/task.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -157,7 +158,7 @@ export class TaskRepeatCfgService {
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<
     (
-      | ReturnType<typeof addTask>
+      | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTaskWithTime>
     )[]
@@ -191,11 +192,11 @@ export class TaskRepeatCfgService {
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
     const createNewActions: (
-      | ReturnType<typeof addTask>
+      | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof scheduleTaskWithTime>
     )[] = [
-      addTask({
+      TaskSharedActions.addTask({
         task: {
           ...task,
           // NOTE if moving this to top isCreateNew check above would not work as intended
