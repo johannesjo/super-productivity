@@ -92,7 +92,7 @@ export interface PluginAPI {
   openDialog(dialogCfg: DialogCfg): Promise<void>;
 
   // tasks
-  getAllTasks(): Promise<TaskCopy[]>;
+  getTasks(): Promise<TaskCopy[]>;
 
   getArchivedTasks(): Promise<TaskCopy[]>;
 

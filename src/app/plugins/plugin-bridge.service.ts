@@ -7,6 +7,7 @@ import {
   DialogCfg,
   Hooks,
   NotifyCfg,
+  PluginMenuEntryCfg,
   SnackCfgLimited,
 } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
@@ -21,7 +22,7 @@ import typia from 'typia';
 import { first } from 'rxjs/operators';
 import { PluginPersistenceService } from './plugin-persistence.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
-import { PluginMenuEntryCfg } from './plugin-api.model';
+import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -43,6 +44,7 @@ export class PluginBridgeService {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _pluginPersistenceService = inject(PluginPersistenceService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   // Track which plugin is currently making calls to prevent cross-plugin access
   private _currentPluginId: string | null = null;
@@ -117,7 +119,7 @@ export class PluginBridgeService {
   /**
    * Get all tasks
    */
-  async getAllTasks(): Promise<TaskCopy[]> {
+  async getTasks(): Promise<TaskCopy[]> {
     const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
     return tasks || [];
   }
@@ -126,10 +128,26 @@ export class PluginBridgeService {
    * Get archived tasks
    */
   async getArchivedTasks(): Promise<TaskCopy[]> {
-    // TaskService doesn't have allArchivedTasks$, so we'll return empty for now
-    // TODO: Implement archived tasks retrieval when available
-    console.log('PluginBridge: getArchivedTasks called - not yet implemented');
-    return [];
+    try {
+      const taskArchive = await this._taskArchiveService.load();
+
+      // Convert the archive format to TaskCopy array
+      const archivedTasks: TaskCopy[] = taskArchive.ids.map((id) => {
+        const task = taskArchive.entities[id];
+        if (!task) {
+          throw new Error(`Archived task with id ${id} not found in entities`);
+        }
+        return task as TaskCopy;
+      });
+
+      console.log('PluginBridge: Retrieved archived tasks', {
+        count: archivedTasks.length,
+      });
+      return archivedTasks;
+    } catch (error) {
+      console.error('PluginBridge: Failed to load archived tasks:', error);
+      return [];
+    }
   }
 
   /**
