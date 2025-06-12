@@ -8,6 +8,7 @@ import {
   moveToArchive_,
   restoreTask,
   scheduleTaskWithTime,
+  unScheduleTask,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -161,6 +162,14 @@ export const taskSharedMetaReducer = (
         const { task, dueWithTime } = action as ReturnType<typeof scheduleTaskWithTime>;
 
         const updatedState = updateTagsWithScheduleTaskWithTime(state, task, dueWithTime);
+
+        return reducer(updatedState, action);
+      }
+
+      case unScheduleTask.type: {
+        const { id } = action as ReturnType<typeof unScheduleTask>;
+
+        const updatedState = updateTagsWithUnScheduleTask(state, id);
 
         return reducer(updatedState, action);
       }
@@ -436,6 +445,27 @@ const updateTagsWithScheduleTaskWithTime = (
           id: TODAY_TAG.id,
           changes: {
             taskIds: todayTag.taskIds.filter((id) => id !== task.id),
+          },
+        },
+        state[TAG_FEATURE_NAME],
+      ),
+    };
+  }
+
+  return state;
+};
+
+const updateTagsWithUnScheduleTask = (state: RootState, taskId: string): RootState => {
+  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
+
+  if (todayTag.taskIds.includes(taskId)) {
+    return {
+      ...state,
+      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((id) => id !== taskId),
           },
         },
         state[TAG_FEATURE_NAME],

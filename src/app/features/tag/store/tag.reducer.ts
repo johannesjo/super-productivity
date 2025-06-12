@@ -1,7 +1,7 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
-import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
+import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
@@ -138,23 +138,6 @@ export const tagReducer = createReducer<TagState>(
       },
     }));
     return tagAdapter.updateMany(updates, state);
-  }),
-
-  on(unScheduleTask, (state, { id }) => {
-    const taskId = id;
-    const todayTag = state.entities[TODAY_TAG.id] as Tag;
-    if (todayTag.taskIds.includes(taskId)) {
-      return tagAdapter.updateOne(
-        {
-          id: todayTag.id,
-          changes: {
-            taskIds: todayTag.taskIds.filter((tId) => tId !== taskId),
-          },
-        },
-        state,
-      );
-    }
-    return state;
   }),
 
   on(
