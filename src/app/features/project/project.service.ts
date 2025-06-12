@@ -142,16 +142,18 @@ export class ProjectService {
     return this._store$.pipe(select(selectProjectById, { id }));
   }
 
-  add(project: Partial<Project>): void {
+  add(project: Partial<Project>): string {
+    const id = nanoid();
     this._store$.dispatch(
       addProject({
         project: {
           ...DEFAULT_PROJECT,
           ...project,
-          id: nanoid(),
+          id,
         },
       }),
     );
+    return id;
   }
 
   upsert(project: Partial<Project>): void {
