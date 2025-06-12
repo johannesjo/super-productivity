@@ -24,8 +24,7 @@ import {
   unsetCurrentTask,
   updateTaskUi,
 } from './task.actions';
-import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { DEFAULT_TASK, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
+import { Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {
@@ -190,16 +189,6 @@ export const taskReducer = createReducer<TaskState>(
 
   // Task Actions
   // ------------
-  on(TaskSharedActions.addTask, (state, { task }) => {
-    const newTask = {
-      // NOTE we also need to do it here to avoid problems with undefined stuff
-      ...DEFAULT_TASK,
-      ...task,
-      timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
-    };
-    return taskAdapter.addOne(newTask, state);
-  }),
-
   on(__updateMultipleTaskSimple, (state, { taskUpdates }) => {
     return taskAdapter.updateMany(taskUpdates, state);
   }),
@@ -269,23 +258,6 @@ export const taskReducer = createReducer<TaskState>(
       },
       state,
     );
-  }),
-
-  on(TaskSharedActions.deleteTask, (state, { task }) => {
-    return deleteTaskHelper(state, task);
-  }),
-
-  on(TaskSharedActions.deleteTasks, (state, { taskIds }) => {
-    const allIds = taskIds.reduce((acc: string[], id: string) => {
-      return [...acc, id, ...getTaskById(id, state).subTaskIds];
-    }, []);
-    const newState = taskAdapter.removeMany(allIds, state);
-    return state.currentTaskId && taskIds.includes(state.currentTaskId)
-      ? {
-          ...newState,
-          currentTaskId: null,
-        }
-      : newState;
   }),
 
   on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, newOrderedIds }) => {
