@@ -1,0 +1,65 @@
+<div class="plugin-index-container">
+  <!-- Header -->
+  <div class="header">
+    <button
+      mat-button
+      (click)="goBack()"
+      class="back-button"
+    >
+      <mat-icon>arrow_back</mat-icon>
+      Back to Plugin Management
+    </button>
+    <h2>Plugin: {{ pluginId() }}</h2>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <mat-card class="loading-card">
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="40"
+          ></mat-progress-spinner>
+          <p>Loading plugin interface...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <mat-card class="error-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon color="warn">error</mat-icon>
+          Error Loading Plugin
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ error() }}</p>
+        <button
+          mat-button
+          color="primary"
+          (click)="goBack()"
+        >
+          Go Back
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Plugin iframe -->
+  @if (iframeSrc() && !isLoading() && !error()) {
+    <div class="iframe-container">
+      <iframe
+        #iframe
+        [src]="iframeSrc()"
+        (load)="onIframeLoad()"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+        class="plugin-iframe"
+      >
+      </iframe>
+    </div>
+  }
+</div>
