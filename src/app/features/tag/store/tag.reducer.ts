@@ -1,7 +1,6 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
-import { updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
@@ -239,26 +238,6 @@ export const tagReducer = createReducer<TagState>(
     }
 
     return state;
-  }),
-
-  on(updateTaskTags, (state, { newTagIds = [], task }) => {
-    const taskId = task.id;
-    const oldTagIds = task.tagIds;
-    const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
-    const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
-    const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
-      id: tagId,
-      changes: {
-        taskIds: (state.entities[tagId] as Tag).taskIds.filter((id) => id !== taskId),
-      },
-    }));
-    const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
-      id: tagId,
-      changes: {
-        taskIds: unique([taskId, ...(state.entities[tagId] as Tag).taskIds]),
-      },
-    }));
-    return tagAdapter.updateMany([...removeFrom, ...addTo], state);
   }),
 
   // REGULAR ACTIONS

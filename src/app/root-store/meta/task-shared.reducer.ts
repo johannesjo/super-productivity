@@ -9,6 +9,7 @@ import {
   restoreTask,
   scheduleTaskWithTime,
   unScheduleTask,
+  updateTaskTags,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -170,6 +171,14 @@ export const taskSharedMetaReducer = (
         const { id } = action as ReturnType<typeof unScheduleTask>;
 
         const updatedState = updateTagsWithUnScheduleTask(state, id);
+
+        return reducer(updatedState, action);
+      }
+
+      case updateTaskTags.type: {
+        const { newTagIds = [], task } = action as ReturnType<typeof updateTaskTags>;
+
+        const updatedState = updateTagsWithUpdateTaskTags(state, task, newTagIds);
 
         return reducer(updatedState, action);
       }
@@ -474,4 +483,42 @@ const updateTagsWithUnScheduleTask = (state: RootState, taskId: string): RootSta
   }
 
   return state;
+};
+
+const updateTagsWithUpdateTaskTags = (
+  state: RootState,
+  task: { id: string; tagIds: string[] },
+  newTagIds: string[],
+): RootState => {
+  const taskId = task.id;
+  const oldTagIds = task.tagIds;
+  const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
+  const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+
+  const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
+    id: tagId,
+    changes: {
+      taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
+        (id) => id !== taskId,
+      ),
+    },
+  }));
+
+  const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
+    id: tagId,
+    changes: {
+      taskIds: unique([
+        taskId,
+        ...(state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds,
+      ]),
+    },
+  }));
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(
+      [...removeFrom, ...addTo],
+      state[TAG_FEATURE_NAME],
+    ),
+  };
 };
