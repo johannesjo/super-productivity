@@ -1,0 +1,14 @@
+{
+  "name": "Test Upload Plugin",
+  "id": "test-upload-plugin",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "13.0.0",
+  "description": "A minimal test plugin for e2e upload testing",
+  "hooks": ["taskComplete"],
+  "permissions": ["PluginAPI.showSnack", "PluginAPI.getTasks"],
+  "iFrame": false,
+  "isSkipMenuEntry": true,
+  "type": "standard",
+  "assets": []
+}
