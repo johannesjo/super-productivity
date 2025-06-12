@@ -11,7 +11,6 @@ export enum PluginHooks {
   TASK_DELETE = 'taskDelete',
   FINISH_DAY = 'finishDay',
   LANGUAGE_CHANGE = 'languageChange',
-  CFG_CHANGE = 'cfgChange',
   PERSISTED_DATA_UPDATE = 'persistedDataUpdate',
   ACTION = 'action',
 

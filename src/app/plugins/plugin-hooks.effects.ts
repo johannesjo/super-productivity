@@ -5,21 +5,19 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 
 import {
+  addTask,
   deleteTask,
   deleteTasks,
   updateTask,
-  addTask,
 } from '../features/tasks/store/task.actions';
 import { selectTaskById } from '../features/tasks/store/task.selectors';
 import { Task } from '../features/tasks/task.model';
 import { PluginService } from './plugin.service';
 import { PluginHooks } from './plugin-api.model';
-import { updateGlobalConfigSection } from '../features/config/store/global-config.actions';
 import { setActiveWorkContext } from '../features/work-context/store/work-context.actions';
 
 @Injectable()
 export class PluginHooksEffects {
-  // Effect for task completion (when isDone changes to true)
   taskComplete$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -41,7 +39,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for task updates (any task update)
   taskUpdate$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -62,7 +59,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for task deletion
   taskDelete$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -76,7 +72,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for multiple task deletion
   tasksDelete$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -90,7 +85,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for task creation
   taskAdd$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -112,22 +106,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for configuration changes
-  configChange$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(updateGlobalConfigSection),
-        tap((action) => {
-          this.pluginService.dispatchHook(PluginHooks.CFG_CHANGE, {
-            sectionKey: action.sectionKey,
-            sectionCfg: action.sectionCfg,
-          });
-        }),
-      ),
-    { dispatch: false },
-  );
-
-  // Effect for work context changes
   workContextChange$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -142,7 +120,6 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Effect for when the day ends (finish day)
   finishDay$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -150,8 +127,19 @@ export class PluginHooksEffects {
         // For now, we'll leave it as a placeholder
         filter(() => false), // Never triggers for now
         tap(() => {
-          this.pluginService.dispatchHook(PluginHooks.FINISH_DAY, {
-            timestamp: Date.now(),
+          this.pluginService.dispatchHook(PluginHooks.FINISH_DAY);
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // private static hiddenActions = [];
+  anyAction$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        tap((action) => {
+          this.pluginService.dispatchHook(PluginHooks.ACTION, {
+            action,
           });
         }),
       ),
