@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  deleteTasks,
-  removeTagsForAllTasks,
-  roundTimeSpentForDay,
-  updateTask,
-} from '../tasks/store/task.actions';
+import { removeTagsForAllTasks, roundTimeSpentForDay } from '../tasks/store/task.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { taskReducer } from '../tasks/store/task.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive, TaskState } from '../tasks/task.model';
@@ -15,8 +11,8 @@ import { ModelCfgToModelCtrl } from '../../pfapi/api';
 import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
 
 type TaskArchiveAction =
-  | ReturnType<typeof updateTask>
-  | ReturnType<typeof deleteTasks>
+  | ReturnType<typeof TaskSharedActions.updateTask>
+  | ReturnType<typeof TaskSharedActions.deleteTasks>
   | ReturnType<typeof removeTagsForAllTasks>
   | ReturnType<typeof roundTimeSpentForDay>;
 
@@ -73,7 +69,7 @@ export class TaskArchiveService {
     if (toDeleteInArchiveYoung.length > 0) {
       const newTaskState = taskReducer(
         archiveYoung.task as TaskState,
-        deleteTasks({ taskIds: toDeleteInArchiveYoung }),
+        TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveYoung }),
       );
       await this._pfapiService.m.archiveYoung.save(
         {
@@ -91,7 +87,7 @@ export class TaskArchiveService {
       );
       const newTaskStateArchiveOld = taskReducer(
         archiveOld.task as TaskState,
-        deleteTasks({ taskIds: toDeleteInArchiveOld }),
+        TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveOld }),
       );
       await this._pfapiService.m.archiveOld.save(
         {
@@ -109,7 +105,7 @@ export class TaskArchiveService {
       return await this._execAction(
         'archiveYoung',
         archiveYoung,
-        updateTask({ task: { id, changes: changedFields } }),
+        TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
       );
     }
     const archiveOld = await this._pfapiService.m.archiveOld.load();
@@ -117,14 +113,14 @@ export class TaskArchiveService {
       return await this._execAction(
         'archiveOld',
         archiveOld,
-        updateTask({ task: { id, changes: changedFields } }),
+        TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
       );
     }
     throw new Error('Archive task to update not found');
   }
 
   async updateTasks(updates: Update<Task>[]): Promise<void> {
-    const allUpdates = updates.map((upd) => updateTask({ task: upd }));
+    const allUpdates = updates.map((upd) => TaskSharedActions.updateTask({ task: upd }));
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const updatesYoung = allUpdates.filter(
       (upd) => !!archiveYoung.task.entities[upd.task.id],

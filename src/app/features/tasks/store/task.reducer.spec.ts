@@ -2,6 +2,7 @@
 import { Task, TaskState } from '../task.model';
 import { initialTaskState, taskReducer } from './task.reducer';
 import * as fromActions from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 
@@ -55,7 +56,7 @@ describe('Task Reducer', () => {
   describe('Task CRUD operations', () => {
     it('should add a task', () => {
       const newTask = createTask('task3');
-      const action = fromActions.addTask({
+      const action = TaskSharedActions.addTask({
         task: newTask,
         isAddToBacklog: false,
         isAddToBottom: false,
@@ -69,7 +70,7 @@ describe('Task Reducer', () => {
     });
 
     it('should delete a task', () => {
-      const action = fromActions.deleteTask({
+      const action = TaskSharedActions.deleteTask({
         task: {
           ...createTask('asd'),
           id: 'task2',

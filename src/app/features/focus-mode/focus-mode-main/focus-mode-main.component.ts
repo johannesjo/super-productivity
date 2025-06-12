@@ -21,7 +21,7 @@ import {
   selectFocusSessionTimeElapsed,
 } from '../store/focus-mode.selectors';
 import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
-import { TaskSharedActions } from '../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';

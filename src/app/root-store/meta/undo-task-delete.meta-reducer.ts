@@ -1,7 +1,8 @@
 import { RootState } from '../root-state';
 import { Dictionary } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { deleteTask, undoDeleteTask } from '../../features/tasks/store/task.actions';
+import { undoDeleteTask } from '../../features/tasks/store/task.actions';
+import { TaskSharedActions } from './task-shared.actions';
 import {
   PROJECT_FEATURE_NAME,
   projectAdapter,
@@ -35,10 +36,10 @@ export const undoTaskDeleteMetaReducer = (
 ): ActionReducer<any, any> => {
   return (state: RootState, action: Action) => {
     switch (action.type) {
-      case deleteTask.type:
+      case TaskSharedActions.deleteTask.type:
         U_STORE = _createTaskDeleteState(
           state,
-          (action as ReturnType<typeof deleteTask>).task,
+          (action as ReturnType<typeof TaskSharedActions.deleteTask>).task,
         );
         return reducer(state, action);
 

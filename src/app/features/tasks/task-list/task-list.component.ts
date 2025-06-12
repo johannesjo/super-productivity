@@ -25,7 +25,7 @@ import {
   moveProjectTaskToRegularList,
 } from '../../project/store/project.actions';
 import { moveSubTask } from '../store/task.actions';
-import { TaskSharedActions } from '../store/task-shared.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';

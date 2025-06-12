@@ -25,7 +25,7 @@ import { JIRA_TYPE } from '../../issue.const';
 import { T } from '../../../../t.const';
 import { JiraTransitionOption } from './jira.model';
 import { setCurrentTask } from '../../../tasks/store/task.actions';
-import { TaskSharedActions } from '../../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { DialogJiraAddWorklogComponent } from './jira-view-components/dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import { selectCurrentTaskParentOrCurrent } from '../../../tasks/store/task.selectors';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';

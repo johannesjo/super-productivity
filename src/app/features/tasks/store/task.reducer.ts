@@ -2,10 +2,7 @@ import {
   __updateMultipleTaskSimple,
   addReminderIdToTask,
   addSubTask,
-  addTask,
   convertToMainTask,
-  deleteTask,
-  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
@@ -27,6 +24,7 @@ import {
   unsetCurrentTask,
   updateTaskUi,
 } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { DEFAULT_TASK, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
@@ -192,7 +190,7 @@ export const taskReducer = createReducer<TaskState>(
 
   // Task Actions
   // ------------
-  on(addTask, (state, { task }) => {
+  on(TaskSharedActions.addTask, (state, { task }) => {
     const newTask = {
       // NOTE we also need to do it here to avoid problems with undefined stuff
       ...DEFAULT_TASK,
@@ -273,11 +271,11 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(deleteTask, (state, { task }) => {
+  on(TaskSharedActions.deleteTask, (state, { task }) => {
     return deleteTaskHelper(state, task);
   }),
 
-  on(deleteTasks, (state, { taskIds }) => {
+  on(TaskSharedActions.deleteTasks, (state, { taskIds }) => {
     const allIds = taskIds.reduce((acc: string[], id: string) => {
       return [...acc, id, ...getTaskById(id, state).subTaskIds];
     }, []);

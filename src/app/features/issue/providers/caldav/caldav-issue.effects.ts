@@ -9,7 +9,7 @@ import { CALDAV_TYPE } from '../../issue.const';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
-import { TaskSharedActions } from '../../../tasks/store/task-shared.actions';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
 
