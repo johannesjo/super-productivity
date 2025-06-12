@@ -7,6 +7,7 @@ import {
   deleteTasks,
   moveToArchive_,
   restoreTask,
+  scheduleTaskWithTime,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -19,6 +20,7 @@ import { Update } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { unique } from '../../util/unique';
+import { isToday } from '../../util/is-today.util';
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
 
@@ -151,6 +153,14 @@ export const taskSharedMetaReducer = (
 
         let updatedState = updateProjectWithRestoreTask(state, task);
         updatedState = updateTagsWithRestoreTask(updatedState, task, subTasks);
+
+        return reducer(updatedState, action);
+      }
+
+      case scheduleTaskWithTime.type: {
+        const { task, dueWithTime } = action as ReturnType<typeof scheduleTaskWithTime>;
+
+        const updatedState = updateTagsWithScheduleTaskWithTime(state, task, dueWithTime);
 
         return reducer(updatedState, action);
       }
@@ -392,4 +402,46 @@ const updateTagsWithRestoreTask = (
     ...state,
     [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
   };
+};
+
+const updateTagsWithScheduleTaskWithTime = (
+  state: RootState,
+  task: { id: string },
+  dueWithTime: number,
+): RootState => {
+  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
+  const isTaskScheduledForToday = isToday(dueWithTime);
+  const isTaskCurrentlyInToday = todayTag.taskIds.includes(task.id);
+
+  if (!isTaskCurrentlyInToday && isTaskScheduledForToday) {
+    return {
+      ...state,
+      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: [task.id, ...todayTag.taskIds],
+          },
+        },
+        state[TAG_FEATURE_NAME],
+      ),
+    };
+  }
+
+  if (isTaskCurrentlyInToday && !isTaskScheduledForToday) {
+    return {
+      ...state,
+      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((id) => id !== task.id),
+          },
+        },
+        state[TAG_FEATURE_NAME],
+      ),
+    };
+  }
+
+  return state;
 };

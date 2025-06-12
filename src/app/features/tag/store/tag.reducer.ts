@@ -1,11 +1,7 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
-import {
-  scheduleTaskWithTime,
-  unScheduleTask,
-  updateTaskTags,
-} from '../../tasks/store/task.actions';
+import { unScheduleTask, updateTaskTags } from '../../tasks/store/task.actions';
 import { TODAY_TAG } from '../tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import {
@@ -44,7 +40,6 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 import { deleteProject } from '../../project/store/project.actions';
-import { isToday } from '../../../util/is-today.util';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -143,33 +138,6 @@ export const tagReducer = createReducer<TagState>(
       },
     }));
     return tagAdapter.updateMany(updates, state);
-  }),
-
-  on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    const todayTag = state.entities[TODAY_TAG.id] as Tag;
-    if (!todayTag.taskIds.includes(task.id) && isToday(dueWithTime)) {
-      return tagAdapter.updateOne(
-        {
-          id: todayTag.id,
-          changes: {
-            taskIds: [task.id, ...todayTag.taskIds],
-          },
-        },
-        state,
-      );
-    }
-    if (todayTag.taskIds.includes(task.id) && !isToday(dueWithTime)) {
-      return tagAdapter.updateOne(
-        {
-          id: todayTag.id,
-          changes: {
-            taskIds: todayTag.taskIds.filter((id) => id !== task.id),
-          },
-        },
-        state,
-      );
-    }
-    return state;
   }),
 
   on(unScheduleTask, (state, { id }) => {
