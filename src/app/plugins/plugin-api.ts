@@ -12,6 +12,7 @@ import {
   TaskCopy,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
@@ -23,8 +24,7 @@ export class PluginAPI implements IPluginAPI {
     string,
     Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
   >();
-  private _headerButtons: Array<{ label: string; icon: string; onClick: () => void }> =
-    [];
+  private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<{ label: string; icon: string; onClick: () => void }> = [];
   private _shortcuts: Array<{ label: string; onExec: () => void }> = [];
 
@@ -54,11 +54,10 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.registerHook(this._pluginId, hook, fn);
   }
 
-  registerHeaderButton(label: string, icon: string, onClick: () => void): void {
-    this._headerButtons.push({ label, icon, onClick });
-    console.log(`Plugin ${this._pluginId} registered header button: ${label}`);
-    // TODO: Implement header button registration in bridge
-    console.warn('Header button registration not yet implemented in bridge');
+  registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
+    this._headerButtons.push({ ...headerBtnCfg, pluginId: this._pluginId });
+    console.log(`Plugin ${this._pluginId} registered header button`, headerBtnCfg);
+    this._pluginBridge.registerHeaderButton(headerBtnCfg);
   }
 
   registerMenuEntry(label: string, icon: string, onClick: () => void): void {

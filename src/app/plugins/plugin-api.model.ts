@@ -2,6 +2,7 @@ import { SnackParams } from '../core/snack/snack.model';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
+import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
 export { TaskCopy, ProjectCopy, TagCopy };
 
@@ -67,7 +68,7 @@ export interface PluginAPI {
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void;
 
-  registerHeaderButton(label: string, icon: string, onClick: () => void): void;
+  registerHeaderButton(headerBtnCfg: Omit<PluginHeaderBtnCfg, 'pluginId'>): void;
 
   registerMenuEntry(label: string, icon: string, onClick: () => void): void;
 
