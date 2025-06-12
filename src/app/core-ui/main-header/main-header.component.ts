@@ -46,6 +46,7 @@ import { isOnline$ } from '../../util/is-online';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncStatus } from '../../pfapi/api';
+import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
 
 @Component({
   selector: 'main-header',
@@ -70,6 +71,7 @@ import { SyncStatus } from '../../pfapi/api';
     TagComponent,
     SimpleCounterButtonComponent,
     LongPressDirective,
+    PluginHeaderBtnsComponent,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {

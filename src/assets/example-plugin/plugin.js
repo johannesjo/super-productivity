@@ -24,3 +24,18 @@ setTimeout(() => {
   });
   console.log('Hello World Plugin initialized successfully!');
 }, 1000);
+
+PluginAPI.registerHeaderButton({
+  label: 'Something',
+  icon: 'celebration',
+  onClick: function (taskData) {
+    console.log('Hello World Plugin: Task completed!', taskData);
+
+    // Show a friendly message when a task is completed
+    PluginAPI.showSnack({
+      msg: '🎉 Hello World! Clicked Button',
+      type: 'SUCCESS',
+      ico: 'celebration',
+    });
+  },
+});
