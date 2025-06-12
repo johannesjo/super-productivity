@@ -31,7 +31,7 @@ export class PluginPersistenceService {
           ? isEnabled
           : existingIndex >= 0
             ? currentState[existingIndex].isEnabled
-            : true,
+            : false, // Default to false for new plugins (user must explicitly enable)
     };
 
     if (existingIndex >= 0) {
@@ -108,13 +108,9 @@ export class PluginPersistenceService {
     const currentState = await this._pfapiService.pf.m.pluginData.load();
     const pluginData = currentState.find((item) => item.id === pluginId);
 
-    // Special case: hello-world plugin is disabled by default
-    if (pluginId === 'hello-world') {
-      return pluginData?.isEnabled ?? false;
-    }
-
-    // Default to true for other plugins that haven't been persisted yet (first time loading)
-    return pluginData?.isEnabled ?? true;
+    // Default to false for all plugins that haven't been explicitly enabled
+    // This ensures plugins start disabled and must be manually enabled by the user
+    return pluginData?.isEnabled ?? false;
   }
 
   /**
