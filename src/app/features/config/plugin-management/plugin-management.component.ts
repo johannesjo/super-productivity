@@ -8,6 +8,7 @@ import {
 import { PluginService } from '../../../plugins/plugin.service';
 import { PluginInstance } from '../../../plugins/plugin-api.model';
 import { PluginPersistenceService } from '../../../plugins/plugin-persistence.service';
+import { PluginCacheService } from '../../../plugins/plugin-cache.service';
 import { CommonModule } from '@angular/common';
 import {
   MatCard,
@@ -22,10 +23,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatError } from '@angular/material/form-field';
-import { MatList, MatListItem } from '@angular/material/list';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
-import { MatToolbar } from '@angular/material/toolbar';
 
 @Component({
   selector: 'plugin-management',
@@ -46,15 +45,13 @@ import { MatToolbar } from '@angular/material/toolbar';
     MatChip,
     MatChipSet,
     MatError,
-    MatList,
-    MatListItem,
     TranslatePipe,
-    MatToolbar,
   ],
 })
 export class PluginManagementComponent implements OnInit {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginPersistenceService = inject(PluginPersistenceService);
+  private readonly _pluginCacheService = inject(PluginCacheService);
 
   T: typeof T = T;
 
@@ -66,6 +63,10 @@ export class PluginManagementComponent implements OnInit {
   readonly uploadError = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
+    // Wait for plugin system to initialize before loading plugins
+    while (!this._pluginService.isInitialized()) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     await this.loadPlugins();
   }
 
@@ -185,6 +186,61 @@ export class PluginManagementComponent implements OnInit {
       console.error('Failed to load plugin from ZIP:', error);
       this.uploadError.set(
         error instanceof Error ? error.message : 'Failed to install plugin',
+      );
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  async clearPluginCache(): Promise<void> {
+    try {
+      this.isUploading.set(true);
+      this.uploadError.set(null);
+
+      await this._pluginCacheService.clearCache();
+      await this.loadPlugins(); // Refresh the plugin list
+
+      console.log('Plugin cache cleared successfully');
+    } catch (error) {
+      console.error('Failed to clear plugin cache:', error);
+      this.uploadError.set(
+        error instanceof Error ? error.message : 'Failed to clear plugin cache',
+      );
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  isUploadedPlugin(plugin: PluginInstance): boolean {
+    // Check if this is an uploaded plugin by checking if it has persistence data with 'uploaded' source
+    // This is a simple heuristic - uploaded plugins have the uploaded:// path prefix
+    return (
+      this._pluginService.getPluginPath(plugin.manifest.id)?.startsWith('uploaded://') ??
+      false
+    );
+  }
+
+  async removeUploadedPlugin(plugin: PluginInstance): Promise<void> {
+    if (
+      !confirm(
+        `Are you sure you want to remove the plugin "${plugin.manifest.name}"? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      this.isUploading.set(true);
+      this.uploadError.set(null);
+
+      await this._pluginService.removeUploadedPlugin(plugin.manifest.id);
+      await this.loadPlugins(); // Refresh the plugin list
+
+      console.log(`Plugin ${plugin.manifest.id} removed successfully`);
+    } catch (error) {
+      console.error('Failed to remove plugin:', error);
+      this.uploadError.set(
+        error instanceof Error ? error.message : 'Failed to remove plugin',
       );
     } finally {
       this.isUploading.set(false);
