@@ -10,6 +10,7 @@ import {
   unScheduleTask,
   updateTaskTags,
 } from '../../features/tasks/store/task.actions';
+import { deleteProject } from '../../features/project/store/project.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -1756,6 +1757,244 @@ describe('taskSharedMetaReducer', () => {
             entities: jasmine.objectContaining({
               tag1: jasmine.objectContaining({
                 taskIds: ['task1', 'existing-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('deleteProject action', () => {
+    it('should remove all project tasks from all tags', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['task1', 'task2', 'keep-task'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task3', 'keep-task'],
+            },
+          },
+        },
+      };
+
+      const mockProject: Project = {
+        id: 'project1',
+        title: 'Test Project',
+        isArchived: false,
+        isHiddenFromMenu: false,
+        isEnableBacklog: true,
+        taskIds: ['task1', 'task2'],
+        backlogTaskIds: ['task3'],
+        noteIds: [],
+        advancedCfg: {
+          worklogExportSettings: {
+            cols: [],
+            roundWorkTimeTo: null,
+            roundStartTimeTo: null,
+            roundEndTimeTo: null,
+            separateTasksBy: '',
+            groupBy: WorklogGrouping.DATE,
+          },
+        },
+        theme: {
+          primary: '#000000',
+        },
+        icon: null,
+      };
+
+      const action = deleteProject({
+        project: mockProject,
+        allTaskIds: ['task1', 'task2', 'task3'],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty project task lists', () => {
+      const mockProject: Project = {
+        id: 'project1',
+        title: 'Test Project',
+        isArchived: false,
+        isHiddenFromMenu: false,
+        isEnableBacklog: true,
+        taskIds: [],
+        backlogTaskIds: [],
+        noteIds: [],
+        advancedCfg: {
+          worklogExportSettings: {
+            cols: [],
+            roundWorkTimeTo: null,
+            roundStartTimeTo: null,
+            roundEndTimeTo: null,
+            separateTasksBy: '',
+            groupBy: WorklogGrouping.DATE,
+          },
+        },
+        theme: {
+          primary: '#000000',
+        },
+        icon: null,
+      };
+
+      const action = deleteProject({
+        project: mockProject,
+        allTaskIds: [],
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should not affect tasks not in the project', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['project-task', 'other-task', 'unrelated-task'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['project-task', 'other-project-task'],
+            },
+          },
+        },
+      };
+
+      const mockProject: Project = {
+        id: 'project1',
+        title: 'Test Project',
+        isArchived: false,
+        isHiddenFromMenu: false,
+        isEnableBacklog: true,
+        taskIds: ['project-task'],
+        backlogTaskIds: [],
+        noteIds: [],
+        advancedCfg: {
+          worklogExportSettings: {
+            cols: [],
+            roundWorkTimeTo: null,
+            roundStartTimeTo: null,
+            roundEndTimeTo: null,
+            separateTasksBy: '',
+            groupBy: WorklogGrouping.DATE,
+          },
+        },
+        theme: {
+          primary: '#000000',
+        },
+        icon: null,
+      };
+
+      const action = deleteProject({
+        project: mockProject,
+        allTaskIds: ['project-task'],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['other-task', 'unrelated-task'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['other-project-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle projects with no tasks in tags', () => {
+      const mockProject: Project = {
+        id: 'project1',
+        title: 'Test Project',
+        isArchived: false,
+        isHiddenFromMenu: false,
+        isEnableBacklog: true,
+        taskIds: ['nonexistent-task'],
+        backlogTaskIds: [],
+        noteIds: [],
+        advancedCfg: {
+          worklogExportSettings: {
+            cols: [],
+            roundWorkTimeTo: null,
+            roundStartTimeTo: null,
+            roundEndTimeTo: null,
+            separateTasksBy: '',
+            groupBy: WorklogGrouping.DATE,
+          },
+        },
+        theme: {
+          primary: '#000000',
+        },
+        icon: null,
+      };
+
+      const action = deleteProject({
+        project: mockProject,
+        allTaskIds: ['nonexistent-task'],
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
               }),
             }),
           }),
