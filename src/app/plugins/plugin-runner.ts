@@ -24,7 +24,6 @@ export class PluginRunner {
       // Create plugin instance
       const pluginInstance: PluginInstance = {
         manifest,
-        api: pluginAPI,
         loaded: false,
         isEnabled: true, // Plugins are enabled by default when loaded
       };
@@ -39,10 +38,9 @@ export class PluginRunner {
       return pluginInstance;
     } catch (error) {
       console.error(`Failed to load plugin ${manifest.id}:`, error);
-      // Create error instance with bridge service
+      // Create error instance
       const errorInstance: PluginInstance = {
         manifest,
-        api: new PluginAPI(baseCfg, manifest.id, this._pluginBridge),
         loaded: false,
         isEnabled: false, // Errored plugins are disabled
         error: error instanceof Error ? error.message : 'Unknown error',
