@@ -6,6 +6,7 @@ import {
   deleteTask,
   deleteTasks,
   moveToArchive_,
+  restoreTask,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -141,6 +142,15 @@ export const taskSharedMetaReducer = (
 
         let updatedState = updateProjectsWithMoveToArchive(state, tasks);
         updatedState = updateTagsWithMoveToArchive(updatedState, tasks);
+
+        return reducer(updatedState, action);
+      }
+
+      case restoreTask.type: {
+        const { task, subTasks } = action as ReturnType<typeof restoreTask>;
+
+        let updatedState = updateProjectWithRestoreTask(state, task);
+        updatedState = updateTagsWithRestoreTask(updatedState, task, subTasks);
 
         return reducer(updatedState, action);
       }
@@ -319,5 +329,67 @@ const updateTagsWithMoveToArchive = (
   return {
     ...state,
     [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
+  };
+};
+
+const updateProjectWithRestoreTask = (
+  state: RootState,
+  task: { id: string; projectId?: string | null },
+): RootState => {
+  if (!task.projectId) {
+    return state;
+  }
+
+  return {
+    ...state,
+    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
+      {
+        id: task.projectId,
+        changes: {
+          taskIds: [
+            ...(state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project).taskIds,
+            task.id,
+          ],
+        },
+      },
+      state[PROJECT_FEATURE_NAME],
+    ),
+  };
+};
+
+const updateTagsWithRestoreTask = (
+  state: RootState,
+  task: { id: string; tagIds: string[] },
+  subTasks: Task[],
+): RootState => {
+  const allTasks = [task, ...subTasks];
+
+  // Create a map of tagIds to an array of associated task and subtask IDs
+  const tagTaskMap: { [tagId: string]: string[] } = {};
+  allTasks.forEach((t) => {
+    t.tagIds.forEach((tagId) => {
+      if (!tagTaskMap[tagId]) {
+        tagTaskMap[tagId] = [];
+      }
+      tagTaskMap[tagId].push(t.id);
+    });
+  });
+
+  // Create updates from the map
+  const updates = Object.entries(tagTaskMap)
+    .filter(([tagId]) => !!(state[TAG_FEATURE_NAME].entities[tagId] as Tag)) // If the tag model is gone we don't update
+    .map(([tagId, taskIds]) => ({
+      id: tagId,
+      changes: {
+        taskIds: [
+          ...(state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds,
+          ...taskIds,
+        ],
+      },
+    }));
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
   };
 };

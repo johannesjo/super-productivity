@@ -5,6 +5,7 @@ import {
   deleteTask,
   deleteTasks,
   moveToArchive_,
+  restoreTask,
 } from '../../features/tasks/store/task.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -987,6 +988,234 @@ describe('taskSharedMetaReducer', () => {
               }),
               TODAY: jasmine.objectContaining({
                 taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('restoreTask action', () => {
+    it('should add task to project taskIds', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const action = restoreTask({ task: mockTask, subTasks: [] });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle task with subtasks', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: ['subtask1'],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const mockSubTasks: Task[] = [
+        {
+          id: 'subtask1',
+          title: 'Sub Task',
+          created: Date.now(),
+          isDone: false,
+          tagIds: ['tag1'],
+          projectId: 'project1',
+          subTaskIds: [],
+          timeSpentOnDay: {},
+          timeSpent: 0,
+          timeEstimate: 0,
+          attachments: [],
+        },
+      ];
+
+      const action = restoreTask({ task: mockTask, subTasks: mockSubTasks });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['task1', 'subtask1'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should skip project update when task has no projectId', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: '',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const action = restoreTask({ task: mockTask, subTasks: [] });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should add tasks to existing taskIds', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [PROJECT_FEATURE_NAME]: {
+          ...initialState[PROJECT_FEATURE_NAME]!,
+          entities: {
+            ...initialState[PROJECT_FEATURE_NAME]!.entities,
+            project1: {
+              ...(initialState[PROJECT_FEATURE_NAME]!.entities.project1 as Project),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+      };
+
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const action = restoreTask({ task: mockTask, subTasks: [] });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: ['existing-task', 'task1'],
+              }),
+            }),
+          }),
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['existing-task', 'task1'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should skip tags that do not exist', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1', 'nonexistent-tag'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const action = restoreTask({ task: mockTask, subTasks: [] });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['task1'],
               }),
             }),
           }),

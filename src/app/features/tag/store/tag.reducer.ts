@@ -2,7 +2,6 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
-  restoreTask,
   scheduleTaskWithTime,
   unScheduleTask,
   updateTaskTags,
@@ -464,33 +463,6 @@ export const tagReducer = createReducer<TagState>(
 
   // TASK STUFF
   // ---------
-
-  on(restoreTask, (state, { task, subTasks }) => {
-    const allTasks = [task, ...subTasks];
-
-    // Create a map of tagIds to an array of associated task and subtask IDs
-    const tagTaskMap: { [tagId: string]: string[] } = {};
-    allTasks.forEach((t) => {
-      t.tagIds.forEach((tagId) => {
-        if (!tagTaskMap[tagId]) {
-          tagTaskMap[tagId] = [];
-        }
-        tagTaskMap[tagId].push(t.id);
-      });
-    });
-
-    // Create updates from the map
-    const updates = Object.entries(tagTaskMap)
-      .filter(([tagId]) => !!(state.entities[tagId] as Tag)) // If the tag model is gone we don't update
-      .map(([tagId, taskIds]) => ({
-        id: tagId,
-        changes: {
-          taskIds: [...(state.entities[tagId] as Tag).taskIds, ...taskIds],
-        },
-      }));
-
-    return tagAdapter.updateMany(updates, state);
-  }),
 
   on(planTasksForToday, (state, { taskIds, parentTaskMap = {} }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;

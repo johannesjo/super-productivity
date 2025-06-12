@@ -5,7 +5,7 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import { moveToOtherProject, restoreTask } from '../../tasks/store/task.actions';
+import { moveToOtherProject } from '../../tasks/store/task.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -552,21 +552,6 @@ export const projectReducer = createReducer<ProjectState>(
   // Task Actions
   // ------------
 
-  on(restoreTask, (state, { task }) => {
-    if (!task.projectId) {
-      return state;
-    }
-
-    return projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: [...(state.entities[task.projectId] as Project).taskIds, task.id],
-        },
-      },
-      state,
-    );
-  }),
   on(moveToOtherProject, (state, { task, targetProjectId }) => {
     const srcProjectId = task.projectId;
     const updates: Update<Project>[] = [];
