@@ -174,7 +174,6 @@ export class PluginService {
             permissions: [],
             type: 'standard',
           },
-          api: null as any,
           loaded: false,
           isEnabled: false,
           error: undefined,
