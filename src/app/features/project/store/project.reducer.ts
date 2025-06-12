@@ -6,7 +6,6 @@ import {
   WorkContextType,
 } from '../../work-context/work-context.model';
 import {
-  deleteTask,
   moveToArchive_,
   moveToOtherProject,
   restoreTask,
@@ -558,22 +557,6 @@ export const projectReducer = createReducer<ProjectState>(
 
   // Task Actions
   // ------------
-
-  on(deleteTask, (state, { task }) => {
-    const project = task.projectId && (state.entities[task.projectId] as Project);
-    return project
-      ? projectAdapter.updateOne(
-          {
-            id: task.projectId as string,
-            changes: {
-              taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
-              backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
-            },
-          },
-          state,
-        )
-      : state;
-  }),
 
   on(moveToArchive_, (state, { tasks }) => {
     const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
