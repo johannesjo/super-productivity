@@ -1,98 +1,92 @@
-<div class="plugin-management">
-  @if (allPlugins().length === 0) {
-    <div class="no-plugins">
+@if (allPlugins().length === 0) {
+  <mat-card>
+    <mat-card-content class="empty-state">
       <mat-icon>extension_off</mat-icon>
       <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
-    </div>
-  } @else {
-    <div class="plugins-list">
-      @for (plugin of allPlugins(); track plugin.manifest.id) {
-        <mat-card class="plugin-card">
-          <mat-card-header>
-            <div class="plugin-header">
-              <div class="plugin-info">
-                <mat-card-title>{{ plugin.manifest.name }}</mat-card-title>
-                <div class="plugin-meta">
-                  <span class="plugin-version">v{{ plugin.manifest.version }}</span>
-                  <mat-chip
-                    [color]="getPluginStatusColor(plugin)"
-                    [class.error-chip]="!!plugin.error"
-                  >
-                    {{ getPluginStatusText(plugin) }}
-                  </mat-chip>
-                </div>
-              </div>
-              <div class="plugin-actions">
-                <mat-slide-toggle
-                  [checked]="isPluginEnabledSync(plugin)"
-                  [disabled]="!!plugin.error"
-                  (change)="onPluginToggle(plugin, $event)"
-                  [attr.aria-label]="'Toggle ' + plugin.manifest.name"
-                >
-                </mat-slide-toggle>
-              </div>
-            </div>
-          </mat-card-header>
+    </mat-card-content>
+  </mat-card>
+}
+<mat-card>EMPTY</mat-card>
 
-          <mat-card-content>
-            <div class="plugin-description">
-              <p>{{ getPluginDescription(plugin) }}</p>
-            </div>
+@for (plugin of allPlugins(); track plugin.manifest.id) {
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ plugin.manifest.name }}</mat-card-title>
+      <mat-card-subtitle>
+        v{{ plugin.manifest.version }}
+        <!--        <mat-chip [color]="getPluginStatusColor(plugin)">-->
+        <!--          {{ getPluginStatusText(plugin) }}-->
+        <!--        </mat-chip>-->
+      </mat-card-subtitle>
+      <mat-slide-toggle
+        [checked]="isPluginEnabledSync(plugin)"
+        [disabled]="!!plugin.error"
+        (change)="onPluginToggle(plugin, $event)"
+        [attr.aria-label]="'Toggle ' + plugin.manifest.name"
+      >
+      </mat-slide-toggle>
+    </mat-card-header>
 
-            @if (plugin.error) {
-              <div class="plugin-error">
-                <mat-icon color="warn">error</mat-icon>
-                <span>{{ plugin.error }}</span>
-              </div>
-            }
+    <mat-card-content>
+      <p>{{ getPluginDescription(plugin) }}</p>
 
-            <div class="plugin-details">
-              <div class="plugin-detail-item">
-                <strong>ID:</strong> {{ plugin.manifest.id }}
-              </div>
-              @if (plugin.manifest.minSupVersion) {
-                <div class="plugin-detail-item">
-                  <strong>Min. Version:</strong> {{ plugin.manifest.minSupVersion }}
-                </div>
-              }
-              @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
-                <div class="plugin-detail-item">
-                  <strong>Hooks:</strong>
-                  <mat-chip-set>
-                    @for (hook of plugin.manifest.hooks; track hook) {
-                      <mat-chip>{{ hook }}</mat-chip>
-                    }
-                  </mat-chip-set>
-                </div>
-              }
-              @if (
-                plugin.manifest.permissions && plugin.manifest.permissions.length > 0
-              ) {
-                <div class="plugin-detail-item">
-                  <strong>Permissions:</strong>
-                  <mat-chip-set>
-                    @for (permission of plugin.manifest.permissions; track permission) {
-                      <mat-chip>{{ permission }}</mat-chip>
-                    }
-                  </mat-chip-set>
-                </div>
-              }
-            </div>
-
-            <div class="plugin-card-actions">
-              <button
-                mat-button
-                color="primary"
-                (click)="reloadPlugin(plugin)"
-                [disabled]="!!plugin.error"
-              >
-                <mat-icon>refresh</mat-icon>
-                {{ T.PS.RELOAD | translate }}
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
+      @if (plugin.error) {
+        <mat-error>
+          <mat-icon>error</mat-icon>
+          {{ plugin.error }}
+        </mat-error>
       }
-    </div>
-  }
-</div>
+
+      <table>
+        <tr>
+          <th>ID:</th>
+          <td>{{ plugin.manifest.id }}</td>
+        </tr>
+        @if (plugin.manifest.minSupVersion) {
+          <tr>
+            <th>Min. Version:</th>
+            <td>{{ plugin.manifest.minSupVersion }}</td>
+          </tr>
+        }
+        @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
+          <tr>
+            <th>Hooks:</th>
+            <td>
+              <mat-chip-set>
+                @for (hook of plugin.manifest.hooks; track hook) {
+                  <mat-chip>{{ hook }}</mat-chip>
+                }
+              </mat-chip-set>
+            </td>
+          </tr>
+        }
+        @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+          <tr>
+            <th>Permissions:</th>
+            <td>
+              <mat-chip-set>
+                @for (permission of plugin.manifest.permissions; track permission) {
+                  <mat-chip>{{ permission }}</mat-chip>
+                }
+              </mat-chip-set>
+            </td>
+          </tr>
+        }
+      </table>
+    </mat-card-content>
+
+    <mat-card-actions [align]="'end'">
+      <button
+        mat-button
+        color="primary"
+        (click)="reloadPlugin(plugin)"
+        [disabled]="!!plugin.error"
+      >
+        <mat-icon>refresh</mat-icon>
+        {{ T.PS.RELOAD | translate }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<div class="bottom-bar"></div>
