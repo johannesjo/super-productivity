@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
-import { PluginPersistenceService } from '../../plugin-persistence.service';
+import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
 import { CommonModule } from '@angular/common';
 import {
@@ -50,7 +50,7 @@ import { T } from '../../../t.const';
 })
 export class PluginManagementComponent implements OnInit {
   private readonly _pluginService = inject(PluginService);
-  private readonly _pluginPersistenceService = inject(PluginPersistenceService);
+  private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
 
   T: typeof T = T;
@@ -95,7 +95,7 @@ export class PluginManagementComponent implements OnInit {
 
     try {
       // Set plugin as enabled in persistence
-      await this._pluginPersistenceService.setPluginEnabled(plugin.manifest.id, true);
+      await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 
       // Update the plugin state immediately
       plugin.isEnabled = true;
@@ -113,7 +113,10 @@ export class PluginManagementComponent implements OnInit {
 
     try {
       // Set plugin as disabled in persistence
-      await this._pluginPersistenceService.setPluginEnabled(plugin.manifest.id, false);
+      await this._pluginMetaPersistenceService.setPluginEnabled(
+        plugin.manifest.id,
+        false,
+      );
 
       // Unload the plugin (this will unregister hooks and remove from loaded plugins)
       this._pluginService.unloadPlugin(plugin.manifest.id);

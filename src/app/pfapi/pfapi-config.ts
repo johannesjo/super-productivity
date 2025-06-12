@@ -56,8 +56,10 @@ import { appDataValidators, validateAllData } from './validate/validation-fn';
 import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
 import { IValidation } from 'typia';
 import {
-  PluginDataState,
-  initialPluginDataState,
+  PluginUserDataState,
+  initialPluginUserDataState,
+  PluginMetaDataState,
+  initialPluginMetaDataState,
 } from '../plugins/plugin-persistence.model';
 
 export const CROSS_MODEL_VERSION = 4.1 as const;
@@ -84,8 +86,8 @@ export type PfapiAllModelCfg = {
 
   timeTracking: ModelCfg<TimeTrackingState>;
 
-  // Plugin data
-  pluginData: ModelCfg<PluginDataState>;
+  pluginUserData: ModelCfg<PluginUserDataState>;
+  pluginMetadata: ModelCfg<PluginMetaDataState>;
 
   archiveYoung: ModelCfg<ArchiveModel>;
   archiveOld: ModelCfg<ArchiveModel>;
@@ -155,9 +157,13 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
   },
 
   //-------------------------------
-  pluginData: {
-    defaultData: initialPluginDataState,
-    validate: appDataValidators.pluginData,
+  pluginUserData: {
+    defaultData: initialPluginUserDataState,
+    validate: appDataValidators.pluginUserData,
+  },
+  pluginMetadata: {
+    defaultData: initialPluginMetaDataState,
+    validate: appDataValidators.pluginMetadata,
   },
 
   //-------------------------------
