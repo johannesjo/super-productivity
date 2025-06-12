@@ -9,13 +9,15 @@ import {
 import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
 import { TASK_FEATURE_NAME, taskAdapter } from '../../features/tasks/store/task.reducer';
 import {
+  deleteTaskHelper,
   updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask,
 } from '../../features/tasks/store/task.reducer.util';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { calcTotalTimeSpent } from '../../features/tasks/util/calc-total-time-spent';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { unique } from '../../util/unique';
@@ -27,11 +29,8 @@ import { isToday } from '../../util/is-today.util';
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
 type TaskEntity = { id: string; projectId?: string | null; tagIds?: string[] };
-type TaskWithTags = {
-  id: string;
+type TaskWithTags = Task & {
   tagIds: string[];
-  dueDay?: string;
-  projectId?: string | null;
 };
 
 // =============================================================================
@@ -143,6 +142,18 @@ const handleAddTask = (
 ): RootState => {
   let updatedState = state;
 
+  // Add task to task state
+  const newTask: Task = {
+    ...DEFAULT_TASK,
+    ...task,
+    timeSpent: calcTotalTimeSpent(task.timeSpentOnDay || {}),
+    projectId: task.projectId || '',
+  };
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: taskAdapter.addOne(newTask, updatedState[TASK_FEATURE_NAME]),
+  };
+
   // Update project if task has projectId
   if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
     const project = getProject(state, task.projectId);
@@ -214,6 +225,15 @@ const handleDeleteTask = (
 ): RootState => {
   let updatedState = state;
 
+  // Delete task from task state using helper
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: deleteTaskHelper(
+      updatedState[TASK_FEATURE_NAME],
+      task as TaskWithSubTasks,
+    ),
+  };
+
   // Update project if task has projectId
   if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
     const project = getProject(state, task.projectId);
@@ -250,6 +270,27 @@ const handleDeleteTask = (
 };
 
 const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
+  let updatedState = state;
+
+  // Get all task IDs including subtasks
+  const allIds = taskIds.reduce((acc: string[], id: string) => {
+    const task = state[TASK_FEATURE_NAME].entities[id] as Task;
+    return task ? [...acc, id, ...task.subTaskIds] : [...acc, id];
+  }, []);
+
+  // Remove tasks from task state
+  const newTaskState = taskAdapter.removeMany(allIds, updatedState[TASK_FEATURE_NAME]);
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: {
+      ...newTaskState,
+      currentTaskId:
+        newTaskState.currentTaskId && taskIds.includes(newTaskState.currentTaskId)
+          ? null
+          : newTaskState.currentTaskId,
+    },
+  };
+
   // Only update tags that actually contain at least one of the tasks being deleted
   const affectedTags = (state[TAG_FEATURE_NAME].ids as string[]).filter((tagId) => {
     const tag = state[TAG_FEATURE_NAME].entities[tagId];
@@ -266,7 +307,7 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
     }),
   );
 
-  return updateTags(state, tagUpdates);
+  return updateTags(updatedState, tagUpdates);
 };
 
 const handleMoveToArchive = (state: RootState, tasks: TaskWithSubTasks[]): RootState => {
