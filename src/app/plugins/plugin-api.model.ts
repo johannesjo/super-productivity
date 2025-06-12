@@ -4,6 +4,13 @@ import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
+export interface PluginMenuEntryCfg {
+  pluginId: string;
+  label: string;
+  icon: string;
+  onClick: () => void;
+}
+
 export { TaskCopy, ProjectCopy, TagCopy };
 
 export enum PluginHooks {
@@ -70,7 +77,7 @@ export interface PluginAPI {
 
   registerHeaderButton(headerBtnCfg: Omit<PluginHeaderBtnCfg, 'pluginId'>): void;
 
-  registerMenuEntry(label: string, icon: string, onClick: () => void): void;
+  registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void;
 
   registerShortcut(label: string, onExec: () => void): void;
 
