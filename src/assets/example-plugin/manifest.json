@@ -16,7 +16,8 @@
     "PluginAPI.addTask",
     "PluginAPI.persistDataSynced"
   ],
-  "iFrame": false,
+  "iFrame": true,
+  "isSkipMenuEntry": false,
   "type": "standard",
   "assets": []
 }

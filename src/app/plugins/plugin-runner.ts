@@ -1,5 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
+import { inject, Injectable } from '@angular/core';
+import {
+  PluginBaseCfg,
+  PluginInstance,
+  PluginManifest,
+  PluginMenuEntryCfg,
+} from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 
@@ -31,6 +36,23 @@ export class PluginRunner {
 
       // Execute plugin code in a sandboxed environment
       await this._executePluginCode(pluginCode, pluginAPI, manifest);
+
+      // Automatically register menu entry unless isSkipMenuEntry is true
+      if (!manifest.isSkipMenuEntry && manifest.iFrame) {
+        // Ensure plugin context is set before registering menu entry
+        this._pluginBridge._setCurrentPlugin(manifest.id);
+
+        const menuEntry: Omit<PluginMenuEntryCfg, 'pluginId'> = {
+          label: manifest.name,
+          icon: 'extension', // Default icon for plugins
+          onClick: () => {
+            // Set plugin context when menu is clicked
+            this._pluginBridge._setCurrentPlugin(manifest.id);
+            pluginAPI.showIndexHtmlAsView();
+          },
+        };
+        pluginAPI.registerMenuEntry(menuEntry);
+      }
 
       pluginInstance.loaded = true;
       this._loadedPlugins.set(manifest.id, pluginInstance);

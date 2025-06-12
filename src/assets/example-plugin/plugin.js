@@ -15,49 +15,26 @@ PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, function (taskData) {
   });
 });
 
+// Show initialization message after a short delay
 setTimeout(() => {
-  // Show a friendly message when a task is completed
   PluginAPI.showSnack({
-    msg: '🎉 Hello World! Init!',
+    msg: '🎉 Hello World Plugin initialized!',
     type: 'SUCCESS',
     ico: 'celebration',
   });
   console.log('Hello World Plugin initialized successfully!');
 }, 1000);
 
+// Register a header button for quick access
 PluginAPI.registerHeaderButton({
   label: 'Plugin Dashboard',
   icon: 'dashboard',
   onClick: function () {
     console.log('Hello World Plugin: Opening dashboard...');
-
     // Open the plugin's index.html in an iframe view
     PluginAPI.showIndexHtmlAsView();
   },
 });
 
-PluginAPI.registerMenuEntry({
-  label: 'Hello World',
-  icon: 'celebration',
-  onClick: function (taskData) {
-    console.log('Hello World Plugin: Task completed!', taskData);
-
-    // Show a friendly message when a task is completed
-    PluginAPI.showSnack({
-      msg: '🎉 Hello World! Clicked Button',
-      type: 'SUCCESS',
-      ico: 'celebration',
-    });
-  },
-});
-
-PluginAPI.registerMenuEntry({
-  label: 'Plugin Dashboard',
-  icon: 'dashboard',
-  onClick: function () {
-    console.log('Hello World Plugin: Opening dashboard from menu...');
-
-    // Open the plugin's index.html in an iframe view
-    PluginAPI.showIndexHtmlAsView();
-  },
-});
+// Note: Menu entry is automatically registered by the plugin system
+// when iFrame is true and isSkipMenuEntry is not set to true
