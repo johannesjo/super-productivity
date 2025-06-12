@@ -11,6 +11,7 @@ import {
   updateTaskTags,
 } from '../../features/tasks/store/task.actions';
 import { deleteProject } from '../../features/project/store/project.actions';
+import { planTasksForToday } from '../../features/tag/store/tag.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -1995,6 +1996,174 @@ describe('taskSharedMetaReducer', () => {
               }),
               TODAY: jasmine.objectContaining({
                 taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('planTasksForToday action', () => {
+    it('should add new tasks to the top of Today tag', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+      };
+
+      const action = planTasksForToday({
+        taskIds: ['task1', 'task2'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'task2', 'existing-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should not add tasks that are already in Today tag', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'existing-task'],
+            },
+          },
+        },
+      };
+
+      const action = planTasksForToday({
+        taskIds: ['task1', 'task2'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task2', 'task1', 'existing-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle parentTaskMap filtering', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['parent-task'],
+            },
+          },
+        },
+      };
+
+      const action = planTasksForToday({
+        taskIds: ['subtask1', 'task2'],
+        parentTaskMap: { subtask1: 'parent-task' },
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task2', 'parent-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty taskIds array', () => {
+      const action = planTasksForToday({
+        taskIds: [],
+        parentTaskMap: {},
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty parentTaskMap', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+      };
+
+      const action = planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'existing-task'],
               }),
             }),
           }),
