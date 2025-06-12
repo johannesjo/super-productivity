@@ -4,6 +4,7 @@ export interface CachedPlugin {
   id: string;
   manifest: string;
   code: string;
+  indexHtml?: string; // Optional index.html content
   uploadDate: number;
   lastAccessed: number;
 }
@@ -53,7 +54,12 @@ export class PluginCacheService {
   /**
    * Store a plugin in the cache
    */
-  async storePlugin(pluginId: string, manifest: string, code: string): Promise<void> {
+  async storePlugin(
+    pluginId: string,
+    manifest: string,
+    code: string,
+    indexHtml?: string,
+  ): Promise<void> {
     const db = await this._getDB();
     const transaction = db.transaction([this.STORE_NAME], 'readwrite');
     const store = transaction.objectStore(this.STORE_NAME);
@@ -62,6 +68,7 @@ export class PluginCacheService {
       id: pluginId,
       manifest,
       code,
+      indexHtml,
       uploadDate: Date.now(),
       lastAccessed: Date.now(),
     };
