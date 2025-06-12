@@ -123,6 +123,10 @@ const _checkForUpdate = (params: {
     });
   }
 
+  // Check if data has been modified since last sync
+  const hasLocalChanges = local > lastSync;
+  const hasRemoteChanges = remote > lastSync;
+
   if (local === remote) {
     if (local === lastSync) {
       return UpdateCheckResult.InSync;
@@ -131,19 +135,28 @@ const _checkForUpdate = (params: {
     }
   } else if (local > remote) {
     if (lastSync < remote) {
+      // Local is newer than remote, but remote has changes since last sync
       pfLog(0, 'DATA DIVERGED: local > remote && lastSync < remote');
       return UpdateCheckResult.DataDiverged;
-    } else if (lastSync < local) {
+    } else if (hasLocalChanges) {
+      // Local has changes and remote doesn't
       return UpdateCheckResult.RemoteUpdateRequired;
-    } else if (lastSync === local) {
-      return UpdateCheckResult.RemoteUpdateRequired;
+    } else {
+      // This shouldn't happen - local is newer but no changes since sync
+      return UpdateCheckResult.LastSyncNotUpToDate;
     }
   } else if (local < remote) {
-    if (lastSync !== local) {
-      pfLog(0, 'DATA DIVERGED: local < remote && lastSync !== local');
+    //  Check if local has changes even though it's older
+    if (hasLocalChanges) {
+      // Local has changes even though remote is newer - conflict!
+      pfLog(0, 'DATA DIVERGED: local < remote but local has changes since lastSync');
       return UpdateCheckResult.DataDiverged;
-    } else {
+    } else if (hasRemoteChanges) {
+      // Only remote has changes
       return UpdateCheckResult.LocalUpdateRequired;
+    } else {
+      // Neither has changes but timestamps differ
+      return UpdateCheckResult.LastSyncNotUpToDate;
     }
   }
 
@@ -159,6 +172,8 @@ const _logHelper = (params: {
     remote: new Date(params.remote).toISOString(),
     local: new Date(params.local).toISOString(),
     lastSync: new Date(params.lastSync).toISOString(),
+    hasLocalChanges: params.local > params.lastSync,
+    hasRemoteChanges: params.remote > params.lastSync,
   });
   const oldestFirst = Object.keys(params).sort(
     (k1: string, k2: string) => (params as any)[k1] - (params as any)[k2],
