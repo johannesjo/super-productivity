@@ -56,6 +56,7 @@ import { ContextMenuComponent } from '../../ui/context-menu/context-menu.compone
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
+import { PluginMenuComponent } from '../../plugins/ui/plugin-menu.component';
 
 @Component({
   selector: 'side-nav',
@@ -79,6 +80,7 @@ import { toggleHideFromMenu } from '../../features/project/store/project.actions
     MatMenuContent,
     TranslatePipe,
     AsyncPipe,
+    PluginMenuComponent,
   ],
 })
 export class SideNavComponent implements OnDestroy {
