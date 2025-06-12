@@ -1,4 +1,4 @@
-import { ActionReducer, Action } from '@ngrx/store';
+import { ActionReducer, Action, MetaReducer } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { RootState } from '../root-state';
 import {
@@ -50,73 +50,75 @@ type TaskWithTags = {
 /**
  * Meta-reducer that handles cross-cutting concerns for task, project, and tag state updates
  */
-export const taskSharedMetaReducer = (
-  reducer: ActionReducer<RootState, Action>,
-): ActionReducer<RootState, Action> => {
-  return (state: RootState | undefined, action: Action) => {
+export const taskSharedMetaReducer: MetaReducer = (
+  reducer: ActionReducer<any, Action>,
+) => {
+  return (state: unknown, action: Action) => {
     if (!state) {
       return reducer(state, action);
     }
 
+    // Type guard to ensure we have a RootState-like object
+    const rootState = state as RootState;
     const actionHandlers: Record<string, (state: RootState) => RootState> = {
       [addTask.type]: () => {
         const { task, isAddToBottom, isAddToBacklog } = action as ReturnType<
           typeof addTask
         >;
-        return handleAddTask(state, task, isAddToBottom, isAddToBacklog);
+        return handleAddTask(rootState, task, isAddToBottom, isAddToBacklog);
       },
       [convertToMainTask.type]: () => {
         const { task, parentTagIds, isPlanForToday } = action as ReturnType<
           typeof convertToMainTask
         >;
-        return handleConvertToMainTask(state, task, parentTagIds, isPlanForToday);
+        return handleConvertToMainTask(rootState, task, parentTagIds, isPlanForToday);
       },
       [deleteTask.type]: () => {
         const { task } = action as ReturnType<typeof deleteTask>;
-        return handleDeleteTask(state, task);
+        return handleDeleteTask(rootState, task);
       },
       [deleteTasks.type]: () => {
         const { taskIds } = action as ReturnType<typeof deleteTasks>;
-        return handleDeleteTasks(state, taskIds);
+        return handleDeleteTasks(rootState, taskIds);
       },
       [moveToArchive_.type]: () => {
         const { tasks } = action as ReturnType<typeof moveToArchive_>;
-        return handleMoveToArchive(state, tasks);
+        return handleMoveToArchive(rootState, tasks);
       },
       [restoreTask.type]: () => {
         const { task, subTasks } = action as ReturnType<typeof restoreTask>;
-        return handleRestoreTask(state, task, subTasks);
+        return handleRestoreTask(rootState, task, subTasks);
       },
       [scheduleTaskWithTime.type]: () => {
         const { task, dueWithTime } = action as ReturnType<typeof scheduleTaskWithTime>;
-        return handleScheduleTaskWithTime(state, task, dueWithTime);
+        return handleScheduleTaskWithTime(rootState, task, dueWithTime);
       },
       [unScheduleTask.type]: () => {
         const { id } = action as ReturnType<typeof unScheduleTask>;
-        return handleUnScheduleTask(state, id);
+        return handleUnScheduleTask(rootState, id);
       },
       [updateTaskTags.type]: () => {
         const { task, newTagIds = [] } = action as ReturnType<typeof updateTaskTags>;
-        return handleUpdateTaskTags(state, task, newTagIds);
+        return handleUpdateTaskTags(rootState, task, newTagIds);
       },
       [deleteProject.type]: () => {
         const { allTaskIds } = action as ReturnType<typeof deleteProject>;
-        return handleDeleteProject(state, allTaskIds);
+        return handleDeleteProject(rootState, allTaskIds);
       },
       [planTasksForToday.type]: () => {
         const { taskIds, parentTaskMap = {} } = action as ReturnType<
           typeof planTasksForToday
         >;
-        return handlePlanTasksForToday(state, taskIds, parentTaskMap);
+        return handlePlanTasksForToday(rootState, taskIds, parentTaskMap);
       },
       [removeTasksFromTodayTag.type]: () => {
         const { taskIds } = action as ReturnType<typeof removeTasksFromTodayTag>;
-        return handleRemoveTasksFromTodayTag(state, taskIds);
+        return handleRemoveTasksFromTodayTag(rootState, taskIds);
       },
     };
 
     const handler = actionHandlers[action.type];
-    const updatedState = handler ? handler(state) : state;
+    const updatedState = handler ? handler(rootState) : rootState;
 
     return reducer(updatedState, action);
   };
