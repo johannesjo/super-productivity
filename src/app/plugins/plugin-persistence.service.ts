@@ -79,18 +79,26 @@ export class PluginPersistenceService {
   async setPluginEnabled(pluginId: string, isEnabled: boolean): Promise<void> {
     const currentState = await this._pfapiService.pf.m.pluginData.load();
     const existingIndex = currentState.findIndex((item) => item.id === pluginId);
+    const updatedState: PluginDataState = [...currentState];
 
     if (existingIndex >= 0) {
-      const updatedState: PluginDataState = [...currentState];
+      // Update existing entry
       updatedState[existingIndex] = {
         ...updatedState[existingIndex],
         isEnabled,
       };
-
-      await this._pfapiService.pf.m.pluginData.save(updatedState, {
-        isUpdateRevAndLastUpdate: true,
+    } else {
+      // Create new entry for this plugin
+      updatedState.push({
+        id: pluginId,
+        data: JSON.stringify({ initializedAt: Date.now() }),
+        isEnabled,
       });
     }
+
+    await this._pfapiService.pf.m.pluginData.save(updatedState, {
+      isUpdateRevAndLastUpdate: true,
+    });
   }
 
   /**
@@ -99,7 +107,14 @@ export class PluginPersistenceService {
   async isPluginEnabled(pluginId: string): Promise<boolean> {
     const currentState = await this._pfapiService.pf.m.pluginData.load();
     const pluginData = currentState.find((item) => item.id === pluginId);
-    return pluginData?.isEnabled ?? false;
+
+    // Special case: hello-world plugin is disabled by default
+    if (pluginId === 'hello-world') {
+      return pluginData?.isEnabled ?? false;
+    }
+
+    // Default to true for other plugins that haven't been persisted yet (first time loading)
+    return pluginData?.isEnabled ?? true;
   }
 
   /**
