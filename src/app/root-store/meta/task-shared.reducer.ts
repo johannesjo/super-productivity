@@ -23,6 +23,7 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { unique } from '../../util/unique';
 import { isToday } from '../../util/is-today.util';
+import { deleteProject } from '../../features/project/store/project.actions';
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
 
@@ -179,6 +180,14 @@ export const taskSharedMetaReducer = (
         const { newTagIds = [], task } = action as ReturnType<typeof updateTaskTags>;
 
         const updatedState = updateTagsWithUpdateTaskTags(state, task, newTagIds);
+
+        return reducer(updatedState, action);
+      }
+
+      case deleteProject.type: {
+        const { allTaskIds } = action as ReturnType<typeof deleteProject>;
+
+        const updatedState = updateTagsWithDeleteProject(state, allTaskIds);
 
         return reducer(updatedState, action);
       }
@@ -520,5 +529,26 @@ const updateTagsWithUpdateTaskTags = (
       [...removeFrom, ...addTo],
       state[TAG_FEATURE_NAME],
     ),
+  };
+};
+
+const updateTagsWithDeleteProject = (
+  state: RootState,
+  allTaskIds: string[],
+): RootState => {
+  const updates: Update<Tag>[] = (state[TAG_FEATURE_NAME].ids as string[]).map(
+    (tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
+          (taskId) => !allTaskIds.includes(taskId),
+        ),
+      },
+    }),
+  );
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
   };
 };
