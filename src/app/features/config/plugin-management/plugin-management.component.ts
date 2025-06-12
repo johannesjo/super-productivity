@@ -95,14 +95,9 @@ export class PluginManagementComponent implements OnInit {
       // Update the plugin state immediately
       plugin.isEnabled = true;
 
-      // If plugin is not loaded, reload it
-      if (!plugin.loaded) {
-        await this._pluginService.reloadPlugin(plugin.manifest.id);
-        await this.loadPlugins(); // Full refresh needed for reloaded plugin
-      } else {
-        // Just update the signal for immediate UI update
-        this.allPlugins.set([...this.allPlugins()]);
-      }
+      // Always reload the plugin to ensure it re-registers header buttons and hooks
+      await this._pluginService.reloadPlugin(plugin.manifest.id);
+      await this.loadPlugins(); // Full refresh needed for reloaded plugin
     } catch (error) {
       console.error('Failed to enable plugin:', error);
     }
