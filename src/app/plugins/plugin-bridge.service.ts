@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
@@ -19,6 +20,7 @@ import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
 import { PluginPersistenceService } from './plugin-persistence.service';
+import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -43,6 +45,10 @@ export class PluginBridgeService {
 
   // Track which plugin is currently making calls to prevent cross-plugin access
   private _currentPluginId: string | null = null;
+
+  // Track header buttons registered by plugins
+  private _headerButtons$ = new BehaviorSubject<PluginHeaderBtnCfg[]>([]);
+  public readonly headerButtons$ = this._headerButtons$.asObservable();
 
   /**
    * Set the current plugin context for secure operations
@@ -310,6 +316,43 @@ export class PluginBridgeService {
     typia.assert<string>(pluginId);
 
     this._pluginHooksService.unregisterPluginHooks(pluginId);
+    this._removePluginHeaderButtons(pluginId);
+  }
+
+  /**
+   * Register a header button for a plugin
+   */
+  registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for header button registration');
+    }
+    typia.assert<Omit<PluginHeaderBtnCfg, 'pluginId'>>(headerBtnCfg);
+
+    const newButton: PluginHeaderBtnCfg = {
+      ...headerBtnCfg,
+      pluginId: this._currentPluginId,
+    };
+
+    const currentButtons = this._headerButtons$.value;
+    this._headerButtons$.next([...currentButtons, newButton]);
+
+    console.log('PluginBridge: Header button registered', {
+      pluginId: this._currentPluginId,
+      headerBtnCfg,
+    });
+  }
+
+  /**
+   * Remove all header buttons for a specific plugin
+   */
+  private _removePluginHeaderButtons(pluginId: string): void {
+    const currentButtons = this._headerButtons$.value;
+    const filteredButtons = currentButtons.filter(
+      (button) => button.pluginId !== pluginId,
+    );
+    this._headerButtons$.next(filteredButtons);
+
+    console.log('PluginBridge: Header buttons removed for plugin', { pluginId });
   }
 
   /**
