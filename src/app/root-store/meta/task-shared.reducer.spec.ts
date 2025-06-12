@@ -785,6 +785,244 @@ describe('taskSharedMetaReducer', () => {
     });
   });
 
+  describe('moveToOtherProject action', () => {
+    const createMoveToOtherProjectAction = (
+      task: TaskWithSubTasks,
+      targetProjectId: string,
+    ) =>
+      TaskSharedActions.moveToOtherProject({
+        task,
+        targetProjectId,
+      });
+
+    it('should move task from one project to another', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []);
+
+      // Add target project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: 'project1' }),
+        subTasks: [],
+        subTaskIds: [],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'project2');
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              project2: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                projectId: 'project2',
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should move task with subtasks to another project', () => {
+      const testState = createStateWithExistingTasks(
+        ['task1', 'subtask1', 'subtask2'],
+        [],
+        [],
+      );
+
+      // Add target project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: 'project1' }),
+        subTasks: [
+          createMockTask({ id: 'subtask1', projectId: 'project1' }),
+          createMockTask({ id: 'subtask2', projectId: 'project1' }),
+        ],
+        subTaskIds: ['subtask1', 'subtask2'],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'project2');
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              project2: jasmine.objectContaining({
+                taskIds: ['task1', 'subtask1', 'subtask2'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                projectId: 'project2',
+              }),
+              subtask1: jasmine.objectContaining({
+                projectId: 'project2',
+              }),
+              subtask2: jasmine.objectContaining({
+                projectId: 'project2',
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle moving task from backlog', () => {
+      const testState = createStateWithExistingTasks([], ['task1'], []);
+
+      // Add target project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: 'project1' }),
+        subTasks: [],
+        subTaskIds: [],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'project2');
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                backlogTaskIds: [],
+              }),
+              project2: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle moving task when source project does not exist', () => {
+      const testState = createStateWithExistingTasks([], [], []);
+
+      // Add target project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      // Create task without project
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: undefined,
+      });
+      (testState[TASK_FEATURE_NAME].ids as string[]) = ['task1'];
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: undefined }),
+        subTasks: [],
+        subTaskIds: [],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'project2');
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project2: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                projectId: 'project2',
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle moving task when target project does not exist', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []);
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: 'project1' }),
+        subTasks: [],
+        subTaskIds: [],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'non-existent-project');
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                projectId: 'non-existent-project',
+              }),
+            }),
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+  });
+
   describe('deleteProject action', () => {
     it('should remove all project tasks from all tags', () => {
       const testState = createStateWithExistingTasks(
