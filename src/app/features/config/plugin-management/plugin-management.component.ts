@@ -11,16 +11,21 @@ import { PluginPersistenceService } from '../../../plugins/plugin-persistence.se
 import { CommonModule } from '@angular/common';
 import {
   MatCard,
+  MatCardActions,
   MatCardContent,
   MatCardHeader,
+  MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
+import { MatError } from '@angular/material/form-field';
+import { MatList, MatListItem } from '@angular/material/list';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { MatToolbar } from '@angular/material/toolbar';
 
 @Component({
   selector: 'plugin-management',
@@ -30,15 +35,21 @@ import { T } from '../../../t.const';
   imports: [
     CommonModule,
     MatCard,
+    MatCardActions,
     MatCardHeader,
     MatCardTitle,
+    MatCardSubtitle,
     MatCardContent,
     MatSlideToggle,
     MatIcon,
     MatButton,
     MatChip,
     MatChipSet,
+    MatError,
+    MatList,
+    MatListItem,
     TranslatePipe,
+    MatToolbar,
   ],
 })
 export class PluginManagementComponent implements OnInit {
