@@ -53,7 +53,13 @@ export class PluginService {
 
     for (const pluginPath of pluginPaths) {
       try {
-        await this._loadPlugin(pluginPath);
+        const pluginInstance = await this._loadPlugin(pluginPath);
+        // Add all plugin instances (loaded and disabled) to the loaded plugins list
+        // so they show up in the management UI
+        if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
+          // This is a disabled plugin, add it to the list for management
+          this._loadedPlugins.push(pluginInstance);
+        }
       } catch (error) {
         console.error(`Failed to load plugin from ${pluginPath}:`, error);
         // Continue loading other plugins even if one fails
@@ -101,23 +107,42 @@ export class PluginService {
         );
       }
 
+      // Check if plugin should be loaded based on persisted enabled state
+      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+        manifest.id,
+      );
+
+      // If plugin is disabled, create a placeholder instance without loading code
+      if (!isPluginEnabled) {
+        const placeholderInstance: PluginInstance = {
+          manifest,
+          loaded: false,
+          isEnabled: false,
+          error: undefined,
+        };
+        this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
+        console.log(`Plugin ${manifest.id} is disabled, skipping load`);
+        return placeholderInstance;
+      }
+
       // Load the plugin
       const baseCfg = this._getBaseCfg();
       const pluginInstance = await this._pluginRunner.loadPlugin(
         manifest,
         pluginCode,
         baseCfg,
+        true, // Plugin is enabled if we reach this point
       );
 
       if (pluginInstance.loaded) {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path
 
-        // Mark plugin as enabled in persistence (with some data)
+        // Update persistence with load time, but preserve enabled state
         await this._pluginPersistenceService.persistPluginData(
           manifest.id,
           JSON.stringify({ loadTime: Date.now() }),
-          true,
+          true, // Only set to true if we actually loaded it
         );
 
         console.log(`Plugin ${manifest.id} loaded successfully`);

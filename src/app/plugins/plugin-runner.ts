@@ -16,6 +16,7 @@ export class PluginRunner {
     manifest: PluginManifest,
     pluginCode: string,
     baseCfg: PluginBaseCfg,
+    isEnabled: boolean = true,
   ): Promise<PluginInstance> {
     try {
       // Create plugin API instance with direct bridge service injection
@@ -25,7 +26,7 @@ export class PluginRunner {
       const pluginInstance: PluginInstance = {
         manifest,
         loaded: false,
-        isEnabled: true, // Plugins are enabled by default when loaded
+        isEnabled, // Use the passed enabled state
       };
 
       // Execute plugin code in a sandboxed environment
