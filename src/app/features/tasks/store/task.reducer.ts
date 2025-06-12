@@ -12,7 +12,6 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
   moveToArchive_,
-  moveToOtherProject,
   removeReminderFromTask,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -473,16 +472,6 @@ export const taskReducer = createReducer<TaskState>(
       };
     }
     return state;
-  }),
-
-  on(moveToOtherProject, (state, { targetProjectId, task }) => {
-    const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map((id) => ({
-      id,
-      changes: {
-        projectId: targetProjectId,
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
   }),
 
   on(roundTimeSpentForDay, (state, { day, taskIds, isRoundUp, roundTo, projectId }) => {

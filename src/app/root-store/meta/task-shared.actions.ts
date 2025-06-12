@@ -68,6 +68,11 @@ export const TaskSharedActions = createActionGroup({
     }>(),
 
     // Project Management
+    moveToOtherProject: props<{
+      task: TaskWithSubTasks;
+      targetProjectId: string;
+    }>(),
+
     deleteProject: props<{
       project: Project;
       allTaskIds: string[];

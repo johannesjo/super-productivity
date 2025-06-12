@@ -98,6 +98,12 @@ export const taskSharedMetaReducer: MetaReducer = (
         >;
         return handleUpdateTask(rootState, task, isIgnoreShortSyntax);
       },
+      [TaskSharedActions.moveToOtherProject.type]: () => {
+        const { task, targetProjectId } = action as ReturnType<
+          typeof TaskSharedActions.moveToOtherProject
+        >;
+        return handleMoveToOtherProject(rootState, task, targetProjectId);
+      },
       [TaskSharedActions.deleteProject.type]: () => {
         const { allTaskIds } = action as ReturnType<
           typeof TaskSharedActions.deleteProject
@@ -452,6 +458,52 @@ const handleTagUpdates = (
   );
 
   return updateTags(state, [...removeUpdates, ...addUpdates]);
+};
+
+const handleMoveToOtherProject = (
+  state: RootState,
+  task: TaskWithSubTasks,
+  targetProjectId: string,
+): RootState => {
+  const currentProjectId = task.projectId;
+  const allTaskIds = [task.id, ...task.subTaskIds];
+
+  let updatedState = state;
+
+  // Remove tasks from current project if it exists
+  if (currentProjectId && state[PROJECT_FEATURE_NAME].entities[currentProjectId]) {
+    const currentProject = getProject(state, currentProjectId);
+    updatedState = updateProject(updatedState, currentProjectId, {
+      taskIds: removeTasksFromList(currentProject.taskIds, allTaskIds),
+      backlogTaskIds: removeTasksFromList(currentProject.backlogTaskIds, allTaskIds),
+    });
+  }
+
+  // Add tasks to target project
+  if (state[PROJECT_FEATURE_NAME].entities[targetProjectId]) {
+    const targetProject = getProject(updatedState, targetProjectId);
+    updatedState = updateProject(updatedState, targetProjectId, {
+      taskIds: [...targetProject.taskIds, ...allTaskIds],
+    });
+  }
+
+  // Update all tasks with new projectId
+  const taskUpdates: Update<Task>[] = allTaskIds.map((id) => ({
+    id,
+    changes: {
+      projectId: targetProjectId,
+    },
+  }));
+
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: taskAdapter.updateMany(
+      taskUpdates,
+      updatedState[TASK_FEATURE_NAME],
+    ),
+  };
+
+  return updatedState;
 };
 
 const handleDeleteProject = (state: RootState, allTaskIds: string[]): RootState => {
