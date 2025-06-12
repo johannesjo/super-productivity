@@ -165,11 +165,11 @@ const handleAddTask = (
     });
   }
 
-  // Update tags
+  // Update tags - only update tags that exist
   const tagIdsToUpdate = [
     ...task.tagIds,
     ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
-  ];
+  ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
   const tagUpdates = tagIdsToUpdate.map(
     (tagId): Update<Tag> => ({
@@ -199,8 +199,11 @@ const handleConvertToMainTask = (
     });
   }
 
-  // Update tags
-  const tagIdsToUpdate = [...parentTagIds, ...(isPlanForToday ? [TODAY_TAG.id] : [])];
+  // Update tags - only update tags that exist
+  const tagIdsToUpdate = [
+    ...parentTagIds,
+    ...(isPlanForToday ? [TODAY_TAG.id] : []),
+  ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
   const tagUpdates = tagIdsToUpdate.map(
     (tagId): Update<Tag> => ({
       id: tagId,
@@ -489,8 +492,12 @@ const handleTagUpdates = (
   oldTagIds: string[],
   newTagIds: string[],
 ): RootState => {
-  const tagsToRemoveFrom = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
-  const tagsToAddTo = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+  const tagsToRemoveFrom = oldTagIds
+    .filter((oldId) => !newTagIds.includes(oldId))
+    .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
+  const tagsToAddTo = newTagIds
+    .filter((newId) => !oldTagIds.includes(newId))
+    .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
 
   const removeUpdates = tagsToRemoveFrom.map(
     (tagId): Update<Tag> => ({
