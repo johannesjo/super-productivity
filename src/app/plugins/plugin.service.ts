@@ -337,13 +337,26 @@ export class PluginService {
       // Create a unique path identifier for uploaded plugins
       const uploadedPluginPath = `uploaded://${manifest.id}`;
 
+      // If plugin is disabled, create a placeholder instance without loading code
+      if (!isPluginEnabled) {
+        const placeholderInstance: PluginInstance = {
+          manifest,
+          loaded: false,
+          isEnabled: false,
+          error: undefined,
+        };
+        this._pluginPaths.set(manifest.id, uploadedPluginPath);
+        console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
+        return placeholderInstance;
+      }
+
       // Load the plugin
       const baseCfg = this._getBaseCfg();
       const pluginInstance = await this._pluginRunner.loadPlugin(
         manifest,
         pluginCode,
         baseCfg,
-        isPluginEnabled,
+        true, // Plugin is enabled if we reach this point
       );
 
       if (pluginInstance.loaded) {
@@ -464,13 +477,25 @@ export class PluginService {
         manifest.id,
       );
 
+      // If plugin is disabled, create a placeholder instance without loading code
+      if (!isPluginEnabled) {
+        const placeholderInstance: PluginInstance = {
+          manifest,
+          loaded: false,
+          isEnabled: false,
+          error: undefined,
+        };
+        console.log(`Uploaded plugin ${manifest.id} is disabled, skipping reload`);
+        return placeholderInstance;
+      }
+
       // Load the plugin
       const baseCfg = this._getBaseCfg();
       const pluginInstance = await this._pluginRunner.loadPlugin(
         manifest,
         pluginCode,
         baseCfg,
-        isPluginEnabled,
+        true, // Plugin is enabled if we reach this point
       );
 
       if (pluginInstance.loaded) {
