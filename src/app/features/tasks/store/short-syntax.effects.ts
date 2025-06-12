@@ -5,7 +5,6 @@ import {
   addTask,
   moveToOtherProject,
   scheduleTaskWithTime,
-  updateTask,
 } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
@@ -55,15 +54,12 @@ export class ShortSyntaxEffects {
 
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(addTask, updateTask, TaskSharedActions.updateTask),
+      ofType(addTask, TaskSharedActions.updateTask),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;
         }
-        if (
-          action.type !== updateTask.type &&
-          action.type !== TaskSharedActions.updateTask.type
-        ) {
+        if (action.type !== TaskSharedActions.updateTask.type) {
           return true;
         }
         const changeProps = Object.keys(action.task.changes);
@@ -144,7 +140,7 @@ export class ShortSyntaxEffects {
         const { taskChanges } = r;
 
         actions.push(
-          updateTask({
+          TaskSharedActions.updateTask({
             task: {
               id: task.id,
               changes: r.taskChanges,

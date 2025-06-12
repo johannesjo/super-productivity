@@ -15,7 +15,6 @@ enum TaskActionTypes {
   'UpdateTaskUi' = '[Task] Update Task Ui',
   'RemoveTagsForAllTasks' = '[Task] Remove Tags from all Tasks',
   'ToggleTaskHideSubTasks' = '[Task] Toggle Show Sub Tasks',
-  'UpdateTask' = '[Task] Update Task',
   'UpdateMTasksSimple' = '[Task] Update multiple Tasks (simple)',
   'UpdateTasks' = '[Task] Update Tasks',
   'DeleteTask' = '[Task] Delete Task',
@@ -78,14 +77,6 @@ export const addTask = createAction(
     workContextType: WorkContextType;
     isAddToBacklog: boolean;
     isAddToBottom: boolean;
-    isIgnoreShortSyntax?: boolean;
-  }>(),
-);
-
-export const updateTask = createAction(
-  TaskActionTypes.UpdateTask,
-  props<{
-    task: Update<Task>;
     isIgnoreShortSyntax?: boolean;
   }>(),
 );

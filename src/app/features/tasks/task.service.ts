@@ -40,7 +40,6 @@ import {
   toggleStart,
   toggleTaskHideSubTasks,
   unsetCurrentTask,
-  updateTask,
   updateTaskUi,
 } from './store/task.actions';
 import { IssueProviderKey } from '../issue/issue.model';
@@ -332,7 +331,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>): void {
     this._store.dispatch(
-      updateTask({
+      TaskSharedActions.updateTask({
         task: { id, changes: changedFields },
       }),
     );

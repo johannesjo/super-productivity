@@ -21,7 +21,7 @@ import {
   selectFocusSessionTimeElapsed,
 } from '../store/focus-mode.selectors';
 import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
-import { updateTask } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../tasks/store/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
@@ -173,7 +173,7 @@ export class FocusModeMainComponent implements OnDestroy {
   finishCurrentTask(): void {
     this._store.dispatch(focusSessionDone({}));
     this._store.dispatch(
-      updateTask({
+      TaskSharedActions.updateTask({
         task: {
           id: this.task?.id as string,
           changes: {

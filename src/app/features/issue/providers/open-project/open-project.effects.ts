@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { setCurrentTask, updateTask } from '../../../tasks/store/task.actions';
+import { setCurrentTask } from '../../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../tasks/store/task-shared.actions';
 import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
 import { OPEN_PROJECT_TYPE } from '../../issue.const';
@@ -36,7 +37,7 @@ export class OpenProjectEffects {
   postTime$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         concatMap((task) =>
@@ -122,7 +123,7 @@ export class OpenProjectEffects {
   checkForDoneTransition$: Observable<any> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task }): boolean => !!task.changes.isDone),
         // NOTE: as this is only a partial object we need to get the full one
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
