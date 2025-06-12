@@ -6,8 +6,8 @@ import {
   moveToOtherProject,
   scheduleTaskWithTime,
   updateTask,
-  updateTaskTags,
 } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   catchError,
   concatMap,
@@ -208,9 +208,13 @@ export class ShortSyntaxEffects {
           }
           if (!isEqualTags) {
             actions.push(
-              updateTaskTags({
-                task,
-                newTagIds: unique(tagIds),
+              TaskSharedActions.updateTask({
+                task: {
+                  id: task.id,
+                  changes: {
+                    tagIds: unique(tagIds),
+                  },
+                },
               }),
             );
           }
@@ -264,9 +268,13 @@ export class ShortSyntaxEffects {
                   newTagIds.push(id);
                 });
                 actions.push(
-                  updateTaskTags({
-                    task,
-                    newTagIds: unique(newTagIds),
+                  TaskSharedActions.updateTask({
+                    task: {
+                      id: task.id,
+                      changes: {
+                        tagIds: unique(newTagIds),
+                      },
+                    },
                   }),
                 );
               }
