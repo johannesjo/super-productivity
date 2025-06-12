@@ -20,7 +20,10 @@ import { ObstructionState } from '../../features/metric/obstruction/obstruction.
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { ValidationResult } from '../api/pfapi.model';
-import { PluginDataState } from '../../plugins/plugin-persistence.model';
+import {
+  PluginUserDataState,
+  PluginMetaDataState,
+} from '../../plugins/plugin-persistence.model';
 
 // for more speed
 // type DataToValidate = Omit<AppDataCompleteNew, 'archiveOld' | 'archiveYoung'>;
@@ -48,7 +51,8 @@ const _validateImprovement = createValidate<ImprovementState>();
 const _validateObstruction = createValidate<ObstructionState>();
 const _validateGlobalConfig = createValidate<GlobalConfigState>();
 const _validateTimeTracking = createValidate<TimeTrackingState>();
-const _validatePluginData = createValidate<PluginDataState>();
+const _validatePluginUserData = createValidate<PluginUserDataState>();
+const _validatePluginMetadata = createValidate<PluginMetaDataState>();
 
 export const validateAllData = <R>(
   d: AppDataCompleteNew | R,
@@ -97,7 +101,10 @@ export const appDataValidators: {
     _wrapValidate(_validateObstruction(d), d, true),
   globalConfig: <R>(d: R | GlobalConfigState) => _wrapValidate(_validateGlobalConfig(d)),
   timeTracking: <R>(d: R | TimeTrackingState) => _wrapValidate(_validateTimeTracking(d)),
-  pluginData: <R>(d: R | PluginDataState) => _wrapValidate(_validatePluginData(d)),
+  pluginUserData: <R>(d: R | PluginUserDataState) =>
+    _wrapValidate(_validatePluginUserData(d)),
+  pluginMetadata: <R>(d: R | PluginMetaDataState) =>
+    _wrapValidate(_validatePluginMetadata(d)),
 } as const;
 
 const validateArchiveModel = <R>(d: ArchiveModel | R): ValidationResult<ArchiveModel> => {
