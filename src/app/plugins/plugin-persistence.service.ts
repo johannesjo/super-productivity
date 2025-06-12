@@ -11,17 +11,28 @@ import { DataForPlugin, PluginDataState } from './plugin-persistence.model';
 export class PluginPersistenceService {
   private _pfapiService = inject(PfapiService);
 
-  constructor() {}
-
   /**
    * Persist plugin data for a specific plugin
    */
-  async persistPluginData(pluginId: string, data: string): Promise<void> {
+  async persistPluginData(
+    pluginId: string,
+    data: string,
+    isEnabled?: boolean,
+  ): Promise<void> {
     const currentState = await this._pfapiService.pf.m.pluginData.load();
     const existingIndex = currentState.findIndex((item) => item.id === pluginId);
 
     const updatedState: PluginDataState = [...currentState];
-    const pluginData: DataForPlugin = { id: pluginId, data };
+    const pluginData: DataForPlugin = {
+      id: pluginId,
+      data,
+      isEnabled:
+        isEnabled !== undefined
+          ? isEnabled
+          : existingIndex >= 0
+            ? currentState[existingIndex].isEnabled
+            : true,
+    };
 
     if (existingIndex >= 0) {
       updatedState[existingIndex] = pluginData;
@@ -63,27 +74,56 @@ export class PluginPersistenceService {
   }
 
   /**
+   * Set plugin enabled/disabled status
+   */
+  async setPluginEnabled(pluginId: string, isEnabled: boolean): Promise<void> {
+    const currentState = await this._pfapiService.pf.m.pluginData.load();
+    const existingIndex = currentState.findIndex((item) => item.id === pluginId);
+
+    if (existingIndex >= 0) {
+      const updatedState: PluginDataState = [...currentState];
+      updatedState[existingIndex] = {
+        ...updatedState[existingIndex],
+        isEnabled,
+      };
+
+      await this._pfapiService.pf.m.pluginData.save(updatedState, {
+        isUpdateRevAndLastUpdate: true,
+      });
+    }
+  }
+
+  /**
+   * Check if plugin is enabled
+   */
+  async isPluginEnabled(pluginId: string): Promise<boolean> {
+    const currentState = await this._pfapiService.pf.m.pluginData.load();
+    const pluginData = currentState.find((item) => item.id === pluginId);
+    return pluginData?.isEnabled ?? false;
+  }
+
+  /**
+   * Get all enabled plugins
+   */
+  async getEnabledPlugins(): Promise<DataForPlugin[]> {
+    const currentState = await this._pfapiService.pf.m.pluginData.load();
+    return currentState.filter((plugin) => plugin.isEnabled === true);
+  }
+
+  /**
+   * Get all disabled plugins
+   */
+  async getDisabledPlugins(): Promise<DataForPlugin[]> {
+    const currentState = await this._pfapiService.pf.m.pluginData.load();
+    return currentState.filter((plugin) => plugin.isEnabled === false);
+  }
+
+  /**
    * Clear all plugin data
    */
   async clearAllPluginData(): Promise<void> {
     await this._pfapiService.pf.m.pluginData.save([], {
       isUpdateRevAndLastUpdate: true,
     });
-  }
-
-  /**
-   * Legacy method for backward compatibility with existing plugin API
-   * @deprecated Use persistPluginData instead
-   */
-  async persistDataSynced(dataStr: string): Promise<void> {
-    return this.persistPluginData('legacy', dataStr);
-  }
-
-  /**
-   * Legacy method for backward compatibility with existing plugin API
-   * @deprecated Use loadPluginData instead
-   */
-  async loadPersistedData(): Promise<string | null> {
-    return this.loadPluginData('legacy');
   }
 }
