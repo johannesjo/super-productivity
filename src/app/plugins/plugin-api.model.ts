@@ -27,10 +27,6 @@ export interface PluginBaseCfg {
   isDev: boolean;
 }
 
-export interface IssueProviderPluginCfg {
-  iconSvg: string;
-}
-
 export interface DialogButtonCfg {
   label: string;
   icon?: string;
