@@ -123,7 +123,6 @@ export interface PluginAPI {
 
 export interface PluginInstance {
   manifest: PluginManifest;
-  api: PluginAPI;
   loaded: boolean;
   isEnabled: boolean;
   error?: string;
