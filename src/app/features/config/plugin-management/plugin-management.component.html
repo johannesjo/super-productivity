@@ -34,6 +34,18 @@
         {{ uploadError() }}
       </mat-error>
     }
+
+    <div style="margin-top: 16px">
+      <button
+        mat-button
+        color="warn"
+        (click)="clearPluginCache()"
+        [disabled]="isUploading()"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        Clear Plugin Cache
+      </button>
+    </div>
   </mat-card-content>
 </mat-card>
 <mat-card>EMPTY</mat-card>
@@ -115,6 +127,17 @@
         <mat-icon>refresh</mat-icon>
         {{ T.PS.RELOAD | translate }}
       </button>
+      @if (isUploadedPlugin(plugin)) {
+        <button
+          mat-button
+          color="warn"
+          (click)="removeUploadedPlugin(plugin)"
+          [disabled]="isUploading()"
+        >
+          <mat-icon>delete</mat-icon>
+          Remove
+        </button>
+      }
     </mat-card-actions>
   </mat-card>
 }

@@ -10,6 +10,7 @@ import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { IS_ELECTRON } from '../app.constants';
 import { PluginPersistenceService } from './plugin-persistence.service';
+import { PluginCacheService } from './plugin-cache.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,7 @@ export class PluginService {
     private _pluginSecurity: PluginSecurityService,
     private _globalThemeService: GlobalThemeService,
     private _pluginPersistenceService: PluginPersistenceService,
+    private _pluginCacheService: PluginCacheService,
   ) {}
 
   async initializePlugins(): Promise<void> {
@@ -43,6 +45,9 @@ export class PluginService {
       // Load uploaded plugins
       await this._loadUploadedPlugins();
 
+      // Clean up old cached plugins
+      await this._pluginCacheService.cleanupOldPlugins();
+
       this._isInitialized = true;
       console.log('Plugin system initialized successfully');
     } catch (error) {
@@ -58,10 +63,9 @@ export class PluginService {
     for (const pluginPath of pluginPaths) {
       try {
         const pluginInstance = await this._loadPlugin(pluginPath);
-        // Add all plugin instances (loaded and disabled) to the loaded plugins list
-        // so they show up in the management UI
+        // Add all plugin instances to the loaded plugins list so they show up in the management UI
+        // Note: _loadPlugin already adds loaded plugins to _loadedPlugins, so we only need to add disabled ones
         if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
-          // This is a disabled plugin, add it to the list for management
           this._loadedPlugins.push(pluginInstance);
         }
       } catch (error) {
@@ -73,34 +77,28 @@ export class PluginService {
 
   private async _loadUploadedPlugins(): Promise<void> {
     try {
-      const allPluginData = await this._pluginPersistenceService.getAllPluginData();
+      const cachedPlugins = await this._pluginCacheService.getAllPlugins();
 
-      // Find uploaded plugins (those with stored files)
-      for (const pluginData of allPluginData) {
+      // Load each cached plugin
+      for (const cachedPlugin of cachedPlugins) {
         try {
-          const storedFiles = await this._pluginPersistenceService.loadPluginData(
-            `${pluginData.id}_files`,
-          );
-          if (storedFiles) {
-            // This is an uploaded plugin
-            console.log(`Loading uploaded plugin: ${pluginData.id}`);
-            const pluginInstance = await this._loadUploadedPlugin(pluginData.id);
+          console.log(`Loading cached plugin: ${cachedPlugin.id}`);
+          const pluginInstance = await this._loadUploadedPlugin(cachedPlugin.id);
 
-            if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
-              // Add disabled uploaded plugin to the list for management
-              this._loadedPlugins.push(pluginInstance);
-            }
-
-            // Set the path for reload functionality
-            this._pluginPaths.set(pluginData.id, `uploaded://${pluginData.id}`);
+          if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
+            // Add disabled uploaded plugin to the list for management
+            this._loadedPlugins.push(pluginInstance);
           }
+
+          // Set the path for reload functionality
+          this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
         } catch (error) {
-          console.error(`Failed to load uploaded plugin ${pluginData.id}:`, error);
+          console.error(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
           // Continue loading other plugins even if one fails
         }
       }
     } catch (error) {
-      console.error('Failed to load uploaded plugins:', error);
+      console.error('Failed to load cached plugins:', error);
       // Don't throw - this shouldn't prevent other plugins from loading
     }
   }
@@ -251,6 +249,10 @@ export class PluginService {
     return [...this._loadedPlugins];
   }
 
+  getPluginPath(pluginId: string): string | undefined {
+    return this._pluginPaths.get(pluginId);
+  }
+
   isInitialized(): boolean {
     return this._isInitialized;
   }
@@ -348,11 +350,8 @@ export class PluginService {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
 
-        // Store plugin files in IndexedDB for later use
-        await this._storeUploadedPluginFiles(manifest.id, {
-          manifest: manifestText,
-          code: pluginCode,
-        });
+        // Store plugin files in cache for later use
+        await this._pluginCacheService.storePlugin(manifest.id, manifestText, pluginCode);
 
         // Mark plugin as enabled in persistence
         await this._pluginPersistenceService.persistPluginData(
@@ -376,15 +375,23 @@ export class PluginService {
     }
   }
 
-  private async _storeUploadedPluginFiles(
-    pluginId: string,
-    files: { manifest: string; code: string },
-  ): Promise<void> {
-    // Store uploaded plugin files using the same persistence service
-    await this._pluginPersistenceService.persistPluginData(
-      `${pluginId}_files`,
-      JSON.stringify(files),
-    );
+  async removeUploadedPlugin(pluginId: string): Promise<void> {
+    // Remove from cache
+    await this._pluginCacheService.removePlugin(pluginId);
+
+    // Remove from persistence
+    await this._pluginPersistenceService.removePluginData(pluginId);
+
+    // Remove from loaded plugins
+    const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
+    if (index !== -1) {
+      this._loadedPlugins.splice(index, 1);
+    }
+
+    // Remove path mapping
+    this._pluginPaths.delete(pluginId);
+
+    console.log(`Uploaded plugin ${pluginId} removed completely`);
   }
 
   unloadPlugin(pluginId: string): boolean {
@@ -427,17 +434,14 @@ export class PluginService {
 
   private async _loadUploadedPlugin(pluginId: string): Promise<PluginInstance> {
     try {
-      // Load stored plugin files
-      const storedFiles = await this._pluginPersistenceService.loadPluginData(
-        `${pluginId}_files`,
-      );
-      if (!storedFiles) {
-        throw new Error(`Stored files not found for uploaded plugin ${pluginId}`);
+      // Load cached plugin files
+      const cachedPlugin = await this._pluginCacheService.getPlugin(pluginId);
+      if (!cachedPlugin) {
+        throw new Error(`Cached files not found for uploaded plugin ${pluginId}`);
       }
 
-      const files = JSON.parse(storedFiles);
-      const manifest: PluginManifest = JSON.parse(files.manifest);
-      const pluginCode: string = files.code;
+      const manifest: PluginManifest = JSON.parse(cachedPlugin.manifest);
+      const pluginCode: string = cachedPlugin.code;
 
       // Validate manifest
       const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
