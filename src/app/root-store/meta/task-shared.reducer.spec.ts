@@ -8,11 +8,13 @@ import { Task } from '../../features/tasks/task.model';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
+import { ActionReducer, Action } from '@ngrx/store';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { WorklogGrouping } from '../../features/worklog/worklog.model';
 
 describe('taskSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
-  let metaReducer: any;
+  let metaReducer: ActionReducer<RootState, Action>;
   let initialState: Partial<RootState>;
 
   beforeEach(() => {
@@ -29,7 +31,14 @@ describe('taskSharedMetaReducer', () => {
       backlogTaskIds: [],
       noteIds: [],
       advancedCfg: {
-        worklogExportSettings: {} as any,
+        worklogExportSettings: {
+          cols: [],
+          roundWorkTimeTo: null,
+          roundStartTimeTo: null,
+          roundEndTimeTo: null,
+          separateTasksBy: '',
+          groupBy: WorklogGrouping.DATE,
+        },
       },
       theme: {
         primary: '#000000',
@@ -44,7 +53,14 @@ describe('taskSharedMetaReducer', () => {
       created: Date.now(),
       taskIds: [],
       advancedCfg: {
-        worklogExportSettings: {} as any,
+        worklogExportSettings: {
+          cols: [],
+          roundWorkTimeTo: null,
+          roundStartTimeTo: null,
+          roundEndTimeTo: null,
+          separateTasksBy: '',
+          groupBy: WorklogGrouping.DATE,
+        },
       },
       theme: {
         primary: '#000000',
@@ -76,9 +92,8 @@ describe('taskSharedMetaReducer', () => {
       [PROJECT_FEATURE_NAME]: {
         ids: ['project1'],
         entities: { project1: mockProject },
-        currentId: null,
       },
-    } as any;
+    };
   });
 
   describe('addTask action', () => {
@@ -105,7 +120,7 @@ describe('taskSharedMetaReducer', () => {
         isAddToBacklog: false,
       });
 
-      metaReducer(initialState, action);
+      metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -151,7 +166,7 @@ describe('taskSharedMetaReducer', () => {
         isAddToBacklog: true,
       });
 
-      metaReducer(initialState, action);
+      metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -191,7 +206,7 @@ describe('taskSharedMetaReducer', () => {
         isAddToBacklog: false,
       });
 
-      metaReducer(initialState, action);
+      metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -212,10 +227,29 @@ describe('taskSharedMetaReducer', () => {
 
     it('should add task to bottom when isAddToBottom is true', () => {
       // Setup existing task in project
-      (initialState[PROJECT_FEATURE_NAME] as any).entities.project1.taskIds = [
-        'existing-task',
-      ];
-      (initialState[TAG_FEATURE_NAME] as any).entities.tag1.taskIds = ['existing-task'];
+      const updatedInitialState = {
+        ...initialState,
+        [PROJECT_FEATURE_NAME]: {
+          ...initialState[PROJECT_FEATURE_NAME]!,
+          entities: {
+            ...initialState[PROJECT_FEATURE_NAME]!.entities,
+            project1: {
+              ...(initialState[PROJECT_FEATURE_NAME]!.entities.project1 as Project),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['existing-task'],
+            },
+          },
+        },
+      };
 
       const mockTask: Task = {
         id: 'task1',
@@ -239,7 +273,7 @@ describe('taskSharedMetaReducer', () => {
         isAddToBacklog: false,
       });
 
-      metaReducer(initialState, action);
+      metaReducer(updatedInitialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -285,7 +319,7 @@ describe('taskSharedMetaReducer', () => {
         isAddToBacklog: false,
       });
 
-      metaReducer(initialState, action);
+      metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -305,10 +339,9 @@ describe('taskSharedMetaReducer', () => {
   describe('other actions', () => {
     it('should pass through other actions to the reducer', () => {
       const action = { type: 'SOME_OTHER_ACTION' };
-      metaReducer(initialState, action);
+      metaReducer(initialState as RootState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(initialState, action);
-      expect(result).toBe(initialState);
     });
   });
 });
