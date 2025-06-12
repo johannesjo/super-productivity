@@ -3,6 +3,7 @@ import {
   addTask,
   convertToMainTask,
   deleteTask,
+  deleteTasks,
 } from '../../features/tasks/store/task.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -697,6 +698,110 @@ describe('taskSharedMetaReducer', () => {
               }),
               TODAY: jasmine.objectContaining({
                 taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('deleteTasks action', () => {
+    it('should remove multiple task IDs from all tags', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['task1', 'task2', 'other-task'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task3', 'today-task'],
+            },
+          },
+        },
+      };
+
+      const action = deleteTasks({ taskIds: ['task1', 'task2', 'task3'] });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['other-task'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['today-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty taskIds array', () => {
+      const action = deleteTasks({ taskIds: [] });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: [],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should not affect taskIds that are not in the deletion list', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            tag1: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.tag1 as Tag),
+              taskIds: ['keep-task1', 'delete-task', 'keep-task2'],
+            },
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['keep-task3', 'delete-task', 'keep-task4'],
+            },
+          },
+        },
+      };
+
+      const action = deleteTasks({ taskIds: ['delete-task', 'nonexistent-task'] });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              tag1: jasmine.objectContaining({
+                taskIds: ['keep-task1', 'keep-task2'],
+              }),
+              TODAY: jasmine.objectContaining({
+                taskIds: ['keep-task3', 'keep-task4'],
               }),
             }),
           }),
