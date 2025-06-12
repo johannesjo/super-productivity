@@ -211,6 +211,15 @@ export const APP_ROUTES: Routes = [
         (m) => m.ConfigPageComponent,
       ),
   },
+  {
+    path: 'plugins/:pluginId/index',
+    loadComponent: () =>
+      import('./plugins/ui/plugin-index/plugin-index.component').then(
+        (m) => m.PluginIndexComponent,
+      ),
+    data: { page: 'plugin-index' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
 
   { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },
 ];
