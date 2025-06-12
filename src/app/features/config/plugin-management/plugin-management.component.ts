@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   OnInit,
   signal,
@@ -9,7 +8,6 @@ import {
 import { PluginService } from '../../../plugins/plugin.service';
 import { PluginInstance } from '../../../plugins/plugin-api.model';
 import { PluginPersistenceService } from '../../../plugins/plugin-persistence.service';
-import { DataForPlugin } from '../../../plugins/plugin-persistence.model';
 import { CommonModule } from '@angular/common';
 import {
   MatCard,
@@ -49,64 +47,23 @@ export class PluginManagementComponent implements OnInit {
 
   T: typeof T = T;
 
-  // Signals for reactive state
-  private readonly _loadedPlugins = signal<PluginInstance[]>([]);
-  private readonly _allPluginData = signal<DataForPlugin[]>([]);
-
-  // Computed signal for all plugins (loaded + disabled)
-  readonly allPlugins = computed(() => {
-    const loadedPlugins = this._loadedPlugins();
-    const allPluginData = this._allPluginData();
-    const plugins: PluginInstance[] = [...loadedPlugins];
-
-    // Add disabled plugins that aren't already in the loaded list
-    for (const pluginData of allPluginData) {
-      const isAlreadyLoaded = plugins.some((p) => p.manifest.id === pluginData.id);
-      if (!isAlreadyLoaded && pluginData.isEnabled === false) {
-        // Create a minimal PluginInstance for disabled plugins
-        plugins.push({
-          manifest: {
-            id: pluginData.id,
-            name: pluginData.id, // We'll use ID as name since we don't have the full manifest
-            version: 'unknown',
-            manifestVersion: 1,
-            minSupVersion: 'unknown',
-            hooks: [],
-            permissions: [],
-            type: 'standard',
-          },
-          api: null as any, // No API for disabled plugins
-          loaded: false,
-          error: undefined,
-        });
-      }
-    }
-
-    return plugins;
-  });
+  // Signal for all plugins (loaded + disabled with isEnabled state)
+  readonly allPlugins = signal<PluginInstance[]>([]);
 
   async ngOnInit(): Promise<void> {
     await this.loadPlugins();
   }
 
   async loadPlugins(): Promise<void> {
-    this._loadedPlugins.set(this._pluginService.getLoadedPlugins());
-    this._allPluginData.set(await this._pluginPersistenceService.getAllPluginData());
+    const allPlugins = await this._pluginService.getAllPlugins();
+    this.allPlugins.set(allPlugins);
   }
 
   /**
-   * Check if a plugin is enabled based on loaded state and persistence data
+   * Check if a plugin is enabled
    */
   isPluginEnabledSync(plugin: PluginInstance): boolean {
-    // If the plugin is loaded, it's enabled
-    if (plugin.loaded) {
-      return true;
-    }
-
-    // Check persistence data for disabled plugins
-    const allPluginData = this._allPluginData();
-    const pluginData = allPluginData.find((data) => data.id === plugin.manifest.id);
-    return pluginData?.isEnabled ?? false;
+    return plugin.isEnabled;
   }
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
@@ -124,12 +81,17 @@ export class PluginManagementComponent implements OnInit {
       // Set plugin as enabled in persistence
       await this._pluginPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 
+      // Update the plugin state immediately
+      plugin.isEnabled = true;
+
       // If plugin is not loaded, reload it
       if (!plugin.loaded) {
         await this._pluginService.reloadPlugin(plugin.manifest.id);
+        await this.loadPlugins(); // Full refresh needed for reloaded plugin
+      } else {
+        // Just update the signal for immediate UI update
+        this.allPlugins.set([...this.allPlugins()]);
       }
-
-      await this.loadPlugins(); // Refresh the list
     } catch (error) {
       console.error('Failed to enable plugin:', error);
     }
@@ -142,10 +104,14 @@ export class PluginManagementComponent implements OnInit {
       // Set plugin as disabled in persistence
       await this._pluginPersistenceService.setPluginEnabled(plugin.manifest.id, false);
 
+      // Update the plugin state immediately
+      plugin.isEnabled = false;
+
       // Unload the plugin
       this._pluginService.unloadPlugin(plugin.manifest.id);
 
-      await this.loadPlugins(); // Refresh the list
+      // Update the signal for immediate UI update
+      this.allPlugins.set([...this.allPlugins()]);
     } catch (error) {
       console.error('Failed to disable plugin:', error);
     }
@@ -180,7 +146,7 @@ export class PluginManagementComponent implements OnInit {
     if (plugin.error) {
       return 'Error';
     }
-    return this.isPluginEnabledSync(plugin) ? 'Enabled' : 'Disabled';
+    return plugin.isEnabled ? 'Enabled' : 'Disabled';
   }
 
   getPluginDescription(plugin: PluginInstance): string {
