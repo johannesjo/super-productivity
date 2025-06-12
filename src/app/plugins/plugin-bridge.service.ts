@@ -41,7 +41,15 @@ export class PluginBridgeService {
   private _tagService = inject(TagService);
   private _pluginPersistenceService = inject(PluginPersistenceService);
 
-  constructor() {}
+  // Track which plugin is currently making calls to prevent cross-plugin access
+  private _currentPluginId: string | null = null;
+
+  /**
+   * Set the current plugin context for secure operations
+   */
+  _setCurrentPlugin(pluginId: string): void {
+    this._currentPluginId = pluginId;
+  }
 
   /**
    * Show a snack message to the user
@@ -241,14 +249,23 @@ export class PluginBridgeService {
   }
 
   /**
-   * Persist plugin data
+   * Persist plugin data - uses current plugin context for security
    */
   async persistDataSynced(dataStr: string): Promise<void> {
     typia.assert<string>(dataStr);
 
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for data persistence');
+    }
+
     try {
-      await this._pluginPersistenceService.persistDataSynced(dataStr);
-      console.log('PluginBridge: Plugin data persisted successfully');
+      await this._pluginPersistenceService.persistPluginData(
+        this._currentPluginId,
+        dataStr,
+      );
+      console.log('PluginBridge: Plugin data persisted successfully', {
+        pluginId: this._currentPluginId,
+      });
     } catch (error) {
       console.error('PluginBridge: Failed to persist plugin data:', error);
       throw new Error('Unable to persist plugin data');
@@ -256,11 +273,15 @@ export class PluginBridgeService {
   }
 
   /**
-   * Get persisted plugin data
+   * Get persisted plugin data - uses current plugin context for security
    */
   async loadPersistedData(): Promise<string | null> {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for data loading');
+    }
+
     try {
-      return await this._pluginPersistenceService.loadPersistedData();
+      return await this._pluginPersistenceService.loadPluginData(this._currentPluginId);
     } catch (error) {
       console.error('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
