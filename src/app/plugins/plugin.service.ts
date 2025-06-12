@@ -16,6 +16,7 @@ import { IS_ELECTRON } from '../app.constants';
 export class PluginService {
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
+  private _pluginPaths: Map<string, string> = new Map(); // Store plugin ID -> path mapping
 
   constructor(
     private _http: HttpClient,
@@ -108,6 +109,7 @@ export class PluginService {
 
       if (pluginInstance.loaded) {
         this._loadedPlugins.push(pluginInstance);
+        this._pluginPaths.set(manifest.id, pluginPath); // Store the path
         console.log(`Plugin ${manifest.id} loaded successfully`);
       } else {
         console.error(`Plugin ${manifest.id} failed to load:`, pluginInstance.error);
@@ -168,8 +170,29 @@ export class PluginService {
     if (index !== -1) {
       this._loadedPlugins.splice(index, 1);
       this._pluginHooks.unregisterPluginHooks(pluginId);
+      // Don't remove from _pluginPaths for reload functionality
       return this._pluginRunner.unloadPlugin(pluginId);
     }
     return false;
+  }
+
+  async reloadPlugin(pluginId: string): Promise<boolean> {
+    const pluginPath = this._pluginPaths.get(pluginId);
+    if (!pluginPath) {
+      console.error(`Cannot reload plugin ${pluginId}: path not found`);
+      return false;
+    }
+
+    // Unload the plugin first
+    this.unloadPlugin(pluginId);
+
+    try {
+      // Reload the plugin
+      const pluginInstance = await this._loadPlugin(pluginPath);
+      return pluginInstance.loaded;
+    } catch (error) {
+      console.error(`Failed to reload plugin ${pluginId}:`, error);
+      return false;
+    }
   }
 }
