@@ -105,6 +105,8 @@
       </button>
     }
 
+    <plugin-header-btns></plugin-header-btns>
+
     <div class="play-btn-wrapper">
       @if (taskService.currentTask$ | async; as currentTask) {
         <div
@@ -237,8 +239,6 @@
         </div>
       }
     }
-
-    <plugin-header-btns></plugin-header-btns>
 
     <button
       class="toggle-notes-btn e2e-toggle-task-view-customizer-panel"
