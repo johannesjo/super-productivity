@@ -1,16 +1,5 @@
 <div class="plugin-index-container">
   <!-- Header -->
-  <div class="header">
-    <button
-      mat-button
-      (click)="goBack()"
-      class="back-button"
-    >
-      <mat-icon>arrow_back</mat-icon>
-      Back to Plugin Management
-    </button>
-    <h2>Plugin: {{ pluginId() }}</h2>
-  </div>
 
   <!-- Loading State -->
   @if (isLoading()) {
@@ -55,7 +44,6 @@
       <iframe
         #iframe
         [src]="iframeSrc()"
-        (load)="onIframeLoad()"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
         class="plugin-iframe"
       >

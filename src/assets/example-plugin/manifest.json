@@ -6,7 +6,16 @@
   "minSupVersion": "13.0.0",
   "description": "A simple example plugin that shows a greeting message when tasks are completed.",
   "hooks": ["taskComplete"],
-  "permissions": ["PluginAPI.showSnack"],
+  "permissions": [
+    "PluginAPI.showSnack",
+    "PluginAPI.showIndexHtmlAsView",
+    "PluginAPI.notify",
+    "PluginAPI.getTasks",
+    "PluginAPI.getAllProjects",
+    "PluginAPI.getAllTags",
+    "PluginAPI.addTask",
+    "PluginAPI.persistDataSynced"
+  ],
   "iFrame": false,
   "type": "standard",
   "assets": []

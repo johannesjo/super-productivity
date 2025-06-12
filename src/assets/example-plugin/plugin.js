@@ -26,17 +26,13 @@ setTimeout(() => {
 }, 1000);
 
 PluginAPI.registerHeaderButton({
-  label: 'Hello World',
-  icon: 'celebration',
-  onClick: function (taskData) {
-    console.log('Hello World Plugin: Task completed!', taskData);
+  label: 'Plugin Dashboard',
+  icon: 'dashboard',
+  onClick: function () {
+    console.log('Hello World Plugin: Opening dashboard...');
 
-    // Show a friendly message when a task is completed
-    PluginAPI.showSnack({
-      msg: '🎉 Hello World! Clicked Button',
-      type: 'SUCCESS',
-      ico: 'celebration',
-    });
+    // Open the plugin's index.html in an iframe view
+    PluginAPI.showIndexHtmlAsView();
   },
 });
 
@@ -52,5 +48,16 @@ PluginAPI.registerMenuEntry({
       type: 'SUCCESS',
       ico: 'celebration',
     });
+  },
+});
+
+PluginAPI.registerMenuEntry({
+  label: 'Plugin Dashboard',
+  icon: 'dashboard',
+  onClick: function () {
+    console.log('Hello World Plugin: Opening dashboard from menu...');
+
+    // Open the plugin's index.html in an iframe view
+    PluginAPI.showIndexHtmlAsView();
   },
 });

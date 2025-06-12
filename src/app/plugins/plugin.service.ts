@@ -137,6 +137,23 @@ export class PluginService {
         throw new Error('Failed to load plugin code');
       }
 
+      // Try to load index.html for built-in plugins (optional)
+      const indexHtmlUrl = `${pluginPath}/index.html`;
+      try {
+        const indexHtml = await this._http
+          .get(indexHtmlUrl, { responseType: 'text' })
+          .pipe(take(1))
+          .toPromise();
+
+        if (indexHtml) {
+          this._pluginIndexHtml.set(manifest.id, indexHtml);
+          console.log(`Loaded index.html for plugin ${manifest.id}`);
+        }
+      } catch (error) {
+        // index.html is optional, so we don't throw an error
+        console.log(`No index.html found for plugin ${manifest.id} (optional)`);
+      }
+
       // Validate plugin code
       const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
       if (!codeValidation.isValid) {
@@ -464,6 +481,9 @@ export class PluginService {
     // Remove path mapping
     this._pluginPaths.delete(pluginId);
 
+    // Remove index.html content
+    this._pluginIndexHtml.delete(pluginId);
+
     console.log(`Uploaded plugin ${pluginId} removed completely`);
   }
 
@@ -472,7 +492,7 @@ export class PluginService {
     if (index !== -1) {
       this._loadedPlugins.splice(index, 1);
       this._pluginHooks.unregisterPluginHooks(pluginId);
-      // Don't remove from _pluginPaths for reload functionality
+      // Don't remove from _pluginPaths or _pluginIndexHtml for reload functionality
       return this._pluginRunner.unloadPlugin(pluginId);
     }
     return false;
@@ -489,16 +509,26 @@ export class PluginService {
     this.unloadPlugin(pluginId);
 
     try {
+      let pluginInstance: PluginInstance;
+
       // Check if this is an uploaded plugin
       if (pluginPath.startsWith('uploaded://')) {
         // Load from stored files
-        const pluginInstance = await this._loadUploadedPlugin(pluginId);
-        return pluginInstance.loaded;
+        pluginInstance = await this._loadUploadedPlugin(pluginId);
       } else {
         // Load from file system path
-        const pluginInstance = await this._loadPlugin(pluginPath);
-        return pluginInstance.loaded;
+        pluginInstance = await this._loadPlugin(pluginPath);
+
+        // For built-in plugins, ensure we add them back to _loadedPlugins if they loaded successfully
+        if (
+          pluginInstance.loaded &&
+          !this._loadedPlugins.some((p) => p.manifest.id === pluginId)
+        ) {
+          this._loadedPlugins.push(pluginInstance);
+        }
       }
+
+      return pluginInstance.loaded;
     } catch (error) {
       console.error(`Failed to reload plugin ${pluginId}:`, error);
       return false;
