@@ -81,9 +81,9 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.showIndexHtmlAsView();
   }
 
-  async getAllTasks(): Promise<TaskCopy[]> {
+  async getTasks(): Promise<TaskCopy[]> {
     console.log(`Plugin ${this._pluginId} requested all tasks`);
-    return this._pluginBridge.getAllTasks();
+    return this._pluginBridge.getTasks();
   }
 
   async getArchivedTasks(): Promise<TaskCopy[]> {

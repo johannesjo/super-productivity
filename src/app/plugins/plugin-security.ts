@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PluginManifest, PluginHooks, PluginAPI } from './plugin-api.model';
+import { PluginAPI, PluginHooks, PluginManifest } from './plugin-api.model';
 
 // TODO should be simple util functions maybe
 @Injectable({
@@ -38,7 +38,7 @@ export class PluginSecurityService {
     // TypeScript will enforce that these are actual methods from the PluginAPI interface
     const permissibleMethods: (keyof PluginAPI)[] = [
       // Task methods
-      'getAllTasks',
+      'getTasks',
       'getArchivedTasks',
       'getCurrentContextTasks',
       'updateTask',
@@ -192,28 +192,6 @@ export class PluginSecurityService {
       .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
       .replace(/on\w+\s*=\s*'[^']*'/gi, '')
       .replace(/javascript:/gi, '');
-  }
-
-  /**
-   * Create a security warning message for users
-   */
-  getSecurityWarning(): string {
-    return `
-⚠️ SECURITY WARNING ⚠️
-
-You are about to install a plugin. Plugins can:
-- Access your task data
-- Modify your tasks
-- Show notifications
-- Store data locally
-
-Only install plugins from trusted sources. Malicious plugins could:
-- Steal your personal data
-- Modify or delete your tasks
-- Disrupt the application
-
-Do you want to continue?
-    `.trim();
   }
 
   /**
