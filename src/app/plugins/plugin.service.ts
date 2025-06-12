@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
@@ -12,6 +13,11 @@ import { IS_ELECTRON } from '../app.constants';
 import { PluginMetaPersistenceService } from './plugin-meta-persistence.service';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginCacheService } from './plugin-cache.service';
+import {
+  MAX_PLUGIN_CODE_SIZE,
+  MAX_PLUGIN_MANIFEST_SIZE,
+  MAX_PLUGIN_ZIP_SIZE,
+} from './plugin.const';
 
 @Injectable({
   providedIn: 'root',
@@ -275,6 +281,13 @@ export class PluginService {
     const { unzip } = await import('fflate');
 
     try {
+      // Validate ZIP file size
+      if (file.size > MAX_PLUGIN_ZIP_SIZE) {
+        throw new Error(
+          `Plugin ZIP file is too large. Maximum allowed size is ${(MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1)} MB, but received ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+        );
+      }
+
       // Convert File to Uint8Array
       const arrayBuffer = await file.arrayBuffer();
       const zipData = new Uint8Array(arrayBuffer);
@@ -297,7 +310,15 @@ export class PluginService {
         throw new Error('manifest.json not found in plugin ZIP');
       }
 
-      const manifestText = new TextDecoder().decode(extractedFiles['manifest.json']);
+      // Validate manifest.json size
+      const manifestBytes = extractedFiles['manifest.json'];
+      if (manifestBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
+        throw new Error(
+          `Plugin manifest.json is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(manifestBytes.length / 1024).toFixed(1)} KB.`,
+        );
+      }
+
+      const manifestText = new TextDecoder().decode(manifestBytes);
       const manifest: PluginManifest = JSON.parse(manifestText);
 
       // Validate manifest
@@ -313,7 +334,15 @@ export class PluginService {
         throw new Error('plugin.js not found in plugin ZIP');
       }
 
-      const pluginCode = new TextDecoder().decode(extractedFiles['plugin.js']);
+      // Validate plugin.js size
+      const pluginCodeBytes = extractedFiles['plugin.js'];
+      if (pluginCodeBytes.length > MAX_PLUGIN_CODE_SIZE) {
+        throw new Error(
+          `Plugin code (plugin.js) is too large. Maximum allowed size is ${(MAX_PLUGIN_CODE_SIZE / 1024 / 1024).toFixed(1)} MB, but received ${(pluginCodeBytes.length / 1024 / 1024).toFixed(1)} MB.`,
+        );
+      }
+
+      const pluginCode = new TextDecoder().decode(pluginCodeBytes);
 
       // Validate plugin code
       const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
