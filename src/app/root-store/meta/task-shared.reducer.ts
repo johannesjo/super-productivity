@@ -1,4 +1,4 @@
-import { ActionReducer, Action, MetaReducer } from '@ngrx/store';
+import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { RootState } from '../root-state';
 import { TaskSharedActions } from './task-shared.actions';
@@ -9,9 +9,9 @@ import {
 import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
 import { TASK_FEATURE_NAME, taskAdapter } from '../../features/tasks/store/task.reducer';
 import {
-  updateTimeSpentForTask,
-  updateTimeEstimateForTask,
   updateDoneOnForTask,
+  updateTimeEstimateForTask,
+  updateTimeSpentForTask,
 } from '../../features/tasks/store/task.reducer.util';
 import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
@@ -224,11 +224,16 @@ const handleDeleteTask = (
   }
 
   // Update tags - collect all affected tags and tasks to remove
-  const affectedTagIds = unique([
+  // Only include tags that actually exist in the state to prevent errors
+  const potentialTagIds = [
     TODAY_TAG.id, // always check today list
     ...task.tagIds,
     ...(task.subTasks || []).flatMap((st) => st.tagIds || []),
-  ]);
+  ];
+
+  const affectedTagIds = unique(
+    potentialTagIds.filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]),
+  );
 
   const taskIdsToRemove = [task.id, ...(task.subTaskIds || [])];
 
@@ -245,7 +250,14 @@ const handleDeleteTask = (
 };
 
 const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
-  const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
+  // Only update tags that actually contain at least one of the tasks being deleted
+  const affectedTags = (state[TAG_FEATURE_NAME].ids as string[]).filter((tagId) => {
+    const tag = state[TAG_FEATURE_NAME].entities[tagId];
+    if (!tag) return false;
+    return taskIds.some((taskId) => tag.taskIds.includes(taskId));
+  });
+
+  const tagUpdates = affectedTags.map(
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
@@ -317,7 +329,7 @@ const handleRestoreTask = (
   if (task.projectId) {
     const project = getProject(state, task.projectId);
     updatedState = updateProject(updatedState, task.projectId, {
-      taskIds: [...project.taskIds, task.id],
+      taskIds: unique([...project.taskIds, task.id]),
     });
   }
 
@@ -340,7 +352,7 @@ const handleRestoreTask = (
       ([tagId, taskIds]): Update<Tag> => ({
         id: tagId,
         changes: {
-          taskIds: [...getTag(state, tagId).taskIds, ...taskIds],
+          taskIds: unique([...getTag(state, tagId).taskIds, ...taskIds]),
         },
       }),
     );
@@ -363,7 +375,7 @@ const handleScheduleTaskWithTime = (
   }
 
   const newTaskIds = isScheduledForToday
-    ? [task.id, ...todayTag.taskIds] // Add to top
+    ? unique([task.id, ...todayTag.taskIds]) // Add to top, prevent duplicates
     : todayTag.taskIds.filter((id) => id !== task.id); // Remove
 
   return updateTags(state, [
@@ -482,8 +494,10 @@ const handleMoveToOtherProject = (
   // Add tasks to target project
   if (state[PROJECT_FEATURE_NAME].entities[targetProjectId]) {
     const targetProject = getProject(updatedState, targetProjectId);
+    // Add all tasks to the regular task list (not backlog) when moving projects
+    // This ensures tasks are visible in the new project
     updatedState = updateProject(updatedState, targetProjectId, {
-      taskIds: [...targetProject.taskIds, ...allTaskIds],
+      taskIds: unique([...targetProject.taskIds, ...allTaskIds]),
     });
   }
 
