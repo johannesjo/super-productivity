@@ -9,7 +9,8 @@ import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.mode
 import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { IS_ELECTRON } from '../app.constants';
-import { PluginPersistenceService } from './plugin-persistence.service';
+import { PluginMetaPersistenceService } from './plugin-meta-persistence.service';
+import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginCacheService } from './plugin-cache.service';
 
 @Injectable({
@@ -26,7 +27,8 @@ export class PluginService {
     private _pluginHooks: PluginHooksService,
     private _pluginSecurity: PluginSecurityService,
     private _globalThemeService: GlobalThemeService,
-    private _pluginPersistenceService: PluginPersistenceService,
+    private _pluginMetaPersistenceService: PluginMetaPersistenceService,
+    private _pluginUserPersistenceService: PluginUserPersistenceService,
     private _pluginCacheService: PluginCacheService,
   ) {}
 
@@ -137,7 +139,7 @@ export class PluginService {
       }
 
       // Check if plugin should be loaded based on persisted enabled state
-      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+      const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
         manifest.id,
       );
 
@@ -167,12 +169,8 @@ export class PluginService {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path
 
-        // Update persistence with load time, but preserve enabled state
-        await this._pluginPersistenceService.persistPluginData(
-          manifest.id,
-          JSON.stringify({ loadTime: Date.now() }),
-          true, // Only set to true if we actually loaded it
-        );
+        // Ensure plugin is marked as enabled since we loaded it
+        await this._pluginMetaPersistenceService.setPluginEnabled(manifest.id, true);
 
         console.log(`Plugin ${manifest.id} loaded successfully`);
       } else {
@@ -204,23 +202,26 @@ export class PluginService {
 
   async getAllPlugins(): Promise<PluginInstance[]> {
     const loadedPlugins = [...this._loadedPlugins];
-    const allPluginData = await this._pluginPersistenceService.getAllPluginData();
+    const allPluginMetadata =
+      await this._pluginMetaPersistenceService.getAllPluginMetadata();
 
     // Update loaded plugins with persistence state
     for (const plugin of loadedPlugins) {
-      const persistedData = allPluginData.find((data) => data.id === plugin.manifest.id);
-      plugin.isEnabled = persistedData?.isEnabled ?? true;
+      const metadata = allPluginMetadata.find((data) => data.id === plugin.manifest.id);
+      plugin.isEnabled = metadata?.isEnabled ?? false;
     }
 
     // Add disabled plugins that aren't loaded
-    for (const pluginData of allPluginData) {
-      const isAlreadyLoaded = loadedPlugins.some((p) => p.manifest.id === pluginData.id);
-      if (!isAlreadyLoaded && pluginData.isEnabled === false) {
+    for (const pluginMetadata of allPluginMetadata) {
+      const isAlreadyLoaded = loadedPlugins.some(
+        (p) => p.manifest.id === pluginMetadata.id,
+      );
+      if (!isAlreadyLoaded && pluginMetadata.isEnabled === false) {
         // Create minimal PluginInstance for disabled plugins
         loadedPlugins.push({
           manifest: {
-            id: pluginData.id,
-            name: pluginData.id,
+            id: pluginMetadata.id,
+            name: pluginMetadata.id,
             version: 'unknown',
             manifestVersion: 1,
             minSupVersion: 'unknown',
@@ -323,7 +324,7 @@ export class PluginService {
       }
 
       // Check if plugin is enabled (default to true for new uploads)
-      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+      const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
         manifest.id,
       );
 
@@ -344,12 +345,6 @@ export class PluginService {
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
         this._loadedPlugins.push(placeholderInstance); // Add to list so it shows in management UI
 
-        // Store plugin data but keep disabled
-        await this._pluginPersistenceService.persistPluginData(
-          manifest.id,
-          JSON.stringify({ uploadTime: Date.now(), source: 'uploaded' }),
-        );
-
         console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
       }
@@ -366,12 +361,6 @@ export class PluginService {
       if (pluginInstance.loaded) {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
-
-        // Store plugin data but preserve enabled state (don't force enable)
-        await this._pluginPersistenceService.persistPluginData(
-          manifest.id,
-          JSON.stringify({ loadTime: Date.now(), source: 'uploaded' }),
-        );
 
         console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
       } else {
@@ -393,7 +382,7 @@ export class PluginService {
     const pluginInstance = this._loadedPlugins.find((p) => p.manifest.id === pluginId);
     if (pluginInstance && pluginInstance.loaded) {
       // Disable the plugin first
-      await this._pluginPersistenceService.setPluginEnabled(pluginId, false);
+      await this._pluginMetaPersistenceService.setPluginEnabled(pluginId, false);
 
       // Unload and unregister the plugin
       this.unloadPlugin(pluginId);
@@ -402,8 +391,9 @@ export class PluginService {
     // Remove from cache
     await this._pluginCacheService.removePlugin(pluginId);
 
-    // Remove from persistence
-    await this._pluginPersistenceService.removePluginData(pluginId);
+    // Remove from persistence (both user data and metadata)
+    await this._pluginUserPersistenceService.removePluginUserData(pluginId);
+    await this._pluginMetaPersistenceService.removePluginMetadata(pluginId);
 
     // Remove from loaded plugins (handles both loaded and placeholder instances)
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
@@ -483,7 +473,7 @@ export class PluginService {
       }
 
       // Check if plugin is enabled
-      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+      const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
         manifest.id,
       );
 

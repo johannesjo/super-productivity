@@ -20,7 +20,7 @@ import { TagService } from '../features/tag/tag.service';
 import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
-import { PluginPersistenceService } from './plugin-persistence.service';
+import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 
@@ -43,7 +43,7 @@ export class PluginBridgeService {
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
-  private _pluginPersistenceService = inject(PluginPersistenceService);
+  private _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private _taskArchiveService = inject(TaskArchiveService);
 
   // Track which plugin is currently making calls to prevent cross-plugin access
@@ -288,7 +288,7 @@ export class PluginBridgeService {
     }
 
     try {
-      await this._pluginPersistenceService.persistPluginData(
+      await this._pluginUserPersistenceService.persistPluginUserData(
         this._currentPluginId,
         dataStr,
       );
@@ -310,7 +310,9 @@ export class PluginBridgeService {
     }
 
     try {
-      return await this._pluginPersistenceService.loadPluginData(this._currentPluginId);
+      return await this._pluginUserPersistenceService.loadPluginUserData(
+        this._currentPluginId,
+      );
     } catch (error) {
       console.error('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
