@@ -33,7 +33,10 @@ export class PluginAPI implements IPluginAPI {
     public cfg: PluginBaseCfg,
     private _pluginId: string,
     private _pluginBridge: PluginBridgeService,
-  ) {}
+  ) {
+    // Set the plugin context for secure operations
+    this._pluginBridge._setCurrentPlugin(this._pluginId);
+  }
 
   registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void {
     if (!this._hookHandlers.has(this._pluginId)) {
