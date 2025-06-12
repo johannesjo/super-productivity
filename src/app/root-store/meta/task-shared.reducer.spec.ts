@@ -6,6 +6,7 @@ import {
   deleteTasks,
   moveToArchive_,
   restoreTask,
+  scheduleTaskWithTime,
 } from '../../features/tasks/store/task.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -1222,6 +1223,168 @@ describe('taskSharedMetaReducer', () => {
         }),
         action,
       );
+    });
+  });
+
+  describe('scheduleTaskWithTime action', () => {
+    it('should add task to Today tag when scheduled for today', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const todayTimestamp = Date.now();
+      const action = scheduleTaskWithTime({
+        task: mockTask,
+        dueWithTime: todayTimestamp,
+        isMoveToBacklog: false,
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should remove task from Today tag when scheduled for different day', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1'],
+            },
+          },
+        },
+      };
+
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      const tomorrowTimestamp = Date.now() + oneDayInMs;
+      const action = scheduleTaskWithTime({
+        task: mockTask,
+        dueWithTime: tomorrowTimestamp,
+        isMoveToBacklog: false,
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should not change state when task is already in Today and scheduled for today', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1'],
+            },
+          },
+        },
+      };
+
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const todayTimestamp = Date.now();
+      const action = scheduleTaskWithTime({
+        task: mockTask,
+        dueWithTime: todayTimestamp,
+        isMoveToBacklog: false,
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(updatedInitialState, action);
+    });
+
+    it('should not change state when task is not in Today and scheduled for different day', () => {
+      const mockTask: Task = {
+        id: 'task1',
+        title: 'Test Task',
+        created: Date.now(),
+        isDone: false,
+        tagIds: ['tag1'],
+        projectId: 'project1',
+        subTaskIds: [],
+        timeSpentOnDay: {},
+        timeSpent: 0,
+        timeEstimate: 0,
+        attachments: [],
+      };
+
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      const tomorrowTimestamp = Date.now() + oneDayInMs;
+      const action = scheduleTaskWithTime({
+        task: mockTask,
+        dueWithTime: tomorrowTimestamp,
+        isMoveToBacklog: false,
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(initialState, action);
     });
   });
 
