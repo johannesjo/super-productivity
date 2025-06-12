@@ -83,13 +83,6 @@ export class PluginService {
       for (const cachedPlugin of cachedPlugins) {
         try {
           console.log(`Loading cached plugin: ${cachedPlugin.id}`);
-          const pluginInstance = await this._loadUploadedPlugin(cachedPlugin.id);
-
-          if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
-            // Add disabled uploaded plugin to the list for management
-            this._loadedPlugins.push(pluginInstance);
-          }
-
           // Set the path for reload functionality
           this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
         } catch (error) {
@@ -337,6 +330,9 @@ export class PluginService {
       // Create a unique path identifier for uploaded plugins
       const uploadedPluginPath = `uploaded://${manifest.id}`;
 
+      // Always store plugin files in cache for later use (regardless of enabled state)
+      await this._pluginCacheService.storePlugin(manifest.id, manifestText, pluginCode);
+
       // If plugin is disabled, create a placeholder instance without loading code
       if (!isPluginEnabled) {
         const placeholderInstance: PluginInstance = {
@@ -346,6 +342,14 @@ export class PluginService {
           error: undefined,
         };
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
+        this._loadedPlugins.push(placeholderInstance); // Add to list so it shows in management UI
+
+        // Store plugin data but keep disabled
+        await this._pluginPersistenceService.persistPluginData(
+          manifest.id,
+          JSON.stringify({ uploadTime: Date.now(), source: 'uploaded' }),
+        );
+
         console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
       }
@@ -363,14 +367,10 @@ export class PluginService {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
 
-        // Store plugin files in cache for later use
-        await this._pluginCacheService.storePlugin(manifest.id, manifestText, pluginCode);
-
-        // Mark plugin as enabled in persistence
+        // Store plugin data but preserve enabled state (don't force enable)
         await this._pluginPersistenceService.persistPluginData(
           manifest.id,
           JSON.stringify({ loadTime: Date.now(), source: 'uploaded' }),
-          true,
         );
 
         console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
@@ -389,13 +389,23 @@ export class PluginService {
   }
 
   async removeUploadedPlugin(pluginId: string): Promise<void> {
+    // First disable and unload the plugin if it's currently loaded
+    const pluginInstance = this._loadedPlugins.find((p) => p.manifest.id === pluginId);
+    if (pluginInstance && pluginInstance.loaded) {
+      // Disable the plugin first
+      await this._pluginPersistenceService.setPluginEnabled(pluginId, false);
+
+      // Unload and unregister the plugin
+      this.unloadPlugin(pluginId);
+    }
+
     // Remove from cache
     await this._pluginCacheService.removePlugin(pluginId);
 
     // Remove from persistence
     await this._pluginPersistenceService.removePluginData(pluginId);
 
-    // Remove from loaded plugins
+    // Remove from loaded plugins (handles both loaded and placeholder instances)
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
     if (index !== -1) {
       this._loadedPlugins.splice(index, 1);
@@ -498,8 +508,10 @@ export class PluginService {
         true, // Plugin is enabled if we reach this point
       );
 
+      // Always add plugin to loaded plugins list for management UI
+      this._loadedPlugins.push(pluginInstance);
+
       if (pluginInstance.loaded) {
-        this._loadedPlugins.push(pluginInstance);
         console.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
       } else {
         console.error(
