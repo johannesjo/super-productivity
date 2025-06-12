@@ -248,7 +248,12 @@ export class PluginManagementComponent implements OnInit {
   }
 
   getPluginDescription(plugin: PluginInstance): string {
-    // Generate a basic description based on plugin manifest
+    // Use manifest description if available
+    if (plugin.manifest.description) {
+      return plugin.manifest.description;
+    }
+
+    // Fallback: generate a basic description based on plugin manifest
     const features: string[] = [];
 
     if (plugin.manifest.hooks?.length > 0) {
