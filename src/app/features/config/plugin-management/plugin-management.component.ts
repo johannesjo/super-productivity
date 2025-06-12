@@ -61,6 +61,10 @@ export class PluginManagementComponent implements OnInit {
   // Signal for all plugins (loaded + disabled with isEnabled state)
   readonly allPlugins = signal<PluginInstance[]>([]);
 
+  // Upload state
+  readonly isUploading = signal<boolean>(false);
+  readonly uploadError = signal<string | null>(null);
+
   async ngOnInit(): Promise<void> {
     await this.loadPlugins();
   }
@@ -153,6 +157,38 @@ export class PluginManagementComponent implements OnInit {
       return 'Error';
     }
     return plugin.isEnabled ? 'Enabled' : 'Disabled';
+  }
+
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.name.endsWith('.zip')) {
+      this.uploadError.set('Please select a ZIP file');
+      return;
+    }
+
+    this.isUploading.set(true);
+    this.uploadError.set(null);
+
+    try {
+      await this._pluginService.loadPluginFromZip(file);
+      await this.loadPlugins(); // Refresh the plugin list
+
+      // Clear the input
+      input.value = '';
+    } catch (error) {
+      console.error('Failed to load plugin from ZIP:', error);
+      this.uploadError.set(
+        error instanceof Error ? error.message : 'Failed to install plugin',
+      );
+    } finally {
+      this.isUploading.set(false);
+    }
   }
 
   getPluginDescription(plugin: PluginInstance): string {

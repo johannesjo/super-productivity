@@ -39,6 +39,10 @@ export class PluginService {
     try {
       // Load plugins from known locations
       await this._loadBuiltInPlugins();
+
+      // Load uploaded plugins
+      await this._loadUploadedPlugins();
+
       this._isInitialized = true;
       console.log('Plugin system initialized successfully');
     } catch (error) {
@@ -64,6 +68,40 @@ export class PluginService {
         console.error(`Failed to load plugin from ${pluginPath}:`, error);
         // Continue loading other plugins even if one fails
       }
+    }
+  }
+
+  private async _loadUploadedPlugins(): Promise<void> {
+    try {
+      const allPluginData = await this._pluginPersistenceService.getAllPluginData();
+
+      // Find uploaded plugins (those with stored files)
+      for (const pluginData of allPluginData) {
+        try {
+          const storedFiles = await this._pluginPersistenceService.loadPluginData(
+            `${pluginData.id}_files`,
+          );
+          if (storedFiles) {
+            // This is an uploaded plugin
+            console.log(`Loading uploaded plugin: ${pluginData.id}`);
+            const pluginInstance = await this._loadUploadedPlugin(pluginData.id);
+
+            if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
+              // Add disabled uploaded plugin to the list for management
+              this._loadedPlugins.push(pluginInstance);
+            }
+
+            // Set the path for reload functionality
+            this._pluginPaths.set(pluginData.id, `uploaded://${pluginData.id}`);
+          }
+        } catch (error) {
+          console.error(`Failed to load uploaded plugin ${pluginData.id}:`, error);
+          // Continue loading other plugins even if one fails
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load uploaded plugins:', error);
+      // Don't throw - this shouldn't prevent other plugins from loading
     }
   }
 
@@ -236,6 +274,119 @@ export class PluginService {
     return pluginInstance;
   }
 
+  async loadPluginFromZip(file: File): Promise<PluginInstance> {
+    // Import fflate dynamically for better bundle size
+    const { unzip } = await import('fflate');
+
+    try {
+      // Convert File to Uint8Array
+      const arrayBuffer = await file.arrayBuffer();
+      const zipData = new Uint8Array(arrayBuffer);
+
+      // Extract ZIP contents
+      const extractedFiles = await new Promise<Record<string, Uint8Array>>(
+        (resolve, reject) => {
+          unzip(zipData, (err, files) => {
+            if (err) {
+              reject(new Error(`Failed to extract ZIP: ${err.message}`));
+              return;
+            }
+            resolve(files);
+          });
+        },
+      );
+
+      // Find and extract manifest.json
+      if (!extractedFiles['manifest.json']) {
+        throw new Error('manifest.json not found in plugin ZIP');
+      }
+
+      const manifestText = new TextDecoder().decode(extractedFiles['manifest.json']);
+      const manifest: PluginManifest = JSON.parse(manifestText);
+
+      // Validate manifest
+      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      if (!manifestValidation.isValid) {
+        throw new Error(
+          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+        );
+      }
+
+      // Find and extract plugin.js
+      if (!extractedFiles['plugin.js']) {
+        throw new Error('plugin.js not found in plugin ZIP');
+      }
+
+      const pluginCode = new TextDecoder().decode(extractedFiles['plugin.js']);
+
+      // Validate plugin code
+      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      if (!codeValidation.isValid) {
+        throw new Error(
+          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
+        );
+      }
+
+      // Check if plugin is enabled (default to true for new uploads)
+      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+        manifest.id,
+      );
+
+      // Create a unique path identifier for uploaded plugins
+      const uploadedPluginPath = `uploaded://${manifest.id}`;
+
+      // Load the plugin
+      const baseCfg = this._getBaseCfg();
+      const pluginInstance = await this._pluginRunner.loadPlugin(
+        manifest,
+        pluginCode,
+        baseCfg,
+        isPluginEnabled,
+      );
+
+      if (pluginInstance.loaded) {
+        this._loadedPlugins.push(pluginInstance);
+        this._pluginPaths.set(manifest.id, uploadedPluginPath);
+
+        // Store plugin files in IndexedDB for later use
+        await this._storeUploadedPluginFiles(manifest.id, {
+          manifest: manifestText,
+          code: pluginCode,
+        });
+
+        // Mark plugin as enabled in persistence
+        await this._pluginPersistenceService.persistPluginData(
+          manifest.id,
+          JSON.stringify({ loadTime: Date.now(), source: 'uploaded' }),
+          true,
+        );
+
+        console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
+      } else {
+        console.error(
+          `Uploaded plugin ${manifest.id} failed to load:`,
+          pluginInstance.error,
+        );
+      }
+
+      return pluginInstance;
+    } catch (error) {
+      console.error('Failed to load plugin from ZIP:', error);
+      throw error;
+    }
+  }
+
+  private async _storeUploadedPluginFiles(
+    pluginId: string,
+    files: { manifest: string; code: string },
+  ): Promise<void> {
+    // Store uploaded plugin files using the same persistence service
+    await this._pluginPersistenceService.persistPluginData(
+      `${pluginId}_files`,
+      JSON.stringify(files),
+    );
+  }
+
   unloadPlugin(pluginId: string): boolean {
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
     if (index !== -1) {
@@ -258,12 +409,80 @@ export class PluginService {
     this.unloadPlugin(pluginId);
 
     try {
-      // Reload the plugin
-      const pluginInstance = await this._loadPlugin(pluginPath);
-      return pluginInstance.loaded;
+      // Check if this is an uploaded plugin
+      if (pluginPath.startsWith('uploaded://')) {
+        // Load from stored files
+        const pluginInstance = await this._loadUploadedPlugin(pluginId);
+        return pluginInstance.loaded;
+      } else {
+        // Load from file system path
+        const pluginInstance = await this._loadPlugin(pluginPath);
+        return pluginInstance.loaded;
+      }
     } catch (error) {
       console.error(`Failed to reload plugin ${pluginId}:`, error);
       return false;
+    }
+  }
+
+  private async _loadUploadedPlugin(pluginId: string): Promise<PluginInstance> {
+    try {
+      // Load stored plugin files
+      const storedFiles = await this._pluginPersistenceService.loadPluginData(
+        `${pluginId}_files`,
+      );
+      if (!storedFiles) {
+        throw new Error(`Stored files not found for uploaded plugin ${pluginId}`);
+      }
+
+      const files = JSON.parse(storedFiles);
+      const manifest: PluginManifest = JSON.parse(files.manifest);
+      const pluginCode: string = files.code;
+
+      // Validate manifest
+      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      if (!manifestValidation.isValid) {
+        throw new Error(
+          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+        );
+      }
+
+      // Validate plugin code
+      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      if (!codeValidation.isValid) {
+        throw new Error(
+          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
+        );
+      }
+
+      // Check if plugin is enabled
+      const isPluginEnabled = await this._pluginPersistenceService.isPluginEnabled(
+        manifest.id,
+      );
+
+      // Load the plugin
+      const baseCfg = this._getBaseCfg();
+      const pluginInstance = await this._pluginRunner.loadPlugin(
+        manifest,
+        pluginCode,
+        baseCfg,
+        isPluginEnabled,
+      );
+
+      if (pluginInstance.loaded) {
+        this._loadedPlugins.push(pluginInstance);
+        console.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
+      } else {
+        console.error(
+          `Uploaded plugin ${manifest.id} failed to reload:`,
+          pluginInstance.error,
+        );
+      }
+
+      return pluginInstance;
+    } catch (error) {
+      console.error(`Failed to reload uploaded plugin ${pluginId}:`, error);
+      throw error;
     }
   }
 }
