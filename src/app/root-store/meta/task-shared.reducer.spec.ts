@@ -11,7 +11,10 @@ import {
   updateTaskTags,
 } from '../../features/tasks/store/task.actions';
 import { deleteProject } from '../../features/project/store/project.actions';
-import { planTasksForToday } from '../../features/tag/store/tag.actions';
+import {
+  planTasksForToday,
+  removeTasksFromTodayTag,
+} from '../../features/tag/store/tag.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -2164,6 +2167,169 @@ describe('taskSharedMetaReducer', () => {
             entities: jasmine.objectContaining({
               TODAY: jasmine.objectContaining({
                 taskIds: ['task1', 'existing-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+  });
+
+  describe('removeTasksFromTodayTag action', () => {
+    it('should remove specified tasks from Today tag', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task2', 'keep-task'],
+            },
+          },
+        },
+      };
+
+      const action = removeTasksFromTodayTag({
+        taskIds: ['task1', 'task2'],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['keep-task'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty taskIds array', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task2'],
+            },
+          },
+        },
+      };
+
+      const action = removeTasksFromTodayTag({
+        taskIds: [],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'task2'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle removing nonexistent tasks', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task2'],
+            },
+          },
+        },
+      };
+
+      const action = removeTasksFromTodayTag({
+        taskIds: ['nonexistent-task'],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'task2'],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should handle empty Today tag', () => {
+      const action = removeTasksFromTodayTag({
+        taskIds: ['task1'],
+      });
+
+      metaReducer(initialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: [],
+              }),
+            }),
+          }),
+        }),
+        action,
+      );
+    });
+
+    it('should remove only specified tasks and keep others', () => {
+      const updatedInitialState = {
+        ...initialState,
+        [TAG_FEATURE_NAME]: {
+          ...initialState[TAG_FEATURE_NAME]!,
+          entities: {
+            ...initialState[TAG_FEATURE_NAME]!.entities,
+            TODAY: {
+              ...(initialState[TAG_FEATURE_NAME]!.entities.TODAY as Tag),
+              taskIds: ['task1', 'task2', 'task3', 'task4'],
+            },
+          },
+        },
+      };
+
+      const action = removeTasksFromTodayTag({
+        taskIds: ['task2', 'task4'],
+      });
+
+      metaReducer(updatedInitialState as RootState, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          [TAG_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              TODAY: jasmine.objectContaining({
+                taskIds: ['task1', 'task3'],
               }),
             }),
           }),
