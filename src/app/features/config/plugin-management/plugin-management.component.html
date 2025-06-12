@@ -1,12 +1,12 @@
 <div class="plugin-management">
-  @if (getAllPlugins().length === 0) {
+  @if (allPlugins().length === 0) {
     <div class="no-plugins">
       <mat-icon>extension_off</mat-icon>
       <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
     </div>
   } @else {
     <div class="plugins-list">
-      @for (plugin of getAllPlugins(); track plugin.manifest.id) {
+      @for (plugin of allPlugins(); track plugin.manifest.id) {
         <mat-card class="plugin-card">
           <mat-card-header>
             <div class="plugin-header">

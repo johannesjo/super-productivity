@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
-  OnDestroy,
   OnInit,
+  signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { PluginService } from '../../../plugins/plugin.service';
 import { PluginInstance } from '../../../plugins/plugin-api.model';
 import { PluginPersistenceService } from '../../../plugins/plugin-persistence.service';
@@ -43,36 +43,24 @@ import { T } from '../../../t.const';
     TranslatePipe,
   ],
 })
-export class PluginManagementComponent implements OnInit, OnDestroy {
+export class PluginManagementComponent implements OnInit {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginPersistenceService = inject(PluginPersistenceService);
 
   T: typeof T = T;
-  loadedPlugins: PluginInstance[] = [];
-  allPluginData: DataForPlugin[] = [];
-  private _subs = new Subscription();
 
-  async ngOnInit(): Promise<void> {
-    await this.loadPlugins();
-  }
+  // Signals for reactive state
+  private readonly _loadedPlugins = signal<PluginInstance[]>([]);
+  private readonly _allPluginData = signal<DataForPlugin[]>([]);
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
-  }
-
-  async loadPlugins(): Promise<void> {
-    this.loadedPlugins = this._pluginService.getLoadedPlugins();
-    this.allPluginData = await this._pluginPersistenceService.getAllPluginData();
-  }
-
-  /**
-   * Get all plugins including loaded and disabled ones
-   */
-  getAllPlugins(): PluginInstance[] {
-    const plugins: PluginInstance[] = [...this.loadedPlugins];
+  // Computed signal for all plugins (loaded + disabled)
+  readonly allPlugins = computed(() => {
+    const loadedPlugins = this._loadedPlugins();
+    const allPluginData = this._allPluginData();
+    const plugins: PluginInstance[] = [...loadedPlugins];
 
     // Add disabled plugins that aren't already in the loaded list
-    for (const pluginData of this.allPluginData) {
+    for (const pluginData of allPluginData) {
       const isAlreadyLoaded = plugins.some((p) => p.manifest.id === pluginData.id);
       if (!isAlreadyLoaded && pluginData.isEnabled === false) {
         // Create a minimal PluginInstance for disabled plugins
@@ -95,6 +83,15 @@ export class PluginManagementComponent implements OnInit, OnDestroy {
     }
 
     return plugins;
+  });
+
+  async ngOnInit(): Promise<void> {
+    await this.loadPlugins();
+  }
+
+  async loadPlugins(): Promise<void> {
+    this._loadedPlugins.set(this._pluginService.getLoadedPlugins());
+    this._allPluginData.set(await this._pluginPersistenceService.getAllPluginData());
   }
 
   /**
@@ -107,7 +104,8 @@ export class PluginManagementComponent implements OnInit, OnDestroy {
     }
 
     // Check persistence data for disabled plugins
-    const pluginData = this.allPluginData.find((data) => data.id === plugin.manifest.id);
+    const allPluginData = this._allPluginData();
+    const pluginData = allPluginData.find((data) => data.id === plugin.manifest.id);
     return pluginData?.isEnabled ?? false;
   }
 
