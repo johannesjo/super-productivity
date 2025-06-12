@@ -1,12 +1,12 @@
 <div class="plugin-management">
-  @if (loadedPlugins.length === 0) {
+  @if (getAllPlugins().length === 0) {
     <div class="no-plugins">
       <mat-icon>extension_off</mat-icon>
       <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
     </div>
   } @else {
     <div class="plugins-list">
-      @for (plugin of loadedPlugins; track plugin.manifest.id) {
+      @for (plugin of getAllPlugins(); track plugin.manifest.id) {
         <mat-card class="plugin-card">
           <mat-card-header>
             <div class="plugin-header">
@@ -24,7 +24,7 @@
               </div>
               <div class="plugin-actions">
                 <mat-slide-toggle
-                  [checked]="plugin.loaded && !plugin.error"
+                  [checked]="isPluginEnabledSync(plugin)"
                   [disabled]="!!plugin.error"
                   (change)="onPluginToggle(plugin, $event)"
                   [attr.aria-label]="'Toggle ' + plugin.manifest.name"
