@@ -12,14 +12,12 @@ import { PluginHooksService } from './plugin-hooks';
 import { TaskCopy } from '../features/tasks/task.model';
 import { TaskService } from '../features/tasks/task.service';
 import { WorkContextService } from '../features/work-context/work-context.service';
-import { GlobalConfigService } from '../features/config/global-config.service';
 import { ProjectService } from '../features/project/project.service';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagService } from '../features/tag/tag.service';
 import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
-import { nanoid } from 'nanoid';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -38,7 +36,6 @@ export class PluginBridgeService {
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
-  private _globalConfigService = inject(GlobalConfigService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
 
@@ -100,43 +97,28 @@ export class PluginBridgeService {
    * Get all tasks
    */
   async getAllTasks(): Promise<TaskCopy[]> {
-    try {
-      const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
-      return tasks || [];
-    } catch (error) {
-      console.error('PluginBridge: Failed to get all tasks:', error);
-      return [];
-    }
+    const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+    return tasks || [];
   }
 
   /**
    * Get archived tasks
    */
   async getArchivedTasks(): Promise<TaskCopy[]> {
-    try {
-      // TaskService doesn't have allArchivedTasks$, so we'll return empty for now
-      // TODO: Implement archived tasks retrieval when available
-      console.log('PluginBridge: getArchivedTasks called - not yet implemented');
-      return [];
-    } catch (error) {
-      console.error('PluginBridge: Failed to get archived tasks:', error);
-      return [];
-    }
+    // TaskService doesn't have allArchivedTasks$, so we'll return empty for now
+    // TODO: Implement archived tasks retrieval when available
+    console.log('PluginBridge: getArchivedTasks called - not yet implemented');
+    return [];
   }
 
   /**
    * Get current context tasks
    */
   async getCurrentContextTasks(): Promise<TaskCopy[]> {
-    try {
-      const contextTasks = await this._workContextService.todaysTasks$
-        .pipe(first())
-        .toPromise();
-      return contextTasks || [];
-    } catch (error) {
-      console.error('PluginBridge: Failed to get current context tasks:', error);
-      return [];
-    }
+    const contextTasks = await this._workContextService.todaysTasks$
+      .pipe(first())
+      .toPromise();
+    return contextTasks || [];
   }
 
   /**
@@ -146,22 +128,17 @@ export class PluginBridgeService {
     typia.assert<string>(taskId);
     typia.assert<Partial<TaskCopy>>(updates);
 
-    try {
-      // Validate that referenced project, tags, and parent task exist if they are being updated
-      await this._validateTaskReferences(
-        updates.projectId,
-        updates.tagIds,
-        updates.parentId,
-      );
+    // Validate that referenced project, tags, and parent task exist if they are being updated
+    await this._validateTaskReferences(
+      updates.projectId,
+      updates.tagIds,
+      updates.parentId,
+    );
 
-      // Update the task using TaskService (TaskCopy is compatible with Task)
-      this._taskService.update(taskId, updates);
+    // Update the task using TaskService (TaskCopy is compatible with Task)
+    this._taskService.update(taskId, updates);
 
-      console.log('PluginBridge: Task updated successfully', { taskId, updates });
-    } catch (error) {
-      console.error('PluginBridge: Failed to update task:', error);
-      throw error;
-    }
+    console.log('PluginBridge: Task updated successfully', { taskId, updates });
   }
 
   /**
@@ -170,50 +147,40 @@ export class PluginBridgeService {
   async addTask(taskData: CreateTaskData): Promise<string> {
     typia.assert<CreateTaskData>(taskData);
 
-    try {
-      // Validate that referenced project, tags, and parent task exist
-      await this._validateTaskReferences(
-        taskData.projectId,
-        taskData.tagIds,
-        taskData.parentId,
-      );
+    // Validate that referenced project, tags, and parent task exist
+    await this._validateTaskReferences(
+      taskData.projectId,
+      taskData.tagIds,
+      taskData.parentId,
+    );
 
-      // TaskService.add expects (title, isAddToBacklog, additional, isAddToBottom)
-      const additional: Partial<any> = {
-        projectId: taskData.projectId || undefined,
-        tagIds: taskData.tagIds || [],
-        notes: taskData.notes || '',
-        timeEstimate: taskData.timeEstimate || 0,
-        parentId: taskData.parentId || undefined,
-      };
+    // TaskService.add expects (title, isAddToBacklog, additional, isAddToBottom)
+    const additional: Partial<TaskCopy> = {
+      projectId: taskData.projectId || undefined,
+      tagIds: taskData.tagIds || [],
+      notes: taskData.notes || '',
+      timeEstimate: taskData.timeEstimate || 0,
+      parentId: taskData.parentId || undefined,
+    };
 
-      // Add the task using TaskService
-      const taskId = this._taskService.add(
-        taskData.title,
-        false, // isAddToBacklog
-        additional,
-        false, // isAddToBottom
-      );
+    // Add the task using TaskService
+    const taskId = this._taskService.add(
+      taskData.title,
+      false, // isAddToBacklog
+      additional,
+      false, // isAddToBottom
+    );
 
-      console.log('PluginBridge: Task added successfully', { taskId, taskData });
-      return taskId;
-    } catch (error) {
-      console.error('PluginBridge: Failed to add task:', error);
-      throw error;
-    }
+    console.log('PluginBridge: Task added successfully', { taskId, taskData });
+    return taskId;
   }
 
   /**
    * Get all projects
    */
   async getAllProjects(): Promise<ProjectCopy[]> {
-    try {
-      const projects = await this._projectService.list$.pipe(first()).toPromise();
-      return projects || [];
-    } catch (error) {
-      console.error('PluginBridge: Failed to get all projects:', error);
-      return [];
-    }
+    const projects = await this._projectService.list$.pipe(first()).toPromise();
+    return projects || [];
   }
 
   /**
@@ -222,24 +189,8 @@ export class PluginBridgeService {
   async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
     typia.assert<Partial<ProjectCopy>>(projectData);
 
-    try {
-      // Generate ID and add project (ProjectCopy is compatible with Project)
-      const projectId = nanoid();
-      const projectToAdd = {
-        id: projectId,
-        title: projectData.title || 'New Project',
-        ...projectData,
-      };
-
-      // Add the project using ProjectService
-      this._projectService.add(projectToAdd);
-
-      console.log('PluginBridge: Project added successfully', { projectId, projectData });
-      return projectId;
-    } catch (error) {
-      console.error('PluginBridge: Failed to add project:', error);
-      throw error;
-    }
+    console.log('PluginBridge: Project add', { projectData });
+    return this._projectService.add(projectData);
   }
 
   /**
@@ -249,28 +200,18 @@ export class PluginBridgeService {
     typia.assert<string>(projectId);
     typia.assert<Partial<ProjectCopy>>(updates);
 
-    try {
-      // Update the project using ProjectService (ProjectCopy is compatible with Project)
-      this._projectService.update(projectId, updates);
+    // Update the project using ProjectService (ProjectCopy is compatible with Project)
+    this._projectService.update(projectId, updates);
 
-      console.log('PluginBridge: Project updated successfully', { projectId, updates });
-    } catch (error) {
-      console.error('PluginBridge: Failed to update project:', error);
-      throw error;
-    }
+    console.log('PluginBridge: Project updated successfully', { projectId, updates });
   }
 
   /**
    * Get all tags
    */
   async getAllTags(): Promise<TagCopy[]> {
-    try {
-      const tags = await this._tagService.tags$.pipe(first()).toPromise();
-      return tags || [];
-    } catch (error) {
-      console.error('PluginBridge: Failed to get all tags:', error);
-      return [];
-    }
+    const tags = await this._tagService.tags$.pipe(first()).toPromise();
+    return tags || [];
   }
 
   /**
@@ -279,16 +220,10 @@ export class PluginBridgeService {
   async addTag(tagData: Partial<TagCopy>): Promise<string> {
     typia.assert<Partial<TagCopy>>(tagData);
 
-    try {
-      // Add the tag using TagService (TagCopy is compatible with Tag)
-      const tagId = this._tagService.addTag(tagData as any);
-
-      console.log('PluginBridge: Tag added successfully', { tagId, tagData });
-      return tagId;
-    } catch (error) {
-      console.error('PluginBridge: Failed to add tag:', error);
-      throw error;
-    }
+    // Add the tag using TagService (TagCopy is compatible with Tag)
+    const tagId = this._tagService.addTag(tagData);
+    console.log('PluginBridge: Tag added successfully', { tagId, tagData });
+    return tagId;
   }
 
   /**
@@ -298,15 +233,9 @@ export class PluginBridgeService {
     typia.assert<string>(tagId);
     typia.assert<Partial<TagCopy>>(updates);
 
-    try {
-      // Update the tag using TagService (TagCopy is compatible with Tag)
-      this._tagService.updateTag(tagId, updates);
-
-      console.log('PluginBridge: Tag updated successfully', { tagId, updates });
-    } catch (error) {
-      console.error('PluginBridge: Failed to update tag:', error);
-      throw error;
-    }
+    // Update the tag using TagService (TagCopy is compatible with Tag)
+    this._tagService.updateTag(tagId, updates);
+    console.log('PluginBridge: Tag updated successfully', { tagId, updates });
   }
 
   /**
@@ -335,29 +264,6 @@ export class PluginBridgeService {
     } catch (error) {
       console.error('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
-    }
-  }
-
-  /**
-   * Add action to execute before app close (placeholder implementation)
-   */
-  addActionBeforeCloseApp(action: () => Promise<void>): void {
-    typia.assert<() => Promise<void>>(action);
-
-    // TODO: Integrate with app lifecycle service
-    console.log('PluginBridge: addActionBeforeCloseApp called', action);
-  }
-
-  /**
-   * Get configuration for plugins
-   */
-  async getCfg<T>(): Promise<T> {
-    try {
-      const config = await this._globalConfigService.cfg$.pipe(first()).toPromise();
-      return (config as T) || ({} as T);
-    } catch (error) {
-      console.error('PluginBridge: Failed to get configuration:', error);
-      return {} as T;
     }
   }
 
@@ -396,49 +302,34 @@ export class PluginBridgeService {
     const errors: string[] = [];
 
     // Validate project exists if provided
-    if (projectId && projectId !== null && projectId !== undefined) {
-      try {
-        const projects = await this._projectService.list$.pipe(first()).toPromise();
+    if (projectId) {
+      const projects = await this._projectService.list$.pipe(first()).toPromise();
 
-        const projectExists = projects?.some((project: any) => project.id === projectId);
-        if (!projectExists) {
-          errors.push(`Project with ID '${projectId}' does not exist`);
-        }
-      } catch (error) {
-        console.error('PluginBridge: Failed to validate project:', error);
-        errors.push(`Failed to validate project '${projectId}'`);
+      const projectExists = projects?.some((project: any) => project.id === projectId);
+      if (!projectExists) {
+        errors.push(`Project with ID '${projectId}' does not exist`);
       }
     }
 
     // Validate tags exist if provided
     if (tagIds && tagIds.length > 0) {
-      try {
-        const tags = await this._tagService.tags$.pipe(first()).toPromise();
+      const tags = await this._tagService.tags$.pipe(first()).toPromise();
 
-        const existingTagIds = tags?.map((tag: any) => tag.id) || [];
-        const nonExistentTags = tagIds.filter((tagId) => !existingTagIds.includes(tagId));
+      const existingTagIds = tags?.map((tag: any) => tag.id) || [];
+      const nonExistentTags = tagIds.filter((tagId) => !existingTagIds.includes(tagId));
 
-        if (nonExistentTags.length > 0) {
-          errors.push(`Tags with IDs '${nonExistentTags.join(', ')}' do not exist`);
-        }
-      } catch (error) {
-        console.error('PluginBridge: Failed to validate tags:', error);
-        errors.push(`Failed to validate tags '${tagIds.join(', ')}'`);
+      if (nonExistentTags.length > 0) {
+        errors.push(`Tags with IDs '${nonExistentTags.join(', ')}' do not exist`);
       }
     }
 
     // Validate parent task exists if provided
-    if (parentId && parentId !== null && parentId !== undefined) {
-      try {
-        const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+    if (parentId) {
+      const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
 
-        const parentExists = tasks?.some((task: any) => task.id === parentId);
-        if (!parentExists) {
-          errors.push(`Parent task with ID '${parentId}' does not exist`);
-        }
-      } catch (error) {
-        console.error('PluginBridge: Failed to validate parent task:', error);
-        errors.push(`Failed to validate parent task '${parentId}'`);
+      const parentExists = tasks?.some((task: any) => task.id === parentId);
+      if (!parentExists) {
+        errors.push(`Parent task with ID '${parentId}' does not exist`);
       }
     }
 

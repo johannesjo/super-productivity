@@ -162,12 +162,6 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.openDialog(dialogCfg);
   }
 
-  addActionBeforeCloseApp(action: () => Promise<void>): void {
-    this._actionsBeforeClose.push(action);
-    console.log(`Plugin ${this._pluginId} added action before close`);
-    this._pluginBridge.addActionBeforeCloseApp(action);
-  }
-
   // Internal methods for the plugin system
   __getHookHandlers(): Map<
     string,
