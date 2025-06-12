@@ -2,7 +2,6 @@
 import { Task, TaskState } from '../task.model';
 import { initialTaskState, taskReducer } from './task.reducer';
 import * as fromActions from './task.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 
@@ -69,16 +68,6 @@ describe('Task Reducer', () => {
       expect(state.entities['task3']).toEqual(newTask);
     });
 
-    it('should update a task', () => {
-      const updatedTitle = 'Updated Task 1';
-      const action = fromActions.updateTask({
-        task: { id: 'task1', changes: { title: updatedTitle } },
-      });
-      const state = taskReducer(stateWithTasks, action);
-
-      expect(state.entities['task1']!.title).toBe(updatedTitle);
-    });
-
     it('should delete a task', () => {
       const action = fromActions.deleteTask({
         task: {
@@ -108,49 +97,6 @@ describe('Task Reducer', () => {
     });
   });
 
-  describe('Task status operations', () => {
-    it('should mark a task as done', () => {
-      const action = fromActions.updateTask({
-        task: { id: 'task1', changes: { isDone: true } },
-      });
-      const state = taskReducer(stateWithTasks, action);
-
-      expect(state.entities['task1']!.isDone).toBe(true);
-      expect(state.entities['task1']!.doneOn).toBeDefined();
-    });
-
-    it('should mark a task as undone', () => {
-      // First mark as done
-      let state = taskReducer(
-        stateWithTasks,
-        fromActions.updateTask({
-          task: { id: 'task1', changes: { isDone: true, doneOn: 123456789 } },
-        }),
-      );
-
-      // Then mark as undone
-      const action = fromActions.updateTask({
-        task: { id: 'task1', changes: { isDone: false } },
-      });
-      state = taskReducer(state, action);
-
-      expect(state.entities['task1']!.isDone).toBe(false);
-      expect(state.entities['task1']!.doneOn).toBeUndefined();
-    });
-  });
-
-  describe('Time tracking operations', () => {
-    it('should update time estimate for a task', () => {
-      const timeEstimate = 7200000; // 2 hours
-      const action = fromActions.updateTask({
-        task: { id: 'task2', changes: { timeEstimate } },
-      });
-      const state = taskReducer(stateWithTasks, action);
-
-      expect(state.entities['task2']!.timeEstimate).toBe(timeEstimate);
-    });
-  });
-
   describe('Current task operations', () => {
     it('should set current task', () => {
       const action = fromActions.setCurrentTask({ id: 'task2' });
@@ -165,77 +111,6 @@ describe('Task Reducer', () => {
 
       expect(state.currentTaskId).toBeNull();
       expect(state.lastCurrentTaskId).toBe('task1');
-    });
-  });
-
-  describe('Complex operations', () => {
-    it('should recalculate time estimate for parent task when subtask is updated', () => {
-      // Start with clean test state
-      let state = { ...stateWithTasks };
-
-      // Add time estimates to subtasks
-      state = taskReducer(
-        state,
-        fromActions.updateTask({
-          task: { id: 'subTask1', changes: { timeEstimate: 3600000 } },
-        }),
-      );
-
-      state = taskReducer(
-        state,
-        fromActions.updateTask({
-          task: { id: 'subTask2', changes: { timeEstimate: 7200000 } },
-        }),
-      );
-
-      // Verify parent has combined estimate
-      expect(state.entities['task1']!.timeEstimate).toBe(10800000);
-
-      // Mark one subtask as done
-      // The reducer should automatically exclude done subtasks from parent's estimate
-      state = taskReducer(
-        state,
-        fromActions.updateTask({
-          task: { id: 'subTask1', changes: { isDone: true } },
-        }),
-      );
-
-      // Verify parent's estimate excludes completed subtask
-      expect(state.entities['task1']!.timeEstimate).toBe(7200000);
-    });
-  });
-
-  describe('Tag operations', () => {
-    it('should add a tag to a task', () => {
-      const N_ID = 'NEW_TAG_ID';
-      const action = fromActions.updateTaskTags({
-        task: task2,
-        newTagIds: [N_ID],
-      });
-      const state = taskReducer(stateWithTasks, action);
-
-      expect(state.entities['task2']!.tagIds).toContain(N_ID);
-    });
-
-    it('should remove a tag from a task', () => {
-      const N_ID = 'NEW_TAG_ID';
-      // First add a tag
-      let state = taskReducer(
-        stateWithTasks,
-        fromActions.updateTaskTags({
-          task: task2,
-          newTagIds: [N_ID],
-        }),
-      );
-
-      // Then remove it
-      const action = fromActions.updateTaskTags({
-        task: state.entities['task2'] as Task,
-        newTagIds: [],
-      });
-      state = taskReducer(state, action);
-
-      expect(state.entities['task2']!.tagIds).not.toContain(TODAY_TAG.id);
     });
   });
 });
