@@ -26,8 +26,6 @@ import {
   toggleTaskHideSubTasks,
   unScheduleTask,
   unsetCurrentTask,
-  updateTask,
-  updateTaskTags,
   updateTaskUi,
 } from './task.actions';
 import { DEFAULT_TASK, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
@@ -39,11 +37,11 @@ import {
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
   removeTaskFromParentSideEffects,
-  updateDoneOnForTask,
-  updateTimeEstimateForTask,
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
+
+export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeft,
@@ -66,7 +64,6 @@ import { createReducer, on } from '@ngrx/store';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { deleteProject } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
@@ -206,39 +203,12 @@ export const taskReducer = createReducer<TaskState>(
     return taskAdapter.addOne(newTask, state);
   }),
 
-  on(updateTask, (state, { task }) => {
-    let stateCopy = state;
-    const id = task.id as string;
-    const { timeSpentOnDay, timeEstimate } = task.changes;
-    stateCopy = timeSpentOnDay
-      ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
-      : stateCopy;
-    stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
-    stateCopy = updateDoneOnForTask(task, stateCopy);
-    return taskAdapter.updateOne(task, stateCopy);
-  }),
-
   on(__updateMultipleTaskSimple, (state, { taskUpdates }) => {
     return taskAdapter.updateMany(taskUpdates, state);
   }),
 
   on(updateTaskUi, (state, { task }) => {
     return taskAdapter.updateOne(task, state);
-  }),
-
-  on(updateTaskTags, (state, { task, newTagIds }) => {
-    if (newTagIds.includes(TODAY_TAG.id)) {
-      throw new Error('We dont do this anymore!');
-    }
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          tagIds: newTagIds,
-        },
-      },
-      state,
-    );
   }),
 
   on(removeTasksFromTodayTag, (state, { taskIds }) => {

@@ -1,4 +1,5 @@
 import { createActionGroup, props } from '@ngrx/store';
+import { Update } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { IssueDataReduced } from '../../features/issue/issue.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
@@ -60,11 +61,10 @@ export const TaskSharedActions = createActionGroup({
       isSkipToast?: boolean;
     }>(),
 
-    // Task Tags
-    updateTaskTags: props<{
-      task: Task;
-      newTagIds: string[];
-      isSkipExcludeCheck?: boolean;
+    // Task Updates
+    updateTask: props<{
+      task: Update<Task>;
+      isIgnoreShortSyntax?: boolean;
     }>(),
 
     // Project Management
