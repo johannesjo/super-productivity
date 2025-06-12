@@ -27,7 +27,6 @@ import {
   deleteTag,
   deleteTags,
   moveTaskInTodayTagList,
-  removeTasksFromTodayTag,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -377,19 +376,6 @@ export const tagReducer = createReducer<TagState>(
 
   // TASK STUFF
   // ---------
-
-  on(removeTasksFromTodayTag, (state, { taskIds }) => {
-    const todayTag = state.entities[TODAY_TAG.id] as Tag;
-    return tagAdapter.updateOne(
-      {
-        id: TODAY_TAG.id,
-        changes: {
-          taskIds: todayTag.taskIds.filter((id) => !taskIds.includes(id)),
-        },
-      },
-      state,
-    );
-  }),
 
   on(moveTaskInTodayTagList, (state, { toTaskId, fromTaskId }) => {
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
