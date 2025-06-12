@@ -56,4 +56,7 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
     timeTracking: initialTimeTrackingState,
     lastTimeTrackingFlush: 0,
   },
+
+  pluginMetadata: [],
+  pluginUserData: [],
 });
