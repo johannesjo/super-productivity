@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic, but avoid unnecessary abstractions.
 4. Confirm understanding before making changes: If you're unsure about the purpose of a piece of code, ask for clarification rather than making assumptions.
 5. Use `npm run prettier` and `npm run lint` to format and check code style before committing changes.
+6. When creating html templates, prefer plain html like `<table>` and `<div>`. Keep CSS styles to a minimum. Keep nesting to a minimum. Keep css classes to a minimum. Use Angular Material components where appropriate, but avoid overusing them.
 
 ## Project Overview
 
