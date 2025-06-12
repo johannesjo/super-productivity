@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { PluginBridgeService } from '../plugin-bridge.service';
-import { PluginMenuEntryCfg } from '../plugin-api.model';
 import { MatMenuItem } from '@angular/material/menu';
 
 @Component({
   selector: 'plugin-menu',
   template: `
-    @for (menuEntry of menuEntries(); track menuEntry.pluginId + menuEntry.label) {
+    @for (menuEntry of menuEntries$ | async; track menuEntry.pluginId + menuEntry.label) {
       <button
         mat-menu-item
         class="plugin-menu-entry"
@@ -39,12 +38,5 @@ import { MatMenuItem } from '@angular/material/menu';
 export class PluginMenuComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);
 
-  readonly menuEntries = signal<PluginMenuEntryCfg[]>([]);
-
-  constructor() {
-    // Subscribe to menu entry changes
-    this._pluginBridge.menuEntries$.subscribe((entries) => {
-      this.menuEntries.set(entries);
-    });
-  }
+  readonly menuEntries$ = this._pluginBridge.menuEntries$;
 }

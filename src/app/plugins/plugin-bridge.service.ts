@@ -383,7 +383,7 @@ export class PluginBridgeService {
   /**
    * Register a menu entry for a plugin
    */
-  registerMenuEntry(menuEntryCfg: PluginMenuEntryCfg): void {
+  registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
     if (!this._currentPluginId) {
       throw new Error('No plugin context set for menu entry registration');
     }

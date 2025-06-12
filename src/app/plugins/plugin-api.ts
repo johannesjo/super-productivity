@@ -61,8 +61,9 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.registerHeaderButton(headerBtnCfg);
   }
 
-  registerMenuEntry(menuEntryCfg: PluginMenuEntryCfg): void {
-    this._menuEntries.push({ ...menuEntryCfg, pluginId: this._pluginId });
+  registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
+    const fullMenuEntry = { ...menuEntryCfg, pluginId: this._pluginId };
+    this._menuEntries.push(fullMenuEntry);
     console.log(`Plugin ${this._pluginId} registered menu entry`, menuEntryCfg);
     this._pluginBridge.registerMenuEntry(menuEntryCfg);
   }
