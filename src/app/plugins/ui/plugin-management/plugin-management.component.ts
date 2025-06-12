@@ -9,6 +9,7 @@ import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
+import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
 import { CommonModule } from '@angular/common';
 import {
   MatCard,
@@ -54,6 +55,9 @@ export class PluginManagementComponent implements OnInit {
   private readonly _pluginCacheService = inject(PluginCacheService);
 
   T: typeof T = T;
+
+  // Plugin size limits for display
+  readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
 
   // Signal for all plugins (loaded + disabled with isEnabled state)
   readonly allPlugins = signal<PluginInstance[]>([]);
@@ -170,6 +174,14 @@ export class PluginManagementComponent implements OnInit {
 
     if (!file.name.endsWith('.zip')) {
       this.uploadError.set('Please select a ZIP file');
+      return;
+    }
+
+    if (file.size > MAX_PLUGIN_ZIP_SIZE) {
+      this.uploadError.set(
+        // eslint-disable-next-line max-len
+        `Plugin file is too large. Maximum allowed size is ${this.maxPluginSizeMB} MB, but selected file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+      );
       return;
     }
 
