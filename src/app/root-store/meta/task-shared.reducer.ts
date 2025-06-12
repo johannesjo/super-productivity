@@ -1,4 +1,5 @@
 import { ActionReducer, Action } from '@ngrx/store';
+import { Update } from '@ngrx/entity';
 import { RootState } from '../root-state';
 import {
   addTask,
@@ -11,84 +12,44 @@ import {
   unScheduleTask,
   updateTaskTags,
 } from '../../features/tasks/store/task.actions';
-import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
-import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
-import { projectAdapter } from '../../features/project/store/project.reducer';
-import { tagAdapter } from '../../features/tag/store/tag.reducer';
-import { Tag } from '../../features/tag/tag.model';
-import { Project } from '../../features/project/project.model';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { Update } from '@ngrx/entity';
-import { TODAY_TAG } from '../../features/tag/tag.const';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { unique } from '../../util/unique';
-import { isToday } from '../../util/is-today.util';
 import { deleteProject } from '../../features/project/store/project.actions';
 import {
   planTasksForToday,
   removeTasksFromTodayTag,
 } from '../../features/tag/store/tag.actions';
+import {
+  PROJECT_FEATURE_NAME,
+  projectAdapter,
+} from '../../features/project/store/project.reducer';
+import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reducer';
+import { Tag } from '../../features/tag/tag.model';
+import { Project } from '../../features/project/project.model';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { unique } from '../../util/unique';
+import { isToday } from '../../util/is-today.util';
+
+// =============================================================================
+// TYPES & UTILITIES
+// =============================================================================
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
-
-const updateProjectWithTask = (
-  state: RootState,
-  task: { id: string; projectId: string },
-  isAddToBottom: boolean,
-  isAddToBacklog: boolean,
-): RootState => {
-  if (!task.projectId || !state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
-    return state;
-  }
-
-  const affectedProject = state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project;
-  const targetList: ProjectTaskList =
-    isAddToBacklog && affectedProject.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';
-
-  const newTaskIds = isAddToBottom
-    ? [...affectedProject[targetList], task.id]
-    : [task.id, ...affectedProject[targetList]];
-
-  return {
-    ...state,
-    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: { [targetList]: newTaskIds },
-      },
-      state[PROJECT_FEATURE_NAME],
-    ),
-  };
+type TaskEntity = { id: string; projectId?: string | null; tagIds?: string[] };
+type TaskWithTags = {
+  id: string;
+  tagIds: string[];
+  dueDay?: string;
+  projectId?: string | null;
 };
 
-const updateTagsWithTask = (
-  state: RootState,
-  task: { id: string; tagIds: string[]; dueDay?: string },
-  isAddToBottom: boolean,
-): RootState => {
-  const tagIdsToUpdate = [
-    ...task.tagIds,
-    ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
-  ];
+// =============================================================================
+// MAIN ACTION HANDLERS
+// =============================================================================
 
-  const tagUpdates: Update<Tag>[] = tagIdsToUpdate.map((tagId) => {
-    const existingTag = state[TAG_FEATURE_NAME].entities[tagId] as Tag;
-    const newTaskIds = isAddToBottom
-      ? [...existingTag.taskIds, task.id]
-      : [task.id, ...existingTag.taskIds];
-
-    return {
-      id: tagId,
-      changes: { taskIds: newTaskIds },
-    };
-  });
-
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
-  };
-};
-
+/**
+ * Meta-reducer that handles cross-cutting concerns for task, project, and tag state updates
+ */
 export const taskSharedMetaReducer = (
   reducer: ActionReducer<RootState, Action>,
 ): ActionReducer<RootState, Action> => {
@@ -96,536 +57,460 @@ export const taskSharedMetaReducer = (
     if (!state) {
       return reducer(state, action);
     }
-    switch (action.type) {
-      case addTask.type: {
+
+    const actionHandlers: Record<string, (state: RootState) => RootState> = {
+      [addTask.type]: () => {
         const { task, isAddToBottom, isAddToBacklog } = action as ReturnType<
           typeof addTask
         >;
-
-        let updatedState = updateProjectWithTask(
-          state,
-          task,
-          isAddToBottom,
-          isAddToBacklog,
-        );
-        updatedState = updateTagsWithTask(updatedState, task, isAddToBottom);
-
-        return reducer(updatedState, action);
-      }
-
-      case convertToMainTask.type: {
+        return handleAddTask(state, task, isAddToBottom, isAddToBacklog);
+      },
+      [convertToMainTask.type]: () => {
         const { task, parentTagIds, isPlanForToday } = action as ReturnType<
           typeof convertToMainTask
         >;
-
-        let updatedState = updateProjectWithConvertToMainTask(state, task);
-        updatedState = updateTagsWithConvertToMainTask(
-          updatedState,
-          task,
-          parentTagIds,
-          isPlanForToday,
-        );
-
-        return reducer(updatedState, action);
-      }
-
-      case deleteTask.type: {
+        return handleConvertToMainTask(state, task, parentTagIds, isPlanForToday);
+      },
+      [deleteTask.type]: () => {
         const { task } = action as ReturnType<typeof deleteTask>;
-
-        let updatedState = updateProjectWithDeleteTask(state, task);
-        updatedState = updateTagsWithDeleteTask(updatedState, task);
-
-        return reducer(updatedState, action);
-      }
-
-      case deleteTasks.type: {
+        return handleDeleteTask(state, task);
+      },
+      [deleteTasks.type]: () => {
         const { taskIds } = action as ReturnType<typeof deleteTasks>;
-
-        const updatedState = updateTagsWithDeleteTasks(state, taskIds);
-
-        return reducer(updatedState, action);
-      }
-
-      case moveToArchive_.type: {
+        return handleDeleteTasks(state, taskIds);
+      },
+      [moveToArchive_.type]: () => {
         const { tasks } = action as ReturnType<typeof moveToArchive_>;
-
-        let updatedState = updateProjectsWithMoveToArchive(state, tasks);
-        updatedState = updateTagsWithMoveToArchive(updatedState, tasks);
-
-        return reducer(updatedState, action);
-      }
-
-      case restoreTask.type: {
+        return handleMoveToArchive(state, tasks);
+      },
+      [restoreTask.type]: () => {
         const { task, subTasks } = action as ReturnType<typeof restoreTask>;
-
-        let updatedState = updateProjectWithRestoreTask(state, task);
-        updatedState = updateTagsWithRestoreTask(updatedState, task, subTasks);
-
-        return reducer(updatedState, action);
-      }
-
-      case scheduleTaskWithTime.type: {
+        return handleRestoreTask(state, task, subTasks);
+      },
+      [scheduleTaskWithTime.type]: () => {
         const { task, dueWithTime } = action as ReturnType<typeof scheduleTaskWithTime>;
-
-        const updatedState = updateTagsWithScheduleTaskWithTime(state, task, dueWithTime);
-
-        return reducer(updatedState, action);
-      }
-
-      case unScheduleTask.type: {
+        return handleScheduleTaskWithTime(state, task, dueWithTime);
+      },
+      [unScheduleTask.type]: () => {
         const { id } = action as ReturnType<typeof unScheduleTask>;
-
-        const updatedState = updateTagsWithUnScheduleTask(state, id);
-
-        return reducer(updatedState, action);
-      }
-
-      case updateTaskTags.type: {
-        const { newTagIds = [], task } = action as ReturnType<typeof updateTaskTags>;
-
-        const updatedState = updateTagsWithUpdateTaskTags(state, task, newTagIds);
-
-        return reducer(updatedState, action);
-      }
-
-      case deleteProject.type: {
+        return handleUnScheduleTask(state, id);
+      },
+      [updateTaskTags.type]: () => {
+        const { task, newTagIds = [] } = action as ReturnType<typeof updateTaskTags>;
+        return handleUpdateTaskTags(state, task, newTagIds);
+      },
+      [deleteProject.type]: () => {
         const { allTaskIds } = action as ReturnType<typeof deleteProject>;
-
-        const updatedState = updateTagsWithDeleteProject(state, allTaskIds);
-
-        return reducer(updatedState, action);
-      }
-
-      case planTasksForToday.type: {
+        return handleDeleteProject(state, allTaskIds);
+      },
+      [planTasksForToday.type]: () => {
         const { taskIds, parentTaskMap = {} } = action as ReturnType<
           typeof planTasksForToday
         >;
-
-        const updatedState = updateTagsWithPlanTasksForToday(
-          state,
-          taskIds,
-          parentTaskMap,
-        );
-
-        return reducer(updatedState, action);
-      }
-
-      case removeTasksFromTodayTag.type: {
+        return handlePlanTasksForToday(state, taskIds, parentTaskMap);
+      },
+      [removeTasksFromTodayTag.type]: () => {
         const { taskIds } = action as ReturnType<typeof removeTasksFromTodayTag>;
-
-        const updatedState = updateTagsWithRemoveTasksFromTodayTag(state, taskIds);
-
-        return reducer(updatedState, action);
-      }
-
-      default:
-        return reducer(state, action);
-    }
-  };
-};
-
-const updateProjectWithConvertToMainTask = (
-  state: RootState,
-  task: { id: string; projectId?: string | null },
-): RootState => {
-  if (!task.projectId || !state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
-    return state;
-  }
-
-  const affectedProject = state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project;
-  return {
-    ...state,
-    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: [task.id, ...affectedProject.taskIds],
-        },
-      },
-      state[PROJECT_FEATURE_NAME],
-    ),
-  };
-};
-
-const updateTagsWithConvertToMainTask = (
-  state: RootState,
-  task: { id: string },
-  parentTagIds: string[],
-  isPlanForToday?: boolean,
-): RootState => {
-  const tagIdsToUpdate = [...parentTagIds, ...(isPlanForToday ? [TODAY_TAG.id] : [])];
-
-  const tagUpdates: Update<Tag>[] = tagIdsToUpdate.map((tagId) => {
-    const existingTag = state[TAG_FEATURE_NAME].entities[tagId] as Tag;
-    return {
-      id: tagId,
-      changes: {
-        taskIds: [task.id, ...existingTag.taskIds],
+        return handleRemoveTasksFromTodayTag(state, taskIds);
       },
     };
-  });
 
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
+    const handler = actionHandlers[action.type];
+    const updatedState = handler ? handler(state) : state;
+
+    return reducer(updatedState, action);
   };
 };
 
-const updateProjectWithDeleteTask = (
+// =============================================================================
+// ACTION HANDLERS
+// =============================================================================
+
+const handleAddTask = (
   state: RootState,
-  task: { id: string; projectId?: string | null; subTaskIds?: string[] },
+  task: TaskWithTags,
+  isAddToBottom: boolean,
+  isAddToBacklog: boolean,
 ): RootState => {
-  if (!task.projectId || !state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
-    return state;
+  let updatedState = state;
+
+  // Update project if task has projectId
+  if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
+    const project = getProject(state, task.projectId);
+    const targetList: ProjectTaskList =
+      isAddToBacklog && project.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';
+
+    updatedState = updateProject(updatedState, task.projectId, {
+      [targetList]: addTaskToList(project[targetList], task.id, isAddToBottom),
+    });
   }
 
-  const project = state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project;
-  return {
-    ...state,
-    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
-          backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
-        },
-      },
-      state[PROJECT_FEATURE_NAME],
-    ),
-  };
-};
+  // Update tags
+  const tagIdsToUpdate = [
+    ...task.tagIds,
+    ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
+  ];
 
-const updateTagsWithDeleteTask = (
-  state: RootState,
-  task: { id: string; tagIds: string[]; subTasks?: any[]; subTaskIds?: string[] },
-): RootState => {
-  const affectedTagIds: string[] = [task, ...(task.subTasks || [])].reduce(
-    (acc, t) => [...acc, ...t.tagIds],
-    // always check today list too
-    [TODAY_TAG.id] as string[],
-  );
-  const removedTasksIds: string[] = [task.id, ...(task.subTaskIds || [])];
-  const tagUpdates: Update<Tag>[] = affectedTagIds.map((tagId) => {
-    return {
+  const tagUpdates = tagIdsToUpdate.map(
+    (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
-          (taskIdForTag) => !removedTasksIds.includes(taskIdForTag),
-        ),
-      },
-    };
-  });
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
-  };
-};
-
-const updateTagsWithDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
-  const tagUpdates: Update<Tag>[] = (state[TAG_FEATURE_NAME].ids as string[]).map(
-    (tagId) => ({
-      id: tagId,
-      changes: {
-        taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
-          (taskId) => !taskIds.includes(taskId),
-        ),
+        taskIds: addTaskToList(getTag(state, tagId).taskIds, task.id, isAddToBottom),
       },
     }),
   );
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
-  };
+
+  return updateTags(updatedState, tagUpdates);
 };
 
-const updateProjectsWithMoveToArchive = (
+const handleConvertToMainTask = (
   state: RootState,
-  tasks: TaskWithSubTasks[],
+  task: TaskEntity,
+  parentTagIds: string[],
+  isPlanForToday?: boolean,
 ): RootState => {
-  const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-  const projectIds = unique<string>(
-    tasks
-      .map((t: Task) => t.projectId || null)
-      .filter((pid: string | null) => !!pid) as string[],
-  );
-  const updates: Update<Project>[] = projectIds.map((pid: string) => ({
-    id: pid,
-    changes: {
-      taskIds: (state[PROJECT_FEATURE_NAME].entities[pid] as Project).taskIds.filter(
-        (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-      ),
-      backlogTaskIds: (
-        state[PROJECT_FEATURE_NAME].entities[pid] as Project
-      ).backlogTaskIds.filter((taskId) => !taskIdsToMoveToArchive.includes(taskId)),
-    },
-  }));
-  return {
-    ...state,
-    [PROJECT_FEATURE_NAME]: projectAdapter.updateMany(
-      updates,
-      state[PROJECT_FEATURE_NAME],
-    ),
-  };
-};
+  let updatedState = state;
 
-const updateTagsWithMoveToArchive = (
-  state: RootState,
-  tasks: TaskWithSubTasks[],
-): RootState => {
-  const taskIdsToMoveToArchive = tasks.flatMap((t) => [
-    t.id,
-    ...t.subTasks.map((st) => st.id),
-  ]);
-  const tagIds = unique([
-    // always cleanup inbox and today tag
-    TODAY_TAG.id,
-    ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
-  ]);
-  const tagUpdates: Update<Tag>[] = tagIds.map((tId: string) => ({
-    id: tId,
-    changes: {
-      taskIds: (state[TAG_FEATURE_NAME].entities[tId] as Tag).taskIds.filter(
-        (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-      ),
-    },
-  }));
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
-  };
-};
-
-const updateProjectWithRestoreTask = (
-  state: RootState,
-  task: { id: string; projectId?: string | null },
-): RootState => {
-  if (!task.projectId) {
-    return state;
+  // Update project if task has projectId
+  if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
+    const project = getProject(state, task.projectId);
+    updatedState = updateProject(updatedState, task.projectId, {
+      taskIds: [task.id, ...project.taskIds],
+    });
   }
 
-  return {
-    ...state,
-    [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: [
-            ...(state[PROJECT_FEATURE_NAME].entities[task.projectId] as Project).taskIds,
-            task.id,
-          ],
-        },
-      },
-      state[PROJECT_FEATURE_NAME],
-    ),
-  };
-};
-
-const updateTagsWithRestoreTask = (
-  state: RootState,
-  task: { id: string; tagIds: string[] },
-  subTasks: Task[],
-): RootState => {
-  const allTasks = [task, ...subTasks];
-
-  // Create a map of tagIds to an array of associated task and subtask IDs
-  const tagTaskMap: { [tagId: string]: string[] } = {};
-  allTasks.forEach((t) => {
-    t.tagIds.forEach((tagId) => {
-      if (!tagTaskMap[tagId]) {
-        tagTaskMap[tagId] = [];
-      }
-      tagTaskMap[tagId].push(t.id);
-    });
-  });
-
-  // Create updates from the map
-  const updates = Object.entries(tagTaskMap)
-    .filter(([tagId]) => !!(state[TAG_FEATURE_NAME].entities[tagId] as Tag)) // If the tag model is gone we don't update
-    .map(([tagId, taskIds]) => ({
+  // Update tags
+  const tagIdsToUpdate = [...parentTagIds, ...(isPlanForToday ? [TODAY_TAG.id] : [])];
+  const tagUpdates = tagIdsToUpdate.map(
+    (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: [
-          ...(state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds,
-          ...taskIds,
-        ],
+        taskIds: [task.id, ...getTag(state, tagId).taskIds],
       },
-    }));
+    }),
+  );
 
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
-  };
+  return updateTags(updatedState, tagUpdates);
 };
 
-const updateTagsWithScheduleTaskWithTime = (
+const handleDeleteTask = (
+  state: RootState,
+  task: {
+    id: string;
+    projectId?: string | null;
+    tagIds: string[];
+    subTasks?: Task[];
+    subTaskIds?: string[];
+  },
+): RootState => {
+  let updatedState = state;
+
+  // Update project if task has projectId
+  if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
+    const project = getProject(state, task.projectId);
+    updatedState = updateProject(updatedState, task.projectId, {
+      taskIds: removeTasksFromList(project.taskIds, [task.id]),
+      backlogTaskIds: removeTasksFromList(project.backlogTaskIds, [task.id]),
+    });
+  }
+
+  // Update tags - collect all affected tags and tasks to remove
+  const affectedTagIds = unique([
+    TODAY_TAG.id, // always check today list
+    ...task.tagIds,
+    ...(task.subTasks || []).flatMap((st) => st.tagIds || []),
+  ]);
+
+  const taskIdsToRemove = [task.id, ...(task.subTaskIds || [])];
+
+  const tagUpdates = affectedTagIds.map(
+    (tagId): Update<Tag> => ({
+      id: tagId,
+      changes: {
+        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, taskIdsToRemove),
+      },
+    }),
+  );
+
+  return updateTags(updatedState, tagUpdates);
+};
+
+const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
+  const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
+    (tagId): Update<Tag> => ({
+      id: tagId,
+      changes: {
+        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, taskIds),
+      },
+    }),
+  );
+
+  return updateTags(state, tagUpdates);
+};
+
+const handleMoveToArchive = (state: RootState, tasks: TaskWithSubTasks[]): RootState => {
+  const taskIdsToArchive = tasks.flatMap((t) => [t.id, ...t.subTasks.map((st) => st.id)]);
+
+  // Update projects
+  const projectIds = unique(
+    tasks.map((t) => t.projectId).filter((pid): pid is string => !!pid),
+  );
+
+  let updatedState = state;
+
+  if (projectIds.length > 0) {
+    const projectUpdates = projectIds.map((pid): Update<Project> => {
+      const project = getProject(state, pid);
+      return {
+        id: pid,
+        changes: {
+          taskIds: removeTasksFromList(project.taskIds, taskIdsToArchive),
+          backlogTaskIds: removeTasksFromList(project.backlogTaskIds, taskIdsToArchive),
+        },
+      };
+    });
+
+    updatedState = {
+      ...updatedState,
+      [PROJECT_FEATURE_NAME]: projectAdapter.updateMany(
+        projectUpdates,
+        updatedState[PROJECT_FEATURE_NAME],
+      ),
+    };
+  }
+
+  // Update tags
+  const affectedTagIds = unique([
+    TODAY_TAG.id, // always cleanup today tag
+    ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
+  ]);
+
+  const tagUpdates = affectedTagIds.map(
+    (tagId): Update<Tag> => ({
+      id: tagId,
+      changes: {
+        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, taskIdsToArchive),
+      },
+    }),
+  );
+
+  return updateTags(updatedState, tagUpdates);
+};
+
+const handleRestoreTask = (
+  state: RootState,
+  task: TaskEntity,
+  subTasks: Task[],
+): RootState => {
+  let updatedState = state;
+
+  // Update project if task has projectId
+  if (task.projectId) {
+    const project = getProject(state, task.projectId);
+    updatedState = updateProject(updatedState, task.projectId, {
+      taskIds: [...project.taskIds, task.id],
+    });
+  }
+
+  // Update tags - group tasks by tagId
+  const allTasks = [task, ...subTasks];
+  const tagTaskMap = allTasks.reduce(
+    (map, t) => {
+      (t.tagIds || []).forEach((tagId) => {
+        if (!map[tagId]) map[tagId] = [];
+        map[tagId].push(t.id);
+      });
+      return map;
+    },
+    {} as Record<string, string[]>,
+  );
+
+  const tagUpdates = Object.entries(tagTaskMap)
+    .filter(([tagId]) => state[TAG_FEATURE_NAME].entities[tagId]) // Only update existing tags
+    .map(
+      ([tagId, taskIds]): Update<Tag> => ({
+        id: tagId,
+        changes: {
+          taskIds: [...getTag(state, tagId).taskIds, ...taskIds],
+        },
+      }),
+    );
+
+  return updateTags(updatedState, tagUpdates);
+};
+
+const handleScheduleTaskWithTime = (
   state: RootState,
   task: { id: string },
   dueWithTime: number,
 ): RootState => {
-  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
-  const isTaskScheduledForToday = isToday(dueWithTime);
-  const isTaskCurrentlyInToday = todayTag.taskIds.includes(task.id);
+  const todayTag = getTag(state, TODAY_TAG.id);
+  const isScheduledForToday = isToday(dueWithTime);
+  const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
-  if (!isTaskCurrentlyInToday && isTaskScheduledForToday) {
-    return {
-      ...state,
-      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
-        {
-          id: TODAY_TAG.id,
-          changes: {
-            taskIds: [task.id, ...todayTag.taskIds],
-          },
-        },
-        state[TAG_FEATURE_NAME],
-      ),
-    };
+  // No change needed
+  if (isScheduledForToday === isCurrentlyInToday) {
+    return state;
   }
 
-  if (isTaskCurrentlyInToday && !isTaskScheduledForToday) {
-    return {
-      ...state,
-      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
-        {
-          id: TODAY_TAG.id,
-          changes: {
-            taskIds: todayTag.taskIds.filter((id) => id !== task.id),
-          },
-        },
-        state[TAG_FEATURE_NAME],
-      ),
-    };
-  }
+  const newTaskIds = isScheduledForToday
+    ? [task.id, ...todayTag.taskIds] // Add to top
+    : todayTag.taskIds.filter((id) => id !== task.id); // Remove
 
-  return state;
+  return updateTags(state, [
+    {
+      id: TODAY_TAG.id,
+      changes: { taskIds: newTaskIds },
+    },
+  ]);
 };
 
-const updateTagsWithUnScheduleTask = (state: RootState, taskId: string): RootState => {
-  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
+const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
+  const todayTag = getTag(state, TODAY_TAG.id);
 
-  if (todayTag.taskIds.includes(taskId)) {
-    return {
-      ...state,
-      [TAG_FEATURE_NAME]: tagAdapter.updateOne(
-        {
-          id: TODAY_TAG.id,
-          changes: {
-            taskIds: todayTag.taskIds.filter((id) => id !== taskId),
-          },
-        },
-        state[TAG_FEATURE_NAME],
-      ),
-    };
+  if (!todayTag.taskIds.includes(taskId)) {
+    return state;
   }
 
-  return state;
+  return updateTags(state, [
+    {
+      id: TODAY_TAG.id,
+      changes: {
+        taskIds: todayTag.taskIds.filter((id) => id !== taskId),
+      },
+    },
+  ]);
 };
 
-const updateTagsWithUpdateTaskTags = (
+const handleUpdateTaskTags = (
   state: RootState,
   task: { id: string; tagIds: string[] },
   newTagIds: string[],
 ): RootState => {
-  const taskId = task.id;
-  const oldTagIds = task.tagIds;
-  const removedFrom: string[] = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
-  const addedTo: string[] = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+  const { id: taskId, tagIds: oldTagIds } = task;
+  const tagsToRemoveFrom = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
+  const tagsToAddTo = newTagIds.filter((newId) => !oldTagIds.includes(newId));
 
-  const removeFrom: Update<Tag>[] = removedFrom.map((tagId) => ({
-    id: tagId,
-    changes: {
-      taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
-        (id) => id !== taskId,
-      ),
-    },
-  }));
-
-  const addTo: Update<Tag>[] = addedTo.map((tagId) => ({
-    id: tagId,
-    changes: {
-      taskIds: unique([
-        taskId,
-        ...(state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds,
-      ]),
-    },
-  }));
-
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(
-      [...removeFrom, ...addTo],
-      state[TAG_FEATURE_NAME],
-    ),
-  };
-};
-
-const updateTagsWithDeleteProject = (
-  state: RootState,
-  allTaskIds: string[],
-): RootState => {
-  const updates: Update<Tag>[] = (state[TAG_FEATURE_NAME].ids as string[]).map(
-    (tagId) => ({
+  const removeUpdates = tagsToRemoveFrom.map(
+    (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
-          (taskId) => !allTaskIds.includes(taskId),
-        ),
+        taskIds: getTag(state, tagId).taskIds.filter((id) => id !== taskId),
       },
     }),
   );
 
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
-  };
+  const addUpdates = tagsToAddTo.map(
+    (tagId): Update<Tag> => ({
+      id: tagId,
+      changes: {
+        taskIds: unique([taskId, ...getTag(state, tagId).taskIds]),
+      },
+    }),
+  );
+
+  return updateTags(state, [...removeUpdates, ...addUpdates]);
 };
 
-const updateTagsWithPlanTasksForToday = (
+const handleDeleteProject = (state: RootState, allTaskIds: string[]): RootState => {
+  const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
+    (tagId): Update<Tag> => ({
+      id: tagId,
+      changes: {
+        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, allTaskIds),
+      },
+    }),
+  );
+
+  return updateTags(state, tagUpdates);
+};
+
+const handlePlanTasksForToday = (
   state: RootState,
   taskIds: string[],
-  parentTaskMap: { [key: string]: string | undefined },
+  parentTaskMap: Record<string, string | undefined>,
 ): RootState => {
-  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
+  const todayTag = getTag(state, TODAY_TAG.id);
 
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateOne(
-      {
-        id: TODAY_TAG.id,
-        changes: {
-          taskIds: unique([
-            // only move new ids to the top
-            ...taskIds.filter(
-              (tId) =>
-                !todayTag.taskIds.includes(tId) &&
-                (!parentTaskMap ||
-                  !parentTaskMap[tId] ||
-                  !todayTag.taskIds.includes(parentTaskMap[tId])),
-            ),
-            ...todayTag.taskIds,
-          ]),
-        },
+  // Filter out tasks that are already in today or whose parent is in today
+  const newTasksForToday = taskIds.filter((taskId) => {
+    if (todayTag.taskIds.includes(taskId)) return false;
+    const parentId = parentTaskMap[taskId];
+    return !parentId || !todayTag.taskIds.includes(parentId);
+  });
+
+  return updateTags(state, [
+    {
+      id: TODAY_TAG.id,
+      changes: {
+        taskIds: unique([...newTasksForToday, ...todayTag.taskIds]),
       },
-      state[TAG_FEATURE_NAME],
-    ),
-  };
+    },
+  ]);
 };
 
-const updateTagsWithRemoveTasksFromTodayTag = (
+const handleRemoveTasksFromTodayTag = (
   state: RootState,
   taskIds: string[],
 ): RootState => {
-  const todayTag = state[TAG_FEATURE_NAME].entities[TODAY_TAG.id] as Tag;
+  const todayTag = getTag(state, TODAY_TAG.id);
 
-  return {
-    ...state,
-    [TAG_FEATURE_NAME]: tagAdapter.updateOne(
-      {
-        id: TODAY_TAG.id,
-        changes: {
-          taskIds: todayTag.taskIds.filter((id) => !taskIds.includes(id)),
-        },
+  return updateTags(state, [
+    {
+      id: TODAY_TAG.id,
+      changes: {
+        taskIds: removeTasksFromList(todayTag.taskIds, taskIds),
       },
-      state[TAG_FEATURE_NAME],
-    ),
-  };
+    },
+  ]);
 };
+
+/**
+ * Helper to update project state with adapter
+ */
+const updateProject = (
+  state: RootState,
+  projectId: string,
+  changes: Partial<Project>,
+): RootState => ({
+  ...state,
+  [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
+    { id: projectId, changes },
+    state[PROJECT_FEATURE_NAME],
+  ),
+});
+
+/**
+ * Helper to update tags state with adapter
+ */
+const updateTags = (state: RootState, updates: Update<Tag>[]): RootState => ({
+  ...state,
+  [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
+});
+
+/**
+ * Helper to get tag entity safely
+ */
+const getTag = (state: RootState, tagId: string): Tag =>
+  state[TAG_FEATURE_NAME].entities[tagId] as Tag;
+
+/**
+ * Helper to get project entity safely
+ */
+const getProject = (state: RootState, projectId: string): Project =>
+  state[PROJECT_FEATURE_NAME].entities[projectId] as Project;
+
+/**
+ * Helper to add task to list (top or bottom)
+ */
+const addTaskToList = (
+  taskIds: string[],
+  taskId: string,
+  isAddToBottom: boolean,
+): string[] => (isAddToBottom ? [...taskIds, taskId] : [taskId, ...taskIds]);
+
+/**
+ * Helper to remove tasks from list
+ */
+const removeTasksFromList = (taskIds: string[], toRemove: string[]): string[] =>
+  taskIds.filter((id) => !toRemove.includes(id));
