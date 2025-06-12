@@ -115,14 +115,11 @@ export class PluginManagementComponent implements OnInit {
       // Set plugin as disabled in persistence
       await this._pluginPersistenceService.setPluginEnabled(plugin.manifest.id, false);
 
-      // Update the plugin state immediately
-      plugin.isEnabled = false;
-
-      // Unload the plugin
+      // Unload the plugin (this will unregister hooks and remove from loaded plugins)
       this._pluginService.unloadPlugin(plugin.manifest.id);
 
-      // Update the signal for immediate UI update
-      this.allPlugins.set([...this.allPlugins()]);
+      // Reload plugins to get the updated state from the service
+      await this.loadPlugins();
     } catch (error) {
       console.error('Failed to disable plugin:', error);
     }
