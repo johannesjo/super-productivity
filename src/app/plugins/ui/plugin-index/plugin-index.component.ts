@@ -90,10 +90,15 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       throw new Error('Plugin does not have an index.html file');
     }
 
-    // Create a blob URL for the iframe
-    const blob = new Blob([indexContent], { type: 'text/html' });
-    const blobUrl = URL.createObjectURL(blob);
-    const safeUrl = this._sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
+    // Inject the PluginAPI script directly into the HTML content before the closing </body> tag
+    const pluginApiScript = `<script>${this._getPluginApiScript()}</script>`;
+    const modifiedContent = indexContent.replace('</body>', `${pluginApiScript}</body>`);
+
+    // Instead of using a blob URL, we'll use a data URL which is more compatible
+    // First, we need to ensure the content is properly encoded
+    const base64Content = btoa(unescape(encodeURIComponent(modifiedContent)));
+    const dataUrl = `data:text/html;charset=utf-8;base64,${base64Content}`;
+    const safeUrl = this._sanitizer.bypassSecurityTrustResourceUrl(dataUrl);
 
     this.iframeSrc.set(safeUrl);
     this.isLoading.set(false);
@@ -122,15 +127,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     if (this._messageListener) {
       window.removeEventListener('message', this._messageListener);
     }
-
-    // Clean up blob URL if it exists
-    const currentSrc = this.iframeSrc();
-    if (currentSrc) {
-      const url = (currentSrc as any).changingThisBreaksApplicationSecurity;
-      if (url && url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    }
+    // Data URLs don't need to be revoked like blob URLs
   }
 
   private async _handlePluginApiCall(pluginId: string, message: any): Promise<void> {
@@ -247,17 +244,17 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         window.addEventListener('message', function(event) {
           if (event.data.type === 'PLUGIN_API_RESPONSE') {
             const { callId: responseCallId, result } = event.data;
-            const resolve = pendingCalls.get(responseCallId);
-            if (resolve) {
+            const resolver = pendingCalls.get(responseCallId);
+            if (resolver) {
               pendingCalls.delete(responseCallId);
-              resolve(result);
+              resolver.resolve(result);
             }
           } else if (event.data.type === 'PLUGIN_API_ERROR') {
             const { callId: responseCallId, error } = event.data;
-            const reject = pendingCalls.get(responseCallId);
-            if (reject) {
+            const resolver = pendingCalls.get(responseCallId);
+            if (resolver) {
               pendingCalls.delete(responseCallId);
-              reject(new Error(error));
+              resolver.reject(new Error(error));
             }
           }
         });
@@ -265,8 +262,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         function makeApiCall(method, args) {
           return new Promise((resolve, reject) => {
             const currentCallId = ++callId;
-            pendingCalls.set(currentCallId, resolve);
-            pendingCalls.set(currentCallId + '_reject', reject);
+            pendingCalls.set(currentCallId, { resolve, reject });
 
             window.parent.postMessage({
               type: 'PLUGIN_API_CALL',
