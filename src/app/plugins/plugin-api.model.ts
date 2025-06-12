@@ -63,6 +63,7 @@ export interface PluginManifest {
   manifestVersion: number;
   version: string;
   minSupVersion: string;
+  description?: string;
   hooks: Hooks[];
   permissions: string[];
   iFrame?: boolean;

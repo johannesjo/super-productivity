@@ -4,6 +4,7 @@
   "manifestVersion": 1,
   "version": "1.0.0",
   "minSupVersion": "13.0.0",
+  "description": "A simple example plugin that shows a greeting message when tasks are completed.",
   "hooks": ["taskComplete"],
   "permissions": ["PluginAPI.showSnack"],
   "iFrame": false,
