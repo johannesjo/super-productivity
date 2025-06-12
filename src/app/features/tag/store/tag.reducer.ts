@@ -2,7 +2,6 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
-  moveToArchive_,
   restoreTask,
   scheduleTaskWithTime,
   unScheduleTask,
@@ -465,27 +464,6 @@ export const tagReducer = createReducer<TagState>(
 
   // TASK STUFF
   // ---------
-
-  on(moveToArchive_, (state, { tasks }) => {
-    const taskIdsToMoveToArchive = tasks.flatMap((t) => [
-      t.id,
-      ...t.subTasks.map((st) => st.id),
-    ]);
-    const tagIds = unique([
-      // always cleanup inbox and today tag
-      TODAY_TAG.id,
-      ...tasks.flatMap((t) => [...t.tagIds, ...t.subTasks.flatMap((st) => st.tagIds)]),
-    ]);
-    const updates: Update<Tag>[] = tagIds.map((tId: string) => ({
-      id: tId,
-      changes: {
-        taskIds: (state.entities[tId] as Tag).taskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-      },
-    }));
-    return tagAdapter.updateMany(updates, state);
-  }),
 
   on(restoreTask, (state, { task, subTasks }) => {
     const allTasks = [task, ...subTasks];
