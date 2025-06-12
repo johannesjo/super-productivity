@@ -23,6 +23,7 @@ import { first } from 'rxjs/operators';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
+import { Router } from '@angular/router';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -45,6 +46,7 @@ export class PluginBridgeService {
   private _tagService = inject(TagService);
   private _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _router = inject(Router);
 
   // Track which plugin is currently making calls to prevent cross-plugin access
   private _currentPluginId: string | null = null;
@@ -112,8 +114,18 @@ export class PluginBridgeService {
     }
   }
 
+  /**
+   * Show the plugin's index.html as a view by navigating to the plugin index route
+   */
   showIndexHtmlAsView(): void {
-    // TODO implement via routing
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for showing index HTML view');
+    }
+    console.log('PluginBridge: Navigating to plugin index view', {
+      pluginId: this._currentPluginId,
+    });
+    // Navigate to the plugin index route
+    this._router.navigate(['/plugins', this._currentPluginId, 'index']);
   }
 
   /**

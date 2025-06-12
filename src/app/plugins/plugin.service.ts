@@ -26,6 +26,7 @@ export class PluginService {
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
   private _pluginPaths: Map<string, string> = new Map(); // Store plugin ID -> path mapping
+  private _pluginIndexHtml: Map<string, string> = new Map(); // Store plugin ID -> index.html content
 
   constructor(
     private _http: HttpClient,
@@ -257,6 +258,13 @@ export class PluginService {
     return this._isInitialized;
   }
 
+  /**
+   * Get index.html content for a plugin
+   */
+  getPluginIndexHtml(pluginId: string): string | null {
+    return this._pluginIndexHtml.get(pluginId) || null;
+  }
+
   async dispatchHook(hookName: any, payload?: any): Promise<void> {
     if (!this._isInitialized) {
       console.warn('Plugin system not initialized, skipping hook dispatch');
@@ -344,6 +352,19 @@ export class PluginService {
 
       const pluginCode = new TextDecoder().decode(pluginCodeBytes);
 
+      // Extract index.html if it exists (optional)
+      let indexHtml: string | null = null;
+      if (extractedFiles['index.html']) {
+        const indexHtmlBytes = extractedFiles['index.html'];
+        // Validate index.html size (same as manifest for now)
+        if (indexHtmlBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
+          throw new Error(
+            `Plugin index.html is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(indexHtmlBytes.length / 1024).toFixed(1)} KB.`,
+          );
+        }
+        indexHtml = new TextDecoder().decode(indexHtmlBytes);
+      }
+
       // Validate plugin code
       const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
       if (!codeValidation.isValid) {
@@ -361,7 +382,17 @@ export class PluginService {
       const uploadedPluginPath = `uploaded://${manifest.id}`;
 
       // Always store plugin files in cache for later use (regardless of enabled state)
-      await this._pluginCacheService.storePlugin(manifest.id, manifestText, pluginCode);
+      await this._pluginCacheService.storePlugin(
+        manifest.id,
+        manifestText,
+        pluginCode,
+        indexHtml || undefined,
+      );
+
+      // Store index.html content if it exists
+      if (indexHtml) {
+        this._pluginIndexHtml.set(manifest.id, indexHtml);
+      }
 
       // If plugin is disabled, create a placeholder instance without loading code
       if (!isPluginEnabled) {
@@ -484,6 +515,11 @@ export class PluginService {
 
       const manifest: PluginManifest = JSON.parse(cachedPlugin.manifest);
       const pluginCode: string = cachedPlugin.code;
+
+      // Store index.html content if it exists in cache
+      if (cachedPlugin.indexHtml) {
+        this._pluginIndexHtml.set(manifest.id, cachedPlugin.indexHtml);
+      }
 
       // Validate manifest
       const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
