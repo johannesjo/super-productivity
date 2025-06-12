@@ -1,22 +1,7 @@
 import { ActionReducer, Action, MetaReducer } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { RootState } from '../root-state';
-import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  deleteTasks,
-  moveToArchive_,
-  restoreTask,
-  scheduleTaskWithTime,
-  unScheduleTask,
-  updateTaskTags,
-} from '../../features/tasks/store/task.actions';
-import { deleteProject } from '../../features/project/store/project.actions';
-import {
-  planTasksForToday,
-  removeTasksFromTodayTag,
-} from '../../features/tag/store/tag.actions';
+import { TaskSharedActions } from './task-shared.actions';
 import {
   PROJECT_FEATURE_NAME,
   projectAdapter,
@@ -61,58 +46,68 @@ export const taskSharedMetaReducer: MetaReducer = (
     // Type guard to ensure we have a RootState-like object
     const rootState = state as RootState;
     const actionHandlers: Record<string, (state: RootState) => RootState> = {
-      [addTask.type]: () => {
+      [TaskSharedActions.addTask.type]: () => {
         const { task, isAddToBottom, isAddToBacklog } = action as ReturnType<
-          typeof addTask
+          typeof TaskSharedActions.addTask
         >;
         return handleAddTask(rootState, task, isAddToBottom, isAddToBacklog);
       },
-      [convertToMainTask.type]: () => {
+      [TaskSharedActions.convertToMainTask.type]: () => {
         const { task, parentTagIds, isPlanForToday } = action as ReturnType<
-          typeof convertToMainTask
+          typeof TaskSharedActions.convertToMainTask
         >;
         return handleConvertToMainTask(rootState, task, parentTagIds, isPlanForToday);
       },
-      [deleteTask.type]: () => {
-        const { task } = action as ReturnType<typeof deleteTask>;
+      [TaskSharedActions.deleteTask.type]: () => {
+        const { task } = action as ReturnType<typeof TaskSharedActions.deleteTask>;
         return handleDeleteTask(rootState, task);
       },
-      [deleteTasks.type]: () => {
-        const { taskIds } = action as ReturnType<typeof deleteTasks>;
+      [TaskSharedActions.deleteTasks.type]: () => {
+        const { taskIds } = action as ReturnType<typeof TaskSharedActions.deleteTasks>;
         return handleDeleteTasks(rootState, taskIds);
       },
-      [moveToArchive_.type]: () => {
-        const { tasks } = action as ReturnType<typeof moveToArchive_>;
+      [TaskSharedActions.moveToArchive.type]: () => {
+        const { tasks } = action as ReturnType<typeof TaskSharedActions.moveToArchive>;
         return handleMoveToArchive(rootState, tasks);
       },
-      [restoreTask.type]: () => {
-        const { task, subTasks } = action as ReturnType<typeof restoreTask>;
+      [TaskSharedActions.restoreTask.type]: () => {
+        const { task, subTasks } = action as ReturnType<
+          typeof TaskSharedActions.restoreTask
+        >;
         return handleRestoreTask(rootState, task, subTasks);
       },
-      [scheduleTaskWithTime.type]: () => {
-        const { task, dueWithTime } = action as ReturnType<typeof scheduleTaskWithTime>;
+      [TaskSharedActions.scheduleTaskWithTime.type]: () => {
+        const { task, dueWithTime } = action as ReturnType<
+          typeof TaskSharedActions.scheduleTaskWithTime
+        >;
         return handleScheduleTaskWithTime(rootState, task, dueWithTime);
       },
-      [unScheduleTask.type]: () => {
-        const { id } = action as ReturnType<typeof unScheduleTask>;
+      [TaskSharedActions.unscheduleTask.type]: () => {
+        const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
         return handleUnScheduleTask(rootState, id);
       },
-      [updateTaskTags.type]: () => {
-        const { task, newTagIds = [] } = action as ReturnType<typeof updateTaskTags>;
+      [TaskSharedActions.updateTaskTags.type]: () => {
+        const { task, newTagIds = [] } = action as ReturnType<
+          typeof TaskSharedActions.updateTaskTags
+        >;
         return handleUpdateTaskTags(rootState, task, newTagIds);
       },
-      [deleteProject.type]: () => {
-        const { allTaskIds } = action as ReturnType<typeof deleteProject>;
+      [TaskSharedActions.deleteProject.type]: () => {
+        const { allTaskIds } = action as ReturnType<
+          typeof TaskSharedActions.deleteProject
+        >;
         return handleDeleteProject(rootState, allTaskIds);
       },
-      [planTasksForToday.type]: () => {
+      [TaskSharedActions.planTasksForToday.type]: () => {
         const { taskIds, parentTaskMap = {} } = action as ReturnType<
-          typeof planTasksForToday
+          typeof TaskSharedActions.planTasksForToday
         >;
         return handlePlanTasksForToday(rootState, taskIds, parentTaskMap);
       },
-      [removeTasksFromTodayTag.type]: () => {
-        const { taskIds } = action as ReturnType<typeof removeTasksFromTodayTag>;
+      [TaskSharedActions.removeTasksFromTodayTag.type]: () => {
+        const { taskIds } = action as ReturnType<
+          typeof TaskSharedActions.removeTasksFromTodayTag
+        >;
         return handleRemoveTasksFromTodayTag(rootState, taskIds);
       },
     };
