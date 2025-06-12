@@ -9,6 +9,7 @@ import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.mode
 import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { IS_ELECTRON } from '../app.constants';
+import { PluginPersistenceService } from './plugin-persistence.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,7 @@ export class PluginService {
     private _pluginHooks: PluginHooksService,
     private _pluginSecurity: PluginSecurityService,
     private _globalThemeService: GlobalThemeService,
+    private _pluginPersistenceService: PluginPersistenceService,
   ) {}
 
   async initializePlugins(): Promise<void> {
@@ -110,6 +112,14 @@ export class PluginService {
       if (pluginInstance.loaded) {
         this._loadedPlugins.push(pluginInstance);
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path
+
+        // Mark plugin as enabled in persistence (with some data)
+        await this._pluginPersistenceService.persistPluginData(
+          manifest.id,
+          JSON.stringify({ loadTime: Date.now() }),
+          true,
+        );
+
         console.log(`Plugin ${manifest.id} loaded successfully`);
       } else {
         console.error(`Plugin ${manifest.id} failed to load:`, pluginInstance.error);
