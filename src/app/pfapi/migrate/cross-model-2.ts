@@ -132,21 +132,19 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
     tagTimeTracking,
   });
 
+  // TODO check if there is a better way to avoid problems with returning only the old model
+  // @ts-ignore
   return {
     ...copy,
-    // TODO remove
-    // taskArchive,
     timeTracking: {
       project: projectTimeTracking,
       tag: tagTimeTracking,
-      // lastFlush: 0,
     },
     archiveYoung: {
       task: migrateTaskArchive(taskArchive),
       timeTracking: {
         project: {},
         tag: {},
-        // lastFlush: 0,
       },
       lastTimeTrackingFlush: 0,
     },
@@ -155,7 +153,6 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       timeTracking: {
         project: {},
         tag: {},
-        // lastFlush: 0,
       },
       lastTimeTrackingFlush: 0,
     },
