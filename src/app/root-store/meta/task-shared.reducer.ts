@@ -4,6 +4,7 @@ import {
   addTask,
   convertToMainTask,
   deleteTask,
+  deleteTasks,
 } from '../../features/tasks/store/task.actions';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../features/tag/store/tag.reducer';
@@ -124,6 +125,14 @@ export const taskSharedMetaReducer = (
         return reducer(updatedState, action);
       }
 
+      case deleteTasks.type: {
+        const { taskIds } = action as ReturnType<typeof deleteTasks>;
+
+        const updatedState = updateTagsWithDeleteTasks(state, taskIds);
+
+        return reducer(updatedState, action);
+      }
+
       default:
         return reducer(state, action);
     }
@@ -221,6 +230,23 @@ const updateTagsWithDeleteTask = (
       },
     };
   });
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
+  };
+};
+
+const updateTagsWithDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
+  const tagUpdates: Update<Tag>[] = (state[TAG_FEATURE_NAME].ids as string[]).map(
+    (tagId) => ({
+      id: tagId,
+      changes: {
+        taskIds: (state[TAG_FEATURE_NAME].entities[tagId] as Tag).taskIds.filter(
+          (taskId) => !taskIds.includes(taskId),
+        ),
+      },
+    }),
+  );
   return {
     ...state,
     [TAG_FEATURE_NAME]: tagAdapter.updateMany(tagUpdates, state[TAG_FEATURE_NAME]),
