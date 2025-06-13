@@ -1,15 +1,19 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 
-import { selectTaskById } from '../features/tasks/store/task.selectors';
+import {
+  selectTaskById,
+  selectTaskFeatureState,
+} from '../features/tasks/store/task.selectors';
 import { Task } from '../features/tasks/task.model';
 import { PluginService } from './plugin.service';
 import { PluginHooks } from './plugin-api.model';
 import { setActiveWorkContext } from '../features/work-context/store/work-context.actions';
 import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
+import { setCurrentTask, unsetCurrentTask } from '../features/tasks/store/task.actions';
 
 @Injectable()
 export class PluginHooksEffects {
@@ -34,6 +38,21 @@ export class PluginHooksEffects {
             map(() => EMPTY),
           ),
         ),
+      ),
+    { dispatch: false },
+  );
+
+  onCurrentTaskChange$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(setCurrentTask, unsetCurrentTask),
+        withLatestFrom(this.store.pipe(select(selectTaskFeatureState))),
+        map(([action, taskState]) => {
+          this.pluginService.dispatchHook(
+            PluginHooks.CURRENT_TASK_CHANGE,
+            taskState.currentTaskId,
+          );
+        }),
       ),
     { dispatch: false },
   );
