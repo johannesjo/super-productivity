@@ -10,6 +10,7 @@ import { TAG_FEATURE_NAME, tagAdapter } from '../../features/tag/store/tag.reduc
 import { TASK_FEATURE_NAME, taskAdapter } from '../../features/tasks/store/task.reducer';
 import {
   deleteTaskHelper,
+  removeTaskFromParentSideEffects,
   updateDoneOnForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask,
@@ -197,11 +198,38 @@ const handleAddTask = (
 
 const handleConvertToMainTask = (
   state: RootState,
-  task: TaskEntity,
+  task: Task,
   parentTagIds: string[],
   isPlanForToday?: boolean,
 ): RootState => {
-  let updatedState = state;
+  // First, get the parent task to copy its properties
+  const parentTask = state[TASK_FEATURE_NAME].entities[task.parentId as string] as Task;
+  if (!parentTask) {
+    throw new Error('No parent for sub task');
+  }
+
+  // Handle parent-child relationship cleanup and task entity updates
+  const taskStateAfterParentCleanup = removeTaskFromParentSideEffects(
+    state[TASK_FEATURE_NAME],
+    task as Task,
+  );
+
+  const updatedTaskState = taskAdapter.updateOne(
+    {
+      id: task.id,
+      changes: {
+        parentId: undefined,
+        tagIds: [...parentTask.tagIds],
+        ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
+      },
+    },
+    taskStateAfterParentCleanup,
+  );
+
+  let updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: updatedTaskState,
+  };
 
   // Update project if task has projectId
   if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
@@ -220,7 +248,7 @@ const handleConvertToMainTask = (
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: [task.id, ...getTag(state, tagId).taskIds],
+        taskIds: [task.id, ...getTag(updatedState, tagId).taskIds],
       },
     }),
   );
@@ -379,7 +407,22 @@ const handleRestoreTask = (
   task: TaskEntity,
   subTasks: Task[],
 ): RootState => {
-  let updatedState = state;
+  // First, restore the task entities with proper state
+  const restoredTask = {
+    ...task,
+    isDone: false,
+    doneOn: undefined,
+  };
+
+  const updatedTaskState = taskAdapter.addMany(
+    [restoredTask as Task, ...subTasks],
+    state[TASK_FEATURE_NAME],
+  );
+
+  let updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: updatedTaskState,
+  };
 
   // Update project if task has projectId
   if (task.projectId) {
@@ -408,7 +451,7 @@ const handleRestoreTask = (
       ([tagId, taskIds]): Update<Tag> => ({
         id: tagId,
         changes: {
-          taskIds: unique([...getTag(state, tagId).taskIds, ...taskIds]),
+          taskIds: unique([...getTag(updatedState, tagId).taskIds, ...taskIds]),
         },
       }),
     );
@@ -631,6 +674,7 @@ const handlePlanTasksForToday = (
   parentTaskMap: Record<string, string | undefined>,
 ): RootState => {
   const todayTag = getTag(state, TODAY_TAG.id);
+  const today = getWorklogStr();
 
   // Filter out tasks that are already in today or whose parent is in today
   const newTasksForToday = taskIds.filter((taskId) => {
@@ -639,7 +683,21 @@ const handlePlanTasksForToday = (
     return !parentId || !todayTag.taskIds.includes(parentId);
   });
 
-  return updateTags(state, [
+  // First, update the task entities with dueDay
+  const taskUpdates: Update<Task>[] = taskIds.map((taskId) => ({
+    id: taskId,
+    changes: {
+      dueDay: today,
+    },
+  }));
+
+  const updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, state[TASK_FEATURE_NAME]),
+  };
+
+  // Then, update the today tag
+  return updateTags(updatedState, [
     {
       id: TODAY_TAG.id,
       changes: {
