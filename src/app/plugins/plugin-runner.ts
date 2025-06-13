@@ -102,8 +102,6 @@ export class PluginRunner {
         global: undefined,
         process: undefined,
         require: undefined,
-        eval: undefined,
-        Function: undefined,
         __dirname: undefined,
         __filename: undefined,
       };
@@ -112,25 +110,29 @@ export class PluginRunner {
       const sandboxKeys = Object.keys(sandboxGlobals);
       const sandboxValues = Object.values(sandboxGlobals);
 
-      // Additional security: wrap in try-catch and use strict mode
+      // Additional security: wrap in an IIFE to isolate scope
       const wrappedCode = `
-        "use strict";
-        try {
-          // Prevent access to global scope
-          const window = undefined;
-          const document = undefined;
-          const global = undefined;
-          const process = undefined;
-          const eval = undefined;
-          const Function = undefined;
-          const WebSocket = undefined;
-          const Worker = undefined;
-
-          ${pluginCode}
-        } catch (e) {
-          console.error('Plugin runtime error:', e);
-          throw e;
-        }
+        (function() {
+          "use strict";
+          try {
+            // Shadow dangerous globals with undefined values
+            var window = undefined;
+            var document = undefined;
+            var global = undefined;
+            var process = undefined;
+            var require = undefined;
+            var XMLHttpRequest = undefined;
+            var fetch = undefined;
+            var WebSocket = undefined;
+            var Worker = undefined;
+            var importScripts = undefined;
+            
+            ${pluginCode}
+          } catch (e) {
+            console.error('Plugin runtime error:', e);
+            throw e;
+          }
+        }).call(this);
       `;
 
       const sandboxedFunction = new Function(...sandboxKeys, wrappedCode);
