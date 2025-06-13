@@ -7,7 +7,6 @@ import {
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
-import { devError } from '../../../util/dev-error';
 
 // TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
@@ -74,9 +73,6 @@ export const getSyncStatusFromMetaFiles = (
           // NOTE this is so unlikely that we can safely resume, that data is in sync even though
           // lastSync was not properly saved
           if (local.lastUpdate === remote.lastUpdate) {
-            devError(
-              'LastSyncedUpdate is not up to date but timestamps match - treating as InSync',
-            );
             pfLog(
               1,
               'WARN: lastSyncedUpdate is not up to date but timestamps match - treating as InSync',
