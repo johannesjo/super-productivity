@@ -1,0 +1,67 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  computed,
+} from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { PluginService } from '../../plugin.service';
+import { MatIcon } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'plugin-icon',
+  template: `
+    @if (sanitizedSvg(); as svg) {
+      <div
+        class="plugin-svg-icon"
+        [innerHTML]="svg"
+        [style.width]="size() + 'px'"
+        [style.height]="size() + 'px'"
+      ></div>
+    } @else {
+      <mat-icon [style.font-size]="size() + 'px'">{{ fallbackIcon() }}</mat-icon>
+    }
+  `,
+  styles: [
+    `
+      :host {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .plugin-svg-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .plugin-svg-icon ::ng-deep svg {
+        width: 100%;
+        height: 100%;
+        fill: currentColor;
+      }
+    `,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, MatIcon],
+})
+export class PluginIconComponent {
+  private readonly _sanitizer = inject(DomSanitizer);
+  private readonly _pluginService = inject(PluginService);
+
+  readonly pluginId = input.required<string>();
+  readonly size = input<number>(24);
+  readonly fallbackIcon = input<string>('extension');
+
+  readonly sanitizedSvg = computed(() => {
+    const iconContent = this._pluginService.getPluginIcon(this.pluginId());
+    if (!iconContent) {
+      return null;
+    }
+
+    return this._sanitizer.bypassSecurityTrustHtml(iconContent);
+  });
+}
