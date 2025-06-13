@@ -6,14 +6,13 @@ import { TaskRepeatCfgService } from './task-repeat-cfg.service';
 import { TaskService } from '../tasks/task.service';
 import { TaskRepeatCfg } from './task-repeat-cfg.model';
 import { WorkContextService } from '../work-context/work-context.service';
-import { TaskCopy, TaskReminderOptionId } from '../tasks/task.model';
+import { TaskCopy } from '../tasks/task.model';
 import { WorkContextType } from '../work-context/work-context.model';
 import { addTask, addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { SubTaskRepeatTemplate } from './task-repeat-cfg.model';
 import { DEFAULT_TASK_REPEAT_CFG } from './task-repeat-cfg.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import 'jasmine';
-
 
 describe('Task Repeat Config Tests', () => {
   let service: TaskRepeatCfgService;
@@ -161,8 +160,8 @@ describe('Task Repeat Config Tests', () => {
             id: 'existingTaskId',
             created: Date.now(),
             repeatCfgId: mockTaskRepeatCfg.id,
-          } as Partial<TaskCopy> as TaskCopy],
-        ),
+          } as Partial<TaskCopy> as TaskCopy,
+        ]),
       );
 
       const result = await service.getActionsForTaskRepeatCfg(mockTaskRepeatCfg);
