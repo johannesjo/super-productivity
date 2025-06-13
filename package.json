@@ -238,6 +238,9 @@
     "@rollup/rollup-linux-x64-gnu": "4.27.4",
     "@rollup/rollup-win32-x64-msvc": "4.28.0"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "publish": [
     {
       "provider": "github",
