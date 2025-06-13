@@ -93,12 +93,6 @@ export const removeTimeSpent = createAction(
   props<{ id: string; date: string; duration: number }>(),
 );
 
-export const unScheduleTask = createAction(
-  '[Task] UnSchedule',
-
-  props<{ id: string; reminderId?: string; isSkipToast?: boolean }>(),
-);
-
 export const removeReminderFromTask = createAction(
   '[Task] Remove Reminder',
 
@@ -126,12 +120,6 @@ export const convertToMainTask = createAction(
   '[Task] Convert SubTask to main task',
 
   props<{ task: Task; parentTagIds: string[]; isPlanForToday?: boolean }>(),
-);
-
-export const moveToOtherProject = createAction(
-  '[Task] Move tasks to other project',
-
-  props<{ task: TaskWithSubTasks; targetProjectId: string }>(),
 );
 
 export const toggleStart = createAction('[Task] Toggle start');
