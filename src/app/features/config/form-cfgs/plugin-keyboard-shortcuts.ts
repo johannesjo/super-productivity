@@ -24,7 +24,7 @@ export const createPluginShortcutFormItems = (
 
   for (const shortcut of shortcuts) {
     items.push({
-      key: `plugin_${shortcut.pluginId}:${shortcut.label}`,
+      key: `plugin_${shortcut.pluginId}:${shortcut.id}`,
       type: 'keyboard',
       templateOptions: {
         label: `${shortcut.label} (${shortcut.pluginId})`,
