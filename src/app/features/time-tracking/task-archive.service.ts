@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { removeTagsForAllTasks, roundTimeSpentForDay } from '../tasks/store/task.actions';
+import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { taskReducer } from '../tasks/store/task.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
@@ -13,7 +13,7 @@ import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
 type TaskArchiveAction =
   | ReturnType<typeof TaskSharedActions.updateTask>
   | ReturnType<typeof TaskSharedActions.deleteTasks>
-  | ReturnType<typeof removeTagsForAllTasks>
+  | ReturnType<typeof TaskSharedActions.removeTagsForAllTasks>
   | ReturnType<typeof roundTimeSpentForDay>;
 
 @Injectable({
@@ -175,7 +175,9 @@ export class TaskArchiveService {
 
   async removeTagsFromAllTasks(tagIdsToRemove: string[]): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
-    await this._execActionBoth(removeTagsForAllTasks({ tagIdsToRemove }));
+    await this._execActionBoth(
+      TaskSharedActions.removeTagsForAllTasks({ tagIdsToRemove }),
+    );
 
     const isOrphanedParentTask = (t: Task): boolean =>
       !t.projectId && !t.tagIds.length && !t.parentId;

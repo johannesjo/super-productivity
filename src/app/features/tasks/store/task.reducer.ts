@@ -9,7 +9,6 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
   removeReminderFromTask,
-  removeTagsForAllTasks,
   removeTimeSpent,
   reScheduleTaskWithTime,
   restoreTask,
@@ -203,18 +202,6 @@ export const taskReducer = createReducer<TaskState>(
       // we do this to maintain the order of tasks when they are moved to overdue
       ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
     };
-  }),
-
-  on(removeTagsForAllTasks, (state, { tagIdsToRemove }) => {
-    const updates: Update<Task>[] = state.ids.map((taskId) => ({
-      id: taskId,
-      changes: {
-        tagIds: getTaskById(taskId, state).tagIds.filter(
-          (tagId) => !tagIdsToRemove.includes(tagId),
-        ),
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
   }),
 
   // TODO simplify

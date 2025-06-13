@@ -121,6 +121,12 @@ export const taskSharedMetaReducer: MetaReducer = (
         >;
         return handleRemoveTasksFromTodayTag(rootState, taskIds);
       },
+      [TaskSharedActions.removeTagsForAllTasks.type]: () => {
+        const { tagIdsToRemove } = action as ReturnType<
+          typeof TaskSharedActions.removeTagsForAllTasks
+        >;
+        return handleRemoveTagsForAllTasks(rootState, tagIdsToRemove);
+      },
     };
 
     const handler = actionHandlers[action.type];
@@ -619,6 +625,31 @@ const handleRemoveTasksFromTodayTag = (
       },
     },
   ]);
+};
+
+const handleRemoveTagsForAllTasks = (
+  state: RootState,
+  tagIdsToRemove: string[],
+): RootState => {
+  const taskState = state[TASK_FEATURE_NAME];
+
+  // Update all tasks to remove the specified tags
+  const taskUpdates: Update<Task>[] = [];
+  Object.values(taskState.entities).forEach((task) => {
+    if (task && task.tagIds && task.tagIds.some((id) => tagIdsToRemove.includes(id))) {
+      taskUpdates.push({
+        id: task.id,
+        changes: {
+          tagIds: task.tagIds.filter((id) => !tagIdsToRemove.includes(id)),
+        },
+      });
+    }
+  });
+
+  return {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, taskState),
+  };
 };
 
 /**
