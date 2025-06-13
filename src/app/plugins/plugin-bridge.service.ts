@@ -4,10 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
-  PluginCreateTaskData,
   DialogCfg,
   Hooks,
   NotifyCfg,
+  PluginCreateTaskData,
   PluginHookHandler,
   PluginMenuEntryCfg,
   PluginShortcutCfg,
@@ -65,8 +65,7 @@ export class PluginBridgeService {
   public readonly menuEntries$ = this._menuEntries$.asObservable();
 
   // Track shortcuts registered by plugins
-  private _shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
-  public readonly shortcuts$ = this._shortcuts$.asObservable();
+  shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
 
   /**
    * Set the current plugin context for secure operations
@@ -367,7 +366,9 @@ export class PluginBridgeService {
     this._pluginHooksService.unregisterPluginHooks(pluginId);
     this._removePluginHeaderButtons(pluginId);
     this._removePluginMenuEntries(pluginId);
-    // TODO remove shortcut
+    this.unregisterPluginShortcuts(pluginId);
+
+    console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
   }
 
   /**
@@ -448,12 +449,59 @@ export class PluginBridgeService {
     if (!this._currentPluginId) {
       throw new Error('No plugin context set for shortcut registration');
     }
-    const currentShortcuts = this._shortcuts$.value;
-    this._shortcuts$.next([...currentShortcuts, shortcutCfg]);
+
+    const shortcutWithPluginId: PluginShortcutCfg = {
+      ...shortcutCfg,
+      pluginId: this._currentPluginId,
+    };
+
+    const currentShortcuts = this.shortcuts$.value;
+    this.shortcuts$.next([...currentShortcuts, shortcutWithPluginId]);
+
     console.log('PluginBridge: Shortcut registered', {
       pluginId: this._currentPluginId,
-      shortcut: shortcutCfg,
+      shortcut: shortcutWithPluginId,
     });
+  }
+
+  /**
+   * Execute a shortcut by its ID (pluginId:label)
+   */
+  async executeShortcut(shortcutId: string): Promise<boolean> {
+    const shortcuts = this.shortcuts$.value;
+    const shortcut = shortcuts.find((s) => `${s.pluginId}:${s.label}` === shortcutId);
+
+    if (shortcut) {
+      try {
+        await Promise.resolve(shortcut.onExec());
+        console.log(
+          `Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`,
+        );
+        return true;
+      } catch (error) {
+        console.error(`Failed to execute shortcut "${shortcut.label}":`, error);
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Unregister all shortcuts for a specific plugin
+   */
+  unregisterPluginShortcuts(pluginId: string): void {
+    const currentShortcuts = this.shortcuts$.value;
+    const filteredShortcuts = currentShortcuts.filter(
+      (shortcut) => shortcut.pluginId !== pluginId,
+    );
+
+    if (filteredShortcuts.length !== currentShortcuts.length) {
+      this.shortcuts$.next(filteredShortcuts);
+      console.log(
+        `Unregistered ${currentShortcuts.length - filteredShortcuts.length} shortcuts for plugin ${pluginId}`,
+      );
+    }
   }
 
   /**

@@ -3,6 +3,7 @@ import {
   Hooks,
   PluginHookHandler,
   PluginHookHandlerRegistration,
+  PluginShortcutCfg,
 } from './plugin-api.model';
 
 @Injectable({
@@ -10,6 +11,7 @@ import {
 })
 export class PluginHooksService {
   private _hookHandlers: PluginHookHandlerRegistration[] = [];
+  private _shortcutHandlers: Map<string, PluginShortcutCfg[]> = new Map();
 
   constructor() {}
 
