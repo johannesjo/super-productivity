@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
@@ -7,7 +8,9 @@ import {
   DialogCfg,
   Hooks,
   NotifyCfg,
+  PluginHookHandler,
   PluginMenuEntryCfg,
+  PluginShortcutCfg,
   SnackCfgLimited,
 } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
@@ -24,6 +27,7 @@ import { PluginUserPersistenceService } from './plugin-user-persistence.service'
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
+import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -39,6 +43,7 @@ import { Router } from '@angular/router';
 export class PluginBridgeService {
   private _snackService = inject(SnackService);
   private _notifyService = inject(NotifyService);
+  private _dialog = inject(MatDialog);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
@@ -58,6 +63,10 @@ export class PluginBridgeService {
   // Track menu entries registered by plugins
   private _menuEntries$ = new BehaviorSubject<PluginMenuEntryCfg[]>([]);
   public readonly menuEntries$ = this._menuEntries$.asObservable();
+
+  // Track shortcuts registered by plugins
+  private _shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
+  public readonly shortcuts$ = this._shortcuts$.asObservable();
 
   /**
    * Set the current plugin context for secure operations
@@ -92,26 +101,33 @@ export class PluginBridgeService {
   }
 
   /**
-   * Open a dialog
+   * Open a dialog using Angular Material
    */
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
     typia.assert<DialogCfg>(dialogCfg);
 
-    // For now, use a simple browser dialog
-    // TODO: Integrate with Angular Material Dialog or custom dialog service
-    if (dialogCfg.htmlContent) {
-      // Strip HTML for simple text display
-      const textContent = dialogCfg.htmlContent.replace(/<[^>]*>/g, '');
-      alert(textContent);
-    }
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const dialogRef = this._dialog.open(PluginDialogComponent, {
+          data: dialogCfg,
+          // TODO make configurable
+          // width: '500px',
+          // maxWidth: '90vw',
+          // maxHeight: '80vh',
+          autoFocus: true,
+          restoreFocus: true,
+          disableClose: false,
+        });
 
-    // Execute button actions if provided
-    if (dialogCfg.buttons && dialogCfg.buttons.length > 0) {
-      const firstButton = dialogCfg.buttons[0];
-      if (firstButton.onClick) {
-        await firstButton.onClick();
+        dialogRef.afterClosed().subscribe((result) => {
+          console.log('PluginBridge: Dialog closed with result:', result);
+          resolve();
+        });
+      } catch (error) {
+        console.error('PluginBridge: Failed to open dialog:', error);
+        reject(error);
       }
-    }
+    });
   }
 
   /**
@@ -334,14 +350,10 @@ export class PluginBridgeService {
   /**
    * Register a hook handler for a plugin
    */
-  registerHook(
-    pluginId: string,
-    hook: Hooks,
-    handler: (...args: any[]) => void | Promise<void>,
-  ): void {
+  registerHook(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
     typia.assert<string>(pluginId);
     typia.assert<Hooks>(hook);
-    typia.assert<(...args: any[]) => void | Promise<void>>(handler);
+    typia.assert<PluginHookHandler>(handler);
 
     this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
   }
@@ -355,6 +367,7 @@ export class PluginBridgeService {
     this._pluginHooksService.unregisterPluginHooks(pluginId);
     this._removePluginHeaderButtons(pluginId);
     this._removePluginMenuEntries(pluginId);
+    // TODO remove shortcut
   }
 
   /**
@@ -429,6 +442,21 @@ export class PluginBridgeService {
   }
 
   /**
+   * Register a keyboard shortcut for a plugin
+   */
+  registerShortcut(shortcutCfg: PluginShortcutCfg): void {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for shortcut registration');
+    }
+    const currentShortcuts = this._shortcuts$.value;
+    this._shortcuts$.next([...currentShortcuts, shortcutCfg]);
+    console.log('PluginBridge: Shortcut registered', {
+      pluginId: this._currentPluginId,
+      shortcut: shortcutCfg,
+    });
+  }
+
+  /**
    * Validate that referenced project, tags, and parent task exist
    */
   private async _validateTaskReferences(
@@ -442,7 +470,7 @@ export class PluginBridgeService {
     if (projectId) {
       const projects = await this._projectService.list$.pipe(first()).toPromise();
 
-      const projectExists = projects?.some((project: any) => project.id === projectId);
+      const projectExists = projects?.some((project) => project.id === projectId);
       if (!projectExists) {
         errors.push(`Project with ID '${projectId}' does not exist`);
       }
@@ -452,7 +480,7 @@ export class PluginBridgeService {
     if (tagIds && tagIds.length > 0) {
       const tags = await this._tagService.tags$.pipe(first()).toPromise();
 
-      const existingTagIds = tags?.map((tag: any) => tag.id) || [];
+      const existingTagIds = tags?.map((tag) => tag.id) || [];
       const nonExistentTags = tagIds.filter((tagId) => !existingTagIds.includes(tagId));
 
       if (nonExistentTags.length > 0) {
@@ -464,7 +492,7 @@ export class PluginBridgeService {
     if (parentId) {
       const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
 
-      const parentExists = tasks?.some((task: any) => task.id === parentId);
+      const parentExists = tasks?.some((task) => task.id === parentId);
       if (!parentExists) {
         errors.push(`Parent task with ID '${parentId}' does not exist`);
       }

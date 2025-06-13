@@ -79,14 +79,69 @@ export class PluginRunner {
     manifest: PluginManifest,
   ): Promise<void> {
     try {
-      // Create a sandboxed function execution environment
-      // This is a basic implementation - in production, we'd want more security
-      const sandboxedFunction = new Function('PluginAPI', 'manifest', pluginCode);
+      // Create a sandboxed execution environment with restricted globals
+      const sandboxGlobals = {
+        PluginAPI: pluginAPI,
+        manifest: manifest,
+        console: {
+          log: console.log.bind(console),
+          warn: console.warn.bind(console),
+          error: console.error.bind(console),
+        },
+        setTimeout: (fn: () => void, delay: number) =>
+          setTimeout(fn, Math.min(delay, 5000)), // Max 5 second delay
+        setInterval: undefined, // Disable setInterval for security
+        clearTimeout: (id: number) => clearTimeout(id),
+        Promise: Promise,
+        JSON: JSON,
+        Math: Math,
+        Date: Date,
+        // Explicitly exclude dangerous globals
+        window: undefined,
+        document: undefined,
+        global: undefined,
+        process: undefined,
+        require: undefined,
+        eval: undefined,
+        Function: undefined,
+        __dirname: undefined,
+        __filename: undefined,
+      };
 
-      // Execute the plugin code with the provided API
-      await sandboxedFunction(pluginAPI, manifest);
+      // Create a sandboxed function with restricted scope
+      const sandboxKeys = Object.keys(sandboxGlobals);
+      const sandboxValues = Object.values(sandboxGlobals);
+
+      // Additional security: wrap in try-catch and use strict mode
+      const wrappedCode = `
+        "use strict";
+        try {
+          // Prevent access to global scope
+          const window = undefined;
+          const document = undefined;
+          const global = undefined;
+          const process = undefined;
+          const eval = undefined;
+          const Function = undefined;
+          const WebSocket = undefined;
+          const Worker = undefined;
+
+          ${pluginCode}
+        } catch (e) {
+          console.error('Plugin runtime error:', e);
+          throw e;
+        }
+      `;
+
+      const sandboxedFunction = new Function(...sandboxKeys, wrappedCode);
+
+      // Execute the plugin code with sandboxed globals
+      await sandboxedFunction(...sandboxValues);
     } catch (error) {
-      throw new Error(`Plugin execution failed: ${error}`);
+      // Clean up error message to avoid exposing internal details
+      const safeError =
+        error instanceof Error ? error.message : 'Plugin execution failed';
+      throw new Error(`Plugin execution failed: ${safeError}`);
     }
   }
 
@@ -116,6 +171,11 @@ export class PluginRunner {
 
   async validateManifest(manifest: any): Promise<boolean> {
     try {
+      // Type guard
+      if (typeof manifest !== 'object' || manifest === null) {
+        throw new Error('Manifest must be an object');
+      }
+
       // Basic validation of required fields
       const required = [
         'name',
@@ -125,11 +185,14 @@ export class PluginRunner {
         'minSupVersion',
         'hooks',
         'permissions',
-        'type',
       ];
 
       for (const field of required) {
-        if (!(field in manifest)) {
+        if (
+          !(field in manifest) ||
+          manifest[field] === undefined ||
+          manifest[field] === null
+        ) {
           throw new Error(`Missing required field: ${field}`);
         }
       }
@@ -143,6 +206,13 @@ export class PluginRunner {
         throw new Error('Invalid id field');
       }
 
+      // Validate id format (alphanumeric with dashes/underscores)
+      if (!/^[a-zA-Z0-9_-]+$/.test(manifest.id)) {
+        throw new Error(
+          'Plugin id must contain only alphanumeric characters, dashes, and underscores',
+        );
+      }
+
       if (!Array.isArray(manifest.hooks)) {
         throw new Error('hooks must be an array');
       }
@@ -151,7 +221,7 @@ export class PluginRunner {
         throw new Error('permissions must be an array');
       }
 
-      if (!['issueProvider', 'standard'].includes(manifest.type)) {
+      if (manifest.type && !['issueProvider', 'standard'].includes(manifest.type)) {
         throw new Error('type must be either "issueProvider" or "standard"');
       }
 

@@ -5,7 +5,10 @@ import {
   NotifyCfg,
   PluginAPI as IPluginAPI,
   PluginBaseCfg,
+  PluginHookHandler,
   PluginHooks,
+  PluginMenuEntryCfg,
+  PluginShortcutCfg,
   ProjectCopy,
   SnackCfgLimited,
   TagCopy,
@@ -13,7 +16,6 @@ import {
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
-import { PluginMenuEntryCfg } from './plugin-api.model';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
@@ -21,13 +23,10 @@ import { PluginMenuEntryCfg } from './plugin-api.model';
  */
 export class PluginAPI implements IPluginAPI {
   readonly Hooks = PluginHooks;
-  private _hookHandlers = new Map<
-    string,
-    Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
-  >();
+  private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler>>>();
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
-  private _shortcuts: Array<{ label: string; onExec: () => void }> = [];
+  private _shortcuts: Array<PluginShortcutCfg> = [];
 
   constructor(
     public cfg: PluginBaseCfg,
@@ -38,7 +37,7 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge._setCurrentPlugin(this._pluginId);
   }
 
-  registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void {
+  registerHook(hook: Hooks, fn: PluginHookHandler): void {
     if (!this._hookHandlers.has(this._pluginId)) {
       this._hookHandlers.set(this._pluginId, new Map());
     }
@@ -68,17 +67,21 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.registerMenuEntry(menuEntryCfg);
   }
 
-  registerShortcut(label: string, onExec: () => void): void {
-    this._shortcuts.push({ label, onExec });
-    console.log(`Plugin ${this._pluginId} registered shortcut: ${label}`);
-    // TODO: Implement shortcut registration in bridge
-    console.warn('Shortcut registration not yet implemented in bridge');
+  registerShortcut(shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'>): void {
+    const shortcut: PluginShortcutCfg = {
+      ...shortcutCfg,
+      pluginId: this._pluginId,
+    };
+
+    this._shortcuts.push(shortcut);
+    console.log(`Plugin ${this._pluginId} registered shortcut`, shortcutCfg);
+
+    // Register shortcut with bridge
+    this._pluginBridge.registerShortcut(shortcut);
   }
 
   showIndexHtmlAsView(): void {
     console.log(`Plugin ${this._pluginId} requested to show index.html`);
-    // TODO: Implement show index html in bridge
-    console.warn('Show index html not yet implemented in bridge');
     return this._pluginBridge.showIndexHtmlAsView();
   }
 
@@ -165,10 +168,7 @@ export class PluginAPI implements IPluginAPI {
   }
 
   // Internal methods for the plugin system
-  __getHookHandlers(): Map<
-    string,
-    Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
-  > {
+  __getHookHandlers(): Map<string, Map<Hooks, Array<PluginHookHandler>>> {
     return this._hookHandlers;
   }
 }

@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
 import { PluginSecurityService } from './plugin-security';
-import { PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
+import { Hooks, PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
 import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { IS_ELECTRON } from '../app.constants';
@@ -23,21 +23,19 @@ import {
   providedIn: 'root',
 })
 export class PluginService {
+  private readonly _http = inject(HttpClient);
+  private readonly _pluginRunner = inject(PluginRunner);
+  private readonly _pluginHooks = inject(PluginHooksService);
+  private readonly _pluginSecurity = inject(PluginSecurityService);
+  private readonly _globalThemeService = inject(GlobalThemeService);
+  private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
+  private readonly _pluginUserPersistenceService = inject(PluginUserPersistenceService);
+  private readonly _pluginCacheService = inject(PluginCacheService);
+
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
   private _pluginPaths: Map<string, string> = new Map(); // Store plugin ID -> path mapping
   private _pluginIndexHtml: Map<string, string> = new Map(); // Store plugin ID -> index.html content
-
-  constructor(
-    private _http: HttpClient,
-    private _pluginRunner: PluginRunner,
-    private _pluginHooks: PluginHooksService,
-    private _pluginSecurity: PluginSecurityService,
-    private _globalThemeService: GlobalThemeService,
-    private _pluginMetaPersistenceService: PluginMetaPersistenceService,
-    private _pluginUserPersistenceService: PluginUserPersistenceService,
-    private _pluginCacheService: PluginCacheService,
-  ) {}
 
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
@@ -66,10 +64,46 @@ export class PluginService {
   }
 
   private async _loadBuiltInPlugins(): Promise<void> {
-    // For now, we'll load the example plugin from assets
     const pluginPaths = ['assets/example-plugin'];
+    await this._loadPluginsFromPaths(pluginPaths, 'built-in');
+  }
 
-    for (const pluginPath of pluginPaths) {
+  private async _loadUploadedPlugins(): Promise<void> {
+    try {
+      const cachedPlugins = await this._pluginCacheService.getAllPlugins();
+
+      const promises = cachedPlugins.map(async (cachedPlugin) => {
+        try {
+          console.log(`Loading cached plugin: ${cachedPlugin.id}`);
+          // Set the path for reload functionality
+          this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
+
+          // Load the cached plugin
+          const pluginInstance = await this._loadUploadedPlugin(cachedPlugin.id);
+          if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
+            this._loadedPlugins.push(pluginInstance);
+          }
+        } catch (error) {
+          console.error(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
+          // Continue loading other plugins even if one fails
+        }
+      });
+
+      await Promise.allSettled(promises);
+    } catch (error) {
+      console.error('Failed to load cached plugins:', error);
+      // Don't throw - this shouldn't prevent other plugins from loading
+    }
+  }
+
+  /**
+   * Load plugins from multiple paths with error handling
+   */
+  private async _loadPluginsFromPaths(
+    pluginPaths: string[],
+    type: 'built-in' | 'uploaded',
+  ): Promise<void> {
+    const promises = pluginPaths.map(async (pluginPath) => {
       try {
         const pluginInstance = await this._loadPlugin(pluginPath);
         // Add all plugin instances to the loaded plugins list so they show up in the management UI
@@ -77,32 +111,78 @@ export class PluginService {
         if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
           this._loadedPlugins.push(pluginInstance);
         }
+        console.log(`${type} plugin loaded successfully from ${pluginPath}`);
       } catch (error) {
-        console.error(`Failed to load plugin from ${pluginPath}:`, error);
+        console.error(`Failed to load ${type} plugin from ${pluginPath}:`, error);
         // Continue loading other plugins even if one fails
       }
-    }
+    });
+
+    await Promise.allSettled(promises);
   }
 
-  private async _loadUploadedPlugins(): Promise<void> {
-    try {
-      const cachedPlugins = await this._pluginCacheService.getAllPlugins();
+  /**
+   * Validate and load plugin files (code, manifest, assets)
+   */
+  private async _validateAndLoadPluginFiles(
+    manifest: PluginManifest,
+    pluginPath?: string,
+  ): Promise<{ pluginCode: string; indexHtml?: string }> {
+    // Validate manifest
+    const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+    if (!manifestValidation.isValid) {
+      throw new Error(
+        `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+      );
+    }
 
-      // Load each cached plugin
-      for (const cachedPlugin of cachedPlugins) {
+    let pluginCode: string;
+    let indexHtml: string | undefined;
+
+    if (pluginPath) {
+      // Load from file system path
+      const pluginCodeUrl = `${pluginPath}/plugin.js`;
+      pluginCode =
+        (await this._http
+          .get(pluginCodeUrl, { responseType: 'text' })
+          .pipe(take(1))
+          .toPromise()) || '';
+
+      if (!pluginCode) {
+        throw new Error('Failed to load plugin code');
+      }
+
+      // Only try to load index.html if manifest.iFrame is true
+      if (manifest.iFrame) {
+        const indexHtmlUrl = `${pluginPath}/index.html`;
         try {
-          console.log(`Loading cached plugin: ${cachedPlugin.id}`);
-          // Set the path for reload functionality
-          this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
+          indexHtml =
+            (await this._http
+              .get(indexHtmlUrl, { responseType: 'text' })
+              .pipe(take(1))
+              .toPromise()) || undefined;
+
+          if (indexHtml) {
+            this._pluginIndexHtml.set(manifest.id, indexHtml);
+            console.log(`Loaded index.html for plugin ${manifest.id}`);
+          }
         } catch (error) {
-          console.error(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
-          // Continue loading other plugins even if one fails
+          console.log(`No index.html found for plugin ${manifest.id} (optional)`);
         }
       }
-    } catch (error) {
-      console.error('Failed to load cached plugins:', error);
-      // Don't throw - this shouldn't prevent other plugins from loading
+    } else {
+      throw new Error('Plugin path is required for file loading');
     }
+
+    // Validate plugin code
+    const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+    if (!codeValidation.isValid) {
+      throw new Error(
+        `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
+      );
+    }
+
+    return { pluginCode, indexHtml };
   }
 
   private async _loadPlugin(pluginPath: string): Promise<PluginInstance> {
@@ -118,51 +198,7 @@ export class PluginService {
         throw new Error('Failed to load plugin manifest');
       }
 
-      // Validate manifest
-      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
-      if (!manifestValidation.isValid) {
-        throw new Error(
-          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
-        );
-      }
-
-      // Load plugin code
-      const pluginCodeUrl = `${pluginPath}/plugin.js`;
-      const pluginCode = await this._http
-        .get(pluginCodeUrl, { responseType: 'text' })
-        .pipe(take(1))
-        .toPromise();
-
-      if (!pluginCode) {
-        throw new Error('Failed to load plugin code');
-      }
-
-      // Only try to load index.html if manifest.iFrame is true
-      if (manifest.iFrame) {
-        const indexHtmlUrl = `${pluginPath}/index.html`;
-        try {
-          const indexHtml = await this._http
-            .get(indexHtmlUrl, { responseType: 'text' })
-            .pipe(take(1))
-            .toPromise();
-
-          if (indexHtml) {
-            this._pluginIndexHtml.set(manifest.id, indexHtml);
-            console.log(`Loaded index.html for plugin ${manifest.id}`);
-          }
-        } catch (error) {
-          // index.html is optional, so we don't throw an error
-          console.log(`No index.html found for plugin ${manifest.id} (optional)`);
-        }
-      }
-
-      // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
-      if (!codeValidation.isValid) {
-        throw new Error(
-          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
-        );
-      }
+      const { pluginCode } = await this._validateAndLoadPluginFiles(manifest, pluginPath);
 
       // Check if plugin should be loaded based on persisted enabled state
       const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
@@ -284,7 +320,7 @@ export class PluginService {
     return this._pluginIndexHtml.get(pluginId) || null;
   }
 
-  async dispatchHook(hookName: any, payload?: any): Promise<void> {
+  async dispatchHook(hookName: Hooks, payload?: unknown): Promise<void> {
     if (!this._isInitialized) {
       console.warn('Plugin system not initialized, skipping hook dispatch');
       return;
@@ -304,6 +340,8 @@ export class PluginService {
   }
 
   async loadPluginFromZip(file: File): Promise<PluginInstance> {
+    console.log(`Starting plugin load from ZIP: ${file.name}`);
+
     // Import fflate dynamically for better bundle size
     const { unzip } = await import('fflate');
 
@@ -452,6 +490,30 @@ export class PluginService {
       return pluginInstance;
     } catch (error) {
       console.error('Failed to load plugin from ZIP:', error);
+
+      // Create error instance for UI display
+      const errorInstance: PluginInstance = {
+        manifest: {
+          id: `error-${Date.now()}`,
+          name: file.name.replace('.zip', ''),
+          version: 'unknown',
+          manifestVersion: 1,
+          minSupVersion: 'unknown',
+          hooks: [],
+          permissions: [],
+          type: 'standard',
+        },
+        loaded: false,
+        isEnabled: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error occurred during plugin installation',
+      };
+
+      // Still add to loaded plugins list so user can see the error
+      this._loadedPlugins.push(errorInstance);
+
       throw error;
     }
   }

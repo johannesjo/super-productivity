@@ -72,16 +72,18 @@ export interface PluginManifest {
   assets?: string[];
 }
 
+export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
+
 export interface PluginAPI {
   cfg: PluginBaseCfg;
 
-  registerHook(hook: Hooks, fn: (...args: any[]) => void | Promise<void>): void;
+  registerHook(hook: Hooks, fn: PluginHookHandler): void;
 
   registerHeaderButton(headerBtnCfg: Omit<PluginHeaderBtnCfg, 'pluginId'>): void;
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void;
 
-  registerShortcut(label: string, onExec: () => void): void;
+  registerShortcut(shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'>): void;
 
   // ui bridge
   showSnack(snackCfg: SnackCfgLimited): void;
@@ -122,10 +124,7 @@ export interface PluginAPI {
 
   loadSyncedData(): Promise<string | null>;
 
-  __getHookHandlers(): Map<
-    string,
-    Map<Hooks, Array<(...args: any[]) => void | Promise<void>>>
-  >;
+  __getHookHandlers(): Map<string, Map<Hooks, Array<PluginHookHandler>>>;
 
   // Potentially later
   // addActionBeforeCloseApp(action: () => Promise<void>): void;
@@ -138,10 +137,10 @@ export interface PluginInstance {
   error?: string;
 }
 
-export interface PluginHookHandler {
+export interface PluginHookHandlerRegistration {
   pluginId: string;
   hook: Hooks;
-  handler: (...args: any[]) => void | Promise<void>;
+  handler: PluginHookHandler;
 }
 
 export interface CreateTaskData {
@@ -151,4 +150,10 @@ export interface CreateTaskData {
   notes?: string;
   timeEstimate?: number;
   parentId?: string | null;
+}
+
+export interface PluginShortcutCfg {
+  pluginId: string;
+  label: string;
+  onExec: () => void;
 }
