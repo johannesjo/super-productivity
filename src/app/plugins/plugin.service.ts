@@ -115,6 +115,11 @@ export class PluginService {
         if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
           this._loadedPlugins.push(pluginInstance);
         }
+        // Store the path for built-in plugins to enable reload functionality
+        // This ensures that built-in plugins can be reloaded just like uploaded ones
+        if (pluginInstance.manifest && pluginInstance.manifest.id) {
+          this._pluginPaths.set(pluginInstance.manifest.id, pluginPath);
+        }
         console.log(`${type} plugin loaded successfully from ${pluginPath}`);
       } catch (error) {
         console.error(`Failed to load ${type} plugin from ${pluginPath}:`, error);
@@ -675,14 +680,7 @@ export class PluginService {
       } else {
         // Load from file system path
         pluginInstance = await this._loadPlugin(pluginPath);
-
-        // For built-in plugins, ensure we add them back to _loadedPlugins if they loaded successfully
-        if (
-          pluginInstance.loaded &&
-          !this._loadedPlugins.some((p) => p.manifest.id === pluginId)
-        ) {
-          this._loadedPlugins.push(pluginInstance);
-        }
+        // Note: _loadPlugin already handles adding to _loadedPlugins
       }
 
       return pluginInstance.loaded;
