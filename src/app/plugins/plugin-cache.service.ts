@@ -5,6 +5,7 @@ export interface CachedPlugin {
   manifest: string;
   code: string;
   indexHtml?: string; // Optional index.html content
+  icon?: string; // Optional SVG icon content
   uploadDate: number;
   lastAccessed: number;
 }
@@ -59,6 +60,7 @@ export class PluginCacheService {
     manifest: string,
     code: string,
     indexHtml?: string,
+    icon: string | undefined = undefined,
   ): Promise<void> {
     const db = await this._getDB();
     const transaction = db.transaction([this.STORE_NAME], 'readwrite');
@@ -69,6 +71,7 @@ export class PluginCacheService {
       manifest,
       code,
       indexHtml,
+      icon,
       uploadDate: Date.now(),
       lastAccessed: Date.now(),
     };

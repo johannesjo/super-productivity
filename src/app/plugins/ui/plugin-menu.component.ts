@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { MatMenuItem } from '@angular/material/menu';
@@ -35,14 +34,15 @@ import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
         justify-content: flex-start;
         margin-bottom: 4px;
 
-        mat-icon {
+        mat-icon,
+        plugin-icon {
           margin-right: 16px;
         }
       }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatButton, MatIcon, MatMenuItem, PluginIconComponent],
+  imports: [CommonModule, MatIcon, MatMenuItem, PluginIconComponent],
 })
 export class PluginMenuComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);
