@@ -424,16 +424,39 @@ describe('taskSharedMetaReducer', () => {
     const createConvertAction = (
       taskOverrides: Partial<Task> = {},
       actionOverrides = {},
-    ) =>
-      TaskSharedActions.convertToMainTask({
-        task: createMockTask(taskOverrides),
+    ) => {
+      // Create state with parent task that has tagIds for the sub-task to inherit
+      const parentTask = createMockTask({
+        id: 'parent-task',
+        tagIds: ['tag1'],
+        projectId: 'project1',
+      });
+
+      // Set up state with parent task
+      const stateWithParent = {
+        ...baseState,
+        [TASK_FEATURE_NAME]: {
+          ...baseState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseState[TASK_FEATURE_NAME].entities,
+            'parent-task': parentTask,
+          },
+          ids: [...baseState[TASK_FEATURE_NAME].ids, 'parent-task'],
+        },
+      };
+
+      const action = TaskSharedActions.convertToMainTask({
+        task: createMockTask({ parentId: 'parent-task', ...taskOverrides }),
         parentTagIds: ['tag1'],
         isPlanForToday: false,
         ...actionOverrides,
       });
 
+      return { action, testState: stateWithParent };
+    };
+
     it('should add task to project taskIds', () => {
-      const action = createConvertAction();
+      const { action, testState } = createConvertAction();
 
       expectStateUpdate(
         {
@@ -441,11 +464,12 @@ describe('taskSharedMetaReducer', () => {
           ...expectTagUpdate('tag1', { taskIds: ['task1'] }),
         },
         action,
+        testState,
       );
     });
 
     it('should add task to Today tag when isPlanForToday is true', () => {
-      const action = createConvertAction({}, { isPlanForToday: true });
+      const { action, testState } = createConvertAction({}, { isPlanForToday: true });
 
       expectStateUpdate(
         expectTagUpdates({
@@ -453,16 +477,45 @@ describe('taskSharedMetaReducer', () => {
           TODAY: { taskIds: ['task1'] },
         }),
         action,
+        testState,
       );
     });
 
     it('should add task at the beginning of existing taskIds', () => {
-      const testState = createStateWithExistingTasks(
-        ['existing-task'],
-        [],
-        ['existing-task'],
-      );
-      const action = createConvertAction();
+      const { action, testState: baseTestState } = createConvertAction();
+
+      // Combine with existing tasks state
+      const testState = {
+        ...baseTestState,
+        [TASK_FEATURE_NAME]: {
+          ...baseTestState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseTestState[TASK_FEATURE_NAME].entities,
+            'existing-task': createMockTask({ id: 'existing-task' }),
+          },
+          ids: [...baseTestState[TASK_FEATURE_NAME].ids, 'existing-task'],
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ...baseTestState[PROJECT_FEATURE_NAME],
+          entities: {
+            ...baseTestState[PROJECT_FEATURE_NAME].entities,
+            project1: {
+              ...baseTestState[PROJECT_FEATURE_NAME].entities.project1,
+              taskIds: ['existing-task'],
+            } as Project,
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ...baseTestState[TAG_FEATURE_NAME],
+          entities: {
+            ...baseTestState[TAG_FEATURE_NAME].entities,
+            tag1: {
+              ...baseTestState[TAG_FEATURE_NAME].entities.tag1,
+              taskIds: ['existing-task'],
+            } as Tag,
+          },
+        },
+      };
 
       expectStateUpdate(
         {

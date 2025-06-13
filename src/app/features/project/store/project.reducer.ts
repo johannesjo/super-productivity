@@ -5,7 +5,6 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -551,40 +550,6 @@ export const projectReducer = createReducer<ProjectState>(
 
   // Task Actions
   // ------------
-
-  on(TaskSharedActions.moveToOtherProject, (state, { task, targetProjectId }) => {
-    const srcProjectId = task.projectId;
-    const updates: Update<Project>[] = [];
-
-    if (srcProjectId === targetProjectId) {
-      devError('Moving task from same project to same project.');
-      return state;
-    }
-
-    if (srcProjectId) {
-      updates.push({
-        id: srcProjectId,
-        changes: {
-          taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
-            (id) => id !== task.id,
-          ),
-          backlogTaskIds: (state.entities[srcProjectId] as Project).backlogTaskIds.filter(
-            (id) => id !== task.id,
-          ),
-        },
-      });
-    }
-    if (targetProjectId) {
-      updates.push({
-        id: targetProjectId,
-        changes: {
-          taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
-        },
-      });
-    }
-
-    return projectAdapter.updateMany(updates, state);
-  }),
 
   on(moveNoteToOtherProject, (state, { note, targetProjectId }) => {
     const srcProjectId = note.projectId;

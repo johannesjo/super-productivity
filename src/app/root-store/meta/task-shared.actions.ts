@@ -103,5 +103,10 @@ export const TaskSharedActions = createActionGroup({
     removeTagsForAllTasks: props<{
       tagIdsToRemove: string[];
     }>(),
+
+    moveTaskInTodayTagList: props<{
+      toTaskId: string;
+      fromTaskId: string;
+    }>(),
   },
 });
