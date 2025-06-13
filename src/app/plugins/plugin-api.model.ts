@@ -1,4 +1,20 @@
-// Import all types from the plugin-api package
+// Import types from the plugin-api package
+import {
+  PluginHooks,
+  Hooks,
+  PluginBaseCfg,
+  DialogButtonCfg,
+  DialogCfg,
+  NotifyCfg,
+  PluginManifest,
+  PluginHookHandler,
+  PluginInstance,
+  PluginHookHandlerRegistration,
+  PluginCreateTaskData,
+  PluginShortcutCfg,
+} from '@super-productivity/plugin-api';
+
+// Re-export plugin-api types
 export {
   PluginHooks,
   Hooks,
@@ -12,8 +28,7 @@ export {
   PluginHookHandlerRegistration,
   PluginCreateTaskData,
   PluginShortcutCfg,
-  // Note: We don't import PluginAPI, TaskData, ProjectData, TagData as we use custom versions
-} from '@super-productivity/plugin-api';
+};
 
 // Import app-specific types
 import { SnackParams } from '../core/snack/snack.model';
