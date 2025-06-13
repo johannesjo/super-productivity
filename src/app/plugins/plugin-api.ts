@@ -67,9 +67,16 @@ export class PluginAPI implements IPluginAPI {
     this._pluginBridge.registerMenuEntry(menuEntryCfg);
   }
 
-  registerShortcut(shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'>): void {
+  registerShortcut(
+    shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
+  ): void {
+    // Generate ID if not provided - use sanitized label as fallback
+    const id =
+      shortcutCfg.id || shortcutCfg.label.toLowerCase().replace(/[^a-z0-9-_]/g, '_');
+
     const shortcut: PluginShortcutCfg = {
       ...shortcutCfg,
+      id,
       pluginId: this._pluginId,
     };
 
