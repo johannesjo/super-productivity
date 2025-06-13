@@ -36,6 +36,7 @@ export class PluginService {
   private _loadedPlugins: PluginInstance[] = [];
   private _pluginPaths: Map<string, string> = new Map(); // Store plugin ID -> path mapping
   private _pluginIndexHtml: Map<string, string> = new Map(); // Store plugin ID -> index.html content
+  private _pluginIcons: Map<string, string> = new Map(); // Store plugin ID -> SVG icon content
 
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
@@ -166,6 +167,24 @@ export class PluginService {
           }
         } catch (error) {
           console.log(`No index.html found for plugin ${manifest.id} (optional)`);
+        }
+      }
+
+      // Try to load icon if specified in manifest
+      if (manifest.icon) {
+        const iconUrl = `${pluginPath}/${manifest.icon}`;
+        try {
+          const iconContent = await this._http
+            .get(iconUrl, { responseType: 'text' })
+            .pipe(take(1))
+            .toPromise();
+
+          if (iconContent) {
+            this._pluginIcons.set(manifest.id, iconContent);
+            console.log(`Loaded icon for plugin ${manifest.id}`);
+          }
+        } catch (error) {
+          console.log(`Failed to load icon for plugin ${manifest.id}:`, error);
         }
       }
     } else {
@@ -328,6 +347,13 @@ export class PluginService {
     return this._pluginIndexHtml.get(pluginId) || null;
   }
 
+  /**
+   * Get SVG icon content for a plugin
+   */
+  getPluginIcon(pluginId: string): string | null {
+    return this._pluginIcons.get(pluginId) || null;
+  }
+
   async dispatchHook(hookName: Hooks, payload?: unknown): Promise<void> {
     if (!this._isInitialized) {
       console.warn('Plugin system not initialized, skipping hook dispatch');
@@ -430,6 +456,24 @@ export class PluginService {
         indexHtml = new TextDecoder().decode(indexHtmlBytes);
       }
 
+      // Extract icon if specified in manifest
+      let iconContent: string | null = null;
+      if (manifest.icon && extractedFiles[manifest.icon]) {
+        const iconBytes = extractedFiles[manifest.icon];
+        // Validate icon size (same as manifest for now)
+        if (iconBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
+          throw new Error(
+            `Plugin icon is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(iconBytes.length / 1024).toFixed(1)} KB.`,
+          );
+        }
+        iconContent = new TextDecoder().decode(iconBytes);
+        // Basic SVG validation
+        if (!iconContent.includes('<svg') || !iconContent.includes('</svg>')) {
+          console.warn(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
+          iconContent = null;
+        }
+      }
+
       // Validate plugin code
       const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
       if (!codeValidation.isValid) {
@@ -457,6 +501,11 @@ export class PluginService {
       // Store index.html content if it exists
       if (indexHtml) {
         this._pluginIndexHtml.set(manifest.id, indexHtml);
+      }
+
+      // Store icon content if it exists
+      if (iconContent) {
+        this._pluginIcons.set(manifest.id, iconContent);
       }
 
       // If plugin is disabled, create a placeholder instance without loading code
@@ -573,6 +622,9 @@ export class PluginService {
 
     // Remove index.html content
     this._pluginIndexHtml.delete(pluginId);
+
+    // Remove icon content
+    this._pluginIcons.delete(pluginId);
 
     console.log(`Uploaded plugin ${pluginId} removed completely`);
   }

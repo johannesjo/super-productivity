@@ -7,7 +7,7 @@ import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 export interface PluginMenuEntryCfg {
   pluginId: string;
   label: string;
-  icon: string;
+  icon?: string;
   onClick: () => void;
 }
 
@@ -70,6 +70,7 @@ export interface PluginManifest {
   isSkipMenuEntry?: boolean;
   type?: 'standard'; // 'issueProvider'
   assets?: string[];
+  icon?: string; // Path to SVG icon file relative to plugin root
 }
 
 export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
