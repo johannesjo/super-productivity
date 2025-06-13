@@ -66,7 +66,11 @@ export class PluginService {
   }
 
   private async _loadBuiltInPlugins(): Promise<void> {
-    const pluginPaths = ['assets/example-plugin', 'assets/yesterday-tasks-plugin'];
+    const pluginPaths = [
+      'assets/example-plugin',
+      'assets/yesterday-tasks-plugin',
+      'assets/markdown-list-to-task',
+    ];
     await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
 
