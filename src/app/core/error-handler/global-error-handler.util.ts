@@ -95,7 +95,7 @@ export const createErrorAlert = (
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
     <p><a href="${githubUrl}" class="github-issue-urlX" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
-    <pre style="line-height: 1.3;">${errEscaped}</pre>
+    ${typeof origErr === 'object' && origErr && 'additionalLog' in origErr ? `<pre style="line-height: 1.3;">${origErr.additionalLog}</pre>` : ''}
 
     <div id="error-fetching-info-wrapper">
       <div>Trying to load more info...</div>
