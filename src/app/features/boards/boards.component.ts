@@ -8,6 +8,7 @@ import {
   OnDestroy,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { Store } from '@ngrx/store';
@@ -46,6 +47,7 @@ import { DEFAULT_BOARD_CFG } from './boards.const';
 })
 export class BoardsComponent implements AfterViewInit, OnDestroy {
   readonly contextMenuTrigger = viewChild.required<MatMenuTrigger>('menuTrigger');
+  readonly contextMenuTriggers = viewChildren<MatMenuTrigger>('menuTrigger');
   store = inject(Store);
   selectedTabIndex = signal(localStorage.getItem(LS.SELECTED_BOARD) || 0);
 
@@ -101,8 +103,7 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
     const clickedTabIdx = el.id.substring(el.id.length - 1);
     if (parseInt(clickedTabIdx) == activeTabIdx) {
       // Open context menu
-      console.log('Active tab clicked');
-      this.contextMenuTrigger().openMenu();
+      this.contextMenuTriggers()[activeTabIdx].openMenu();
     }
   }
 }
