@@ -23,6 +23,8 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { unique } from '../../util/unique';
 import { isToday } from '../../util/is-today.util';
+import { moveItemBeforeItem } from '../../util/move-item-before-item';
+import { PlannerActions } from '../../features/planner/store/planner.actions';
 
 // =============================================================================
 // TYPES & UTILITIES
@@ -133,6 +135,37 @@ export const taskSharedMetaReducer: MetaReducer = (
           typeof TaskSharedActions.removeTagsForAllTasks
         >;
         return handleRemoveTagsForAllTasks(rootState, tagIdsToRemove);
+      },
+      [PlannerActions.transferTask.type]: () => {
+        const { task, today, targetIndex, newDay, prevDay, targetTaskId } =
+          action as ReturnType<typeof PlannerActions.transferTask>;
+        return handleTransferTask(
+          rootState,
+          task,
+          today,
+          targetIndex,
+          newDay,
+          prevDay,
+          targetTaskId,
+        );
+      },
+      [PlannerActions.planTaskForDay.type]: () => {
+        const { task, day, isAddToTop } = action as ReturnType<
+          typeof PlannerActions.planTaskForDay
+        >;
+        return handlePlanTaskForDay(rootState, task, day, isAddToTop || false);
+      },
+      [PlannerActions.moveBeforeTask.type]: () => {
+        const { fromTask, toTaskId } = action as ReturnType<
+          typeof PlannerActions.moveBeforeTask
+        >;
+        return handleMoveBeforeTask(rootState, fromTask, toTaskId);
+      },
+      [TaskSharedActions.moveTaskInTodayTagList.type]: () => {
+        const { toTaskId, fromTaskId } = action as ReturnType<
+          typeof TaskSharedActions.moveTaskInTodayTagList
+        >;
+        return handleMoveTaskInTodayTagList(rootState, toTaskId, fromTaskId);
       },
     };
 
@@ -746,6 +779,135 @@ const handleRemoveTagsForAllTasks = (
     ...state,
     [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, taskState),
   };
+};
+
+const handleTransferTask = (
+  state: RootState,
+  task: Task,
+  today: string,
+  targetIndex: number,
+  newDay: string,
+  prevDay: string,
+  targetTaskId?: string,
+): RootState => {
+  const todayTag = getTag(state, TODAY_TAG.id);
+
+  if (prevDay === today && newDay !== today) {
+    return updateTags(state, [
+      {
+        id: TODAY_TAG.id,
+        changes: {
+          taskIds: todayTag.taskIds.filter((id) => id !== task.id),
+        },
+      },
+    ]);
+  }
+
+  if (prevDay !== today && newDay === today) {
+    const taskIds = [...todayTag.taskIds];
+    const targetIndexToUse = targetTaskId
+      ? todayTag.taskIds.findIndex((id) => id === targetTaskId)
+      : targetIndex;
+    taskIds.splice(targetIndexToUse, 0, task.id);
+
+    return updateTags(state, [
+      {
+        id: TODAY_TAG.id,
+        changes: {
+          taskIds: unique(taskIds),
+        },
+      },
+    ]);
+  }
+
+  return state;
+};
+
+const handlePlanTaskForDay = (
+  state: RootState,
+  task: Task,
+  day: string,
+  isAddToTop: boolean,
+): RootState => {
+  const todayStr = getWorklogStr();
+  const todayTag = getTag(state, TODAY_TAG.id);
+
+  if (day === todayStr && !todayTag.taskIds.includes(task.id)) {
+    return updateTags(state, [
+      {
+        id: todayTag.id,
+        changes: {
+          taskIds: unique(
+            isAddToTop
+              ? [task.id, ...todayTag.taskIds]
+              : [...todayTag.taskIds.filter((tid) => tid !== task.id), task.id],
+          ),
+        },
+      },
+    ]);
+  } else if (day !== todayStr && todayTag.taskIds.includes(task.id)) {
+    return updateTags(state, [
+      {
+        id: todayTag.id,
+        changes: {
+          taskIds: todayTag.taskIds.filter((id) => id !== task.id),
+        },
+      },
+    ]);
+  }
+
+  return state;
+};
+
+const handleMoveBeforeTask = (
+  state: RootState,
+  fromTask: Task,
+  toTaskId: string,
+): RootState => {
+  const todayTag = getTag(state, TODAY_TAG.id);
+
+  if (todayTag.taskIds.includes(toTaskId)) {
+    const taskIds = todayTag.taskIds.filter((id) => id !== fromTask.id);
+    const targetIndex = taskIds.indexOf(toTaskId);
+    taskIds.splice(targetIndex, 0, fromTask.id);
+
+    return updateTags(state, [
+      {
+        id: todayTag.id,
+        changes: {
+          taskIds: unique(taskIds),
+        },
+      },
+    ]);
+  } else if (todayTag.taskIds.includes(fromTask.id)) {
+    return updateTags(state, [
+      {
+        id: todayTag.id,
+        changes: {
+          taskIds: todayTag.taskIds.filter((id) => id !== fromTask.id),
+        },
+      },
+    ]);
+  }
+
+  return state;
+};
+
+const handleMoveTaskInTodayTagList = (
+  state: RootState,
+  toTaskId: string,
+  fromTaskId: string,
+): RootState => {
+  const todayTag = getTag(state, TODAY_TAG.id);
+
+  return updateTags(state, [
+    {
+      id: todayTag.id,
+      changes: {
+        taskIds: moveItemBeforeItem(todayTag.taskIds, fromTaskId, toTaskId),
+      },
+    },
+  ]);
 };
 
 /**
