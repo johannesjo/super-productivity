@@ -123,8 +123,6 @@ export class WebdavApi {
 
     try {
       // Ensure parent directory exists before upload
-      await this._ensureParentDirectoryExists(path);
-
       const response = await this._makeRequest({
         method: 'PUT',
         path,
@@ -920,7 +918,7 @@ export class WebdavApi {
     const dirParts = pathParts.slice(0, -1);
 
     // Create directories progressively from root to parent
-    // Use optimistic creation - just try to create each directory
+    // This is only called when we get a 409 error, so we know directories are missing
     for (let i = 1; i <= dirParts.length; i++) {
       const currentPath = dirParts.slice(0, i).join('/');
 
