@@ -7,8 +7,6 @@ export * from './types';
 export type {
   PluginAPI,
   PluginManifest,
-  PluginHooks,
-  Hooks,
   TaskData,
   ProjectData,
   TagData,
@@ -22,3 +20,6 @@ export type {
   PluginShortcutCfg,
   PluginHeaderBtnCfg,
 } from './types';
+
+// Re-export enums as values (not just types) so they can be used
+export { PluginHooks, type Hooks } from './types';

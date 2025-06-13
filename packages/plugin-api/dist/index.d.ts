@@ -2,8 +2,6 @@ export * from './types';
 export type {
   PluginAPI,
   PluginManifest,
-  PluginHooks,
-  Hooks,
   TaskData,
   ProjectData,
   TagData,
@@ -17,4 +15,5 @@ export type {
   PluginShortcutCfg,
   PluginHeaderBtnCfg,
 } from './types';
+export { PluginHooks, type Hooks } from './types';
 //# sourceMappingURL=index.d.ts.map
