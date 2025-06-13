@@ -684,19 +684,26 @@ export class WebdavApi {
         });
 
         // Convert CapacitorHttp response to fetch Response format
-        // HTTP status codes that cannot have a body per spec
-        const nullBodyStatuses = [204, 304];
-        const shouldHaveNullBody =
-          method === 'HEAD' || nullBodyStatuses.includes(capacitorResponse.status);
-
-        const response = new Response(
-          shouldHaveNullBody ? null : capacitorResponse.data,
-          {
+        // Try to construct Response with data first, fall back to null body if it fails
+        let response: Response;
+        try {
+          response = new Response(capacitorResponse.data, {
             status: capacitorResponse.status,
             statusText: `${capacitorResponse.status}`,
             headers: new Headers(capacitorResponse.headers || {}),
-          },
-        );
+          });
+        } catch (error) {
+          // If Response construction fails due to null body status, try with null body
+          if (error instanceof TypeError && error.message.includes('null body status')) {
+            response = new Response(null, {
+              status: capacitorResponse.status,
+              statusText: `${capacitorResponse.status}`,
+              headers: new Headers(capacitorResponse.headers || {}),
+            });
+          } else {
+            throw error;
+          }
+        }
 
         // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
         if (response.status === 404) {
