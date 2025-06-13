@@ -12,19 +12,19 @@ import {
   PluginMenuEntryCfg,
   PluginShortcutCfg,
   SnackCfgLimited,
+  PluginHeaderBtnCfg,
+  TaskCopy,
+  ProjectCopy,
+  TagCopy,
 } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
-import { TaskCopy } from '../features/tasks/task.model';
 import { TaskService } from '../features/tasks/task.service';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
-import { ProjectCopy } from '../features/project/project.model';
 import { TagService } from '../features/tag/tag.service';
-import { TagCopy } from '../features/tag/tag.model';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
-import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
