@@ -52,6 +52,13 @@
 @for (plugin of allPlugins(); track plugin.manifest.id) {
   <mat-card>
     <mat-card-header>
+      <div mat-card-avatar>
+        <plugin-icon
+          [pluginId]="plugin.manifest.id"
+          [size]="40"
+          fallbackIcon="extension"
+        ></plugin-icon>
+      </div>
       <mat-card-title>{{ plugin.manifest.name }}</mat-card-title>
       <mat-card-subtitle>
         v{{ plugin.manifest.version }}

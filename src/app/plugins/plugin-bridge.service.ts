@@ -402,7 +402,16 @@ export class PluginBridgeService {
       throw new Error('No plugin context set for menu entry registration');
     }
 
-    typia.assert<Omit<PluginMenuEntryCfg, 'pluginId'>>(menuEntryCfg);
+    // Validate required fields manually since typia has issues with optional fields
+    if (!menuEntryCfg.label || typeof menuEntryCfg.label !== 'string') {
+      throw new Error('Menu entry must have a valid label string');
+    }
+    if (!menuEntryCfg.onClick || typeof menuEntryCfg.onClick !== 'function') {
+      throw new Error('Menu entry must have a valid onClick function');
+    }
+    if (menuEntryCfg.icon !== undefined && typeof menuEntryCfg.icon !== 'string') {
+      throw new Error('Menu entry icon must be a string if provided');
+    }
 
     const newMenuEntry: PluginMenuEntryCfg = {
       ...menuEntryCfg,

@@ -26,6 +26,7 @@ import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatError } from '@angular/material/form-field';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 
 @Component({
   selector: 'plugin-management',
@@ -47,6 +48,7 @@ import { T } from '../../../t.const';
     MatChipSet,
     MatError,
     TranslatePipe,
+    PluginIconComponent,
   ],
 })
 export class PluginManagementComponent implements OnInit {

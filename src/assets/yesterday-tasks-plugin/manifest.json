@@ -10,5 +10,6 @@
   "iFrame": true,
   "isSkipMenuEntry": false,
   "type": "standard",
-  "assets": []
+  "assets": [],
+  "icon": "icon.svg"
 }
