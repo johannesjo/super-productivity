@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { moveToOtherProject, undoDeleteTask } from './task.actions';
+import { undoDeleteTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { select, Store } from '@ngrx/store';
 import {
@@ -156,7 +156,7 @@ export class TaskUiEffects {
   goToProjectSnack$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(moveToOtherProject),
+        ofType(TaskSharedActions.moveToOtherProject),
         filter(
           ({ targetProjectId }) =>
             targetProjectId !== this._workContextService.activeWorkContextId,

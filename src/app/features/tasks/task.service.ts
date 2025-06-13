@@ -24,7 +24,6 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
   reScheduleTaskWithTime,
@@ -688,7 +687,9 @@ export class TaskService {
     if (!!task.parentId) {
       throw new Error('Wrong task model');
     }
-    this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
+    this._store.dispatch(
+      TaskSharedActions.moveToOtherProject({ task, targetProjectId: projectId }),
+    );
   }
 
   moveToCurrentWorkContext(task: TaskWithSubTasks | Task): void {
