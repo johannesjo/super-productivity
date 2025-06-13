@@ -68,10 +68,7 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
-import {
-  initializePlugins,
-  PLUGIN_INITIALIZER_PROVIDER,
-} from './app/plugins/plugin-initializer';
+import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 
 if (environment.production || environment.stage) {
@@ -187,15 +184,7 @@ bootstrapApplication(AppComponent, {
     PLUGIN_INITIALIZER_PROVIDER,
     provideExperimentalZonelessChangeDetection(),
   ],
-}).then(async (appRef) => {
-  // Initialize plugins after app is fully bootstrapped
-  try {
-    await initializePlugins(appRef.injector);
-    console.log('Plugins initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize plugins:', error);
-  }
-
+}).then(() => {
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
 
